@@ -1,0 +1,22 @@
+# Installed by `make setup`. The secret-detection hooks exist because
+# CLAUDE.md hard rule 2 (never commit a key) is unrecoverable once violated:
+# the value stays in history forever.
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.5
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: detect-private-key
+      - id: check-added-large-files
+        # 50 MB is the threshold at which CLAUDE.md says to revisit git-lfs.
+        args: [--maxkb=51200]
+      - id: check-yaml
+      - id: check-toml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace

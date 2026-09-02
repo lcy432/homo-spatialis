@@ -1,0 +1,28 @@
+# The two base models under test (README §10.4: different family, different
+# country of origin). Keys are never stored here -- only the name of the
+# environment variable to read them from.
+#
+# `model` must be a dated snapshot ending in -YYYY-MM-DD or -YYYYMMDD.
+# CLAUDE.md hard rule 6: rolling aliases such as `qwen-plus` are rejected at
+# load time, because a run logged against a moving alias cannot be reproduced.
+# Leaving `model` null is allowed; resolving that role then fails loudly.
+
+base_a:
+  provider: TBD
+  base_url: TBD
+  api_key_env: BASE_A_API_KEY
+  model: null
+  note: >-
+    Frontier model, not yet chosen. Fill provider, base_url and a dated snapshot
+    when picked. The adapter is vendor-neutral, so nothing else changes.
+
+base_b:
+  provider: dashscope
+  base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+  api_key_env: DASHSCOPE_API_KEY
+  model: null
+  note: >-
+    Qwen via the DashScope OpenAI-compatible endpoint. Connectivity verified.
+    Pin the dated snapshot from the Bailian console model list -- run
+    `make check-env`, which lists the snapshot-shaped model ids the key can see.
+    Use the -intl base_url if the key belongs to the international region.

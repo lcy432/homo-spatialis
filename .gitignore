@@ -1,0 +1,35 @@
+# --- secrets: never commit (CLAUDE.md hard rule 2) ---
+.env
+.env.*
+!.env.example
+
+# --- python ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+build/
+dist/
+
+# --- data ---
+# raw downloads are not committed; processed and frozen ARE (CLAUDE.md data decisions)
+data/raw/*
+!data/raw/.gitkeep
+
+# --- experiment outputs ---
+runs/*
+!runs/.gitkeep
+
+# --- notebooks ---
+.ipynb_checkpoints/
+
+# --- editors / OS / stray ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+.Rhistory
+.RData

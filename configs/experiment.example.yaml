@@ -1,0 +1,10 @@
+# Copy and edit per experiment. Everything here lands in runs/<run_id>/meta.json.
+name: m0-smoke
+seed: 20260901
+reference_id: US_MSA_2024      # frozen amenity reference population, README §5.3
+numeraire: USD_2024_US100      # scale of every monetary quantity, README §5.8
+model_role: base_b
+notes: >-
+  Minimal configuration exercised by `make demo`. It touches no language model
+  and no real data; it exists so that config loading, run identity and the call
+  log are covered from the first commit.

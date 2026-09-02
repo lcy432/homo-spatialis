@@ -1,0 +1,12 @@
+# Normalise to LF in the repository and in the working tree. CI runs on Linux
+# and development on Windows; without this every file shows as modified when it
+# crosses between them, and a CRLF Makefile is not portable.
+* text=auto eol=lf
+
+# Binary payloads: never touched, never diffed as text.
+*.parquet binary
+*.xlsx    binary
+*.xls     binary
+*.png     binary
+*.jpg     binary
+*.pdf     binary
