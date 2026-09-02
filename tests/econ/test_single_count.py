@@ -7,27 +7,36 @@ correct code proves nothing.
 
 import pytest
 
+from common.money import USD_2024_US100
 from econ.graph import CANONICAL_HOME, DoubleCountError, Term, UtilityGraph
-from tests.econ.conftest import DiagnosticInUtilityCore, DoubleCountingCore
+from tests.econ.conftest import (
+    REFERENCE_ID,
+    DiagnosticInUtilityCore,
+    DoubleCountingCore,
+)
 
 
-def test_compliant_core_passes_every_assertion(core, persona, cities):
-    for code in cities:
-        g = core.graph_for(persona, core.cities[code].city_id)
-        g.assert_all()
+def _broken(cls, cities, tax):
+    return cls(cities, tax, numeraire=USD_2024_US100, reference_id=REFERENCE_ID)
 
 
-def test_rent_in_two_terms_is_caught(persona, cities):
-    """The exact failure of §7.4: rent as both a price and an amenity."""
-    broken = DoubleCountingCore(cities)
-    g = broken.graph_for(persona, broken.cities["C1"].city_id)
+def test_compliant_core_passes_every_assertion(core, persona):
+    """真核，不是替身：这条断言咬的是生产代码。"""
+    for rec in core.cities.values():
+        core.graph_for(persona, rec.city).assert_all()
+
+
+def test_rent_in_two_terms_is_caught(persona, cities, tax):
+    """§7.4 点名的那个错误：房租既是价格又是舒适度。"""
+    broken = _broken(DoubleCountingCore, cities, tax)
+    g = broken.graph_for(persona, broken.cities["C1"].city)
     with pytest.raises(DoubleCountError, match="more than one term"):
         g.assert_single_count()
 
 
-def test_diagnostic_entering_utility_is_caught(persona, cities):
-    broken = DiagnosticInUtilityCore(cities)
-    g = broken.graph_for(persona, broken.cities["C1"].city_id)
+def test_diagnostic_entering_utility_is_caught(persona, cities, tax):
+    broken = _broken(DiagnosticInUtilityCore, cities, tax)
+    g = broken.graph_for(persona, broken.cities["C1"].city)
     with pytest.raises(DoubleCountError, match="diagnostic"):
         g.assert_no_diagnostic_in_utility()
 

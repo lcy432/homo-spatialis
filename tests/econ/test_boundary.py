@@ -1,5 +1,7 @@
 """CLAUDE.md hard rule 1 / README §3.2: the type boundary."""
 
+import math
+
 import pytest
 
 from common.money import USD_2024_US100, WelfareLevel
@@ -13,7 +15,7 @@ from econ.types import (
 
 
 def _observables(core, persona, tier):
-    return tuple(core.observe(persona, c.city_id, 2024, tier) for c in core.cities.values())
+    return tuple(core.observe(persona, c.city, 2024, tier) for c in core.cities.values())
 
 
 def test_agent_input_accepts_the_visible_side(core, persona):
@@ -36,7 +38,7 @@ def test_agent_input_accepts_the_visible_side(core, persona):
 )
 def test_answer_side_objects_cannot_reach_an_agent_input(core, persona, smuggled):
     obj = {
-        "ground_truth": core.score(persona, core.cities["C1"].city_id, 2024),
+        "ground_truth": core.score(persona, core.cities["C1"].city, 2024),
         "persona": persona,
         "params": persona.params,
         "welfare": WelfareLevel(1.0, USD_2024_US100, "US_MSA_2024"),
@@ -48,7 +50,7 @@ def test_answer_side_objects_cannot_reach_an_agent_input(core, persona, smuggled
 
 def test_nested_smuggling_is_also_caught(core, persona):
     """A truth object buried inside a mapping inside a sequence."""
-    truth = core.score(persona, core.cities["C1"].city_id, 2024)
+    truth = core.score(persona, core.cities["C1"].city, 2024)
     with pytest.raises(BoundaryViolationError):
         AgentInput(brief=persona.brief, options=({"innocuous": [{"deep": truth}]},))
 
@@ -63,36 +65,39 @@ def test_permutation_must_be_a_real_permutation(core, persona):
 def test_every_tier_retains_l0_and_l1(core, persona, tier):
     """README §11.4: collapsed quantities are additional, never a replacement,
     or the design matrix loses rank and the weights cannot be recovered."""
-    o = core.observe(persona, core.cities["C1"].city_id, 2024, tier)
+    o = core.observe(persona, core.cities["C1"].city, 2024, tier)
     assert o.l0_amenities and o.l1_economics
-    assert set(o.l0_amenities) == {"crime_rate", "sunshine_hours", "commute_minutes"}
+    assert set(o.l0_amenities) == {"safety", "sunshine", "commute"}
 
 
 def test_o1_carries_no_accounting(core, persona):
-    o = core.observe(persona, core.cities["C1"].city_id, 2024, ObservableTier.O1)
+    o = core.observe(persona, core.cities["C1"].city, 2024, ObservableTier.O1)
     assert o.l2_accounting is None and o.o3_representative_real is None
 
 
 def test_o2_adds_accounting_and_o3_adds_deflated_income(core, persona):
-    o2 = core.observe(persona, core.cities["C1"].city_id, 2024, ObservableTier.O2)
-    o3 = core.observe(persona, core.cities["C1"].city_id, 2024, ObservableTier.O3)
+    o2 = core.observe(persona, core.cities["C1"].city, 2024, ObservableTier.O2)
+    o3 = core.observe(persona, core.cities["C1"].city, 2024, ObservableTier.O3)
     assert o2.l2_accounting is not None and o2.o3_representative_real is None
     assert o3.l2_accounting is not None and o3.o3_representative_real is not None
 
 
 def test_o3_uses_the_representative_basket_not_the_persona_shares(core, persona):
-    """That is why O3 is still environment and not L3 in disguise: it does not
-    depend on this person's preference parameters."""
-    o3 = core.observe(persona, core.cities["C1"].city_id, 2024, ObservableTier.O3)
-    personal_p = core.price_index(persona, core.cities["C1"].city_id)
-    net = core.net_income(persona, core.cities["C1"].city_id)
-    assert o3.o3_representative_real["real_income_representative"] != pytest.approx(
-        net / personal_p
+    """这正是 O3 仍属环境而非 L3 的全部理由：它不依赖任何偏好参数。
+
+    若这里误用 persona.shares，O3 就把 A(a; θ) 的一半直接递给了代理，
+    对抗档当场失效。
+    """
+    city = core.cities["C1"].city
+    o3 = core.observe(persona, city, 2024, ObservableTier.O3)
+    personal_real = core._income(persona, city)["net_income"] / math.exp(
+        core._price_index(persona, city)
     )
+    assert o3.o3_representative_real["real_income_representative"] != pytest.approx(personal_real)
 
 
 def test_malformed_tiers_are_rejected(core, persona):
-    o = core.observe(persona, core.cities["C1"].city_id, 2024, ObservableTier.O1)
+    o = core.observe(persona, core.cities["C1"].city, 2024, ObservableTier.O1)
     with pytest.raises(ValueError, match="O1 carries L0 and L1 only"):
         Observable(
             tier=ObservableTier.O1,

@@ -1,261 +1,210 @@
-"""Fixtures for the M2 harness.
+"""M2 harness 的 fixtures。
 
-Contains a toy core. It is NOT M2 and src/econ/ must never import it. Its only
-purpose is to give the assertions something to bite on: a single-count check
-that has never seen a double count, and a leak scan that has never seen a leak,
-are decoration. So alongside the compliant toy there are two deliberately broken
-ones, and the tests require the harness to catch them.
+与上一版的关键差别：**不再有玩具核**。故意写坏的核直接继承真正的
+WelfareCore，只重写一个方法。这样单次计入断言咬的是生产代码，而不是
+一个长得像生产代码的替身。
 
-When the real core lands, expose a callable ``build_core`` in ``econ.core`` and
-the contract tests in test_contract.py will pick it up automatically and run the
-same assertions against it.
+依然保留"每个检查都要有一个能被它抓到的坏核"这条原则：一个从未见过
+违规的断言等于装饰。
 """
 
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
 
 import pytest
 
-from common.ids import CityId, OccupationId
-from common.money import USD_2024_US100, WelfareLevel
+from common.ids import CityId, Jurisdiction, OccupationId
+from common.money import USD_2024_US100, Money
 from common.providers import ExpenditureShares
+from econ.core import WelfareCore
 from econ.graph import Term, UtilityGraph
+from econ.kernel import GrowthRates, TransitionKernel
 from econ.types import (
-    GroundTruth,
+    CityRecord,
     LiteralnessTier,
     Observable,
-    ObservableTier,
     Persona,
     PersonaBrief,
     PersonaParams,
 )
 
 REFERENCE_ID = "US_MSA_2024"
+AMENITY_DIMS = ("safety", "sunshine", "commute")
 
-AMENITY_COLUMNS = {
-    "safety": "crime_rate",
-    "sunshine": "sunshine_hours",
-    "commute": "commute_minutes",
+
+class ProgressiveTax:
+    """两档累进税加一个按辖区深度的地方附加。
+
+    累进是必须的，不是装饰：Albouy (2009) 的效应——名义工资高的城市，
+    同等条件劳动者多交约 30% 联邦税——只有在累进税下才存在。平税会让
+    §11.3 第四档（对抗型，检验货币幻觉）失去一半的构造空间。
+
+    地方附加依赖 Jurisdiction 路径的**深度**，这样美国式的 (国, 州) 与
+    只有 (国,) 的国家走同一个签名，M2 不需要知道区别。
+    """
+
+    def __init__(
+        self, brackets: tuple[tuple[float, float], ...] = ((50_000.0, 0.12), (float("inf"), 0.32))
+    ):
+        self.brackets = brackets
+
+    def tax(self, gross: Money, jurisdiction: Jurisdiction, year: int) -> Money:
+        owed = 0.0
+        lower = 0.0
+        for upper, rate in self.brackets:
+            if gross.amount <= lower:
+                break
+            taxable = min(gross.amount, upper) - lower
+            owed += taxable * rate
+            lower = upper
+        local = 0.02 * (len(jurisdiction.path) - 1)
+        return Money(owed + gross.amount * local, gross.numeraire)
+
+
+US_JURISDICTION = Jurisdiction(("US", "MA"))
+
+# 三座合成城市。中性标签（§11.3：不得写得像任何一座真实城市，否则测的是
+# 模型对真实城市的记忆而非推理）。rpp 已归一到全美=1。
+CITY_RECORDS = {
+    "C1": CityRecord(
+        city=CityId("US", "SYNTH", "C1"),
+        rpp={"rent": 1.31, "goods": 1.02, "other": 1.11},
+        wage_by_quantile={10: 58_000.0, 25: 71_000.0, 50: 92_000.0, 75: 118_000.0, 90: 149_000.0},
+        amenities_scaled={"safety": 0.62, "sunshine": 0.58, "commute": 0.41},
+        jurisdiction=US_JURISDICTION,
+    ),
+    "C7": CityRecord(
+        city=CityId("US", "SYNTH", "C7"),
+        rpp={"rent": 0.88, "goods": 0.97, "other": 0.94},
+        wage_by_quantile={10: 44_000.0, 25: 54_000.0, 50: 71_000.0, 75: 89_000.0, 90: 112_000.0},
+        amenities_scaled={"safety": 0.79, "sunshine": 0.83, "commute": 0.76},
+        jurisdiction=US_JURISDICTION,
+    ),
+    "C4": CityRecord(
+        city=CityId("US", "SYNTH", "C4"),
+        rpp={"rent": 1.04, "goods": 1.00, "other": 1.02},
+        wage_by_quantile={10: 50_000.0, 25: 62_000.0, 50: 80_500.0, 75: 101_000.0, 90: 127_000.0},
+        amenities_scaled={"safety": 0.71, "sunshine": 0.66, "commute": 0.58},
+        jurisdiction=US_JURISDICTION,
+    ),
 }
 
 
-@dataclass(frozen=True)
-class ToyCity:
-    city_id: CityId
-    wage: float
-    tax_rate: float
-    rpp_rents: float
-    rpp_goods: float
-    rpp_other: float
-    crime_rate: float
-    sunshine_hours: float
-    commute_minutes: float
+class DoubleCountingCore(WelfareCore):
+    """故意写坏：房租既进价格指数又进舒适度向量。
 
-    def l1(self) -> dict[str, float]:
-        return {
-            "wage": self.wage,
-            "tax_rate": self.tax_rate,
-            "rpp_rents": self.rpp_rents,
-            "rpp_goods": self.rpp_goods,
-            "rpp_other": self.rpp_other,
-        }
-
-    def l0(self) -> dict[str, float]:
-        return {
-            "crime_rate": self.crime_rate,
-            "sunshine_hours": self.sunshine_hours,
-            "commute_minutes": self.commute_minutes,
-        }
-
-    def with_wage(self, wage: float) -> ToyCity:
-        return ToyCity(
-            self.city_id,
-            wage,
-            self.tax_rate,
-            self.rpp_rents,
-            self.rpp_goods,
-            self.rpp_other,
-            self.crime_rate,
-            self.sunshine_hours,
-            self.commute_minutes,
-        )
-
-
-def _scale(variable: str, raw: float) -> float:
-    """Toy scale function. Monotone and bounded, which is all §7.3 requires of a
-    research-mode world: any monotone scaling defines a legitimate world, it only
-    changes the difficulty."""
-    if variable == "commute_minutes":  # less is better
-        return max(0.0, min(1.0, 1.0 - raw / 120.0))
-    if variable == "crime_rate":
-        return max(0.0, min(1.0, 1.0 - raw / 100.0))
-    return max(0.0, min(1.0, raw / 4000.0))  # sunshine hours
-
-
-class ReferenceToyCore:
-    """A minimal stand-in for M2. Not the real welfare model.
-
-    Implements exactly the indirect form agreed for the housing question:
-
-        V = (Y_net / P) ** w1  *  prod_k A_k ** theta_k
-
-    Rent appears once, inside P. Housing quantity never appears: it is optimised
-    out, which is why there is nothing for it to be double counted against.
+    这正是 §7.4 点名的那个错误，也是运行时看上去完全健康、却会摧毁
+    识别的那一个。
     """
 
-    def __init__(self, cities: dict[str, ToyCity]):
-        self.cities = cities
-
-    def _city(self, city: CityId) -> ToyCity:
-        return self.cities[city.code]
-
-    def price_index(self, persona: Persona, city: CityId, g: UtilityGraph | None = None) -> float:
-        c = self._city(city)
-        s = persona.shares
+    def _amenities(self, persona, city, g=None):
+        out = super()._amenities(persona, city, g)
         if g is not None:
-            for col in ("rpp_rents", "rpp_goods", "rpp_other"):
-                g.contribute(col, Term.PRICE_INDEX)
-        return c.rpp_rents**s.s_rent * c.rpp_goods**s.s_goods * c.rpp_other**s.s_other
-
-    def net_income(self, persona: Persona, city: CityId, g: UtilityGraph | None = None) -> float:
-        c = self._city(city)
-        if g is not None:
-            g.contribute("wage", Term.BUDGET)
-            g.contribute("tax", Term.BUDGET)
-        quantile_factor = {10: 0.72, 25: 0.85, 50: 1.0, 75: 1.22, 90: 1.51}
-        return c.wage * quantile_factor[persona.ability_quantile] * (1.0 - c.tax_rate)
-
-    def amenity_index(self, persona: Persona, city: CityId, g: UtilityGraph | None = None) -> float:
-        c = self._city(city)
-        out = 1.0
-        for dim, column in AMENITY_COLUMNS.items():
-            theta = persona.params.theta.get(dim, 0.0)
-            if g is not None:
-                g.contribute(column, Term.AMENITY, dimension=dim)
-            out *= _scale(column, getattr(c, column)) ** theta
-        return out
-
-    def utility_value(self, persona: Persona, city: CityId, g: UtilityGraph | None = None) -> float:
-        real = self.net_income(persona, city, g) / self.price_index(persona, city, g)
-        return real**persona.params.w_material * self.amenity_index(persona, city, g)
-
-    def graph_for(self, persona: Persona, city: CityId) -> UtilityGraph:
-        g = UtilityGraph()
-        self.utility_value(persona, city, g)
-        return g
-
-    def observe(
-        self, persona: Persona, city: CityId, year: int, tier: ObservableTier
-    ) -> Observable:
-        c = self._city(city)
-        l2 = None
-        o3 = None
-        if tier in (ObservableTier.O2, ObservableTier.O3):
-            l2 = {"net_income": self.net_income(persona, city), "savings_3y": 0.0}
-        if tier is ObservableTier.O3:
-            rep = ExpenditureShares(0.33, 0.33, 0.34)
-            rep_p = c.rpp_rents**rep.s_rent * c.rpp_goods**rep.s_goods * c.rpp_other**rep.s_other
-            o3 = {"real_income_representative": self.net_income(persona, city) / rep_p}
-        return Observable(
-            tier=tier,
-            city=city,
-            year=year,
-            l0_amenities=c.l0(),
-            l1_economics=c.l1(),
-            l2_accounting=l2,
-            o3_representative_real=o3,
-        )
-
-    def score(self, persona: Persona, city: CityId, year: int) -> GroundTruth:
-        c = self._city(city)
-        return GroundTruth(
-            city=city,
-            year=year,
-            amenity_index=self.amenity_index(persona, city),
-            profile={dim: _scale(col, getattr(c, col)) for dim, col in AMENITY_COLUMNS.items()},
-            utility=WelfareLevel(self.utility_value(persona, city), USD_2024_US100, REFERENCE_ID),
-        )
-
-    def solve_wage_for_tie(self, persona: Persona, target: CityId, city: CityId) -> float:
-        """Wage in ``city`` that makes its utility exactly equal ``target``'s.
-
-        A direct algebraic inversion, not a root find. README §11.3's third tier
-        needs exact ties, and the closed form is what makes that a one-liner
-        rather than a numerical search in a high-dimensional space.
-        """
-        c = self._city(city)
-        u_target = self.utility_value(persona, target)
-        a = self.amenity_index(persona, city)
-        p = self.price_index(persona, city)
-        w1 = persona.params.w_material
-        real_needed = (u_target / a) ** (1.0 / w1)
-        quantile_factor = {10: 0.72, 25: 0.85, 50: 1.0, 75: 1.22, 90: 1.51}
-        return real_needed * p / (quantile_factor[persona.ability_quantile] * (1.0 - c.tax_rate))
-
-
-class DoubleCountingCore(ReferenceToyCore):
-    """Broken on purpose: rent is both a price and an amenity.
-
-    This is exactly the mistake README §7.4 warns about, and the one that would
-    look completely healthy at runtime while destroying identification.
-    """
-
-    def amenity_index(self, persona: Persona, city: CityId, g: UtilityGraph | None = None) -> float:
-        out = super().amenity_index(persona, city, g)
-        if g is not None:
-            g.contribute("rpp_rents", Term.AMENITY, dimension="housing_niceness")
+            g.contribute("rpp_rent", Term.AMENITY, dimension="housing_niceness")
         return out
 
 
-class DiagnosticInUtilityCore(ReferenceToyCore):
-    """Broken on purpose: housing burden ratio treated as an amenity.
+class DiagnosticInUtilityCore(WelfareCore):
+    """故意写坏：住房负担比被当成舒适度。
 
-    Burden is rent over income, so both are already counted; adding it is a
-    third counting of each (README §9.1 keeps it as a diagnostic).
+    负担比是租金除以收入，两者都已经计过了，再加一次是各计了三遍。
+    §9.1 把它留作诊断量。
     """
 
-    def amenity_index(self, persona: Persona, city: CityId, g: UtilityGraph | None = None) -> float:
-        out = super().amenity_index(persona, city, g)
+    def _amenities(self, persona, city, g=None):
+        out = super()._amenities(persona, city, g)
         if g is not None:
             g.contribute("housing_burden_ratio", Term.AMENITY, dimension="affordability")
         return out
 
 
+class CityVaryingSharesCore(WelfareCore):
+    """故意写坏：份额按城市变（架构修正一禁止的那件事）。
+
+    留着它是为了让"κ 跨城不变"那条断言有东西可抓。真核里份额只从
+    persona 读，所以正确实现下这个错误无法发生；但假如有一天有人把
+    CEX provider 塞回装配层，κ 就会开始跨城漂移，而排序测试发现不了。
+    """
+
+    def _price_index(self, persona, city, g=None):
+        rec = self.record(city)
+        # 用城市的租金水平去"调整"份额 —— 正是被禁止的做法
+        tilt = min(0.55, 0.34 * rec.rpp["rent"])
+        skewed = ExpenditureShares.from_raw(tilt, 0.29, 0.37)
+        clone = Persona(
+            persona_id=persona.persona_id,
+            params=persona.params,
+            shares=skewed,
+            occupation=persona.occupation,
+            ability_quantile=persona.ability_quantile,
+            brief=persona.brief,
+        )
+        return super()._price_index(clone, city, g)
+
+    def kappa_of(self, persona, city):
+        """这个坏核下 κ 会随城市变；真核下不会。"""
+        from econ.utility import ln_kappa
+
+        rec = self.record(city)
+        tilt = min(0.55, 0.34 * rec.rpp["rent"])
+        skewed = ExpenditureShares.from_raw(tilt, 0.29, 0.37)
+        w1 = persona.params.w_material
+        params = PersonaParams(
+            alpha=w1 * (skewed.s_goods + skewed.s_other),
+            beta=w1 * skewed.s_rent,
+            theta=persona.params.theta,
+        )
+        return ln_kappa(params)
+
+
 def render_prompt(brief: PersonaBrief, observables: list[Observable]) -> str:
-    """A stand-in prompt serialiser, so the leak scan has text to scan."""
+    """一个替身 prompt 序列化器，让泄漏扫描有文本可扫。"""
     lines = [f"You are: {brief.narrative}", "", "Options:"]
     for o in observables:
         lines.append(f"  {o.city.code}:")
-        for k, v in sorted(o.l1_economics.items()):
-            lines.append(f"    {k} = {v}")
-        for k, v in sorted(o.l0_amenities.items()):
-            lines.append(f"    {k} = {v}")
-        if o.l2_accounting:
-            for k, v in sorted(o.l2_accounting.items()):
-                lines.append(f"    {k} = {v}")
-        if o.o3_representative_real:
-            for k, v in sorted(o.o3_representative_real.items()):
-                lines.append(f"    {k} = {v}")
+        for block in (o.l1_economics, o.l0_amenities, o.l2_accounting, o.o3_representative_real):
+            if block:
+                for k, v in sorted(block.items()):
+                    lines.append(f"    {k} = {v}")
     return "\n".join(lines)
 
 
-CITY_A = ToyCity(CityId("US", "SYNTH", "C1"), 92000.0, 0.24, 1.31, 1.02, 1.11, 38.0, 2600.0, 41.0)
-CITY_B = ToyCity(CityId("US", "SYNTH", "C7"), 71000.0, 0.17, 0.88, 0.97, 0.94, 21.0, 3300.0, 24.0)
-CITY_C = ToyCity(CityId("US", "SYNTH", "C4"), 80500.0, 0.21, 1.04, 1.00, 1.02, 29.0, 2950.0, 32.0)
+def softmax_entropy(utilities: list[float], sigma: float) -> float:
+    """真值选择分布的熵。
+
+    放在测试里而不是 src/eval/：M5 的核心数学由人手写第一版，这里只是
+    为了演示实验设计的一个性质。
+    """
+    m = max(u / sigma for u in utilities)
+    exps = [math.exp(u / sigma - m) for u in utilities]
+    total = sum(exps)
+    probs = [e / total for e in exps]
+    return -sum(p * math.log(p) for p in probs if p > 0)
 
 
 @pytest.fixture
-def cities() -> dict[str, ToyCity]:
-    return {c.city_id.code: c for c in (CITY_A, CITY_B, CITY_C)}
+def cities() -> dict[str, CityRecord]:
+    return dict(CITY_RECORDS)
+
+
+@pytest.fixture
+def tax() -> ProgressiveTax:
+    return ProgressiveTax()
 
 
 @pytest.fixture
 def persona() -> Persona:
+    """一个七维被压到五维的人设（三个舒适度 + 物质项拆成 α/β）。
+
+    份额在这里就是冻结的常数，不是查表的结果——这正是架构修正一要求的
+    形态：Persona 构造时用一个与城市无关的参照收入查一次，然后固定。
+    """
+    shares = ExpenditureShares(0.34, 0.29, 0.37)
+    w1 = 0.52
     params = PersonaParams(
-        alpha=0.30,
-        beta=0.22,
+        alpha=w1 * (shares.s_goods + shares.s_other),
+        beta=w1 * shares.s_rent,
         theta={"safety": 0.20, "sunshine": 0.13, "commute": 0.15},
     )
     brief = PersonaBrief(
@@ -265,11 +214,12 @@ def persona() -> Persona:
             "I hate driving and cannot take grey winters. I would rather have a smaller "
             "place in a quiet neighbourhood than a big one I have to commute to."
         ),
+        dimension_order=("commute", "sunshine", "safety"),
     )
     return Persona(
         persona_id="p001",
         params=params,
-        shares=ExpenditureShares(0.34, 0.29, 0.37),
+        shares=shares,
         occupation=OccupationId("SOC2018", "15-1252"),
         ability_quantile=50,
         brief=brief,
@@ -277,19 +227,31 @@ def persona() -> Persona:
 
 
 @pytest.fixture
-def core(cities) -> ReferenceToyCore:
-    return ReferenceToyCore(cities)
+def core(cities, tax) -> WelfareCore:
+    return WelfareCore(cities, tax, numeraire=USD_2024_US100, reference_id=REFERENCE_ID)
 
 
-def softmax_entropy(utilities: list[float], sigma: float) -> float:
-    """Entropy of the ground-truth choice distribution at temperature sigma.
+@pytest.fixture
+def kernel() -> TransitionKernel:
+    return TransitionKernel(
+        {
+            "C1": GrowthRates(real_wage=0.012, real_rent=0.021, real_interest=0.015),
+            "C7": GrowthRates(real_wage=0.019, real_rent=0.006, real_interest=0.015),
+            "C4": GrowthRates(real_wage=0.015, real_rent=0.011, real_interest=0.015),
+        },
+        savings_rate=0.15,
+    )
 
-    Lives in the test rather than in src/eval/: M5's core mathematics is written
-    by hand first (CLAUDE.md), and this exists only to demonstrate a property of
-    the experimental design.
-    """
-    m = max(u / sigma for u in utilities)
-    exps = [math.exp(u / sigma - m) for u in utilities]
-    total = sum(exps)
-    probs = [e / total for e in exps]
-    return -sum(p * math.log(p) for p in probs if p > 0)
+
+@pytest.fixture
+def city_a() -> CityId:
+    return CITY_RECORDS["C1"].city
+
+
+@pytest.fixture
+def city_b() -> CityId:
+    return CITY_RECORDS["C7"].city
+
+
+def graph_of(core: WelfareCore, persona: Persona, city: CityId) -> UtilityGraph:
+    return core.graph_for(persona, city)

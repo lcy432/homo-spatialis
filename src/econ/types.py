@@ -24,7 +24,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Protocol, runtime_checkable
 
-from common.ids import CityId, OccupationId
+from common.ids import CityId, Jurisdiction, OccupationId
 from common.money import Money, WelfareLevel
 from common.providers import ExpenditureShares
 
@@ -93,16 +93,51 @@ class PersonaParams:
 
 @dataclass(frozen=True, slots=True)
 class PersonaBrief:
-    """Everything about a person that an agent is allowed to read."""
+    """代理唯一被允许读到的关于"人"的信息。
+
+    ``dimension_order`` 记录七个维度在散文里的叙述顺序。它存在是为了堵一条
+    数值扫描完全抓不到的泄漏通道：如果人设散文总是按权重从高到低铺陈维度，
+    那么秩序信息已经泄漏了——模型只要读出叙述次序就能答对权衡档，一个数字
+    都不用看。这与 §10.2 已有的城市排列随机化是同一手法：随机化，并记录
+    置换，然后检验置换与真值之间没有系统关联（见 common.leakcheck 的
+    narration_order_leakage）。
+
+    注意这个字段本身是"可见"的：它就是散文的顺序，代理读散文时自然知道。
+    记录它不是为了隐藏，而是为了让"顺序里没有信息"这件事可被检验。
+    """
 
     persona_id: str
     literalness: LiteralnessTier
     narrative: str
+    dimension_order: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
 class Persona:
-    """A person as the environment knows them. Answer side; never in a prompt."""
+    """环境所知道的"这个人"。答案侧，永不进入 prompt。
+
+    ``shares`` 是 Persona 的字段，**不是 (persona, city) 的函数**，这一点是
+    硬约束而非风格。若按各城市的税后收入去查 CEX 档位，份额会跨城市波动，
+    随之三件事同时坏掉：
+
+      (a) P 不再是价格指数。指数数论要求权重固定，权重随价格变动的加权
+          几何平均不是任何东西的价格指数；
+      (b) κ 跨城市变动，于是它不再能从排序里约掉，等价变差失效；
+      (c) ln V 的系数随备选项变化，§11.7 的条件 logit 变成误设定——
+          它假定同一个人在所有备选项上用同一组系数。
+
+    更根本的理由是函数形式本身：Cobb-Douglas 位似、替代弹性为一，支出份额
+    在理论上就不随价格和收入变化。让 s 随城市变，是在跟自己选的效用函数
+    打架。
+
+    因此查 CEX 用的是一个**与城市无关的参照收入**（产品模式取用户当前收入，
+    研究模式取人设指定收入），在 Persona 构造时算一次并冻结。装配层不得
+    持有 ExpenditureShareProvider 的引用——有一条测试盯着这件事。
+
+    ``variety`` 是 §6.4 的可贸易品三题（常吃菜系、汽车品牌倾向、手机品牌
+    倾向）。V1 全美同值，因此这三列方差为零，白送一个泄漏对照：若模型的
+    选择与零方差列相关，说明估计层在读噪声。
+    """
 
     persona_id: str
     params: PersonaParams
@@ -110,6 +145,7 @@ class Persona:
     occupation: OccupationId
     ability_quantile: int  # one of the OEWS quantiles: 10, 25, 50, 75, 90
     brief: PersonaBrief
+    variety: Mapping[str, str] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if self.ability_quantile not in (10, 25, 50, 75, 90):
@@ -158,14 +194,73 @@ class Observable:
 
 
 @dataclass(frozen=True, slots=True)
+class CityRecord:
+    """M2 眼中的一座城市：已经被 ledger 标准化过的量，没有一列原始数据。
+
+    这是"M2 对国家无知"这条架构规则的落点。M2 里不允许出现
+    ``if country == ...``；它拿到的就是这个结构，不知道 rpp 是 BEA 发的还是
+    别国统计局发的，也不知道 amenities 是用绝对锚定还是分位表标度出来的。
+    所有国别知识都在上游的 CountryPack 里被消化掉了。若 M2 里冒出了需要
+    分国家讨论的东西，那是上游抽象漏了，修上游，不修 M2。
+
+    字段约定：
+
+      rpp                 三个分项，**已归一到全美=1**（不是 BEA 发布的
+                          全美=100）。归一在 ledger 层做，见
+                          ledger.normalization。这样 ln P 落在 0 附近，
+                          条件 logit 的数值条件明显更好。
+      wage_by_quantile    OEWS 的五个分位。§7.5 明确禁止一律取中位数：
+                          能力分位到工资分位的映射是不能省的一项。
+      amenities_scaled    已标度到 [0,1]，语义是"越大越好"。标度函数是
+                          自由参数（§5.3），它属于 ledger，不属于这里。
+      variety_ln_price    可贸易品的品种调整项，对数空间，按类别给出。
+                          V1 全美同值（通常全零），V2 由标志商品机制填。
+    """
+
+    city: CityId
+    rpp: Mapping[str, float]  # 键为 "rent" / "goods" / "other"
+    wage_by_quantile: Mapping[int, float]
+    amenities_scaled: Mapping[str, float]
+    jurisdiction: Jurisdiction
+    variety_ln_price: Mapping[str, float] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        missing = {"rent", "goods", "other"} - set(self.rpp)
+        if missing:
+            raise ValueError(f"CityRecord.rpp 缺少分项 {sorted(missing)}；§5.2 不使用 rpp_all")
+        for name, value in self.amenities_scaled.items():
+            if not 0.0 <= value <= 1.0:
+                raise ValueError(f"舒适度 {name} 的标度值 {value} 不在 [0,1]，标度应在 ledger 完成")
+
+
+@dataclass(frozen=True, slots=True)
 class GroundTruth:
-    """L3-L4. Never reaches a prompt (CLAUDE.md hard rule 1)."""
+    """L3-L4。永不进入 prompt（CLAUDE.md 硬规则 1）。
+
+    ``features`` 与 ``coefficients`` 是 ln V 的分解，M5 直接消费，**不自行
+    重算**。这么做的理由不是浮点漂移（那是 1e-15 量级，可忽略），而是两条：
+
+      一、单一真值来源。特征表示若有两份实现，它们迟早会分叉，而分叉之后
+          "回收误差"这个核心因变量就没有意义了。
+      二、§11.3 的精确并列求解器与 M5 必须用同一套特征表示。并列是在
+          ln V 上求解出来的；如果 M5 眼里的特征不是同一组，那个"精确"在
+          M5 看来就不精确，§11.6 赖以成立的 σ 无关性随之失效。
+
+    物质项**拆成 ln_y_net 与 ln_p 两列**，而不是合成一列 ln(Y/P)。模型说
+    这两个系数应当等值反号（都是 ±w₁），拆开之后这个约束从"我们的假设"
+    变成"可检验的假设"，而 ``|coef_Y + coef_P|`` 直接就是货币幻觉的连续
+    度量——它把 §11.3 第四档从一个二元的对错判断升级成了一个标量。
+    """
 
     city: CityId
     year: int
-    amenity_index: float  # A(a; theta), L3
-    profile: Mapping[str, float]  # per-dimension profile, L3
+    amenity_index: float  # A(a; theta)，L3
+    profile: Mapping[str, float]  # 分维剖面，L3
     utility: WelfareLevel  # L4
+    ln_utility: float  # L4，对数空间的同一个数
+    ln_kappa: float  # 跨城不变的常数项，见 econ.utility.ln_kappa
+    features: Mapping[str, float]  # ln V 的各列，M5 消费
+    coefficients: Mapping[str, float]  # 各列对应的真值系数
     equivalent_variation: Money | None = None  # L4
 
 

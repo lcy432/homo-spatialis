@@ -56,7 +56,12 @@ src = ["src", "tests", "scripts"]
 select = ["E", "F", "I", "UP", "B", "SIM", "N", "RUF"]
 # E501 off: docstrings and comments in this repo are Chinese, where character
 # width and character count disagree and the limit fires spuriously.
-ignore = ["E501"]
+#
+# RUF001/002/003 off: these flag "ambiguous" unicode that resembles ASCII, which
+# in practice means every full-width comma and bracket in a Chinese comment.
+# The rule is aimed at homoglyph attacks in identifiers; here it would fire
+# several hundred times on ordinary prose and train everyone to ignore ruff.
+ignore = ["E501", "RUF001", "RUF002", "RUF003"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["S101"]
