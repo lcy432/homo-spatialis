@@ -39,6 +39,51 @@ class ConfigError(ValueError):
     """Raised for a configuration that loads as YAML but is not usable."""
 
 
+_DOTENV_LOADED = False
+
+
+def _ensure_dotenv() -> None:
+    """惰性加载一次 .env，作为进程环境变量的**后备**，不覆盖它。
+
+    为什么需要这条后备路径。Windows 只把改过的环境变量交给**之后**启动的
+    进程；已经在运行的进程继承的是父进程那份旧副本，而且没法刷新。于是
+    "变量明明设好了，程序却读不到"是一个必然会重复发生的故障，而它的表现
+    是 KeyError 而不是鉴权失败——2026-09-02 那次排查里，第一次探针报的
+    正是"not set"，我却按"key 无效"去查了。
+
+    ``override=False`` 是刻意的：真实环境变量优先。一份过期的 .env 不该
+    盖掉一个刚设好的系统变量，否则这个后备机制自己会变成下一个坑。
+
+    .env 在 .gitignore 里（硬规则 2），仓库里只有 .env.example。
+    """
+    global _DOTENV_LOADED
+    if _DOTENV_LOADED:
+        return
+    from dotenv import find_dotenv, load_dotenv
+
+    # usecwd=True 是必需的：默认的 find_dotenv 从**调用方源文件**所在目录
+    # 往上找，也就是从 src/common/ 往上，而不是从你运行命令的地方往上。
+    # 默认行为在这个仓库里碰巧能用，但在测试里和从别处调用时都会找错，
+    # 而找错的表现是"没读到"，又一次伪装成凭证问题。
+    load_dotenv(find_dotenv(usecwd=True), override=False)
+    _DOTENV_LOADED = True
+
+
+def key_source(env_var: str) -> str:
+    """这个密钥是从哪儿来的。只报来源，永不报值。
+
+    诊断用。"读到了"和"从哪读到的"是两件事，后者在排查环境变量问题时
+    才是有用的那一件。
+    """
+    in_process = env_var in os.environ
+    _ensure_dotenv()
+    if in_process:
+        return "process environment"
+    if env_var in os.environ:
+        return ".env file"
+    return "not found"
+
+
 def load_yaml(path: str | Path) -> dict[str, Any]:
     p = Path(path)
     if not p.exists():
@@ -94,6 +139,7 @@ class ModelSpec(BaseModel):
         return v
 
     def resolve(self) -> ResolvedModel:
+        _ensure_dotenv()
         if self.model is None:
             raise ConfigError(
                 f"base model for provider {self.provider!r} has no snapshot pinned yet; "
@@ -102,8 +148,10 @@ class ModelSpec(BaseModel):
         key = os.environ.get(self.api_key_env)
         if not key:
             raise ConfigError(
-                f"environment variable {self.api_key_env} is not set. "
-                "Keys are read from the environment, never from config or the repo."
+                f"environment variable {self.api_key_env} is not set, and no .env supplied it. "
+                "Keys are read from the environment or .env, never from config or the repo. "
+                "On Windows, a variable set after this process started is invisible to it: "
+                "open a new terminal, or put the key in .env."
             )
         return ResolvedModel(
             provider=self.provider, base_url=self.base_url, model=self.model, api_key=key

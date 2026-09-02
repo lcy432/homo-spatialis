@@ -12,7 +12,7 @@ import subprocess
 import sys
 
 import _bootstrap  # noqa: F401  (side effect: puts src/ on the path)
-from common.config import ConfigError, ModelsConfig
+from common.config import ConfigError, ModelsConfig, key_source
 
 OK, WARN, BAD = "[ ok ]", "[warn]", "[fail]"
 _SNAPSHOT_SHAPED = re.compile(r"-(?:\d{4}-\d{2}-\d{2}|\d{8})$")
@@ -41,8 +41,15 @@ def check_keys(models: ModelsConfig) -> None:
     print("\n-- keys (values never printed) --")
     for role in ("base_a", "base_b"):
         env = models.spec(role).api_key_env
-        present = bool(os.environ.get(env))
-        print(f"{OK if present else WARN} {role}: {env} {'set' if present else 'not set'}")
+        source = key_source(env)
+        present = source != "not found"
+        detail = f"from {source}" if present else "not set"
+        print(f"{OK if present else WARN} {role}: {env} {detail}")
+    if not any(key_source(models.spec(r).api_key_env) != "not found" for r in ("base_a", "base_b")):
+        print(
+            f"{WARN} 没有任何密钥可见。若你确信已经设过：Windows 只把改动交给之后启动的\n"
+            "       进程，已运行的进程继承的是旧副本。开一个新终端，或把密钥写进 .env。"
+        )
 
 
 def check_snapshots(models: ModelsConfig) -> None:
