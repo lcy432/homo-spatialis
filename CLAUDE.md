@@ -80,7 +80,7 @@ homo-spatialis/
 │   ├── ledger/            M1.5 字段台账、参照总体、分位表
 │   ├── econ/              M2  福利模型（真值，改动需询问）
 │   ├── worlds/            M3  合成世界与人设生成
-│   ├── agents/            M4  语言模型接口
+│   ├── agentlayer/        M4  语言模型接口（不叫 agents：PyPI 上 openai-agents 装成顶层 agents，会静默冲突）
 │   ├── eval/              M5  评估
 │   └── ui/                M6  问卷与结果展示
 ├── tests/
