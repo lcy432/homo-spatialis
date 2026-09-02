@@ -21,8 +21,18 @@ from typing import Any, Literal
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-# A dated snapshot ends in -YYYY-MM-DD or -YYYYMMDD.
-_DATED_SNAPSHOT = re.compile(r"-(?:\d{4}-\d{2}-\d{2}|\d{8})$")
+# A dated snapshot ends in -YYYY-MM-DD, -YYYYMMDD, or -MMDD.
+#
+# The -MMDD form (qwen-max-0107, qwen3.8-max-0902) is what DashScope uses for
+# some of its models. It is a genuine pin -- the rolling alias would be
+# `qwen-max` with no suffix -- so rejecting it would block legitimate choices,
+# which is not what hard rule 6 is for.
+#
+# It is still the weaker form: the year is implicit, so the string alone does
+# not identify the version across years. Prefer a full-date snapshot when the
+# provider offers one. The run log records the model string together with the
+# run timestamp, so the year stays recoverable either way.
+_DATED_SNAPSHOT = re.compile(r"-(?:\d{4}-\d{2}-\d{2}|\d{8}|\d{4})$")
 
 
 class ConfigError(ValueError):
@@ -78,8 +88,8 @@ class ModelSpec(BaseModel):
         if not _DATED_SNAPSHOT.search(v):
             raise ValueError(
                 f"model {v!r} is not a dated snapshot. CLAUDE.md hard rule 6 forbids rolling "
-                "aliases; use a name ending in -YYYY-MM-DD or -YYYYMMDD so the run stays "
-                "reproducible after the alias moves."
+                "aliases; use a name ending in -YYYY-MM-DD, -YYYYMMDD or -MMDD so the run "
+                "stays reproducible after the alias moves."
             )
         return v
 

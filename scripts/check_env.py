@@ -56,7 +56,19 @@ def check_snapshots(models: ModelsConfig) -> None:
 
 
 def check_connectivity(models: ModelsConfig, role: str = "base_b") -> None:
-    """List snapshot-shaped model ids the key can see, to help pin `model`."""
+    """探活并列出可用的快照。
+
+    两级探针，顺序有讲究。先试 GET /models，因为它免费且能列出快照名；
+    失败时**不下结论**，改用一次最小的 chat/completions 再判。
+
+    这个回退是有来历的：2026-09-02 那次排查里，一个刚创建的 key 在
+    GET /models 上返回 401 invalid_api_key，几十分钟后同一个 key 同一段
+    代码返回 200——大概率是新 key 的生效延迟。当时只有单级探针，于是
+    "阿里云说这个 key 无效"被当成了"这个 key 是坏的"，白绕了一圈。
+
+    教训不是"多试一个端点"，是**一个探针失败只能说明那个探针失败**。
+    所以两级都挂了才报 fail，只挂一级报 warn 并说明差异。
+    """
     print(f"\n-- connectivity: {role} --")
     spec = models.spec(role)
     if not os.environ.get(spec.api_key_env):
@@ -65,20 +77,53 @@ def check_connectivity(models: ModelsConfig, role: str = "base_b") -> None:
     if spec.base_url == "TBD":
         print(f"{WARN} skipped: base_url not configured yet")
         return
-    try:
-        from openai import OpenAI
 
-        client = OpenAI(api_key=os.environ[spec.api_key_env], base_url=spec.base_url)
-        ids = sorted(m.id for m in client.models.list().data)
+    from openai import OpenAI
+
+    client = OpenAI(api_key=os.environ[spec.api_key_env], base_url=spec.base_url)
+
+    listed: list[str] = []
+    list_error: str | None = None
+    try:
+        listed = sorted(m.id for m in client.models.list().data)
     except Exception as exc:
-        print(f"{BAD} could not list models: {type(exc).__name__}: {exc}")
-        return
-    dated = [i for i in ids if _SNAPSHOT_SHAPED.search(i)]
-    print(f"{OK} endpoint reachable, {len(ids)} models visible, {len(dated)} snapshot-shaped")
-    for i in dated[:40]:
-        print(f"       {i}")
-    if not dated:
-        print(f"{WARN} no dated snapshots visible; pin one from the provider console instead")
+        list_error = f"{type(exc).__name__}: {exc}"
+
+    chat_ok = False
+    chat_error: str | None = None
+    if spec.model is not None:
+        try:
+            client.chat.completions.create(
+                model=spec.model,
+                messages=[{"role": "user", "content": "ping"}],
+                max_tokens=1,
+            )
+            chat_ok = True
+        except Exception as exc:
+            chat_error = f"{type(exc).__name__}: {exc}"
+
+    if listed:
+        dated = [i for i in listed if _SNAPSHOT_SHAPED.search(i)]
+        print(f"{OK} GET /models: {len(listed)} visible, {len(dated)} snapshot-shaped")
+        if spec.model and spec.model not in listed:
+            print(f"{WARN} pinned model {spec.model!r} is not in the visible list")
+    else:
+        print(f"{WARN} GET /models failed: {list_error}")
+
+    if spec.model is None:
+        print(f"{WARN} chat probe skipped: no snapshot pinned")
+    elif chat_ok:
+        print(f"{OK} POST /chat/completions with {spec.model}: reachable")
+    else:
+        print(f"{BAD} POST /chat/completions failed: {chat_error}")
+
+    if not listed and not chat_ok and spec.model is not None:
+        print(f"{BAD} both probes failed -- treat the credential as the suspect")
+    elif not listed and chat_ok:
+        print(
+            f"{WARN} the listing endpoint refused but chat works. The key is fine; "
+            "do not conclude otherwise from a single failing probe."
+        )
 
 
 def main() -> int:

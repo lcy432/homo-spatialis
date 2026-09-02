@@ -20,9 +20,12 @@ base_b:
   provider: dashscope
   base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
   api_key_env: DASHSCOPE_API_KEY
-  model: null
+  model: qwen3.7-max-2026-06-08
   note: >-
-    Qwen via the DashScope OpenAI-compatible endpoint. Connectivity verified.
-    Pin the dated snapshot from the Bailian console model list -- run
-    `make check-env`, which lists the snapshot-shaped model ids the key can see.
-    Use the -intl base_url if the key belongs to the international region.
+    Qwen via the DashScope OpenAI-compatible endpoint. Connectivity verified
+    2026-09-02 against the China-region endpoint; 250 models visible to the key.
+    Max tier rather than plus, so that base A and base B sit in comparable
+    capability tiers -- README 10.4 makes the base model a treatment variable,
+    and a family/origin contrast confounded with a capability-tier contrast
+    would not be interpretable. Switch to qwen3.7-plus-2026-05-26 if the call
+    budget requires it, but then pick a comparable tier for base A too.
