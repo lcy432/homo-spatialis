@@ -62,15 +62,31 @@ def test_distance_hits_its_bound_at_a_corner():
 
 
 def test_distance_needs_no_fitted_center():
-    """硬规则 21 的要害:分层变量必须事前可算。
+    """硬规则 21 的要害：分层变量必须**事前可算**。
 
-    `d_i = ‖w_i − ŵ_center‖` 依赖跑完才有的 ŵ_center,不能用来分层。这个
-    代理只用 1/K,签名里没有任何拟合出来的东西。
+    `d_i = ‖w_i − ŵ_center‖` 依赖跑完才有的 ŵ_center，不能用来分层。这个
+    函数只接受一个可选的常数中心：默认是单纯形几何中心，非对称 Dirichlet
+    下应当显式传注入均值（DECISIONS/0006）。两者都在跑之前就定死，签名里
+    没有任何拟合出来的东西。
     """
     import inspect
 
-    params = set(inspect.signature(distance_from_center).parameters)
-    assert params == {"weights", "n"}
+    sig = inspect.signature(distance_from_center)
+    assert set(sig.parameters) == {"weights", "center", "n"}
+    assert sig.parameters["center"].default is None, "中心必须可选，默认几何中心"
+
+
+def test_an_explicit_center_shifts_the_distance():
+    """非对称 Dirichlet 的均值不是 1/7，继续用 1/7 会给所有人加一个固定偏移。"""
+    injected = [1 / 3] + [1 / 9] * 6
+    w = [0.30, 0.20, 0.15, 0.12, 0.10, 0.08, 0.05]
+    assert distance_from_center(w) != pytest.approx(distance_from_center(w, center=injected))
+    assert distance_from_center(injected, center=injected) == pytest.approx(0.0)
+
+
+def test_a_mismatched_center_is_refused():
+    with pytest.raises(ValueError, match="维数"):
+        distance_from_center(UNIFORM, center=[0.5, 0.5])
 
 
 def test_entropy_and_distance_disagree_enough_to_matter():

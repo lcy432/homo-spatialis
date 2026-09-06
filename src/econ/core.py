@@ -319,7 +319,7 @@ class WelfareCore:
             features=d.features,
             coefficients=d.coefficients,
             ln_money_metric=ln_e,
-            equivalent_variation=None if dollars is None else Money(dollars, self.numeraire),
+            money_metric=None if dollars is None else Money(dollars, self.numeraire),
         )
 
     def score_set(
@@ -334,16 +334,20 @@ class WelfareCore:
         """
         if len(cities) < 2:
             raise ValueError("选择集至少要有两座城市")
-        ln_e: dict[str, float] = {}
+        ln_v: dict[str, float] = {}
+        ln_kappa_value = 0.0
         for c in cities:
             d = self.decompose(persona, c, savings_rate=savings_rate)
-            ln_e[c.code] = ln_money_metric(d.ln_utility, d.ln_kappa, persona.params)
-        best = max(cities, key=lambda c: ln_e[c.code])
+            ln_v[c.code] = d.ln_utility
+            ln_kappa_value = d.ln_kappa  # 跨城不变（M2 断言三），取哪一次都一样
+        best = max(cities, key=lambda c: ln_v[c.code])
         return ChoiceSetTruth(
             persona_id=persona.persona_id,
             year=year,
             cities=tuple(cities),
-            ln_money_metric=ln_e,
+            ln_utility=ln_v,
+            w_material=persona.params.w_material,
+            ln_kappa=ln_kappa_value,
             argmax_city=best,
             numeraire=self.numeraire,
             reference=MONEY_METRIC_REFERENCE,

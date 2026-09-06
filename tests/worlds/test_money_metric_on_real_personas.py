@@ -70,15 +70,39 @@ def test_dispersion_and_range_are_separate_quantities(core, persona):
         assert cst.welfare_dispersion < cst.welfare_range
 
 
-def test_the_log_gap_survives_where_the_dollar_gap_does_not(core):
-    """分箱与分组要用 ln 版本：美元版在下尾是 None，会把样本悄悄削掉一块。"""
+def test_the_log_gap_survives_where_the_dollar_gap_does_not(core, persona):
+    """分箱与分组要用 ln 版本：美元版在语义地板之下是 None，用它分箱会悄悄
+    削掉一块非随机的样本。
+
+    低 w₁ 的人设在 α₁ = 1.5 之后已经很少（缺失率 0.8%），所以这里直接构造
+    一个而不是靠抽样撞——测的是 property 的行为，不是抽样分布。
+    """
+    from dataclasses import replace
+
     cities = [rec.city for rec in core.cities.values()]
-    sparse = [p for p in PersonaGenerator().generate(300, seed=4) if p.params.w_material < 0.01]
-    assert sparse, "没抽到低 w₁ 人设，样本量或 seed 要调"
-    cst = core.score_set(sparse[0], cities, 2024)
-    assert math.isfinite(cst.ln_welfare_gap)
-    assert cst.welfare_gap is None
-    assert cst.n_below_money_floor > 0
+    cst = core.score_set(persona, cities, 2024)
+    starved = replace(cst, w_material=0.002)
+
+    assert math.isfinite(starved.ln_welfare_gap)
+    assert starved.ln_welfare_gap == pytest.approx(cst.ln_welfare_gap), (
+        "ln V 空间的间隔与 w₁ 无关，换 w₁ 不该改变它"
+    )
+    assert starved.welfare_gap is None
+    assert starved.n_outside_money_band > 0
+
+
+def test_normalised_loss_is_free_of_the_material_weight(core, persona):
+    """归一化必须在 ln V 空间算：分子分母各含一个 1/w₁，约掉。"""
+    from dataclasses import replace
+
+    cities = [rec.city for rec in core.cities.values()]
+    cst = core.score_set(persona, cities, 2024)
+    worst = min(cities, key=lambda c: cst.ln_utility[c.code])
+
+    for w1 in (0.002, 0.2, 0.9):
+        shifted = replace(cst, w_material=w1)
+        assert shifted.normalised_welfare_loss(cst.argmax_city) == pytest.approx(0.0)
+        assert shifted.normalised_welfare_loss(worst) == pytest.approx(1.0)
 
 
 def test_a_one_city_set_is_refused(core, persona, city_a):
@@ -92,7 +116,9 @@ def test_inconsistent_city_lists_are_refused(core, persona, city_a, city_b):
             persona_id="p",
             year=2024,
             cities=(city_a, city_b),
-            ln_money_metric={city_a.code: 1.0},
+            ln_utility={city_a.code: 1.0},
+            w_material=0.3,
+            ln_kappa=-0.3,
             argmax_city=city_a,
             numeraire="USD_2024_US100",
             reference="P=1,A=1",

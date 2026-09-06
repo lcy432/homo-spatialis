@@ -82,3 +82,28 @@ def test_groundtruth_still_refuses_to_reach_a_prompt(core, persona, city_a):
     assert isinstance(gt, GroundTruth)
     with pytest.raises(BoundaryViolationError):
         AgentInput(brief=persona.brief, options=(gt,))  # type: ignore[arg-type]
+
+
+def test_the_band_is_guarded_on_both_sides():
+    """回归测试。第一版只守了下侧，于是 w₁ 很小且效用高于 κ 时
+    `math.exp` 直接抛 OverflowError。
+
+    两侧是同一件事：这个人几乎不在乎钱，所以"多少钱能补偿"没有有意义的
+    答案。一年十亿美元不是对个人年度福利的回答，正如一分钱不是。
+    """
+    from econ.utility import MONEY_METRIC_LN_CEILING
+
+    assert money_metric_dollars(MONEY_METRIC_LN_CEILING + 0.1) is None
+    assert money_metric_dollars(MONEY_METRIC_LN_CEILING - 0.1) is not None
+    # 不得抛异常
+    assert welfare_loss(MONEY_METRIC_LN_CEILING + 50.0, MONEY_METRIC_LN_CEILING + 49.0) is None
+
+
+def test_an_extreme_low_material_weight_does_not_raise():
+    """构造出会溢出的那个情形，确认它返回 None 而不是炸掉。"""
+    from econ.types import PersonaParams
+
+    starved = PersonaParams(alpha=0.0015, beta=0.0005, theta={"a": 0.5, "b": 0.3, "c": 0.198})
+    ln_e = ln_money_metric(ln_utility=5.0, ln_kappa_value=-0.3, params=starved)
+    assert ln_e > 1000  # 确实在溢出区
+    assert money_metric_dollars(ln_e) is None

@@ -282,6 +282,16 @@ MONEY_METRIC_REFERENCE = "P=1,A=1"
 # 人,"多少钱能补偿"这个问题本身没有有意义的答案,而不是"答案很难算"。
 MONEY_METRIC_LN_FLOOR = -4.6
 
+# 上界。exp(20.72) ≈ 1e9，即十亿美元一年。
+#
+# 两侧都要守，而且理由是同一个。1/w₁ 在指数上，w₁ 很小时 ln e 往哪边跑取决于
+# (ln V − ln κ) 的符号：负则下溢到零，正则溢出到 inf。第一版只守了下侧，于是
+# 低 w₁ 的人设在效用高于 κ 时直接抛 OverflowError。
+#
+# 语义上两侧是同一件事：**这个人几乎不在乎钱，所以"多少钱能补偿"没有有意义
+# 的答案**。一年十亿美元不是对一个人年度福利的回答，正如一分钱不是。
+MONEY_METRIC_LN_CEILING = 20.72
+
 
 def ln_money_metric(ln_utility: float, ln_kappa_value: float, params: PersonaParams) -> float:
     """货币度量的对数:达到这个效用水平,在参照点上需要多少年收入。
@@ -337,7 +347,7 @@ def money_metric_dollars(ln_e: float) -> float | None:
     静默地把后者写成 0,会让"福利损失 $0"同时表示"没有损失"和"损失无法
     用美元表达",而前者是最好的结果、后者是最坏的。
     """
-    if ln_e < MONEY_METRIC_LN_FLOOR:
+    if not MONEY_METRIC_LN_FLOOR <= ln_e <= MONEY_METRIC_LN_CEILING:
         return None
     return math.exp(ln_e)
 
@@ -359,6 +369,6 @@ def welfare_loss(ln_e_best: float, ln_e_chosen: float) -> float | None:
             f"最优的货币度量 {ln_e_best!r} 小于实选的 {ln_e_chosen!r};"
             "参数传反了,或者'最优'不是按同一组真值参数算的(硬规则 13)"
         )
-    if ln_e_best < MONEY_METRIC_LN_FLOOR:
+    if not MONEY_METRIC_LN_FLOOR <= ln_e_best <= MONEY_METRIC_LN_CEILING:
         return None
     return -math.exp(ln_e_best) * math.expm1(ln_e_chosen - ln_e_best)

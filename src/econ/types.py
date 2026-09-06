@@ -265,9 +265,11 @@ class GroundTruth:
     w₁ 极小的人设，直接存美元会让约 3% 的人设静默下溢成 $0——而"没有损失"
     与"美元口径对这个人没有意义"在报表上会长得一模一样。
 
-    ``equivalent_variation`` 是它的美元形式，低于语义地板时为 None 而不是 0。
-    **命名提醒**：这个字段装的是货币度量 e(V) 本身，不是等价变差；两座城市
-    的 e 之差才是等价变差。只应经 econ.utility.welfare_loss 消费。
+    ``money_metric`` 是它的美元形式，低于语义地板时为 None 而不是 0。字段
+    早先叫 `equivalent_variation`，改名是因为它装的是货币度量 e(V) **本身**，
+    不是等价变差——两座城市的 e 之差才是等价变差。旧名字会让人把水平量当成
+    差值读，而水平量依赖参照点的选法，单独看没有意义。只应经
+    econ.utility.welfare_loss 消费。
 
     物质项**拆成 ln_y_net 与 ln_p 两列**，而不是合成一列 ln(Y/P)。模型说
     这两个系数应当等值反号（都是 ±w₁），拆开之后这个约束从"我们的假设"
@@ -285,7 +287,7 @@ class GroundTruth:
     features: Mapping[str, float]  # ln V 的各列，M5 消费
     coefficients: Mapping[str, float]  # 各列对应的真值系数
     ln_money_metric: float  # ln e(V)，见 econ.utility.ln_money_metric
-    equivalent_variation: Money | None = None  # e(V) 的美元值，低于语义地板时为 None
+    money_metric: Money | None = None  # e(V) 的美元值，低于语义地板时为 None
 
 
 @dataclass(frozen=True, slots=True)
@@ -295,18 +297,38 @@ class ChoiceSetTruth:
     **为什么与 GroundTruth 分开**：福利间隔、离散度、全距都是"这个选择集"
     的属性，不是"这座城市"的属性——同一座城市放进不同的选择集，这三个数
     就不同。挂在单城市的 GroundTruth 上会让它们看起来像城市属性，而那类
-    错位不会报错，只会让某个下游算出对不上的数。顺带也避免了每座城市都
-    把全集合算一遍的 N 倍重复。见 DECISIONS/0004。
+    错位不会报错，只会让某个下游算出对不上的数。见 DECISIONS/0004。
 
-    **只存一个向量，其余全是派生量。** 三个福利量都是同一组 ln e 的函数，
-    分别存下来就有三个可以各自漂移的地方；存一份、其余用 property 算，
-    是把"它们必须自洽"这件事变成结构性的而不是纪律性的。
+    --------------------------------------------------------------------
+    规范形式是 ln V，美元是派生量
+    --------------------------------------------------------------------
+
+    存的只有 `ln_utility` 一个向量加两个 persona 常数，其余全是 property。
+    三个福利量都是同一组数的函数，分别存下来就有三个可以各自漂移的地方。
+
+    **规范量在 ln V 空间，不在美元空间**，三条理由：
+
+      跨情境可比  ln V 的差是无量纲的，可以跨难度档、跨世界、将来跨国家
+                  直接比较。美元数带 numeraire，本质上是本国的。
+      数值良态    美元版要过 exp((ln V − ln κ)/w₁)，w₁ 在分母上，低 w₁ 的
+                  人设会下溢；ln V 空间永远有限。
+      永不缺失    美元版在语义地板之下是 None，用它分箱会悄悄削掉一块非
+                  随机的样本。分箱、分组、按难度排序一律用 ln 版。
+
+    **归一化福利损失也在 ln V 空间算**，因此与 w₁ 无关：分子分母各含一个
+    1/w₁ 因子，约掉了。在美元空间算则不会约掉，同一个人换个 w₁ 归一化值
+    就变，而那不是我们想度量的东西。
+
+    美元数留给**对用户报数**（§9.1.1 的头条口径）：带 numeraire_id，在本国
+    范围内报，并附缺失说明。
     """
 
     persona_id: str
     year: int
     cities: tuple[CityId, ...]
-    ln_money_metric: Mapping[str, float]  # 城市码 -> ln e(V)
+    ln_utility: Mapping[str, float]  # 规范来源：城市码 -> ln V
+    w_material: float  # persona 常数，用来换算货币度量
+    ln_kappa: float  # persona 常数，跨城不变
     argmax_city: CityId
     numeraire: str
     reference: str  # 货币度量的参照点，见 econ.utility.MONEY_METRIC_REFERENCE
@@ -315,69 +337,114 @@ class ChoiceSetTruth:
         if len(self.cities) < 2:
             raise ValueError("选择集至少要有两座城市，否则没有可比较的东西")
         codes = {c.code for c in self.cities}
-        if set(self.ln_money_metric) != codes:
+        if set(self.ln_utility) != codes:
             raise ValueError(
-                f"ln_money_metric 的城市与 cities 不一致："
-                f"{sorted(codes ^ set(self.ln_money_metric))} 只出现在一侧"
+                f"ln_utility 的城市与 cities 不一致："
+                f"{sorted(codes ^ set(self.ln_utility))} 只出现在一侧"
             )
         if self.argmax_city not in self.cities:
             raise ValueError(f"argmax_city {self.argmax_city} 不在选择集里")
+        if self.w_material <= 0.0:
+            raise ValueError("w₁ 必须为正")
+
+    # -- 规范量：ln V 空间，永远有限 --------------------------------------
 
     @property
-    def _sorted_ln(self) -> list[float]:
-        return sorted(self.ln_money_metric.values(), reverse=True)
+    def _sorted_ln_v(self) -> list[float]:
+        return sorted(self.ln_utility.values(), reverse=True)
 
     @property
     def ln_welfare_gap(self) -> float:
-        """最优与次优的 ln e 之差。无量纲，永远有限，不受语义地板影响。
-
-        分箱、分组、按难度排序都该用这个，不要用美元版——美元版在下尾是
-        None，会把样本悄悄削掉一块。
-        """
-        top = self._sorted_ln
+        """最优与次优的 ln V 之差。"""
+        top = self._sorted_ln_v
         return top[0] - top[1]
 
     @property
-    def welfare_gap(self) -> float | None:
-        """最优与次优的美元差。低于语义地板时为 None。"""
-        from econ.utility import welfare_loss
-
-        top = self._sorted_ln
-        return welfare_loss(top[0], top[1])
+    def ln_welfare_range(self) -> float:
+        """最优与最劣的 ln V 之差。归一化福利损失的分母。"""
+        top = self._sorted_ln_v
+        return top[0] - top[-1]
 
     @property
-    def welfare_range(self) -> float | None:
-        """最优与最劣的美元差。§1.2.5 归一化福利损失的分母。"""
-        from econ.utility import welfare_loss
+    def ln_welfare_dispersion(self) -> float:
+        """全部城市 ln V 的标准差。适用边界阈值 τ 与信噪比分组用它。
 
-        top = self._sorted_ln
-        return welfare_loss(top[0], top[-1])
-
-    @property
-    def welfare_dispersion(self) -> float | None:
-        """全部城市美元货币度量的标准差。适用边界阈值 τ 与信噪比分组用它。
-
-        与 welfare_range **必须分开**（MIGRATION B1）：全距是归一化的分母，
-        标准差是分组的依据，两者在城市数不同的选择集之间行为不同。
+        与 ln_welfare_range **必须分开**（MIGRATION B1）：全距是归一化的
+        分母，标准差是分组的依据，两者在城市数不同的选择集之间行为不同。
         """
+        values = list(self.ln_utility.values())
+        mean = sum(values) / len(values)
+        return (sum((v - mean) ** 2 for v in values) / len(values)) ** 0.5
+
+    def normalised_welfare_loss(self, chosen: CityId | str) -> float:
+        """归一化福利损失，**与 w₁ 无关**。
+
+            (ln V_最优 − ln V_实选) / (ln V_最优 − ln V_最劣)
+
+        0 表示选中了最优，1 表示选中了最劣。分子分母各含一个隐含的 1/w₁
+        因子，在比值里约掉——这正是它必须在 ln V 空间算的理由。§1.2.5 用它
+        剥掉"赌注"那一维：d_i 大的人熵低、福利间隔大，任何错误过程都会画出
+        上升曲线，除以全距把那个混淆去掉。
+        """
+        code = chosen if isinstance(chosen, str) else chosen.code
+        if code not in self.ln_utility:
+            raise KeyError(f"{code} 不在这个选择集里")
+        span = self.ln_welfare_range
+        if span <= 0.0:
+            raise ValueError("全部城市效用相同，归一化没有定义（精确并列档用别的口径）")
+        return (self._sorted_ln_v[0] - self.ln_utility[code]) / span
+
+    # -- 派生量：美元，带 numeraire，可能缺失 ------------------------------
+
+    @property
+    def ln_money_metric(self) -> dict[str, float]:
+        """每座城市的 ln e(V)。派生自 ln V 与两个 persona 常数。"""
+        return {
+            code: (ln_v - self.ln_kappa) / self.w_material for code, ln_v in self.ln_utility.items()
+        }
+
+    def _dollars(self, hi: float, lo: float) -> Money | None:
+        from econ.utility import welfare_loss
+
+        value = welfare_loss(hi, lo)
+        return None if value is None else Money(value, self.numeraire)
+
+    @property
+    def welfare_gap(self) -> Money | None:
+        """最优与次优的美元差。低于语义地板时为 None。"""
+        e = sorted(self.ln_money_metric.values(), reverse=True)
+        return self._dollars(e[0], e[1])
+
+    @property
+    def welfare_range(self) -> Money | None:
+        e = sorted(self.ln_money_metric.values(), reverse=True)
+        return self._dollars(e[0], e[-1])
+
+    @property
+    def welfare_dispersion(self) -> Money | None:
         from econ.utility import money_metric_dollars
 
         values = [money_metric_dollars(v) for v in self.ln_money_metric.values()]
         if any(v is None for v in values):
             return None
         mean = sum(values) / len(values)
-        return (sum((v - mean) ** 2 for v in values) / len(values)) ** 0.5
+        sd = (sum((v - mean) ** 2 for v in values) / len(values)) ** 0.5
+        return Money(sd, self.numeraire)
 
     @property
-    def n_below_money_floor(self) -> int:
-        """有多少座城市的货币度量落在语义地板之下。
+    def n_outside_money_band(self) -> int:
+        """有多少座城市的货币度量落在语义区间之外（两侧都算）。
 
-        它必须进结果元数据：美元口径的样本量与总样本量不同，而差多少是
-        一个要被看见的数，不是一个可以四舍五入掉的细节。
+        必须进结果元数据：美元口径的样本量与总样本量不同，而差多少是一个
+        要被看见的数，不是可以四舍五入掉的细节。
         """
-        from econ.utility import MONEY_METRIC_LN_FLOOR
+        from econ.utility import MONEY_METRIC_LN_CEILING, MONEY_METRIC_LN_FLOOR
 
-        return sum(1 for v in self.ln_money_metric.values() if v < MONEY_METRIC_LN_FLOOR)
+        return sum(
+            1
+            for v in self.ln_money_metric.values()
+            if not MONEY_METRIC_LN_FLOOR <= v <= MONEY_METRIC_LN_CEILING
+        )
 
 
 def _reject_answer_side(value: object, forbidden: tuple[type, ...], path: str) -> None:

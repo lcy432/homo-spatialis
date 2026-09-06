@@ -67,7 +67,8 @@ class PersonaSamplingConfig:
     """抽样参数。**这是 CLAUDE.md 里唯一还没最终裁决的一处**，所以每一项
     都做成配置，等实验设计定了再调。"""
 
-    dirichlet_alpha: float = 0.5
+    material_alpha: float = 1.5  # 见 MATERIAL_ALPHA 与 DECISIONS/0006
+    amenity_alpha: float = 0.5
     occupations: tuple[OccupationId, ...] = SYNTH_OCCUPATIONS
     quantiles: tuple[int, ...] = QUANTILES
     household_sizes: tuple[int, ...] = (1, 1, 2, 2, 3, 4)  # 权重体现在重复次数上
@@ -76,8 +77,11 @@ class PersonaSamplingConfig:
     calibration: AttributeCalibration = field(default_factory=AttributeCalibration)
 
     def __post_init__(self) -> None:
-        if self.dirichlet_alpha <= 0:
+        if self.material_alpha <= 0 or self.amenity_alpha <= 0:
             raise ValueError("Dirichlet 的 α 必须为正")
+
+    def alpha(self) -> list[float]:
+        return dirichlet_alpha_vector(self.material_alpha, self.amenity_alpha)
 
 
 class PersonaGenerator:
@@ -101,7 +105,7 @@ class PersonaGenerator:
         cfg = self.config
 
         # 定和量表：Dirichlet 抽出七维权重，乘一百变成"分"。
-        weights = rng.dirichlet([cfg.dirichlet_alpha] * len(ALL_DIMENSIONS))
+        weights = rng.dirichlet(cfg.alpha())
         points = {d: float(w * 100.0) for d, w in zip(ALL_DIMENSIONS, weights, strict=True)}
 
         # 顺序效应（§6.3）：呈现顺序随机化并记录置换。
@@ -173,3 +177,66 @@ def reference_persona(config: PersonaSamplingConfig | None = None) -> Persona:
         ),
         persona_id="reference",
     )
+
+
+# --------------------------------------------------------------------------
+# 非对称 Dirichlet 与它的闭式协方差（DECISIONS/0006）
+# --------------------------------------------------------------------------
+
+# 物质维的 Dirichlet 参数。六个舒适度维保持 0.5。
+#
+# 为什么物质维要单独取值：它在结构上与六个舒适度维**不同**——只有它的指数
+# 出现在货币度量的分母上（`ln e = (ln V − ln κ)/w₁`）。对称先验把它当成可
+# 互换的第七维，而它不是。α₁ = 0.5 时 w₁ 的中位数只有 0.076，意思是"典型的
+# 合成人只给经济与居住 7.6% 的权重"，那既不像真人，也让约 20% 的人设算不出
+# 美元福利数。
+#
+# 1.5 是扫描出来的：{0.5, 1.0, 1.5, 2.0, 3.0} 里第一个把"美元口径缺失"压到
+# 2% 以下的值（0.8%）。取最小的那个，因为每往上加都在削弱物质维的离散度，
+# 而离散度正是回收测试的信息来源。
+MATERIAL_ALPHA = 1.5
+AMENITY_ALPHA = 0.5
+
+
+def dirichlet_alpha_vector(
+    material_alpha: float = MATERIAL_ALPHA, amenity_alpha: float = AMENITY_ALPHA
+) -> list[float]:
+    """按 ALL_DIMENSIONS 的顺序给出 α 向量。物质维在第一位。"""
+    return [material_alpha] + [amenity_alpha] * (len(ALL_DIMENSIONS) - 1)
+
+
+def dirichlet_covariance(alpha: list[float] | None = None) -> np.ndarray:
+    """注入协方差的闭式解。**这是协方差比的分母，必须是写得下来的常数。**
+
+    §1.2.3 说协方差比之所以是坍缩的主证据，是因为两端都是**已知输入**：
+    自检时注入的 Σ_true 已知，匹配臂里 Σ_true 就是人设分布的协方差——而
+    Dirichlet 的协方差有闭式解。这个函数就是那个闭式解。
+
+        E[w_k]       = α_k / α₀
+        Var(w_k)     = α_k(α₀ − α_k) / (α₀²(α₀+1))
+        Cov(w_j,w_k) = −α_j·α_k     / (α₀²(α₀+1))
+
+    **非对称之后对角线不再是常数**（DECISIONS/0006）：物质维的 α 更大，
+    它的方差与其余六维不同。任何把注入方差当成一个标量的旧代码都要改成
+    按维取。
+
+    秩仍然是 6：`1'Σ1 = 0` 是单纯形约束的代数后果，与 α 对称与否无关。
+    """
+    a = np.asarray(alpha if alpha is not None else dirichlet_alpha_vector(), dtype=float)
+    a0 = a.sum()
+    denom = a0**2 * (a0 + 1.0)
+    sigma = -np.outer(a, a) / denom
+    np.fill_diagonal(sigma, a * (a0 - a) / denom)
+    return sigma
+
+
+def dirichlet_mean(alpha: list[float] | None = None) -> np.ndarray:
+    """注入分布的均值。无坍缩时 `ŵ_center` 应当收敛到它。
+
+    **非对称之后它不再是 `1/7`**。硬规则 21 的分层变量 `‖w − 1/7‖` 用的是
+    单纯形的几何中心，那仍然是对的（它只需要事前可算、且与 `d_i` 在无坍缩
+    参照情形下重合）；但"无坍缩时 ŵ_center 收敛到 1/7"这句话现在不成立，
+    它收敛到的是这里返回的向量。见 DECISIONS/0006。
+    """
+    a = np.asarray(alpha if alpha is not None else dirichlet_alpha_vector(), dtype=float)
+    return a / a.sum()

@@ -54,16 +54,33 @@ def normalised_entropy(weights: Mapping[str, float] | Sequence[float]) -> float:
 
 
 def distance_from_center(
-    weights: Mapping[str, float] | Sequence[float], *, n: int | None = None
+    weights: Mapping[str, float] | Sequence[float],
+    *,
+    center: Sequence[float] | None = None,
+    n: int | None = None,
 ) -> float:
-    """到单纯形中心 `1/K` 的欧氏距离。P10 的分层变量(硬规则 21)。
+    """到参照中心的欧氏距离。P10 的分层变量（硬规则 21）。
 
-    上界是 `sqrt((K−1)/K)`(权重全压在一维时取到),K=7 时约 0.926。
+    ``center`` 不给时退化到单纯形几何中心 `1/K`。
+
+    **非对称 Dirichlet 之后应当显式传注入均值**（DECISIONS/0006）。硬规则 21
+    原来的理由是"无坍缩时 ŵ_center 收敛到 1/7，所以用 1/7 作代理"。α₁ = 1.5
+    之后注入均值是 `[1/3, 1/9 × 6]` 而不是 `1/7`，那句理由不再成立——继续用
+    `1/7` 会给所有人的距离加上一个固定偏移，分层的层就整体歪了。
+
+    注入均值仍然**事前可算**（α 向量是设计选择，跑之前就定死），所以硬规则 21
+    "分层变量不能依赖跑完才有的 ŵ_center"这条约束完好无损。改的只是中心取
+    哪个常数，不是改成用拟合量。
+
+    上界（用几何中心时）是 `sqrt((K−1)/K)`，K=7 时约 0.926。
     """
     values = _as_vector(weights)
     total = sum(values)
     k = n or len(values)
-    return math.sqrt(sum((v / total - 1.0 / k) ** 2 for v in values))
+    ref = list(center) if center is not None else [1.0 / k] * len(values)
+    if len(ref) != len(values):
+        raise ValueError(f"中心的维数 {len(ref)} 与权重的 {len(values)} 不一致")
+    return math.sqrt(sum((v / total - c) ** 2 for v, c in zip(values, ref, strict=True)))
 
 
 def max_distance_from_center(n: int = N_WEIGHTS) -> float:
