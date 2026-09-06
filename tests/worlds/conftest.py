@@ -48,3 +48,26 @@ def persona(personas):
 
 def scenarios(world, personas, tax, tier: Tier):
     return [instantiate(tier, world, p, tax) for p in personas]
+
+
+@pytest.fixture(scope="session")
+def core(world, tax):
+    """真实规模的 WelfareCore：十二座城市、六维舒适度。
+
+    与 tests/econ/conftest.py 的同名 fixture 不同——那个是三维的小世界，
+    用来测纯函数与类型契约。这个用来测在实际抽样分布下的行为。
+    """
+    from common.money import USD_2024_US100
+    from econ.core import WelfareCore
+
+    return WelfareCore(world.cities, tax, numeraire=USD_2024_US100, reference_id="SYNTH_2024")
+
+
+@pytest.fixture(scope="session")
+def city_a(world):
+    return world.city_ids[0]
+
+
+@pytest.fixture(scope="session")
+def city_b(world):
+    return world.city_ids[1]

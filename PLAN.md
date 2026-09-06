@@ -105,11 +105,11 @@
 **新增字段**：
 
 ```python
-features: dict[str, float]         # ln V 的各列，物质项拆成 ln_y_net 与 ln_p 两列
-ev_by_city: dict[CityId, float]    # 每座城市的等价变差，美元
-welfare_gap: float                 # 最优与次优的福利差
-welfare_dispersion: float          # 全部城市福利值的标准差
-welfare_range: float               # 全部城市福利值的最大减最小
+features: dict[str, float]  # ln V 的各列，物质项拆成 ln_y_net 与 ln_p 两列
+ev_by_city: dict[CityId, float]  # 每座城市的等价变差，美元
+welfare_gap: float  # 最优与次优的福利差
+welfare_dispersion: float  # 全部城市福利值的标准差
+welfare_range: float  # 全部城市福利值的最大减最小
 ```
 
 **最后两项必须分开存**，用途不同：`welfare_dispersion` 服务适用边界阈值 τ 与信噪比分组，`welfare_range` 是问题一归一化福利损失的分母。

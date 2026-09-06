@@ -89,18 +89,24 @@ def test_the_solver_is_persona_specific(core, persona, city_a, city_b):
 
 def test_an_unreachable_tie_refuses_rather_than_clamping(core, persona, city_a, city_b):
     """夹回 [0,1] 边界会把精确并列变成近似并列，而整个 §11.6 建立在
-    "精确"之上。所以够不着时报错，不夹。"""
+    "精确"之上。所以够不着时报错，不夹。
+
+    构造方式受 P3 的 rpp 量级护栏约束：不能靠把价格设成 0.10 来拉开差距，
+    那种世界本来就不合法（护栏正是为了挡住"忘了把 100 制归一化"）。改用
+    合法区间内的极端值加上工资倍数。
+    """
+    from econ.types import RPP_MIN
+
+    rec_a = core.record(city_a)
     hopeless = core.with_amenity(city_b, "safety", 0.79)
     hopeless = hopeless.with_record(
         city_a,
-        type(hopeless.record(city_a))(
-            city=hopeless.record(city_a).city,
-            rpp={"rent": 0.10, "goods": 0.10, "other": 0.10},
-            wage_by_quantile={
-                q: w * 12 for q, w in hopeless.record(city_a).wage_by_quantile.items()
-            },
-            amenities_scaled=hopeless.record(city_a).amenities_scaled,
-            jurisdiction=hopeless.record(city_a).jurisdiction,
+        type(rec_a)(
+            city=rec_a.city,
+            rpp=dict.fromkeys(("rent", "goods", "other"), RPP_MIN),
+            wage_by_quantile={q: w * 12 for q, w in rec_a.wage_by_quantile.items()},
+            amenities_scaled=rec_a.amenities_scaled,
+            jurisdiction=rec_a.jurisdiction,
         ),
     )
     with pytest.raises(ValueError, match=r"超出 \[0,1\]"):

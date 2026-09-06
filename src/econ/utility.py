@@ -263,3 +263,102 @@ def solve_ln_amenity_for_tie(
     others = sum(params.theta[d] * ln_a[d] for d in params.theta if d != dimension)
     material = params.w_material * (ln_y_net - ln_p)
     return (target_ln_utility - ln_kappa(params) - material - others) / theta_k
+
+
+# --------------------------------------------------------------------------
+# 货币度量(P2)。§9.1.1 的美元口径由此而来。
+# --------------------------------------------------------------------------
+
+# 参照点:价格指数 1(全美平均,rpp 已在 ledger 归一)、舒适度聚合 1。
+#
+# 选这个参照点的好处是它与世界无关——不是选择集里的某座城市,所以换一批
+# 世界不会改变 e 的含义。代价是它是一个不存在的地方("全国平均价格、
+# 舒适度满格"),因此 e 的**水平**只有相对意义。
+MONEY_METRIC_REFERENCE = "P=1,A=1"
+
+# 低于这个 ln 值就不再把 e 当美元报。exp(-4.6) ≈ 0.01,即一分钱。
+#
+# 这不是数值容差,是**语义地板**。见下面 ln_money_metric 的文档:w₁ 很小的
+# 人,"多少钱能补偿"这个问题本身没有有意义的答案,而不是"答案很难算"。
+MONEY_METRIC_LN_FLOOR = -4.6
+
+
+def ln_money_metric(ln_utility: float, ln_kappa_value: float, params: PersonaParams) -> float:
+    """货币度量的对数:达到这个效用水平,在参照点上需要多少年收入。
+
+        e(V) = P_ref · A_ref^(−1/w₁) · (V/κ)^(1/w₁)
+
+    参照点取 P_ref = 1、A_ref = 1,于是
+
+        ln e = (ln V − ln κ) / w₁
+
+    单位是美元/年。核对:把 ln V 展开代回去得到
+    `ln e = (ln Y − ln P) + Σθ_k·ln A_k / w₁`,在参照点上(P=1、A=1)退化成
+    `ln e = ln Y`,即"你现在挣多少就是多少"。✓
+
+    **只有差值有意义,水平没有。** 两座城市的 e 之差就是等价变差——"从次优
+    搬到最优,等于一年多拿多少钱"。而单个 e 的水平依赖参照点的选法,换个
+    参照点整体乘一个常数。所以本函数的输出只应经 `welfare_loss` 消费。
+
+    --------------------------------------------------------------------
+    为什么返回对数,而不是直接返回美元
+    --------------------------------------------------------------------
+
+    因为 1/w₁ 在指数上,而 Dirichlet(α=0.5) 会抽出 w₁ 极小的人设。实测
+    400 个人设(2026-09-05):w₁ 中位数 0.080,p10 只有 0.0026。对应的
+    ln e 分位是
+
+        p5 = −227    p25 = 2.9    p50 = 9.3    p95 = 11.2
+
+    中位数 exp(9.3) ≈ 11,000 美元,完全正常;但 **18% 的人设 e 低于一分钱,
+    3.2% 直接下溢成 0.0**。
+
+    下溢的失败形态是**静默的零**,不是崩溃——那些人的美元福利损失会被报成
+    正好 $0,而真相是"这个人几乎不在乎钱,所以任何钱数都补偿不了效用差,
+    美元口径对他没有意义"。两者在报表上长得一模一样。
+
+    对数空间不会下溢,所以真值这一层永远存下 ln e;要不要、以及怎么变成
+    美元,由消费方按 MONEY_METRIC_LN_FLOOR 显式决定。
+    """
+    w1 = params.w_material
+    if w1 <= 0.0:
+        raise ValueError("w₁ = α + β 必须为正:不在乎物质的人无法定义货币度量")
+    return (ln_utility - ln_kappa_value) / w1
+
+
+def money_metric_dollars(ln_e: float) -> float | None:
+    """把 ln e 变成美元。低于语义地板时返回 None,不返回 0。
+
+    返回 None 而不是 0,是因为这两件事在报表上必须能分开:
+
+        0     这个人在这座城市与参照点等价(不会发生,参照点不在选择集里)
+        None  美元口径对这个人没有意义(w₁ 太小)
+
+    静默地把后者写成 0,会让"福利损失 $0"同时表示"没有损失"和"损失无法
+    用美元表达",而前者是最好的结果、后者是最坏的。
+    """
+    if ln_e < MONEY_METRIC_LN_FLOOR:
+        return None
+    return math.exp(ln_e)
+
+
+def welfare_loss(ln_e_best: float, ln_e_chosen: float) -> float | None:
+    """美元福利损失 = e(最优) − e(实选)。低于语义地板时返回 None。
+
+    用 expm1 而不是两次 exp 相减:两个 e 接近时直接相减会丢掉几乎全部
+    有效数字,而"接近"正是并列档与低离散度选择集的常态。
+
+        e_a − e_b = exp(ln_e_a) · ( 1 − exp(ln_e_b − ln_e_a) )
+                  = −exp(ln_e_a) · expm1(ln_e_b − ln_e_a)
+
+    **不扣任何地板**(硬规则 18):地板是估计器的性质,而估计器不在产品里。
+    真实用户拿到的是推荐城市,中间没有混合 logit。
+    """
+    if ln_e_best < ln_e_chosen:
+        raise ValueError(
+            f"最优的货币度量 {ln_e_best!r} 小于实选的 {ln_e_chosen!r};"
+            "参数传反了,或者'最优'不是按同一组真值参数算的(硬规则 13)"
+        )
+    if ln_e_best < MONEY_METRIC_LN_FLOOR:
+        return None
+    return -math.exp(ln_e_best) * math.expm1(ln_e_chosen - ln_e_best)

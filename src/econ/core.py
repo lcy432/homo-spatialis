@@ -38,13 +38,14 @@ _representative_real 里，注释标了。
 from __future__ import annotations
 
 import math
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 
 from common.ids import CityId
 from common.money import Money, WelfareLevel
 from common.providers import ExpenditureShares, TaxFunction
 from econ.graph import Term, UtilityGraph
 from econ.types import (
+    ChoiceSetTruth,
     CityRecord,
     GroundTruth,
     Observable,
@@ -53,9 +54,12 @@ from econ.types import (
 )
 from econ.utility import (
     MIN_AMENITY,
+    MONEY_METRIC_REFERENCE,
     UtilityDecomposition,
     indirect_utility,
     ln_indirect_utility,
+    ln_money_metric,
+    money_metric_dollars,
     solve_ln_amenity_for_tie,
 )
 from econ.variety import NULL_VARIETY, VarietyAdjustment
@@ -302,6 +306,8 @@ class WelfareCore:
                 for dim, ln_a in self._amenities(persona, city).items()
             )
         )
+        ln_e = ln_money_metric(d.ln_utility, d.ln_kappa, persona.params)
+        dollars = money_metric_dollars(ln_e)
         return GroundTruth(
             city=city,
             year=year,
@@ -312,6 +318,35 @@ class WelfareCore:
             ln_kappa=d.ln_kappa,
             features=d.features,
             coefficients=d.coefficients,
+            ln_money_metric=ln_e,
+            equivalent_variation=None if dollars is None else Money(dollars, self.numeraire),
+        )
+
+    def score_set(
+        self, persona: Persona, cities: Sequence[CityId], year: int, *, savings_rate: float = 0.0
+    ) -> ChoiceSetTruth:
+        """选择集层面的真值（P2 / DECISIONS/0004）。
+
+        与 score() 走同一条 decompose 路径，所以两个真值对象不可能分叉。
+        这是 §3.2 "一份实现两个出口" 在集合层面的重复应用：再开一条路去
+        算福利间隔，它迟早会与 score() 的 ln_utility 不一致，而不一致的
+        那天没有人会发现。
+        """
+        if len(cities) < 2:
+            raise ValueError("选择集至少要有两座城市")
+        ln_e: dict[str, float] = {}
+        for c in cities:
+            d = self.decompose(persona, c, savings_rate=savings_rate)
+            ln_e[c.code] = ln_money_metric(d.ln_utility, d.ln_kappa, persona.params)
+        best = max(cities, key=lambda c: ln_e[c.code])
+        return ChoiceSetTruth(
+            persona_id=persona.persona_id,
+            year=year,
+            cities=tuple(cities),
+            ln_money_metric=ln_e,
+            argmax_city=best,
+            numeraire=self.numeraire,
+            reference=MONEY_METRIC_REFERENCE,
         )
 
     # ------------------------------------------------------------------

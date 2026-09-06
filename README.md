@@ -502,9 +502,9 @@ assert abs(sum(s) − 1) < tol
 
 ```python
 class AmenityScaler:
-    reference_id: str        # "US_MSA_2024" / "CN_CITY_2024" / "NA_CN_POOLED_2024"
-    scaling_methods: dict    # 变量名 -> "absolute" | "quantile"
-    quantile_tables: dict    # 变量名 -> 冻结的经验分位函数
+    reference_id: str  # "US_MSA_2024" / "CN_CITY_2024" / "NA_CN_POOLED_2024"
+    scaling_methods: dict  # 变量名 -> "absolute" | "quantile"
+    quantile_tables: dict  # 变量名 -> 冻结的经验分位函数
 ```
 
 V1 中 `reference_id` 恒为 `US_MSA_2024`，但它全程存在、进配置、进日志、进结果元数据。加国家时新增一张表，不改任何调用点。
@@ -1119,7 +1119,7 @@ Agentopia（arXiv 2606.07513）第 4.1 节的 life reward 由社会、主观、�
 
 ```python
 for cand in extract_numbers(prompt):
-    for mult in (1, 100, 1/100, 12, 1/12, 1000, 1/1000):
+    for mult in (1, 100, 1 / 100, 12, 1 / 12, 1000, 1 / 1000):
         if rel_close(cand, truth * mult, rtol=1e-3):
             flag()
 ```

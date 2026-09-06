@@ -202,6 +202,7 @@ make demo       跑一个最小的端到端示例
 
 ```python
 from openai import OpenAI
+
 client = OpenAI(
     api_key=os.environ["DASHSCOPE_API_KEY"],
     base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
