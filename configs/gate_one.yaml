@@ -10,7 +10,7 @@
 meta:
   gate: one
   criterion_source: "README §9.1.1.1"
-  status: DRAFT            # 经确认后改成 PREREGISTERED 并 commit，然后才跑
+  status: PREREGISTERED    # 2026-09-06 确认；本文件的 sha 进产出，证明判据是事前的
   llm_calls: 0
 
 # ---------------------------------------------------------------------------
