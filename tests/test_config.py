@@ -86,9 +86,12 @@ def test_dotenv_supplies_the_key_when_the_process_environment_lacks_it(tmp_path,
     assert spec.resolve().api_key == "from-dotenv"
 
 
-def test_a_real_environment_variable_wins_over_a_stale_dotenv(tmp_path, monkeypatch):
-    """override=False 是刻意的。一份过期的 .env 不该盖掉刚设好的系统变量，
-    否则这个后备机制自己会变成下一个坑。"""
+def test_dotenv_does_not_override_the_process_environment(tmp_path, monkeypatch):
+    """`override=False` 仍然成立：真实环境变量优先于 .env。
+
+    这是 12-factor 的约定，也是部署时唯一说得通的方向。改变的不是优先级，
+    而是**两处不一致时不再静默地按优先级挑一个**——见下面那条冲突测试。
+    """
     import common.config as cfg
 
     monkeypatch.setenv("SOME_TEST_KEY", "from-process")
@@ -96,10 +99,10 @@ def test_a_real_environment_variable_wins_over_a_stale_dotenv(tmp_path, monkeypa
     monkeypatch.chdir(tmp_path)
     (tmp_path / ".env").write_text("SOME_TEST_KEY=stale-value\n", encoding="utf-8")
 
-    spec = cfg.ModelSpec(
-        provider="p", base_url="u", api_key_env="SOME_TEST_KEY", model="m-2025-01-01"
-    )
-    assert spec.resolve().api_key == "from-process"
+    cfg._ensure_dotenv()
+    import os
+
+    assert os.environ["SOME_TEST_KEY"] == "from-process"
 
 
 def test_key_source_reports_where_it_came_from_never_the_value(tmp_path, monkeypatch):
@@ -110,3 +113,46 @@ def test_key_source_reports_where_it_came_from_never_the_value(tmp_path, monkeyp
     monkeypatch.delenv("SOME_TEST_KEY", raising=False)
     monkeypatch.setattr(cfg, "_DOTENV_LOADED", True)  # 不去碰真实的 .env
     assert cfg.key_source("SOME_TEST_KEY") == "not found"
+
+
+def test_a_conflicting_dotenv_and_process_env_is_reported(tmp_path, monkeypatch):
+    """两处取值不同时进程环境赢，而"赢了的是旧的"表现为 401——看起来像
+    凭证坏了，不像配置冲突。
+
+    2026-09-06 实测到的正是这一形态：新 key 在 .env 里，旧的已吊销 key 还
+    留在系统环境变量里，探针连报两次 401，而 .env 里那个 key 单独测完全
+    正常。不改 precedence（12-factor 说真实环境变量优先，那是对的），改成
+    把冲突报出来。
+    """
+    import common.config as cfg
+
+    monkeypatch.setenv("SOME_TEST_KEY", "stale-from-process")
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / ".env").write_text("SOME_TEST_KEY=fresh-from-dotenv\n", encoding="utf-8")
+
+    assert cfg.dotenv_conflicts() == {"SOME_TEST_KEY": "fresh-from-dotenv"}
+
+
+def test_agreeing_values_are_not_a_conflict(tmp_path, monkeypatch):
+    import common.config as cfg
+
+    monkeypatch.setenv("SOME_TEST_KEY", "same")
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / ".env").write_text("SOME_TEST_KEY=same\n", encoding="utf-8")
+    assert cfg.dotenv_conflicts() == {}
+
+
+def test_resolve_refuses_a_conflicted_key(tmp_path, monkeypatch):
+    """静默地选一个，无论选哪个都会在某天骗到人。"""
+    import common.config as cfg
+
+    monkeypatch.setenv("SOME_TEST_KEY", "stale")
+    monkeypatch.setattr(cfg, "_DOTENV_LOADED", True)  # 不去动真实的 .env
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / ".env").write_text("SOME_TEST_KEY=fresh\n", encoding="utf-8")
+
+    spec = cfg.ModelSpec(
+        provider="p", base_url="u", api_key_env="SOME_TEST_KEY", model="m-2025-01-01"
+    )
+    with pytest.raises(cfg.ConfigError, match="取值不同"):
+        spec.resolve()

@@ -12,7 +12,7 @@ import subprocess
 import sys
 
 import _bootstrap  # noqa: F401  (side effect: puts src/ on the path)
-from common.config import ConfigError, ModelsConfig, key_source
+from common.config import ConfigError, ModelsConfig, dotenv_conflicts, key_source
 
 OK, WARN, BAD = "[ ok ]", "[warn]", "[fail]"
 _SNAPSHOT_SHAPED = re.compile(r"-(?:\d{4}-\d{2}-\d{2}|\d{8})$")
@@ -39,6 +39,12 @@ def check_toolchain() -> None:
 
 def check_keys(models: ModelsConfig) -> None:
     print("\n-- keys (values never printed) --")
+    for name in sorted(dotenv_conflicts()):
+        # 静默故障：两处取值不同时进程环境赢。旧的那个让探针报 401，
+        # 而 401 看起来像凭证坏了，不像配置冲突。
+        print(f"{BAD} {name}: 进程环境与 .env 取值不同，进程环境优先。")
+        print("       若进程环境里那份是旧的，探针会报 401。删掉系统环境变量里的")
+        print("       那一份，或删掉 .env 里那一行。")
     for role in ("base_a", "base_b"):
         env = models.spec(role).api_key_env
         source = key_source(env)

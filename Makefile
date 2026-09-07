@@ -21,6 +21,9 @@ setup:
 test:
 	$(UV) run pytest
 
+test-live:
+	$(UV) run pytest -m live
+
 lint:
 	$(UV) run ruff check .
 	$(UV) run ruff format --check .

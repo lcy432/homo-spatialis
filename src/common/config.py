@@ -69,6 +69,31 @@ def _ensure_dotenv() -> None:
     _DOTENV_LOADED = True
 
 
+def dotenv_conflicts() -> dict[str, str]:
+    """同时出现在进程环境与 .env 里、但**取值不同**的变量。
+
+    这是一个必须主动检测的静默故障。`override=False` 是对的（12-factor：
+    真实环境变量优先），但它假定两处一致。两处不一致时旧的那个会赢，而
+    "旧的赢了"的表现是 401——看起来像凭证坏了，而不是像配置冲突。
+
+    2026-09-06 实测到的正是这一形态：用户把新 key 写进 .env，进程环境里
+    还留着已吊销的旧 key，探针报 401，而 .env 里那个 key 单独测完全正常。
+
+    不改 precedence，改成**报出来**：静默地选一个，无论选哪个都会在某天
+    骗到人。
+    """
+    from dotenv import dotenv_values, find_dotenv
+
+    path = find_dotenv(usecwd=True)
+    if not path:
+        return {}
+    return {
+        name: value
+        for name, value in dotenv_values(path).items()
+        if value is not None and name in os.environ and os.environ[name] != value
+    }
+
+
 def key_source(env_var: str) -> str:
     """这个密钥是从哪儿来的。只报来源，永不报值。
 
@@ -140,6 +165,14 @@ class ModelSpec(BaseModel):
 
     def resolve(self) -> ResolvedModel:
         _ensure_dotenv()
+        if self.api_key_env in dotenv_conflicts():
+            raise ConfigError(
+                f"{self.api_key_env} 在进程环境与 .env 里取值不同。"
+                "进程环境优先（override=False），所以生效的是进程环境里那个——"
+                "若它是旧的，你会看到 401，而那看起来像凭证坏了、不像配置冲突。\n"
+                "改法二选一：删掉系统环境变量里的那一份（推荐，既然已经改用 .env），"
+                "或者把 .env 里那一行删掉。"
+            )
         if self.model is None:
             raise ConfigError(
                 f"base model for provider {self.provider!r} has no snapshot pinned yet; "
