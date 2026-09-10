@@ -36,6 +36,7 @@ from worlds.attributes import (
     LATENT_ORDER,
     QUANTILES,
     AttributeCalibration,
+    scale_amenity,
 )
 from worlds.dimensions import AMENITY_DIMENSIONS
 from worlds.taxes import StateRegime, SyntheticProgressiveTax
@@ -101,6 +102,43 @@ def _standard_normal_cdf(x: np.ndarray) -> np.ndarray:
     return np.vectorize(lambda v: 0.5 * (1.0 + erf(v / sqrt(2.0))))(x)
 
 
+def _assign_states(
+    latent: np.ndarray, calibration: AttributeCalibration, rng: np.random.Generator
+) -> list[str]:
+    """按"税负与宜居正相关"分配州税制原型。
+
+    现实里六个舒适度维中有五个（治安、医疗、机会、休闲、通勤）主要靠税收
+    与公共转移支付支撑，所以高税辖区通常提供更多公共服务。此前州制度是
+    **独立随机**分配的，实测 corr(税负, 舒适度) = +0.020——世界里根本不
+    存在"高税高服务"的城市。后果不只是不现实：
+
+      · 装置连表达"税收换来的服务是否值那些税"这个机制的能力都没有；
+      · §11.3 第四档（货币幻觉）因此只能测"高名义工资但房租贵"，测不到
+        最现实的那一种——**只看到手工资，看不见税买了什么**。
+
+    做法是把宜居因子与一个独立噪声按 ``tax_amenity_corr`` 混合成一个排序
+    分数，再按分数的分位把四种税制原型（无州税、平税、累进、累进加地方
+    附加）铺上去。相关强度可调，因为它是**国别参数**：同一国内部应当明显
+    为正，跨国合并则不一定——国家能力与经济实力不同，高税不必然换来高服务。
+
+    **这不泄露任何东西。** 税率与舒适度都是 L0/L1 可观测量，代理本来就
+    看得见两者；改变的只是它们在世界里的联合分布。真值仍然只在 score()
+    那一侧，AgentInput 的边界一动没动。
+    """
+    idx = {name: i for i, name in enumerate(LATENT_ORDER)}
+    amenity_score = latent[:, [idx[d] for d in AMENITY_DIMENSIONS]].mean(axis=1)
+    rho = float(np.clip(calibration.tax_amenity_corr, -1.0, 1.0))
+    noise = rng.standard_normal(len(amenity_score))
+    blended = rho * amenity_score + np.sqrt(max(0.0, 1.0 - rho**2)) * noise
+
+    order = np.argsort(blended)  # 分数低 -> 低税
+    states = [""] * len(order)
+    for rank, city in enumerate(order):
+        bucket = min(len(SYNTH_STATES) - 1, rank * len(SYNTH_STATES) // len(order))
+        states[city] = SYNTH_STATES[bucket]
+    return states
+
+
 def _build_records(
     latent: np.ndarray,
     calibration: AttributeCalibration,
@@ -124,11 +162,13 @@ def _build_records(
         median = calibration.median_wage * float(np.exp(z[col["wage"]] * calibration.ln_wage_sd))
         wages = {q: median * calibration.quantile_ratios[q] for q in QUANTILES}
 
-        amenity_z = np.array([z[col[d]] for d in AMENITY_DIMENSIONS])
-        scaled = _standard_normal_cdf(amenity_z)
+        # 绝对锚定优先、分位兜底（§5.3）。见 attributes.scale_amenity：
+        # 锚定维走物理量与外生标准，分位维走显式离散度而不是 (0,1) 均匀。
         amenities = {
-            d: float(np.clip(v, 1e-6, 1.0 - 1e-6))
-            for d, v in zip(AMENITY_DIMENSIONS, scaled, strict=True)
+            d: float(
+                np.clip(scale_amenity(d, float(z[col[d]]), calibration.quantile_ln_sd), 1e-6, 1.0)
+            )
+            for d in AMENITY_DIMENSIONS
         }
 
         records.append(
@@ -251,7 +291,7 @@ class WorldGenerator:
         permutation = rng.permutation(self.n_cities)
         latent = latent[permutation]
 
-        states = [SYNTH_STATES[int(rng.integers(len(SYNTH_STATES)))] for _ in range(self.n_cities)]
+        states = _assign_states(latent, self.calibration, rng)
         records = _build_records(latent, self.calibration, states)
 
         growth = {

@@ -88,6 +88,131 @@ LATENT_ORDER: tuple[str, ...] = (
 QUANTILES: tuple[int, ...] = (10, 25, 50, 75, 90)
 
 
+# ---------------------------------------------------------------------------
+# 舒适度的标度：绝对锚定优先，分位兜底（§5.3）
+# ---------------------------------------------------------------------------
+#
+# §5.3 说"能用绝对的就用绝对"，而我们此前一个绝对锚定都没实现——六维全是
+# 分位等价物（高斯 copula 给均匀边际）。补上它有两个收益，第二个比第一个
+# 更要紧：
+#
+# 一、跨国可比。绝对锚定的变量不需要参照总体：µg/m³ 在哪儿都是 µg/m³，
+#    分钟在哪儿都是分钟。§5.3 明写这一点，而 §5.8 的跨国分级正靠它。
+#
+# 二、**不双重计入强度。** 分位法把每一维都拉伸填满 [0,1]，无论那一维在
+#    物理上到底变化多少。于是"人有多在乎这一维"被烤进了标度，而 θ 又在
+#    问卷里量了一遍同一件事。绝对标度把强度整个赶进 θ——标度只说"物理上
+#    差多少"，θ 说"这个人多在乎"。这正是分工该有的样子。
+#
+# 第二条同时解释了 10.8×：分位法把 ln A 的跨城 sd 抻到 0.855，而工资是
+# 0.186、房租是 0.229。锚定之后（PM2.5 给 0.282、日照 0.180）三者同量级，
+# 不是靠挑一个 floor 凑出来的。
+#
+# **只锚定真有外生标准的。** 治安、医疗、机会、休闲没有——"多少犯罪率算
+# 好"没有世卫指导值那样的东西，硬给一个参照点就是把任意标度换个说法。
+# 它们继续走分位，但分位的离散度改成**显式参数**（见 quantile_ln_sd），
+# 不再是 (0,1) 均匀映射的意外副产品。
+
+
+@dataclass(frozen=True)
+class AbsoluteAnchor:
+    """一个外生标准，加上把物理量映到 [0,1] 的变换。
+
+    ``reference`` 必须是外生的：世卫指导值、天文上限、物理零点。若它是
+    "样本里最好的那个"或者"我们觉得合理的数"，那就不是绝对锚定，是换了
+    个名字的分位法。
+    """
+
+    variable: str
+    reference: float
+    source: str
+    kind: str  # "ratio_to_standard" | "share_of_budget"
+
+    def scale(self, raw: float) -> float:
+        if self.kind == "ratio_to_standard":
+            # 越小越好的量（污染物浓度）：达到或优于标准记 1，之后按比例衰减。
+            return float(min(1.0, self.reference / max(raw, 1e-12)))
+        if self.kind == "share_of_budget":
+            # 越小越好的量，且有一个外生的总量（清醒时间）。
+            return float(max(0.0, 1.0 - raw / self.reference))
+        raise ValueError(f"未知的锚定形式 {self.kind!r}")
+
+
+# 每天清醒分钟数。用于把通勤时长变成"没被通勤吃掉的清醒时间占比"。
+# 两端都外生：零通勤是理想，一整天是上限。
+WAKING_MINUTES_PER_DAY = 960.0
+
+AMENITY_ANCHORS: dict[str, AbsoluteAnchor] = {
+    # 年均 PM2.5，µg/m³。世卫 2021 年空气质量指导值的年均值是 5。
+    "environment": AbsoluteAnchor(
+        variable="pm25_annual_ug_m3",
+        reference=5.0,
+        source="WHO Global Air Quality Guidelines 2021, annual PM2.5",
+        kind="ratio_to_standard",
+    ),
+    # 单程通勤分钟数，换算成往返占清醒时间的比例。
+    #
+    # 注意这一维锚定之后的 ln A 离散度只有 0.008——按清醒时间占比算，美国
+    # 都会区之间的通勤差异**在物理上确实很小**。若人对通勤的厌恶远超这个
+    # 比例，那应当体现在 θ（他在量表上给通勤多少分），不在标度里。这正是
+    # 绝对锚定该有的效果：强度归 θ，物理差异归标度。
+    "commute": AbsoluteAnchor(
+        variable="commute_minutes_one_way",
+        reference=WAKING_MINUTES_PER_DAY / 2.0,
+        source="往返通勤占清醒时间的比例；零通勤与整日两端均外生",
+        kind="share_of_budget",
+    ),
+}
+
+# 没有外生标准的四维，走分位。
+QUANTILE_DIMENSIONS: tuple[str, ...] = tuple(
+    d for d in AMENITY_DIMENSIONS if d not in AMENITY_ANCHORS
+)
+
+
+# 锚定维度的物理量边际分布。参数取自美国都会区的实际范围，是**标定**，
+# 与锚定标准本身分开：标准是外生的（世卫指导值、清醒时间），分布是我们
+# 对"美国都会区之间差多少"的经验描述，M1 拿到真实数据后替换。
+PHYSICAL_MARGINALS: dict[str, tuple[float, float, float, float]] = {
+    # (对数均值 或 均值, 尺度, 下截断, 上截断)
+    "environment": (8.0, 0.30, 3.0, 20.0),  # PM2.5 µg/m³，对数正态
+    "commute": (26.0, 4.0, 15.0, 45.0),  # 单程分钟，正态
+}
+
+
+def _physical_value(dim: str, z: float) -> float:
+    """把隐变量映到物理量。**符号翻转**：z 大表示宜居因子高，而 PM2.5 与
+    通勤时长都是"越小越好"，所以用 −z。
+
+    这个负号是锚定维度与分位维度唯一的实现差异，也是最容易写反的一处：
+    写正了不会报错，只会让空气差的城市看起来宜居。有测试盯着它。
+    """
+    import math
+
+    loc, scale, lo, hi = PHYSICAL_MARGINALS[dim]
+    # PM2.5 走对数正态（浓度是正的、右偏），通勤时长走正态。
+    lognormal = dim == "environment"
+    raw = math.exp(math.log(loc) + scale * (-z)) if lognormal else loc + scale * (-z)
+    return min(hi, max(lo, raw))
+
+
+def scale_amenity(dim: str, z: float, quantile_ln_sd: float) -> float:
+    """隐变量 → [0,1] 的标度值。锚定维走物理量，其余走显式离散度的对数正态。
+
+    分位维用 `A = exp(σ·(z − z_cap))`，`z_cap = 3`：
+      · `z ≤ 3` 时 `A ≤ 1`，满足 §5.3 的值域；
+      · `ln A` 的跨城标准差**恰好是 σ**，因此那是一个可以直接指定、直接
+        扫描的参数，而不是 (0,1) 均匀映射的意外副产品（那个副产品是 0.855，
+        而工资是 0.186、房租是 0.229）。
+    """
+    import math
+
+    anchor = AMENITY_ANCHORS.get(dim)
+    if anchor is not None:
+        return anchor.scale(_physical_value(dim, z))
+    return math.exp(quantile_ln_sd * (min(z, 3.0) - 3.0))
+
+
 @dataclass(frozen=True)
 class FactorLoadings:
     """Roback 两因子结构的载荷。相关矩阵由它生成，因此天然半正定。
@@ -185,6 +310,28 @@ class AttributeCalibration:
     real_rent_growth_mean: float = 0.012
     real_rent_growth_sd: float = 0.012
     real_interest: float = 0.015
+
+    # --- 分位维度的 ln A 跨城标准差。**显式参数，不是映射的副产品。** ---
+    #
+    # 默认 0.22 不是挑出来凑比值的：它落在两个锚定维实测给出的区间里
+    # （PM2.5 0.282、日照 0.180），也落在经济变量的量级上（ln wage 0.186、
+    # ln rpp_rent 0.229）。所以它表达的假设是"没有外生标准的舒适度，其
+    # 跨城变异与有标准的那些差不多大"——一个写下来的、可检验的假设，
+    # 而不是 (0,1) 均匀映射的意外结果（那个结果是 0.855）。
+    #
+    # 研究模式下它是**扫描参数**：舒适度与物质两个通道的汇率没人知道，
+    # 正确的反应不是挑一个，是扫过去、把结论报成它的函数。
+    quantile_ln_sd: float = 0.22
+
+    # 税制与宜居因子的相关。现实里高税辖区提供更多公共服务（六个舒适度维
+    # 里五个主要靠税收支撑），而此前税制是独立随机分配的，实测
+    # corr(税负, 舒适度) = +0.020——世界里根本不存在"高税高服务"的城市，
+    # 第四档因此测不到最现实的那种货币幻觉：只看到手工资，看不见税买了什么。
+    #
+    # **这是国别参数。** 同一国内部它应当明显为正；跨国合并则不一定，因为
+    # 国家能力与经济实力不同，高税不一定换来高服务。所以它属于 CountryPack
+    # 的标定，不是一个全球常数（§5.8 的分级同理）。
+    tax_amenity_corr: float = 0.55
 
     # --- 相关结构。见模块文档：因子模型，不是两两手填 ---
     loadings: FactorLoadings = field(default_factory=FactorLoadings)
