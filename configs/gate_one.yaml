@@ -10,7 +10,16 @@
 meta:
   gate: one
   criterion_source: "README §9.1.1.1"
-  status: PREREGISTERED    # 2026-09-06 确认；本文件的 sha 进产出，证明判据是事前的
+  status: PREREGISTERED_AMENDED
+  preregistered_at: fe0ab6e          # 原始冻结 commit
+  preregistered_sha256_16: cf1b22dbce286df2
+  amendments:
+    - date: 2026-09-10
+      field: perturbation.aggregation
+      from: median_within_then_across
+      to: mean_within_then_across
+      reason: structural           # 见 DECISIONS/0010；理由先验成立，与实测无关
+      original_still_reported: true
   llm_calls: 0
 
 # ---------------------------------------------------------------------------
@@ -91,11 +100,23 @@ perturbation:
 
   draws_per_persona: 32
 
-  # 两级中位数，不是池化。
-  #   每个人设：32 次扰动诱导的 EV 变动的中位数  → 这个人的噪声地板
-  #   跨人设：  上述值的中位数                    → 报告的噪声地板
-  # 池化会让"扰动敏感"的人设按次数加权，而 L_rep 那一侧是一人一个数。
-  aggregation: median_within_then_across
+  # 人设内取**均值**，跨人设取中位数（2026-09-10 修订，见 DECISIONS/0010）。
+  #   每个人设：32 次扰动诱导的 EV 变动的**均值** → 这个人的噪声地板
+  #   跨人设：  上述值的中位数                     → 报告的噪声地板
+  #
+  # 原为两级中位数。改的理由是结构性的、先验成立的：argmax 是离散的，
+  # 不翻转则损失严格为零，所以人设内是一个**零膨胀分布**，对它取中位数
+  # 在翻转概率低于 50% 时**恒等于零**——不是噪声小，是中位数落在零点质量上。
+  #
+  # 均值才与 L_rep 同类（期望美元成本），而且美元单位的全部意义就是线性
+  # 可加，取中位数把线性性丢掉了。均值还天然可分解成
+  # P(翻转) × E[损失|翻转]，两者是同一个数，拆开报信息更多。
+  #
+  # 跨人设那一轴不动：人口摘要要对 1/w₁ 的重尾稳健，且与 L_rep 一侧对称。
+  aggregation: mean_within_then_across
+
+  # **原判据照样计算、照样进产出**，读者自行判断修订有没有改变结论。
+  also_report: median_within_then_across
 
   # 方向性推力诊断**必进产出**，两个方案都报。不是可选的健全性检查：
   # 一个带方向性推力的地板会把被测对象掺进标尺，而那不会报错。
@@ -169,17 +190,20 @@ decision:
 outputs:
   path: "runs/{run_id}/gate_one.json"
   required_fields:
-    - noise_floor_usd                    # 地板本身
+    - noise_floor_usd                    # 规范口径：人设内均值，跨人设中位数
+    - noise_floor_usd_median_within      # 原判据口径，一并报告（DECISIONS/0010）
+    - flip_probability                   # P(扰动翻转 argmax)
+    - conditional_loss_usd               # E[损失 | 翻转]；与 noise_floor 之积相等
     - perturbation_diagnostics           # E[ΔH_norm] 与 |E[δ]|，两个方案都报
     - per_rung:                          # 每一档一条
         - tau
         - n_personas_feasible            # 无解的被排除了多少（非随机缺失）
         - n_personas_money_metric_missing  # 货币度量落在语义区间外的（硬规则 27）
-        - median_L_rep_usd
+        - median_l_rep_usd
         - ci_lower_usd
         - ci_upper_usd
-        - median_L_s_usd
-        - median_L_amen_usd
+        - median_l_s_usd
+        - median_l_amen_usd
         - feasible_fraction
         - counts_toward_verdict          # 可行比例低于 min_feasible_fraction 则为 false
         - passes

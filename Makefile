@@ -41,6 +41,9 @@ data:
 freeze:
 	$(UV) run python scripts/freeze_reference.py
 
+gates:
+	$(UV) run python scripts/run_gate_one.py
+
 demo:
 	$(UV) run python scripts/demo.py
 

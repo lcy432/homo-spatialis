@@ -123,11 +123,28 @@ def _loss_against_truth(
 
 @dataclass(frozen=True)
 class PersonaBaselines:
+    """一个人设在一个选择集上的三条基准线加噪声地板。
+
+    地板有两个口径，两个都报（DECISIONS/0010）：
+
+        noise_floor          人设内**均值**。规范口径。
+        noise_floor_median   人设内中位数。原预注册口径，一并报告。
+
+    均值恒等于 ``flip_probability × conditional_loss``：argmax 不翻转时
+    损失严格为零，所以 `E[损失] = P(翻转)·E[损失|翻转]`。拆开报是因为
+    "问卷噪声有 p 的概率改变你的推荐，改变时平均代价 X 美元"比一个合成
+    的数更能说明发生了什么。
+    """
+
     persona_id: str
     l_rep: float | None
     l_s: float | None
     l_amen: float | None
-    noise_floor: float | None
+    noise_floor: float | None  # 人设内均值（规范）
+    noise_floor_median: float | None  # 人设内中位数（原判据）
+    flip_probability: float
+    conditional_loss: float | None  # E[损失 | 翻转]
+    n_perturbations: int
     argmax_true: str
     argmax_rep: str
 
@@ -179,12 +196,18 @@ def baselines_for(
         if loss is not None:
             floors.append(loss)
 
+    values = np.asarray(floors, dtype=float)
+    flipped = values > 0.0
     return PersonaBaselines(
         persona_id=persona.persona_id,
         l_rep=_loss_against_truth(truth, persona, i_rep),
         l_s=_loss_against_truth(truth, persona, i_s),
         l_amen=_loss_against_truth(truth, persona, i_amen),
-        noise_floor=float(np.median(floors)) if floors else None,
+        noise_floor=float(values.mean()) if len(values) else None,
+        noise_floor_median=float(np.median(values)) if len(values) else None,
+        flip_probability=float(flipped.mean()) if len(values) else 0.0,
+        conditional_loss=float(values[flipped].mean()) if flipped.any() else None,
+        n_perturbations=len(values),
         argmax_true=cities[best].code,
         argmax_rep=cities[i_rep].code,
     )

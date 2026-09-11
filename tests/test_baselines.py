@@ -112,3 +112,41 @@ def test_changing_shares_leaves_the_scale_weights_alone(persona):
     assert swapped.params.w_material == pytest.approx(persona.params.w_material)
     assert swapped.params.theta == persona.params.theta
     assert swapped.params.beta / swapped.params.w_material == pytest.approx(SBAR.s_rent)
+
+
+# --------------------------------------------------------------------------
+# 噪声地板的两个口径（DECISIONS/0010）
+# --------------------------------------------------------------------------
+
+
+def test_the_mean_floor_equals_flip_probability_times_conditional_loss(core, cities, perturbations):
+    """`E[损失] = P(翻转)·E[损失|翻转]`，因为不翻转时损失严格为零。
+
+    所以"翻转概率 × 条件损失"与均值是**同一个数**，拆开报只是信息更多。
+    这条把那个恒等式钉住，免得将来有人把它们当成两个可以各自定义的量。
+    """
+    for p in PersonaGenerator().generate(15, seed=9):
+        b = baselines_for(core, p, cities, SBAR, perturbations=perturbations)
+        if b.noise_floor is None or b.conditional_loss is None:
+            continue
+        assert b.noise_floor == pytest.approx(b.flip_probability * b.conditional_loss, rel=1e-9)
+
+
+def test_the_median_floor_is_zero_whenever_flips_are_rare(core, cities, perturbations):
+    """原判据为什么被修订：argmax 离散，不翻转则损失严格为零，所以人设内
+    是零膨胀分布——翻转概率低于 50% 时中位数**恒等于零**，不是噪声小。
+
+    这条先验成立，与实测无关；实测只是确认它会咬。
+    """
+    for p in PersonaGenerator().generate(15, seed=9):
+        b = baselines_for(core, p, cities, SBAR, perturbations=perturbations)
+        if b.flip_probability < 0.5:
+            assert b.noise_floor_median == 0.0
+
+
+def test_both_floor_definitions_are_reported(core, persona, cities, perturbations):
+    """修订后原口径仍然计算并进产出，读者自行判断修订有没有改变结论。"""
+    b = baselines_for(core, persona, cities, SBAR, perturbations=perturbations)
+    assert b.noise_floor is not None
+    assert b.noise_floor_median is not None
+    assert b.n_perturbations == len(perturbations)
