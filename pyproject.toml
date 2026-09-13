@@ -25,6 +25,7 @@ dependencies = [
     "openai>=1.40",
     # figures
     "matplotlib>=3.8",
+    "xlogit>=0.2.7",
 ]
 
 [dependency-groups]

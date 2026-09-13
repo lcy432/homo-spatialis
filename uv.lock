@@ -275,6 +275,7 @@ dependencies = [
     { name = "scipy", version = "1.17.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
     { name = "scipy", version = "1.18.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "tenacity" },
+    { name = "xlogit" },
 ]
 
 [package.dev-dependencies]
@@ -299,6 +300,7 @@ requires-dist = [
     { name = "pyyaml", specifier = ">=6.0" },
     { name = "scipy", specifier = ">=1.13" },
     { name = "tenacity", specifier = ">=8.3" },
+    { name = "xlogit", specifier = ">=0.2.7" },
 ]
 
 [package.metadata.requires-dev]
@@ -1638,4 +1640,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/08/1c/69faa2e6a83484e2a8227bce5cfaa183941c5720f99c48f204931d286b07/virtualenv-21.7.8.tar.gz", hash = "sha256:1dc49c790072a9072cb1803f9bd62aa69cd583077cada32390f75505cdc64c9b", size = 5347580, upload-time = "2026-09-01T13:36:13.894Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/9f/34/88d507d4a4030fa559788de9c690a214f9a4053aa1d91cfb60e9b36127c2/virtualenv-21.7.8-py3-none-any.whl", hash = "sha256:3040eb3cbf5d32b10ffd57d167e6a162237ad82ba7d8cf1400a1efed593d85ac", size = 5324617, upload-time = "2026-09-01T13:36:11.248Z" },
+]
+
+[[package]]
+name = "xlogit"
+version = "0.2.7"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
+    { name = "numpy", version = "2.5.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
+    { name = "scipy", version = "1.17.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
+    { name = "scipy", version = "1.18.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/52/ce/c2d15e5b5a98334b1d5093c24698a2a747d623a053c84d33d844d6b67491/xlogit-0.2.7.tar.gz", hash = "sha256:60b3a657082cfe0b5b5a1ce1c49496da07ad14f51b2a4b6cda3e6089d5371608", size = 39423, upload-time = "2023-07-25T13:56:00.465Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5b/ab/5280d6920d59e739063effb59b54349a71ee66bdd11daa1664d08e68564a/xlogit-0.2.7-py3-none-any.whl", hash = "sha256:7b091b5bb1e0b806892eccbc2b0f9b8b876bb80fcd994446faec80ac000fbc3f", size = 36036, upload-time = "2023-07-25T13:55:58.655Z" },
 ]
