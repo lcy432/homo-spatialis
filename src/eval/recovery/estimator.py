@@ -37,6 +37,7 @@ from .inversion import (
     weights_from_gamma,
 )
 from .msl import CovarianceMode, DrawMethod, MslFit, fit_mixed_logit
+from .msl_alr import fit_mixed_logit_alr
 from .results import (
     CovarianceReport,
     RecoveryDiagnostics,
@@ -56,6 +57,15 @@ class RecoveryConfig:
     协方差模式全部从这里显式流下去。"""
 
     base_dim: str = MATERIAL
+
+    #: ``"difference_normal"``（默认，原有分支：`w` 直接正态，`Σw = 1` 恒成立、
+    #: `0 ≤ w ≤ 1` 不保证，越界如实报告）或 ``"alr_logistic_normal"``（ALR 坐标
+    #: 加 softmax，两条约束都由构造保证）。
+    #:
+    #: **默认刻意不改。** 换默认估计器是一次科学裁决，不是一次实现选择；在
+    #: 有裁决之前，比较脚本必须显式指定，不得依赖这个默认值。
+    parameterization: str = "difference_normal"
+
     covariance: CovarianceMode = "diagonal"
     n_draws: int = 200
     seed: int = 0
@@ -86,8 +96,18 @@ def _population_simplex(fit: MslFit, base: int, gamma_0: float, n: int, seed: in
 
 
 def fit_recovery(dataset: ChoiceDataset, config: RecoveryConfig | None = None) -> RecoveryResult:
-    """拟合面板混合 logit 并反解回七维权重空间。"""
+    """拟合面板混合 logit 并反解回七维权重空间。
+
+    ``config.parameterization`` 选分支，默认仍是 ``difference_normal``。
+    """
     cfg = config or RecoveryConfig()
+    if cfg.parameterization == "alr_logistic_normal":
+        return _fit_recovery_alr(dataset, cfg)
+    if cfg.parameterization != "difference_normal":
+        raise ValueError(
+            f"未知参数化 {cfg.parameterization!r}；"
+            "可选 'difference_normal' 或 'alr_logistic_normal'"
+        )
     base = base_index(cfg.base_dim)
 
     fit = fit_mixed_logit(
@@ -165,6 +185,91 @@ def fit_recovery(dataset: ChoiceDataset, config: RecoveryConfig | None = None) -
         w_hat=w_hat,
         diagnostics=diagnostics,
         fit=fit,
+    )
+
+
+def _fit_recovery_alr(dataset: ChoiceDataset, cfg: RecoveryConfig) -> RecoveryResult:
+    """ALR/logistic-normal 分支。
+
+    与默认分支的**唯一**语义差别在潜空间：``mu_gamma``/``sigma_gamma`` 这两个
+    字段在这里装的是 μ_a 与 Σ_a（别名 ``mu_latent``/``sigma_latent``）。
+    ``w_center_hat``、``sigma_w_hat``、``w_hat`` 三个权重空间的量含义完全相同，
+    且全部是在**权重空间实算**的矩，不是 delta 近似。
+    """
+    base = base_index(cfg.base_dim)
+    fit = fit_mixed_logit_alr(
+        dataset,
+        base,
+        n_draws=cfg.n_draws,
+        seed=cfg.seed,
+        covariance=cfg.covariance,
+        draw_method=cfg.draw_method,
+        maxiter=cfg.maxiter,
+        tol=cfg.tol,
+        draw_batch=cfg.draw_batch,
+        population_draws=cfg.simplex_draws,
+    )
+
+    gamma_0 = check_gamma_0(fit.gamma_0)
+    warning = None
+    if gamma_0 < cfg.gamma0_warn_below:
+        warning = (
+            f"γ_0 = {gamma_0:.4g} 低于 {cfg.gamma0_warn_below:g}（σ̂ = {1.0 / gamma_0:.4g}）。"
+            "选择已接近随机；这与门二 2a/2b 是同一个情形，结论要带上这条警告。"
+        )
+
+    w_hat = fit.posterior.weight_mean
+    design = design_matrix(dataset.features, base)
+    cond = condition_number(design, within_task=dataset.row_task)
+    within_sd = within_task_variation(dataset.features, dataset.row_task)
+    tasks = dataset.tasks_per_persona
+
+    diagnostics = RecoveryDiagnostics(
+        converged=fit.converged,
+        message=fit.message,
+        n_iterations=fit.n_iterations,
+        n_function_evals=fit.n_function_evals,
+        loglik=fit.loglik,
+        loglik_conditional_logit=fit.mnl_loglik,
+        gamma_0=gamma_0,
+        sigma_hat=1.0 / gamma_0,
+        gamma_0_warning=warning,
+        design_condition_number=cond,
+        attribute_within_sd=tuple(float(v) for v in within_sd),
+        weakly_identified_dimensions=weakly_identified_dimensions(
+            within_sd, ratio=cfg.weak_identification_ratio
+        ),
+        covariance=CovarianceReport.of(fit.sigma_w),
+        population_simplex=SimplexReport.of(fit.population_weights),
+        individual_simplex=SimplexReport.of(w_hat),
+        posterior_ess_median=float(np.median(fit.posterior.ess)),
+        posterior_sd_median=float(np.median(fit.posterior.latent_sd)),
+        n_personas=dataset.n_personas,
+        n_tasks=dataset.n_tasks,
+        n_rows=dataset.n_rows,
+        tasks_per_persona_min=int(tasks.min()),
+        tasks_per_persona_median=float(np.median(tasks)),
+        tasks_per_persona_max=int(tasks.max()),
+    )
+
+    return RecoveryResult(
+        base_dim=ALL_DIMENSIONS[base],
+        covariance=cfg.covariance,
+        n_draws=cfg.n_draws,
+        seed=cfg.seed,
+        gamma_0=gamma_0,
+        sigma_hat=1.0 / gamma_0,
+        mu_gamma=fit.mu_alr,
+        sigma_gamma=fit.sigma_alr,
+        w_center_hat=fit.w_center,
+        sigma_w_hat=fit.sigma_w,
+        persona_ids=dataset.persona_order,
+        posterior_gamma=fit.posterior.latent_mean,
+        posterior_sd_gamma=fit.posterior.latent_sd,
+        w_hat=w_hat,
+        diagnostics=diagnostics,
+        fit=fit,
+        parameterization="alr_logistic_normal",
     )
 
 

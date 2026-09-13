@@ -153,6 +153,7 @@ class _Layout:
 
     xb: np.ndarray  # (n_rows,)
     z: np.ndarray  # (n_rows, 6)
+    x: np.ndarray  # (n_rows, 7) 原始七维属性；ALR 分支不做差分，直接用它
     chosen_f: np.ndarray  # (n_rows,) 0/1
     row_task: np.ndarray
     row_persona: np.ndarray
@@ -172,6 +173,7 @@ def layout(dataset: ChoiceDataset, base: int) -> _Layout:
     return _Layout(
         xb=np.ascontiguousarray(xb),
         z=np.ascontiguousarray(z),
+        x=np.ascontiguousarray(np.asarray(dataset.features, dtype=float)),
         chosen_f=dataset.chosen.astype(float),
         row_task=dataset.row_task,
         row_persona=dataset.row_persona,
@@ -232,6 +234,27 @@ class _Workspace:
     gmu: np.ndarray  # (n_personas, R, 6)
 
 
+def _panel_terms(v: np.ndarray, lay: _Layout) -> tuple[np.ndarray, np.ndarray]:
+    """两个分支共用的那一段：组内 log-sum-exp、按人设聚合、选择残差。
+
+    `v` 是 (n_rows, batch) 的系统效用。返回
+
+      * ``ell``  (n_personas, batch)：该人设**全部**选择任务的联合对数似然；
+      * ``resid`` (n_rows, batch)：`1[被选] − P(选)`，两个分支的梯度都从它出发。
+
+    两个参数化的差别只在"怎么从参数算出 `v`"和"`∂v/∂参数` 是什么"，这一段
+    一模一样。抽出来是为了让 ALR 分支不必复制它，**不是**为了重构已经通过
+    测试的差分分支——运算顺序原样保留，因此结果逐位不变。
+    """
+    m = np.maximum.reduceat(v, lay.task_starts, axis=0)
+    e = np.exp(v - m[lay.row_task])
+    s = np.add.reduceat(e, lay.task_starts, axis=0)
+    logp_task = v[lay.chosen_row] - (m + np.log(s))
+    ell = np.add.reduceat(logp_task, lay.task_persona_starts, axis=0)
+    resid = lay.chosen_f[:, None] - e / s[lay.row_task]
+    return ell, resid
+
+
 def _simulate(
     theta: np.ndarray,
     lay: _Layout,
@@ -256,13 +279,8 @@ def _simulate(
         for k in range(N_RANDOM):
             v += lay.z[:, k : k + 1] * gamma[lay.row_persona, :, k]
 
-        m = np.maximum.reduceat(v, lay.task_starts, axis=0)
-        e = np.exp(v - m[lay.row_task])
-        s = np.add.reduceat(e, lay.task_starts, axis=0)
-        logp_task = v[lay.chosen_row] - (m + np.log(s))
-        ws.ell[:, lo:hi] = np.add.reduceat(logp_task, lay.task_persona_starts, axis=0)
-
-        resid = lay.chosen_f[:, None] - e / s[lay.row_task]
+        ell_block, resid = _panel_terms(v, lay)
+        ws.ell[:, lo:hi] = ell_block
         ws.g0[:, lo:hi] = np.add.reduceat(resid * lay.xb[:, None], lay.persona_starts, axis=0)
         for k in range(N_RANDOM):
             ws.gmu[:, lo:hi, k] = np.add.reduceat(

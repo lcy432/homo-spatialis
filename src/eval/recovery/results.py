@@ -162,9 +162,28 @@ class RecoveryResult:
     dimensions: tuple[str, ...] = ALL_DIMENSIONS
     fit: Any = field(default=None, repr=False)
 
+    #: ``"difference_normal"``（默认，原有分支）或 ``"alr_logistic_normal"``。
+    #:
+    #: **``mu_gamma`` / ``sigma_gamma`` 是"所用参数化的潜空间矩"**：默认分支下
+    #: 它们就是 γ 空间的 μ 与 Σ（语义一字未改）；ALR 分支下它们是 a 空间的
+    #: μ_a 与 Σ_a。字段名为兼容保留，``mu_latent`` / ``sigma_latent`` 是不带
+    #: 分支暗示的别名。``w_center_hat`` / ``sigma_w_hat`` / ``w_hat`` 在两个
+    #: 分支下含义完全相同，下游按它们取值即可。
+    parameterization: str = "difference_normal"
+
     @property
     def n_personas(self) -> int:
         return len(self.persona_ids)
+
+    @property
+    def mu_latent(self) -> np.ndarray:
+        """潜空间均值：默认分支是 μ_γ，ALR 分支是 μ_a。"""
+        return self.mu_gamma
+
+    @property
+    def sigma_latent(self) -> np.ndarray:
+        """潜空间协方差：默认分支是 Σ_γ，ALR 分支是 Σ_a。"""
+        return self.sigma_gamma
 
     def weights_frame(self) -> dict[str, np.ndarray]:
         """``维度名 → (n_personas,) 的回收权重``，方便下游按名取列。"""
@@ -174,6 +193,7 @@ class RecoveryResult:
         """JSON 可写的摘要，供 ``runs/<run_id>/`` 落盘。个体层面的数组不进摘要。"""
         return {
             "base_dim": self.base_dim,
+            "parameterization": self.parameterization,
             "covariance": self.covariance,
             "n_draws": self.n_draws,
             "seed": self.seed,

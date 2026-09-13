@@ -201,3 +201,27 @@ def test_holding_the_draws_fixed_is_an_option_not_the_default():
         r.persona_draw for r in fixed.replicates
     ]
     assert not np.array_equal(varying.metric_values("gamma_0"), fixed.metric_values("gamma_0"))
+
+
+def test_the_bootstrap_supports_both_parameterizations():
+    """第十二节：只增加对 ALR 结果的支持，抽样逻辑一行未改。
+
+    ``parameterization`` 在 ``RecoveryConfig`` 上，所以 bootstrap 不需要知道
+    有几种参数化——它照原样把 config 传给 ``fit_recovery``。
+    """
+    from dataclasses import replace
+
+    s = make_synthetic(n_personas=25, n_tasks=3, n_alts=4, seed=91, strata=True)
+    for par in ("difference_normal", "alr_logistic_normal"):
+        cfg = replace(TINY, parameterization=par)
+        out = block_bootstrap(
+            s.dataset, cfg, n_replicates=3, seed=3, stratified=True, metric_fn=default_metrics
+        )
+        assert len(out.successes) == 3, out.failure_reasons()
+        assert all(r.result is None for r in out.replicates)  # keep_results 默认关
+        assert all(len(r.persona_draw) == s.dataset.n_personas for r in out.replicates)
+        lo, hi = out.percentile_interval("sigma_hat")
+        assert np.isfinite(lo) and np.isfinite(hi) and lo <= hi
+        # 分层重抽不跨层，与参数化无关
+        drawn = {s.dataset.strata[p] for p in out.replicates[0].persona_draw}
+        assert drawn <= set(s.dataset.strata.values())

@@ -22,6 +22,48 @@ result = fit_recovery(dataset, RecoveryConfig(base_dim="material", n_draws=400))
 设计矩阵，**刻意丢掉** ``true_coefficients``。
 
 --------------------------------------------------------------------------
+两个参数化
+--------------------------------------------------------------------------
+
+```python
+RecoveryConfig(parameterization="difference_normal")     # 默认，原有分支
+RecoveryConfig(parameterization="alr_logistic_normal")   # ALR/logistic-normal
+```
+
+|  | `difference_normal` | `alr_logistic_normal` |
+|---|---|---|
+| 潜空间 | `γ_k = w_k/σ`，正态 | `a_k = log(w_k/w_b)`，正态 |
+| `Σw = 1` | 恒成立 | 恒成立 |
+| `0 ≤ w ≤ 1` | **不保证**，越界如实报告 | 构造保证，`0 < w < 1` |
+| 尺度 | `γ_0` 直接估 | `ρ = log γ_0`，恒正 |
+| `Σ_w` | `B·(Σ_γ/γ_0²)·Bᵀ`，闭式 | 权重空间实算的矩，非 delta 近似 |
+| 个体后验 | `E[γ|y]` 反解 | `E[w(a)|y]`，**不是** `w(E[a|y])` |
+| xlogit 交叉验证 | 有（对角规格） | 无（xlogit 表达不了） |
+
+`RecoveryResult` 的 `mu_gamma`/`sigma_gamma` 装的是**所用参数化的潜空间矩**
+（别名 `mu_latent`/`sigma_latent`）；`w_center_hat`、`sigma_w_hat`、`w_hat`
+在两个分支下含义完全相同，下游按它们取值即可。
+
+**默认刻意不改。** 换默认估计器是一次科学裁决；证据与待裁决项见
+`DECISIONS/0011`。
+
+--------------------------------------------------------------------------
+可识别性诊断（M3 那一侧的问题）
+--------------------------------------------------------------------------
+
+```python
+from eval.recovery import identifiability_report
+report = identifiability_report(dataset)
+report.flagged(threshold=0.10)     # 阈值必须显式传，没有生产默认
+```
+
+`within_sd` 问"这一维在选择集内部动不动"，`unique_sd` 问"它动的部分是不是
+能被别的维度解释掉"，切空间奇异谱问"哪个**权重组合**最测不出来"。三者都
+基准维无关——条件数不是。名单非空时先修世界，不要先解读 `ŵ`。
+
+**权重合法 ≠ 权重可识别。** ALR 只保证前者。
+
+--------------------------------------------------------------------------
 换基准维
 --------------------------------------------------------------------------
 
@@ -72,6 +114,12 @@ spread = base_dimension_spread(results)
 P9 内部不写死任何一版。
 """
 
+from .alr import (
+    ALR_COORD_CAP,
+    alr_from_weights,
+    population_moments,
+    weights_from_alr,
+)
 from .bootstrap import (
     BootstrapOutcome,
     BootstrapReplicate,
@@ -100,6 +148,13 @@ from .estimator import (
     fit_base_dimension_robustness,
     fit_recovery,
 )
+from .identifiability import (
+    IdentifiabilityReport,
+    identifiability_report,
+    simplex_tangent_basis,
+    unique_variation,
+    within_centered,
+)
 from .inversion import (
     GAMMA0_FLOOR,
     DegenerateScaleError,
@@ -119,6 +174,12 @@ from .msl import (
     layout,
     standard_normal_draws,
 )
+from .msl_alr import (
+    AlrFit,
+    AlrPosterior,
+    alr_posterior_at,
+    fit_mixed_logit_alr,
+)
 from .results import (
     CovarianceReport,
     RecoveryDiagnostics,
@@ -133,8 +194,11 @@ from .schema import (
 )
 
 __all__ = [
+    "ALR_COORD_CAP",
     "DEFAULT_BASE_DIMS",
     "GAMMA0_FLOOR",
+    "AlrFit",
+    "AlrPosterior",
     "BaseDimensionError",
     "BootstrapOutcome",
     "BootstrapReplicate",
@@ -142,11 +206,14 @@ __all__ = [
     "ChoiceDataset",
     "CovarianceReport",
     "DegenerateScaleError",
+    "IdentifiabilityReport",
     "MslFit",
     "RecoveryConfig",
     "RecoveryDiagnostics",
     "RecoveryResult",
     "SimplexReport",
+    "alr_from_weights",
+    "alr_posterior_at",
     "attributes_from_m2_features",
     "base_dimension_spread",
     "base_index",
@@ -163,19 +230,26 @@ __all__ = [
     "fit_base_dimension_robustness",
     "fit_conditional_logit",
     "fit_mixed_logit",
+    "fit_mixed_logit_alr",
     "fit_recovery",
+    "identifiability_report",
     "is_positive_semidefinite",
     "layout",
     "numerical_rank",
     "other_indices",
+    "population_moments",
     "resample_persona_ids",
     "sigma_q_from_sigma_gamma",
     "sigma_w_from_sigma_gamma",
+    "simplex_tangent_basis",
     "simplex_violation",
     "stack_metric",
     "standard_normal_draws",
     "systematic_utility",
+    "unique_variation",
     "weakly_identified_dimensions",
+    "weights_from_alr",
     "weights_from_gamma",
+    "within_centered",
     "within_task_variation",
 ]
