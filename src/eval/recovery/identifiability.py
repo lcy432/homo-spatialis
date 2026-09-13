@@ -20,6 +20,12 @@
     的切空间里看设计矩阵，才是估计器实际面对的那个几何。最小奇异值对应的
     方向就是"最测不出来的那个权重组合"。
 
+``tangent_singular_values`` 报两套：按七维组内标准差的中位数归一的（尺度无关，
+用来看**谁**相对最弱），以及 ``_absolute``（ln V 单位，用来看**够不够**）。
+两套都要，因为归一化的那套对"所有维度一起变小"是瞎的——分母跟着一起变。
+绝对那套可以直接和选择噪声 σ 比：某方向的奇异值低于 σ，沿该方向改变权重在
+一次选择里造成的效用差异就小于噪声本身。
+
 三者都是**诊断**，不是新的估计器，也不取代 ``design.condition_number``：
 后者量的是差分设计（含基准维那一列）的病态程度，是基准维相关的；这里的量
 全部基准维无关。
@@ -84,7 +90,8 @@ class IdentifiabilityReport:
     unique_sd: tuple[float, ...]
     within_sd_relative: tuple[float, ...]  # s_k / median_j(s_j)
     unique_sd_relative: tuple[float, ...]  # u_k / median_j(s_j)
-    tangent_singular_values: tuple[float, ...]  # 6 个
+    tangent_singular_values: tuple[float, ...]  # 6 个，按中位数归一（尺度无关）
+    tangent_singular_values_absolute: tuple[float, ...]  # 6 个，ln V 单位
     tangent_condition_number: float  # s_max / s_min
     weakest_direction: tuple[float, ...]  # 7 维，最小奇异值对应的权重方向
 
@@ -93,6 +100,14 @@ class IdentifiabilityReport:
 
         取 ``unique`` 而非 ``within``：一维即使自己会动，只要动的部分能被别的
         维度解释掉，它的权重照样不可识别，而这正是 ``within`` 看不见的那一半。
+
+        **已知盲区：这是一个相对判据，看不见"所有维度一起变小"。** 分母是七维
+        的中位数，所以若几个维度同时缩水，它们互相掩护，谁都不会被标记。实测：
+        把 ``quantile_ln_sd`` 从 0.22 调到 0.02，四个分位维的组内标准差一起掉到
+        0.018–0.022，本方法一个都不标记，而六维平均回收相关从 0.705 崩到 0.210
+        （opportunity 甚至变成 −0.28）。**要看这种情形，用
+        ``tangent_singular_values_absolute``**，它是有量纲的，可以直接和选择
+        噪声 σ 比。
         """
         return tuple(
             d
@@ -108,6 +123,7 @@ class IdentifiabilityReport:
             "within_sd_relative": list(self.within_sd_relative),
             "unique_sd_relative": list(self.unique_sd_relative),
             "tangent_singular_values": list(self.tangent_singular_values),
+            "tangent_singular_values_absolute": list(self.tangent_singular_values_absolute),
             "tangent_condition_number": self.tangent_condition_number,
             "weakest_direction": list(self.weakest_direction),
         }
@@ -123,7 +139,12 @@ def identifiability_report(dataset: ChoiceDataset) -> IdentifiabilityReport:
         scale = 1.0
 
     q = simplex_tangent_basis(centered.shape[1])
-    d = (centered @ q) / (np.sqrt(len(centered)) * scale)
+    # 绝对谱：只除 √n（样本量无关），单位仍是 ln V。**这是可以和选择噪声 σ
+    # 直接比的那一个**——某个方向的奇异值低于 σ，意味着沿该方向改变权重在
+    # 一次选择里造成的效用差异小于噪声本身，那才是"测不出来"的绝对含义。
+    d_absolute = (centered @ q) / np.sqrt(len(centered))
+    sv_absolute = np.linalg.svd(d_absolute, compute_uv=False)
+    d = d_absolute / scale
 
     # **这里刻意不做逐列等尺度化**，与 ``design.condition_number`` 相反。
     # 两者问的问题不同：条件数问"各列之间是不是共线"，那是尺度无关的几何
@@ -142,6 +163,7 @@ def identifiability_report(dataset: ChoiceDataset) -> IdentifiabilityReport:
         within_sd_relative=tuple(float(v / scale) for v in s),
         unique_sd_relative=tuple(float(v / scale) for v in u),
         tangent_singular_values=tuple(float(v) for v in sv),
+        tangent_singular_values_absolute=tuple(float(v) for v in sv_absolute),
         tangent_condition_number=cond,
         weakest_direction=tuple(float(v) for v in weakest),
     )

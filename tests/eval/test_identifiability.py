@@ -150,6 +150,7 @@ def test_the_report_is_json_shaped():
     text = json.dumps(identifiability_report(s.dataset).as_dict())
     assert len(json.loads(text)["within_sd"]) == N_DIMENSIONS
     assert len(json.loads(text)["tangent_singular_values"]) == N_DIMENSIONS - 1
+    assert len(json.loads(text)["tangent_singular_values_absolute"]) == N_DIMENSIONS - 1
 
 
 def test_unique_variation_matches_a_direct_least_squares_residual():
@@ -159,3 +160,44 @@ def test_unique_variation_matches_a_direct_least_squares_residual():
     others = np.delete(m, 2, axis=1)
     coef, *_ = np.linalg.lstsq(others, m[:, 2], rcond=None)
     assert got[2] == pytest.approx(float((m[:, 2] - others @ coef).std()), rel=1e-12)
+
+
+def test_the_relative_spectrum_is_blind_to_everything_shrinking_together():
+    """相对判据的已知盲区，以及绝对谱为什么必须一起报。
+
+    把**所有**维度一起缩小：相对量一个都不动（分母跟着缩），旗标一个都不出，
+    但数据里的信息确实少了一个数量级。绝对谱按同样的比例下降，所以它看得见。
+
+    这不是假想：把 ``quantile_ln_sd`` 从 0.22 调到 0.02 就是这个情形，而那
+    正是 DECISIONS/0007 要求研究模式去扫的那个参数。
+    """
+    s = make_synthetic(n_personas=15, n_tasks=4, n_alts=5, seed=137)
+    full = identifiability_report(s.dataset)
+    shrunk = identifiability_report(_rebuild(s.dataset, s.dataset.features * 0.05))
+
+    # 相对量完全不动——它对全局缩放是不变的
+    assert np.allclose(full.unique_sd_relative, shrunk.unique_sd_relative, rtol=1e-9)
+    assert np.allclose(full.tangent_singular_values, shrunk.tangent_singular_values, rtol=1e-9)
+    assert full.flagged(threshold=0.10) == shrunk.flagged(threshold=0.10) == ()
+
+    # 绝对量按比例下降——它看得见
+    assert np.allclose(
+        np.array(shrunk.tangent_singular_values_absolute),
+        0.05 * np.array(full.tangent_singular_values_absolute),
+        rtol=1e-9,
+    )
+    assert min(shrunk.tangent_singular_values_absolute) < 0.1 * min(
+        full.tangent_singular_values_absolute
+    )
+
+
+def test_the_absolute_spectrum_is_in_log_utility_units():
+    """量纲要对：属性整体乘 c，绝对谱就乘 c。这是它能和 σ 比的前提。"""
+    s = make_synthetic(n_personas=12, n_tasks=3, n_alts=4, seed=139)
+    base = identifiability_report(s.dataset)
+    doubled = identifiability_report(_rebuild(s.dataset, s.dataset.features * 2.0))
+    assert np.allclose(
+        np.array(doubled.tangent_singular_values_absolute),
+        2.0 * np.array(base.tangent_singular_values_absolute),
+        rtol=1e-9,
+    )
