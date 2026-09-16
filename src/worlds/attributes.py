@@ -69,7 +69,7 @@ Rosen-Roback 说：劳动力自由流动时，城市间的实际工资差异必�
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 import numpy as np
 
@@ -213,6 +213,68 @@ def scale_amenity(dim: str, z: float, quantile_ln_sd: float) -> float:
     return math.exp(quantile_ln_sd * (min(z, 3.0) - 3.0))
 
 
+def commute_minutes_for_world(z_commute, calibration) -> np.ndarray:
+    """一个世界里全部城市的**城市层面代表性单程通勤分钟**。
+
+    关闭长通勤臂（默认）时，它逐城退化为 ``_physical_value("commute", z)``，
+    与旧实现逐位一致——旧配置因此仍然完全可复现。
+
+    --------------------------------------------------------------------
+    为什么这条规则必须看整个世界，而不能放进 ``scale_amenity``
+    --------------------------------------------------------------------
+
+    长通勤档是按**世界内排序**指派的：要保证同一道选择题里同时出现短通勤和
+    长通勤城市。逐城独立抽样做不到这一点——它只会把不同世界的整体通勤水平
+    抬高抬低，而条件 logit 看不见世界之间的差异，只看得见选择集**内部**的
+    差异（`DECISIONS/0011` 第四节）。
+
+    --------------------------------------------------------------------
+    指派规则：同一个隐变量，换一个更宽的单调映射
+    --------------------------------------------------------------------
+
+    取 ``z_commute`` 最低的 k 座（原映射下通勤最长的那几座）升到长通勤档，
+    最低的拿最长的那一档。于是 ``分钟数`` 仍然是 ``z_commute`` 的**非增函数**，
+    因子结构（通勤与宜居因子的相关）因此原样保留——它只是同一个隐变量的另一
+    个单调变换，不是新加的一层随机性。
+
+    这一条同时挡住两个陷阱：
+
+      · **不是按真值权重指派。** 世界在人设之前生成，这里只看世界自己的隐
+        变量，两条轴保持正交（§11.9）。
+      · **不是"短通勤城市在别的维度上全面占优"。** 每个舒适度维在因子模型里
+        都带自己的特异噪声，所以长通勤城市在治安、医疗等维度上有高有低，
+        权衡是真的权衡。
+
+    **长通勤档是人为设定的情境水平，不代表现实发生频率。** 口径没有变：仍然
+    是城市层面的代表性单程通勤分钟，不是某个人的通勤。60 分钟接近美国都会区
+    的现实上沿，90 与 120 已经超出，它们的作用是把这一维的组内变异撑开到可
+    识别，而不是描述美国。
+    """
+    import numpy as np
+
+    z = np.asarray(z_commute, dtype=float)
+    base = np.array([_physical_value("commute", float(v)) for v in z])
+
+    levels = tuple(float(v) for v in calibration.commute_long_minutes)
+    k = min(int(calibration.commute_long_cities), len(base))
+    if not levels or k <= 0:
+        return base
+
+    ceiling = PHYSICAL_MARGINALS["commute"][3]
+    if min(levels) <= ceiling:
+        raise ValueError(
+            f"长通勤档 {levels} 必须全部高于短通勤段的上截断 {ceiling}，"
+            "否则分钟数不再是 z_commute 的单调函数，因子结构会被打乱"
+        )
+
+    ordered = np.argsort(z, kind="stable")  # z 升序：通勤最长的在前
+    longest_first = sorted(levels, reverse=True)
+    out = base.copy()
+    for rank in range(k):
+        out[ordered[rank]] = longest_first[rank * len(longest_first) // k]
+    return out
+
+
 @dataclass(frozen=True)
 class FactorLoadings:
     """Roback 两因子结构的载荷。相关矩阵由它生成，因此天然半正定。
@@ -333,6 +395,21 @@ class AttributeCalibration:
     # 的标定，不是一个全球常数（§5.8 的分级同理）。
     tax_amenity_corr: float = 0.55
 
+    # --- 长通勤实验臂（默认关闭，关闭时与旧实现逐位一致）---
+    #
+    # `DECISIONS/0011` 第四节：绝对锚定之后 commute 的 ln A 绝对跨度只有
+    # 0.0667，因此**任何**选择集的标准差上界是 0.0334，而其余五维中位是
+    # 0.2088——这一维的权重在数据上不可识别，且这个上界来自 A = 1 − t/480
+    # 与截断 [15, 45] 本身，选世界、重试都够不着。
+    #
+    # 这里不动 `A(t) = 1 − t/480`，只在世界里**加入长通勤城市**：把 t 的取值
+    # 范围从"美国都会区经验区间"扩到包含人为设定的长通勤情境。见
+    # `commute_minutes_for_world` 的指派规则与口径说明。
+    #
+    # 空元组 / 零座 = 关闭 = 旧基线。
+    commute_long_minutes: tuple[float, ...] = ()
+    commute_long_cities: int = 0
+
     # --- 相关结构。见模块文档：因子模型，不是两两手填 ---
     loadings: FactorLoadings = field(default_factory=FactorLoadings)
 
@@ -360,6 +437,20 @@ class AttributeCalibration:
 
 
 PROVISIONAL_US_2024 = AttributeCalibration()
+
+#: 长通勤实验臂。**显式启用**：``WorldGenerator(calibration=LONG_COMMUTE_ARM_2024)``。
+#:
+#: 12 座城市里 3 座走长通勤档（每档一座：60 / 90 / 120 分钟单程），其余 9 座
+#: 仍走原来的 15–45 分钟经验区间。三座的选取由 ``commute_long_cities`` 与
+#: ``commute_minutes_for_world`` 的排序规则决定，与人设真值权重无关。
+#:
+#: 3 是最小值：三个档位各一座，既保证同一道题里短长通勤同时在场，又尽量少
+#: 改动世界。要更强的对比就调 ``commute_long_cities``，规则会按档位均分。
+LONG_COMMUTE_ARM_2024 = replace(
+    PROVISIONAL_US_2024,
+    commute_long_minutes=(60.0, 90.0, 120.0),
+    commute_long_cities=3,
+)
 """V1 的标定。**手工设定，不是从数据估的。**
 
 文件名与常量名都带 provisional，是为了让任何一个读到这里的人（包括三个月

@@ -33,9 +33,11 @@ from common.ids import CityId, Jurisdiction
 from econ.kernel import GrowthRates
 from econ.types import CityRecord
 from worlds.attributes import (
+    AMENITY_ANCHORS,
     LATENT_ORDER,
     QUANTILES,
     AttributeCalibration,
+    commute_minutes_for_world,
     scale_amenity,
 )
 from worlds.dimensions import AMENITY_DIMENSIONS
@@ -152,6 +154,10 @@ def _build_records(
     col = {name: i for i, name in enumerate(LATENT_ORDER)}
     records: list[CityRecord] = []
 
+    # 通勤的分钟数按**世界内排序**决定（长通勤臂），所以它先整批算好，不能
+    # 逐城独立算。关闭长通勤臂时这一步与 scale_amenity 逐位相同，有测试盯着。
+    commute_raw = commute_minutes_for_world(latent[:, col["commute"]], calibration)
+
     for i in range(latent.shape[0]):
         z = latent[i]
         rpp = {
@@ -170,6 +176,10 @@ def _build_records(
             )
             for d in AMENITY_DIMENSIONS
         }
+        # A(t) = 1 − t/480 一字未动，换的只是 t 从哪来（见上面的整批计算）。
+        amenities["commute"] = float(
+            np.clip(AMENITY_ANCHORS["commute"].scale(float(commute_raw[i])), 1e-6, 1.0)
+        )
 
         records.append(
             CityRecord(
