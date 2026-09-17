@@ -1,0 +1,60 @@
+# P8：估计器自检的两条地板，以及门二、门三。零大模型调用。
+# 判据与规模全部在这里，模块不内置阈值（与门一同一套纪律，硬规则 20）。
+meta:
+  status: ENGINEERING_BASELINE
+  note: >-
+    本文件固定 P8 的参考设计与判据。design 的任何一项改动都要求重新匹配地板：
+    地板与主实验的样本规模、世界 profile、噪声来源、拟合配置必须逐项一致
+    （README §10.3）。研究拟合规格来自 eval.recovery 的 research profile，
+    不在这里重复定义，避免两份配置漂移。
+
+# 参考设计。n_choice_sets 是**不同选择集**的数量，不是同情境重复次数。
+design:
+  n_personas: 1000
+  n_choice_sets: 12
+  n_cities: 12
+  world_calibration: LONG_COMMUTE_ARM_2024
+  tier: TRADEOFF
+  persona_seed: 20260906
+  world_seed: 8100
+
+noise:
+  # 生成噪声是**输入**。拟合出来的 sigma_hat 是输出，两者不互相覆盖。
+  # 正式运行时这一项应由重复子集标定（DECISIONS/0003）后写入。
+  sigma_generating: 0.05
+  source: synthetic_pilot_known_sigma
+
+calibration:
+  # 高/低方差案例：alpha 整体缩放，理论均值不变，只改离散度。
+  # 只用于校准案例，绝不覆盖主实验先验（DECISIONS/0006 的 alpha 不动）。
+  alpha_scales: [0.5, 1.0, 2.0]
+
+geometry:
+  regression_with_intercept: true   # 三个臂必须用同一条规则
+  shuffle_seed: 40507
+
+repeat_subset:
+  # README §11.8：150 人设 × 3 次重复。T=12 个不同选择集**不会**改变这一条。
+  n_personas: 150
+  n_scenarios: 3
+  n_repeats: 3
+  seed: 20260906
+  synthetic_validation: true   # 合成验证；真实重复数据到位前 sigma 校准仍是 pending_input
+
+lambda_path:
+  t_grid: [0.0, 0.25, 0.5, 0.75, 1.0]
+
+bootstrap:
+  n_replicates: 5      # 本轮是工程 smoke。正式 B=200–500，另行配置。
+  seed: 909
+
+gates:
+  two:
+    threshold_2a: 0.8
+    # 2b 的阈值本仓库尚无预注册值。留空 = pending_input，
+    # **不得**事后看着结果补一个刚好能过的数。
+    threshold_2b: null
+    threshold_2c: 0.5
+    min_bootstrap: 200
+  three:
+    confidence: 0.95

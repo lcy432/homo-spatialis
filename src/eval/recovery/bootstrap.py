@@ -27,6 +27,10 @@ from .results import RecoveryResult
 from .schema import ChoiceDataset
 
 MetricFn = Callable[[RecoveryResult], Mapping[str, float]]
+#: 每个 replicate 用哪个拟合流程。默认 ``fit_recovery``；P8 与主实验传
+#: ``eval.recovery.profiles.fit_research`` 的适配器，保证 bootstrap 与点估计
+#: 走的是**同一套**起点集合、draws 与容差。
+FitFn = Callable[[ChoiceDataset, RecoveryConfig], RecoveryResult]
 
 
 @dataclass(frozen=True)
@@ -127,6 +131,7 @@ def block_bootstrap(
     metric_fn: MetricFn | None = None,
     keep_results: bool = False,
     resample_draws: bool = True,
+    fit_fn: FitFn | None = None,
 ) -> BootstrapOutcome:
     """跑 ``n_replicates`` 次完整重拟合。固定 seed 下完全可复现。
 
@@ -147,7 +152,7 @@ def block_bootstrap(
         try:
             resampled = dataset.take_personas(picks)
             rep_cfg = cfg if not resample_draws else _with_seed(cfg, rep_seed)
-            result = fit_recovery(resampled, rep_cfg)
+            result = (fit_fn or fit_recovery)(resampled, rep_cfg)
             metrics = dict(metric_fn(result)) if metric_fn is not None else None
             reps.append(
                 BootstrapReplicate(

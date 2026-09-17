@@ -188,7 +188,9 @@ def fit_recovery(dataset: ChoiceDataset, config: RecoveryConfig | None = None) -
     )
 
 
-def _fit_recovery_alr(dataset: ChoiceDataset, cfg: RecoveryConfig) -> RecoveryResult:
+def _fit_recovery_alr(
+    dataset: ChoiceDataset, cfg: RecoveryConfig, *, start: np.ndarray | None = None
+) -> RecoveryResult:
     """ALR/logistic-normal 分支。
 
     与默认分支的**唯一**语义差别在潜空间：``mu_gamma``/``sigma_gamma`` 这两个
@@ -208,6 +210,7 @@ def _fit_recovery_alr(dataset: ChoiceDataset, cfg: RecoveryConfig) -> RecoveryRe
         tol=cfg.tol,
         draw_batch=cfg.draw_batch,
         population_draws=cfg.simplex_draws,
+        start=start,
     )
 
     gamma_0 = check_gamma_0(fit.gamma_0)
