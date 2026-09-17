@@ -457,3 +457,14 @@ LONG_COMMUTE_ARM_2024 = replace(
 后的自己）知道这些数还没有被真实数据支持过。M1 落地后新增一个从 OEWS 与
 RPP 估出来的实例，把这个留在原地作对照。
 """
+
+
+#: 按名字取标定。配置文件里写名字、产出里记名字，比记一个对象的 repr 稳。
+#: **换名字就是换实验臂**，因此 P8 的设计指纹与门一的配置哈希都要吃到它。
+CALIBRATIONS: dict[str, AttributeCalibration] = {
+    "LONG_COMMUTE_ARM_2024": LONG_COMMUTE_ARM_2024,
+    "PROVISIONAL_US_2024": PROVISIONAL_US_2024,
+}
+
+#: 没写就是它——与 2026-09-11 跑过的门一逐位一致的那一个。
+DEFAULT_CALIBRATION_NAME = "PROVISIONAL_US_2024"

@@ -1,0 +1,51 @@
+# synthetic pilot：主规模基准点，证明 P8 入口能消费正式尺寸数据。
+# **这不是正式地板**：只跑 baseline 一个校准案例、小 B bootstrap。
+# 正式运行用 configs/p8.yaml（三个校准案例）与 B=200–500。
+meta:
+  status: SYNTHETIC_PILOT
+  note: >-
+    标记为 synthetic pilot：地板臂与打乱臂都由真值 softmax 生成，零大模型调用。
+    门二/门三的判定状态取决于 sigma 校准与 2b 阈值，二者当前均为 pending_input。
+
+design:
+  n_personas: 1000
+  n_choice_sets: 12
+  n_cities: 12
+  world_calibration: LONG_COMMUTE_ARM_2024
+  tier: TRADEOFF
+  persona_seed: 20260906
+  world_seed: 8100
+
+noise:
+  sigma_generating: 0.05
+  source: synthetic_pilot_known_sigma
+
+calibration:
+  alpha_scales: [1.0]      # pilot 只跑 baseline；正式运行用 [0.5, 1.0, 2.0]
+
+geometry:
+  regression_with_intercept: true
+  shuffle_seed: 40507
+
+repeat_subset:
+  n_personas: 150
+  n_scenarios: 3
+  n_repeats: 3
+  seed: 20260906
+  synthetic_validation: true
+
+lambda_path:
+  t_grid: [0.0, 0.25, 0.5, 0.75, 1.0]
+
+bootstrap:
+  n_replicates: 2          # 工程 smoke，不是正式区间
+  seed: 909
+
+gates:
+  two:
+    threshold_2a: 0.8
+    threshold_2b: null     # 无预注册值 → pending_input
+    threshold_2c: 0.5
+    min_bootstrap: 200
+  three:
+    confidence: 0.95

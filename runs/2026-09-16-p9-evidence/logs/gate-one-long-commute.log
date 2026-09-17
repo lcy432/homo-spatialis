@@ -1,0 +1,14 @@
+config      configs\gate_one_long_commute.yaml  status=PREREGISTERED_AMENDED
+personas    1000   tau 梯子 [0.05, 0.1, 0.2, 0.4, 0.8]
+running (zero language-model calls) ...
+
+   tau       可行     计入   median L_rep        CI 下沿       地板(均值)       地板(中位)      翻转率     通过
+  0.05   100.0%     是          2,970        2,712           48            0    18.2%     是
+   0.1   100.0%     是          8,673        7,725            0            0     9.4%     是
+   0.2    99.9%     是         14,145       13,177            0            0     4.7%     是
+   0.4    98.8%     是         19,341       17,490            0            0     2.3%     是
+   0.8    86.3%     是         23,215       21,323            0            0     1.0%     是
+
+判定：PASS
+配置 sha  82328662d7f0125d
+产出      runs\20260917T075153Z-c45fca\gate_one.json

@@ -25,17 +25,12 @@ import numpy as np
 
 from econ.types import Persona, PersonaParams
 from eval.recovery import ChoiceDataset, dataset_from_choice_observations
-from worlds.attributes import LONG_COMMUTE_ARM_2024, PROVISIONAL_US_2024, AttributeCalibration
+from worlds.attributes import CALIBRATIONS, AttributeCalibration
 from worlds.difficulty import Tier, instantiate
 from worlds.dimensions import ALL_DIMENSIONS, AMENITY_DIMENSIONS
 from worlds.generator import WorldGenerator
 from worlds.personas import PersonaGenerator, PersonaSamplingConfig, reference_persona
 from worlds.selfcheck import simulate_choices
-
-CALIBRATIONS: dict[str, AttributeCalibration] = {
-    "LONG_COMMUTE_ARM_2024": LONG_COMMUTE_ARM_2024,
-    "PROVISIONAL_US_2024": PROVISIONAL_US_2024,
-}
 
 
 @dataclass(frozen=True)

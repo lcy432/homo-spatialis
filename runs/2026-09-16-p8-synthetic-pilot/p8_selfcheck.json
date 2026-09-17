@@ -1,0 +1,656 @@
+{
+ "module": "P8_estimator_selfcheck",
+ "language_model_calls": 0,
+ "design": {
+  "n_personas": 1000,
+  "n_choice_sets_per_persona": 12,
+  "n_cities": 12,
+  "world_calibration": "LONG_COMMUTE_ARM_2024",
+  "tier": "TRADEOFF",
+  "persona_seed": 20260906,
+  "world_seed": 8100,
+  "choice_sets_are_distinct_worlds": true,
+  "repeat_subset_is_separate": true
+ },
+ "design_digest": "435523913cc5ee85",
+ "profile": {
+  "profile": "alr_full_material_2026_09",
+  "parameterization": "alr_logistic_normal",
+  "covariance": "full",
+  "base_dim": "material",
+  "n_draws": 200,
+  "draw_method": "halton",
+  "draw_seed": 1,
+  "maxiter": 500,
+  "tol": 1e-07,
+  "population_moment_draws": 20000,
+  "start_sd0": [
+   0.1,
+   0.5,
+   1.0,
+   2.0
+  ],
+  "selection_rule": "max_simulated_loglik_over_starts"
+ },
+ "dimensions": [
+  "material",
+  "safety",
+  "healthcare",
+  "opportunity",
+  "leisure",
+  "environment",
+  "commute"
+ ],
+ "config_sha256_16": "d9ba030debb9c21e",
+ "bias_tables": [
+  {
+   "case": "baseline",
+   "sigma_generating": 0.05,
+   "sigma_hat": 0.05037553754148284,
+   "dimensions": [
+    "material",
+    "safety",
+    "healthcare",
+    "opportunity",
+    "leisure",
+    "environment",
+    "commute"
+   ],
+   "injected_theoretical": {
+    "source": "dirichlet_closed_form",
+    "mean": [
+     0.3333333333333333,
+     0.1111111111111111,
+     0.1111111111111111,
+     0.1111111111111111,
+     0.1111111111111111,
+     0.1111111111111111,
+     0.1111111111111111
+    ],
+    "variance_diagonal": [
+     0.04040404040404041,
+     0.017957351290684626,
+     0.017957351290684626,
+     0.017957351290684626,
+     0.017957351290684626,
+     0.017957351290684626,
+     0.017957351290684626
+    ]
+   },
+   "injected_realised": {
+    "source": "finite_sample_injected",
+    "mean": [
+     0.32831604524916086,
+     0.11770178990340116,
+     0.1080656493094238,
+     0.10922020451908711,
+     0.11642410013547527,
+     0.10967211616818613,
+     0.11060009471526573
+    ],
+    "variance_diagonal": [
+     0.03923528243986595,
+     0.01855632346276242,
+     0.01794146747644071,
+     0.017976770610017963,
+     0.018113193191766096,
+     0.01818547426819789,
+     0.01903285017762935
+    ]
+   },
+   "fitted_population": {
+    "source": "fitted_population_weight_space",
+    "mean": [
+     0.3199834336337808,
+     0.12323840032117196,
+     0.10497669521362041,
+     0.11710864260305982,
+     0.11525570393243854,
+     0.112540488140587,
+     0.10689663615534073
+    ],
+    "variance_diagonal": [
+     0.038049918343209116,
+     0.021178692373356265,
+     0.022150901526846397,
+     0.020337758629817713,
+     0.021143547728510154,
+     0.01947907027942511,
+     0.015895364784543176
+    ]
+   },
+   "centre_bias": [
+    -0.00833261161538007,
+    0.005536610417770801,
+    -0.003088954095803398,
+    0.007888438083972715,
+    -0.0011683962030367284,
+    0.0028683719724008627,
+    -0.003703458559925002
+   ],
+   "variance_ratio_fitted_over_realised": [
+    0.9697883123825198,
+    1.1413194222366427,
+    1.2346203874311383,
+    1.1313354923983976,
+    1.1673009559750955,
+    1.0711334767600431,
+    0.8351542010889215
+   ],
+   "covariance_frobenius": 0.01104355366517097,
+   "covariance_frobenius_relative": 0.16975020739710095,
+   "individual_bias": [
+    -0.0004655791527563802,
+    0.001696812031478296,
+    -0.007020532804023849,
+    0.002880165624374673,
+    -0.002536166637788791,
+    0.0052773697629291605,
+    0.00016793117578685598
+   ],
+   "individual_rmse": [
+    0.09427435163820265,
+    0.0685682534456356,
+    0.06514599727249985,
+    0.0694747231441827,
+    0.0688822050056004,
+    0.0626111880573574,
+    0.11239874941114965
+   ],
+   "individual_corr": [
+    0.8793595149351208,
+    0.8642695287109872,
+    0.8755013589232731,
+    0.8554299568677328,
+    0.8609077069566189,
+    0.8866146258564377,
+    0.5827012418132662
+   ],
+   "constant_baseline_rmse": [
+    0.19797991604560833,
+    0.13615346906817946,
+    0.13387877355639416,
+    0.13401042436843474,
+    0.13451795418669704,
+    0.13478608531272687,
+    0.13789059912645138
+   ],
+   "skill_vs_constant": [
+    0.5238186098811921,
+    0.4963899640977951,
+    0.5133956224579679,
+    0.48157224729640513,
+    0.4879330017909802,
+    0.5354773609450213,
+    0.1848701062784175
+   ],
+   "converged": true,
+   "n_failed_starts": 0,
+   "loglik": -22404.888997459013,
+   "loglik_spread_over_starts": 138.7197373086201,
+   "chosen_sd0": 1.0,
+   "seconds": 887.6306502819061,
+   "design_digest": "435523913cc5ee85",
+   "profile": {
+    "profile": "alr_full_material_2026_09",
+    "parameterization": "alr_logistic_normal",
+    "covariance": "full",
+    "base_dim": "material",
+    "n_draws": 200,
+    "draw_method": "halton",
+    "draw_seed": 1,
+    "maxiter": 500,
+    "tol": 1e-07,
+    "population_moment_draws": 20000,
+    "start_sd0": [
+     0.1,
+     0.5,
+     1.0,
+     2.0
+    ],
+    "selection_rule": "max_simulated_loglik_over_starts"
+   }
+  }
+ ],
+ "geometry": {
+  "shared": {
+   "centre": [
+    0.3199834336337808,
+    0.12323840032117196,
+    0.10497669521362041,
+    0.11710864260305982,
+    0.11525570393243854,
+    0.112540488140587,
+    0.10689663615534073
+   ],
+   "centre_source": "floor_arm_fitted_centre",
+   "n_personas": 1000,
+   "n_d_near_zero": 0,
+   "d_near_zero_threshold": 1e-08,
+   "d_quantiles": [
+    0.11804376321838173,
+    0.28967375223267966,
+    0.3550322084429864,
+    0.4409992047347814,
+    0.7688264653543202
+   ]
+  },
+  "slopes": [
+   {
+    "arm": "floor",
+    "source": "synthetic_truth_softmax",
+    "slope": 0.2506741193564539,
+    "intercept": 0.010429086496236733,
+    "n_used": 1000,
+    "n_excluded_near_zero": 0,
+    "with_intercept": true
+   },
+   {
+    "arm": "shuffled",
+    "source": "synthetic_shuffled",
+    "slope": 1.0869005380460148,
+    "intercept": -0.02699760307582614,
+    "n_used": 1000,
+    "n_excluded_near_zero": 0,
+    "with_intercept": true
+   }
+  ],
+  "note": "中心/d/u 只构造一次，三个臂共用（DECISIONS/0002，硬规则 24）",
+  "matched_arm": "absent_requires_language_model",
+  "collapse_ratio_with_synthetic_matched_placeholder": {
+   "r": null,
+   "status": "missing_input",
+   "numerator": NaN,
+   "denominator": 0.8362264186895609,
+   "s_matched": NaN,
+   "s_shuffled": 1.0869005380460148,
+   "lambda": 0.2506741193564539
+  },
+  "floor_fit_seconds": 887.6306502819061
+ },
+ "sigma_calibration": {
+  "status": "calibrated",
+  "sigma": 0.05506064173579216,
+  "target_disagreement": 0.7659259259259259,
+  "achieved_disagreement": 0.7659257711968227,
+  "bounds": [
+   0.0001,
+   5.0
+  ],
+  "n_crossings": 450,
+  "utility_template": "m2_ln_indirect_utility_true_params",
+  "note": "校准启发式：重复子集测跨次分歧，logit 的 σ 测备选项间特异误差，两者相关但不同一。一致率也受效用间隔影响，重复选择无法唯一分离所有系统误差",
+  "measurement": {
+   "disagreement_rate": 0.7659259259259259,
+   "n_pairs": 1350,
+   "n_crossings": 450,
+   "n_alternatives": 12,
+   "random_ceiling": 0.9166666666666666,
+   "source": "synthetic_validation"
+  },
+  "generating_sigma_is_input_not_output": 0.05,
+  "never_read_from_matched_arm_sigma_hat": true
+ },
+ "lambda_path": {
+  "protocol": "DECISIONS/0013 sixth section: weight-space moment calibration, population parameters pinned by target moments, posterior evaluated at fixed parameters (population NOT re-estimated)",
+  "sigma_used": 0.05506064173579216,
+  "target_mean_source": "interpolated_with_covariance_(1-t)*injected+t*matched",
+  "why_mean_is_interpolated": "只插值 Σ 会在端点给出不可行的 (均值, Σ)：实测 Var(commute)=0.1334 超过注入均值下的伯努利上界 0.0904。总体是一对矩，必须一起插值",
+  "sigma_matched_source": "placeholder_floor_arm_fitted_sigma_w_until_real_matched_arm_exists",
+  "feasibility_of_endpoints": [
+   {
+    "feasible": true,
+    "psd": true,
+    "row_sums_zero": true,
+    "variance_within_bernoulli_bound": true,
+    "mean_in_open_simplex": true,
+    "worst_variance_slack": 0.07844599727231572
+   },
+   {
+    "feasible": true,
+    "psd": true,
+    "row_sums_zero": true,
+    "variance_within_bernoulli_bound": true,
+    "mean_in_open_simplex": true,
+    "worst_variance_slack": 0.07180568714880066
+   }
+  ],
+  "points": [
+   {
+    "t": 0.0,
+    "status": "ok",
+    "target_mean": [
+     0.32831604524916086,
+     0.11770178990340116,
+     0.1080656493094238,
+     0.10922020451908711,
+     0.11642410013547527,
+     0.10967211616818613,
+     0.11060009471526573
+    ],
+    "target_variance_diagonal": [
+     0.03923528243986595,
+     0.01855632346276242,
+     0.01794146747644071,
+     0.017976770610017963,
+     0.018113193191766096,
+     0.01818547426819789,
+     0.01903285017762935
+    ],
+    "achieved_mean": [
+     0.32831191153055905,
+     0.1177024821590229,
+     0.10807354395234488,
+     0.1092132995027986,
+     0.11643476386510776,
+     0.1096646718866599,
+     0.11059932710350649
+    ],
+    "achieved_variance_diagonal": [
+     0.03923565476570695,
+     0.01855561632644023,
+     0.017940997354968836,
+     0.017976282451431142,
+     0.018113033856810196,
+     0.018185419227833982,
+     0.01903431763155125
+    ],
+    "mean_rel_error": 4.029833264742416e-05,
+    "cov_rel_frobenius": 6.584850807072598e-05,
+    "tolerance": 0.005,
+    "feasibility": {
+     "feasible": true,
+     "psd": true,
+     "row_sums_zero": true,
+     "variance_within_bernoulli_bound": true,
+     "mean_in_open_simplex": true,
+     "worst_variance_slack": 0.07844599727231572
+    },
+    "lambda": 0.2562116166349865,
+    "n_used": 1000
+   },
+   {
+    "t": 0.25,
+    "status": "ok",
+    "target_mean": [
+     0.32623289234531583,
+     0.11908594250784385,
+     0.10729341078547296,
+     0.11119231404008029,
+     0.1161320010847161,
+     0.11038920916128635,
+     0.10967423007528448
+    ],
+    "target_variance_diagonal": [
+     0.03893894141570174,
+     0.01921191569041088,
+     0.018993825989042132,
+     0.0185670176149679,
+     0.01887078182595211,
+     0.018508873271004696,
+     0.018248478829357807
+    ],
+    "achieved_mean": [
+     0.3262227616427127,
+     0.11909318190915835,
+     0.10730540143335845,
+     0.11118644455488254,
+     0.11613938199332219,
+     0.1103800343742503,
+     0.10967279409231429
+    ],
+    "achieved_variance_diagonal": [
+     0.03894013731158436,
+     0.019211083135672394,
+     0.018992123896024105,
+     0.018568400907750575,
+     0.018868904972101596,
+     0.018508445739019826,
+     0.018250342179797974
+    ],
+    "mean_rel_error": 5.1006339111731675e-05,
+    "cov_rel_frobenius": 8.54492921146993e-05,
+    "tolerance": 0.005,
+    "feasibility": {
+     "feasible": true,
+     "psd": true,
+     "row_sums_zero": true,
+     "variance_within_bernoulli_bound": true,
+     "mean_in_open_simplex": true,
+     "worst_variance_slack": 0.07678770879845058
+    },
+    "lambda": 0.25352562699920544,
+    "n_used": 1000
+   },
+   {
+    "t": 0.5,
+    "status": "ok",
+    "target_mean": [
+     0.32414973944147085,
+     0.12047009511228657,
+     0.1065211722615221,
+     0.11316442356107347,
+     0.11583990203395692,
+     0.11110630215438656,
+     0.10874836543530322
+    ],
+    "target_variance_diagonal": [
+     0.03864260039153754,
+     0.019867507918059343,
+     0.020046184501643555,
+     0.01915726461991784,
+     0.019628370460138125,
+     0.0188322722738115,
+     0.01746410748108626
+    ],
+    "achieved_mean": [
+     0.3241448263911616,
+     0.12047322869384673,
+     0.10653685302164902,
+     0.11316238139589345,
+     0.11584042212537754,
+     0.11110563335830216,
+     0.10873665501376993
+    ],
+    "achieved_variance_diagonal": [
+     0.03864403521123107,
+     0.019863977729043764,
+     0.020046310106868533,
+     0.01916004768897074,
+     0.019627062628466793,
+     0.01883564093840943,
+     0.017463993960351278
+    ],
+    "mean_rel_error": 4.823406311667554e-05,
+    "cov_rel_frobenius": 0.00013007624848156632,
+    "tolerance": 0.005,
+    "feasibility": {
+     "feasible": true,
+     "psd": true,
+     "row_sums_zero": true,
+     "variance_within_bernoulli_bound": true,
+     "mean_in_open_simplex": true,
+     "worst_variance_slack": 0.07512822761990968
+    },
+    "lambda": 0.2501035391156332,
+    "n_used": 1000
+   },
+   {
+    "t": 0.75,
+    "status": "ok",
+    "target_mean": [
+     0.3220665865376258,
+     0.12185424771672926,
+     0.10574893373757126,
+     0.11513653308206664,
+     0.11554780298319772,
+     0.11182339514748678,
+     0.10782250079532198
+    ],
+    "target_variance_diagonal": [
+     0.03834625936737333,
+     0.020523100145707806,
+     0.021098543014244974,
+     0.019747511624867778,
+     0.02038595909432414,
+     0.019155671276618304,
+     0.016679736132814718
+    ],
+    "achieved_mean": [
+     0.32205907513848614,
+     0.12187409047346541,
+     0.10575369394636609,
+     0.11513467531693518,
+     0.11555834524154793,
+     0.11181198754975817,
+     0.1078081323334415
+    ],
+    "achieved_variance_diagonal": [
+     0.038345417373405064,
+     0.02052187023732254,
+     0.02109470044513614,
+     0.01974871776971173,
+     0.020389233239901022,
+     0.019155158766992794,
+     0.01667960677506048
+    ],
+    "mean_rel_error": 7.154845918771479e-05,
+    "cov_rel_frobenius": 0.00011845886097646274,
+    "tolerance": 0.005,
+    "feasibility": {
+     "feasible": true,
+     "psd": true,
+     "row_sums_zero": true,
+     "variance_within_bernoulli_bound": true,
+     "mean_in_open_simplex": true,
+     "worst_variance_slack": 0.07346755373669304
+    },
+    "lambda": 0.2456788919589717,
+    "n_used": 1000
+   },
+   {
+    "t": 1.0,
+    "status": "ok",
+    "target_mean": [
+     0.3199834336337808,
+     0.12323840032117196,
+     0.10497669521362041,
+     0.11710864260305982,
+     0.11525570393243854,
+     0.112540488140587,
+     0.10689663615534073
+    ],
+    "target_variance_diagonal": [
+     0.038049918343209116,
+     0.021178692373356265,
+     0.022150901526846397,
+     0.020337758629817713,
+     0.021143547728510154,
+     0.01947907027942511,
+     0.015895364784543176
+    ],
+    "achieved_mean": [
+     0.3199763712092401,
+     0.12325302387794641,
+     0.10497760906816127,
+     0.1171101119810992,
+     0.11525590493524665,
+     0.11253609385033132,
+     0.10689088507797305
+    ],
+    "achieved_variance_diagonal": [
+     0.03805023559177578,
+     0.02117780711075025,
+     0.022150626363439296,
+     0.020337765960765794,
+     0.021142968638764296,
+     0.019479148005700817,
+     0.015895645285413935
+    ],
+    "mean_rel_error": 4.2143939050881616e-05,
+    "cov_rel_frobenius": 5.111031677945668e-05,
+    "tolerance": 0.005,
+    "feasibility": {
+     "feasible": true,
+     "psd": true,
+     "row_sums_zero": true,
+     "variance_within_bernoulli_bound": true,
+     "mean_in_open_simplex": true,
+     "worst_variance_slack": 0.07180568714880066
+    },
+    "lambda": 0.24046157158238418,
+    "n_used": 1000
+   }
+  ],
+  "n_points_realised": 5,
+  "n_points_requested": 5,
+  "status": "ok"
+ },
+ "gate_two": {
+  "gate": "two_measurement_window",
+  "status": "pending_input",
+  "criteria": [
+   {
+    "name": "2a",
+    "status": "pass",
+    "value": 0.2306320685120881,
+    "threshold": 0.8,
+    "reason": ""
+   },
+   {
+    "name": "2b",
+    "status": "pending_input",
+    "value": null,
+    "threshold": null,
+    "reason": "仓库尚无预注册的 2b 阈值；正式判定缺少预注册值"
+   },
+   {
+    "name": "2c",
+    "status": "pass",
+    "value": 1.0869005380460148,
+    "threshold": 0.5,
+    "reason": ""
+   }
+  ],
+  "lambda": 0.2506741193564539,
+  "s_shuffled": 1.0869005380460148,
+  "window": 0.8362264186895609,
+  "window_bootstrap_se": 0.03608908377566865,
+  "n_bootstrap": 2,
+  "arm_sources": {
+   "floor": "synthetic_truth_softmax",
+   "shuffled": "synthetic_shuffled"
+  }
+ },
+ "gate_three": {
+  "gate": "three_lambda_depends_on_d",
+  "status": "pending_input",
+  "slope": null,
+  "ci": null,
+  "n_used": 0,
+  "n_strata": 0,
+  "minimum_detectable_effect": null,
+  "mde_assumptions": "未提供重复子集的人内不一致度；MDE 无法计算",
+  "reason": "缺实测重复子集",
+  "default_metric": "r(d,t) binned; single slope only as robustness"
+ },
+ "bootstrap": {
+  "n_requested": 2,
+  "n_succeeded": 2,
+  "n_failed": 0,
+  "failure_reasons": {},
+  "lambda_values": [
+   0.2151783900956669,
+   0.2662160618248363
+  ],
+  "lambda_se": 0.03608908377566865,
+  "window_se": 0.03608908377566865,
+  "is_engineering_smoke_not_formal_interval": true,
+  "note": "小 B 输出不得充当正式置信区间，也不能作为门二 2b 的通过证据"
+ },
+ "verdicts": {
+  "gate_two": "pending_input",
+  "gate_three": "pending_input",
+  "note": "门二用的是**合成**地板臂与合成打乱臂；真实匹配/打乱臂需要大模型调用。本产出只证明接口与判据可执行，不是主实验的坍缩结论"
+ }
+}

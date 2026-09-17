@@ -1,0 +1,131 @@
+{
+  "run_id": "20260917T075153Z-c45fca",
+  "started_at": "2026-09-17T07:51:53.717Z",
+  "git_sha": "3fff2cf",
+  "git_dirty": true,
+  "python": "3.13.3",
+  "config": {
+    "meta": {
+      "gate": "one",
+      "criterion_source": "README §9.1.1.1",
+      "status": "PREREGISTERED_AMENDED",
+      "preregistered_at": "fe0ab6e",
+      "preregistered_sha256_16": "cf1b22dbce286df2",
+      "amendments": [
+        {
+          "date": "2026-09-10",
+          "field": "perturbation.aggregation",
+          "from": "median_within_then_across",
+          "to": "mean_within_then_across",
+          "reason": "structural",
+          "original_still_reported": true
+        }
+      ],
+      "llm_calls": 0
+    },
+    "tau_ladder": {
+      "quantity": "ln_welfare_dispersion",
+      "values": [
+        0.05,
+        0.1,
+        0.2,
+        0.4,
+        0.8
+      ],
+      "feasibility_precheck": {
+        "n_personas": 500,
+        "world_seed": 20260906,
+        "measured": {
+          "0.05": 1.0,
+          "0.1": 1.0,
+          "0.2": 1.0,
+          "0.4": 0.99,
+          "0.8": 0.862
+        }
+      },
+      "on_infeasible": "report_and_exclude",
+      "min_feasible_fraction": 0.8,
+      "below_threshold": "descriptive_only"
+    },
+    "perturbation": {
+      "cap_points": 5.0,
+      "constant_sum": true,
+      "sampler": "per_dimension_symmetric_truncation",
+      "gibbs_sweeps": 30,
+      "draws_per_persona": 32,
+      "aggregation": "mean_within_then_across",
+      "also_report": "median_within_then_across",
+      "report_diagnostics_for": [
+        "per_dimension_symmetric_truncation",
+        "symmetric_with_rejection"
+      ]
+    },
+    "baselines": {
+      "evaluate_with": "true_params_always",
+      "argmax_with": "approximate_params",
+      "definitions": {
+        "L_rep": {
+          "shares": "representative",
+          "weights": "material_only"
+        },
+        "L_s": {
+          "shares": "representative",
+          "weights": true
+        },
+        "L_amen": {
+          "shares": true,
+          "weights": "material_only"
+        }
+      },
+      "additive": false
+    },
+    "sample": {
+      "world_calibration": "LONG_COMMUTE_ARM_2024",
+      "n_personas": 1000,
+      "persona_seed": 20260906,
+      "world_seed": 20260906,
+      "n_cities": 12,
+      "stratified": false,
+      "dirichlet_material_alpha": 1.5,
+      "dirichlet_amenity_alpha": 0.5
+    },
+    "decision": {
+      "rule": "exists_rung_with_ci_lower_bound_above_floor",
+      "confidence": 0.95,
+      "bootstrap": {
+        "method": "percentile",
+        "resamples": 2000,
+        "unit": "persona"
+      },
+      "on_fail": "stop_and_report"
+    },
+    "outputs": {
+      "path": "runs/{run_id}/gate_one.json",
+      "required_fields": [
+        "noise_floor_usd",
+        "noise_floor_usd_median_within",
+        "flip_probability",
+        "conditional_loss_usd",
+        "perturbation_diagnostics",
+        {
+          "per_rung": [
+            "tau",
+            "n_personas_feasible",
+            "n_personas_money_metric_missing",
+            "median_l_rep_usd",
+            "ci_lower_usd",
+            "ci_upper_usd",
+            "median_l_s_usd",
+            "median_l_amen_usd",
+            "feasible_fraction",
+            "counts_toward_verdict",
+            "passes"
+          ]
+        },
+        "verdict",
+        "config_sha"
+      ]
+    }
+  },
+  "gate": "one"
+}

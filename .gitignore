@@ -20,8 +20,13 @@ data/raw/*
 !data/raw/.gitkeep
 
 # --- experiment outputs ---
+# 批量产出不进仓库（大、可重跑）。但 DECISIONS/ 与 MEMOS/ 引用的证据必须进，
+# 否则决策记录指向一个别人看不到的文件，记录本身就失效了。这两个目录是**手工
+# 策展**的：只放被引用的报告、清单与关键 JSON，不放整批 run 目录。
 runs/*
 !runs/.gitkeep
+!runs/2026-09-16-p9-evidence/
+!runs/2026-09-16-p8-synthetic-pilot/
 
 # --- notebooks ---
 .ipynb_checkpoints/

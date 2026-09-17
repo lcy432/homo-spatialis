@@ -301,6 +301,14 @@ welfare_range: float  # 全部城市福利值的最大减最小
 > （commute）未了结。P10 尚未实现，P8 目前用合成分层 fixture。
 >
 > 下一步是 P10（分层抽样与两个报告函数），再 P8（估计器自检的两条地板）。
+>
+> **进度（2026-09-17，长通勤 profile 的门一）**：`DECISIONS/0012` 第六节要求的
+> 「升为主臂就重跑门一」已执行。`scripts/run_gate_one.py` 加了 `--config`
+> （默认仍是 `configs/gate_one.yaml`，旧调用不变），用
+> `configs/gate_one_long_commute.yaml` 跑出 **PASS**，五档全过
+> （`runs/20260917T075153Z-c45fca`）。判据一字未动，配置哈希不同，是另一次
+> 预注册运行；默认配置复跑与 2026-09-11 的产出逐位一致。
+> 明细 `runs/2026-09-16-p9-evidence/gate-one-long-commute.md`。
 
 P9 排在 P8 之前，因为 P8 的自检必须跑在最终的估计器设定上，否则测出的地板不是主实验会用的那个地板。P10 也排在 P8 之前，因为分层决定了自检数据的抽样结构。
 

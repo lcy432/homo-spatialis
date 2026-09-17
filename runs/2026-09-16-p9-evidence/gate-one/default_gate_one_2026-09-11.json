@@ -1,0 +1,103 @@
+{
+  "gate": "one",
+  "verdict": "pass",
+  "config_sha": "e691b58a616581d8",
+  "config_status": "PREREGISTERED_AMENDED",
+  "n_personas": 1000,
+  "representative_shares": {
+    "s_rent": 0.32281163198761287,
+    "s_goods": 0.33819881932668844,
+    "s_other": 0.3389895486856988
+  },
+  "perturbation_diagnostics": {
+    "per_dimension_symmetric_truncation": "per_dimension_symmetric_truncation: E[ΔH_norm] = -0.01039 ± 0.00038 (z=-27.5), |E[δ]|max = 0.030 分, 接受率 —",
+    "symmetric_with_rejection": "symmetric_with_rejection: E[ΔH_norm] = +0.03380 ± 0.00056 (z=+60.7), |E[δ]|max = 0.877 分, 接受率 26.1%"
+  },
+  "per_rung": [
+    {
+      "tau": 0.05,
+      "n_personas_feasible": 1000,
+      "feasible_fraction": 1.0,
+      "counts_toward_verdict": true,
+      "n_personas_money_metric_missing": 25,
+      "median_l_rep_usd": 2281.960338221965,
+      "ci_lower_usd": 1847.5920636707733,
+      "ci_upper_usd": 2493.006618166597,
+      "median_l_s_usd": 0.0,
+      "median_l_amen_usd": 2281.960338221965,
+      "noise_floor_usd": 46.21860242698885,
+      "noise_floor_usd_median_within": 0.0,
+      "flip_probability": 0.17584375,
+      "conditional_loss_usd": 657.7268024954996,
+      "passes": true
+    },
+    {
+      "tau": 0.1,
+      "n_personas_feasible": 1000,
+      "feasible_fraction": 1.0,
+      "counts_toward_verdict": true,
+      "n_personas_money_metric_missing": 19,
+      "median_l_rep_usd": 6674.203882228338,
+      "ci_lower_usd": 5510.196927611727,
+      "ci_upper_usd": 7470.340078341641,
+      "median_l_s_usd": 0.0,
+      "median_l_amen_usd": 6674.203882228338,
+      "noise_floor_usd": 0.0,
+      "noise_floor_usd_median_within": 0.0,
+      "flip_probability": 0.0894375,
+      "conditional_loss_usd": 1026.290586486487,
+      "passes": true
+    },
+    {
+      "tau": 0.2,
+      "n_personas_feasible": 999,
+      "feasible_fraction": 0.999,
+      "counts_toward_verdict": true,
+      "n_personas_money_metric_missing": 14,
+      "median_l_rep_usd": 11746.063620838004,
+      "ci_lower_usd": 10459.638751860017,
+      "ci_upper_usd": 12776.864398249762,
+      "median_l_s_usd": 0.0,
+      "median_l_amen_usd": 11746.063620838004,
+      "noise_floor_usd": 0.0,
+      "noise_floor_usd_median_within": 0.0,
+      "flip_probability": 0.04470095095095095,
+      "conditional_loss_usd": 999.7378164064522,
+      "passes": true
+    },
+    {
+      "tau": 0.4,
+      "n_personas_feasible": 988,
+      "feasible_fraction": 0.988,
+      "counts_toward_verdict": true,
+      "n_personas_money_metric_missing": 14,
+      "median_l_rep_usd": 15996.10918160899,
+      "ci_lower_usd": 14273.900963338738,
+      "ci_upper_usd": 17364.28476817329,
+      "median_l_s_usd": 0.0,
+      "median_l_amen_usd": 15996.10918160899,
+      "noise_floor_usd": 0.0,
+      "noise_floor_usd_median_within": 0.0,
+      "flip_probability": 0.022899797570850203,
+      "conditional_loss_usd": 1047.8530635189884,
+      "passes": true
+    },
+    {
+      "tau": 0.8,
+      "n_personas_feasible": 855,
+      "feasible_fraction": 0.855,
+      "counts_toward_verdict": true,
+      "n_personas_money_metric_missing": 14,
+      "median_l_rep_usd": 19935.542330608976,
+      "ci_lower_usd": 18705.791973836385,
+      "ci_upper_usd": 21873.127707111827,
+      "median_l_s_usd": 0.0,
+      "median_l_amen_usd": 19935.542330608976,
+      "noise_floor_usd": 0.0,
+      "noise_floor_usd_median_within": 0.0,
+      "flip_probability": 0.009685672514619883,
+      "conditional_loss_usd": 1203.5153831227358,
+      "passes": true
+    }
+  ]
+}

@@ -1,6 +1,7 @@
 """跑门一。零大模型调用。
 
     uv run python scripts/run_gate_one.py
+    uv run python scripts/run_gate_one.py --config configs/gate_one_long_commute.yaml
 
 判据全部来自 configs/gate_one.yaml，本脚本不内置任何阈值。结果写进
 runs/<run_id>/gate_one.json，含配置哈希——证明判据是事前的（硬规则 20）。
@@ -8,6 +9,7 @@ runs/<run_id>/gate_one.json，含配置哈希——证明判据是事前的（�
 
 from __future__ import annotations
 
+import argparse
 from pathlib import Path
 
 import _bootstrap  # noqa: F401  (side effect: puts src/ on the path)
@@ -19,14 +21,19 @@ CONFIG = Path("configs/gate_one.yaml")
 
 
 def main() -> int:
-    config = load_yaml(CONFIG)
-    print(f"config      {CONFIG}  status={config['meta']['status']}")
+    parser = argparse.ArgumentParser(description="跑门一（零大模型调用）")
+    parser.add_argument("--config", type=Path, default=CONFIG)
+    args = parser.parse_args()
+    config_path = args.config
+
+    config = load_yaml(config_path)
+    print(f"config      {config_path}  status={config['meta']['status']}")
     print(
         f"personas    {config['sample']['n_personas']}   tau 梯子 {config['tau_ladder']['values']}"
     )
     print("running (zero language-model calls) ...\n")
 
-    result = run_gate_one(config, CONFIG)
+    result = run_gate_one(config, config_path)
     run = RunDir()
     run.write_meta(config=config, gate="one")
     path = write_result(result, run.path)

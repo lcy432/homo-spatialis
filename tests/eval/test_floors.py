@@ -482,3 +482,22 @@ def test_a_small_end_to_end_bias_table_is_produced():
     assert d["sigma_generating"] == 0.05  # 输入
     assert d["sigma_hat"] != d["sigma_generating"]  # 输出，不互相覆盖
     assert d["design_digest"] == SMALL.digest()
+
+
+def test_the_baseline_calibration_case_and_the_floor_arm_are_the_same_arm():
+    """`run_p8` 只拟合一次 baseline，5.1 的 baseline 表与 5.2 的地板共用它。
+
+    这条钉住那次复用赖以成立的前提：`injected_alpha=None` 与不传是同一件事。
+    如果哪天 baseline 改成别的含义，5.1 报的偏差与 5.2 算的地板就描述两批不同
+    的数据，而下游的几何、λ 与门二全都会照常跑完、给出归错因的数。
+    """
+    assert "baseline" in calibration_alphas((0.5, 1.0, 2.0))
+
+    implicit = build_floor_arm(SMALL, sigma=0.05)
+    explicit = build_floor_arm(SMALL, sigma=0.05, injected_alpha=None)
+
+    np.testing.assert_array_equal(implicit.injected_weights, explicit.injected_weights)
+    np.testing.assert_array_equal(implicit.dataset.features, explicit.dataset.features)
+    np.testing.assert_array_equal(implicit.dataset.chosen, explicit.dataset.chosen)
+    assert implicit.dataset.persona_ids == explicit.dataset.persona_ids
+    assert implicit.source == explicit.source

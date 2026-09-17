@@ -23,6 +23,7 @@ from common.providers import ExpenditureShares
 from econ.core import WelfareCore
 from eval.baselines import PersonaBaselines, baselines_for
 from eval.perturbation import diagnose, sample_truncated
+from worlds.attributes import CALIBRATIONS, DEFAULT_CALIBRATION_NAME
 from worlds.generator import WorldGenerator
 from worlds.personas import PersonaGenerator, reference_persona
 from worlds.targets import TargetInfeasibleError, solve_for_ln_dispersion
@@ -92,7 +93,11 @@ def run_gate_one(config: dict[str, Any], config_path: Path) -> dict[str, Any]:
     ladder = config["tau_ladder"]
     decision = config["decision"]
 
-    generator = WorldGenerator(n_cities=sample["n_cities"])
+    # 世界标定默认是 PROVISIONAL_US_2024，与已跑过的门一结果逐位一致；
+    # 只有显式写出 world_calibration 才会换。**换了标定就是另一次运行**，
+    # 判据一字未动，旧结果的适用范围也不因此扩大（DECISIONS/0013 第七节）。
+    calibration = CALIBRATIONS[sample.get("world_calibration", DEFAULT_CALIBRATION_NAME)]
+    generator = WorldGenerator(n_cities=sample["n_cities"], calibration=calibration)
     world = generator.generate(seed=sample["world_seed"], reference_persona=reference_persona())
     tax = generator.tax()
     base_core = WelfareCore(world.cities, tax, numeraire=USD_2024_US100, reference_id=REFERENCE_ID)

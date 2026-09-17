@@ -25,7 +25,7 @@ from eval.recovery import (
 from eval.recovery.msl_alr import alr_posterior_at
 from eval.recovery.schema import ChoiceDataset
 
-from .bias import BiasTable, calibration_alphas, run_case
+from .bias import BiasTable, bias_table, calibration_alphas
 from .design import ReferenceDesign, build_floor_arm, build_shuffled_arm, dimension_names
 from .gates import gate_three, gate_two
 from .geometry import arm_slope, collapse_ratio, projections, shared_geometry
@@ -73,25 +73,28 @@ def run_p8(config: dict[str, Any], config_path: Path | None = None) -> dict[str,
     # ---------------------------------------------------------------- 5.1
     tables: list[BiasTable] = []
     alphas = calibration_alphas(tuple(config["calibration"]["alpha_scales"]))
+    baseline_arm = baseline_fit = None
+    baseline_seconds = 0.0
     for case, alpha in alphas.items():
-        arm = build_floor_arm(
-            design, sigma=sigma_gen, injected_alpha=None if case == "baseline" else alpha
-        )
-        tables.append(
-            run_case(
-                arm,
-                case=case,
-                injected_alpha=None if case == "baseline" else alpha,
-                profile=profile,
-            )
-        )
+        injected = None if case == "baseline" else alpha
+        arm = build_floor_arm(design, sigma=sigma_gen, injected_alpha=injected)
+        t0 = time.time()
+        fit = fit_research(arm.dataset, profile)
+        seconds = time.time() - t0
+        tables.append(bias_table(arm, fit, case=case, injected_alpha=injected, seconds=seconds))
+        if case == "baseline":
+            baseline_arm, baseline_fit, baseline_seconds = arm, fit, seconds
     out["bias_tables"] = [t.as_dict() for t in tables]
 
     # ---------------------------------------------------------------- 5.2
-    baseline_arm = build_floor_arm(design, sigma=sigma_gen)
-    t0 = time.time()
-    floor_fit = fit_research(baseline_arm.dataset, profile)
-    floor_seconds = time.time() - t0
+    # 复用 baseline 案例的臂与拟合：同一份数据、同一个 profile，没有理由拟合两次。
+    if baseline_arm is None:
+        baseline_arm = build_floor_arm(design, sigma=sigma_gen)
+        t0 = time.time()
+        baseline_fit = fit_research(baseline_arm.dataset, profile)
+        baseline_seconds = time.time() - t0
+    floor_fit = baseline_fit
+    floor_seconds = baseline_seconds
     truth = baseline_arm.injected_weights
 
     geom = shared_geometry(
