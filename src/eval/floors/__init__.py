@@ -37,6 +37,15 @@ from .path import (
     covariance_path,
     simplex_moment_feasibility,
 )
+from .reuse import (
+    MATCHED_FIELDS,
+    PROVENANCE_ONLY,
+    FloorDescriptor,
+    FloorReuseError,
+    ReuseVerdict,
+    check_reuse,
+    descriptor_from_run,
+)
 from .runner import run_p8, source_persona_ids, write_run
 from .sigma import (
     DisagreementMeasurement,
@@ -51,13 +60,17 @@ from .sigma import (
 __all__ = [
     "CALIBRATIONS",
     "D_NEAR_ZERO",
+    "MATCHED_FIELDS",
     "MOMENT_RTOL",
+    "PROVENANCE_ONLY",
     "ArmSlope",
     "BiasTable",
     "CollapseRatio",
     "Criterion",
     "DisagreementMeasurement",
     "FloorArm",
+    "FloorDescriptor",
+    "FloorReuseError",
     "GateThreeResult",
     "GateTwoResult",
     "MomentCalibration",
@@ -65,6 +78,7 @@ __all__ = [
     "MomentSet",
     "ReferenceDesign",
     "RepeatObservation",
+    "ReuseVerdict",
     "SharedGeometry",
     "SigmaCalibration",
     "arm_slope",
@@ -74,8 +88,10 @@ __all__ = [
     "calibrate_logistic_normal",
     "calibrate_sigma",
     "calibration_alphas",
+    "check_reuse",
     "collapse_ratio",
     "covariance_path",
+    "descriptor_from_run",
     "dimension_names",
     "gate_three",
     "gate_two",

@@ -1,0 +1,44 @@
+# P10：分层抽样的配置。零大模型调用。
+#
+# **本文件里的配额是占位值，不是预注册值。** `allocation.status` 写着
+# `provisional`，`eval.sampling.Allocation` 也默认这个状态。要把它升成
+# `preregistered`，需要有人裁决并在跑之前 commit（硬规则 20）——不是跑一轮
+# 看看哪组好看。
+meta:
+  status: PROVISIONAL_NOT_PREREGISTERED
+  note: >-
+    分层变量是 z = ||w − μ₀||，μ₀ = 注入均值 = (1/3, 1/9×6)，显式传。
+    它不是 d = ||w − ĉ||（那是拟合之后才有的分析变量）。层标签在选择数据
+    产生之前冻结，不得按结果重抽人。
+
+# 层边界与层概率来自这批**独立参照样本**，不来自本轮的行为结果。
+# seed 与规模进指纹；换任何一项都是换一套层。
+reference_population:
+  alpha: [1.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]   # DECISIONS/0006，不得在这里改
+  n_draws: 200000
+  seed: 20260926
+
+strata:
+  labels: [s1_near, s2, s3, s4, s5_far]
+  rule: equal_frequency        # 等频不等宽，与 README §10.3.4 的 r(d) 分箱同一套
+
+allocation:
+  # 默认按总体比例。等频层下 p_h = 1/H，所以这也等于每层等量——
+  # **那是控制层人数，不是过采样尾部**；设计权重恒为 1。
+  kind: proportional
+  n_total: 1000
+  status: provisional
+
+  # 若将来要过采样尾部，改成下面这种并**先裁决**。注意它会触发
+  # DECISIONS/0014 第四节的估计对象问题：未加权 MSL 估的将是设计总体，
+  # 而协方差比的分母仍是注入总体的闭式解，两者不再可比。
+  # kind: custom
+  # quotas: [150, 175, 200, 225, 250]
+
+# 设计权重还原到哪个总体。一次分析只能用一个，并写进产出。
+weights:
+  target: superpopulation      # 或 finite_pool（需要候选库规模）
+
+sampling:
+  seed: 20260926
+  pool_size: null              # null = 按需生成直到配额满；给数则走有限候选库
