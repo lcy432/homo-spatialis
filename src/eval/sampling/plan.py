@@ -111,6 +111,48 @@ class Allocation:
         )
 
     @staticmethod
+    def intensity(
+        scheme: StratumScheme,
+        n_total: int,
+        multipliers: Sequence[float],
+        **kw: Any,
+    ) -> Allocation:
+        """按**抽样强度**倍率分配：`q_h = m_h·p_h / Σ_l m_l·p_l`。
+
+        `m_h = 1` 是按比例；`m_H = 2` 表示**最尾层的抽样强度相对其他层加倍**。
+
+        **注意它不是"尾层人数翻倍"。** 人数是 `q_h·N`，而 `q_h` 经过归一化，
+        所以尾层人数只上升到 `2p_H/(1+p_H)` 那个比例——等频五层下从 200 变成
+        333，不是 400。这句区别要写进报告，否则"加倍"会被读成人数加倍。
+
+        它是一个**温和的覆盖配置**，不声称 Neyman 最优，也不声称达到了任何
+        功效要求。
+        """
+        p = np.asarray(scheme.population_share, dtype=float)
+        m = np.asarray(multipliers, dtype=float)
+        if m.shape != p.shape:
+            raise ValueError(f"倍率要 {p.shape[0]} 个，得到 {m.shape[0]}")
+        if np.any(m <= 0):
+            raise ValueError("抽样强度倍率必须为正")
+        q = m * p / float((m * p).sum())
+        raw = q * n_total
+        quotas = np.floor(raw).astype(int)
+        # 最大余数法分配剩余名额。确定性：并列时取下标小的，可复现。
+        for i in np.argsort(-(raw - quotas), kind="stable")[: n_total - int(quotas.sum())]:
+            quotas[i] += 1
+        rounding = [float(r - q_) for r, q_ in zip(raw, quotas, strict=True)]
+        return Allocation(
+            quotas=tuple(int(v) for v in quotas),
+            kind="custom",
+            note=(
+                f"抽样强度倍率 {[float(v) for v in m]}；"
+                + describe_allocation(tuple(int(v) for v in quotas), scheme.population_share)
+                + f"；整数化余数 {[round(r, 3) for r in rounding]}（最大余数法）"
+            ),
+            **kw,
+        )
+
+    @staticmethod
     def custom(quotas: tuple[int, ...], **kw: Any) -> Allocation:
         return Allocation(quotas=tuple(int(v) for v in quotas), kind="custom", **kw)
 

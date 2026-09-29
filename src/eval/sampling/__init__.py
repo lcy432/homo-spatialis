@@ -38,6 +38,19 @@ P9 的混合 logit 是在实验样本上**未加权**拟合的。它估出来的
 from __future__ import annotations
 
 from .draw import draw_stratified, weights_of
+from .moments import (
+    DDOF,
+    AlrMoments,
+    Estimand,
+    MomentComparison,
+    WeightMoments,
+    alr_coordinates,
+    compare_to_injected,
+    empirical_alr_moments,
+    empirical_weight_moments,
+    theoretical_alr_moments,
+    theoretical_weight_moments,
+)
 from .plan import (
     ALLOCATION_TOLERANCE,
     Allocation,
@@ -70,32 +83,48 @@ ESTIMAND_GAP: dict[str, object] = {
     "report_weighting_does_not_fix_it": True,
     "affects": "协方差比的分子（§1.2.3 的主证据）",
     "options": [
-        "proportional allocation (implemented, needs no new adjudication)",
-        "weighted likelihood (NOT implemented; changes the P9 estimator)",
-        "redefine the denominator as Sigma_design (NOT implemented)",
+        "proportional allocation (implemented)",
+        "weighted likelihood (REJECTED by DECISIONS/0015: changes the P9 estimator)",
+        "redefine denominator as Sigma_design (REJECTED by DECISIONS/0015)",
     ],
-    "status": "待科学裁决",
+    "resolution": (
+        "DECISIONS/0015 裁决三：估计对象就是实验抽样人群；协方差分母取本次实际"
+        "注入名单 S 的真值矩（eval.sampling.moments，ddof=0）。P 的闭式解保留作"
+        "数学 fixture 与人口口径还原目标，不再兼任 S 的真值。"
+    ),
+    "status": "已裁决（DECISIONS/0015）",
 }
 
 __all__ = [
     "ALLOCATION_TOLERANCE",
+    "DDOF",
     "DEFAULT_STRATUM_LABELS",
     "ESTIMAND_GAP",
     "Allocation",
+    "AlrMoments",
+    "Estimand",
+    "MomentComparison",
     "ReferencePopulation",
     "SamplingPlan",
     "StratifiedSample",
     "StratumRealisation",
     "StratumScheme",
+    "WeightMoments",
     "WeightTarget",
+    "alr_coordinates",
+    "compare_to_injected",
     "describe_allocation",
     "design_weights",
     "draw_stratified",
+    "empirical_alr_moments",
+    "empirical_weight_moments",
     "population_moments",
     "report_conditional",
     "report_cross_stratum_relationship",
     "report_population",
     "stratification_variable",
+    "theoretical_alr_moments",
+    "theoretical_weight_moments",
     "weight_for",
     "weights_of",
 ]

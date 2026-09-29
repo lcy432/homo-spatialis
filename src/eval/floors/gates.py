@@ -24,7 +24,9 @@ from typing import Any, Literal
 
 import numpy as np
 
-GateStatus = Literal["pass", "fail", "inconclusive", "pending_input"]
+#: `pending_input` = 缺真实数据；`pending_computation` = 数据在、算力没花够。
+#: 两者必须分开：前者要去取数，后者要去跑。合成 PASS 与真实判定也永远分开。
+GateStatus = Literal["pass", "fail", "inconclusive", "pending_input", "pending_computation"]
 
 
 @dataclass(frozen=True)
@@ -55,6 +57,10 @@ class GateTwoResult:
     window_se: float | None
     n_bootstrap: int
     arm_sources: dict[str, str]
+    #: SE(W) 是怎么来的。**必须是同一 replicate 内 (ŝ_shuffled − λ̂) 的变化**，
+    #: 不能是 Var(ŝ)+Var(λ̂)（那假设了独立，实测可差 2.5 倍）。
+    se_basis: str = "per_replicate_window"
+    coverage: str = "pointwise_at_one_t"
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -67,11 +73,18 @@ class GateTwoResult:
             "window_bootstrap_se": self.window_se,
             "n_bootstrap": self.n_bootstrap,
             "arm_sources": self.arm_sources,
+            "se_basis": self.se_basis,
+            "coverage": self.coverage,
+            "thresholds_are_design_rules": (
+                "0.8 / 1.96 / 0.5 都是预注册的设计规则，不是定理。1.96 来自正态近似"
+                "下双侧 95% 的直觉，**不保证 80% power**，也不保证小样本、重尾或"
+                "多个 t/层上的联合覆盖率"
+            ),
         }
 
 
 def _worst(statuses: list[GateStatus]) -> GateStatus:
-    for bad in ("pending_input", "inconclusive", "fail"):
+    for bad in ("pending_input", "pending_computation", "inconclusive", "fail"):
         if bad in statuses:
             return bad  # type: ignore[return-value]
     return "pass"
@@ -88,6 +101,8 @@ def gate_two(
     threshold_2c: float,
     min_bootstrap: int,
     arm_sources: dict[str, str],
+    se_basis: str = "per_replicate_window",
+    coverage: str = "pointwise_at_one_t",
 ) -> GateTwoResult:
     """三条判据一起判。分母非正、窗口趋零、输入不足各自返回明确原因。"""
     criteria: list[Criterion] = []
@@ -100,7 +115,16 @@ def gate_two(
                 )
             )
         return GateTwoResult(
-            "pending_input", tuple(criteria), lam, s_shuffled, None, None, n_bootstrap, arm_sources
+            "pending_input",
+            tuple(criteria),
+            lam,
+            s_shuffled,
+            None,
+            None,
+            n_bootstrap,
+            arm_sources,
+            se_basis,
+            coverage,
         )
 
     window = float(s_shuffled) - float(lam)
@@ -133,10 +157,11 @@ def gate_two(
         criteria.append(
             Criterion(
                 "2b",
-                "pending_input",
+                "pending_computation",
                 None,
                 threshold_2b,
-                f"bootstrap 只有 {n_bootstrap} 次，低于正式判定所需的 {min_bootstrap} 次",
+                f"有效 replicate 只有 {n_bootstrap}，低于正式判定所需的 {min_bootstrap}。"
+                "这是算力没花够，不是缺数据——工程 smoke 的小 B 不得充当正式 SE",
             )
         )
     elif window_se is None or not np.isfinite(window_se) or window_se <= 0:
@@ -175,6 +200,8 @@ def gate_two(
         window_se=window_se,
         n_bootstrap=n_bootstrap,
         arm_sources=arm_sources,
+        se_basis=se_basis,
+        coverage=coverage,
     )
 
 

@@ -364,12 +364,20 @@ def test_weighted_moments_do_not_claim_to_fix_the_fit(scheme):
     assert "unweighted MSL" in out["does_not_apply_to"]
 
 
-def test_the_estimand_gap_is_machine_readable():
+def test_the_estimand_gap_is_machine_readable_and_records_its_resolution():
+    """`DECISIONS/0015` 裁决三之后，这条从"待裁决"变成"已裁决"。
+
+    两个备选**没有消失，是被否决了**——记录要能区分"还没想好"与"想过并否决"，
+    否则下一轮会把已经否决的方案当新想法重新提出来。
+    """
     from eval.sampling import ESTIMAND_GAP
 
     assert ESTIMAND_GAP["report_weighting_does_not_fix_it"] is True
-    assert ESTIMAND_GAP["status"] == "待科学裁决"
+    assert ESTIMAND_GAP["status"].startswith("已裁决")
     assert "does_not_bite_when" in ESTIMAND_GAP
+    assert "S" in ESTIMAND_GAP["resolution"] and "ddof=0" in ESTIMAND_GAP["resolution"]
+    rejected = [o for o in ESTIMAND_GAP["options"] if "REJECTED" in o]
+    assert len(rejected) == 2, "两个备选必须显式标为已否决，不是静默消失"
 
 
 # --------------------------------------------------------------------------

@@ -27,6 +27,7 @@ runs/*
 !runs/.gitkeep
 !runs/2026-09-16-p9-evidence/
 !runs/2026-09-16-p8-synthetic-pilot/
+!runs/2026-09-26-p10-evidence/
 
 # --- notebooks ---
 .ipynb_checkpoints/

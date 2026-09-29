@@ -392,9 +392,25 @@ def test_gate_two_reports_a_reason_instead_of_a_plausible_ratio():
 
 
 def test_gate_two_refuses_to_judge_2b_on_too_few_bootstrap_replicates():
+    """算力没花够 → `pending_computation`，**不是** `pending_input`。
+
+    两者要分开：缺数据得去取数，缺 replicate 得去跑。混成一个状态，读的人
+    会以为还在等真实数据，而其实只差一次 bootstrap。
+    """
     g = _gate_two(n_bootstrap=5)
-    assert next(c for c in g.criteria if c.name == "2b").status == "pending_input"
-    assert g.status == "pending_input"
+    c2b = next(c for c in g.criteria if c.name == "2b")
+    assert c2b.status == "pending_computation"
+    assert g.status == "pending_computation"
+    assert "算力" in c2b.reason
+
+
+def test_missing_arms_and_missing_computation_are_different_statuses():
+    """让上一条有牙：两种阻塞必须给出不同的状态。"""
+    no_data = _gate_two(lam=None, s_shuffled=None)
+    no_compute = _gate_two(n_bootstrap=5)
+    assert no_data.status == "pending_input"
+    assert no_compute.status == "pending_computation"
+    assert no_data.status != no_compute.status
 
 
 def test_gate_two_is_pending_when_the_arms_are_missing():

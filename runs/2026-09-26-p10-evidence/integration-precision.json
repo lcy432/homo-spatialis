@@ -1,0 +1,238 @@
+{
+ "check": "fixed_parameter_integration_precision",
+ "fits_run_this_check": 0,
+ "cache": "runs\\2026-09-16-p9-evidence\\minimal-numerical-check.json",
+ "R_fit_from_cache": 200,
+ "R_reference": 12800,
+ "n_randomisations": 8,
+ "tolerances": {
+  "M1_mean": 0.002,
+  "M2_cov_rel_frobenius": 0.01,
+  "M3_posterior": 0.005
+ },
+ "se_fraction_required": 0.5,
+ "rows": [
+  {
+   "R": 50,
+   "seconds": 4.66064977645874,
+   "M1_mean": {
+    "median": 5.669960404229568e-05,
+    "se": 1.737304118531155e-05,
+    "tolerance": 0.002,
+    "within_tolerance": true,
+    "se_resolves_tolerance": true,
+    "verdict": "ok"
+   },
+   "M2_cov_rel_frobenius": {
+    "median": 0.0012213581123534808,
+    "se": 0.00016051034743728098,
+    "tolerance": 0.01,
+    "within_tolerance": true,
+    "se_resolves_tolerance": true,
+    "verdict": "ok"
+   },
+   "M3_posterior": {
+    "median": 0.430352640668189,
+    "se": 0.07702260653225446,
+    "tolerance": 0.005,
+    "within_tolerance": false,
+    "se_resolves_tolerance": false,
+    "verdict": "not_established"
+   }
+  },
+  {
+   "R": 100,
+   "seconds": 9.654671669006348,
+   "M1_mean": {
+    "median": 3.3877158136422225e-05,
+    "se": 6.9615970843496226e-06,
+    "tolerance": 0.002,
+    "within_tolerance": true,
+    "se_resolves_tolerance": true,
+    "verdict": "ok"
+   },
+   "M2_cov_rel_frobenius": {
+    "median": 0.0007069811607784027,
+    "se": 0.00010241156136551412,
+    "tolerance": 0.01,
+    "within_tolerance": true,
+    "se_resolves_tolerance": true,
+    "verdict": "ok"
+   },
+   "M3_posterior": {
+    "median": 0.28216873487770355,
+    "se": 0.0647520756149952,
+    "tolerance": 0.005,
+    "within_tolerance": false,
+    "se_resolves_tolerance": false,
+    "verdict": "not_established"
+   }
+  },
+  {
+   "R": 200,
+   "seconds": 19.50434446334839,
+   "M1_mean": {
+    "median": 1.6894163766711934e-05,
+    "se": 9.073651700041721e-06,
+    "tolerance": 0.002,
+    "within_tolerance": true,
+    "se_resolves_tolerance": true,
+    "verdict": "ok"
+   },
+   "M2_cov_rel_frobenius": {
+    "median": 0.00042810262540064325,
+    "se": 9.93022846527729e-05,
+    "tolerance": 0.01,
+    "within_tolerance": true,
+    "se_resolves_tolerance": true,
+    "verdict": "ok"
+   },
+   "M3_posterior": {
+    "median": 0.1865538837992392,
+    "se": 0.04082413926735737,
+    "tolerance": 0.005,
+    "within_tolerance": false,
+    "se_resolves_tolerance": false,
+    "verdict": "not_established"
+   }
+  },
+  {
+   "R": 400,
+   "seconds": 39.62533450126648,
+   "M1_mean": {
+    "median": 9.492324741275371e-06,
+    "se": 3.1798056381031584e-06,
+    "tolerance": 0.002,
+    "within_tolerance": true,
+    "se_resolves_tolerance": true,
+    "verdict": "ok"
+   },
+   "M2_cov_rel_frobenius": {
+    "median": 0.00022544180798134573,
+    "se": 5.332974757160024e-05,
+    "tolerance": 0.01,
+    "within_tolerance": true,
+    "se_resolves_tolerance": true,
+    "verdict": "ok"
+   },
+   "M3_posterior": {
+    "median": 0.14805708292512587,
+    "se": 0.019776129127637918,
+    "tolerance": 0.005,
+    "within_tolerance": false,
+    "se_resolves_tolerance": false,
+    "verdict": "not_established"
+   }
+  },
+  {
+   "R": 800,
+   "seconds": 81.63344597816467,
+   "M1_mean": {
+    "median": 4.942270221332257e-06,
+    "se": 1.9781249309172738e-06,
+    "tolerance": 0.002,
+    "within_tolerance": true,
+    "se_resolves_tolerance": true,
+    "verdict": "ok"
+   },
+   "M2_cov_rel_frobenius": {
+    "median": 0.0001285582290842566,
+    "se": 3.444094689829517e-05,
+    "tolerance": 0.01,
+    "within_tolerance": true,
+    "se_resolves_tolerance": true,
+    "verdict": "ok"
+   },
+   "M3_posterior": {
+    "median": 0.10055755879642742,
+    "se": 0.015426327534178528,
+    "tolerance": 0.005,
+    "within_tolerance": false,
+    "se_resolves_tolerance": false,
+    "verdict": "not_established"
+   }
+  },
+  {
+   "R": 1600,
+   "seconds": 156.7676727771759,
+   "M1_mean": {
+    "median": 2.2243533212770727e-06,
+    "se": 9.908154527451392e-07,
+    "tolerance": 0.002,
+    "within_tolerance": true,
+    "se_resolves_tolerance": true,
+    "verdict": "ok"
+   },
+   "M2_cov_rel_frobenius": {
+    "median": 7.693656708891299e-05,
+    "se": 1.3109360922406138e-05,
+    "tolerance": 0.01,
+    "within_tolerance": true,
+    "se_resolves_tolerance": true,
+    "verdict": "ok"
+   },
+   "M3_posterior": {
+    "median": 0.07987755345364836,
+    "se": 0.018608127248286564,
+    "tolerance": 0.005,
+    "within_tolerance": false,
+    "se_resolves_tolerance": false,
+    "verdict": "not_established"
+   }
+  },
+  {
+   "R": 3200,
+   "seconds": 302.96275448799133,
+   "M1_mean": {
+    "median": 1.350184670109722e-06,
+    "se": 4.975586667497798e-07,
+    "tolerance": 0.002,
+    "within_tolerance": true,
+    "se_resolves_tolerance": true,
+    "verdict": "ok"
+   },
+   "M2_cov_rel_frobenius": {
+    "median": 3.005047160396199e-05,
+    "se": 1.5510383108761158e-05,
+    "tolerance": 0.01,
+    "within_tolerance": true,
+    "se_resolves_tolerance": true,
+    "verdict": "ok"
+   },
+   "M3_posterior": {
+    "median": 0.05200513753378852,
+    "se": 0.0074069665237125396,
+    "tolerance": 0.005,
+    "within_tolerance": false,
+    "se_resolves_tolerance": false,
+    "verdict": "not_established"
+   }
+  }
+ ],
+ "m3_distribution": {
+  "200": {
+   "median": 0.033425487029194616,
+   "p90": 0.06804949122618693,
+   "p99": 0.12775040415043484,
+   "max": 0.2697297824719078,
+   "n_above_tolerance": 1000,
+   "n_personas": 1000
+  },
+  "3200": {
+   "median": 0.006002884280317214,
+   "p90": 0.014251682145826733,
+   "p99": 0.029911338698036624,
+   "max": 0.053854102663779435,
+   "n_above_tolerance": 625,
+   "n_personas": 1000
+  }
+ },
+ "verdict": {
+  "R_moment_at_200": "established",
+  "R_post_at_200": "not_established",
+  "R_fit_at_200": "not_tested_by_this_check",
+  "smallest_R_meeting_posterior_tolerance": null,
+  "why_fit_untested": "本检查固定参数，只能支持后验/总体矩的积分精度；R_fit 的充分性要在更高 R 上重估参数再比（方案乙，未运行）",
+  "m3_is_a_max": "M3 是 1000 人设 × 7 维上取最大，由最差的个体主导。它衡量的是最坏情形，不是典型精度；分位数见 m3_distribution"
+ }
+}
