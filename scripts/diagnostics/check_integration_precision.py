@@ -141,7 +141,7 @@ def main() -> int:
     r_fit = cached["profile"]["n_draws"]
     say(f"  参数取自 material 解；R_fit = {r_fit}（**本检查不验证它**）")
 
-    say(f"\n参照点 R* = {R_REFERENCE}")
+    say(f"\n参照点 R* = {args.reference}")
     t0 = time.time()
     ref_mean, ref_cov, ref_post, _ref_ess = evaluate(
         ds, mu, chol, gamma_0, MATERIAL, args.reference, 90_001

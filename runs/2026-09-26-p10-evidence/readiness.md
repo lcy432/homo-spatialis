@@ -17,11 +17,11 @@
 |---|---|---|
 | P9 研究主规格与拟合入口 | 已实现，主规模跑过 baseline | — |
 | 门一（长通勤 profile） | **PASS**，五档全过 | — |
-| P10 分层、配额、权重、两个报告 | 已实现，小型验证 | — |
+| P10 分层、配额、权重、两个报告 | 已实现，小型验证；**未接入 run_p8**（地板臂仍用简单随机抽样） | pending_computation |
 | 估计对象 P/Q/S 与 ddof=0 矩 | 已实现，小型验证 | — |
-| 方案 A 的 `t` 路径 | 已实现，小型验证 | — |
-| 逐人表与分组对照 | 已实现，小型验证 | — |
-| 联合窗口 SE 与 `pending_computation` | 已实现，小型验证 | — |
+| 方案 A 的 `t` 路径 | **已接入 CLI**（`bc0e49b`），SMALL 端到端验证通过 | — |
+| 逐人表与分组对照 | 已实现，小型验证；**未接入 run_p8** | pending_computation |
+| 联合窗口 SE 与 `pending_computation` | **已接入 CLI**（`bc0e49b`），两臂共用抽样 | — |
 | `R_moment` @200 积分精度 | **established** | — |
 | `R_post` @200 积分精度 | **not_established**（1000/1000 超容差，中位 3.3e−2） | pending_computation |
 | `R_fit` @ 200 的充分性 | **未验证** | pending_computation |
@@ -35,6 +35,17 @@
 | 散文语义忠实核查 | 无 `PersonaBrief` 抽取规则 | missing_input |
 
 **没有任何一项可以写成"门已通过"。**
+
+## 一之二、代码审核之后新增的两项（2026-09-28）
+
+| 项 | 状态 | 类别 |
+|---|---|---|
+| P10 分层接入 `run_p8` | **未接入**：地板臂仍走 `PersonaGenerator` 简单随机抽样，没消费 `eval.sampling` 的配额与权重 | pending_computation |
+| 逐人表接入 `run_p8` | **未接入**：`eval/individual.py` 有函数有测试，产出里还没有逐人表 | pending_computation |
+
+**这两条与审核查出的 F1/F2 是同一个模式**（模块写好了、入口没用上），所以明确
+列出来而不是留在"已实现"里。它们不阻塞门的判定——门二/门三卡在真实数据上——
+但在跑正式 P8 之前必须接上，否则正式地板用的不是冻结的抽样设计。
 
 ## 二、执行顺序与命令
 

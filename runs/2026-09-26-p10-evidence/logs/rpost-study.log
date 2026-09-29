@@ -7,3 +7,6 @@
   参数取自 material 解；R_fit = 200（**本检查不验证它**）
 
 参照点 R* = 12800
+  531s
+  R=  200 (  13.8s, ESS 中位    7.5 = 3.7% of R)  M1 1.78e-05±9.1e-06 ok  M2 4.32e-04±9.7e-05 ok  M3 1.85e-01±4.2e-02 not_established
+  R= 3000 ( 208.5s, ESS 中位   88.4 = 2.9% of R)  M1 1.40e-06±7.2e-07 ok  M2 3.36e-05±1.9e-05 ok  M3 4.82e-02±9.3e-03 not_established
