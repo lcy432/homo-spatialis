@@ -20,7 +20,7 @@ brief can reach a prompt.
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields, is_dataclass
 from enum import Enum
 from typing import Protocol, runtime_checkable
 
@@ -447,18 +447,64 @@ class ChoiceSetTruth:
         )
 
 
-def _reject_answer_side(value: object, forbidden: tuple[type, ...], path: str) -> None:
+#: Every answer-side type. **Adding one here is not optional**: a type left out
+#: is a type the boundary check waves through, and the check is the only
+#: mechanical enforcement of hard rule 1.
+ANSWER_SIDE_TYPES: tuple[type, ...] = (
+    GroundTruth,
+    ChoiceSetTruth,
+    Persona,
+    PersonaParams,
+    WelfareLevel,
+)
+
+#: Scalars and strings cannot hide an answer-side object, so the walk stops
+#: there. Everything else gets opened up.
+_LEAF_TYPES = (str, bytes, bytearray, int, float, bool, complex, type(None))
+
+
+def _reject_answer_side(
+    value: object, forbidden: tuple[type, ...], path: str, *, _seen: set[int] | None = None
+) -> None:
+    """Walk a payload and refuse anything from the answer side.
+
+    Recursion covers mappings, sequences, sets, **and dataclass fields**. The
+    dataclass case is the one that matters: a type annotation of
+    ``Mapping[str, float]`` does not stop a ``PersonaParams`` from being put
+    there at runtime, and the earlier version only opened mappings and
+    sequences, so an answer-side object one level inside an ``Observable``
+    was waved straight through.
+    """
     if isinstance(value, forbidden):
         raise BoundaryViolationError(
             f"{type(value).__name__} reached agent-visible field {path!r}; "
             "CLAUDE.md hard rule 1 forbids GroundTruth in any prompt"
         )
+    if isinstance(value, _LEAF_TYPES):
+        return
+
+    # Guard against cycles: a payload that refers to itself would otherwise
+    # recurse forever, and a RecursionError is not a boundary verdict.
+    seen = set() if _seen is None else _seen
+    marker = id(value)
+    if marker in seen:
+        return
+    seen.add(marker)
+
     if isinstance(value, Mapping):
         for k, v in value.items():
-            _reject_answer_side(v, forbidden, f"{path}[{k!r}]")
-    elif isinstance(value, Sequence) and not isinstance(value, str | bytes):
+            _reject_answer_side(v, forbidden, f"{path}[{k!r}]", _seen=seen)
+    elif isinstance(value, (set, frozenset)):
         for i, v in enumerate(value):
-            _reject_answer_side(v, forbidden, f"{path}[{i}]")
+            _reject_answer_side(v, forbidden, f"{path}{{{i}}}", _seen=seen)
+    elif isinstance(value, Sequence):
+        for i, v in enumerate(value):
+            _reject_answer_side(v, forbidden, f"{path}[{i}]", _seen=seen)
+    elif is_dataclass(value) and not isinstance(value, type):
+        for f in fields(value):
+            _reject_answer_side(
+                getattr(value, f.name, None), forbidden, f"{path}.{f.name}", _seen=seen
+            )
 
 
 @dataclass(frozen=True, slots=True)
@@ -475,7 +521,7 @@ class AgentInput:
     permutation: tuple[int, ...] = field(default=())
 
     def __post_init__(self) -> None:
-        forbidden = (GroundTruth, Persona, PersonaParams, WelfareLevel)
+        forbidden = ANSWER_SIDE_TYPES
         for name in ("brief", "options", "permutation"):
             _reject_answer_side(getattr(self, name), forbidden, path=name)
         if self.permutation and sorted(self.permutation) != list(range(len(self.options))):

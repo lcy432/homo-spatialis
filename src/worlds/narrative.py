@@ -43,6 +43,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from dataclasses import dataclass, replace
 from pathlib import Path
@@ -187,38 +188,109 @@ def generate_narratives(
     return out
 
 
-def freeze(personas: list[Persona], path: Path = FROZEN_PATH) -> Path:
-    """把散文冻结进仓库。**只存代理能看到的东西**，不存权重。
+#: 冻结文件的格式版本。**旧格式（裸列表、无指纹）一律拒绝绑定**，
+#: 不拿当前真值补一个指纹再宣称验证通过——那等于用被检查的东西去检查自己。
+FROZEN_FORMAT_VERSION = 2
+
+
+def truth_digest(persona: Persona) -> str:
+    """一个人设答案侧的指纹。**只进内部清单，不进代理可见文本。**
+
+    取七维权重加能力分位，四舍五入到 1e-9 再哈希。用摘要而不是权重本身，
+    是为了让这个文件即使被误发出去也不直接泄漏真值（`freeze` 的原始理由）；
+    但它足以判定"同一个 ID 背后还是不是同一个人"。
+    """
+    pp = persona.params
+    payload = {
+        "alpha": round(float(pp.alpha), 9),
+        "beta": round(float(pp.beta), 9),
+        "theta": {k: round(float(v), 9) for k, v in sorted(pp.theta.items())},
+        "ability_quantile": getattr(persona, "ability_quantile", None),
+    }
+    blob = json.dumps(payload, sort_keys=True, ensure_ascii=False).encode("utf-8")
+    return hashlib.sha256(blob).hexdigest()[:16]
+
+
+def freeze(
+    personas: list[Persona],
+    path: Path = FROZEN_PATH,
+    *,
+    persona_seed: int | None = None,
+    config_digest: str | None = None,
+) -> Path:
+    """把散文冻结进仓库。**只存代理能看到的东西**，外加一份内部指纹清单。
 
     权重由 seed 决定，随时可以重算；散文不能。分开存还有一层好处：这个
-    文件即使被误发出去也不泄漏真值。
+    文件即使被误发出去也不泄漏真值——存的是摘要，不是权重。
+
+    **`persona_id` 是流水号**（`p00000`…），不同 seed/config 抽出来的人会用
+    同一批 ID。只按 ID 绑定，换了先验或种子之后匹配臂会在不报错的情况下
+    变成错配臂。所以这里同时记生成参数与逐人真值指纹，加载时验。
     """
     path.parent.mkdir(parents=True, exist_ok=True)
-    payload = [
-        {
-            "persona_id": p.persona_id,
-            "literalness": p.brief.literalness.value,
-            "narrative": p.brief.narrative,
-            "dimension_order": list(p.brief.dimension_order),
-        }
-        for p in personas
-    ]
+    payload = {
+        "format_version": FROZEN_FORMAT_VERSION,
+        "generation": {
+            "persona_seed": persona_seed,
+            "config_digest": config_digest,
+            "n": len(personas),
+        },
+        "personas": [
+            {
+                "persona_id": p.persona_id,
+                "literalness": p.brief.literalness.value,
+                "narrative": p.brief.narrative,
+                "dimension_order": list(p.brief.dimension_order),
+                # 内部字段，`attach_frozen` 不会把它放进 brief
+                "truth_digest": truth_digest(p),
+            }
+            for p in personas
+        ],
+    }
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     return path
 
 
-def attach_frozen(personas: list[Persona], path: Path = FROZEN_PATH) -> list[Persona]:
+def attach_frozen(
+    personas: list[Persona], path: Path = FROZEN_PATH, *, require_digest: bool = True
+) -> list[Persona]:
     """把冻结的散文贴回按 seed 重算出来的人设上。
 
-    按 persona_id 对齐，缺一个就抛：静默跳过会得到一批没有散文的人设，
-    而它们在实验里看起来跟"无人设对照组"一模一样。
+    按 `persona_id` 对齐，**再按真值指纹校验**。缺一个人就抛：静默跳过会得到
+    一批没有散文的人设，而它们在实验里看起来跟"无人设对照组"一模一样。
+    指纹对不上也抛：那说明同一个 ID 背后换了人，而那种错配同样不报错。
+
+    `require_digest=False` 只给"明知在读旧格式、且只想看散文"的诊断用途，
+    **不得用于任何会进入实验的路径**。
     """
-    frozen = {row["persona_id"]: row for row in json.loads(path.read_text(encoding="utf-8"))}
+    raw = json.loads(path.read_text(encoding="utf-8"))
+
+    if isinstance(raw, list):
+        raise NarrativeError(
+            f"{path} 是旧格式（裸列表，无生成参数与真值指纹）。"
+            f"旧格式不能绑定：persona_id 是流水号，换 seed 之后同一个 ID 背后是"
+            f"另一个人，而绑定不会报错。请用当前 seed/config 重新 freeze 一次；"
+            f"**不要**拿现在的真值给旧文件补指纹——那是用被检查的东西检查自己"
+        )
+    version = raw.get("format_version")
+    if version != FROZEN_FORMAT_VERSION:
+        raise NarrativeError(
+            f"{path} 的 format_version={version!r}，当前要求 {FROZEN_FORMAT_VERSION}"
+        )
+
+    frozen = {row["persona_id"]: row for row in raw["personas"]}
     out: list[Persona] = []
+    mismatched: list[str] = []
     for p in personas:
         row = frozen.get(p.persona_id)
         if row is None:
             raise NarrativeError(f"冻结文件里没有 {p.persona_id} 的散文")
+        stored = row.get("truth_digest")
+        if require_digest:
+            if stored is None:
+                raise NarrativeError(f"{p.persona_id} 没有 truth_digest，无法确认它还是同一个人")
+            if stored != truth_digest(p):
+                mismatched.append(p.persona_id)
         out.append(
             replace(
                 p,
@@ -228,6 +300,12 @@ def attach_frozen(personas: list[Persona], path: Path = FROZEN_PATH) -> list[Per
                     dimension_order=tuple(row["dimension_order"]),
                 ),
             )
+        )
+    if mismatched:
+        raise NarrativeError(
+            f"{len(mismatched)} 个人设的真值指纹与冻结文件不符（前几个："
+            f"{mismatched[:5]}）。同一个 ID 背后换了人——多半是换了 seed、先验或"
+            f"生成算法。继续绑定会得到一条**错配臂**，而它不会报错"
         )
     return out
 

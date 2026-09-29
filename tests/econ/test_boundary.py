@@ -1,15 +1,20 @@
 """CLAUDE.md hard rule 1 / README §3.2: the type boundary."""
 
 import math
+from dataclasses import replace
 
 import pytest
 
 from common.money import USD_2024_US100, WelfareLevel
 from econ.types import (
+    ANSWER_SIDE_TYPES,
     AgentInput,
     BoundaryViolationError,
+    ChoiceSetTruth,
+    GroundTruth,
     Observable,
     ObservableTier,
+    Persona,
     PersonaParams,
 )
 
@@ -112,3 +117,74 @@ def test_malformed_tiers_are_rejected(core, persona):
 def test_exponents_must_sum_to_one():
     with pytest.raises(ValueError, match="sum to 1"):
         PersonaParams(alpha=0.5, beta=0.3, theta={"safety": 0.4})
+
+
+# --------------------------------------------------------------------------
+# 代码审核 F3：两条真实绕过路径
+# --------------------------------------------------------------------------
+
+
+def test_an_answer_object_inside_a_dataclass_field_is_caught(core, persona):
+    """**旧实现放行这条。**
+
+    `_reject_answer_side` 过去只递归 Mapping 与 Sequence，不进 dataclass 字段。
+    `Observable.l0_amenities` 的注解是 `Mapping[str, float]`，但注解拦不住运行时
+    真的塞一个 `PersonaParams` 进去——于是真值藏在一个合法的可见对象**内部**，
+    检查照样通过。
+    """
+    options = list(_observables(core, persona, ObservableTier.O1))
+    leaky = replace(options[0], l0_amenities={"safety": 0.5, "leak": persona.params})
+    with pytest.raises(BoundaryViolationError, match="l0_amenities"):
+        AgentInput(brief=persona.brief, options=(leaky, *options[1:]))
+
+
+def test_a_choice_set_truth_is_refused(core, persona):
+    """**旧实现放行这条。** `ChoiceSetTruth` 当时不在 forbidden 元组里。"""
+    cities = tuple(c.city for c in core.cities.values())
+    cst = ChoiceSetTruth(
+        persona_id=persona.persona_id,
+        year=2024,
+        cities=cities,
+        ln_utility={c.code: -1.0 - i for i, c in enumerate(cities)},
+        w_material=persona.params.alpha + persona.params.beta,
+        ln_kappa=0.0,
+        argmax_city=cities[0],
+        numeraire=USD_2024_US100,
+        reference="US_MSA_2024",
+    )
+    with pytest.raises(BoundaryViolationError, match="ChoiceSetTruth"):
+        AgentInput(brief=persona.brief, options=(cst,))
+
+
+def test_every_answer_side_type_is_listed(core, persona):
+    """漏掉一个类型，就等于给它开了一扇门。
+
+    这条把"清单是否齐全"变成一个会失败的断言：`econ.types` 里凡是携带真值的
+    dataclass，都必须在 `ANSWER_SIDE_TYPES` 里。
+    """
+    assert set(ANSWER_SIDE_TYPES) == {
+        GroundTruth,
+        ChoiceSetTruth,
+        Persona,
+        PersonaParams,
+        WelfareLevel,
+    }
+
+
+def test_a_self_referential_payload_does_not_recurse_forever(core, persona):
+    """环不该变成 RecursionError——那不是一个边界判定。"""
+    cyclic: dict = {"ok": 1.0}
+    cyclic["self"] = cyclic
+    options = list(_observables(core, persona, ObservableTier.O1))
+    leaky = replace(options[0], l0_amenities=cyclic)
+    AgentInput(brief=persona.brief, options=(leaky, *options[1:]))
+
+
+def test_the_visible_side_still_passes_after_the_deeper_walk(core, persona):
+    """递归变深之后合法输入必须照常通过，否则这个修复把边界焊死了。"""
+    ai = AgentInput(
+        brief=persona.brief,
+        options=_observables(core, persona, ObservableTier.O3),
+        permutation=(1, 2, 0),
+    )
+    assert len(ai.options) == 3

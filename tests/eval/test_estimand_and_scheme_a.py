@@ -313,3 +313,143 @@ def test_signed_errors_are_kept_not_just_magnitudes(tables):
     rec = t["matched"].as_dict()["records"]
     errs = [r["error_material"] for r in rec]
     assert min(errs) < 0 < max(errs)
+
+
+# --------------------------------------------------------------------------
+# 窗口与 r 的有效性必须分开记（代码审核复现的边界）
+# --------------------------------------------------------------------------
+
+
+def test_a_mostly_negative_window_does_not_yield_an_r_interval():
+    """**旧实现在这里给出一个宽度为零的"区间"。**
+
+    199/200 次窗口为负、1 次为正时，旧代码返回 status=ok、n_valid=200、
+    r_ci≈(0.2, 0.2)——拿唯一那次的 r 当区间依据。那不是精度，是样本量为一。
+    """
+    from eval.floors.window import window_uncertainty
+
+    s = np.full(200, 0.5)
+    lam = np.full(200, 0.9)
+    s[0] = 1.5
+    m = np.full(200, 0.62)
+    m[0] = 1.02
+
+    u = window_uncertainty(s_shuffled=s, lam=lam, s_matched=m, n_requested=200)
+
+    assert u.status == "ok", "窗口 SE 本身仍可估——s 与 λ 都有限"
+    assert u.r_status == "too_many_nonpositive_windows"
+    assert u.r_ci is None
+    assert not u.r_is_reportable
+    assert u.n_valid == 200
+    assert u.n_valid_r == 1, "两个有效次数必须分开记"
+    assert u.nonpositive_window_fraction == pytest.approx(0.995)
+
+
+def test_window_se_being_estimable_does_not_make_r_reportable():
+    """两个状态是两件事，不能用一个 status 概括。"""
+    from eval.floors.window import window_uncertainty
+
+    rng = np.random.default_rng(7)
+    n = 300
+    shared = rng.normal(0, 0.05, n)
+    # 让 W = s − λ 的均值恰好为零：约一半的重抽会翻负。
+    u = window_uncertainty(
+        s_shuffled=0.40 + shared,
+        lam=0.40 + 0.5 * shared,
+        s_matched=0.39 + 0.7 * shared,
+        n_requested=n,
+    )
+    assert 0.3 < u.nonpositive_window_fraction < 0.7, "构造要真的让一半窗口翻负"
+    assert u.window_se is not None
+    assert u.r_status != "ok"
+    assert u.r_ci is None
+
+
+def test_a_healthy_window_still_gives_an_r_interval():
+    """反面：正常情形必须照常出区间，否则上面两条只是把功能关掉了。"""
+    from eval.floors.window import window_uncertainty
+
+    rng = np.random.default_rng(0)
+    n = 300
+    shared = rng.normal(0, 0.05, n)
+    u = window_uncertainty(
+        s_shuffled=1.05 + shared + rng.normal(0, 0.02, n),
+        lam=0.25 + 0.8 * shared + rng.normal(0, 0.02, n),
+        s_matched=0.55 + 0.9 * shared + rng.normal(0, 0.02, n),
+        n_requested=n,
+    )
+    assert u.status == "ok" and u.r_status == "ok"
+    assert u.r_ci is not None and u.r_ci[0] < u.r_point < u.r_ci[1]
+    assert u.nonpositive_window_fraction == 0.0
+
+
+def test_a_failed_arm_voids_the_whole_replicate():
+    """任一臂失败 → 整个 replicate 作废。
+
+    各臂各自删掉失败记录再拼数组，第 j 个 `s` 与第 j 个 `λ` 就不再来自同一次
+    抽样，而 `SE(W)` 的全部意义就在于它们来自同一次。
+    """
+    from eval.floors.window import joint_bootstrap, paired_slopes
+
+    def fit_both(picks, rep_seed):
+        if rep_seed % 2 == 0:
+            err = RuntimeError("shuffled 臂拟合失败")
+            err.arm = "shuffled"
+            raise err
+        return {"floor|t=None|stratum=None": 0.3, "shuffled|t=None|stratum=None": 1.0}
+
+    reps = joint_bootstrap(n_replicates=12, seed=3, draw_picks=lambda s: ["p0"], fit_both=fit_both)
+    lam, lam_ids = paired_slopes(reps, "floor|t=None|stratum=None")
+    sh, sh_ids = paired_slopes(reps, "shuffled|t=None|stratum=None")
+
+    assert lam_ids == sh_ids, "两个臂必须留下同一组 replicate ID"
+    assert len(lam) == len(sh) < 12
+    assert any(not r.ok for r in reps)
+    assert {r.failed_arm for r in reps if not r.ok} == {"shuffled"}
+
+
+# --------------------------------------------------------------------------
+# ALR 变换统一（F4）
+# --------------------------------------------------------------------------
+
+
+def test_the_two_alr_transforms_are_now_one():
+    """`scheme_a` 委托到 `eval.recovery.alr`，不再各维护一份。"""
+    from eval.recovery.alr import weights_from_alr
+
+    rng = np.random.default_rng(11)
+    a = rng.normal(0, 3.0, size=(5_000, 6))
+    for base in (0, 1, 3):
+        np.testing.assert_array_equal(softmax_with_base(a, base), weights_from_alr(a, base))
+
+
+def test_the_unified_transform_is_bit_identical_on_realistic_coordinates():
+    """统一**不改变**现有数值——这一条靠新旧对照验证，不靠"零命中"推断。"""
+    from eval.recovery.alr import clip_hits, weights_from_alr
+
+    def unclipped(a, base):
+        a = np.asarray(a, float)
+        n = a.shape[-1] + 1
+        keep = [k for k in range(n) if k != base]
+        full = np.zeros((*a.shape[:-1], n))
+        full[..., keep] = a
+        full = full - full.max(-1, keepdims=True)
+        e = np.exp(full)
+        return e / e.sum(-1, keepdims=True)
+
+    rng = np.random.default_rng(2)
+    a = rng.normal(-2.0, 2.4, size=(50_000, 6))  # 实际拟合分布的量级
+    assert clip_hits(a) == 0
+    for base in (0, 1):
+        np.testing.assert_array_equal(weights_from_alr(a, base), unclipped(a, base))
+
+
+def test_the_clip_counter_can_actually_fire():
+    """让上一条有牙：截断确实会造成差异，只是在现有量级上不发生。"""
+    from eval.recovery.alr import ALR_COORD_CAP, clip_hits, weights_from_alr
+
+    extreme = np.array([[60.0, 50.0, 0.0, 0.0, 0.0, 0.0]])
+    assert clip_hits(extreme) == 2
+    assert ALR_COORD_CAP == 40.0
+    w = weights_from_alr(extreme, 0)
+    assert w[0, 1] == pytest.approx(0.5), "截断抹掉了 60 与 50 之间的差"

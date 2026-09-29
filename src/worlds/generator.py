@@ -97,13 +97,6 @@ def _sample_latent(
     return z @ chol.T
 
 
-def _standard_normal_cdf(x: np.ndarray) -> np.ndarray:
-    """Φ(x)。用 erf 而不是引 scipy，这一处不值得多一个依赖。"""
-    from math import erf, sqrt
-
-    return np.vectorize(lambda v: 0.5 * (1.0 + erf(v / sqrt(2.0))))(x)
-
-
 def _assign_states(
     latent: np.ndarray, calibration: AttributeCalibration, rng: np.random.Generator
 ) -> list[str]:

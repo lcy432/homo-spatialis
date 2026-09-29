@@ -19,18 +19,27 @@ from eval.recovery import (
     RESEARCH_PROFILE_ALR_FULL_MATERIAL,
     RecoveryConfig,
     RecoveryResult,
-    block_bootstrap,
     fit_research,
 )
+from eval.recovery.bootstrap import resample_persona_ids
+from eval.recovery.design import base_index
 from eval.recovery.msl_alr import alr_posterior_at
 from eval.recovery.schema import ChoiceDataset
+from eval.sampling.moments import empirical_alr_moments
 
 from .bias import BiasTable, bias_table, calibration_alphas
 from .design import ReferenceDesign, build_floor_arm, build_shuffled_arm, dimension_names
 from .gates import gate_three, gate_two
 from .geometry import arm_slope, collapse_ratio, projections, shared_geometry
-from .path import calibrate_logistic_normal, covariance_path, simplex_moment_feasibility
+from .scheme_a import PROTOCOL, PROTOCOL_VERSION, scheme_a_path
 from .sigma import calibrate_sigma, measured_disagreement, simulate_repeats
+from .window import (
+    MIN_REPLICATES_FOR_FORMAL_SE,
+    independent_se_would_be,
+    joint_bootstrap,
+    paired_slopes,
+    window_uncertainty,
+)
 
 
 def _fit_research_adapter(dataset: ChoiceDataset, cfg: RecoveryConfig) -> RecoveryResult:
@@ -219,28 +228,39 @@ def _repeat_ln_utilities(design: ReferenceDesign, config: dict[str, Any]):
 
 
 def _lambda_path(config, design, arm, floor_fit, geom, truth, sigma) -> dict[str, Any]:
-    """`Σ_w(t)` 路径上的 λ(t)。总体参数被目标矩钉死，**不重新拟合总体**。"""
+    """`λ(t)`，**方案 A**（`DECISIONS/0015` 裁决四）。
+
+    五个条件都在这里兑现，每一条都写进产出供核对：
+
+    1. 共享中心 `c` 取匹配分布的 `E[softmax(a)]`。这里用 `geom.centre`，它来自
+       `AlrFit.w_center`（权重空间实算），**不是** `softmax(μ_a)`。
+    2. 注入协方差取**本次实际名单 S** 的 ALR 坐标矩（ddof=0），不是 P 的闭式解，
+       也不是权重空间的 `np.cov`。
+    3. 各臂、所有 `t` 共用同一个 `c` 与同一份 `d/u`——就是传进来的 `geom`，
+       本函数**不另造中心**。
+    4. 每个 `t` 的独立积分点校验若不过，该点标 invalid，**不发 λ**。
+    5. 匹配臂缺席时用地板臂顶替，产出里带显式占位标记。
+    """
     grid = np.array(config["lambda_path"]["t_grid"], dtype=float)
-    sigma_injected = np.cov(truth, rowvar=False)
-    sigma_matched = floor_fit.result.sigma_w_hat  # 开发阶段用地板臂自身的 Σ̂ 占位
-    targets = covariance_path(sigma_injected, sigma_matched, grid)
-
-    # **均值必须与协方差一起插值。** §1.2.2 只写了 Σ(t)，没写均值目标；实测
-    # 把注入均值配上拟合协方差会在端点给出不可行的 (均值, Σ)——本仓库实测
-    # Var(commute)=0.1334 超过该均值下的伯努利上界 0.0904，那对矩不对应单纯形
-    # 上任何分布。总体是 (均值, 协方差) 一对，插值就要一起插（DECISIONS/0013 第六节）。
-    mean_injected = truth.mean(axis=0)
-    mean_matched = floor_fit.result.w_center_hat
-    means = [(1.0 - float(t)) * mean_injected + float(t) * mean_matched for t in grid]
-
-    from eval.recovery.design import base_index
-
     base = base_index(RESEARCH_PROFILE_ALR_FULL_MATERIAL.config.base_dim)
+
+    # 条件 2：注入端取本次名单 S 的 ALR 矩
+    injected = empirical_alr_moments(truth, base=base)
+    c_a_matched = floor_fit.result.fit.sigma_alr
+
+    # 条件 1、3：中心就是 geom 的那一个，不另造
+    centre = geom.centre
+
+    # 条件 5：匹配臂缺席
+    matched_is_placeholder = True
+
+    path = scheme_a_path(injected.covariance, c_a_matched, centre, grid, base=base)
+
     points: list[dict[str, Any]] = []
-    for t, cov, target_mean in zip(grid, targets, means, strict=True):
-        cal = calibrate_logistic_normal(target_mean, cov, base=base, t=float(t))
+    for cal in path:
         entry: dict[str, Any] = {**cal.as_dict()}
-        if cal.status == "ok":
+        # 条件 4：校验不过就不发 λ
+        if cal.valid:
             post = alr_posterior_at(
                 arm.dataset,
                 base,
@@ -251,74 +271,147 @@ def _lambda_path(config, design, arm, floor_fit, geom, truth, sigma) -> dict[str
                 seed=RESEARCH_PROFILE_ALR_FULL_MATERIAL.config.seed,
             )
             proj = projections(post.weight_mean, truth, geom)
-            s = arm_slope(
+            sl = arm_slope(
                 proj,
                 geom,
-                arm=f"floor_t={t:.2f}",
+                arm=f"floor_t={cal.t:.2f}",
                 source="synthetic_truth_softmax",
                 with_intercept=bool(config["geometry"]["regression_with_intercept"]),
             )
-            entry["lambda"] = s.slope
-            entry["n_used"] = s.n_used
+            entry["lambda"] = sl.slope
+            entry["n_used"] = sl.n_used
         else:
             entry["lambda"] = None
+            entry["n_used"] = 0
+            entry["lambda_withheld_because"] = cal.status
         points.append(entry)
 
     realised = [p for p in points if p["lambda"] is not None]
     return {
-        "protocol": "DECISIONS/0013 sixth section: weight-space moment calibration, "
-        "population parameters pinned by target moments, posterior evaluated at fixed "
-        "parameters (population NOT re-estimated)",
-        "sigma_used": sigma,
-        "target_mean_source": "interpolated_with_covariance_(1-t)*injected+t*matched",
-        "why_mean_is_interpolated": (
-            "只插值 Σ 会在端点给出不可行的 (均值, Σ)：实测 Var(commute)=0.1334 "
-            "超过注入均值下的伯努利上界 0.0904。总体是一对矩，必须一起插值"
+        "protocol": PROTOCOL,
+        "protocol_version": PROTOCOL_VERSION,
+        "protocol_description": (
+            "方案 A：共享权重中心固定为匹配分布的 E[softmax(a)]，只在 ALR 空间"
+            "插值协方差并逐 t 校准位置 μ_a(t)。**不是**权重空间的均值/协方差共同插值"
         ),
-        "sigma_matched_source": "placeholder_floor_arm_fitted_sigma_w_until_real_matched_arm_exists",
-        "feasibility_of_endpoints": [
-            simplex_moment_feasibility(means[0], targets[0]).as_dict(),
-            simplex_moment_feasibility(means[-1], targets[-1]).as_dict(),
-        ],
+        "sigma_used": sigma,
+        "sigma_treated_as": "fixed_exogenous_along_t",
+        "centre_source": geom.centre_source,
+        "centre_is_e_softmax_not_softmax_of_mean": True,
+        "injected_covariance_source": {
+            "estimand": injected.estimand,
+            "base_dim": base,
+            "ddof": injected.ddof,
+            "n": injected.n,
+            "note": "本次实际名单 S 的 ALR 坐标矩；**不是** P 的闭式解",
+        },
+        "matched_arm_is_placeholder": matched_is_placeholder,
+        "matched_placeholder_note": (
+            "真实匹配臂缺席，C_a,matched 暂用地板臂自身的 Σ_a 顶替。"
+            "**此产出不得当作坍缩结论**，只证明路径可执行"
+        ),
+        "shared_geometry_digest": {
+            "centre": [float(v) for v in geom.centre],
+            "n_personas": len(geom.d),
+            "n_d_near_zero": geom.n_near_zero,
+        },
         "points": points,
         "n_points_realised": len(realised),
         "n_points_requested": len(points),
-        "status": "ok" if len(realised) == len(points) else "partial_residual_above_tolerance",
+        "status": "ok" if len(realised) == len(points) else "partial_some_t_invalid",
     }
 
 
 def _bootstrap_window(arm, shuffled_arm, geom, truth, config, profile) -> dict[str, Any]:
-    """窗口 `(ŝ_shuffled − λ̂)` 的 block bootstrap。本轮跑小 B 的工程 smoke。"""
+    """窗口 `(ŝ_shuffled − λ̂)` 的联合 block bootstrap。
+
+    **两个臂用同一份抽样索引。** 这是 `SE(W)` 有意义的唯一前提：`Var(ŝ − λ̂)`
+    含 `−2·Cov(ŝ, λ̂)`，而协方差只有在两个数来自同一次抽样时才估得出来。
+    各臂各抽各的、或者只抽地板臂然后拿 `std(λ)` 冒充 `SE(W)`，都会算错，
+    而且方向取决于数据。
+
+    每个 replicate 内：同一份 picks → 两个臂各拟合 → **重估匹配中心** →
+    用那个中心构造**一份**共享几何 → 两个臂在这份几何上各出一条斜率。
+    任一臂失败 → 整个 replicate 作废（按 ID 联合处理）。
+    """
     b = int(config["bootstrap"]["n_replicates"])
+    stratified = bool(config["bootstrap"].get("stratified", False))
     index = {pid: i for i, pid in enumerate(arm.persona_ids)}
+    with_intercept = bool(config["geometry"]["regression_with_intercept"])
 
-    def metric(result):
-        src = [tag.split("#", 1)[0] for tag in result.persona_ids]
-        w_true = truth[[index[s] for s in src]]
-        g = shared_geometry(w_true, result.w_center_hat, centre_source="replicate_refit_centre")
-        proj = projections(result.w_hat, w_true, g)
-        s = arm_slope(proj, g, arm="floor", source="synthetic_truth_softmax")
-        return {"lambda": s.slope, "n_used": float(s.n_used)}
+    def draw_picks(rep_seed: int) -> list[str]:
+        # 条件：同一份索引；分层设计下保留事前层标签（strata 在 dataset 上）
+        return resample_persona_ids(
+            arm.dataset, np.random.default_rng(rep_seed), stratified=stratified
+        )
 
-    outcome = block_bootstrap(
-        arm.dataset,
-        profile.config,
+    def fit_both(picks, rep_seed: int) -> dict[str, float]:
+        cfg = replace(profile.config, seed=rep_seed)
+        out: dict[str, float] = {}
+        fits = {}
+        for name, a in (("floor", arm), ("shuffled", shuffled_arm)):
+            try:
+                fits[name] = _fit_research_adapter(a.dataset.take_personas(picks), cfg)
+            except Exception as exc:
+                exc.arm = name  # type: ignore[attr-defined]
+                raise
+
+        # 该次重估匹配中心；**两个臂共用这一份几何**
+        src = [tag.split("#", 1)[0] for tag in fits["floor"].persona_ids]
+        w_true = truth[[index[p] for p in src]]
+        g = shared_geometry(
+            w_true, fits["floor"].w_center_hat, centre_source="replicate_refit_centre"
+        )
+        out["_centre"] = g.centre  # type: ignore[assignment]
+
+        for name in ("floor", "shuffled"):
+            proj = projections(fits[name].w_hat, w_true, g)
+            sl = arm_slope(proj, g, arm=name, source="bootstrap", with_intercept=with_intercept)
+            out[f"{name}|t=None|stratum=None"] = sl.slope
+        return out
+
+    reps = joint_bootstrap(
         n_replicates=b,
         seed=int(config["bootstrap"]["seed"]),
-        metric_fn=metric,
-        fit_fn=_fit_research_adapter,
+        draw_picks=draw_picks,
+        fit_both=fit_both,
     )
-    lam = outcome.metric_values("lambda")
+
+    lam, lam_ids = paired_slopes(reps, "floor|t=None|stratum=None")
+    sh, sh_ids = paired_slopes(reps, "shuffled|t=None|stratum=None")
+    assert lam_ids == sh_ids, "两个臂的斜率必须来自同一组 replicate ID"
+
+    unc = window_uncertainty(
+        s_shuffled=sh,
+        lam=lam,
+        s_matched=None,  # 真实匹配臂缺席；r 的区间由 window_uncertainty 拒发
+        n_requested=b,
+        sigma_treated_as="fixed_exogenous_not_propagated",
+        coverage="pointwise_single_t_no_strata",
+    )
+    failures: dict[str, int] = {}
+    for r in reps:
+        if not r.ok and r.failure:
+            failures[r.failure] = failures.get(r.failure, 0) + 1
+
     return {
-        "n_requested": b,
-        "n_succeeded": len(outcome.successes),
-        "n_failed": outcome.n_failed,
-        "failure_reasons": outcome.failure_reasons(),
+        **unc.as_dict(),
+        "n_succeeded": len(lam_ids),
+        "n_failed": sum(1 for r in reps if not r.ok),
+        "failure_reasons": failures,
+        "failed_arms": sorted({r.failed_arm for r in reps if r.failed_arm}),
+        "both_arms_share_one_persona_draw": True,
+        "geometry_rebuilt_per_replicate": True,
+        "stratified": stratified,
         "lambda_values": [float(v) for v in lam],
-        "lambda_se": float(np.std(lam, ddof=1)) if len(lam) > 1 else None,
-        "window_se": float(np.std(lam, ddof=1)) if len(lam) > 1 else None,
-        "is_engineering_smoke_not_formal_interval": True,
-        "note": "小 B 输出不得充当正式置信区间，也不能作为门二 2b 的通过证据",
+        "s_shuffled_values": [float(v) for v in sh],
+        "replicate_ids": lam_ids,
+        "independence_diagnostic": (independent_se_would_be(sh, lam) if len(lam) > 1 else None),
+        "is_engineering_smoke_not_formal_interval": len(lam_ids) < MIN_REPLICATES_FOR_FORMAL_SE,
+        "note": (
+            "小 B 输出不得充当正式置信区间，也不能作为门二 2b 的通过证据。"
+            "σ 在本计算里是**固定条件**，其标定误差未传播"
+        ),
     }
 
 

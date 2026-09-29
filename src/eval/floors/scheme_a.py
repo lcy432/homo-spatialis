@@ -56,8 +56,13 @@ from typing import Any
 import numpy as np
 from scipy.optimize import minimize
 
+from eval.recovery.alr import weights_from_alr
+
 #: 协议名。进 run 与 floor 签名；正式入口只认这个。
-PROTOCOL = "scheme_a_shared_weight_centre_v1"
+PROTOCOL = "scheme_a_shared_weight_centre"
+#: 协议版本。**改变数值含义就要跳版本**，并进缓存/产物的兼容性检查。
+#: 缺这个字段的旧产物**不得**默认解释成新协议——见 `protocol_of`。
+PROTOCOL_VERSION = "v1"
 #: 已降级的旧协议。**正式入口拒绝**，只允许显式标注的历史复现。
 LEGACY_PROTOCOL = "joint_mean_covariance_interpolation_experimental"
 
@@ -71,16 +76,55 @@ NOISE_FLOOR_FACTOR = 3.0
 SOLVER_GTOL = 1e-10
 
 
+class ProtocolMismatchError(RuntimeError):
+    """产物/缓存的 t 路径协议与要求的不一致。**拒绝，不降级为警告。**"""
+
+
+def protocol_of(payload: dict[str, Any]) -> str:
+    """读一份产物的 t 路径协议。**缺字段绝不当成新协议。**
+
+    这条是本次审核最该防的那个失败模式的一部分：新模块写好了、测试过了，而
+    旧产物因为"没写协议字段"被默认解释成新协议，于是旧数字悄悄获得了新身份。
+    缺字段只可能是在协议字段存在之前写的，所以它**一定**是旧协议。
+    """
+    lp = payload.get("lambda_path", payload)
+    name = lp.get("protocol")
+    if name is None:
+        return LEGACY_PROTOCOL
+    # 旧产物把整段描述写在 protocol 里，不是一个名字。
+    if name.startswith("DECISIONS/0013"):
+        return LEGACY_PROTOCOL
+    version = lp.get("protocol_version")
+    return f"{name}@{version}" if version else name
+
+
+def require_formal_protocol(payload: dict[str, Any]) -> str:
+    """正式结果入口的守门。**旧协议在这里没有通过的可能。**
+
+    注意这与"旧协议须显式选"不是一回事：历史复现与实验入口可以跑旧协议，
+    但**不能靠一个开关让旧协议获得正式结果身份**。所以这里没有 `allow_legacy`
+    参数——要跑旧的就别走这个函数。
+    """
+    got = protocol_of(payload)
+    want = f"{PROTOCOL}@{PROTOCOL_VERSION}"
+    if got != want:
+        raise ProtocolMismatchError(
+            f"正式结果要求 t 路径协议 {want}，产物是 {got}。"
+            "旧协议的产物可作历史参考，**不能**当作正式结果；"
+            "缺协议字段的产物一律按旧协议处理，不默认成新的"
+        )
+    return got
+
+
 def softmax_with_base(a: np.ndarray, base: int) -> np.ndarray:
-    """`S_b(a)`：在基准维补零后取 softmax。`a` 是 (..., 6)。"""
-    a = np.asarray(a, dtype=float)
-    n = a.shape[-1] + 1
-    keep = [k for k in range(n) if k != base]
-    full = np.zeros((*a.shape[:-1], n), dtype=float)
-    full[..., keep] = a
-    full = full - full.max(axis=-1, keepdims=True)
-    e = np.exp(full)
-    return e / e.sum(axis=-1, keepdims=True)
+    """`S_b(a)`：在基准维补零后取 softmax。`a` 是 (..., 6)。
+
+    **委托到 `eval.recovery.alr.weights_from_alr`**，不另写一份。本模块曾经有
+    过自己的实现，与回收分支在截断上分叉：`a=[60,50,0,0,0,0]`、基准维 0 时
+    一个给 `[0.5, 0.5]`、另一个给 `[0.99995, 0.00005]`，差 0.49995。
+    分叉不会报错，只会让校准、似然与后验对应不同的模型。
+    """
+    return weights_from_alr(a, base)
 
 
 def shared_centre_from_fit(
@@ -137,6 +181,9 @@ class PositionCalibration:
     #: 独立点均值自身的蒙特卡洛标准误（逐维取最大）。**容差必须大于它的几倍**，
     #: 否则这个检查测的是自己的噪声。
     mc_se_holdout: float
+    #: 要让这个检查分辨得了声明的容差，独立点至少得有多少个。**噪声地板不是
+    #: 死路**：SE 按 `1/√n` 降，所以它总能被算出来，把它报出来才叫可操作。
+    n_draws_check_needed: int | None
     n_draws_solve: int
     n_draws_check: int
     protocol: str = PROTOCOL
@@ -161,6 +208,7 @@ class PositionCalibration:
             else [float(v) for v in np.diag(self.achieved_covariance)],
             "mean_abs_error_holdout": self.mean_abs_error_holdout,
             "mc_se_holdout": self.mc_se_holdout,
+            "n_draws_check_needed": self.n_draws_check_needed,
             "mean_tolerance": MEAN_TOL,
             "tolerance_is_resolvable": self.mean_abs_error_holdout == self.mean_abs_error_holdout
             and NOISE_FLOOR_FACTOR * self.mc_se_holdout <= MEAN_TOL,
@@ -180,7 +228,7 @@ def calibrate_position(
     base: int,
     t: float,
     n_draws: int = 80_000,
-    n_draws_check: int = 200_000,
+    n_draws_check: int = 500_000,
     seed: int = 4_099,
     check_seed: int = 7_717,
     start: np.ndarray | None = None,
@@ -211,6 +259,7 @@ def calibrate_position(
             achieved_covariance=None,
             mean_abs_error_holdout=float("nan"),
             mc_se_holdout=float("nan"),
+            n_draws_check_needed=None,
             n_draws_solve=n_draws,
             n_draws_check=n_draws_check,
         )
@@ -236,6 +285,8 @@ def calibrate_position(
     cov_out = (w2 - achieved_out).T @ (w2 - achieved_out) / w2.shape[0]
     err = float(np.abs(achieved_out - c).max())
     mc_se = float(np.sqrt(np.diag(cov_out) / w2.shape[0]).max())
+    # SE ∝ 1/√n，所以"要多少点才够"是可以直接解出来的。
+    needed = int(np.ceil(w2.shape[0] * (NOISE_FLOOR_FACTOR * mc_se / MEAN_TOL) ** 2))
 
     # **求解器自己那批点上的残差说明不了任何事**：凸问题的驻点就是"在那批点上
     # 均值命中目标"，所以它必然接近机器精度（实测 6e-11）。真正的误差是用
@@ -262,6 +313,7 @@ def calibrate_position(
         achieved_covariance=cov_out,
         mean_abs_error_holdout=err,
         mc_se_holdout=mc_se,
+        n_draws_check_needed=needed if needed > w2.shape[0] else None,
         n_draws_solve=n_draws,
         n_draws_check=n_draws_check,
     )

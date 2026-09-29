@@ -29,6 +29,7 @@ import numpy as np
 
 from eval.recovery import ResearchProfile, fit_research
 from eval.recovery.profiles import RESEARCH_PROFILE_ALR_FULL_MATERIAL, ResearchFit
+from eval.sampling.moments import empirical_weight_moments
 from worlds.personas import dirichlet_covariance, dirichlet_mean
 
 from .design import FloorArm, dimension_names
@@ -149,10 +150,17 @@ def bias_table(
         if alpha is not None
         else dirichlet_covariance(),
     )
+    # **S 的真值矩，ddof = 0**（`DECISIONS/0015` 裁决三）。复用
+    # `eval.sampling.moments`，不在这里另写一遍公式——两份公式迟早分叉，
+    # 而 ddof 差一位正是最难查的那种分叉。
+    #
+    # ddof 的适用范围到此为止：bootstrap 重抽的样本标准差仍用 ddof=1
+    # （那是从重抽分布里抽样，不是描述一份有限名单），**不做全项目替换**。
+    s_moments = empirical_weight_moments(truth, source="finite_sample_injected")
     realised = MomentSet(
         source="finite_sample_injected",
-        mean=truth.mean(axis=0),
-        covariance=np.cov(truth, rowvar=False),
+        mean=s_moments.mean,
+        covariance=s_moments.covariance,
     )
     fitted = MomentSet(
         source="fitted_population_weight_space",

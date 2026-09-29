@@ -1,0 +1,565 @@
+%% 基线 c3b9171；133 个 Python 文件；393 个静态显式依赖 + 2 个已确认动态加载。
+%% 箭头方向：导入者 --> 被导入者。虚线为延迟导入或动态加载。
+flowchart LR
+  subgraph g0["scripts"]
+    n0["_bootstrap.py"]
+    n1["check_env.py"]
+    n2["demo.py"]
+    n11["fetch_data.py"]
+    n12["freeze_reference.py"]
+    n13["generate_personas.py"]
+    n14["run_gate_one.py"]
+    n15["run_p8.py"]
+  end
+  subgraph g1["scripts/diagnostics"]
+    n3["check_base_change.py"]
+    n4["check_integration_precision.py"]
+    n5["compare_commute.py"]
+    n6["compare_p9.py"]
+    n7["diag1_multistart.py"]
+    n8["diag2_tasks.py"]
+    n9["diag3_material.py"]
+    n10["diagnose_commute.py"]
+  end
+  subgraph g2["src/agentlayer"]
+    n16["__init__.py"]
+  end
+  subgraph g3["src/common"]
+    n17["__init__.py"]
+    n18["config.py"]
+    n19["countries.py"]
+    n20["ids.py"]
+    n21["leakcheck.py"]
+    n22["money.py"]
+    n23["provenance.py"]
+    n24["providers.py"]
+    n25["runlog.py"]
+    n26["weights.py"]
+  end
+  subgraph g4["src/data"]
+    n27["__init__.py"]
+  end
+  subgraph g5["src/econ"]
+    n28["__init__.py"]
+    n29["core.py"]
+    n30["graph.py"]
+    n31["kernel.py"]
+    n32["types.py"]
+    n33["utility.py"]
+    n34["variety.py"]
+  end
+  subgraph g6["src/eval"]
+    n35["__init__.py"]
+    n36["baselines.py"]
+    n48["gates.py"]
+    n49["individual.py"]
+    n50["perturbation.py"]
+  end
+  subgraph g7["src/eval/floors"]
+    n37["__init__.py"]
+    n38["bias.py"]
+    n39["design.py"]
+    n40["gates.py"]
+    n41["geometry.py"]
+    n42["path.py"]
+    n43["reuse.py"]
+    n44["runner.py"]
+    n45["scheme_a.py"]
+    n46["sigma.py"]
+    n47["window.py"]
+  end
+  subgraph g8["src/eval/recovery"]
+    n51["__init__.py"]
+    n52["alr.py"]
+    n53["bootstrap.py"]
+    n54["design.py"]
+    n55["estimator.py"]
+    n56["identifiability.py"]
+    n57["inversion.py"]
+    n58["msl.py"]
+    n59["msl_alr.py"]
+    n60["profiles.py"]
+    n61["results.py"]
+    n62["schema.py"]
+    n63["xlogit_backend.py"]
+  end
+  subgraph g9["src/eval/sampling"]
+    n64["__init__.py"]
+    n65["draw.py"]
+    n66["moments.py"]
+    n67["plan.py"]
+    n68["report.py"]
+    n69["strata.py"]
+  end
+  subgraph g10["src/ledger"]
+    n70["__init__.py"]
+    n71["normalization.py"]
+  end
+  subgraph g11["src/ui"]
+    n72["__init__.py"]
+  end
+  subgraph g12["src/worlds"]
+    n73["__init__.py"]
+    n74["attributes.py"]
+    n75["controls.py"]
+    n76["difficulty.py"]
+    n77["dimensions.py"]
+    n78["elicitation.py"]
+    n79["generator.py"]
+    n80["narrative.py"]
+    n81["personas.py"]
+    n82["selfcheck.py"]
+    n83["shares.py"]
+    n84["targets.py"]
+    n85["taxes.py"]
+  end
+  subgraph g13["tests"]
+    n86["__init__.py"]
+    n87["conftest.py"]
+    n115["test_baselines.py"]
+    n116["test_config.py"]
+    n117["test_live_base_models.py"]
+    n118["test_money.py"]
+    n119["test_perturbation.py"]
+    n120["test_repo_hygiene.py"]
+    n121["test_runlog.py"]
+    n122["test_seams.py"]
+    n123["test_weights.py"]
+  end
+  subgraph g14["tests/econ"]
+    n88["__init__.py"]
+    n89["conftest.py"]
+    n90["test_assertions.py"]
+    n91["test_boundary.py"]
+    n92["test_contract.py"]
+    n93["test_kernel.py"]
+    n94["test_leak.py"]
+    n95["test_money_metric.py"]
+    n96["test_order_leakage.py"]
+    n97["test_single_count.py"]
+    n98["test_tie_and_entropy.py"]
+  end
+  subgraph g15["tests/eval"]
+    n99["__init__.py"]
+    n100["conftest.py"]
+    n101["synthetic.py"]
+    n102["test_estimand_and_scheme_a.py"]
+    n103["test_floors.py"]
+    n104["test_gate_one_calibration.py"]
+    n105["test_identifiability.py"]
+    n106["test_minimal_check_cache.py"]
+    n107["test_recovery_alr.py"]
+    n108["test_recovery_bootstrap.py"]
+    n109["test_recovery_estimator.py"]
+    n110["test_recovery_golden.py"]
+    n111["test_recovery_math.py"]
+    n112["test_recovery_schema.py"]
+    n113["test_recovery_xlogit.py"]
+    n114["test_sampling.py"]
+  end
+  subgraph g16["tests/worlds"]
+    n124["test_attributes.py"]
+    n125["test_controls_and_selfcheck.py"]
+    n126["test_difficulty.py"]
+    n127["test_elicitation.py"]
+    n128["test_generator.py"]
+    n129["test_long_commute_arm.py"]
+    n130["test_money_metric_on_real_personas.py"]
+    n131["test_narrative.py"]
+    n132["test_targets.py"]
+  end
+  n1 --> n0
+  n1 --> n18
+  n2 --> n0
+  n2 --> n18
+  n2 --> n25
+  n2 --> n76
+  n2 --> n79
+  n2 --> n81
+  n2 --> n82
+  n3 --> n51
+  n3 --> n52
+  n3 -.-> n55
+  n3 --> n58
+  n3 --> n59
+  n3 --> n60
+  n3 --> n74
+  n3 --> n76
+  n3 --> n77
+  n3 --> n79
+  n3 --> n81
+  n3 --> n82
+  n4 -.-> n3
+  n4 --> n52
+  n4 --> n58
+  n4 --> n59
+  n5 --> n51
+  n5 --> n74
+  n5 --> n76
+  n5 --> n77
+  n5 --> n79
+  n5 --> n81
+  n5 --> n82
+  n6 --> n51
+  n6 --> n52
+  n6 -.-> n54
+  n6 --> n58
+  n6 --> n59
+  n6 --> n81
+  n7 --> n51
+  n7 --> n52
+  n7 --> n58
+  n7 --> n59
+  n7 --> n74
+  n7 --> n76
+  n7 --> n77
+  n7 --> n79
+  n7 --> n81
+  n7 --> n82
+  n8 --> n51
+  n8 --> n74
+  n8 --> n76
+  n8 --> n77
+  n8 --> n79
+  n8 --> n81
+  n8 --> n82
+  n9 --> n51
+  n9 --> n52
+  n9 --> n58
+  n9 --> n59
+  n9 --> n74
+  n9 --> n76
+  n9 --> n77
+  n9 --> n79
+  n9 --> n81
+  n9 --> n82
+  n10 --> n51
+  n10 --> n74
+  n10 --> n76
+  n10 --> n77
+  n10 --> n79
+  n10 --> n81
+  n10 --> n82
+  n13 --> n0
+  n13 --> n18
+  n13 -.-> n77
+  n13 --> n80
+  n13 --> n81
+  n14 --> n0
+  n14 --> n18
+  n14 --> n25
+  n14 --> n48
+  n15 --> n0
+  n15 --> n25
+  n15 --> n37
+  n19 --> n24
+  n24 --> n20
+  n24 --> n22
+  n24 --> n23
+  n29 --> n20
+  n29 --> n22
+  n29 --> n24
+  n29 --> n30
+  n29 --> n32
+  n29 --> n33
+  n29 --> n34
+  n31 --> n20
+  n31 --> n22
+  n31 --> n32
+  n32 --> n20
+  n32 --> n22
+  n32 --> n24
+  n32 -.-> n33
+  n33 --> n32
+  n34 --> n20
+  n36 --> n20
+  n36 --> n29
+  n36 --> n32
+  n36 --> n33
+  n37 --> n38
+  n37 --> n39
+  n37 --> n40
+  n37 --> n41
+  n37 --> n42
+  n37 --> n43
+  n37 --> n44
+  n37 --> n45
+  n37 --> n46
+  n37 --> n47
+  n38 --> n39
+  n38 --> n51
+  n38 --> n60
+  n38 --> n81
+  n39 --> n32
+  n39 --> n51
+  n39 --> n74
+  n39 --> n76
+  n39 --> n77
+  n39 --> n79
+  n39 --> n81
+  n39 --> n82
+  n42 --> n52
+  n44 --> n38
+  n44 --> n39
+  n44 --> n40
+  n44 --> n41
+  n44 --> n42
+  n44 --> n46
+  n44 --> n51
+  n44 -.-> n54
+  n44 --> n59
+  n44 --> n62
+  n44 -.-> n76
+  n44 -.-> n79
+  n44 -.-> n81
+  n48 --> n22
+  n48 --> n24
+  n48 --> n29
+  n48 --> n36
+  n48 --> n50
+  n48 --> n74
+  n48 --> n79
+  n48 --> n81
+  n48 --> n84
+  n50 -.-> n26
+  n51 --> n52
+  n51 --> n53
+  n51 --> n54
+  n51 --> n55
+  n51 --> n56
+  n51 --> n57
+  n51 --> n58
+  n51 --> n59
+  n51 --> n60
+  n51 --> n61
+  n51 --> n62
+  n52 --> n54
+  n53 --> n55
+  n53 --> n61
+  n53 --> n62
+  n54 --> n77
+  n55 --> n54
+  n55 --> n57
+  n55 --> n58
+  n55 --> n59
+  n55 --> n61
+  n55 --> n62
+  n55 --> n77
+  n56 --> n54
+  n56 --> n62
+  n56 --> n77
+  n57 --> n54
+  n58 --> n54
+  n58 --> n62
+  n59 --> n52
+  n59 --> n54
+  n59 --> n58
+  n59 --> n62
+  n60 --> n52
+  n60 --> n54
+  n60 --> n55
+  n60 --> n58
+  n60 --> n59
+  n60 --> n61
+  n60 --> n62
+  n61 --> n57
+  n61 --> n77
+  n62 --> n33
+  n62 --> n77
+  n63 --> n54
+  n63 --> n62
+  n64 --> n65
+  n64 --> n66
+  n64 --> n67
+  n64 --> n68
+  n64 --> n69
+  n65 --> n32
+  n65 --> n67
+  n65 --> n69
+  n65 -.-> n77
+  n65 --> n81
+  n66 --> n81
+  n67 --> n69
+  n68 --> n67
+  n69 --> n81
+  n74 --> n77
+  n75 --> n20
+  n75 --> n32
+  n75 --> n79
+  n76 --> n20
+  n76 --> n29
+  n76 --> n32
+  n76 --> n77
+  n76 --> n79
+  n78 --> n20
+  n78 --> n24
+  n78 --> n32
+  n78 --> n77
+  n78 --> n83
+  n79 --> n20
+  n79 -.-> n29
+  n79 --> n31
+  n79 --> n32
+  n79 --> n74
+  n79 --> n77
+  n79 --> n85
+  n80 --> n21
+  n80 --> n32
+  n80 --> n77
+  n81 --> n20
+  n81 --> n32
+  n81 --> n74
+  n81 --> n77
+  n81 --> n78
+  n81 --> n83
+  n82 --> n32
+  n82 --> n76
+  n83 --> n20
+  n83 --> n24
+  n84 --> n20
+  n84 --> n29
+  n84 --> n32
+  n84 --> n33
+  n85 --> n20
+  n85 --> n22
+  n87 -.-> n22
+  n87 -.-> n29
+  n87 --> n76
+  n87 --> n79
+  n87 --> n81
+  n89 --> n20
+  n89 --> n22
+  n89 --> n24
+  n89 --> n29
+  n89 --> n30
+  n89 --> n31
+  n89 --> n32
+  n89 -.-> n33
+  n90 -.-> n22
+  n90 --> n32
+  n90 --> n33
+  n90 --> n89
+  n91 --> n22
+  n91 --> n32
+  n92 --> n22
+  n92 --> n24
+  n92 --> n29
+  n92 --> n32
+  n92 --> n89
+  n93 --> n22
+  n93 --> n31
+  n94 --> n21
+  n94 --> n32
+  n94 --> n89
+  n95 --> n32
+  n95 --> n33
+  n96 --> n21
+  n97 --> n22
+  n97 --> n30
+  n97 --> n89
+  n98 -.-> n32
+  n98 --> n89
+  n100 --> n101
+  n101 --> n51
+  n101 --> n81
+  n102 --> n45
+  n102 --> n49
+  n102 --> n64
+  n102 --> n66
+  n102 --> n77
+  n102 --> n81
+  n103 --> n37
+  n103 -.-> n44
+  n103 -.-> n46
+  n103 --> n51
+  n103 --> n77
+  n103 --> n81
+  n104 --> n48
+  n104 --> n74
+  n104 --> n79
+  n104 --> n81
+  n105 --> n51
+  n105 --> n77
+  n105 --> n101
+  n106 -.-> n3
+  n106 --> n101
+  n107 --> n51
+  n107 --> n52
+  n107 --> n58
+  n107 --> n59
+  n107 --> n77
+  n107 --> n101
+  n108 --> n51
+  n108 --> n53
+  n108 --> n101
+  n109 --> n51
+  n109 --> n58
+  n109 --> n77
+  n109 --> n101
+  n110 --> n51
+  n110 --> n58
+  n110 --> n101
+  n111 --> n51
+  n111 --> n77
+  n111 --> n81
+  n112 --> n33
+  n112 --> n51
+  n112 --> n77
+  n112 -.-> n82
+  n112 --> n101
+  n113 --> n51
+  n113 --> n63
+  n113 --> n101
+  n114 --> n37
+  n114 -.-> n53
+  n114 --> n64
+  n114 --> n81
+  n114 -.-> n101
+  n115 --> n24
+  n115 -.-> n32
+  n115 --> n36
+  n115 --> n50
+  n115 --> n81
+  n116 --> n18
+  n117 --> n18
+  n118 --> n22
+  n119 --> n26
+  n119 --> n50
+  n121 --> n25
+  n122 --> n19
+  n122 --> n20
+  n122 --> n22
+  n122 --> n23
+  n122 --> n24
+  n123 --> n26
+  n124 --> n74
+  n124 --> n77
+  n125 --> n75
+  n125 --> n76
+  n125 --> n81
+  n125 --> n82
+  n126 --> n76
+  n126 --> n81
+  n127 --> n20
+  n127 --> n77
+  n127 --> n78
+  n127 --> n83
+  n128 --> n29
+  n128 --> n77
+  n128 --> n79
+  n129 --> n51
+  n129 --> n74
+  n129 --> n76
+  n129 --> n77
+  n129 --> n79
+  n129 --> n81
+  n129 --> n82
+  n130 --> n32
+  n130 --> n33
+  n130 --> n81
+  n131 --> n77
+  n131 --> n80
+  n131 --> n81
+  n132 -.-> n33
+  n132 --> n81
+  n132 --> n84

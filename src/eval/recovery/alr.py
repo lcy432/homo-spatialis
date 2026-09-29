@@ -50,8 +50,26 @@ def expand_alr(a: np.ndarray, base: int) -> np.ndarray:
     return full
 
 
+def clip_hits(a: np.ndarray) -> int:
+    """会被 `ALR_COORD_CAP` 截断的坐标个数。
+
+    **这是本项目唯一的权重变换里唯一一处非线性钳制**，而解析梯度是按**未截断**
+    的 softmax 推的，不含截断的导数。所以截断一旦真的发生，似然与梯度就不再
+    对应同一个模型。
+
+    一次性测到"零命中"不等于永远不会命中——历史缓存、别的基准维、bootstrap
+    重抽、以及优化器走过的中间参数都没被那一次测量覆盖。所以把它做成一个随时
+    可调的计数器，而不是一条写在备忘录里的观察。
+    """
+    return int((np.abs(np.asarray(a, dtype=float)) > ALR_COORD_CAP).sum())
+
+
 def weights_from_alr(a: np.ndarray, base: int) -> np.ndarray:
-    """ALR 坐标 → 七维权重。稳定 softmax，构造上严格为正且和为一。"""
+    """ALR 坐标 → 七维权重。稳定 softmax，构造上严格为正且和为一。
+
+    **全项目唯一的 ALR→权重实现。** `floors.scheme_a` 委托到这里；两份各自
+    维护的版本已经分叉过一次（截断与否，极端坐标下差 0.49995）。
+    """
     full = expand_alr(a, base)
     full = np.clip(full, -ALR_COORD_CAP, ALR_COORD_CAP)
     full -= full.max(axis=-1, keepdims=True)

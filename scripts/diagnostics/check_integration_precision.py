@@ -98,7 +98,11 @@ def evaluate(ds, mu, chol, gamma_0, base, n_draws, seed):
     ell = _panel_loglik(w, gamma_0, lay)
     q, _ = _posterior_weights(ell)
     post = np.einsum("ir,irk->ik", q, w)
-    return mean, cov, post
+    # 有效样本量：后验权重集中之后，每个人实际用上的抽样点远少于 R。
+    # 这正是个体后验比总体矩难积得多的原因——总体矩用满 n_personas × R 个点，
+    # 个体后验每人只用上 ESS_i 个。
+    ess = 1.0 / np.sum(q**2, axis=1)
+    return mean, cov, post, ess
 
 
 def main() -> int:
@@ -107,6 +111,8 @@ def main() -> int:
     ap.add_argument("--out", type=Path, default=OUT / "integration-precision.json")
     ap.add_argument("--budget-seconds", type=float, default=1800.0)
     ap.add_argument("--n-randomisations", type=int, default=N_RANDOMISATIONS)
+    ap.add_argument("--grid", type=int, nargs="+", default=list(R_GRID))
+    ap.add_argument("--reference", type=int, default=R_REFERENCE)
     args = ap.parse_args()
 
     import importlib.util
@@ -137,26 +143,37 @@ def main() -> int:
 
     say(f"\n参照点 R* = {R_REFERENCE}")
     t0 = time.time()
-    ref_mean, ref_cov, ref_post = evaluate(ds, mu, chol, gamma_0, MATERIAL, R_REFERENCE, 90_001)
+    ref_mean, ref_cov, ref_post, _ref_ess = evaluate(
+        ds, mu, chol, gamma_0, MATERIAL, args.reference, 90_001
+    )
     say(f"  {time.time() - t0:.0f}s")
 
     ref_cov_norm = float(np.linalg.norm(ref_cov, "fro"))
     rows = []
     started = time.time()
-    for r in R_GRID:
+    for r in args.grid:
         if time.time() - started > args.budget_seconds:
             say(f"\n预算 {args.budget_seconds:.0f}s 用尽，停在 R={r} 之前。已完成的照常落盘。")
             break
-        m1s, m2s, m3s = [], [], []
+        m1s, m2s, m3s, esss = [], [], [], []
         t0 = time.time()
         for j in range(args.n_randomisations):
-            mean, cov, post = evaluate(ds, mu, chol, gamma_0, MATERIAL, r, 1_000 + 97 * j)
+            mean, cov, post, ess = evaluate(ds, mu, chol, gamma_0, MATERIAL, r, 1_000 + 97 * j)
             m1s.append(float(np.abs(mean - ref_mean).max()))
             m2s.append(float(np.linalg.norm(cov - ref_cov, "fro") / ref_cov_norm))
             m3s.append(float(np.abs(post - ref_post).max()))
+            esss.append(ess)
+        ess_all = np.concatenate(esss)
         row = {
             "R": r,
             "seconds": time.time() - t0,
+            "seconds_per_randomisation": (time.time() - t0) / max(1, args.n_randomisations),
+            "effective_sample_size": {
+                "median": float(np.median(ess_all)),
+                "p10": float(np.quantile(ess_all, 0.10)),
+                "min": float(ess_all.min()),
+                "as_fraction_of_R": float(np.median(ess_all) / r),
+            },
             "M1_mean": {"median": float(np.median(m1s)), "se": float(np.std(m1s, ddof=1))},
             "M2_cov_rel_frobenius": {
                 "median": float(np.median(m2s)),
@@ -175,7 +192,8 @@ def main() -> int:
             )
         rows.append(row)
         say(
-            f"  R={r:>5} ({row['seconds']:5.1f}s)  "
+            f"  R={r:>5} ({row['seconds']:6.1f}s, ESS 中位 {row['effective_sample_size']['median']:6.1f}"
+            f" = {row['effective_sample_size']['as_fraction_of_R']:.1%} of R)  "
             + "  ".join(
                 f"{k.split('_')[0]} {row[k]['median']:.2e}±{row[k]['se']:.1e} {row[k]['verdict']}"
                 for k in TOL
@@ -188,7 +206,7 @@ def main() -> int:
     for r in (200, 3200):
         if not any(x["R"] == r for x in rows):
             continue
-        _, _, post = evaluate(ds, mu, chol, gamma_0, MATERIAL, r, 1_000)
+        _, _, post, _ess = evaluate(ds, mu, chol, gamma_0, MATERIAL, r, 1_000)
         per_person = np.abs(post - ref_post).max(axis=1)
         m3_dist[str(r)] = {
             "median": float(np.median(per_person)),
@@ -235,7 +253,7 @@ def main() -> int:
         "fits_run_this_check": 0,
         "cache": str(args.cache),
         "R_fit_from_cache": r_fit,
-        "R_reference": R_REFERENCE,
+        "R_reference": args.reference,
         "n_randomisations": args.n_randomisations,
         "tolerances": TOL,
         "se_fraction_required": SE_FRACTION,
