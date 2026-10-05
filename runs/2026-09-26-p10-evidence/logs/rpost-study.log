@@ -10,3 +10,12 @@
   531s
   R=  200 (  13.8s, ESS 中位    7.5 = 3.7% of R)  M1 1.78e-05±9.1e-06 ok  M2 4.32e-04±9.7e-05 ok  M3 1.85e-01±4.2e-02 not_established
   R= 3000 ( 208.5s, ESS 中位   88.4 = 2.9% of R)  M1 1.40e-06±7.2e-07 ok  M2 3.36e-05±1.9e-05 ok  M3 4.82e-02±9.3e-03 not_established
+  R= 5000 ( 349.4s, ESS 中位  145.6 = 2.9% of R)  M1 1.07e-06±5.7e-07 ok  M2 2.77e-05±1.3e-05 ok  M3 4.18e-02±9.8e-03 not_established
+  R=10000 ( 711.0s, ESS 中位  290.0 = 2.9% of R)  M1 6.12e-07±2.1e-07 ok  M2 1.52e-05±4.4e-06 ok  M3 2.57e-02±5.9e-03 not_established
+  R=20000 (1412.0s, ESS 中位  578.3 = 2.9% of R)  M1 3.11e-07±9.3e-08 ok  M2 9.31e-06±2.5e-06 ok  M3 1.79e-02±3.5e-03 not_established
+  M3 分布 R=  200  中位 3.36e-02  p90 6.91e-02  p99 1.27e-01  max 2.59e-01  超容差 1000/1000
+
+判定 R_moment @200: established
+     R_post   @200: not_established（满足后验容差的最小 R：None）
+     R_fit    @200: not_tested_by_this_check
+结果写入 runs\2026-09-26-p10-evidence\integration-precision-rpost.json

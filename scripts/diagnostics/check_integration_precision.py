@@ -202,8 +202,12 @@ def main() -> int:
 
     # M3 的分布。**判据不变**（预注册的就是 max），但只报 max 无法区分
     # "所有人都差"与"几个人很差"，而两者的处置完全不同。
+    #
+    # 取**网格的首尾**。写死 (200, 3200) 会在换网格之后悄悄只剩一个点——
+    # 2026-09-28 的 R_post 研究就撞上了这个，高 R 端的分布没算出来，而那正是
+    # "换中位数口径够不够"的决定性数字。
     m3_dist = {}
-    for r in (200, 3200):
+    for r in dict.fromkeys((args.grid[0], args.grid[-1])):
         if not any(x["R"] == r for x in rows):
             continue
         _, _, post, _ess = evaluate(ds, mu, chol, gamma_0, MATERIAL, r, 1_000)
