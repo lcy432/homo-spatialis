@@ -1,0 +1,86 @@
+# E1 补充"日常生活便利"的真实模型运行配置（DECISIONS/0033）：产品角色 Qwen3.8 Flash（configs/models.yaml 的 product_planner，滚动型号，
+# DECISIONS/0032），新名单 roster_e1_convenience.yaml（一位用户 × 两座城 × 每城一个分身 × 3 年）、新提示模板 e1-convenience-prompt-v1
+# （行动说明书多一节"日常杂务：设备与人工服务"）。
+#
+# 与 run_e1_7b_flash.yaml 相同：信息条件、每年 1 + 2 份候选、记忆政策、模型与角色、温度 0.2、思考关闭、JSON object、输出上限 4,096、
+# 超时 90 秒、SDK 自动重试关闭、每份候选最多 1 次服务重试——不为了表现调整温度或输出上限。不同的只有：名单与城市事实、提示模板、
+# 全局规划调用上限与付费预算。
+#
+# 付费预算：本轮授权的限额试跑。全部真实请求（含服务重试与计划修订）最多 12 次、应用侧估算最多 2 元，新账本在本轮证据目录里，不消耗也
+# 不重置旧试跑的 Max 账本（runs/2026-10-13-e1-7b-live-pilot/budget）与 Flash 账本（runs/2026-10-13-product-flash-switch/budget）。
+# 先导是名单第一项的第 1 年（pilot 命令），检查之后用 resume 从同一份冻结的归档继续完成整批；不另外从头再跑。预算保护是按已记录报价执行的
+# 应用侧控制，不是供应商级的账单上限；费用以供应商账单为准。
+
+run_notice: >-
+  exploratory_synthetic：日常生活便利的限额真实试跑（Qwen3.8 Flash，滚动型号）。合成城市、合成参数、合成人设；结果只说明这个模型在这一次
+  合成试跑里的表现，不代表模型的一般能力，也不是现实城市评价。
+
+run:
+  run_config_id: run.e1-convenience.flash
+  status: exploratory_synthetic
+  version: e1-7b-run-v1
+  roster: configs/life/roster_e1_convenience.yaml
+  city_facts: configs/life/city_facts_e1_convenience.yaml
+  information:
+    condition: product_stated_profile
+    show_stated_dimension_points: true
+    show_soft_preferences: true
+    show_hard_requirements: true
+    show_free_text: true
+    show_energy_level: true
+    show_stated_material_points: true
+    permission_version: e1-7b-product-v1
+  planning:
+    plans_per_year: 1
+    max_revisions_per_year: 2
+    global_call_limit: 12
+    run_order: roster_order
+    transport_retries: 1
+    note: >-
+      每个分身每年一次正常规划、最多两次修订（与 E1-7B 相同）。全局规划调用上限 12 与付费上限 12 次请求一致；两个分身 × 3 年至少要 6 次。
+      每份候选最多再试 1 次服务请求，与计划修订分开计数。顺序调度，不并发
+  planner:
+    identity:
+      kind: llm
+      planner_id: llm.qwen.product_planner
+      version: e1-7b-llm-v1
+      model_snapshot: qwen3.8-flash
+      note: 真实模型规划器：DashScope OpenAI 兼容端点上的千问滚动型号（没有带日期的快照）；只收安全投影的请求，计划由环境检查与结算
+    llm:
+      model_role: product_planner
+      provider: dashscope
+      model: qwen3.8-flash
+      version_policy: rolling
+      base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+      temperature: 0.2
+      enable_thinking: false
+      response_format: json_object
+      max_output_tokens: 4096
+      timeout_seconds: 90
+      sdk_max_retries: 0
+      service_retries: 1
+      retry_wait_seconds: 5
+      max_input_tokens: 64000
+      token_estimate: ascii1_nonascii2_v1
+      note: >-
+        沿用 E1-7B 的调用设定（思考关闭、温度 0.2、JSON object、输出上限 4,096、超时 90 秒、SDK 自动重试关闭、每份候选最多 1 次服务重试），
+        只换模型与角色；qwen3.8-flash 是滚动型号（没有带日期的快照）
+  paid_budget:
+    ledger_dir: runs/2026-10-18-e1-daily-convenience/budget
+    max_requests: 12
+    max_cost_cny: 2
+    price:
+      price_version: qwen3.8-flash@beijing@2026-10-09
+      model: qwen3.8-flash
+      region: 华北2（北京）
+      currency: CNY
+      input_per_million: 0.8
+      output_per_million: 2.7
+      source_url: https://help.aliyun.com/zh/model-studio/qwen3-8-flash
+      checked_on: "2026-10-18"
+      rule: >-
+        官方页面（2026-10-09 更新，2026-10-18 发送前再次核对）的标价：输入 0.8 元 / 百万 token、输出 2.7 元 / 百万 token，页面没有按输入长度
+        分档；每个输入 token 都按未命中缓存的标价估算，不假设缓存折扣或促销。核对记录见 runs/2026-10-18-e1-daily-convenience/pricing/
+  prompt_template: e1-convenience-prompt-v1
+  memory_policy: e1-7a-memory-v1
+  note: 日常生活便利的限额真实试跑（12 次请求、2 元以内）。mock 对照见 run_e1_convenience_mock.yaml。

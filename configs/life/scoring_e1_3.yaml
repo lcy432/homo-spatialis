@@ -1,0 +1,171 @@
+# E1-3 探索评分配置（DECISIONS/0018）。生活输入在 synthetic_e1_3.yaml。
+#
+# **全部是合成探索参数，不是经验估计，不能声称已经现实标定，不能用来排序城市。**
+#
+# 函数：z = b + Σ η·x；s = min(c, z / (z + τ))。
+#   * τ 写在评分规格里，所有城市共用——城市条件里根本没有 τ 这个字段；
+#   * b（基础条件）、η（改善效率）、c（上限）可以因城而异，但每一条都带来源；
+#   * 基础条件单独就不能超过上限（b/(b+τ) ≤ c），加载器会检查。
+#
+# 本轮**不复用**旧城市属性（worlds.attributes / CityRecord.amenities_scaled）：那些是旧静态
+# 模型的标度，与这里的单位、锚点没有核对过映射；这里的基础条件全部是显式写出的合成值。
+
+scoring_notice: >-
+  exploratory_synthetic：E1-3 探索评分配置。分项、单位、锚点、基础条件、改善效率与上限
+  全部是手工合成的探索设定，用来检验评分结构，不代表任何真实城市的生活质量。
+
+spec:
+  spec_id: score.e1-3.explore
+  scoring_version: e1-3-explore-v1
+  status: exploratory_synthetic
+  function: saturating_capped_v1
+  protocol_id: life-v1-e1-3
+  note: >-
+    物质维四个细项（居住面积、新鲜食品、私人工作空间、耐用品）由实际执行记录改善；
+    休闲由声明了使用安排的锻炼与实际发生的体验改善；安全、医疗、机会、环境、通勤五维
+    当前只有城市基础条件，没有行动改善机制。
+  components:
+    - component_id: housing_space
+      dimension: material
+      material_need: housing_space
+      unit: 百平方英尺
+      tau: 5
+      combine: max
+      description: 这个月实际住的那一处居所的面积。面积从规格读，房租从不进入计算。
+      sources:
+        - source_id: dwelling
+          records: [housing]
+          value: spec_number
+          spec_key: floor_area_sqft
+          unit: 平方英尺
+          note: 实际住的那一处；降级后读最低方案那一处的规格
+    - component_id: fresh_food
+      dimension: material
+      material_need: fresh_food
+      unit: 新鲜餐/周（折算）
+      tau: 7
+      combine: max
+      description: 这个月实际执行的食品方案每周有几顿新鲜餐。
+      sources:
+        - source_id: food_plan
+          records: [food]
+          value: spec_number
+          spec_key: fresh_meals_per_week
+          unit: 餐/周
+          note: 实际吃的那一份方案；降级后读最低方案那一份
+    - component_id: workspace
+      dimension: material
+      material_need: workspace
+      unit: 有/无能关门的私人工作空间
+      tau: 1
+      combine: any
+      description: 这个月有没有能关门的私人工作空间。住宅里的工作间与共享办公互为替代，同一个月只计一次。
+      sources:
+        - source_id: home_office
+          records: [housing]
+          value: spec_flag
+          spec_key: home_office
+          flag_value: true
+          unit: 是/否
+          note: 实际住的居所自带能关门的工作间
+        - source_id: shared_office
+          records: [periodic_service, prepaid_service]
+          requires_spec_key: workspace
+          value: spec_flag
+          spec_key: workspace
+          flag_value: true
+          unit: 是/否
+          note: 这个月实际在用的共享办公（只看声明了 workspace 的服务）
+    - component_id: durables
+      dimension: material
+      material_need: durables
+      unit: 在用耐用品件数
+      tau: 1
+      combine: sum
+      description: 这个月在服务期内的耐用品件数。成交那一下不计分，计的是持有期间每个月的使用。
+      sources:
+        - source_id: owned
+          records: [durable_good]
+          value: quantity
+          unit: 件
+          note: 只读 HoldingService 的服务月（含年初已有的）
+    - component_id: safety
+      dimension: safety
+      unit: 安全指数（合成）
+      tau: 3
+      description: 城市基础条件；当前没有行动改善机制。
+    - component_id: healthcare
+      dimension: healthcare
+      unit: 医疗可及指数（合成）
+      tau: 4
+      description: 城市基础条件；当前没有行动改善机制。
+    - component_id: opportunity
+      dimension: opportunity
+      unit: 机会指数（合成）
+      tau: 2
+      description: 城市基础条件；当前没有行动改善机制。培训参与是否计入当月体验留到 E1-5。
+    - component_id: leisure
+      dimension: leisure
+      unit: 每月参与次数（折算）
+      tau: 12
+      combine: sum
+      description: 城市基础休闲条件，加上声明了使用安排的锻炼次数与实际发生的体验。
+      sources:
+        - source_id: usage_plan
+          records: [prepaid_service, periodic_service]
+          requires_spec_key: visits_per_month
+          value: spec_number
+          spec_key: visits_per_month
+          per_unit: true
+          unit: 次/月
+          note: 使用假设：只有声明了每月锻炼次数的会员才算锻炼；没有使用安排的年卡不计
+        - source_id: events
+          records: [experience]
+          value: quantity
+          unit: 次
+          note: 这个月实际发生的一次体验
+    - component_id: environment
+      dimension: environment
+      unit: 环境指数（合成）
+      tau: 3
+      description: 城市基础条件；当前没有行动改善机制。
+    - component_id: commute
+      dimension: commute
+      unit: 通勤指数（合成）
+      tau: 2
+      description: 城市基础条件；当前没有行动改善机制（固定城市、不建模住址位置）。
+
+city_conditions:
+  - city: {country: US, scheme: SYNTH2026, code: A31}
+    spec_id: score.e1-3.explore
+    label: 合成城 A31
+    components:
+      - {component_id: housing_space, status: known, base: 0, cap: 0.9, efficiencies: [{source_id: dwelling, eta: 0.01}], source: &cond
+          {kind: synthetic, observed_on: 2026-10-06, geography_scope: synthetic city (no real geography),
+           mapping_version: scoring-e1-3, synthetic_note: 手工设定的探索参数，不是经验估计}}
+      - {component_id: fresh_food, status: known, base: 0, cap: 0.9, efficiencies: [{source_id: food_plan, eta: 1.0}], source: *cond}
+      - {component_id: workspace, status: known, base: 1, cap: 0.9, eta_any: 3, source: *cond}
+      - {component_id: durables, status: known, base: 0, cap: 0.9, efficiencies: [{source_id: owned, eta: 1.0}], source: *cond}
+      - {component_id: safety, status: known, base: 3, cap: 0.9, source: *cond}
+      - {component_id: healthcare, status: known, base: 4, cap: 0.9, source: *cond}
+      - {component_id: opportunity, status: known, base: 2, cap: 0.9, source: *cond}
+      - {component_id: leisure, status: known, base: 4, cap: 0.9,
+         efficiencies: [{source_id: usage_plan, eta: 1.0}, {source_id: events, eta: 4.0}], source: *cond}
+      - {component_id: environment, status: known, base: 3, cap: 0.9, source: *cond}
+      - {component_id: commute, status: known, base: 2, cap: 0.9, source: *cond}
+  - city: {country: US, scheme: SYNTH2026, code: B32}
+    spec_id: score.e1-3.explore
+    label: 合成城 B32
+    components:
+      - {component_id: housing_space, status: known, base: 0, cap: 0.8, efficiencies: [{source_id: dwelling, eta: 0.01}], source: *cond}
+      - {component_id: fresh_food, status: known, base: 0, cap: 0.9, efficiencies: [{source_id: food_plan, eta: 1.0}], source: *cond}
+      - {component_id: workspace, status: known, base: 0, cap: 0.9, eta_any: 3, source: *cond}
+      - {component_id: durables, status: known, base: 0, cap: 0.9, efficiencies: [{source_id: owned, eta: 1.0}], source: *cond}
+      - {component_id: safety, status: known, base: 6, cap: 0.9, source: *cond}
+      - {component_id: healthcare, status: known, base: 2, cap: 0.9, source: *cond}
+      - {component_id: opportunity, status: known, base: 6, cap: 0.9, source: *cond}
+      - {component_id: leisure, status: known, base: 2, cap: 0.85,
+         efficiencies: [{source_id: usage_plan, eta: 1.0}, {source_id: events, eta: 4.0}], source: *cond}
+      # 故意留空：检验"缺数据不等于零"——有正权重的人在 B32 的月度总分会不完整
+      - {component_id: environment, status: unknown, unknown_reason: 合成样例故意留空，没有环境数据, source: *cond}
+      - {component_id: commute, status: known, base: 1, cap: 0.9, source: *cond}

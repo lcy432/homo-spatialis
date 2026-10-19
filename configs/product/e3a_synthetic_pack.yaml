@@ -1,0 +1,398 @@
+# E3-A 合成资料包（DECISIONS/0034）。E3 维护的产品词表、问卷与便利资料候选，以及它**显式采用**的 E1 便利版整套配置。
+#
+# **纯合成。** 城市、职业词表里的岗位情境、报价、寿命、残余小时、时间与精力的模型设定全部手工设定，不来自任何真实城市、商品、
+# 服务、雇主或 LLM；职业映射里的 SOC 2018 代码是公开分类体系的代码，只用于演示“概念 → 分类代码”的内部保留方式。这份资料包只
+# 用来检验 E3-A 的输入、确认、编译、离线运行与结果投影，不是城市评价，不排序真实城市。真实资料的获取与冻结属于 E3-B。
+#
+# 读这份资料包的代码：src/product/pack.py（加载与内容身份）、src/product/capabilities.py（能力清单）、src/product/answers.py
+# （输入与确认）、src/product/catalog.py（便利资料编译与选项目录覆盖）、src/product/compile.py（编译成 E1 输入）。
+
+pack_notice: >-
+  synthetic_fixture_only：E3-A 合成资料包。全部数值是手工合成的模型设定或测试资料，不对应任何真实地点、商品、服务、雇主或制度；
+  问卷文案是暂定稿，未经认知访谈与量表验证。
+
+pack:
+  pack_id: pack.e3a.synthetic-v1
+  status: synthetic_fixture_only
+  observed_on: 2026-10-18
+  note: >-
+    E3-A 合成资料包：两座合成城（K51、M52）、受控职业词表、六维与物质题干、独立健康问卷暂定稿、硬要求与属性偏好的支持清单、
+    便利设备与服务的资料候选。显式采用 E1 便利版整套配置（协议、评分、评价、城市事实、提示模板），并派生新的产品协议。
+
+  # 显式采用的 E1 便利版整套配置（不依赖 scripts/run_life_e1_7b.py 不写 --config 时的旧默认）。编译器逐项核对版本与评分内容身份，
+  # 对不上就拒绝编译。
+  e1_base:
+    life_input: configs/life/synthetic_e1_convenience.yaml
+    scoring_config: configs/life/scoring_e1_convenience.yaml
+    evaluation_config: configs/life/evaluation_e1_convenience.yaml
+    city_facts: configs/life/city_facts_e1_convenience.yaml
+    protocol_id: life-v1-e1-convenience
+    scoring_version: e1-convenience-v1
+    scoring_content_fingerprint: f209137b1101407427724a8d7f3009fb09eca8a8c11884114412feea6fdcd690
+    prompt_template: e1-convenience-prompt-v1
+
+  # 派生的产品协议：生活规则、资源、职业、储蓄、疾病规则与评分规格的内容与便利版相同；只换健康输入的声明（独立健康回答）与反馈
+  # 政策的偏好来源（六维产品画像）。
+  product_protocol:
+    protocol_id: life-v1-e3a-product
+    schema_version: e3a-product-draft
+    info_permission_version: e3a-product-v1
+    feedback_policy_id: feedback.e3a-product.main
+    health_input_note: >-
+      E3-A 产品画像：健康回答是独立的健康风险应对问卷（e3a-health-coping-q-v0.1-draft），不占六维 100 分、不是第七个评分权重；
+      只供分身做计划，结算、风险抽签与评分都不读它
+
+  run:
+    prompt_template: e3a-product-prompt-v1
+    repeat_indexes: [0]
+    max_revisions_per_year: 2
+    permission_version: e3a-product-v1
+    show_health_answers: true
+    planner:
+      kind: mock
+      planner_id: mock.rules.e3a-product
+      version: e3a-product-mock-v1
+      rules_version: e3a-product-mock-rules-v1
+
+  # 现金口径：本版只支持“2024 年美元、当地价格水平”的流动资金，换算是恒等（同一口径）。别的币种或时期没有合法换算，明确阻断。
+  money_basis: {currency: USD, base_year: 2024, minor_unit_digits: 2}
+  money_bases:
+    - currency: USD
+      price_period: "2024"
+      meaning: liquid_funds_v1
+      conversion_rule: identity_same_basis_v1
+      numeraire_id: USD_2024_LOCAL
+      note: 按 2024 年美元、当地价格水平填写的可动用流动资金；与目录同一口径，换算是恒等，不做通胀或汇率换算
+
+  # 标准开局里的模型设定（不是对用户的测量，用户不填负担点数）。与 E1 便利版样例相同。
+  start_model_settings:
+    time_budget_hours_per_year: 4380
+    energy_quota: 250
+    energy_scale_version: e1-4a-monthly-quota-v1
+    reserved_text: 只预留协议声明的睡眠与基本休息（每天 12 小时），其余 12 小时/天可分配
+    readable_time_note: 每月可安排约 365 小时（每天 12 小时的睡眠与基本休息已经预留在外）——本版统一的模型设定，不是对你的测量
+    readable_energy_note: 每月可承受 250 个负担点的活动（本版统一的模型设定）；上一年过得越满意，下一年最多多 10%
+
+  age_min: 18
+  age_max: 100
+
+  cities:
+    - {city_ref: "US:SYNTH2026:K51", country: US, scheme: SYNTH2026, code: K51, label: 合成城 K51,
+       geography_version: synthetic-2026-10, note: 合成城市：设备便宜、人工服务贵；住房、食品、岗位、课程与治疗与 M52 相同}
+    - {city_ref: "US:SYNTH2026:M52", country: US, scheme: SYNTH2026, code: M52, label: 合成城 M52,
+       geography_version: synthetic-2026-10, note: 合成城市：人工服务便宜、设备贵；其余与 K51 相同}
+
+  # 受控职业词表：概念 → 别名（用于匹配）→ 各国分类映射（内部保留，不展示给用户）。别名都是手工写的；匹配规则见 src/product/occupation.py。
+  occupations:
+    - concept_id: occ.office_clerk
+      label: 办公室文员
+      duties: [处理文件与表格, 录入与整理资料, 接听电话、安排日程]
+      aliases: [文员, 行政助理, 办公室职员, office clerk, admin assistant]
+      mappings:
+        - {country: US, scheme: SOC2018, version: "2018", code: "43-9061", basis: "SOC 2018 职业定义 Office Clerks, General（通用办公室文员）"}
+    - concept_id: occ.retail_sales
+      label: 门店销售员
+      duties: [在门店接待顾客、介绍商品, 整理货架与陈列]
+      aliases: [店员, 售货员, 门店销售, 导购, retail sales]
+      mappings:
+        - {country: US, scheme: SOC2018, version: "2018", code: "41-2031", basis: "SOC 2018 职业定义 Retail Salespersons"}
+    - concept_id: occ.cashier
+      label: 收银员
+      duties: [为顾客结账收款, 核对现金与票据]
+      aliases: [收银, cashier]
+      mappings:
+        - {country: US, scheme: SOC2018, version: "2018", code: "41-2011", basis: "SOC 2018 职业定义 Cashiers"}
+    - concept_id: occ.counter_drinks
+      label: 柜台点单与饮品制作
+      duties: [在柜台点单与收款, 制作咖啡、奶茶等饮品]
+      aliases: [做饮品, 饮品制作, 咖啡师, 奶茶, barista]
+      mappings:
+        - {country: US, scheme: SOC2018, version: "2018", code: "35-3023", basis: "SOC 2018 职业定义 Fast Food and Counter Workers"}
+    - concept_id: occ.accountant
+      label: 会计
+      duties: [编制财务报表, 核对账目与税务资料]
+      aliases: [会计, 审计, accountant]
+      mappings:
+        - {country: US, scheme: SOC2018, version: "2018", code: "13-2011", basis: "SOC 2018 职业定义 Accountants and Auditors"}
+    - concept_id: occ.bookkeeper
+      label: 记账员或出纳
+      duties: [登记日常收支, 管理现金与票据]
+      aliases: [记账, 出纳, 做账, bookkeeper]
+      mappings:
+        - {country: US, scheme: SOC2018, version: "2018", code: "43-3031", basis: "SOC 2018 职业定义 Bookkeeping, Accounting, and Auditing Clerks"}
+
+  abilities:
+    - ability_id: accounting_cert
+      label: 会计从业资格（合成）
+      ask_when: 只有你选的职业或候选城市里的岗位要求它时才问；不从职称自动授予
+
+  dimensions:
+    - key: material
+      label: 物质生活
+      definition: 住得多宽敞、吃得是否新鲜、日常杂务能不能花钱省掉等实际消费得到的条件（内部还要再分三项）
+      reference_improvement: 参考情境：从远处一居室、以米面罐头为主、洗衣打扫全部自己做，改善到每天三顿新鲜食材、每月少做约 18 小时家务（本版合成模型里的一档改善）
+      support: supported
+      support_note: 居住空间、新鲜食品、日常生活便利三项都能按实际生活评分；物质生活里的其他需求（通信、储物、衣着）本版没有
+    - key: safety
+      label: 安全
+      definition: 城市的公共安全条件
+      reference_improvement: 参考情境：合成安全指数从 4 提高到 8（0–10，只在本组合成城市之间可比）
+      support: partially_supported
+      support_note: 本版只有城市背景条件，分身不能花钱或行动改善它
+    - key: opportunity
+      label: 发展机会
+      definition: 城市提供的职业与成长条件，加上你在生活中实际学到的新能力
+      reference_improvement: 参考情境：在一年里学完一门 12 个月的资格课程，或城市发展条件从合成指数 4 提高到 8
+      support: supported
+      support_note: 城市背景 + 实际参加的学习；证书本身、换岗与涨薪不另加分
+    - key: leisure
+      label: 休闲
+      definition: 城市基础休闲条件，加上实际参加的锻炼、演出等活动
+      reference_improvement: 参考情境：从每月不参加任何活动，到每月去 8 次健身房
+      support: supported
+      support_note: 只算实际发生的活动；具体爱好与地理的匹配本版没有
+    - key: environment
+      label: 环境
+      definition: 空气、气候与城市环境的背景条件
+      reference_improvement: 参考情境：合成环境指数从 4 提高到 8（0–10，只在本组合成城市之间可比）
+      support: partially_supported
+      support_note: 本版只有城市背景条件，分身不能行动改善它
+    - key: commute
+      label: 交通便捷程度
+      definition: 住处到工作地点的往返时间与实际出门上班的次数对生活的影响
+      reference_improvement: 参考情境：每月到岗 20 次时，每天往返从 70 分钟缩短到 30 分钟
+      support: supported
+      support_note: 按实际所住住房的往返分钟与实际到岗次数评分；非工作出行本版没有细化
+
+  material_leaves:
+    - key: housing_space
+      label: 居住空间
+      definition: 实际住的那一处有多大
+      support: supported
+      note: 只看面积；房租与通勤不在这一项
+    - key: fresh_food
+      label: 新鲜食品
+      definition: 实际吃的食品方案每周有几顿以新鲜食材为主
+      support: supported
+      note: 准备时间算在时间账里，不另给“省时”分
+    - key: daily_convenience
+      label: 日常生活便利
+      definition: 你愿意在多大程度上花钱减少日常杂务（洗衣与打扫）
+      support: supported
+      note: 只看本人实际少做了多少小时；设备与人工服务是两种实现方式，不分别打分；它是相对重要程度，不是预算或必须购买的指令；不是旧问卷的“洗衣”题
+
+  points:
+    manual_entry: 手工输入按精确十进制解析，最多 2 位小数（步长不是测量精度）；也接受规范分数写法（例如 50/3）
+    manual_max_decimals: 2
+    display_decimals: 1
+    canonical_form: 约分后的整数（30）或 分子/分母（50/3）；计算与比较都用它，显示四舍五入到 1 位小数，显示值不回流计算
+    equal_split_six: 50/3
+    equal_split_material: 100/3
+    rules:
+      - 六维合计必须精确等于 100；不预填数值、不提供人格套餐，不自动按比例扣减其他项
+      - 只有用户主动选择“平均分配”才生成均分（六维每项 50/3、物质每项 100/3），不让排在前面的项目多拿分
+      - 明确 0 是已提供的数值；“未答”“明确无所谓”“暂不确定”都不会被自动换成 0 或均分
+      - 物质父项为正时，物质三项也必须精确合计 100；物质父项明确为 0 时细分不适用，不伪造三个回答
+
+  health_questionnaire:
+    version: e3a-health-coping-q-v0.1-draft
+    status: draft_wording_not_validated
+    common_prompt: 假设基本生活已有保障，判断下面的选择是否符合你。没有正确答案。
+    questions:
+      - question_id: hc_more_pay_more_sick_risk
+        text: 一种安排能多赚一点钱，但生病、需要休息几天的可能也更高。我愿意选择它。
+        agree_meaning: 愿意为多一点收入接受更高的生病与休息可能
+        disagree_meaning: 不愿意为多一点收入接受更高的生病与休息可能
+      - question_id: hc_reserve_for_health_costs
+        text: 为了应对可能发生的健康开支，我愿意推迟一次想要、但并不急需的消费，先留一笔钱。
+        agree_meaning: 愿意推迟不急需的消费，先为可能的健康开支留钱
+        disagree_meaning: 不倾向为可能的健康开支推迟不急需的消费
+      - question_id: hc_wait_for_clear_risk_info
+        text: 健康风险的信息还不清楚时，我愿意先放弃眼前的一点收益，等了解清楚再决定。
+        agree_meaning: 健康风险信息不清楚时，愿意先放弃一点眼前收益、等了解清楚
+        disagree_meaning: 健康风险信息不清楚时，不倾向为了等待而放弃眼前收益
+    options:
+      - {option_id: agree, label: 符合我, meaning: 这句话符合用户自己}
+      - {option_id: disagree, label: 不符合我, meaning: 这句话不符合用户自己}
+      - {option_id: no_clear_tendency, label: 无明显倾向, meaning: 用户在这一题上没有明显倾向}
+      - {option_id: unsure, label: 暂不确定, meaning: 用户暂不确定——没有这一项的明确指令}
+    unanswered_rule: 没有作答另存为“未答”，与“暂不确定”分开；两者都表示没有这一项的明确指令，不补中间值
+    rules:
+      - 不计算总健康分，不推断患病概率、疼痛权重、疗效、愿付金额或拒绝治疗
+      - 健康回答不占六维 100 分，也不是第七个评分权重；只供分身做计划，不改变疾病规则、γ、H、账目或满足感
+      - 题目是暂定文案，没有经过认知访谈或量表验证
+
+  hard_requirement_options:
+    - option_id: housing.max_commute_roundtrip
+      label: 住处到就业中心的往返时间不超过（分钟）
+      parameter: max_commute_roundtrip_minutes
+      unit: 分钟
+      minimum: 20
+      maximum: 180
+      step: 5
+      need: commute_limit
+      compiles_to: E1 硬要求：住房类别、规格 commute_roundtrip_minutes ≤ 给定分钟（每个月检查实际所住住房）
+      verification: 每月检查实际所住住房的往返分钟：满足、不满足、无法判断单独报告；不进分数，也不拦截计划
+
+  attribute_kinds:
+    - {kind: brand, label: 品牌, support: unsupported, usage: [retained_only], note: 已记录原文，本版不评分、不交给分身；需要同规格报价与匹配规则（V2）}
+    - {kind: cuisine, label: 菜系, support: unsupported, usage: [retained_only], note: 已记录原文，本版不评分、不交给分身}
+    - {kind: preparation, label: 制作方式（做饭 / 外卖）, support: unsupported, usage: [retained_only], note: 已记录原文，本版不评分}
+    - {kind: tier, label: 档次, support: unsupported, usage: [retained_only], note: 已记录原文，本版不评分；不从价格推断档次偏好}
+    - {kind: service_quality, label: 服务质量, support: unsupported, usage: [retained_only], note: 已记录原文，本版不评分}
+    - {kind: home_entry_concern, label: 上门顾虑（例如不想让陌生人进家）, support: unsupported, usage: [retained_only],
+       note: 已记录原文；本版没有能核验或拦截上门服务的机制，分身可能选择上门服务——即使你把它确认为不可妥协，也只能原样留存}
+
+  start_scenario:
+    - 这是一次搬到候选城市重新开始的简化情景：从第 1 年、健康、没有已有物品、没有在学课程、没有资金目标开始
+    - 现实中的旧家具、病史与在学课程暂未纳入；这是模拟的假设，不是对你现实情况的判断
+    - 同一个你在各城市、各个分身里的年龄、现金、能力与基础时间精力都相同；城市里的具体岗位按当地目录匹配
+  unsupported:
+    - 固定远程收入、家庭共同资产、多人家庭、买房与贷款
+    - 跨国比较与跨币种的财富换算
+    - 品牌、菜系、制作方式、档次、服务质量与上门顾虑的评分（只记录原文）
+    - 生病时暂停零参与时间的按月服务来省钱
+    - 访谈式输入（只保留来源与证据引用接口）
+  limits:
+    - 城市、报价、工资、税、疾病与治疗全部是合成设定；结果不排序真实城市，也不是现实推荐
+    - 离线规划器是可控的 mock，不代表真实大语言模型的能力或偏好理解
+    - 问卷文案与参考改善范围是暂定稿，没有做认知访谈与量表验证
+
+  # ---------------------------------------------------------------- 便利资料候选（模块 D）
+  catalog_scope:
+    scope_version: e3a-convenience-inventory-scope-v1
+    declared_scope: >-
+      合成资料包里两座城的“日常杂务”设备与人工服务：只调查能替代洗衣或打扫（协议的代表性杂务组合）的方案；做饭、照护、维修等不在
+      本次调查范围。调查范围之外的东西不计入分母，也不代表城市没有。
+    categories: [household_device, household_service]
+    tasks: [laundry, cleaning]
+    # 编入目录的机会的地理粒度：必须与比较组声明的一致（E1 的比较组检查逐项核对，不能某城细化、某城用别的粒度）。
+    # 来源事实里的 geography 写具体地点（合成城 K51……），这里写粒度。
+    geography_scope: synthetic city (no real geography)
+
+  facts:
+    - {fact_id: f.k51.pack.price, field: price, raw_value: "1440", unit: USD_2024_LOCAL/套, period: 2024 年不变价, geography: 合成城 K51,
+       kind: synthetic, assumption: 手工设定的合成报价（与 E1 便利版样例相同）, note: 合成报价，不来自任何商店}
+    - {fact_id: f.pack.life, field: lifetime, raw_value: "5", unit: 年, period: 2024 年不变价, geography: 合成比较组（全组共用）,
+       kind: synthetic, assumption: 全组共用的合成寿命设定（两城同一款设备包相同）, note: 合成寿命，不是厂商资料}
+    - {fact_id: f.pack.effect, field: effect, raw_value: "laundry 4; cleaning 6", unit: 小时/月（本人残余）, period: 2024 年不变价, geography: 合成比较组（全组共用）,
+       kind: synthetic, assumption: 全组共用的统一效果假设：两城同一款设备包的本人残余小时相同（参数目录 SC-18）, note: 残余是本人处理整项家务后仍需的月小时，不是机器运行时间}
+    - {fact_id: f.k51.chores.price, field: price, raw_value: "216", unit: USD_2024_LOCAL/月, period: 2024 年不变价, geography: 合成城 K51,
+       kind: synthetic, assumption: 手工设定的合成月价（与 E1 便利版样例相同）, note: 合成报价，不来自任何服务商}
+    - {fact_id: f.chores.effect, field: effect, raw_value: "laundry 2; cleaning 2", unit: 小时/月（本人残余）, period: 2024 年不变价, geography: 合成比较组（全组共用）,
+       kind: synthetic, assumption: 全组共用的统一效果假设：两城同一种杂务服务的本人残余小时相同（参数目录 SC-18）, note: 残余是本人收纳与交接的时间，不是服务人员的工作时间}
+    - {fact_id: f.m52.pack.price, field: price, raw_value: "6000", unit: USD_2024_LOCAL/套, period: 2024 年不变价, geography: 合成城 M52,
+       kind: synthetic, assumption: 手工设定的合成报价（与 E1 便利版样例相同）, note: 合成报价，不来自任何商店}
+    - {fact_id: f.m52.chores.price, field: price, raw_value: "108", unit: USD_2024_LOCAL/月, period: 2024 年不变价, geography: 合成城 M52,
+       kind: synthetic, assumption: 手工设定的合成月价（与 E1 便利版样例相同）, note: 合成报价，不来自任何服务商}
+    - {fact_id: f.k51.robot.price, field: price, raw_value: "420", unit: USD_2024_LOCAL/台, period: 2024 年不变价, geography: 合成城 K51,
+       kind: synthetic, assumption: 手工设定的合成报价, note: 有报价，但寿命资料缺失}
+    - {fact_id: f.k51.robot.effect, field: effect, raw_value: "cleaning 6", unit: 小时/月（本人残余）, period: 2024 年不变价, geography: 合成城 K51,
+       kind: synthetic, assumption: 合成效果设定, note: 只替代打扫}
+    - {fact_id: f.k51.dryer.life, field: lifetime, raw_value: "8", unit: 年, period: 2024 年不变价, geography: 合成城 K51,
+       kind: synthetic, assumption: 合成寿命设定, note: 报价资料缺失}
+    - {fact_id: f.k51.dryer.effect, field: effect, raw_value: "laundry 7", unit: 小时/月（本人残余）, period: 2024 年不变价, geography: 合成城 K51,
+       kind: synthetic, assumption: 合成效果设定, note: 只替代洗衣的晾晒部分}
+    - {fact_id: f.k51.cooker.price, field: price, raw_value: "900", unit: USD_2024_LOCAL/台, period: 2024 年不变价, geography: 合成城 K51,
+       kind: synthetic, assumption: 手工设定的合成报价, note: 做饭设备，不在本次调查范围}
+    - {fact_id: f.m52.cleaning.price, field: price, raw_value: "90", unit: USD_2024_LOCAL/月, period: 2024 年不变价, geography: 合成城 M52,
+       kind: synthetic, assumption: 手工设定的合成月价, note: 有报价，但减负效果资料缺失}
+    - {fact_id: f.service.participation, field: participation, raw_value: "0 小时、负担 0", unit: 小时/月（本人参与）, period: 2024 年不变价,
+       geography: 合成比较组（全组共用）, kind: synthetic, assumption: 合成设定：上门服务本人不参与服务本身（收纳与交接算在残余家务里）,
+       note: 本人参与时间不是服务人员的工作时间}
+
+  candidates:
+    - candidate_id: cand.k51.device.convenience-pack
+      city_ref: "US:SYNTH2026:K51"
+      kind: device
+      label: 便利设备包（洗烘一体机＋扫地机器人）
+      quality: 一次买下、能用 5 年；有它时本人每月洗衣还要约 4 小时（分拣、叠放、收纳），打扫还要约 6 小时（机器顾不到的部分）
+      tasks: [laundry, cleaning]
+      market_status: offered
+      price: {status: known, amount_text: "1440", currency: USD, base_year: 2024, price_meaning: local_price_base_year, billing: one_time, per_unit: appliance-set, facts: [f.k51.pack.price]}
+      lifetime: {status: known, years_text: "5", effective_from: same_year, facts: [f.pack.life]}
+      effect: {status: known, residuals: [{task: laundry, residual_hours_per_month: "4"}, {task: cleaning, residual_hours_per_month: "6"}], facts: [f.pack.effect]}
+      target_opportunity_id: k51.durable.convenience_pack
+    - candidate_id: cand.k51.service.chores
+      city_ref: "US:SYNTH2026:K51"
+      kind: service
+      label: 日常杂务服务（每月上门洗衣与打扫）
+      quality: 按月购买：每周上门取送衣物并打扫；本人每月洗衣还要约 2 小时、打扫约 2 小时（收纳与交接）；本人不参与服务本身
+      tasks: [laundry, cleaning]
+      market_status: offered
+      price: {status: known, amount_text: "216", currency: USD, base_year: 2024, price_meaning: local_price_base_year, billing: per_month, per_unit: service-month, facts: [f.k51.chores.price]}
+      lifetime: {status: not_applicable}
+      effect: {status: known, residuals: [{task: laundry, residual_hours_per_month: "2"}, {task: cleaning, residual_hours_per_month: "2"}], facts: [f.chores.effect]}
+      participation: {status: known, hours_text: "0", burden_per_hour_text: "0", facts: [f.service.participation]}
+      service_period: 按实际付费的月份（只在买到服务的那几个月起作用）
+      target_opportunity_id: k51.service.chores
+    - candidate_id: cand.k51.device.robot-lifetime-unknown
+      city_ref: "US:SYNTH2026:K51"
+      kind: device
+      label: 扫地机器人（单件）
+      quality: 一次购买；能用几年资料缺失；有它时本人每月打扫还要约 6 小时
+      tasks: [cleaning]
+      market_status: offered
+      price: {status: known, amount_text: "420", currency: USD, base_year: 2024, price_meaning: local_price_base_year, billing: one_time, per_unit: robot, facts: [f.k51.robot.price]}
+      lifetime: {status: unknown}
+      effect: {status: known, residuals: [{task: cleaning, residual_hours_per_month: "6"}], facts: [f.k51.robot.effect]}
+      target_opportunity_id: k51.durable.robot
+    - candidate_id: cand.k51.device.dryer-quote-unknown
+      city_ref: "US:SYNTH2026:K51"
+      kind: device
+      label: 烘干机（单件）
+      quality: 一次购买、能用 8 年；有它时本人每月洗衣还要约 7 小时；报价资料缺失
+      tasks: [laundry]
+      market_status: offered
+      price: {status: unknown, per_unit: dryer}
+      lifetime: {status: known, years_text: "8", effective_from: same_year, facts: [f.k51.dryer.life]}
+      effect: {status: known, residuals: [{task: laundry, residual_hours_per_month: "7"}], facts: [f.k51.dryer.effect]}
+      target_opportunity_id: k51.durable.dryer
+    - candidate_id: cand.k51.device.cooker-out-of-scope
+      city_ref: "US:SYNTH2026:K51"
+      kind: device
+      label: 自动炒菜机（单件）
+      quality: 做饭设备；做饭不在本次调查的代表性杂务组合里
+      tasks: [cooking]
+      market_status: offered
+      price: {status: known, amount_text: "900", currency: USD, base_year: 2024, price_meaning: local_price_base_year, billing: one_time, per_unit: machine, facts: [f.k51.cooker.price]}
+      lifetime: {status: unknown}
+      effect: {status: unknown}
+      target_opportunity_id: k51.durable.cooker
+    - candidate_id: cand.m52.device.convenience-pack
+      city_ref: "US:SYNTH2026:M52"
+      kind: device
+      label: 便利设备包（洗烘一体机＋扫地机器人）
+      quality: 一次买下、能用 5 年；有它时本人每月洗衣还要约 4 小时（分拣、叠放、收纳），打扫还要约 6 小时（机器顾不到的部分）
+      tasks: [laundry, cleaning]
+      market_status: offered
+      price: {status: known, amount_text: "6000", currency: USD, base_year: 2024, price_meaning: local_price_base_year, billing: one_time, per_unit: appliance-set, facts: [f.m52.pack.price]}
+      lifetime: {status: known, years_text: "5", effective_from: same_year, facts: [f.pack.life]}
+      effect: {status: known, residuals: [{task: laundry, residual_hours_per_month: "4"}, {task: cleaning, residual_hours_per_month: "6"}], facts: [f.pack.effect]}
+      target_opportunity_id: m52.durable.convenience_pack
+    - candidate_id: cand.m52.service.chores
+      city_ref: "US:SYNTH2026:M52"
+      kind: service
+      label: 日常杂务服务（每月上门洗衣与打扫）
+      quality: 按月购买：每周上门取送衣物并打扫；本人每月洗衣还要约 2 小时、打扫约 2 小时（收纳与交接）；本人不参与服务本身
+      tasks: [laundry, cleaning]
+      market_status: offered
+      price: {status: known, amount_text: "108", currency: USD, base_year: 2024, price_meaning: local_price_base_year, billing: per_month, per_unit: service-month, facts: [f.m52.chores.price]}
+      lifetime: {status: not_applicable}
+      effect: {status: known, residuals: [{task: laundry, residual_hours_per_month: "2"}, {task: cleaning, residual_hours_per_month: "2"}], facts: [f.chores.effect]}
+      participation: {status: known, hours_text: "0", burden_per_hour_text: "0", facts: [f.service.participation]}
+      service_period: 按实际付费的月份（只在买到服务的那几个月起作用）
+      target_opportunity_id: m52.service.chores
+    - candidate_id: cand.m52.service.cleaning-effect-unknown
+      city_ref: "US:SYNTH2026:M52"
+      kind: service
+      label: 保洁服务（按月）
+      quality: 按月购买的打扫服务；本人每月还要做多少打扫的资料缺失
+      tasks: [cleaning]
+      market_status: offered
+      price: {status: known, amount_text: "90", currency: USD, base_year: 2024, price_meaning: local_price_base_year, billing: per_month, per_unit: service-month, facts: [f.m52.cleaning.price]}
+      lifetime: {status: not_applicable}
+      effect: {status: unknown}
+      participation: {status: known, hours_text: "0", burden_per_hour_text: "0", facts: [f.service.participation]}
+      service_period: 按实际付费的月份
+      target_opportunity_id: m52.service.cleaning

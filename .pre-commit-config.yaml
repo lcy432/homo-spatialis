@@ -1,13 +1,18 @@
 # Installed by `make setup`. The secret-detection hooks exist because
 # CLAUDE.md hard rule 2 (never commit a key) is unrecoverable once violated:
 # the value stays in history forever.
+# runs/ and the doc archives are frozen evidence (saved diffs, logs, review
+# copies of old code): formatters would rewrite them, so only the secret and
+# size checks look there.
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.14.5
     hooks:
       - id: ruff-check
         args: [--fix]
+        exclude: ^(runs|docs/history|docs/design/(history|prompts))/
       - id: ruff-format
+        exclude: ^(runs|docs/history|docs/design/(history|prompts))/
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
@@ -19,4 +24,6 @@ repos:
       - id: check-yaml
       - id: check-toml
       - id: end-of-file-fixer
+        exclude: ^(runs|docs/history|docs/design/(history|prompts))/
       - id: trailing-whitespace
+        exclude: ^(runs|docs/history|docs/design/(history|prompts))/

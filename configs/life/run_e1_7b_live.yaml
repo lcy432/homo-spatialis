@@ -1,0 +1,82 @@
+# E1-7B 真实模型运行配置（DECISIONS/0031）。开跑之前写好；运行清单记下它的内容身份——改了任何一项（名单、事实表、信息条件、
+# 修订上限、调用上限、运行顺序、规划器与模型设定、付费预算、提示模板、记忆政策），都不能冒充原来那次运行继续。
+#
+# 规划器是 DashScope OpenAI 兼容端点上的千问固定快照（configs/models.yaml 的 base_b；服务商、端点与快照必须与那里一致）。
+# 凭证只在调用时从环境变量或 .env 读取，从不写进这里、归档或日志。先导试跑与主试跑用同一份配置（先导只跑名单第一项的第 1 年，
+# 在年度边界停下）；两者与任何诊断请求共用 paid_budget 指向的同一本付费预算账本。
+#
+# 预算保护是按已记录报价执行的应用侧控制（发送前预留、返回后按用量核算；没有用量的请求保留预留值），不是供应商级的账单上限；
+# 费用以供应商账单为准。
+
+run_notice: >-
+  exploratory_synthetic：E1-7B 真实模型小规模试跑的运行配置。合成城市、合成参数、合成人设；结果只说明这个模型在这一次合成试跑
+  里的表现，不代表模型的一般能力，也不是现实城市评价。
+
+run:
+  run_config_id: run.e1-7b.live
+  status: exploratory_synthetic
+  version: e1-7b-run-v1
+  roster: configs/life/roster_e1_7b.yaml
+  city_facts: configs/life/city_facts_e1_7b.yaml
+  information:
+    condition: product_stated_profile
+    show_stated_dimension_points: true
+    show_soft_preferences: true
+    show_hard_requirements: true
+    show_free_text: true
+    show_energy_level: true
+    show_stated_material_points: true
+    permission_version: e1-7b-product-v1
+  planning:
+    plans_per_year: 1
+    max_revisions_per_year: 2
+    global_call_limit: 72
+    run_order: roster_order
+    transport_retries: 1
+    note: >-
+      每个分身每年一次正常规划、最多两次修订（三份候选）；全局规划调用上限 72 次（8 个分身 × 3 年 × 3 份候选）。每份候选
+      最多再试 1 次服务请求（只在超时、断连、限流、服务端错误时），与计划修订分开计数。顺序调度，不并发
+  planner:
+    identity:
+      kind: llm
+      planner_id: llm.qwen.base_b
+      version: e1-7b-llm-v1
+      model_snapshot: qwen3.7-max-2026-06-08
+      note: 真实模型规划器：DashScope OpenAI 兼容端点上的千问固定快照；只收安全投影的请求，计划由环境检查与结算
+    llm:
+      model_role: base_b
+      provider: dashscope
+      model: qwen3.7-max-2026-06-08
+      base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+      temperature: 0.2
+      enable_thinking: false
+      response_format: json_object
+      max_output_tokens: 4096
+      timeout_seconds: 90
+      sdk_max_retries: 0
+      service_retries: 1
+      retry_wait_seconds: 5
+      max_input_tokens: 64000
+      token_estimate: ascii1_nonascii2_v1
+      note: >-
+        所有者在 E1-7B 指令里给定的设定：思考关闭、温度 0.2、JSON object 输出、输出上限 4096；超时 90 秒、SDK 自动重试关闭、
+        每份候选最多 1 次服务重试（等 5 秒）；单次输入的估计上限 64,000（估计规则见 DECISIONS/0031，不是实际 token）
+  paid_budget:
+    ledger_dir: runs/2026-10-13-e1-7b-live-pilot/budget
+    max_requests: 150
+    max_cost_cny: 50
+    price:
+      price_version: qwen3.7-max-2026-06-08@beijing@2026-10-09
+      model: qwen3.7-max-2026-06-08
+      region: 华北2（北京）
+      currency: CNY
+      input_per_million: 12
+      output_per_million: 36
+      source_url: https://help.aliyun.com/zh/model-studio/qwen3-7-max
+      checked_on: "2026-10-13"
+      rule: >-
+        官方页面（2026-10-09 更新）的标价：输入 12 元 / 百万 token、输出 36 元 / 百万 token；每个输入 token 都按未命中缓存的
+        标价估算，不假设缓存折扣或促销。核对记录见 runs/2026-10-13-e1-7b-live-pilot/pricing/price_check.json
+  prompt_template: e1-7b-prompt-v1
+  memory_policy: e1-7a-memory-v1
+  note: 两位用户、两座城、8 个分身、3 年；先导与主试跑共用一本付费预算（150 次请求、50 元）。

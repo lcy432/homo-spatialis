@@ -26,6 +26,9 @@ dependencies = [
     # figures
     "matplotlib>=3.8",
     "xlogit>=0.2.7",
+    "claude-agent-sdk>=0.2.168",
+    "langgraph>=1.0",
+    "langgraph-checkpoint-sqlite>=2.0",
 ]
 
 [dependency-groups]

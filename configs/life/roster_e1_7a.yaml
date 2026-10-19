@@ -1,0 +1,32 @@
+# E1-7A 原计划名单（DECISIONS/0030）。在跑任何生活之前写好并冻结（沿用 E1-6B 的冻结与标准开局 v1 检查）；不从收到多少结果
+# 反推原计划人数。名单顺序就是运行顺序（run_e1_7a.yaml 的 run_order = roster_order）。
+#
+# 两位用户、两座城：α 每城 4 个重复分身，β 每城 1 个。主臂一个（evaluation_e1_7a.yaml）；本轮不跑评价对照臂。
+
+roster_notice: >-
+  exploratory_synthetic：E1-7A 代理规划闭环演示的原计划名单。全部是合成样例，规划器是可控的 mock，不是现实城市评价。
+
+roster:
+  roster_id: roster.e1-7a.demo
+  status: exploratory_synthetic
+  aggregation_version: e1-6b-aggregation-v1
+  life_input: configs/life/synthetic_e1_7a_loop.yaml
+  scoring_config: configs/life/scoring_e1_7a_loop.yaml
+  comparison_group_id: group.e1-7a.synth
+  note: 两位用户、两座城；α 每城 4 个重复分身，β 每城 1 个。每一年的计划由规划器给出，名单冻结时还没有任何计划。
+  users:
+    - {user_id: user.alpha, person_id: u101, label: α（标准偏好）}
+    - {user_id: user.beta, person_id: u102, label: β（只看重交通，有通勤硬要求）}
+  arms:
+    - {arm_id: arm.main, role: main, evaluation_config: configs/life/evaluation_e1_7a.yaml, note: 主设定 δ = 1、四个基础生活模板}
+  entries:
+    - {user_id: user.alpha, clone_id: u101.a95.r0, city: {country: US, scheme: SYNTH2026, code: A95}, repeat_index: 0}
+    - {user_id: user.alpha, clone_id: u101.a95.r1, city: {country: US, scheme: SYNTH2026, code: A95}, repeat_index: 1}
+    - {user_id: user.alpha, clone_id: u101.a95.r2, city: {country: US, scheme: SYNTH2026, code: A95}, repeat_index: 2}
+    - {user_id: user.alpha, clone_id: u101.a95.r3, city: {country: US, scheme: SYNTH2026, code: A95}, repeat_index: 3}
+    - {user_id: user.alpha, clone_id: u101.b96.r0, city: {country: US, scheme: SYNTH2026, code: B96}, repeat_index: 0}
+    - {user_id: user.alpha, clone_id: u101.b96.r1, city: {country: US, scheme: SYNTH2026, code: B96}, repeat_index: 1}
+    - {user_id: user.alpha, clone_id: u101.b96.r2, city: {country: US, scheme: SYNTH2026, code: B96}, repeat_index: 2}
+    - {user_id: user.alpha, clone_id: u101.b96.r3, city: {country: US, scheme: SYNTH2026, code: B96}, repeat_index: 3}
+    - {user_id: user.beta, clone_id: u102.a95.r0, city: {country: US, scheme: SYNTH2026, code: A95}, repeat_index: 0}
+    - {user_id: user.beta, clone_id: u102.b96.r0, city: {country: US, scheme: SYNTH2026, code: B96}, repeat_index: 0}

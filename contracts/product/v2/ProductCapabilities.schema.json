@@ -1,0 +1,919 @@
+{
+ "$defs": {
+  "AbilityOption": {
+   "additionalProperties": false,
+   "description": "一项可以由用户确认的资格事实（不从职称自动授予）。",
+   "properties": {
+    "ability_id": {
+     "pattern": "^[a-z][a-z0-9_]{1,47}$",
+     "title": "Ability Id",
+     "type": "string"
+    },
+    "ask_when": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Ask When",
+     "type": "string"
+    },
+    "label": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Label",
+     "type": "string"
+    }
+   },
+   "required": [
+    "ability_id",
+    "label",
+    "ask_when"
+   ],
+   "title": "AbilityOption",
+   "type": "object"
+  },
+  "AttributeKindDef": {
+   "additionalProperties": false,
+   "description": "属性偏好的种类（品牌、菜系、制作方式、档次、服务质量、上门顾虑……）：本版的支持状态与用途。",
+   "properties": {
+    "kind": {
+     "pattern": "^[a-z][a-z0-9_]{1,47}$",
+     "title": "Kind",
+     "type": "string"
+    },
+    "label": {
+     "maxLength": 40,
+     "minLength": 1,
+     "title": "Label",
+     "type": "string"
+    },
+    "note": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Note",
+     "type": "string"
+    },
+    "support": {
+     "enum": [
+      "supported",
+      "partially_supported",
+      "unsupported"
+     ],
+     "title": "Support",
+     "type": "string"
+    },
+    "usage": {
+     "items": {
+      "enum": [
+       "planning",
+       "start_state",
+       "qualification",
+       "scoring",
+       "retained_only"
+      ],
+      "type": "string"
+     },
+     "minItems": 1,
+     "title": "Usage",
+     "type": "array"
+    }
+   },
+   "required": [
+    "kind",
+    "label",
+    "support",
+    "usage",
+    "note"
+   ],
+   "title": "AttributeKindDef",
+   "type": "object"
+  },
+  "CityOption": {
+   "additionalProperties": false,
+   "description": "一个候选城市：完整身份（国家 / 地理体系 / 代码）与地理边界版本；不用中文名拼接资料。",
+   "properties": {
+    "city_ref": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+     "title": "City Ref",
+     "type": "string"
+    },
+    "code": {
+     "maxLength": 40,
+     "minLength": 1,
+     "title": "Code",
+     "type": "string"
+    },
+    "country": {
+     "pattern": "^[A-Z]{2}$",
+     "title": "Country",
+     "type": "string"
+    },
+    "data_status": {
+     "enum": [
+      "synthetic_fixture",
+      "real_data"
+     ],
+     "title": "Data Status",
+     "type": "string"
+    },
+    "geography_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Geography Version",
+     "type": "string"
+    },
+    "label": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Label",
+     "type": "string"
+    },
+    "note": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Note",
+     "type": "string"
+    },
+    "scheme": {
+     "maxLength": 40,
+     "minLength": 1,
+     "title": "Scheme",
+     "type": "string"
+    },
+    "selectable": {
+     "title": "Selectable",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "city_ref",
+    "country",
+    "scheme",
+    "code",
+    "label",
+    "geography_version",
+    "data_status",
+    "selectable",
+    "note"
+   ],
+   "title": "CityOption",
+   "type": "object"
+  },
+  "DataPackRef": {
+   "additionalProperties": false,
+   "description": "一份资料包的身份：编号与内容指纹。本轮只有合成资料包（``synthetic_fixture_only``）。",
+   "properties": {
+    "content_fingerprint": {
+     "pattern": "^[0-9a-f]{64}$",
+     "title": "Content Fingerprint",
+     "type": "string"
+    },
+    "note": {
+     "maxLength": 400,
+     "minLength": 1,
+     "title": "Note",
+     "type": "string"
+    },
+    "pack_id": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+     "title": "Pack Id",
+     "type": "string"
+    },
+    "status": {
+     "enum": [
+      "synthetic_fixture_only",
+      "real_data_frozen"
+     ],
+     "title": "Status",
+     "type": "string"
+    }
+   },
+   "required": [
+    "pack_id",
+    "content_fingerprint",
+    "status",
+    "note"
+   ],
+   "title": "DataPackRef",
+   "type": "object"
+  },
+  "DimensionDefinition": {
+   "additionalProperties": false,
+   "description": "六维之一的统一定义：中性题干、具体的参考改善范围与当前覆盖。全比较组共用，不逐城重新标定用户权重。",
+   "properties": {
+    "definition": {
+     "maxLength": 400,
+     "minLength": 1,
+     "title": "Definition",
+     "type": "string"
+    },
+    "key": {
+     "enum": [
+      "material",
+      "safety",
+      "opportunity",
+      "leisure",
+      "environment",
+      "commute"
+     ],
+     "title": "Key",
+     "type": "string"
+    },
+    "label": {
+     "maxLength": 40,
+     "minLength": 1,
+     "title": "Label",
+     "type": "string"
+    },
+    "reference_improvement": {
+     "maxLength": 400,
+     "minLength": 1,
+     "title": "Reference Improvement",
+     "type": "string"
+    },
+    "support": {
+     "enum": [
+      "supported",
+      "partially_supported",
+      "unsupported"
+     ],
+     "title": "Support",
+     "type": "string"
+    },
+    "support_note": {
+     "maxLength": 400,
+     "minLength": 1,
+     "title": "Support Note",
+     "type": "string"
+    }
+   },
+   "required": [
+    "key",
+    "label",
+    "definition",
+    "reference_improvement",
+    "support",
+    "support_note"
+   ],
+   "title": "DimensionDefinition",
+   "type": "object"
+  },
+  "HardRequirementOption": {
+   "additionalProperties": false,
+   "description": "一个受支持的硬要求选项：有定义、有资料、能按月核验。**核验只单独报告，环境不拦截计划**（``enforced_by_execution``）。",
+   "properties": {
+    "compiles_to": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Compiles To",
+     "type": "string"
+    },
+    "enforced_by_execution": {
+     "const": false,
+     "default": false,
+     "title": "Enforced By Execution",
+     "type": "boolean"
+    },
+    "label": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Label",
+     "type": "string"
+    },
+    "maximum": {
+     "title": "Maximum",
+     "type": "integer"
+    },
+    "minimum": {
+     "title": "Minimum",
+     "type": "integer"
+    },
+    "option_id": {
+     "pattern": "^[a-z][a-z0-9_.]{1,63}$",
+     "title": "Option Id",
+     "type": "string"
+    },
+    "parameter": {
+     "maxLength": 48,
+     "minLength": 1,
+     "title": "Parameter",
+     "type": "string"
+    },
+    "step": {
+     "minimum": 1,
+     "title": "Step",
+     "type": "integer"
+    },
+    "unit": {
+     "maxLength": 40,
+     "minLength": 1,
+     "title": "Unit",
+     "type": "string"
+    },
+    "verification": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Verification",
+     "type": "string"
+    }
+   },
+   "required": [
+    "option_id",
+    "label",
+    "parameter",
+    "unit",
+    "minimum",
+    "maximum",
+    "step",
+    "compiles_to",
+    "verification"
+   ],
+   "title": "HardRequirementOption",
+   "type": "object"
+  },
+  "HealthOptionDef": {
+   "additionalProperties": false,
+   "properties": {
+    "label": {
+     "maxLength": 20,
+     "minLength": 1,
+     "title": "Label",
+     "type": "string"
+    },
+    "meaning": {
+     "maxLength": 200,
+     "minLength": 1,
+     "title": "Meaning",
+     "type": "string"
+    },
+    "option_id": {
+     "enum": [
+      "agree",
+      "disagree",
+      "no_clear_tendency",
+      "unsure"
+     ],
+     "title": "Option Id",
+     "type": "string"
+    }
+   },
+   "required": [
+    "option_id",
+    "label",
+    "meaning"
+   ],
+   "title": "HealthOptionDef",
+   "type": "object"
+  },
+  "HealthQuestion": {
+   "additionalProperties": false,
+   "properties": {
+    "question_id": {
+     "pattern": "^[a-z][a-z0-9_]{1,47}$",
+     "title": "Question Id",
+     "type": "string"
+    },
+    "text": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Text",
+     "type": "string"
+    }
+   },
+   "required": [
+    "question_id",
+    "text"
+   ],
+   "title": "HealthQuestion",
+   "type": "object"
+  },
+  "HealthQuestionnaire": {
+   "additionalProperties": false,
+   "description": "独立健康问卷（不占六维 100 分，不是第七个评分权重）。题目是暂定文案，**未经量表验证**。",
+   "properties": {
+    "common_prompt": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Common Prompt",
+     "type": "string"
+    },
+    "options": {
+     "items": {
+      "$ref": "#/$defs/HealthOptionDef"
+     },
+     "maxItems": 4,
+     "minItems": 4,
+     "title": "Options",
+     "type": "array"
+    },
+    "questions": {
+     "items": {
+      "$ref": "#/$defs/HealthQuestion"
+     },
+     "minItems": 1,
+     "title": "Questions",
+     "type": "array"
+    },
+    "rules": {
+     "items": {
+      "type": "string"
+     },
+     "title": "Rules",
+     "type": "array"
+    },
+    "status": {
+     "const": "draft_wording_not_validated",
+     "title": "Status",
+     "type": "string"
+    },
+    "unanswered_rule": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Unanswered Rule",
+     "type": "string"
+    },
+    "version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Version",
+     "type": "string"
+    }
+   },
+   "required": [
+    "version",
+    "status",
+    "common_prompt",
+    "questions",
+    "options",
+    "unanswered_rule",
+    "rules"
+   ],
+   "title": "HealthQuestionnaire",
+   "type": "object"
+  },
+  "MaterialLeafDefinition": {
+   "additionalProperties": false,
+   "description": "物质细项之一：含义、支持状态与说明。细分是父项内部的相对重要性，不是开支比例。",
+   "properties": {
+    "definition": {
+     "maxLength": 400,
+     "minLength": 1,
+     "title": "Definition",
+     "type": "string"
+    },
+    "key": {
+     "maxLength": 48,
+     "minLength": 1,
+     "title": "Key",
+     "type": "string"
+    },
+    "label": {
+     "maxLength": 40,
+     "minLength": 1,
+     "title": "Label",
+     "type": "string"
+    },
+    "note": {
+     "maxLength": 400,
+     "minLength": 1,
+     "title": "Note",
+     "type": "string"
+    },
+    "support": {
+     "enum": [
+      "supported",
+      "partially_supported",
+      "unsupported"
+     ],
+     "title": "Support",
+     "type": "string"
+    }
+   },
+   "required": [
+    "key",
+    "label",
+    "definition",
+    "support",
+    "note"
+   ],
+   "title": "MaterialLeafDefinition",
+   "type": "object"
+  },
+  "MoneyBasisOption": {
+   "additionalProperties": false,
+   "description": "一种受支持的现金口径：币种、金额时期、含义与换算规则。没有列出的组合没有合法换算，明确阻断。",
+   "properties": {
+    "conversion_rule": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Conversion Rule",
+     "type": "string"
+    },
+    "currency": {
+     "pattern": "^[A-Z]{3}$",
+     "title": "Currency",
+     "type": "string"
+    },
+    "meaning": {
+     "const": "liquid_funds_v1",
+     "title": "Meaning",
+     "type": "string"
+    },
+    "note": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Note",
+     "type": "string"
+    },
+    "numeraire_id": {
+     "maxLength": 40,
+     "minLength": 1,
+     "title": "Numeraire Id",
+     "type": "string"
+    },
+    "price_period": {
+     "maxLength": 20,
+     "minLength": 1,
+     "title": "Price Period",
+     "type": "string"
+    }
+   },
+   "required": [
+    "currency",
+    "price_period",
+    "meaning",
+    "conversion_rule",
+    "numeraire_id",
+    "note"
+   ],
+   "title": "MoneyBasisOption",
+   "type": "object"
+  },
+  "OccupationCapability": {
+   "additionalProperties": false,
+   "description": "职业匹配能力：受控词表与明确规则，用户确认少量可读候选，不填职业代码。",
+   "properties": {
+    "concept_count": {
+     "minimum": 1,
+     "title": "Concept Count",
+     "type": "integer"
+    },
+    "languages": {
+     "items": {
+      "type": "string"
+     },
+     "minItems": 1,
+     "title": "Languages",
+     "type": "array"
+    },
+    "max_candidates": {
+     "maximum": 10,
+     "minimum": 1,
+     "title": "Max Candidates",
+     "type": "integer"
+    },
+    "method": {
+     "const": "controlled_vocabulary_alias_match_v1",
+     "title": "Method",
+     "type": "string"
+    },
+    "note": {
+     "maxLength": 400,
+     "minLength": 1,
+     "title": "Note",
+     "type": "string"
+    },
+    "users_enter_codes": {
+     "const": false,
+     "default": false,
+     "title": "Users Enter Codes",
+     "type": "boolean"
+    },
+    "vocabulary_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Vocabulary Version",
+     "type": "string"
+    }
+   },
+   "required": [
+    "vocabulary_version",
+    "method",
+    "languages",
+    "concept_count",
+    "max_candidates",
+    "note"
+   ],
+   "title": "OccupationCapability",
+   "type": "object"
+  },
+  "PointsRules": {
+   "additionalProperties": false,
+   "description": "定和量表的规则：合计、手工输入的小数位、显示小数位、精确分数的规范写法与均分的精确值。",
+   "properties": {
+    "canonical_form": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Canonical Form",
+     "type": "string"
+    },
+    "display_decimals": {
+     "maximum": 6,
+     "minimum": 0,
+     "title": "Display Decimals",
+     "type": "integer"
+    },
+    "equal_split_material": {
+     "pattern": "^(0|-?[1-9][0-9]*)(/[1-9][0-9]*)?$",
+     "title": "Equal Split Material",
+     "type": "string"
+    },
+    "equal_split_six": {
+     "pattern": "^(0|-?[1-9][0-9]*)(/[1-9][0-9]*)?$",
+     "title": "Equal Split Six",
+     "type": "string"
+    },
+    "manual_entry": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Manual Entry",
+     "type": "string"
+    },
+    "manual_max_decimals": {
+     "maximum": 6,
+     "minimum": 0,
+     "title": "Manual Max Decimals",
+     "type": "integer"
+    },
+    "rules": {
+     "items": {
+      "type": "string"
+     },
+     "title": "Rules",
+     "type": "array"
+    },
+    "total": {
+     "const": 100,
+     "title": "Total",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "total",
+    "manual_entry",
+    "manual_max_decimals",
+    "display_decimals",
+    "canonical_form",
+    "equal_split_six",
+    "equal_split_material",
+    "rules"
+   ],
+   "title": "PointsRules",
+   "type": "object"
+  },
+  "ProductMeta": {
+   "additionalProperties": false,
+   "description": "每条产品消息都带的共同元数据：结构、问卷、词表、健康问卷、转换的版本与资料包身份。",
+   "properties": {
+    "conversion_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Conversion Version",
+     "type": "string"
+    },
+    "data_pack": {
+     "$ref": "#/$defs/DataPackRef"
+    },
+    "health_questionnaire_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Health Questionnaire Version",
+     "type": "string"
+    },
+    "questionnaire_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Questionnaire Version",
+     "type": "string"
+    },
+    "sample": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/SampleLabel"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "schema_version": {
+     "const": "e3a-product-schema-v2",
+     "title": "Schema Version",
+     "type": "string"
+    },
+    "vocabulary_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Vocabulary Version",
+     "type": "string"
+    }
+   },
+   "required": [
+    "schema_version",
+    "questionnaire_version",
+    "vocabulary_version",
+    "health_questionnaire_version",
+    "conversion_version",
+    "data_pack"
+   ],
+   "title": "ProductMeta",
+   "type": "object"
+  },
+  "SampleLabel": {
+   "additionalProperties": false,
+   "description": "公共样例的出处标签（只出现在样例里；真实运行的消息不写）。\n\n* ``offline_run``：由离线闭环实际执行产生；\n* ``controlled_fixture``：受控测试夹具（例如写好的计划、注入的事件、构造的资料缺口），标明来源；\n* ``contract_example``：线上服务（幂等提交、查询、断线恢复）尚未实现，这里只是**标明为示例**的契约响应。",
+   "properties": {
+    "note": {
+     "maxLength": 600,
+     "minLength": 1,
+     "title": "Note",
+     "type": "string"
+    },
+    "origin": {
+     "enum": [
+      "offline_run",
+      "controlled_fixture",
+      "contract_example"
+     ],
+     "title": "Origin",
+     "type": "string"
+    },
+    "produced_by": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Produced By",
+     "type": "string"
+    },
+    "synthetic": {
+     "const": true,
+     "default": true,
+     "title": "Synthetic",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "origin",
+    "produced_by",
+    "note"
+   ],
+   "title": "SampleLabel",
+   "type": "object"
+  }
+ },
+ "additionalProperties": false,
+ "description": "E3 发布的能力清单（E5 只能呈现这里有的选择）。",
+ "properties": {
+  "abilities": {
+   "default": [],
+   "items": {
+    "$ref": "#/$defs/AbilityOption"
+   },
+   "title": "Abilities",
+   "type": "array"
+  },
+  "age_max": {
+   "maximum": 120,
+   "title": "Age Max",
+   "type": "integer"
+  },
+  "age_min": {
+   "minimum": 14,
+   "title": "Age Min",
+   "type": "integer"
+  },
+  "attribute_kinds": {
+   "default": [],
+   "items": {
+    "$ref": "#/$defs/AttributeKindDef"
+   },
+   "title": "Attribute Kinds",
+   "type": "array"
+  },
+  "capabilities_id": {
+   "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+   "title": "Capabilities Id",
+   "type": "string"
+  },
+  "cities": {
+   "items": {
+    "$ref": "#/$defs/CityOption"
+   },
+   "minItems": 1,
+   "title": "Cities",
+   "type": "array"
+  },
+  "dimensions": {
+   "items": {
+    "$ref": "#/$defs/DimensionDefinition"
+   },
+   "maxItems": 6,
+   "minItems": 6,
+   "title": "Dimensions",
+   "type": "array"
+  },
+  "free_text_max_chars": {
+   "const": 2000,
+   "title": "Free Text Max Chars",
+   "type": "integer"
+  },
+  "hard_requirement_options": {
+   "default": [],
+   "items": {
+    "$ref": "#/$defs/HardRequirementOption"
+   },
+   "title": "Hard Requirement Options",
+   "type": "array"
+  },
+  "health_questionnaire": {
+   "$ref": "#/$defs/HealthQuestionnaire"
+  },
+  "interview": {
+   "const": "reserved_not_implemented",
+   "default": "reserved_not_implemented",
+   "title": "Interview",
+   "type": "string"
+  },
+  "limits": {
+   "default": [],
+   "items": {
+    "type": "string"
+   },
+   "title": "Limits",
+   "type": "array"
+  },
+  "material_leaves": {
+   "items": {
+    "$ref": "#/$defs/MaterialLeafDefinition"
+   },
+   "minItems": 1,
+   "title": "Material Leaves",
+   "type": "array"
+  },
+  "meta": {
+   "$ref": "#/$defs/ProductMeta"
+  },
+  "money_bases": {
+   "items": {
+    "$ref": "#/$defs/MoneyBasisOption"
+   },
+   "minItems": 1,
+   "title": "Money Bases",
+   "type": "array"
+  },
+  "money_input_rule_zh": {
+   "maxLength": 300,
+   "minLength": 1,
+   "title": "Money Input Rule Zh",
+   "type": "string"
+  },
+  "occupation": {
+   "$ref": "#/$defs/OccupationCapability"
+  },
+  "points": {
+   "$ref": "#/$defs/PointsRules"
+  },
+  "start_scenario": {
+   "items": {
+    "type": "string"
+   },
+   "minItems": 1,
+   "title": "Start Scenario",
+   "type": "array"
+  },
+  "unsupported": {
+   "default": [],
+   "items": {
+    "type": "string"
+   },
+   "title": "Unsupported",
+   "type": "array"
+  }
+ },
+ "required": [
+  "meta",
+  "capabilities_id",
+  "cities",
+  "occupation",
+  "dimensions",
+  "material_leaves",
+  "points",
+  "health_questionnaire",
+  "money_bases",
+  "money_input_rule_zh",
+  "age_min",
+  "age_max",
+  "free_text_max_chars",
+  "start_scenario"
+ ],
+ "title": "ProductCapabilities",
+ "type": "object"
+}

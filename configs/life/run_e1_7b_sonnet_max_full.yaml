@@ -1,0 +1,72 @@
+# 完整对照试跑（整份名单：8 个分身 × 3 年；所有者 2026-10-18 要求 Haiku / Sonnet × medium / max 四组）。与对应的先导配置相同，只是全局规划调用上限 150、effort 如文件名。
+# Haiku 之后的对照测试配置（2026-10-18，DECISIONS/0035）：Claude Sonnet 5.5（configs/models.yaml 的 test_planner_sonnet 角色），经 Claude Agent SDK
+# 单轮调用，effort medium（所有者 2026-10-18 指定：先用 Haiku 5.5、effort max 测，测完之后再用 Sonnet 5.5、effort medium 测一次）。只在显式写
+# --config configs/life/run_e1_7b_sonnet.yaml 时使用；不写 --config 时仍是 Haiku 的 run_e1_7b_haiku.yaml。
+#
+# 与 run_e1_7b_haiku.yaml 逐项相同：名单、事实表、信息条件、每年 1 + 2 份候选、提示模板、记忆政策、调用方式（单轮、无工具、不读设置、隔离环境）、
+# 输出不另设上限（模型最大值 128,000）、超时 600 秒、每份候选最多 1 次服务重试。不同的只有模型与角色、effort 与计费。
+#
+# 认证与计费：auth: claude_subscription——用本机已登录的 Claude 订阅（`claude auth login`），不要 ANTHROPIC_API_KEY（所有者 2026-10-18）；
+# 先不计算费用（unmetered_reason），用量照记，实际请求次数受全局规划调用上限约束。
+
+run_notice: >-
+  exploratory_synthetic：Haiku 之后的对照测试配置（Claude Sonnet 5.5，滚动型号，Claude Agent SDK 单轮调用，effort medium）。合成城市、合成参数、
+  合成人设；结果只说明这个模型在这一次合成试跑里的表现，不代表模型的一般能力，也不是现实城市评价。
+
+run:
+  run_config_id: run.e1-7b.sonnet-max-full
+  status: exploratory_synthetic
+  version: e1-7b-run-v1
+  roster: configs/life/roster_e1_7b.yaml
+  city_facts: configs/life/city_facts_e1_7b.yaml
+  information:
+    condition: product_stated_profile
+    show_stated_dimension_points: true
+    show_soft_preferences: true
+    show_hard_requirements: true
+    show_free_text: true
+    show_energy_level: true
+    show_stated_material_points: true
+    permission_version: e1-7b-product-v1
+  planning:
+    plans_per_year: 1
+    max_revisions_per_year: 2
+    global_call_limit: 150
+    run_order: roster_order
+    transport_retries: 1
+    note: >-
+      每个分身每年一次正常规划、最多两次修订（与 Haiku 配置相同）。全局规划调用上限 3：本轮的对照试跑只跑名单第一项的第 1 年；
+      扩大试跑要另给预算并改这一项。每份候选最多再试 1 次服务请求，与计划修订分开计数。顺序调度，不并发
+  planner:
+    identity:
+      kind: llm
+      planner_id: llm.claude.test_planner_sonnet
+      version: e1-7b-llm-v1
+      model_snapshot: claude-sonnet-5-5
+      note: 真实模型规划器：Claude Agent SDK 单轮调用（一个输入、一轮、一个输出；无工具、不读设置、隔离环境）上的 Claude 滚动型号（没有带日期的快照）；只收安全投影的请求，计划由环境检查与结算
+    llm:
+      model_role: test_planner_sonnet
+      provider: claude_agent_sdk
+      model: claude-sonnet-5-5
+      version_policy: rolling
+      base_url: https://api.anthropic.com
+      response_format: prompt_only
+      auth: claude_subscription
+      thinking: adaptive
+      effort: max
+      max_output_tokens: 128000
+      timeout_seconds: 600
+      sdk_max_retries: 0
+      service_retries: 1
+      retry_wait_seconds: 5
+      max_input_tokens: 64000
+      token_estimate: ascii1_nonascii2_v1
+      note: >-
+        Claude Agent SDK 单轮调用：max_turns 1、无工具、不读设置、隔离的工作目录与配置目录、命令行内部重试与提示缓存关闭；输出不另设上限（用模型
+        自身的最大值 128,000，与命令行不设时的默认相同；所有者 2026-10-18 要求）、超时 600 秒；每份候选最多 1 次服务重试与 Haiku 配置相同；不设温度，思考由命令行固定为自适应，effort medium（所有者 2026-10-18 指定）
+  unmetered_reason: >-
+    使用 Claude 订阅额度（auth: claude_subscription，所有者 2026-10-18：先不计算费用）；只受全局规划调用上限约束，
+    token 用量照记在请求明细里
+  prompt_template: e1-7b-prompt-v1
+  memory_policy: e1-7a-memory-v1
+  note: Haiku 之后的对照测试（Claude Sonnet 5.5，effort medium），只在本轮；单独账本、不设额度上限，全局调用上限 3。默认的 Haiku 见 run_e1_7b_haiku.yaml。

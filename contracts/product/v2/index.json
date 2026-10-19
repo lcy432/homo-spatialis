@@ -1,0 +1,62 @@
+{
+ "conversion_version": "e3a-conversion-v2",
+ "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
+ "messages": {
+  "CatalogCompilation": {
+   "file": "CatalogCompilation.schema.json",
+   "sha256": "df5d2e14c2c483858b99ffe2c28a63cf6ef5dc91eb08d148fb196dacbfa69792"
+  },
+  "ConfirmedProfile": {
+   "file": "ConfirmedProfile.schema.json",
+   "sha256": "51852f3f99931bd0ecc54172bf4b8d4de32521a0089bd8f467d33f286ef71e27"
+  },
+  "OpportunityCandidate": {
+   "file": "OpportunityCandidate.schema.json",
+   "sha256": "a748141b6602111d542dd1c81a841d3e0e71d26933017b1b04f42357c106e070"
+  },
+  "OptionInventoryCoverage": {
+   "file": "OptionInventoryCoverage.schema.json",
+   "sha256": "0165a913fc202b0d09146e8ac0f4a673056a28fde88cb5b86a678807721a5277"
+  },
+  "ProductCapabilities": {
+   "file": "ProductCapabilities.schema.json",
+   "sha256": "a1cab557b4f562294333ace49109fde1b8f5a41b193b2c55b0469ba497f3781f"
+  },
+  "ProductPreflight": {
+   "file": "ProductPreflight.schema.json",
+   "sha256": "f6bd849c8e3670e573c51ec485245ed6bc183f4d8fddd681f96ba08b475ff150"
+  },
+  "ProductResult": {
+   "file": "ProductResult.schema.json",
+   "sha256": "de4848fdf09027557a1ba5c5864424c6e915b71cfb87126e8391a2149e17e29b"
+  },
+  "ProfileReview": {
+   "file": "ProfileReview.schema.json",
+   "sha256": "57ca24ae8e91440f726c7fda07311a61dc8165b34d2002a0327908be37f66757"
+  },
+  "RunProgress": {
+   "file": "RunProgress.schema.json",
+   "sha256": "cd8fb5719fe05b74440ec3c618b53de30e1887562ec7e01750c4d2fd5e2e3042"
+  },
+  "RunReceipt": {
+   "file": "RunReceipt.schema.json",
+   "sha256": "99259e4728e9742e450fc6b10606a2ad9122415434480d64d1f6f1fec687865b"
+  },
+  "RunSubmission": {
+   "file": "RunSubmission.schema.json",
+   "sha256": "76b96ae9bae80fafdb08d071edc42c633966847dfc6ad58204cc4d739833e9d6"
+  },
+  "SourceFact": {
+   "file": "SourceFact.schema.json",
+   "sha256": "bcf457fdab17c4dc971e21bb41e3062098a55d4d1ed0fbaa990f875536479a97"
+  },
+  "UserInputDraft": {
+   "file": "UserInputDraft.schema.json",
+   "sha256": "f9fb0ef5f8c3ebbe1eb16ff5bb98be953b7d16be9ae1596c159f205f39a0da68"
+  }
+ },
+ "questionnaire_version": "e3a-questionnaire-v0.1-draft",
+ "schema_version": "e3a-product-schema-v2",
+ "source": "src/common/product_contracts.py（唯一权威结构；这些文件由 scripts/product_e3a.py export-schema 导出，不要手改）",
+ "vocabulary_version": "e3a-vocabulary-v1"
+}

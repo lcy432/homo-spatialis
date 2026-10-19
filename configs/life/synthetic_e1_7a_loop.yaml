@@ -1,0 +1,718 @@
+# E1-7A 代理规划闭环的合成生活样例（DECISIONS/0030）。评分配置在 scoring_e1_7a_loop.yaml，评价规格在 evaluation_e1_7a.yaml，
+# 原计划名单在 roster_e1_7a.yaml，城市背景事实在 city_facts_e1_7a.yaml，运行配置在 run_e1_7a.yaml。
+#
+# **纯合成。** 城市、报价、工资、疾病与治疗全部手工设定，不来自任何真实城市、医疗资料或 LLM；不是现实结论，也不排序城市。
+# 由 synthetic_e1_6b_aggregation.yaml 复制而来，只改了：协议身份（life-v1-e1-7a-loop）与反馈政策、评分规格的编号；来源的
+# mapping_version；指定疾病事件（按 E1-7A 的三个生活故事）；开局名单（α 每城 4 个分身、β 每城 1 个）；**没有预先写好的年度
+# 计划**——每一年的计划由规划器（本轮是可控的 mock）根据当年的安全观察给出，环境执行。城市目录、价格、岗位、疾病规则与评分
+# 参数逐项不变；只订正了从 E1-6A 样例继承下来的城市名笔误（两处分节注释与 B96 课程说明里的“A93”“B94”，分身看得到那条课程
+# 说明），数值不受影响。
+#
+# 两位用户（全部 35 岁），同一用户在两座城从同样的条件出发（标准开局 v1）；指定事件按"人 + 重复序号"发生，同序号的分身在两座
+# 城遇到同样的事件：
+#   α（u101，标准偏好）开局 2,000、门店兼职。r0 健康；r1 第 2 年第 5 月大病；r2 第 1 年第 2 月大病（钱还少）；r3 第 2 年第 3 月小病
+#   β（u102，只看重交通 90、健康风险应对 10；硬要求"住房到工作地往返 ≤ 70 分钟"）开局 4,000、门店兼职。r0 健康
+# 手算见 docs/design/e1-7-agent-loop.md 与运行证据。
+
+fixture_notice: >-
+  synthetic_fixture_only：E1-7A 代理规划闭环样例。报价、工资、学费、时长、负担、疾病、治疗价格与税档全部手工合成，不对应任何
+  真实地点、医疗服务、雇主或制度；只用来检验"规划 → 执行 → 记忆 → 下一年规划 → 评价"的接线，不是城市评价，不排序真实城市。
+
+protocol:
+  protocol_id: life-v1-e1-7a-loop
+  schema_version: e1-7a-loop-draft
+  life_rules_version: e1-5c-monthly-health-v1
+  scoring_scale_version: e1-5c-health-v1
+  info_permission_version: e1-7a-draft
+  status: synthetic_fixture_only
+  simulation_years: 3
+  math_policies:
+    score_mapping:
+      state: undecided
+      proposal: >-
+        E1-3 探索映射加 E1-5A 补充的六维与 E1-5C 的健康项（S = (1 − γ)·B + γ·H），合成方案；E1-6A 的跨月汇总只读它的逐月结果
+    material_preference_aggregation: {state: undecided}
+    energy_feedback:
+      state: undecided
+      settled_parts:
+        - "月度精力额度约束：当月实际活动负担 ≤ 当月可承受额度；不结转、不回血（DECISIONS/0020）"
+        - "探索版年度反馈：下一年额度 = 基础额度 × (1 + α × 上一年完整年度满足感)，向下保留到 0.01（DECISIONS/0021，仅用于合成探索）"
+      open_parts:
+        - "反馈的方向与幅度的经验标定、α 的取值；是否允许低于基础额度"
+    income_payment_timing:
+      state: decided
+      decision_ref: DECISIONS/0017
+    risk_scenarios:
+      state: undecided
+      settled_parts:
+        - "E1-5C 合成探索版：健康 / 小病 / 大病三种状态，一次一病；指定事件与配对随机数（DECISIONS/0027）"
+      open_parts:
+        - 概率、恢复期与治疗效果的经验标定
+    discounting:
+      state: undecided
+      settled_parts:
+        - "E1-6A 合成探索版：评价规格显式声明月度时间权重 δ（主设定 δ = 1，非 1 对照只验证机制；DECISIONS/0028）"
+      open_parts:
+        - δ 的实证依据；是否区分用户自己的未来取舍与报告折现
+    terminal_value:
+      state: undecided
+      settled_parts:
+        - "E1-6A 合成探索版：从真实终态出发，按预先声明的少量参考方案在 12 个月估值期里真实结算与评分，取参考集合内最高（DECISIONS/0028）"
+      open_parts:
+        - 估值期长度与参考方案集合的依据；估值期之后的剩余资产；未完成课程的潜力
+    failure_handling:
+      state: undecided
+      settled_parts:
+        - 付不起最低住房与最低食品（两项合计）→ 出局；钱恰好够则通过
+        - 时间或精力超限 → 计划不可行（DECISIONS/0020）
+        - 反馈开着而上一年没有完整评分 → 反馈信息不足，当年结算保留（DECISIONS/0021）
+        - 年初无事件试算不可行 → 计划问题；疾病之后应急安排不足或资料缺口 → 停在那个月（DECISIONS/0027）
+        - "评价口径（所有者 2026-10-11，DECISIONS/0028）：确认的生活出局不进城市平均、不当未知分数；模拟问题造成的未完成计算另作不确定性分析；停止不自动改称出局"
+      open_parts:
+        - 规划修订、调度与批次失败的处理见 E1-7A（DECISIONS/0030）；真实模型的服务重试在 E1-7B
+  resource_rules:
+    version: e1-4a-monthly-resources-v1
+    time_unit: hour
+    month_rule: annual_net_hours_div_12
+    reserved_time: >-
+      净可分配小时已预留每天 8 小时睡眠与 4 小时基本休息（吃饭、洗漱、个人照料），按 365 天计；
+      这些不再进活动账
+    energy_unit: burden_point
+    energy_scale_version: e1-4a-monthly-quota-v1
+    commute_minutes_key: commute_roundtrip_minutes
+    commute_reference: >-
+      每座合成城只有一个到岗工作地点（城市就业中心的抽象）：住房写明的往返分钟就是到那里的往返，
+      所有需要到岗的岗位都在那里；不做地图与路线规划
+    commute_burden_per_hour: 0.75
+    household_tasks:
+      - {task: laundry, baseline_hours_per_month: 12, burden_per_hour: 0.5,
+         description: 没有洗衣设备或洗衣服务时，自己手洗或去自助洗衣店}
+      - {task: cleaning, baseline_hours_per_month: 10, burden_per_hour: 0.6,
+         description: 自己打扫一居室}
+    source: &rules
+      kind: synthetic
+      observed_on: 2026-10-12
+      geography_scope: synthetic city (no real geography)
+      mapping_version: synthetic-e1-7a-loop
+      synthetic_note: 手工设定的规则、负担系数、职业、目标、疾病与恢复规则，不是时间利用调查、医疗资料、价格资料或制度的标定
+  energy_feedback:
+    policy_id: feedback.e1-7a.main
+    version: e1-4b-satisfaction-quota-v1
+    mode: enabled
+    alpha: 0.10
+    formula: base_times_one_plus_alpha_s
+    lag_years: 1
+    score_statistic: complete_year_mean_u
+    scoring_spec_id: score.e1-7a.explore
+    scoring_version: e1-5c-health-v1
+    # 评分内容身份（DECISIONS/0025）：scoring_e1_7a_loop.yaml 的规格与 E1-6B 的规格逐项相同（只有编号与协议编号不同，不进入
+    # 内容身份），所以内容身份也相同。
+    scoring_content_fingerprint: bf5fabac734d8784f2e4d350182861b8a6279c88b8d59ab51aae529821ec2dae
+    preference_source: product_stated_numeric
+    quantization: floor_to_0.01
+    source: *rules
+    note: 沿用 E1-4B 的合成探索参数 α = 0.10；E1-6A 估值期的额度用第 3 年的完整年度满足感按同一公式重算
+  career_rules:
+    version: e1-5a-career-v1
+    attendance: planned_month_fee_settled
+    completion: participated_months_reach_required
+    grant: union_by_ability_id
+    effective_from: next_action_year
+    qualification_basis: year_start_state
+    job_access: deterministic_if_available_and_qualified
+    abilities:
+      - ability_id: accounting_cert
+        kind: credential
+        label: 会计从业资格（合成）
+        description: 通过会计资格课程后取得的证书；会计岗位要求它
+        scope: {kind: general}
+        source: *rules
+    employers:
+      - {employer_id: firm.shop95, label: 街角百货（合成）, city: {country: US, scheme: SYNTH2026, code: A95}, source: *rules}
+      - {employer_id: firm.office95, label: 合成办公室（合成）, city: {country: US, scheme: SYNTH2026, code: A95}, source: *rules}
+      - {employer_id: firm.shop96, label: 河边百货（合成）, city: {country: US, scheme: SYNTH2026, code: B96}, source: *rules}
+    source: *rules
+    note: 沿用 E1-5A 的合成职业规则：一门会计课、会计岗位要求会计资格；另有门店组长（要求现职零售）与高级会计（要求现职办公室）两个岗位，供资格测试用
+  savings_rules:
+    version: e1-5b-savings-goals-v1
+    goal_kinds: [durable_purchase, training_tuition]
+    max_open_goals: 1
+    changes: year_start_plan_only
+    funding: single_cash_ledger_no_earmark
+    progress: month_end_cash_vs_current_quote
+    realization: linked_executed_full_payment
+    due: record_unrealized_at_target_month_end
+    automatic: none
+    source: *rules
+    note: 沿用 E1-5B 的目标规则；本样例没有设目标
+  health_rules:
+    version: e1-5c-health-v1
+    states: healthy_minor_major
+    concurrency: one_illness_at_a_time
+    onset: new_events_only_in_healthy_months
+    month_state: month_start_state_sets_month
+    treatment_effect: recover_at_end_of_treated_month
+    treatment_offer: only_when_it_shortens_the_course
+    charge: once_per_treated_illness
+    payment_order: minimum_check_housing_food_then_treatment_then_other
+    pause_rule: declared_order_as_needed_then_skip_treatment_then_stop
+    minor:
+      severity: minor
+      work: continues
+      participation: as_planned
+      untreated_months: 2
+      recovery_hours_per_month: 10
+      recovery_burden_per_hour: 2.0
+      description: 小病：照常上班；不治疗持续 2 个月；每个病月本人额外花 10 小时恢复，每小时负担 2.0（合成）
+    major:
+      severity: major
+      work: sick_leave_unpaid
+      participation: paused
+      untreated_months: 3
+      recovery_hours_per_month: 60
+      recovery_burden_per_hour: 1.0
+      description: 大病：整月病假、没有工资；暂停有参与时间的主动活动；不治疗持续 3 个月；每个病月恢复 60 小时 × 1.0（合成）
+    treatment_needs:
+      - {severity: minor, need_id: minor_illness_care, description: 小病的门诊与药物：接受后当月月末恢复（全组共用的疗效）}
+      - {severity: major, need_id: major_illness_care, description: 大病的住院治疗：接受后当月月末恢复（全组共用的疗效）}
+    risk:
+      unit: per_month
+      burden_measure: previous_month_work_relative_burden
+      history_window_months: 1
+      first_month_burden_band: moderate
+      age_rule: integer_age_plus_one_per_year
+      age_bands:
+        - {band_id: under_40, min_age: 14, max_age: 39}
+        - {band_id: age_40_59, min_age: 40, max_age: 59}
+        - {band_id: age_60_plus, min_age: 60}
+      burden_bands:
+        - {band_id: light, lower: 0, upper: 0.4}
+        - {band_id: moderate, lower: 0.4, upper: 0.7}
+        - {band_id: heavy, lower: 0.7}
+      cells:
+        - {age_band: under_40, burden_band: light, minor: 0.02, major: 0.002}
+        - {age_band: under_40, burden_band: moderate, minor: 0.03, major: 0.004}
+        - {age_band: under_40, burden_band: heavy, minor: 0.05, major: 0.008}
+        - {age_band: age_40_59, burden_band: light, minor: 0.03, major: 0.004}
+        - {age_band: age_40_59, burden_band: moderate, minor: 0.045, major: 0.007}
+        - {age_band: age_40_59, burden_band: heavy, minor: 0.07, major: 0.012}
+        - {age_band: age_60_plus, burden_band: light, minor: 0.045, major: 0.008}
+        - {age_band: age_60_plus, burden_band: moderate, minor: 0.065, major: 0.012}
+        - {age_band: age_60_plus, burden_band: heavy, minor: 0.10, major: 0.02}
+    source: *rules
+    note: 合成探索规则，与 E1-5C 样例逐项相同（内容指纹相同）；不是医学或流行病学结论
+  illness_events:
+    mode: injected
+    stream_version: e1-5c-illness-stream-v1
+    injected:
+      - {person_id: u101, repeat_index: 1, year_index: 2, month: 5, severity: major, note: α 的第 1 号分身第 2 年第 5 月大病（计划已在执行，不能回到年初重选）}
+      - {person_id: u101, repeat_index: 2, year_index: 1, month: 2, severity: major, note: α 的第 2 号分身第 1 年第 2 月大病（钱还少）}
+      - {person_id: u101, repeat_index: 3, year_index: 2, month: 3, severity: minor, note: α 的第 3 号分身第 2 年第 3 月小病}
+    note: 只用确定的指定事件（按人与重复分身序号，两座城同序号的分身遇到同样的事件），故事可以手算；估值期另由评价器派生"没有新发疾病"的条件
+  health_input:
+    dimension: healthcare
+    semantics: health_risk_coping_v1
+    use: agent_planning_information_only
+    question_text: "健康风险应对：生病或可能生病时，你愿意为及时治疗、预防和给自己留余地付出多少（钱、时间、少做别的事）？给这一项的点数越多，分身做计划时越看重应对健康风险。它不改变生病的概率、病有多难受或治疗效果，也不进入生活满足感"
+    note: 与 E1-5C 相同的问卷原题
+
+consumption_needs: [housing_space, fresh_food, laundry, home_cleaning, short_commute]
+categories: [housing, food, durable, job, training, experience, service]
+functions: [housing, food, laundry]
+function_kinds: {laundry: presence}
+
+tax_policies:
+  - policy_id: tax.synth.ze
+    status: synthetic_test_double
+    money_basis_id: USD_2024_LOCAL
+    applies_to: {path: [US, ZE]}
+    brackets: [{lower: 0, rate: 0.0}, {lower: 40000, rate: 0.2}]
+    note: 合成测试替身：全年应税收入 40,000 以内 0%，超出部分 20%（样例里的工资都在 40,000 以内，月度现金流可以直接手算）
+
+catalogs:
+  # ======================================================================= A95
+  - city: {country: US, scheme: SYNTH2026, code: A95}
+    jurisdiction: {path: [US, ZE]}
+    label: 合成城 A95
+    money_basis: {currency: USD, base_year: 2024}
+    tax_policy_id: tax.synth.ze
+    function_supply:
+      - {function: laundry, status: available, source: &supply
+         {kind: synthetic, observed_on: 2026-10-12, geography_scope: synthetic city (no real geography),
+          mapping_version: synthetic-e1-7a-loop, synthetic_note: 合成声明：目录已列出的就是这座合成城的全部方案}}
+    minimum_living:
+      - need: housing
+        baseline_opportunity_id: a95.housing.far
+        baseline_quantity: 1
+        qualifying_opportunity_ids: [a95.housing.far, a95.housing.near]
+        meets: 一个人独占、有基本卫浴厨房的一居室（合成声明）
+      - need: food
+        baseline_opportunity_id: a95.food.basic
+        baseline_quantity: 1
+        qualifying_opportunity_ids: [a95.food.basic, a95.food.fresh]
+        meets: 一个成年人一个月的基本口粮（合成声明）
+    treatments:
+      - treatment_id: a95.care.clinic
+        severity: minor
+        need_id: minor_illness_care
+        label: 社区门诊与药物
+        serves: 小病：看一次门诊、拿药；接受后当月月末恢复（全组共用的疗效）
+        availability: available
+        price: {amount: {amount: 300, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: illness-episode}
+        visit_hours: 2
+        burden_per_hour: 1.0
+        source: &care
+          kind: synthetic
+          observed_on: 2026-10-12
+          geography_scope: synthetic city (no real geography)
+          mapping_version: synthetic-e1-7a-loop
+          synthetic_note: 手工设定的治疗价格与就医时间，不来自任何真实医疗机构或价格资料
+      - treatment_id: a95.care.hospital
+        severity: major
+        need_id: major_illness_care
+        label: 住院治疗
+        serves: 大病：住院治疗；接受后当月月末恢复（全组共用的疗效）
+        availability: available
+        price: {amount: {amount: 2000, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: illness-episode}
+        visit_hours: 8
+        burden_per_hour: 1.0
+        source: *care
+    opportunities:
+      - opportunity_id: a95.housing.near
+        category: housing
+        label: 一居室（离工作地近）
+        spec: {floor_area_sqft: 600, rooms: 1, exclusive: true, basic_facilities: true, home_office: false, commute_roundtrip_minutes: 30}
+        functions: [housing]
+        unit: dwelling
+        quality: 独占一居室；到就业中心往返约 30 分钟（合成情景）
+        availability: available
+        price: {amount: {amount: 1400, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: dwelling-month}
+        duration: {kind: ongoing_service}
+        resource: {basis: passive, note: 住房本身不占时间；它的往返分钟用于算通勤，也代理广义出行条件}
+        source: &synth
+          kind: synthetic
+          observed_on: 2026-10-12
+          geography_scope: synthetic city (no real geography)
+          mapping_version: synthetic-e1-7a-loop
+          synthetic_note: 手工设定的测试数值，不来自任何真实城市、商品、雇主、数据源或 LLM
+      - opportunity_id: a95.housing.far
+        category: housing
+        label: 一居室（离工作地远）
+        spec: {floor_area_sqft: 600, rooms: 1, exclusive: true, basic_facilities: true, home_office: false, commute_roundtrip_minutes: 70}
+        functions: [housing]
+        unit: dwelling
+        quality: 与近处同样的一居室；到就业中心往返约 70 分钟（合成情景）
+        availability: available
+        price: {amount: {amount: 1000, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: dwelling-month}
+        duration: {kind: ongoing_service}
+        resource: {basis: passive, note: 住房本身不占时间；它的往返分钟用于算通勤，也代理广义出行条件}
+        source: *synth
+      - opportunity_id: a95.food.basic
+        category: food
+        label: 基本食品方案（自己做）
+        spec: {fresh_meals_per_week: 3}
+        functions: [food]
+        unit: household-plan
+        quality: 米面与罐头为主；自己做，每月准备约 30 小时
+        availability: available
+        price: {amount: {amount: 380, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: plan-month}
+        duration: {kind: ongoing_service}
+        resource: {basis: per_service_month, hours: 30, burden_per_hour: 0.5, quantity_scales: false,
+                   note: 准备时间就是这份方案的全部做饭时间；生病时照常要吃饭}
+        source: *synth
+      - opportunity_id: a95.food.fresh
+        category: food
+        label: 新鲜食材方案（自己做）
+        spec: {fresh_meals_per_week: 21}
+        functions: [food]
+        unit: household-plan
+        quality: 每天三顿以新鲜食材为主；自己做，每月准备约 40 小时
+        availability: available
+        price: {amount: {amount: 450, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: plan-month}
+        duration: {kind: ongoing_service}
+        resource: {basis: per_service_month, hours: 40, burden_per_hour: 0.5, quantity_scales: false,
+                   note: 买菜、洗切、做饭与收拾的合计}
+        source: *synth
+      - opportunity_id: a95.durable.washer_dryer
+        category: durable
+        label: 洗烘一体机
+        functions: [laundry]
+        unit: appliance
+        quality: 洗烘一体；能用 10 年；有它时本人每月洗衣还要约 2 小时（分拣、叠、收）
+        availability: available
+        price: {amount: {amount: 2400, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: appliance}
+        duration: {kind: durable_good, lasts_years: 10}
+        resource: {basis: passive, substitutes: [{task: laundry, residual_hours_per_month: 2}],
+                   note: 持有本身不占时间；在服务期内把洗衣基准 12 小时降到 2 小时}
+        source: *synth
+      - opportunity_id: a95.durable.used_washer
+        category: durable
+        label: 二手洗衣机（还能用一年）
+        functions: [laundry]
+        unit: appliance
+        quality: 二手，只能再用 12 个月；有它时本人每月洗衣还要约 4 小时
+        availability: available
+        price: {amount: {amount: 600, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: appliance}
+        duration: {kind: durable_good, lasts_years: 1}
+        resource: {basis: passive, substitutes: [{task: laundry, residual_hours_per_month: 4}],
+                   note: 持有本身不占时间；在服务期内把洗衣基准 12 小时降到 4 小时}
+        source: *synth
+      - opportunity_id: a95.service.cleaning
+        category: service
+        label: 上门清洁（每月）
+        unit: service-month
+        quality: 每月上门打扫；本人还要约 2 小时收拾；本人不参与服务本身
+        availability: available
+        price: {amount: {amount: 120, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: service-month}
+        duration: {kind: ongoing_service}
+        resource: {basis: per_service_month, hours: 0, burden_per_hour: 0, quantity_scales: false,
+                   substitutes: [{task: cleaning, residual_hours_per_month: 2}],
+                   note: 零小时的服务：生病时照常起作用}
+        source: *synth
+      - opportunity_id: a95.service.gym
+        category: service
+        label: 健身房月卡（每月去 8 次）
+        spec: {visits_per_month: 8}
+        unit: membership-month
+        quality: 每月去 8 次，每次约 1.5 小时
+        availability: available
+        price: {amount: {amount: 60, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: membership-month}
+        duration: {kind: ongoing_service}
+        resource: {basis: per_use, uses_per_month: 8, hours: 1.5, burden_per_hour: 1.0, quantity_scales: false,
+                   note: 有参与时间的主动活动：大病时暂停}
+        source: *synth
+      - opportunity_id: a95.experience.concert
+        category: experience
+        label: 音乐会（一次）
+        unit: ticket
+        quality: 一晚演出，往返加演出约 4 小时
+        availability: available
+        price: {amount: {amount: 150, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: ticket}
+        duration: {kind: one_time_experience, lasts_years: 0}
+        resource: {basis: per_occurrence, hours: 4, burden_per_hour: 0.5, quantity_scales: true,
+                   note: 一次体验 4 小时}
+        source: *synth
+      # ---------------------------------------------------------- 岗位（合成）
+      - opportunity_id: a95.job.shop_parttime
+        category: job
+        label: 门店兼职（街角百货）
+        spec: {work_mode: onsite}
+        unit: position
+        quality: 兼职，每月 80 工时、10 个工作日，10 次到岗；没有资格要求
+        availability: available
+        compensation: {amount: {amount: 18000, numeraire: USD_2024_LOCAL}, billing: per_year, per_unit: position-year}
+        occupation: {scheme: SOC2018, code: "41-2031"}
+        employer_id: firm.shop95
+        duration: {kind: ongoing_service}
+        resource:
+          basis: job
+          job: {work_mode: onsite, work_hours_per_month: 80, workdays_per_month: 10, onsite_days_per_month: 10, burden_per_work_hour: 1.0}
+          note: 薪酬与工时、到岗日绑定；计划不能改；大病病假没有工资
+        source: *synth
+      - opportunity_id: a95.job.shop_lead
+        category: job
+        label: 门店组长（街角百货）
+        spec: {work_mode: onsite}
+        unit: position
+        quality: 要求现职是零售岗位；每月 120 工时、15 次到岗
+        availability: available
+        compensation: {amount: {amount: 24000, numeraire: USD_2024_LOCAL}, billing: per_year, per_unit: position-year}
+        occupation: {scheme: SOC2018, code: "41-2031"}
+        employer_id: firm.shop95
+        eligibility: ["occupation:SOC2018:41-2031"]
+        duration: {kind: ongoing_service}
+        resource:
+          basis: job
+          job: {work_mode: onsite, work_hours_per_month: 120, workdays_per_month: 15, onsite_days_per_month: 15, burden_per_work_hour: 1.0}
+          note: 只用于资格测试（职业作用域）
+        source: *synth
+      - opportunity_id: a95.job.accountant_office
+        category: job
+        label: 会计（合成办公室）
+        spec: {work_mode: onsite}
+        unit: position
+        quality: 要求会计从业资格；全职，每月 160 工时、20 次到岗
+        availability: available
+        compensation: {amount: {amount: 36000, numeraire: USD_2024_LOCAL}, billing: per_year, per_unit: position-year}
+        occupation: {scheme: SOC2018, code: "13-2011"}
+        employer_id: firm.office95
+        eligibility: ["ability:accounting_cert"]
+        duration: {kind: ongoing_service}
+        resource:
+          basis: job
+          job: {work_mode: onsite, work_hours_per_month: 160, workdays_per_month: 20, onsite_days_per_month: 20, burden_per_work_hour: 1.1}
+          note: 每工时负担 1.1（合成）
+        source: *synth
+      - opportunity_id: a95.job.office_senior
+        category: job
+        label: 高级会计（合成办公室）
+        spec: {work_mode: onsite}
+        unit: position
+        quality: 要求会计资格，且现职就在这家办公室；全职，每月 160 工时、20 次到岗
+        availability: available
+        compensation: {amount: {amount: 39000, numeraire: USD_2024_LOCAL}, billing: per_year, per_unit: position-year}
+        occupation: {scheme: SOC2018, code: "13-2011"}
+        employer_id: firm.office95
+        eligibility: ["ability:accounting_cert", "employer:firm.office95"]
+        duration: {kind: ongoing_service}
+        resource:
+          basis: job
+          job: {work_mode: onsite, work_hours_per_month: 160, workdays_per_month: 20, onsite_days_per_month: 20, burden_per_work_hour: 1.1}
+          note: 只用于资格测试（雇主作用域）
+        source: *synth
+      # ---------------------------------------------------------- 学习
+      - opportunity_id: a95.training.accounting_course
+        category: training
+        label: 会计资格课程（12 个月）
+        unit: course
+        quality: 每月上课与作业约 40 小时；参加满 12 个月取得会计从业资格（下一行动年起可用）
+        availability: available
+        price: {amount: {amount: 1200, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: course}
+        duration: {kind: training_course, completion_years: 1}
+        grants: [accounting_cert]
+        resource: {basis: per_service_month, hours: 40, burden_per_hour: 1.2, quantity_scales: false,
+                   note: 按实际参加的月份计；每月 40 × 1.2 = 48 负担点}
+        source: *synth
+  # ======================================================================= B96
+  - city: {country: US, scheme: SYNTH2026, code: B96}
+    jurisdiction: {path: [US, ZE]}
+    label: 合成城 B96
+    money_basis: {currency: USD, base_year: 2024}
+    tax_policy_id: tax.synth.ze
+    function_supply:
+      - {function: laundry, status: available, source: *supply}
+    minimum_living:
+      - need: housing
+        baseline_opportunity_id: b96.housing.far
+        baseline_quantity: 1
+        qualifying_opportunity_ids: [b96.housing.far, b96.housing.near]
+        meets: 一个人独占、有基本卫浴厨房的一居室（合成声明）
+      - need: food
+        baseline_opportunity_id: b96.food.basic
+        baseline_quantity: 1
+        qualifying_opportunity_ids: [b96.food.basic, b96.food.fresh]
+        meets: 一个成年人一个月的基本口粮（合成声明）
+    treatments:
+      - treatment_id: b96.care.clinic
+        severity: minor
+        need_id: minor_illness_care
+        label: 社区门诊（本城没有）
+        serves: 小病：门诊与药物
+        availability: unavailable
+        source: *care
+      - treatment_id: b96.care.hospital
+        severity: major
+        need_id: major_illness_care
+        label: 住院治疗（资料未知）
+        serves: 大病：住院治疗
+        availability: unknown
+        unknown_reason: 合成情景：这座城住院的价格与床位没有采集到——未知不是免费，也不是没有
+        source: *care
+    opportunities:
+      - opportunity_id: b96.housing.near
+        category: housing
+        label: 一居室（离工作地近）
+        spec: {floor_area_sqft: 600, rooms: 1, exclusive: true, basic_facilities: true, home_office: false, commute_roundtrip_minutes: 30}
+        functions: [housing]
+        unit: dwelling
+        quality: 独占一居室；到就业中心往返约 30 分钟（合成情景）
+        availability: available
+        price: {amount: {amount: 1400, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: dwelling-month}
+        duration: {kind: ongoing_service}
+        resource: {basis: passive, note: 住房本身不占时间；它的往返分钟用于算通勤，也代理广义出行条件}
+        source: *synth
+      - opportunity_id: b96.housing.far
+        category: housing
+        label: 一居室（离工作地远）
+        spec: {floor_area_sqft: 600, rooms: 1, exclusive: true, basic_facilities: true, home_office: false, commute_roundtrip_minutes: 90}
+        functions: [housing]
+        unit: dwelling
+        quality: 与近处同样的一居室；到就业中心往返约 90 分钟（合成情景）
+        availability: available
+        price: {amount: {amount: 1000, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: dwelling-month}
+        duration: {kind: ongoing_service}
+        resource: {basis: passive, note: 住房本身不占时间；它的往返分钟用于算通勤，也代理广义出行条件}
+        source: *synth
+      - opportunity_id: b96.food.basic
+        category: food
+        label: 基本食品方案（自己做）
+        spec: {fresh_meals_per_week: 3}
+        functions: [food]
+        unit: household-plan
+        quality: 米面与罐头为主；自己做，每月准备约 30 小时
+        availability: available
+        price: {amount: {amount: 380, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: plan-month}
+        duration: {kind: ongoing_service}
+        resource: {basis: per_service_month, hours: 30, burden_per_hour: 0.5, quantity_scales: false,
+                   note: 准备时间就是这份方案的全部做饭时间}
+        source: *synth
+      - opportunity_id: b96.food.fresh
+        category: food
+        label: 新鲜食材方案（自己做）
+        spec: {fresh_meals_per_week: 21}
+        functions: [food]
+        unit: household-plan
+        quality: 每天三顿以新鲜食材为主；自己做，每月准备约 40 小时
+        availability: available
+        price: {amount: {amount: 450, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: plan-month}
+        duration: {kind: ongoing_service}
+        resource: {basis: per_service_month, hours: 40, burden_per_hour: 0.5, quantity_scales: false,
+                   note: 买菜、洗切、做饭与收拾的合计}
+        source: *synth
+      - opportunity_id: b96.durable.washer_dryer
+        category: durable
+        label: 洗烘一体机
+        functions: [laundry]
+        unit: appliance
+        quality: 洗烘一体；能用 10 年；有它时本人每月洗衣还要约 2 小时
+        availability: available
+        price: {amount: {amount: 2400, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: appliance}
+        duration: {kind: durable_good, lasts_years: 10}
+        resource: {basis: passive, substitutes: [{task: laundry, residual_hours_per_month: 2}],
+                   note: 持有本身不占时间；在服务期内把洗衣基准 12 小时降到 2 小时}
+        source: *synth
+      - opportunity_id: b96.service.gym
+        category: service
+        label: 健身房月卡（每月去 8 次）
+        spec: {visits_per_month: 8}
+        unit: membership-month
+        quality: 每月去 8 次，每次约 1.5 小时
+        availability: available
+        price: {amount: {amount: 60, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: membership-month}
+        duration: {kind: ongoing_service}
+        resource: {basis: per_use, uses_per_month: 8, hours: 1.5, burden_per_hour: 1.0, quantity_scales: false,
+                   note: 有参与时间的主动活动}
+        source: *synth
+      - opportunity_id: b96.experience.concert
+        category: experience
+        label: 音乐会（一次）
+        unit: ticket
+        quality: 一晚演出，往返加演出约 4 小时
+        availability: available
+        price: {amount: {amount: 150, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: ticket}
+        duration: {kind: one_time_experience, lasts_years: 0}
+        resource: {basis: per_occurrence, hours: 4, burden_per_hour: 0.5, quantity_scales: true,
+                   note: 一次体验 4 小时}
+        source: *synth
+      - opportunity_id: b96.training.accounting_course
+        category: training
+        label: 会计资格课程（12 个月）
+        unit: course
+        quality: 每月上课与作业约 40 小时；参加满 12 个月取得会计从业资格（下一行动年起可用）；B96 没有会计岗位
+        availability: available
+        price: {amount: {amount: 1200, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: course}
+        duration: {kind: training_course, completion_years: 1}
+        grants: [accounting_cert]
+        resource: {basis: per_service_month, hours: 40, burden_per_hour: 1.2, quantity_scales: false,
+                   note: 按实际参加的月份计；每月 40 × 1.2 = 48 负担点}
+        source: *synth
+      - opportunity_id: b96.job.shop_parttime
+        category: job
+        label: 门店兼职（河边百货）
+        spec: {work_mode: onsite}
+        unit: position
+        quality: 兼职，每月 80 工时、10 个工作日，10 次到岗；没有资格要求
+        availability: available
+        compensation: {amount: {amount: 18000, numeraire: USD_2024_LOCAL}, billing: per_year, per_unit: position-year}
+        occupation: {scheme: SOC2018, code: "41-2031"}
+        employer_id: firm.shop96
+        duration: {kind: ongoing_service}
+        resource:
+          basis: job
+          job: {work_mode: onsite, work_hours_per_month: 80, workdays_per_month: 10, onsite_days_per_month: 10, burden_per_work_hour: 1.0}
+          note: 薪酬与工时、到岗日绑定；计划不能改
+        source: *synth
+
+# ---------------------------------------------------------------------- 两位用户（α 标准偏好；β 只看重交通、有通勤硬要求）
+stated_profiles:
+  - {person_id: u101, healthcare_semantics: health_risk_coping_v1, occupation: &retail {scheme: SOC2018, code: "41-2031"},
+     dimension_points: {material: 30, safety: 10, healthcare: 10, opportunity: 20, leisure: 10, environment: 10, commute: 10},
+     material_points: &mpoints {housing_space: 50, fresh_food: 30, laundry: 20}}
+  - {person_id: u102, healthcare_semantics: health_risk_coping_v1, occupation: *retail,
+     dimension_points: {material: 0, safety: 0, healthcare: 10, opportunity: 0, leisure: 0, environment: 0, commute: 90},
+     hard_requirements: [{need: short_commute, requirement: {category: housing, max_commute_roundtrip_minutes: 70}}]}
+
+internal_truths:
+  - {person_id: u101, status: synthetic_fixture_only, healthcare_semantics: health_risk_coping_v1,
+     dimension_weights: {material: 0.30, safety: 0.10, healthcare: 0.10, opportunity: 0.20, leisure: 0.10, environment: 0.10, commute: 0.10},
+     material_subweights: &msub {housing_space: 0.5, fresh_food: 0.3, laundry: 0.2}}
+  - {person_id: u102, status: synthetic_fixture_only, healthcare_semantics: health_risk_coping_v1,
+     dimension_weights: {material: 0.0, safety: 0.0, healthcare: 0.10, opportunity: 0.0, leisure: 0.0, environment: 0.0, commute: 0.90},
+     material_subweights: *msub}
+
+# ---------------------------------------------------------------------- 第一年开局（标准开局 v1：健康、没有病史、不绑定）
+# 没有 plans：每一年的计划由规划器根据当年的安全观察给出（E1-7A）。
+initial_states:
+  - {person_id: u101, clone_id: u101.a95.r0, city: {country: US, scheme: SYNTH2026, code: A95}, year_index: 1,
+     occupation: *retail, money_basis_id: USD_2024_LOCAL, cash: {amount: 2000, numeraire: USD_2024_LOCAL},
+     time_budget_hours: 4380, energy: &q250 {level: 250, scale_version: e1-4a-monthly-quota-v1},
+     resource_budget_basis: &basis12 {rules_version: e1-4a-monthly-resources-v1,
+       reserved: 只预留协议声明的睡眠与基本休息（每天 12 小时），其余 12 小时/天可分配, source: *rules},
+     energy_quota_basis: &base250 {base_level: 250, status: base_first_year},
+     employment: {stated_occupation: *retail, as_of: start_declaration,
+       positions: [{opportunity_id: a95.job.shop_parttime, occupation: *retail, employer_id: firm.shop95}],
+       current_position_ids: [a95.job.shop_parttime]},
+     savings_goals: [], health: {age_years: 35, repeat_index: 0}, goals: [], experience_summary: []}
+  - {person_id: u101, clone_id: u101.a95.r1, city: {country: US, scheme: SYNTH2026, code: A95}, year_index: 1,
+     occupation: *retail, money_basis_id: USD_2024_LOCAL, cash: {amount: 2000, numeraire: USD_2024_LOCAL},
+     time_budget_hours: 4380, energy: *q250, resource_budget_basis: *basis12, energy_quota_basis: *base250,
+     employment: {stated_occupation: *retail, as_of: start_declaration,
+       positions: [{opportunity_id: a95.job.shop_parttime, occupation: *retail, employer_id: firm.shop95}],
+       current_position_ids: [a95.job.shop_parttime]},
+     savings_goals: [], health: {age_years: 35, repeat_index: 1}, goals: [], experience_summary: []}
+  - {person_id: u101, clone_id: u101.a95.r2, city: {country: US, scheme: SYNTH2026, code: A95}, year_index: 1,
+     occupation: *retail, money_basis_id: USD_2024_LOCAL, cash: {amount: 2000, numeraire: USD_2024_LOCAL},
+     time_budget_hours: 4380, energy: *q250, resource_budget_basis: *basis12, energy_quota_basis: *base250,
+     employment: {stated_occupation: *retail, as_of: start_declaration,
+       positions: [{opportunity_id: a95.job.shop_parttime, occupation: *retail, employer_id: firm.shop95}],
+       current_position_ids: [a95.job.shop_parttime]},
+     savings_goals: [], health: {age_years: 35, repeat_index: 2}, goals: [], experience_summary: []}
+  - {person_id: u101, clone_id: u101.a95.r3, city: {country: US, scheme: SYNTH2026, code: A95}, year_index: 1,
+     occupation: *retail, money_basis_id: USD_2024_LOCAL, cash: {amount: 2000, numeraire: USD_2024_LOCAL},
+     time_budget_hours: 4380, energy: *q250, resource_budget_basis: *basis12, energy_quota_basis: *base250,
+     employment: {stated_occupation: *retail, as_of: start_declaration,
+       positions: [{opportunity_id: a95.job.shop_parttime, occupation: *retail, employer_id: firm.shop95}],
+       current_position_ids: [a95.job.shop_parttime]},
+     savings_goals: [], health: {age_years: 35, repeat_index: 3}, goals: [], experience_summary: []}
+  - {person_id: u101, clone_id: u101.b96.r0, city: {country: US, scheme: SYNTH2026, code: B96}, year_index: 1,
+     occupation: *retail, money_basis_id: USD_2024_LOCAL, cash: {amount: 2000, numeraire: USD_2024_LOCAL},
+     time_budget_hours: 4380, energy: *q250, resource_budget_basis: *basis12, energy_quota_basis: *base250,
+     employment: {stated_occupation: *retail, as_of: start_declaration,
+       positions: [{opportunity_id: b96.job.shop_parttime, occupation: *retail, employer_id: firm.shop96}],
+       current_position_ids: [b96.job.shop_parttime]},
+     savings_goals: [], health: {age_years: 35, repeat_index: 0}, goals: [], experience_summary: []}
+  - {person_id: u101, clone_id: u101.b96.r1, city: {country: US, scheme: SYNTH2026, code: B96}, year_index: 1,
+     occupation: *retail, money_basis_id: USD_2024_LOCAL, cash: {amount: 2000, numeraire: USD_2024_LOCAL},
+     time_budget_hours: 4380, energy: *q250, resource_budget_basis: *basis12, energy_quota_basis: *base250,
+     employment: {stated_occupation: *retail, as_of: start_declaration,
+       positions: [{opportunity_id: b96.job.shop_parttime, occupation: *retail, employer_id: firm.shop96}],
+       current_position_ids: [b96.job.shop_parttime]},
+     savings_goals: [], health: {age_years: 35, repeat_index: 1}, goals: [], experience_summary: []}
+  - {person_id: u101, clone_id: u101.b96.r2, city: {country: US, scheme: SYNTH2026, code: B96}, year_index: 1,
+     occupation: *retail, money_basis_id: USD_2024_LOCAL, cash: {amount: 2000, numeraire: USD_2024_LOCAL},
+     time_budget_hours: 4380, energy: *q250, resource_budget_basis: *basis12, energy_quota_basis: *base250,
+     employment: {stated_occupation: *retail, as_of: start_declaration,
+       positions: [{opportunity_id: b96.job.shop_parttime, occupation: *retail, employer_id: firm.shop96}],
+       current_position_ids: [b96.job.shop_parttime]},
+     savings_goals: [], health: {age_years: 35, repeat_index: 2}, goals: [], experience_summary: []}
+  - {person_id: u101, clone_id: u101.b96.r3, city: {country: US, scheme: SYNTH2026, code: B96}, year_index: 1,
+     occupation: *retail, money_basis_id: USD_2024_LOCAL, cash: {amount: 2000, numeraire: USD_2024_LOCAL},
+     time_budget_hours: 4380, energy: *q250, resource_budget_basis: *basis12, energy_quota_basis: *base250,
+     employment: {stated_occupation: *retail, as_of: start_declaration,
+       positions: [{opportunity_id: b96.job.shop_parttime, occupation: *retail, employer_id: firm.shop96}],
+       current_position_ids: [b96.job.shop_parttime]},
+     savings_goals: [], health: {age_years: 35, repeat_index: 3}, goals: [], experience_summary: []}
+  - {person_id: u102, clone_id: u102.a95.r0, city: {country: US, scheme: SYNTH2026, code: A95}, year_index: 1,
+     occupation: *retail, money_basis_id: USD_2024_LOCAL, cash: {amount: 4000, numeraire: USD_2024_LOCAL},
+     time_budget_hours: 4380, energy: *q250, resource_budget_basis: *basis12, energy_quota_basis: *base250,
+     employment: {stated_occupation: *retail, as_of: start_declaration,
+       positions: [{opportunity_id: a95.job.shop_parttime, occupation: *retail, employer_id: firm.shop95}],
+       current_position_ids: [a95.job.shop_parttime]},
+     savings_goals: [], health: {age_years: 35, repeat_index: 0}, goals: [], experience_summary: []}
+  - {person_id: u102, clone_id: u102.b96.r0, city: {country: US, scheme: SYNTH2026, code: B96}, year_index: 1,
+     occupation: *retail, money_basis_id: USD_2024_LOCAL, cash: {amount: 4000, numeraire: USD_2024_LOCAL},
+     time_budget_hours: 4380, energy: *q250, resource_budget_basis: *basis12, energy_quota_basis: *base250,
+     employment: {stated_occupation: *retail, as_of: start_declaration,
+       positions: [{opportunity_id: b96.job.shop_parttime, occupation: *retail, employer_id: firm.shop96}],
+       current_position_ids: [b96.job.shop_parttime]},
+     savings_goals: [], health: {age_years: 35, repeat_index: 0}, goals: [], experience_summary: []}

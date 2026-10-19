@@ -1,0 +1,60 @@
+{
+ "description_zh": "断线后查询同一运行（契约示例；响应内容来自真实归档的进度投影）",
+ "message": "RunProgress",
+ "payload": {
+  "clones": [
+   {
+    "city_ref": "US:SYNTH2026:K51",
+    "clone_ref": "u501.k51.r0",
+    "status": "completed",
+    "status_zh": "正常生活完 N 年",
+    "years_committed": 3
+   },
+   {
+    "city_ref": "US:SYNTH2026:M52",
+    "clone_ref": "u501.m52.r0",
+    "status": "completed",
+    "status_zh": "正常生活完 N 年",
+    "years_committed": 3
+   }
+  ],
+  "cost": {
+   "call_limit": 18,
+   "calls_used": 6,
+   "estimated_cost": null,
+   "kind": "offline_mock_zero_cost",
+   "note": "离线 mock：没有网络调用，费用为 0（真实模型运行会写“按报价估算”，以供应商账单为准）"
+  },
+  "meta": {
+   "conversion_version": "e3a-conversion-v1",
+   "data_pack": {
+    "content_fingerprint": "2496b047ae91b906f9e3210405af32c4b7cb928bcec30e833a7dd6cfefcf2580",
+    "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
+    "pack_id": "pack.e3a.synthetic-v1",
+    "status": "synthetic_fixture_only"
+   },
+   "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.1-draft",
+   "sample": {
+    "note": "断线后按运行 ID 查询同一运行：不重发付费规划、不生成新的一批分身。HTTP 层是示例，未实现",
+    "origin": "contract_example",
+    "produced_by": "product.bridge.progress",
+    "synthetic": true
+   },
+   "schema_version": "e3a-product-schema-v1",
+   "vocabulary_version": "e3a-vocabulary-v1"
+  },
+  "pause_reason": null,
+  "report_available": true,
+  "resumable": false,
+  "resume_note": "这次运行已经结束，没有可以恢复的部分",
+  "run_id": "run-e3a-d848784eae75d077",
+  "stage": "completed",
+  "stage_zh": "已完成"
+ },
+ "request_example": {
+  "method": "GET",
+  "note": "示例：线上查询接口尚未实现（E3-C/E5-B）；离线等价物是 product.bridge.progress(运行归档)",
+  "path": "/runs/run-e3a-d848784eae75d077/progress"
+ }
+}

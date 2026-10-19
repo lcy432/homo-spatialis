@@ -1,0 +1,338 @@
+# E1-3 增补的探索评分配置（DECISIONS/0019）。生活输入在 synthetic_e1_3s.yaml。
+#
+# **全部是合成探索参数，不是经验估计，不能声称已经现实标定，不能用来排序城市。**
+#
+# 与 E1-3 配置（scoring_e1_3.yaml，保留不动、照旧按 ADR0018 运行）相比，新增的只有：
+#   * 物质叶子按需求功能计分：通信 / 工作设备 / 洗衣用 any + present（同功能第二件不再加分），
+#     储物按声明的容量（升）相加；工作空间的外部工位按功能 workspace 认；
+#   * 环境：S_env = min(c, b/(b+τ) + β·A_nature)，β = 0.1 全组共用；
+#   * 通勤：方案级 S = τ_T/(τ_T + T)，T 是这个月实际所住住房的每工作日往返分钟，τ_T = 60；
+#     只对"这个月恰好执行了一份固定线下工作"评分；
+#   * 比较组：冻结地理粒度、币种与基年、行动类型、来源类型、单位、通勤粒度与评分版本；
+#   * 省略清单：省略了什么、影响哪些偏好的人、归哪一轮。
+#
+# 2026-10-08 迁移（DECISIONS/0019 第十二节，边界修复）：只补元数据，η、τ、β、b、c、景观指标都不变——
+#   * 每个来源声明数量语义 measure：presence（有没有）/ capacity（容量 × 件数）/ level（取最好一项的
+#     规格水平）/ count（一次体验算一次）；存在型不能让件数进入；
+#   * 单位改成登记过的写法（common/life_units.py）：资料单位必须与读取单位是同一单位，读取单位到分项
+#     单位的换算（平方英尺 → 百平方英尺、升 → 百升）写进来源表；分项的说明文字仍在 description 里；
+#   * 方案级通勤的分项单位写成"分钟/工作日往返"：τ_T = 60 与往返分钟同一单位。
+
+scoring_notice: >-
+  exploratory_synthetic：E1-3 增补探索评分配置。分项、单位、锚点、基础条件、改善效率、上限、景观指标与
+  β 全部是手工合成的探索设定，用来检验评分结构，不代表任何真实城市的生活质量。
+
+spec:
+  spec_id: score.e1-3s.explore
+  scoring_version: e1-3-supplement-v1
+  status: exploratory_synthetic
+  function: saturating_capped_v1
+  protocol_id: life-v1-e1-3s
+  note: >-
+    物质维七个叶子：居住面积、新鲜食品、工作空间、通信、工作设备、洗衣、储物（原"耐用品"拆成后四个，
+    新样例为每个叶子明确给了点数）。休闲由声明了使用安排的锻炼与实际发生的体验改善；环境是基础条件加
+    自然景观加分；通勤按实际所住住房的往返分钟；安全、医疗、机会三维当前只有城市基础条件。
+  components:
+    - component_id: housing_space
+      dimension: material
+      material_need: housing_space
+      unit: 百平方英尺
+      tau: 6
+      combine: max
+      description: >-
+        这个月实际住的那一处居所的面积。房租与通勤分钟都不进入这一项；独占、基本设施、房间数是结构化事实，
+        用于最低生活声明与硬要求检验。
+      sources:
+        - source_id: dwelling
+          records: [housing]
+          value: spec_number
+          measure: level
+          spec_key: floor_area_sqft
+          unit: 平方英尺
+          note: 实际住的那一处；降级后读最低方案那一处的规格
+    - component_id: fresh_food
+      dimension: material
+      material_need: fresh_food
+      unit: 新鲜餐/周（折算）
+      tau: 7
+      combine: max
+      description: >-
+        这个月实际执行的食品方案每周有几顿新鲜餐。准备方式与菜系是属性（未评价），准备时间是时间事实，
+        不另给一份"省时幸福"。
+      sources:
+        - source_id: food_plan
+          records: [food]
+          value: spec_number
+          measure: level
+          spec_key: fresh_meals_per_week
+          unit: 餐/周
+          note: 实际吃的那一份方案；降级后读最低方案那一份
+    - component_id: workspace
+      dimension: material
+      material_need: workspace
+      unit: 有/无
+      tau: 1
+      combine: any
+      description: >-
+        这个月有没有能关门的私人工作空间。住宅自带的工作间与外部工位互为替代，同一个月只计一次。
+        不设城市基础值：没有依据时不虚构免费的私人办公室。
+      sources:
+        - source_id: home_office
+          records: [housing]
+          value: spec_flag
+          measure: presence
+          spec_key: home_office
+          flag_value: true
+          unit: 是/否
+          note: 实际住的居所自带能关门的工作间
+        - source_id: external_desk
+          records: [periodic_service, prepaid_service]
+          functions: [workspace]
+          value: present
+          measure: presence
+          unit: 有/无
+          note: 这个月实际在用、声明了 workspace 功能的服务（共享办公等）
+    - component_id: communication
+      dimension: material
+      material_need: communication
+      unit: 有/无
+      tau: 1
+      combine: any
+      description: 这个月有没有在用的通信功能。第二部手机、更贵的手机都不再加分；品牌与档次已记录、未评价。
+      sources:
+        - source_id: communication_item
+          records: [durable_good, periodic_service, prepaid_service]
+          functions: [communication]
+          value: present
+          measure: presence
+          unit: 有/无
+          note: 声明了 communication 功能、这个月在服务期内的物品或服务
+    - component_id: work_device
+      dimension: material
+      material_need: work_device
+      unit: 有/无
+      tau: 1
+      combine: any
+      description: 这个月有没有在用的工作设备（电脑等）。
+      sources:
+        - source_id: work_device_item
+          records: [durable_good, periodic_service, prepaid_service]
+          functions: [work_device]
+          value: present
+          measure: presence
+          unit: 有/无
+          note: 声明了 work_device 功能、这个月在服务期内的物品或服务
+    - component_id: laundry
+      dimension: material
+      material_need: laundry
+      unit: 有/无
+      tau: 1
+      combine: any
+      description: 这个月有没有洗衣条件。洗衣机与洗衣服务互为替代，同一个月只计一次。
+      sources:
+        - source_id: laundry_item
+          records: [durable_good, periodic_service, prepaid_service]
+          functions: [laundry]
+          value: present
+          measure: presence
+          unit: 有/无
+          note: 声明了 laundry 功能、这个月在服务期内的物品或服务
+    - component_id: storage
+      dimension: material
+      material_need: storage
+      unit: 百升
+      tau: 2
+      combine: sum
+      description: >-
+        这个月在用的储物容量。容量型功能：只按声明的容量（升 × 件数）相加，两个柜子就是容量加倍，
+        满足感照样递减。
+      sources:
+        - source_id: storage_capacity
+          records: [durable_good]
+          functions: [storage]
+          value: spec_number
+          measure: capacity
+          spec_key: storage_liters
+          per_unit: true
+          unit: 升
+          note: 只读声明了 storage 功能与 storage_liters 容量的持续物品
+    - component_id: safety
+      dimension: safety
+      unit: 指数（合成）
+      tau: 3
+      description: 统一城市背景；当前没有行动改善机制，不造"房租买安全"的系数。
+    - component_id: healthcare
+      dimension: healthcare
+      unit: 指数（合成）
+      tau: 4
+      description: 城市背景；当前没有行动改善机制。年龄与工作负荷相关的疾病情景留 E1-5。
+    - component_id: opportunity
+      dimension: opportunity
+      unit: 指数（合成）
+      tau: 2
+      description: 城市背景；当前没有行动改善机制。培训—资格—岗位留 E1-5。
+    - component_id: leisure
+      dimension: leisure
+      unit: 每月参与次数（折算）
+      tau: 12
+      combine: sum
+      description: 城市基础休闲条件，加上声明了使用安排的锻炼次数与实际发生的体验。
+      sources:
+        - source_id: usage_plan
+          records: [prepaid_service, periodic_service]
+          requires_spec_key: visits_per_month
+          value: spec_number
+          measure: capacity
+          spec_key: visits_per_month
+          per_unit: true
+          unit: 次/月
+          note: 使用假设：只有声明了每月锻炼次数的会员才算锻炼；没有使用安排的年卡不计
+        - source_id: events
+          records: [experience]
+          value: quantity
+          measure: count
+          unit: 次
+          note: 这个月实际发生的一次体验
+    - component_id: environment
+      dimension: environment
+      unit: 指数（合成）
+      tau: 3
+      description: >-
+        基础环境 b/(b+τ)（显式合成，不声称已接真实空气或气候）加自然景观加分 β·A_nature，再按上限截顶。
+      landscape:
+        beta: 0.1
+        definition: >-
+          自然景观与户外环境吸引力（山水、绿地、可达的户外空间），0–1 的共同定义；不含购物、历史古迹、
+          游客数量或旅游收入。
+    - component_id: commute
+      dimension: commute
+      unit: 分钟/工作日往返
+      tau: 60
+      description: >-
+        方案级通勤：S = τ_T/(τ_T + T)，T 取这个月实际所住住房（含兜底降级那一处）写明的每工作日往返分钟；
+        这个月恰好执行一份固定线下工作才评分。乘工作日数后的时间占用留 E1-4。
+      plan_commute:
+        minutes_key: commute_roundtrip_minutes
+        work_mode_key: work_mode
+        onsite_value: onsite
+        unit: 分钟/工作日往返
+  omissions:
+    - what: 住房位置对安全的影响（住房开支不能买安全）
+      affects: 很看重安全、愿意为安全街区付房租的人
+      owner: V2
+    - what: 住房位置对室外环境与景观可达性的影响
+      affects: 很看重环境、想住在公园或水边的人
+      owner: V2
+    - what: 通勤乘工作日数后的月度时间占用，以及与其他活动竞争时间
+      affects: 时间紧、通勤长又想多做别的事的人
+      owner: E1-4
+    - what: 远程、混合办公、多份工作的通勤
+      affects: 远程或兼多份工作的人（本轮通勤分项报不支持/信息不足）
+      owner: E1-4
+    - what: 家务与清洁需求的评分（保洁服务只记录功能与时间事实）
+      affects: 重视家务外包、给家务需求正权重的人（总分会不完整）
+      owner: E1-4
+    - what: 外购现成餐省下的准备时间
+      affects: 时间紧、看重少做饭的人
+      owner: E1-4
+    - what: 品牌、档次、菜系、准备方式等属性匹配
+      affects: 有明确品牌或饮食偏好的人
+      owner: V2
+    - what: 疾病情景（无病/小病/大病）及其费用、工作中断与恢复
+      affects: 年龄较大、工作负荷重或很看重医疗的人
+      owner: E1-5
+    - what: 培训—资格—岗位—收入的成长路径
+      affects: 看重职业发展与机会的人
+      owner: E1-5
+    - what: 爱好与城市地理的匹配（滑雪、冲浪、登山……）
+      affects: 有强烈地理相关爱好的人
+      owner: V2
+    - what: 留存到期末的现金与物品尚未获得期末评价（省下的房租若花在可评分的实际服务上，已经通过那些服务体现，不另给节约加分）
+      affects: 看重储蓄与未来消费、愿意住远省钱并把钱留存下来的人
+      owner: E1-5/E1-6
+
+comparison_group:
+  group_id: group.e1-3s.synth
+  cities:
+    - {country: US, scheme: SYNTH2026, code: A41}
+    - {country: US, scheme: SYNTH2026, code: B42}
+  scoring_version: e1-3-supplement-v1
+  geography_scope: synthetic city (no real geography)
+  currency: USD
+  base_year: 2024
+  time_basis: 2024 年不变价、当地价格水平（USD_2024_LOCAL）；年度决策、月度执行
+  action_roles: [housing, food, job, periodic_service, prepaid_service, durable_good, experience]
+  allowed_source_kinds: [synthetic]
+  commute_granularity: plan_level
+  units:
+    floor_area_sqft: 平方英尺
+    fresh_meals_per_week: 新鲜餐/周
+    home_office: 是/否
+    storage_liters: 升
+    visits_per_month: 次/月
+    commute_roundtrip_minutes: 分钟/工作日往返
+    work_mode: 类别
+  note: >-
+    合成比较组：两座城全部用合成设定、同一地理口径、同一币种与基年；方案级通勤全组通过检查才启用。
+    共享办公在 B42 确定不可得（合法事实），不是缺资料。
+
+city_conditions:
+  - city: {country: US, scheme: SYNTH2026, code: A41}
+    spec_id: score.e1-3s.explore
+    label: 合成城 A41
+    components:
+      - {component_id: housing_space, status: known, base: 0, cap: 0.9, efficiencies: [{source_id: dwelling, eta: 0.01}], source: &cond
+          {kind: synthetic, observed_on: 2026-10-07, geography_scope: synthetic city (no real geography),
+           mapping_version: scoring-e1-3s, synthetic_note: 手工设定的探索参数，不是经验估计}}
+      - {component_id: fresh_food, status: known, base: 0, cap: 0.9, efficiencies: [{source_id: food_plan, eta: 1.0}], source: *cond}
+      - {component_id: workspace, status: known, base: 0, cap: 0.9, eta_any: 3, source: *cond}
+      - {component_id: communication, status: known, base: 0, cap: 0.9, eta_any: 3, source: *cond}
+      - {component_id: work_device, status: known, base: 0, cap: 0.9, eta_any: 3, source: *cond}
+      - {component_id: laundry, status: known, base: 0, cap: 0.9, eta_any: 3, source: *cond}
+      - {component_id: storage, status: known, base: 0, cap: 0.9, efficiencies: [{source_id: storage_capacity, eta: 0.01}], source: *cond}
+      - {component_id: safety, status: known, base: 3, cap: 0.9, source: *cond}
+      - {component_id: healthcare, status: known, base: 4, cap: 0.9, source: *cond}
+      - {component_id: opportunity, status: known, base: 2, cap: 0.9, source: *cond}
+      - {component_id: leisure, status: known, base: 4, cap: 0.9,
+         efficiencies: [{source_id: usage_plan, eta: 1.0}, {source_id: events, eta: 4.0}], source: *cond}
+      - component_id: environment
+        status: known
+        base: 3
+        cap: 0.9
+        source: *cond
+        nature:
+          status: known
+          a_nature: 0.8
+          base_includes_landscape: false
+          source: {kind: synthetic, observed_on: 2026-10-07, geography_scope: synthetic city (no real geography),
+                   mapping_version: scoring-e1-3s, synthetic_note: 手工设定的景观指标，不按城市名、游客数或收入推断}
+      - {component_id: commute, status: plan_level, source: *cond}
+  - city: {country: US, scheme: SYNTH2026, code: B42}
+    spec_id: score.e1-3s.explore
+    label: 合成城 B42
+    components:
+      - {component_id: housing_space, status: known, base: 0, cap: 0.9, efficiencies: [{source_id: dwelling, eta: 0.01}], source: *cond}
+      - {component_id: fresh_food, status: known, base: 0, cap: 0.9, efficiencies: [{source_id: food_plan, eta: 1.0}], source: *cond}
+      - {component_id: workspace, status: known, base: 0, cap: 0.9, eta_any: 3, source: *cond}
+      - {component_id: communication, status: known, base: 0, cap: 0.9, eta_any: 3, source: *cond}
+      - {component_id: work_device, status: known, base: 0, cap: 0.9, eta_any: 3, source: *cond}
+      - {component_id: laundry, status: known, base: 0, cap: 0.9, eta_any: 3, source: *cond}
+      - {component_id: storage, status: known, base: 0, cap: 0.9, efficiencies: [{source_id: storage_capacity, eta: 0.01}], source: *cond}
+      - {component_id: safety, status: known, base: 6, cap: 0.9, source: *cond}
+      - {component_id: healthcare, status: known, base: 2, cap: 0.9, source: *cond}
+      - {component_id: opportunity, status: known, base: 6, cap: 0.9, source: *cond}
+      - {component_id: leisure, status: known, base: 2, cap: 0.85,
+         efficiencies: [{source_id: usage_plan, eta: 1.0}, {source_id: events, eta: 4.0}], source: *cond}
+      # 基础环境已知，但景观数据故意留空：β > 0 时环境分项未知，有正权重的人月度总分不完整；
+      # β = 0 对照下这一项不阻断。
+      - component_id: environment
+        status: known
+        base: 3
+        cap: 0.9
+        source: *cond
+        nature:
+          status: unknown
+          unknown_reason: 合成样例故意留空，没有景观数据
+          source: {kind: synthetic, observed_on: 2026-10-07, geography_scope: synthetic city (no real geography),
+                   mapping_version: scoring-e1-3s, synthetic_note: 合成样例故意不提供景观指标}
+      - {component_id: commute, status: plan_level, source: *cond}

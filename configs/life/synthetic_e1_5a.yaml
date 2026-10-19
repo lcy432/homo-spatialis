@@ -1,0 +1,639 @@
+# E1-5A 学习与技能 → 岗位选择 → 实际收入的合成生活样例（DECISIONS/0023）。评分配置另存在 scoring_e1_5a.yaml。
+#
+# **纯合成。** 城市、雇主、能力、学费、学习时长与负担、工资、工时与额度全部手工设定，不来自任何真实城市、职业
+# 数据、培训回报研究或 LLM。数字故意取整，方便手算（见文末）。**不是现实职业发展的结论，也不排序城市。**
+#
+# 在 E1-4B 样例（synthetic_e1_4b.yaml，保留不动）之上：生活规则版本 e1-5a-monthly-career-v1，协议必须再声明职业
+# 规则 career_rules（学习成果、生效时点、岗位取得规则、能力词表与雇主）。岗位写明雇主，培训写明完成后授予的能力，
+# 岗位要求用 ability:<能力> 写。每个人开局写明岗位记录（用户陈述的职业 + 声明的起始岗位）。
+#
+# 本样例不带健身卡：基本生活每月负担 195，加 48 的会计课是 243 ≤ 250，可以边上班边学。
+
+fixture_notice: >-
+  synthetic_fixture_only：E1-5A 学习—资格—岗位样例。能力、学费、学习时长与负担、工资与工时全部手工合成，不对应
+  任何真实地点、雇主、证书或职业调查；"学了能换到哪份工作"是确定性的合成规则，不是现实录用或涨薪结论。
+
+protocol:
+  protocol_id: life-v1-e1-5a
+  schema_version: e1-5a-draft
+  life_rules_version: e1-5a-monthly-career-v1
+  scoring_scale_version: e1-3-supplement-v1
+  info_permission_version: e1-5a-draft
+  status: synthetic_fixture_only
+  simulation_years: 3
+  math_policies:
+    score_mapping:
+      state: undecided
+      proposal: "E1-3 探索版与增补（ADR0018、ADR0019）的合成探索映射；学习与职业本身不计满足感（CA-06 未实现）"
+    material_preference_aggregation: {state: undecided}
+    energy_feedback:
+      state: undecided
+      settled_parts:
+        - "月度精力额度约束：当月实际活动负担 ≤ 当月可承受额度；不结转、不回血（DECISIONS/0020）"
+        - "探索版年度反馈：下一年额度 = 基础额度 × (1 + α × 上一年完整年度满足感)，向下保留到 0.01（DECISIONS/0021，仅用于合成探索）"
+      open_parts:
+        - "反馈的方向与幅度的经验标定、α 的取值；是否允许低于基础额度"
+        - "与疾病、恢复的关系（E1-5C）"
+    income_payment_timing:
+      state: decided
+      decision_ref: DECISIONS/0017
+    risk_scenarios: {state: undecided}
+    discounting: {state: undecided}
+    terminal_value: {state: undecided}
+    failure_handling:
+      state: undecided
+      settled_parts:
+        - 付不起最低住房与最低食品（两项合计）→ 出局；钱恰好够则通过
+        - 时间或精力超限 → 计划不可行（DECISIONS/0020）
+        - 反馈开着而上一年没有完整评分 → 反馈信息不足，当年结算保留（DECISIONS/0021）
+        - 计划里写了年初不满足要求的项目 → 输入错误，整份计划退回（DECISIONS/0023）
+      open_parts:
+        - LLM 格式错误的有限重试与重试后的默认动作（E1-7）
+        - 计划退回之后的重试（E1-7）
+        - 出局月份与剩余期间如何计分（E1-6）
+  resource_rules:
+    version: e1-4a-monthly-resources-v1
+    time_unit: hour
+    month_rule: annual_net_hours_div_12
+    reserved_time: >-
+      净可分配小时已预留每天 8 小时睡眠与 4 小时基本休息（吃饭、洗漱、个人照料），按 365 天计；
+      这些不再进活动账
+    energy_unit: burden_point
+    energy_scale_version: e1-4a-monthly-quota-v1
+    commute_minutes_key: commute_roundtrip_minutes
+    commute_reference: >-
+      每座合成城只有一个到岗工作地点（城市就业中心的抽象）：住房写明的往返分钟就是到那里的往返，
+      所有需要到岗的岗位都在那里；不做地图与路线规划
+    commute_burden_per_hour: 0.75
+    household_tasks:
+      - {task: laundry, baseline_hours_per_month: 12, burden_per_hour: 0.5,
+         description: 没有洗衣机或洗衣服务时，自己手洗或去自助洗衣店}
+      - {task: cleaning, baseline_hours_per_month: 10, burden_per_hour: 0.6,
+         description: 自己打扫一居室}
+    source: &rules
+      kind: synthetic
+      observed_on: 2026-10-08
+      geography_scope: synthetic city (no real geography)
+      mapping_version: synthetic-e1-5a
+      synthetic_note: 手工设定的规则、负担系数与职业设定，不是时间利用调查、生理学或职业数据的标定
+  energy_feedback:
+    policy_id: feedback.e1-5a.main
+    version: e1-4b-satisfaction-quota-v1
+    mode: enabled
+    alpha: 0.10
+    formula: base_times_one_plus_alpha_s
+    lag_years: 1
+    score_statistic: complete_year_mean_u
+    scoring_spec_id: score.e1-5a.explore
+    scoring_version: e1-3-supplement-v1
+    preference_source: product_stated_numeric
+    quantization: floor_to_0.01
+    source: *rules
+    note: 沿用 E1-4B 的合成探索参数 α = 0.10；学习与岗位不改变反馈公式
+  career_rules:
+    version: e1-5a-career-v1
+    attendance: planned_month_fee_settled
+    completion: participated_months_reach_required
+    grant: union_by_ability_id
+    effective_from: next_action_year
+    qualification_basis: year_start_state
+    job_access: deterministic_if_available_and_qualified
+    abilities:
+      - ability_id: accounting_cert
+        kind: credential
+        label: 会计从业资格（合成）
+        description: 通过会计资格课程后取得的证书；会计岗位要求它，不论雇主是会计事务所还是互联网公司
+        scope: {kind: general}
+        source: *rules
+      - ability_id: python_programming
+        kind: skill
+        label: Python 编程
+        description: 一门编程语言的实际使用能力；软件开发岗位要求它。会计资格不能代替它
+        scope: {kind: general}
+        source: *rules
+      - ability_id: hr_rules_netco
+        kind: knowledge
+        label: 网鹊科技内部人事规则
+        description: 网鹊科技的考勤、薪酬与招聘流程；只对网鹊科技的岗位有用
+        scope: {kind: employer, employer_id: firm.netco}
+        source: *rules
+      - ability_id: hr_rules_ledgerco
+        kind: knowledge
+        label: 账房事务所内部人事规则
+        description: 账房事务所的人事流程；熟悉网鹊科技的规则不等于熟悉它
+        scope: {kind: employer, employer_id: firm.ledgerco}
+        source: *rules
+    employers:
+      - {employer_id: firm.netco, label: 网鹊科技（互联网公司，合成）, city: {country: US, scheme: SYNTH2026, code: A71}, source: *rules}
+      - {employer_id: firm.ledgerco, label: 账房事务所（会计事务所，合成）, city: {country: US, scheme: SYNTH2026, code: A71}, source: *rules}
+    source: *rules
+    note: 合成试点规则：少量命名能力、显式岗位要求、下一年生效、确定性取得；没有技能树、录用概率、竞争或遗忘
+
+consumption_needs: [housing_space, fresh_food, laundry, home_cleaning]
+categories: [housing, food, durable, job, training]
+functions: [housing, food, laundry]
+function_kinds: {laundry: presence}
+
+tax_policies:
+  - policy_id: tax.synth.zc
+    status: synthetic_test_double
+    money_basis_id: USD_2024_LOCAL
+    applies_to: {path: [US, ZC]}
+    brackets: [{lower: 0, rate: 0.0}, {lower: 12000, rate: 0.2}]
+    note: 合成测试替身：全年应税收入 12,000 以内 0%，超出部分 20%
+
+catalogs:
+  - city: {country: US, scheme: SYNTH2026, code: A71}
+    jurisdiction: {path: [US, ZC]}
+    label: 合成城 A71
+    money_basis: {currency: USD, base_year: 2024}
+    tax_policy_id: tax.synth.zc
+    function_supply:
+      - {function: laundry, status: available, source: &supply
+         {kind: synthetic, observed_on: 2026-10-08, geography_scope: synthetic city (no real geography),
+          mapping_version: synthetic-e1-5a, synthetic_note: 合成声明：目录已列出的就是这座合成城的全部方案}}
+    minimum_living:
+      - need: housing
+        baseline_opportunity_id: a71.housing.far
+        baseline_quantity: 1
+        qualifying_opportunity_ids: [a71.housing.far, a71.housing.near]
+        meets: 一个人独占、有基本卫浴厨房的一居室（合成声明）
+      - need: food
+        baseline_opportunity_id: a71.food.basic
+        baseline_quantity: 1
+        qualifying_opportunity_ids: [a71.food.basic, a71.food.fresh]
+        meets: 一个成年人一个月的基本口粮（合成声明）
+    opportunities:
+      - opportunity_id: a71.housing.near
+        category: housing
+        label: 一居室（离工作地近）
+        spec: {floor_area_sqft: 600, rooms: 1, exclusive: true, basic_facilities: true, home_office: false, commute_roundtrip_minutes: 30}
+        functions: [housing]
+        unit: dwelling
+        quality: 独占一居室；每个到岗日往返约 30 分钟（合成情景）
+        availability: available
+        price: {amount: {amount: 1400, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: dwelling-month}
+        duration: {kind: ongoing_service}
+        resource: {basis: passive, note: 住房本身不占时间；它的往返分钟用于算通勤}
+        source: &synth
+          kind: synthetic
+          observed_on: 2026-10-08
+          geography_scope: synthetic city (no real geography)
+          mapping_version: synthetic-e1-5a
+          synthetic_note: 手工设定的测试数值，不来自任何真实城市、雇主、数据源或 LLM
+      - opportunity_id: a71.housing.far
+        category: housing
+        label: 一居室（离工作地远）
+        spec: {floor_area_sqft: 600, rooms: 1, exclusive: true, basic_facilities: true, home_office: false, commute_roundtrip_minutes: 70}
+        functions: [housing]
+        unit: dwelling
+        quality: 与近处同样的一居室；每个到岗日往返约 70 分钟（合成情景）
+        availability: available
+        price: {amount: {amount: 1000, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: dwelling-month}
+        duration: {kind: ongoing_service}
+        resource: {basis: passive, note: 住房本身不占时间；它的往返分钟用于算通勤}
+        source: *synth
+      - opportunity_id: a71.food.basic
+        category: food
+        label: 基本食品方案（自己做）
+        spec: {fresh_meals_per_week: 3}
+        functions: [food]
+        unit: household-plan
+        quality: 米面与罐头为主；自己做，每月准备约 30 小时
+        availability: available
+        price: {amount: {amount: 380, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: plan-month}
+        duration: {kind: ongoing_service}
+        resource: {basis: per_service_month, hours: 30, burden_per_hour: 0.5, quantity_scales: false,
+                   note: 准备时间就是这份方案的全部做饭时间}
+        source: *synth
+      - opportunity_id: a71.food.fresh
+        category: food
+        label: 新鲜食材方案（自己做）
+        spec: {fresh_meals_per_week: 21}
+        functions: [food]
+        unit: household-plan
+        quality: 每天三顿以新鲜食材为主；自己做，每月准备约 40 小时
+        availability: available
+        price: {amount: {amount: 450, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: plan-month}
+        duration: {kind: ongoing_service}
+        resource: {basis: per_service_month, hours: 40, burden_per_hour: 0.5, quantity_scales: false,
+                   note: 买菜、洗切、做饭与收拾的合计}
+        source: *synth
+      - opportunity_id: a71.durable.washer
+        category: durable
+        label: 洗衣机
+        functions: [laundry]
+        unit: appliance
+        quality: 中档家用洗衣机；有它时本人每月洗衣还要约 3 小时（分拣、晾、叠、收）
+        availability: available
+        price: {amount: {amount: 700, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: appliance}
+        duration: {kind: durable_good, lasts_years: 8}
+        resource: {basis: passive, substitutes: [{task: laundry, residual_hours_per_month: 3}],
+                   note: 持有本身不占时间；在服务期内把洗衣基准 12 小时降到 3 小时}
+        source: *synth
+      # ---------------------------------------------------------- 岗位（全部固定线下、每月 160 工时、20 个工作日）
+      - opportunity_id: a71.job.clerk_netco
+        category: job
+        label: 行政文员（网鹊科技）
+        spec: {work_mode: onsite}
+        unit: position
+        quality: 全职，每月 160 工时、20 个工作日，天天到岗；没有资格要求
+        availability: available
+        compensation: {amount: {amount: 36000, numeraire: USD_2024_LOCAL}, billing: per_year, per_unit: position-year}
+        occupation: {scheme: SOC2018, code: "43-6014"}
+        employer_id: firm.netco
+        duration: {kind: ongoing_service}
+        resource:
+          basis: job
+          job: {work_mode: onsite, work_hours_per_month: 160, workdays_per_month: 20, onsite_days_per_month: 20, burden_per_work_hour: 1.0}
+          note: 薪酬与工时、到岗日绑定；计划不能改
+        source: *synth
+      - opportunity_id: a71.job.accountant_netco
+        category: job
+        label: 会计（网鹊科技）
+        spec: {work_mode: onsite}
+        unit: position
+        quality: 互联网公司里的会计岗位；要求会计从业资格；全职，每月 160 工时、20 个工作日
+        availability: available
+        compensation: {amount: {amount: 48000, numeraire: USD_2024_LOCAL}, billing: per_year, per_unit: position-year}
+        occupation: {scheme: SOC2018, code: "13-2011"}
+        employer_id: firm.netco
+        eligibility: ["ability:accounting_cert"]
+        duration: {kind: ongoing_service}
+        resource:
+          basis: job
+          job: {work_mode: onsite, work_hours_per_month: 160, workdays_per_month: 20, onsite_days_per_month: 20, burden_per_work_hour: 1.1}
+          note: 每工时负担 1.1（合成）：比文员略累
+        source: *synth
+      - opportunity_id: a71.job.developer_netco
+        category: job
+        label: 软件开发（网鹊科技）
+        spec: {work_mode: onsite}
+        unit: position
+        quality: 同一家互联网公司的开发岗位；要求 Python 编程（会计资格不能代替）；全职，每月 160 工时、20 个工作日
+        availability: available
+        compensation: {amount: {amount: 60000, numeraire: USD_2024_LOCAL}, billing: per_year, per_unit: position-year}
+        occupation: {scheme: SOC2018, code: "15-1252"}
+        employer_id: firm.netco
+        eligibility: ["ability:python_programming"]
+        duration: {kind: ongoing_service}
+        resource:
+          basis: job
+          job: {work_mode: onsite, work_hours_per_month: 160, workdays_per_month: 20, onsite_days_per_month: 20, burden_per_work_hour: 1.2}
+          note: 每工时负担 1.2（合成）
+        source: *synth
+      - opportunity_id: a71.job.hr_netco
+        category: job
+        label: 人事专员（网鹊科技）
+        spec: {work_mode: onsite}
+        unit: position
+        quality: 要求熟悉网鹊科技的内部人事规则；全职，每月 160 工时、20 个工作日
+        availability: available
+        compensation: {amount: {amount: 44000, numeraire: USD_2024_LOCAL}, billing: per_year, per_unit: position-year}
+        occupation: {scheme: SOC2018, code: "13-1071"}
+        employer_id: firm.netco
+        eligibility: ["ability:hr_rules_netco"]
+        duration: {kind: ongoing_service}
+        resource:
+          basis: job
+          job: {work_mode: onsite, work_hours_per_month: 160, workdays_per_month: 20, onsite_days_per_month: 20, burden_per_work_hour: 1.0}
+          note: 薪酬与工时、到岗日绑定
+        source: *synth
+      - opportunity_id: a71.job.hr_ledgerco
+        category: job
+        label: 人事专员（账房事务所）
+        spec: {work_mode: onsite}
+        unit: position
+        quality: 要求熟悉账房事务所的内部人事规则（熟悉网鹊科技的规则不算）；全职，每月 160 工时、20 个工作日
+        availability: available
+        compensation: {amount: {amount: 44000, numeraire: USD_2024_LOCAL}, billing: per_year, per_unit: position-year}
+        occupation: {scheme: SOC2018, code: "13-1071"}
+        employer_id: firm.ledgerco
+        eligibility: ["ability:hr_rules_ledgerco"]
+        duration: {kind: ongoing_service}
+        resource:
+          basis: job
+          job: {work_mode: onsite, work_hours_per_month: 160, workdays_per_month: 20, onsite_days_per_month: 20, burden_per_work_hour: 1.0}
+          note: 薪酬与工时、到岗日绑定
+        source: *synth
+      # ---------------------------------------------------------- 学习（都要占用实际时间与负担）
+      - opportunity_id: a71.training.accounting_course
+        category: training
+        label: 会计资格课程（12 个月）
+        unit: course
+        quality: 每月上课与作业约 40 小时；参加满 12 个月取得会计从业资格（下一行动年起可用）
+        availability: available
+        price: {amount: {amount: 1200, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: course}
+        duration: {kind: training_course, completion_years: 1}
+        grants: [accounting_cert]
+        resource: {basis: per_service_month, hours: 40, burden_per_hour: 1.2, quantity_scales: false,
+                   note: 按实际参加的月份计；每月 40 × 1.2 = 48 负担点}
+        source: *synth
+      - opportunity_id: a71.training.python_selfstudy
+        category: training
+        label: Python 自学（12 个月）
+        unit: course
+        quality: 用公开教材自学，学费明确为 0；每月练习约 30 小时；满 12 个月掌握 Python 编程（下一行动年起可用）
+        availability: available
+        price: {amount: {amount: 0, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: course}
+        duration: {kind: training_course, completion_years: 1}
+        grants: [python_programming]
+        resource: {basis: per_service_month, hours: 30, burden_per_hour: 1.0, quantity_scales: false,
+                   note: 免费不等于没有代价：每月 30 × 1.0 = 30 负担点，与工作时间分开计}
+        source: *synth
+      - opportunity_id: a71.training.hr_rules_netco
+        category: training
+        label: 网鹊科技人事规则内训（12 个月）
+        unit: course
+        quality: 只对网鹊科技在职员工开放，公司承担费用（学费 0）；工作之外每月约 10 小时
+        availability: available
+        price: {amount: {amount: 0, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: course}
+        employer_id: firm.netco
+        eligibility: ["employer:firm.netco"]
+        duration: {kind: training_course, completion_years: 1}
+        grants: [hr_rules_netco]
+        resource: {basis: per_service_month, hours: 10, burden_per_hour: 1.0, quantity_scales: false,
+                   note: 工作时间之外的学习：每月 10 × 1.0 = 10 负担点}
+        source: *synth
+
+# ---------------------------------------------------------------------- 人
+stated_profiles:
+  - person_id: u51
+    dimension_points: {material: 35, safety: 15, healthcare: 10, opportunity: 10, leisure: 10, environment: 10, commute: 10}
+    material_points: {housing_space: 50, fresh_food: 30, laundry: 20}
+    occupation: {scheme: SOC2018, code: "43-6014"}
+  # u53 没有工作、存款少：边自学边找机会，第 3 月付不起最低生活出局（学习进度保留，没有能力）
+  - person_id: u53
+    dimension_points: {material: 40, safety: 10, healthcare: 10, opportunity: 10, leisure: 10, environment: 10, commute: 10}
+    material_points: {housing_space: 50, fresh_food: 50}
+  # u54 给"家务"点了 20 点而评分规格没有家务分项：月度总分不完整 → 反馈开着时下一年额度定不下来
+  - person_id: u54
+    dimension_points: {material: 35, safety: 15, healthcare: 10, opportunity: 10, leisure: 10, environment: 10, commute: 10}
+    material_points: {housing_space: 40, fresh_food: 30, laundry: 10, home_cleaning: 20}
+    occupation: {scheme: SOC2018, code: "43-6014"}
+
+internal_truths:
+  - person_id: u51
+    status: synthetic_fixture_only
+    dimension_weights: {material: 0.35, safety: 0.15, healthcare: 0.10, opportunity: 0.10, leisure: 0.10, environment: 0.10, commute: 0.10}
+    material_subweights: {housing_space: 0.5, fresh_food: 0.3, laundry: 0.2}
+  - person_id: u53
+    status: synthetic_fixture_only
+    dimension_weights: {material: 0.40, safety: 0.10, healthcare: 0.10, opportunity: 0.10, leisure: 0.10, environment: 0.10, commute: 0.10}
+    material_subweights: {housing_space: 0.5, fresh_food: 0.5}
+  - person_id: u54
+    status: synthetic_fixture_only
+    dimension_weights: {material: 0.35, safety: 0.15, healthcare: 0.10, opportunity: 0.10, leisure: 0.10, environment: 0.10, commute: 0.10}
+    material_subweights: {housing_space: 0.4, fresh_food: 0.3, laundry: 0.1, home_cleaning: 0.2}
+
+# ---------------------------------------------------------------------- 第一年开局
+# 同一个人（u51）的六个分身起点完全相同：网鹊科技的行政文员，没有任何能力，现金 3,000，额度 250，时间 4,380 小时/年。
+# 它们只在声明的学习与岗位选择上不同。
+initial_states:
+  - {person_id: u51, clone_id: u51.a71.study, city: {country: US, scheme: SYNTH2026, code: A71}, year_index: 1,
+     occupation: {scheme: SOC2018, code: "43-6014"}, money_basis_id: USD_2024_LOCAL,
+     cash: {amount: 3000, numeraire: USD_2024_LOCAL}, time_budget_hours: 4380,
+     energy: &q250 {level: 250, scale_version: e1-4a-monthly-quota-v1},
+     resource_budget_basis: &basis12 {rules_version: e1-4a-monthly-resources-v1,
+       reserved: 只预留协议声明的睡眠与基本休息（每天 12 小时），其余 12 小时/天可分配, source: *rules},
+     energy_quota_basis: &base250 {base_level: 250, status: base_first_year},
+     employment: &clerk_start {stated_occupation: {scheme: SOC2018, code: "43-6014"}, as_of: start_declaration,
+       positions: [{opportunity_id: a71.job.clerk_netco, occupation: {scheme: SOC2018, code: "43-6014"}, employer_id: firm.netco}],
+       current_position_ids: [a71.job.clerk_netco]},
+     goals: [], experience_summary: []}
+  - {person_id: u51, clone_id: u51.a71.stay, city: {country: US, scheme: SYNTH2026, code: A71}, year_index: 1,
+     occupation: {scheme: SOC2018, code: "43-6014"}, money_basis_id: USD_2024_LOCAL,
+     cash: {amount: 3000, numeraire: USD_2024_LOCAL}, time_budget_hours: 4380, energy: *q250,
+     resource_budget_basis: *basis12, energy_quota_basis: *base250, employment: *clerk_start,
+     goals: [], experience_summary: []}
+  - {person_id: u51, clone_id: u51.a71.nostudy, city: {country: US, scheme: SYNTH2026, code: A71}, year_index: 1,
+     occupation: {scheme: SOC2018, code: "43-6014"}, money_basis_id: USD_2024_LOCAL,
+     cash: {amount: 3000, numeraire: USD_2024_LOCAL}, time_budget_hours: 4380, energy: *q250,
+     resource_budget_basis: *basis12, energy_quota_basis: *base250, employment: *clerk_start,
+     goals: [], experience_summary: []}
+  - {person_id: u51, clone_id: u51.a71.python, city: {country: US, scheme: SYNTH2026, code: A71}, year_index: 1,
+     occupation: {scheme: SOC2018, code: "43-6014"}, money_basis_id: USD_2024_LOCAL,
+     cash: {amount: 3000, numeraire: USD_2024_LOCAL}, time_budget_hours: 4380, energy: *q250,
+     resource_budget_basis: *basis12, energy_quota_basis: *base250, employment: *clerk_start,
+     goals: [], experience_summary: []}
+  - {person_id: u51, clone_id: u51.a71.midyear, city: {country: US, scheme: SYNTH2026, code: A71}, year_index: 1,
+     occupation: {scheme: SOC2018, code: "43-6014"}, money_basis_id: USD_2024_LOCAL,
+     cash: {amount: 3000, numeraire: USD_2024_LOCAL}, time_budget_hours: 4380, energy: *q250,
+     resource_budget_basis: *basis12, energy_quota_basis: *base250, employment: *clerk_start,
+     goals: [], experience_summary: []}
+  - {person_id: u51, clone_id: u51.a71.hr, city: {country: US, scheme: SYNTH2026, code: A71}, year_index: 1,
+     occupation: {scheme: SOC2018, code: "43-6014"}, money_basis_id: USD_2024_LOCAL,
+     cash: {amount: 3000, numeraire: USD_2024_LOCAL}, time_budget_hours: 4380, energy: *q250,
+     resource_budget_basis: *basis12, energy_quota_basis: *base250, employment: *clerk_start,
+     goals: [], experience_summary: []}
+  - {person_id: u53, clone_id: u53.a71.c0, city: {country: US, scheme: SYNTH2026, code: A71}, year_index: 1,
+     money_basis_id: USD_2024_LOCAL, cash: {amount: 4000, numeraire: USD_2024_LOCAL}, time_budget_hours: 4380,
+     energy: *q250, resource_budget_basis: *basis12, energy_quota_basis: *base250,
+     employment: {as_of: start_declaration, positions: [], current_position_ids: []},
+     goals: [], experience_summary: []}
+  - {person_id: u54, clone_id: u54.a71.c0, city: {country: US, scheme: SYNTH2026, code: A71}, year_index: 1,
+     occupation: {scheme: SOC2018, code: "43-6014"}, money_basis_id: USD_2024_LOCAL,
+     cash: {amount: 3000, numeraire: USD_2024_LOCAL}, time_budget_hours: 4380, energy: *q250,
+     resource_budget_basis: *basis12, energy_quota_basis: *base250, employment: *clerk_start,
+     goals: [], experience_summary: []}
+
+# ---------------------------------------------------------------------- 预先声明的年度计划
+# 基本生活（每年）：近处住房、新鲜食材、一份岗位；第 1 年第 1 月买洗衣机。
+plans:
+  # 例一：学会计 → 第 2 年选会计岗位
+  - person_id: u51
+    clone_id: u51.a71.study
+    year_index: 1
+    items:
+      - {opportunity_id: a71.housing.near, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.food.fresh, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.job.clerk_netco, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.durable.washer, quantity: 1, month: 1}
+      - {opportunity_id: a71.training.accounting_course, quantity: 1, start_month: 1, end_month: 12}
+    rationale: 边上班边考会计资格。
+  - person_id: u51
+    clone_id: u51.a71.study
+    year_index: 2
+    items:
+      - {opportunity_id: a71.housing.near, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.food.fresh, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.job.accountant_netco, quantity: 1, start_month: 1, end_month: 12}
+    rationale: 有了资格，换到会计岗位。
+  - person_id: u51
+    clone_id: u51.a71.study
+    year_index: 3
+    items:
+      - {opportunity_id: a71.housing.near, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.food.fresh, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.job.accountant_netco, quantity: 1, start_month: 1, end_month: 12}
+    rationale: 继续做会计。
+  # 例一对照：同样学会计，但第 2 年仍选文员（不自动涨薪）；第 3 年再自学 Python（终态保存能力，不再有行动）
+  - person_id: u51
+    clone_id: u51.a71.stay
+    year_index: 1
+    items:
+      - {opportunity_id: a71.housing.near, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.food.fresh, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.job.clerk_netco, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.durable.washer, quantity: 1, month: 1}
+      - {opportunity_id: a71.training.accounting_course, quantity: 1, start_month: 1, end_month: 12}
+    rationale: 边上班边考会计资格。
+  - person_id: u51
+    clone_id: u51.a71.stay
+    year_index: 2
+    items:
+      - {opportunity_id: a71.housing.near, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.food.fresh, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.job.clerk_netco, quantity: 1, start_month: 1, end_month: 12}
+    rationale: 资格拿到了，但还想留在原岗位。
+  - person_id: u51
+    clone_id: u51.a71.stay
+    year_index: 3
+    items:
+      - {opportunity_id: a71.housing.near, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.food.fresh, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.job.clerk_netco, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.training.python_selfstudy, quantity: 1, start_month: 1, end_month: 12}
+    rationale: 最后一年再自学 Python。
+  # 例一对照：不学习
+  - person_id: u51
+    clone_id: u51.a71.nostudy
+    year_index: 1
+    items:
+      - {opportunity_id: a71.housing.near, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.food.fresh, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.job.clerk_netco, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.durable.washer, quantity: 1, month: 1}
+    rationale: 照常上班，不学习。
+  - person_id: u51
+    clone_id: u51.a71.nostudy
+    year_index: 2
+    items:
+      - {opportunity_id: a71.housing.near, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.food.fresh, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.job.clerk_netco, quantity: 1, start_month: 1, end_month: 12}
+    rationale: 照常上班。
+  - person_id: u51
+    clone_id: u51.a71.nostudy
+    year_index: 3
+    items:
+      - {opportunity_id: a71.housing.near, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.food.fresh, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.job.clerk_netco, quantity: 1, start_month: 1, end_month: 12}
+    rationale: 照常上班。
+  # 例二、例三：免费自学 Python → 第 2 年选开发岗位
+  - person_id: u51
+    clone_id: u51.a71.python
+    year_index: 1
+    items:
+      - {opportunity_id: a71.housing.near, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.food.fresh, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.job.clerk_netco, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.durable.washer, quantity: 1, month: 1}
+      - {opportunity_id: a71.training.python_selfstudy, quantity: 1, start_month: 1, end_month: 12}
+    rationale: 下班后自学 Python。
+  - person_id: u51
+    clone_id: u51.a71.python
+    year_index: 2
+    items:
+      - {opportunity_id: a71.housing.near, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.food.fresh, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.job.developer_netco, quantity: 1, start_month: 1, end_month: 12}
+    rationale: 换到开发岗位。
+  - person_id: u51
+    clone_id: u51.a71.python
+    year_index: 3
+    items:
+      - {opportunity_id: a71.housing.near, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.food.fresh, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.job.developer_netco, quantity: 1, start_month: 1, end_month: 12}
+    rationale: 继续做开发。
+  # 例四：年中开始学会计，跨年保留进度、不重复收学费；第 2 年第 6 月学完，第 3 年才能做会计
+  - person_id: u51
+    clone_id: u51.a71.midyear
+    year_index: 1
+    items:
+      - {opportunity_id: a71.housing.near, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.food.fresh, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.job.clerk_netco, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.durable.washer, quantity: 1, month: 1}
+      - {opportunity_id: a71.training.accounting_course, quantity: 1, start_month: 7, end_month: 12}
+    rationale: 下半年开始学会计。
+  - person_id: u51
+    clone_id: u51.a71.midyear
+    year_index: 2
+    items:
+      - {opportunity_id: a71.housing.near, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.food.fresh, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.job.clerk_netco, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.training.accounting_course, quantity: 1, start_month: 1, end_month: 6}
+    rationale: 学完剩下的 6 个月。
+  - person_id: u51
+    clone_id: u51.a71.midyear
+    year_index: 3
+    items:
+      - {opportunity_id: a71.housing.near, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.food.fresh, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.job.accountant_netco, quantity: 1, start_month: 1, end_month: 12}
+    rationale: 换到会计岗位。
+  # 例四：公司特定知识——网鹊科技的人事规则内训 → 第 2 年做网鹊科技的人事专员
+  - person_id: u51
+    clone_id: u51.a71.hr
+    year_index: 1
+    items:
+      - {opportunity_id: a71.housing.near, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.food.fresh, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.job.clerk_netco, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.durable.washer, quantity: 1, month: 1}
+      - {opportunity_id: a71.training.hr_rules_netco, quantity: 1, start_month: 1, end_month: 12}
+    rationale: 参加公司人事规则内训。
+  - person_id: u51
+    clone_id: u51.a71.hr
+    year_index: 2
+    items:
+      - {opportunity_id: a71.housing.near, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.food.fresh, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.job.hr_netco, quantity: 1, start_month: 1, end_month: 12}
+    rationale: 转到本公司人事岗位。
+  - person_id: u51
+    clone_id: u51.a71.hr
+    year_index: 3
+    items:
+      - {opportunity_id: a71.housing.near, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.food.fresh, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.job.hr_netco, quantity: 1, start_month: 1, end_month: 12}
+    rationale: 继续做人事。
+  # 出局：没有工作、存款 4,000，边自学边生活；第 3 月付不起最低生活
+  - person_id: u53
+    clone_id: u53.a71.c0
+    year_index: 1
+    items:
+      - {opportunity_id: a71.housing.far, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.food.basic, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.training.python_selfstudy, quantity: 1, start_month: 1, end_month: 12}
+    rationale: 先自学，找到工作前靠存款生活。
+  # 反馈受阻：与例一第 1 年同样学会计，但评分不完整
+  - person_id: u54
+    clone_id: u54.a71.c0
+    year_index: 1
+    items:
+      - {opportunity_id: a71.housing.near, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.food.fresh, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.job.clerk_netco, quantity: 1, start_month: 1, end_month: 12}
+      - {opportunity_id: a71.durable.washer, quantity: 1, month: 1}
+      - {opportunity_id: a71.training.accounting_course, quantity: 1, start_month: 1, end_month: 12}
+    rationale: 边上班边考会计资格。
+
+# ---------------------------------------------------------------------- 手算（合成）
+# 每月负担（负担点）：文员 160 × 1.0 = 160；通勤 30 分钟 × 20 次 / 60 = 10 小时 × 0.75 = 7.5；新鲜食材 40 × 0.5 = 20；
+#   洗衣（有洗衣机）3 × 0.5 = 1.5；打扫 10 × 0.6 = 6 → 基本生活 195。时间：160 + 10 + 40 + 3 + 10 = 223 小时 ≤ 365。
+# 会计课 40 × 1.2 = 48 → 243 ≤ 250，时间 263；自学 Python 30 × 1.0 = 30 → 225，时间 253；人事内训 10 → 205。
+# 同时上会计课与自学 Python：195 + 48 + 30 = 273 > 250 → 计划不可行（派生情景）。
+# 换岗后：会计 160 × 1.1 = 176 → 211；开发 160 × 1.2 = 192 → 227；人事 160 → 195。
+# 年收入与合成税（12,000 以内 0%、以上 20%）：文员 36,000 − 4,800 = 31,200；会计 48,000 − 7,200 = 40,800；
+#   开发 60,000 − 9,600 = 50,400；人事 44,000 − 6,400 = 37,600。
+# 第 1 年支出：房 1,400 × 12 = 16,800；食 450 × 12 = 5,400；洗衣机 700 → 22,900；会计课再加 1,200（自学 Python 与内训 0）。
+#   年末现金：学会计 3,000 + 31,200 − 24,100 = 10,100；不学或免费学 3,000 + 31,200 − 22,900 = 11,300。
+# 第 2 年（支出 22,200）：会计 10,100 + 40,800 − 22,200 = 28,700；仍做文员 10,100 + 31,200 − 22,200 = 19,100；
+#   不学 11,300 + 9,000 = 20,300；开发 11,300 + 50,400 − 22,200 = 39,500。
+# u53：每月最低生活 1,000 + 380 = 1,380；4,000 → 2,620 → 1,240 < 1,380，第 3 月出局；自学进度 2/12，没有能力。

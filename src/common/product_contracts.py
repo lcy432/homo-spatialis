@@ -1,0 +1,1320 @@
+"""E3-A 产品共享结构：E3 与 E5 共用的消息定义（DECISIONS/0034）。**这是唯一的权威来源。**
+
+``contracts/product/v1/`` 里的 JSON Schema 由本文件导出（``scripts/product_e3a.py export-schema``），一致性检查用同一个入口的
+``check-schema``；E5 读 schema 与公共样例，不另写一套职业、偏好、计价或结果语义。
+
+这里**只有形状与局部约束**，没有业务计算：输入校验、职业匹配、精确分配、确认身份、编译、预检查与结果投影在 ``product`` 包里；
+生活、评分与评价仍由 E1 完成。产品消息不是 E1 的内部对象，E1 的内部对象（评分规格、研究真值、评价明细……）也不直接出现在这些
+消息里——结果只是 E1 报告的白名单投影。
+
+消息一览（共享约定第 7 节的消息草案在本轮落地的名字）：
+
+==========================  ===========================================================================
+ProductCapabilities         城市、职业搜索能力、六维与物质词表、健康题、硬要求选项、支持范围、单位与限制
+UserInputDraft              原始答案及逐项状态（未答 / 已提供 / 明确无所谓 / 暂不确定；明确 0 是已提供的数值）
+ProfileReview               可读解释、职业候选、缺失、未支持项与待确认内容
+ConfirmedProfile            已确认语义、精确数值、来源与内容身份
+ProductPreflight            开局摘要、可执行 / 可评分 / 可反馈、资料缺口、范围与运行绑定
+RunSubmission / RunReceipt  确认与预检查的引用、幂等键、接受 / 拒绝与运行 ID（线上服务留 E3-C，本轮只有契约与示例）
+RunProgress                 阶段、已执行年度、暂停、费用状态、恢复状态
+ProductResult               生活事实、评价、汇总、缺失、来源与限制（E1 报告的白名单投影）
+SourceFact 等               便利资料候选、目录编译与“选项目录覆盖”（与实际轨迹能否评分是两件事）
+==========================  ===========================================================================
+
+版本分层（共同元数据 ``ProductMeta``）：结构版本、问卷 / 题干语义版本、词表版本、健康问卷版本、转换版本、资料包身份。内容指纹
+（``*_fingerprint``）只核对内容，**不代替**线上认证与授权（E3-C / E5-C）。
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+from typing import Annotated, Any, Literal
+
+from pydantic import BaseModel, ConfigDict, Field, model_validator
+
+#: 结构版本（字段形状）。字段含义或形状一变就换名字，并在 ADR 记录。
+PRODUCT_SCHEMA_VERSION = "e3a-product-schema-v2"
+#: 问卷 / 题干语义版本：六维与物质的题干、定义、参考改善范围与控件规则。题干一变，旧确认失效、需要重新确认。
+QUESTIONNAIRE_VERSION = "e3a-questionnaire-v0.1-draft"
+#: 词表版本：六维键、物质键、职业受控词表、硬要求选项与属性偏好种类。
+VOCABULARY_VERSION = "e3a-vocabulary-v1"
+#: 独立健康问卷版本（暂定文案，未经量表验证）。
+HEALTH_QUESTIONNAIRE_VERSION = "e3a-health-coping-q-v0.1-draft"
+#: 转换版本：原始答案 → 确认画像 → E1 输入的规则（精确分数、规范写法、金额换算、标准开局编译）。
+CONVERSION_VERSION = "e3a-conversion-v2"
+#: 自由文字的上限（沿用 E1 画像的 2,000 字符；超限明确报错，不静默截断）。
+FREE_TEXT_MAX_CHARS = 2000
+
+_SHA256 = r"^[0-9a-f]{64}$"
+_EXACT = r"^(0|-?[1-9][0-9]*)(/[1-9][0-9]*)?$"
+_REF = r"^[A-Za-z0-9][A-Za-z0-9_.:\-/]{0,127}$"
+Sha256 = Annotated[str, Field(pattern=_SHA256)]
+ExactText = Annotated[str, Field(pattern=_EXACT)]
+RefStr = Annotated[str, Field(pattern=_REF)]
+
+
+class ProductModel(BaseModel):
+    """产品消息的基类：不可变、拒绝未知字段、拒绝 inf/nan（与 E1 契约同样的保护）。"""
+
+    model_config = ConfigDict(frozen=True, extra="forbid", allow_inf_nan=False)
+
+
+def canonical_json(content: object) -> str:
+    """规范 JSON：键排序、紧凑分隔、保留中文。内容指纹都用它。"""
+    return json.dumps(content, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
+
+
+def content_fingerprint(content: object) -> str:
+    """一份规范化内容的 SHA-256（只核对内容，不是认证）。"""
+    return hashlib.sha256(canonical_json(content).encode("utf-8")).hexdigest()
+
+
+def identity_content(model: BaseModel, fingerprint_field: str) -> dict[str, Any]:
+    """参与内容身份的字段：除了指纹本身与公共样例的出处标签（``meta.sample``）以外的全部内容。样例标签只说明样例从哪来，
+    不改变它的含义，所以同一份内容打不打标签身份都相同。"""
+    content = model.model_dump(mode="json", exclude={fingerprint_field})
+    meta = content.get("meta")
+    if isinstance(meta, dict):
+        meta.pop("sample", None)
+    return content
+
+
+# ==========================================================================
+# 共同元数据、错误与状态词
+# ==========================================================================
+
+
+class DataPackRef(ProductModel):
+    """一份资料包的身份：编号与内容指纹。本轮只有合成资料包（``synthetic_fixture_only``）。"""
+
+    pack_id: RefStr
+    content_fingerprint: Sha256
+    status: Literal["synthetic_fixture_only", "real_data_frozen"]
+    note: str = Field(min_length=1, max_length=400)
+
+
+class SampleLabel(ProductModel):
+    """公共样例的出处标签（只出现在样例里；真实运行的消息不写）。
+
+    * ``offline_run``：由离线闭环实际执行产生；
+    * ``controlled_fixture``：受控测试夹具（例如写好的计划、注入的事件、构造的资料缺口），标明来源；
+    * ``contract_example``：线上服务（幂等提交、查询、断线恢复）尚未实现，这里只是**标明为示例**的契约响应。
+    """
+
+    origin: Literal["offline_run", "controlled_fixture", "contract_example"]
+    synthetic: Literal[True] = True
+    produced_by: str = Field(min_length=1, max_length=300)
+    note: str = Field(min_length=1, max_length=600)
+
+
+class ProductMeta(ProductModel):
+    """每条产品消息都带的共同元数据：结构、问卷、词表、健康问卷、转换的版本与资料包身份。"""
+
+    schema_version: Literal["e3a-product-schema-v2"]
+    questionnaire_version: str = Field(min_length=1, max_length=80)
+    vocabulary_version: str = Field(min_length=1, max_length=80)
+    health_questionnaire_version: str = Field(min_length=1, max_length=80)
+    conversion_version: str = Field(min_length=1, max_length=80)
+    data_pack: DataPackRef
+    sample: SampleLabel | None = None
+
+
+IssueSeverity = Literal["error", "warning", "info"]
+
+
+class ProductIssue(ProductModel):
+    """一条可展示的问题：机器代码、字段位置、中文原因、影响与下一步动作。E5 原样展示中文，不另写解释。"""
+
+    code: Annotated[str, Field(pattern=r"^[a-z][a-z0-9_]{1,63}$")]
+    severity: IssueSeverity
+    field: str = Field(min_length=1, max_length=160)
+    message_zh: str = Field(min_length=1, max_length=400)
+    impact_zh: str = Field(min_length=1, max_length=300)
+    next_action_zh: str = Field(min_length=1, max_length=300)
+    #: 不含内部内容的审计编号（E3-A 收尾 F5）：维护者用它在服务端的内部诊断或运行归档里找到完整原文。没有内部记录时为空。
+    audit_ref: str | None = Field(default=None, max_length=200)
+
+
+class PublicExplanation(ProductModel):
+    """给用户看的状态说明（E3-A 收尾 F5）：只由结构化类别生成——类别代码、中文原因、影响与下一步，加一个不含内部内容的审计编号。
+
+    不透传异常原文、内部路径或参数；完整原文留在运行归档或内部诊断里，``audit_ref`` 指向它（运行编号、分身与记录文件）。"""
+
+    category: Annotated[str, Field(pattern=r"^[a-z][a-z0-9_]{1,63}$")]
+    reason_zh: str = Field(min_length=1, max_length=300)
+    impact_zh: str = Field(min_length=1, max_length=300)
+    next_action_zh: str = Field(min_length=1, max_length=300)
+    audit_ref: str | None = Field(default=None, max_length=200)
+
+
+#: 答案状态：未答、已提供（明确 0 也是已提供）、明确无所谓、暂不确定。四者互不代替。
+AnswerState = Literal["unanswered", "provided", "indifferent", "unsure"]
+#: 支持状态：本版能完整使用、部分使用（例如只有城市背景、没有行动机制）、不能使用（只留存）。
+SupportState = Literal["supported", "partially_supported", "unsupported"]
+#: 确认状态：待确认、已确认、修改后失效。
+ConfirmationState = Literal["pending", "confirmed", "invalidated"]
+#: 用途：规划（给分身看）、开局状态、资格、评分、仅留存。
+Usage = Literal["planning", "start_state", "qualification", "scoring", "retained_only"]
+
+
+class ExactNumber(ProductModel):
+    """一个精确数：``exact`` 是规范分数写法（参与计算与比较），``display`` 只供显示（四舍五入，不回流计算）。"""
+
+    exact: ExactText
+    display: str = Field(min_length=1, max_length=40)
+
+
+class ProductMoney(ProductModel):
+    """一笔钱：整数最小单位（美元是分）、币种与计价口径；``display`` 只供显示。"""
+
+    amount_minor: int
+    currency: Annotated[str, Field(pattern=r"^[A-Z]{3}$")]
+    numeraire_id: str = Field(min_length=1, max_length=40)
+    display: str = Field(min_length=1, max_length=40)
+
+
+# ==========================================================================
+# ProductCapabilities：E3 发布、E5 呈现（界面不能提供服务端没有的选择）
+# ==========================================================================
+
+
+class CityOption(ProductModel):
+    """一个候选城市：完整身份（国家 / 地理体系 / 代码）与地理边界版本；不用中文名拼接资料。"""
+
+    city_ref: RefStr
+    country: Annotated[str, Field(pattern=r"^[A-Z]{2}$")]
+    scheme: str = Field(min_length=1, max_length=40)
+    code: str = Field(min_length=1, max_length=40)
+    label: str = Field(min_length=1, max_length=80)
+    geography_version: str = Field(min_length=1, max_length=80)
+    data_status: Literal["synthetic_fixture", "real_data"]
+    selectable: bool
+    note: str = Field(min_length=1, max_length=300)
+
+
+class DimensionDefinition(ProductModel):
+    """六维之一的统一定义：中性题干、具体的参考改善范围与当前覆盖。全比较组共用，不逐城重新标定用户权重。"""
+
+    key: Literal["material", "safety", "opportunity", "leisure", "environment", "commute"]
+    label: str = Field(min_length=1, max_length=40)
+    definition: str = Field(min_length=1, max_length=400)
+    reference_improvement: str = Field(min_length=1, max_length=400)
+    support: SupportState
+    support_note: str = Field(min_length=1, max_length=400)
+
+
+class MaterialLeafDefinition(ProductModel):
+    """物质细项之一：含义、支持状态与说明。细分是父项内部的相对重要性，不是开支比例。"""
+
+    key: str = Field(min_length=1, max_length=48)
+    label: str = Field(min_length=1, max_length=40)
+    definition: str = Field(min_length=1, max_length=400)
+    support: SupportState
+    note: str = Field(min_length=1, max_length=400)
+
+
+class PointsRules(ProductModel):
+    """定和量表的规则：合计、手工输入的小数位、显示小数位、精确分数的规范写法与均分的精确值。"""
+
+    total: Literal[100]
+    manual_entry: str = Field(min_length=1, max_length=300)
+    manual_max_decimals: Annotated[int, Field(ge=0, le=6)]
+    display_decimals: Annotated[int, Field(ge=0, le=6)]
+    canonical_form: str = Field(min_length=1, max_length=300)
+    equal_split_six: ExactText
+    equal_split_material: ExactText
+    rules: tuple[str, ...]
+
+
+class HealthQuestion(ProductModel):
+    question_id: Annotated[str, Field(pattern=r"^[a-z][a-z0-9_]{1,47}$")]
+    text: str = Field(min_length=1, max_length=300)
+
+
+class HealthOptionDef(ProductModel):
+    option_id: Literal["agree", "disagree", "no_clear_tendency", "unsure"]
+    label: str = Field(min_length=1, max_length=20)
+    meaning: str = Field(min_length=1, max_length=200)
+
+
+class HealthQuestionnaire(ProductModel):
+    """独立健康问卷（不占六维 100 分，不是第七个评分权重）。题目是暂定文案，**未经量表验证**。"""
+
+    version: str = Field(min_length=1, max_length=80)
+    status: Literal["draft_wording_not_validated"]
+    common_prompt: str = Field(min_length=1, max_length=300)
+    questions: tuple[HealthQuestion, ...] = Field(min_length=1)
+    options: tuple[HealthOptionDef, ...] = Field(min_length=4, max_length=4)
+    unanswered_rule: str = Field(min_length=1, max_length=300)
+    rules: tuple[str, ...]
+
+
+class HardRequirementOption(ProductModel):
+    """一个受支持的硬要求选项：有定义、有资料、能按月核验。**核验只单独报告，环境不拦截计划**（``enforced_by_execution``）。"""
+
+    option_id: Annotated[str, Field(pattern=r"^[a-z][a-z0-9_.]{1,63}$")]
+    label: str = Field(min_length=1, max_length=80)
+    parameter: str = Field(min_length=1, max_length=48)
+    unit: str = Field(min_length=1, max_length=40)
+    minimum: int
+    maximum: int
+    step: Annotated[int, Field(ge=1)]
+    compiles_to: str = Field(min_length=1, max_length=300)
+    enforced_by_execution: Literal[False] = False
+    verification: str = Field(min_length=1, max_length=300)
+
+
+class AttributeKindDef(ProductModel):
+    """属性偏好的种类（品牌、菜系、制作方式、档次、服务质量、上门顾虑……）：本版的支持状态与用途。"""
+
+    kind: Annotated[str, Field(pattern=r"^[a-z][a-z0-9_]{1,47}$")]
+    label: str = Field(min_length=1, max_length=40)
+    support: SupportState
+    usage: tuple[Usage, ...] = Field(min_length=1)
+    note: str = Field(min_length=1, max_length=300)
+
+
+class MoneyBasisOption(ProductModel):
+    """一种受支持的现金口径：币种、金额时期、含义与换算规则。没有列出的组合没有合法换算，明确阻断。"""
+
+    currency: Annotated[str, Field(pattern=r"^[A-Z]{3}$")]
+    price_period: str = Field(min_length=1, max_length=20)
+    meaning: Literal["liquid_funds_v1"]
+    conversion_rule: str = Field(min_length=1, max_length=80)
+    numeraire_id: str = Field(min_length=1, max_length=40)
+    note: str = Field(min_length=1, max_length=300)
+
+
+class OccupationCapability(ProductModel):
+    """职业匹配能力：受控词表与明确规则，用户确认少量可读候选，不填职业代码。"""
+
+    vocabulary_version: str = Field(min_length=1, max_length=80)
+    method: Literal["controlled_vocabulary_alias_match_v1"]
+    languages: tuple[str, ...] = Field(min_length=1)
+    concept_count: Annotated[int, Field(ge=1)]
+    max_candidates: Annotated[int, Field(ge=1, le=10)]
+    users_enter_codes: Literal[False] = False
+    note: str = Field(min_length=1, max_length=400)
+
+
+class AbilityOption(ProductModel):
+    """一项可以由用户确认的资格事实（不从职称自动授予）。"""
+
+    ability_id: Annotated[str, Field(pattern=r"^[a-z][a-z0-9_]{1,47}$")]
+    label: str = Field(min_length=1, max_length=80)
+    ask_when: str = Field(min_length=1, max_length=300)
+
+
+class ProductCapabilities(ProductModel):
+    """E3 发布的能力清单（E5 只能呈现这里有的选择）。"""
+
+    meta: ProductMeta
+    capabilities_id: RefStr
+    cities: tuple[CityOption, ...] = Field(min_length=1)
+    occupation: OccupationCapability
+    dimensions: tuple[DimensionDefinition, ...] = Field(min_length=6, max_length=6)
+    material_leaves: tuple[MaterialLeafDefinition, ...] = Field(min_length=1)
+    points: PointsRules
+    health_questionnaire: HealthQuestionnaire
+    hard_requirement_options: tuple[HardRequirementOption, ...] = ()
+    attribute_kinds: tuple[AttributeKindDef, ...] = ()
+    abilities: tuple[AbilityOption, ...] = ()
+    money_bases: tuple[MoneyBasisOption, ...] = Field(min_length=1)
+    #: 金额的写法（E3-A 收尾 F3）：服务端按这条规则严格解析，E5 照着提示用户；前端提示不能代替服务端检查。
+    money_input_rule_zh: str = Field(min_length=1, max_length=300)
+    age_min: Annotated[int, Field(ge=14)]
+    age_max: Annotated[int, Field(le=120)]
+    free_text_max_chars: Literal[2000]
+    start_scenario: tuple[str, ...] = Field(min_length=1)
+    unsupported: tuple[str, ...] = ()
+    limits: tuple[str, ...] = ()
+    interview: Literal["reserved_not_implemented"] = "reserved_not_implemented"
+
+
+# ==========================================================================
+# UserInputDraft：原始答案及逐项状态
+# ==========================================================================
+
+
+class PointEntry(ProductModel):
+    """一个维度或细项的作答：已提供时写数值文字（精确十进制或规范分数），其余状态不写数值。明确 0 写 ``"0"``。"""
+
+    state: AnswerState
+    value_text: str | None = Field(default=None, max_length=40)
+
+    @model_validator(mode="after")
+    def _value_matches_state(self) -> PointEntry:
+        if (self.state == "provided") != (self.value_text is not None):
+            raise ValueError('只有 provided 写 value_text，provided 必须写（明确 0 写 "0"）')
+        return self
+
+
+class AllocationAnswer(ProductModel):
+    """一组定和分配的作答。``mode = equal_split`` 表示用户**主动**选择了平均分配（不预选、不默认）；``None`` 表示还没开始分配。"""
+
+    mode: Literal["manual", "equal_split"] | None = None
+    entries: dict[str, PointEntry] = Field(default_factory=dict)
+
+
+class OccupationAnswer(ProductModel):
+    """职业：原文与语言；用户在候选里选中的概念（不透明 ID，不是职业代码）。"""
+
+    state: AnswerState
+    raw_text: str | None = Field(default=None, max_length=300)
+    language: str = Field(default="zh", min_length=2, max_length=10)
+    selected_candidate: str | None = Field(default=None, max_length=80)
+
+
+class AgeAnswer(ProductModel):
+    state: AnswerState
+    value: int | None = None
+
+
+class CashAnswer(ProductModel):
+    """开始时可用于生活的流动资金：金额文字、币种、金额时期与口径（不是总资产、信用额度或月薪）。"""
+
+    state: AnswerState
+    amount_text: str | None = Field(default=None, max_length=40)
+    currency: str | None = Field(default=None, max_length=3)
+    price_period: str | None = Field(default=None, max_length=20)
+    meaning: Literal["liquid_funds_v1"] = "liquid_funds_v1"
+
+
+class CitiesAnswer(ProductModel):
+    state: AnswerState
+    city_refs: tuple[str, ...] = ()
+
+
+class HealthItemAnswer(ProductModel):
+    """一题的作答：四个选项之一；``None`` = 未答（与“暂不确定”分开保存）。"""
+
+    question_id: str = Field(min_length=1, max_length=48)
+    choice: Literal["agree", "disagree", "no_clear_tendency", "unsure"] | None = None
+
+
+class HealthAnswers(ProductModel):
+    questionnaire_version: str = Field(min_length=1, max_length=80)
+    items: tuple[HealthItemAnswer, ...] = ()
+
+
+class FreeTextAnswer(ProductModel):
+    """可选文字。超过 2,000 字符**不截断**：校验时报错，由用户自己删减。"""
+
+    state: AnswerState
+    text: str | None = None
+
+
+class AttributePreferenceAnswer(ProductModel):
+    """一条属性偏好（品牌、菜系、上门顾虑……）：原文与它挂在哪项需求下；``as_hard_requirement`` 表示用户想把它当不可妥协的要求。"""
+
+    preference_id: Annotated[str, Field(pattern=r"^[a-z][a-z0-9_.]{1,63}$")]
+    need: str = Field(min_length=1, max_length=48)
+    kind: str = Field(min_length=1, max_length=48)
+    raw_text: str = Field(min_length=1, max_length=300)
+    as_hard_requirement: bool = False
+
+
+class AbilityClaim(ProductModel):
+    """用户自己确认的一项资格事实（只在相关岗位需要时追问；不从职称推断）。"""
+
+    ability_id: str = Field(min_length=1, max_length=48)
+    state: AnswerState
+
+
+class HardRequirementAnswer(ProductModel):
+    """一条硬要求：选了受支持的选项（带参数），或只写了原文（本版未支持，只留存）。"""
+
+    requirement_id: Annotated[str, Field(pattern=r"^[a-z][a-z0-9_.]{1,63}$")]
+    option_id: str | None = Field(default=None, max_length=64)
+    parameter_value: int | None = None
+    raw_text: str | None = Field(default=None, max_length=300)
+
+    @model_validator(mode="after")
+    def _something(self) -> HardRequirementAnswer:
+        if self.option_id is None and not self.raw_text:
+            raise ValueError("硬要求要么选一个受支持的选项，要么写原文")
+        return self
+
+
+class EvidenceRef(ProductModel):
+    """答案的来源证据：本轮只有表单字段；未来访谈的记录引用在这里接入（访谈 → 候选解释 → 确认 → 同一编译器）。"""
+
+    kind: Literal["form_field", "interview_turn_reserved"]
+    ref: str = Field(min_length=1, max_length=160)
+    note: str | None = Field(default=None, max_length=300)
+
+
+class UserInputDraft(ProductModel):
+    """一份原始答案草稿（逐项保存状态）。原始答案、候选解释与确认画像分层保存：这里只有原始答案。"""
+
+    meta: ProductMeta
+    draft_id: RefStr
+    revision: Annotated[int, Field(ge=1)]
+    input_channel: Literal["form"] = "form"
+    cities: CitiesAnswer
+    occupation: OccupationAnswer
+    age: AgeAnswer
+    cash: CashAnswer
+    six_dimensions: AllocationAnswer
+    material: AllocationAnswer
+    health: HealthAnswers
+    free_text: FreeTextAnswer
+    attribute_preferences: tuple[AttributePreferenceAnswer, ...] = ()
+    abilities: tuple[AbilityClaim, ...] = ()
+    hard_requirements: tuple[HardRequirementAnswer, ...] = ()
+    evidence: tuple[EvidenceRef, ...] = ()
+
+
+# ==========================================================================
+# ProfileReview：可读解释、候选、缺失、未支持与待确认
+# ==========================================================================
+
+
+class DraftRef(ProductModel):
+    """引用一份草稿：编号、修订号与内容指纹（草稿改了，指纹就不同）。"""
+
+    draft_id: RefStr
+    revision: Annotated[int, Field(ge=1)]
+    draft_fingerprint: Sha256
+
+
+class OccupationCandidate(ProductModel):
+    """一个可读的职业候选：概念 ID（不透明）、名称、职责说明与匹配到的词。不展示分类代码。"""
+
+    candidate_id: str = Field(min_length=1, max_length=80)
+    label: str = Field(min_length=1, max_length=80)
+    duties: tuple[str, ...] = Field(min_length=1)
+    matched_terms: tuple[str, ...] = ()
+
+
+class OccupationReview(ProductModel):
+    status: Literal["explicit", "ambiguous", "unknown", "not_provided"]
+    raw_text: str | None = None
+    candidates: tuple[OccupationCandidate, ...] = ()
+    selected: str | None = None
+    message_zh: str = Field(min_length=1, max_length=400)
+
+
+class AllocationLine(ProductModel):
+    """一个维度或细项：状态、精确值与显示值（显示只供阅读）、支持状态与用途。"""
+
+    key: str
+    label: str
+    state: AnswerState
+    exact: ExactText | None = None
+    display: str | None = None
+    support: SupportState
+    usage: tuple[Usage, ...]
+
+
+class AllocationReview(ProductModel):
+    mode: Literal["manual", "equal_split"] | None = None
+    status: Literal["complete", "incomplete", "not_applicable"]
+    total: ExactNumber | None = None
+    lines: tuple[AllocationLine, ...] = ()
+
+
+class HealthReviewItem(ProductModel):
+    question_id: str
+    text: str
+    answer_state: Literal["provided", "unsure", "unanswered"]
+    option: Literal["agree", "disagree", "no_clear_tendency"] | None = None
+    option_label: str | None = None
+    meaning: str
+
+
+class MoneyReview(ProductModel):
+    status: Literal["convertible", "blocked", "missing"]
+    amount_text: str | None = None
+    currency: str | None = None
+    price_period: str | None = None
+    meaning: str
+    conversion_rule: str | None = None
+    converted: ProductMoney | None = None
+
+
+class ItemStatus(ProductModel):
+    """一项输入的四类状态汇总：答案、支持、确认与用途（必要时写执行是否保障）。"""
+
+    item: str = Field(min_length=1, max_length=80)
+    label: str = Field(min_length=1, max_length=80)
+    answer_state: AnswerState
+    support: SupportState
+    confirmation: ConfirmationState
+    usage: tuple[Usage, ...]
+    execution_guaranteed: bool | None = None
+    note: str = Field(min_length=1, max_length=300)
+
+
+class StatementReview(ProductModel):
+    """一条属性偏好或硬要求的审阅结果：原文、支持状态、用途与说明（未支持的不挪进已有权重）。"""
+
+    ref: str
+    kind: str
+    raw_text: str
+    support: SupportState
+    usage: tuple[Usage, ...]
+    as_hard_requirement: bool
+    execution_guaranteed: bool
+    message_zh: str
+
+
+class ProfileReview(ProductModel):
+    """一份草稿的审阅：E3 给出的可读解释与全部问题。``confirmable`` 为假时，``issues`` 里有阻断项。"""
+
+    meta: ProductMeta
+    review_id: RefStr
+    draft: DraftRef
+    confirmable: bool
+    cities: tuple[str, ...] = ()
+    occupation: OccupationReview
+    age: int | None = None
+    money: MoneyReview
+    six_dimensions: AllocationReview
+    material: AllocationReview
+    health: tuple[HealthReviewItem, ...]
+    free_text_chars: Annotated[int, Field(ge=0)] = 0
+    statements: tuple[StatementReview, ...] = ()
+    abilities: tuple[str, ...] = ()
+    items: tuple[ItemStatus, ...]
+    pending_confirmations: tuple[str, ...] = ()
+    issues: tuple[ProductIssue, ...] = ()
+    summary_zh: tuple[str, ...] = ()
+
+
+# ==========================================================================
+# ConfirmedProfile：已确认语义、精确数值、来源与内容身份
+# ==========================================================================
+
+
+class OccupationMapping(ProductModel):
+    """职业概念在某国分类体系里的映射（内部保留，**不展示给用户**，也不是用户的永久身份）。"""
+
+    country: Annotated[str, Field(pattern=r"^[A-Z]{2}$")]
+    scheme: str = Field(min_length=1, max_length=40)
+    version: str = Field(min_length=1, max_length=40)
+    code: str = Field(min_length=1, max_length=40)
+    basis: str = Field(min_length=1, max_length=300)
+
+
+class ConfirmedOccupation(ProductModel):
+    concept_id: str = Field(min_length=1, max_length=80)
+    label: str = Field(min_length=1, max_length=80)
+    duties: tuple[str, ...] = Field(min_length=1)
+    raw_text: str = Field(min_length=1, max_length=300)
+    language: str = Field(min_length=2, max_length=10)
+    match_status: Literal["explicit", "ambiguous"]
+    internal_mappings: tuple[OccupationMapping, ...] = Field(min_length=1)
+
+
+class ConfirmedMoney(ProductModel):
+    """确认的开局现金：保留原始金额、币种、时期、口径与换算依据，以及换算后的整数最小单位。"""
+
+    amount_text: str = Field(min_length=1, max_length=40)
+    currency: Annotated[str, Field(pattern=r"^[A-Z]{3}$")]
+    price_period: str = Field(min_length=1, max_length=20)
+    meaning: Literal["liquid_funds_v1"]
+    conversion_rule: str = Field(min_length=1, max_length=80)
+    converted: ProductMoney
+
+
+class ConfirmedAllocation(ProductModel):
+    """确认的定和分配：规范精确分数（参与计算）与显示文字（只供阅读）。"""
+
+    mode: Literal["manual", "equal_split"]
+    points: dict[str, ExactText]
+    display: dict[str, str]
+
+
+class ConfirmedMaterial(ProductModel):
+    status: Literal["allocated", "not_applicable_parent_zero"]
+    allocation: ConfirmedAllocation | None = None
+
+    @model_validator(mode="after")
+    def _shape(self) -> ConfirmedMaterial:
+        if (self.status == "allocated") != (self.allocation is not None):
+            raise ValueError("只有 allocated 才有细分；父项为 0 时不伪造细分")
+        return self
+
+
+class ConfirmedHealthAnswer(ProductModel):
+    question_id: str = Field(min_length=1, max_length=48)
+    question_text: str = Field(min_length=1, max_length=300)
+    answer_state: Literal["provided", "unsure", "unanswered"]
+    option: Literal["agree", "disagree", "no_clear_tendency"] | None = None
+    option_label: str | None = None
+    meaning: str = Field(min_length=1, max_length=300)
+
+
+class ConfirmedHealth(ProductModel):
+    questionnaire_version: str = Field(min_length=1, max_length=80)
+    status: Literal["draft_wording_not_validated"]
+    answers: tuple[ConfirmedHealthAnswer, ...] = Field(min_length=1)
+
+
+class ConfirmedHardRequirement(ProductModel):
+    """一条受支持、已确认的硬要求：编译成 E1 的结构化条件；**只单独报告，环境不拦截计划**。"""
+
+    requirement_id: str = Field(min_length=1, max_length=64)
+    option_id: str = Field(min_length=1, max_length=64)
+    parameter_value: int
+    label_zh: str = Field(min_length=1, max_length=200)
+    enforced_by_execution: Literal[False] = False
+
+
+class RetainedStatement(ProductModel):
+    """只留存的陈述：未支持的属性偏好、未获执行保障的“不可妥协”要求等。保留原文与支持状态，不挪进已有权重。"""
+
+    ref: str = Field(min_length=1, max_length=64)
+    kind: str = Field(min_length=1, max_length=48)
+    need: str | None = Field(default=None, max_length=48)
+    raw_text: str = Field(min_length=1, max_length=300)
+    support: Literal["unsupported", "partially_supported"]
+    usage: tuple[Usage, ...]
+    as_hard_requirement: bool
+    message_zh: str = Field(min_length=1, max_length=400)
+
+
+class FieldSource(ProductModel):
+    """一项确认值的来源（表单字段，或未来的访谈证据引用）。"""
+
+    field: str = Field(min_length=1, max_length=80)
+    evidence: tuple[EvidenceRef, ...] = Field(min_length=1)
+
+
+class ConfirmedProfile(ProductModel):
+    """用户确认的画像。``content_fingerprint`` 覆盖除它本身以外的全部内容（含版本与草稿引用）：改了相关答案、词表、问卷或转换
+    规则，旧确认就对不上；内容被改写，指纹核对不通过。指纹只核对内容，不代替线上认证与授权。"""
+
+    meta: ProductMeta
+    confirmed_id: RefStr
+    person_ref: Annotated[str, Field(pattern=r"^[a-z0-9][a-z0-9_.\-]{0,63}$")]
+    draft: DraftRef
+    review_id: RefStr
+    confirmation_source: Literal["user_form"]
+    cities: tuple[str, ...] = Field(min_length=1)
+    occupation: ConfirmedOccupation
+    age_years: int
+    money: ConfirmedMoney
+    six_dimensions: ConfirmedAllocation
+    material: ConfirmedMaterial
+    health: ConfirmedHealth
+    free_text: str | None = Field(default=None, max_length=FREE_TEXT_MAX_CHARS)
+    abilities: tuple[str, ...] = ()
+    hard_requirements: tuple[ConfirmedHardRequirement, ...] = ()
+    retained: tuple[RetainedStatement, ...] = ()
+    sources: tuple[FieldSource, ...] = ()
+    content_fingerprint: Sha256
+
+    def content(self) -> dict[str, Any]:
+        """参与内容身份的全部字段（指纹本身与样例出处标签除外）。"""
+        return identity_content(self, "content_fingerprint")
+
+    def expected_fingerprint(self) -> str:
+        return content_fingerprint(self.content())
+
+
+class ConfirmedRef(ProductModel):
+    confirmed_id: RefStr
+    content_fingerprint: Sha256
+
+
+# ==========================================================================
+# ProductPreflight：开局摘要、三种能力、资料缺口、范围与运行绑定
+# ==========================================================================
+
+
+class CapabilityStatus(ProductModel):
+    """一种能力在当前输入与声明范围内的状态。**不保证**未来每份计划都合法、每个月都能完整评分。"""
+
+    status: Literal["yes", "no", "partial", "unknown"]
+    reasons: tuple[str, ...] = ()
+
+
+class StartSummary(ProductModel):
+    """标准开局摘要：同一用户跨城、跨重复序号相同的个人条件。"""
+
+    rule: str = Field(min_length=1, max_length=80)
+    age_years: int
+    cash: ProductMoney
+    abilities: tuple[str, ...] = ()
+    occupation_label: str
+    monthly_time_note: str
+    monthly_energy_note: str
+    scenario_zh: tuple[str, ...] = Field(min_length=1)
+
+
+class CityCoverageSummary(ProductModel):
+    """一座城的偏好覆盖摘要（E1 覆盖报告的投影）。不是阈值，也不解锁不完整的总分。
+
+    * ``common_weight``：整个比较组**共同**覆盖的权重（每座城资料都齐、规则都有的叶子之和；各城相同，城市比较只在这部分上是同口径的）；
+    * ``unknown_weight``：**这座城**资料未知的正权重之和（这些月份的总分会不完整，不补 0、不删掉再重新归一化）；
+    * ``no_component_weight``：本版评分没有分项的正权重之和（各城相同）；
+    * ``unsupported_positive_leaves``：**这座城**资料未知或没有评分分项的正权重叶子。
+    """
+
+    common_weight: ExactNumber
+    unknown_weight: ExactNumber
+    no_component_weight: ExactNumber
+    unsupported_positive_leaves: tuple[str, ...] = ()
+    label: str
+
+
+class CityPreflight(ProductModel):
+    city_ref: RefStr
+    label: str
+    start_job_label: str | None = None
+    executable: CapabilityStatus
+    scorable: CapabilityStatus
+    feedback: CapabilityStatus
+    coverage: CityCoverageSummary | None = None
+    option_inventory_status: Literal["complete_for_declared_scope", "partial", "not_assessed"]
+    data_gaps: tuple[ProductIssue, ...] = ()
+
+
+class RunBinding(ProductModel):
+    """预检查绑定的运行身份：编译出的 E1 输入、协议、评分、评价、提示模板、规划器与运行清单的内容身份。变了就要重新预检查。"""
+
+    protocol_id: str
+    scoring_version: str
+    scoring_content_fingerprint: Sha256
+    evaluation_spec_id: str
+    prompt_template: str
+    planner_kind: Literal["mock", "llm"]
+    planner_id: str
+    compiled_inputs: dict[str, Sha256]
+    identities_fingerprint: Sha256
+
+
+class PlannerAndCost(ProductModel):
+    planner_kind: Literal["mock", "llm"]
+    planner_id: str
+    description_zh: str
+    call_limit: int
+    paid: bool
+    max_cost: str | None = None
+
+
+class ProductPreflight(ProductModel):
+    """一次运行前检查。``preflight_fingerprint`` 覆盖除它本身以外的全部内容；确认画像或运行身份变了，旧预检查失效。"""
+
+    meta: ProductMeta
+    preflight_id: RefStr
+    confirmed: ConfirmedRef
+    status: Literal["ready", "blocked"]
+    start: StartSummary | None = None
+    cities: tuple[CityPreflight, ...] = ()
+    executable: CapabilityStatus
+    scorable: CapabilityStatus
+    feedback: CapabilityStatus
+    clones_per_city: Annotated[int, Field(ge=0)]
+    years: Annotated[int, Field(ge=1)]
+    planner: PlannerAndCost
+    binding: RunBinding | None = None
+    issues: tuple[ProductIssue, ...] = ()
+    scope_zh: tuple[str, ...] = ()
+    preflight_fingerprint: Sha256
+
+    def content(self) -> dict[str, Any]:
+        """参与内容身份的全部字段（指纹本身与样例出处标签除外）。"""
+        return identity_content(self, "preflight_fingerprint")
+
+    def expected_fingerprint(self) -> str:
+        return content_fingerprint(self.content())
+
+
+class PreflightRef(ProductModel):
+    preflight_id: RefStr
+    preflight_fingerprint: Sha256
+
+
+# ==========================================================================
+# 提交、回执与进度（线上服务留 E3-C：本轮只有契约与标明为示例的响应）
+# ==========================================================================
+
+
+class RunSubmission(ProductModel):
+    """提交一次运行：引用确认画像与预检查，带幂等键。相同确认的重复点击只生成同一运行；输入或配置变了必须重查。"""
+
+    meta: ProductMeta
+    confirmed: ConfirmedRef
+    preflight: PreflightRef
+    idempotency_key: Annotated[str, Field(min_length=8, max_length=80)]
+
+
+class RunReceipt(ProductModel):
+    """提交回执：接受、重复提交（返回原运行 ID，不再生成新的一批分身）或拒绝（附原因）。"""
+
+    meta: ProductMeta
+    status: Literal["accepted", "duplicate_same_run", "rejected"]
+    run_id: str | None = None
+    idempotency_key: str
+    reasons: tuple[ProductIssue, ...] = ()
+    service: Literal["offline_bridge", "contract_example_only"]
+
+    @model_validator(mode="after")
+    def _run_id(self) -> RunReceipt:
+        if (self.status == "rejected") == (self.run_id is not None):
+            raise ValueError("接受与重复提交必须写运行 ID；拒绝不写")
+        return self
+
+
+class CloneProgress(ProductModel):
+    clone_ref: str
+    city_ref: str
+    status: str
+    status_zh: str
+    years_committed: Annotated[int, Field(ge=0)]
+
+
+class CostStatus(ProductModel):
+    """费用状态：离线 mock 为零；真实模型只能写“按报价估算”，以供应商账单为准。"""
+
+    kind: Literal["offline_mock_zero_cost", "estimated_from_quote"]
+    calls_used: Annotated[int, Field(ge=0)]
+    call_limit: Annotated[int, Field(ge=0)]
+    estimated_cost: str | None = None
+    note: str
+
+
+class RunProgress(ProductModel):
+    """一次运行的进度（断线后用运行 ID 查询；不重发付费规划）。请求成功、计划可执行、生活完成、评分完整分别记录。"""
+
+    meta: ProductMeta
+    run_id: str
+    stage: Literal[
+        "queued", "running", "completed", "paused", "halted", "interrupted", "budget_exhausted"
+    ]
+    stage_zh: str
+    clones: tuple[CloneProgress, ...] = ()
+    #: 暂停 / 停下 / 中断时给用户看的说明（E3-A 收尾 F5：按进度的结构化状态生成，不透传内部原因原文）。
+    pause: PublicExplanation | None = None
+    cost: CostStatus
+    resumable: bool
+    resume_note: str
+    report_available: bool
+
+
+# ==========================================================================
+# ProductResult：E1 报告的白名单投影
+# ==========================================================================
+
+
+class ConvenienceDevice(ProductModel):
+    opportunity_id: str
+    label: str
+    months_in_service: tuple[int, ...]
+
+
+class ConvenienceService(ProductModel):
+    opportunity_id: str
+    label: str
+    months_planned: tuple[int, ...]
+    months_covered: tuple[int, ...]
+    months_not_obtained: tuple[int, ...]
+
+
+class HouseholdHours(ProductModel):
+    """本人每月实际做的家务小时（资源账的事实，精确值）。"""
+
+    task: str
+    monthly_hours: tuple[str, ...]
+
+
+class YearFacts(ProductModel):
+    """一个分身一年的生活事实（取自 E1 的结算记录与资源账；不含模型理由与内部评分对象）。"""
+
+    year_index: int
+    status: str
+    months_lived: Annotated[int, Field(ge=0, le=12)]
+    cash_start: ProductMoney
+    cash_end: ProductMoney | None = None
+    jobs: tuple[str, ...] = ()
+    housing: tuple[str, ...] = ()
+    food: tuple[str, ...] = ()
+    #: 实际参加的课程与参加的月份（E1 记为执行了的月份；暂停、被拒或没付成学费的月份不算）。换岗的原因要靠它讲清楚。
+    training: tuple[str, ...] = ()
+    paid_total: ProductMoney
+    devices: tuple[ConvenienceDevice, ...] = ()
+    services: tuple[ConvenienceService, ...] = ()
+    household: tuple[HouseholdHours, ...] = ()
+    health_months: tuple[str, ...] = ()
+    notes: tuple[str, ...] = ()
+
+
+class RequirementLine(ProductModel):
+    need: str
+    summary: str
+    months_satisfied: int
+    months_not_satisfied: int
+    months_unknown: int
+    months_not_lived: int
+
+
+class CloneResult(ProductModel):
+    """一个分身：C / E / M 分类与原因、L / V / J（精确值与显示值）、事件链与硬要求核验、生活事实。"""
+
+    clone_ref: str
+    city_ref: str
+    repeat_index: int
+    category: Literal["C", "E", "M"] | None = None
+    category_zh: str
+    missing_reason: str | None = None
+    missing_reason_zh: str | None = None
+    #: 这个分身为什么是这一类、影响什么、下一步（E3-A 收尾 F5：按类别与缺失原因生成，不透传 E1 内部说明或异常原文）。
+    explanation: PublicExplanation
+    l_actual: ExactNumber | None = None
+    v_reference: ExactNumber | None = None
+    j: ExactNumber | None = None
+    range_lower: ExactNumber | None = None
+    range_upper: ExactNumber | None = None
+    reference_plan: str | None = None
+    event_chain: tuple[str, ...] = ()
+    hard_requirements: tuple[RequirementLine, ...] = ()
+    years: tuple[YearFacts, ...] = ()
+
+
+class MissingReasonLine(ProductModel):
+    reason: str
+    reason_zh: str
+    count: int
+
+
+class RequirementSummaryLine(ProductModel):
+    """一条硬要求在一座城的核验人数。未核验不等于核验过、没有问题。"""
+
+    need: str
+    planned: int
+    checked: int
+    satisfied_every_month: int
+    violated: int
+    unknown: int
+    satisfied_in_lived_months: int
+    not_checked: int
+
+
+class CityResult(ProductModel):
+    """一座城的结果：原计划 N = C + E + M；完整者均值的分母是 C；模拟缺失范围的分母是 C + M（出局者不进）。空值保持为空。"""
+
+    city_ref: str
+    label: str
+    planned: int
+    complete: int
+    exits: int
+    missing: int
+    mean_j: ExactNumber | None = None
+    mean_l: ExactNumber | None = None
+    mean_v: ExactNumber | None = None
+    mean_denominator: int
+    range_lower: ExactNumber | None = None
+    range_upper: ExactNumber | None = None
+    range_denominator: int
+    exit_share: ExactNumber
+    missing_share: ExactNumber
+    missing_reasons: tuple[MissingReasonLine, ...] = ()
+    hard_requirements: tuple[RequirementSummaryLine, ...] = ()
+    headline_zh: str
+    notes_zh: tuple[str, ...] = ()
+
+    @model_validator(mode="after")
+    def _denominators(self) -> CityResult:
+        if self.complete + self.exits + self.missing != self.planned:
+            raise ValueError("原计划人数必须等于 C + E + M")
+        if self.mean_denominator != self.complete:
+            raise ValueError("完整者均值的分母必须是 C")
+        if self.range_denominator != self.complete + self.missing:
+            raise ValueError("模拟缺失范围的分母必须是 C + M（出局者不进）")
+        if self.complete == 0 and self.mean_j is not None:
+            raise ValueError("C = 0 时没有均值（不显示为 0）")
+        return self
+
+
+class ComparisonLine(ProductModel):
+    city_a: str
+    city_b: str
+    direction: Literal["a_higher", "b_higher", "undetermined", "not_available"]
+    range_difference_low: ExactNumber | None = None
+    range_difference_high: ExactNumber | None = None
+    note_zh: str
+
+
+class OptionCoverageLine(ProductModel):
+    """选项目录覆盖的摘要（与实际轨迹能否评分是两件事）。"""
+
+    city_ref: str
+    status: Literal["complete_for_declared_scope", "partial", "not_assessed"]
+    surveyed: int
+    resolved: int
+    unresolved: int
+    excluded: int
+    note_zh: str
+
+
+class ProductResult(ProductModel):
+    """面向产品的结果：只投影 E1 已算好的报告与生活事实，不另算“更好看”的分数，不排序，不给现实推荐结论。"""
+
+    meta: ProductMeta
+    result_id: RefStr
+    run_id: str
+    confirmed: ConfirmedRef
+    preflight: PreflightRef
+    evaluation_status: Literal["generated", "not_generated"]
+    not_generated_reason: str | None = None
+    run_stage: str
+    cities: tuple[CityResult, ...] = ()
+    clones: tuple[CloneResult, ...] = ()
+    comparisons: tuple[ComparisonLine, ...] = ()
+    option_coverage: tuple[OptionCoverageLine, ...] = ()
+    reading_guide_zh: tuple[str, ...] = ()
+    limitations_zh: tuple[str, ...] = ()
+    sources_zh: tuple[str, ...] = ()
+    planner: PlannerAndCost
+    real_model_calls: Annotated[int, Field(ge=0)]
+    result_fingerprint: Sha256
+
+    @model_validator(mode="after")
+    def _generated(self) -> ProductResult:
+        if (self.evaluation_status == "not_generated") != (self.not_generated_reason is not None):
+            raise ValueError("没有生成评价时必须写原因；生成了不写")
+        if self.evaluation_status == "not_generated" and self.cities:
+            raise ValueError("没有生成评价时不擅自给城市分类或分数")
+        return self
+
+    def content(self) -> dict[str, Any]:
+        """参与内容身份的全部字段（指纹本身与样例出处标签除外）。"""
+        return identity_content(self, "result_fingerprint")
+
+    def expected_fingerprint(self) -> str:
+        return content_fingerprint(self.content())
+
+
+# ==========================================================================
+# 便利资料：来源事实、候选方案、目录编译与选项目录覆盖（模块 D）
+# ==========================================================================
+
+FactKind = Literal["observed", "derived", "estimated", "synthetic"]
+CandidateField = Literal["price", "lifetime", "effect", "participation", "availability"]
+
+
+class SourceFact(ProductModel):
+    """一条来源事实：原始值、单位、时期、地理、来源性质，以及换算或假设的引用。报价、寿命与减负效果分别保留来源。"""
+
+    fact_id: Annotated[str, Field(pattern=r"^[a-z0-9][a-z0-9_.\-]{0,79}$")]
+    field: CandidateField
+    raw_value: str | None = Field(default=None, max_length=80)
+    unit: str = Field(min_length=1, max_length=60)
+    period: str = Field(min_length=1, max_length=40)
+    geography: str = Field(min_length=1, max_length=120)
+    kind: FactKind
+    locator: str | None = Field(default=None, max_length=300)
+    conversion: str | None = Field(default=None, max_length=300)
+    assumption: str | None = Field(default=None, max_length=300)
+    note: str = Field(min_length=1, max_length=400)
+
+    @model_validator(mode="after")
+    def _kind_consistent(self) -> SourceFact:
+        if self.kind == "observed" and not self.locator:
+            raise ValueError(f"{self.fact_id}: 观测事实必须写定位（locator）")
+        if self.kind == "synthetic" and not self.assumption:
+            raise ValueError(f"{self.fact_id}: 合成设定必须写假设说明（assumption）")
+        if self.kind in ("derived", "estimated") and not self.conversion:
+            raise ValueError(f"{self.fact_id}: 派生或估计必须写换算 / 方法（conversion）")
+        return self
+
+
+class PriceField(ProductModel):
+    """报价字段：金额、币种、基年、当地价口径、计费周期与计价单位；未知时 ``status = unknown``，不填 0。"""
+
+    status: Literal["known", "unknown"]
+    amount_text: str | None = None
+    currency: str | None = None
+    base_year: int | None = None
+    price_meaning: Literal["local_price_base_year"] | None = None
+    billing: Literal["one_time", "per_month", "per_visit", "per_year"] | None = None
+    per_unit: str | None = None
+    facts: tuple[str, ...] = ()
+
+
+class LifetimeField(ProductModel):
+    """设备寿命与生效时点。当前 E1 只接受 1–30 的整数年；未知或非整数年**不补值、不取整**。"""
+
+    status: Literal["known", "unknown", "not_applicable"]
+    years_text: str | None = None
+    effective_from: Literal["same_year", "next_year"] | None = None
+    facts: tuple[str, ...] = ()
+
+
+class TaskRelief(ProductModel):
+    task: str = Field(min_length=1, max_length=48)
+    residual_hours_per_month: str = Field(min_length=1, max_length=20)
+
+
+class EffectField(ProductModel):
+    """减负效果：每项代表性家务的“本人处理整项家务后仍需的月小时”（不是机器运行或服务人员工作时间）。未知不等于没有效果。"""
+
+    status: Literal["known", "unknown"]
+    residuals: tuple[TaskRelief, ...] = ()
+    facts: tuple[str, ...] = ()
+
+
+class ParticipationField(ProductModel):
+    """服务需要本人每月花多少小时参与（不是服务人员的工作时间）。设备不适用；服务未知时不能编入（不当成 0）。"""
+
+    status: Literal["known", "unknown", "not_applicable"]
+    hours_text: str | None = None
+    burden_per_hour_text: str | None = None
+    facts: tuple[str, ...] = ()
+
+
+class OpportunityCandidate(ProductModel):
+    """一个可能不完整的设备 / 服务候选，逐字段带状态。``market_status`` 是真实供给状态，与能否编译分开记。"""
+
+    candidate_id: Annotated[str, Field(pattern=r"^[a-z0-9][a-z0-9_.\-]{0,79}$")]
+    city_ref: RefStr
+    kind: Literal["device", "service"]
+    label: str = Field(min_length=1, max_length=120)
+    quality: str = Field(min_length=1, max_length=280)
+    tasks: tuple[str, ...] = Field(min_length=1)
+    market_status: Literal["offered", "not_offered", "unknown"]
+    price: PriceField
+    lifetime: LifetimeField
+    effect: EffectField
+    participation: ParticipationField = ParticipationField(status="not_applicable")
+    service_period: str | None = Field(default=None, max_length=80)
+    target_opportunity_id: Annotated[str, Field(pattern=r"^[a-z0-9][a-z0-9_.\-]{0,63}$")]
+
+
+class CompiledOpportunity(ProductModel):
+    """编入 E1 的一项合法机会：E1 的 ``availability``、逐字段来源映射与最弱来源性质（整条机会的来源标签取它）。"""
+
+    candidate_id: str
+    opportunity_id: str
+    city_ref: str
+    availability: Literal["available", "unknown"]
+    #: 编成资料未知的原因（E3-A 收尾 F2）：报价未知、供给未知，或两者都未知；可购买时为空。
+    unknown_reason: (
+        Literal["price_unknown", "supply_unknown", "supply_and_price_unknown"] | None
+    ) = None
+    field_sources: dict[str, tuple[str, ...]]
+    weakest_source_kind: FactKind
+    note_zh: str
+
+
+class UncompiledCandidate(ProductModel):
+    """没有编入 E1 的候选：原因（机器代码 + 中文），真实供给状态原样保留（有卖但寿命未知，不改写成确定买不到）。"""
+
+    candidate_id: str
+    city_ref: str
+    market_status: Literal["offered", "not_offered", "unknown"]
+    reasons: tuple[ProductIssue, ...] = Field(min_length=1)
+
+
+class TaskDefinition(ProductModel):
+    """全组共用的家务任务定义：基准小时、单位与说明（与 E1 协议的家务基准同一单位）。"""
+
+    task: str
+    baseline_hours_per_month: str
+    unit: Literal["小时/月"]
+    description: str
+
+
+class CatalogCompilation(ProductModel):
+    """一次目录编译：合法机会、未编入候选与原因、版本、范围与来源映射。过滤之后的分母仍保留在覆盖报告里。"""
+
+    meta: ProductMeta
+    compilation_id: RefStr
+    compiler_version: str
+    scope_zh: str
+    cities: tuple[str, ...]
+    tasks: tuple[TaskDefinition, ...]
+    compiled: tuple[CompiledOpportunity, ...] = ()
+    uncompiled: tuple[UncompiledCandidate, ...] = ()
+    facts: tuple[SourceFact, ...] = ()
+    compilation_fingerprint: Sha256
+
+
+#: 供给状态：资料显示这座城有卖、确定没有、不知道（E3-A 收尾 F2：与资料状态、编译状态分开记）。
+SupplyStatus = Literal["offered", "not_offered", "unknown"]
+#: 资料状态：用到的字段都有值、单位与来源；只有报价未知；有缺失或非法（不编入）；确定没有供给因而不需要；不在调查范围。
+DataStatus = Literal["complete", "price_unknown", "incomplete", "not_needed", "not_assessed"]
+#: 编译状态：编成可购买的 E1 机会；编成资料未知（看得到、不能买）；没有编入。
+CompileStatus = Literal["compiled_available", "compiled_unknown", "not_compiled"]
+
+
+class InventoryItem(ProductModel):
+    """一个调查过的候选在覆盖报告里的结论。``outcome`` 决定分母里的归属：已解决（可购买，或已证实不可得）、未解决（资料未知或
+    缺口）、排除（不在声明范围）。三种状态分开写，确定不可得是已确定的调查结果，但不是可购买的方案。"""
+
+    candidate_id: str
+    outcome: Literal["resolved", "unresolved", "excluded"]
+    supply_status: SupplyStatus
+    data_status: DataStatus
+    compile_status: CompileStatus
+    reason_zh: str
+
+
+class CityInventory(ProductModel):
+    city_ref: str
+    status: Literal["complete_for_declared_scope", "partial", "not_assessed"]
+    surveyed: int
+    resolved: int
+    unresolved: int
+    excluded: int
+    items: tuple[InventoryItem, ...] = ()
+
+    @model_validator(mode="after")
+    def _counts(self) -> CityInventory:
+        if self.resolved + self.unresolved + self.excluded != self.surveyed:
+            raise ValueError(
+                f"{self.city_ref}: 已解决 + 未解决 + 排除 必须等于调查的候选数（分母不因过滤变小）"
+            )
+        return self
+
+
+class OptionInventoryCoverage(ProductModel):
+    """选项目录覆盖（``option_inventory_coverage``）：在**声明的调查范围**内，便利设备与服务的资料齐不齐。
+
+    它与“实际轨迹能否评分”、分身的 C / E / M 是三个不同的判断：目录不完整不改写 E1 已发生轨迹的评分；没有采用方案且资源账完整时，
+    E1 照样给出确定的 q = 0。不保证穷尽整个城市市场。"""
+
+    meta: ProductMeta
+    coverage_id: RefStr
+    scope_version: str
+    declared_scope_zh: str
+    categories: tuple[str, ...] = Field(min_length=1)
+    cities: tuple[CityInventory, ...]
+    not_exhaustive_zh: str
+
+
+# ==========================================================================
+# 注册：导出 schema 与样例校验用同一份清单
+# ==========================================================================
+
+#: 消息名 → 类。``scripts/product_e3a.py export-schema`` 按这份清单导出，``check-schema`` 按它核对。
+PRODUCT_MESSAGES: dict[str, type[ProductModel]] = {
+    "ProductCapabilities": ProductCapabilities,
+    "UserInputDraft": UserInputDraft,
+    "ProfileReview": ProfileReview,
+    "ConfirmedProfile": ConfirmedProfile,
+    "ProductPreflight": ProductPreflight,
+    "RunSubmission": RunSubmission,
+    "RunReceipt": RunReceipt,
+    "RunProgress": RunProgress,
+    "ProductResult": ProductResult,
+    "SourceFact": SourceFact,
+    "OpportunityCandidate": OpportunityCandidate,
+    "CatalogCompilation": CatalogCompilation,
+    "OptionInventoryCoverage": OptionInventoryCoverage,
+}
+
+
+def internal_product_models() -> tuple[type[ProductModel], ...]:
+    """产品消息整体都不能进代理观察或规划请求（``agentlayer.life_views`` 的扫描登记它们）：给分身看的只有 E1 的逐字段投影。"""
+    return (
+        *PRODUCT_MESSAGES.values(),
+        ConfirmedOccupation,
+        OccupationMapping,
+        ConfirmedMoney,
+        RetainedStatement,
+    )

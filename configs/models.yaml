@@ -29,3 +29,65 @@ base_b:
     and a family/origin contrast confounded with a capability-tier contrast
     would not be interpretable. Switch to qwen3.7-plus-2026-05-26 if the call
     budget requires it, but then pick a comparable tier for base A too.
+
+# Product life planner (DECISIONS/0032, 2026-10-13). A separate role so the product
+# default can change without touching the research bases above: base_a / base_b
+# keep their meaning and their dated-snapshot rule.
+#
+# qwen3.8-flash has no dated snapshot: the official model page (updated
+# 2026-10-09) lists only the call id `qwen3.8-flash`, and the account's model
+# list (GET /models, 2026-10-13) shows `qwen3.8-flash` with no dated variant.
+# So this role declares version_policy: rolling. That exception exists only for
+# this role (ProductModelSpec); a research role still rejects rolling names.
+# Each run records the requested name, the name the service returned, and the
+# run time, because the model behind a rolling name can change without notice.
+product_planner:
+  provider: dashscope
+  base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+  api_key_env: DASHSCOPE_API_KEY
+  model: qwen3.8-flash
+  version_policy: rolling
+  rolling_note: >-
+    No dated snapshot published for qwen3.8-flash (official page 2026-10-09;
+    account model list 2026-10-13). Re-check and pin a snapshot when one appears.
+  note: >-
+    Default model for product life-planner runs (configs/life/run_e1_7b_flash.yaml).
+    The earlier Max runs keep using base_b (configs/life/run_e1_7b_live.yaml).
+
+# Test planner (DECISIONS/0035, 2026-10-18). Real-LLM tests and trial runs of the life
+# planner use this role: Claude Haiku 5.5 through the Claude Agent SDK (one turn per
+# request, no tools, no settings loaded, isolated working and config directories; see
+# agentlayer.life_llm.ClaudeAgentSdkTransport). The product role above and the research
+# bases are unchanged.
+#
+# Anthropic publishes only the id `claude-haiku-5-5` for this model (no dated snapshot),
+# so the role declares version_policy: rolling, like product_planner. Each run records
+# the requested name, the name the service returned, and the run time.
+test_planner:
+  provider: claude_agent_sdk
+  base_url: https://api.anthropic.com
+  api_key_env: ANTHROPIC_API_KEY
+  model: claude-haiku-5-5
+  version_policy: rolling
+  rolling_note: >-
+    Anthropic publishes no dated snapshot id for Claude Haiku 5.5; the model id is
+    claude-haiku-5-5 (checked 2026-10-18). Pin a snapshot if one is ever published.
+  note: >-
+    Default model for real-LLM tests and trial runs (configs/life/run_e1_7b_haiku.yaml,
+    configs/life/run_e1_convenience_haiku.yaml; CLI default of scripts/run_life_e1_7b.py).
+    The Flash product role and the Max research base stay selectable with --config.
+
+# Second test planner (DECISIONS/0035, 2026-10-18): Claude Sonnet 5.5, run after the Haiku test as
+# a cross-check (owner: Haiku at effort max first, then Sonnet at effort medium). Same Agent SDK
+# transport and rules as test_planner; only selectable with --config configs/life/run_e1_7b_sonnet.yaml.
+test_planner_sonnet:
+  provider: claude_agent_sdk
+  base_url: https://api.anthropic.com
+  api_key_env: ANTHROPIC_API_KEY
+  model: claude-sonnet-5-5
+  version_policy: rolling
+  rolling_note: >-
+    Anthropic publishes no dated snapshot id for Claude Sonnet 5.5; the model id is
+    claude-sonnet-5-5 (checked 2026-10-18). Pin a snapshot if one is ever published.
+  note: >-
+    Cross-check test model after Haiku (configs/life/run_e1_7b_sonnet.yaml, effort medium).

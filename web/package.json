@@ -1,0 +1,41 @@
+{
+  "name": "homo-spatialis-web",
+  "private": true,
+  "version": "0.1.0",
+  "description": "E5-A offline UI prototype: fill, confirm, preflight, progress and results, driven by the E3 shared contract samples (contracts/product/v2)",
+  "type": "module",
+  "scripts": {
+    "contract:gen": "node scripts/contract-gen.mjs",
+    "contract:check": "node scripts/contract-check.mjs",
+    "dev": "vite",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "build": "npm run contract:check && npm run typecheck && vite build",
+    "preview": "vite preview",
+    "test": "npm run contract:check && vitest run",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "5.104.4",
+    "ajv": "8.20.0",
+    "fraction.js": "5.3.4",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "react-router": "7.18.4"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
+    "@playwright/test": "1.64.1",
+    "@testing-library/jest-dom": "7.0.1",
+    "@testing-library/react": "16.3.3",
+    "@testing-library/user-event": "14.6.8",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "jsdom": "29.1.1",
+    "json-schema-to-typescript": "16.0.0",
+    "typescript": "7.0.2",
+    "vite": "8.3.4",
+    "vitest": "5.0.5"
+  }
+}

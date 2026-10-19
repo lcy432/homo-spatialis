@@ -1,0 +1,306 @@
+{
+ "description_zh": "合成资料包发布的能力清单：城市、职业匹配、六维与物质题干、健康问卷、硬要求与属性偏好的支持状态",
+ "message": "ProductCapabilities",
+ "payload": {
+  "abilities": [
+   {
+    "ability_id": "accounting_cert",
+    "ask_when": "只有你选的职业或候选城市里的岗位要求它时才问；不从职称自动授予",
+    "label": "会计从业资格（合成）"
+   }
+  ],
+  "age_max": 100,
+  "age_min": 18,
+  "attribute_kinds": [
+   {
+    "kind": "brand",
+    "label": "品牌",
+    "note": "已记录原文，本版不评分、不交给分身；需要同规格报价与匹配规则（V2）",
+    "support": "unsupported",
+    "usage": [
+     "retained_only"
+    ]
+   },
+   {
+    "kind": "cuisine",
+    "label": "菜系",
+    "note": "已记录原文，本版不评分、不交给分身",
+    "support": "unsupported",
+    "usage": [
+     "retained_only"
+    ]
+   },
+   {
+    "kind": "preparation",
+    "label": "制作方式（做饭 / 外卖）",
+    "note": "已记录原文，本版不评分",
+    "support": "unsupported",
+    "usage": [
+     "retained_only"
+    ]
+   },
+   {
+    "kind": "tier",
+    "label": "档次",
+    "note": "已记录原文，本版不评分；不从价格推断档次偏好",
+    "support": "unsupported",
+    "usage": [
+     "retained_only"
+    ]
+   },
+   {
+    "kind": "service_quality",
+    "label": "服务质量",
+    "note": "已记录原文，本版不评分",
+    "support": "unsupported",
+    "usage": [
+     "retained_only"
+    ]
+   },
+   {
+    "kind": "home_entry_concern",
+    "label": "上门顾虑（例如不想让陌生人进家）",
+    "note": "已记录原文；本版没有能核验或拦截上门服务的机制，分身可能选择上门服务——即使你把它确认为不可妥协，也只能原样留存",
+    "support": "unsupported",
+    "usage": [
+     "retained_only"
+    ]
+   }
+  ],
+  "capabilities_id": "caps.pack.e3a.synthetic-v1",
+  "cities": [
+   {
+    "city_ref": "US:SYNTH2026:K51",
+    "code": "K51",
+    "country": "US",
+    "data_status": "synthetic_fixture",
+    "geography_version": "synthetic-2026-10",
+    "label": "合成城 K51",
+    "note": "合成城市：设备便宜、人工服务贵；住房、食品、岗位、课程与治疗与 M52 相同",
+    "scheme": "SYNTH2026",
+    "selectable": true
+   },
+   {
+    "city_ref": "US:SYNTH2026:M52",
+    "code": "M52",
+    "country": "US",
+    "data_status": "synthetic_fixture",
+    "geography_version": "synthetic-2026-10",
+    "label": "合成城 M52",
+    "note": "合成城市：人工服务便宜、设备贵；其余与 K51 相同",
+    "scheme": "SYNTH2026",
+    "selectable": true
+   }
+  ],
+  "dimensions": [
+   {
+    "definition": "住得多宽敞、吃得是否新鲜、日常杂务能不能花钱省掉等实际消费得到的条件（内部还要再分三项）",
+    "key": "material",
+    "label": "物质生活",
+    "reference_improvement": "参考情境：从远处一居室、以米面罐头为主、洗衣打扫全部自己做，改善到每天三顿新鲜食材、每月少做约 18 小时家务（本版合成模型里的一档改善）",
+    "support": "supported",
+    "support_note": "居住空间、新鲜食品、日常生活便利三项都能按实际生活评分；物质生活里的其他需求（通信、储物、衣着）本版没有"
+   },
+   {
+    "definition": "城市的公共安全条件",
+    "key": "safety",
+    "label": "安全",
+    "reference_improvement": "参考情境：合成安全指数从 4 提高到 8（0–10，只在本组合成城市之间可比）",
+    "support": "partially_supported",
+    "support_note": "本版只有城市背景条件，分身不能花钱或行动改善它"
+   },
+   {
+    "definition": "城市提供的职业与成长条件，加上你在生活中实际学到的新能力",
+    "key": "opportunity",
+    "label": "发展机会",
+    "reference_improvement": "参考情境：在一年里学完一门 12 个月的资格课程，或城市发展条件从合成指数 4 提高到 8",
+    "support": "supported",
+    "support_note": "城市背景 + 实际参加的学习；证书本身、换岗与涨薪不另加分"
+   },
+   {
+    "definition": "城市基础休闲条件，加上实际参加的锻炼、演出等活动",
+    "key": "leisure",
+    "label": "休闲",
+    "reference_improvement": "参考情境：从每月不参加任何活动，到每月去 8 次健身房",
+    "support": "supported",
+    "support_note": "只算实际发生的活动；具体爱好与地理的匹配本版没有"
+   },
+   {
+    "definition": "空气、气候与城市环境的背景条件",
+    "key": "environment",
+    "label": "环境",
+    "reference_improvement": "参考情境：合成环境指数从 4 提高到 8（0–10，只在本组合成城市之间可比）",
+    "support": "partially_supported",
+    "support_note": "本版只有城市背景条件，分身不能行动改善它"
+   },
+   {
+    "definition": "住处到工作地点的往返时间与实际出门上班的次数对生活的影响",
+    "key": "commute",
+    "label": "交通便捷程度",
+    "reference_improvement": "参考情境：每月到岗 20 次时，每天往返从 70 分钟缩短到 30 分钟",
+    "support": "supported",
+    "support_note": "按实际所住住房的往返分钟与实际到岗次数评分；非工作出行本版没有细化"
+   }
+  ],
+  "free_text_max_chars": 2000,
+  "hard_requirement_options": [
+   {
+    "compiles_to": "E1 硬要求：住房类别、规格 commute_roundtrip_minutes ≤ 给定分钟（每个月检查实际所住住房）",
+    "enforced_by_execution": false,
+    "label": "住处到就业中心的往返时间不超过（分钟）",
+    "maximum": 180,
+    "minimum": 20,
+    "option_id": "housing.max_commute_roundtrip",
+    "parameter": "max_commute_roundtrip_minutes",
+    "step": 5,
+    "unit": "分钟",
+    "verification": "每月检查实际所住住房的往返分钟：满足、不满足、无法判断单独报告；不进分数，也不拦截计划"
+   }
+  ],
+  "health_questionnaire": {
+   "common_prompt": "假设基本生活已有保障，判断下面的选择是否符合你。没有正确答案。",
+   "options": [
+    {
+     "label": "符合我",
+     "meaning": "这句话符合用户自己",
+     "option_id": "agree"
+    },
+    {
+     "label": "不符合我",
+     "meaning": "这句话不符合用户自己",
+     "option_id": "disagree"
+    },
+    {
+     "label": "无明显倾向",
+     "meaning": "用户在这一题上没有明显倾向",
+     "option_id": "no_clear_tendency"
+    },
+    {
+     "label": "暂不确定",
+     "meaning": "用户暂不确定——没有这一项的明确指令",
+     "option_id": "unsure"
+    }
+   ],
+   "questions": [
+    {
+     "question_id": "hc_more_pay_more_sick_risk",
+     "text": "一种安排能多赚一点钱，但生病、需要休息几天的可能也更高。我愿意选择它。"
+    },
+    {
+     "question_id": "hc_reserve_for_health_costs",
+     "text": "为了应对可能发生的健康开支，我愿意推迟一次想要、但并不急需的消费，先留一笔钱。"
+    },
+    {
+     "question_id": "hc_wait_for_clear_risk_info",
+     "text": "健康风险的信息还不清楚时，我愿意先放弃眼前的一点收益，等了解清楚再决定。"
+    }
+   ],
+   "rules": [
+    "不计算总健康分，不推断患病概率、疼痛权重、疗效、愿付金额或拒绝治疗",
+    "健康回答不占六维 100 分，也不是第七个评分权重；只供分身做计划，不改变疾病规则、γ、H、账目或满足感",
+    "题目是暂定文案，没有经过认知访谈或量表验证"
+   ],
+   "status": "draft_wording_not_validated",
+   "unanswered_rule": "没有作答另存为“未答”，与“暂不确定”分开；两者都表示没有这一项的明确指令，不补中间值",
+   "version": "e3a-health-coping-q-v0.1-draft"
+  },
+  "interview": "reserved_not_implemented",
+  "limits": [
+   "城市、报价、工资、税、疾病与治疗全部是合成设定；结果不排序真实城市，也不是现实推荐",
+   "离线规划器是可控的 mock，不代表真实大语言模型的能力或偏好理解",
+   "问卷文案与参考改善范围是暂定稿，没有做认知访谈与量表验证"
+  ],
+  "material_leaves": [
+   {
+    "definition": "实际住的那一处有多大",
+    "key": "housing_space",
+    "label": "居住空间",
+    "note": "只看面积；房租与通勤不在这一项",
+    "support": "supported"
+   },
+   {
+    "definition": "实际吃的食品方案每周有几顿以新鲜食材为主",
+    "key": "fresh_food",
+    "label": "新鲜食品",
+    "note": "准备时间算在时间账里，不另给“省时”分",
+    "support": "supported"
+   },
+   {
+    "definition": "你愿意在多大程度上花钱减少日常杂务（洗衣与打扫）",
+    "key": "daily_convenience",
+    "label": "日常生活便利",
+    "note": "只看本人实际少做了多少小时；设备与人工服务是两种实现方式，不分别打分；它是相对重要程度，不是预算或必须购买的指令；不是旧问卷的“洗衣”题",
+    "support": "supported"
+   }
+  ],
+  "meta": {
+   "conversion_version": "e3a-conversion-v2",
+   "data_pack": {
+    "content_fingerprint": "a9cbd04955d49ea6ba0059b18f9ec6e30b7dd77a511bd0331cf50e5765e0e9b5",
+    "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
+    "pack_id": "pack.e3a.synthetic-v1",
+    "status": "synthetic_fixture_only"
+   },
+   "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.1-draft",
+   "sample": {
+    "note": "合成资料包发布的能力清单",
+    "origin": "offline_run",
+    "produced_by": "product.capabilities.build_capabilities",
+    "synthetic": true
+   },
+   "schema_version": "e3a-product-schema-v2",
+   "vocabulary_version": "e3a-vocabulary-v1"
+  },
+  "money_bases": [
+   {
+    "conversion_rule": "identity_same_basis_v1",
+    "currency": "USD",
+    "meaning": "liquid_funds_v1",
+    "note": "按 2024 年美元、当地价格水平填写的可动用流动资金；与目录同一口径，换算是恒等，不做通胀或汇率换算",
+    "numeraire_id": "USD_2024_LOCAL",
+    "price_period": "2024"
+   }
+  ],
+  "money_input_rule_zh": "金额只接受两种写法：不分组的非负十进制（例如 3000.50），或严格每三位一组的千分位（例如 3,000.50）；小数点只能用“.”，最多两位小数。“3000,50”“3,,000”“1,23.45”这类写法会被拒绝，系统不猜你的意思",
+  "occupation": {
+   "concept_count": 6,
+   "languages": [
+    "en",
+    "zh"
+   ],
+   "max_candidates": 4,
+   "method": "controlled_vocabulary_alias_match_v1",
+   "note": "用自然语言描述你的工作；系统按受控词表的别名给出少量可读候选（名称与职责），由你确认。分类代码只在内部保留，不需要、也不会请你填写；匹配不到时说明原因，不自动改成“普通白领”",
+   "users_enter_codes": false,
+   "vocabulary_version": "e3a-vocabulary-v1"
+  },
+  "points": {
+   "canonical_form": "约分后的整数（30）或 分子/分母（50/3）；计算与比较都用它，显示四舍五入到 1 位小数，显示值不回流计算",
+   "display_decimals": 1,
+   "equal_split_material": "100/3",
+   "equal_split_six": "50/3",
+   "manual_entry": "手工输入按精确十进制解析，最多 2 位小数（步长不是测量精度）；也接受规范分数写法（例如 50/3）",
+   "manual_max_decimals": 2,
+   "rules": [
+    "六维合计必须精确等于 100；不预填数值、不提供人格套餐，不自动按比例扣减其他项",
+    "只有用户主动选择“平均分配”才生成均分（六维每项 50/3、物质每项 100/3），不让排在前面的项目多拿分",
+    "明确 0 是已提供的数值；“未答”“明确无所谓”“暂不确定”都不会被自动换成 0 或均分",
+    "物质父项为正时，物质三项也必须精确合计 100；物质父项明确为 0 时细分不适用，不伪造三个回答"
+   ],
+   "total": 100
+  },
+  "start_scenario": [
+   "这是一次搬到候选城市重新开始的简化情景：从第 1 年、健康、没有已有物品、没有在学课程、没有资金目标开始",
+   "现实中的旧家具、病史与在学课程暂未纳入；这是模拟的假设，不是对你现实情况的判断",
+   "同一个你在各城市、各个分身里的年龄、现金、能力与基础时间精力都相同；城市里的具体岗位按当地目录匹配"
+  ],
+  "unsupported": [
+   "固定远程收入、家庭共同资产、多人家庭、买房与贷款",
+   "跨国比较与跨币种的财富换算",
+   "品牌、菜系、制作方式、档次、服务质量与上门顾虑的评分（只记录原文）",
+   "生病时暂停零参与时间的按月服务来省钱",
+   "访谈式输入（只保留来源与证据引用接口）"
+  ]
+ }
+}

@@ -1,0 +1,208 @@
+{
+ "description_zh": "受控夹具：M52 的安全资料未知而用户给安全 20 分——预检查明确报告缺口（M52 可评分 partial），不删掉安全、不把其余权重重新归一化",
+ "message": "ProductPreflight",
+ "payload": {
+  "binding": {
+   "compiled_inputs": {
+    "life_input": "f8af2644c1cca5552d1d992b82066aa497e53d3c89eac0610bf7a5aa1faca910",
+    "roster": "f6c5b57c1f5bfd4e073770c77b38cfa35ebf1c7745325fdf10132414dc06d3e5",
+    "run_config": "13b6caec9e0cf6160ae7f50ac294a716cd1e9e2933fdf8f0bfa33618a58612a4",
+    "scoring_config": "4746795c1a47d014387d1dc7ae6d140146594a853d9bb455f4e62da32c786a47"
+   },
+   "evaluation_spec_id": "eval.e1-convenience.main",
+   "identities_fingerprint": "cde7afad43826dd293b7d010c7ac9931065b285fa5fd387c69eef95f4f869add",
+   "planner_id": "mock.rules.e3a-product",
+   "planner_kind": "mock",
+   "prompt_template": "e3a-product-prompt-v1",
+   "protocol_id": "life-v1-e3a-product",
+   "scoring_content_fingerprint": "f209137b1101407427724a8d7f3009fb09eca8a8c11884114412feea6fdcd690",
+   "scoring_version": "e1-convenience-v1"
+  },
+  "cities": [
+   {
+    "city_ref": "US:SYNTH2026:K51",
+    "coverage": {
+     "common_weight": {
+      "display": "0.840",
+      "exact": "8400000000000001/10000000000000000"
+     },
+     "label": "synthetic_contract_coverage",
+     "no_component_weight": {
+      "display": "0.000",
+      "exact": "0"
+     },
+     "unknown_weight": {
+      "display": "0.000",
+      "exact": "0"
+     },
+     "unsupported_positive_leaves": []
+    },
+    "data_gaps": [],
+    "executable": {
+     "reasons": [
+      "标准开局通过、名单已冻结；年度计划仍由环境逐次检查，不保证每份计划都合法"
+     ],
+     "status": "yes"
+    },
+    "feedback": {
+     "reasons": [
+      "上一年 12 个月都完整评分时才更新下一年的精力额度"
+     ],
+     "status": "yes"
+    },
+    "label": "合成城 K51",
+    "option_inventory_status": "partial",
+    "scorable": {
+     "reasons": [
+      "按当前输入，正权重的评分资料在声明范围内齐全；不保证未来每个月都能完整评分"
+     ],
+     "status": "yes"
+    },
+    "start_job_label": "全职文员（合成写字楼）"
+   },
+   {
+    "city_ref": "US:SYNTH2026:M52",
+    "coverage": {
+     "common_weight": {
+      "display": "0.840",
+      "exact": "8400000000000001/10000000000000000"
+     },
+     "label": "synthetic_contract_coverage",
+     "no_component_weight": {
+      "display": "0.000",
+      "exact": "0"
+     },
+     "unknown_weight": {
+      "display": "0.160",
+      "exact": "16000000000000003/100000000000000000"
+     },
+     "unsupported_positive_leaves": [
+      "safety"
+     ]
+    },
+    "data_gaps": [
+     {
+      "code": "positive_weight_data_unknown",
+      "field": "preferences.safety",
+      "impact_zh": "这座城相关月份的总分会不完整：不补 0，也不把这一项删掉再把其余权重重新归一化",
+      "message_zh": "合成城 M52 缺少“安全”评分要读的资料（你给它的权重为正）",
+      "next_action_zh": "等资料补齐，或知悉这一限制",
+      "severity": "error"
+     }
+    ],
+    "executable": {
+     "reasons": [
+      "标准开局通过、名单已冻结；年度计划仍由环境逐次检查，不保证每份计划都合法"
+     ],
+     "status": "yes"
+    },
+    "feedback": {
+     "reasons": [
+      "上一年 12 个月都完整评分时才更新下一年的精力额度"
+     ],
+     "status": "partial"
+    },
+    "label": "合成城 M52",
+    "option_inventory_status": "partial",
+    "scorable": {
+     "reasons": [
+      "合成城 M52 缺少“安全”评分要读的资料（你给它的权重为正）"
+     ],
+     "status": "partial"
+    },
+    "start_job_label": "全职文员（合成写字楼）"
+   }
+  ],
+  "clones_per_city": 1,
+  "confirmed": {
+   "confirmed_id": "confirmed.draft.u510.unknown_safety.r1",
+   "content_fingerprint": "8e0884ee380b03ee30bf613b202672b75686c8f80bb42481056d3712c4d2e8cd"
+  },
+  "executable": {
+   "reasons": [
+    "全部候选城市的标准开局与名单检查通过"
+   ],
+   "status": "yes"
+  },
+  "feedback": {
+   "reasons": [
+    "上一年完整评分才更新下一年额度；不完整时这个分身的下一年会受阻"
+   ],
+   "status": "partial"
+  },
+  "issues": [
+   {
+    "code": "positive_weight_data_unknown",
+    "field": "preferences.safety",
+    "impact_zh": "这座城相关月份的总分会不完整：不补 0，也不把这一项删掉再把其余权重重新归一化",
+    "message_zh": "合成城 M52 缺少“安全”评分要读的资料（你给它的权重为正）",
+    "next_action_zh": "等资料补齐，或知悉这一限制",
+    "severity": "error"
+   }
+  ],
+  "meta": {
+   "conversion_version": "e3a-conversion-v1",
+   "data_pack": {
+    "content_fingerprint": "2496b047ae91b906f9e3210405af32c4b7cb928bcec30e833a7dd6cfefcf2580",
+    "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
+    "pack_id": "pack.e3a.synthetic-v1",
+    "status": "synthetic_fixture_only"
+   },
+   "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.1-draft",
+   "sample": {
+    "note": "工作区副本里 M52 的安全资料改成资料未知（评分条件与可见事实一起改）；预检查的实际输出",
+    "origin": "controlled_fixture",
+    "produced_by": "product.scenarios.positive_weight_data_unknown",
+    "synthetic": true
+   },
+   "schema_version": "e3a-product-schema-v1",
+   "vocabulary_version": "e3a-vocabulary-v1"
+  },
+  "planner": {
+   "call_limit": 18,
+   "description_zh": "可控的确定性离线规划器（mock）：只检验接线、状态传递与信息隔离，不代表真实大语言模型的能力；没有网络调用",
+   "max_cost": null,
+   "paid": false,
+   "planner_id": "mock.rules.e3a-product",
+   "planner_kind": "mock"
+  },
+  "preflight_fingerprint": "a0e4a42b8054998a492a8e3bd21732d1fcdd4615b5342755d3833746d704ebcd",
+  "preflight_id": "preflight.confirmed.draft.u510.unknown_safety.r1",
+  "scope_zh": [
+   "生活协议 life-v1-e3a-product（状态 synthetic_fixture_only）、评分 score.e1-convenience.explore（探索版）：城市、报价、工资、疾病、治疗与评分参数全部是合成设定，不是现实城市，不排序真实城市",
+   "城市背景事实 e1-7a-city-facts-v1：每座城 4 条合成指数，换算到评分条件的规则是内部合成设定",
+   "评价沿用 E1-6：完整者均值只用完整评价的分身；生活出局另报比例与事件链；模拟问题进入缺失范围（不是置信区间）",
+   "城市、报价、工资、税、疾病与治疗全部是合成设定；结果不排序真实城市，也不是现实推荐",
+   "离线规划器是可控的 mock，不代表真实大语言模型的能力或偏好理解",
+   "问卷文案与参考改善范围是暂定稿，没有做认知访谈与量表验证"
+  ],
+  "scorable": {
+   "reasons": [
+    "逐城说明见 cities；不保证未来每个月都能完整评分"
+   ],
+   "status": "partial"
+  },
+  "start": {
+   "abilities": [],
+   "age_years": 35,
+   "cash": {
+    "amount_minor": 300000,
+    "currency": "USD",
+    "display": "3,000.00",
+    "numeraire_id": "USD_2024_LOCAL"
+   },
+   "monthly_energy_note": "每月可承受 250 个负担点的活动（本版统一的模型设定）；上一年过得越满意，下一年最多多 10%",
+   "monthly_time_note": "每月可安排约 365 小时（每天 12 小时的睡眠与基本休息已经预留在外）——本版统一的模型设定，不是对你的测量",
+   "occupation_label": "办公室文员",
+   "rule": "v1_standard_start_2026_10_12",
+   "scenario_zh": [
+    "这是一次搬到候选城市重新开始的简化情景：从第 1 年、健康、没有已有物品、没有在学课程、没有资金目标开始",
+    "现实中的旧家具、病史与在学课程暂未纳入；这是模拟的假设，不是对你现实情况的判断",
+    "同一个你在各城市、各个分身里的年龄、现金、能力与基础时间精力都相同；城市里的具体岗位按当地目录匹配"
+   ]
+  },
+  "status": "ready",
+  "years": 3
+ }
+}

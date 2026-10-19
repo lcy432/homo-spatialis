@@ -1,0 +1,509 @@
+{
+ "description_zh": "受控夹具：确定没有供给、供给未知、参与小时为负、缺计价单位、只有报价有来源、来源字段不对——逐候选给出原因，其余候选照常编译",
+ "message": "CatalogCompilation",
+ "payload": {
+  "cities": [
+   "US:SYNTH2026:K51",
+   "US:SYNTH2026:M52"
+  ],
+  "compilation_fingerprint": "a77d80b4605eebd76f9e5cc7a6463b855b4201d22a29d874488e8a5957ebba68",
+  "compilation_id": "catalog.pack.e3a.synthetic-v1",
+  "compiled": [
+   {
+    "availability": "available",
+    "candidate_id": "cand.k51.device.convenience-pack",
+    "city_ref": "US:SYNTH2026:K51",
+    "field_sources": {
+     "effect": [
+      "f.pack.effect"
+     ],
+     "lifetime": [
+      "f.pack.life"
+     ],
+     "price": [
+      "f.k51.pack.price"
+     ]
+    },
+    "note_zh": "资料齐全：编成可购买的机会；E1 照旧按最小残余、寿命与实际服务月份结算",
+    "opportunity_id": "k51.durable.convenience_pack",
+    "unknown_reason": null,
+    "weakest_source_kind": "synthetic"
+   },
+   {
+    "availability": "available",
+    "candidate_id": "cand.k51.service.chores",
+    "city_ref": "US:SYNTH2026:K51",
+    "field_sources": {
+     "effect": [
+      "f.chores.effect"
+     ],
+     "participation": [
+      "f.service.participation"
+     ],
+     "price": [
+      "f.k51.chores.price"
+     ]
+    },
+    "note_zh": "资料齐全：编成可购买的机会；E1 照旧按最小残余、寿命与实际服务月份结算",
+    "opportunity_id": "k51.service.chores",
+    "unknown_reason": null,
+    "weakest_source_kind": "synthetic"
+   },
+   {
+    "availability": "unknown",
+    "candidate_id": "cand.k51.device.dryer-quote-unknown",
+    "city_ref": "US:SYNTH2026:K51",
+    "field_sources": {
+     "effect": [
+      "f.k51.dryer.effect"
+     ],
+     "lifetime": [
+      "f.k51.dryer.life"
+     ]
+    },
+    "note_zh": "有卖但报价未知：编成“资料未知”，分身看得到但不能购买；不当免费",
+    "opportunity_id": "k51.durable.dryer",
+    "unknown_reason": "price_unknown",
+    "weakest_source_kind": "synthetic"
+   },
+   {
+    "availability": "available",
+    "candidate_id": "cand.m52.device.convenience-pack",
+    "city_ref": "US:SYNTH2026:M52",
+    "field_sources": {
+     "effect": [
+      "f.pack.effect"
+     ],
+     "lifetime": [
+      "f.pack.life"
+     ],
+     "price": [
+      "f.m52.pack.price"
+     ]
+    },
+    "note_zh": "资料齐全：编成可购买的机会；E1 照旧按最小残余、寿命与实际服务月份结算",
+    "opportunity_id": "m52.durable.convenience_pack",
+    "unknown_reason": null,
+    "weakest_source_kind": "synthetic"
+   },
+   {
+    "availability": "available",
+    "candidate_id": "cand.m52.service.chores",
+    "city_ref": "US:SYNTH2026:M52",
+    "field_sources": {
+     "effect": [
+      "f.chores.effect"
+     ],
+     "participation": [
+      "f.service.participation"
+     ],
+     "price": [
+      "f.m52.chores.price"
+     ]
+    },
+    "note_zh": "资料齐全：编成可购买的机会；E1 照旧按最小残余、寿命与实际服务月份结算",
+    "opportunity_id": "m52.service.chores",
+    "unknown_reason": null,
+    "weakest_source_kind": "synthetic"
+   },
+   {
+    "availability": "unknown",
+    "candidate_id": "cand.m52.service.chores-supply-unknown",
+    "city_ref": "US:SYNTH2026:M52",
+    "field_sources": {
+     "effect": [
+      "f.chores.effect"
+     ],
+     "participation": [
+      "f.service.participation"
+     ]
+    },
+    "note_zh": "不知道这座城有没有这项方案（供给未知）：编成“资料未知”，分身看得到但不能购买",
+    "opportunity_id": "m52.service.chores2",
+    "unknown_reason": "supply_unknown",
+    "weakest_source_kind": "synthetic"
+   }
+  ],
+  "compiler_version": "e3a-catalog-compiler-v2",
+  "facts": [
+   {
+    "assumption": "手工设定的合成报价（与 E1 便利版样例相同）",
+    "conversion": null,
+    "fact_id": "f.k51.pack.price",
+    "field": "price",
+    "geography": "合成城 K51",
+    "kind": "synthetic",
+    "locator": null,
+    "note": "合成报价，不来自任何商店",
+    "period": "2024 年不变价",
+    "raw_value": "1440",
+    "unit": "USD_2024_LOCAL/套"
+   },
+   {
+    "assumption": "全组共用的合成寿命设定（两城同一款设备包相同）",
+    "conversion": null,
+    "fact_id": "f.pack.life",
+    "field": "lifetime",
+    "geography": "合成比较组（全组共用）",
+    "kind": "synthetic",
+    "locator": null,
+    "note": "合成寿命，不是厂商资料",
+    "period": "2024 年不变价",
+    "raw_value": "5",
+    "unit": "年"
+   },
+   {
+    "assumption": "全组共用的统一效果假设：两城同一款设备包的本人残余小时相同（参数目录 SC-18）",
+    "conversion": null,
+    "fact_id": "f.pack.effect",
+    "field": "effect",
+    "geography": "合成比较组（全组共用）",
+    "kind": "synthetic",
+    "locator": null,
+    "note": "残余是本人处理整项家务后仍需的月小时，不是机器运行时间",
+    "period": "2024 年不变价",
+    "raw_value": "laundry 4; cleaning 6",
+    "unit": "小时/月（本人残余）"
+   },
+   {
+    "assumption": "手工设定的合成月价（与 E1 便利版样例相同）",
+    "conversion": null,
+    "fact_id": "f.k51.chores.price",
+    "field": "price",
+    "geography": "合成城 K51",
+    "kind": "synthetic",
+    "locator": null,
+    "note": "合成报价，不来自任何服务商",
+    "period": "2024 年不变价",
+    "raw_value": "216",
+    "unit": "USD_2024_LOCAL/月"
+   },
+   {
+    "assumption": "全组共用的统一效果假设：两城同一种杂务服务的本人残余小时相同（参数目录 SC-18）",
+    "conversion": null,
+    "fact_id": "f.chores.effect",
+    "field": "effect",
+    "geography": "合成比较组（全组共用）",
+    "kind": "synthetic",
+    "locator": null,
+    "note": "残余是本人收纳与交接的时间，不是服务人员的工作时间",
+    "period": "2024 年不变价",
+    "raw_value": "laundry 2; cleaning 2",
+    "unit": "小时/月（本人残余）"
+   },
+   {
+    "assumption": "手工设定的合成报价（与 E1 便利版样例相同）",
+    "conversion": null,
+    "fact_id": "f.m52.pack.price",
+    "field": "price",
+    "geography": "合成城 M52",
+    "kind": "synthetic",
+    "locator": null,
+    "note": "合成报价，不来自任何商店",
+    "period": "2024 年不变价",
+    "raw_value": "6000",
+    "unit": "USD_2024_LOCAL/套"
+   },
+   {
+    "assumption": "手工设定的合成月价（与 E1 便利版样例相同）",
+    "conversion": null,
+    "fact_id": "f.m52.chores.price",
+    "field": "price",
+    "geography": "合成城 M52",
+    "kind": "synthetic",
+    "locator": null,
+    "note": "合成报价，不来自任何服务商",
+    "period": "2024 年不变价",
+    "raw_value": "108",
+    "unit": "USD_2024_LOCAL/月"
+   },
+   {
+    "assumption": "手工设定的合成报价",
+    "conversion": null,
+    "fact_id": "f.k51.robot.price",
+    "field": "price",
+    "geography": "合成城 K51",
+    "kind": "synthetic",
+    "locator": null,
+    "note": "有报价，但寿命资料缺失",
+    "period": "2024 年不变价",
+    "raw_value": "420",
+    "unit": "USD_2024_LOCAL/台"
+   },
+   {
+    "assumption": "合成效果设定",
+    "conversion": null,
+    "fact_id": "f.k51.robot.effect",
+    "field": "effect",
+    "geography": "合成城 K51",
+    "kind": "synthetic",
+    "locator": null,
+    "note": "只替代打扫",
+    "period": "2024 年不变价",
+    "raw_value": "cleaning 6",
+    "unit": "小时/月（本人残余）"
+   },
+   {
+    "assumption": "合成寿命设定",
+    "conversion": null,
+    "fact_id": "f.k51.dryer.life",
+    "field": "lifetime",
+    "geography": "合成城 K51",
+    "kind": "synthetic",
+    "locator": null,
+    "note": "报价资料缺失",
+    "period": "2024 年不变价",
+    "raw_value": "8",
+    "unit": "年"
+   },
+   {
+    "assumption": "合成效果设定",
+    "conversion": null,
+    "fact_id": "f.k51.dryer.effect",
+    "field": "effect",
+    "geography": "合成城 K51",
+    "kind": "synthetic",
+    "locator": null,
+    "note": "只替代洗衣的晾晒部分",
+    "period": "2024 年不变价",
+    "raw_value": "laundry 7",
+    "unit": "小时/月（本人残余）"
+   },
+   {
+    "assumption": "手工设定的合成报价",
+    "conversion": null,
+    "fact_id": "f.k51.cooker.price",
+    "field": "price",
+    "geography": "合成城 K51",
+    "kind": "synthetic",
+    "locator": null,
+    "note": "做饭设备，不在本次调查范围",
+    "period": "2024 年不变价",
+    "raw_value": "900",
+    "unit": "USD_2024_LOCAL/台"
+   },
+   {
+    "assumption": "手工设定的合成月价",
+    "conversion": null,
+    "fact_id": "f.m52.cleaning.price",
+    "field": "price",
+    "geography": "合成城 M52",
+    "kind": "synthetic",
+    "locator": null,
+    "note": "有报价，但减负效果资料缺失",
+    "period": "2024 年不变价",
+    "raw_value": "90",
+    "unit": "USD_2024_LOCAL/月"
+   },
+   {
+    "assumption": "合成设定：上门服务本人不参与服务本身（收纳与交接算在残余家务里）",
+    "conversion": null,
+    "fact_id": "f.service.participation",
+    "field": "participation",
+    "geography": "合成比较组（全组共用）",
+    "kind": "synthetic",
+    "locator": null,
+    "note": "本人参与时间不是服务人员的工作时间",
+    "period": "2024 年不变价",
+    "raw_value": "0 小时、负担 0",
+    "unit": "小时/月（本人参与）"
+   },
+   {
+    "assumption": "合成设定：受控夹具的月价",
+    "conversion": null,
+    "fact_id": "f.m52.chores2.price",
+    "field": "price",
+    "geography": "合成城 M52",
+    "kind": "synthetic",
+    "locator": null,
+    "note": "供给是否存在不知道，但手里有一个报价",
+    "period": "2024 年不变价",
+    "raw_value": "120",
+    "unit": "USD_2024_LOCAL/月"
+   },
+   {
+    "assumption": "合成设定：受控夹具的月价",
+    "conversion": null,
+    "fact_id": "f.k51.helper.price",
+    "field": "price",
+    "geography": "合成城 K51",
+    "kind": "synthetic",
+    "locator": null,
+    "note": "本人参与小时写成了负数",
+    "period": "2024 年不变价",
+    "raw_value": "150",
+    "unit": "USD_2024_LOCAL/月"
+   },
+   {
+    "assumption": null,
+    "conversion": null,
+    "fact_id": "f.k51.washer2.price.observed-fixture",
+    "field": "price",
+    "geography": "合成城 K51",
+    "kind": "observed",
+    "locator": "fixture://e3a/observed-quote-shape（受控夹具：只模拟一条观测报价的形状，不是真实资料）",
+    "note": "只有报价有来源，寿命与效果没有",
+    "period": "2024 年不变价",
+    "raw_value": "900",
+    "unit": "USD_2024_LOCAL/台"
+   }
+  ],
+  "meta": {
+   "conversion_version": "e3a-conversion-v2",
+   "data_pack": {
+    "content_fingerprint": "a26ef89ab145404a293be6243ac7decd7626753248965c501c09a74b81f48364",
+    "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
+    "pack_id": "pack.e3a.synthetic-v1",
+    "status": "synthetic_fixture_only"
+   },
+   "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.1-draft",
+   "sample": {
+    "note": "资料包副本里加了确定没有、供给未知、参与小时为负、缺计价单位、只有报价有来源、来源字段不对的候选（受控夹具）",
+    "origin": "controlled_fixture",
+    "produced_by": "product.scenarios.catalog_statuses",
+    "synthetic": true
+   },
+   "schema_version": "e3a-product-schema-v2",
+   "vocabulary_version": "e3a-vocabulary-v1"
+  },
+  "scope_zh": "合成资料包里两座城的“日常杂务”设备与人工服务：只调查能替代洗衣或打扫（协议的代表性杂务组合）的方案；做饭、照护、维修等不在 本次调查范围。调查范围之外的东西不计入分母，也不代表城市没有。",
+  "tasks": [
+   {
+    "baseline_hours_per_month": "12",
+    "description": "洗衣：没有设备或服务时，自己手洗或去自助洗衣店，连同晾晒、叠放与收纳",
+    "task": "laundry",
+    "unit": "小时/月"
+   },
+   {
+    "baseline_hours_per_month": "10",
+    "description": "打扫：自己打扫一居室（扫地、拖地、整理）",
+    "task": "cleaning",
+    "unit": "小时/月"
+   }
+  ],
+  "uncompiled": [
+   {
+    "candidate_id": "cand.k51.device.robot-lifetime-unknown",
+    "city_ref": "US:SYNTH2026:K51",
+    "market_status": "offered",
+    "reasons": [
+     {
+      "audit_ref": null,
+      "code": "lifetime_unknown",
+      "field": "candidates.cand.k51.device.robot-lifetime-unknown.lifetime",
+      "impact_zh": "这项设备不能编入目录；它的供给状态照实保留（有卖不等于确定买不到）",
+      "message_zh": "设备能用几年的资料缺失：E1 可执行的耐用品要求明确的 1–30 整数年，不按“常见寿命”补值",
+      "next_action_zh": "补充寿命资料，或登记全组共用的明确假设",
+      "severity": "error"
+     }
+    ]
+   },
+   {
+    "candidate_id": "cand.m52.service.cleaning-effect-unknown",
+    "city_ref": "US:SYNTH2026:M52",
+    "market_status": "offered",
+    "reasons": [
+     {
+      "audit_ref": null,
+      "code": "effect_unknown",
+      "field": "candidates.cand.m52.service.cleaning-effect-unknown.effect",
+      "impact_zh": "这项候选不能编入目录",
+      "message_zh": "减负效果（本人每月还要做多少小时）资料缺失：不能删掉替代字段把它伪装成“确定没有效果”",
+      "next_action_zh": "补充减负资料，或登记全组共用的明确效果假设",
+      "severity": "error"
+     }
+    ]
+   },
+   {
+    "candidate_id": "cand.k51.service.ironing-not-offered",
+    "city_ref": "US:SYNTH2026:K51",
+    "market_status": "not_offered",
+    "reasons": [
+     {
+      "audit_ref": null,
+      "code": "not_offered",
+      "field": "candidates.cand.k51.service.ironing-not-offered.market_status",
+      "impact_zh": "这是已确定的调查结果；它不是可购买的方案，所以不编入目录",
+      "message_zh": "资料显示这座城确定没有这项方案",
+      "next_action_zh": "无需补资料；资料变了再更新",
+      "severity": "info"
+     }
+    ]
+   },
+   {
+    "candidate_id": "cand.k51.service.helper-negative-participation",
+    "city_ref": "US:SYNTH2026:K51",
+    "market_status": "offered",
+    "reasons": [
+     {
+      "audit_ref": null,
+      "code": "participation_invalid",
+      "field": "candidates.cand.k51.service.helper-negative-participation.participation",
+      "impact_zh": "这项服务不能编入目录（其他候选照常编译）",
+      "message_zh": "本人参与资料不是不小于 0、最多两位小数的数：每月小时 “-1”",
+      "next_action_zh": "核对本人每月参与小时与每小时负担",
+      "severity": "error"
+     }
+    ]
+   },
+   {
+    "candidate_id": "cand.m52.device.pack-no-unit",
+    "city_ref": "US:SYNTH2026:M52",
+    "market_status": "offered",
+    "reasons": [
+     {
+      "audit_ref": null,
+      "code": "price_unit_missing",
+      "field": "candidates.cand.m52.device.pack-no-unit.price.per_unit",
+      "impact_zh": "这项候选不能编入目录",
+      "message_zh": "没有写计价单位（例如每套设备、每服务月）：系统不会自动补成 appliance-set 或 service-month",
+      "next_action_zh": "补上计价单位",
+      "severity": "error"
+     }
+    ]
+   },
+   {
+    "candidate_id": "cand.k51.device.washer-observed-price-only",
+    "city_ref": "US:SYNTH2026:K51",
+    "market_status": "offered",
+    "reasons": [
+     {
+      "audit_ref": null,
+      "code": "source_missing",
+      "field": "candidates.cand.k51.device.washer-observed-price-only.lifetime.facts",
+      "impact_zh": "这项候选不能编入目录",
+      "message_zh": "寿命有值，但没有引用任何来源事实：不能当作资料齐全，也不会自动生成来源或合成说明",
+      "next_action_zh": "为寿命补上来源事实（真实资料写定位；合成设定写明假设说明）",
+      "severity": "error"
+     },
+     {
+      "audit_ref": null,
+      "code": "source_missing",
+      "field": "candidates.cand.k51.device.washer-observed-price-only.effect.facts",
+      "impact_zh": "这项候选不能编入目录",
+      "message_zh": "减负效果有值，但没有引用任何来源事实：不能当作资料齐全，也不会自动生成来源或合成说明",
+      "next_action_zh": "为减负效果补上来源事实（真实资料写定位；合成设定写明假设说明）",
+      "severity": "error"
+     }
+    ]
+   },
+   {
+    "candidate_id": "cand.m52.service.chores-wrong-field-source",
+    "city_ref": "US:SYNTH2026:M52",
+    "market_status": "offered",
+    "reasons": [
+     {
+      "audit_ref": null,
+      "code": "source_field_mismatch",
+      "field": "candidates.cand.m52.service.chores-wrong-field-source.price.facts",
+      "impact_zh": "这项候选不能编入目录",
+      "message_zh": "报价引用的事实 f.chores.effect 记录的是 减负效果：不能直接支持报价（跨字段推导需要写明方法，本版没有登记任何跨字段推导）",
+      "next_action_zh": "引用记录报价本身的事实",
+      "severity": "error"
+     }
+    ]
+   }
+  ]
+ }
+}

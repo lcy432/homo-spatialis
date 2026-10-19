@@ -7,6 +7,17 @@ Two things here are enforcement rather than plumbing:
     against "qwen-plus" cannot be reproduced once the alias moves. The validator
     turns that into a load-time failure.
 
+    One narrow, explicit exception (2026-10-13, DECISIONS/0032): the product life
+    planner role ``product_planner`` may declare ``version_policy: rolling`` when
+    the provider publishes no dated snapshot for the chosen model. It lives in its
+    own spec class (``ProductModelSpec``); the research bases ``base_a`` / ``base_b``
+    keep the dated-snapshot rule unchanged.
+
+    The same exception covers the test planner role ``test_planner`` (2026-10-18,
+    DECISIONS/0035): real-LLM tests and trial runs use Claude Haiku 5.5, whose only
+    published id is ``claude-haiku-5-5`` (no dated snapshot). It reuses
+    ``ProductModelSpec``; research roles are unaffected.
+
   * A key is never a config value. Configuration names the *environment
     variable* to read; the value is resolved at use time and redacted in repr.
 """
@@ -19,7 +30,7 @@ from pathlib import Path
 from typing import Any, Literal
 
 import yaml
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 # A dated snapshot ends in -YYYY-MM-DD, -YYYYMMDD, or -MMDD.
 #
@@ -32,7 +43,13 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 # not identify the version across years. Prefer a full-date snapshot when the
 # provider offers one. The run log records the model string together with the
 # run timestamp, so the year stays recoverable either way.
-_DATED_SNAPSHOT = re.compile(r"-(?:\d{4}-\d{2}-\d{2}|\d{8}|\d{4})$")
+DATED_SUFFIX = r"-(?:\d{4}-\d{2}-\d{2}|\d{8}|\d{4})"
+_DATED_SNAPSHOT = re.compile(DATED_SUFFIX + "$")
+
+
+def is_dated_snapshot(model: str) -> bool:
+    """Whether a model string ends in a snapshot date (the hard-rule-6 test, shared by every caller)."""
+    return bool(_DATED_SNAPSHOT.search(model))
 
 
 class ConfigError(ValueError):
@@ -137,10 +154,8 @@ class ResolvedModel(BaseModel):
     __str__ = __repr__
 
 
-class ModelSpec(BaseModel):
-    """One base model. ``model`` may be null while the choice is still open;
-    resolving an unset spec is an error, so a half-configured base fails loudly
-    at the point of use rather than silently defaulting to the other one."""
+class _ModelEndpoint(BaseModel):
+    """Provider, endpoint, the env var holding the key, and the model string; ``resolve`` reads the key at use time."""
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
@@ -149,19 +164,6 @@ class ModelSpec(BaseModel):
     api_key_env: str
     model: str | None = None
     note: str | None = None
-
-    @field_validator("model")
-    @classmethod
-    def _must_be_dated_snapshot(cls, v: str | None) -> str | None:
-        if v is None:
-            return v
-        if not _DATED_SNAPSHOT.search(v):
-            raise ValueError(
-                f"model {v!r} is not a dated snapshot. CLAUDE.md hard rule 6 forbids rolling "
-                "aliases; use a name ending in -YYYY-MM-DD, -YYYYMMDD or -MMDD so the run "
-                "stays reproducible after the alias moves."
-            )
-        return v
 
     def resolve(self) -> ResolvedModel:
         _ensure_dotenv()
@@ -191,7 +193,63 @@ class ModelSpec(BaseModel):
         )
 
 
+class ModelSpec(_ModelEndpoint):
+    """One research base model. ``model`` may be null while the choice is still open;
+    resolving an unset spec is an error, so a half-configured base fails loudly
+    at the point of use rather than silently defaulting to the other one."""
+
+    @field_validator("model")
+    @classmethod
+    def _must_be_dated_snapshot(cls, v: str | None) -> str | None:
+        if v is None:
+            return v
+        if not _DATED_SNAPSHOT.search(v):
+            raise ValueError(
+                f"model {v!r} is not a dated snapshot. CLAUDE.md hard rule 6 forbids rolling "
+                "aliases; use a name ending in -YYYY-MM-DD, -YYYYMMDD or -MMDD so the run "
+                "stays reproducible after the alias moves."
+            )
+        return v
+
+
+class ProductModelSpec(_ModelEndpoint):
+    """The product life planner's model (DECISIONS/0032). Separate from the research bases so changing
+    the product default never touches ``base_a`` / ``base_b``.
+
+    ``version_policy`` is explicit, with no default:
+
+    * ``dated_snapshot`` -- the model string must end in a snapshot date (hard rule 6 as usual);
+    * ``rolling`` -- the provider publishes no dated snapshot for this model, so the call id is a
+      rolling name. Allowed only here, only with a written ``rolling_note`` saying why, and the
+      string must *not* look dated (a dated string is declared ``dated_snapshot``). Every run
+      records the requested name, the name the service returned, and the run time, because the
+      model behind a rolling name can change without notice."""
+
+    model: str
+    version_policy: Literal["dated_snapshot", "rolling"]
+    rolling_note: str | None = None
+
+    @model_validator(mode="after")
+    def _policy_consistent(self) -> ProductModelSpec:
+        dated = is_dated_snapshot(self.model)
+        if self.version_policy == "dated_snapshot" and not dated:
+            raise ValueError(
+                f"product model {self.model!r} is declared dated_snapshot but has no snapshot date"
+            )
+        if self.version_policy == "rolling":
+            if dated:
+                raise ValueError(
+                    f"product model {self.model!r} looks dated; declare version_policy: dated_snapshot"
+                )
+            if not (self.rolling_note or "").strip():
+                raise ValueError(
+                    "a rolling product model needs rolling_note saying why no snapshot is used"
+                )
+        return self
+
+
 ModelRole = Literal["base_a", "base_b"]
+PlannerModelRole = Literal["base_b", "product_planner", "test_planner", "test_planner_sonnet"]
 
 
 class ModelsConfig(BaseModel):
@@ -199,11 +257,24 @@ class ModelsConfig(BaseModel):
 
     base_a: ModelSpec
     base_b: ModelSpec
+    #: The product life planner (DECISIONS/0032). Optional so older files still load; a run that
+    #: names this role fails loudly when it is missing -- there is no fallback to ``base_b``.
+    product_planner: ProductModelSpec | None = None
+    #: The test planner (DECISIONS/0035): real-LLM tests and trial runs. Same rules as the product
+    #: role (explicit version policy, rolling only with a note); missing means "no such role", no fallback.
+    test_planner: ProductModelSpec | None = None
+    #: The second test planner (DECISIONS/0035): Claude Sonnet 5.5, run after the Haiku test as a cross-check.
+    test_planner_sonnet: ProductModelSpec | None = None
 
-    def spec(self, role: ModelRole) -> ModelSpec:
-        return getattr(self, role)
+    def spec(self, role: ModelRole | PlannerModelRole) -> ModelSpec | ProductModelSpec:
+        got = getattr(self, role, None)
+        if got is None:
+            raise ConfigError(
+                f"configs/models.yaml has no {role!r} role; no fallback to another role"
+            )
+        return got
 
-    def resolve(self, role: ModelRole) -> ResolvedModel:
+    def resolve(self, role: ModelRole | PlannerModelRole) -> ResolvedModel:
         return self.spec(role).resolve()
 
     @classmethod

@@ -1,0 +1,150 @@
+{
+ "description_zh": "受控夹具：门店兼职的收入付完住房与食品只剩约 120，计划全年买每月 216 的杂务服务；钱不够的月份没有买到服务（家务回到本人自己做）",
+ "e1_facts": {
+  "convenience_q_by_month": [
+   "18",
+   "18",
+   "18",
+   "0",
+   "18",
+   "0",
+   "18",
+   "0",
+   "0",
+   "0",
+   "0",
+   "0"
+  ],
+  "score_annual_status": "complete",
+  "settlement_status": "completed",
+  "start_cash_override": "300（受控夹具：把开局现金改成 300，只为演示买不到服务的月份；不是标准开局，也不进城市比较）"
+ },
+ "message": "YearFacts",
+ "payload": {
+  "cash_end": {
+   "amount_minor": 6000,
+   "currency": "USD",
+   "display": "60.00",
+   "numeraire_id": "USD_2024_LOCAL"
+  },
+  "cash_start": {
+   "amount_minor": 30000,
+   "currency": "USD",
+   "display": "300.00",
+   "numeraire_id": "USD_2024_LOCAL"
+  },
+  "devices": [],
+  "food": [
+   "基本食品方案（自己做）（1–12 月）"
+  ],
+  "health_months": [
+   "healthy",
+   "healthy",
+   "healthy",
+   "healthy",
+   "healthy",
+   "healthy",
+   "healthy",
+   "healthy",
+   "healthy",
+   "healthy",
+   "healthy",
+   "healthy"
+  ],
+  "household": [
+   {
+    "monthly_hours": [
+     "2",
+     "2",
+     "2",
+     "10",
+     "2",
+     "10",
+     "2",
+     "10",
+     "10",
+     "10",
+     "10",
+     "10"
+    ],
+    "task": "cleaning"
+   },
+   {
+    "monthly_hours": [
+     "2",
+     "2",
+     "2",
+     "12",
+     "2",
+     "12",
+     "2",
+     "12",
+     "12",
+     "12",
+     "12",
+     "12"
+    ],
+    "task": "laundry"
+   }
+  ],
+  "housing": [
+   "一居室（离工作地远）（1–12 月）"
+  ],
+  "jobs": [
+   "门店兼职（合成百货）（1–12 月）"
+  ],
+  "months_lived": 12,
+  "notes": [],
+  "paid_total": {
+   "amount_minor": 1764000,
+   "currency": "USD",
+   "display": "17,640.00",
+   "numeraire_id": "USD_2024_LOCAL"
+  },
+  "services": [
+   {
+    "label": "日常杂务服务（每月上门洗衣与打扫）",
+    "months_covered": [
+     1,
+     2,
+     3,
+     5,
+     7
+    ],
+    "months_not_obtained": [
+     4,
+     6,
+     8,
+     9,
+     10,
+     11,
+     12
+    ],
+    "months_planned": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9,
+     10,
+     11,
+     12
+    ],
+    "opportunity_id": "k51.service.chores"
+   }
+  ],
+  "status": "completed",
+  "training": [],
+  "year_index": 1
+ },
+ "sample": {
+  "note": "写好的计划（不是规划器输出）；开局现金改成 300 只为演示",
+  "origin": "controlled_fixture",
+  "produced_by": "product.scenarios.partial_service_months",
+  "synthetic": true
+ }
+}

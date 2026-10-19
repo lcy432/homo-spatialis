@@ -1,0 +1,205 @@
+# E1-7B 真实模型小规模试跑样例的探索评分配置（生活输入在 synthetic_e1_7b_pilot.yaml；DECISIONS/0031）。由 scoring_e1_7a_loop.yaml
+# 复制而来，只改了规格编号、协议编号、比较组编号、城市与说明。
+#
+# 逐月评分规格与 E1-7A 的规格逐项相同（只有编号、协议编号与说明不同，这些不进入评分内容身份），所以评分内容身份也相同。
+# C97 的城市评分条件与 A95 相同；D98 的背景量按它自己的可见事实换算（b = 0.5 × 指数，见 city_facts_e1_7b.yaml）。
+#
+# **全部是合成探索参数，不是经验估计，不能声称已经现实标定，不能用来排序城市。**
+
+scoring_notice: >-
+  exploratory_synthetic：E1-7B 真实模型小规模试跑样例的探索评分配置。逐月评分规格与 E1-7A 逐项相同；两座新合成城 C97、D98 的
+  城市评分条件按各自的可见事实换算。不代表任何真实城市的生活质量、医疗水平或人的心理规律。
+
+spec:
+  spec_id: score.e1-7b.explore
+  scoring_version: e1-5c-health-v1
+  status: exploratory_synthetic
+  function: saturating_capped_v1
+  protocol_id: life-v1-e1-7b-pilot
+  note: >-
+    物质维三个叶子：居住面积、新鲜食品、洗衣。安全、环境只有城市基础条件；休闲由城市基础条件与实际发生的锻炼、体验改善；
+    发展维 = 城市发展条件 + 当月实际新增的能力进度；通勤维为广义交通。医疗维没有分项（城市医疗背景不进满足感）；健康由
+    全组共用的健康项 γ·H(月初状态) 评价。工资、现金、付医疗费与剩余时间不进入满足感。
+  health:
+    gamma: 0.2
+    state_values: {healthy: 1.0, minor: 0.5, major: 0.0}
+    rule: month_start_state
+    definition: >-
+      H 读这个月的月初健康状态（与工作限制同一个时点）：健康 1、小病 0.5、大病 0（合成方案）。同等病情对每个人的直接扣分都是
+      γ(1 − H)，不乘个人医疗点数；付医疗费不加分，没有"没看病"的额外惩罚；治疗只改变之后的月份
+  components:
+    - component_id: housing_space
+      dimension: material
+      material_need: housing_space
+      unit: 百平方英尺
+      tau: 6
+      combine: max
+      description: 这个月实际住的那一处居所的面积。房租与通勤分钟都不进入这一项。
+      sources:
+        - source_id: dwelling
+          records: [housing]
+          value: spec_number
+          measure: level
+          spec_key: floor_area_sqft
+          unit: 平方英尺
+          note: 实际住的那一处；降级后读最低方案那一处的规格
+    - component_id: fresh_food
+      dimension: material
+      material_need: fresh_food
+      unit: 新鲜餐/周（折算）
+      tau: 7
+      combine: max
+      description: 这个月实际执行的食品方案每周有几顿新鲜餐。准备时间是时间事实，不另给一份"省时幸福"。
+      sources:
+        - source_id: food_plan
+          records: [food]
+          value: spec_number
+          measure: level
+          spec_key: fresh_meals_per_week
+          unit: 餐/周
+          note: 实际吃的那一份方案；降级后读最低方案那一份
+    - component_id: laundry
+      dimension: material
+      material_need: laundry
+      unit: 有/无
+      tau: 1
+      combine: any
+      description: 这个月有没有在用的洗衣条件。第二台洗衣机不再加分。
+      sources:
+        - source_id: laundry_item
+          records: [durable_good, periodic_service, prepaid_service]
+          functions: [laundry]
+          value: present
+          measure: presence
+          unit: 有/无
+          note: 声明了 laundry 功能、这个月在服务期内的物品或服务
+    - component_id: safety
+      dimension: safety
+      unit: 指数（合成）
+      tau: 3
+      description: 统一城市背景；当前没有行动改善机制。
+    - component_id: opportunity
+      dimension: opportunity
+      unit: 指数（合成）
+      tau: 2
+      description: >-
+        发展维：城市的发展条件（背景 b，不由本人的学习结果回填）加上这个人这个月实际新增的能力进度。只计实际参加的学习；
+        生病暂停的月份不上课，也就没有成长。证书本身、换岗、职位名称与涨薪都不另加分。
+      growth:
+        eta: 12
+        progress_rule: ability_progress_increment_v1
+        unit: 能力进度/月
+        definition: >-
+          g_m = 词表里每项能力当月新增进度之和；年初已有的能力进度为 1，未有的取授予它的课程里最高的"实际累计参加月数 /
+          要求月数"。一门课授予两项能力就有两份进度：能力拆分粒度会影响成长量（合成假设，见参数目录 CA-06）
+    - component_id: leisure
+      dimension: leisure
+      unit: 每月参与次数（折算）
+      tau: 12
+      combine: sum
+      description: 城市基础休闲条件，加上声明了使用安排的锻炼次数与实际发生的体验。生病暂停的月份没有使用，也就没有改善。
+      sources:
+        - source_id: usage_plan
+          records: [prepaid_service, periodic_service]
+          requires_spec_key: visits_per_month
+          value: spec_number
+          measure: capacity
+          spec_key: visits_per_month
+          per_unit: true
+          unit: 次/月
+          note: 使用假设：只有声明了每月锻炼次数的会员才算锻炼
+        - source_id: events
+          records: [experience]
+          value: quantity
+          measure: count
+          unit: 次
+          note: 这个月实际发生的一次体验
+    - component_id: environment
+      dimension: environment
+      unit: 指数（合成）
+      tau: 3
+      description: 城市基础环境（显式合成）。本样例不启用自然景观加分。
+    - component_id: commute
+      dimension: commute
+      unit: 分钟/工作日往返
+      tau: 60
+      description: >-
+        交通便捷程度及出行对生活的影响（维度键沿用 commute）。按这个月实际所住住房的往返分钟与实际累计到岗次数评分；
+        大病病假的月份没有到岗，只剩 ρ 份不因上班消失的出行影响。时间与负担由月度资源账另算。
+      transport:
+        minutes_key: commute_roundtrip_minutes
+        rho: 0.25
+        reference_visits: 20
+        unit: 分钟/工作日往返
+        visits_unit: 次/月
+        definition: >-
+          k = ρ + (1 − ρ)·D/D_ref，T_eq = k·T，S = τ_T/(τ_T + T_eq)。T：实际住房到就业中心的往返分钟；D：资源账的当月累计
+          到岗次数（多岗位相加；病假月份为 0）。T_eq 是评分中间量，不是实际出行分钟
+  omissions:
+    - what: 家务与清洁需求的评分（只有时间事实，没有评分分项）
+      affects: 给家务需求正权重的人（总分会不完整，反馈因此无法更新）
+      owner: E1-4 后续
+    - what: 非工作出行（购物、社交、就医）的时间与满足感；公共交通可及性
+      affects: 不上班但出行多的人、依赖公共交通或住得离日常设施远的人
+      owner: V2（需要共同粒度的出行资料）
+    - what: 学习之外的职业成长（持续成就感、职位名称、晋升、涨薪带来的满足感）
+      affects: 很看重职位、晋升与长期成就感的人
+      owner: CA-06 后续
+    - what: 疾病的心理后果（焦虑、对生病的担心）、疲劳累积、慢性病、多病叠加、住院以外的照护与疾病名称
+      affects: 体弱、慢性病、照护负担重或很担心健康的人
+      owner: V2（需要外部资料与所有者裁决）
+    - what: 期末仍未恢复的疾病、留存到期末的现金与物品的评价
+      affects: 模拟最后几个月生病的人、看重储蓄与未来消费的人
+      owner: E1-6A 只估 12 个月期末；更远的价值与课程潜力待定
+
+comparison_group:
+  group_id: group.e1-7b.synth
+  cities:
+    - {country: US, scheme: SYNTH2026, code: C97}
+    - {country: US, scheme: SYNTH2026, code: D98}
+  scoring_version: e1-5c-health-v1
+  geography_scope: synthetic city (no real geography)
+  currency: USD
+  base_year: 2024
+  time_basis: 2024 年不变价、当地价格水平（USD_2024_LOCAL）；年度决策、月度执行
+  action_roles: [housing, food, job, durable_good, training, periodic_service, experience]
+  allowed_source_kinds: [synthetic]
+  commute_granularity: plan_level
+  units:
+    floor_area_sqft: 平方英尺
+    fresh_meals_per_week: 新鲜餐/周
+    visits_per_month: 次/月
+    commute_roundtrip_minutes: 分钟/工作日往返
+  note: >-
+    合成比较组：两座城，全部用合成设定、同一地理口径、同一币种与基年；治疗目录按同一套需求定义（小病门诊、大病住院）
+    与同一计价粒度（每次疾病一次性）写明，两座城的小病、大病治疗都已知。
+
+city_conditions:
+  - city: {country: US, scheme: SYNTH2026, code: C97}
+    spec_id: score.e1-7b.explore
+    label: 合成城 C97
+    components:
+      - {component_id: housing_space, status: known, base: 0, cap: 0.9, efficiencies: [{source_id: dwelling, eta: 0.01}], source: &cond
+          {kind: synthetic, observed_on: 2026-10-13, geography_scope: synthetic city (no real geography),
+           mapping_version: scoring-e1-7b-pilot, synthetic_note: 手工设定的探索参数，不是经验估计}}
+      - {component_id: fresh_food, status: known, base: 0, cap: 0.9, efficiencies: [{source_id: food_plan, eta: 1.0}], source: *cond}
+      - {component_id: laundry, status: known, base: 0, cap: 0.9, eta_any: 3, source: *cond}
+      - {component_id: safety, status: known, base: 3, cap: 0.9, source: *cond}
+      - {component_id: opportunity, status: known, base: 2, cap: 0.9, source: *cond}
+      - {component_id: leisure, status: known, base: 4, cap: 0.9,
+         efficiencies: [{source_id: usage_plan, eta: 1.0}, {source_id: events, eta: 4.0}], source: *cond}
+      - {component_id: environment, status: known, base: 3, cap: 0.9, source: *cond}
+      - {component_id: commute, status: plan_level, source: *cond}
+  - city: {country: US, scheme: SYNTH2026, code: D98}
+    spec_id: score.e1-7b.explore
+    label: 合成城 D98
+    components:
+      - {component_id: housing_space, status: known, base: 0, cap: 0.9, efficiencies: [{source_id: dwelling, eta: 0.01}], source: *cond}
+      - {component_id: fresh_food, status: known, base: 0, cap: 0.9, efficiencies: [{source_id: food_plan, eta: 1.0}], source: *cond}
+      - {component_id: laundry, status: known, base: 0, cap: 0.9, eta_any: 3, source: *cond}
+      - {component_id: safety, status: known, base: 2.5, cap: 0.9, source: *cond}
+      - {component_id: opportunity, status: known, base: 2.5, cap: 0.9, source: *cond}
+      - {component_id: leisure, status: known, base: 3, cap: 0.9,
+         efficiencies: [{source_id: usage_plan, eta: 1.0}, {source_id: events, eta: 4.0}], source: *cond}
+      - {component_id: environment, status: known, base: 3.5, cap: 0.9, source: *cond}
+      - {component_id: commute, status: plan_level, source: *cond}

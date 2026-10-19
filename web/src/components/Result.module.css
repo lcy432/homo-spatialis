@@ -1,0 +1,65 @@
+.units {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3em;
+  list-style: none;
+  padding: 0;
+  margin: 0.5em 0;
+}
+
+.unit {
+  min-width: 2.6em;
+  min-height: 2.6em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  font-weight: 700;
+  border: 2px solid;
+  background: #fff;
+}
+
+.c {
+  border-color: var(--c-color);
+  color: var(--c-color);
+}
+
+.e {
+  border-color: var(--e-color);
+  color: var(--e-color);
+  border-style: dashed;
+}
+
+.m {
+  border-color: var(--m-color);
+  color: var(--m-color);
+  border-style: dotted;
+}
+
+.mean {
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.range {
+  width: 100%;
+  max-width: 28rem;
+  height: 3.2rem;
+  display: block;
+}
+
+.cityGrid {
+  display: grid;
+  gap: 0.8em;
+}
+
+@media (min-width: 900px) {
+  .cityGrid {
+    grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
+  }
+}
+
+.storyTable td,
+.storyTable th {
+  min-width: 2.2em;
+}

@@ -1,0 +1,299 @@
+{
+ "$defs": {
+  "CloneProgress": {
+   "additionalProperties": false,
+   "properties": {
+    "city_ref": {
+     "title": "City Ref",
+     "type": "string"
+    },
+    "clone_ref": {
+     "title": "Clone Ref",
+     "type": "string"
+    },
+    "status": {
+     "title": "Status",
+     "type": "string"
+    },
+    "status_zh": {
+     "title": "Status Zh",
+     "type": "string"
+    },
+    "years_committed": {
+     "minimum": 0,
+     "title": "Years Committed",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "clone_ref",
+    "city_ref",
+    "status",
+    "status_zh",
+    "years_committed"
+   ],
+   "title": "CloneProgress",
+   "type": "object"
+  },
+  "CostStatus": {
+   "additionalProperties": false,
+   "description": "费用状态：离线 mock 为零；真实模型只能写“按报价估算”，以供应商账单为准。",
+   "properties": {
+    "call_limit": {
+     "minimum": 0,
+     "title": "Call Limit",
+     "type": "integer"
+    },
+    "calls_used": {
+     "minimum": 0,
+     "title": "Calls Used",
+     "type": "integer"
+    },
+    "estimated_cost": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Estimated Cost"
+    },
+    "kind": {
+     "enum": [
+      "offline_mock_zero_cost",
+      "estimated_from_quote"
+     ],
+     "title": "Kind",
+     "type": "string"
+    },
+    "note": {
+     "title": "Note",
+     "type": "string"
+    }
+   },
+   "required": [
+    "kind",
+    "calls_used",
+    "call_limit",
+    "note"
+   ],
+   "title": "CostStatus",
+   "type": "object"
+  },
+  "DataPackRef": {
+   "additionalProperties": false,
+   "description": "一份资料包的身份：编号与内容指纹。本轮只有合成资料包（``synthetic_fixture_only``）。",
+   "properties": {
+    "content_fingerprint": {
+     "pattern": "^[0-9a-f]{64}$",
+     "title": "Content Fingerprint",
+     "type": "string"
+    },
+    "note": {
+     "maxLength": 400,
+     "minLength": 1,
+     "title": "Note",
+     "type": "string"
+    },
+    "pack_id": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+     "title": "Pack Id",
+     "type": "string"
+    },
+    "status": {
+     "enum": [
+      "synthetic_fixture_only",
+      "real_data_frozen"
+     ],
+     "title": "Status",
+     "type": "string"
+    }
+   },
+   "required": [
+    "pack_id",
+    "content_fingerprint",
+    "status",
+    "note"
+   ],
+   "title": "DataPackRef",
+   "type": "object"
+  },
+  "ProductMeta": {
+   "additionalProperties": false,
+   "description": "每条产品消息都带的共同元数据：结构、问卷、词表、健康问卷、转换的版本与资料包身份。",
+   "properties": {
+    "conversion_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Conversion Version",
+     "type": "string"
+    },
+    "data_pack": {
+     "$ref": "#/$defs/DataPackRef"
+    },
+    "health_questionnaire_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Health Questionnaire Version",
+     "type": "string"
+    },
+    "questionnaire_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Questionnaire Version",
+     "type": "string"
+    },
+    "sample": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/SampleLabel"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "schema_version": {
+     "const": "e3a-product-schema-v1",
+     "title": "Schema Version",
+     "type": "string"
+    },
+    "vocabulary_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Vocabulary Version",
+     "type": "string"
+    }
+   },
+   "required": [
+    "schema_version",
+    "questionnaire_version",
+    "vocabulary_version",
+    "health_questionnaire_version",
+    "conversion_version",
+    "data_pack"
+   ],
+   "title": "ProductMeta",
+   "type": "object"
+  },
+  "SampleLabel": {
+   "additionalProperties": false,
+   "description": "公共样例的出处标签（只出现在样例里；真实运行的消息不写）。\n\n* ``offline_run``：由离线闭环实际执行产生；\n* ``controlled_fixture``：受控测试夹具（例如写好的计划、注入的事件、构造的资料缺口），标明来源；\n* ``contract_example``：线上服务（幂等提交、查询、断线恢复）尚未实现，这里只是**标明为示例**的契约响应。",
+   "properties": {
+    "note": {
+     "maxLength": 600,
+     "minLength": 1,
+     "title": "Note",
+     "type": "string"
+    },
+    "origin": {
+     "enum": [
+      "offline_run",
+      "controlled_fixture",
+      "contract_example"
+     ],
+     "title": "Origin",
+     "type": "string"
+    },
+    "produced_by": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Produced By",
+     "type": "string"
+    },
+    "synthetic": {
+     "const": true,
+     "default": true,
+     "title": "Synthetic",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "origin",
+    "produced_by",
+    "note"
+   ],
+   "title": "SampleLabel",
+   "type": "object"
+  }
+ },
+ "additionalProperties": false,
+ "description": "一次运行的进度（断线后用运行 ID 查询；不重发付费规划）。请求成功、计划可执行、生活完成、评分完整分别记录。",
+ "properties": {
+  "clones": {
+   "default": [],
+   "items": {
+    "$ref": "#/$defs/CloneProgress"
+   },
+   "title": "Clones",
+   "type": "array"
+  },
+  "cost": {
+   "$ref": "#/$defs/CostStatus"
+  },
+  "meta": {
+   "$ref": "#/$defs/ProductMeta"
+  },
+  "pause_reason": {
+   "anyOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Pause Reason"
+  },
+  "report_available": {
+   "title": "Report Available",
+   "type": "boolean"
+  },
+  "resumable": {
+   "title": "Resumable",
+   "type": "boolean"
+  },
+  "resume_note": {
+   "title": "Resume Note",
+   "type": "string"
+  },
+  "run_id": {
+   "title": "Run Id",
+   "type": "string"
+  },
+  "stage": {
+   "enum": [
+    "queued",
+    "running",
+    "completed",
+    "paused",
+    "halted",
+    "interrupted",
+    "budget_exhausted"
+   ],
+   "title": "Stage",
+   "type": "string"
+  },
+  "stage_zh": {
+   "title": "Stage Zh",
+   "type": "string"
+  }
+ },
+ "required": [
+  "meta",
+  "run_id",
+  "stage",
+  "stage_zh",
+  "cost",
+  "resumable",
+  "resume_note",
+  "report_available"
+ ],
+ "title": "RunProgress",
+ "type": "object"
+}

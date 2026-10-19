@@ -1,0 +1,263 @@
+{
+ "description_zh": "主动均分确认后的精确分数",
+ "message": "ConfirmedProfile",
+ "payload": {
+  "abilities": [],
+  "age_years": 35,
+  "cities": [
+   "US:SYNTH2026:K51",
+   "US:SYNTH2026:M52"
+  ],
+  "confirmation_source": "user_form",
+  "confirmed_id": "confirmed.draft.u501.equal_split.r1",
+  "content_fingerprint": "effe92355c4f6bd74111e17ccf1d5ed5e1f920ff9c9eea67bc273a2dae32ad2a",
+  "draft": {
+   "draft_fingerprint": "ed1089a6d5739d18bceaf7a822027d7b0f743da76eb85179f15884ef8f915ba1",
+   "draft_id": "draft.u501.equal_split",
+   "revision": 1
+  },
+  "free_text": "我在写字楼做全职文员。下班以后不想再把很多时间花在洗衣服、打扫屋子上，愿意为省事花一些钱；但也不想因为花钱让自己手头太紧。",
+  "hard_requirements": [
+   {
+    "enforced_by_execution": false,
+    "label_zh": "住处到就业中心的往返时间不超过（分钟） 60 分钟（单独核验并报告，不拦截计划）",
+    "option_id": "housing.max_commute_roundtrip",
+    "parameter_value": 60,
+    "requirement_id": "hr.commute"
+   }
+  ],
+  "health": {
+   "answers": [
+    {
+     "answer_state": "provided",
+     "meaning": "不愿意为多一点收入接受更高的生病与休息可能",
+     "option": "disagree",
+     "option_label": "不符合我",
+     "question_id": "hc_more_pay_more_sick_risk",
+     "question_text": "一种安排能多赚一点钱，但生病、需要休息几天的可能也更高。我愿意选择它。"
+    },
+    {
+     "answer_state": "provided",
+     "meaning": "愿意推迟不急需的消费，先为可能的健康开支留钱",
+     "option": "agree",
+     "option_label": "符合我",
+     "question_id": "hc_reserve_for_health_costs",
+     "question_text": "为了应对可能发生的健康开支，我愿意推迟一次想要、但并不急需的消费，先留一笔钱。"
+    },
+    {
+     "answer_state": "unsure",
+     "meaning": "用户暂不确定",
+     "option": null,
+     "option_label": null,
+     "question_id": "hc_wait_for_clear_risk_info",
+     "question_text": "健康风险的信息还不清楚时，我愿意先放弃眼前的一点收益，等了解清楚再决定。"
+    }
+   ],
+   "questionnaire_version": "e3a-health-coping-q-v0.1-draft",
+   "status": "draft_wording_not_validated"
+  },
+  "material": {
+   "allocation": {
+    "display": {
+     "daily_convenience": "33.3",
+     "fresh_food": "33.3",
+     "housing_space": "33.3"
+    },
+    "mode": "equal_split",
+    "points": {
+     "daily_convenience": "100/3",
+     "fresh_food": "100/3",
+     "housing_space": "100/3"
+    }
+   },
+   "status": "allocated"
+  },
+  "meta": {
+   "conversion_version": "e3a-conversion-v1",
+   "data_pack": {
+    "content_fingerprint": "2496b047ae91b906f9e3210405af32c4b7cb928bcec30e833a7dd6cfefcf2580",
+    "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
+    "pack_id": "pack.e3a.synthetic-v1",
+    "status": "synthetic_fixture_only"
+   },
+   "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.1-draft",
+   "sample": {
+    "note": "审阅与确认的实际输出（没有运行生活）",
+    "origin": "offline_run",
+    "produced_by": "product.scenarios.review_only(equal_split)",
+    "synthetic": true
+   },
+   "schema_version": "e3a-product-schema-v1",
+   "vocabulary_version": "e3a-vocabulary-v1"
+  },
+  "money": {
+   "amount_text": "3000",
+   "conversion_rule": "identity_same_basis_v1",
+   "converted": {
+    "amount_minor": 300000,
+    "currency": "USD",
+    "display": "3,000.00",
+    "numeraire_id": "USD_2024_LOCAL"
+   },
+   "currency": "USD",
+   "meaning": "liquid_funds_v1",
+   "price_period": "2024"
+  },
+  "occupation": {
+   "concept_id": "occ.office_clerk",
+   "duties": [
+    "处理文件与表格",
+    "录入与整理资料",
+    "接听电话、安排日程"
+   ],
+   "internal_mappings": [
+    {
+     "basis": "SOC 2018 职业定义 Office Clerks, General（通用办公室文员）",
+     "code": "43-9061",
+     "country": "US",
+     "scheme": "SOC2018",
+     "version": "2018"
+    }
+   ],
+   "label": "办公室文员",
+   "language": "zh",
+   "match_status": "explicit",
+   "raw_text": "我在写字楼做全职文员，平时处理文件和表格"
+  },
+  "person_ref": "u501",
+  "retained": [],
+  "review_id": "review.draft.u501.equal_split.r1",
+  "six_dimensions": {
+   "display": {
+    "commute": "16.7",
+    "environment": "16.7",
+    "leisure": "16.7",
+    "material": "16.7",
+    "opportunity": "16.7",
+    "safety": "16.7"
+   },
+   "mode": "equal_split",
+   "points": {
+    "commute": "50/3",
+    "environment": "50/3",
+    "leisure": "50/3",
+    "material": "50/3",
+    "opportunity": "50/3",
+    "safety": "50/3"
+   }
+  },
+  "sources": [
+   {
+    "evidence": [
+     {
+      "kind": "form_field",
+      "note": null,
+      "ref": "draft:draft.u501.equal_split#cities"
+     }
+    ],
+    "field": "cities"
+   },
+   {
+    "evidence": [
+     {
+      "kind": "form_field",
+      "note": null,
+      "ref": "draft:draft.u501.equal_split#occupation"
+     }
+    ],
+    "field": "occupation"
+   },
+   {
+    "evidence": [
+     {
+      "kind": "form_field",
+      "note": null,
+      "ref": "draft:draft.u501.equal_split#age"
+     }
+    ],
+    "field": "age"
+   },
+   {
+    "evidence": [
+     {
+      "kind": "form_field",
+      "note": null,
+      "ref": "draft:draft.u501.equal_split#cash"
+     }
+    ],
+    "field": "cash"
+   },
+   {
+    "evidence": [
+     {
+      "kind": "form_field",
+      "note": null,
+      "ref": "draft:draft.u501.equal_split#six_dimensions"
+     }
+    ],
+    "field": "six_dimensions"
+   },
+   {
+    "evidence": [
+     {
+      "kind": "form_field",
+      "note": null,
+      "ref": "draft:draft.u501.equal_split#material"
+     }
+    ],
+    "field": "material"
+   },
+   {
+    "evidence": [
+     {
+      "kind": "form_field",
+      "note": null,
+      "ref": "draft:draft.u501.equal_split#health"
+     }
+    ],
+    "field": "health"
+   },
+   {
+    "evidence": [
+     {
+      "kind": "form_field",
+      "note": null,
+      "ref": "draft:draft.u501.equal_split#free_text"
+     }
+    ],
+    "field": "free_text"
+   },
+   {
+    "evidence": [
+     {
+      "kind": "form_field",
+      "note": null,
+      "ref": "draft:draft.u501.equal_split#abilities"
+     }
+    ],
+    "field": "abilities"
+   },
+   {
+    "evidence": [
+     {
+      "kind": "form_field",
+      "note": null,
+      "ref": "draft:draft.u501.equal_split#hard_requirements"
+     }
+    ],
+    "field": "hard_requirements"
+   },
+   {
+    "evidence": [
+     {
+      "kind": "form_field",
+      "note": null,
+      "ref": "draft:draft.u501.equal_split#attribute_preferences"
+     }
+    ],
+    "field": "attribute_preferences"
+   }
+  ]
+ }
+}

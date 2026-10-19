@@ -1,0 +1,24 @@
+# E1 补充"日常生活便利"的原计划名单（DECISIONS/0033）。在跑任何生活之前写好并冻结（沿用 E1-6B 的冻结与标准开局 v1 检查）；不从收到
+# 多少结果反推原计划人数。名单顺序就是运行顺序（run_order = roster_order）。
+#
+# 一位用户 × 两座城 × 每城 1 个分身 = 2 个分身，3 年。先导只跑名单第一项（u301.k51.r0）的第 1 年，检查之后从同一份冻结的归档继续
+# 完成整批（不另外从头再跑）。真实模型（run_e1_convenience_flash.yaml）与 mock 对照（run_e1_convenience_mock.yaml）用同一份名单。
+
+roster_notice: >-
+  exploratory_synthetic：E1 补充"日常生活便利"的原计划名单。全部是合成样例，不是现实城市评价，也不是模型能力的一般结论。
+
+roster:
+  roster_id: roster.e1-convenience.pilot
+  status: exploratory_synthetic
+  aggregation_version: e1-6b-aggregation-v1
+  life_input: configs/life/synthetic_e1_convenience.yaml
+  scoring_config: configs/life/scoring_e1_convenience.yaml
+  comparison_group_id: group.e1-convenience.synth
+  note: 一位用户、两座城、每城 1 个分身；受控主场景不发生新疾病。每一年的计划由规划器给出，名单冻结时还没有任何计划。
+  users:
+    - {user_id: user.convenience, person_id: u301, label: u301（全职文员，看重省事）}
+  arms:
+    - {arm_id: arm.main, role: main, evaluation_config: configs/life/evaluation_e1_convenience.yaml, note: 主设定 δ = 1、六个基础生活模板}
+  entries:
+    - {user_id: user.convenience, clone_id: u301.k51.r0, city: {country: US, scheme: SYNTH2026, code: K51}, repeat_index: 0}
+    - {user_id: user.convenience, clone_id: u301.m52.r0, city: {country: US, scheme: SYNTH2026, code: M52}, repeat_index: 0}
