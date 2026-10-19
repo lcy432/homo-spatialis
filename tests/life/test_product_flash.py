@@ -121,7 +121,7 @@ def _driver():
 
 def test_b_the_product_entry_selects_flash_and_never_falls_back(repo, monkeypatch):
     driver = _driver()
-    assert driver.PRODUCT == FLASH_CONFIG and driver.DEFAULT.name == "run_product_haiku.yaml"
+    assert driver.PRODUCT == FLASH_CONFIG and driver.DEFAULT.name == "run_product_sonnet.yaml"
     asked: list[str] = []
 
     def fake_resolve(self):

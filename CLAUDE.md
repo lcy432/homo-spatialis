@@ -40,8 +40,11 @@
 
 ## 真实 LLM 测试
 
-- 要真实调用大语言模型的测试与试跑，一律用 `configs/models.yaml` 的测试角色 `test_planner`（Claude Haiku 5.5，`claude-haiku-5-5`，effort max）。`scripts/run_life_e1_7b.py` 不写 `--config` 时就是它；Flash（`product_planner`）与 Max（`base_b`）只在所有者明确要求时显式选。离线测试用 mock。
-- Claude 经 Claude Agent SDK 调用，只当"一个输入、跑一轮、一个输出"：`agentlayer.life_llm.ClaudeAgentSdkTransport`（`max_turns=1`、无工具、`setting_sources=[]`、每次新建的隔离工作与配置目录、命令行只继承白名单系统变量与代理变量，用项目自己的 `ANTHROPIC_API_KEY` 与官方端点，不用宿主的 Claude 登录态）。不得给它工具、多轮、会话恢复或读设置文件。
+- 按规模选模型（所有者 2026-10-19，DECISIONS/0038）：
+  - 非全量的真实 LLM 测试（先导、小名单、部分城市或少量分身、几年以内的试跑）用 Claude Sonnet 5.5 effort max：`configs/models.yaml` 的 `test_planner_sonnet` 角色，配置 `configs/life/run_product_sonnet.yaml`，也就是 `scripts/run_life_e1_7b.py` 不写 `--config` 时的默认。
+  - 全规模的产品流程测试（走完整产品链：资料包里所有可用城市、每城 4 个及以上分身、完整年限；或部分城市但大量分身、超过 3 年的模拟）用 Qwen 最新的 Flash：`product_planner` 角色（现在是 `qwen3.8-flash`；有更新的 Flash 时更新这个角色），入口 `scripts/run_product_full.py`（付费，每次运行一本新账本，有次数与费用上限）。
+  - Haiku（`test_planner`）与 Max（`base_b`）只在所有者明确要求时用 `--config` 显式选。离线测试用 mock；`run_product_full.py --mock` 是同一条产品链的零费用版本。
+- Claude 经 Claude Agent SDK 调用，只当"一个输入、跑一轮、一个输出"：`agentlayer.life_llm.ClaudeAgentSdkTransport`（`max_turns=1`、无工具、`setting_sources=[]`、命令行只继承白名单系统变量与代理变量）。默认 `auth: claude_subscription` 走本机已登录的 Claude 订阅（`claude auth login`），不需要密钥；写 `auth: api_key` 时用项目 `.env` 的 `ANTHROPIC_API_KEY` 与官方端点。不得给它工具、多轮、会话恢复或读设置文件。
 - 厂商差异只在传输层（请求体写法、发送、错误 / 用量 / 结束原因的翻译）；规划器 `LlmPlanner` 与预算、服务记录、一致性检查与厂商无关。新增服务商就加一份传输层与设定校验。
 - 计费可选：运行配置写 `paid_budget`（账本，额度可不写）或 `unmetered_reason`（不记账），两者选一。
 - 模型版本：研究角色只用带日期的快照；产品与测试角色在供应商没有快照时可以显式声明 `version_policy: rolling`，每次实际返回的型号记进请求明细。

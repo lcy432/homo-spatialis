@@ -59,6 +59,7 @@ from .live_support import (
     LIVE_CONFIG,
     MOCK_CONFIG,
     REPO,
+    SONNET_CONFIG,
     ScriptedTransport,
     load_yaml,
     make_repo,
@@ -653,9 +654,15 @@ def _driver():
     return importlib.import_module("run_life_e1_7b")
 
 
-def test_f_the_cli_default_is_haiku_and_the_transport_follows_the_provider(repo, monkeypatch):
+def test_f_the_cli_default_is_sonnet_max_and_the_transport_follows_the_provider(repo, monkeypatch):
     driver = _driver()
-    assert driver.DEFAULT == HAIKU_CONFIG and driver.PRODUCT == FLASH_CONFIG
+    assert driver.DEFAULT == SONNET_CONFIG and driver.PRODUCT == FLASH_CONFIG
+    default = preflight(SONNET_CONFIG).config.planner.llm
+    assert (default.model, default.model_role, default.effort) == (
+        SONNET,
+        "test_planner_sonnet",
+        "max",
+    )
     asked: list[str] = []
 
     def fake_resolve(self):

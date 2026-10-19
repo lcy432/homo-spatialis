@@ -1,8 +1,9 @@
 """生活规划器真实模型运行的入口（DECISIONS/0031、0032、0035）。全部经 ``orchestration.life_runner`` 的正式入口；不是第二个运行器。
 
-**用哪个模型由运行配置决定**（``--config``）。不写时用产品协议样例的测试配置 ``configs/life/run_product_haiku.yaml``：Claude Haiku 5.5，
-models.yaml 的 ``test_planner`` 角色，经 Claude Agent SDK 单轮调用（真实 LLM 测试与试跑一律用它）。产品角色的 Flash 配置只在所有者明确
-要求时显式选：``--config configs/life/run_product_flash.yaml``。找不到配置里写的模型角色就报错，不回退到别的角色或别的模型。真实运行必须写
+**用哪个模型由运行配置决定**（``--config``）。不写时用非全量真实 LLM 测试的配置 ``configs/life/run_product_sonnet.yaml``：Claude Sonnet 5.5，
+effort max，models.yaml 的 ``test_planner_sonnet`` 角色，经 Claude Agent SDK 单轮调用（所有者 2026-10-19）。全规模的产品流程测试不走这里，
+用 ``scripts/run_product_full.py``（Qwen Flash）。Haiku 测试配置（``run_product_haiku.yaml``）与产品样例的 Flash 配置
+（``run_product_flash.yaml``）可以用 ``--config`` 显式选。找不到配置里写的模型角色就报错，不回退到别的角色或别的模型。真实运行必须写
 ``--run-id``（新的编号）。``resume`` 与 ``replay`` 只按归档里冻结的配置与模型执行，不接受 ``--config``，写了就报错——不能用换配置的办法
 让另一个模型接着跑旧归档。
 
@@ -21,8 +22,8 @@ models.yaml 的 ``test_planner`` 角色，经 Claude Agent SDK 单轮调用（�
                                                                         只用归档的零调用重放（不需要密钥）；生活重放与付费对账分开报告
     uv run python scripts/run_life_e1_7b.py budget [--config …]          付费预算账本的汇总（读配置里写的那一本）
 
-真实调用只在 pilot、main、resume 三个子命令里发生；凭证在调用时从环境变量或 .env 读取，从不打印、不写进任何文件（Haiku 读
-``ANTHROPIC_API_KEY``，千问读 ``DASHSCOPE_API_KEY``）。付费预算是按已记录报价执行的应用侧控制，不是供应商级的账单上限；运行配置也可以
+真实调用只在 pilot、main、resume 三个子命令里发生；凭证在调用时从环境变量或 .env 读取，从不打印、不写进任何文件（Claude 走订阅时
+不要密钥，写 ``auth: api_key`` 时读 ``ANTHROPIC_API_KEY``；千问读 ``DASHSCOPE_API_KEY``）。付费预算是按已记录报价执行的应用侧控制，不是供应商级的账单上限；运行配置也可以
 显式写 ``unmetered_reason`` 不记账（DECISIONS/0035），这时只受全局调用上限约束。
 """
 
@@ -57,8 +58,8 @@ from orchestration.life_runner import (
     start_run,
 )
 
-#: 不写 --config 时的配置（DECISIONS/0035）：真实 LLM 测试与试跑用 Claude Haiku 5.5（test_planner 角色）
-DEFAULT = Path("configs/life/run_product_haiku.yaml")
+#: 不写 --config 时的配置（所有者 2026-10-19）：非全量真实 LLM 测试用 Claude Sonnet 5.5 effort max（test_planner_sonnet 角色）
+DEFAULT = Path("configs/life/run_product_sonnet.yaml")
 #: 产品角色的 Qwen3.8 Flash 配置（DECISIONS/0032）：只在显式 ``--config`` 时使用
 PRODUCT = Path("configs/life/run_product_flash.yaml")
 MOCK = Path("configs/life/run_product_mock.yaml")

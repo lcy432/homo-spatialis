@@ -1,5 +1,7 @@
 # 0035 真实 LLM 测试改用 Claude Haiku 5.5：Claude Agent SDK 单轮调用、厂商适配与可选计费
 
+> ⚠ “真实 LLM 测试一律用 Haiku”已被 [DECISIONS/0038](0038-test-models-by-scale.md) 取代：非全量用 Sonnet 5.5 max，全规模用 Qwen 最新 Flash。传输层与计费部分仍有效。
+
 **状态**：已实现、离线自测通过；最小真实试跑见第六节（2026-10-18，本地时区 UTC−7）。授权来自所有者在对话里的要求与选择（原文见
 [prompt 归档](../docs/design/prompts/2026-10-18-haiku-test-planner.md)）。`src/econ/` 没有改；生活、评分、评价与汇总的数学都没有改。代码未提交，
 没有执行 `git add`。

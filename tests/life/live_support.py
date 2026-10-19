@@ -35,6 +35,8 @@ from orchestration.life_runner import RunWorld, preflight
 LIVE_CONFIG = Path("configs/life/run_product_flash.yaml")
 MOCK_CONFIG = Path("configs/life/run_product_mock.yaml")
 HAIKU_CONFIG = Path("configs/life/run_product_haiku.yaml")
+#: 非全量真实 LLM 测试的默认配置（所有者 2026-10-19）：Sonnet 5.5 effort max
+SONNET_CONFIG = Path("configs/life/run_product_sonnet.yaml")
 MODEL = "qwen3.8-flash"
 #: 名单第一项（运行顺序的第一个分身）
 FIRST = "u301.k51.r0"
@@ -47,6 +49,7 @@ FILES = (
     "configs/life/run_product_flash.yaml",
     "configs/life/run_product_mock.yaml",
     "configs/life/run_product_haiku.yaml",
+    "configs/life/run_product_sonnet.yaml",
     "configs/models.yaml",
 )
 REPO = Path(__file__).resolve().parents[2]

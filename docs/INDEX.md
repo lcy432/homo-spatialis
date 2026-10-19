@@ -64,6 +64,7 @@
 | agent-02 | E1-7B | 真实千问接入、预算账本、服务记录 | 已实现 | 曾通过审核 | [0031](../DECISIONS/0031-life-e1-7b-live-model-pilot.md) |
 | agent-03 | — | 产品角色用 Qwen3.8 Flash | 已实现 | 曾通过审核 | [0032](../DECISIONS/0032-product-planner-default-qwen3-8-flash.md) |
 | agent-04 | — | 真实 LLM 测试用 Claude Haiku 5.5：Agent SDK 单轮调用、厂商适配的传输层、可选计费 | 已实现 | 真实试跑结果待汇总 | [0035](../DECISIONS/0035-haiku-test-planner-agent-sdk.md) |
+| agent-05 | — | 按规模选测试模型：非全量真实 LLM 测试用 Sonnet 5.5 effort max；全规模产品流程测试用 Qwen 最新 Flash（`scripts/run_product_full.py`） | 已实现 | 离线测试通过 | [0038](../DECISIONS/0038-test-models-by-scale.md) |
 
 ### 接入层
 
@@ -90,12 +91,13 @@ P8 / P9 / P10 已实现，门一已过，门二与门三待真实输入；开发
 | 用途 | 配置 |
 |---|---|
 | 生活样例（唯一一份，测试、命令行与资料包共用） | `configs/life/synthetic_product.yaml`，评分 `scoring_product.yaml`、评价 `evaluation_product.yaml`、名单 `roster_product.yaml`、城市事实 `city_facts_product.yaml` |
-| 真实 LLM 测试（`scripts/run_life_e1_7b.py` 不写 `--config`） | `configs/life/run_product_haiku.yaml`（Claude Haiku 5.5，effort max） |
-| 产品角色 Flash（只在所有者明确要求时） | `configs/life/run_product_flash.yaml`（账本 `ledgers/qwen-flash-convenience/`） |
+| 非全量真实 LLM 测试（`scripts/run_life_e1_7b.py` 不写 `--config`） | `configs/life/run_product_sonnet.yaml`（Claude Sonnet 5.5，effort max，走订阅） |
+| 全规模产品流程测试（所有城市、每城 ≥ 4 个分身、完整年限） | `scripts/run_product_full.py`（Qwen 最新 Flash，`product_planner`；每次运行一本新账本；`--mock` 零费用） |
+| 产品样例的 Flash 配置 / Haiku 测试配置（显式 `--config`） | `configs/life/run_product_flash.yaml`（账本 `ledgers/qwen-flash-convenience/`）/ `configs/life/run_product_haiku.yaml` |
 | 离线 mock 对照 | `configs/life/run_product_mock.yaml` |
 | 接入层产品链 | `scripts/product_e3a.py` 显式编译产品样例 |
 
-模型角色在 `configs/models.yaml`：研究基座 `base_a` / `base_b`，产品 `product_planner`（Flash），测试 `test_planner`（Haiku）与 `test_planner_sonnet`（Sonnet）。密钥在 `.env`。
+模型角色在 `configs/models.yaml`：研究基座 `base_a` / `base_b`，产品 `product_planner`（Flash，全规模测试也用它），测试 `test_planner_sonnet`（Sonnet，非全量测试默认）与 `test_planner`（Haiku）。密钥在 `.env`。
 
 ## 4. 文档各管什么
 
