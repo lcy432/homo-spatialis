@@ -21,7 +21,7 @@
 
 这些对象都是**评分侧内部对象**：评分规格、城市条件、评分偏好与评分结果都不进代理
 观察或事实反馈（``agentlayer.life_views`` 的扫描会拦截它们）。用户自己的陈述
-（``StatedLifeProfile``）照旧按许可可见，这里不改变那条边界。
+（六维产品画像）照旧按许可可见，这里不改变那条边界。
 """
 
 from __future__ import annotations
@@ -51,7 +51,7 @@ from common.life_contracts import (
 from common.life_units import NUMERIC_DIMENSIONS, conversion_factor, resolve_unit
 from worlds.dimensions import ALL_DIMENSIONS, AMENITY_DIMENSIONS, MATERIAL
 
-#: 七维里医疗维的键（E1-5C 健康版本里它表示健康风险应对倾向，不进满足感）。
+#: 七维常量里医疗维的键：评分没有医疗分项（城市医疗背景不进满足感，健康由全组共用的健康项 γH 评价）。
 HEALTHCARE = "healthcare"
 assert HEALTHCARE in AMENITY_DIMENSIONS
 
@@ -86,30 +86,15 @@ CombineRule = Literal["sum", "max", "any"]
 ValueMode = Literal["spec_number", "spec_flag", "quantity", "present"]
 #: 景观加分系数的探索上限（`DECISIONS/0019` 第七节）。A_nature ≤ 1，所以景观最多加半格再截顶。
 LANDSCAPE_BETA_MAX = 0.5
-#: 按 ADR0018 原规则运行的评分版本。它们的来源可以不声明数量语义（旧的"按件数相加"照旧），
-#: 单位写法也不按规范单位检查——旧配置与旧结果不改写。其他版本一律按增补订正的规则检查。
-ADR0018_SCORING_VERSIONS: frozenset[str] = frozenset({"e1-3-explore-v1"})
-#: 发展维成长项与广义交通的评分版本（`DECISIONS/0024`）。只有这些版本能声明 ``growth`` / ``transport``，
-#: 而且必须两项都声明：旧版本（ADR0018、E1-3 增补）的名字不会悄悄换成新行为。E1-5C 的健康评分版本与日常生活便利版本沿用它们。
-GROWTH_TRANSPORT_VERSIONS: frozenset[str] = frozenset(
-    {"e1-5a-growth-transport-v1", "e1-5c-health-v1", "e1-convenience-v1"}
-)
-#: E1-5C 的健康评分版本（`DECISIONS/0027`）：
+#: 评分版本（DECISIONS/0018、0019、0024、0027、0033）。只有这一版：
 #:
-#:     w̃_k = w_k / Σ_{j≠医疗} w_j        B_m = Σ_{k≠医疗} w̃_k s_{k,m}        S_m = (1 − γ) B_m + γ H(q_m)
+#:     w̃_k = w_k（六维产品画像的有效权重，合计 1）        B_m = Σ_k w̃_k s_{k,m}        S_m = (1 − γ) B_m + γ H(q_m)
 #:
-#: 六维（物质、安全、发展、休闲、环境、交通）的公式不变；医疗维没有分项（城市医疗背景不进满足感）；七维里 healthcare
-#: 的点数表示健康风险应对倾向，不进满足感；H 读月初健康状态、全组共用，不乘任何个人权重。只有这些版本能声明 ``health``，
-#: 而且必须声明。日常生活便利的版本（下面）沿用这一套健康语义。
-HEALTH_SCORING_VERSIONS: frozenset[str] = frozenset({"e1-5c-health-v1", "e1-convenience-v1"})
-#: E1 补充"日常生活便利"（`DECISIONS/0033`）的评分版本：物质维的第三项从"有没有洗衣设备"换成"这个月实际少做了多少家务
-#: 小时"。它沿用 E1-5C 的健康语义与 E1-5A 补充的成长、广义交通（也登记在上面两个集合里，不会意外回到旧医疗语义）。只有这些
-#: 版本能声明 ``convenience``，而且必须恰好一个；不能再有洗衣分项或按家务功能取"有没有"的来源——同一件事不计两份分。
-CONVENIENCE_SCORING_VERSIONS: frozenset[str] = frozenset({"e1-convenience-v1"})
+#: 六维（物质、安全、发展、休闲、环境、交通）各有分项，医疗维没有分项；发展维带成长项、交通维是广义交通；物质三项里
+#: daily_convenience 读这个月实际减少的家务小时。H 读月初健康状态、全组共用，不乘任何个人权重。
+SCORING_VERSION = "e1-convenience-v1"
 #: 便利分项的物质细需求键（产品输入里的"日常生活便利"：愿意在多大程度上花钱减少日常杂务）。
 DAILY_CONVENIENCE = "daily_convenience"
-#: 旧的洗衣细需求键与洗衣功能键。便利版本不接受它们：旧的洗衣点数不能静默改读成广义便利，旧的洗衣分也不能与便利分叠加。
-LEGACY_LAUNDRY = "laundry"
 #: 评分内容身份的规范化格式（哪些字段参与见 ``LifeScoringSpec.content``，DECISIONS/0025）。
 SCORING_CONTENT_SCHEMA = "life-scoring-content-v1"
 #: 不参与评分内容身份的字段：名字与引用（另行核对）、说明文字。其余字段——包括以后新增的——默认参与。
@@ -122,7 +107,7 @@ SCORING_CONTENT_EXCLUDED_SPEC_FIELDS: tuple[str, ...] = (
 SCORING_CONTENT_EXCLUDED_COMPONENT_FIELDS: tuple[str, ...] = ("description",)
 SCORING_CONTENT_EXCLUDED_SOURCE_FIELDS: tuple[str, ...] = ("note",)
 SCORING_CONTENT_EXCLUDED_MAPPING_FIELDS: tuple[str, ...] = ("definition",)
-#: 来源的数量语义（`DECISIONS/0019` 第十二节）。新版本的每个来源都必须声明：
+#: 来源的数量语义（`DECISIONS/0019` 第十二节）。每个来源都必须声明：
 #:
 #: ===========  ==========================================  ======================
 #: presence     有没有：取"存在"或规格是/否，数量不进入       分项只能 any 或 max
@@ -173,14 +158,12 @@ class ComponentSource(ContractModel):
     per_unit: bool = False
     unit: str = Field(min_length=1, max_length=80)
     note: str = Field(min_length=1, max_length=280)
-    #: 数量语义（增补订正）。旧版本可以不写；其他版本必须写，见 ``SourceMeasure``。
-    measure: SourceMeasure | None = None
+    #: 数量语义，见 ``SourceMeasure``。
+    measure: SourceMeasure
 
     @model_validator(mode="after")
     def _measure_consistent(self) -> ComponentSource:
         m = self.measure
-        if m is None:
-            return self
         if self.value not in _MEASURE_VALUES[m]:
             raise ValueError(
                 f"{self.source_id}: {m} 来源不能取 {self.value}"
@@ -230,19 +213,6 @@ class LandscapeSpec(ContractModel):
 
     beta: Annotated[float, Field(ge=0, le=LANDSCAPE_BETA_MAX)]
     definition: str = Field(min_length=1, max_length=400)
-
-
-class PlanCommuteSpec(ContractModel):
-    """通勤分项的方案级映射（`DECISIONS/0019` 第八节）：S = τ_T / (τ_T + T)。
-
-    T 是这个月实际住的住房在规格 ``minutes_key`` 里写的每工作日往返分钟；只有这个月恰好执行
-    了一份工作方式（``work_mode_key``）等于 ``onsite_value`` 的工作，才评通勤。τ_T 就是分项的 τ。
-    """
-
-    minutes_key: KeyStr
-    work_mode_key: KeyStr
-    onsite_value: Primitive
-    unit: str = Field(min_length=1, max_length=80)
 
 
 class GrowthSpec(ContractModel):
@@ -380,15 +350,11 @@ class ScoringComponent(ContractModel):
     combine: CombineRule = "sum"
     sources: tuple[ComponentSource, ...] = ()
     description: str = Field(min_length=1, max_length=400)
-    #: E1-3 增补的两种局部映射。没声明就按原规则（ADR0018），旧配置不受影响。
+    #: 局部映射，各只属于一个维度：环境的景观加分（`DECISIONS/0019`）、发展维的成长项与交通维的广义交通（`DECISIONS/0024`）、
+    #: 物质细需求 daily_convenience 的日常生活便利（`DECISIONS/0033`）。没有用到的不序列化。
     landscape: LandscapeSpec | None = None
-    plan_commute: PlanCommuteSpec | None = None
-    #: E1-5A 补充（`DECISIONS/0024`）：发展维的成长项、通勤维的广义交通。只有 ``GROWTH_TRANSPORT_VERSIONS``
-    #: 能声明；没有用到时不序列化——旧规格的输出与指纹逐字节不变。
     growth: GrowthSpec | None = Field(default=None, exclude_if=lambda v: v is None)
     transport: TransportSpec | None = Field(default=None, exclude_if=lambda v: v is None)
-    #: E1 补充"日常生活便利"（`DECISIONS/0033`）：只有 ``CONVENIENCE_SCORING_VERSIONS`` 能声明；没有用到时不序列化——
-    #: 旧规格的输出与内容身份逐字节不变。
     convenience: ConvenienceSpec | None = Field(default=None, exclude_if=lambda v: v is None)
 
     @field_validator("dimension")
@@ -426,18 +392,11 @@ class ScoringComponent(ContractModel):
                 )
         if self.landscape is not None and self.dimension != "environment":
             raise ValueError(f"{self.component_id}: 景观加分只属于环境维")
-        if self.plan_commute is not None:
-            if self.dimension != "commute":
-                raise ValueError(f"{self.component_id}: 方案级通勤只属于通勤维")
-            if self.sources:
-                raise ValueError(f"{self.component_id}: 方案级通勤读住房与工作的事实，不再挂来源")
         if self.transport is not None:
             if self.dimension != "commute":
                 raise ValueError(f"{self.component_id}: 广义交通只属于通勤维（交通便捷程度）")
-            if self.sources or self.plan_commute is not None:
-                raise ValueError(
-                    f"{self.component_id}: 广义交通读实际住房与到岗次数，不再挂来源，也不与旧的方案级通勤并存"
-                )
+            if self.sources:
+                raise ValueError(f"{self.component_id}: 广义交通读实际住房与到岗次数，不再挂来源")
         if self.growth is not None:
             if self.dimension != "opportunity":
                 raise ValueError(f"{self.component_id}: 成长项只属于发展维（opportunity）")
@@ -464,7 +423,6 @@ class ScoringComponent(ContractModel):
     def base_only(self) -> bool:
         return (
             not self.sources
-            and self.plan_commute is None
             and self.transport is None
             and self.growth is None
             and self.convenience is None
@@ -472,12 +430,8 @@ class ScoringComponent(ContractModel):
 
     @property
     def plan_level(self) -> bool:
-        """这一项的值来自实际执行方案的事实（城市条件写 plan_level）：旧的方案级通勤、广义交通或日常生活便利。"""
-        return (
-            self.plan_commute is not None
-            or self.transport is not None
-            or self.convenience is not None
-        )
+        """这一项的值来自实际执行方案的事实（城市条件写 plan_level）：广义交通或日常生活便利。"""
+        return self.transport is not None or self.convenience is not None
 
 
 class Omission(ContractModel):
@@ -492,60 +446,40 @@ class LifeScoringSpec(ContractModel):
     """一套探索评分规格。同一规格内，所有城市用同一套分项含义、方向、单位与锚点。"""
 
     spec_id: IdStr
-    scoring_version: str = Field(min_length=1)
+    scoring_version: Literal["e1-convenience-v1"]
     status: Literal["exploratory_synthetic"]
     function: Literal["saturating_capped_v1"] = SCORING_FUNCTION
     protocol_id: IdStr
     components: tuple[ScoringComponent, ...] = Field(min_length=1)
     note: str = Field(min_length=1)
     omissions: tuple[Omission, ...] = ()
-    #: E1-5C：健康项（γ 与 H）。只有 ``HEALTH_SCORING_VERSIONS`` 能声明，且必须声明；没有用到时不序列化——旧规格的
-    #: 输出与内容身份逐字节不变。
-    health: HealthScoringSpec | None = Field(default=None, exclude_if=lambda v: v is None)
+    #: 健康项（γ 与 H，DECISIONS/0027）。
+    health: HealthScoringSpec
 
     @model_validator(mode="after")
     def _complete(self) -> LifeScoringSpec:
         ids = [c.component_id for c in self.components]
         if len(ids) != len(set(ids)):
             raise ValueError("评分分项 ID 重复")
-        health_version = self.scoring_version in HEALTH_SCORING_VERSIONS
         for dim in AMENITY_DIMENSIONS:
             n = sum(1 for c in self.components if c.dimension == dim)
-            if health_version and dim == HEALTHCARE:
+            if dim == HEALTHCARE:
                 if n != 0:
                     raise ValueError(
-                        f"评分版本 {self.scoring_version} 没有医疗分项：城市医疗背景不进满足感，健康由全组共用的"
-                        "健康项 γH 评价（DECISIONS/0027）"
+                        "没有医疗分项：城市医疗背景不进满足感，健康由全组共用的健康项 γH 评价（DECISIONS/0027）"
                     )
                 continue
             if n != 1:
                 raise ValueError(f"维度 {dim} 必须恰好一个分项，得到 {n}")
-        if health_version and self.health is None:
-            raise ValueError(
-                f"评分版本 {self.scoring_version} 必须声明健康项 health（γ 与 H；γ = 0 是关闭对照）"
-            )
-        if not health_version and self.health is not None:
-            raise ValueError(
-                f"评分版本 {self.scoring_version} 不读健康项；要启用请用 {sorted(HEALTH_SCORING_VERSIONS)}——旧版本的名字"
-                "不能悄悄换成新行为"
-            )
         needs = [c.material_need for c in self.components if c.dimension == MATERIAL]
         if not needs:
             raise ValueError("物质维至少要有一个分项")
         if len(needs) != len(set(needs)):
             raise ValueError("同一物质细需求只能有一个分项")
-        if self.scoring_version not in ADR0018_SCORING_VERSIONS:
-            problems = supplement_spec_problems(self)  # 含成长项、广义交通与日常生活便利的版本检查
-        else:
-            problems = growth_transport_version_problems(self) + convenience_version_problems(self)
+        problems = supplement_spec_problems(self)
         if problems:
             raise ValueError("；".join(problems))
         return self
-
-    @property
-    def follows_adr0018(self) -> bool:
-        """这套规格是否按 ADR0018 的原规则运行（旧版本：不要求数量语义与规范单位）。"""
-        return self.scoring_version in ADR0018_SCORING_VERSIONS
 
     def content(self) -> dict[str, object]:
         """决定计算的全部规格内容，规范化成一份确定的字典（评分内容身份，DECISIONS/0025）。
@@ -553,7 +487,7 @@ class LifeScoringSpec(ContractModel):
         做法：原样 ``model_dump(mode="json")``，再删掉明确列出的不参与字段——默认全部参与，以后新增的字段也参与
         （漏排除只会多报一次"内容不同"，方向安全）。参与：评分版本、状态、公式标识；每个分项的编号、维度、物质
         细需求、单位、τ、合并规则；每个来源的取值规则、过滤条件、单位与数量语义；景观 β、方案级通勤、成长项 η 与
-        进度规则、广义交通 ρ 与参考到岗次数及各自单位、日常生活便利的任务组合、c、规则与单位。**不参与**：``spec_id``（名字，由反馈政策的
+        进度规则、广义交通 ρ 与参考到岗次数及各自单位、日常生活便利的任务组合、c、规则与单位、健康项 γ 与 H。**不参与**：``spec_id``（名字，由反馈政策的
         ``scoring_spec_id`` 另行核对）、``protocol_id``（引用，加载器与评分器另行核对）、规格 ``note`` 与
         ``omissions``、分项 ``description``、来源 ``note``、景观 / 成长项 / 广义交通 / 日常生活便利的 ``definition``（说明文字）。
 
@@ -574,9 +508,8 @@ class LifeScoringSpec(ContractModel):
                 if comp.get(mapping) is not None:
                     for key in SCORING_CONTENT_EXCLUDED_MAPPING_FIELDS:
                         comp[mapping].pop(key)
-        if data.get("health") is not None:  # E1-5C：γ 与 H 参与，说明文字不参与
-            for key in SCORING_CONTENT_EXCLUDED_MAPPING_FIELDS:
-                data["health"].pop(key)
+        for key in SCORING_CONTENT_EXCLUDED_MAPPING_FIELDS:  # 健康项：γ 与 H 参与，说明文字不参与
+            data["health"].pop(key)
         return {"content_schema": SCORING_CONTENT_SCHEMA, "spec": data}
 
     @property
@@ -595,23 +528,19 @@ class LifeScoringSpec(ContractModel):
 
     @property
     def scored_amenities(self) -> tuple[str, ...]:
-        """有分项的非物质维（E1-5C 健康版本里没有医疗维）。"""
-        if self.scoring_version in HEALTH_SCORING_VERSIONS:
-            return tuple(d for d in AMENITY_DIMENSIONS if d != HEALTHCARE)
-        return tuple(AMENITY_DIMENSIONS)
+        """有分项的非物质维（没有医疗维）。"""
+        return tuple(d for d in AMENITY_DIMENSIONS if d != HEALTHCARE)
 
 
 def scoring_content_problems(
     policy: EnergyFeedbackPolicy, spec: LifeScoringSpec
 ) -> list[tuple[str, str]]:
-    """实际加载并使用的评分规格，内容是否就是反馈政策声明的那一套（r3，DECISIONS/0025）。
+    """实际加载并使用的评分规格，内容是否就是反馈政策声明的那一套（DECISIONS/0025）。
 
     加载（``ledger.life_scoring_config.scoring_config_problems``）与年度交接（``econ.life_year``，结算之前）共用这一份。
-    政策没有声明（旧格式评分版本）时没有可比的，返回空——那些协议照旧只按编号与版本绑定。返回 (问题代码, 说明)。
+    返回 (问题代码, 说明)。
     """
     declared = policy.scoring_content_fingerprint
-    if declared is None:
-        return []
     actual = spec.content_fingerprint
     if actual == declared:
         return []
@@ -627,13 +556,13 @@ def scoring_content_problems(
 
 
 def supplement_spec_problems(spec: LifeScoringSpec) -> list[str]:
-    """新版本（非 ADR0018）规格的数量语义与单位检查（`DECISIONS/0019` 第十二节）。
+    """规格的数量语义与单位检查（`DECISIONS/0019` 第十二节），以及成长项、广义交通与日常生活便利是否齐全。
 
-    * 每个来源都要声明数量语义；``count`` 只读一次体验（拥有的物品按件数计分会刷分）；
-    * 分项单位、来源读取单位、方案级通勤单位都要是登记过的写法；
+    * ``count`` 只读一次体验（拥有的物品按件数计分会刷分）；
+    * 分项单位、来源读取单位、广义交通、成长项与便利的单位都要是登记过的写法；
     * 来源读取单位与分项单位同量纲（之间的换算系数写进来源表）；取值方式与量纲配套：
       存在型读布尔，数量读每月次数，规格数值读数值量纲；
-    * 方案级通勤：τ 与往返分钟同一个单位（S = τ/(τ+T) 不做换算）。
+    * 广义交通：τ_T 与往返分钟同一个单位（S = τ_T/(τ_T + T_eq) 不做换算）。
     """
     out: list[str] = []
     for comp in spec.components:
@@ -643,11 +572,7 @@ def supplement_spec_problems(spec: LifeScoringSpec) -> list[str]:
             out.append(f"{where}: 分项单位 {comp.unit!r} 没有登记——不按名称猜单位")
         for src in comp.sources:
             w = f"{where}/{src.source_id}"
-            if src.measure is None:
-                out.append(
-                    f"{w}: 新版本的来源必须声明数量语义 measure（presence/capacity/level/count）"
-                )
-            elif src.measure == "count" and set(src.records) - {"experience"}:
+            if src.measure == "count" and set(src.records) - {"experience"}:
                 out.append(
                     f"{w}: count 只用于一次体验（一次算一次）；拥有的物品、服务按件数计分会刷分，"
                     "请改成存在型或声明容量"
@@ -667,16 +592,6 @@ def supplement_spec_problems(spec: LifeScoringSpec) -> list[str]:
                 out.append(f"{w}: 数量取值是这个月的件数/次数，单位应是 次/月，得到 {su.label}")
             if src.value == "spec_number" and su.dimension not in NUMERIC_DIMENSIONS:
                 out.append(f"{w}: 规格数值的单位必须是数值量纲，得到 {su.label}")
-        pc = comp.plan_commute
-        if pc is not None:
-            pu = resolve_unit(pc.unit)
-            if pu is None or pu.dimension != "duration":
-                out.append(f"{where}: 方案级通勤的单位 {pc.unit!r} 必须是登记过的时长单位")
-            elif cu is not None and cu.unit_id != pu.unit_id:
-                out.append(
-                    f"{where}: 方案级通勤的 τ 用分项单位 {cu.label}，往返时间用 {pu.label}——"
-                    "S = τ/(τ+T) 不做换算，两者必须是同一个单位"
-                )
         ts = comp.transport
         if ts is not None:
             tu = resolve_unit(ts.unit)
@@ -712,70 +627,44 @@ def supplement_spec_problems(spec: LifeScoringSpec) -> list[str]:
                     f"{where}: 日常生活便利的 τ 用分项单位 {cu.label}，减少的家务用 {vu.label}——"
                     "s = q/(q + τ) 不做换算，两者必须是同一个单位"
                 )
-    out.extend(growth_transport_version_problems(spec))
-    out.extend(convenience_version_problems(spec))
+    out.extend(growth_transport_problems(spec))
+    out.extend(convenience_problems(spec))
     return out
 
 
-def growth_transport_version_problems(spec: LifeScoringSpec) -> list[str]:
-    """成长项与广义交通只属于 ``GROWTH_TRANSPORT_VERSIONS``，而且新版本必须两项都声明（`DECISIONS/0024`）。"""
+def growth_transport_problems(spec: LifeScoringSpec) -> list[str]:
+    """发展维必须声明成长项、交通维必须声明广义交通（`DECISIONS/0024`）。"""
     out: list[str] = []
-    declared = [c.component_id for c in spec.components if c.growth or c.transport]
-    if spec.scoring_version not in GROWTH_TRANSPORT_VERSIONS:
-        if declared:
-            out.append(
-                f"评分版本 {spec.scoring_version} 不读成长项或广义交通，分项 {declared} 却声明了——要启用"
-                f"请用 {sorted(GROWTH_TRANSPORT_VERSIONS)}，旧版本的名字不能悄悄换成新行为"
-            )
-        return out
     if spec.dimension_component("opportunity").growth is None:
-        out.append(
-            f"评分版本 {spec.scoring_version} 的发展维必须声明成长项 growth（η = 0 是关闭对照）"
-        )
+        out.append("发展维必须声明成长项 growth（η = 0 是关闭对照）")
     if spec.dimension_component("commute").transport is None:
-        out.append(f"评分版本 {spec.scoring_version} 的通勤维必须声明广义交通 transport")
+        out.append("交通维必须声明广义交通 transport")
     return out
 
 
-def convenience_version_problems(spec: LifeScoringSpec) -> list[str]:
-    """日常生活便利只属于 ``CONVENIENCE_SCORING_VERSIONS``；这些版本恰好一个便利分项，并且不再计旧的洗衣分（`DECISIONS/0033`）。
+def convenience_problems(spec: LifeScoringSpec) -> list[str]:
+    """恰好一个日常生活便利分项，并且不按家务功能另给一份"有没有"的分（`DECISIONS/0033`）。
 
-    "不叠加"的检查：物质维不能还有 ``laundry`` 细需求；任何来源不能按 ``laundry`` 或便利任务组合里的功能取"有没有"——同一项
-    家务已经由"实际减少了多少小时"评价，再按"有没有洗衣机"给一份分，就是同一件事计两份。旧版本声明便利分项，或在旧版本里给
-    ``daily_convenience`` 另写一套分项，都是把旧名字悄悄换成新行为，一律拒绝。
+    同一项家务已经由"实际减少了多少小时"评价，再按"有没有洗衣机"给一份分，就是同一件事计两份。
     """
     out: list[str] = []
     declared = [c for c in spec.components if c.convenience is not None]
-    named = [c.component_id for c in spec.components if c.material_need == DAILY_CONVENIENCE]
-    if spec.scoring_version not in CONVENIENCE_SCORING_VERSIONS:
-        if declared or named:
-            out.append(
-                f"评分版本 {spec.scoring_version} 不读日常生活便利，分项 {sorted(set(named))} 却声明了——要启用请用 "
-                f"{sorted(CONVENIENCE_SCORING_VERSIONS)}，旧版本的名字不能悄悄换成新行为"
-            )
-        return out
     if len(declared) != 1:
         out.append(
-            f"评分版本 {spec.scoring_version} 必须恰好有一个日常生活便利分项（物质细需求 {DAILY_CONVENIENCE}，声明 "
-            f"convenience），得到 {len(declared)} 个"
+            f"必须恰好有一个日常生活便利分项（物质细需求 {DAILY_CONVENIENCE}，声明 convenience），得到 {len(declared)} 个"
         )
     for c in spec.components:
         if c.material_need == DAILY_CONVENIENCE and c.convenience is None:
             out.append(
                 f"{c.component_id}: 细需求 {DAILY_CONVENIENCE} 只能由 convenience 规则评价（读实际减少的家务小时）"
             )
-        if c.material_need == LEGACY_LAUNDRY:
-            out.append(
-                f"{c.component_id}: 评分版本 {spec.scoring_version} 用日常生活便利替换了旧的洗衣分——两者不能并存，"
-                "否则同一项家务计两份分"
-            )
     tasks = {t for c in declared for t in c.convenience.tasks}  # type: ignore[union-attr]
     for c in spec.components:
-        for s in c.sources:
-            hit = sorted(set(s.functions) & (tasks | {LEGACY_LAUNDRY}))
+        for src in c.sources:
+            hit = sorted(set(src.functions) & tasks)
             if hit:
                 out.append(
-                    f"{c.component_id}/{s.source_id}: 按家务功能 {hit} 取“有没有”的来源与日常生活便利重复计分"
+                    f"{c.component_id}/{src.source_id}: 按家务功能 {hit} 取“有没有”的来源与日常生活便利重复计分"
                     "（便利只读实际减少的家务小时）"
                 )
     return out
@@ -814,7 +703,7 @@ class CityComponentCondition(ContractModel):
     ``status = unknown``：这座城这项没有数据。**不是零**：有正权重时该月总分不完整，
     不补零，也不把这项删掉后重新归一化其余权重。
 
-    ``status = plan_level``（E1-3 增补）：这一项的值来自实际执行方案的事实（方案级通勤），
+    ``status = plan_level``：这一项的值来自实际执行方案的事实（广义交通、日常生活便利），
     不用城市背景，所以不带 b、c、η。
     """
 
@@ -899,7 +788,7 @@ class ComparisonGroup(ContractModel):
     time_basis: str = Field(min_length=1, max_length=200)
     action_roles: tuple[ItemRole, ...] = Field(min_length=1)
     allowed_source_kinds: tuple[SourceKind, ...] = Field(min_length=1)
-    commute_granularity: Literal["background", "plan_level"]
+    commute_granularity: Literal["plan_level"]
     units: dict[KeyStr, Annotated[str, Field(min_length=1, max_length=80)]]
     note: str = Field(min_length=1)
 
@@ -917,25 +806,17 @@ class ComparisonGroup(ContractModel):
 # 偏好：来源必须明确
 # ==========================================================================
 
-PreferenceSource = Literal[
-    "research_synthetic_truth", "product_stated_numeric", "product_confirmed_six_dim"
-]
-#: E3-A（DECISIONS/0034）：六维产品画像的偏好来源。它的 ``dimension_weights`` 只有六维（没有 healthcare），就是用户确认的精确点数
-#: / 100 只转一次浮点得到的有效权重；只能交给健康评分版本（那里有效权重本来就只含六维）。
+#: 偏好来源：用户确认的六维精确点数（DECISIONS/0034）。``dimension_weights`` 只有六维（没有 healthcare），就是确认的精确点数 / 100
+#: 只转一次浮点得到的有效权重。
+PreferenceSource = Literal["product_confirmed_six_dim"]
 SIX_DIM_DIMENSIONS: tuple[str, ...] = tuple(d for d in ALL_DIMENSIONS if d != HEALTHCARE)
 
 
 class ScoringPreference(ContractModel):
-    """评分用的权重。**来源写在对象上**，研究与产品两条路径不混。
+    """评分用的权重：用户确认的六维精确点数 / 100（只有六个键，健康回答独立、不进权重），物质细项精确点数 / 100；物质父项为 0
+    时没有细项权重。不从序数或文字臆造。
 
-    * ``research_synthetic_truth``：合成设定的已知偏好（研究内部）。
-    * ``product_stated_numeric``：用户明确给出的数值（七维定和点数、物质细项定和点数）
-      按声明的规则 / 100 换算；不从序数或文字臆造，不借用研究真值。
-    * ``product_confirmed_six_dim``（E3-A）：用户确认的六维精确点数 / 100（只有六个键，健康回答独立、不进权重），物质细项精确点数
-      / 100；物质父项为 0 时没有细项权重。
-
-    权重不随城市变化，也不用实际花钱比例冒充偏好。不在 ``material_weights`` 里的物质
-    细需求权重为 0（定和量表的含义）。
+    权重不随城市变化，也不用实际花钱比例冒充偏好。不在 ``material_weights`` 里的物质细需求权重为 0（定和量表的含义）。
     """
 
     person_id: IdStr
@@ -943,28 +824,13 @@ class ScoringPreference(ContractModel):
     dimension_weights: dict[str, Annotated[float, Field(ge=0, allow_inf_nan=False)]]
     material_weights: dict[KeyStr, Annotated[float, Field(ge=0, allow_inf_nan=False)]]
     derivation: str = Field(min_length=1, max_length=400)
-    #: E1-5C：七维 healthcare 权重的含义，照抄输入（画像或研究真值）。``health_risk_coping_v1`` 时只有健康评分版本能用它，
-    #: 而且六维换算会把它排除在外；为空是旧含义，只有旧版本能用。没有用到时不序列化。
-    healthcare_semantics: Literal["health_risk_coping_v1"] | None = Field(
-        default=None, exclude_if=lambda v: v is None
-    )
 
     @model_validator(mode="after")
     def _weights_ok(self) -> ScoringPreference:
-        if self.source == "product_confirmed_six_dim":
-            # E3-A：六维产品画像只有六个键；不能补一个 healthcare 权重去凑旧的七维形状
-            if set(self.dimension_weights) != set(SIX_DIM_DIMENSIONS):
-                raise ValueError(f"六维产品画像的权重必须恰好是 {list(SIX_DIM_DIMENSIONS)}")
-            if self.healthcare_semantics is not None:
-                raise ValueError("六维产品画像没有 healthcare 点数，不写 healthcare_semantics")
-        elif set(self.dimension_weights) != set(ALL_DIMENSIONS):
-            raise ValueError(f"七维权重必须恰好是 {list(ALL_DIMENSIONS)}")
+        if set(self.dimension_weights) != set(SIX_DIM_DIMENSIONS):
+            raise ValueError(f"六维产品画像的权重必须恰好是 {list(SIX_DIM_DIMENSIONS)}")
         if abs(math.fsum(self.dimension_weights.values()) - 1.0) > WEIGHT_SUM_TOL:
-            raise ValueError(
-                "六维权重必须合计 1"
-                if self.source == "product_confirmed_six_dim"
-                else "七维权重必须合计 1"
-            )
+            raise ValueError("六维权重必须合计 1")
         if (
             self.material_weights
             and abs(math.fsum(self.material_weights.values()) - 1.0) > WEIGHT_SUM_TOL
@@ -1024,15 +890,6 @@ class LandscapeTerm(ContractModel):
     physical: float  # S_physical = b/(b+τ)
     contribution: float  # β × A
     source_kind: SourceKind
-
-
-class CommuteTerm(ContractModel):
-    """方案级通勤的明细：这个月住在哪、做哪份线下工作、每工作日往返多少分钟。"""
-
-    housing_opportunity_id: IdStr
-    job_opportunity_id: IdStr
-    minutes: Annotated[float, Field(ge=0)]
-    tau_minutes: float
 
 
 class AbilityProgressStep(ContractModel):
@@ -1104,11 +961,9 @@ class ComponentMonth(ContractModel):
     capped: bool = False
     reasons: tuple[str, ...] = ()
     landscape: LandscapeTerm | None = None
-    commute: CommuteTerm | None = None
-    #: E1-5A 补充（`DECISIONS/0024`）。没有用到时不序列化——旧评分结果逐字节不变。
+    #: 没有用到的映射明细不序列化。
     growth: GrowthTerm | None = Field(default=None, exclude_if=lambda v: v is None)
     transport: TransportTerm | None = Field(default=None, exclude_if=lambda v: v is None)
-    #: E1 补充"日常生活便利"（`DECISIONS/0033`）。没有用到时不序列化——旧评分结果逐字节不变。
     convenience: ConvenienceTerm | None = Field(default=None, exclude_if=lambda v: v is None)
 
 
@@ -1208,35 +1063,21 @@ AnnualStatus = Literal["complete", "incomplete_months", "exited", "stopped"]
 
 
 class HealthWeighting(ContractModel):
-    """E1-5C 这一年的权重换算（`DECISIONS/0027`）：原始七维权重、有效六维权重、γ 与 H。
+    """这一年的权重换算（`DECISIONS/0027`、0034）：六维产品画像的原始权重（确认点数 / 100）、有效六维权重、γ 与 H。
 
-    ``raw_dimension_weights`` 是输入原样（产品：用户点数 / 100；研究：合成真值），其中 healthcare 是健康风险应对倾向；
-    ``effective_weights`` = w_k / Σ_{j≠医疗} w_j，只含六维、合计为 1。
-
-    E3-A（DECISIONS/0034）：六维产品画像没有 healthcare 点数——``raw_dimension_weights`` 只有六维（确认点数 / 100），
-    ``healthcare_semantics`` 为空、``independent_health_input`` 写独立健康回答的含义；不为了旧形状伪造一份七维原始权重。两者恰好写一个。"""
+    六维产品画像没有 healthcare 点数；``independent_health_input`` 写独立健康回答的含义（不占 100 分、不进权重）。"""
 
     raw_dimension_weights: dict[str, float]
-    healthcare_semantics: Literal["health_risk_coping_v1"] | None = Field(
-        default=None, exclude_if=lambda v: v is None
-    )
     six_dimension_sum: float
     effective_weights: dict[str, float]
     gamma: float
     state_values: HealthStateValues
     formula: str = Field(min_length=1, max_length=280)
-    #: E3-A：六维产品画像的健康回答是独立问卷（不占 100 分、不进权重）。旧记录没有这一项（不序列化，逐字节不变）。
-    independent_health_input: Literal["independent_health_answers_v1"] | None = Field(
-        default=None, exclude_if=lambda v: v is None
-    )
+    independent_health_input: Literal["independent_health_answers_v1"]
 
     @model_validator(mode="after")
-    def _one_health_input(self) -> HealthWeighting:
-        if (self.healthcare_semantics is None) == (self.independent_health_input is None):
-            raise ValueError(
-                "权重换算记录必须恰好说明一种健康输入：七维 healthcare 点数的含义，或独立健康回答（六维产品画像）"
-            )
-        if self.independent_health_input is not None and HEALTHCARE in self.raw_dimension_weights:
+    def _six_dimensions(self) -> HealthWeighting:
+        if HEALTHCARE in self.raw_dimension_weights:
             raise ValueError("六维产品画像的原始权重没有 healthcare：不伪造医疗点数")
         return self
 
@@ -1270,15 +1111,15 @@ class ExploratoryYearScore(ContractModel):
     hard_requirements: tuple[HardRequirementResult, ...] = ()
     explanation: str = Field(min_length=1)
     notes: tuple[str, ...] = ()
-    #: 持有物数量从哪来：结算写出（recorded）、旧记录推断（legacy_order_inference，只有旧评分版本）、
-    #: 或这一年没有持有物（no_holdings）。
-    holding_quantity_source: Literal["recorded", "legacy_order_inference", "no_holdings"]
+    #: 持有物数量从哪来：结算写出（recorded），或这一年没有持有物（no_holdings）。
+    holding_quantity_source: Literal["recorded", "no_holdings"]
     #: 在用物品上记录了、本轮不评价的方案属性（品牌、档次、菜系……）。不从价格推断偏好。
     unevaluated_attributes: tuple[str, ...] = ()
-    #: E1-5C：停止月与停止之后的月份；健康评分版本的权重换算。没有用到时不序列化。
+    #: 停止月与停止之后的月份（DECISIONS/0027）。没有用到时不序列化。
     months_stopped: tuple[Month, ...] = Field(default=(), exclude_if=lambda v: v == ())
     months_after_stop: tuple[Month, ...] = Field(default=(), exclude_if=lambda v: v == ())
-    health_weighting: HealthWeighting | None = Field(default=None, exclude_if=lambda v: v is None)
+    #: 权重换算与健康项。
+    health_weighting: HealthWeighting
 
     @model_validator(mode="after")
     def _consistent(self) -> ExploratoryYearScore:
@@ -1296,22 +1137,20 @@ class ExploratoryYearScore(ContractModel):
 
 LeafSupport = Literal["supported", "unknown_in_some_city", "no_component"]
 EvidenceClass = Literal["observed_or_derived", "estimated", "synthetic_only", "mixed", "none"]
-#: 覆盖报告版本。coverage-v1（2026-10-07）只核对评分条件有没有声明，**没有**核对目录事实与
-#: 功能供给；它的 data_coverage 不代表生活资料齐全。coverage-v2 起分开报三层与两类来源。
-CoverageReportVersion = Literal["coverage-v1", "coverage-v2"]
+#: 覆盖报告版本：分开报规则、城市资料、实际行动三层与生活事实、评分参数两类来源（`DECISIONS/0019` 第十二节）。
+CoverageReportVersion = Literal["coverage-v2"]
 #: 规则覆盖：评分规格有没有定义这项需求怎样评分。
 RuleCoverage = Literal["defined", "no_component"]
 #: 城市资料覆盖：比较组每座城是否提供了这项规则读到的事实（规格键、功能供给、景观、通勤分钟）。
 CityDataCoverage = Literal["complete", "gap", "not_applicable"]
-#: 实际行动可评分性：只要城市资料齐全，任何实际安排都能评；还是要看这个人的实际安排
-#: （例如方案级通勤只评恰好一份线下工作的月份）。
+#: 实际行动可评分性：只要城市资料齐全，任何实际安排都能评；还是要看这个人的实际安排。
 ActionScope = Literal["all_arrangements", "conditional", "not_applicable"]
 
 
 class LeafCoverage(ContractModel):
     """一个偏好叶子的覆盖。
 
-    ``support`` 沿用 v1 的三种取值，但 v2 的 supported 意味着规则已定义**且**每座城的资料齐全。
+    ``support = supported`` 意味着规则已定义**且**每座城的资料齐全。
     ``fact_evidence`` 是生活事实（目录规格、功能供给声明、景观指标、住房分钟与工作方式）的来源；
     ``parameter_evidence`` 是评分映射参数（城市评分条件里的 b、c、η）的来源。参数是估计，不会让
     合成的住房、商品或通勤资料变成真实资料。``evidence`` 是两者合起来的类别。
@@ -1325,21 +1164,16 @@ class LeafCoverage(ContractModel):
     action_mechanism: bool  # 背景已知不代表行动效果也建模了
     cities_unknown: tuple[str, ...] = ()
     reasons: tuple[str, ...] = ()
-    # ---- coverage-v2 起 ----
-    rule: RuleCoverage | None = None
-    city_data: CityDataCoverage | None = None
-    action_scope: ActionScope | None = None
-    fact_evidence: EvidenceClass | None = None
+    rule: RuleCoverage
+    city_data: CityDataCoverage
+    action_scope: ActionScope
+    fact_evidence: EvidenceClass
     parameter_evidence: EvidenceClass | None = None
     data_gaps: tuple[str, ...] = ()
 
 
 class CoverageReport(ContractModel):
-    """一个人在一个比较组上的偏好覆盖。**不设阈值，不解锁总分**；正权重未知时总分照旧为空。
-
-    ``report_version`` 缺省为 coverage-v1，是为了旧报告（2026-10-07 的演示输出）还能读进来；
-    v1 没有核对目录事实，``catalog_facts_checked`` 为 False，它的标签不能当成生活资料齐全的证明。
-    """
+    """一个人在一个比较组上的偏好覆盖。**不设阈值，不解锁总分**；正权重未知时总分照旧为空。"""
 
     person_id: IdStr
     preference_source: PreferenceSource
@@ -1353,21 +1187,9 @@ class CoverageReport(ContractModel):
     coverage_label: Literal["synthetic_contract_coverage", "data_coverage", "mixed_coverage"]
     omissions: tuple[Omission, ...] = ()
     notes: tuple[str, ...] = ()
-    report_version: CoverageReportVersion = "coverage-v1"
+    report_version: CoverageReportVersion = "coverage-v2"
     fact_weight_by_evidence: dict[str, float] = Field(default_factory=dict)
     parameter_weight_by_evidence: dict[str, float] = Field(default_factory=dict)
-
-    @model_validator(mode="after")
-    def _v2_complete(self) -> CoverageReport:
-        if self.report_version == "coverage-v2":
-            for leaf in self.leaves:
-                if None in (leaf.rule, leaf.city_data, leaf.action_scope, leaf.fact_evidence):
-                    raise ValueError(f"coverage-v2 的叶子 {leaf.leaf} 必须写明三层覆盖与事实来源")
-        return self
-
-    @property
-    def catalog_facts_checked(self) -> bool:
-        return self.report_version != "coverage-v1"
 
 
 # ==========================================================================
@@ -1439,7 +1261,6 @@ def internal_scoring_models() -> tuple[type[ContractModel], ...]:
         ScoringComponent,
         ComponentSource,
         LandscapeSpec,
-        PlanCommuteSpec,
         GrowthSpec,
         TransportSpec,
         ConvenienceSpec,
@@ -1457,7 +1278,6 @@ def internal_scoring_models() -> tuple[type[ContractModel], ...]:
         MaterialTerm,
         ImprovementTerm,
         LandscapeTerm,
-        CommuteTerm,
         AbilityProgressStep,
         GrowthTerm,
         TransportTerm,

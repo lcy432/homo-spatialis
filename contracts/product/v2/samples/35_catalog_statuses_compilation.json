@@ -6,7 +6,7 @@
    "US:SYNTH2026:K51",
    "US:SYNTH2026:M52"
   ],
-  "compilation_fingerprint": "a77d80b4605eebd76f9e5cc7a6463b855b4201d22a29d874488e8a5957ebba68",
+  "compilation_fingerprint": "8ef2b45bd8bd56e7244402d40a905a245c5c0e2d73c4257a84d9773785a75fc9",
   "compilation_id": "catalog.pack.e3a.synthetic-v1",
   "compiled": [
    {
@@ -351,7 +351,7 @@
   "meta": {
    "conversion_version": "e3a-conversion-v2",
    "data_pack": {
-    "content_fingerprint": "a26ef89ab145404a293be6243ac7decd7626753248965c501c09a74b81f48364",
+    "content_fingerprint": "708c13856e70f7334a13d07113dbe9ba6921009bfc744155e3923b005fca594e",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
     "pack_id": "pack.e3a.synthetic-v1",
     "status": "synthetic_fixture_only"

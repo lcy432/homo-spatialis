@@ -20,10 +20,7 @@ E1-2 起：只有 ``active`` 状态能构造观察（终态与出局都不再接
 ``ObservationPermission`` 的每个字段**都没有默认值**，``build_observation`` 的
 ``permission`` 也没有默认值。没声明许可就不能构造观察，更不会默认落到最宽松的模式。
 
-两种信息条件**不是同一种实验**：
-
-* ``product_stated_profile``：产品模式。可以把用户自己填的问卷分数告诉代理。
-* ``research_text_only``：研究"从文字理解隐藏偏好"。**不给**问卷分数，只给文字。
+信息条件只有产品模式 ``product_stated_profile``：分身替用户本人生活，用户自己的陈述按许可可见。
 
 --------------------------------------------------------------------------
 一条语义边界（记在这里，免得以后忘）
@@ -40,7 +37,7 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Any, Literal
 
-from pydantic import Field, model_validator
+from pydantic import Field
 
 from common.ids import CityId, OccupationId
 from common.life_aggregation_contracts import RESERVED_AGGREGATION_KEYS
@@ -73,7 +70,6 @@ from common.life_contracts import (
     GoalRealization,
     HardRequirement,
     HealthBinding,
-    HealthInputDeclaration,
     HealthMonth,
     HealthRules,
     HealthState,
@@ -83,7 +79,6 @@ from common.life_contracts import (
     IllnessEventSource,
     IndependentHealthInputDeclaration,
     InjectedIllness,
-    InternalPreferenceTruth,
     InternalYearScore,
     ItemExecution,
     LearningYearRecord,
@@ -109,8 +104,6 @@ from common.life_contracts import (
     SettlementProblem,
     SettlementResult,
     SeverityRules,
-    SoftPreference,
-    StatedLifeProfile,
     StopRecord,
     TreatmentNeed,
     TreatmentOffer,
@@ -141,7 +134,7 @@ from common.life_scoring_contracts import RESERVED_SCORING_KEYS, serialized_inte
 from common.money import Money
 from common.product_contracts import internal_product_models
 
-InformationCondition = Literal["product_stated_profile", "research_text_only"]
+InformationCondition = Literal["product_stated_profile"]
 
 
 class ObservationPermission(ContractModel):
@@ -149,53 +142,36 @@ class ObservationPermission(ContractModel):
 
     condition: InformationCondition
     show_stated_dimension_points: bool
-    show_soft_preferences: bool
     show_hard_requirements: bool
     show_free_text: bool
     show_energy_level: bool
-    #: 用户自己明确给出的物质细项点数（E1-3）。和七维点数一样是用户的陈述，产品模式可以
-    #: 给；研究"从文字理解偏好"时不能给。内部评分结果则任何模式都不进观察。
+    #: 用户自己明确给出的物质细分（DECISIONS/0034）。内部评分结果则任何模式都不进观察。
     show_stated_material_points: bool
     permission_version: str = Field(min_length=1)
-    #: E3-A（DECISIONS/0034）：六维产品画像的独立健康回答是否可见。六维产品画像的观察**必须**显式写 true 或 false
-    #: （``build_observation`` 检查，没有默认值）；旧画像不读它，不写也不序列化（旧许可的身份逐字节不变）。
-    show_health_answers: bool | None = Field(default=None, exclude_if=lambda v: v is None)
-
-    @model_validator(mode="after")
-    def _research_hides_stated_scores(self) -> ObservationPermission:
-        if self.condition == "research_text_only" and (
-            self.show_stated_dimension_points
-            or self.show_soft_preferences
-            or self.show_stated_material_points
-            or self.show_health_answers
-        ):
-            raise ValueError(
-                "research_text_only 研究的就是从文字理解偏好，不能同时给出问卷分数、"
-                "物质细项点数、结构化软偏好或健康问卷的回答——那会把答案直接递过去"
-            )
-        return self
+    #: 独立健康回答是否可见（DECISIONS/0034）。
+    show_health_answers: bool
 
 
 def standard_product_permission(permission_version: str) -> ObservationPermission:
     """标准产品观察的许可（E1-4A 修复，所有者 2026-10-08 裁决；ADR0020 第十二节）。
 
-    产品模式里分身替用户本人生活：用户自己的陈述（七维点数、软偏好、硬要求、自由文本、物质细项点数）
+    产品模式里分身替用户本人生活：用户自己的陈述（六维点数、物质分配、独立健康回答、硬要求、自由文本）
     都可见；做月度计划还要知道自己的每月时间预算、**每月精力额度及单位**、公开的资源成本与已执行生活的
     时间与负担反馈——普通产品情景不让分身靠猜隐藏额度做计划，所以 ``show_energy_level`` 显式打开。
 
     这是一个显式预设，不是全局默认：研究对照要隐藏精力，就自己构造 ``show_energy_level=False`` 的许可；
     隐藏后额度与汇总字段为空，但各项活动的每小时负担仍是公开成本，代理可能自己推算负担。显示精力的观察
-    照旧标为动态反馈条件（``dynamic_feedback_channel``），虽然本轮没有满足感对精力的反馈。
+    照旧标为动态反馈条件（``dynamic_feedback_channel``）。
     """
     return ObservationPermission(
         condition="product_stated_profile",
         show_stated_dimension_points=True,
-        show_soft_preferences=True,
         show_hard_requirements=True,
         show_free_text=True,
         show_energy_level=True,
         show_stated_material_points=True,
         permission_version=permission_version,
+        show_health_answers=True,
     )
 
 
@@ -213,8 +189,6 @@ class VisibleOpportunity(ContractModel):
     price: PriceQuote | None
     compensation: PriceQuote | None
     occupation: OccupationId | None
-    time_cost_hours_per_year: float
-    energy_burden: float
     eligibility: tuple[str, ...]
     arrangement_options: dict[str, tuple[str | int | float | bool, ...]]
     duration: DurationSpec
@@ -223,10 +197,11 @@ class VisibleOpportunity(ContractModel):
     attributes: dict[str, str | int | float | bool]
     #: E1-4A：公开的时间与精力事实（契约里的 ``resource``）——工时与到岗安排、每次或每月的小时、
     #: 使用频率、每小时负担、家务替代。可见字段不叫 resource：免得与溯源信息（source）混淆。
-    time_energy: ResourceProfile | None = None
-    #: E1-5A：雇主、学习完成后授予的能力，以及"按年初状态现在能不能选、还缺什么"。旧协议不序列化。
+    time_energy: ResourceProfile
+    #: 雇主（没有雇主的不序列化）、学习完成后授予的能力，以及"按年初状态现在能不能选、还缺什么"（DECISIONS/0023）。
     employer_id: str | None = Field(default=None, exclude_if=lambda v: v is None)
-    grants: tuple[str, ...] | None = Field(default=None, exclude_if=lambda v: v is None)
+    grants: tuple[str, ...]
+    #: 没有资格要求的机会不序列化。
     qualification: VisibleQualification | None = Field(default=None, exclude_if=lambda v: v is None)
 
 
@@ -244,8 +219,8 @@ class VisibleTraining(ContractModel):
     months_participated: int
     months_required: int
     completed: bool
-    #: E1-5A：学费是否已结清（继续参加不再收费）、完成年月。旧协议不序列化。
-    fee_paid: bool | None = Field(default=None, exclude_if=lambda v: v is None)
+    #: 学费是否已结清（继续参加不再收费）、完成年月（还没完成的不序列化）。
+    fee_paid: bool
     completed_year: int | None = Field(default=None, exclude_if=lambda v: v is None)
     completed_month: int | None = Field(default=None, exclude_if=lambda v: v is None)
 
@@ -322,23 +297,15 @@ class VisibleHealthAnswer(ContractModel):
 
 
 class VisibleProfile(ContractModel):
-    """用户陈述里**被许可**的那部分。没许可的字段是 ``None``，不是被省略的键。
+    """用户陈述里**被许可**的那部分（六维产品画像，DECISIONS/0034）。没许可的字段在 ``not_permitted`` 里列出。
 
-    E3-A（DECISIONS/0034）：六维产品画像写在 ``six_dimension_points``（精确分数，六维合计 100，没有 healthcare）、
-    ``material_allocation``（物质内部的相对重要性，父项为 0 时不适用）与 ``health_answers``（独立问卷，不占 100 分）；
-    这时 ``statement_kind = product_six_dimension_v1``，七维的 ``dimension_points`` / ``material_points`` 为空——不是没有许可，
-    是这份画像没有七维整数点数。新字段没有用到时不序列化，旧观察逐字节不变。"""
+    ``six_dimension_points`` 是精确分数（六维合计 100，没有 healthcare）；``material_allocation`` 是物质内部的相对重要性（父项为 0
+    时不适用）；``health_answers`` 是独立问卷（不占 100 分）。"""
 
-    dimension_points: dict[str, int] | None
-    soft_preferences: tuple[SoftPreference, ...] | None
     hard_requirements: tuple[HardRequirement, ...] | None
     free_text: str | None
-    material_points: dict[str, int] | None
-    #: E1-5C：七维里 healthcare 点数在这份协议里是什么意思（只在点数可见、协议声明了新含义时）。没有用到时不序列化。
-    healthcare_meaning: str | None = Field(default=None, exclude_if=lambda v: v is None)
-    statement_kind: Literal["product_six_dimension_v1"] | None = Field(
-        default=None, exclude_if=lambda v: v is None
-    )
+    statement_kind: Literal["product_six_dimension_v1"]
+    #: 下面几项没有许可时不出现（键不序列化），并在 ``not_permitted`` 里列出。
     six_dimension_points: dict[str, str] | None = Field(
         default=None, exclude_if=lambda v: v is None
     )
@@ -350,8 +317,8 @@ class VisibleProfile(ContractModel):
     health_answers: tuple[VisibleHealthAnswer, ...] | None = Field(
         default=None, exclude_if=lambda v: v is None
     )
-    #: E3-A：六维产品画像里因为许可没有给出的字段（显式列出，免得“没有这个键”被读成“用户没有回答”）。旧画像不写、不序列化。
-    not_permitted: tuple[str, ...] | None = Field(default=None, exclude_if=lambda v: v is None)
+    #: 因为许可没有给出的字段（显式列出，免得“没有这个键”被读成“用户没有回答”）。
+    not_permitted: tuple[str, ...]
 
 
 class VisibleHouseholdTask(ContractModel):
@@ -485,27 +452,20 @@ class ObservationChannels(ContractModel):
     """这次观察处在什么信息条件下（E1-4B，DECISIONS/0021）。分开记，不用一个布尔值兼作几种含义。
 
     * ``energy_visible``：精力额度与精力用量是否显示（原有的 ``show_energy_level`` 许可）；
-    * ``satisfaction_feedback``：满足感 → 下一年额度的反馈是否实际起作用——``quota_feedback`` 只在 E1-4B
-      协议的反馈开着且 α > 0 时；E1-4A 与更早的协议、关闭的反馈、α = 0 都是 ``none``；
-    * ``study_condition``：静态的文字理解条件（研究，无满足感反馈）、没有满足感反馈的产品条件，还是含生活
-      反馈的动态条件。反馈开着时，即使隐藏精力数值，行动可行性的变化也可能透露评价——所以动态条件只看
-      反馈是否起作用，不看额度显不显示。
+    * ``satisfaction_feedback``：满足感 → 下一年额度的反馈是否实际起作用——``quota_feedback`` 只在反馈开着且 α > 0 时；
+      关闭的反馈、α = 0 都是 ``none``；
+    * ``study_condition``：没有满足感反馈的产品条件，还是含生活反馈的动态条件。反馈开着时，即使隐藏精力数值，行动可行性
+      的变化也可能透露评价——所以动态条件只看反馈是否起作用，不看额度显不显示。
 
-    原有的 ``dynamic_feedback_channel``（= 精力是否可见）照旧保留作保守标识，不拿它判断 E1-4B 是否开启。
+    原有的 ``dynamic_feedback_channel``（= 精力是否可见）照旧保留作保守标识，不拿它判断反馈是否开启。
     """
 
     energy_visible: bool
     satisfaction_feedback: Literal["none", "quota_feedback"]
-    study_condition: Literal[
-        "static_text_understanding",
-        "product_without_satisfaction_feedback",
-        "dynamic_life_feedback",
-    ]
-    #: E1-5C：疾病风险的信息条件。本轮只实现默认条件：不告知疾病—工作负担关系、概率表、系数与未来事件；当前病情、
-    #: 规则与费用公开。其他条件（给定性提示、给概率）登记为以后的工作。没有用到时不序列化。
-    health_risk_information: Literal["default_no_risk_relation"] | None = Field(
-        default=None, exclude_if=lambda v: v is None
-    )
+    study_condition: Literal["product_without_satisfaction_feedback", "dynamic_life_feedback"]
+    #: 疾病风险的信息条件（DECISIONS/0027）。只实现默认条件：不告知疾病—工作负担关系、概率表、系数与未来事件；当前病情、
+    #: 规则与费用公开。其他条件（给定性提示、给概率）登记为以后的工作。
+    health_risk_information: Literal["default_no_risk_relation"]
 
 
 class AgentObservation(ContractModel):
@@ -524,36 +484,24 @@ class AgentObservation(ContractModel):
     occupation: OccupationId | None
     holdings: tuple[VisibleHolding, ...]
     training: tuple[VisibleTraining, ...]
-    skills: dict[str, float]
     goals: tuple[str, ...]
     experience_summary: tuple[str, ...]
     profile: VisibleProfile
     opportunities: tuple[VisibleOpportunity, ...]
     minimum_living: tuple[VisibleMinimumNeed, ...]
     last_feedback: VisibleFeedback | None
-    #: E1-4A：月度资源规则与预算（旧规则为空）。
-    resources: VisibleResourceBudget | None = None
-    #: E1-4B：信息条件的分项记录（见 ``ObservationChannels``）。
+    #: 月度资源规则与预算（DECISIONS/0020）。
+    resources: VisibleResourceBudget
+    #: 信息条件的分项记录（见 ``ObservationChannels``）。
     channels: ObservationChannels
-    #: E1-5A：已有能力、当前岗位与学习/岗位规则说明。旧协议不序列化。
-    #: E1-5A 里没有能力时是空列表（明确"一项都没有"）；旧协议为 None、不序列化。
-    abilities: tuple[VisibleAbility, ...] | None = Field(
-        default=None, exclude_if=lambda v: v is None
-    )
-    employment: VisibleEmployment | None = Field(default=None, exclude_if=lambda v: v is None)
-    career_rules: VisibleCareerRules | None = Field(default=None, exclude_if=lambda v: v is None)
-    #: E1-5B：自己的资金目标、真实余额、已知报价、差距、事件与规则说明。旧协议为 None、不序列化。
-    savings: VisibleSavings | None = Field(default=None, exclude_if=lambda v: v is None)
-    #: E1-5C：年龄、年初病情、病史、疾病规则、本城治疗与信息条件说明。旧协议为 None、不序列化。
-    health: VisibleHealth | None = Field(default=None, exclude_if=lambda v: v is None)
-
-
-#: E1-5A 才出现在 payload 里的顶层字段（旧协议的观察不序列化它们）。
-CAREER_OBSERVATION_FIELDS: frozenset[str] = frozenset({"abilities", "employment", "career_rules"})
-#: E1-5B 才出现在 payload 里的顶层字段（更早的协议不序列化它）。
-SAVINGS_OBSERVATION_FIELDS: frozenset[str] = frozenset({"savings"})
-#: E1-5C 才出现在 payload 里的顶层字段（更早的协议不序列化它）。
-HEALTH_OBSERVATION_FIELDS: frozenset[str] = frozenset({"health"})
+    #: 已有能力（没有时是空列表，明确"一项都没有"）、当前岗位与学习/岗位规则说明（DECISIONS/0023）。
+    abilities: tuple[VisibleAbility, ...]
+    employment: VisibleEmployment
+    career_rules: VisibleCareerRules
+    #: 自己的资金目标、真实余额、已知报价、差距、事件与规则说明（DECISIONS/0026）。
+    savings: VisibleSavings
+    #: 年龄、年初病情、病史、疾病规则、本城治疗与信息条件说明（DECISIONS/0027）。
+    health: VisibleHealth
 
 
 # ---------------------------------------------------------------------- 构造
@@ -739,7 +687,6 @@ def _visible_health_month(x: HealthMonth) -> VisibleHealthMonth:
 
 
 def _visible_health_year(outcome: EnvironmentOutcome) -> VisibleHealthYear:
-    assert outcome.health is not None
     stop = outcome.stop
     return VisibleHealthYear(
         months=tuple(_visible_health_month(x) for x in outcome.health.months),
@@ -924,15 +871,10 @@ def _qualification(
 
 
 def _visible_opportunity(
-    o: Any,
-    state: PersonYearState | None = None,
-    catalog: CityLifeCatalog | None = None,
-    rules: CareerRules | None = None,
+    o: Any, state: PersonYearState, catalog: CityLifeCatalog, rules: CareerRules
 ) -> VisibleOpportunity:
-    # 逐字段复制。source（溯源）与 targets（状态影响标签）不进代理视野：
-    # 前者是审计信息，后者会提示"这项会改变什么状态"，属于规则侧。E1-5A 的 grants（学完授予什么能力）
-    # 是做计划要用的公开事实，所以可见。
-    career = rules is not None and state is not None and catalog is not None
+    # 逐字段复制。source（溯源）与 targets（状态影响标签）不进代理视野：前者是审计信息，后者会提示"这项会改变什么状态"，
+    # 属于规则侧。grants（学完授予什么能力）是做计划要用的公开事实，所以可见。
     return VisibleOpportunity(
         opportunity_id=o.opportunity_id,
         category=o.category,
@@ -944,26 +886,19 @@ def _visible_opportunity(
         price=o.price,
         compensation=o.compensation,
         occupation=o.occupation,
-        time_cost_hours_per_year=o.time_cost_hours_per_year,
-        energy_burden=o.energy_burden,
         eligibility=tuple(o.eligibility),
         arrangement_options=dict(o.arrangement_options),
         duration=o.duration,
         functions=tuple(o.functions),
         attributes=dict(o.attributes),
         time_energy=o.resource,
-        employer_id=o.employer_id if career else None,
-        grants=tuple(o.grants) if career else None,
-        qualification=_qualification(o, state, catalog, rules) if career else None,  # type: ignore[arg-type]
+        employer_id=o.employer_id,
+        grants=tuple(o.grants),
+        qualification=_qualification(o, state, catalog, rules),
     )
 
 
-def _energy_rule(rules: MonthlyResourceRules, feedback: EnergyFeedbackPolicy | None) -> str:
-    if feedback is None:  # E1-4A：原文不变
-        return (
-            f"每月活动负担合计不能超过每月可承受额度（单位 {rules.energy_unit}）；一项活动的负担 = 小时 × "
-            "它的每小时负担。额度每月重新给、不结转，休息不回血，满足感不改变额度；时间与精力分别检查"
-        )
+def _energy_rule(rules: MonthlyResourceRules, feedback: EnergyFeedbackPolicy) -> str:
     head = (
         f"每月活动负担合计不能超过每月可承受额度（单位 {rules.energy_unit}）；一项活动的负担 = 小时 × "
         "它的每小时负担。额度在一年里每月相同、每月重新给、不结转，休息不回血；时间与精力分别检查。"
@@ -980,10 +915,9 @@ def _visible_resources(
     rules: MonthlyResourceRules,
     state: PersonYearState,
     show_energy: bool,
-    feedback: EnergyFeedbackPolicy | None,
+    feedback: EnergyFeedbackPolicy,
 ) -> VisibleResourceBudget:
     basis = state.resource_budget_basis
-    assert basis is not None
     return VisibleResourceBudget(
         rules_version=rules.version,
         rules_revision=RESOURCE_RULES_REVISION,
@@ -1024,22 +958,14 @@ def _visible_resources(
 
 
 def _channels(
-    permission: ObservationPermission,
-    feedback: EnergyFeedbackPolicy | None,
-    health: HealthRules | None = None,
+    permission: ObservationPermission, feedback: EnergyFeedbackPolicy
 ) -> ObservationChannels:
-    on = feedback is not None and feedback.effective
-    if on:
-        condition = "dynamic_life_feedback"
-    elif permission.condition == "research_text_only":
-        condition = "static_text_understanding"
-    else:
-        condition = "product_without_satisfaction_feedback"
+    on = feedback.effective
     return ObservationChannels(
         energy_visible=permission.show_energy_level,
         satisfaction_feedback="quota_feedback" if on else "none",
-        study_condition=condition,  # type: ignore[arg-type]
-        health_risk_information="default_no_risk_relation" if health is not None else None,
+        study_condition="dynamic_life_feedback" if on else "product_without_satisfaction_feedback",
+        health_risk_information="default_no_risk_relation",
     )
 
 
@@ -1066,26 +992,33 @@ def _without_energy(feedback: VisibleFeedback) -> VisibleFeedback:
 def build_observation(
     *,
     permission: ObservationPermission,
-    profile: StatedLifeProfile | ProductLifeProfile,
+    profile: ProductLifeProfile,
     state: PersonYearState,
     catalog: CityLifeCatalog,
     last_feedback: VisibleFeedback | None = None,
-    resource_rules: MonthlyResourceRules | None = None,
-    energy_feedback: EnergyFeedbackPolicy | None = None,
-    career_rules: CareerRules | None = None,
-    savings_rules: SavingsRules | None = None,
-    health_rules: HealthRules | None = None,
-    health_input: HealthInputDeclaration | IndependentHealthInputDeclaration | None = None,
+    resource_rules: MonthlyResourceRules,
+    energy_feedback: EnergyFeedbackPolicy,
+    career_rules: CareerRules,
+    savings_rules: SavingsRules,
+    health_rules: HealthRules,
+    health_input: IndependentHealthInputDeclaration,
 ) -> AgentObservation:
     """按许可构造一年的可见观察。**每个参数都按类型检查**，传错类型直接拒绝。
 
-    尤其：``profile`` 必须是 ``StatedLifeProfile``（或 E3-A 的六维产品画像 ``ProductLifeProfile``）。传旧的 ``Persona`` 或研究
-    内部的 ``InternalPreferenceTruth`` 都会被拒——产品允许看问卷，不等于放行整个人设。
+    尤其：``profile`` 必须是六维产品画像 ``ProductLifeProfile``。传旧的 ``Persona`` 或别的对象都会被拒——产品允许看问卷，
+    不等于放行整个人设。
     """
     checks = (
         (permission, ObservationPermission, "permission"),
+        (profile, ProductLifeProfile, "profile"),
         (state, PersonYearState, "state"),
         (catalog, CityLifeCatalog, "catalog"),
+        (resource_rules, MonthlyResourceRules, "resource_rules"),
+        (energy_feedback, EnergyFeedbackPolicy, "energy_feedback"),
+        (career_rules, CareerRules, "career_rules"),
+        (savings_rules, SavingsRules, "savings_rules"),
+        (health_rules, HealthRules, "health_rules"),
+        (health_input, IndependentHealthInputDeclaration, "health_input"),
     )
     for value, cls, name in checks:
         if type(value) is not cls:
@@ -1093,12 +1026,6 @@ def build_observation(
                 f"{name} 必须是 {cls.__name__}，得到 {type(value).__name__}；"
                 "不接受旧人设或内部真值对象"
             )
-    if type(profile) not in (StatedLifeProfile, ProductLifeProfile):
-        raise LifeContractError(
-            f"profile 必须是 StatedLifeProfile 或 ProductLifeProfile，得到 {type(profile).__name__}；"
-            "不接受旧人设或内部真值对象"
-        )
-    six_dim = type(profile) is ProductLifeProfile
     if last_feedback is not None and type(last_feedback) is not VisibleFeedback:
         raise LifeContractError(
             f"last_feedback 必须是 VisibleFeedback，得到 {type(last_feedback).__name__}；"
@@ -1112,101 +1039,30 @@ def build_observation(
         raise LifeContractError(f"画像 {profile.person_id} 与状态 {state.person_id} 不是同一人")
     if str(catalog.city) != str(state.city):
         raise LifeContractError(f"目录城市 {catalog.city} 与状态城市 {state.city} 不一致")
-    if (state.resource_budget_basis is None) != (resource_rules is None):
+    if state.resource_budget_basis.rules_version != resource_rules.version:
+        raise LifeContractError("状态的资源预算依据与资源规则的版本不一致")
+    # 与加载、结算同一份判断：候选状态、换了编号或内容的政策、关闭反馈却带着加成，都不构造观察——不论精力是否可见
+    problems = energy_quota_problems(energy_feedback, state)
+    if problems:
         raise LifeContractError(
-            "按月核算的状态必须同时给协议的资源规则（resource_rules），旧规则的状态不能给——"
-            "做计划要知道每月预算与家务基准，也不能把旧精力数值当成额度"
+            "；".join(message for _, message in problems) + "——不为这个状态构造观察"
         )
-    if resource_rules is not None:
-        if type(resource_rules) is not MonthlyResourceRules:
-            raise LifeContractError("resource_rules 必须是 MonthlyResourceRules")
-        assert state.resource_budget_basis is not None
-        if state.resource_budget_basis.rules_version != resource_rules.version:
-            raise LifeContractError("状态的资源预算依据与资源规则的版本不一致")
-    q = state.energy_quota_basis
-    if (q is None) != (energy_feedback is None):
+    if health_input.questionnaire_version != profile.health_questionnaire_version:
         raise LifeContractError(
-            "E1-4B 的状态必须同时给协议的反馈政策（energy_feedback），其他状态不能给——观察要据此写明"
-            "额度会不会随生活变化，以及这是不是含生活反馈的动态条件"
+            "画像的健康问卷版本与协议声明的不同——旧答案不能改读成新题目的答案，不构造观察"
         )
-    if energy_feedback is not None:
-        assert q is not None
-        if type(energy_feedback) is not EnergyFeedbackPolicy:
-            raise LifeContractError("energy_feedback 必须是 EnergyFeedbackPolicy")
-        # 与加载、结算同一份判断（r2）：候选状态、换了编号或内容的政策、关闭反馈却带着加成，都不构造观察——
-        # 不论精力是否可见，也就不会把带着旧加成的状态标成静态文字理解条件。
-        problems = energy_quota_problems(energy_feedback, state)
-        if problems:
-            raise LifeContractError(
-                "；".join(message for _, message in problems) + "——不为这个状态构造观察"
-            )
-        if permission.condition == "research_text_only" and energy_feedback.effective:
-            raise LifeContractError(
-                "research_text_only 测的是从文字理解偏好，必须在没有满足感反馈的条件下进行；反馈开着时即使"
-                "隐藏精力，行动可行性的变化也会透露评价"
-            )
-
-    if (state.employment is None) != (career_rules is None):
+    # 状态的健康部分必须由这一套疾病规则产生——与加载、结算前检查同一份判断（common），同一个冲突给出同一个代码与说明。
+    # 在任何按许可裁剪的代码之前执行，不受显示开关影响；规则冲突时不给出恢复日期等事实
+    problems = health_rules_state_problems(health_rules, state)
+    if problems:
         raise LifeContractError(
-            "E1-5A 的状态必须同时给协议的职业规则（career_rules），其他状态不能给——观察要据此写明能力、岗位"
-            "要求与生效规则"
+            "；".join(f"[{code}] {message}" for code, message in problems)
+            + "——不为这个状态构造观察"
         )
-    if career_rules is not None and type(career_rules) is not CareerRules:
-        raise LifeContractError("career_rules 必须是 CareerRules")
-    if (state.savings_goals is None) != (savings_rules is None):
-        raise LifeContractError(
-            "E1-5B 的状态必须同时给协议的目标储蓄规则（savings_rules），其他状态不能给——观察要据此写明目标、"
-            "余额与报价的比较，以及目标只是软约束"
-        )
-    if savings_rules is not None and type(savings_rules) is not SavingsRules:
-        raise LifeContractError("savings_rules 必须是 SavingsRules")
-    if (state.health is None) != (health_rules is None) or (health_rules is None) != (
-        health_input is None
-    ):
-        raise LifeContractError(
-            "E1-5C 的状态必须同时给协议的疾病规则（health_rules）与健康输入含义（health_input），其他状态不能给——"
-            "观察要据此写明病情、规则、本城治疗与医疗点数的含义"
-        )
-    want_input = IndependentHealthInputDeclaration if six_dim else HealthInputDeclaration
-    if health_rules is not None and (
-        type(health_rules) is not HealthRules or type(health_input) is not want_input
-    ):
-        raise LifeContractError(
-            f"health_rules 必须是 HealthRules，health_input 必须是 {want_input.__name__}"
-            + ("（六维产品画像的健康回答是独立问卷）" if six_dim else "")
-        )
-    if six_dim:
-        assert isinstance(profile, ProductLifeProfile)
-        if not isinstance(health_input, IndependentHealthInputDeclaration):
-            raise LifeContractError(
-                "六维产品画像的健康回答是独立问卷：协议必须声明独立健康回答——不构造观察"
-            )
-        if health_input.questionnaire_version != profile.health_questionnaire_version:
-            raise LifeContractError(
-                "画像的健康问卷版本与协议声明的不同——旧答案不能改读成新题目的答案，不构造观察"
-            )
-        if permission.show_health_answers is None:
-            raise LifeContractError(
-                "六维产品画像的观察必须显式声明健康回答是否可见（show_health_answers），没有默认值"
-            )
-    elif health_input is not None and profile.healthcare_semantics != health_input.semantics:  # type: ignore[union-attr]
-        raise LifeContractError(
-            "画像的 healthcare 点数含义与协议声明的不一致——旧答案不能改读成新含义，不构造观察"
-        )
-    if health_rules is not None:
-        # 收尾修订（F1）：状态的健康部分必须由这一套疾病规则产生——与加载、结算前检查同一份判断（common），同一个
-        # 冲突给出同一个代码与说明。在任何按许可裁剪的代码之前执行，不受显示开关影响；规则冲突时不给出恢复日期等事实
-        problems = health_rules_state_problems(health_rules, state)
-        if problems:
-            raise LifeContractError(
-                "；".join(f"[{code}] {message}" for code, message in problems)
-                + "——不为这个状态构造观察"
-            )
 
     p = permission
     if last_feedback is not None and not p.show_energy_level:
         last_feedback = _without_energy(last_feedback)
-    career = career_rules is not None
     obs = AgentObservation(
         information_condition=p.condition,
         permission_version=p.permission_version,
@@ -1234,38 +1090,15 @@ def build_observation(
                 months_participated=t.months_participated,
                 months_required=t.months_required,
                 completed=t.completed,
-                fee_paid=t.fee_paid if career else None,
-                completed_year=t.completed_year if career else None,
-                completed_month=t.completed_month if career else None,
+                fee_paid=t.fee_paid,
+                completed_year=t.completed_year,
+                completed_month=t.completed_month,
             )
             for t in state.training
         ),
-        skills=dict(state.skills),
         goals=tuple(state.goals),
         experience_summary=tuple(state.experience_summary),
-        profile=_visible_product_profile(profile, p)  # type: ignore[arg-type]
-        if six_dim
-        else VisibleProfile(
-            dimension_points=dict(profile.dimension_points)  # type: ignore[union-attr]
-            if p.show_stated_dimension_points
-            else None,
-            soft_preferences=tuple(profile.soft_preferences)  # type: ignore[union-attr]
-            if p.show_soft_preferences
-            else None,
-            hard_requirements=tuple(profile.hard_requirements)
-            if p.show_hard_requirements
-            else None,
-            free_text=profile.free_text if p.show_free_text else None,
-            material_points=dict(profile.material_points)
-            if p.show_stated_material_points and profile.material_points is not None
-            else None,
-            healthcare_meaning=(
-                "七维里的 healthcare 是你的“健康风险应对倾向”（只供分身做计划）——问卷原题："
-                + health_input.question_text  # type: ignore[union-attr]
-            )[:600]
-            if health_input is not None and p.show_stated_dimension_points
-            else None,
-        ),
+        profile=_visible_product_profile(profile, p),
         opportunities=tuple(
             _visible_opportunity(o, state, catalog, career_rules) for o in catalog.opportunities
         ),
@@ -1280,15 +1113,13 @@ def build_observation(
             for m in catalog.minimum_living
         ),
         last_feedback=last_feedback,
-        resources=_visible_resources(resource_rules, state, p.show_energy_level, energy_feedback)
-        if resource_rules is not None
-        else None,
-        channels=_channels(p, energy_feedback, health_rules),
-        abilities=_visible_abilities(career_rules, state, catalog) if career_rules else None,
-        employment=_visible_employment(state) if career_rules else None,
-        career_rules=_career_context(career_rules) if career_rules else None,
-        savings=_visible_savings(savings_rules, state, catalog) if savings_rules else None,
-        health=_visible_health(health_rules, state, catalog) if health_rules else None,
+        resources=_visible_resources(resource_rules, state, p.show_energy_level, energy_feedback),
+        channels=_channels(p, energy_feedback),
+        abilities=_visible_abilities(career_rules, state, catalog),
+        employment=_visible_employment(state),
+        career_rules=_career_context(career_rules),
+        savings=_visible_savings(savings_rules, state, catalog),
+        health=_visible_health(health_rules, state, catalog),
     )
     assert_payload_clean(obs)
     return obs
@@ -1297,14 +1128,11 @@ def build_observation(
 def _visible_product_profile(
     profile: ProductLifeProfile, p: ObservationPermission
 ) -> VisibleProfile:
-    """E3-A：六维产品画像的可见投影（逐字段复制，按许可）。六维与物质细分用精确分数原样给出（例如 "50/3"），不在这里四舍五入；
+    """六维产品画像的可见投影（逐字段复制，按许可）。六维与物质细分用精确分数原样给出（例如 "50/3"），不在这里四舍五入；
     健康回答逐题给出题目、作答状态、选项文字与读法，不给任何推断出的数值。"""
     return VisibleProfile(
-        dimension_points=None,
-        soft_preferences=() if p.show_soft_preferences else None,
         hard_requirements=tuple(profile.hard_requirements) if p.show_hard_requirements else None,
         free_text=profile.free_text if p.show_free_text else None,
-        material_points=None,
         statement_kind="product_six_dimension_v1",
         six_dimension_points=dict(profile.dimension_points)
         if p.show_stated_dimension_points
@@ -1346,7 +1174,6 @@ def _visible_product_profile(
 
 def _visible_employment(state: PersonYearState) -> VisibleEmployment:
     e = state.employment
-    assert e is not None
     as_of = "开局声明" if e.as_of == "start_declaration" else f"第 {e.settled_year} 年实际执行"
     return VisibleEmployment(
         stated_occupation=e.stated_occupation,
@@ -1392,29 +1219,25 @@ def visible_feedback(result: SettlementResult) -> VisibleFeedback:
         )
     if nxt.status == "terminal":
         notes.append("这是最后一个行动年；之后是终态，不再接受行动")
-    resources: tuple[VisibleMonthResources, ...] = ()
-    if out.resources is not None:
-        resources = tuple(_visible_month(r) for r in out.resources.months)
-    career = None
-    if out.career is not None:
-        career = VisibleCareerYear(
-            learning=tuple(
-                VisibleLearning(
-                    opportunity_id=x.opportunity_id,
-                    fee_charged=x.fee_charged,
-                    months_attended=tuple(x.months_attended),
-                    progress_after=x.progress_after,
-                    months_required=x.months_required,
-                    completed_month=x.completed_month,
-                    granted=tuple(x.granted),
-                    already_held=tuple(x.already_held),
-                    usable_from_year=x.usable_from_year,
-                )
-                for x in out.career.learning
-            ),
-            positions=tuple(_visible_position(p) for p in out.career.positions),
-            current_position_ids=tuple(out.career.current_position_ids),
-        )
+    resources = tuple(_visible_month(r) for r in out.resources.months)
+    career = VisibleCareerYear(
+        learning=tuple(
+            VisibleLearning(
+                opportunity_id=x.opportunity_id,
+                fee_charged=x.fee_charged,
+                months_attended=tuple(x.months_attended),
+                progress_after=x.progress_after,
+                months_required=x.months_required,
+                completed_month=x.completed_month,
+                granted=tuple(x.granted),
+                already_held=tuple(x.already_held),
+                usable_from_year=x.usable_from_year,
+            )
+            for x in out.career.learning
+        ),
+        positions=tuple(_visible_position(p) for p in out.career.positions),
+        current_position_ids=tuple(out.career.current_position_ids),
+    )
     feedback = VisibleFeedback(
         year_index=out.year_index,
         cash_balance=out.cash_end if out.cash_end is not None else nxt.cash,
@@ -1426,8 +1249,8 @@ def visible_feedback(result: SettlementResult) -> VisibleFeedback:
         notes=tuple(notes),
         resources=resources,
         career=career,
-        savings=None if out.savings is None else _visible_savings_year(out.savings),
-        health=None if out.health is None else _visible_health_year(out),
+        savings=_visible_savings_year(out.savings),
+        health=_visible_health_year(out),
     )
     assert_payload_clean(feedback)
     return feedback
@@ -1512,7 +1335,6 @@ def _forbidden_types() -> tuple[type, ...]:
 
     return (
         *ANSWER_SIDE_TYPES,
-        InternalPreferenceTruth,
         InternalYearScore,
         EnvironmentOutcome,
         PersonYearState,
@@ -1555,8 +1377,7 @@ def _forbidden_types() -> tuple[type, ...]:
         TreatmentNeed,
         IllnessEventSource,
         InjectedIllness,
-        HealthInputDeclaration,
-        # E3-A：独立健康回答的协议声明与六维产品画像本身也不能整体进 payload（可见部分逐字段投影）
+        # 独立健康回答的协议声明与六维产品画像本身也不能整体进 payload（可见部分逐字段投影）
         IndependentHealthInputDeclaration,
         ProductLifeProfile,
         ProductHealthAnswer,

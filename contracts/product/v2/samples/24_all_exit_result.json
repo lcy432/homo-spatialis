@@ -276,7 +276,7 @@
   ],
   "confirmed": {
    "confirmed_id": "confirmed.draft.u504.r1",
-   "content_fingerprint": "9473232f99083bfeca751bd8ac9f662b32e02cb8fc3ca797f9ca7d81a31ee82f"
+   "content_fingerprint": "b43e5b2a935c5c328d1d1d49456eb7a5fec64714504ce5c299f50d5d0ab6a292"
   },
   "evaluation_status": "generated",
   "limitations_zh": [
@@ -289,7 +289,7 @@
   "meta": {
    "conversion_version": "e3a-conversion-v2",
    "data_pack": {
-    "content_fingerprint": "a9cbd04955d49ea6ba0059b18f9ec6e30b7dd77a511bd0331cf50e5765e0e9b5",
+    "content_fingerprint": "2aa831e380440c458570b6838b39d2dcb058a4bf39ec4b8660fd7ae136f80bd0",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
     "pack_id": "pack.e3a.synthetic-v1",
     "status": "synthetic_fixture_only"
@@ -335,7 +335,7 @@
    "planner_kind": "mock"
   },
   "preflight": {
-   "preflight_fingerprint": "187a47053eb19194dfc3eb644d9ced88790554614b2b201694407d709c5af059",
+   "preflight_fingerprint": "6d719a42b0c20e4dd775b0afab52e68269112a7ffe0027587e7780dd7525a18e",
    "preflight_id": "preflight.confirmed.draft.u504.r1"
   },
   "reading_guide_zh": [
@@ -349,14 +349,14 @@
    "分数是当前合成模型下、按你确认的陈述偏好计算的结果；小数末位的差异不构成可靠的排序"
   ],
   "real_model_calls": 0,
-  "result_fingerprint": "bcc6e439ade11fc8465876fa8d20ecf93e334138546649d4ba364962270b1a60",
-  "result_id": "result.run-e3a-d0fd8111df059813",
-  "run_id": "run-e3a-d0fd8111df059813",
+  "result_fingerprint": "f1a7e074ff73d1b95f87f164c23a1b3f3f2fa1c34f1290e229c8fdad6ef7391a",
+  "result_id": "result.run-e3a-9de90562b5b217c1",
+  "run_id": "run-e3a-9de90562b5b217c1",
   "run_stage": "completed",
   "sources_zh": [
    "生活事实：E1 结算记录（钱、岗位、住房、食品、服务月份）与月度资源账（本人家务小时）",
    "评价：E1-6A 单分身跨期评价（L / V / J）；汇总：E1-6B 城市报告（C / E / M、均值、模拟缺失范围、事件链、硬要求）",
-   "资料：合成资料包 pack.e3a.synthetic-v1（a9cbd04955d4…）与 E1 便利版配置；全部是合成设定"
+   "资料：合成资料包 pack.e3a.synthetic-v1（2aa831e38044…）与产品协议的基础样例；全部是合成设定"
   ]
  }
 }

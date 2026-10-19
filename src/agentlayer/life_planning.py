@@ -46,14 +46,12 @@ from common.life_contracts import (
     PersonYearState,
     PlanCheck,
     SettlementProblem,
-    StatedLifeProfile,
     SyntheticTaxPolicy,
     VisibleFeedback,
     YearAction,
 )
 from common.life_planning_contracts import (
     ACTION_GUIDE_VERSION,
-    CONVENIENCE_ACTION_GUIDE_VERSION,
     DEVELOPER_NOTE_MARKERS,
     MAX_MEMORY_FACT_CHARS,
     MAX_MEMORY_FACTS_PER_YEAR,
@@ -65,7 +63,6 @@ from common.life_planning_contracts import (
     MEMORY_FACT_YEARS,
     MEMORY_POLICY_VERSION,
     PLANNING_VERSION,
-    PRODUCT_ACTION_GUIDE_VERSION,
     PROMPT_TEMPLATE_GUIDES,
     PROMPT_TEMPLATE_VERSION,
     SELF_REPORT_YEARS,
@@ -129,7 +126,7 @@ def guide_version_of(template: str) -> str:
 
 
 def prompt_template_fingerprint(template: str = PROMPT_TEMPLATE_VERSION) -> str:
-    """提示模板（系统文字、用户开头与输出格式、它带的说明书版本）的内容身份，写进运行清单。默认模板的身份与以前逐字节相同。"""
+    """提示模板（系统文字、用户开头与输出格式、它带的说明书版本）的内容身份，写进运行清单。"""
     text = json.dumps(
         {
             "version": template,
@@ -153,7 +150,7 @@ def prompt_template_fingerprint(template: str = PROMPT_TEMPLATE_VERSION) -> str:
 class PlanningRequest(ContractModel):
     """一次规划请求：分身这一年获准看到的全部。只由下面这些字段构成。"""
 
-    planning_version: Literal["e1-7b-planning-v1"]
+    planning_version: Literal["product-planning-v1"]
     request_id: str
     clone_id: str
     city: CityId
@@ -313,21 +310,12 @@ def product_statement_guide_section() -> VisibleGuideSection:
 def action_guide(
     protocol: LifeProtocol, guide_version: str = ACTION_GUIDE_VERSION
 ) -> VisibleActionGuide:
-    """年度行动说明书（E1-7B）：按协议启用的部分生成。示例都是**局部**片段，编号用不存在的 example.*，只演示语法与规则，不是
-    一份完整的年度计划，也不是"最好"的计划。
-
-    ``guide_version``（由运行配置的提示模板决定）：``e1-7b-action-guide-v1`` 与以前逐字节相同；``e1-convenience-action-guide-v1``
-    在协议有家务规则时多一节"日常杂务：设备与人工服务"（DECISIONS/0033）；``e3a-product-action-guide-v1``（DECISIONS/0034）在便利版
-    各节之外，开头多一节"你的用户陈述：六维、物质分配与独立健康回答"。"""
-    if guide_version not in (
-        ACTION_GUIDE_VERSION,
-        CONVENIENCE_ACTION_GUIDE_VERSION,
-        PRODUCT_ACTION_GUIDE_VERSION,
-    ):
+    """年度行动说明书：示例都是**局部**片段，编号用不存在的 example.*，只演示语法与规则，不是一份完整的年度计划，也不是"最好"
+    的计划。开头是"你的用户陈述：六维、物质分配与独立健康回答"一节（DECISIONS/0034），协议有家务规则时另有"日常杂务：设备与
+    人工服务"一节（DECISIONS/0033）。``guide_version`` 由运行配置的提示模板决定（``PROMPT_TEMPLATE_GUIDES``）。"""
+    if guide_version not in PROMPT_TEMPLATE_GUIDES.values():
         raise LifeContractError(f"不认识的行动说明书版本 {guide_version!r}")
-    sections = (
-        [product_statement_guide_section()] if guide_version == PRODUCT_ACTION_GUIDE_VERSION else []
-    )
+    sections = [product_statement_guide_section()]
     sections += [
         VisibleGuideSection(
             topic="时间字段与数量",
@@ -363,132 +351,125 @@ def action_guide(
             examples=(_ex("声明兜底", {"minimum_fallback": ["housing", "food"]}),),
         ),
     ]
-    if protocol.career_rules is not None:
-        sections.append(
-            VisibleGuideSection(
-                topic="工作与学习",
-                rules=(
-                    "资格按年初状态判断：每项机会的 qualification 写着现在能选还是还缺什么；年初不合格的项目写进计划，整份计划退回",
-                    "岗位的工时、到岗日与薪酬绑定在岗位里，不能改；可以同时做几份工作，工资、工时与负担相加",
-                    "课程在 start_month 报名、一次付清学费；之后每个实际参加的月份都占时间与精力；参加满要求的月数才算完成；"
-                    "完成授予的能力从下一个行动年起才能用来申请岗位；取得资格不会自动换岗",
+    sections.append(
+        VisibleGuideSection(
+            topic="工作与学习",
+            rules=(
+                "资格按年初状态判断：每项机会的 qualification 写着现在能选还是还缺什么；年初不合格的项目写进计划，整份计划退回",
+                "岗位的工时、到岗日与薪酬绑定在岗位里，不能改；可以同时做几份工作，工资、工时与负担相加",
+                "课程在 start_month 报名、一次付清学费；之后每个实际参加的月份都占时间与精力；参加满要求的月数才算完成；"
+                "完成授予的能力从下一个行动年起才能用来申请岗位；取得资格不会自动换岗",
+            ),
+            examples=(
+                _ex(
+                    "全年上课",
+                    {
+                        "opportunity_id": "example.course",
+                        "quantity": 1,
+                        "start_month": 1,
+                        "end_month": 12,
+                    },
                 ),
-                examples=(
-                    _ex(
-                        "全年上课",
-                        {
-                            "opportunity_id": "example.course",
-                            "quantity": 1,
-                            "start_month": 1,
-                            "end_month": 12,
-                        },
-                    ),
-                ),
-            )
+            ),
         )
-    if protocol.savings_rules is not None:
-        sections.append(
-            VisibleGuideSection(
-                topic="资金目标（savings_goal，可选）",
-                rules=(
-                    "一年最多一条指令，年初生效；不写就是已有目标原样延续；同一时刻最多一个未结束的目标",
-                    "action：set 建立新目标（写机会、数量与目标年月）；keep 保留；cancel 取消；replace 用新目标替换旧目标（replaces "
-                    "写旧目标编号）；reschedule 只改目标年月",
-                    "目标只是记录与提醒：不圈钱、不扣款、不自动购买、不自动延期；到期没兑现只记为逾期，不会出局",
-                    "兑现只认一种情况：计划里那条一次性购买或课程报名写了 goal_id，并且那个月实际全额付清",
-                ),
-                examples=(
-                    _ex(
-                        "建立目标",
-                        {
-                            "savings_goal": {
-                                "action": "set",
-                                "goal_id": "goal.example1",
-                                "opportunity_id": "example.durable",
-                                "quantity": 1,
-                                "target_year": 2,
-                                "target_month": 6,
-                            }
-                        },
-                    ),
-                    _ex(
-                        "改时点",
-                        {
-                            "savings_goal": {
-                                "action": "reschedule",
-                                "goal_id": "goal.example1",
-                                "target_year": 3,
-                                "target_month": 2,
-                            }
-                        },
-                    ),
-                    _ex(
-                        "保留或取消",
-                        {"savings_goal": {"action": "keep", "goal_id": "goal.example1"}},
-                    ),
-                    _ex(
-                        "替换",
-                        {
-                            "savings_goal": {
-                                "action": "replace",
-                                "goal_id": "goal.example2",
-                                "replaces": "goal.example1",
-                                "opportunity_id": "example.course",
-                                "quantity": 1,
-                                "target_year": 2,
-                                "target_month": 1,
-                            }
-                        },
-                    ),
-                    _ex(
-                        "实际购买并关联目标",
-                        {
+    )
+    sections.append(
+        VisibleGuideSection(
+            topic="资金目标（savings_goal，可选）",
+            rules=(
+                "一年最多一条指令，年初生效；不写就是已有目标原样延续；同一时刻最多一个未结束的目标",
+                "action：set 建立新目标（写机会、数量与目标年月）；keep 保留；cancel 取消；replace 用新目标替换旧目标（replaces "
+                "写旧目标编号）；reschedule 只改目标年月",
+                "目标只是记录与提醒：不圈钱、不扣款、不自动购买、不自动延期；到期没兑现只记为逾期，不会出局",
+                "兑现只认一种情况：计划里那条一次性购买或课程报名写了 goal_id，并且那个月实际全额付清",
+            ),
+            examples=(
+                _ex(
+                    "建立目标",
+                    {
+                        "savings_goal": {
+                            "action": "set",
+                            "goal_id": "goal.example1",
                             "opportunity_id": "example.durable",
                             "quantity": 1,
-                            "month": 6,
+                            "target_year": 2,
+                            "target_month": 6,
+                        }
+                    },
+                ),
+                _ex(
+                    "改时点",
+                    {
+                        "savings_goal": {
+                            "action": "reschedule",
                             "goal_id": "goal.example1",
-                        },
-                    ),
+                            "target_year": 3,
+                            "target_month": 2,
+                        }
+                    },
                 ),
-            )
+                _ex(
+                    "保留或取消",
+                    {"savings_goal": {"action": "keep", "goal_id": "goal.example1"}},
+                ),
+                _ex(
+                    "替换",
+                    {
+                        "savings_goal": {
+                            "action": "replace",
+                            "goal_id": "goal.example2",
+                            "replaces": "goal.example1",
+                            "opportunity_id": "example.course",
+                            "quantity": 1,
+                            "target_year": 2,
+                            "target_month": 1,
+                        }
+                    },
+                ),
+                _ex(
+                    "实际购买并关联目标",
+                    {
+                        "opportunity_id": "example.durable",
+                        "quantity": 1,
+                        "month": 6,
+                        "goal_id": "goal.example1",
+                    },
+                ),
+            ),
         )
-    if protocol.health_rules is not None:
-        sections.append(
-            VisibleGuideSection(
-                topic="生病与应急（emergency，必须写）",
-                rules=(
-                    "minor（小病）与 major（大病）各选 treat_if_possible（条件允许就治）或 decline（明确选择不治）",
-                    "看 observation.health.treatments 的 availability：available = 资料已知、本城可得，选 treat_if_possible 时在病月"
-                    "付钱治疗；unavailable = 本城确定没有，治不了，只能等自然恢复；unknown = 资料未知，不是免费、也不是没有——"
-                    "计划要治而遇到资料未知，模拟会停在那个月并记为资料缺口（那不是你选择不治）",
-                    "decline 是你自己的选择：病按规则自然恢复，期间照样有病假或恢复负担。环境不会把资料未知替你改成不治，也不会"
-                    "替你改计划",
-                    "pause_order：生病而这个月时间或精力不够时，按顺序暂停的有参与时间的主动活动（课程、体验、有参与时间的服务），"
-                    "只暂停到够为止",
-                    "cancel_purchases_when_ill：本年计划里的一次性耐用品购买，购买那个月月初生着病就取消这一次（不扣款、不顺延、"
-                    "不补购）。它和 pause_order 是两件事：一个是生病时先把钱留着，一个是时间精力不够时的暂停顺序",
-                    "未来会不会生病事先不知道；病发生之后不能回到年初重选计划",
+    )
+    sections.append(
+        VisibleGuideSection(
+            topic="生病与应急（emergency，必须写）",
+            rules=(
+                "minor（小病）与 major（大病）各选 treat_if_possible（条件允许就治）或 decline（明确选择不治）",
+                "看 observation.health.treatments 的 availability：available = 资料已知、本城可得，选 treat_if_possible 时在病月"
+                "付钱治疗；unavailable = 本城确定没有，治不了，只能等自然恢复；unknown = 资料未知，不是免费、也不是没有——"
+                "计划要治而遇到资料未知，模拟会停在那个月并记为资料缺口（那不是你选择不治）",
+                "decline 是你自己的选择：病按规则自然恢复，期间照样有病假或恢复负担。环境不会把资料未知替你改成不治，也不会"
+                "替你改计划",
+                "pause_order：生病而这个月时间或精力不够时，按顺序暂停的有参与时间的主动活动（课程、体验、有参与时间的服务），"
+                "只暂停到够为止",
+                "cancel_purchases_when_ill：本年计划里的一次性耐用品购买，购买那个月月初生着病就取消这一次（不扣款、不顺延、"
+                "不补购）。它和 pause_order 是两件事：一个是生病时先把钱留着，一个是时间精力不够时的暂停顺序",
+                "未来会不会生病事先不知道；病发生之后不能回到年初重选计划",
+            ),
+            examples=(
+                _ex(
+                    "应急安排的写法（选择只是示例，不是建议）",
+                    {
+                        "emergency": {
+                            "minor": "treat_if_possible",
+                            "major": "treat_if_possible",
+                            "pause_order": ["example.course"],
+                            "cancel_purchases_when_ill": ["example.durable"],
+                        }
+                    },
                 ),
-                examples=(
-                    _ex(
-                        "应急安排的写法（选择只是示例，不是建议）",
-                        {
-                            "emergency": {
-                                "minor": "treat_if_possible",
-                                "major": "treat_if_possible",
-                                "pause_order": ["example.course"],
-                                "cancel_purchases_when_ill": ["example.durable"],
-                            }
-                        },
-                    ),
-                ),
-            )
+            ),
         )
-    if (
-        guide_version in (CONVENIENCE_ACTION_GUIDE_VERSION, PRODUCT_ACTION_GUIDE_VERSION)
-        and protocol.resource_rules is not None
-        and protocol.resource_rules.household_tasks
-    ):
+    )
+    if protocol.resource_rules.household_tasks:
         sections.append(household_guide_section(protocol))
     sections.append(
         VisibleGuideSection(
@@ -514,30 +495,26 @@ def action_rules(protocol: LifeProtocol, attempts_allowed: int) -> tuple[str, ..
         "食品时改用本城最低方案。不声明的需求，环境不会替你挑替代方案",
         "数量只支持整数；住房、食品、岗位与课程的数量必须是 1",
     ]
-    if protocol.resource_rules is not None:
-        rules.append(
-            "时间与精力按月检查（见 observation.resources 与每项机会的 time_energy）：当月已安排的时间不能超过每月时间预算；当月"
-            "活动负担不能超过每月精力额度。超了就是整份计划不可行，环境不会替你删掉活动或少上班"
-        )
-        rules.append(
-            "岗位的工时、到岗日与薪酬绑定在岗位方案里，不能写 arrangement；可以同时做几份工作，工资、工时与负担相加"
-        )
-    if protocol.career_rules is not None:
-        rules.append(
-            "资格一律按年初状态判断（每项机会的 qualification：现在能选 / 还缺什么）；计划里写了年初还不合格的项目，整份计划"
-            "退回。课程在 start_month 报名并付一次性学费；参加满要求的月数才完成，完成的能力从下一个行动年起可用；取得资格"
-            "不会自动换岗——要在计划里实际选择那份岗位"
-        )
-    if protocol.savings_rules is not None:
-        rules.append(
-            "savings_goal（可选）：在年初设定、保留、取消、替换资金目标或改时点；目标只是软约束，不圈钱、不自动购买。不需要就写 null"
-        )
-    if protocol.health_rules is not None:
-        rules.append(
-            "emergency（本协议必须写）：minor 与 major 各选 treat_if_possible（条件允许就治）或 decline（不治）；pause_order 只能列"
-            "本年计划里有参与时间的主动活动（课程、体验、有参与时间的服务）；cancel_purchases_when_ill 只能列本年计划里的一次性"
-            "耐用品购买"
-        )
+    rules.append(
+        "时间与精力按月检查（见 observation.resources 与每项机会的 time_energy）：当月已安排的时间不能超过每月时间预算；当月"
+        "活动负担不能超过每月精力额度。超了就是整份计划不可行，环境不会替你删掉活动或少上班"
+    )
+    rules.append(
+        "岗位的工时、到岗日与薪酬绑定在岗位方案里，不能写 arrangement；可以同时做几份工作，工资、工时与负担相加"
+    )
+    rules.append(
+        "资格一律按年初状态判断（每项机会的 qualification：现在能选 / 还缺什么）；计划里写了年初还不合格的项目，整份计划"
+        "退回。课程在 start_month 报名并付一次性学费；参加满要求的月数才完成，完成的能力从下一个行动年起可用；取得资格"
+        "不会自动换岗——要在计划里实际选择那份岗位"
+    )
+    rules.append(
+        "savings_goal（可选）：在年初设定、保留、取消、替换资金目标或改时点；目标只是软约束，不圈钱、不自动购买。不需要就写 null"
+    )
+    rules.append(
+        "emergency（本协议必须写）：minor 与 major 各选 treat_if_possible（条件允许就治）或 decline（不治）；pause_order 只能列"
+        "本年计划里有参与时间的主动活动（课程、体验、有参与时间的服务）；cancel_purchases_when_ill 只能列本年计划里的一次性"
+        "耐用品购买"
+    )
     rules += [
         f"执行前检查：环境会在不发生新随机事件的前提下逐月试算这份计划；没通过时什么都不提交，你会收到安全诊断。今年最多可以交 "
         f"{attempts_allowed} 份候选计划（第 1 份 + 修订）。通过之后真实执行；之后发生的疾病等事件不能回到年初重选",
@@ -552,7 +529,7 @@ def build_request(
     attempt: int,
     attempts_allowed: int,
     permission: ObservationPermission,
-    profile: StatedLifeProfile | ProductLifeProfile,
+    profile: ProductLifeProfile,
     state: PersonYearState,
     catalog: CityLifeCatalog,
     protocol: LifeProtocol,
@@ -567,7 +544,7 @@ def build_request(
     已经投影过的可见类型。构造完再整体扫描一遍。
 
     ``tax_policy`` 必须是这座城目录声明的那一份（``catalog.tax_policy_id``）；运行器另在发送之前核对它与结算用的税绑定。
-    ``prompt_template`` 是运行配置声明的提示模板，决定行动说明书的版本（默认模板的请求与以前逐字节相同）。"""
+    ``prompt_template`` 是运行配置声明的提示模板，决定行动说明书的版本。"""
     if type(tax_policy) is not SyntheticTaxPolicy or tax_policy.policy_id != catalog.tax_policy_id:
         raise LifeContractError(
             f"税声明 {getattr(tax_policy, 'policy_id', None)} 不是 {catalog.city} 目录声明的 {catalog.tax_policy_id}"
@@ -1026,44 +1003,41 @@ def _fact_lines(fb: VisibleFeedback) -> list[str]:
         lines.append(
             f"第 {y} 年：税前收入 {_money(fb.income_gross)}，税 {tax}，支出 {_money(fb.spending)}"
         )
-    if fb.career is not None:
-        for p in fb.career.positions:  # 每份岗位各写各的月份，不把不同岗位拼成一段连续经历
-            if p.months:
-                lines.append(
-                    f"第 {y} 年：岗位 {p.opportunity_id} 领到工资的月份 {month_ranges(p.months)}"
-                )
-            else:
-                lines.append(f"第 {y} 年：岗位 {p.opportunity_id} 这一年没有领到工资")
-        for x in fb.career.learning:
-            done = (
-                f"第 {x.completed_month} 月完成，授予 {'、'.join(x.granted) or '—'}（第 {x.usable_from_year} 年起可用）"
-                if x.completed_month is not None
-                else "未完成"
-            )
+    for p in fb.career.positions:  # 每份岗位各写各的月份，不把不同岗位拼成一段连续经历
+        if p.months:
             lines.append(
-                f"第 {y} 年：课程 {x.opportunity_id} 实付学费 {_money(x.fee_charged)}，参加 {len(x.months_attended)} 个月，"
-                f"进度 {x.progress_after}/{x.months_required}，{done}"
+                f"第 {y} 年：岗位 {p.opportunity_id} 领到工资的月份 {month_ranges(p.months)}"
             )
-    if fb.health is not None:
-        sick = [m for m in fb.health.months if m.state != "healthy"]
-        for m in sick:
-            treat = "" if m.treatment is None else f"，治疗：{m.treatment.status_label}"
-            lines.append(
-                f"第 {y} 年第 {m.month} 月：{m.state_label}"
-                + ("（新发）" if m.new_illness else "")
-                + ("，病假" if m.sick_leave else "")
-                + treat
-                + f"，{m.transition}"
-            )
-        if fb.health.stop is not None:
-            lines.append(fb.health.stop)
+        else:
+            lines.append(f"第 {y} 年：岗位 {p.opportunity_id} 这一年没有领到工资")
+    for x in fb.career.learning:
+        done = (
+            f"第 {x.completed_month} 月完成，授予 {'、'.join(x.granted) or '—'}（第 {x.usable_from_year} 年起可用）"
+            if x.completed_month is not None
+            else "未完成"
+        )
+        lines.append(
+            f"第 {y} 年：课程 {x.opportunity_id} 实付学费 {_money(x.fee_charged)}，参加 {len(x.months_attended)} 个月，"
+            f"进度 {x.progress_after}/{x.months_required}，{done}"
+        )
+    sick = [m for m in fb.health.months if m.state != "healthy"]
+    for m in sick:
+        treat = "" if m.treatment is None else f"，治疗：{m.treatment.status_label}"
+        lines.append(
+            f"第 {y} 年第 {m.month} 月：{m.state_label}"
+            + ("（新发）" if m.new_illness else "")
+            + ("，病假" if m.sick_leave else "")
+            + treat
+            + f"，{m.transition}"
+        )
+    if fb.health.stop is not None:
+        lines.append(fb.health.stop)
     for e in fb.executed:
         if e.status in ("rejected", "partially_executed", "not_reached", "cancelled_when_ill"):
             why = "" if not e.reason else f"：{e.reason}"
             lines.append(f"第 {y} 年：行动 {e.opportunity_id} 状态 {e.status}{why}")
-    if fb.savings is not None:
-        for ev in fb.savings.events:
-            lines.append(f"第 {y} 年：目标 {ev.goal_id} {ev.kind}")
+    for ev in fb.savings.events:
+        lines.append(f"第 {y} 年：目标 {ev.goal_id} {ev.kind}")
     lines.extend(f"第 {y} 年：{n}" for n in fb.notes)
     return lines
 

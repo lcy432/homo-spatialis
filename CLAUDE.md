@@ -130,7 +130,8 @@ homo-spatialis/
 ├── configs/             运行与模型配置（configs/life/、configs/product/、models.yaml）
 ├── scripts/             入口与演示脚本
 ├── tests/               与 src 同样分层
-└── runs/                运行输出
+├── ledgers/             付费预算账本（每本一个 ledger.sqlite，进 git；运行配置的 paid_budget.ledger_dir 指向这里）
+└── runs/                运行输出（只在本机，不进 git）
 ```
 
 ---

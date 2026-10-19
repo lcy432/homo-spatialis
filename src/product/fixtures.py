@@ -138,19 +138,19 @@ def make_draft(
     )
 
 
-#: 一个自包含的“小仓库”需要的文件：资料包与它显式采用的便利版配置（相对路径与仓库里相同）。场景在这样的目录里运行，编译产物与
+#: 一个自包含的“小仓库”需要的文件：资料包与它显式采用的产品协议基础样例（相对路径与仓库里相同）。场景在这样的目录里运行，编译产物与
 #: 运行配置里的路径都是相对路径，结果不依赖目录放在哪里。
 WORKSPACE_FILES = (
     "configs/product/e3a_synthetic_pack.yaml",
-    "configs/life/synthetic_e1_convenience.yaml",
-    "configs/life/scoring_e1_convenience.yaml",
-    "configs/life/evaluation_e1_convenience.yaml",
-    "configs/life/city_facts_e1_convenience.yaml",
+    "configs/life/synthetic_product.yaml",
+    "configs/life/scoring_product.yaml",
+    "configs/life/evaluation_product.yaml",
+    "configs/life/city_facts_product.yaml",
 )
 
 
 def prepare_workspace(work: Path, repo: Path) -> Path:
-    """把资料包与便利版配置按原相对路径复制进 ``work``（只复制，不修改）。"""
+    """把资料包与基础样例按原相对路径复制进 ``work``（只复制，不修改）。"""
     work.mkdir(parents=True, exist_ok=True)
     for rel in WORKSPACE_FILES:
         dst = work / rel

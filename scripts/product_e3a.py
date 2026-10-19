@@ -10,8 +10,6 @@
         一条正常闭环：原始答案 → 审阅 → 确认 → 编译 → E1 预检查与冻结 → 提交 → mock 三年 → E1 评价与汇总 → 产品结果
     uv run python scripts/product_e3a.py reject-example --out <新目录>
         被正确拒绝的例子：设备有报价但寿命未知（不编入 E1）、职业在本地没有岗位、金额没有合法换算
-    uv run python scripts/product_e3a.py equivalence --out <新目录>
-        新旧严格等价：旧七维（27/18/18/9/9/9＋医疗 10）与新六维（30/20/20/10/10/10），同一规则、行动、注入事件与开局，逐月比较
 
 ``--out`` 与 ``--work`` 必须是还不存在的目录（不覆盖已有证据）。
 """
@@ -813,17 +811,6 @@ def reject_example_cmd(out: Path) -> None:
     print(_json(data))
 
 
-# ---------------------------------------------------------------------- 新旧严格等价
-
-
-def equivalence(out: Path) -> dict[str, Any]:
-    """旧七维 27/18/18/9/9/9＋医疗 10 与新六维 30/20/20/10/10/10：同一便利规则、同一计划、同一注入事件、同一开局与同一物质比例
-    （30/30/40），逐月比较有效权重、各维贡献、B、S、年均与反馈的未量化与量化额度。只用 ``==``，不加容差。"""
-    from product.equivalence import compare_old_new
-
-    return compare_old_new(out)
-
-
 def main() -> int:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -836,7 +823,7 @@ def main() -> int:
     p = sub.add_parser("samples")
     p.add_argument("--out", type=Path, default=SCHEMA_DIR / "samples")
     p.add_argument("--work", type=Path, default=None)
-    for name in ("run-offline", "reject-example", "equivalence"):
+    for name in ("run-offline", "reject-example"):
         p = sub.add_parser(name)
         p.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
@@ -856,12 +843,6 @@ def main() -> int:
         run_offline_cmd(args.out)
     elif args.cmd == "reject-example":
         reject_example_cmd(args.out)
-    elif args.cmd == "equivalence":
-        out = _fresh(args.out)
-        out.mkdir(parents=True)
-        result = equivalence(out)
-        print(_json({k: v for k, v in result.items() if k != "months"}))
-        return 0 if result["identical"] else 1
     return 0
 
 

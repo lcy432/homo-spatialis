@@ -1,7 +1,7 @@
 """E3 合成资料包的加载与内容身份（E3-A，DECISIONS/0034）。
 
 资料包是 E3 维护的数据：城市、职业受控词表、六维与物质题干、独立健康问卷、硬要求与属性偏好的支持清单、标准开局的模型设定、
-便利资料候选，以及它**显式采用**的 E1 便利版整套配置（``e1_base``）。结构在这里严格检查（未知字段报错）；内容身份是规范 JSON 的
+便利资料候选，以及它**显式采用**的产品协议基础样例（``e1_base``）。结构在这里严格检查（未知字段报错）；内容身份是规范 JSON 的
 SHA-256——资料包改了，旧确认与预检查都对不上。
 """
 
@@ -49,14 +49,6 @@ class E1Base(_Strict):
     scoring_version: str
     scoring_content_fingerprint: str
     prompt_template: str
-
-
-class ProductProtocolDecl(_Strict):
-    protocol_id: str
-    schema_version: str
-    info_permission_version: str
-    feedback_policy_id: str
-    health_input_note: str
 
 
 class PlannerDecl(_Strict):
@@ -216,7 +208,6 @@ class PackBody(_Strict):
     observed_on: _dt.date
     note: str
     e1_base: E1Base
-    product_protocol: ProductProtocolDecl
     run: RunDecl
     money_basis: MoneyBasisDecl
     money_bases: tuple[MoneyBasisOptionDecl, ...]

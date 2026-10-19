@@ -1,27 +1,18 @@
-"""E3-A 模块 C：规划观察、提示模板与 mock 正确读取新字段；不泄露研究真值、评分参数或隐藏风险关系；新旧模板与 mock 分版。"""
+"""规划观察、提示模板与 mock 正确读取六维产品画像；不泄露评分参数或隐藏风险关系；模板与 mock 按版本号登记。"""
 
 from __future__ import annotations
 
 import contextlib
 import json
-from pathlib import Path
 
 import pytest
 
-from agentlayer.life_mock import (
-    CONVENIENCE_MOCK_IDENTITY,
-    MOCK_IDENTITY,
-    PRODUCT_MOCK_IDENTITY,
-    ConvenienceMockPlanner,
-    ProductMockPlanner,
-    mock_planner_for,
-)
+from agentlayer.life_mock import PRODUCT_MOCK_IDENTITY, ProductMockPlanner, mock_planner_for
 from agentlayer.life_planning import (
     PlannerCall,
     action_guide,
     build_memory,
     build_request,
-    prompt_template_fingerprint,
     render_prompt,
     request_payload,
 )
@@ -32,15 +23,11 @@ from orchestration.life_runner import _forbidden_texts
 from product import scenarios as sc
 from product.fixtures import K51
 
-REPO = Path(__file__).resolve().parents[2]
-CONV_MOCK_ARCHIVE = REPO / "runs/2026-10-18-e1-daily-convenience/mock/manifest.json"
-
 
 def permission(**kw) -> ObservationPermission:
     base = dict(
         condition="product_stated_profile",
         show_stated_dimension_points=True,
-        show_soft_preferences=True,
         show_hard_requirements=True,
         show_free_text=True,
         show_energy_level=True,
@@ -94,9 +81,12 @@ def test_observation_carries_exact_six_points_material_allocation_and_health_ans
         "environment": "10",
         "commute": "10",
     }
-    assert profile["dimension_points"] is None and "healthcare" not in json.dumps(
-        profile["six_dimension_points"]
-    )
+    assert "healthcare" not in json.dumps(profile["six_dimension_points"])
+    # 只为旧七维画像存在的键都不在请求里
+    for old in ("dimension_points", "soft_preferences", "material_points", "healthcare_meaning"):
+        assert old not in profile
+    assert "skills" not in payload["observation"]
+    assert payload["planning_version"] == "product-planning-v1"
     assert profile["material_allocation"] == {
         "housing_space": "30",
         "fresh_food": "30",
@@ -110,7 +100,7 @@ def test_observation_carries_exact_six_points_material_allocation_and_health_ans
     assert topics[0].startswith("你的用户陈述") and "日常杂务：设备与人工服务（可选）" in topics
 
 
-def test_health_answer_visibility_has_no_default_and_research_condition_hides_it(ready):
+def test_health_answer_visibility_has_no_default(ready):
     hidden = request_payload(_request(ready, perm=permission(show_health_answers=False)))[
         "observation"
     ]["profile"]
@@ -119,16 +109,10 @@ def test_health_answer_visibility_has_no_default_and_research_condition_hides_it
     ]  # 显式写明“没有许可”，不是“没有回答”
     shown = request_payload(_request(ready))["observation"]["profile"]
     assert shown["not_permitted"] == []
-    with pytest.raises(LifeContractError, match="show_health_answers"):
-        _request(ready, perm=permission(show_health_answers=None))
-    with pytest.raises(ValueError, match="research_text_only"):
-        permission(
-            condition="research_text_only",
-            show_stated_dimension_points=False,
-            show_soft_preferences=False,
-            show_stated_material_points=False,
-            show_health_answers=True,
-        )
+    with pytest.raises(ValueError, match="show_health_answers"):
+        permission(show_health_answers=None)
+    with pytest.raises(ValueError, match="condition"):
+        permission(condition="research_text_only")
 
 
 def test_the_request_does_not_leak_scoring_parameters_truth_or_hidden_risk(ready):
@@ -151,75 +135,34 @@ def test_the_request_does_not_leak_scoring_parameters_truth_or_hidden_risk(ready
         assert f'"{word}"' not in text, word
 
 
-def test_profile_types_are_dispatched_explicitly(ready):
-    from common.life_contracts import InternalPreferenceTruth
-
+def test_observation_only_accepts_the_product_profile(ready):
     w = ready.pre.world
-    truth = InternalPreferenceTruth(
-        person_id="u501",
-        status="synthetic_fixture_only",
-        dimension_weights={
-            "material": 0.3,
-            "safety": 0.2,
-            "healthcare": 0.0,
-            "opportunity": 0.2,
-            "leisure": 0.1,
-            "environment": 0.1,
-            "commute": 0.1,
-        },
-        material_subweights={"housing_space": 0.3, "fresh_food": 0.3, "daily_convenience": 0.4},
-    )
+    state = w.bundle.initial_state("u501.k51.r0")
+    p = w.bundle.protocol
     with contextlib.chdir(ready.work), pytest.raises(LifeContractError, match="profile 必须是"):
         build_observation(
             permission=w.permission,
-            profile=truth,  # type: ignore[arg-type]
-            state=w.bundle.initial_state("u501.k51.r0"),
+            profile=state,  # type: ignore[arg-type]
+            state=state,
             catalog=w.bundle.catalog_for(K51),
+            resource_rules=p.resource_rules,
+            energy_feedback=p.energy_feedback,
+            career_rules=p.career_rules,
+            savings_rules=p.savings_rules,
+            health_rules=p.health_rules,
+            health_input=p.health_input,
         )
 
 
-def test_old_templates_keep_their_identity_and_the_product_template_is_separate():
-    manifest = json.loads(CONV_MOCK_ARCHIVE.read_text(encoding="utf-8"))
-    assert (
-        prompt_template_fingerprint("e1-convenience-prompt-v1")
-        == manifest["identities"]["prompt_template"]
-    )
-    product = prompt_template_fingerprint("e3a-product-prompt-v1")
-    assert product not in {
-        prompt_template_fingerprint("e1-convenience-prompt-v1"),
-        prompt_template_fingerprint("e1-7b-prompt-v1"),
-    }
-
-
-def test_run_config_ties_the_product_protocol_to_the_product_template(ready):
+def test_prompt_templates_are_registered_by_version(ready):
     w = ready.pre.world
     assert run_config_problems(w.config, w.roster_config, w.bundle, w.facts) == []
-    old_template = w.config.model_copy(update={"prompt_template": "e1-convenience-prompt-v1"})
-    assert any(
-        "e3a-product-prompt-v1" in p
-        for p in run_config_problems(old_template, w.roster_config, w.bundle, w.facts)
-    )
-    no_health = w.config.model_copy(
-        update={
-            "information": w.config.information.model_copy(update={"show_health_answers": None})
-        }
-    )
-    assert any(
-        "show_health_answers" in p
-        for p in run_config_problems(no_health, w.roster_config, w.bundle, w.facts)
-    )
-
-
-def test_product_template_on_an_old_seven_dimension_protocol_is_refused():
-    from orchestration.life_runner import preflight
-
-    world = preflight(Path("configs/life/run_e1_convenience_mock.yaml"))
-    cfg = world.config.model_copy(update={"prompt_template": "e3a-product-prompt-v1"})
-    problems = run_config_problems(cfg, world.roster_config, world.bundle, world.facts)
-    assert any("只给六维产品画像" in p for p in problems)
-    # 便利版说明书一节照旧在旧便利模板里，产品模板只是多一节
-    guide_old = action_guide(world.bundle.protocol, "e1-convenience-action-guide-v1")
-    assert not guide_old.sections[0].topic.startswith("你的用户陈述")
+    with pytest.raises(ValueError, match="不认识的提示模板"):
+        type(w.config).model_validate(
+            {**w.config.model_dump(mode="json"), "prompt_template": "e1-convenience-prompt-v1"}
+        )
+    with pytest.raises(LifeContractError, match="不认识的行动说明书版本"):
+        action_guide(w.bundle.protocol, "e1-convenience-action-guide-v1")
 
 
 def _plan(planner, s, perm=None):
@@ -280,15 +223,17 @@ def test_product_mock_reads_new_fields_and_uses_a_fixed_documented_emergency_pol
     )
 
 
-def test_mock_identities_are_versioned_and_old_mocks_are_unchanged():
-    manifest = json.loads(CONV_MOCK_ARCHIVE.read_text(encoding="utf-8"))
-    assert CONVENIENCE_MOCK_IDENTITY.model_dump(mode="json") == manifest["planner"]
-    assert MOCK_IDENTITY.rules_version == "e1-7a-mock-rules-v1"
-    assert PRODUCT_MOCK_IDENTITY.rules_version == "e3a-product-mock-rules-v1"
-    from common.life_planning_contracts import PlannerSpec
+def test_mock_identity_is_versioned():
+    from common.life_planning_contracts import PlannerIdentity, PlannerSpec
 
+    assert PRODUCT_MOCK_IDENTITY.rules_version == "e3a-product-mock-rules-v1"
     assert type(mock_planner_for(PlannerSpec(identity=PRODUCT_MOCK_IDENTITY))) is ProductMockPlanner
-    assert (
-        type(mock_planner_for(PlannerSpec(identity=CONVENIENCE_MOCK_IDENTITY)))
-        is ConvenienceMockPlanner
+    old = PlannerIdentity(
+        kind="mock",
+        planner_id="mock.rules.e1-7a",
+        version="e1-7a-mock-v1",
+        rules_version="e1-7a-mock-rules-v1",
+        note="旧规则",
     )
+    with pytest.raises(ValueError, match="不认识的 mock 身份"):
+        mock_planner_for(PlannerSpec(identity=old))

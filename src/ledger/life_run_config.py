@@ -23,15 +23,8 @@ from pydantic import ValidationError
 from common.config import ConfigError, ModelsConfig
 from common.life_aggregation_contracts import RosterConfig
 from common.life_city_facts import CityFactsConfig
-from common.life_contracts import IndependentHealthInputDeclaration, LifeContractError
-from common.life_planning_contracts import (
-    CONVENIENCE_PROMPT_TEMPLATE_VERSION,
-    DEVELOPER_NOTE_MARKERS,
-    HOUSEHOLD_GUIDE_TEMPLATES,
-    PRODUCT_PROMPT_TEMPLATE_VERSION,
-    LifeRunConfig,
-)
-from common.life_scoring_contracts import CONVENIENCE_SCORING_VERSIONS
+from common.life_contracts import LifeContractError
+from common.life_planning_contracts import DEVELOPER_NOTE_MARKERS, LifeRunConfig
 from ledger.life_catalog import LifeBundle
 
 #: 模型角色的声明文件（只读服务商、端点与模型快照；密钥只在调用时读取）。
@@ -126,38 +119,6 @@ def run_config_problems(
         out += llm_settings_problems(config, models_path)
         out += developer_note_hits(bundle, facts)
     protocol = bundle.protocol
-    # E1 补充"日常生活便利"（DECISIONS/0033）：分身要从说明书里知道 daily_convenience 点数的含义与设备、服务的用法。
-    # E3-A（DECISIONS/0034）：产品模板 e3a-product-prompt-v1 也带这一节（兼容声明扩展，检查本身不删）
-    if (
-        protocol.scoring_scale_version in CONVENIENCE_SCORING_VERSIONS
-        and config.prompt_template not in HOUSEHOLD_GUIDE_TEMPLATES
-    ):
-        out.append(
-            f"协议 {protocol.protocol_id} 用日常生活便利评分（{protocol.scoring_scale_version}），运行配置的提示模板 "
-            f"{config.prompt_template} 没有“日常杂务：设备与人工服务”一节——请用 {CONVENIENCE_PROMPT_TEMPLATE_VERSION}"
-            f"（六维产品画像用 {PRODUCT_PROMPT_TEMPLATE_VERSION}）"
-        )
-    # E3-A：六维产品画像（协议声明独立健康回答）⇔ 产品提示模板。分身要从说明书里知道精确点数、物质分配与独立健康回答怎样读；
-    # 反过来，产品模板描述的字段在七维画像里不存在
-    independent = isinstance(protocol.health_input, IndependentHealthInputDeclaration)
-    if independent and config.prompt_template != PRODUCT_PROMPT_TEMPLATE_VERSION:
-        out.append(
-            f"协议 {protocol.protocol_id} 声明独立健康回答（六维产品画像），运行配置的提示模板 {config.prompt_template} 没有"
-            f"“你的用户陈述：六维、物质分配与独立健康回答”一节——请用 {PRODUCT_PROMPT_TEMPLATE_VERSION}"
-        )
-    if not independent and config.prompt_template == PRODUCT_PROMPT_TEMPLATE_VERSION:
-        out.append(
-            f"提示模板 {PRODUCT_PROMPT_TEMPLATE_VERSION} 只给六维产品画像（协议声明独立健康回答）用；协议 {protocol.protocol_id} "
-            "是七维画像，说明书里描述的字段不存在"
-        )
-    if bundle.product_profiles and config.information.show_health_answers is None:
-        out.append(
-            "六维产品画像的运行必须在信息条件里显式写 show_health_answers（true 或 false）：健康回答的可见性没有默认值"
-        )
-    if protocol.energy_feedback is None or protocol.resource_rules is None:
-        out.append(
-            f"协议 {protocol.protocol_id} 没有月度资源规则或反馈政策：年度交接（run_life_year）需要它们，本轮的运行器不支持"
-        )
     clones = {e.clone_id for e in roster.entries}
     n = protocol.simulation_years
     for s in config.planner.scripts:

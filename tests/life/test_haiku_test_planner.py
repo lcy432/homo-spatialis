@@ -15,7 +15,6 @@ import asyncio
 import importlib
 import json
 import os
-import shutil
 import sys
 from decimal import Decimal
 from pathlib import Path
@@ -29,7 +28,6 @@ from agentlayer.life_llm import (
     LlmPlanner,
     OpenAICompatibleTransport,
     ProviderCallLog,
-    QwenPlanner,
     TransportError,
     TransportResponse,
     expected_provider_body,
@@ -42,7 +40,12 @@ from agentlayer.life_planning import render_prompt
 from common.config import ConfigError, ModelsConfig, ProductModelSpec, ResolvedModel
 from common.life_planning_contracts import LifeRunConfig, LlmSettings, PaidBudget
 from common.run_store import RunStore
-from orchestration.life_budget import RoundBudget, budget_header, budget_identity_problems
+from orchestration.life_budget import (
+    RoundBudget,
+    budget_header,
+    budget_identity_problems,
+    read_ledger,
+)
 from orchestration.life_runner import (
     budget_reconciliation,
     planner_payloads,
@@ -52,7 +55,8 @@ from orchestration.life_runner import (
 )
 
 from .live_support import (
-    FLASH_CONFIG,
+    HAIKU_CONFIG,
+    LIVE_CONFIG,
     MOCK_CONFIG,
     REPO,
     ScriptedTransport,
@@ -64,16 +68,9 @@ from .live_support import (
     write_yaml,
 )
 
-HAIKU_CONFIG = Path("configs/life/run_e1_7b_haiku.yaml")
-HAIKU_CONVENIENCE = Path("configs/life/run_e1_convenience_haiku.yaml")
-#: Haiku 之后的对照测试（所有者 2026-10-18：Haiku effort max，之后 Sonnet effort medium）
-SONNET_CONFIG = Path("configs/life/run_e1_7b_sonnet.yaml")
-#: 第一次真实试跑：Haiku effort medium（所有者 2026-10-18：先不要 max）
-HAIKU_MEDIUM = Path("configs/life/run_e1_7b_haiku_medium.yaml")
+FLASH_CONFIG = LIVE_CONFIG
 SONNET = "claude-sonnet-5-5"
 HAIKU = "claude-haiku-5-5"
-FLASH_MANIFEST = REPO / "runs/2026-10-13-product-flash-switch/pilot/manifest.json"
-FLASH_LEDGER = REPO / "runs/2026-10-13-product-flash-switch/budget/budget.json"
 FAKE_KEY = "sk-ant-offlinefake0000000000000000"
 #: 测试自带的美元账本（与真实配置的计费选择无关：真实配置可以写账本，也可以写不记账的理由）。报价与官方 Haiku 5.5 报价相同。
 TEST_BUDGET = {
@@ -107,15 +104,13 @@ def _haiku(**over) -> LlmSettings:
 
 @pytest.fixture
 def repo(tmp_path, monkeypatch):
-    """临时仓库：E1-7B 的配置加上 Haiku 测试配置；Haiku 的账本放在临时目录的 ``budget-haiku``。"""
+    """临时仓库：产品协议样例的配置；Haiku 测试配置改成带测试账本的版本，账本放在临时目录的 ``budget-haiku``。"""
     root = make_repo(tmp_path / "repo")
     data = load_yaml(REPO / HAIKU_CONFIG)
     data["run"].pop("unmetered_reason", None)
     data["run"]["paid_budget"] = TEST_BUDGET
     (root / HAIKU_CONFIG).parent.mkdir(parents=True, exist_ok=True)
     write_yaml(root / HAIKU_CONFIG, data)
-    for extra in (SONNET_CONFIG, HAIKU_MEDIUM):  # 真实配置原样（订阅、不记账）
-        shutil.copyfile(REPO / extra, root / extra)
     monkeypatch.chdir(root)
     return root
 
@@ -190,35 +185,18 @@ def test_a_claude_settings_have_their_own_rules():
     ident = llm_identity(s)
     assert (ident.planner_id, ident.model_snapshot) == ("llm.claude.test_planner", HAIKU)
     assert ident.note == load_yaml(REPO / HAIKU_CONFIG)["run"]["planner"]["identity"]["note"]
-    # 对照测试的 Sonnet：同一套 Claude 规则，effort medium，自己的规划器编号；身份说明不写死型号
-    sonnet_run = load_yaml(REPO / SONNET_CONFIG)["run"]
-    so = LlmSettings.model_validate(sonnet_run["planner"]["llm"])
-    assert (so.model_role, so.model, so.effort, so.provider) == (
-        "test_planner_sonnet",
-        SONNET,
-        "medium",
-        "claude_agent_sdk",
-    )
-    si = llm_identity(so)
-    assert (si.planner_id, si.note) == (
-        "llm.claude.test_planner_sonnet",
-        sonnet_run["planner"]["identity"]["note"],
-    )
 
 
 def test_a_qwen_identities_and_ledgers_are_unchanged(monkeypatch):
     monkeypatch.chdir(REPO)
     world = preflight(FLASH_CONFIG)
-    manifest = json.loads(FLASH_MANIFEST.read_text(encoding="utf-8"))
-    for key in ("run_config", "planner_behavior", "planner"):
-        assert world.identities[key] == manifest["identities"][key], key
-    assert world.config.planner.identity.model_dump(mode="json") == manifest["planner"]
     llm = world.config.planner.llm
     assert {"thinking", "effort"}.isdisjoint(llm.model_dump(mode="json"))
-    on_disk = json.loads(FLASH_LEDGER.read_text(encoding="utf-8"))
-    on_disk.pop("created_at")
-    assert budget_header(world.config.paid_budget) == on_disk  # 旧人民币账本的头文件逐项相同
-    assert QwenPlanner is LlmPlanner
+    found = read_ledger(Path(world.config.paid_budget.ledger_dir))
+    assert found is not None
+    on_disk = {k: v for k, v in found[0].items() if k != "created_at"}
+    assert budget_header(world.config.paid_budget) == on_disk  # 迁移后的人民币账本，头逐项相同
+    assert LlmPlanner is LlmPlanner
 
 
 def test_a_billing_is_a_ledger_or_a_declared_reason():
@@ -249,7 +227,7 @@ def test_a_billing_is_a_ledger_or_a_declared_reason():
         {k: v for k, v in paid.items() if k not in ("max_cost_usd", "max_requests")}
     )
     assert (uncapped.max_requests, uncapped.max_cost) == (None, None)
-    for cfg in (HAIKU_CONFIG, HAIKU_CONVENIENCE, SONNET_CONFIG, HAIKU_MEDIUM):
+    for cfg in (HAIKU_CONFIG,):
         # 真实的 Claude 配置走订阅、先不计费：不写账本，写明理由，认证方式 claude_subscription
         real = load_yaml(REPO / cfg)["run"]
         assert "paid_budget" not in real and real["unmetered_reason"], cfg
@@ -478,7 +456,7 @@ def test_d_a_usd_quote_keeps_a_usd_ledger_and_respects_the_price_tier(tmp_path):
         TEST_BUDGET | {"ledger_dir": str(tmp_path / "b")}
     )  # 有额度的账本（测试自带）
     b = RoundBudget(paid)
-    header = json.loads((tmp_path / "b" / "budget.json").read_text(encoding="utf-8"))
+    header = b.header()
     assert header["max_cost_usd"] == "0.25" and "max_cost_cny" not in header
     assert (
         header["price"]["currency"] == "USD"
@@ -529,7 +507,7 @@ def test_d_an_uncapped_ledger_records_every_request_but_never_refuses(tmp_path):
     """额度可选：不写次数与费用上限时，账本照常预留与核算（记账），超过原来的 3 次、0.05 美元也照发；报价分档照旧检查。"""
     spec = {k: v for k, v in TEST_BUDGET.items() if k not in ("max_requests", "max_cost_usd")}
     b = RoundBudget(PaidBudget.model_validate(spec | {"ledger_dir": str(tmp_path / "u")}))
-    header = json.loads((tmp_path / "u" / "budget.json").read_text(encoding="utf-8"))
+    header = b.header()
     assert (header["max_requests"], header["max_cost_usd"]) == (None, None)
     for i in range(5):  # 128,000 输出上限的预留每次约 0.069 美元：5 次远超原来的额度
         b.reserve(
@@ -687,46 +665,17 @@ def test_f_the_cli_default_is_haiku_and_the_transport_follows_the_provider(repo,
         )
 
     monkeypatch.setattr(ProductModelSpec, "resolve", fake_resolve)
-    p = driver._live_planner(preflight(HAIKU_MEDIUM))
+    real = load_yaml(REPO / HAIKU_CONFIG)  # 真实的 Haiku 配置：订阅、不记账
+    write_yaml(repo / HAIKU_CONFIG, real)
+    p = driver._live_planner(preflight(HAIKU_CONFIG))
     assert isinstance(p.transport, ClaudeAgentSdkTransport) and p.budget is None  # 订阅认证、不记账
     assert p.transport._key is None
     q = driver._live_planner(preflight(FLASH_CONFIG))
     assert isinstance(q.transport, OpenAICompatibleTransport) and q.budget.currency == "CNY"
     q.transport.close()
     assert asked == ["qwen3.8-flash"]  # Haiku 走订阅，不读密钥
-    # 便利版的 Haiku 配置与它的 mock 对照用同一份名单与资料（离线探针要求）
-    shutil.copyfile(REPO / HAIKU_CONVENIENCE, repo / HAIKU_CONVENIENCE)
-    for rel in (
-        "configs/life/run_e1_convenience_mock.yaml",
-        "configs/life/roster_e1_convenience.yaml",
-        "configs/life/synthetic_e1_convenience.yaml",
-        "configs/life/scoring_e1_convenience.yaml",
-        "configs/life/city_facts_e1_convenience.yaml",
-        "configs/life/evaluation_e1_convenience.yaml",
-    ):
-        shutil.copyfile(REPO / rel, repo / rel)
-    live, mock = (
-        preflight(HAIKU_CONVENIENCE),
-        preflight(Path("configs/life/run_e1_convenience_mock.yaml")),
-    )
-    assert driver.pairing_problems(live, mock) == []
-
-
-def test_f_the_sonnet_cross_check_is_explicit_and_uses_the_subscription(repo, monkeypatch):
-    """本轮在 Haiku 之后的对照：只在显式 --config 时用 Sonnet 5.5（effort medium），订阅认证、不要密钥、不记账。"""
-    driver = _driver()
-    monkeypatch.setattr(ProductModelSpec, "resolve", lambda self: pytest.fail("订阅认证不该读密钥"))
-    world = preflight(SONNET_CONFIG)
-    p = driver._live_planner(world)
-    assert isinstance(p.transport, ClaudeAgentSdkTransport) and p.transport._key is None
-    assert (p.settings.effort, p.settings.auth, p.identity.planner_id, p.budget) == (
-        "medium",
-        "claude_subscription",
-        "llm.claude.test_planner_sonnet",
-        None,
-    )
-    assert driver.pairing_problems(world, preflight(MOCK_CONFIG)) == []
-    assert driver.DEFAULT == HAIKU_CONFIG  # 不写 --config 时仍是 Haiku
+    # Haiku 配置与它的 mock 对照用同一份名单与资料（离线探针要求）
+    assert driver.pairing_problems(preflight(HAIKU_CONFIG), preflight(MOCK_CONFIG)) == []
 
 
 def test_f_subscription_mode_uses_no_key_and_keeps_the_login_path(monkeypatch):

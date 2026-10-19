@@ -1,0 +1,21 @@
+# 产品协议样例的原计划名单。在跑任何生活之前写好并冻结（标准开局 v1 检查）；不从收到多少结果反推原计划人数。名单顺序就是运行顺序。
+# 一位用户 × 两座城 × 每城 1 个分身 = 2 个分身，3 年。mock、Haiku 与 Flash 三份运行配置用同一份名单。
+
+roster_notice: >-
+  exploratory_synthetic：产品协议样例的原计划名单。全部是合成样例，不是现实城市评价，也不是模型能力的一般结论。
+
+roster:
+  roster_id: roster.product.sample
+  status: exploratory_synthetic
+  aggregation_version: e1-6b-aggregation-v1
+  life_input: configs/life/synthetic_product.yaml
+  scoring_config: configs/life/scoring_product.yaml
+  comparison_group_id: group.e1-convenience.synth
+  note: 一位用户、两座城、每城 1 个分身；受控主场景不发生新疾病。每一年的计划由规划器给出，名单冻结时还没有任何计划。
+  users:
+    - {user_id: user.product, person_id: u301, label: u301（全职文员，看重省事）}
+  arms:
+    - {arm_id: arm.main, role: main, evaluation_config: configs/life/evaluation_product.yaml, note: 主设定 δ = 1、六个基础生活模板}
+  entries:
+    - {user_id: user.product, clone_id: u301.k51.r0, city: {country: US, scheme: SYNTH2026, code: K51}, repeat_index: 0}
+    - {user_id: user.product, clone_id: u301.m52.r0, city: {country: US, scheme: SYNTH2026, code: M52}, repeat_index: 0}

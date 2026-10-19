@@ -390,7 +390,7 @@ def project_result(
         sources_zh=(
             "生活事实：E1 结算记录（钱、岗位、住房、食品、服务月份）与月度资源账（本人家务小时）",
             "评价：E1-6A 单分身跨期评价（L / V / J）；汇总：E1-6B 城市报告（C / E / M、均值、模拟缺失范围、事件链、硬要求）",
-            f"资料：合成资料包 {pack.body.pack_id}（{pack.fingerprint[:12]}…）与 E1 便利版配置；全部是合成设定",
+            f"资料：合成资料包 {pack.body.pack_id}（{pack.fingerprint[:12]}…）与产品协议的基础样例；全部是合成设定",
         ),
         planner=planner,
         real_model_calls=real_model_calls,

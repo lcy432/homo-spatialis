@@ -282,18 +282,18 @@ def preflight_only(
 def positive_weight_data_unknown(work: Path) -> Scenario:
     """受控夹具：工作区副本里把 M52 的安全资料改成“资料未知”（评分条件与可见事实同时改，E1 的“未知只对应未知”照旧核对），
     用户给安全 20 分。预检查必须明确报告这一缺口（这座城“可评分”只是 partial），而不是把安全删掉、把其余权重重新归一化。
-    便利版评分规格（内容身份）不变，只改城市条件。"""
+    评分规格（内容身份）不变，只改城市条件。"""
     work = workspace(work)
     edits = (
         (
-            "configs/life/scoring_e1_convenience.yaml",
+            "configs/life/scoring_product.yaml",
             "label: 合成城 M52",
             "      - {component_id: safety, status: known, base: 3, cap: 0.9, source: *cond}\n",
             "      - {component_id: safety, status: unknown, unknown_reason: 受控夹具：这座城的安全资料未知, "
             "source: *cond}\n",
         ),
         (
-            "configs/life/city_facts_e1_convenience.yaml",
+            "configs/life/city_facts_product.yaml",
             "label: 合成城 M52",
             "unit: 合成指数（0–10）, period: *period, status: known, number: 6, source: *factsrc}\n",
             "unit: 合成指数（0–10）, period: *period, status: unknown, "

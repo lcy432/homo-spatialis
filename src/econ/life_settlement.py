@@ -43,12 +43,12 @@
 月度时间与精力（E1-4A，DECISIONS/0020）
 --------------------------------------------------------------------------
 
-按月核算的协议（生活规则 ``e1-4a-monthly-v1``）在每月第 7 步之后，用**这个月实际执行**的东西
+每月第 7 步之后，用**这个月实际执行**的东西
 调用 ``econ.life_resources`` 算时间与精力：实际住的房（含兜底）、实际吃的食品方案、拿到工资的工作、
 执行了的服务、发生了的体验、参加了的培训、在服务期内的持有物。超限 → ``plan_infeasible``（整份计划
 试算失败，什么都不提交，带诊断）；资料缺失 → ``data_error``。
 
-执行修订 r2（2026-10-08，ADR0020 第十二节）：
+执行修订（ADR0020 第十二节）：
 
 * 出局当月（第 4 步付不起最低生活）照样检查**已知下限**：工资已经入账的工作照记工时与负担，没有到岗
   需求的通勤确定为零；已知用量超过预算或额度，就是 ``plan_infeasible``——资金出局不能绕过资源约束。没超
@@ -56,27 +56,24 @@
 * 多份工作（包括两份到岗工作）可以同时执行，工资、工时、负担分别相加，税按年内累计合并计算；每个岗位
   每次到岗算一趟完整往返，岗位之间不合并行程。
 
-旧规则照旧：年度时间检查在结算前，精力只记录。满足感对精力的反馈不在这里（E1-4B）。
-
 E1-4B（DECISIONS/0021）：结算不读评分或偏好，也不计算反馈。它只做两件事——拒绝额度待定或来自另一个
 反馈政策的年初状态（``ledger.feedback_state_problems``）；在下一年仍是行动年时，把结算产生的下一年状态标成
 "额度待定"的候选（``energy_quota_basis.status = pending_feedback``）。额度由年度交接（``econ.life_year``）在
-评分之后确定；终态与出局状态不需要下一年额度，原样带过去。r2（DECISIONS/0021 第十三节）：候选状态在产生时
-记下当时协议的政策内容指纹；"来自另一个反馈政策"按编号、版本与内容一起判断（``common.energy_quota_problems``）。
+评分之后确定；终态与出局状态不需要下一年额度，原样带过去。候选状态在产生时记下当时协议的政策内容指纹与评分内容身份；
+"来自另一个反馈政策"按编号、版本与内容一起判断（``common.energy_quota_problems``）。
 
-E1-5A（DECISIONS/0023，只在生活规则 ``e1-5a-monthly-career-v1``）：资格一律按年初状态判断
+E1-5A（DECISIONS/0023）：资格一律按年初状态判断
 （``common.qualification_gaps``；当年完成的学习从下一行动年起才算，不再"完成次月解锁"）；培训完成时记下完成年月；
 年末把这一年的学习与岗位事实写进结算结果，按 ``econ.life_career`` 授予能力（按能力去重）并写出实际岗位记录——
 都在下一年候选状态与年度绑定封存之前完成。工资、税、计费、培训进度与资源核算仍是原来那一套，没有第二份。
-旧协议的语义（年内完成次月解锁、不合格岗位逐月被拒、职业与技能原样带过去）不变。
 
-E1-5B（DECISIONS/0026，只在生活规则 ``e1-5b-monthly-savings-v1``）：资金目标由 ``econ.life_savings`` 记录——年初应用
+E1-5B（DECISIONS/0026）：资金目标由 ``econ.life_savings`` 记录——年初应用
 年度计划里的目标指令；每个完整过完的月份月末，把月末余额、当月实际支出与关联行动被拒的原因交给它；年末把这一年的
 目标事实写进结算结果、把目标写进下一年候选状态（都在年度绑定封存之前）。**结算本身一分钱都不因目标而变**：
 目标不扣款、不锁钱、不自动购买；购买与学费仍按原来的第 6 步、原来的顺序与资金检查执行。出局当月不再更新目标。
 
 --------------------------------------------------------------------------
-疾病、应急与恢复（E1-5C，DECISIONS/0027，只在生活规则 ``e1-5c-monthly-health-v1``）
+疾病、应急与恢复（E1-5C，DECISIONS/0027）
 --------------------------------------------------------------------------
 
 **先判定计划本身。** 同一份计划、同一个年初状态先做一遍"没有新疾病事件"的试算（年初已在延续的疾病照常按规则走）：
@@ -103,7 +100,6 @@ import math
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from decimal import ROUND_HALF_UP, Decimal
-from fractions import Fraction
 
 from common.ids import Jurisdiction
 from common.life_billing import annual_minor, monthly_installment, unit_minor
@@ -162,15 +158,11 @@ from econ.life_health import (
 from econ.life_resources import Activity, blocked_month, month_resources, resource_year
 from econ.life_savings import SavingsYearTracker
 from ledger.life_catalog import (
-    PERIODIC_ROLES,
     career_catalog_problems,
     career_state_problems,
     catalog_settlement_problems,
-    event_hours,
     health_catalog_problems,
-    hours_for_months,
     item_role,
-    parse_eligibility,
     participation_activity,
     plan_problems,
     plan_state_problems,
@@ -456,12 +448,11 @@ def settle_year(
     if failure is not None:
         return failure
 
-    if protocol.health_rules is not None:
-        # E1-5C：先判定计划本身——同一份计划、同一个年初状态，不发生新疾病事件（年初已在延续的疾病照常走）。
-        # 这一遍不可行就是年初的计划问题：什么都不提交，带着诊断退回（E1-7 可修改重试，随机数不变）。
-        trial = _Year(protocol, state, action, catalog, tax, new_events=False).settle()
-        if trial.status not in ("completed", "exited"):
-            return trial
+    # 先判定计划本身——同一份计划、同一个年初状态，不发生新疾病事件（年初已在延续的疾病照常走）。这一遍不可行就是年初的
+    # 计划问题：什么都不提交，带着诊断退回（可修改重试，随机数不变）。
+    trial = _Year(protocol, state, action, catalog, tax, new_events=False).settle()
+    if trial.status not in ("completed", "exited"):
+        return trial
     return _Year(protocol, state, action, catalog, tax).settle()
 
 
@@ -475,14 +466,14 @@ def check_year_plan(
 ) -> PlanCheck:
     """执行前检查（E1-7A，DECISIONS/0030）：结算前的全部检查，加上一遍**没有新随机事件**的逐月试算。什么都不提交。
 
-    与 ``settle_year`` 用同一份检查（``_screen``）与同一个月度执行器（``_Year(..., new_events=False)``）：E1-5C 协议里这就是
-    结算本来就做的无事件试算（年初已在延续的疾病照常走）；没有随机事件的协议里，这一遍就是完整的确定性执行。返回检查停在哪个
+    与 ``settle_year`` 用同一份检查（``_screen``）与同一个月度执行器（``_Year(..., new_events=False)``）：这就是结算本来就做的
+    无事件试算（年初已在延续的疾病照常走）。返回检查停在哪个
     阶段与问题清单，不返回试算的账目或状态——调用方据此判断能不能让规划器修订，不能借它看到真实的未来事件。
 
     通过的计划交给 ``settle_year`` / ``run_life_year`` 真实执行：结算会再做一遍同样的检查与试算（纯函数，结果相同），之后由
     随机事件引起的停止是已经发生的生活，不回滚、不重抽。
     """
-    events = type(protocol) is LifeProtocol and protocol.health_rules is not None
+    events = type(protocol) is LifeProtocol
     stage, failure = _screen(protocol, state, action, catalog, tax)
     if failure is not None:
         return PlanCheck(
@@ -559,7 +550,7 @@ class _Line:
     downgraded_from: int | None = None
     downgrade_reason: str | None = None
     failure: tuple[int, str] | None = None  # 年付或报名失败；之后的月份按同一原因记被拒
-    #: E1-5C：因为生病暂停的月份（月份、暂停种类、原因）。旧协议永远为空。
+    #: E1-5C：因为生病暂停的月份（月份、暂停种类、原因）。
     paused: list[tuple[int, str, str]] = field(default_factory=list)
 
 
@@ -575,7 +566,7 @@ class _Held:
     line: _Line | None = None  # 年付服务：本年覆盖月同时记在买下它的那一项上
     covered: list[int] = field(default_factory=list)
     expired: bool = False
-    #: E1-5C：服务期照样流逝、因为生病没有使用的月份（"付款 ≠ 参与"）。旧协议永远为空。
+    #: E1-5C：服务期照样流逝、因为生病没有使用的月份（"付款 ≠ 参与"）。
     paused: list[int] = field(default_factory=list)
 
 
@@ -641,7 +632,7 @@ class _Year:
         self.action = action
         self.catalog = catalog
         self.tax = tax
-        self.rules = protocol.resource_rules  # 旧规则为 None：不按月核算时间与精力
+        self.rules = protocol.resource_rules
         self.resource_months: list = []
         self.year = state.year_index
         self.digits = catalog.money_basis.minor_unit_digits
@@ -710,46 +701,32 @@ class _Year:
             )
             for t in state.training
         }
-        # E1-5B：资金目标的年度记录（只读余额与已发生的支出，不动钱）。旧协议为 None。
-        rules = protocol.savings_rules
-        self.savings = (
-            SavingsYearTracker(
-                rules=rules,
-                state=state,
-                action=action,
-                catalog=catalog,
-                digits=self.digits,
-                cash_start_minor=cash,
-            )
-            if rules is not None
-            else None
+        # 资金目标的年度记录（只读余额与已发生的支出，不动钱）
+        self.savings = SavingsYearTracker(
+            rules=protocol.savings_rules,
+            state=state,
+            action=action,
+            catalog=catalog,
+            digits=self.digits,
+            cash_start_minor=cash,
         )
         self.goal_line = next(
             (ln for ln in self.lines if action.items[ln.order].goal_id is not None), None
         )
-        # E1-5C：疾病、应急与恢复（旧协议为 None，下面的每一处健康分支都不会执行）
+        # 疾病、应急与恢复
         self.new_events = new_events
-        self.health = (
-            HealthYearTracker(
-                rules=protocol.health_rules,
-                source=protocol.illness_events,  # type: ignore[arg-type]  # 契约保证三者同时出现
-                state=state,
-                new_events=new_events,
-            )
-            if protocol.health_rules is not None
-            else None
+        self.health = HealthYearTracker(
+            rules=protocol.health_rules,
+            source=protocol.illness_events,
+            state=state,
+            new_events=new_events,
         )
         self.ctx: _MonthCtx | None = None
         # 收尾修订（F2）：年度计划声明"生病月份取消"的一次性耐用品购买（计划检查保证每一项都能唯一找到）
-        plan = action.emergency
-        self.cancel_declared: tuple[str, ...] = (
-            tuple(plan.cancel_purchases_when_ill) if plan is not None else ()
-        )
+        self.cancel_declared: tuple[str, ...] = tuple(action.emergency.cancel_purchases_when_ill)
         self.stop: StopRecord | None = None
         self.blocked_treatment: TreatmentOutcome | None = None
-        self.start_positions = frozenset(
-            state.employment.current_position_ids if state.employment is not None else ()
-        )
+        self.start_positions = frozenset(state.employment.current_position_ids)
 
     # ------------------------------------------------------------------ 小工具
 
@@ -784,31 +761,11 @@ class _Year:
             return "确定缺货：本城没有这一项"
         if o.availability == "unknown":
             return "未知：没有数据，不当零价，也不当可得"
-        if self.protocol.career_rules is not None:
-            # E1-5A：资格按年初状态判断，年内不变（当年完成的学习从下一行动年起才算）；与加载、结算前检查
-            # 与观察共用同一份判断。计划层面已经把不满足的项目挡掉，这里是最后一道保险。
-            gaps = qualification_gaps(o, self.state)
-            if gaps:
-                return "不满足资格 " + "；".join(f"{g.tag}（{g.reason}）" for g in gaps)
-            return None
-        for tag in o.eligibility:
-            parsed = parse_eligibility(tag)
-            if parsed is None:  # catalog_settlement_problems 已检查
-                raise LifeContractError(f"资格标签 {tag!r} 不在词表里")
-            kind, a, b = parsed
-            if kind == "occupation":
-                occ = self.state.occupation
-                ok = occ is not None and occ.scheme == a and occ.code == b
-            elif kind == "skill":
-                have = Fraction(Decimal(repr(float(self.state.skills.get(a, 0.0)))))
-                ok = have >= Fraction(Decimal(b))
-            elif kind == "training_completed":
-                t = self.training.get(a)
-                ok = t is not None and t.months_participated >= t.months_required
-            else:  # catalog_settlement_problems 已按协议检查：旧协议不读 E1-5A 的写法
-                raise LifeContractError(f"旧协议不读资格标签 {tag!r}")
-            if not ok:
-                return f"不满足资格 {tag}"
+        # 资格按年初状态判断，年内不变（当年完成的学习从下一行动年起才算）；与加载、结算前检查与观察共用同一份判断。
+        # 计划层面已经把不满足的项目挡掉，这里是最后一道保险。
+        gaps = qualification_gaps(o, self.state)
+        if gaps:
+            return "不满足资格 " + "；".join(f"{g.tag}（{g.reason}）" for g in gaps)
         return None
 
     def _minimum_cost(self, need: str, month: int) -> int:
@@ -823,22 +780,13 @@ class _Year:
         blocked = self._chosen_needs_never_provided()
         if blocked:
             return _failed("plan_infeasible", blocked)
-        if self.health is not None:
-            return self._settle_with_health()
-        for month in range(1, MONTHS_PER_YEAR + 1):
-            stop = self._month(month)
-            if stop is not None:
-                return stop
-            if self.exit is not None:
-                break
-        return self._finish()
+        return self._settle_with_health()
 
     # ------------------------------------------------------------------ 疾病、应急与恢复（E1-5C）
 
     def _settle_with_health(self) -> SettlementResult:
         """E1-5C 的月循环。无事件试算里失败 = 年初的计划问题（直接退回）；真实执行里失败 = 事件之后应急规则不足或
         资料缺口：恢复到上月月末、记停止月，之前的月份全部保留。"""
-        assert self.health is not None
         for month in range(1, MONTHS_PER_YEAR + 1):
             failure = self._health_month(month)
             if failure is not None:
@@ -890,7 +838,6 @@ class _Year:
 
     def _health_month(self, m: int) -> SettlementResult | None:
         """一个月：月初定状态（提交）→ 按应急安排试算（可回退）→ 成功就记健康事实。失败时恢复到上月月末并返回问题。"""
-        assert self.health is not None and self.protocol.health_rules is not None
         rules = self.protocol.health_rules
         start = self.health.month_start(m)
         self.blocked_treatment = None
@@ -1063,7 +1010,6 @@ class _Year:
 
     def _commit_health(self, m: int, ctx: _MonthCtx) -> None:
         """一次试算成功之后：记下这个月的健康事实与月末转移（出局当月不转移）。"""
-        assert self.health is not None
         start = ctx.start
         label = {"minor": "小病", "major": "大病"}.get(start.state)
         if self.exit is not None and self.exit.month == m:
@@ -1110,7 +1056,7 @@ class _Year:
 
     def _stop(self, m: int, failure: SettlementResult) -> None:
         """停止在第 m 月：这个月的执行没有提交（账目已恢复到上月月末），事件与原因保留。"""
-        assert self.health is not None and self.health.started is not None
+        assert self.health.started is not None
         problems = failure.problems
         kind = "data_gap" if failure.status == "data_error" else "emergency_insufficient"
         shortfalls = [p.resource for p in problems if p.resource is not None]
@@ -1229,9 +1175,7 @@ class _Year:
         if self.cash < min_h + min_f:
             self._exit(m, min_h, min_f)
             self._close_month(m, cash_start, gross, tax, min_h + min_f, "failed", 0, first_flow)
-            if self.rules is not None:
-                return self._check_resources(m, exit_month=True)
-            return None
+            return self._check_resources(m, exit_month=True)
 
         # 第 5 步：住房、食品，然后其他周期性费用
         for need, reserve in (("housing", min_f), ("food", 0)):
@@ -1261,17 +1205,14 @@ class _Year:
                 ln.rejections.append((m, ln.failure[1]))
         spent = after_income - self.cash
         self._close_month(m, cash_start, gross, tax, min_h + min_f, "passed", spent, first_flow)
-        if self.savings is not None:
-            self.savings.month_end(
-                m,
-                self.cash,
-                self._month_payments(first_flow),
-                self._goal_line_failure(m),
-                link_cancelled=self._goal_line_cancelled(m),
-            )
-        if self.rules is not None:
-            return self._check_resources(m)
-        return None
+        self.savings.month_end(
+            m,
+            self.cash,
+            self._month_payments(first_flow),
+            self._goal_line_failure(m),
+            link_cancelled=self._goal_line_cancelled(m),
+        )
+        return self._check_resources(m)
 
     # ------------------------------------------------------------------ 资金目标（E1-5B）
 
@@ -1331,7 +1272,6 @@ class _Year:
         return out
 
     def _check_resources(self, m: int, *, exit_month: bool = False) -> SettlementResult | None:
-        assert self.rules is not None
         # E1-5C：生病月份的恢复与就医进同一本账（出局当月不计：这个月没有过完）
         extra = tuple(self.ctx.loads) if self.ctx is not None and not exit_month else ()
         try:
@@ -1354,7 +1294,6 @@ class _Year:
         return None
 
     def _shortfall_problem(self, x: ResourceShortfall) -> SettlementProblem:
-        assert self.rules is not None
         label, unit = (
             ("时间", "小时") if x.resource == "time" else ("精力", f"{self.rules.energy_unit}")
         )
@@ -1379,15 +1318,12 @@ class _Year:
 
     def _career_year(
         self,
-    ) -> tuple[CareerYear, tuple[HeldAbility, ...], EmploymentRecord] | None:
-        """E1-5A：这一年的学习与岗位事实、授予后的能力与岗位记录。旧协议返回 None。
+    ) -> tuple[CareerYear, tuple[HeldAbility, ...], EmploymentRecord]:
+        """这一年的学习与岗位事实、授予后的能力与岗位记录（DECISIONS/0023）。
 
         只读实际执行的记录：培训行实际参加的月份（``covered``）与实付学费，岗位行实际领到工资的月份。
         """
-        if self.protocol.career_rules is None:
-            return None
         s = self.state
-        assert s.employment is not None  # career_state_problems 已检查
         start_progress = {t.opportunity_id: t.months_participated for t in s.training}
         trainings = [ln for ln in self.lines if ln.role == "training"]
         completions = []
@@ -1453,10 +1389,10 @@ class _Year:
         )
         return career, abilities, employment
 
-    def _next_quota_basis(self, next_status: str) -> EnergyQuotaBasis | None:
-        """E1-4B：下一年还是行动年时，下一年额度待定（由年度交接确定）；终态与出局原样带过去。"""
+    def _next_quota_basis(self, next_status: str) -> EnergyQuotaBasis:
+        """下一年还是行动年时，下一年额度待定（由年度交接确定）；终态与出局原样带过去。"""
         basis, policy = self.state.energy_quota_basis, self.protocol.energy_feedback
-        if basis is None or policy is None or next_status != "active":
+        if next_status != "active":
             return basis
         return EnergyQuotaBasis(
             base_level=basis.base_level,
@@ -1464,8 +1400,8 @@ class _Year:
             policy_id=policy.policy_id,
             policy_version=policy.version,
             source_year=self.year,
-            policy_fingerprint=policy.content_fingerprint,  # r2：候选状态在产生时绑定政策内容
-            # r3（DECISIONS/0025）：同时记下政策声明的评分内容身份；结算只读政策，不调用评分器
+            policy_fingerprint=policy.content_fingerprint,  # 候选状态在产生时绑定政策内容
+            # 同时记下政策声明的评分内容身份（DECISIONS/0025）；结算只读政策，不调用评分器
             scoring_content_fingerprint=policy.scoring_content_fingerprint,
         )
 
@@ -1758,11 +1694,8 @@ class _Year:
                 if ln.effective is None:
                     ln.effective = (self.year, m)
                 if t.months_participated == t.months_required:
-                    if self.protocol.career_rules is not None:
-                        t.completed_year, t.completed_month = self.year, m
-                        self._event(m, f"完成{ln.opp.label}；授予的能力从下一行动年起可用")
-                    else:
-                        self._event(m, f"完成{ln.opp.label}（只记录完成，技能与工资变化属于 E1-5）")
+                    t.completed_year, t.completed_month = self.year, m
+                    self._event(m, f"完成{ln.opp.label}；授予的能力从下一行动年起可用")
             else:
                 reason = ln.failure[1] if ln.failure else "未报名"
                 ln.rejections.append((m, f"未能参加：{reason}"))
@@ -1786,7 +1719,7 @@ class _Year:
 
     def _records(self, rec: _Line) -> tuple[ItemExecution, ExecutedItem]:
         rejected = [m for m, _ in rec.rejections]
-        paused = [m for m, _, _ in rec.paused]  # E1-5C：因为生病暂停的月份（旧协议为空）
+        paused = [m for m, _, _ in rec.paused]  # E1-5C：因为生病暂停的月份
         # 降级之后的月份交给兜底那一条记录（在那里记执行或未到达），这里不再重复记。
         handed_over = (
             {k for k in rec.months if k >= rec.downgraded_from}
@@ -1861,25 +1794,6 @@ class _Year:
         )
         return item, visible
 
-    def _time_and_energy(self, records: list[_Line]) -> tuple[Fraction, Fraction]:
-        hours = Fraction(0)
-        energy = Fraction(0)
-        for rec in records:
-            burden = Fraction(Decimal(repr(rec.opp.energy_burden)))
-            if rec.role == "experience":
-                if rec.covered:
-                    hours += event_hours(rec.opp, rec.qty)
-                    energy += burden * rec.qty
-            elif rec.role in PERIODIC_ROLES:
-                hours += hours_for_months(rec.opp, len(rec.covered), rec.qty)
-                energy += burden * len(rec.covered) * rec.qty / MONTHS_PER_YEAR
-        for h in self.held:  # 持续物品与年付服务按实际服务月
-            burden = Fraction(Decimal(repr(h.opp.energy_burden)))
-            q = Fraction(Decimal(repr(h.quantity)))
-            hours += hours_for_months(h.opp, len(h.covered), h.quantity)
-            energy += burden * len(h.covered) * q / MONTHS_PER_YEAR
-        return hours, energy
-
     def _finish(self) -> SettlementResult:
         if self.cash - self.cash_start != sum(f.amount for f in self.flows):
             raise AssertionError("全年账不平：期末 − 期初 ≠ 实际现金流合计")
@@ -1894,45 +1808,29 @@ class _Year:
             f"合成记账验证：税是合成测试替身 {self.tax.policy_id}（{self.tax.status}），"
             "这份账不是真实税后生活成本",
         ]
-        if self.rules is None:
-            hours, energy = self._time_and_energy(records)
-            time_used: float | None = float(hours)
-            energy_recorded: float | None = float(energy)
-            feasibility = "not_implemented"
-            resources = None
-            notes.append(
-                "精力只记录（energy_feasibility = not_implemented）：没有检查精力可行性，也没有"
-                "反馈；账务可行不等于完整生活可行"
-            )
+        resources = resource_year(self.rules, self.state, self.resource_months)
+        complete = [m.month for m in resources.months if m.resource_check == "complete"]
+        partial = [m.month for m in resources.months if m.resource_check == "known_lower_bound"]
+        stopped_at = [m.month for m in resources.months if m.resource_check == "blocked"]
+        if stopped_at:  # E1-5C
+            feasibility = "monthly_quota_checked_until_stop"
+            scope = (
+                f"第 {complete[0]}–{complete[-1]} 月完整检查，" if complete else ""
+            ) + f"第 {stopped_at[0]} 月停止（执行没有提交），之后的月份未发生——不是全年通过"
+        elif partial:
+            feasibility = "monthly_quota_checked_until_exit"
+            scope = (
+                f"第 {complete[0]}–{complete[-1]} 月完整检查，" if complete else ""
+            ) + f"第 {partial[0]} 月（出局当月）只检查已知下限，之后的月份未发生——不是全年通过"
         else:
-            time_used = energy_recorded = None
-            resources = resource_year(self.rules, self.state, self.resource_months)
-            complete = [m.month for m in resources.months if m.resource_check == "complete"]
-            partial = [m.month for m in resources.months if m.resource_check == "known_lower_bound"]
-            stopped_at = [m.month for m in resources.months if m.resource_check == "blocked"]
-            if stopped_at:  # E1-5C
-                feasibility = "monthly_quota_checked_until_stop"
-                scope = (
-                    f"第 {complete[0]}–{complete[-1]} 月完整检查，" if complete else ""
-                ) + f"第 {stopped_at[0]} 月停止（执行没有提交），之后的月份未发生——不是全年通过"
-            elif partial:
-                feasibility = "monthly_quota_checked_until_exit"
-                scope = (
-                    f"第 {complete[0]}–{complete[-1]} 月完整检查，" if complete else ""
-                ) + f"第 {partial[0]} 月（出局当月）只检查已知下限，之后的月份未发生——不是全年通过"
-            else:
-                feasibility = "monthly_quota_checked"
-                scope = "十二个月都做了完整检查"
-            feedback = (
-                "满足感对下一年额度的反馈不在结算里，由年度交接在评分之后计算（E1-4B）"
-                if self.protocol.energy_feedback is not None
-                else "满足感对精力的反馈尚未实现（E1-4B）"
-            )
-            notes.append(
-                f"时间与精力按月检查（{self.rules.version}，执行修订 {resources.rules_revision}）："
-                f"{scope}。每月已安排时间 ≤ 净可分配小时 / 12（未安排的月底作废），每月负担 ≤ 额度；"
-                f"负担系数与额度是合成设定；{feedback}"
-            )
+            feasibility = "monthly_quota_checked"
+            scope = "十二个月都做了完整检查"
+        feedback = "满足感对下一年额度的反馈不在结算里，由年度交接在评分之后计算（E1-4B）"
+        notes.append(
+            f"时间与精力按月检查（{self.rules.version}，执行修订 {resources.rules_revision}）："
+            f"{scope}。每月已安排时间 ≤ 净可分配小时 / 12（未安排的月底作废），每月负担 ≤ 额度；"
+            f"负担系数与额度是合成设定；{feedback}"
+        )
         if any(item.arrangement for item in self.action.items):
             notes.append("安排项只记录、本轮不定价")
 
@@ -1948,23 +1846,17 @@ class _Year:
         else:
             year_index, status = self.year + 1, "active"
         career = self._career_year()
-        savings, goals = None, self.state.savings_goals
-        if self.savings is not None:
-            savings, goals = self.savings.finish(
-                exit_month=self.exit.month if self.exit is not None else None,
-                stopped_month=self.stop.month if self.stop is not None else None,
+        savings, goals = self.savings.finish(
+            exit_month=self.exit.month if self.exit is not None else None,
+            stopped_month=self.stop.month if self.stop is not None else None,
+        )
+        health_year, next_health = self.health.finish(status, cancel_declared=self.cancel_declared)
+        if self.stop is not None:
+            label = "资料缺口" if self.stop.kind == "data_gap" else "应急安排不足"
+            notes.append(
+                f"第 {self.stop.month} 月停止（{label}）：这是模拟器的支持边界，不是现实中活不下去，也不是出局；"
+                "停止月的执行没有提交，此前的月份全部保留"
             )
-        health_year, next_health = None, self.state.health
-        if self.health is not None:
-            health_year, next_health = self.health.finish(
-                status, cancel_declared=self.cancel_declared
-            )
-            if self.stop is not None:
-                label = "资料缺口" if self.stop.kind == "data_gap" else "应急安排不足"
-                notes.append(
-                    f"第 {self.stop.month} 月停止（{label}）：这是模拟器的支持边界，不是现实中活不下去，也不是出局；"
-                    "停止月的执行没有提交，此前的月份全部保留"
-                )
         outcome = EnvironmentOutcome(
             person_id=self.state.person_id,
             clone_id=self.state.clone_id,
@@ -2003,12 +1895,10 @@ class _Year:
             tax_policy_id=self.tax.policy_id,
             tax_status=self.tax.status,
             bookkeeping_label="synthetic_bookkeeping_only",
-            time_used_hours=time_used,
-            energy_burden_recorded=energy_recorded,
             energy_feasibility=feasibility,  # type: ignore[arg-type]
             resources=resources,
             notes=tuple(notes),
-            career=career[0] if career is not None else None,
+            career=career[0],
             savings=savings,
             health=health_year,
             stop=self.stop,
@@ -2023,7 +1913,7 @@ class _Year:
             status=status,  # type: ignore[arg-type]
             exit=self.exit,
             stop=self.stop,
-            occupation=career[2].occupation_summary() if career is not None else s.occupation,
+            occupation=career[2].occupation_summary(),
             money_basis_id=s.money_basis_id,
             cash=self._money(self.cash),
             holdings=tuple(
@@ -2038,13 +1928,12 @@ class _Year:
                 for h in self.held
                 if not h.expired
             ),
-            skills=dict(s.skills),
             time_budget_hours=s.time_budget_hours,
             energy=s.energy,
             resource_budget_basis=s.resource_budget_basis,
             energy_quota_basis=self._next_quota_basis(status),
-            abilities=career[1] if career is not None else s.abilities,
-            employment=career[2] if career is not None else s.employment,
+            abilities=career[1],
+            employment=career[2],
             training=tuple(
                 TrainingProgress(
                     opportunity_id=t.opportunity_id,

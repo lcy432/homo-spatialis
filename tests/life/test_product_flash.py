@@ -1,11 +1,9 @@
-"""产品生活规划器默认模型切换为 Qwen3.8 Flash（2026-10-13，DECISIONS/0032）的离线验收。零网络、零费用；付费账本都在临时目录。
+"""产品角色 Qwen3.8 Flash（DECISIONS/0032）的离线验收。零网络、零费用；付费账本都在临时目录。
 
-* 配置：产品角色 ``product_planner`` 与研究基座 ``base_a`` / ``base_b`` 分开；滚动型号的例外只在产品角色；旧 Max 入口的身份不变。
-* 选择：产品入口实际选 Flash，按配置里写的角色取密钥，角色缺失就报错，不回退到 Max。
+* 配置：产品角色 ``product_planner`` 与研究基座 ``base_a`` / ``base_b`` 分开；滚动型号的例外只在产品角色。
+* 选择：显式选 Flash 配置时按配置里写的角色取密钥，角色缺失就报错，不回退；不写 ``--config`` 时是测试配置（Haiku）。
 * 核对：声明、实际规划器、返回型号与报价对不上时按明确规则拒绝；发送前能发现的问题零调用拒绝。
-* 归档：Max 的中间归档不能被 Flash 接着执行；Flash 归档的恢复、已保存回复的重放与预算保护照常。
-
-读的归档（只读，未来提交时必须一起提交）：``runs/2026-10-13-e1-7b-live-pilot/main/manifest.json``（旧 Max 入口的身份）。
+* 归档：Flash 归档的恢复、已保存回复的重放与预算保护照常。
 """
 
 from __future__ import annotations
@@ -16,7 +14,7 @@ import sys
 
 import pytest
 
-from agentlayer.life_llm import ProviderCallLog, QwenPlanner, returned_model_accepted
+from agentlayer.life_llm import LlmPlanner, ProviderCallLog, returned_model_accepted
 from common.config import ConfigError, ModelsConfig, ModelSpec, ProductModelSpec, ResolvedModel
 from common.life_contracts import LifeContractError
 from common.life_planning_contracts import LlmSettings
@@ -25,31 +23,28 @@ from orchestration.life_runner import (
     RunInterrupted,
     RunRefusedError,
     budget_reconciliation,
-    preflight,
     replay_run,
     resume_run,
     start_run,
 )
 
 from .live_support import (
-    FLASH_CONFIG,
-    FLASH_MODEL,
     LIVE_CONFIG,
     MODEL,
     REPO,
     ScriptedTransport,
-    flash_world,
     live_world,
     make_repo,
     mock_text,
     qwen,
     records,
     reply,
-    snapshot,
     timeout,
 )
 
-MAX_MANIFEST = REPO / "runs/2026-10-13-e1-7b-live-pilot/main/manifest.json"
+FLASH_CONFIG = LIVE_CONFIG
+FLASH_MODEL = MODEL
+flash_world = live_world
 
 
 @pytest.fixture
@@ -114,23 +109,6 @@ def test_a_rolling_names_are_allowed_only_on_the_product_role():
     assert dated.effective_version_policy == "dated_snapshot"
 
 
-def test_a_the_old_max_entry_keeps_its_meaning(monkeypatch):
-    monkeypatch.chdir(REPO)
-    world = preflight(LIVE_CONFIG)
-    manifest = json.loads(MAX_MANIFEST.read_text(encoding="utf-8"))
-    llm = world.config.planner.llm
-    assert (llm.model_role, llm.model, llm.effective_version_policy) == (
-        "base_b",
-        MODEL,
-        "dated_snapshot",
-    )
-    assert "version_policy" not in llm.model_dump(mode="json")  # 旧配置不多出一栏，设定指纹不变
-    # 运行配置与规划器行为的身份与原主试跑的运行清单逐位相同（代码身份按设计不同）
-    for key in ("run_config", "planner_behavior", "planner"):
-        assert world.identities[key] == manifest["identities"][key], key
-    assert world.config.planner.identity.model_dump(mode="json") == manifest["planner"]
-
-
 # ---------------------------------------------------------------------- 选择：产品入口实际选 Flash，不回退
 
 
@@ -143,7 +121,7 @@ def _driver():
 
 def test_b_the_product_entry_selects_flash_and_never_falls_back(repo, monkeypatch):
     driver = _driver()
-    assert driver.PRODUCT == FLASH_CONFIG and driver.LEGACY_MAX == LIVE_CONFIG
+    assert driver.PRODUCT == FLASH_CONFIG and driver.DEFAULT.name == "run_product_haiku.yaml"
     asked: list[str] = []
 
     def fake_resolve(self):
@@ -182,7 +160,7 @@ def test_b_the_product_entry_selects_flash_and_never_falls_back(repo, monkeypatc
 
 
 def test_b_resume_and_replay_use_the_archive_model_and_refuse_a_config_flag(monkeypatch):
-    """新运行默认用测试配置（2026-10-18 起是 Haiku，DECISIONS/0035）、可以显式选 Max；恢复与重放只按归档冻结的配置与模型执行，写了
+    """新运行默认用测试配置（Haiku，DECISIONS/0035）、可以显式选 Flash；恢复与重放只按归档冻结的配置与模型执行，写了
     --config 就报错（不能换模型接着跑）。"""
     driver = _driver()
     seen: list[tuple[str, object]] = []
@@ -237,27 +215,11 @@ def test_c_declared_and_actual_settings_must_match_with_zero_calls(repo, tmp_pat
     assert t.bodies == [] and not (tmp_path / "run").exists()
 
 
-def test_c_a_max_planner_or_max_price_is_refused_on_the_flash_entry(repo, tmp_path):
-    world = flash_world()
-    max_settings = live_world().config.planner.llm
-    t = ScriptedTransport()
-    with pytest.raises(RunRefusedError, match="不一致"):  # 隐式换回 Max：拒绝
-        start_run(world, qwen(world, t, settings=max_settings), tmp_path / "run1", run_id="flash-c")
-    max_price = RoundBudget(
-        world.config.paid_budget.model_copy(
-            update={"ledger_dir": "budget-maxprice", "price": live_world().config.paid_budget.price}
-        )
-    )
-    with pytest.raises(RunRefusedError, match="报价"):  # 计价用的是 Max 的报价：拒绝
-        start_run(world, qwen(world, t, budget=max_price), tmp_path / "run2", run_id="flash-c")
-    assert t.bodies == []
-
-
 def test_c_config_level_mismatches_are_refused_before_any_run(tmp_path, monkeypatch):
     def price_of_max(r):
-        r["paid_budget"]["price"]["model"] = MODEL
+        r["paid_budget"]["price"]["model"] = "qwen3.7-max-2026-06-08"
 
-    monkeypatch.chdir(make_repo(tmp_path / "r1", flash=price_of_max))
+    monkeypatch.chdir(make_repo(tmp_path / "r1", run=price_of_max))
     with pytest.raises(LifeContractError, match="报价表对应的模型"):
         flash_world()
 
@@ -266,14 +228,14 @@ def test_c_config_level_mismatches_are_refused_before_any_run(tmp_path, monkeypa
         r["planner"]["llm"]["model"] = "qwen3.8-plus"
         r["paid_budget"]["price"]["model"] = "qwen3.8-plus"
 
-    monkeypatch.chdir(make_repo(tmp_path / "r2", flash=other_model))
+    monkeypatch.chdir(make_repo(tmp_path / "r2", run=other_model))
     with pytest.raises(RunRefusedError, match="模型快照"):  # 与 models.yaml 的产品角色不一致
         flash_world()
 
     def research_role(r):
         r["planner"]["llm"]["model_role"] = "base_b"
 
-    monkeypatch.chdir(make_repo(tmp_path / "r3", flash=research_role))
+    monkeypatch.chdir(make_repo(tmp_path / "r3", run=research_role))
     with pytest.raises(LifeContractError, match="只允许在产品规划角色"):
         flash_world()
 
@@ -293,9 +255,10 @@ def test_c_the_returned_model_rule_is_explicit():
         (None, False),
     ]:
         assert returned_model_accepted(flash, name) is ok, name
-    max_settings = _settings(model_role="base_b", model=MODEL, version_policy=None)
-    assert returned_model_accepted(max_settings, MODEL)
-    assert not returned_model_accepted(max_settings, MODEL + "-2026-06-09")
+    dated = "qwen3.7-max-2026-06-08"
+    max_settings = _settings(model_role="base_b", model=dated, version_policy=None)
+    assert returned_model_accepted(max_settings, dated)
+    assert not returned_model_accepted(max_settings, dated + "-2026-06-09")
     assert not returned_model_accepted(max_settings, "qwen3.7-max")
 
 
@@ -327,23 +290,7 @@ def test_c_returned_models_are_recorded_and_judged_by_the_rule(repo, tmp_path, r
 # ---------------------------------------------------------------------- 归档：不混用、恢复、重放、预算
 
 
-def test_d_a_max_archive_cannot_be_continued_by_flash(repo, tmp_path):
-    max_world = live_world()
-    out = tmp_path / "max-run"
-    start_run(
-        max_world, qwen(max_world, ScriptedTransport()), out, run_id="max-d", stop_after_commits=1
-    )
-    before = snapshot(out)
-    world = flash_world()
-    t = ScriptedTransport()
-    with pytest.raises(RunRefusedError):  # Max 的世界 + Flash 规划器：规划器与声明不一致
-        resume_run(max_world, qwen(world, t), out)
-    with pytest.raises(RunRefusedError):  # Flash 的世界去接 Max 的归档：运行清单不同
-        resume_run(world, qwen(world, t), out)
-    assert t.bodies == [] and snapshot(out) == before
-
-
-class _CrashAfterReply(QwenPlanner):
+class _CrashAfterReply(LlmPlanner):
     def plan(self, call):
         super().plan(call)
         raise RunInterrupted("回复落盘之后、规划记录之前中断")
@@ -382,9 +329,13 @@ def test_d_a_flash_archive_resumes_replays_and_records_the_model_profile(repo, t
     assert budget_reconciliation(world, out)["consistent"] is True
 
 
-def test_d_the_flash_budget_stops_at_three_requests(repo, tmp_path):
+def test_d_the_flash_budget_stops_at_three_requests(tmp_path, monkeypatch):
+    def three(r):
+        r["paid_budget"]["max_requests"] = 3
+
+    monkeypatch.chdir(make_repo(tmp_path / "repo", run=three))
     world = flash_world()
-    assert (world.config.paid_budget.max_requests, world.config.paid_budget.max_cost_cny) == (3, 1)
+    assert world.config.paid_budget.max_requests == 3
     t = ScriptedTransport(
         [timeout(), "散文", "散文"]
     )  # 第 1 份候选 2 次请求、第 2 份 1 次；第 3 份需要第 4 次

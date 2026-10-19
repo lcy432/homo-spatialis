@@ -15,7 +15,7 @@
   ``orchestration.life_outcome.outcome_from_archive`` 从归档零调用重建（先过 E1 官方重放核对），所以“E1 已经跑完、外层还没记下”
   之后恢复，也只是读取，不会再模拟一次。
 
-全部操作在一个 E3 工作目录里进行（``product.fixtures.prepare_workspace``：资料包与便利版配置按仓库相对路径复制进来，编译产物
+全部操作在一个 E3 工作目录里进行（``product.fixtures.prepare_workspace``：资料包与基础样例按仓库相对路径复制进来，编译产物
 与运行配置都用相对路径）。工作目录里本层自己的文件都在 ``workflow/`` 下：
 
     workflow/confirmed/<确认编号>.json   已确认画像（E3 的 ConfirmedProfile；流程从这里开始，不重做问卷）
@@ -101,7 +101,7 @@ HALT_CODES: dict[str, str | None] = {
 
 
 class RunRequest(BaseModel):
-    """本次输入：资料包（含便利版整套配置与运行设置）+ 编译目录名 + 受控测试设置。流程侧的文件，不是 E3 的共享消息。"""
+    """本次输入：资料包（含基础样例与运行设置）+ 编译目录名 + 受控测试设置。流程侧的文件，不是 E3 的共享消息。"""
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 

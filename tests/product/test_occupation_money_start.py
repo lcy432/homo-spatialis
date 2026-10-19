@@ -172,9 +172,8 @@ def test_compiled_bundle_uses_the_product_protocol_and_the_unchanged_scoring_con
     assert p.energy_feedback.preference_source == "product_confirmed_six_dim"
     assert (
         scoring.spec.content_fingerprint
-        == "f209137b1101407427724a8d7f3009fb09eca8a8c11884114412feea6fdcd690"
+        == "fdf920f447af884c8fa05ee90a6e971193fb7cc6cffee772d77b8c5d0588f23a"
     )
-    assert bundle.stated_profiles == () and bundle.internal_truths == ()  # 产品路径没有研究真值
     assert [x.person_id for x in bundle.product_profiles] == ["u601"]
     assert report.contract_valid and report.settlement_ready
 

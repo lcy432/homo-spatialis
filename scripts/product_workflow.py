@@ -5,7 +5,7 @@
 两种服务：
 
 * ``--services e3``：真实 E3 / E1 接入（E3 的预检查、登记、进度与结果投影；E1 的启动、恢复与归档）。需要 ``--e3-workspace``：
-  一个 E3 工作目录（``e3-seed`` 会准备它：资料包与便利版整套配置按仓库相对路径复制进来）。规划器是资料包声明的离线 mock。
+  一个 E3 工作目录（``e3-seed`` 会准备它：资料包与基础样例按仓库相对路径复制进来）。规划器是资料包声明的离线 mock。
 * ``--services synthetic``（默认）：合成替身（``workflows.synthetic``），只检验流程本身；需要 ``--synthetic-root``。
 
     uv run python scripts/product_workflow.py --e3-workspace <目录> e3-seed --example normal

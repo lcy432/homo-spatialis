@@ -161,7 +161,7 @@ def run_preflight(
         preference=pref,  # type: ignore[arg-type]
     )
     digits = pack.body.points.display_decimals + 2
-    effective = protocol.energy_feedback is not None and protocol.energy_feedback.effective
+    effective = protocol.energy_feedback.effective
     inv = {c.city_ref: c for c in inventory.cities}
     names = {d.key: d.label for d in pack.body.dimensions} | {
         m.key: m.label for m in pack.body.material_leaves

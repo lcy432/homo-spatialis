@@ -1,4 +1,4 @@
-"""E1-7A 测试的辅助：读运行配置、写变体配置、在临时目录里跑一个批次（mock 规划器，零网络）。
+"""运行器测试的辅助：读运行配置、写变体配置、在临时目录里跑一个批次（mock 规划器，零网络）。
 
 不是第二个运行器：全部经 ``orchestration.life_runner`` 的正式入口（``preflight`` / ``start_run`` / ``resume_run`` / ``replay_run``）。
 变体配置只写在 pytest 的临时目录，不改仓库里的配置。
@@ -13,13 +13,13 @@ from typing import Any
 
 import yaml
 
-from agentlayer.life_mock import RuleBasedMockPlanner
+from agentlayer.life_mock import ProductMockPlanner
 from common.run_store import RunStore
 from orchestration.life_runner import RunOutcome, RunWorld, preflight, start_run
 
-RUN_CONFIG = Path("configs/life/run_e1_7a.yaml")
-FACTS = Path("configs/life/city_facts_e1_7a.yaml")
-RUN_ID = "test-e1-7a"
+RUN_CONFIG = Path("configs/life/run_product_mock.yaml")
+FACTS = Path("configs/life/city_facts_product.yaml")
+RUN_ID = "test-product-mock"
 ARM = "arm.main"
 
 
@@ -48,8 +48,8 @@ def facts_variant(tmp_path: Path, mutate: Callable[[dict[str, Any]], None]) -> P
     return write_yaml(tmp_path / "facts.yaml", data)
 
 
-def batch(world: RunWorld, out: Path, **kw: Any) -> tuple[RunOutcome, RuleBasedMockPlanner]:
-    planner = RuleBasedMockPlanner(world.config.planner.scripts)
+def batch(world: RunWorld, out: Path, **kw: Any) -> tuple[RunOutcome, ProductMockPlanner]:
+    planner = ProductMockPlanner(world.config.planner.scripts)
     outcome = start_run(world, planner, out, run_id=RUN_ID, **kw)
     return outcome, planner
 

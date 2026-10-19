@@ -1,7 +1,8 @@
-"""单个对象自己能检查的规则（E1-1，`DECISIONS/0016`）。
+"""单个对象自己能检查的规则（`DECISIONS/0016`）。
 
 每条测试盯一个会造成实际损害的错误：未知价格被补成零、确定缺货被删掉、空间平减
 口径装当地标价、价格指数冒充报价、协议在政策未定时自称可评分、代理自己填工资。
+需要完整对象时从产品协议样例取一份真实的，只改坏一处。
 """
 
 from __future__ import annotations
@@ -29,6 +30,8 @@ from common.life_contracts import (
 )
 from common.money import USD_2024_US100, Money, NumeraireMismatchError
 
+from .conftest import CLONE_K, HEALTHY
+
 USD = "USD_2024_LOCAL"
 SYNTH = {
     "kind": "synthetic",
@@ -36,6 +39,13 @@ SYNTH = {
     "geography_scope": "synthetic",
     "mapping_version": "t",
     "synthetic_note": "test",
+}
+RESOURCE = {
+    "basis": "per_service_month",
+    "hours": 30,
+    "burden_per_hour": 0.5,
+    "quantity_scales": False,
+    "note": "测试：每月准备 30 小时",
 }
 
 
@@ -53,6 +63,7 @@ def _opp(**over) -> dict:
             "per_unit": "u",
         },
         "duration": {"kind": "ongoing_service"},
+        "resource": dict(RESOURCE),
         "source": SYNTH,
     }
     base.update(over)
@@ -66,18 +77,17 @@ def _policies(state="undecided") -> dict:
     }
 
 
-def _protocol(**over) -> dict:
-    base = {
-        "protocol_id": "life-test",
-        "schema_version": "s",
-        "life_rules_version": "r",
-        "scoring_scale_version": "c",
-        "info_permission_version": "i",
-        "status": "synthetic_fixture_only",
-        "math_policies": _policies(),
-    }
-    base.update(over)
-    return base
+@pytest.fixture
+def protocol_doc(bundle):
+    """产品协议样例的协议，数学政策全部改回"未定"。"""
+
+    def make(**over) -> dict:
+        base = bundle.protocol.model_dump(mode="json")
+        base.update(status="synthetic_fixture_only", math_policies=_policies())
+        base.update(over)
+        return base
+
+    return make
 
 
 # --------------------------------------------------------------------------
@@ -164,8 +174,9 @@ def test_the_three_states_are_distinct_values():
             },
             "finite",
         ),
-        ("time_cost_hours_per_year", 9000.0, "less than or equal"),
-        ("energy_burden", -1.0, "greater than or equal"),
+        ("resource", {**RESOURCE, "hours": 9000}, "less than or equal"),
+        ("resource", {**RESOURCE, "burden_per_hour": -1.0}, "greater than or equal"),
+        ("resource", {**RESOURCE, "burden_per_hour": None}, "零也要显式写 0"),
     ],
 )
 def test_illegal_numbers_are_rejected(field, value, match):
@@ -269,21 +280,15 @@ def test_a_price_index_cannot_stand_in_for_a_quote():
         _ = Money(1.0, USD) + idx  # type: ignore[operator]
 
 
-def test_different_bases_cannot_enter_one_ledger():
+def test_different_bases_cannot_enter_one_ledger(first_year):
     zz = "XTS_2024_LOCAL"
     with pytest.raises(NumeraireMismatchError):
         _ = Money(1.0, USD) + Money(1.0, zz)
+    doc = first_year.settlement.outcome.model_dump(mode="json")
+    assert EnvironmentOutcome.model_validate(doc) == first_year.settlement.outcome
+    doc["cash_flows"][0]["amount"]["numeraire"] = zz
     with pytest.raises(ValidationError, match="不一致"):
-        EnvironmentOutcome.model_validate(
-            {
-                "person_id": "u",
-                "clone_id": "c",
-                "year_index": 1,
-                "money_basis_id": USD,
-                "executed": [],
-                "cash_flows": [{"label": "rent", "amount": {"amount": -1.0, "numeraire": zz}}],
-            }
-        )
+        EnvironmentOutcome.model_validate(doc)
 
 
 def test_money_basis_carries_currency_year_and_meaning():
@@ -292,23 +297,15 @@ def test_money_basis_carries_currency_year_and_meaning():
     assert b.price_meaning == "local_price_base_year"
 
 
-def test_time_and_energy_are_different_quantities():
-    state = PersonYearState.model_validate(
-        {
-            "person_id": "u",
-            "clone_id": "c",
-            "city": {"country": "US", "scheme": "S", "code": "1"},
-            "year_index": 1,
-            "money_basis_id": USD,
-            "cash": {"amount": 1.0, "numeraire": USD},
-            "time_budget_hours": 5840,
-            "energy": {"level": 10, "scale_version": "t"},
-        }
-    )
-    assert state.time_budget_hours == 5840 and state.energy.level == 10
+def test_time_and_energy_are_different_quantities(bundle):
+    state = bundle.initial_state(CLONE_K)
+    assert state.time_budget_hours != state.energy.level
     assert type(state.energy).__name__ == "EnergyState"
+    doc = state.model_dump(mode="json")
     with pytest.raises(ValidationError):
-        PersonYearState.model_validate({**state.model_dump(), "time_budget_hours": 9000})
+        PersonYearState.model_validate({**doc, "time_budget_hours": 9000})
+    with pytest.raises(ValidationError):
+        PersonYearState.model_validate({**doc, "energy": {**doc["energy"], "level": 0}})
 
 
 # --------------------------------------------------------------------------
@@ -337,6 +334,7 @@ def test_rationale_does_not_reach_settlement():
             "clone_id": "c",
             "year_index": 1,
             "items": items,
+            "emergency": HEALTHY,
             "rationale": "我会非常努力地工作",
         }
     )
@@ -346,12 +344,20 @@ def test_rationale_does_not_reach_settlement():
             "clone_id": "c",
             "year_index": 1,
             "items": items,
+            "emergency": HEALTHY,
             "rationale": "随便干干",
         }
     )
     assert a.settlement_view() == b.settlement_view()
     assert "rationale" not in a.settlement_view()
     assert a != b, "理由确实不同；只是不进结算"
+    assert a.settlement_view()["emergency"] == HEALTHY  # 应急安排进结算
+
+
+def test_the_emergency_plan_is_required():
+    """生病时怎么办必须写（E3A 起用户都会回答健康问题；mock 也有固定的应急政策），不默认成"不治"。"""
+    with pytest.raises(ValidationError, match="emergency"):
+        YearAction.model_validate({"person_id": "u", "clone_id": "c", "year_index": 1, "items": []})
 
 
 # --------------------------------------------------------------------------
@@ -359,34 +365,45 @@ def test_rationale_does_not_reach_settlement():
 # --------------------------------------------------------------------------
 
 
-def test_a_protocol_cannot_be_formal_while_policies_are_undecided():
+def test_a_protocol_cannot_be_formal_while_policies_are_undecided(protocol_doc):
     with pytest.raises(ValidationError, match="不能标成 formal"):
-        LifeProtocol.model_validate(_protocol(status="formal"))
+        LifeProtocol.model_validate(protocol_doc(status="formal"))
 
 
-def test_scoring_ready_is_false_until_every_policy_is_decided():
-    assert LifeProtocol.model_validate(_protocol()).scoring_ready is False
+def test_scoring_ready_is_false_until_every_policy_is_decided(protocol_doc):
+    assert LifeProtocol.model_validate(protocol_doc()).scoring_ready is False
     half = _policies()
     half["score_mapping"] = {"state": "decided", "decision_ref": "DECISIONS/9999"}
-    assert LifeProtocol.model_validate(_protocol(math_policies=half)).scoring_ready is False
+    assert LifeProtocol.model_validate(protocol_doc(math_policies=half)).scoring_ready is False
     full = LifeProtocol.model_validate(
-        _protocol(status="formal", math_policies=_policies("decided"))
+        protocol_doc(status="formal", math_policies=_policies("decided"))
     )
     assert full.scoring_ready is True, "反面：全定且 formal 时必须能变成可评分，否则上面测的是常数"
 
 
-def test_a_decided_policy_must_point_at_a_decision():
+def test_a_decided_policy_must_point_at_a_decision(protocol_doc):
     p = _policies()
     p["discounting"] = {"state": "decided"}
     with pytest.raises(ValidationError, match="decision_ref"):
-        LifeProtocol.model_validate(_protocol(math_policies=p))
+        LifeProtocol.model_validate(protocol_doc(math_policies=p))
 
 
-def test_every_open_policy_must_be_listed():
+def test_every_open_policy_must_be_listed(protocol_doc):
     p = _policies()
     del p["terminal_value"]
     with pytest.raises(ValidationError, match="terminal_value"):
-        LifeProtocol.model_validate(_protocol(math_policies=p))
+        LifeProtocol.model_validate(protocol_doc(math_policies=p))
+
+
+@pytest.mark.parametrize(
+    "rule", ["resource_rules", "energy_feedback", "career_rules", "savings_rules", "health_rules"]
+)
+def test_every_life_rule_is_required(protocol_doc, rule):
+    """现行生活规则只有一套（月度资源、精力反馈、职业、储蓄、健康）；少了哪一块都不是"旧规则"，而是不完整。"""
+    doc = protocol_doc()
+    del doc[rule]
+    with pytest.raises(ValidationError, match=rule):
+        LifeProtocol.model_validate(doc)
 
 
 def test_an_official_internal_score_is_not_representable_yet():
@@ -418,7 +435,7 @@ def test_the_new_score_is_not_the_old_welfare_type():
 
 
 def test_importing_the_contracts_does_not_drag_in_the_world_generator():
-    """`common` 只依赖七维常量这一个叶模块，不该把 M3 的生成器拖进来。"""
+    """生活契约不该把研究线的 M3 生成器拖进来。"""
     code = (
         "import sys; import common.life_contracts; "
         "bad=[m for m in ('worlds.generator','worlds.personas','eval','econ.core') if m in sys.modules]; "

@@ -84,9 +84,7 @@ def monthly_time_budget(state: PersonYearState) -> Fraction:
 
 
 def monthly_energy_quota(state: PersonYearState) -> Fraction:
-    """每月可承受负担额度。只认尺度 ``e1-4a-monthly-quota-v1``——旧尺度的数值不是额度。"""
-    if state.resource_budget_basis is None:
-        raise LifeContractError(f"{state.clone_id}: 没有月度资源预算依据，精力数值不能当成月度额度")
+    """每月可承受负担额度（尺度 ``e1-4a-monthly-quota-v1``）。"""
     return to_fraction(state.energy.level)
 
 

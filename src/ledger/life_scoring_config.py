@@ -25,10 +25,6 @@ from pydantic import Field, ValidationError
 
 from common.life_contracts import ContractModel, LifeContractError, LifeProtocol
 from common.life_scoring_contracts import (
-    CONVENIENCE_SCORING_VERSIONS,
-    DAILY_CONVENIENCE,
-    HEALTH_SCORING_VERSIONS,
-    LEGACY_LAUNDRY,
     CityScoringConditions,
     ComparisonGroup,
     LifeScoringSpec,
@@ -44,8 +40,8 @@ class ScoringConfig(ContractModel):
     scoring_notice: str = Field(min_length=1)
     spec: LifeScoringSpec
     city_conditions: tuple[CityScoringConditions, ...]
-    #: E1-3 增补：比较组的共同粒度（`DECISIONS/0019` 第五节）。旧配置没有这一项，照旧可运行。
-    comparison_group: ComparisonGroup | None = None
+    #: 比较组的共同粒度（`DECISIONS/0019` 第五节）：资料单位与功能供给都在比较组里核对。
+    comparison_group: ComparisonGroup
 
     def conditions_for(self, city_key: str) -> CityScoringConditions | None:
         return next((c for c in self.city_conditions if str(c.city) == city_key), None)
@@ -85,8 +81,6 @@ def condition_problems(spec: LifeScoringSpec, conditions: CityScoringConditions)
         if cond is None:
             continue
         where = f"{city}/{comp.component_id}"
-        if comp.plan_commute is not None and cond.status == "known":
-            out.append(f"{where}: 方案级通勤读实际住房的分钟，城市条件应写 plan_level 或 unknown")
         if comp.transport is not None and cond.status == "known":
             out.append(
                 f"{where}: 广义交通读实际住房的分钟与到岗次数，城市条件应写 plan_level 或 unknown"
@@ -97,7 +91,7 @@ def condition_problems(spec: LifeScoringSpec, conditions: CityScoringConditions)
                 "plan_level 或 unknown（不按城市给背景值或上限）"
             )
         if not comp.plan_level and cond.status == "plan_level":
-            out.append(f"{where}: 只有方案级通勤或广义交通分项才能写 plan_level")
+            out.append(f"{where}: 只有广义交通或日常生活便利分项才能写 plan_level")
         if cond.nature is not None and comp.landscape is None:
             out.append(f"{where}: 评分规格没有启用景观规则，城市却写了景观数据")
         if comp.landscape is not None and comp.landscape.beta > 0 and cond.status == "known":
@@ -160,35 +154,11 @@ def scoring_config_problems(
                 "不补零、不重新归一化"
             )
     errors.extend(growth_transport_protocol_problems(spec, bundle.protocol))
-    errors.extend(health_protocol_problems(spec, bundle.protocol))
     errors.extend(convenience_protocol_problems(spec, bundle.protocol))
     notes.extend(convenience_protocol_notes(spec, bundle.protocol))
-    # E1 补充"日常生活便利"：旧的洗衣点数不能改读成广义便利，新的便利点数也不能交给没有便利分项的旧评分版本
-    for p in bundle.stated_profiles:
-        errors.extend(
-            convenience_preference_problems(
-                spec, f"stated_profiles/{p.person_id}", p.material_points or {}
-            )
-        )
-    for t in bundle.internal_truths:
-        errors.extend(
-            convenience_preference_problems(
-                spec, f"internal_truths/{t.person_id}", t.material_subweights
-            )
-        )
-    # E3-A：六维产品画像的物质细分同样核对（便利版本拒绝 laundry，旧版本拒绝 daily_convenience）
-    for pp in bundle.product_profiles:
-        errors.extend(
-            convenience_preference_problems(
-                spec, f"product_profiles/{pp.person_id}", pp.material_points or {}
-            )
-        )
     policy = bundle.protocol.energy_feedback
-    if policy is not None and (policy.scoring_spec_id, policy.scoring_version) == (
-        spec.spec_id,
-        spec.scoring_version,
-    ):
-        # r3（DECISIONS/0025）：反馈政策读这套规格时，实际加载的内容必须就是政策声明的那一套（与年度交接同一份判断）
+    if (policy.scoring_spec_id, policy.scoring_version) == (spec.spec_id, spec.scoring_version):
+        # 反馈政策读这套规格时，实际加载的内容必须就是政策声明的那一套（与年度交接同一份判断，DECISIONS/0025）
         errors.extend(message for _, message in scoring_content_problems(policy, spec))
     categories = set(bundle.categories)
     needs = set(bundle.consumption_needs)
@@ -203,52 +173,22 @@ def scoring_config_problems(
             for f in src.functions:
                 if f not in functions:
                     errors.append(f"{comp.component_id}/{src.source_id}: 功能 {f!r} 没有声明")
-    if config.comparison_group is not None:
-        errors.extend(comparison_group_problems(config, bundle))
-    elif not spec.follows_adr0018:
-        errors.append(
-            f"评分版本 {spec.scoring_version} 不是 ADR0018 的旧版本，必须声明比较组：资料单位与功能供给"
-            "都在比较组里核对，没有比较组就不能当成资料已经核查过"
-        )
+    errors.extend(comparison_group_problems(config, bundle))
     base_only = [c.dimension for c in spec.components if c.base_only]
     if base_only:
         notes.append(f"维度 {base_only} 只有城市基础条件：当前没有行动改善机制")
-    covered = {c.material_need for c in spec.material_components()}
-    for t in bundle.internal_truths:
-        gap = sorted(n for n, w in t.material_subweights.items() if w > 0 and n not in covered)
-        if gap:
-            notes.append(
-                f"{t.person_id} 的真值对 {gap} 有正权重但规格没有对应分项：月度总分会不完整"
-            )
     return errors, notes
 
 
 def growth_transport_protocol_problems(spec: LifeScoringSpec, protocol: LifeProtocol) -> list[str]:
-    """成长项与广义交通要读的生活事实，协议里必须真的有（`DECISIONS/0024`）。
-
-    * 成长项读能力词表与学习记录：协议必须带职业规则（E1-5A 的 ``career_rules``）；
-    * 广义交通读资源账的到岗次数：协议必须带月度资源规则；住房往返分钟的字段必须就是资源账计通勤用的
-      那一个（``resource_rules.commute_minutes_key``）——评分与时间账读同一份事实，不另起一套。
-
-    加载器与评分器（``econ.life_scoring.score_year``）共用这一份检查。
+    """广义交通读的住房往返分钟字段，必须就是资源账计通勤用的那一个（``resource_rules.commute_minutes_key``，DECISIONS/0024）
+    ——评分与时间账读同一份事实，不另起一套。加载器与评分器（``econ.life_scoring.score_year``）共用这一份检查。
     """
     out: list[str] = []
+    rules = protocol.resource_rules
     for comp in spec.components:
-        if comp.growth is not None and protocol.career_rules is None:
-            out.append(
-                f"分项 {comp.component_id} 的成长项读能力词表与实际学习记录：协议 {protocol.protocol_id} 没有"
-                "职业规则（career_rules），不能评成长"
-            )
         ts = comp.transport
-        if ts is None:
-            continue
-        rules = protocol.resource_rules
-        if rules is None:
-            out.append(
-                f"分项 {comp.component_id} 的广义交通读资源账里的到岗次数：协议 {protocol.protocol_id} 没有月度"
-                "资源规则，不能评"
-            )
-        elif rules.commute_minutes_key != ts.minutes_key:
+        if ts is not None and rules.commute_minutes_key != ts.minutes_key:
             out.append(
                 f"分项 {comp.component_id} 的广义交通读住房字段 {ts.minutes_key}，资源账计通勤用的是 "
                 f"{rules.commute_minutes_key}——评分与时间账必须读同一个往返分钟字段"
@@ -256,48 +196,22 @@ def growth_transport_protocol_problems(spec: LifeScoringSpec, protocol: LifeProt
     return out
 
 
-def health_protocol_problems(spec: LifeScoringSpec, protocol: LifeProtocol) -> list[str]:
-    """E1-5C：健康评分版本 ⇔ 有疾病规则的协议（`DECISIONS/0027`）。
-
-    健康版本读结算写出的月初健康状态，协议必须有疾病规则；反过来，有疾病规则的协议里七维 healthcare 点数表示健康风险
-    应对倾向，旧评分版本会把它当成医疗可及性的满足感权重——不能混用。加载器与评分器共用这一份检查。
-    """
-    health_version = spec.scoring_version in HEALTH_SCORING_VERSIONS
-    if health_version and protocol.health_rules is None:
-        return [
-            f"评分版本 {spec.scoring_version} 读月初健康状态：协议 {protocol.protocol_id} 没有疾病规则（health_rules）"
-        ]
-    if not health_version and protocol.health_rules is not None:
-        return [
-            f"协议 {protocol.protocol_id} 有疾病规则，healthcare 点数表示健康风险应对倾向；评分版本 {spec.scoring_version} "
-            f"会把它当成医疗可及性的满足感权重——请用 {sorted(HEALTH_SCORING_VERSIONS)}"
-        ]
-    return []
-
-
 def convenience_protocol_problems(spec: LifeScoringSpec, protocol: LifeProtocol) -> list[str]:
-    """日常生活便利要读的生活事实，协议里必须真的有（`DECISIONS/0033`）。加载器与评分器共用这一份。
+    """评分规格与协议是否配套（`DECISIONS/0033`）。加载器与评分器共用这一份。
 
-    * 便利读资源账的家务行：协议必须带月度资源规则；
-    * 任务组合里的每一项都必须是协议声明了基准的家务——基准缺了不能当 0，也不能按城市另设；
-    * 版本一致：协议声明的评分尺度是便利版本，评分规格也必须是（反过来也一样），旧尺度的协议不会悄悄换成新评分。
+    * 协议声明的评分尺度就是这套规格的评分版本；
+    * 便利任务组合里的每一项都必须是协议声明了基准的家务——基准缺了不能当 0，也不能按城市另设。
     """
     out: list[str] = []
-    declared = protocol.scoring_scale_version in CONVENIENCE_SCORING_VERSIONS
-    if declared != (spec.scoring_version in CONVENIENCE_SCORING_VERSIONS):
+    if protocol.scoring_scale_version != spec.scoring_version:
         out.append(
             f"协议 {protocol.protocol_id} 声明的评分尺度是 {protocol.scoring_scale_version}，评分规格是 "
-            f"{spec.scoring_version}：日常生活便利版本必须两边一致"
+            f"{spec.scoring_version}：两边必须一致"
         )
+    rules = protocol.resource_rules
     for comp in spec.components:
         cv = comp.convenience
         if cv is None:
-            continue
-        rules = protocol.resource_rules
-        if rules is None:
-            out.append(
-                f"分项 {comp.component_id} 读资源账里的家务小时：协议 {protocol.protocol_id} 没有月度资源规则，不能评"
-            )
             continue
         for task in cv.tasks:
             if rules.task(task) is None:
@@ -314,7 +228,7 @@ def convenience_protocol_notes(spec: LifeScoringSpec, protocol: LifeProtocol) ->
     out: list[str] = []
     for comp in spec.components:
         cv = comp.convenience
-        if cv is None or rules is None:
+        if cv is None:
             continue
         rest = sorted(t.task for t in rules.household_tasks if t.task not in cv.tasks)
         if rest:
@@ -325,29 +239,6 @@ def convenience_protocol_notes(spec: LifeScoringSpec, protocol: LifeProtocol) ->
     return out
 
 
-def convenience_preference_problems(
-    spec: LifeScoringSpec, who: str, material_keys: object
-) -> list[str]:
-    """偏好的物质细项键与评分版本是否配套（`DECISIONS/0033`）。加载器（陈述与真值）与评分器（评分偏好）共用这一份。
-
-    便利版本不接受 ``laundry``：旧问卷的洗衣点数问的是"有没有洗衣条件"，不能静默改读成"愿意花钱减少日常杂务"——请用新问卷重新
-    询问。旧版本不接受 ``daily_convenience``：旧评分没有这一项，正权重会让总分不完整，更不能被当成洗衣分。"""
-    keys = set(material_keys) if isinstance(material_keys, dict) else set()
-    if spec.scoring_version in CONVENIENCE_SCORING_VERSIONS:
-        if LEGACY_LAUNDRY in keys:
-            return [
-                f"{who}: 评分版本 {spec.scoring_version} 的物质细项是 housing_space / fresh_food / {DAILY_CONVENIENCE}；"
-                f"旧的 {LEGACY_LAUNDRY} 点数不能当作日常生活便利——请用新问卷重新询问"
-            ]
-        return []
-    if DAILY_CONVENIENCE in keys:
-        return [
-            f"{who}: 评分版本 {spec.scoring_version} 没有日常生活便利分项，{DAILY_CONVENIENCE} 点数不能交给它（也不能当成洗衣分）"
-            f"——请用 {sorted(CONVENIENCE_SCORING_VERSIONS)}"
-        ]
-    return []
-
-
 def comparison_group_problems(config: ScoringConfig, bundle: LifeBundle) -> list[str]:
     """比较组的共同粒度检查（`DECISIONS/0019` 第五节）。
 
@@ -355,18 +246,13 @@ def comparison_group_problems(config: ScoringConfig, bundle: LifeBundle) -> list
     单位、通勤粒度不统一。挡不住：作者把别城数字抄来并标成同类来源——那要审计来源的输入与规则。
     """
     g = config.comparison_group
-    assert g is not None
     spec = config.spec
     out: list[str] = []
     if g.scoring_version != spec.scoring_version:
         out.append(f"比较组冻结的评分版本是 {g.scoring_version}，规格是 {spec.scoring_version}")
     commute = spec.dimension_component("commute")
-    if g.commute_granularity == "plan_level" and not commute.plan_level:
-        out.append("比较组声明方案级通勤，但评分规格的通勤不是方案级")
-    if g.commute_granularity == "background" and commute.plan_level:
-        out.append(
-            "比较组是背景级通勤，评分规格却用方案级——全组要么都用背景级，要么都通过方案级检查"
-        )
+    if not commute.plan_level:
+        out.append("比较组声明方案级交通，但评分规格的交通不是方案级")
     for city in g.cities:
         key = str(city)
         cat = bundle.catalog_for(key)
@@ -409,31 +295,6 @@ def comparison_group_problems(config: ScoringConfig, bundle: LifeBundle) -> list
                     f"{key}: 评分要用的功能 {f} 没有供给声明——可得、确定不可得或资料未知都要写明；"
                     "目录里没有记录不等于确定没有"
                 )
-        if g.commute_granularity == "plan_level" and commute.plan_commute is not None:
-            pc = commute.plan_commute
-            ccond = cond.condition(commute.component_id)
-            if ccond is None or ccond.status != "plan_level":
-                out.append(f"{key}: 方案级通勤要求城市条件写 plan_level")
-            for o in cat.opportunities:
-                if o.availability != "available":
-                    continue
-                role = item_role(cat, o)
-                if pc.minutes_key in o.arrangement_options:
-                    out.append(
-                        f"{key}/{o.opportunity_id}: {pc.minutes_key} 被列成可选安排——往返分钟是住房方案的"
-                        "事实，不能另选（那就是远处租金配近处通勤的拆配）"
-                    )
-                if role == "housing":
-                    v = o.spec.get(pc.minutes_key)
-                    if isinstance(v, bool) or not isinstance(v, (int, float)) or v < 0:
-                        out.append(
-                            f"{key}/{o.opportunity_id}: 方案级通勤要求每个可得住房写明 {pc.minutes_key}"
-                            "（非负分钟）——全组通过才启用方案级"
-                        )
-                elif role == "job" and pc.work_mode_key not in o.spec:
-                    out.append(
-                        f"{key}/{o.opportunity_id}: 方案级通勤要求每份可得工作写明 {pc.work_mode_key}"
-                    )
         if g.commute_granularity == "plan_level" and commute.transport is not None:
             ts = commute.transport
             ccond = cond.condition(commute.component_id)
@@ -455,7 +316,7 @@ def comparison_group_problems(config: ScoringConfig, bundle: LifeBundle) -> list
                             f"{key}/{o.opportunity_id}: 广义交通要求每个可得住房写明 {ts.minutes_key}"
                             "（非负分钟）——全组通过才启用"
                         )
-                elif role == "job" and (o.resource is None or o.resource.job is None):
+                elif role == "job" and o.resource.job is None:
                     out.append(
                         f"{key}/{o.opportunity_id}: 广义交通的到岗次数读资源账——每份可得工作必须写岗位方案"
                         "（工时、工作日与到岗次数），不能按工作方式字样或岗位数量去猜"
@@ -465,8 +326,6 @@ def comparison_group_problems(config: ScoringConfig, bundle: LifeBundle) -> list
     for comp in spec.components:
         for src in comp.sources:
             used.update(k for k in (src.spec_key, src.requires_spec_key) if k)
-        if comp.plan_commute is not None:
-            used.update((comp.plan_commute.minutes_key, comp.plan_commute.work_mode_key))
         if comp.transport is not None:
             used.add(comp.transport.minutes_key)
     for k in sorted(used - set(g.units)):
@@ -477,13 +336,11 @@ def comparison_group_problems(config: ScoringConfig, bundle: LifeBundle) -> list
 
 
 def treatment_group_problems(config: ScoringConfig, bundle: LifeBundle) -> list[str]:
-    """E1-5C：比较组里每座城的治疗条目用同一套需求定义与计价粒度（每次疾病一次性计费、同一个计价单位）。
+    """比较组里每座城的治疗条目用同一套需求定义与计价粒度（每次疾病一次性计费、同一个计价单位）。
 
     真正不可得或资料未知照样合法（各城写明）；不合法的是某城换了需求、换了计费粒度或漏写。"""
     rules = bundle.protocol.health_rules
     g = config.comparison_group
-    if rules is None or g is None:
-        return []
     out: list[str] = []
     for sev in ("minor", "major"):
         need = rules.need(sev).need_id
@@ -549,14 +406,6 @@ def unit_problems(spec: LifeScoringSpec, units: dict[str, str]) -> list[str]:
                 same(src.spec_key, src.unit, f"{comp.component_id}/{src.source_id}")
             if src.requires_spec_key is not None and src.requires_spec_key != src.spec_key:
                 data_unit(src.requires_spec_key)
-        pc = comp.plan_commute
-        if pc is not None:
-            same(pc.minutes_key, pc.unit, f"{comp.component_id} 的方案级通勤")
-            mode = data_unit(pc.work_mode_key)
-            if mode is not None and mode.dimension != "category":
-                out.append(
-                    f"规格键 {pc.work_mode_key} 是工作方式（类别），单位表写成了 {mode.label}"
-                )
         ts = comp.transport
         if ts is not None:
             same(ts.minutes_key, ts.unit, f"{comp.component_id} 的广义交通")

@@ -17,7 +17,7 @@
 编排器持有内部对象；交给规划器的只有 ``agentlayer.life_planning`` 的安全投影。L、V、J、城市平均与缺失范围都由 econ 里已有的
 ``evaluate_clone`` / ``aggregate_arm`` 计算，这里不重写。
 
-E1-7B（``DECISIONS/0031``）：同一个运行器接真实模型规划器（``agentlayer.life_llm.QwenPlanner``）。发送之前，请求里的税费说明
+E1-7B（``DECISIONS/0031``）：同一个运行器接真实模型规划器（``agentlayer.life_llm.LlmPlanner``）。发送之前，请求里的税费说明
 必须等于执行用的税务绑定的投影，最终请求体再查一遍（研究真值、评分参数、未来事件、凭证、写给开发者的说明）；规划器的
 ``PlannerHalt``（服务失败、预算、输入超限、发送状态不确定等）让整个批次停在 ``halted``——不是生活结果、不消耗计划修订、
 不替分身生成计划，可以在所有者决定之后恢复。第一次调用之前把全部输入文件冻结进归档（``inputs/``），重放与恢复可以只用归档。
@@ -105,13 +105,12 @@ from common.life_planning_contracts import (
     RunProgress,
     VisibleDiagnostic,
 )
-from common.life_product_profile import ProductLifeProfile
 from common.life_scoring_contracts import ScoringPreference
 from common.runlog import new_run_id, utc_now_iso
 from econ.life_aggregation import aggregate_arm, freeze_roster
 from econ.life_coverage import coverage_report
 from econ.life_evaluation import evaluate_clone
-from econ.life_scoring import preference_from_confirmed_profile, preference_from_stated_profile
+from econ.life_scoring import preference_from_confirmed_profile
 from econ.life_settlement import LifeTaxBinding, binding_from_policy, check_year_plan
 from econ.life_year import ScoringInputs, run_life_year, tax_binding_fingerprint
 from ledger.life_catalog import LifeBundle
@@ -336,13 +335,10 @@ def _scope(
     group = scoring.comparison_group
     for u in roster.users:
         profile = bundle.profile_for(u.person_id)
-        pref = (
-            preference_from_confirmed_profile(profile)
-            if type(profile) is ProductLifeProfile
-            else preference_from_stated_profile(profile)  # type: ignore[arg-type]
-        )
-        if group is None or not isinstance(pref, ScoringPreference):
-            coverage.append(f"{u.label}：偏好信息不足或没有比较组，不能做覆盖报告")
+        assert profile is not None  # 名单检查已核对
+        pref = preference_from_confirmed_profile(profile)
+        if not isinstance(pref, ScoringPreference):
+            coverage.append(f"{u.label}：偏好信息不足，不能做覆盖报告")
             continue
         rep = coverage_report(
             spec=scoring.spec,
@@ -697,7 +693,7 @@ class LifeRunner:
     # ------------------------------------------------------------------ 小工具
 
     def _profile(self, person_id: str) -> Any:
-        # 旧七维陈述或 E3-A 六维产品画像（名单冻结时已核对类型）
+        # 六维产品画像（名单冻结时已核对类型）
         profile = self.world.bundle.profile_for(person_id)
         assert profile is not None
         return profile
@@ -1900,13 +1896,12 @@ def _attach(planner: object, archive: RunArchive, run_id: str) -> None:
 def _check_manifest(world: RunWorld, archive: RunArchive) -> RunManifest:
     manifest = RunManifest.model_validate(archive.read_json("manifest.json"))
     want = _manifest(world, manifest.run_id)
-    # 开发期（所有者 2026-10-18）：运行清单不再记源码指纹，改了代码旧运行仍可接着跑；配置、规则、事实、初态、许可、模型等
-    # 内容身份照旧逐项核对。之前的归档里还留着 source:* / source_set 两类键，核对时忽略。
+    # 开发期（所有者 2026-10-18）：运行清单不记源码指纹，改了代码之后的运行仍可接着跑；配置、规则、事实、初态、许可、模型等
+    # 内容身份照旧逐项核对。
     diff = sorted(
         k
         for k in set(manifest.identities) | set(want.identities)
-        if not (k.startswith("source:") or k == "source_set")
-        and manifest.identities.get(k) != want.identities.get(k)
+        if manifest.identities.get(k) != want.identities.get(k)
     )
     for name in ("planner", "planning", "information", "order"):
         if getattr(manifest, name) != getattr(want, name):

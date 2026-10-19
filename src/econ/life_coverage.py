@@ -10,8 +10,7 @@
    （面积、储物容量……）、功能的供给声明（可得 / 确定不可得 / 资料未知）、景观指标、住房的往返
    分钟与工作方式、城市评分条件本身。候选怎样认、规格怎样读，用的是评分器同一份函数
    （``econ.life_scoring.source_candidate`` / ``source_reading``），两边不会各自漂移；
-3. **实际行动可评分性**：资料齐全时，是不是任何实际安排都能评（方案级通勤只评恰好一份线下工作
-   的月份，是"看安排"的）。
+3. **实际行动可评分性**：资料齐全时，是不是任何实际安排都能评。
 
 来源也分两类：**生活事实**（目录、功能供给、景观、住房与工作）与**评分映射参数**（城市评分条件
 里的 b、c、η）。参数标成估计，不会让合成的住房、商品或通勤资料变成真实资料；只要依赖里还有合成
@@ -90,23 +89,6 @@ def _city_dependencies(
         else:
             facts.append(cond.nature.source.kind)
     available = [o for o in catalog.opportunities if o.availability == "available"]
-    pc = comp.plan_commute
-    if pc is not None:
-        if cond.status != "plan_level":
-            gaps.append(f"{city}: 方案级通勤要求城市条件写 plan_level")
-        for o in available:
-            role = item_role(catalog, o)
-            if role == "housing":
-                v = o.spec.get(pc.minutes_key)
-                if isinstance(v, bool) or not isinstance(v, (int, float)) or v < 0:
-                    gaps.append(f"{city}/{o.opportunity_id}: 缺 {pc.minutes_key}（非负分钟）")
-                else:
-                    facts.append(o.source.kind)
-            elif role == "job":
-                if pc.work_mode_key not in o.spec:
-                    gaps.append(f"{city}/{o.opportunity_id}: 缺 {pc.work_mode_key}")
-                else:
-                    facts.append(o.source.kind)
     ts = comp.transport
     if ts is not None:
         # 广义交通（`DECISIONS/0024`）：每个可得住房的往返分钟，每份可得工作的岗位方案（到岗次数由资源账记）
@@ -200,7 +182,6 @@ def _leaf(
     reasons: list[str] = []
     action = (
         bool(comp.sources)
-        or comp.plan_commute is not None
         or comp.transport is not None
         or comp.growth is not None
         or comp.convenience is not None
@@ -212,11 +193,6 @@ def _leaf(
     if comp.combine == "any" and gaps:
         reasons.append(
             "any 替代：某个替代方案的资料有缺口时，实际安排若用了资料完整的另一个替代，这个月仍可评分"
-        )
-    if comp.plan_commute is not None:
-        reasons.append(
-            "方案级：只对恰好一份固定线下工作的月份评分；无工作、远程、多岗位的月份这一项报"
-            "不支持/信息不足——城市资料齐全不等于每个人的安排都能评"
         )
     if comp.transport is not None:
         reasons.append(
@@ -244,7 +220,7 @@ def _leaf(
         reasons=tuple(reasons),
         rule="defined",
         city_data="gap" if gaps else "complete",
-        action_scope="conditional" if comp.plan_commute is not None else "all_arrangements",
+        action_scope="all_arrangements",
         fact_evidence=_evidence(facts),  # type: ignore[arg-type]
         parameter_evidence=_evidence(params),  # type: ignore[arg-type]
         data_gaps=tuple(gaps),
@@ -284,8 +260,8 @@ def coverage_report(
         if cc.spec_id != spec.spec_id:
             raise LifeContractError(f"{cc.city} 的条件写的是规格 {cc.spec_id}，不是 {spec.spec_id}")
 
-    # E1-5C：健康版本的叶子权重 = (1 − γ) × 有效六维权重；旧版本照旧是七维原始权重
-    share = 1.0 - spec.health.gamma if spec.health is not None else 1.0
+    # 叶子权重 = (1 − γ) × 六维权重；健康项单独一片叶子，权重 γ
+    share = 1.0 - spec.health.gamma
     w = {k: share * v for k, v in effective_weights(spec, preference).items()}
     leaves: list[LeafCoverage] = []
     by_need = {c.material_need: c for c in spec.material_components()}
@@ -297,26 +273,25 @@ def coverage_report(
         leaves.append(_leaf(need, MATERIAL, a, by_need.get(need), conditions, by_city))
     for dim in spec.scored_amenities:
         leaves.append(_leaf(dim, dim, w[dim], spec.dimension_component(dim), conditions, by_city))
-    if spec.health is not None:
-        leaves.append(
-            LeafCoverage(
-                leaf="health_state",
-                dimension="health",
-                weight=spec.health.gamma,
-                support="supported",
-                evidence="synthetic_only",
-                action_mechanism=True,
-                reasons=(
-                    "健康项 γH 读结算写出的月初健康状态（实际生活事实），不需要城市资料；H 与 γ 是全组共用的合成设定，"
-                    "疾病、治疗与恢复规则也是合成设定。行动通过工作负担、治疗与恢复影响它",
-                ),
-                rule="defined",
-                city_data="not_applicable",
-                action_scope="all_arrangements",
-                fact_evidence="synthetic_only",
-                parameter_evidence="synthetic_only",
-            )
+    leaves.append(
+        LeafCoverage(
+            leaf="health_state",
+            dimension="health",
+            weight=spec.health.gamma,
+            support="supported",
+            evidence="synthetic_only",
+            action_mechanism=True,
+            reasons=(
+                "健康项 γH 读结算写出的月初健康状态（实际生活事实），不需要城市资料；H 与 γ 是全组共用的合成设定，"
+                "疾病、治疗与恢复规则也是合成设定。行动通过工作负担、治疗与恢复影响它",
+            ),
+            rule="defined",
+            city_data="not_applicable",
+            action_scope="all_arrangements",
+            fact_evidence="synthetic_only",
+            parameter_evidence="synthetic_only",
         )
+    )
 
     supported = [x for x in leaves if x.support == "supported"]
     weighted = [x for x in supported if x.weight > 0]

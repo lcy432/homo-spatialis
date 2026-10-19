@@ -2,17 +2,17 @@
 
 编译做四件事，全部经过 E1 已有的加载、名单与运行前检查，不另写一套宽松校验：
 
-1. **显式采用便利版整套配置**：读资料包 ``e1_base`` 指向的便利版生活输入、评分、评价与城市事实，逐项核对协议、评分版本与评分内容
-   身份（``f209137b…``）；对不上就拒绝编译。不依赖旧 CLI 默认。
-2. **派生产品协议** ``life-v1-e3a-product``：生活规则、资源、职业、储蓄与疾病规则原样复制；只换健康输入的声明（独立健康回答，问卷版本
-   与画像相同）与反馈政策的偏好来源（``product_confirmed_six_dim``）。评分规格的内容身份不变（只换它指向的协议编号）。
+1. **显式采用产品协议的基础样例**：读资料包 ``e1_base`` 指向的生活输入、评分、评价与城市事实，逐项核对协议、评分版本与评分
+   内容身份；对不上就拒绝编译。不依赖 CLI 默认。
+2. **协议原样沿用**：生活规则、资源、职业、储蓄与疾病规则、反馈政策与健康输入声明都来自基础样例；只把健康输入声明的问卷版本
+   写成确认画像用的那一版（版本不同就拒绝，不改读旧答案）。评分规格原样沿用。
 3. **六维产品画像**（``ProductLifeProfile``）：确认的六维与物质精确分数原样带过去，健康回答带题目、状态、选项文字与读法；不补
    ``healthcare = 0``，不伪造研究真值。
 4. **标准开局**（E1 标准开局 v1）：同一用户跨城、跨重复序号相同的年龄、现金、能力、基础时间与精力；健康、没有已有物品、病史、
    在学课程与资金目标；开局岗位按当地目录里与确认职业同一分类代码的岗位匹配（城市可以不同，个人条件不能随城变）；能力只来自
    用户确认的事实，不凭职业文字推断。不随机生成家具、病史或财富。
 
-便利设备与服务由 ``product.catalog`` 从资料候选编入城市目录（替换便利版样例里的同类机会）；其余目录原样复制。
+便利设备与服务由 ``product.catalog`` 从资料候选编入城市目录（替换基础样例里的同类机会）；其余目录原样复制。
 """
 
 from __future__ import annotations
@@ -28,7 +28,6 @@ import yaml
 from pydantic import ValidationError
 
 from agentlayer.life_mock import PRODUCT_MOCK_IDENTITY
-from common.life_contracts import INDEPENDENT_HEALTH_INPUT_SEMANTICS, PRODUCT_SIX_DIM_SOURCE
 from common.life_planning_contracts import MockScript
 from common.life_product_profile import (
     PRODUCT_PROFILE_VERSION,
@@ -75,7 +74,7 @@ def _load_raw(path: str) -> dict[str, Any]:
 
 
 def base_problems(pack: DataPack) -> list[ProductIssue]:
-    """资料包显式采用的便利版配置还是不是审核过的那一套（协议、评分版本与评分内容身份）。"""
+    """资料包显式采用的基础样例还是不是声明的那一套（协议、评分版本与评分内容身份）。"""
     base = pack.body.e1_base
     bundle, _ = load_life_bundle(Path(base.life_input), require_settlement_ready=True)
     scoring, _ = load_scoring_config(Path(base.scoring_config), bundle)
@@ -90,8 +89,8 @@ def base_problems(pack: DataPack) -> list[ProductIssue]:
                 issue(
                     "base_config_changed",
                     f"pack.e1_base.{name}",
-                    f"资料包声明采用的便利版{name}是 {want}，实际读到 {got}",
-                    "不能把另一套规则当成审核过的便利版来运行",
+                    f"资料包声明采用的基础样例{name}是 {want}，实际读到 {got}",
+                    "不能把另一套规则当成声明的基础样例来运行",
                     "核对资料包与 E1 配置，换新的资料包版本",
                 )
             )
@@ -192,7 +191,7 @@ def compile_inputs(
     run_label: str | None = None,
 ) -> CompiledInputs:
     """把一份确认画像编译成 E1 输入文件（写进 ``out_dir``）。开局岗位匹配不到等问题收进 ``issues``（预检查据此阻断）；配置不是
-    审核过的便利版、确认画像被改写等全局问题直接拒绝（``CompileRefusedError``）。
+    声明的基础样例、确认画像被改写等全局问题直接拒绝（``CompileRefusedError``）。
 
     ``illness_events`` 只给受控夹具用（例如注入一次大病来演示出局与停止）：它换掉派生协议里的疾病事件来源，因而是另一份协议身份。
     """
@@ -217,22 +216,9 @@ def compile_inputs(
     scoring_raw = _load_raw(base.scoring_config)
     issues: list[ProductIssue] = []
 
-    # ---- 派生产品协议：只换健康输入声明与反馈政策的偏好来源
-    pp = b.product_protocol
+    # ---- 协议原样沿用基础样例；健康输入声明写成确认画像用的问卷版本
     protocol = copy.deepcopy(life["protocol"])
-    protocol["protocol_id"] = pp.protocol_id
-    protocol["schema_version"] = pp.schema_version
-    protocol["info_permission_version"] = pp.info_permission_version
-    protocol["health_input"] = {
-        "kind": "independent_health_answers",
-        "semantics": INDEPENDENT_HEALTH_INPUT_SEMANTICS,
-        "questionnaire_version": confirmed.health.questionnaire_version,
-        "use": "agent_planning_information_only",
-        "note": pp.health_input_note,
-    }
-    feedback = protocol["energy_feedback"]
-    feedback["policy_id"] = pp.feedback_policy_id
-    feedback["preference_source"] = PRODUCT_SIX_DIM_SOURCE
+    protocol["health_input"]["questionnaire_version"] = confirmed.health.questionnaire_version
     if illness_events is not None:
         protocol["illness_events"] = illness_events
 
@@ -293,7 +279,7 @@ def compile_inputs(
                 issue(
                     "city_not_in_base",
                     "cities",
-                    f"城市 {ref} 不在便利版配置里",
+                    f"城市 {ref} 不在基础样例里",
                     "不能运行这座城",
                     "从能力清单选择",
                 )
@@ -426,21 +412,17 @@ def compile_inputs(
         "function_kinds": life.get("function_kinds", {}),
         "tax_policies": life["tax_policies"],
         "catalogs": catalogs,
-        "stated_profiles": [],
-        "internal_truths": [],
         "product_profiles": [profile.model_dump(mode="json")],
         "initial_states": states,
     }
     header = (
         f"# E3-A 编译产物（{COMPILER}；DECISIONS/0034）。由确认画像 {confirmed.confirmed_id} 与资料包 {b.pack_id} 生成，不要手改：\n"
-        f"# 改答案或资料要重新确认、重新编译（内容身份会变）。生活规则、评分与评价沿用 E1 便利版（{base.protocol_id}）。\n"
+        f"# 改答案或资料要重新确认、重新编译（内容身份会变）。生活规则、评分与评价沿用基础样例（{base.protocol_id}）。\n"
     )
     _dump(paths["life_input"], header, bundle)
     scoring = copy.deepcopy(scoring_raw)
-    scoring["spec"]["protocol_id"] = pp.protocol_id
     scoring["scoring_notice"] = (
-        "exploratory_synthetic：E1 便利版评分规格（内容身份不变），只是指向派生的产品协议 "
-        f"{pp.protocol_id}。全部是合成探索参数。"
+        f"exploratory_synthetic：基础样例的评分规格（协议 {base.protocol_id}），原样沿用。全部是合成探索参数。"
     )
     _dump(paths["scoring_config"], header, scoring)
     roster = {
@@ -467,7 +449,7 @@ def compile_inputs(
                     "arm_id": "arm.main",
                     "role": "main",
                     "evaluation_config": base.evaluation_config,
-                    "note": "沿用 E1 便利版的评价规格（主设定 δ = 1、六个基础生活模板）",
+                    "note": "沿用基础样例的评价规格（主设定 δ = 1、六个基础生活模板）",
                 }
             ],
             "entries": entries,
@@ -487,7 +469,6 @@ def compile_inputs(
             "information": {
                 "condition": "product_stated_profile",
                 "show_stated_dimension_points": True,
-                "show_soft_preferences": True,
                 "show_hard_requirements": True,
                 "show_free_text": True,
                 "show_energy_level": True,

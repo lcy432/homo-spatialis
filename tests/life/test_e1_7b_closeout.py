@@ -7,13 +7,12 @@ F1 服务回复：首次、缓存、恢复与重放共用一份一致性检查�
 
 from __future__ import annotations
 
-import json
 from decimal import Decimal
 from pathlib import Path
 
 import pytest
 
-from agentlayer.life_llm import ProviderCallLog, QwenPlanner, service_history
+from agentlayer.life_llm import LlmPlanner, ProviderCallLog, service_history
 from agentlayer.life_planning import visible_tax_rules
 from common.money import Money
 from econ.life_settlement import SyntheticBracketTax
@@ -31,7 +30,6 @@ from .live_support import (
     MODEL,
     ScriptedTransport,
     has_records,
-    jsonl,
     live_world,
     make_repo,
     mock_text,
@@ -43,7 +41,7 @@ from .live_support import (
     snapshot,
 )
 
-FIRST = "u201.c97.r0"
+FIRST = "u301.k51.r0"
 
 
 @pytest.fixture
@@ -57,17 +55,13 @@ def _ledger(world) -> RoundBudget:
     return RoundBudget(world.config.paid_budget)
 
 
-def _rewrite(path: Path, fn) -> None:
-    rows = jsonl(path)
+def _rewrite(ledger: RoundBudget, fn) -> None:
+    rows = ledger.events()
     fn(rows)
-    path.write_text(
-        "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows),
-        encoding="utf-8",
-        newline="\n",
-    )
+    ledger.replace_events(rows)
 
 
-class _CrashAfterReply(QwenPlanner):
+class _CrashAfterReply(LlmPlanner):
     """服务回复已经写进明细，规划记录还没写：进程在这里中断。"""
 
     def plan(self, call):
@@ -126,7 +120,7 @@ def test_b_a_tampered_pending_service_record_is_refused_before_any_write(repo, t
         elif edit == "settings":
             rows[0]["settings_fingerprint"] = "0" * 64
         elif edit == "owner":
-            rows[1]["clone_id"] = "u202.c97.r0"
+            rows[1]["clone_id"] = "u301.m52.r0"
         elif edit == "temperature":
             rows[0]["request"]["temperature"] = 1.9
         elif edit == "missing_intent":
@@ -186,7 +180,7 @@ def test_b_the_cache_compares_the_rebuilt_request_not_only_the_record(repo, tmp_
             if r["event"] == "reserve":
                 r.update(input_tokens_estimate=forged["est"], reserved_cny=forged["reserved"])
 
-    _rewrite(ledger.ledger_path, fix_ledger)
+    _rewrite(ledger, fix_ledger)
     before = snapshot(out)
     t = ScriptedTransport()
     with pytest.raises(RunRefusedError, match="对不上"):
@@ -203,7 +197,7 @@ def test_b_replay_alone_refuses_a_tampered_pending_service_record(repo, tmp_path
 
     def change(rows):
         if edit == "owner":
-            rows[1]["clone_id"] = "u202.c97.r0"
+            rows[1]["clone_id"] = "u301.m52.r0"
         else:
             rows[0]["settings_fingerprint"] = "0" * 64
 
@@ -343,19 +337,15 @@ def test_f_lost_or_changed_cost_history_is_refused_before_resume(repo, tmp_path,
     world = live_world()
     out = tmp_path / "run"
     start_run(world, qwen(world, ScriptedTransport()), out, run_id="c7b", stop_after_commits=1)
-    path = _ledger(world).ledger_path
-    rows = jsonl(path)
+    ledger = _ledger(world)
+    rows = ledger.events()
     if damage == "emptied":
         rows = []
     elif damage == "settle_removed":
         rows = [r for r in rows if r["event"] != "settle"]
     else:
         next(r for r in rows if r["event"] == "settle")["cost_cny"] = "0.000001"
-    path.write_text(
-        "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows),
-        encoding="utf-8",
-        newline="\n",
-    )
+    ledger.replace_events(rows)
     before = snapshot(out)
     t = ScriptedTransport()
     with pytest.raises(RunRefusedError, match="账本"):
@@ -466,7 +456,7 @@ def test_j_the_tax_text_follows_the_first_bracket(tmp_path, monkeypatch, rate, t
 
     monkeypatch.chdir(make_repo(tmp_path / "repo", life=change))
     world = live_world()
-    policy = world.bundle.tax_policy("tax.synth.e17b")
+    policy = world.bundle.tax_policy("tax.synth.e1conv")
     engine = SyntheticBracketTax(policy).tax(
         Money(1500, policy.money_basis_id), policy.applies_to, 1
     )

@@ -4,18 +4,18 @@
  "payload": {
   "binding": {
    "compiled_inputs": {
-    "life_input": "35912d4791d1093694074e6826c9eb2a8b95153f51abfde5c0939a37d97179a4",
-    "roster": "68f28464474303553e6bd4246050f1de80289e2b84e81bb8908958691436689e",
-    "run_config": "0c13d2d04d7f970b3a9a78835a6b9b92f07b7d918a97c2429583234c1f55031e",
-    "scoring_config": "4400cd3a2fef60500541514c06c14ab5b61bd8cdc60e07aa9bb6c0314a593938"
+    "life_input": "7f0ccdb58bc5a8ef024004e5c768d7df8cdf0b80b94ac4338dd10e9c9d7ad2d4",
+    "roster": "300312b4a0da49ac4e853d16a53bef332ac2e18d274789897953230d08cfdd80",
+    "run_config": "333403a3be7de4c0067c82b7df708c90b4cbd8c56f8604702cf79bc00da1fcc8",
+    "scoring_config": "e92b15630e28c4426f2be13bc516504d4067dd1eb5eb144ccfb74c3169437303"
    },
    "evaluation_spec_id": "eval.e1-convenience.main",
-   "identities_fingerprint": "8f16ed40c9c7288d48c15839595886317641194868fee1e0a25868d51a1e7426",
+   "identities_fingerprint": "10c39764b0968d8414673204529995d5a9ee9b1de1871e91b3454baab4515870",
    "planner_id": "mock.rules.e3a-product",
    "planner_kind": "mock",
    "prompt_template": "e3a-product-prompt-v1",
    "protocol_id": "life-v1-e3a-product",
-   "scoring_content_fingerprint": "f209137b1101407427724a8d7f3009fb09eca8a8c11884114412feea6fdcd690",
+   "scoring_content_fingerprint": "fdf920f447af884c8fa05ee90a6e971193fb7cc6cffee772d77b8c5d0588f23a",
    "scoring_version": "e1-convenience-v1"
   },
   "cities": [
@@ -105,7 +105,7 @@
   "clones_per_city": 1,
   "confirmed": {
    "confirmed_id": "confirmed.draft.u501.r1",
-   "content_fingerprint": "88f0eb43e1a0f8afbe1aea8d0ea5938e804198535b85459dd186ea6deb39003b"
+   "content_fingerprint": "f20a2d4f3f7cf0e69d7ac50344b2824b498d7cf19f90885422582a526b2e96e8"
   },
   "executable": {
    "reasons": [
@@ -123,7 +123,7 @@
   "meta": {
    "conversion_version": "e3a-conversion-v2",
    "data_pack": {
-    "content_fingerprint": "a9cbd04955d49ea6ba0059b18f9ec6e30b7dd77a511bd0331cf50e5765e0e9b5",
+    "content_fingerprint": "2aa831e380440c458570b6838b39d2dcb058a4bf39ec4b8660fd7ae136f80bd0",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
     "pack_id": "pack.e3a.synthetic-v1",
     "status": "synthetic_fixture_only"
@@ -147,7 +147,7 @@
    "planner_id": "mock.rules.e3a-product",
    "planner_kind": "mock"
   },
-  "preflight_fingerprint": "a109ca4b177d5fb1c95a0fd454a400f47ace00534327673be4990f19a10ac4e9",
+  "preflight_fingerprint": "a248e5f44d3343ed571f6e09a89971f5624883b955983de2e987b5b9dd3f2e56",
   "preflight_id": "preflight.confirmed.draft.u501.r1",
   "scope_zh": [
    "生活协议 life-v1-e3a-product（状态 synthetic_fixture_only）、评分 score.e1-convenience.explore（探索版）：城市、报价、工资、疾病、治疗与评分参数全部是合成设定，不是现实城市，不排序真实城市",

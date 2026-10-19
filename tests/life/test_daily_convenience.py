@@ -1,5 +1,5 @@
-"""E1 补充"日常生活便利"（`DECISIONS/0033`）：便利分只读资源账里实际减少的家务小时，没有第二份奖励；新旧版本隔离；mock、
-规划请求与期末估值确实用了新输入。零网络、零费用。
+"""日常生活便利（`DECISIONS/0033`）：便利分只读资源账里实际减少的家务小时，没有第二份奖励；mock、规划请求与期末估值确实用了
+这项输入。样例是产品协议样例（``configs/life/synthetic_product.yaml``）。零网络、零费用。
 
 可手算的主例（K51，全职文员，远处住房、基本食品）：洗衣基准 12 小时、打扫 10 小时，共 22；设备包残余 4 + 6 = 10，q = 12，
 s = 12/20 = 0.6；人工服务残余 2 + 2 = 4，q = 18，s = 18/26；两者同时在用按每项取最小残余，q 仍是 18。
@@ -19,10 +19,8 @@ import pytest
 import yaml
 
 from agentlayer.life_mock import (
-    CONVENIENCE_MOCK_IDENTITY,
-    MOCK_IDENTITY,
-    ConvenienceMockPlanner,
-    RuleBasedMockPlanner,
+    PRODUCT_MOCK_IDENTITY,
+    ProductMockPlanner,
     mock_planner_for,
 )
 from agentlayer.life_planning import (
@@ -38,30 +36,18 @@ from common.life_contracts import (
     LifeContractError,
     YearAction,
 )
-from common.life_planning_contracts import (
-    CONVENIENCE_ACTION_GUIDE_VERSION,
-    CONVENIENCE_PROMPT_TEMPLATE_VERSION,
-    PlannerSpec,
-)
-from common.life_scoring_contracts import (
-    CONVENIENCE_SCORING_VERSIONS,
-    DAILY_CONVENIENCE,
-    GROWTH_TRANSPORT_VERSIONS,
-    HEALTH_SCORING_VERSIONS,
-    LifeScoringSpec,
-)
+from common.life_planning_contracts import ACTION_GUIDE_VERSION, PlannerSpec
+from common.life_scoring_contracts import DAILY_CONVENIENCE, LifeScoringSpec
 from common.money import Money
 from common.run_store import RunStore
 from econ.life_coverage import coverage_report
 from econ.life_evaluation import evaluate_clone
-from econ.life_scoring import preference_from_stated_profile, score_year
+from econ.life_scoring import preference_from_confirmed_profile, score_year
 from econ.life_settlement import binding_from_policy
 from econ.life_year import ScoringInputs, run_life_year
 from ledger.life_catalog import load_life_bundle
 from ledger.life_evaluation_config import load_evaluation_config
-from ledger.life_run_config import run_config_problems
 from ledger.life_scoring_config import (
-    convenience_preference_problems,
     convenience_protocol_problems,
     load_scoring_config,
     parse_scoring_config,
@@ -70,31 +56,21 @@ from ledger.life_scoring_config import (
 from orchestration.life_runner import planner_payloads, preflight, start_run
 
 REPO = Path(__file__).resolve().parents[2]
-LIFE = REPO / "configs/life/synthetic_e1_convenience.yaml"
-SCORING = REPO / "configs/life/scoring_e1_convenience.yaml"
-EVALUATION = REPO / "configs/life/evaluation_e1_convenience.yaml"
-FLASH = Path("configs/life/run_e1_convenience_flash.yaml")
-MOCK = Path("configs/life/run_e1_convenience_mock.yaml")
-#: 读的历史证据（只读）：产品 Flash 先导的运行清单（本轮之前的代码写的旧提示模板身份）与 E1-7B 评分规格的内容身份
-FLASH_MANIFEST = REPO / "runs/2026-10-13-product-flash-switch/pilot/manifest.json"
-E1_7B_SCORING_CONTENT = "bf5fabac734d8784f2e4d350182861b8a6279c88b8d59ab51aae529821ec2dae"
+LIFE = REPO / "configs/life/synthetic_product.yaml"
+SCORING = REPO / "configs/life/scoring_product.yaml"
+EVALUATION = REPO / "configs/life/evaluation_product.yaml"
+FLASH = Path("configs/life/run_product_flash.yaml")
+MOCK = Path("configs/life/run_product_mock.yaml")
 K51, M52 = "US:SYNTH2026:K51", "US:SYNTH2026:M52"
 HEALTHY = {"minor": "decline", "major": "decline", "pause_order": []}
 REPO_FILES = (
-    "configs/life/synthetic_e1_convenience.yaml",
-    "configs/life/scoring_e1_convenience.yaml",
-    "configs/life/evaluation_e1_convenience.yaml",
-    "configs/life/city_facts_e1_convenience.yaml",
-    "configs/life/roster_e1_convenience.yaml",
-    "configs/life/run_e1_convenience_flash.yaml",
-    "configs/life/run_e1_convenience_mock.yaml",
-    "configs/life/synthetic_e1_7b_pilot.yaml",
-    "configs/life/scoring_e1_7b_pilot.yaml",
-    "configs/life/evaluation_e1_7b.yaml",
-    "configs/life/city_facts_e1_7b.yaml",
-    "configs/life/roster_e1_7b.yaml",
-    "configs/life/run_e1_7b_mock.yaml",
-    "configs/life/run_e1_7b_flash.yaml",
+    "configs/life/synthetic_product.yaml",
+    "configs/life/scoring_product.yaml",
+    "configs/life/evaluation_product.yaml",
+    "configs/life/city_facts_product.yaml",
+    "configs/life/roster_product.yaml",
+    "configs/life/run_product_flash.yaml",
+    "configs/life/run_product_mock.yaml",
     "configs/models.yaml",
 )
 
@@ -108,7 +84,7 @@ class World:
         self.scoring, _ = load_scoring_config(SCORING, self.bundle)
         self.evaluation = load_evaluation_config(EVALUATION, self.bundle, self.scoring).spec
         self.protocol = self.bundle.protocol
-        self.profile = self.bundle.stated_profiles[0]
+        self.profile = self.bundle.product_profiles[0]
 
     def catalog(self, city: str):
         return self.bundle.catalog_for(city)
@@ -388,7 +364,7 @@ def _score_with(w, result, month_fn):
         catalog=w.catalog(K51),
         state=w.start(K51),
         outcome=variant,
-        preference=preference_from_stated_profile(w.profile),
+        preference=preference_from_confirmed_profile(w.profile),
     )
 
 
@@ -458,7 +434,7 @@ def test_unit_conflicts_are_refused():
         parse_scoring_config(_spec_variant(not_monthly_hours))
 
 
-def test_spec_rules_old_laundry_score_cannot_coexist_and_old_versions_cannot_declare_it():
+def test_spec_rules_one_convenience_component_and_no_presence_score_for_the_same_task():
     def add_laundry(raw):
         raw["spec"]["components"].insert(
             2,
@@ -484,14 +460,8 @@ def test_spec_rules_old_laundry_score_cannot_coexist_and_old_versions_cannot_dec
             },
         )
 
-    with pytest.raises(LifeContractError, match="不能并存"):
+    with pytest.raises(LifeContractError, match="重复计分"):
         parse_scoring_config(_spec_variant(add_laundry))
-
-    def old_version(raw):
-        raw["spec"]["scoring_version"] = "e1-5c-health-v1"
-
-    with pytest.raises(LifeContractError, match="不读日常生活便利"):
-        parse_scoring_config(_spec_variant(old_version))
 
     def none_declared(raw):
         raw["spec"]["components"] = [
@@ -500,11 +470,6 @@ def test_spec_rules_old_laundry_score_cannot_coexist_and_old_versions_cannot_dec
 
     with pytest.raises(LifeContractError, match="恰好有一个日常生活便利分项"):
         parse_scoring_config(_spec_variant(none_declared))
-
-
-def test_versions_are_registered_on_the_health_and_growth_transport_branches():
-    assert CONVENIENCE_SCORING_VERSIONS <= HEALTH_SCORING_VERSIONS
-    assert CONVENIENCE_SCORING_VERSIONS <= GROWTH_TRANSPORT_VERSIONS
 
 
 def test_city_condition_and_protocol_checks(w):
@@ -530,31 +495,16 @@ def test_city_condition_and_protocol_checks(w):
         }
     )
     assert any("cleaning" in p for p in convenience_protocol_problems(w.scoring.spec, no_cleaning))
-    old_scale = w.protocol.model_copy(update={"scoring_scale_version": "e1-5c-health-v1"})
-    assert any("两边一致" in p for p in convenience_protocol_problems(w.scoring.spec, old_scale))
-
-
-def test_old_laundry_points_are_not_read_as_convenience_and_vice_versa(w):
-    spec = w.scoring.spec
-    assert convenience_preference_problems(spec, "u", {"housing_space": 50, "laundry": 50})
-    assert not convenience_preference_problems(
-        spec, "u", {"housing_space": 50, "daily_convenience": 50}
+    other_scale = w.protocol.model_copy(update={"scoring_scale_version": "other-scale-v1"})
+    assert any(
+        "两边必须一致" in p for p in convenience_protocol_problems(w.scoring.spec, other_scale)
     )
-    old = parse_scoring_config(
-        yaml.safe_load((REPO / "configs/life/scoring_e1_7b_pilot.yaml").read_text(encoding="utf-8"))
-    ).spec
-    assert convenience_preference_problems(old, "u", {"daily_convenience": 100})
-    assert not convenience_preference_problems(old, "u", {"laundry": 100})
-    # 评分入口同样拒绝：旧的洗衣点数交给便利版本
-    legacy = w.profile.model_copy(update={"material_points": {"housing_space": 60, "laundry": 40}})
-    with pytest.raises(LifeContractError, match="不能当作日常生活便利"):
-        w.year(w.start(K51), base(), profile=legacy)
 
 
 # ---------------------------------------------------------------------- 4. 版本与内容身份
 
 
-def test_content_identity_follows_tau_cap_and_tasks_and_old_specs_keep_theirs(w):
+def test_content_identity_follows_tau_and_cap_not_the_wording(w):
     spec = w.scoring.spec
     comp = spec.component(DAILY_CONVENIENCE)
 
@@ -581,10 +531,6 @@ def test_content_identity_follows_tau_cap_and_tasks_and_old_specs_keep_theirs(w)
         ).content_fingerprint
         == base_fp
     )
-    old = parse_scoring_config(
-        yaml.safe_load((REPO / "configs/life/scoring_e1_7b_pilot.yaml").read_text(encoding="utf-8"))
-    ).spec
-    assert old.content_fingerprint == E1_7B_SCORING_CONTENT
 
 
 def test_cap_binds_when_set_low(w):
@@ -606,7 +552,7 @@ def test_cap_binds_when_set_low(w):
         catalog=w.catalog(K51),
         state=w.start(K51),
         outcome=r.settlement.outcome,
-        preference=preference_from_stated_profile(w.profile),
+        preference=preference_from_confirmed_profile(w.profile),
     )
     c0 = next(c for c in s.months[0].components if c.component_id == DAILY_CONVENIENCE)
     assert (c0.s, c0.capped) == (0.5, True) and c0.raw == 18 / 26
@@ -618,7 +564,7 @@ def test_coverage_reports_an_action_mechanism_for_every_arrangement(w):
         group=w.scoring.comparison_group,
         conditions=w.scoring.city_conditions,
         catalogs=w.bundle.catalogs,
-        preference=preference_from_stated_profile(w.profile),
+        preference=preference_from_confirmed_profile(w.profile),
     )
     leaf = next(x for x in rep.leaves if x.leaf == DAILY_CONVENIENCE)
     assert (leaf.support, leaf.action_mechanism, leaf.action_scope, leaf.fact_evidence) == (
@@ -627,7 +573,7 @@ def test_coverage_reports_an_action_mechanism_for_every_arrangement(w):
         "all_arrangements",
         "synthetic_only",
     )
-    assert abs(leaf.weight - 0.8 * (40 / 90) * 0.4) < 1e-12
+    assert abs(leaf.weight - 0.8 * 0.45 * 0.4) < 1e-12  # (1 − γ) × 物质 45/100 × 便利 40/100
 
 
 # ---------------------------------------------------------------------- 5. 学习与资源：省下的时间进入已有执行链
@@ -647,7 +593,9 @@ def test_convenience_makes_the_course_plan_feasible_without_changing_learning(w)
 
 
 def test_zero_weight_keeps_the_time_saving_but_adds_no_score(w):
-    zero = w.profile.model_copy(update={"material_points": {"housing_space": 50, "fresh_food": 50}})
+    zero = w.profile.model_copy(
+        update={"material_points": {"housing_space": "50", "fresh_food": "50"}}
+    )
     s0 = w.start(K51)
     none = w.year(s0, base(), profile=zero)
     device = w.year(s0, [*base(), once("k51.durable.convenience_pack", 1)], profile=zero)
@@ -724,7 +672,7 @@ def _views(w, city, cash=3000.0, holdings=(), material=None):
         else w.profile.model_copy(update={"material_points": material})
     )
     obs = build_observation(
-        permission=standard_product_permission("e1-7b-product-v1"),
+        permission=standard_product_permission(w.protocol.info_permission_version),
         profile=profile,
         state=state,
         catalog=cat,
@@ -742,7 +690,7 @@ def _views(w, city, cash=3000.0, holdings=(), material=None):
 def _m5(w, city, **kw):
     from agentlayer.life_mock import _View
 
-    planner = ConvenienceMockPlanner()
+    planner = ProductMockPlanner()
     notes: list[str] = []
     v = _View(_views(w, city, **kw))
     return planner._extras(v, 2500 - 1380, 0.0, notes), notes
@@ -757,7 +705,7 @@ def test_mock_picks_the_cheaper_way_per_hour_from_public_facts(w):
     assert items == [
         whole("m52.service.chores")
     ]  # 108 / 18 = 6.0 每小时，设备 6,000 / 60 / 12 ≈ 8.3
-    items, _ = _m5(w, K51, material={"housing_space": 50, "fresh_food": 50})
+    items, _ = _m5(w, K51, material={"housing_space": "50", "fresh_food": "50"})
     assert items == []  # 用户没有给便利点数：不买
     held = (
         Holding(
@@ -771,28 +719,17 @@ def test_mock_picks_the_cheaper_way_per_hour_from_public_facts(w):
     assert items == [] and "已有" in notes[0]
 
 
-def test_old_mock_rules_ignore_the_new_key_and_the_factory_matches_identities(w):
-    from agentlayer.life_mock import _View
-
-    v = _View(_views(w, K51))
-    assert RuleBasedMockPlanner()._extras(v, 1120.0, 0.0, []) == []  # 旧 M5 只看 laundry
-    assert type(mock_planner_for(PlannerSpec(identity=MOCK_IDENTITY))) is RuleBasedMockPlanner
-    assert (
-        type(mock_planner_for(PlannerSpec(identity=CONVENIENCE_MOCK_IDENTITY)))
-        is ConvenienceMockPlanner
-    )
+def test_the_mock_factory_matches_the_product_identity_only():
+    assert type(mock_planner_for(PlannerSpec(identity=PRODUCT_MOCK_IDENTITY))) is ProductMockPlanner
     with pytest.raises(ValueError, match="不认识的 mock 身份"):
         mock_planner_for(
-            PlannerSpec(identity=CONVENIENCE_MOCK_IDENTITY.model_copy(update={"version": "v9"}))
+            PlannerSpec(identity=PRODUCT_MOCK_IDENTITY.model_copy(update={"version": "v9"}))
         )
 
 
-def test_guide_section_only_in_the_new_template_and_old_template_identity_unchanged(w):
-    old = action_guide(w.protocol)
-    new = action_guide(w.protocol, CONVENIENCE_ACTION_GUIDE_VERSION)
-    topics_old = [s.topic for s in old.sections]
+def test_the_guide_explains_devices_and_services_without_scoring_internals(w):
+    new = action_guide(w.protocol)
     topics_new = [s.topic for s in new.sections]
-    assert "日常杂务：设备与人工服务（可选）" not in topics_old
     assert topics_new[-2] == "日常杂务：设备与人工服务（可选）"
     text = " ".join(new.sections[-2].rules)
     for phrase in (
@@ -805,12 +742,9 @@ def test_guide_section_only_in_the_new_template_and_old_template_identity_unchan
     ):
         assert phrase in text
     assert_payload_clean(new.model_dump(mode="json"))
-    manifest = json.loads(FLASH_MANIFEST.read_text(encoding="utf-8"))
-    assert prompt_template_fingerprint() == manifest["identities"]["prompt_template"]
-    assert (
-        prompt_template_fingerprint(CONVENIENCE_PROMPT_TEMPLATE_VERSION)
-        != prompt_template_fingerprint()
-    )
+    text = json.dumps(new.model_dump(mode="json"), ensure_ascii=False)
+    for hidden in ("tau", "relief_hours", "cap"):
+        assert f'"{hidden}"' not in text
 
 
 @pytest.fixture
@@ -820,10 +754,7 @@ def conv_repo(tmp_path, monkeypatch):
         dst = root / rel
         dst.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(REPO / rel, dst)
-    for rel, ledger in (
-        (FLASH, "budget-conv"),
-        (Path("configs/life/run_e1_7b_flash.yaml"), "budget-flash"),
-    ):
+    for rel, ledger in ((FLASH, "budget-conv"),):
         p = root / rel
         data = yaml.safe_load(p.read_text(encoding="utf-8"))
         data["run"]["paid_budget"]["ledger_dir"] = ledger
@@ -844,14 +775,12 @@ def test_mock_run_and_requests_use_the_new_inputs(conv_repo):
     outcome = start_run(world, mock_planner_for(world.config.planner), out, run_id="conv-test")
     assert outcome.status == "completed"
     manifest = json.loads((out / "manifest.json").read_text(encoding="utf-8"))
-    assert manifest["identities"]["prompt_template"] == prompt_template_fingerprint(
-        CONVENIENCE_PROMPT_TEMPLATE_VERSION
-    )
+    assert manifest["identities"]["prompt_template"] == prompt_template_fingerprint()
     payloads = planner_payloads(out)
     assert len(payloads) == 6
     for p in payloads:
-        assert p["observation"]["profile"]["material_points"]["daily_convenience"] == 40
-        assert p["guide"]["version"] == CONVENIENCE_ACTION_GUIDE_VERSION
+        assert p["observation"]["profile"]["material_allocation"]["daily_convenience"] == "40"
+        assert p["guide"]["version"] == ACTION_GUIDE_VERSION
         assert any(s["topic"].startswith("日常杂务") for s in p["guide"]["sections"])
         text = json.dumps(p, ensure_ascii=False)
         for hidden in ("tau_hours", "relief_hours", "household_baseline_minus_residual_v1"):
@@ -866,13 +795,6 @@ def test_mock_run_and_requests_use_the_new_inputs(conv_repo):
     assert "m52.service.chores" in first["u301.m52.r0"]
 
 
-def test_convenience_protocol_requires_the_convenience_template(conv_repo):
-    world = preflight(FLASH)
-    old = world.config.model_copy(update={"prompt_template": "e1-7b-prompt-v1"})
-    problems = run_config_problems(old, world.roster_config, world.bundle, world.facts)
-    assert any(CONVENIENCE_PROMPT_TEMPLATE_VERSION in p for p in problems)
-
-
 def _driver():
     scripts = str(REPO / "scripts")
     if scripts not in sys.path:
@@ -880,12 +802,32 @@ def _driver():
     return importlib.import_module("run_life_e1_7b")
 
 
+def _other_data_mock(root: Path) -> Path:
+    """另一份资料的 mock 配置：K51 设备包贵一元，名单与运行配置指向它。"""
+    life = (root / "configs/life/synthetic_product.yaml").read_text(encoding="utf-8")
+    pack = life.index("opportunity_id: k51.durable.convenience_pack")
+    at = life.index("amount: 1440", pack)
+    other = life[:at] + "amount: 1441" + life[at + len("amount: 1440") :]
+    (root / "configs/life/synthetic_other.yaml").write_text(other, encoding="utf-8", newline="\n")
+    roster = (root / "configs/life/roster_product.yaml").read_text(encoding="utf-8")
+    roster = roster.replace("synthetic_product.yaml", "synthetic_other.yaml")
+    (root / "configs/life/roster_other.yaml").write_text(roster, encoding="utf-8", newline="\n")
+    run = (
+        (root / MOCK)
+        .read_text(encoding="utf-8")
+        .replace("roster_product.yaml", "roster_other.yaml")
+    )
+    out = Path("configs/life/run_other_mock.yaml")
+    (root / out).write_text(run, encoding="utf-8", newline="\n")
+    return out
+
+
 def test_offline_probe_refuses_a_mock_config_with_other_data(conv_repo, monkeypatch):
     driver = _driver()
     live = preflight(FLASH)
     assert driver.pairing_problems(live, preflight(MOCK)) == []
-    old_mock = preflight(Path("configs/life/run_e1_7b_mock.yaml"))
-    assert driver.pairing_problems(live, old_mock)
+    other = _other_data_mock(conv_repo)
+    assert driver.pairing_problems(live, preflight(other))
     monkeypatch.setattr(
         sys,
         "argv",
@@ -897,7 +839,7 @@ def test_offline_probe_refuses_a_mock_config_with_other_data(conv_repo, monkeypa
             "--config",
             str(FLASH),
             "--mock-config",
-            "configs/life/run_e1_7b_mock.yaml",
+            str(other),
         ],
     )
     with pytest.raises(SystemExit, match="不是同一套资料与名单"):

@@ -1,17 +1,14 @@
-"""生活规划器真实模型运行的入口（E1-7B，DECISIONS/0031；产品默认模型 2026-10-13 起见 DECISIONS/0032；真实 LLM 测试 2026-10-18 起见
-DECISIONS/0035）。全部经 ``orchestration.life_runner`` 的正式入口；不是第二个运行器。
+"""生活规划器真实模型运行的入口（DECISIONS/0031、0032、0035）。全部经 ``orchestration.life_runner`` 的正式入口；不是第二个运行器。
 
-**用哪个模型由运行配置决定**（``--config``）。不写时用测试配置 ``configs/life/run_e1_7b_haiku.yaml``：Claude Haiku 5.5，models.yaml 的
-``test_planner`` 角色，经 Claude Agent SDK 单轮调用（2026-10-18 起，真实 LLM 测试与试跑一律用它）。产品角色的 Flash 配置要显式选：
-``--config configs/life/run_e1_7b_flash.yaml``；旧的 Max 试跑配置：``--config configs/life/run_e1_7b_live.yaml``（base_b 的
-qwen3.7-max-2026-06-08）。日常生活便利版对应 ``run_e1_convenience_haiku.yaml``（测试）与 ``run_e1_convenience_flash.yaml``（Flash）。找不到配置里写的模型角色就报错，不回退到别的角色或别的模型。真实运行必须写 ``--run-id``（新的编号）。
-``resume`` 与 ``replay`` 只按归档里冻结的配置与模型执行（Max 的归档永远由 Max 接着跑，Flash 的由 Flash），不接受 ``--config``，
-写了就报错——不能用换配置的办法让另一个模型接着跑旧归档。
+**用哪个模型由运行配置决定**（``--config``）。不写时用产品协议样例的测试配置 ``configs/life/run_product_haiku.yaml``：Claude Haiku 5.5，
+models.yaml 的 ``test_planner`` 角色，经 Claude Agent SDK 单轮调用（真实 LLM 测试与试跑一律用它）。产品角色的 Flash 配置只在所有者明确
+要求时显式选：``--config configs/life/run_product_flash.yaml``。找不到配置里写的模型角色就报错，不回退到别的角色或别的模型。真实运行必须写
+``--run-id``（新的编号）。``resume`` 与 ``replay`` 只按归档里冻结的配置与模型执行，不接受 ``--config``，写了就报错——不能用换配置的办法
+让另一个模型接着跑旧归档。
 
-离线探针与 mock 对照用的 mock 配置由 ``--mock-config`` 选（默认 E1-7B 的 ``configs/life/run_e1_7b_mock.yaml``；2026-10-18 起，日常生活
-便利的运行用 ``configs/life/run_e1_convenience_mock.yaml``，DECISIONS/0033）。``offline-check`` 核对 mock 配置与真实模型配置用的是同一份
-名单、同一套协议、目录、评分、事实、许可、提示模板与记忆政策，对不上就拒绝——不能拿旧样例的探针证明新场景。mock 规划器按 mock 配置
-声明的身份构造（``agentlayer.life_mock.mock_planner_for``），不认识的规则版本直接报错。
+离线探针与 mock 对照用的 mock 配置由 ``--mock-config`` 选（默认 ``configs/life/run_product_mock.yaml``）。``offline-check`` 核对 mock 配置与
+真实模型配置用的是同一份名单、同一套协议、目录、评分、事实、许可、提示模板与记忆政策，对不上就拒绝。mock 规划器按 mock 配置声明的身份
+构造（``agentlayer.life_mock.mock_planner_for``），不认识的规则版本直接报错。
 
     uv run python scripts/run_life_e1_7b.py offline-check --out <目录> [--config <运行配置>] [--mock-config <mock 配置>]
                                                                         开跑前检查与请求估计（零网络、零费用）
@@ -60,14 +57,12 @@ from orchestration.life_runner import (
     start_run,
 )
 
-#: 不写 --config 时的配置（2026-10-18 起，DECISIONS/0035）：真实 LLM 测试与试跑用 Claude Haiku 5.5（test_planner 角色）
-DEFAULT = Path("configs/life/run_e1_7b_haiku.yaml")
+#: 不写 --config 时的配置（DECISIONS/0035）：真实 LLM 测试与试跑用 Claude Haiku 5.5（test_planner 角色）
+DEFAULT = Path("configs/life/run_product_haiku.yaml")
 #: 产品角色的 Qwen3.8 Flash 配置（DECISIONS/0032）：只在显式 ``--config`` 时使用
-PRODUCT = Path("configs/life/run_e1_7b_flash.yaml")
-#: 旧的 E1-7B Max 试跑配置：只在显式 ``--config`` 时使用
-LEGACY_MAX = Path("configs/life/run_e1_7b_live.yaml")
-MOCK = Path("configs/life/run_e1_7b_mock.yaml")
-MOCK_RUN_ID = "e1-7b-mock-2026-10-13"
+PRODUCT = Path("configs/life/run_product_flash.yaml")
+MOCK = Path("configs/life/run_product_mock.yaml")
+MOCK_RUN_ID = "product-mock"
 #: 离线探针要求 mock 配置与真实模型配置相同的身份（同一份名单与资料；规划器、运行配置与预算当然不同）
 PAIRED_IDENTITIES = (
     "roster",
@@ -277,7 +272,7 @@ def main() -> None:
         "--config",
         type=Path,
         default=None,
-        help=f"offline-check / pilot / main / budget 的运行配置（默认测试配置 {DEFAULT}；Flash：{PRODUCT}；旧 Max：{LEGACY_MAX}）；"
+        help=f"offline-check / pilot / main / budget 的运行配置（默认测试配置 {DEFAULT}；Flash：{PRODUCT}）；"
         "resume / replay / mock 不接受",
     )
     ap.add_argument(

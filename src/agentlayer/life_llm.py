@@ -20,7 +20,7 @@
 日志不保存密钥、鉴权头、环境变量或包含凭证的配置对象；异常只记类型、状态码与供应商错误码。
 
 两层接口（2026-10-18，``DECISIONS/0035``）：生活引擎只认规划器接口（``plan()`` / ``effective_spec()``，mock 与真实模型都实现）；真实模型
-规划器 ``LlmPlanner``（旧名 ``QwenPlanner`` 保留为别名）只认传输层接口 ``Transport.send(请求体, 超时)``。厂商相关的只有三样，按设定的
+规划器 ``LlmPlanner`` 只认传输层接口 ``Transport.send(请求体, 超时)``。厂商相关的只有三样，按设定的
 ``provider`` 选：请求体怎样描述（``_provider_body``）、怎样发送（``OpenAICompatibleTransport`` 给千问，``ClaudeAgentSdkTransport`` 给
 Claude）、错误与用量怎样翻译回统一的 ``TransportResponse`` / ``TransportError``。预算预留、服务记录、一致性核对与重试次数都在传输层
 之上，与厂商无关。计费是可选的：规划器的预算闸门可以不传（运行配置写 ``unmetered_reason``），这时照常调用，费用记为未计量。
@@ -894,10 +894,6 @@ class LlmPlanner:
             "service_unavailable",
             f"{call.request_id} 的 {allowed} 次服务请求在之前都已经失败：不再发送（计数不因恢复而清零）",
         )
-
-
-#: 旧名字（E1-7B、产品默认模型那两轮的代码与测试都这样叫）：同一个通用规划器
-QwenPlanner = LlmPlanner
 
 
 # ---------------------------------------------------------------------- Claude Agent SDK 传输层（DECISIONS/0035）

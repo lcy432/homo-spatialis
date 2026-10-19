@@ -1,21 +1,26 @@
-"""E1-7A 可控的 mock 规划器（`DECISIONS/0030`）。确定性、规则简单，只读收到的请求 JSON。
+"""可控的 mock 规划器（`DECISIONS/0030`；产品版规则 ``e3a-product-mock-rules-v1``，DECISIONS/0033、0034）。确定性、规则简单，
+只读收到的请求 JSON。
 
 **它不是模型能力的证据**：只用来检查接口、状态传递、错误处理与信息隔离。它读的是 ``PlannerCall.payload``——与渲染进提示文字的是
-同一份投影，没有任何内部对象。规则版本 ``e1-7a-mock-rules-v1``：
+同一份投影，没有任何内部对象。读观察里的六维精确点数（``six_dimension_points``）与物质分配（``material_allocation``）：
 
 * M1 住房：本城合格住房（``minimum_living`` 的合格名单、明确可得、按月计价）里，能满足用户硬要求（往返分钟上限）的最便宜的
   一项——前提是按"岗位月收入 − 住房 − 最便宜食品"推算的年末现金不少于一个月最低生活费；否则选最便宜的合格住房，并在理由里
-  写明硬要求今年满足不了。推算不含税（观察里没有税制说明）。
+  写明硬要求今年满足不了。推算不含税。
 * M2 食品：最便宜的合格食品。
 * M3 岗位：用户的物质或发展点数大于 0（点数不可见时照做）才考虑换岗：年初"现在能选"的岗位里工资最高的一份，比现职高才换；
   否则保留年初的当前岗位。
 * M4 课程：有在学而没学完的课程就接着学；否则（同样要求物质或发展点数大于 0）如果本城有岗位要求某项我还没有的能力、有课程授予
   它、那份岗位比选中的岗位工资高，并且 1 月付完住房与食品后的现金付得起学费、付学费后推算的年末现金不少于一个月最低生活费，
   就从 1 月起报名。
-* M5 洗衣：物质细项里洗衣点数大于 0、手上没有在服务期内的洗衣物品，而 1 月付完住房、食品与学费后的现金付得起最便宜的洗衣耐用品、
-  买了以后推算的年末现金不少于三个月最低生活费，就在 1 月买。
-* M6 应急：七维 healthcare 点数 ≥ 10（点数不可见时同样）则小病、大病都"条件允许就治"，否则都不治；暂停顺序是本年计划里有参与
-  时间的主动活动（体验 → 服务 → 课程）；生病的月份取消本年计划里的一次性耐用品购买。
+* M5 便利：物质分配里 daily_convenience 大于 0、手上没有在服务期内能替代家务的物品时，在本城可得、按公开事实能替代家务的设备
+  （一次性购买）与人工服务（按月购买）里，按"每月少做 1 小时家务要花多少钱"从低到高挑第一个付得起的：设备的每月花费 = 价格 ÷
+  （寿命年数 × 12），服务的每月花费 = 月价；每月少做的小时 = Σ（家务基准 − 残余）。付得起：设备在 1 月付完住房、食品与学费后的
+  现金付得起，服务 12 个月的花费付完后，推算的年末现金都不少于三个月最低生活费。只读请求里的公开报价、寿命与资源事实，不读评分
+  参数，不是评分最优化器。
+* M6 应急：**固定测试政策**——小病、大病都写 treat_if_possible；暂停顺序是本年计划里有参与时间的主动活动（体验 → 服务 → 课程）；
+  生病的月份取消本年计划里的一次性耐用品购买。这是 mock 的测试设定，**不是**从用户健康回答推断出的治疗态度；健康回答只出现在
+  需求摘要里，不改变任何行动。
 * M7 兜底：住房与食品都声明 ``minimum_fallback``。M8 目标储蓄：不设。
 
 修订（第 2 份起）：读修订块。上一份输出能解析就在它的基础上按诊断改——资源超限：在诊断列出的占用最多的项目里，按"额外的第二份
@@ -24,18 +29,6 @@
 
 受控行为（``MockScript``，进入运行身份）只用于演示与测试：第一份草稿多做一份工作、选一个还不合格的岗位、返回不是 JSON 的文字、
 抛出意外异常、只换需求摘要与理由的措辞。
-
-E1 补充"日常生活便利"（DECISIONS/0033）另有一套规则 ``e1-convenience-mock-rules-v1``（``ConvenienceMockPlanner``）：M1–M4、M6–M8 与
-修订规则逐条相同，只把 M5 换成 M5c 便利——物质细项里 daily_convenience 点数大于 0、手上没有在服务期内能替代家务的物品时，在本城
-可得、按公开事实能替代家务的设备（一次性购买）与人工服务（按月购买）里，按"每月少做 1 小时家务要花多少钱"从低到高挑第一个付得起
-的：设备的每月花费 = 价格 ÷（寿命年数 × 12），服务的每月花费 = 月价；每月少做的小时 = Σ（家务基准 − 残余，残余最小的那个方案才算）。
-付得起：设备在 1 月付完住房、食品与学费后的现金付得起，服务 12 个月的花费付完后，推算的年末现金都不少于三个月最低生活费。只读请求里
-的公开报价、寿命与资源事实，不读评分参数，不是评分最优化器。旧规则 ``e1-7a-mock-rules-v1``（``RuleBasedMockPlanner``）不变。
-
-E3-A（DECISIONS/0034）另有一套规则 ``e3a-product-mock-rules-v1``（``ProductMockPlanner``），给六维产品画像用：M1–M5c、M7、M8 与修订
-规则同便利版，只是读的输入换成观察里的六维精确点数（``six_dimension_points``）与物质分配（``material_allocation``）；M6 应急改成
-**固定测试政策** M6p——小病、大病都写 treat_if_possible，暂停与取消清单照旧。这是 mock 的测试设定，**不是**从用户健康回答推断出的
-治疗态度（没有 healthcare 点数也不会因此默认不治疗）；健康回答只出现在需求摘要里，不改变任何行动。
 """
 
 from __future__ import annotations
@@ -48,13 +41,18 @@ from typing import Any
 from agentlayer.life_planning import PlannerCall
 from common.life_planning_contracts import MockScript, PlannerIdentity, PlannerSpec
 
-MOCK_RULES_VERSION = "e1-7a-mock-rules-v1"
-MOCK_IDENTITY = PlannerIdentity(
+PRODUCT_MOCK_RULES_VERSION = "e3a-product-mock-rules-v1"
+#: 固定测试政策的名字（写进身份说明与需求摘要，便于审计：它不是从健康回答推断的）。
+PRODUCT_MOCK_EMERGENCY_POLICY = "fixed_treat_if_possible_test_policy_v1"
+PRODUCT_MOCK_IDENTITY = PlannerIdentity(
     kind="mock",
-    planner_id="mock.rules.e1-7a",
-    version="e1-7a-mock-v1",
-    rules_version=MOCK_RULES_VERSION,
-    note="可控的确定性模拟代理：只检查接线、状态传递与信息隔离，不代表任何真实模型的能力",
+    planner_id="mock.rules.e3a-product",
+    version="e3a-product-mock-v1",
+    rules_version=PRODUCT_MOCK_RULES_VERSION,
+    note=(
+        "可控的确定性模拟代理（六维产品画像版规则）：只检查接线、状态传递与信息隔离，不代表任何真实模型的能力；读六维精确点数与物质"
+        "分配，M5 按公开报价、寿命与残余时间挑设备或按月服务；应急是固定测试政策（小病、大病都 treat_if_possible），不从健康回答推断"
+    ),
 )
 #: 修订时删项目的先后（数小的先删）：额外的第二份工作 0、有参与时间的服务 1、体验 2、课程 3、耐用品 4。
 _PRIORITY: dict[str, int] = {"experience": 2, "training": 3, "durable": 4}
@@ -102,16 +100,33 @@ def _once(oid: str, month: int) -> dict[str, Any]:
     return {"opportunity_id": oid, "quantity": 1, "month": month}
 
 
+def _exact_points(raw: object) -> dict[str, Fraction]:
+    """观察里精确分数写法的点数（"30"、"50/3"）。点数不可见时为空。"""
+    if not isinstance(raw, dict):
+        return {}
+    return {str(k): Fraction(str(v)) for k, v in raw.items()}
+
+
+def _points_text(q: Fraction) -> str:
+    return str(q.numerator) if q.denominator == 1 else f"{q.numerator}/{q.denominator}"
+
+
 class _View:
-    """请求 JSON 的只读视图（只读 payload，不碰任何内部对象）。"""
+    """请求 JSON 的只读视图（只读 payload，不碰任何内部对象）。点数与物质分配读精确分数。"""
 
     def __init__(self, payload: dict[str, Any]) -> None:
         self.p = payload
         self.obs = payload["observation"]
         self.opps = {o["opportunity_id"]: o for o in self.obs["opportunities"]}
         profile = self.obs.get("profile") or {}
-        self.points = profile.get("dimension_points")
-        self.material_points = profile.get("material_points") or {}
+        six = profile.get("six_dimension_points")
+        self.exact = _exact_points(six)
+        #: 点数不可见时为 None（照常考虑换岗）
+        self.points = None if six is None else {k: float(v) for k, v in self.exact.items()}
+        self.material_points = {
+            k: float(v) for k, v in _exact_points(profile.get("material_allocation")).items()
+        }
+        self.health_answers = list(profile.get("health_answers") or [])
         self.hard = profile.get("hard_requirements") or []
         self.cash = float(self.obs["cash"]["amount"])
 
@@ -143,14 +158,13 @@ class _View:
         ]
 
     def career_minded(self) -> bool:
-        if self.points is None:  # 点数不可见（研究条件）：不靠点数分辨，照常考虑
+        if self.points is None:  # 点数不可见：不靠点数分辨，照常考虑
             return True
         return self.points.get("material", 0) + self.points.get("opportunity", 0) > 0
 
     def treat(self) -> str:
-        if self.points is None:
-            return "treat_if_possible"
-        return "treat_if_possible" if self.points.get("healthcare", 0) >= 10 else "decline"
+        # M6：固定测试政策。不读健康回答，也不因为没有 healthcare 点数就默认不治疗
+        return "treat_if_possible"
 
     def max_commute(self) -> float | None:
         limits = [
@@ -168,16 +182,26 @@ class _View:
         return {a["ability_id"] for a in (self.obs.get("abilities") or [])}
 
     def household_tasks(self) -> list[dict[str, Any]]:
-        """公开的家务基准（observation.resources.household_tasks）；没有月度资源规则时为空。"""
-        return list((self.obs.get("resources") or {}).get("household_tasks") or [])
+        """公开的家务基准（observation.resources.household_tasks）。"""
+        return list(self.obs["resources"].get("household_tasks") or [])
 
 
-class RuleBasedMockPlanner:
+def _relief(v: _View, o: dict[str, Any]) -> float:
+    """这个方案在用时，本人每月少做的家务小时（按公开的家务基准与这个方案的残余；不超过基准）。"""
+    te = o.get("time_energy") or {}
+    tasks = {t["task"]: float(t["baseline_hours_per_month"]) for t in v.household_tasks()}
+    total = 0.0
+    for sub in te.get("substitutes") or []:
+        base = tasks.get(sub["task"])
+        if base is not None:
+            total += max(0.0, base - min(base, float(sub["residual_hours_per_month"])))
+    return total
+
+
+class ProductMockPlanner:
     """按 M1–M8 规则读请求、给出年度计划的 mock（``Planner`` 接口）。"""
 
-    identity = MOCK_IDENTITY
-    #: 读请求 JSON 的视图（E3-A 的产品规则换成读六维精确点数的视图；旧规则照旧）。
-    view_class: type[_View] = _View
+    identity = PRODUCT_MOCK_IDENTITY
 
     def __init__(self, scripts: Sequence[MockScript] = ()) -> None:
         self.scripts = tuple(scripts)
@@ -200,7 +224,7 @@ class RuleBasedMockPlanner:
             )
         if "malformed_output" in behaviors:
             return MALFORMED_TEXT
-        v = self.view_class(p)
+        v = _View(p)
         revision = p.get("revision")
         notes: list[str] = []
         if revision is None:
@@ -284,7 +308,7 @@ class RuleBasedMockPlanner:
             "items": items,
             "minimum_fallback": ["housing", "food"],
             "savings_goal": None,
-            "emergency": self._emergency(v, items) if v.obs.get("health") is not None else None,
+            "emergency": self._emergency(v, items),
         }
 
     @staticmethod
@@ -338,31 +362,56 @@ class RuleBasedMockPlanner:
     def _extras(
         self, v: _View, monthly_net: float, spend: float, notes: list[str]
     ) -> list[dict[str, Any]]:
-        """M5：住房、食品、岗位与课程之外的物质安排。旧规则只有洗衣（M5）。"""
-        washer = self._washer(v, monthly_net, spend, notes)
-        return [] if washer is None else [_once(washer, 1)]
-
-    def _washer(self, v: _View, monthly_net: float, spend: float, notes: list[str]) -> str | None:
-        if v.material_points.get("laundry", 0) <= 0:
-            return None
-        held = v.held_ids()
-        if any("laundry" in v.opps[h].get("functions", []) for h in held if h in v.opps):
-            return None
-        options = sorted(
-            (o for o in v.of("durable") if _available(o) and "laundry" in o.get("functions", [])),
-            key=lambda o: (_price(o) or 0.0, o["opportunity_id"]),
-        )
-        if not options:
-            return None
-        o = options[0]
-        price = _price(o) or 0.0
-        end = v.cash + 12 * monthly_net - spend - price
-        if v.cash + monthly_net - spend >= price and end >= 3 * v.min_living():
-            notes.append(
-                f"M5 洗衣：买 {o['opportunity_id']}（{_price(o):,.0f}），推算年末现金约 {end:,.0f}"
-            )
-            return o["opportunity_id"]
-        return None
+        """M5 便利：住房、食品、岗位与课程之外的物质安排。"""
+        if v.material_points.get("daily_convenience", 0) <= 0:
+            return []
+        substitutes = {
+            oid for oid, o in v.opps.items() if (o.get("time_energy") or {}).get("substitutes")
+        }
+        held = [
+            h["opportunity_id"]
+            for h in v.obs.get("holdings", [])
+            if h["opportunity_id"] in substitutes and (h.get("remaining_months") or 0) > 0
+        ]
+        if held:
+            notes.append(f"M5c 便利：已有 {held} 在服务期内，今年不再买")
+            return []
+        options: list[tuple[float, str, str, float]] = []
+        for oid in sorted(substitutes):
+            o = v.opps[oid]
+            relief = _relief(v, o)
+            if not _available(o) or relief <= 0:
+                continue
+            price = _price(o)
+            if price is None:
+                continue
+            if o["category"] == "durable":
+                years = int((o.get("duration") or {}).get("lasts_years") or 0)
+                if years <= 0:
+                    continue
+                per_month = price / (12 * years)
+                options.append((per_month / relief, oid, "durable", price))
+            elif _monthly(o) is not None:
+                options.append((price / relief, oid, "service", price))
+        floor = 3 * v.min_living()
+        for cost, oid, kind, price in sorted(options):
+            if kind == "durable":
+                end = v.cash + 12 * monthly_net - spend - price
+                if v.cash + monthly_net - spend >= price and end >= floor:
+                    notes.append(
+                        f"M5c 便利：买 {oid}（{price:,.0f}，每月少做 1 小时家务约 {cost:,.1f}），推算年末现金约 {end:,.0f}"
+                    )
+                    return [_once(oid, 1)]
+            else:
+                end = v.cash + 12 * (monthly_net - price) - spend
+                if end >= floor:
+                    notes.append(
+                        f"M5c 便利：按月买 {oid}（每月 {price:,.0f}，每月少做 1 小时家务约 {cost:,.1f}），推算年末现金约 {end:,.0f}"
+                    )
+                    return [_period(oid, 1, 12)]
+        if options:
+            notes.append("M5c 便利：能替代家务的方案今年都付不起（按推算的年末现金），自己做")
+        return []
 
     def _emergency(self, v: _View, items: list[dict[str, Any]]) -> dict[str, Any]:
         def kind(oid: str) -> str:
@@ -403,8 +452,7 @@ class RuleBasedMockPlanner:
         for j in extra:
             action["items"].append(_period(j, 1, 12))
             notes.append(f"草稿：再做一份 {j}，想多挣一点（受控行为：第一份草稿多做一份工作）")
-        if action.get("emergency") is not None:
-            action["emergency"] = self._emergency(v, action["items"])
+        action["emergency"] = self._emergency(v, action["items"])
 
     def _unqualified(self, v: _View, action: dict[str, Any], notes: list[str]) -> None:
         jobs = [o for o in v.of("job") if _available(o) and not _qualified(o)]
@@ -487,18 +535,16 @@ class RuleBasedMockPlanner:
                     for j in v.current_jobs():
                         items.append(_period(j, 1, 12))
                         notes.append(f"修订：补回现职 {j}")
-        emergency = action.get("emergency")
-        if emergency is not None:
-            # 暂停与取消清单按改过的计划重新列（只能列计划里的项目）；治不治沿用上一份的选择
-            fresh = self._emergency(v, items)
-            for k in ("minor", "major"):
-                fresh[k] = emergency.get(k, fresh[k])
-            emergency = fresh
-            if "treatment_data_unknown" in codes:
-                for t in (v.obs.get("health") or {}).get("treatments", []):
-                    if t.get("availability") == "unknown":
-                        emergency[t["severity"]] = "decline"
-                        notes.append(f"修订：本城{t['label']}资料未知，{t['severity']} 改成不治")
+        previous = action.get("emergency") or {}
+        # 暂停与取消清单按改过的计划重新列（只能列计划里的项目）；治不治沿用上一份的选择
+        emergency = self._emergency(v, items)
+        for k in ("minor", "major"):
+            emergency[k] = previous.get(k, emergency[k])
+        if "treatment_data_unknown" in codes:
+            for t in (v.obs.get("health") or {}).get("treatments", []):
+                if t.get("availability") == "unknown":
+                    emergency[t["severity"]] = "decline"
+                    notes.append(f"修订：本城{t['label']}资料未知，{t['severity']} 改成不治")
         return {
             "items": items,
             "minimum_fallback": action.get("minimum_fallback", ["housing", "food"]),
@@ -511,178 +557,19 @@ class RuleBasedMockPlanner:
     @staticmethod
     def _need(v: _View, alt: bool) -> str:
         y = v.p["year_index"]
-        if v.points is not None:
-            top = sorted(v.points.items(), key=lambda kv: (-kv[1], kv[0]))[:3]
-            focus = "、".join(f"{k} {n}" for k, n in top if n > 0)
-            basis = f"用户点数最高的是 {focus}"
-        else:
-            basis = "点数在这个信息条件下不可见，按文字与处境安排"
-        jobs = "、".join(v.current_jobs()) or "没有岗位"
-        cash = f"{v.cash:,.2f}"
-        if alt:
-            return f"（换一种说法）第 {y} 年开头手上 {cash}，现在做 {jobs}；{basis}。"
-        return f"第 {y} 年：现金 {cash}，现职 {jobs}；{basis}。今年先保证住房与吃饭，再看能不能往上走。"
-
-    @staticmethod
-    def _rationale(notes: list[str], alt: bool) -> str:
-        text = "；".join(notes) or "按规则安排"
-        if alt:
-            text = "（同样的安排，换一种说法）" + text
-        return text[:1000]
-
-
-# ---------------------------------------------------------------------- E1 补充：日常生活便利（DECISIONS/0033）
-
-CONVENIENCE_MOCK_RULES_VERSION = "e1-convenience-mock-rules-v1"
-CONVENIENCE_MOCK_IDENTITY = PlannerIdentity(
-    kind="mock",
-    planner_id="mock.rules.e1-convenience",
-    version="e1-convenience-mock-v1",
-    rules_version=CONVENIENCE_MOCK_RULES_VERSION,
-    note=(
-        "可控的确定性模拟代理（日常生活便利版规则）：只检查接线、状态传递与信息隔离，不代表任何真实模型的能力；M5 改为按公开报价、"
-        "寿命与残余时间挑设备或按月服务"
-    ),
-)
-
-
-def _relief(v: _View, o: dict[str, Any]) -> float:
-    """这个方案在用时，本人每月少做的家务小时（按公开的家务基准与这个方案的残余；不超过基准）。"""
-    te = o.get("time_energy") or {}
-    tasks = {t["task"]: float(t["baseline_hours_per_month"]) for t in v.household_tasks()}
-    total = 0.0
-    for sub in te.get("substitutes") or []:
-        base = tasks.get(sub["task"])
-        if base is not None:
-            total += max(0.0, base - min(base, float(sub["residual_hours_per_month"])))
-    return total
-
-
-class ConvenienceMockPlanner(RuleBasedMockPlanner):
-    """M5c 便利（规则 ``e1-convenience-mock-rules-v1``）：其余规则与 ``RuleBasedMockPlanner`` 逐条相同。"""
-
-    identity = CONVENIENCE_MOCK_IDENTITY
-
-    def _extras(
-        self, v: _View, monthly_net: float, spend: float, notes: list[str]
-    ) -> list[dict[str, Any]]:
-        if v.material_points.get("daily_convenience", 0) <= 0:
-            return []
-        substitutes = {
-            oid for oid, o in v.opps.items() if (o.get("time_energy") or {}).get("substitutes")
-        }
-        held = [
-            h["opportunity_id"]
-            for h in v.obs.get("holdings", [])
-            if h["opportunity_id"] in substitutes and (h.get("remaining_months") or 0) > 0
-        ]
-        if held:
-            notes.append(f"M5c 便利：已有 {held} 在服务期内，今年不再买")
-            return []
-        options: list[tuple[float, str, str, float]] = []
-        for oid in sorted(substitutes):
-            o = v.opps[oid]
-            relief = _relief(v, o)
-            if not _available(o) or relief <= 0:
-                continue
-            price = _price(o)
-            if price is None:
-                continue
-            if o["category"] == "durable":
-                years = int((o.get("duration") or {}).get("lasts_years") or 0)
-                if years <= 0:
-                    continue
-                per_month = price / (12 * years)
-                options.append((per_month / relief, oid, "durable", price))
-            elif _monthly(o) is not None:
-                options.append((price / relief, oid, "service", price))
-        floor = 3 * v.min_living()
-        for cost, oid, kind, price in sorted(options):
-            if kind == "durable":
-                end = v.cash + 12 * monthly_net - spend - price
-                if v.cash + monthly_net - spend >= price and end >= floor:
-                    notes.append(
-                        f"M5c 便利：买 {oid}（{price:,.0f}，每月少做 1 小时家务约 {cost:,.1f}），推算年末现金约 {end:,.0f}"
-                    )
-                    return [_once(oid, 1)]
-            else:
-                end = v.cash + 12 * (monthly_net - price) - spend
-                if end >= floor:
-                    notes.append(
-                        f"M5c 便利：按月买 {oid}（每月 {price:,.0f}，每月少做 1 小时家务约 {cost:,.1f}），推算年末现金约 {end:,.0f}"
-                    )
-                    return [_period(oid, 1, 12)]
-        if options:
-            notes.append("M5c 便利：能替代家务的方案今年都付不起（按推算的年末现金），自己做")
-        return []
-
-
-# ---------------------------------------------------------------------- E3-A：六维产品画像（DECISIONS/0034）
-
-PRODUCT_MOCK_RULES_VERSION = "e3a-product-mock-rules-v1"
-#: 固定测试政策的名字（写进身份说明与需求摘要，便于审计：它不是从健康回答推断的）。
-PRODUCT_MOCK_EMERGENCY_POLICY = "fixed_treat_if_possible_test_policy_v1"
-PRODUCT_MOCK_IDENTITY = PlannerIdentity(
-    kind="mock",
-    planner_id="mock.rules.e3a-product",
-    version="e3a-product-mock-v1",
-    rules_version=PRODUCT_MOCK_RULES_VERSION,
-    note=(
-        "可控的确定性模拟代理（六维产品画像版规则）：只检查接线、状态传递与信息隔离，不代表任何真实模型的能力；读六维精确点数与物质"
-        "分配，M5 按公开报价、寿命与残余时间挑设备或按月服务；应急是固定测试政策（小病、大病都 treat_if_possible），不从健康回答推断"
-    ),
-)
-
-
-def _exact_points(raw: object) -> dict[str, Fraction]:
-    """观察里精确分数写法的点数（"30"、"50/3"）。点数不可见时为空。"""
-    if not isinstance(raw, dict):
-        return {}
-    return {str(k): Fraction(str(v)) for k, v in raw.items()}
-
-
-class _ProductView(_View):
-    """六维产品画像的请求视图：点数与物质分配读精确分数；应急用固定测试政策。"""
-
-    def __init__(self, payload: dict[str, Any]) -> None:
-        super().__init__(payload)
-        profile = self.obs.get("profile") or {}
-        six = profile.get("six_dimension_points")
-        self.exact = _exact_points(six)
-        # 与旧视图同一个接口：点数不可见（研究条件）时为 None，照常考虑换岗
-        self.points = None if six is None else {k: float(v) for k, v in self.exact.items()}
-        self.material_points = {
-            k: float(v) for k, v in _exact_points(profile.get("material_allocation")).items()
-        }
-        self.health_answers = list(profile.get("health_answers") or [])
-
-    def treat(self) -> str:
-        # M6p：固定测试政策。不读健康回答，也不因为没有 healthcare 点数就默认不治疗
-        return "treat_if_possible"
-
-
-class ProductMockPlanner(ConvenienceMockPlanner):
-    """六维产品画像的 mock（规则 ``e3a-product-mock-rules-v1``）：便利版规则 + 读精确点数的视图 + 固定测试应急政策。"""
-
-    identity = PRODUCT_MOCK_IDENTITY
-    view_class = _ProductView
-
-    @staticmethod
-    def _need(v: _View, alt: bool) -> str:
-        y = v.p["year_index"]
-        exact = getattr(v, "exact", {})
-        if exact:
-            top = sorted(exact.items(), key=lambda kv: (-kv[1], kv[0]))[:3]
+        if v.exact:
+            top = sorted(v.exact.items(), key=lambda kv: (-kv[1], kv[0]))[:3]
             focus = "、".join(f"{k} {_points_text(n)}" for k, n in top if n > 0)
             basis = f"用户六维点数最高的是 {focus}"
         else:
             basis = "点数在这个信息条件下不可见，按文字与处境安排"
-        answers = getattr(v, "health_answers", [])
-        unclear = [a["question_id"] for a in answers if a.get("answer_state") != "provided"]
+        unclear = [
+            a["question_id"] for a in v.health_answers if a.get("answer_state") != "provided"
+        ]
         health = (
             f"；健康问卷有 {len(unclear)} 题没有明确倾向，不替用户补"
             if unclear
-            else ("；健康问卷的回答只作参考" if answers else "")
+            else ("；健康问卷的回答只作参考" if v.health_answers else "")
         )
         jobs = "、".join(v.current_jobs()) or "没有岗位"
         cash = f"{v.cash:,.2f}"
@@ -695,20 +582,21 @@ class ProductMockPlanner(ConvenienceMockPlanner):
             )
         return f"第 {y} 年：现金 {cash}，现职 {jobs}；{basis}{health}{policy}。"[:400]
 
-
-def _points_text(q: Fraction) -> str:
-    return str(q.numerator) if q.denominator == 1 else f"{q.numerator}/{q.denominator}"
+    @staticmethod
+    def _rationale(notes: list[str], alt: bool) -> str:
+        text = "；".join(notes) or "按规则安排"
+        if alt:
+            text = "（同样的安排，换一种说法）" + text
+        return text[:1000]
 
 
 #: 规则版本 → mock 规划器类。入口脚本按运行配置声明的身份取对应的类；不认识的规则版本直接报错，不回退。
-MOCK_PLANNERS: dict[str, type[RuleBasedMockPlanner]] = {
-    MOCK_RULES_VERSION: RuleBasedMockPlanner,
-    CONVENIENCE_MOCK_RULES_VERSION: ConvenienceMockPlanner,
+MOCK_PLANNERS: dict[str, type[ProductMockPlanner]] = {
     PRODUCT_MOCK_RULES_VERSION: ProductMockPlanner,
 }
 
 
-def mock_planner_for(spec: PlannerSpec) -> RuleBasedMockPlanner:
+def mock_planner_for(spec: PlannerSpec) -> ProductMockPlanner:
     """按运行配置声明的规划器设定（身份与受控行为）构造对应的 mock。身份对不上任何已知规则就报错。"""
     if spec.identity.kind != "mock":
         raise ValueError(f"规划器 {spec.identity.planner_id} 不是 mock")

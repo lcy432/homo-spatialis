@@ -22,7 +22,7 @@ from __future__ import annotations
 
 from typing import Annotated, Any, Literal
 
-from pydantic import Field, model_validator
+from pydantic import Field, field_validator, model_validator
 
 from common.config import is_dated_snapshot
 from common.ids import CityId
@@ -44,41 +44,24 @@ from common.life_contracts import (
 from common.life_evaluation_contracts import PlanningStop
 from common.money import Money
 
-#: 规划接口、运行配置、提示模板与记忆政策的版本。改其中任何一项的含义就换名字，并在 ADR 记录。
-#: E1-7B（DECISIONS/0031）：请求新增公开的合成税制与行动说明书，提示文字改为紧凑 JSON，所以规划接口与提示模板换了名字。
-PLANNING_VERSION = "e1-7b-planning-v1"
+#: 规划接口、运行配置、提示模板与记忆政策的版本。改其中任何一项的含义就换名字。
+#: product-planning-v1（2026-10-19）：删除旧版本之后的请求结构——观察里不再有七维画像、软偏好、旧的年度时间与精力字段和
+#: 数值技能这些只为旧协议存在的键；其余与 e1-7b-planning-v1 相同。
+PLANNING_VERSION = "product-planning-v1"
 RUN_CONFIG_VERSION = "e1-7a-run-v1"
 #: 带真实模型与付费预算的运行配置（E1-7B）。mock 运行照旧用 e1-7a-run-v1。
 RUN_CONFIG_VERSION_LIVE = "e1-7b-run-v1"
-PROMPT_TEMPLATE_VERSION = "e1-7b-prompt-v1"
-#: E1 补充"日常生活便利"（DECISIONS/0033）的提示模板：系统提示、用户开头与输出格式与 e1-7b-prompt-v1 逐字相同，只是行动说明书多一节
-#: "日常杂务：设备与人工服务"（版本 e1-convenience-action-guide-v1）。旧模板的请求逐字节不变；运行配置写哪个就用哪个。
-CONVENIENCE_PROMPT_TEMPLATE_VERSION = "e1-convenience-prompt-v1"
-#: E3-A（DECISIONS/0034）的产品提示模板：系统提示、用户开头与输出格式与 e1-7b-prompt-v1 逐字相同；行动说明书 e3a-product-action-guide-v1
-#: = 便利版说明书的全部各节 + "你的用户陈述：六维、物质分配与独立健康回答"一节。只给六维产品画像的运行用；旧模板的请求逐字节不变。
-PRODUCT_PROMPT_TEMPLATE_VERSION = "e3a-product-prompt-v1"
+#: 提示模板与它带的行动说明书（DECISIONS/0031、0033、0034）。提示模板 = 系统提示、用户开头与输出格式 + 一版行动说明书。
+#: 改了任何文字就换版本号，并在 ``PROMPT_TEMPLATE_GUIDES`` 里登记；运行配置的 prompt_template 只能写这里的键。
+PROMPT_TEMPLATE_VERSION = "e3a-product-prompt-v1"
+ACTION_GUIDE_VERSION = "e3a-product-action-guide-v1"
+PROMPT_TEMPLATE_GUIDES: dict[str, str] = {PROMPT_TEMPLATE_VERSION: ACTION_GUIDE_VERSION}
 MEMORY_POLICY_VERSION = "e1-7a-memory-v1"
-#: 执行修订。e1-7a-r2（2026-10-12 E1-7A 收尾，DECISIONS/0030 第六节）：恢复前逐条核对归档记录、核对实际规划器的有效设置、事实记忆
-#: 按真实领薪月份写区间。e1-7b-r1（2026-10-13，DECISIONS/0031）：在 r2 之上加服务请求的暂停状态（halted）、供应商请求明细、
-#: 付费前的输入副本与年度边界的受控暂停。记在运行清单里；没有这一项的旧归档在新执行器下不能恢复或重放，从初始输入重跑。
-#: e1-7b-r2（2026-10-13 E1-7B 收尾，DECISIONS/0031 第八节）：服务记录一致性检查（新回复、缓存、恢复与重放共用一份）、实际预算与
-#: 声明及账本历史的核对、按实际第一档税率写的公开税说明。
+#: 执行修订（DECISIONS/0030 第六节、0031 第八节）：恢复前逐条核对归档记录、核对实际规划器的有效设置、服务记录一致性检查、实际
+#: 预算与声明及账本历史的核对。记在运行清单里；改执行语义就换修订号。
 EXECUTION_REVISION = "e1-7b-r2"
-#: 可见税制与行动说明书的版本（E1-7B）。税说明 v2（收尾 F3）：按实际第一档税率写说明，第一档不是 0% 时不再说"不扣税"。
+#: 可见税制说明的版本（按实际第一档税率写说明）。
 VISIBLE_TAX_VERSION = "e1-7b-visible-tax-v2"
-ACTION_GUIDE_VERSION = "e1-7b-action-guide-v1"
-CONVENIENCE_ACTION_GUIDE_VERSION = "e1-convenience-action-guide-v1"
-PRODUCT_ACTION_GUIDE_VERSION = "e3a-product-action-guide-v1"
-#: 提示模板 → 它带的行动说明书版本。运行配置的 prompt_template 只能写这里的键。
-PROMPT_TEMPLATE_GUIDES: dict[str, str] = {
-    PROMPT_TEMPLATE_VERSION: ACTION_GUIDE_VERSION,
-    CONVENIENCE_PROMPT_TEMPLATE_VERSION: CONVENIENCE_ACTION_GUIDE_VERSION,
-    PRODUCT_PROMPT_TEMPLATE_VERSION: PRODUCT_ACTION_GUIDE_VERSION,
-}
-#: 说明书里带"日常杂务：设备与人工服务"一节的模板（便利评分的协议只能用这些；DECISIONS/0033、0034）。
-HOUSEHOLD_GUIDE_TEMPLATES: frozenset[str] = frozenset(
-    {CONVENIENCE_PROMPT_TEMPLATE_VERSION, PRODUCT_PROMPT_TEMPLATE_VERSION}
-)
 #: 输入 token 的保守估计规则（E1-7B，AG-13）：ASCII 字符每个记 1 个 token（字节级 BPE 的一个 token 至少覆盖 1 个字节，所以这是
 #: ASCII 部分的严格上界），非 ASCII 字符每个记 2 个 token（千问词表里常用汉字多是 1 个 token，按 2 留余量；罕见字可能更多，
 #: 所以整体**不是**严格上界），每条消息另加 16、每个请求另加 16。它不是实际 token；实际 token 只认供应商返回的用量。
@@ -280,9 +263,7 @@ class VisibleGuideSection(ContractModel):
 class VisibleActionGuide(ContractModel):
     """**代理可见**的年度行动说明书（E1-7B）：支持的字段、单位、月份含义、数量限制与少量合法的局部示例。"""
 
-    version: Literal[
-        "e1-7b-action-guide-v1", "e1-convenience-action-guide-v1", "e3a-product-action-guide-v1"
-    ]
+    version: str = Field(min_length=1, max_length=60)
     sections: tuple[VisibleGuideSection, ...]
 
 
@@ -558,17 +539,15 @@ class PlannerSpec(ContractModel):
 class InformationSetting(ContractModel):
     """这次运行的信息条件（与 ``agentlayer.life_views.ObservationPermission`` 逐项对应，**没有默认值**）。"""
 
-    condition: Literal["product_stated_profile", "research_text_only"]
+    condition: Literal["product_stated_profile"]
     show_stated_dimension_points: bool
-    show_soft_preferences: bool
     show_hard_requirements: bool
     show_free_text: bool
     show_energy_level: bool
     show_stated_material_points: bool
     permission_version: str = Field(min_length=1, max_length=60)
-    #: E3-A（DECISIONS/0034）：六维产品画像的独立健康回答是否可见。六维产品画像的运行**必须**显式写 true 或 false（加载与观察
-    #: 构造时检查），旧运行不写（不序列化，运行配置身份逐字节不变）。
-    show_health_answers: bool | None = Field(default=None, exclude_if=lambda v: v is None)
+    #: 六维产品画像的独立健康回答是否可见（DECISIONS/0034）。
+    show_health_answers: bool
 
 
 class PlanningPolicy(ContractModel):
@@ -599,7 +578,7 @@ class LifeRunConfig(ContractModel):
     information: InformationSetting
     planning: PlanningPolicy
     planner: PlannerSpec
-    prompt_template: Literal["e1-7b-prompt-v1", "e1-convenience-prompt-v1", "e3a-product-prompt-v1"]
+    prompt_template: str = Field(min_length=1, max_length=60)
     memory_policy: Literal["e1-7a-memory-v1"]
     #: E1-7B：真实模型运行的付费预算（mock 运行不写）。
     paid_budget: PaidBudget | None = Field(default=None, exclude_if=lambda v: v is None)
@@ -609,6 +588,13 @@ class LifeRunConfig(ContractModel):
         default=None, min_length=8, max_length=300, exclude_if=lambda v: v is None
     )
     note: str | None = Field(default=None, max_length=800)
+
+    @field_validator("prompt_template")
+    @classmethod
+    def _known_template(cls, v: str) -> str:
+        if v not in PROMPT_TEMPLATE_GUIDES:
+            raise ValueError(f"不认识的提示模板 {v!r}：只有 {sorted(PROMPT_TEMPLATE_GUIDES)}")
+        return v
 
     @model_validator(mode="after")
     def _live_consistent(self) -> LifeRunConfig:
@@ -780,7 +766,7 @@ class RunManifest(ContractModel):
     """一次运行的身份：开跑前记下全部内容身份。恢复时任何一项对不上就拒绝继续，不冒充原运行。"""
 
     run_id: str = Field(min_length=1, max_length=120)
-    planning_version: Literal["e1-7b-planning-v1"]
+    planning_version: Literal["product-planning-v1"]
     run_config_fingerprint: Sha256
     identities: dict[str, str]
     planner: PlannerIdentity

@@ -1,7 +1,7 @@
 """生活模型的探索月度评分（E1-3，`DECISIONS/0018`）。纯函数，无 I/O、无随机、无 LLM。
 
 读一年已经结算好的生活记录（``EnvironmentOutcome``），逐月说明分身**实际**享受了什么、
-各分项与七维的满足感是多少、哪些硬要求没有满足、每个数从哪条记录来。
+各分项与六维的满足感是多少、哪些硬要求没有满足、每个数从哪条记录来。
 
 **只读不写。** 评分不改余额、物品或行动；结算也不依赖评分（``econ.life_settlement`` 不
 import 本模块）。
@@ -22,42 +22,28 @@ import 本模块）。
    来自 ``ItemExecution`` 的执行月；持续物品与年付服务**只**来自 ``HoldingService`` 的服务月。
 2. 每个分项：z = b + Σ η·x，s = min(c, z/(z+τ))。价格从不进入计算——同样的房子标价更高
    也不会得分更高；钱只决定买得起什么。
-3. 物质维 s_material = Σ m_j s_j；月度分 u = Σ w_k s_k。
+3. 物质维 s_material = Σ m_j s_j；日常生活分 B = Σ w_k s_k；月度分 S = (1 − γ)·B + γ·H。
 4. 有正权重的分项数据未知 → 这个月总分不完整（只给分项与原因）。不补零，不把缺的
    需求删掉再重新归一化。权重为 0 的分项缺失不阻断。
 5. 出局当月与之后单列状态，不评分，也不当普通缺失跳过。
 6. 十二个月都可评分才有年均分：先逐月评分，再平均。
 
-E1-3 增补（`DECISIONS/0019`）只在评分规格声明时启用：按需求功能取"存在"的来源（同功能的第二件
-不再加分，容量型只按声明的容量规格相加）；环境的自然景观加分 S_env = min(c, S_physical + β·A)；
-通勤的方案级映射 τ_T/(τ_T + T)，T 从这个月实际住的住房读取，并且要求这个月恰好执行了一份固定线下
-工作。持有物数量直接读结算写出的记录。没有声明这些的旧规格照 ADR0018 原样运行。
+按需求功能取"存在"的来源（`DECISIONS/0019`）：同功能的第二件不再加分，容量型只按声明的容量规格相加；环境的自然景观
+加分 S_env = min(c, S_physical + β·A)。持有物数量直接读结算写出的记录。
 
-E1-5A 补充（`DECISIONS/0024`）只在评分版本 ``e1-5a-growth-transport-v1`` 启用：
+* 发展维 z_m = b + η_growth · g_m（`DECISIONS/0024`）：g_m 是这个月实际新增的能力进度之和（``growth_by_month``），读年初
+  状态与同一次结算写出的学习记录；没有学习的月份成长为 0（已知），不是缺失。证书本身、换岗与涨薪不另加分；
+* 交通维（交通便捷程度）k_m = ρ + (1 − ρ)·D_m / D_ref，T_eq = k_m · T_m，S = τ_T/(τ_T + T_eq)：T 读实际所住住房的往返
+  分钟，D 读资源账的到岗次数（时间账用的同一个计数——这是"评分不读资源账"的一个窄例外）；无工作、远程、混合、多岗位在
+  资料齐全时都能评。T_eq 是评分中间量，不是实际出行分钟；
+* 物质维"日常生活便利"（`DECISIONS/0033`）：q_m = Σ_t（协议基准小时 − 当月资源账里本人的残余小时），s = min(c, q/(q + τ))。
+  设备与人工服务只通过实际减少的小时起作用；成交、花钱与目标兑现不另计分；
+* 健康项（`DECISIONS/0027`）：医疗维没有分项（城市医疗背景不进满足感）；日常生活分 B_m = Σ w_k s_{k,m}，月度总分
+  S_m = (1 − γ) B_m + γ H(q_m)，q_m 读结算写出的**月初**健康状态，H 与 γ 全组共用、不乘个人权重；付医疗费不加分，没有
+  "没看病"的额外惩罚；六维里有正权重的分项未知照旧阻断（不补零、不重新归一化）；停止月与之后不评分。
 
-* 发展维 z_m = b + η_growth · g_m：g_m 是这个月实际新增的能力进度之和（``growth_by_month``），读年初状态与
-  同一次结算写出的学习记录；没有学习的月份成长为 0（已知），不是缺失。证书本身、换岗与涨薪不另加分；
-* 通勤维（交通便捷程度）k_m = ρ + (1 − ρ)·D_m / D_ref，T_eq = k_m · T_m，S = τ_T/(τ_T + T_eq)：T 读实际所住
-  住房的往返分钟，D 读资源账的到岗次数（时间账用的同一个计数——这是"评分不读资源账"的一个窄例外，只读这
-  一个计数）；无工作、远程、混合、多岗位在资料齐全时都能评。T_eq 是评分中间量，不是实际出行分钟。
-
-E1 补充"日常生活便利"（`DECISIONS/0033`）只在评分版本 ``e1-convenience-v1`` 启用（它沿用下面 E1-5C 的健康语义与上面的
-成长、广义交通）：物质维第三项从"有没有洗衣设备"换成 q_m = Σ_t（协议基准小时 − 当月资源账里本人的残余小时），
-s = min(c, q/(q + τ))。设备与人工服务只通过实际减少的小时起作用；成交、花钱与目标兑现不另计分；旧的洗衣分不再叠加。
-
-E1-5C（`DECISIONS/0027`）只在评分版本 ``e1-5c-health-v1`` 启用（日常生活便利版本沿用）：
-
-* 医疗维没有分项（城市医疗背景不进满足感）；七维 healthcare 点数表示健康风险应对倾向，不进满足感；
-* 有效六维权重 w̃_k = w_k / Σ_{j≠医疗} w_j（按输入的十进制写法精确相除再取浮点，只改健康输入、六维比例不变时
-  分数逐位相同）；日常生活分 B_m = Σ w̃_k s_{k,m}，六维公式（物质、成长、广义交通……）都不变；
-* 月度总分 S_m = (1 − γ) B_m + γ H(q_m)，q_m 读结算写出的**月初**健康状态，H 与 γ 全组共用、不乘个人权重；
-  付医疗费不加分，没有"没看病"的额外惩罚；六维里有正权重的分项未知照旧阻断（不补零、不重新归一化）；
-* 停止月（应急规则不足或资料缺口）与之后不评分，不当普通缺失跳过。
-
-E3-A（`DECISIONS/0034`）新增一种**输入**，不改上面任何公式：六维产品画像（``ProductLifeProfile``，偏好来源
-``product_confirmed_six_dim``）。六维权重 = 确认的精确点数 / 100，只转一次浮点；它就是健康版本的有效权重（Σ六维 = 100），
-所以同一组六维比例与旧七维路径的有效权重逐位相同。健康回答独立、不进权重；六维画像只能交给健康评分版本，协议必须声明独立
-健康回答（``IndependentHealthInputDeclaration``）；遇到要七维原始权重的旧版本直接拒绝，不补医疗占位分。
+偏好是六维产品画像（``ProductLifeProfile``，`DECISIONS/0034`）：六维权重 = 确认的精确点数 / 100，只转一次浮点；健康回答
+独立、不进权重。
 """
 
 from __future__ import annotations
@@ -73,8 +59,6 @@ from common.life_contracts import (
     EnvironmentOutcome,
     ExactAmount,
     HardRequirement,
-    IndependentHealthInputDeclaration,
-    InternalPreferenceTruth,
     LifeContractError,
     LifeOpportunity,
     LifeProtocol,
@@ -82,18 +66,14 @@ from common.life_contracts import (
     MonthResources,
     PersonYearState,
     ResourceContribution,
-    StatedLifeProfile,
     to_fraction,
 )
 from common.life_product_profile import POINTS_TOTAL, ProductLifeProfile
 from common.life_scoring_contracts import (
-    ADR0018_SCORING_VERSIONS,
-    HEALTH_SCORING_VERSIONS,
     HEALTHCARE,
     AbilityProgressStep,
     CityComponentCondition,
     CityScoringConditions,
-    CommuteTerm,
     ComponentMonth,
     ComponentSource,
     ConvenienceTerm,
@@ -118,12 +98,10 @@ from common.life_scoring_contracts import (
 from common.life_units import conversion_factor, resolve_unit
 from ledger.life_scoring_config import (
     condition_problems,
-    convenience_preference_problems,
     convenience_protocol_problems,
     growth_transport_protocol_problems,
-    health_protocol_problems,
 )
-from worlds.dimensions import ALL_DIMENSIONS, MATERIAL
+from worlds.dimensions import MATERIAL
 
 #: 每一类实际记录从结果对象的哪个字段读取。评分来源表的代码形式（ADR0018 第三节）。
 READ_FROM: dict[str, str] = {
@@ -153,96 +131,17 @@ def saturating(z: float, tau: float, cap: float) -> tuple[float, float, bool]:
 
 
 # ==========================================================================
-# 偏好：两条路径，来源写在结果上
+# 偏好：六维产品画像，来源写在结果上
 # ==========================================================================
-
-
-def preference_from_research_truth(
-    truth: InternalPreferenceTruth,
-) -> ScoringPreference | PreferenceInsufficient:
-    """研究路径：合成设定的已知偏好。只在研究内部使用。"""
-    if type(truth) is not InternalPreferenceTruth:
-        raise LifeContractError(
-            f"研究偏好只接受 InternalPreferenceTruth，得到 {type(truth).__name__}"
-        )
-    if truth.dimension_weights[MATERIAL] > 0 and not truth.material_subweights:
-        return PreferenceInsufficient(
-            person_id=truth.person_id,
-            source="research_synthetic_truth",
-            missing=("material_subweights",),
-            message="物质维权重为正，但合成真值没有物质细项权重",
-        )
-    if truth.healthcare_semantics is not None and six_dimension_total(
-        truth.dimension_weights
-    ) == Fraction(0):
-        return PreferenceInsufficient(
-            person_id=truth.person_id,
-            source="research_synthetic_truth",
-            missing=("six_dimension_weights",),
-            message="healthcare 之外的六维权重全为 0：健康风险应对倾向不进满足感，不能用平均权重代替",
-        )
-    return ScoringPreference(
-        person_id=truth.person_id,
-        source="research_synthetic_truth",
-        dimension_weights=dict(truth.dimension_weights),
-        material_weights=dict(truth.material_subweights),
-        derivation=f"合成已知偏好（{truth.status}）：七维权重与物质细项权重取自研究内部真值",
-        healthcare_semantics=truth.healthcare_semantics,
-    )
-
-
-def preference_from_stated_profile(
-    profile: StatedLifeProfile,
-) -> ScoringPreference | PreferenceInsufficient:
-    """产品路径：只用用户**明确给出的数值**，按声明的规则换算。
-
-    七维定和点数 / 100；物质细项定和点数 / 100。软偏好的 low/medium/high **不**换算成
-    数字，自由文字**不**读。物质维有正点数却没有物质细项数值时，返回信息不足——不补
-    均匀权重，也不借用研究真值（签名里就拿不到真值）。
-    """
-    if type(profile) is not StatedLifeProfile:
-        raise LifeContractError(f"产品偏好只接受 StatedLifeProfile，得到 {type(profile).__name__}")
-    points = profile.dimension_points
-    if points[MATERIAL] > 0 and profile.material_points is None:
-        return PreferenceInsufficient(
-            person_id=profile.person_id,
-            source="product_stated_numeric",
-            missing=("material_points",),
-            message=(
-                f"物质维有 {points[MATERIAL]} 点，但用户没有给出物质细项的数值；序数偏好"
-                "（low/medium/high）不换算成数字，也不补均匀权重或借用研究真值"
-            ),
-        )
-    if profile.healthcare_semantics is not None and not any(
-        v for k, v in points.items() if k != HEALTHCARE
-    ):
-        return PreferenceInsufficient(
-            person_id=profile.person_id,
-            source="product_stated_numeric",
-            missing=("six_dimension_points",),
-            message=(
-                "100 点全部给了“健康风险应对”：它只供分身做计划、不进满足感，其余六维没有任何点数——请补充六维"
-                "的取舍；不用平均权重代替"
-            ),
-        )
-    return ScoringPreference(
-        person_id=profile.person_id,
-        source="product_stated_numeric",
-        dimension_weights={k: points[k] / 100 for k in ALL_DIMENSIONS},
-        material_weights={k: v / 100 for k, v in (profile.material_points or {}).items()},
-        derivation="用户明确给出的七维定和点数 / 100；物质细项定和点数 / 100（声明的换算规则）",
-        healthcare_semantics=profile.healthcare_semantics,
-    )
 
 
 def preference_from_confirmed_profile(
     profile: ProductLifeProfile,
 ) -> ScoringPreference | PreferenceInsufficient:
-    """E3-A 产品路径（DECISIONS/0034）：用户确认的六维精确点数与物质细分。
+    """用户确认的六维精确点数与物质细分（DECISIONS/0034）。
 
-    w_k = p_k / 100、m_j = q_j / 100，**精确相除后只转一次**浮点。健康评分版本的有效权重是 w_k / Σ六维，而新画像的六维精确合计
-    100，所以这里得到的就是有效权重本身——与旧七维路径上“同一组六维比例”算出的权重逐位相同（例：旧 27/(27+18+18+9+9+9) = 3/10，
-    新 30/100 = 3/10）。健康回答独立，不进任何权重；物质父项为 0 时没有细项权重（不补均匀权重）。签名里拿不到研究真值。
+    w_k = p_k / 100、m_j = q_j / 100，**精确相除后只转一次**浮点；六维精确合计 100，所以这就是评分用的六维权重。健康回答独立，
+    不进任何权重；物质父项为 0 时没有细项权重（不补均匀权重）。
     """
     if type(profile) is not ProductLifeProfile:
         raise LifeContractError(
@@ -274,26 +173,8 @@ def six_dimension_total(weights: dict[str, float]) -> Fraction:
 
 
 def effective_weights(spec: LifeScoringSpec, pref: ScoringPreference) -> dict[str, float]:
-    """评分用的维度权重。健康版本：w̃_k = w_k / Σ_{j≠医疗} w_j（只含六维，精确相除再取浮点）；旧版本：七维原样。
-
-    E3-A：六维产品画像的权重在换算时已经是有效权重（精确点数 / 100，Σ = 1），原样使用；它没有 healthcare，只能交给健康评分版本。"""
-    if pref.source == PRODUCT_SIX_DIM_SOURCE:
-        if spec.scoring_version not in HEALTH_SCORING_VERSIONS:
-            raise LifeContractError(
-                f"六维产品画像只能用健康评分版本 {sorted(HEALTH_SCORING_VERSIONS)}；评分版本 {spec.scoring_version} 要七维"
-                "原始权重（含医疗点数），不能补一个医疗占位分"
-            )
-        return dict(pref.dimension_weights)
-    if spec.scoring_version not in HEALTH_SCORING_VERSIONS:
-        return dict(pref.dimension_weights)
-    total = six_dimension_total(pref.dimension_weights)
-    if total == 0:
-        raise LifeContractError("六维权重全为 0：信息不足，应在偏好换算时报 PreferenceInsufficient")
-    return {
-        k: float(to_fraction(w) / total)
-        for k, w in pref.dimension_weights.items()
-        if k != HEALTHCARE
-    }
+    """评分用的六维权重：换算时已经是确认点数 / 100（Σ = 1），原样使用。"""
+    return dict(pref.dimension_weights)
 
 
 # ==========================================================================
@@ -308,77 +189,15 @@ class _InUse:
     quantity: float
 
 
-#: 接受"持有服务没有数量"的旧记录、按 ADR0018 的顺序推断数量的评分版本。新版本不在其中：
-#: 它们只读结算写出的数量（`DECISIONS/0019` 第二节）。与契约里的 ADR0018 版本集合是同一份。
-LEGACY_QUANTITY_INFERENCE_VERSIONS: frozenset[str] = ADR0018_SCORING_VERSIONS
-
-
-def _holding_quantities(
-    spec: LifeScoringSpec, state: PersonYearState, outcome: EnvironmentOutcome
-) -> tuple[list[float], str]:
-    """每条 ``HoldingService`` 的数量，以及数量从哪来。
-
-    * 结算写出了数量（增补之后的记录）：直接读取，与记录顺序无关；
-    * 全部没有数量（增补之前的旧记录）：只有旧评分版本按 ADR0018 推断，新版本拒绝；
-    * 部分有、部分没有：记录不完整，拒绝。任何情况下都不默认为 1。
-    """
+def _holding_quantities(outcome: EnvironmentOutcome) -> tuple[list[float], str]:
+    """每条 ``HoldingService`` 的数量（结算写出），以及数量从哪来。没有数量就是记录不完整，拒绝——不默认为 1。"""
     services = outcome.holdings_service
     if not services:
         return [], "no_holdings"
     recorded = [hs.quantity for hs in services]
-    if all(q is not None for q in recorded):
-        return [float(q) for q in recorded if q is not None], "recorded"
-    if any(q is not None for q in recorded):
-        raise LifeContractError("持有服务记录部分有数量、部分没有：记录不完整，拒绝评分")
-    if spec.scoring_version not in LEGACY_QUANTITY_INFERENCE_VERSIONS:
-        raise LifeContractError(
-            f"这是增补之前写出的旧记录（持有服务没有数量）；评分版本 {spec.scoring_version} 不推断"
-            "数量——请重新结算，或用旧评分版本 e1-3-explore-v1 读取"
-        )
-    return _legacy_order_inference(state, outcome), "legacy_order_inference"
-
-
-def _legacy_order_inference(state: PersonYearState, outcome: EnvironmentOutcome) -> list[float]:
-    """旧记录的数量推断（ADR0018）：年初已有的取年初状态，本年买的取本年成交数量。
-
-    依赖结算"年初持有物在前、本年新买在后"的写出顺序，同一项目至多两条（年付服务到期后
-    续买）。对不上就报错，不默认为 1。只给旧评分版本读旧记录用。
-    """
-    at_start = {h.opportunity_id: h.quantity for h in state.holdings}
-    bought = {
-        it.opportunity_id: it.executed_quantity
-        for it in outcome.items
-        if it.role in ("durable_good", "prepaid_service") and it.executed_quantity > 0
-    }
-    seen: set[str] = set()
-    out: list[float] = []
-    for hs in outcome.holdings_service:
-        oid = hs.opportunity_id
-        if oid in at_start and oid not in seen:
-            out.append(at_start[oid])
-        elif oid in bought:
-            out.append(bought[oid])
-        else:
-            raise LifeContractError(
-                f"持有物服务记录 {oid} 对不上年初状态或本年购买——记录与状态不配套"
-            )
-        seen.add(oid)
-    return out
-
-
-def _jobs_by_month(
-    outcome: EnvironmentOutcome, catalog: CityLifeCatalog
-) -> dict[int, list[LifeOpportunity]]:
-    """每个月实际执行（拿到工资）的工作。只给方案级通勤核对"这个月有没有线下工作"用；工资本身不计分。"""
-    out: dict[int, list[LifeOpportunity]] = {m: [] for m in range(1, MONTHS_PER_YEAR + 1)}
-    for it in outcome.items:
-        if it.role != "job":
-            continue
-        opp = catalog.opportunity(it.opportunity_id)
-        assert opp is not None
-        for m in it.covered_months:
-            out[m].append(opp)
-    return out
+    if any(q is None for q in recorded):
+        raise LifeContractError("持有服务记录没有数量：记录不完整，拒绝评分")
+    return [float(q) for q in recorded if q is not None], "recorded"
 
 
 def _in_use_by_month(
@@ -396,7 +215,7 @@ def _in_use_by_month(
         assert opp is not None  # score_year 已检查
         for m in it.covered_months:
             by_month[m].append(_InUse(record, opp, it.executed_quantity))
-    quantities, quantity_source = _holding_quantities(spec, state, outcome)
+    quantities, quantity_source = _holding_quantities(outcome)
     for hs, quantity in zip(outcome.holdings_service, quantities, strict=True):
         opp = catalog.opportunity(hs.opportunity_id)
         assert opp is not None
@@ -478,69 +297,6 @@ def _head(comp: ScoringComponent) -> dict[str, object]:
     )
 
 
-#: 方案级通勤不能评分时的统一前缀：不是"零通勤"，也不是"最长通勤"，是这一项未知。
-_COMMUTE_UNSUPPORTED = "方案级通勤评分不支持/信息不足："
-
-
-def _score_plan_commute(
-    comp: ScoringComponent,
-    cond: CityComponentCondition,
-    in_use: list[_InUse],
-    jobs: list[LifeOpportunity],
-) -> ComponentMonth:
-    """S = τ_T/(τ_T + T)：T 是这个月实际住的住房写明的每工作日往返分钟（`DECISIONS/0019` 第八节）。
-
-    只对"这个月恰好执行了一份固定线下工作"评分。无工作、远程、多岗位、工作方式没写、住房分钟
-    没写——都报不支持/信息不足（分项未知），不给最高分，也不照扣通勤分。
-    """
-    head = _head(comp)
-    pc = comp.plan_commute
-    assert pc is not None
-
-    def unsupported(why: str) -> ComponentMonth:
-        return ComponentMonth(**head, status="unknown", reasons=(_COMMUTE_UNSUPPORTED + why,))
-
-    if cond.status == "unknown":
-        return ComponentMonth(
-            **head, status="unknown", reasons=(f"城市条件未知：{cond.unknown_reason}",)
-        )
-    if cond.status != "plan_level":
-        return unsupported(f"城市条件是 {cond.status}，不是方案级")
-    homes = [r for r in in_use if r.record == "housing"]
-    if len(homes) != 1:
-        return unsupported(f"这个月实际住房记录有 {len(homes)} 处，不是恰好一处")
-    if not jobs:
-        return unsupported("这个月没有执行任何工作，方案级通勤不适用")
-    if len(jobs) > 1:
-        return unsupported(f"这个月执行了 {len(jobs)} 份工作，多岗位通勤本轮未定义")
-    job = jobs[0]
-    mode = job.spec.get(pc.work_mode_key)
-    if mode is None:
-        return unsupported(f"工作 {job.opportunity_id} 的规格缺 {pc.work_mode_key}")
-    if mode != pc.onsite_value:
-        return unsupported(f"工作 {job.opportunity_id} 的工作方式是 {mode!r}，不是固定线下工作")
-    home = homes[0].opp
-    minutes = _num(home.spec.get(pc.minutes_key))
-    if minutes is None:
-        return unsupported(f"住房 {home.opportunity_id} 的规格缺 {pc.minutes_key}（或不是数值）")
-    if minutes < 0:
-        raise LifeContractError(f"{home.opportunity_id} 的往返分钟为负")
-    s_value = comp.tau / (comp.tau + minutes)
-    return ComponentMonth(
-        **head,
-        status="known",
-        raw=s_value,
-        s=s_value,
-        commute=CommuteTerm(
-            housing_opportunity_id=home.opportunity_id,
-            job_opportunity_id=job.opportunity_id,
-            minutes=minutes,
-            tau_minutes=comp.tau,
-        ),
-        reasons=("方案级通勤：S = τ_T/(τ_T + T)，T 取实际所住住房的往返分钟；时间占用留 E1-4",),
-    )
-
-
 #: 一个月的成长：g_m（精确分数）与有进步的能力明细。
 MonthGrowth = tuple[Fraction, tuple[AbilityProgressStep, ...]]
 
@@ -560,10 +316,6 @@ def growth_by_month(
     """
     rules = protocol.career_rules
     career = outcome.career
-    if rules is None or career is None:
-        raise LifeContractError(
-            "成长项要读能力词表与这一年的学习记录：协议没有职业规则，或结果没有职业事实"
-        )
     held = {a.ability_id for a in state.abilities}
     start: dict[str, tuple[int, int]] = {
         t.opportunity_id: (t.months_participated, t.months_required) for t in state.training
@@ -708,7 +460,7 @@ def _score_transport(
         raise LifeContractError(f"{home.opportunity_id} 的往返分钟为负")
     if resources is None:
         return unknown(
-            "这一年没有月度资源账：到岗次数未知（不当 0，也不按工作方式字样或岗位数量猜）"
+            "这个月没有资源账记录：到岗次数未知（不当 0，也不按工作方式字样或岗位数量猜）"
         )
     if resources.resource_check != "complete":
         return unknown(f"资源账这个月是 {resources.resource_check}，不是完整检查：到岗次数不完整")
@@ -793,12 +545,8 @@ def _score_convenience(
         )
     if cond.status != "plan_level":
         return unknown(f"城市条件是 {cond.status}，不是方案级")
-    if rules is None:
-        raise LifeContractError(
-            f"{comp.component_id}: 日常生活便利要读协议的家务基准：协议没有月度资源规则"
-        )
     if resources is None:
-        return unknown("这一年没有月度资源账：本人的家务小时未知（不当 0，也不当基准）")
+        return unknown("这个月没有资源账记录：本人的家务小时未知（不当 0，也不当基准）")
     m = resources.month
     if resources.resource_check != "complete":
         return unknown(
@@ -882,7 +630,6 @@ def _score_component(
     comp: ScoringComponent,
     cond: CityComponentCondition,
     in_use: list[_InUse],
-    jobs: list[LifeOpportunity] | None = None,
     supply: dict[str, str] | None = None,
     growth: MonthGrowth | None = None,
     resources: MonthResources | None = None,
@@ -891,8 +638,6 @@ def _score_component(
     """一个分项一个月的评分。``supply`` 是这座城各项功能的供给声明（功能 → 状态）；``growth`` 是这个月的
     成长（只有成长项分项用）；``resources`` 是这个月的资源账（广义交通读其中的到岗次数，日常生活便利读其中的家务行）；
     ``rules`` 是协议的月度资源规则（日常生活便利读其中的家务基准）。"""
-    if comp.plan_commute is not None:
-        return _score_plan_commute(comp, cond, in_use, jobs or [])
     if comp.transport is not None:
         return _score_transport(comp, cond, in_use, resources)
     if comp.convenience is not None:
@@ -1022,14 +767,14 @@ def _score_component(
 
 
 # ==========================================================================
-# 七维与月度分
+# 六维与月度分
 # ==========================================================================
 
 
 def _aggregate(
     spec: LifeScoringSpec, comps: dict[str, ComponentMonth], pref: ScoringPreference
 ) -> tuple[list[DimensionMonth], float | None, list[str]]:
-    w = effective_weights(spec, pref)  # 旧版本：七维原样；健康版本：有效六维权重（E1-5C）
+    w = effective_weights(spec, pref)
     reasons: list[str] = []
     blocking = False
 
@@ -1243,56 +988,11 @@ def _check_inputs(
     problems = condition_problems(spec, conditions)
     if problems:
         raise LifeContractError("城市评分条件不能用：\n  " + "\n  ".join(problems))
-    problems = (
-        growth_transport_protocol_problems(spec, protocol)
-        + health_protocol_problems(spec, protocol)
-        + convenience_protocol_problems(spec, protocol)
+    problems = growth_transport_protocol_problems(spec, protocol) + convenience_protocol_problems(
+        spec, protocol
     )
     if problems:
         raise LifeContractError("评分规格读不到它要的生活事实：\n  " + "\n  ".join(problems))
-    problems = convenience_preference_problems(
-        spec, f"偏好 {preference.person_id}", preference.material_weights
-    )
-    if problems:
-        raise LifeContractError("偏好与评分版本不配套：\n  " + "\n  ".join(problems))
-    if any(c.growth is not None for c in spec.components) and outcome.career is None:
-        raise LifeContractError(
-            "成长项要读这一年的学习记录：结果没有职业事实，不是 E1-5A 结算写出的记录"
-        )
-    if any(c.transport is not None for c in spec.components) and outcome.resources is None:
-        raise LifeContractError("广义交通要读资源账的到岗次数：结果没有月度资源账")
-    if any(c.convenience is not None for c in spec.components) and outcome.resources is None:
-        raise LifeContractError("日常生活便利要读资源账的家务小时：结果没有月度资源账")
-    health_version = spec.scoring_version in HEALTH_SCORING_VERSIONS
-    six_dim = preference.source == PRODUCT_SIX_DIM_SOURCE
-    if health_version:
-        if six_dim:
-            # E3-A：六维产品画像的健康回答是独立问卷——协议必须声明独立健康回答，而不是七维 healthcare 点数的含义
-            if not isinstance(protocol.health_input, IndependentHealthInputDeclaration):
-                raise LifeContractError(
-                    f"这是六维产品画像（健康回答独立），协议 {protocol.protocol_id} 没有声明独立健康回答——不能交给按七维"
-                    "医疗点数声明的协议评分"
-                )
-        elif preference.healthcare_semantics is None:
-            # E1-5C：七维 healthcare 必须是新含义（健康风险应对倾向）；健康项读结算写出的月初健康状态
-            raise LifeContractError(
-                f"评分版本 {spec.scoring_version} 只接受 healthcare 点数含义为健康风险应对倾向的偏好；这份偏好是旧含义"
-                "（医疗可及性）——旧答案不能改读成新含义，请用新问卷重新询问"
-            )
-        if protocol.health_rules is None or outcome.health is None:
-            raise LifeContractError(
-                "健康评分版本读结算写出的月初健康状态：协议没有疾病规则，或结果没有这一年的健康事实"
-            )
-    elif six_dim:
-        raise LifeContractError(
-            f"六维产品画像只能用健康评分版本 {sorted(HEALTH_SCORING_VERSIONS)}；评分版本 {spec.scoring_version} 要七维"
-            "原始权重（含医疗点数），不能补一个医疗占位分"
-        )
-    elif preference.healthcare_semantics is not None:
-        raise LifeContractError(
-            f"这份偏好的 healthcare 点数是 {preference.healthcare_semantics}（健康风险应对倾向），评分版本 "
-            f"{spec.scoring_version} 会把它当成医疗可及性的满足感权重——不能悄悄换含义"
-        )
     cities = {str(catalog.city), str(state.city), str(conditions.city)}
     if len(cities) != 1:
         raise LifeContractError(
@@ -1340,7 +1040,6 @@ def score_year(
         protocol, spec, conditions, catalog, state, outcome, preference, hard_requirements
     )
     by_month, quantity_source = _in_use_by_month(spec, outcome, catalog, state)
-    jobs = _jobs_by_month(outcome, catalog)
     supply = {fs.function: fs.status for fs in catalog.function_supply}
     exit_month = outcome.exit.month if outcome.exit is not None else None
     with_growth = any(c.growth is not None for c in spec.components)
@@ -1349,12 +1048,11 @@ def score_year(
     growth = growth_by_month(protocol, catalog, state, outcome) if with_growth else {}
     resources = (
         {r.month: r for r in outcome.resources.months}
-        if (with_transport or with_convenience) and outcome.resources is not None
+        if (with_transport or with_convenience)
         else {}
     )
 
     health_spec = spec.health
-    six_dim = preference.source == PRODUCT_SIX_DIM_SOURCE  # E3-A：六维产品画像（健康回答独立）
     stop_month = outcome.stop.month if outcome.stop is not None else None
     months: list[MonthScore] = []
     contributed: set[str] = set()
@@ -1394,7 +1092,6 @@ def score_year(
                 comp,
                 cond,
                 by_month[m],
-                jobs[m],
                 supply,
                 growth=growth.get(m),
                 resources=resources.get(m),
@@ -1413,28 +1110,24 @@ def score_year(
         dims, u, reasons = _aggregate(spec, comps, preference)
         daily_life: float | None = None
         health_term: HealthTerm | None = None
-        if health_spec is not None:
-            # E1-5C：S = (1 − γ)·B + γ·H(月初状态)。B 不完整时总分照旧为空（不补零、不重新归一化）
-            assert outcome.health is not None
-            record = outcome.health.month(m)
-            if record is None:
-                raise LifeContractError(
-                    f"第 {m} 月没有健康记录：结果不是健康协议结算写出的完整记录"
-                )
-            gamma = health_spec.gamma
-            value = health_spec.state_values.of(record.state)
-            health_term = HealthTerm(
-                state=record.state,
-                value=value,
-                gamma=gamma,
-                contribution=gamma * value,
-                # 相对健康的扣分：H(健康) 固定为 1（契约保证，收尾修订），健康月份扣 0
-                deduction=gamma * (1 - value),
-                daily_life_share=1 - gamma,
-            )
-            if u is not None:
-                daily_life = u
-                u = (1 - gamma) * daily_life + gamma * value
+        # S = (1 − γ)·B + γ·H(月初状态)。B 不完整时总分照旧为空（不补零、不重新归一化）
+        record = outcome.health.month(m)
+        if record is None:
+            raise LifeContractError(f"第 {m} 月没有健康记录：结果不是健康协议结算写出的完整记录")
+        gamma = health_spec.gamma
+        value = health_spec.state_values.of(record.state)
+        health_term = HealthTerm(
+            state=record.state,
+            value=value,
+            gamma=gamma,
+            contribution=gamma * value,
+            # 相对健康的扣分：H(健康) 固定为 1（契约保证，收尾修订），健康月份扣 0
+            deduction=gamma * (1 - value),
+            daily_life_share=1 - gamma,
+        )
+        if u is not None:
+            daily_life = u
+            u = (1 - gamma) * daily_life + gamma * value
         months.append(
             MonthScore(
                 month=m,
@@ -1486,10 +1179,6 @@ def score_year(
         notes.append(
             f"方案属性 {attribute_keys} 已记录、本轮未评价（V2 才做品牌/菜系/档次匹配）；不从价格推断品质偏好"
         )
-    if any(c.plan_commute is not None for c in spec.components):
-        notes.append(
-            "通勤按实际所住住房的往返分钟与当月线下工作评分；乘工作日数后的时间占用留 E1-4"
-        )
     if with_transport:
         notes.append(
             "交通（通勤维，交通便捷程度）：k = ρ + (1 − ρ)·D/D_ref，T_eq = k·T 是评分中间量、不是实际出行分钟；"
@@ -1511,54 +1200,30 @@ def score_year(
         notes.append(
             f"第 {list(_months('incomplete'))} 月有正权重的分项数据未知：不生成总分，不补零，不重新归一化"
         )
-    weighting: HealthWeighting | None = None
-    if health_spec is not None and six_dim:
-        # E3-A：六维产品画像——原始权重就是确认点数 / 100（六维），健康回答独立；不伪造医疗点数
-        effective = effective_weights(spec, preference)
-        weighting = HealthWeighting(
-            raw_dimension_weights=dict(preference.dimension_weights),
-            six_dimension_sum=float(six_dimension_total(preference.dimension_weights)),
-            effective_weights=effective,
-            gamma=health_spec.gamma,
-            state_values=health_spec.state_values,
-            formula=(
-                "S = (1 − γ)·B + γ·H(月初状态)；B = Σ 六维权重 × 维度分；六维权重 = 确认的六维精确点数 / 100（健康回答独立，"
-                "不占点数、不进权重）"
-            ),
-            independent_health_input="independent_health_answers_v1",
-        )
-        notes.append(
-            "健康评分版本（DECISIONS/0027、0034）：六维产品画像的健康回答是独立问卷，只供分身做计划、不进满足感；城市医疗背景不进"
-            f"满足感；健康项 γ = {health_spec.gamma:g} 读月初状态、全组共用；付医疗费不加分"
-        )
-    elif health_spec is not None:
-        assert preference.healthcare_semantics is not None
-        effective = effective_weights(spec, preference)
-        weighting = HealthWeighting(
-            raw_dimension_weights=dict(preference.dimension_weights),
-            healthcare_semantics=preference.healthcare_semantics,
-            six_dimension_sum=float(six_dimension_total(preference.dimension_weights)),
-            effective_weights=effective,
-            gamma=health_spec.gamma,
-            state_values=health_spec.state_values,
-            formula="S = (1 − γ)·B + γ·H(月初状态)；B = Σ 有效六维权重 × 维度分；有效权重 = w_k / Σ_{j≠医疗} w_j",
-        )
-        notes.append(
-            "健康评分版本（DECISIONS/0027）：医疗点数表示健康风险应对倾向、不进满足感；城市医疗背景不进满足感；"
-            f"健康项 γ = {health_spec.gamma:g} 读月初状态、全组共用；付医疗费不加分。这不是旧的七维分"
-        )
+    effective = effective_weights(spec, preference)
+    weighting = HealthWeighting(
+        raw_dimension_weights=dict(preference.dimension_weights),
+        six_dimension_sum=float(six_dimension_total(preference.dimension_weights)),
+        effective_weights=effective,
+        gamma=health_spec.gamma,
+        state_values=health_spec.state_values,
+        formula=(
+            "S = (1 − γ)·B + γ·H(月初状态)；B = Σ 六维权重 × 维度分；六维权重 = 确认的六维精确点数 / 100（健康回答独立，"
+            "不占点数、不进权重）"
+        ),
+        independent_health_input="independent_health_answers_v1",
+    )
+    notes.append(
+        "健康项（DECISIONS/0027、0034）：六维产品画像的健康回答是独立问卷，只供分身做计划、不进满足感；城市医疗背景不进"
+        f"满足感；健康项 γ = {health_spec.gamma:g} 读月初状态、全组共用；付医疗费不加分"
+    )
     if stop_month is not None:
         notes.append(
             f"第 {stop_month} 月停止（应急安排不足或资料缺口）：停止月与之后不评分，也不当普通缺失跳过；"
             "完整轨迹怎么计留到 E1-6"
         )
 
-    if preference.source in ("product_stated_numeric", PRODUCT_SIX_DIM_SOURCE):
-        explanation = (
-            "按你提供的偏好和当前探索模型计算；这不是你真实的幸福权重，模型参数是合成探索设定"
-        )
-    else:
-        explanation = "按合成设定的已知偏好计算（研究内部）；模型参数是合成探索设定，不是现实标定"
+    explanation = "按你提供的偏好和当前探索模型计算；这不是你真实的幸福权重，模型参数是合成探索设定"
 
     return ExploratoryYearScore(
         person_id=state.person_id,
@@ -1602,7 +1267,7 @@ def unit_path(source_unit: str, component_unit: str) -> str:
     """读取单位 → 分项单位，以及登记过的换算系数（η = 换算 × 效率，这里只写出换算那一半）。"""
     su, cu = resolve_unit(source_unit), resolve_unit(component_unit)
     if su is None or cu is None:
-        return f"{source_unit} → {component_unit}（未按规范单位登记：ADR0018 旧版本）"
+        return f"{source_unit} → {component_unit}（未按规范单位登记）"
     factor = conversion_factor(su, cu)
     if su.unit_id == cu.unit_id or factor is None:
         return f"{su.label} → {cu.label}"
@@ -1686,26 +1351,6 @@ def source_table(spec: LifeScoringSpec) -> tuple[dict[str, str], ...]:
                     "combine": "—",
                 }
             )
-        if c.plan_commute is not None:
-            pc = c.plan_commute
-            rows.append(
-                {
-                    "component": c.component_id,
-                    "dimension": c.dimension,
-                    "source": "plan_commute",
-                    "read_from": (
-                        f"ItemExecution.covered_months（role=housing，含兜底那条）的规格 {pc.minutes_key}；"
-                        f"同月 ItemExecution（role=job）的规格 {pc.work_mode_key}"
-                    ),
-                    "value": (
-                        f"τ_T/(τ_T + T)，τ_T = {c.tau:g}；只在恰好一份 {pc.work_mode_key} = "
-                        f"{pc.onsite_value!r} 的工作时评分"
-                    ),
-                    "unit": pc.unit,
-                    "combine": "—",
-                }
-            )
-            continue
         if c.base_only:
             rows.append(
                 {
@@ -1732,8 +1377,7 @@ def source_table(spec: LifeScoringSpec) -> tuple[dict[str, str], ...]:
                 value += f"（只看声明了功能 {list(s.functions)} 的项目）"
             if s.requires_spec_key:
                 value += f"（只看声明了 {s.requires_spec_key} 的项目）"
-            if s.measure is not None:
-                value += f"；数量语义 {MEASURE_LABEL[s.measure]}"
+            value += f"；数量语义 {MEASURE_LABEL[s.measure]}"
             rows.append(
                 {
                     "component": c.component_id,

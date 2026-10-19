@@ -10,18 +10,15 @@
 年初状态就是传进来的那一份——不会拿已经推进到第 y+1 年的状态去评第 y 年，也不会用一个同名但来自另一份
 账目的分数。不缓存。
 
-r2（2026-10-08 修复，DECISIONS/0021 第十三节）：结算与评分在 ``settle_and_score`` 里一起完成，并当场封存成
-年度绑定 ``ScoredYear``——这是唯一产生封存绑定的地方。反馈只从封存的绑定生成，也只写回绑定里的那一份候选
-状态。``run_life_year`` 就是 ``settle_and_score`` → 反馈 → 交接。
+结算与评分在 ``settle_and_score`` 里一起完成，并当场封存成年度绑定 ``ScoredYear``（DECISIONS/0021 第十三节）——这是
+唯一产生封存绑定的地方。反馈只从封存的绑定生成，也只写回绑定里的那一份候选状态。``run_life_year`` 就是
+``settle_and_score`` → 反馈 → 交接。结算之前核对实际用来评分的规格内容就是反馈政策声明的那一套
+（``common.life_scoring_contracts.scoring_content_problems``，与加载器同一份），年度绑定记下它；下一年开始前由
+``common.life_contracts.energy_quota_problems`` 拿额度依据里的评分内容与当前政策声明比较（DECISIONS/0025）。
 
-r3（2026-10-09 修复，DECISIONS/0025）：反馈政策声明了评分内容身份时，结算之前核对实际用来评分的规格内容就是
-声明的那一套（``common.life_scoring_contracts.scoring_content_problems``，与加载器同一份），年度绑定记下它；
-下一年开始前由 ``common.life_contracts.energy_quota_problems`` 拿额度依据里的评分内容与当前政策声明比较。
+偏好输入是六维产品画像（``ProductLifeProfile``，DECISIONS/0034），问卷版本必须与协议声明的独立健康回答相同。
 
-这不是通用 runner：不调用 LLM、不重试、不管理多分身；多年度只是调用方按年循环（完整闭环在 E1-7）。
-
-E3-A（DECISIONS/0034）：偏好来源 → 输入类型改为显式对照表 ``PREFERENCE_INPUT_TYPES``（旧七维陈述、研究真值、六维产品画像
-三选一），不认识的来源或类型拒绝；六维产品画像要求协议声明独立健康回答且问卷版本相同。结算、评分公式与反馈公式不变。
+这不是通用 runner：不调用 LLM、不重试、不管理多分身；多年度只是调用方按年循环（完整闭环在代理层）。
 """
 
 from __future__ import annotations
@@ -31,18 +28,14 @@ import json
 from dataclasses import dataclass
 
 from common.life_contracts import (
+    FEEDBACK_HANDOFF_REVISION,
     PRODUCT_SIX_DIM_SOURCE,
     RESOURCE_RULES_REVISION,
-    SCORING_CONTENT_HANDOFF_REVISION,
     CityLifeCatalog,
     HardRequirement,
-    HealthInputDeclaration,
-    IndependentHealthInputDeclaration,
-    InternalPreferenceTruth,
     LifeContractError,
     LifeProtocol,
     PersonYearState,
-    StatedLifeProfile,
     YearAction,
     model_fingerprint,
 )
@@ -56,32 +49,20 @@ from common.life_scoring_contracts import (
     scoring_content_problems,
 )
 from econ.life_feedback import apply_feedback, feedback_record
-from econ.life_scoring import (
-    preference_from_confirmed_profile,
-    preference_from_research_truth,
-    preference_from_stated_profile,
-    score_year,
-)
+from econ.life_scoring import preference_from_confirmed_profile, score_year
 from econ.life_settlement import LifeTaxBinding, settle_year
 
-#: 反馈政策声明的偏好来源 → 唯一接受的偏好输入类型（E3-A 起是显式对照表，DECISIONS/0034）。不在表里的来源或类型一律拒绝，
-#: 不落入"不是产品陈述就当研究真值"的旧分支。
-PREFERENCE_INPUT_TYPES: dict[str, type] = {
-    "product_stated_numeric": StatedLifeProfile,
-    "research_synthetic_truth": InternalPreferenceTruth,
-    PRODUCT_SIX_DIM_SOURCE: ProductLifeProfile,
-}
+#: 反馈政策声明的偏好来源 → 唯一接受的偏好输入类型。不在表里的来源或类型一律拒绝。
+PREFERENCE_INPUT_TYPES: dict[str, type] = {PRODUCT_SIX_DIM_SOURCE: ProductLifeProfile}
 
 
 @dataclass(frozen=True)
 class ScoringInputs:
-    """对这一年实际结果评分要用的东西。偏好输入的类型必须与反馈政策声明的来源一致：
-    产品路径只给 ``StatedLifeProfile``（用户明确给出的数值），研究路径只给 ``InternalPreferenceTruth``；E3-A 的六维产品
-    路径只给 ``ProductLifeProfile``（见 ``PREFERENCE_INPUT_TYPES``）。"""
+    """对这一年实际结果评分要用的东西。偏好输入是六维产品画像（``ProductLifeProfile``），类型必须与反馈政策声明的来源一致。"""
 
     spec: LifeScoringSpec
     conditions: CityScoringConditions
-    preference_input: StatedLifeProfile | InternalPreferenceTruth | ProductLifeProfile
+    preference_input: ProductLifeProfile
     hard_requirements: tuple[HardRequirement, ...] = ()
 
 
@@ -89,7 +70,6 @@ def _check_scoring_inputs(
     protocol: LifeProtocol, state: PersonYearState, scoring: ScoringInputs
 ) -> None:
     policy = protocol.energy_feedback
-    assert policy is not None
     if (
         type(scoring.spec) is not LifeScoringSpec
         or type(scoring.conditions) is not CityScoringConditions
@@ -104,7 +84,7 @@ def _check_scoring_inputs(
             f"{policy.scoring_spec_id}（{policy.scoring_version}）"
         )
     problems = scoring_content_problems(policy, scoring.spec)
-    if problems:  # r3：编号与版本相同、内容不同——不结算，不留下账目
+    if problems:  # 编号与版本相同、内容不同——不结算，不留下账目
         raise LifeContractError("；".join(message for _, message in problems))
     want_type = PREFERENCE_INPUT_TYPES.get(policy.preference_source)
     if want_type is None:
@@ -114,36 +94,17 @@ def _check_scoring_inputs(
     if type(scoring.preference_input) is not want_type:
         raise LifeContractError(
             f"反馈政策的偏好来源是 {policy.preference_source}，只接受 {want_type.__name__}，得到 "
-            f"{type(scoring.preference_input).__name__}——产品路径缺偏好时不借用研究真值"
+            f"{type(scoring.preference_input).__name__}"
         )
     if scoring.preference_input.person_id != state.person_id:
         raise LifeContractError(
             f"偏好属于 {scoring.preference_input.person_id}，这一年是 {state.person_id} 的生活"
         )
     declared = protocol.health_input
-    if isinstance(scoring.preference_input, ProductLifeProfile):
-        # E3-A：六维产品画像的健康回答是独立问卷——协议必须声明独立健康回答，问卷版本相同
-        if not isinstance(declared, IndependentHealthInputDeclaration):
-            raise LifeContractError(
-                f"这是六维产品画像（健康回答独立），协议 {protocol.protocol_id} 没有声明独立健康回答——不结算"
-            )
-        if declared.questionnaire_version != scoring.preference_input.health_questionnaire_version:
-            raise LifeContractError(
-                f"画像的健康问卷版本是 {scoring.preference_input.health_questionnaire_version}，协议声明的是 "
-                f"{declared.questionnaire_version}——旧答案不能改读成新题目的答案；不结算"
-            )
-        return
-    if isinstance(declared, IndependentHealthInputDeclaration):
+    if declared.questionnaire_version != scoring.preference_input.health_questionnaire_version:
         raise LifeContractError(
-            f"协议 {protocol.protocol_id} 声明的是独立健康回答（六维产品画像），偏好输入是 "
-            f"{type(scoring.preference_input).__name__}（七维）——不能把七维医疗点数改读成独立健康回答；不结算"
-        )
-    # E1-5C：healthcare 点数的含义必须与协议声明的一致（旧答案不改读成新含义，新答案不交给旧评分）
-    want = declared.semantics if isinstance(declared, HealthInputDeclaration) else None
-    if scoring.preference_input.healthcare_semantics != want:
-        raise LifeContractError(
-            f"偏好输入的 healthcare 点数含义是 {scoring.preference_input.healthcare_semantics or '旧含义（医疗可及性）'}，"
-            f"协议 {protocol.protocol_id} 声明的是 {want or '旧含义（医疗可及性）'}——不能悄悄换含义；不结算"
+            f"画像的健康问卷版本是 {scoring.preference_input.health_questionnaire_version}，协议声明的是 "
+            f"{declared.questionnaire_version}——旧答案不能改读成新题目的答案；不结算"
         )
 
 
@@ -154,16 +115,10 @@ def _score(
     outcome: object,
     scoring: ScoringInputs,
 ) -> tuple[ExploratoryYearScore | None, str | None]:
-    # 按输入的确切类型分派（E3-A：显式三选一，不认识的类型拒绝）
     kind = type(scoring.preference_input)
-    if kind is StatedLifeProfile:
-        pref = preference_from_stated_profile(scoring.preference_input)  # type: ignore[arg-type]
-    elif kind is ProductLifeProfile:
-        pref = preference_from_confirmed_profile(scoring.preference_input)  # type: ignore[arg-type]
-    elif kind is InternalPreferenceTruth:
-        pref = preference_from_research_truth(scoring.preference_input)  # type: ignore[arg-type]
-    else:
+    if kind is not ProductLifeProfile:
         raise LifeContractError(f"不认识的偏好输入类型 {kind.__name__}：不评分")
+    pref = preference_from_confirmed_profile(scoring.preference_input)
     if isinstance(pref, PreferenceInsufficient):
         return None, f"偏好信息不足（{pref.source}）：{pref.message}"
     score = score_year(
@@ -225,10 +180,6 @@ def scoring_inputs_fingerprint(scoring: ScoringInputs) -> str:
 def _check_protocol(protocol: LifeProtocol, state: PersonYearState) -> None:
     if type(protocol) is not LifeProtocol:
         raise LifeContractError(f"protocol 必须是 LifeProtocol，得到 {type(protocol).__name__}")
-    if protocol.energy_feedback is None or protocol.resource_rules is None:
-        raise LifeContractError(
-            f"协议 {protocol.protocol_id} 不是 E1-4B 协议：E1-4A 与更早的协议额度固定，用 settle_year 即可"
-        )
     if type(state) is not PersonYearState:
         raise LifeContractError(f"state 必须是 PersonYearState，得到 {type(state).__name__}")
 
@@ -264,14 +215,7 @@ def settle_and_score(
     elif committed:
         score_problem = "没有给评分输入"
     out, nxt = settlement.outcome, settlement.next_state
-    policy = protocol.energy_feedback
-    assert policy is not None
-    revision = policy.handoff_revision
-    content = (
-        scoring.spec.content_fingerprint
-        if scoring is not None and revision == SCORING_CONTENT_HANDOFF_REVISION
-        else None
-    )
+    content = scoring.spec.content_fingerprint if scoring is not None else None
     fields = dict(
         person_id=state.person_id,
         clone_id=state.clone_id,
@@ -290,7 +234,7 @@ def settle_and_score(
         outcome_fingerprint=None if out is None else model_fingerprint(out),
         candidate_fingerprint=None if nxt is None else model_fingerprint(nxt),
         score_fingerprint=None if score is None else model_fingerprint(score),
-        feedback_revision=revision,
+        feedback_revision=FEEDBACK_HANDOFF_REVISION,
         scoring_content_fingerprint=content,
     )
     unsealed = ScoredYear.model_construct(**fields, binding_fingerprint="0" * 64)

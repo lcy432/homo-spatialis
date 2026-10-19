@@ -137,7 +137,7 @@ def weighted_mean(scores: Sequence[Fraction], delta: Fraction, start_power: int 
 # ---------------------------------------------------------------------- 估值上下文
 
 
-def _derived_protocol(protocol: LifeProtocol) -> tuple[LifeProtocol, IllnessEventSource | None]:
+def _derived_protocol(protocol: LifeProtocol) -> tuple[LifeProtocol, IllnessEventSource]:
     n = protocol.simulation_years
     if n + 1 > MAX_SIMULATION_YEARS:
         raise LifeContractError(
@@ -145,14 +145,12 @@ def _derived_protocol(protocol: LifeProtocol) -> tuple[LifeProtocol, IllnessEven
         )
     data = protocol.model_dump(mode="python")
     data["simulation_years"] = n + 1
-    source = None
-    if protocol.illness_events is not None:
-        source = IllnessEventSource(
-            mode="none",
-            stream_version=protocol.illness_events.stream_version,
-            note=VALUATION_SOURCE_NOTE,
-        )
-        data["illness_events"] = source.model_dump(mode="python")
+    source = IllnessEventSource(
+        mode="none",
+        stream_version=protocol.illness_events.stream_version,
+        note=VALUATION_SOURCE_NOTE,
+    )
+    data["illness_events"] = source.model_dump(mode="python")
     return LifeProtocol.model_validate(data), source
 
 
@@ -162,10 +160,6 @@ def _valuation_quota(
     """估值期的额度：开反馈时用第 N 年完整年度满足感重算；关着时用基础值。算不出来返回原因（不补零、不沿用旧额度）。"""
     policy = protocol.energy_feedback
     basis = terminal.energy_quota_basis
-    if policy is None or basis is None:
-        raise LifeContractError(
-            f"协议 {protocol.protocol_id} 没有满足感反馈政策或终态没有额度依据：E1-6A 的估值只支持 E1-4B 起的协议"
-        )
     base = to_fraction(basis.base_level)
     head = dict(
         source_year=terminal.year_index - 1,
@@ -210,7 +204,7 @@ def _valuation_state(
     terminal: PersonYearState,
     quota: ValuationQuota,
     protocol: LifeProtocol,
-    source: IllnessEventSource | None,
+    source: IllnessEventSource,
 ) -> tuple[PersonYearState, tuple[str, ...], tuple[str, ...]]:
     """真实终态 → 估值年初状态。返回（状态、转换说明、不带入的到期物品）。不改传入的终态。"""
     policy = protocol.energy_feedback
@@ -247,18 +241,17 @@ def _valuation_state(
     ]
     if expired:
         conversions.append(f"已到期（剩余 0 个月）的持有物不带入：{list(expired)}")
-    if terminal.health is not None and source is not None:
-        binding = terminal.health.binding
-        assert binding is not None  # 终态由结算产生，必然绑定（下面的检查保证）
-        data["health"]["binding"] = {
-            "rules_version": binding.rules_version,
-            "rules_fingerprint": binding.rules_fingerprint,
-            "source_fingerprint": source.content_fingerprint,
-        }
-        conversions.append(
-            f"健康绑定：事件来源 {binding.source_fingerprint[:12]}… → 派生的 none 来源 "
-            f"{source.content_fingerprint[:12]}…（疾病规则指纹不变）"
-        )
+    binding = terminal.health.binding
+    assert binding is not None  # 终态由结算产生，必然绑定（下面的检查保证）
+    data["health"]["binding"] = {
+        "rules_version": binding.rules_version,
+        "rules_fingerprint": binding.rules_fingerprint,
+        "source_fingerprint": source.content_fingerprint,
+    }
+    conversions.append(
+        f"健康绑定：事件来源 {binding.source_fingerprint[:12]}… → 派生的 none 来源 "
+        f"{source.content_fingerprint[:12]}…（疾病规则指纹不变）"
+    )
     return PersonYearState.model_validate(data), tuple(conversions), expired
 
 
@@ -274,7 +267,7 @@ def _summary(state: PersonYearState, point: str, horizon: int) -> ValuationState
         for a in state.abilities
         if a.usable_from_year > state.year_index
     ]
-    episode = state.health.episode if state.health is not None else None
+    episode = state.health.episode
     return ValuationStateSummary(
         point=point,  # type: ignore[arg-type]
         year_index=state.year_index,
@@ -294,7 +287,7 @@ def _summary(state: PersonYearState, point: str, horizon: int) -> ValuationState
             for h in state.holdings
         ),
         abilities=tuple(usable + pending),
-        positions=state.employment.current_position_ids if state.employment is not None else (),
+        positions=state.employment.current_position_ids,
         training=tuple(
             f"{t.opportunity_id}：已参加 {t.months_participated}/{t.months_required} 个月，学费"
             f"{'已付' if t.fee_paid else '未付'}{'，已完成' if t.completed else ''}"
@@ -347,7 +340,7 @@ def _branches(
     spec: EvaluationSpec, state: PersonYearState
 ) -> tuple[list[_Branch], str, str | None]:
     """按估值期初的健康状态展开分支：健康 → 每个模板一个（未触发）；带病 → 每个模板治 / 不治两个（只针对这场病）。"""
-    episode = state.health.episode if state.health is not None else None
+    episode = state.health.episode
     if episode is None:
         return (
             [_Branch(t, "untriggered", None) for t in spec.life_templates],
@@ -449,7 +442,7 @@ def _plan_action(
 
     jobs: list[tuple[str, LifeOpportunity]] = []
     if plan.jobs == "current_positions":
-        current = state.employment.current_position_ids if state.employment is not None else ()
+        current = state.employment.current_position_ids
         for jid in current:
             o = catalog.opportunity(jid)
             if o is None:
@@ -533,11 +526,8 @@ def _evaluate_plan(
         "year_index": state.year_index,
         "items": raw,
         "rationale": f"E1-6A 参考估值分支 {branch.plan_id}：估值专用，不是分身的真实行动",
+        "emergency": branch.emergency(),
     }
-    if (
-        protocol.health_rules is not None
-    ):  # 只有带疾病规则的协议要写应急安排；旧协议写了反而是输入错误
-        data["emergency"] = branch.emergency()
     action = YearAction.model_validate(data)
     common = dict(
         items=items,
@@ -555,7 +545,7 @@ def _evaluate_plan(
         outcome_fingerprint=None if out is None else model_fingerprint(out),
         **common,
     )
-    if out is not None and out.health is not None:
+    if out is not None:
         head["health_states"] = tuple(m.state for m in out.health.months)
         head["new_onsets"] = sum(m.onset is not None for m in out.health.months)
         if branch.treatment == "untriggered" and any(s != "healthy" for s in head["health_states"]):
@@ -730,20 +720,14 @@ def value_terminal(
     binding = spec.binding_for(str(terminal.city))
     if binding is None:
         raise LifeContractError(f"评价规格 {spec.spec_id} 没有 {terminal.city} 的槽位绑定")
-    if protocol.health_rules is not None:
-        problems = health_rules_state_problems(protocol.health_rules, terminal)
-        source = protocol.illness_events
-        bound = terminal.health.binding if terminal.health is not None else None
-        if (
-            problems
-            or source is None
-            or bound is None
-            or bound.source_fingerprint != source.content_fingerprint
-        ):
-            raise LifeContractError(
-                f"{terminal.clone_id}: 终态的健康部分不是由这份协议的疾病规则与事件来源产生的——不派生估值上下文："
-                + "；".join(m for _, m in problems)
-            )
+    problems = health_rules_state_problems(protocol.health_rules, terminal)
+    source = protocol.illness_events
+    bound = terminal.health.binding
+    if problems or bound is None or bound.source_fingerprint != source.content_fingerprint:
+        raise LifeContractError(
+            f"{terminal.clone_id}: 终态的健康部分不是由这份协议的疾病规则与事件来源产生的——不派生估值上下文："
+            + "；".join(m for _, m in problems)
+        )
 
     quota = _valuation_quota(protocol, terminal, last_year)
     not_valued = _not_valued(terminal, spec.valuation_horizon_months)

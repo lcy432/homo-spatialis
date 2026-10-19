@@ -60,8 +60,6 @@ class SavingsYearTracker:
         digits: int,
         cash_start_minor: int,
     ) -> None:
-        if state.savings_goals is None:
-            raise LifeContractError(f"{state.clone_id}: 状态没有 savings_goals，不能记录目标")
         self.rules = rules
         self.year = state.year_index
         self.basis = state.money_basis_id

@@ -1,4 +1,4 @@
-"""E1-7A 城市背景事实（DECISIONS/0030 第三节）：可见事实与内部评分输入分开，并且逐项对得上。
+"""城市背景事实（DECISIONS/0030 第三节）：可见事实与内部评分输入分开，并且逐项对得上。
 
 代理看到的是事实表（定义、数值或类别、单位、已知 / 确定不存在 / 资料未知、时间口径与来源性质）；事实怎样换成评分条件里的 b 是
 内部对应。加载器在开跑前核对两边说的是同一座城：定义各城相同、已知事实按换算正好得到评分条件的 b、未知不补零、有城市背景的
@@ -21,7 +21,7 @@ from ledger.life_roster import load_roster
 
 from .planning_support import FACTS, facts_variant
 
-ROSTER = Path("configs/life/roster_e1_7a.yaml")
+ROSTER = Path("configs/life/roster_product.yaml")
 
 
 @pytest.fixture(scope="module")
@@ -57,10 +57,10 @@ def test_the_sample_facts_reproduce_every_background_value_exactly(loaded):
 
 def test_a_fact_that_disagrees_with_the_scoring_condition_is_refused(tmp_path, loaded):
     def mutate(d):
-        d["sheets"][1]["facts"][3]["number"] = 8  # B96 环境指数 8 → b = 4，评分条件写的是 3
+        d["sheets"][1]["facts"][3]["number"] = 8  # M52 环境指数 8 → b = 4，评分条件写的是 3
 
     problems = _problems(tmp_path, loaded, mutate)
-    assert any("B96" in p and "environment" in p and "评分条件写的是 b = 3" in p for p in problems)
+    assert any("M52" in p and "environment" in p and "评分条件写的是 b = 3" in p for p in problems)
 
 
 def test_unknown_is_not_zero_on_either_side(tmp_path, loaded):
@@ -85,7 +85,7 @@ def test_a_city_without_a_fact_sheet_cannot_be_compared(tmp_path, loaded):
         d["sheets"] = d["sheets"][:1]
 
     problems = _problems(tmp_path, loaded, mutate)
-    assert any("B96 没有城市事实表" in p for p in problems)
+    assert any("M52 没有城市事实表" in p for p in problems)
 
 
 def test_a_background_without_a_visible_fact_is_refused(tmp_path, loaded):

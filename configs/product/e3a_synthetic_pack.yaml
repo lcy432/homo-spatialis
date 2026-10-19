@@ -1,4 +1,4 @@
-# E3-A 合成资料包（DECISIONS/0034）。E3 维护的产品词表、问卷与便利资料候选，以及它**显式采用**的 E1 便利版整套配置。
+# E3-A 合成资料包（DECISIONS/0034）。E3 维护的产品词表、问卷与便利资料候选，以及它**显式采用**的产品协议基础样例。
 #
 # **纯合成。** 城市、职业词表里的岗位情境、报价、寿命、残余小时、时间与精力的模型设定全部手工设定，不来自任何真实城市、商品、
 # 服务、雇主或 LLM；职业映射里的 SOC 2018 代码是公开分类体系的代码，只用于演示“概念 → 分类代码”的内部保留方式。这份资料包只
@@ -17,30 +17,19 @@ pack:
   observed_on: 2026-10-18
   note: >-
     E3-A 合成资料包：两座合成城（K51、M52）、受控职业词表、六维与物质题干、独立健康问卷暂定稿、硬要求与属性偏好的支持清单、
-    便利设备与服务的资料候选。显式采用 E1 便利版整套配置（协议、评分、评价、城市事实、提示模板），并派生新的产品协议。
+    便利设备与服务的资料候选。显式采用产品协议的基础样例（协议、评分、评价、城市事实、提示模板）。
 
-  # 显式采用的 E1 便利版整套配置（不依赖 scripts/run_life_e1_7b.py 不写 --config 时的旧默认）。编译器逐项核对版本与评分内容身份，
+  # 显式采用的产品协议基础样例（不依赖 scripts/run_life_e1_7b.py 不写 --config 时的默认）。编译器逐项核对版本与评分内容身份，
   # 对不上就拒绝编译。
   e1_base:
-    life_input: configs/life/synthetic_e1_convenience.yaml
-    scoring_config: configs/life/scoring_e1_convenience.yaml
-    evaluation_config: configs/life/evaluation_e1_convenience.yaml
-    city_facts: configs/life/city_facts_e1_convenience.yaml
-    protocol_id: life-v1-e1-convenience
-    scoring_version: e1-convenience-v1
-    scoring_content_fingerprint: f209137b1101407427724a8d7f3009fb09eca8a8c11884114412feea6fdcd690
-    prompt_template: e1-convenience-prompt-v1
-
-  # 派生的产品协议：生活规则、资源、职业、储蓄、疾病规则与评分规格的内容与便利版相同；只换健康输入的声明（独立健康回答）与反馈
-  # 政策的偏好来源（六维产品画像）。
-  product_protocol:
+    life_input: configs/life/synthetic_product.yaml
+    scoring_config: configs/life/scoring_product.yaml
+    evaluation_config: configs/life/evaluation_product.yaml
+    city_facts: configs/life/city_facts_product.yaml
     protocol_id: life-v1-e3a-product
-    schema_version: e3a-product-draft
-    info_permission_version: e3a-product-v1
-    feedback_policy_id: feedback.e3a-product.main
-    health_input_note: >-
-      E3-A 产品画像：健康回答是独立的健康风险应对问卷（e3a-health-coping-q-v0.1-draft），不占六维 100 分、不是第七个评分权重；
-      只供分身做计划，结算、风险抽签与评分都不读它
+    scoring_version: e1-convenience-v1
+    scoring_content_fingerprint: fdf920f447af884c8fa05ee90a6e971193fb7cc6cffee772d77b8c5d0588f23a
+    prompt_template: e3a-product-prompt-v1
 
   run:
     prompt_template: e3a-product-prompt-v1

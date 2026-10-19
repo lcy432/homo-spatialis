@@ -1,7 +1,7 @@
-"""信息边界：代理能看到什么（E1-1，`DECISIONS/0016` 第三节）。
+"""信息边界：代理能看到什么（`DECISIONS/0016` 第三节；产品观察的许可见 ADR0020 第十二节）。
 
-主机制是白名单构造，扫描只是第二道防线。所以这里两类测试都要有：正常路径里真值
-根本进不来；以及有人硬塞进来时，扫描能在嵌套深处拦住。
+主机制是白名单构造，扫描只是第二道防线。所以这里两类测试都要有：正常路径里评分内部量根本进不来；以及有人硬塞进来时，
+扫描能在嵌套深处拦住。样例是产品协议样例（u301，K51 / M52）。
 """
 
 from __future__ import annotations
@@ -12,54 +12,40 @@ import pytest
 from pydantic import ValidationError
 
 from agentlayer.life_views import (
-    CAREER_OBSERVATION_FIELDS,
-    HEALTH_OBSERVATION_FIELDS,
-    SAVINGS_OBSERVATION_FIELDS,
     AgentObservation,
     ObservationPermission,
     assert_payload_clean,
     build_observation,
     observation_payload,
+    standard_product_permission,
+    visible_feedback,
 )
-from common.life_contracts import (
-    InternalYearScore,
-    LifeContractError,
-    VisibleFeedback,
-)
+from common.life_contracts import InternalYearScore, LifeContractError
+from econ.life_scoring import preference_from_confirmed_profile
 
-PRODUCT = dict(
-    condition="product_stated_profile",
-    show_stated_dimension_points=True,
-    show_soft_preferences=True,
-    show_hard_requirements=True,
-    show_free_text=True,
-    show_energy_level=False,
-    show_stated_material_points=True,
-    permission_version="e1-1-draft",
-)
-RESEARCH = dict(
-    PRODUCT,
-    condition="research_text_only",
-    show_stated_dimension_points=False,
-    show_soft_preferences=False,
-    show_stated_material_points=False,
-)
+from .conftest import CLONE_K, K51
 
 
-def _inputs(bundle, clone_id):
-    state = next(s for s in bundle.initial_states if s.clone_id == clone_id)
-    profile = next(p for p in bundle.stated_profiles if p.person_id == state.person_id)
-    truth = next(t for t in bundle.internal_truths if t.person_id == state.person_id)
-    return profile, state, bundle.catalog_for(str(state.city)), truth
+def _perm(bundle, **change) -> ObservationPermission:
+    base = standard_product_permission(bundle.protocol.info_permission_version)
+    return base.model_copy(update=change) if change else base
 
 
-def _obs(bundle, clone_id="u02.b02.c0", **perm):
-    profile, state, cat, _ = _inputs(bundle, clone_id)
+def _obs(bundle, *, permission=None, profile=None, state=None, catalog=None, last_feedback=None):
+    p = bundle.protocol
+    state = state or bundle.initial_state(CLONE_K)
     return build_observation(
-        permission=ObservationPermission(**{**PRODUCT, **perm}),
-        profile=profile,
+        permission=permission or _perm(bundle),
+        profile=profile or bundle.profile_for(state.person_id),
         state=state,
-        catalog=cat,
+        catalog=catalog or bundle.catalog_for(str(state.city)),
+        last_feedback=last_feedback,
+        resource_rules=p.resource_rules,
+        energy_feedback=p.energy_feedback,
+        career_rules=p.career_rules,
+        savings_rules=p.savings_rules,
+        health_rules=p.health_rules,
+        health_input=p.health_input,
     )
 
 
@@ -73,86 +59,86 @@ def test_a_permission_has_no_defaults():
     with pytest.raises(ValidationError) as exc:
         ObservationPermission()  # type: ignore[call-arg]
     missing = {e["loc"][0] for e in exc.value.errors() if e["type"] == "missing"}
-    assert {"condition", "show_stated_dimension_points", "show_energy_level"} <= missing
+    assert {
+        "condition",
+        "show_stated_dimension_points",
+        "show_energy_level",
+        "show_health_answers",
+    } <= missing
 
 
 def test_build_observation_requires_a_permission(bundle):
-    profile, state, cat, _ = _inputs(bundle, "u01.a01.c0")
+    state = bundle.initial_state(CLONE_K)
     with pytest.raises(TypeError):
-        build_observation(profile=profile, state=state, catalog=cat)  # type: ignore[call-arg]
-
-
-def test_research_text_only_cannot_show_stated_scores():
-    """那正是被研究的东西——给了分数，"从文字理解偏好"就不成立了。"""
-    with pytest.raises(ValidationError, match="research_text_only"):
-        ObservationPermission(**{**RESEARCH, "show_stated_dimension_points": True})
-
-
-def test_the_two_conditions_are_labelled_differently(bundle):
-    a = _obs(bundle)
-    b = _obs(bundle, **RESEARCH)
-    assert a.information_condition != b.information_condition
-    assert b.profile.dimension_points is None and b.profile.soft_preferences is None
-    assert b.profile.free_text is not None, "文字条件下文字照常给"
+        build_observation(  # type: ignore[call-arg]
+            profile=bundle.profile_for(state.person_id),
+            state=state,
+            catalog=bundle.catalog_for(K51),
+        )
 
 
 def test_showing_energy_marks_a_dynamic_feedback_channel(bundle):
-    """可见精力将来会携带间接偏好反馈；这种观察必须标出来，不能与静态条件混用。"""
-    quiet = _obs(bundle)
-    loud = _obs(bundle, show_energy_level=True)
+    """可见精力携带间接偏好反馈；这种观察必须标出来，不能与静态条件混用。"""
+    quiet = _obs(bundle, permission=_perm(bundle, show_energy_level=False))
+    loud = _obs(bundle, permission=_perm(bundle, show_energy_level=True))
     assert quiet.energy_level is None and quiet.dynamic_feedback_channel is False
     assert loud.energy_level is not None and loud.dynamic_feedback_channel is True
 
 
 # --------------------------------------------------------------------------
-# 正常路径：真值根本进不来
+# 正常路径：评分内部量根本进不来
 # --------------------------------------------------------------------------
 
 
-def test_internal_weights_never_reach_the_payload_even_in_product_mode(bundle):
-    """u02 的真值（material 0.28 / healthcare 0.17）与陈述（25 / 20）故意不同。
-
-    产品模式显示陈述是允许的；真值的数字与键名都不能出现。
-    """
-    _, _, _, truth = _inputs(bundle, "u02.b02.c0")
+def test_the_stated_profile_is_shown_but_no_scoring_weight_is(bundle):
+    """产品模式显示用户确认的陈述（六维点数、物质分配、健康回答）；评分用的权重、γ 与评分规格不出现。"""
+    profile = bundle.profile_for("u301")
     payload = observation_payload(_obs(bundle))
+    shown = payload["profile"]
+    assert shown["six_dimension_points"]["material"] == "45"
+    assert shown["material_allocation"]["daily_convenience"] == "40"
+    assert len(shown["health_answers"]) == len(profile.health_answers)
     blob = json.dumps(payload, ensure_ascii=False)
-    assert payload["profile"]["dimension_points"]["material"] == 25
-    for key in ("dimension_weights", "material_subweights", "synthetic_fixture_only"):
-        assert key not in blob
-    assert "0.28" not in blob and "0.17" not in blob
-    for need, w in truth.material_subweights.items():
-        assert f'"{need}": {w}' not in blob
+    for key in (
+        "dimension_weights",
+        "material_subweights",
+        "effective_weights",
+        "gamma",
+        "scoring_content_fingerprint",
+        "confirmed_profile_fingerprint",
+        "synthetic_fixture_only",
+    ):
+        assert f'"{key}"' not in blob
+    preference = preference_from_confirmed_profile(profile)
+    assert_payload_clean(payload)
+    with pytest.raises(LifeContractError):
+        assert_payload_clean({"profile": {"deep": [preference]}})
 
 
 def test_the_payload_is_built_from_a_whitelist_not_from_the_state(bundle):
-    """顶层键是固定的一组，不随 PersonYearState 增加字段而增加。
+    """顶层键是事先固定的一组（AgentObservation 的字段），不随 PersonYearState 增加字段而增加。"""
+    payload = observation_payload(_obs(bundle, permission=_perm(bundle, show_energy_level=True)))
+    assert set(payload) <= set(AgentObservation.model_fields)
+    for always in ("profile", "opportunities", "resources", "employment", "savings", "health"):
+        assert always in payload
+    first = payload["opportunities"][0]
+    assert "source" not in json.dumps(first) and "targets" not in first
 
-    2026-10-08 E1-5A 接口适配：E1-5A 的三个顶层字段（能力、岗位、学习规则）只在新协议出现，旧协议的观察
-    不序列化它们；所以旧协议的白名单 = 全部字段减去 ``CAREER_OBSERVATION_FIELDS``。新协议的白名单等于
-    全部字段，见 ``test_career_wiring.py``。原意（顶层键是事先固定的白名单）不变。
 
-    2026-10-09 E1-5B 接口适配：目标储蓄的顶层字段 ``savings`` 只在 E1-5B 协议出现，同样从旧协议的白名单里减去
-    （``SAVINGS_OBSERVATION_FIELDS``）。
-
-    2026-10-11 E1-5C 接口适配：健康的顶层字段 ``health`` 只在 E1-5C 协议出现，同样从旧协议的白名单里减去
-    （``HEALTH_OBSERVATION_FIELDS``）。原意（顶层键是事先固定的白名单）不变。
-    """
-    payload = observation_payload(_obs(bundle))
-    assert (
-        set(payload)
-        == set(AgentObservation.model_fields)
-        - CAREER_OBSERVATION_FIELDS
-        - SAVINGS_OBSERVATION_FIELDS
-        - HEALTH_OBSERVATION_FIELDS
+def test_hidden_profile_parts_are_none_and_listed_as_not_permitted(bundle):
+    obs = _obs(
+        bundle,
+        permission=_perm(
+            bundle,
+            show_hard_requirements=False,
+            show_free_text=False,
+            show_health_answers=False,
+        ),
     )
-    assert "source" not in json.dumps(payload["opportunities"][0])
-    assert "targets" not in payload["opportunities"][0]
-
-
-def test_hidden_profile_parts_are_none_not_merely_omitted(bundle):
-    b = _obs(bundle, show_hard_requirements=False, show_free_text=False)
-    assert b.profile.hard_requirements is None and b.profile.free_text is None
+    assert obs.profile.hard_requirements is None and obs.profile.free_text is None
+    assert obs.profile.health_answers is None
+    assert {"hard_requirements", "free_text", "health_answers"} <= set(obs.profile.not_permitted)
+    assert "health_answers" not in observation_payload(obs)["profile"]
 
 
 # --------------------------------------------------------------------------
@@ -164,57 +150,38 @@ def test_the_old_persona_is_refused_as_a_profile(bundle):
     """产品允许看问卷，不等于放行整个旧人设。"""
     from worlds.personas import reference_persona
 
-    _, state, cat, _ = _inputs(bundle, "u01.a01.c0")
     with pytest.raises(LifeContractError, match="profile"):
-        build_observation(
-            permission=ObservationPermission(**PRODUCT),
-            profile=reference_persona(),
-            state=state,
-            catalog=cat,
-        )  # type: ignore[arg-type]
+        _obs(bundle, profile=reference_persona())  # type: ignore[arg-type]
 
 
-def test_the_internal_truth_is_refused_as_a_profile(bundle):
-    _, state, cat, truth = _inputs(bundle, "u01.a01.c0")
+def test_a_scoring_preference_is_refused_as_a_profile(bundle):
+    """评分用的偏好对象（由确认画像换算出的权重）不是画像，不能当画像传进来。"""
+    preference = preference_from_confirmed_profile(bundle.profile_for("u301"))
     with pytest.raises(LifeContractError, match="profile"):
-        build_observation(
-            permission=ObservationPermission(**PRODUCT), profile=truth, state=state, catalog=cat
-        )  # type: ignore[arg-type]
+        _obs(bundle, profile=preference)  # type: ignore[arg-type]
 
 
 def test_an_internal_score_cannot_be_passed_as_feedback(bundle):
-    profile, state, cat, _ = _inputs(bundle, "u01.a01.c0")
     score = InternalYearScore(
-        person_id="u01",
-        clone_id="u01.a01.c0",
+        person_id="u301",
+        clone_id=CLONE_K,
         year_index=1,
-        protocol_id="life-v1-contract",
+        protocol_id=bundle.protocol.protocol_id,
         scoring_scale_version="undefined",
         status="synthetic_fixture_only",
         values={"leisure": 0.4},
     )
     with pytest.raises(LifeContractError, match="last_feedback"):
-        build_observation(
-            permission=ObservationPermission(**PRODUCT),
-            profile=profile,
-            state=state,
-            catalog=cat,
-            last_feedback=score,
-        )  # type: ignore[arg-type]
+        _obs(bundle, last_feedback=score)  # type: ignore[arg-type]
 
 
-@pytest.mark.parametrize(
-    "smuggled", ["internal_truth", "internal_score", "old_ground_truth_params"]
-)
-def test_a_smuggled_answer_object_is_caught_however_deep(bundle, smuggled):
+def test_a_smuggled_answer_object_is_caught_however_deep(bundle, scoring):
     """绕过构造函数、把答案对象埋进嵌套结构，扫描也要拦住。"""
     from econ.types import PersonaParams
 
-    _, _, _, truth = _inputs(bundle, "u01.a01.c0")
-    obj = {
-        "internal_truth": truth,
-        "internal_score": InternalYearScore(
-            person_id="u01",
+    for obj in (
+        InternalYearScore(
+            person_id="u301",
             clone_id="c",
             year_index=1,
             protocol_id="p",
@@ -222,11 +189,13 @@ def test_a_smuggled_answer_object_is_caught_however_deep(bundle, smuggled):
             status="synthetic_fixture_only",
             values={},
         ),
-        "old_ground_truth_params": PersonaParams(alpha=0.3, beta=0.2, theta={"safety": 0.5}),
-    }[smuggled]
-    nested = {"opportunities": [{"spec": {"deep": [obj]}}]}
-    with pytest.raises(LifeContractError):
-        assert_payload_clean(nested)
+        PersonaParams(alpha=0.3, beta=0.2, theta={"safety": 0.5}),
+        scoring.spec,
+        bundle.protocol.health_rules,
+        bundle.initial_state(CLONE_K),
+    ):
+        with pytest.raises(LifeContractError):
+            assert_payload_clean({"opportunities": [{"spec": {"deep": [obj]}}]})
 
 
 def test_a_forbidden_key_is_caught_inside_a_dumped_payload(bundle):
@@ -236,55 +205,51 @@ def test_a_forbidden_key_is_caught_inside_a_dumped_payload(bundle):
         assert_payload_clean(payload)
 
 
-def test_a_catalog_spec_cannot_carry_a_nested_object():
+def test_a_catalog_spec_cannot_carry_a_nested_object(bundle):
     """规格只许原始值，嵌套对象进不了目录——这挡掉了一整类藏匿通道。"""
     from common.life_contracts import LifeOpportunity
 
+    o = bundle.catalog_for(K51).opportunity("k51.food.basic").model_dump(mode="json")
+    o["spec"] = {"hidden": {"dimension_weights": {"material": 1.0}}}
     with pytest.raises(ValidationError):
-        LifeOpportunity.model_validate(
-            {
-                "opportunity_id": "x",
-                "category": "food",
-                "label": "l",
-                "unit": "u",
-                "quality": "q",
-                "availability": "unknown",
-                "duration": {"kind": "ongoing_service"},
-                "spec": {"hidden": {"dimension_weights": {"material": 1.0}}},
-                "source": {
-                    "kind": "synthetic",
-                    "observed_on": "2026-10-05",
-                    "geography_scope": "s",
-                    "mapping_version": "m",
-                    "synthetic_note": "n",
-                },
-            }
-        )
+        LifeOpportunity.model_validate(o)
 
 
 def test_only_an_agent_observation_can_be_serialised(bundle):
-    _, state, _, _ = _inputs(bundle, "u01.a01.c0")
     with pytest.raises(LifeContractError, match="AgentObservation"):
-        observation_payload(state)  # type: ignore[arg-type]
+        observation_payload(bundle.initial_state(CLONE_K))  # type: ignore[arg-type]
 
 
-def test_visible_feedback_is_accepted_and_kept_separate(bundle):
-    profile, state, cat, _ = _inputs(bundle, "u01.a01.c0")
-    fb = VisibleFeedback(year_index=1, cash_balance=state.cash, notes=("房租按时付清",))
-    obs = build_observation(
-        permission=ObservationPermission(**PRODUCT),
-        profile=profile,
-        state=state,
-        catalog=cat,
-        last_feedback=fb,
-    )
-    assert observation_payload(obs)["last_feedback"]["notes"] == ["房租按时付清"]
+def test_visible_feedback_is_facts_only_and_passes_the_scan(bundle, first_year):
+    """上一年的可见反馈只有事实（余额、执行了哪些月、职业、储蓄、健康），没有满足感或分数。"""
+    fb = visible_feedback(first_year.settlement)
+    obs = _obs(bundle, state=first_year.next_state, last_feedback=fb)
+    payload = observation_payload(obs)
+    shown = payload["last_feedback"]
+    assert shown["year_index"] == 1 and {"career", "savings", "health"} <= set(shown)
+    blob = json.dumps(shown, ensure_ascii=False)
+    for key in ('"u"', '"score"', '"satisfaction"', '"annual_mean"', '"weights"'):
+        assert key not in blob
 
 
 def test_the_unknown_item_stays_unknown_in_what_the_agent_sees(bundle):
     """可见层也不能把未知补成零价。"""
-    payload = observation_payload(_obs(bundle, clone_id="u01.b02.c0"))
-    washer = next(
-        o for o in payload["opportunities"] if o["opportunity_id"] == "b02.durable.washer"
+    cat = bundle.catalog_for(K51)
+    pack = cat.opportunity("k51.durable.convenience_pack")
+    unknown = pack.model_copy(
+        update={
+            "availability": "unknown",
+            "price": None,
+            "unknown_reason": "合成情景：这座城的设备包报价没有采集到",
+        }
     )
-    assert washer["availability"] == "unknown" and washer["price"] is None
+    variant = cat.model_copy(
+        update={
+            "opportunities": tuple(
+                unknown if o.opportunity_id == pack.opportunity_id else o for o in cat.opportunities
+            )
+        }
+    )
+    payload = observation_payload(_obs(bundle, catalog=variant))
+    seen = next(o for o in payload["opportunities"] if o["opportunity_id"] == pack.opportunity_id)
+    assert seen["availability"] == "unknown" and seen.get("price") is None

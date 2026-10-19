@@ -89,18 +89,7 @@ def evaluation_spec_problems(
     """评价规格与生活输入、评分配置之间的跨对象问题。空列表 = 可以用。每座城的绑定用 ``city_binding_problems``
     （与正式评价入口同一份）；这里另查比较组层面的事。"""
     out: list[str] = []
-    protocol = bundle.protocol
-    if protocol.resource_rules is None or protocol.energy_feedback is None:
-        out.append(
-            f"协议 {protocol.protocol_id} 没有月度资源规则或满足感反馈政策：E1-6A 的期末估值要按原反馈政策算估值期额度，"
-            "只支持 E1-4B 起的协议"
-        )
-    group = scoring.comparison_group
-    if group is None:
-        out.append("评分配置没有比较组：评价规格的槽位要在比较组的每座城里绑定同一套方案类别")
-        group_cities: set[str] = set()
-    else:
-        group_cities = {str(c) for c in group.cities}
+    group_cities = {str(c) for c in scoring.comparison_group.cities}
     bound = {str(b.city) for b in spec.city_bindings}
     for city in sorted(group_cities - bound):
         out.append(f"比较组的 {city} 没有槽位绑定：比较组的每座城都要有同一套参考方案类别")

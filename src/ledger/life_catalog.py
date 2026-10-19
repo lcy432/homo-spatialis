@@ -21,10 +21,8 @@
 
 from __future__ import annotations
 
-import re
 from collections import Counter
 from decimal import Decimal
-from fractions import Fraction
 from pathlib import Path
 from typing import Any
 
@@ -36,7 +34,6 @@ from common.life_billing import monthly_charges, one_time_total_minor
 from common.life_contracts import (
     CAREER_REQUIREMENT_KINDS,
     HEALTH_STATUS_LABEL,
-    LEGACY_REQUIREMENT_KINDS,
     MINIMUM_NEEDS,
     MONTHS_PER_YEAR,
     RESERVED_HEALTH_KEYS,
@@ -45,9 +42,6 @@ from common.life_contracts import (
     CityLifeCatalog,
     ContractModel,
     FunctionKind,
-    HealthInputDeclaration,
-    IndependentHealthInputDeclaration,
-    InternalPreferenceTruth,
     ItemRole,
     LifeContractError,
     LifeOpportunity,
@@ -57,7 +51,6 @@ from common.life_contracts import (
     SavingsGoal,
     SavingsGoalDirective,
     SettlementProblem,
-    StatedLifeProfile,
     SyntheticTaxPolicy,
     YearAction,
     energy_quota_problems,
@@ -84,11 +77,8 @@ ONE_TIME_ROLES: frozenset[str] = frozenset({"durable_good", "experience"})
 class LifeBundle(ContractModel):
     """一份完整的生活输入：协议、需求与类别的声明、城市目录、人、初始状态、计划。
 
-    陈述（``stated_profiles``）与真值（``internal_truths``）是两个独立字段。视图层只
-    接 ``StatedLifeProfile``；真值不会因为"在同一个文件里"就靠近 prompt，结算也不读它。
-
-    E3-A（DECISIONS/0034）：``product_profiles`` 是用户确认的六维产品画像（``ProductLifeProfile``），独立健康回答，**没有**
-    研究真值——产品陈述不是人的完整心理真值，也不伪造一份。同一个人只能有一种画像（旧七维陈述 + 真值，或六维产品画像）。
+    ``product_profiles`` 是用户确认的六维产品画像（``ProductLifeProfile``，DECISIONS/0034），健康回答独立——产品陈述不是人的
+    完整心理真值，也不伪造一份。结算不读画像。
 
     ``example_actions`` 是 E1-1 的结构样例（不结算）；``plans`` 是 E1-2 可结算的年度计划，
     同一分身可以有多年，每年至多一份。
@@ -104,13 +94,8 @@ class LifeBundle(ContractModel):
     #: 过滤时必须与这里一致——不能把"通信"换个说法当容量来按件计分。
     function_kinds: dict[str, FunctionKind] = Field(default_factory=dict)
     catalogs: tuple[CityLifeCatalog, ...]
-    stated_profiles: tuple[StatedLifeProfile, ...]
-    internal_truths: tuple[InternalPreferenceTruth, ...]
+    product_profiles: tuple[ProductLifeProfile, ...]
     initial_states: tuple[PersonYearState, ...]
-    #: E3-A：六维产品画像。没有用到时不序列化——旧输入的输出逐字节不变。
-    product_profiles: tuple[ProductLifeProfile, ...] = Field(
-        default=(), exclude_if=lambda v: v == ()
-    )
     example_actions: tuple[YearAction, ...] = ()
     tax_policies: tuple[SyntheticTaxPolicy, ...] = ()
     plans: tuple[YearAction, ...] = ()
@@ -147,10 +132,9 @@ class LifeBundle(ContractModel):
     def initial_state(self, clone_id: str) -> PersonYearState | None:
         return next((s for s in self.initial_states if s.clone_id == clone_id), None)
 
-    def profile_for(self, person_id: str) -> StatedLifeProfile | ProductLifeProfile | None:
-        """这个人的产品侧画像：旧七维陈述或六维产品画像（E3-A）。研究真值不在这里返回。"""
-        found = [p for p in self.stated_profiles if p.person_id == person_id]
-        found += [p for p in self.product_profiles if p.person_id == person_id]
+    def profile_for(self, person_id: str) -> ProductLifeProfile | None:
+        """这个人的六维产品画像。"""
+        found = [p for p in self.product_profiles if p.person_id == person_id]
         return found[0] if len(found) == 1 else None
 
 
@@ -201,44 +185,6 @@ def item_role(catalog: CityLifeCatalog, o: LifeOpportunity) -> ItemRole:
     return "periodic_service"
 
 
-_ELIG_OCCUPATION = re.compile(r"^occupation:([A-Za-z0-9]+):([A-Za-z0-9.\-]+)$")
-_ELIG_SKILL = re.compile(r"^skill:([a-z][a-z0-9_]{0,47})>=(\d+(?:\.\d+)?)$")
-_ELIG_TRAINING = re.compile(r"^training_completed:([a-z0-9][a-z0-9_.\-]{0,63})$")
-
-
-def parse_eligibility(tag: str) -> tuple[str, str, str] | None:
-    """本轮支持的资格词表。词表外的标签返回 None——由调用方报数据错误，**不猜**。
-
-    * ``occupation:<体系>:<代码>``：当前职业等于它
-    * ``skill:<名>>=<数>``：技能水平不低于它
-    * ``training_completed:<机会 ID>``：那门培训已完成
-    """
-    if m := _ELIG_OCCUPATION.match(tag):
-        return ("occupation", m.group(1), m.group(2))
-    if m := _ELIG_SKILL.match(tag):
-        return ("skill", m.group(1), m.group(2))
-    if m := _ELIG_TRAINING.match(tag):
-        return ("training_completed", m.group(1), "")
-    return None
-
-
-def hours_for_months(o: LifeOpportunity, months: int, quantity: float = 1) -> Fraction:
-    """一项按年计的时间成本在 ``months`` 个月里占多少小时：``h × months / 12 × 数量``。
-
-    用分数精确计算，比较时不需要容差。
-    """
-    return Fraction(Decimal(repr(o.time_cost_hours_per_year))) * months * _q(quantity) / 12
-
-
-def event_hours(o: LifeOpportunity, quantity: float = 1) -> Fraction:
-    """一次体验的时间成本：发生一次就整笔计入，不按月摊。"""
-    return Fraction(Decimal(repr(o.time_cost_hours_per_year))) * _q(quantity)
-
-
-def _q(quantity: float) -> Fraction:
-    return Fraction(Decimal(repr(float(quantity))))
-
-
 # ==========================================================================
 # 月度资源资料（E1-4A，DECISIONS/0020）：完整性与一致性。算法在 econ.life_resources。
 # ==========================================================================
@@ -261,32 +207,13 @@ SUBSTITUTE_ROLES: frozenset[str] = frozenset(
 
 
 def resource_catalog_problems(protocol: LifeProtocol, catalog: CityLifeCatalog) -> list[str]:
-    """一座城的资源资料是否齐全、一致（按月核算的协议）。缺了、尺度不对、自相矛盾都是资料错误。
-
-    旧规则的协议里出现资源事实也是错误：旧规则不读它，悄悄忽略会让人以为已经约束了。
-    """
+    """一座城的资源资料是否齐全、一致。缺了、尺度不对、自相矛盾都是资料错误。"""
     rules = protocol.resource_rules
     out: list[str] = []
-    if rules is None:
-        stray = [o.opportunity_id for o in catalog.opportunities if o.resource is not None]
-        if stray:
-            out.append(
-                f"{catalog.city}: 生活规则 {protocol.life_rules_version} 不读资源事实，"
-                f"却有 {stray[:5]}——要按月核算请用 E1-4A 规则版本"
-            )
-        return out
     d = rules.input_decimals
     for o in catalog.opportunities:
         where = f"{catalog.city}/{o.opportunity_id}"
-        if o.time_cost_hours_per_year != 0 or o.energy_burden != 0:
-            out.append(
-                f"{where}: 按月核算的协议不再使用 time_cost_hours_per_year / energy_burden"
-                "（含义没冻结，不能当成月量或一次量）；请写在 resource 里，旧字段保持 0"
-            )
         r = o.resource
-        if r is None:
-            out.append(f"{where}: 缺资源事实 resource——零也要显式写 0，缺了不当零")
-            continue
         role = item_role(catalog, o)
         allowed = RESOURCE_BASIS_BY_ROLE.get(role, frozenset())
         if r.basis not in allowed:
@@ -339,15 +266,9 @@ def resource_state_problems(protocol: LifeProtocol, state: PersonYearState) -> l
     """一个人的资源预算是否与协议的资源规则配套（尺度、版本、精度）。"""
     rules = protocol.resource_rules
     who = state.clone_id
-    if rules is None:
-        if state.resource_budget_basis is not None:
-            return [f"{who}: 生活规则 {protocol.life_rules_version} 不读月度资源预算"]
-        return []
     out: list[str] = []
     basis = state.resource_budget_basis
-    if basis is None:
-        out.append(f"{who}: 按月核算的协议必须写资源预算依据（预留了什么、额度从哪来）")
-    elif basis.rules_version != rules.version:
+    if basis.rules_version != rules.version:
         out.append(
             f"{who}: 资源预算依据的规则版本 {basis.rules_version} 与协议 {rules.version} 不一致"
         )
@@ -363,17 +284,7 @@ def resource_state_problems(protocol: LifeProtocol, state: PersonYearState) -> l
         if not has_decimals(x, rules.input_decimals):
             out.append(f"{who}: {name} = {x!r} 的精度细于 {rules.input_decimals} 位小数")
     q = state.energy_quota_basis
-    if protocol.energy_feedback is None:
-        if q is not None:
-            out.append(
-                f"{who}: 生活规则 {protocol.life_rules_version} 没有满足感反馈，不读精力额度依据——"
-                "要启用 E1-4B 请声明对应的规则版本与反馈政策"
-            )
-    elif q is None:
-        out.append(
-            f"{who}: E1-4B 协议必须写精力额度依据（固定的个人基础额度、当前额度的来由）；缺了不当成基础"
-        )
-    elif not has_decimals(q.base_level, rules.input_decimals):
+    if not has_decimals(q.base_level, rules.input_decimals):
         out.append(f"{who}: 基础额度 {q.base_level!r} 的精度细于 {rules.input_decimals} 位小数")
     return out
 
@@ -381,7 +292,7 @@ def resource_state_problems(protocol: LifeProtocol, state: PersonYearState) -> l
 def feedback_state_problems(
     protocol: LifeProtocol, state: PersonYearState
 ) -> list[SettlementProblem]:
-    """E1-4B：一个年初状态的精力额度能不能直接拿来结算（DECISIONS/0021；r2 第十三节）。
+    """一个年初状态的精力额度能不能直接拿来结算（DECISIONS/0021 第十三节）。
 
     判断本身在 ``common.life_contracts.energy_quota_problems``——加载、结算前检查与可见投影共用那一份：
     候选状态（额度待定）不能结算；额度只能在确定它的那份政策（编号、版本与**内容指纹**都相同）下继续；
@@ -529,23 +440,12 @@ def catalog_settlement_problems(
             out.append(f"{city}/{oid}: 带职业的机会按工作结算，不能有价格")
         if o.compensation is not None and o.compensation.billing == "one_time":
             out.append(f"{city}/{oid}: 一次性报酬不是工作；本轮不支持")
-        career = protocol is not None and protocol.career_rules is not None
-        allowed = CAREER_REQUIREMENT_KINDS if career else LEGACY_REQUIREMENT_KINDS
         for tag in o.eligibility:
             parsed = parse_eligibility_tag(tag)
-            if parsed is None or parsed[0] not in allowed:
-                if parsed is not None and career:
-                    out.append(
-                        f"{city}/{oid}: 资格标签 {tag!r} 是旧写法；E1-5A 只认 ability / occupation / employer"
-                        "——旧写法会绕过下一年生效规则"
-                    )
-                elif parsed is not None:
-                    out.append(
-                        f"{city}/{oid}: 资格标签 {tag!r} 是 E1-5A 的写法；生活规则 "
-                        f"{protocol.life_rules_version if protocol else '（旧）'} 不读它"
-                    )
-                else:
-                    out.append(f"{city}/{oid}: 资格标签 {tag!r} 不在本轮词表里")
+            if parsed is None or parsed[0] not in CAREER_REQUIREMENT_KINDS:
+                out.append(
+                    f"{city}/{oid}: 资格标签 {tag!r} 不在词表里（只认 ability / occupation / employer）"
+                )
     return out
 
 
@@ -555,28 +455,13 @@ def catalog_settlement_problems(
 
 
 def career_catalog_problems(protocol: LifeProtocol, catalog: CityLifeCatalog) -> list[str]:
-    """一座城的雇主、学习成果与资格要求是否自洽。加载器与结算前检查共用。
-
-    旧协议出现雇主或学习成果字段也是错误：旧协议不读它们，悄悄忽略会让人以为学习有了回报。
-    """
+    """一座城的雇主、学习成果与资格要求是否自洽。加载器与结算前检查共用。"""
     rules = protocol.career_rules
     city = catalog.city
     out: list[str] = []
-    if rules is None:
-        stray = [o.opportunity_id for o in catalog.opportunities if o.employer_id or o.grants]
-        if stray:
-            out.append(
-                f"{city}: 生活规则 {protocol.life_rules_version} 不读雇主与学习成果（employer_id / grants），"
-                f"却有 {stray[:5]}——要启用学习与岗位变化请用 E1-5A 规则版本"
-            )
-        return out
     for o in catalog.opportunities:
         oid = o.opportunity_id
         where = f"{city}/{oid}"
-        if o.targets:
-            out.append(
-                f"{where}: E1-5A 用 grants 声明学习成果；targets 是旧协议的说明标签，两者不并存"
-            )
         if o.employer_id is not None:
             employer = rules.employer(o.employer_id)
             if employer is None:
@@ -600,8 +485,7 @@ def career_catalog_problems(protocol: LifeProtocol, catalog: CityLifeCatalog) ->
         if o.duration.kind == "training_course":
             r = o.resource
             if (
-                r is None
-                or r.basis != "per_service_month"
+                r.basis != "per_service_month"
                 or not r.hours
                 or r.hours <= 0
                 or not r.burden_per_hour
@@ -649,25 +533,7 @@ def career_state_problems(
     """一个状态的能力、岗位记录与学习进度是否与协议、目录一致（资料错误）。加载器与结算前检查共用。"""
     rules = protocol.career_rules
     who = state.clone_id
-    if rules is None:
-        extra = (
-            state.abilities
-            or state.employment is not None
-            or any(t.completed_year is not None for t in state.training)
-        )
-        if extra:
-            return [
-                f"{who}: 生活规则 {protocol.life_rules_version} 不读能力、岗位记录与完成年月——要启用请用 "
-                "E1-5A 规则版本"
-            ]
-        return []
     out: list[str] = []
-    if state.employment is None:
-        out.append(
-            f"{who}: E1-5A 的状态必须写岗位记录 employment（可以没有岗位）；缺了不猜他在哪工作"
-        )
-    if state.skills:
-        out.append(f"{who}: E1-5A 不读数值 skills；能力写在 abilities（已获得 / 未获得）")
     held = {a.ability_id for a in state.abilities}
     for a in state.abilities:
         if rules.ability(a.ability_id) is None:
@@ -689,14 +555,13 @@ def career_state_problems(
             out.append(
                 f"{who}: 课程 {tr.opportunity_id} 已完成，却没有它授予的能力 {missing}——不猜学习成果"
             )
-    if state.employment is not None:
-        for pos in state.employment.positions:
-            o = catalog.opportunity(pos.opportunity_id)
-            if o is None or o.compensation is None:
-                out.append(f"{who}: 岗位记录里的 {pos.opportunity_id} 不是本城的岗位")
-                continue
-            if o.occupation != pos.occupation or o.employer_id != pos.employer_id:
-                out.append(f"{who}: 岗位记录 {pos.opportunity_id} 的职业或雇主与目录不一致")
+    for pos in state.employment.positions:
+        o = catalog.opportunity(pos.opportunity_id)
+        if o is None or o.compensation is None:
+            out.append(f"{who}: 岗位记录里的 {pos.opportunity_id} 不是本城的岗位")
+            continue
+        if o.occupation != pos.occupation or o.employer_id != pos.employer_id:
+            out.append(f"{who}: 岗位记录 {pos.opportunity_id} 的职业或雇主与目录不一致")
     return out
 
 
@@ -713,18 +578,6 @@ def savings_state_problems(
     rules = protocol.savings_rules
     who = state.clone_id
     goals = state.savings_goals
-    if rules is None:
-        if goals is not None:
-            return [
-                f"{who}: 协议 {protocol.protocol_id}（生活规则 {protocol.life_rules_version}）不支持结构化资金"
-                "目标，状态却写了 savings_goals——旧协议不静默启用新行为；文字目标照旧写在 goals 里"
-            ]
-        return []
-    if goals is None:
-        return [
-            f"{who}: 生活规则 {protocol.life_rules_version} 的状态必须写 savings_goals（还没有目标就写空列表）"
-            "——缺了不猜他有没有目标"
-        ]
     out: list[str] = []
     n = protocol.simulation_years
     for g in goals:
@@ -757,7 +610,6 @@ def goal_target_problems(
 ) -> list[SettlementProblem]:
     """一个新目标指向的机会能不能当资金目标：只看目录（不看状态）。"""
     rules = protocol.savings_rules
-    assert rules is not None
     o = catalog.opportunity(opportunity_id)
     if o is None:
         return [_p("goal_rejected", f"{who}: 目标机会 {opportunity_id} 在 {catalog.city} 不存在")]
@@ -852,17 +704,6 @@ def _savings_plan_static(
     """计划与目录就能判定的目标问题（不依赖当年状态，加载器对后续年份也做这一层）。"""
     d = action.savings_goal
     linked = [(i, it) for i, it in enumerate(action.items) if it.goal_id is not None]
-    rules = protocol.savings_rules
-    if rules is None:
-        if d is not None or linked:
-            return [
-                _p(
-                    "goal_not_supported",
-                    f"{who}: 协议 {protocol.protocol_id}（生活规则 {protocol.life_rules_version}）不支持结构化资金"
-                    "目标——旧协议不静默启用新行为；文字目标照旧写在状态的 goals 里",
-                )
-            ]
-        return []
     out: list[SettlementProblem] = []
     n = protocol.simulation_years
     if d is not None and d.target_year is not None and not action.year_index <= d.target_year <= n:
@@ -935,8 +776,6 @@ def _savings_plan_state(
     who: str,
 ) -> list[SettlementProblem]:
     """需要当年年初状态才能判定的目标问题：现有目标、ID 是否用过、按现有规则能否由新交易兑现、关联是否对得上。"""
-    if protocol.savings_rules is None or state.savings_goals is None:
-        return []
     out: list[SettlementProblem] = []
     current = _open_goal(state)
     used = {g.goal_id for g in state.savings_goals}
@@ -1034,16 +873,9 @@ def participation_activity(catalog: CityLifeCatalog, o: LifeOpportunity) -> bool
 
 
 def health_catalog_problems(protocol: LifeProtocol, catalog: CityLifeCatalog) -> list[str]:
-    """一座城的治疗目录是否齐全、与规则的需求定义一致（资料错误）。旧协议出现治疗目录也是错误。"""
+    """一座城的治疗目录是否齐全、与规则的需求定义一致（资料错误）。"""
     rules = protocol.health_rules
     city = catalog.city
-    if rules is None:
-        if catalog.treatments:
-            return [
-                f"{city}: 生活规则 {protocol.life_rules_version} 不读治疗目录（treatments）——要启用疾病与恢复请用 "
-                "E1-5C 规则版本，旧协议不悄悄获得新行为"
-            ]
-        return []
     out: list[str] = []
     for sev in SEVERITIES:
         label = HEALTH_STATUS_LABEL[sev]
@@ -1066,29 +898,11 @@ def health_catalog_problems(protocol: LifeProtocol, catalog: CityLifeCatalog) ->
 def health_state_problems(
     protocol: LifeProtocol, state: PersonYearState
 ) -> list[SettlementProblem]:
-    """一个状态的健康部分能不能在这份协议下继续（输入错误）：有没有写、年龄在不在风险表里、规则与事件来源是否就是
+    """一个状态的健康部分能不能在这份协议下继续（输入错误）：年龄在不在风险表里、规则与事件来源是否就是
     产生它的那一套（换了规则或来源的中间状态不静默续跑）、延续中的疾病是否早该结束。"""
     rules, source = protocol.health_rules, protocol.illness_events
     h = state.health
     who = state.clone_id
-    if rules is None or source is None:
-        if h is not None:
-            return [
-                _p(
-                    "health_state",
-                    f"{who}: 生活规则 {protocol.life_rules_version} 不读健康状态——要启用疾病与恢复请用 E1-5C "
-                    "规则版本",
-                )
-            ]
-        return []
-    if h is None:
-        return [
-            _p(
-                "health_state",
-                f"{who}: 生活规则 {protocol.life_rules_version} 的状态必须写健康状态（年龄、重复分身序号；共同初始状态"
-                "是健康、没有病史）——缺了不猜，也不默认成健康",
-            )
-        ]
     # 状态与疾病规则的关系：与观察构造共用 common 的同一份判断（收尾修订，F1）
     out = [_p(code, message) for code, message in health_rules_state_problems(rules, state)]
     # 事件来源只有结算需要（观察不显示任何由它推出的事实），所以只在这里核对
@@ -1110,24 +924,6 @@ def _emergency_plan_static(
 ) -> list[SettlementProblem]:
     """计划与目录就能判定的应急安排问题（不依赖当年状态，加载器对后续年份也做这一层）。"""
     plan = action.emergency
-    if protocol.health_rules is None:
-        if plan is not None:
-            return [
-                _p(
-                    "emergency_not_supported",
-                    f"{who}: 协议 {protocol.protocol_id}（生活规则 {protocol.life_rules_version}）没有疾病规则，不读"
-                    "应急安排——旧协议不悄悄启用新行为",
-                )
-            ]
-        return []
-    if plan is None:
-        return [
-            _p(
-                "emergency_missing",
-                f"{who}: E1-5C 的年度计划必须写应急安排（小病、大病各选条件允许就治或明确不治；时间精力不够时按什么"
-                "顺序暂停哪些活动）——漏写不会被默认成总是治疗，也不由健康输入替你生成",
-            )
-        ]
     out: list[SettlementProblem] = []
     for oid in plan.pause_order:
         o = catalog.opportunity(oid)
@@ -1182,8 +978,6 @@ def _emergency_plan_state(
 ) -> list[SettlementProblem]:
     """需要年初状态才能判定的：暂停顺序里的活动要么在这一年的计划里，要么是年初的持有物。"""
     plan = action.emergency
-    if protocol.health_rules is None or plan is None:
-        return []
     have = {it.opportunity_id for it in action.items} | {h.opportunity_id for h in state.holdings}
     return [
         _p(
@@ -1461,8 +1255,7 @@ def plan_problems(
                 )
             )
 
-    if protocol.resource_rules is not None:
-        out.extend(_resource_plan_problems(catalog, action, roles, who))
+    out.extend(_resource_plan_problems(catalog, action, roles, who))
     out.extend(_savings_plan_static(protocol, catalog, action, who))
     out.extend(_emergency_plan_static(protocol, catalog, action, who))
 
@@ -1503,11 +1296,10 @@ def plan_problems(
 def _resource_plan_problems(
     catalog: CityLifeCatalog, action: YearAction, roles: dict[int, str], who: str
 ) -> list[SettlementProblem]:
-    """按月核算的协议里，结算前就能判定的计划问题（E1-4A）。
+    """结算前就能判定的资源相关计划问题（DECISIONS/0020）。
 
     岗位的工时与到岗是岗位方案的事实：计划不能用安排项改它们。多份工作（包括同月两份到岗工作）可以
-    同时做——执行修订 r2 起不再一律拒绝；资源够不够在实际执行路径上按月核算，超了是计划不可行，不是
-    输入错误。同一个岗位写两遍仍由 ``YearAction`` 的结构校验拒绝（合并成一条），岗位数量必须是 1。
+    同时做；资源够不够在实际执行路径上按月核算，超了是计划不可行，不是输入错误。同一个岗位写两遍仍由 ``YearAction`` 的结构校验拒绝（合并成一条），岗位数量必须是 1。
     """
     out: list[SettlementProblem] = []
     for i, role in roles.items():
@@ -1528,56 +1320,13 @@ def _resource_plan_problems(
     return out
 
 
-def planned_hours(state: PersonYearState, action: YearAction, catalog: CityLifeCatalog) -> Fraction:
-    """计划占用的时间（小时，精确分数）。
-
-    周期行动按请求的月数摊；一次体验整笔；本年买下、当年生效的持续物品按服务月摊；
-    年付服务按本年覆盖月摊；**已有的持有物**按本年仍在服务的月数摊。声明了兜底的住房
-    或食品取"所选项与最低方案"中较费时的那个——这样执行时即使降级，实际用时也不会
-    超过这里检查过的预算。
-    """
-    total = Fraction(0)
-    year = state.year_index
-    for item in action.items:
-        o = catalog.opportunity(item.opportunity_id)
-        if o is None:
-            continue
-        role = item_role(catalog, o)
-        months = _requested_months(role, item)
-        if role == "experience":
-            total += event_hours(o, item.quantity)
-            continue
-        if role == "durable_good":
-            life = o.duration.lifetime_months or 0
-            n = (
-                min(MONTHS_PER_YEAR - item.month + 1, life)
-                if item.month and o.duration.effective_from == "same_year"
-                else 0
-            )
-            total += hours_for_months(o, n, item.quantity)
-            continue
-        h = hours_for_months(o, len(months), item.quantity)
-        if role in action.minimum_fallback:
-            spec = catalog.minimum_spec(role)
-            base = catalog.opportunity(spec.baseline_opportunity_id) if spec else None
-            if base is not None:
-                h = max(h, hours_for_months(base, len(months)))
-        total += h
-    for held in state.holdings:
-        o = catalog.opportunity(held.opportunity_id)
-        if o is None:
-            continue
-        if held.in_service_from_year is not None and held.in_service_from_year > year:
-            continue
-        n = min(MONTHS_PER_YEAR, held.effective_remaining_months or 0)
-        total += hours_for_months(o, n, held.quantity)
-    return total
-
-
 def plan_state_problems(
     protocol: LifeProtocol, state: PersonYearState, action: YearAction, catalog: CityLifeCatalog
 ) -> list[SettlementProblem]:
-    """计划与当年状态之间的错误：身份、重复购入、预付重叠、培训进度、时间预算。"""
+    """计划与当年状态之间的错误：身份、重复购入、预付重叠、培训进度、资格、资金目标、应急安排。
+
+    时间与精力在实际执行路径上逐月检查，超限是计划不可行（plan_infeasible），不是这里的输入错误（DECISIONS/0020 第七节）。
+    """
     out: list[SettlementProblem] = []
     who = f"{action.clone_id} 第 {action.year_index} 年"
     if action.clone_id != state.clone_id or action.person_id != state.person_id:
@@ -1637,36 +1386,22 @@ def plan_state_problems(
                             item_order=i,
                         )
                     )
-    if protocol.career_rules is not None:
-        # E1-5A：资格按年初状态判断，年内不会变。计划里写了年初还不满足要求的项目，是计划本身的错误
-        # （整份计划退回，E1-7 接重试），不是逐月拒绝——"展示未来机会"不等于允许立即执行。
-        for i, item in enumerate(action.items):
-            o = catalog.opportunity(item.opportunity_id)
-            if o is None:
-                continue
-            for gap in qualification_gaps(o, state):
-                out.append(
-                    _p(
-                        "qualification_missing",
-                        f"{who}/{o.opportunity_id}: 年初不满足 {gap.tag}——{gap.reason}",
-                        item_order=i,
-                    )
+    # 资格按年初状态判断，年内不会变。计划里写了年初还不满足要求的项目，是计划本身的错误（整份计划退回，可修改重试），
+    # 不是逐月拒绝——"展示未来机会"不等于允许立即执行。
+    for i, item in enumerate(action.items):
+        o = catalog.opportunity(item.opportunity_id)
+        if o is None:
+            continue
+        for gap in qualification_gaps(o, state):
+            out.append(
+                _p(
+                    "qualification_missing",
+                    f"{who}/{o.opportunity_id}: 年初不满足 {gap.tag}——{gap.reason}",
+                    item_order=i,
                 )
+            )
     out.extend(_savings_plan_state(protocol, state, action, catalog, who))
     out.extend(_emergency_plan_state(protocol, state, action, who))
-    if protocol.resource_rules is not None:
-        # 按月核算的协议：时间与精力在实际执行路径上逐月检查，超限是计划不可行（plan_infeasible），
-        # 不是这里的输入错误（DECISIONS/0020 第七节）。
-        return out
-    used = planned_hours(state, action, catalog)
-    budget = Fraction(Decimal(repr(state.time_budget_hours)))
-    if used > budget:
-        out.append(
-            _p(
-                "time_budget",
-                f"{who}: 计划占用 {float(used):.1f} 小时，超过年度时间预算 {state.time_budget_hours} 小时",
-            )
-        )
     return out
 
 
@@ -1797,86 +1532,20 @@ def cross_validate(bundle: LifeBundle) -> ContractReport:
             else:
                 errors.extend(tax_reference_problems(cat, policy))
 
-    # ---- 人：陈述与真值一一对应 ----
-    stated = {p.person_id: p for p in bundle.stated_profiles}
-    truths = {t.person_id: t for t in bundle.internal_truths}
-    for label, seq in (
-        ("stated_profiles", bundle.stated_profiles),
-        ("internal_truths", bundle.internal_truths),
-    ):
-        for k, cnt in Counter(p.person_id for p in seq).items():
-            if cnt > 1:
-                errors.append(f"{label}: person_id {k} 重复")
-    for pid in sorted(set(stated) ^ set(truths)):
-        errors.append(f"person_id {pid} 只在陈述与真值的一边出现")
-    # E3-A（DECISIONS/0034）：六维产品画像没有研究真值；同一个人只能有一种画像
+    # ---- 人：六维产品画像，健康问卷版本与协议声明相同 ----
     product = {p.person_id: p for p in bundle.product_profiles}
     for k, cnt in Counter(p.person_id for p in bundle.product_profiles).items():
         if cnt > 1:
             errors.append(f"product_profiles: person_id {k} 重复")
-    for pid in sorted(set(product) & (set(stated) | set(truths))):
-        errors.append(
-            f"person_id {pid} 同时有六维产品画像与旧七维陈述或研究真值：同一个人只能有一种画像，产品画像不配研究真值"
-        )
     for p in bundle.product_profiles:
         product_needs = [h.need for h in p.hard_requirements] + list(p.material_points or {})
         for need in product_needs:
             if need not in needs:
                 errors.append(f"product_profiles/{p.person_id}: 需求 {need!r} 没有声明")
-    for p in bundle.stated_profiles:
-        stated_needs = (
-            [s.need for s in p.soft_preferences]
-            + [h.need for h in p.hard_requirements]
-            + list(p.material_points or {})
-        )
-        for need in stated_needs:
-            if need not in needs:
-                errors.append(f"{p.person_id}: 需求 {need!r} 没有声明")
-    for t in bundle.internal_truths:
-        for need in t.material_subweights:
-            if need not in needs:
-                errors.append(f"{t.person_id}: 物质细权重的需求 {need!r} 没有声明")
-    # E1-5C：七维 healthcare 点数的含义必须与协议声明的一致——旧画像（医疗可及性）不能进新协议，
-    # 新画像（健康风险应对倾向）也不能交给旧协议；同一个键不悄悄换含义
-    declared = protocol.health_input
-    independent = isinstance(declared, IndependentHealthInputDeclaration)
-    semantics = declared.semantics if isinstance(declared, HealthInputDeclaration) else None
-    for label, seq in (
-        ("stated_profiles", bundle.stated_profiles),
-        ("internal_truths", bundle.internal_truths),
-    ):
-        for p in seq:
-            if independent:
-                errors.append(
-                    f"{label}/{p.person_id}: 协议声明的是独立健康回答（六维产品画像），这份是七维输入——不能把七维医疗点数"
-                    "改读成独立健康回答，请用新问卷重新确认"
-                )
-                continue
-            if p.healthcare_semantics == semantics:
-                continue
-            if semantics is not None:
-                errors.append(
-                    f"{label}/{p.person_id}: 协议把 healthcare 点数声明为 {semantics}（健康风险应对倾向，只供代理做"
-                    f"计划），这份输入写的是 {p.healthcare_semantics or '旧含义（医疗可及性）'}——旧答案不能改读成新含义，"
-                    "请用新问卷重新询问"
-                )
-            else:
-                errors.append(
-                    f"{label}/{p.person_id}: 这份输入的 healthcare 点数是 {p.healthcare_semantics}（新含义），协议 "
-                    f"{protocol.protocol_id} 按旧含义（医疗可及性）评分——不能悄悄换含义"
-                )
-
-    # E3-A：六维产品画像只进声明了独立健康回答、问卷版本相同的协议
-    for p in bundle.product_profiles:
-        if not independent:
-            errors.append(
-                f"product_profiles/{p.person_id}: 六维产品画像的健康回答是独立问卷，协议 {protocol.protocol_id} 没有声明独立"
-                "健康回答（IndependentHealthInputDeclaration）——不能交给按七维点数声明的协议"
-            )
-        elif declared.questionnaire_version != p.health_questionnaire_version:  # type: ignore[union-attr]
+        if protocol.health_input.questionnaire_version != p.health_questionnaire_version:
             errors.append(
                 f"product_profiles/{p.person_id}: 健康问卷版本 {p.health_questionnaire_version} 与协议声明的 "
-                f"{declared.questionnaire_version} 不同——旧答案不能改读成新题目的答案"  # type: ignore[union-attr]
+                f"{protocol.health_input.questionnaire_version} 不同——旧答案不能改读成新题目的答案"
             )
 
     # ---- 初始状态 ----
@@ -1885,7 +1554,7 @@ def cross_validate(bundle: LifeBundle) -> ContractReport:
         if s.clone_id in clones:
             errors.append(f"分身 {s.clone_id} 重复")
         clones[s.clone_id] = s
-        if s.person_id not in stated and s.person_id not in product:
+        if s.person_id not in product:
             errors.append(f"{s.clone_id}: 引用了不存在的人 {s.person_id}")
         cat = bundle.catalog_for(str(s.city))
         if cat is None:
@@ -1894,73 +1563,59 @@ def cross_validate(bundle: LifeBundle) -> ContractReport:
         errors.extend(p.message for p in state_problems(protocol, s, cat))
         errors.extend(resource_state_problems(protocol, s))
         errors.extend(career_state_problems(protocol, s, cat))
-    if protocol.career_rules is not None:
-        # 同一个人的对照分身：开局的能力与陈述的职业相同；岗位属于各自的城市，可以不同。
-        start: dict[str, set[tuple[object, ...]]] = {}
-        for s in bundle.initial_states:
-            stated_occ = s.employment.stated_occupation if s.employment is not None else None
-            start.setdefault(s.person_id, set()).add(
-                (tuple(sorted(a.ability_id for a in s.abilities)), stated_occ)
+    # 同一个人的对照分身：开局的能力与陈述的职业相同；岗位属于各自的城市，可以不同。
+    start: dict[str, set[tuple[object, ...]]] = {}
+    for s in bundle.initial_states:
+        stated_occ = s.employment.stated_occupation
+        start.setdefault(s.person_id, set()).add(
+            (tuple(sorted(a.ability_id for a in s.abilities)), stated_occ)
+        )
+        profile = product.get(s.person_id)
+        if profile is not None and stated_occ != profile.occupation:
+            errors.append(
+                f"{s.clone_id}: 岗位记录里陈述的职业 {stated_occ} 与用户陈述 {profile.occupation} 不一致"
             )
-            profile = stated.get(s.person_id) or product.get(s.person_id)
-            if (
-                profile is not None
-                and s.employment is not None
-                and stated_occ != profile.occupation
-            ):
-                errors.append(
-                    f"{s.clone_id}: 岗位记录里陈述的职业 {stated_occ} 与用户陈述 {profile.occupation} 不一致"
-                )
-        for pid, values in sorted(start.items()):
-            if len(values) > 1:
-                errors.append(f"{pid}: 对照分身的开局能力或陈述职业不一致——同一个人只有一份起点")
-    if protocol.resource_rules is not None:
-        # 同一个人的对照分身：基础时间预算与精力额度跨城相同，城市不能擅自给不同的基础额度。E1-4B 比较的
-        # 是固定的个人基础额度——第二年起的当前额度可以因各城实际生活的满足感不同而不同。
-        by_person: dict[str, set[tuple[float, float, str]]] = {}
-        for s in bundle.initial_states:
-            base = (
-                s.energy_quota_basis.base_level
-                if s.energy_quota_basis is not None
-                else s.energy.level
+    for pid, values in sorted(start.items()):
+        if len(values) > 1:
+            errors.append(f"{pid}: 对照分身的开局能力或陈述职业不一致——同一个人只有一份起点")
+    # 同一个人的对照分身：基础时间预算与精力额度跨城相同，城市不能擅自给不同的基础额度。比较的是固定的个人基础
+    # 额度——第二年起的当前额度可以因各城实际生活的满足感不同而不同。
+    by_person: dict[str, set[tuple[float, float, str]]] = {}
+    for s in bundle.initial_states:
+        by_person.setdefault(s.person_id, set()).add(
+            (s.time_budget_hours, s.energy_quota_basis.base_level, s.energy.scale_version)
+        )
+    for pid, values in sorted(by_person.items()):
+        if len(values) > 1:
+            errors.append(
+                f"{pid} 的对照分身基础资源不同 {sorted(values)}：同一个人在不同城市的净可分配小时"
+                "与精力额度必须相同"
             )
-            by_person.setdefault(s.person_id, set()).add(
-                (s.time_budget_hours, base, s.energy.scale_version)
+    # 疾病配对：同一个人只有一个年龄；同一个人在同一座城的重复分身序号不能重复（跨城同序号的分身共用随机数）
+    ages: dict[str, set[int]] = {}
+    repeats: Counter[tuple[str, str, int]] = Counter()
+    for s in bundle.initial_states:
+        ages.setdefault(s.person_id, set()).add(s.health.age_years)
+        repeats[(s.person_id, str(s.city), s.health.repeat_index)] += 1
+    for pid, values in sorted(ages.items()):
+        if len(values) > 1:
+            errors.append(f"{pid}: 对照分身的年龄不同 {sorted(values)}——同一个人只有一个年龄")
+    for (pid, city, k), cnt in sorted(repeats.items()):
+        if cnt > 1:
+            errors.append(
+                f"{pid} 在 {city} 有 {cnt} 个分身都用重复序号 {k}——它们会共用同一串随机数，重复序号必须不同"
             )
-        for pid, values in sorted(by_person.items()):
-            if len(values) > 1:
-                errors.append(
-                    f"{pid} 的对照分身基础资源不同 {sorted(values)}：同一个人在不同城市的净可分配小时"
-                    "与精力额度必须相同"
-                )
-    if protocol.health_rules is not None:
-        # E1-5C 配对：同一个人只有一个年龄；同一个人在同一座城的重复分身序号不能重复（跨城同序号的分身共用随机数）
-        ages: dict[str, set[int]] = {}
-        repeats: Counter[tuple[str, str, int]] = Counter()
-        for s in bundle.initial_states:
-            if s.health is None:
-                continue
-            ages.setdefault(s.person_id, set()).add(s.health.age_years)
-            repeats[(s.person_id, str(s.city), s.health.repeat_index)] += 1
-        for pid, values in sorted(ages.items()):
-            if len(values) > 1:
-                errors.append(f"{pid}: 对照分身的年龄不同 {sorted(values)}——同一个人只有一个年龄")
-        for (pid, city, k), cnt in sorted(repeats.items()):
-            if cnt > 1:
-                errors.append(
-                    f"{pid} 在 {city} 有 {cnt} 个分身都用重复序号 {k}——它们会共用同一串随机数，重复序号必须不同"
-                )
-        source = protocol.illness_events
-        used = {(pid, k) for pid, _, k in repeats}
-        for e in source.injected if source is not None else ():
-            if (e.person_id, e.repeat_index) not in used:
-                errors.append(
-                    f"指定事件 {e.person_id} 序号 {e.repeat_index} 第 {e.year_index} 年第 {e.month} 月：没有这个人的这个"
-                    "重复序号的分身——指定事件不会落到任何人身上"
-                )
-            if e.year_index > n:
-                errors.append(f"指定事件第 {e.year_index} 年超出协议的 N = {n}")
-    for pid in sorted(set(stated) | set(product)):
+    source = protocol.illness_events
+    used = {(pid, k) for pid, _, k in repeats}
+    for e in source.injected:
+        if (e.person_id, e.repeat_index) not in used:
+            errors.append(
+                f"指定事件 {e.person_id} 序号 {e.repeat_index} 第 {e.year_index} 年第 {e.month} 月：没有这个人的这个"
+                "重复序号的分身——指定事件不会落到任何人身上"
+            )
+        if e.year_index > n:
+            errors.append(f"指定事件第 {e.year_index} 年超出协议的 N = {n}")
+    for pid in sorted(product):
         if not any(s.person_id == pid for s in bundle.initial_states):
             notes.append(f"{pid} 没有任何分身的初始状态")
 
@@ -2061,7 +1716,7 @@ def cross_validate(bundle: LifeBundle) -> ContractReport:
             "money_bases": bases,
             "n_opportunities": sum(len(c.opportunities) for c in bundle.catalogs),
             "availability": dict(sorted(availability.items())),
-            "n_people": len(bundle.stated_profiles) + len(bundle.product_profiles),
+            "n_people": len(bundle.product_profiles),
             "n_clones": len(bundle.initial_states),
             "n_example_actions": len(bundle.example_actions),
             "n_plans": len(bundle.plans),

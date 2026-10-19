@@ -40,19 +40,10 @@ from common.life_contracts import (
 )
 from common.money import Money
 
-#: 评价规格的版本、执行修订与内容格式。改变任何一项计算语义都换修订号，并在 ADR 里记录。
-#: v2 / r2（2026-10-12，DECISIONS/0029）：生活模板与治疗分支分开（F3）；身份核对（F1）、已有物品先于新品供给（F2）、
-#: 正式入口复查配置（F4）。不保留 v1 / r1 的执行器：旧规格明确拒绝，旧配置与 E1-6A 证据原样保留作历史。
+#: 评价规格的版本、执行修订与内容格式（DECISIONS/0028、0029）。改变任何一项计算语义都换修订号，并在 ADR 里记录。
 EVALUATION_VERSION = "e1-6a-evaluation-v2"
 EVALUATION_REVISION = "e1-6a-r2"
 EVALUATION_CONTENT_SCHEMA = "e1-6a-evaluation-content-v2"
-#: 已退役的版本 → 拒绝时的说明。
-RETIRED_EVALUATION_VERSIONS = {
-    "e1-6a-evaluation-v1": (
-        "评价版本 e1-6a-evaluation-v1（参考方案里绑定了治疗选择）已由 e1-6a-evaluation-v2 取代：基础生活模板与治疗分支"
-        "分开（DECISIONS/0029）。当前代码不再执行 v1 / r1；旧配置与 E1-6A 证据原样保留作历史"
-    ),
-}
 #: 本轮只支持 12 个月的估值期；其他长度明确拒绝，不静默改成 12。
 SUPPORTED_HORIZON_MONTHS = 12
 #: 最多几个基础生活模板；估值期初健康时每个模板一次试算（≤ 6），带病时每个模板两次（≤ 12）。
@@ -202,15 +193,6 @@ class EvaluationSpec(ContractModel):
     life_templates: tuple[LifeTemplate, ...]
     city_bindings: tuple[CitySlotBinding, ...]
     note: str | None = Field(default=None, max_length=800)
-
-    @model_validator(mode="before")
-    @classmethod
-    def _retired(cls, data: object) -> object:
-        if isinstance(data, dict):
-            retired = RETIRED_EVALUATION_VERSIONS.get(str(data.get("version")))
-            if retired is not None:
-                raise ValueError(retired)
-        return data
 
     @model_validator(mode="after")
     def _consistent(self) -> EvaluationSpec:

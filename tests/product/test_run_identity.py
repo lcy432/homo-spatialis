@@ -44,7 +44,7 @@ def compiled(tmp_path_factory):
 
 def test_no_run_records_source_fingerprints(compiled):
     with contextlib.chdir(REPO):
-        old = preflight(Path("configs/life/run_e1_convenience_mock.yaml"))
+        old = preflight(Path("configs/life/run_product_mock.yaml"))
     for ids in (compiled.pre.world.identities, old.identities):
         assert not [k for k in ids if k.startswith("source:") or k == "source_set"]
 

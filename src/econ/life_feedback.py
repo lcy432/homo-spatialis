@@ -15,16 +15,15 @@
   已知月份平均、不重新归一化偏好、不维持旧加成，也不擅自恢复基础额度说成反馈已完成。
 * 分数的人、分身、城市、年份、评分规格、偏好来源对不上，直接拒绝（``LifeContractError``）。
 
-r2（2026-10-08 修复，DECISIONS/0021 第十三节）：
+年度绑定（DECISIONS/0021 第十三节、0025）：
 
 * ``feedback_record`` 只接受年度绑定 ``ScoredYear``——同一个年初状态的这一次实际结算、对这份结果的实际评分
-  与它产生的候选状态，由 ``econ.life_year.settle_and_score`` 在真正结算并评分时一起封存。分别传入的
-  ``start`` / ``settlement`` / ``score`` 被明确拒绝：同人、同城、同年、同版本不足以证明是同一次生活。
+  与它产生的候选状态，由 ``econ.life_year.settle_and_score`` 在真正结算并评分时一起封存。同人、同城、同年、
+  同版本不足以证明是同一次生活。
 * ``apply_feedback`` 只把额度写进记录指向的那一份候选状态（内容指纹相同），并核对政策内容指纹。
 * 年初状态与候选状态的政策核对用 ``common.life_contracts.energy_quota_problems``，与加载、结算、观察同一份。
-
-r3（2026-10-09 修复，DECISIONS/0025）：政策声明了评分内容身份时，记录写下它（并核对年度绑定里实际评分规格的
-身份与之相同），``apply_feedback`` 核对候选状态记下的身份并写进下一年的额度依据。
+* 记录写下政策声明的评分内容身份（并核对年度绑定里实际评分规格的身份与之相同），``apply_feedback`` 核对候选状态
+  记下的身份并写进下一年的额度依据。
 
 签名里只有协议（反馈政策）与年度绑定；没有偏好真值或行动理由。年度交接（结算 → 评分 → 本模块）在
 ``econ.life_year``。
@@ -38,6 +37,7 @@ from decimal import Decimal
 from fractions import Fraction
 
 from common.life_contracts import (
+    FEEDBACK_HANDOFF_REVISION,
     EnergyFeedbackPolicy,
     EnergyQuotaBasis,
     EnergyState,
@@ -111,22 +111,6 @@ def quota_from_score(base_level: float, alpha: float, score: float) -> QuotaComp
     return QuotaComputation(score=s, score_text=text, raw=raw, quantized=quantized, upper=upper)
 
 
-def _policy(protocol: LifeProtocol) -> EnergyFeedbackPolicy:
-    policy = protocol.energy_feedback
-    if policy is None:
-        raise LifeContractError(
-            f"协议 {protocol.protocol_id} 没有满足感反馈政策：E1-4A 与更早的协议额度固定，不做年度反馈"
-        )
-    return policy
-
-
-def _quota_basis(state: PersonYearState) -> EnergyQuotaBasis:
-    basis = state.energy_quota_basis
-    if basis is None:
-        raise LifeContractError(f"{state.clone_id}: 没有基础额度与额度依据，不能做年度反馈")
-    return basis
-
-
 def _check_score(
     policy: EnergyFeedbackPolicy, start: PersonYearState, score: ExploratoryYearScore
 ) -> None:
@@ -181,30 +165,12 @@ def verified_year(protocol: LifeProtocol, year: object) -> ScoredYear:
     return year
 
 
-def feedback_record(
-    *,
-    protocol: LifeProtocol,
-    year: ScoredYear | None = None,
-    **legacy: object,
-) -> EnergyFeedbackRecord:
+def feedback_record(*, protocol: LifeProtocol, year: ScoredYear) -> EnergyFeedbackRecord:
     """一次年度交接对下一年额度的决定。``year`` 是年度绑定：这一年**年初**状态、它的这一次实际结算、评分器
     对**这一份**结果的评分（没有评分时为空并写明原因），以及结算产生的候选状态。
-
-    r1 的调用方式（分别传 ``start``、``settlement``、``score``）被明确拒绝：两次真实生活即使同人、同城、同年，
-    也可能有不同的账目与分数，分别传入无法证明它们来自同一次生活。
     """
-    if legacy or year is None:
-        names = ", ".join(sorted(legacy)) or "（没有给 year）"
-        raise LifeContractError(
-            f"feedback_record 只接受年度绑定 year=ScoredYear，不再接受分别传入的 {names}：账目、分数与候选状态"
-            "必须由 econ.life_year.settle_and_score 在同一次结算并评分时一起建立"
-        )
     year = verified_year(protocol, year)
-    policy = _policy(protocol)
-    if year.feedback_revision != policy.handoff_revision:
-        raise LifeContractError(
-            f"年度绑定的执行修订是 {year.feedback_revision}，这份政策下应是 {policy.handoff_revision}"
-        )
+    policy = protocol.energy_feedback
     if (
         year.scoring_content_fingerprint is not None
         and year.scoring_content_fingerprint != policy.scoring_content_fingerprint
@@ -214,12 +180,11 @@ def feedback_record(
             f"{policy.scoring_content_fingerprint}：分数来自另一套评分内容，不能确定下一年额度"
         )
     rules = protocol.resource_rules
-    assert rules is not None  # E1-4B 的协议必须带月度资源规则（契约检查）
     start, settlement = year.start, year.settlement
     score, score_problem = year.score, year.score_problem
     if start.status != "active":
         raise LifeContractError(f"{start.clone_id}: 年初状态是 {start.status}，不是一个行动年")
-    basis = _quota_basis(start)
+    basis = start.energy_quota_basis
     if basis.status == "pending_feedback":
         raise LifeContractError(f"{start.clone_id}: 年初额度还没确定，这一年不该被结算")
     base, previous = to_fraction(basis.base_level), to_fraction(start.energy.level)
@@ -244,7 +209,7 @@ def feedback_record(
         policy_fingerprint=policy.content_fingerprint,
         binding_fingerprint=year.binding_fingerprint,
         candidate_fingerprint=year.candidate_fingerprint,
-        feedback_revision=policy.handoff_revision,
+        feedback_revision=FEEDBACK_HANDOFF_REVISION,
         scoring_content_fingerprint=policy.scoring_content_fingerprint,
     )
     out, nxt = settlement.outcome, settlement.next_state
@@ -363,12 +328,12 @@ def apply_feedback(candidate: PersonYearState, record: EnergyFeedbackRecord) -> 
     """把一次已确定的额度写进下一年的年初状态。只接受结算刚产生的候选状态（额度待定），而且必须是
     记录所说的那个分身、那一年——同一次交接重复应用，或拿别的年份、别的分身的记录，都被拒绝。
 
-    r2：候选状态必须**正是**这条记录的年度绑定里的那一份（内容指纹相同），并且由同一份政策内容产生。
+    候选状态必须**正是**这条记录的年度绑定里的那一份（内容指纹相同），并且由同一份政策内容产生。
     同人、同城、同年的另一次生活（例如住远处的试算）的候选状态不接受这条记录。"""
     if record.decision not in ("applied", "off_disabled", "off_alpha_zero"):
         raise LifeContractError(f"反馈记录是 {record.decision}：没有确定的下一年额度可写")
     basis = candidate.energy_quota_basis
-    if candidate.status != "active" or basis is None or basis.status != "pending_feedback":
+    if candidate.status != "active" or basis.status != "pending_feedback":
         raise LifeContractError(
             f"{candidate.clone_id}: 只能把额度写进结算刚产生、额度待定的候选状态；这个状态已经确定过额度"
             "（重复交接不叠加加成）"

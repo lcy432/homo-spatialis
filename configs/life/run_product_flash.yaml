@@ -1,0 +1,80 @@
+# 产品协议样例的真实模型配置：产品角色 Qwen3.8 Flash（configs/models.yaml 的 product_planner，滚动型号，DECISIONS/0032）。只在所有者
+# 明确要求时用 --config 显式选。模型调用设定（思考关闭、温度 0.2、JSON object、输出上限 4,096、超时 90 秒、每份候选最多 1 次服务重试）
+# 与之前的 Flash 配置逐项相同。
+#
+# 付费预算：接着用 ledgers/qwen-flash-convenience 这本账（额度 12 次请求、应用侧估算 2 元，已用的照算，不重置）。要更大的预算，所有者另给
+# 额度并换一本新账。预算保护是按已记录报价执行的应用侧控制，不是供应商级的账单上限；费用以供应商账单为准。
+
+run_notice: >-
+  exploratory_synthetic：产品协议样例的真实模型配置（Qwen3.8 Flash）。合成城市、合成参数、合成人设；结果只说明这个模型在这一次合成试跑
+  里的表现，不代表模型的一般能力，也不是现实城市评价。
+
+run:
+  run_config_id: run.product.flash
+  status: exploratory_synthetic
+  version: e1-7b-run-v1
+  roster: configs/life/roster_product.yaml
+  city_facts: configs/life/city_facts_product.yaml
+  information:
+    condition: product_stated_profile
+    show_stated_dimension_points: true
+    show_hard_requirements: true
+    show_free_text: true
+    show_energy_level: true
+    show_stated_material_points: true
+    permission_version: e3a-product-v1
+    show_health_answers: true
+  planning:
+    plans_per_year: 1
+    max_revisions_per_year: 2
+    global_call_limit: 12
+    run_order: roster_order
+    transport_retries: 1
+    note: >-
+      每个分身每年一次正常规划、最多两次修订（与 E1-7B 相同）。全局规划调用上限 12 与付费上限 12 次请求一致；两个分身 × 3 年至少要 6 次。
+      每份候选最多再试 1 次服务请求，与计划修订分开计数。顺序调度，不并发
+  planner:
+    identity:
+      kind: llm
+      planner_id: llm.qwen.product_planner
+      version: e1-7b-llm-v1
+      model_snapshot: qwen3.8-flash
+      note: 真实模型规划器：DashScope OpenAI 兼容端点上的千问滚动型号（没有带日期的快照）；只收安全投影的请求，计划由环境检查与结算
+    llm:
+      model_role: product_planner
+      provider: dashscope
+      model: qwen3.8-flash
+      version_policy: rolling
+      base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+      temperature: 0.2
+      enable_thinking: false
+      response_format: json_object
+      max_output_tokens: 4096
+      timeout_seconds: 90
+      sdk_max_retries: 0
+      service_retries: 1
+      retry_wait_seconds: 5
+      max_input_tokens: 64000
+      token_estimate: ascii1_nonascii2_v1
+      note: >-
+        沿用 E1-7B 的调用设定（思考关闭、温度 0.2、JSON object、输出上限 4,096、超时 90 秒、SDK 自动重试关闭、每份候选最多 1 次服务重试），
+        只换模型与角色；qwen3.8-flash 是滚动型号（没有带日期的快照）
+  paid_budget:
+    ledger_dir: ledgers/qwen-flash-convenience
+    max_requests: 12
+    max_cost_cny: 2
+    price:
+      price_version: qwen3.8-flash@beijing@2026-10-09
+      model: qwen3.8-flash
+      region: 华北2（北京）
+      currency: CNY
+      input_per_million: 0.8
+      output_per_million: 2.7
+      source_url: https://help.aliyun.com/zh/model-studio/qwen3-8-flash
+      checked_on: "2026-10-18"
+      rule: >-
+        官方页面（2026-10-09 更新，2026-10-18 发送前再次核对）的标价：输入 0.8 元 / 百万 token、输出 2.7 元 / 百万 token，页面没有按输入长度
+        分档；每个输入 token 都按未命中缓存的标价估算，不假设缓存折扣或促销。核对记录见 runs/2026-10-18-e1-daily-convenience/pricing/
+  prompt_template: e3a-product-prompt-v1
+  memory_policy: e1-7a-memory-v1
+  note: 产品协议样例的真实模型配置（产品角色 Qwen3.8 Flash）；接着用 ledgers/qwen-flash-convenience 这本账（12 次、2 元以内）。

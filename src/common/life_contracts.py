@@ -17,22 +17,16 @@
 （``PROTOCOL_FAMILY``），不借用 ln V、美元福利或 P8 的精度结论。
 
 复用的只有身份与计价的基础类型——``CityId``、``OccupationId``、``Jurisdiction``、
-``Money``、``Provenance``——以及七维的唯一定义 ``worlds.dimensions``。后者是本包对
-``worlds`` 的唯一依赖：它是零 import 的常量叶模块，``worlds/__init__.py`` 也没有
-import，所以不会把 M3 的生成器带进来（有测试盯着）。
+``Money``、``Provenance``。
 
 --------------------------------------------------------------------------
-三条贯穿全文件的区分
+两条贯穿全文件的区分
 --------------------------------------------------------------------------
 
-**偏好 vs 安排。** 偏好是人的稳定属性（``StatedLifeProfile`` / ``InternalPreferenceTruth``）；
+**偏好 vs 安排。** 偏好是人的稳定属性（六维产品画像 ``common.life_product_profile.ProductLifeProfile``）；
 实际消费安排是行动（``YearAction``），可以因城而异。旧协议的硬规则 9（支出份额是
 人的字段、不随城市变）管的是旧 Cobb-Douglas 份额，与这里不冲突：这里**不用**支出
 份额代替偏好，也不要求动态消费比例跨城固定。
-
-**陈述 vs 真值。** 用户说了什么（产品可见，``StatedLifeProfile``）与评分侧用什么
-（研究内部，``InternalPreferenceTruth``）是两个**独立的顶层对象**。放进同一个对象，
-任何一次粗心的序列化都会把真值一起带出去。
 
 **实际报价 vs 价格指数。** 报价（``PriceQuote``）是可以付的钱；指数（``PriceIndex``）
 是无量纲的相对水平，没有金额，不能当付款单价。
@@ -55,7 +49,6 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 from common.ids import CityId, Jurisdiction, OccupationId
 from common.money import USD_2024_US100, Money
 from common.provenance import Provenance
-from worlds.dimensions import ALL_DIMENSIONS
 
 #: 新生活协议的家族名。与旧静态协议（ln V / 美元福利 / P8）**不是同一个协议**。
 PROTOCOL_FAMILY = "life_simulation"
@@ -105,97 +98,33 @@ MINIMUM_NEEDS: tuple[str, ...] = ("housing", "food")
 Availability = Literal["available", "unavailable", "unknown"]
 BillingPeriod = Literal["one_time", "per_week", "per_month", "per_year"]
 
-#: E1-4A（DECISIONS/0020）：生活规则版本为这个值的协议按月核算时间与精力，并**必须**带资源规则。
-#: 其他规则版本（如 E1-2/E1-3 的 ``e1-2-monthly-v1``）照旧：年度时间检查、精力只记录。
-E1_4A_LIFE_RULES_VERSION = "e1-4a-monthly-v1"
+#: 生活规则版本。只有这一版：月度时间与精力（DECISIONS/0020）、满足感 → 下一年精力额度（0021）、学习与岗位（0023）、
+#: 目标储蓄（0026）、疾病与应急（0027）。协议必须同时带这些规则。
+LIFE_RULES_VERSION = "e1-5c-monthly-health-v1"
 RESOURCE_RULES_VERSION = "e1-4a-monthly-resources-v1"
-#: 资源规则的执行修订（DECISIONS/0020 第十二节）。输入格式与规则版本不变，执行语义按修订走：
-#: r1（2026-10-07）出局当月不判额度、同月两份到岗工作一律拒绝；r2（2026-10-08）出局当月检查已知劳动的
-#: 资源下限、多份到岗工作按"每个岗位每次到岗一趟完整往返"相加。只保留 r2 的执行器，r1 的结果留在历史 runs。
+#: 资源规则的执行修订（DECISIONS/0020 第十二节），写进资源账与诊断：出局当月检查已知劳动的资源下限、多份到岗工作按
+#: "每个岗位每次到岗一趟完整往返"相加。改资源执行语义要换修订号。
 RESOURCE_RULES_REVISION = "r2-2026-10-08"
-#: 新规则下 ``EnergyState.level`` 的含义：每个月可持续承受的活动负担额度（负担点）。旧样例的
-#: ``level`` 尺度没有冻结，**不**被解释成月度额度。
+#: ``EnergyState.level`` 的含义：每个月可持续承受的活动负担额度（负担点）。
 ENERGY_QUOTA_SCALE = "e1-4a-monthly-quota-v1"
 #: 资源输入（小时、每小时负担、额度、净可分配小时）最多两位小数；分钟与天数是整数。
 RESOURCE_INPUT_DECIMALS = 2
-#: E1-4B（DECISIONS/0021）：生活规则版本为这个值的协议在 E1-4A 的月度资源规则之上，**必须**再声明
-#: 满足感 → 下一年月度精力额度的反馈政策（``energy_feedback``）。E1-4A 的协议不能带它——旧输入不会被
-#: 悄悄赋予新行为。
-E1_4B_LIFE_RULES_VERSION = "e1-4b-monthly-feedback-v1"
-#: E1-5A（DECISIONS/0023）：在 E1-4B 之上加"学习 → 能力 → 下一年可选岗位 → 实际收入"。这个版本的协议
-#: 还**必须**带月度资源规则、满足感反馈政策与职业规则（``career_rules``）。
-E1_5A_LIFE_RULES_VERSION = "e1-5a-monthly-career-v1"
-#: E1-5B（DECISIONS/0026）：在 E1-5A 之上加结构化资金目标（目标储蓄）。这个版本的协议还**必须**带
-#: ``savings_rules``；资源规则、反馈政策与职业规则照旧必带。旧版本的协议不能带目标——旧输入不会被悄悄赋予新行为。
-E1_5B_LIFE_RULES_VERSION = "e1-5b-monthly-savings-v1"
-#: E1-5C（DECISIONS/0027）：在 E1-5B 之上加疾病、应急与恢复。这个版本的协议还**必须**带健康规则（``health_rules``）、
-#: 疾病事件来源（``illness_events``）与健康输入的含义声明（``health_input``）；资源规则、反馈政策、职业规则与目标储蓄
-#: 规则照旧必带。旧版本的协议不能带它们——旧输入不会被悄悄赋予新行为。
-E1_5C_LIFE_RULES_VERSION = "e1-5c-monthly-health-v1"
-#: 按月核算时间与精力的生活规则版本（都必须带 ``resource_rules``）。
-MONTHLY_LIFE_RULES_VERSIONS: frozenset[str] = frozenset(
-    {
-        E1_4A_LIFE_RULES_VERSION,
-        E1_4B_LIFE_RULES_VERSION,
-        E1_5A_LIFE_RULES_VERSION,
-        E1_5B_LIFE_RULES_VERSION,
-        E1_5C_LIFE_RULES_VERSION,
-    }
-)
-#: 必须声明满足感反馈政策（``energy_feedback``）的生活规则版本。
-FEEDBACK_LIFE_RULES_VERSIONS: frozenset[str] = frozenset(
-    {
-        E1_4B_LIFE_RULES_VERSION,
-        E1_5A_LIFE_RULES_VERSION,
-        E1_5B_LIFE_RULES_VERSION,
-        E1_5C_LIFE_RULES_VERSION,
-    }
-)
-#: 必须声明职业规则（``career_rules``）的生活规则版本。
-CAREER_LIFE_RULES_VERSIONS: frozenset[str] = frozenset(
-    {E1_5A_LIFE_RULES_VERSION, E1_5B_LIFE_RULES_VERSION, E1_5C_LIFE_RULES_VERSION}
-)
-#: 必须声明目标储蓄规则（``savings_rules``）的生活规则版本。
-SAVINGS_LIFE_RULES_VERSIONS: frozenset[str] = frozenset(
-    {E1_5B_LIFE_RULES_VERSION, E1_5C_LIFE_RULES_VERSION}
-)
-#: 必须声明健康规则、疾病事件来源与健康输入含义的生活规则版本（E1-5C）。
-HEALTH_LIFE_RULES_VERSIONS: frozenset[str] = frozenset({E1_5C_LIFE_RULES_VERSION})
 ENERGY_FEEDBACK_POLICY_VERSION = "e1-4b-satisfaction-quota-v1"
-#: E1-4B 年度交接的执行修订。r1（2026-10-08 首版）只按政策编号与版本核对、底层反馈接口可以混用不同生活的
-#: 账目与分数；r2（2026-10-08 修复，DECISIONS/0021 第十三节）让额度绑定政策**内容**、让反馈绑定同一次
-#: 年度结算与评分。公式、滞后、固定基础与量化都没有变，所以政策版本不升级；产物靠这个修订号区分修复前后。
-FEEDBACK_HANDOFF_REVISION = "r2-2026-10-08"
-#: r3（2026-10-09 修复，DECISIONS/0025）：额度还绑定确定它的**评分内容**（``LifeScoringSpec.content_fingerprint``）。
-#: 只用于声明了评分内容身份（``EnergyFeedbackPolicy.scoring_content_fingerprint``）的政策；没有声明的旧格式政策照旧是
-#: r2，行为与产物逐字节不变。同一个执行器：声明了才多核对一项。``handoff_revision`` 按政策给出生效的修订。
-SCORING_CONTENT_HANDOFF_REVISION = "r3-2026-10-09"
-FEEDBACK_HANDOFF_REVISIONS: tuple[str, ...] = (
-    FEEDBACK_HANDOFF_REVISION,
-    SCORING_CONTENT_HANDOFF_REVISION,
-)
-#: 政策内容指纹的规范化格式（哪些字段参与见 ``EnergyFeedbackPolicy.content``）。v2 = 声明了评分内容身份的政策。
-FEEDBACK_POLICY_CONTENT_SCHEMA = "e1-4b-policy-content-v1"
-FEEDBACK_POLICY_CONTENT_SCHEMA_SCORING = "e1-4b-policy-content-v2"
-#: 可以不声明评分内容身份的旧格式评分版本（E1-3 探索版与增补版：E1-4B、E1-5A 协议用的就是它们）。其他评分版本——
-#: ``e1-5a-growth-transport-v1`` 以及以后新增的版本——的反馈政策**必须**声明，漏写是输入错误，不默认通过。
-UNBOUND_SCORING_VERSIONS: frozenset[str] = frozenset({"e1-3-explore-v1", "e1-3-supplement-v1"})
-#: E1-5A 职业规则（DECISIONS/0023）的版本与内容指纹格式（哪些字段参与见 ``CareerRules.content``）。
+#: 年度交接的执行修订（DECISIONS/0021 第十三节、0025）：额度绑定反馈政策的内容与确定它的评分内容。
+FEEDBACK_HANDOFF_REVISION = "r3-2026-10-09"
+#: 政策内容指纹的规范化格式（哪些字段参与见 ``EnergyFeedbackPolicy.content``）。
+FEEDBACK_POLICY_CONTENT_SCHEMA = "e1-4b-policy-content-v2"
+#: 职业规则（DECISIONS/0023）的版本与内容指纹格式（哪些字段参与见 ``CareerRules.content``）。
 CAREER_RULES_VERSION = "e1-5a-career-v1"
 CAREER_RULES_CONTENT_SCHEMA = "e1-5a-career-content-v1"
-#: E1-5B 目标储蓄规则（DECISIONS/0026）的版本与内容指纹格式（哪些字段参与见 ``SavingsRules.content``）。
+#: 目标储蓄规则（DECISIONS/0026）的版本与内容指纹格式（哪些字段参与见 ``SavingsRules.content``）。
 SAVINGS_RULES_VERSION = "e1-5b-savings-goals-v1"
 SAVINGS_RULES_CONTENT_SCHEMA = "e1-5b-savings-content-v1"
 #: 本探索版允许的最大加成比例 α 上限（0 ≤ α ≤ 0.10）。合成设定，不是经验结论。
 FEEDBACK_ALPHA_MAX = 0.10
-#: 反馈读取的偏好来源。与 ``common.life_scoring_contracts.PreferenceSource`` 同一组取值（测试核对）；
-#: 在这里另写一份，是因为协议契约不能反过来 import 评分契约。
-#: E3-A（DECISIONS/0034）：``product_confirmed_six_dim`` = 用户确认的六维精确点数（``common.life_product_profile.ProductLifeProfile``），
-#: 健康回答独立、不进权重。它与 ``product_stated_numeric``（旧七维 ``StatedLifeProfile``）是两条不同的产品路径，不互相代替。
-FeedbackPreferenceSource = Literal[
-    "research_synthetic_truth", "product_stated_numeric", "product_confirmed_six_dim"
-]
-#: 六维产品画像的偏好来源名（年度交接按它找输入类型，评分按它分派有效权重）。
+#: 偏好来源：用户确认的六维精确点数（``common.life_product_profile.ProductLifeProfile``，DECISIONS/0034），健康回答独立、
+#: 不进权重。与 ``common.life_scoring_contracts.PreferenceSource`` 同一组取值；协议契约不能反过来 import 评分契约，所以另写一份。
+FeedbackPreferenceSource = Literal["product_confirmed_six_dim"]
 PRODUCT_SIX_DIM_SOURCE = "product_confirmed_six_dim"
 
 
@@ -243,7 +172,7 @@ class LifeProtocol(ContractModel):
     protocol_id: IdStr
     family: Literal["life_simulation"] = PROTOCOL_FAMILY
     schema_version: str
-    life_rules_version: str
+    life_rules_version: Literal["e1-5c-monthly-health-v1"]
     scoring_scale_version: str
     info_permission_version: str
     status: ProtocolStatus
@@ -252,32 +181,19 @@ class LifeProtocol(ContractModel):
     simulation_years: Annotated[int, Field(ge=1, le=MAX_SIMULATION_YEARS)] = (
         DEFAULT_SIMULATION_YEARS
     )
-    #: E1-4A：月度时间与精力规则。生活规则版本是 E1-4A 或 E1-4B（``MONTHLY_LIFE_RULES_VERSIONS``）时
-    #: **必须**给，其他版本**不能**给——漏填不会悄悄退回"只记录、不约束"，旧协议也不会悄悄被改规则。
-    resource_rules: MonthlyResourceRules | None = None
-    #: E1-4B：满足感 → 下一年月度精力额度的反馈政策。生活规则版本在 ``FEEDBACK_LIFE_RULES_VERSIONS``
-    #: 里时**必须**给（开、关与强度都要显式写），其他版本**不能**给。
-    energy_feedback: EnergyFeedbackPolicy | None = None
-    #: E1-5A：学习成果、生效时点、岗位取得规则与能力词表。生活规则版本是 ``E1_5A_LIFE_RULES_VERSION`` 时
-    #: **必须**给，其他版本**不能**给。没有用到时不序列化——旧协议的输出与指纹逐字节不变。
-    career_rules: CareerRules | None = Field(default=None, exclude_if=lambda v: v is None)
-    #: E1-5B：目标储蓄规则。生活规则版本在 ``SAVINGS_LIFE_RULES_VERSIONS`` 里时**必须**给，其他版本**不能**给。
-    #: 没有用到时不序列化——旧协议的输出与指纹逐字节不变。
-    savings_rules: SavingsRules | None = Field(default=None, exclude_if=lambda v: v is None)
-    #: E1-5C：疾病与恢复的世界规则、疾病事件来源（实验设置）与健康输入的含义声明。生活规则版本在
-    #: ``HEALTH_LIFE_RULES_VERSIONS`` 里时三者都**必须**给，其他版本都**不能**给。没有用到时不序列化。
-    health_rules: HealthRules | None = Field(default=None, exclude_if=lambda v: v is None)
-    illness_events: IllnessEventSource | None = Field(default=None, exclude_if=lambda v: v is None)
-    #: E3-A（DECISIONS/0034）：也可以是 ``IndependentHealthInputDeclaration``——新产品画像的健康回答独立于六维定和。两种声明
-    #: 互不代替：旧声明说明七维 healthcare 点数的含义，新声明说明独立健康问卷的版本；画像类型必须与声明对应。
-    health_input: HealthInputDeclaration | IndependentHealthInputDeclaration | None = Field(
-        default=None, exclude_if=lambda v: v is None
-    )
-
-    @property
-    def monthly_resources(self) -> bool:
-        """这份协议是否按月核算时间与精力（E1-4A/E1-4B）。"""
-        return self.resource_rules is not None
+    #: 月度时间与精力规则（DECISIONS/0020）。
+    resource_rules: MonthlyResourceRules
+    #: 满足感 → 下一年月度精力额度的反馈政策（DECISIONS/0021；开、关与强度都要显式写）。
+    energy_feedback: EnergyFeedbackPolicy
+    #: 学习成果、生效时点、岗位取得规则与能力词表（DECISIONS/0023）。
+    career_rules: CareerRules
+    #: 目标储蓄规则（DECISIONS/0026）。
+    savings_rules: SavingsRules
+    #: 疾病与恢复的世界规则、疾病事件来源（实验设置）与健康输入的含义声明（DECISIONS/0027、0034）。健康回答是独立问卷，
+    #: 不在六维定和里。
+    health_rules: HealthRules
+    illness_events: IllnessEventSource
+    health_input: IndependentHealthInputDeclaration
 
     @property
     def terminal_year_index(self) -> int:
@@ -304,74 +220,6 @@ class LifeProtocol(ContractModel):
     def scoring_ready(self) -> bool:
         """只有 ``formal`` 且八条政策全部已定，才算可评分。"""
         return self.status == "formal" and not self.undecided_policies
-
-    @model_validator(mode="after")
-    def _resource_rules_match_version(self) -> LifeProtocol:
-        new = self.life_rules_version in MONTHLY_LIFE_RULES_VERSIONS
-        if new and self.resource_rules is None:
-            raise ValueError(
-                f"生活规则 {self.life_rules_version} 必须声明 resource_rules（月度时间与精力规则）；"
-                "漏填不能退回只记录、不约束"
-            )
-        if not new and self.resource_rules is not None:
-            raise ValueError(
-                f"生活规则 {self.life_rules_version} 不读月度资源规则；要按月核算时间与精力，"
-                f"请声明规则版本 {E1_4A_LIFE_RULES_VERSION}"
-            )
-        feedback = self.life_rules_version in FEEDBACK_LIFE_RULES_VERSIONS
-        if feedback and self.energy_feedback is None:
-            raise ValueError(
-                f"生活规则 {self.life_rules_version} 必须显式声明 energy_feedback（开或关、强度 α）；"
-                "漏填不能静默当成关闭"
-            )
-        if not feedback and self.energy_feedback is not None:
-            raise ValueError(
-                f"生活规则 {self.life_rules_version} 不读满足感反馈政策；要启用 E1-4B，请声明规则版本 "
-                f"{E1_4B_LIFE_RULES_VERSION}——旧协议的输入不能被悄悄赋予新行为"
-            )
-        career = self.life_rules_version in CAREER_LIFE_RULES_VERSIONS
-        if career and self.career_rules is None:
-            raise ValueError(
-                f"生活规则 {self.life_rules_version} 必须声明 career_rules（学习成果、生效时点、岗位取得规则与"
-                "能力词表）；漏填不能猜"
-            )
-        if not career and self.career_rules is not None:
-            raise ValueError(
-                f"生活规则 {self.life_rules_version} 不读职业规则；要启用学习成果与岗位变化，请声明规则版本 "
-                f"{E1_5A_LIFE_RULES_VERSION}——旧配置不能在没有声明的情况下自动获得学习收益"
-            )
-        savings = self.life_rules_version in SAVINGS_LIFE_RULES_VERSIONS
-        if savings and self.savings_rules is None:
-            raise ValueError(
-                f"生活规则 {self.life_rules_version} 必须声明 savings_rules（目标种类、同时几个、何时可改、"
-                "资金与兑现规则）；漏填不能猜"
-            )
-        if not savings and self.savings_rules is not None:
-            raise ValueError(
-                f"生活规则 {self.life_rules_version} 不读目标储蓄规则；要启用结构化资金目标，请声明规则版本 "
-                f"{E1_5B_LIFE_RULES_VERSION}——旧协议的输入不能被悄悄赋予新行为"
-            )
-        health = self.life_rules_version in HEALTH_LIFE_RULES_VERSIONS
-        declared = {
-            "health_rules": self.health_rules,
-            "illness_events": self.illness_events,
-            "health_input": self.health_input,
-        }
-        if health:
-            missing = [k for k, v in declared.items() if v is None]
-            if missing:
-                raise ValueError(
-                    f"生活规则 {self.life_rules_version} 必须声明 {missing}（疾病与恢复的世界规则、疾病事件来源、"
-                    "健康输入的含义）；漏填不能猜，也不能默认成没有疾病"
-                )
-        else:
-            stray = [k for k, v in declared.items() if v is not None]
-            if stray:
-                raise ValueError(
-                    f"生活规则 {self.life_rules_version} 不读 {stray}；要启用疾病、应急与恢复，请声明规则版本 "
-                    f"{E1_5C_LIFE_RULES_VERSION}——旧协议的输入不能被悄悄赋予新行为"
-                )
-        return self
 
     @model_validator(mode="after")
     def _formal_needs_policies(self) -> LifeProtocol:
@@ -663,30 +511,14 @@ class EnergyFeedbackPolicy(ContractModel):
     quantization: Literal["floor_to_0.01"]
     source: SourceRecord
     note: str = Field(min_length=1, max_length=400)
-    #: r3（DECISIONS/0025）：反馈读取的评分规格的**内容**身份（``LifeScoringSpec.content_fingerprint``）。
-    #: 声明了它，政策内容指纹就覆盖评分内容：同编号同版本、参数不同的规格是另一份政策。评分版本不在
-    #: ``UNBOUND_SCORING_VERSIONS`` 里时必须声明。没有用到时不序列化——旧政策的输出与指纹逐字节不变。
-    scoring_content_fingerprint: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")] | None = Field(
-        default=None, exclude_if=lambda v: v is None
-    )
+    #: 反馈读取的评分规格的**内容**身份（``LifeScoringSpec.content_fingerprint``，DECISIONS/0025）：同编号同版本、参数不同的
+    #: 规格是另一份政策。
+    scoring_content_fingerprint: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
 
     @model_validator(mode="after")
     def _alpha_precision(self) -> EnergyFeedbackPolicy:
         if not has_decimals(self.alpha, RESOURCE_INPUT_DECIMALS):
             raise ValueError(f"α = {self.alpha!r} 的精度细于两位小数")
-        return self
-
-    @model_validator(mode="after")
-    def _scoring_content_declared(self) -> EnergyFeedbackPolicy:
-        if (
-            self.scoring_version not in UNBOUND_SCORING_VERSIONS
-            and self.scoring_content_fingerprint is None
-        ):
-            raise ValueError(
-                f"评分版本 {self.scoring_version} 的反馈政策必须声明评分内容身份 scoring_content_fingerprint"
-                "（LifeScoringSpec.content_fingerprint）：只按编号与版本绑定，改了评分参数的规格会沿用旧参数算出的"
-                f"额度。只有旧格式版本 {sorted(UNBOUND_SCORING_VERSIONS)} 可以不声明"
-            )
         return self
 
     @property
@@ -695,29 +527,19 @@ class EnergyFeedbackPolicy(ContractModel):
         return self.mode == "enabled" and self.alpha > 0
 
     def content(self) -> dict[str, object]:
-        """决定反馈行为的全部字段，规范化成一份确定的字典（r2，DECISIONS/0021 第十三节）。
+        """决定反馈行为的全部字段，规范化成一份确定的字典（DECISIONS/0021 第十三节、0025）。
 
-        参与：反馈版本、开关、α（按百分之一的整数写，避免浮点写法差异）、公式、滞后、评分统计量、量化规则、
-        评分规格与版本、偏好来源，以及声明了的评分内容身份（r3，格式 v2）。**不参与**：``policy_id``（名字，另行
-        核对）、``source``（溯源）、``note``（说明文字）——只改说明不会改变数学政策。声明的 α 即使在关闭时也参与：
-        声明变了就是另一份政策。没有声明评分内容身份的旧格式政策，内容与格式 v1 逐字节相同。
+        参与：反馈版本、开关、α（按百分之一的整数写，避免浮点写法差异）、公式、滞后、评分统计量、量化规则、评分规格与版本、
+        偏好来源、评分内容身份。**不参与**：``policy_id``（名字，另行核对）、``source``（溯源）、``note``（说明文字）——只改
+        说明不会改变数学政策。声明的 α 即使在关闭时也参与：声明变了就是另一份政策。
         """
         hundredths = to_fraction(self.alpha) * 100
         assert hundredths.denominator == 1  # 两位小数由 _alpha_precision 保证
-        if self.scoring_content_fingerprint is not None:
-            return {
-                **self._content_v1(int(hundredths)),
-                "content_schema": FEEDBACK_POLICY_CONTENT_SCHEMA_SCORING,
-                "scoring_content_fingerprint": self.scoring_content_fingerprint,
-            }
-        return self._content_v1(int(hundredths))
-
-    def _content_v1(self, alpha_hundredths: int) -> dict[str, object]:
         return {
             "content_schema": FEEDBACK_POLICY_CONTENT_SCHEMA,
             "version": self.version,
             "mode": self.mode,
-            "alpha_hundredths": alpha_hundredths,
+            "alpha_hundredths": int(hundredths),
             "formula": self.formula,
             "lag_years": self.lag_years,
             "score_statistic": self.score_statistic,
@@ -725,6 +547,7 @@ class EnergyFeedbackPolicy(ContractModel):
             "scoring_spec_id": self.scoring_spec_id,
             "scoring_version": self.scoring_version,
             "preference_source": self.preference_source,
+            "scoring_content_fingerprint": self.scoring_content_fingerprint,
         }
 
     @property
@@ -732,13 +555,6 @@ class EnergyFeedbackPolicy(ContractModel):
         """``content()`` 按键排序、紧凑分隔的 JSON 的 SHA-256：不依赖字典插入顺序、路径或运行时间。"""
         text = json.dumps(self.content(), sort_keys=True, ensure_ascii=False, separators=(",", ":"))
         return hashlib.sha256(text.encode("utf-8")).hexdigest()
-
-    @property
-    def handoff_revision(self) -> str:
-        """这份政策下年度交接的执行修订：声明了评分内容身份是 r3，旧格式是 r2。"""
-        if self.scoring_content_fingerprint is not None:
-            return SCORING_CONTENT_HANDOFF_REVISION
-        return FEEDBACK_HANDOFF_REVISION
 
 
 # ==========================================================================
@@ -1387,8 +1203,8 @@ def savings_goal_kind(o: LifeOpportunity) -> SavingsGoalKind | None:
 # ``agentlayer.life_views`` 逐字段投影。
 #
 # 三件事分开登记：**世界规则**（``HealthRules``：月概率表、恢复期、小病与大病的限制与恢复负担——全组共用）、
-# **实验设置**（``IllnessEventSource``：关闭 / 指定事件 / 配对随机数）、**用户输入的含义**（``HealthInputDeclaration``：
-# 新协议里七维的 healthcare 点数表示健康风险应对倾向，只供代理做计划，不是病痛权重、也不是患病概率）。城市只经
+# **实验设置**（``IllnessEventSource``：关闭 / 指定事件 / 配对随机数）、**用户输入的含义**（``IndependentHealthInputDeclaration``：
+# 独立的健康风险应对问卷，只供代理做计划，不是病痛权重、也不是患病概率）。城市只经
 # 治疗目录（``TreatmentOffer``：可得性、费用、就医时间与负担）影响生活；疗效与恢复期全组共用，不从城市背景分推出。
 # ==========================================================================
 
@@ -1400,9 +1216,6 @@ HEALTH_RULES_VERSION = "e1-5c-health-v1"
 HEALTH_RULES_CONTENT_SCHEMA = "e1-5c-health-content-v1"
 ILLNESS_STREAM_VERSION = "e1-5c-illness-stream-v1"
 ILLNESS_SOURCE_CONTENT_SCHEMA = "e1-5c-illness-source-content-v1"
-#: 新协议里七维 healthcare 点数的含义：健康风险应对倾向（只供代理做计划）。旧画像没有这个声明，不能进新协议；
-#: 写了这个声明的画像也不能交给旧七维评分版本——同一个键不能悄悄换含义。
-HEALTH_INPUT_SEMANTICS = "health_risk_coping_v1"
 #: 月概率最多四位小数（例如 0.0150）；恢复小时与负担沿用资源输入的两位小数。
 PROBABILITY_DECIMALS = 4
 #: 年龄的防呆范围（整数岁）。
@@ -1744,21 +1557,6 @@ class IllnessEventSource(ContractModel):
         )
 
 
-class HealthInputDeclaration(ContractModel):
-    """新协议对七维 healthcare 点数含义的声明（DECISIONS/0027）。
-
-    它表达**健康风险应对倾向**——生病或可能生病时，这个人愿意为及时治疗、预防和留余地付出多少——只作为代理做计划的
-    信息。它**不是**病痛权重、患病概率、恢复速度或疗效，结算与风险抽签都不读它，评分也不用它（六维换算把它排除在外）。
-    不从年龄、财富或旧的医疗答案推断信心、主观概率或风险厌恶。
-    """
-
-    dimension: Literal["healthcare"]
-    semantics: Literal["health_risk_coping_v1"]
-    use: Literal["agent_planning_information_only"]
-    question_text: str = Field(min_length=1, max_length=400)
-    note: str = Field(min_length=1, max_length=400)
-
-
 #: E3-A（DECISIONS/0034）：新产品画像里健康回答的含义——独立的健康风险应对问卷，**不占**六维 100 分，也不是第七个评分权重。
 INDEPENDENT_HEALTH_INPUT_SEMANTICS = "independent_health_answers_v1"
 
@@ -1766,7 +1564,7 @@ INDEPENDENT_HEALTH_INPUT_SEMANTICS = "independent_health_answers_v1"
 class IndependentHealthInputDeclaration(ContractModel):
     """新产品协议对健康回答的声明（E3-A，DECISIONS/0034）：健康回答是一份**独立**的有版本问卷，不在六维定和里。
 
-    与 ``HealthInputDeclaration`` 一样只作为代理做计划的信息：不是病痛权重、患病概率、恢复速度、疗效、愿付金额或治疗指令；结算、
+    只作为代理做计划的信息：不是病痛权重、患病概率、恢复速度、疗效、愿付金额或治疗指令；结算、
     风险抽签与评分都不读它（六维权重本来就不含它，γ 与 H 全组共用）。``questionnaire_version`` 必须等于画像里健康回答的问卷版本：
     换了题目就是另一份声明，旧答案不能改读成新题目的答案。
     """
@@ -2186,8 +1984,6 @@ class LifeOpportunity(ContractModel):
     price: PriceQuote | None = None
     compensation: PriceQuote | None = None  # 工作类：报的薪酬（L1 经济数据，可见）
     occupation: OccupationId | None = None
-    time_cost_hours_per_year: Annotated[float, Field(ge=0, le=HOURS_PER_YEAR_MAX)] = 0.0
-    energy_burden: Annotated[float, Field(ge=0)] = 0.0  # 尺度属于 energy_feedback 政策，未定
     eligibility: tuple[str, ...] = ()  # 资格标签；本轮只记录，不求值
     targets: tuple[str, ...] = ()  # 可能影响的状态标签（如 "skill:bookkeeping"）；**不含幅度**
     #: 这项机会满足哪些需求功能（E1-3 增补）：词表在生活输入里声明。评分按功能去重，不按件数。
@@ -2196,9 +1992,8 @@ class LifeOpportunity(ContractModel):
     attributes: dict[KeyStr, Primitive] = Field(default_factory=dict)
     arrangement_options: dict[KeyStr, tuple[Primitive, ...]] = Field(default_factory=dict)
     duration: DurationSpec
-    #: E1-4A：资源事实。按月核算时间与精力的协议里**每项机会都必须写**（零也要显式写），旧字段
-    #: ``time_cost_hours_per_year`` 与 ``energy_burden`` 在那里必须保持 0；旧协议不读它。
-    resource: ResourceProfile | None = None
+    #: 资源事实（DECISIONS/0020）：每项机会都必须写（零也要显式写）。
+    resource: ResourceProfile
     source: SourceRecord
     #: E1-5A：岗位或培训属于哪家雇主（雇主在 ``CareerRules.employers`` 里声明）。没有用到时不序列化。
     employer_id: IdStr | None = Field(default=None, exclude_if=lambda v: v is None)
@@ -2452,7 +2247,7 @@ class CityLifeCatalog(ContractModel):
 
 
 # ==========================================================================
-# 用户生活画像：陈述（可见）与真值（内部）分开
+# 用户陈述里的需求条件（六维产品画像 ``common.life_product_profile.ProductLifeProfile`` 用）
 # ==========================================================================
 
 
@@ -2496,89 +2291,6 @@ class HardRequirement(ContractModel):
     def _non_empty(cls, v: dict[str, Primitive]) -> dict[str, Primitive]:
         if not v:
             raise ValueError("硬要求不能是空条件")
-        return v
-
-
-class StatedLifeProfile(ContractModel):
-    """**产品可见**的用户陈述：问卷七维分数、细消费偏好、硬要求、可选文字。
-
-    这是用户说的话，不是评分侧用的真值。进不进代理输入、进多少，由
-    ``agentlayer.life_views.ObservationPermission`` 显式决定，不因"它是陈述"就整体放行。
-    """
-
-    person_id: IdStr
-    dimension_points: dict[str, Annotated[int, Field(ge=0, le=100)]]
-    soft_preferences: tuple[SoftPreference, ...] = ()
-    hard_requirements: tuple[HardRequirement, ...] = ()
-    free_text: str | None = Field(default=None, max_length=2000)
-    occupation: OccupationId | None = None
-    #: 用户**明确给出**的物质细项定和点数（合计 100）。产品评分只认这种数值来源；
-    #: 软偏好的 low/medium/high 不会被换算成数字（E1-3，`DECISIONS/0018`）。
-    material_points: dict[KeyStr, Annotated[int, Field(ge=0, le=100)]] | None = None
-    #: E1-5C：七维里 healthcare 点数的含义。写 ``health_risk_coping_v1`` = 健康风险应对倾向（新协议的问卷，只供代理做
-    #: 计划，不是病痛权重或患病概率）；不写 = 旧含义（医疗可及性等），不能进新协议，也不会被悄悄改读。原始点数照旧保存
-    #: 在 ``dimension_points``。没有用到时不序列化。
-    healthcare_semantics: Literal["health_risk_coping_v1"] | None = Field(
-        default=None, exclude_if=lambda v: v is None
-    )
-
-    @field_validator("dimension_points")
-    @classmethod
-    def _seven_dims_constant_sum(cls, v: dict[str, int]) -> dict[str, int]:
-        if set(v) != set(ALL_DIMENSIONS):
-            raise ValueError(
-                f"七维必须恰好是 {list(ALL_DIMENSIONS)}；"
-                f"缺 {sorted(set(ALL_DIMENSIONS) - set(v))}，多 {sorted(set(v) - set(ALL_DIMENSIONS))}"
-            )
-        if sum(v.values()) != 100:
-            raise ValueError(f"七维定和量表必须合计 100 分，得到 {sum(v.values())}")
-        return v
-
-    @model_validator(mode="after")
-    def _needs_unique(self) -> StatedLifeProfile:
-        soft = [p.need for p in self.soft_preferences]
-        hard = [r.need for r in self.hard_requirements]
-        if len(soft) != len(set(soft)) or len(hard) != len(set(hard)):
-            raise ValueError(f"{self.person_id}: 同一需求的软偏好或硬要求重复")
-        if self.material_points is not None and sum(self.material_points.values()) != 100:
-            raise ValueError(
-                f"{self.person_id}: 物质细项定和点数必须合计 100，得到 {sum(self.material_points.values())}"
-            )
-        return self
-
-
-class InternalPreferenceTruth(ContractModel):
-    """**研究内部**的偏好真值。永不进代理输入。
-
-    ``material_subweights`` 是物质维内部的细偏好（住房空间、鲜食、准备时间、耐用品……）。
-    它们**怎么聚合**进物质维是未定政策 ``material_preference_aggregation``，本轮不写
-    聚合函数。数值只能是测试夹具（``status = synthetic_fixture_only``）。
-    """
-
-    person_id: IdStr
-    status: Literal["synthetic_fixture_only"]
-    dimension_weights: dict[str, Annotated[float, Field(ge=0)]]
-    material_subweights: dict[KeyStr, Annotated[float, Field(ge=0)]] = Field(default_factory=dict)
-    #: E1-5C：与 ``StatedLifeProfile.healthcare_semantics`` 同义——研究真值的 healthcare 权重在新协议里表示健康风险
-    #: 应对倾向，不进入满足感。没有用到时不序列化。
-    healthcare_semantics: Literal["health_risk_coping_v1"] | None = Field(
-        default=None, exclude_if=lambda v: v is None
-    )
-
-    @field_validator("dimension_weights")
-    @classmethod
-    def _seven_dims_sum_one(cls, v: dict[str, float]) -> dict[str, float]:
-        if set(v) != set(ALL_DIMENSIONS):
-            raise ValueError(f"七维真值权重必须恰好是 {list(ALL_DIMENSIONS)}")
-        if abs(sum(v.values()) - 1.0) > 1e-9:
-            raise ValueError(f"七维真值权重必须合计 1，得到 {sum(v.values())!r}")
-        return v
-
-    @field_validator("material_subweights")
-    @classmethod
-    def _subweights_sum_one(cls, v: dict[str, float]) -> dict[str, float]:
-        if v and abs(sum(v.values()) - 1.0) > 1e-9:
-            raise ValueError(f"物质维内部细权重必须合计 1，得到 {sum(v.values())!r}")
         return v
 
 
@@ -2705,14 +2417,11 @@ class EnergyQuotaBasis(ContractModel):
 
     ``record_fingerprint`` 指向内部反馈记录（SHA-256）；分数、α 与计算过程在记录里，不在状态里。
 
-    ``policy_fingerprint``（r2）是确定这份额度的反馈政策的**内容**指纹（``EnergyFeedbackPolicy.content_fingerprint``）。
-    绑定时点：第一年状态不绑定（额度就是基础值，任何政策下都一样，所以合法的实验臂可以从同一个初始状态
-    分别开始）；结算产生候选状态时绑定当时协议的政策；交接写入正式的下一年状态时沿用反馈记录里的政策。
-    之后加载、结算与观察都按同一份检查（``energy_quota_problems``）核对：编号、版本或内容任何一项不同都拒绝。
-
-    ``scoring_content_fingerprint``（r3，DECISIONS/0025）是确定这份额度的评分规格的**内容**身份（政策声明、年度交接核对过
-    实际用的规格）。绑定时点同上；之后与当前政策声明的评分内容不同（含任何一边缺失）就是"额度来自另一套评分内容"。
-    r2 旧格式的状态没有它；没有用到时不序列化。
+    ``policy_fingerprint`` 是确定这份额度的反馈政策的**内容**指纹（``EnergyFeedbackPolicy.content_fingerprint``），
+    ``scoring_content_fingerprint`` 是确定它的评分规格的**内容**身份（DECISIONS/0021 第十三节、0025）。绑定时点：第一年状态不绑定
+    （额度就是基础值，任何政策下都一样，所以合法的实验臂可以从同一个初始状态分别开始）；结算产生候选状态时绑定当时协议的政策；
+    交接写入正式的下一年状态时沿用反馈记录里的政策。之后加载、结算与观察都按同一份检查（``energy_quota_problems``）核对：编号、
+    版本、政策内容或评分内容任何一项不同都拒绝。
     """
 
     base_level: Annotated[float, Field(gt=0)]
@@ -2722,9 +2431,7 @@ class EnergyQuotaBasis(ContractModel):
     source_year: YearIndex | None = None
     record_fingerprint: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")] | None = None
     policy_fingerprint: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")] | None = None
-    scoring_content_fingerprint: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")] | None = Field(
-        default=None, exclude_if=lambda v: v is None
-    )
+    scoring_content_fingerprint: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")] | None = None
 
     @model_validator(mode="after")
     def _shape(self) -> EnergyQuotaBasis:
@@ -2746,10 +2453,10 @@ class EnergyQuotaBasis(ContractModel):
             return self
         if self.policy_id is None or self.policy_version is None or self.source_year is None:
             raise ValueError(f"{self.status} 必须写明反馈政策、版本与来源年")
-        if self.policy_fingerprint is None:
+        if self.policy_fingerprint is None or self.scoring_content_fingerprint is None:
             raise ValueError(
-                f"{self.status} 必须写明确定这份额度的政策内容指纹（policy_fingerprint）。缺了它的是 r1 旧格式的"
-                "中间状态：不猜它通过了检查，请从初始输入重新运行"
+                f"{self.status} 必须写明确定这份额度的政策内容指纹（policy_fingerprint）与评分内容身份"
+                "（scoring_content_fingerprint）"
             )
         if (self.status == "pending_feedback") != (self.record_fingerprint is None):
             raise ValueError("只有已确定的额度（反馈已算或已关闭）才指向反馈记录；候选状态没有记录")
@@ -2759,18 +2466,13 @@ class EnergyQuotaBasis(ContractModel):
 class EnergyState(ContractModel):
     """精力：独立的活动负担约束。**与时间不是同一个量。**
 
-    时间是固定年度资源（小时）；精力是另一条约束。``level`` 的含义由 ``scale_version`` 决定：
-
-    * ``e1-4a-monthly-quota-v1``（E1-4A，DECISIONS/0020）：每个月可持续承受的活动负担额度（负担点），
-      必须为正；同一年的 12 个月不变。E1-4A 协议里同一个人跨年、跨城也不变；E1-4B 协议（DECISIONS/0021）
-      里固定的是基础额度（``PersonYearState.energy_quota_basis``），当前额度从第二年起可由上一年满足感在
-      [基础, 基础 × (1 + α)] 内确定，因城而异；
-    * 其他尺度（旧样例的 ``synthetic_fixture_only_energy_v0`` 等）：含义没有冻结，只记录，**不**被解释
-      成月度额度。
+    ``level`` 是每个月可持续承受的活动负担额度（负担点，DECISIONS/0020），必须为正；同一年的 12 个月不变。固定的是基础额度
+    （``PersonYearState.energy_quota_basis``），当前额度从第二年起可由上一年满足感在 [基础, 基础 × (1 + α)] 内确定，因城而异
+    （DECISIONS/0021）。
     """
 
-    level: Annotated[float, Field(ge=0)]
-    scale_version: str = Field(min_length=1)
+    level: Annotated[float, Field(gt=0)]
+    scale_version: Literal["e1-4a-monthly-quota-v1"]
 
 
 LifeStatus = Literal["active", "terminal", "exited", "stopped"]
@@ -2806,29 +2508,21 @@ class PersonYearState(ContractModel):
     money_basis_id: str
     cash: Money
     holdings: tuple[Holding, ...] = ()
-    skills: dict[KeyStr, Annotated[float, Field(ge=0)]] = Field(default_factory=dict)
     time_budget_hours: Annotated[float, Field(gt=0, le=HOURS_PER_YEAR_MAX)]
     energy: EnergyState
-    #: E1-4A：资源预算的依据（预留了什么、来源）。按月核算的协议必须写；此时 ``time_budget_hours``
-    #: 是年度净可分配小时，``energy.level`` 是每月可承受负担额度。
-    resource_budget_basis: ResourceBudgetBasis | None = None
-    #: E1-4B：固定的个人基础额度与当前额度的来由。E1-4B 协议必须写，E1-4A 与更早的协议不能写。
-    energy_quota_basis: EnergyQuotaBasis | None = None
-    #: E1-5A：已获得的能力（来源、完成年月、可用起始年）与实际岗位记录。E1-5A 协议的状态必须有岗位记录
-    #: （可以没有岗位）；旧协议不能写。没有用到时不序列化——旧状态的输出与指纹逐字节不变。在 E1-5A 里
-    #: ``occupation`` 是岗位记录的兼容摘要（见 ``EmploymentRecord.occupation_summary``），用户开局陈述的职业
-    #: 在 ``employment.stated_occupation``。
-    abilities: tuple[HeldAbility, ...] = Field(default=(), exclude_if=lambda v: v == ())
-    employment: EmploymentRecord | None = Field(default=None, exclude_if=lambda v: v is None)
+    #: 资源预算的依据（预留了什么、来源）：``time_budget_hours`` 是年度净可分配小时，``energy.level`` 是每月可承受负担额度。
+    resource_budget_basis: ResourceBudgetBasis
+    #: 固定的个人基础额度与当前额度的来由（DECISIONS/0021）。
+    energy_quota_basis: EnergyQuotaBasis
+    #: 已获得的能力（来源、完成年月、可用起始年）与实际岗位记录（DECISIONS/0023）。``occupation`` 是岗位记录的兼容摘要
+    #: （见 ``EmploymentRecord.occupation_summary``），用户开局陈述的职业在 ``employment.stated_occupation``。
+    abilities: tuple[HeldAbility, ...] = ()
+    employment: EmploymentRecord
     training: tuple[TrainingProgress, ...] = ()
-    #: E1-5B：结构化资金目标（含已结束的，保留历史）。``None`` = 协议不支持目标（旧协议，不序列化）；
-    #: ``()`` = 支持、还没有目标。下面的 ``goals`` 仍是原来的文字目标，不被解析成资金目标。
-    savings_goals: tuple[SavingsGoal, ...] | None = Field(
-        default=None, exclude_if=lambda v: v is None
-    )
-    #: E1-5C：健康状态（年龄、重复序号、正在延续的疾病、病史、上月工作相对负担、绑定）。新协议必须写，旧协议不能写；
-    #: 没有用到时不序列化。
-    health: HealthState | None = Field(default=None, exclude_if=lambda v: v is None)
+    #: 结构化资金目标（含已结束的，保留历史；DECISIONS/0026）。下面的 ``goals`` 是文字目标，不被解析成资金目标。
+    savings_goals: tuple[SavingsGoal, ...] = ()
+    #: 健康状态（年龄、重复序号、正在延续的疾病、病史、上月工作相对负担、绑定；DECISIONS/0027）。
+    health: HealthState
     goals: tuple[Annotated[str, Field(min_length=1, max_length=200)], ...] = ()
     experience_summary: tuple[
         Annotated[str, Field(min_length=1, max_length=MAX_SUMMARY_CHARS)], ...
@@ -2859,41 +2553,28 @@ class PersonYearState(ContractModel):
             raise ValueError(f"{self.clone_id}: 只有停止状态才带停止记录，停止状态必须带")
         if self.stop is not None and self.stop.year_index != self.year_index:
             raise ValueError(f"{self.clone_id}: 停止记录的年份与状态年份不一致")
-        quota_scale = self.energy.scale_version == ENERGY_QUOTA_SCALE
-        if quota_scale != (self.resource_budget_basis is not None):
-            raise ValueError(
-                f"{self.clone_id}: 精力尺度 {ENERGY_QUOTA_SCALE} 与资源预算依据必须一起出现——"
-                "按月核算的状态要写明额度与预留，旧尺度的数值不能当成月度额度"
-            )
-        if quota_scale and self.energy.level <= 0:
-            raise ValueError(f"{self.clone_id}: 每月可承受负担额度必须为正")
         q = self.energy_quota_basis
-        if q is not None:
-            if not quota_scale:
+        level, base = to_fraction(self.energy.level), to_fraction(q.base_level)
+        if q.status in ("base_first_year", "feedback_off") and level != base:
+            raise ValueError(
+                f"{self.clone_id}: {q.status} 时当前额度必须等于基础额度 {q.base_level}，得到 "
+                f"{self.energy.level}"
+            )
+        if level < base:
+            raise ValueError(
+                f"{self.clone_id}: 当前额度 {self.energy.level} 低于基础额度 {q.base_level}"
+            )
+        if self.status == "active":
+            if q.status == "base_first_year" and self.year_index != 1:
                 raise ValueError(
-                    f"{self.clone_id}: 额度依据只用于月度额度尺度 {ENERGY_QUOTA_SCALE}；旧尺度的数值不是额度"
+                    f"{self.clone_id}: 第 {self.year_index} 年不能写 base_first_year——第二年起的额度"
+                    "要么由反馈算出，要么由关闭的反馈定为基础值"
                 )
-            level, base = to_fraction(self.energy.level), to_fraction(q.base_level)
-            if q.status in ("base_first_year", "feedback_off") and level != base:
+            if q.source_year is not None and q.source_year != self.year_index - 1:
                 raise ValueError(
-                    f"{self.clone_id}: {q.status} 时当前额度必须等于基础额度 {q.base_level}，得到 "
-                    f"{self.energy.level}"
+                    f"{self.clone_id}: 第 {self.year_index} 年的额度只能来自第 {self.year_index - 1} 年，"
+                    f"得到第 {q.source_year} 年"
                 )
-            if level < base:
-                raise ValueError(
-                    f"{self.clone_id}: 当前额度 {self.energy.level} 低于基础额度 {q.base_level}"
-                )
-            if self.status == "active":
-                if q.status == "base_first_year" and self.year_index != 1:
-                    raise ValueError(
-                        f"{self.clone_id}: 第 {self.year_index} 年不能写 base_first_year——第二年起的额度"
-                        "要么由反馈算出，要么由关闭的反馈定为基础值"
-                    )
-                if q.source_year is not None and q.source_year != self.year_index - 1:
-                    raise ValueError(
-                        f"{self.clone_id}: 第 {self.year_index} 年的额度只能来自第 {self.year_index - 1} 年，"
-                        f"得到第 {q.source_year} 年"
-                    )
         held = [a.ability_id for a in self.abilities]
         dup = sorted({x for x in held if held.count(x) > 1})
         if dup:
@@ -2904,35 +2585,33 @@ class PersonYearState(ContractModel):
                 raise ValueError(
                     f"{self.clone_id}: 第 {self.year_index} 年年初还不能用 {early}（下一年生效规则）"
                 )
-        if self.employment is not None:
-            summary = self.employment.occupation_summary()
-            if self.occupation != summary:
+        summary = self.employment.occupation_summary()
+        if self.occupation != summary:
+            raise ValueError(
+                f"{self.clone_id}: occupation 必须是当前岗位的兼容摘要 {summary}（没有岗位或职业不止一个时"
+                f"为空），得到 {self.occupation}"
+            )
+        ids = [g.goal_id for g in self.savings_goals]
+        dup = sorted({x for x in ids if ids.count(x) > 1})
+        if dup:
+            raise ValueError(f"{self.clone_id}: 目标 ID {dup} 重复——目标 ID 全史唯一")
+        if sum(1 for g in self.savings_goals if g.open) > 1:
+            raise ValueError(f"{self.clone_id}: 同一时刻只能有一个未结束的资金目标")
+        stopped_in_year = self.status in ("exited", "stopped")
+        latest = self.year_index if stopped_in_year else self.year_index - 1
+        for g in self.savings_goals:
+            if g.money_basis_id != self.money_basis_id:
+                raise ValueError(f"{self.clone_id}: 目标 {g.goal_id} 的口径与账户不一致")
+            if g.created_year > latest or any(e.year_index > latest for e in g.events):
                 raise ValueError(
-                    f"{self.clone_id}: occupation 必须是当前岗位的兼容摘要 {summary}（没有岗位或职业不止一个时"
-                    f"为空），得到 {self.occupation}"
+                    f"{self.clone_id}: 目标 {g.goal_id} 有晚于第 {latest} 年的事件——第 {self.year_index} 年"
+                    "年初的状态不可能已经记下当年的事"
                 )
-        if self.savings_goals is not None:
-            ids = [g.goal_id for g in self.savings_goals]
-            dup = sorted({x for x in ids if ids.count(x) > 1})
-            if dup:
-                raise ValueError(f"{self.clone_id}: 目标 ID {dup} 重复——目标 ID 全史唯一")
-            if sum(1 for g in self.savings_goals if g.open) > 1:
-                raise ValueError(f"{self.clone_id}: 同一时刻只能有一个未结束的资金目标")
-            stopped_in_year = self.status in ("exited", "stopped")
-            latest = self.year_index if stopped_in_year else self.year_index - 1
-            for g in self.savings_goals:
-                if g.money_basis_id != self.money_basis_id:
-                    raise ValueError(f"{self.clone_id}: 目标 {g.goal_id} 的口径与账户不一致")
-                if g.created_year > latest or any(e.year_index > latest for e in g.events):
-                    raise ValueError(
-                        f"{self.clone_id}: 目标 {g.goal_id} 有晚于第 {latest} 年的事件——第 {self.year_index} 年"
-                        "年初的状态不可能已经记下当年的事"
-                    )
-                if not stopped_in_year and g.status == "active" and g.target_year < self.year_index:
-                    raise ValueError(
-                        f"{self.clone_id}: 目标 {g.goal_id} 的目标年 {g.target_year} 已过却仍标进行中——到期未兑现"
-                        "要记下来（逾期）"
-                    )
+            if not stopped_in_year and g.status == "active" and g.target_year < self.year_index:
+                raise ValueError(
+                    f"{self.clone_id}: 目标 {g.goal_id} 的目标年 {g.target_year} 已过却仍标进行中——到期未兑现"
+                    "要记下来（逾期）"
+                )
         if self.exit is not None:
             if self.exit.year_index != self.year_index:
                 raise ValueError(f"{self.clone_id}: 出局记录的年份与状态年份不一致")
@@ -2942,9 +2621,9 @@ class PersonYearState(ContractModel):
 
 
 def energy_quota_problems(
-    policy: EnergyFeedbackPolicy | None, state: PersonYearState
+    policy: EnergyFeedbackPolicy, state: PersonYearState
 ) -> list[tuple[str, str]]:
-    """E1-4B：一个行动年年初状态的精力额度，能不能在这份反馈政策下使用（DECISIONS/0021 第十三节）。
+    """一个行动年年初状态的精力额度，能不能在这份反馈政策下使用（DECISIONS/0021 第十三节、0025）。
 
     加载与结算前检查（``ledger.life_catalog.feedback_state_problems``）、可见投影（``agentlayer.life_views``）
     与反馈函数（``econ.life_feedback``）共用这一份判断，返回 (问题代码, 说明)：
@@ -2953,8 +2632,7 @@ def energy_quota_problems(
     * ``feedback_policy_switched``：额度由另一个编号或版本的政策确定；
     * ``feedback_policy_content_changed``：编号、版本相同，但政策内容（开关、α、公式、评分来源……）变了——
       不沿用旧加成，也不静默恢复基础额度；
-    * ``scoring_content_changed``（r3，DECISIONS/0025）：额度由另一套评分内容确定——额度依据记下的评分内容身份与
-      当前政策声明的不同（含任何一边缺失：r2 旧格式状态、字段被删、政策没声明）。编号与版本可能完全相同；
+    * ``scoring_content_changed``：额度由另一套评分内容确定（编号与版本可能完全相同）；
     * ``energy_quota_not_base``：政策关闭或 α = 0，当前额度却不是基础值；
     * ``energy_quota_over_bound``：当前额度超出 ``基础 × (1 + α)``。
 
@@ -2962,7 +2640,7 @@ def energy_quota_problems(
     这些都是**输入错误**，不是分身的生活不可行。
     """
     q = state.energy_quota_basis
-    if policy is None or q is None or state.status != "active":
+    if state.status != "active":
         return []
     who = f"{state.clone_id} 第 {state.year_index} 年"
     if q.status == "pending_feedback":
@@ -2993,12 +2671,11 @@ def energy_quota_problems(
                 )
             )
         if q.scoring_content_fingerprint != policy.scoring_content_fingerprint:
-            source = q.scoring_content_fingerprint or "未记录（r2 旧格式状态或字段被删除）"
-            current = policy.scoring_content_fingerprint or "未声明（旧格式政策）"
             out.append(
                 (
                     "scoring_content_changed",
-                    f"{who}的额度来自另一套评分内容：来源评分内容 {source}；当前政策声明的评分内容 {current}"
+                    f"{who}的额度来自另一套评分内容：来源评分内容 {q.scoring_content_fingerprint}；当前政策声明的评分内容 "
+                    f"{policy.scoring_content_fingerprint}"
                     "（评分规格编号与版本可能相同）。不沿用旧加成、不恢复基础额度、不关闭反馈、不猜旧状态的来源；"
                     "要比较不同评分参数，请从相同初始状态分别运行",
                 )
@@ -3036,11 +2713,9 @@ def health_rules_state_problems(
 
     第 1 年的共同初始状态（健康、没有病史、没有负担记录）可以不绑定，所以各实验臂能从同一个起点用不同规则运行。
     事件来源的核对不在这里：观察不显示任何由事件来源推出的事实，只有结算需要它（``illness_source_changed``）。
-    健康部分缺失或多余由各入口自己报告。都是**输入错误**，不是分身的生活不可行。
+    都是**输入错误**，不是分身的生活不可行。
     """
     h = state.health
-    if h is None:
-        return []
     who = state.clone_id
     out: list[tuple[str, str]] = []
     if rules.risk.age_band_of(h.age_years) is None:
@@ -3080,13 +2755,9 @@ def health_rules_state_problems(
 
 
 _TAG_OCCUPATION = re.compile(r"^occupation:([A-Za-z0-9]+):([A-Za-z0-9.\-]+)$")
-_TAG_SKILL = re.compile(r"^skill:([a-z][a-z0-9_]{0,47})>=(\d+(?:\.\d+)?)$")
-_TAG_TRAINING = re.compile(r"^training_completed:([a-z0-9][a-z0-9_.\-]{0,63})$")
 _TAG_ABILITY = re.compile(r"^ability:([a-z][a-z0-9_]{0,47})$")
 _TAG_EMPLOYER = re.compile(r"^employer:([a-z0-9][a-z0-9_.\-]{0,63})$")
-#: 每种生活规则可以用的资格标签种类。E1-5A 只认 ``ability`` / ``occupation`` / ``employer``：旧的
-#: ``skill:`` 与 ``training_completed:`` 写法会绕过"下一年生效"，在新协议里是资料错误。
-LEGACY_REQUIREMENT_KINDS: frozenset[str] = frozenset({"occupation", "skill", "training_completed"})
+#: 资格标签的种类（DECISIONS/0023）：能力、职业、雇主，都按年初状态判断。
 CAREER_REQUIREMENT_KINDS: frozenset[str] = frozenset({"ability", "occupation", "employer"})
 
 
@@ -3094,17 +2765,11 @@ def parse_eligibility_tag(tag: str) -> tuple[str, str, str] | None:
     """资格标签的语法（不管协议允许哪几种）。词表外的标签返回 None——由调用方报资料错误，**不猜**。
 
     * ``occupation:<体系>:<代码>``：当前职业等于它
-    * ``skill:<名>>=<数>``：技能水平不低于它（旧协议）
-    * ``training_completed:<机会 ID>``：那门培训已完成（旧协议；年内完成次月即解锁）
     * ``ability:<能力>``：已获得这项能力（E1-5A；按年初状态）
     * ``employer:<雇主>``：当前在这家雇主有岗位（E1-5A；按年初状态）
     """
     if m := _TAG_OCCUPATION.match(tag):
         return ("occupation", m.group(1), m.group(2))
-    if m := _TAG_SKILL.match(tag):
-        return ("skill", m.group(1), m.group(2))
-    if m := _TAG_TRAINING.match(tag):
-        return ("training_completed", m.group(1), "")
     if m := _TAG_ABILITY.match(tag):
         return ("ability", m.group(1), "")
     if m := _TAG_EMPLOYER.match(tag):
@@ -3127,10 +2792,10 @@ def qualification_gaps(
     """E1-5A：按**年初状态**，这项机会还有哪些要求不满足。加载与结算前检查、结算与可见投影共用这一份。
 
     能力只认年初已经可用的（当年完成的学习从下一行动年起才算）；职业与雇主只认年初的当前岗位。
-    词表外或新协议不认的旧写法一律算不满足——不能把看不懂的要求当作满足。
+    词表外的写法一律算不满足——不能把看不懂的要求当作满足。
     """
     usable = {a.ability_id for a in state.abilities if a.usable_from_year <= state.year_index}
-    current = state.employment.current_positions() if state.employment is not None else ()
+    current = state.employment.current_positions()
     occupations = {(p.occupation.scheme, p.occupation.code) for p in current}
     employers = {p.employer_id for p in current if p.employer_id is not None}
     gaps: list[QualificationGap] = []
@@ -3164,19 +2829,9 @@ def qualification_gaps(
                         reason=f"年初的当前岗位里没有职业 {a}:{b}",
                     )
                 )
-        elif kind == "employer":
-            if a not in employers:
-                gaps.append(
-                    QualificationGap(tag=tag, kind=kind, target=a, reason=f"年初不在雇主 {a} 工作")
-                )
-        else:
+        elif kind == "employer" and a not in employers:
             gaps.append(
-                QualificationGap(
-                    tag=tag,
-                    kind=kind,
-                    target=a,
-                    reason=f"新协议不认 {kind} 写法（会绕过下一年生效规则），请改用 ability:<能力>",
-                )
+                QualificationGap(tag=tag, kind=kind, target=a, reason=f"年初不在雇主 {a} 工作")
             )
     return gaps
 
@@ -3281,9 +2936,9 @@ class YearAction(ContractModel):
     #: E1-5B：年初对资金目标的指令（设定、保留、取消、替换或改时点）。不写就是已有目标原样延续。
     #: 没有用到时不序列化。
     savings_goal: SavingsGoalDirective | None = Field(default=None, exclude_if=lambda v: v is None)
-    #: E1-5C：这一年的应急安排（生病时治不治、时间精力不够时按什么顺序暂停哪些活动）。新协议必须写，旧协议不能写；
-    #: 没有用到时不序列化。
-    emergency: EmergencyPlan | None = Field(default=None, exclude_if=lambda v: v is None)
+    #: 这一年的应急安排（生病时治不治、时间精力不够时按什么顺序暂停哪些活动；DECISIONS/0027）。由规划器写，必须写：漏写是
+    #: 格式问题（可修改重试），不默认总是治疗，也不由健康回答替它生成。
+    emergency: EmergencyPlan
 
     @model_validator(mode="after")
     def _unique_items(self) -> YearAction:
@@ -3312,9 +2967,8 @@ class YearAction(ContractModel):
         }
         if self.savings_goal is not None:
             view["savings_goal"] = self.savings_goal.model_dump(mode="json")
-        # E1-5C：应急安排改变生病时的执行，所以属于结算能读的部分（说明文字不算）
-        if self.emergency is not None:
-            view["emergency"] = self.emergency.model_dump(mode="json", exclude={"note"})
+        # 应急安排改变生病时的执行，所以属于结算能读的部分（说明文字不算）
+        view["emergency"] = self.emergency.model_dump(mode="json", exclude={"note"})
         return view
 
 
@@ -3887,26 +3541,23 @@ class EnvironmentOutcome(ContractModel):
     tax_status: str | None = None
     bookkeeping_label: Literal["synthetic_bookkeeping_only"] | None = None
     time_used_hours: Annotated[float, Field(ge=0)] | None = None
-    energy_burden_recorded: Annotated[float, Field(ge=0)] | None = None
-    #: not_implemented：旧规则，精力只记录；monthly_quota_checked：E1-4A，十二个月都做了完整检查；
-    #: monthly_quota_checked_until_exit：出局前的月份完整检查、出局当月只检查已知下限、之后未发生——
-    #: 不是"全年通过"。
+    #: monthly_quota_checked：十二个月都做了完整检查；monthly_quota_checked_until_exit：出局前的月份完整检查、出局当月只检查
+    #: 已知下限、之后未发生；monthly_quota_checked_until_stop：停止之前的月份完整检查，停止月没有提交、之后未发生——后两者
+    #: 都不是"全年通过"。
     energy_feasibility: Literal[
-        "not_implemented",
         "monthly_quota_checked",
         "monthly_quota_checked_until_exit",
-        # E1-5C：停止之前的月份完整检查，停止月没有提交、之后未发生——不是"全年通过"
         "monthly_quota_checked_until_stop",
-    ] = "not_implemented"
-    #: E1-4A：逐月的时间与精力账。旧规则没有（为空）。
-    resources: ResourceYear | None = None
+    ]
+    #: 逐月的时间与精力账（DECISIONS/0020）。
+    resources: ResourceYear
     notes: tuple[Annotated[str, Field(max_length=MAX_SUMMARY_CHARS)], ...] = ()
-    #: E1-5A：这一年的学习与岗位事实。没有用到时不序列化。
-    career: CareerYear | None = Field(default=None, exclude_if=lambda v: v is None)
-    #: E1-5B：这一年的资金目标事实。没有用到时不序列化。评分器不读它。
-    savings: SavingsYear | None = Field(default=None, exclude_if=lambda v: v is None)
-    #: E1-5C：这一年的健康事实（评分只读各月月初状态）与停止记录。没有用到时不序列化。
-    health: HealthYear | None = Field(default=None, exclude_if=lambda v: v is None)
+    #: 这一年的学习与岗位事实（DECISIONS/0023）。
+    career: CareerYear
+    #: 这一年的资金目标事实（DECISIONS/0026）。评分器不读它。
+    savings: SavingsYear
+    #: 这一年的健康事实（评分只读各月月初状态，DECISIONS/0027）与停止记录。
+    health: HealthYear
     stop: StopRecord | None = Field(default=None, exclude_if=lambda v: v is None)
 
     @model_validator(mode="after")
@@ -3924,12 +3575,9 @@ class EnvironmentOutcome(ContractModel):
             raise ValueError("只有出局的结果才带出局记录，出局的结果必须带")
         if (self.settlement_status == "stopped") != (self.stop is not None):
             raise ValueError("只有停止的结果才带停止记录，停止的结果必须带")
-        if self.stop is not None and self.health is None:
-            raise ValueError("停止只出现在有健康规则的协议里，结果必须带这一年的健康事实")
-        if self.savings is not None:
-            for g in self.savings.progress:
-                if g.cash.numeraire != self.money_basis_id:
-                    raise ValueError("目标进展的余额口径与本账不一致")
+        for g in self.savings.progress:
+            if g.cash.numeraire != self.money_basis_id:
+                raise ValueError("目标进展的余额口径与本账不一致")
         return self
 
 
@@ -4178,14 +3826,12 @@ class VisibleFeedback(ContractModel):
     spending: Money | None = None
     executed: tuple[ExecutedItem, ...] = ()
     notes: tuple[Annotated[str, Field(max_length=MAX_SUMMARY_CHARS)], ...] = ()
-    #: E1-4A：逐月资源事实（精力字段按许可清空）。旧规则为空。
-    resources: tuple[VisibleMonthResources, ...] = ()
-    #: E1-5A：上一年的学习与岗位事实。没有用到时不序列化。
-    career: VisibleCareerYear | None = Field(default=None, exclude_if=lambda v: v is None)
-    #: E1-5B：上一年的资金目标事实。没有用到时不序列化。
-    savings: VisibleSavingsYear | None = Field(default=None, exclude_if=lambda v: v is None)
-    #: E1-5C：上一年的健康事实（病情、病假、暂停、治疗与恢复）。没有用到时不序列化。
-    health: VisibleHealthYear | None = Field(default=None, exclude_if=lambda v: v is None)
+    #: 逐月资源事实（精力字段按许可清空）。
+    resources: tuple[VisibleMonthResources, ...]
+    #: 上一年的学习与岗位事实、资金目标事实、健康事实（病情、病假、暂停、治疗与恢复）。
+    career: VisibleCareerYear
+    savings: VisibleSavingsYear
+    health: VisibleHealthYear
 
     @field_validator("cash_balance")
     @classmethod

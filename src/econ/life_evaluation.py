@@ -86,36 +86,35 @@ def _events(results: Sequence[LifeYearResult]) -> tuple[LifeEvent, ...]:
         o = r.settlement.outcome
         if o is None:
             continue
-        if o.health is not None:
-            for m in o.health.months:
-                if m.onset is not None:
-                    out.append(
-                        LifeEvent(
-                            year_index=o.year_index,
-                            month=m.month,
-                            event_kind="illness_onset",
-                            detail=f"新发{'小病' if m.onset == 'minor' else '大病'}（{m.onset_source}）",
-                        )
+        for m in o.health.months:
+            if m.onset is not None:
+                out.append(
+                    LifeEvent(
+                        year_index=o.year_index,
+                        month=m.month,
+                        event_kind="illness_onset",
+                        detail=f"新发{'小病' if m.onset == 'minor' else '大病'}（{m.onset_source}）",
                     )
-                if m.sick_leave:
-                    out.append(
-                        LifeEvent(
-                            year_index=o.year_index,
-                            month=m.month,
-                            event_kind="sick_leave",
-                            detail="大病病假：没有工资",
-                        )
+                )
+            if m.sick_leave:
+                out.append(
+                    LifeEvent(
+                        year_index=o.year_index,
+                        month=m.month,
+                        event_kind="sick_leave",
+                        detail="大病病假：没有工资",
                     )
-                if m.treatment is not None and m.treatment.status == "treated":
-                    paid = m.treatment.amount_paid
-                    out.append(
-                        LifeEvent(
-                            year_index=o.year_index,
-                            month=m.month,
-                            event_kind="treated",
-                            detail=f"治疗，付 {paid.amount:,.2f}" if paid is not None else "治疗",
-                        )
+                )
+            if m.treatment is not None and m.treatment.status == "treated":
+                paid = m.treatment.amount_paid
+                out.append(
+                    LifeEvent(
+                        year_index=o.year_index,
+                        month=m.month,
+                        event_kind="treated",
+                        detail=f"治疗，付 {paid.amount:,.2f}" if paid is not None else "治疗",
                     )
+                )
         if o.exit is not None:
             out.append(
                 LifeEvent(
@@ -318,7 +317,7 @@ def _month_facts(results: Sequence[LifeYearResult]) -> tuple[MonthFact, ...]:
         o = r.settlement.outcome
         if o is None:
             continue
-        health = {m.month: m for m in o.health.months} if o.health is not None else {}
+        health = {m.month: m for m in o.health.months}
         for m in o.months:
             h = health.get(m.month)
             t = None if h is None else h.treatment

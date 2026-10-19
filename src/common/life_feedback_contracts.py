@@ -7,13 +7,10 @@
 
 计算在 ``econ.life_feedback``（纯函数）；年度交接在 ``econ.life_year``（结算 → 评分 → 反馈）。
 
-r2（2026-10-08 修复，DECISIONS/0021 第十三节）新增年度绑定 ``ScoredYear``：同一个年初状态的这一次实际结算、
-对这份结果的实际评分、以及它产生的候选状态，在真正结算并评分的那一步一起建立并封存。反馈只从封存的绑定生成，
-也只能写回绑定里的那一份候选状态——同人、同城、同年、同版本不足以认定是同一次生活。
-
-r3（2026-10-09 修复，DECISIONS/0025）：声明了评分内容身份的政策下，年度绑定还记下实际评分规格的内容身份，反馈记录
-写下政策声明的身份（两者必须相同），额度依据沿用它——下一年开始前与当前政策声明的比较。旧格式政策照旧是 r2，
-这些字段不出现，产物逐字节不变。
+年度绑定 ``ScoredYear``（DECISIONS/0021 第十三节）：同一个年初状态的这一次实际结算、对这份结果的实际评分、以及它
+产生的候选状态，在真正结算并评分的那一步一起建立并封存。反馈只从封存的绑定生成，也只能写回绑定里的那一份候选状态——
+同人、同城、同年、同版本不足以认定是同一次生活。年度绑定还记下实际评分规格的内容身份，反馈记录写下政策声明的身份
+（两者必须相同），额度依据沿用它——下一年开始前与当前政策声明的比较（DECISIONS/0025）。
 """
 
 from __future__ import annotations
@@ -27,8 +24,6 @@ from pydantic import Field, PrivateAttr, model_validator
 from common.ids import CityId
 from common.life_contracts import (
     FEEDBACK_HANDOFF_REVISION,
-    FEEDBACK_HANDOFF_REVISIONS,
-    SCORING_CONTENT_HANDOFF_REVISION,
     ContractModel,
     EnergyFeedbackPolicy,
     ExactAmount,
@@ -43,19 +38,19 @@ from common.life_scoring_contracts import ExploratoryYearScore
 
 _SHA256 = r"^[0-9a-f]{64}$"
 Sha256 = Annotated[str, Field(pattern=_SHA256)]
-#: 年度交接的执行修订：r2 = 旧格式政策（没有声明评分内容身份），r3 = 声明了的（DECISIONS/0025）。
-HandoffRevision = Literal["r2-2026-10-08", "r3-2026-10-09"]
+#: 年度交接的执行修订（``common.life_contracts.FEEDBACK_HANDOFF_REVISION``）。
+HandoffRevision = Literal["r3-2026-10-09"]
 
 
 class ScoredYear(ContractModel):
-    """一次年度交接的绑定（r2）：年初状态 → 这一次实际结算 → 对这份结果的实际评分 → 它产生的候选状态。
+    """一次年度交接的绑定：年初状态 → 这一次实际结算 → 对这份结果的实际评分 → 它产生的候选状态。
 
     **只由 ``econ.life_year.settle_and_score`` 建立**：它自己调用结算器，再对这份结算结果、用这个年初状态调用
     评分器，然后封存（私有标记 ``_sealed``）。直接构造、``model_validate`` 或从 JSON 还原得到的对象都没有封存
     标记，反馈函数不接受——不能把任意一份分数和一份账目放在一起、各算一次指纹就当成"同一次生活"。
 
     依据（全部是确定的 SHA-256，可以重放，没有随机运行编号）：协议；年初状态；年度计划；城市目录；税绑定的声明
-    身份；评分输入（规格、城市评分条件、偏好、硬要求）；实际结果；候选状态；分数；r3 下还有实际评分规格的内容身份。
+    身份；评分输入（规格、城市评分条件、偏好、硬要求）；实际结果；候选状态；分数；实际评分规格的内容身份。
     ``binding_fingerprint`` 是它们
     （加上人、分身、城市、年份与执行修订）的指纹。构造时核对对象与指纹一致；反馈生成与应用时再重算核对，
     事后替换其中任何一项都会被发现。这不是抵抗任意伪造全部内部数据的安全机制。
@@ -83,9 +78,8 @@ class ScoredYear(ContractModel):
     candidate_fingerprint: Sha256 | None = None
     score_fingerprint: Sha256 | None = None
     feedback_revision: HandoffRevision
-    #: r3：这一年实际用来评分的规格的内容身份（``LifeScoringSpec.content_fingerprint``）；没有给评分输入时为空。
-    #: r2 不写；没有用到时不序列化。
-    scoring_content_fingerprint: Sha256 | None = Field(default=None, exclude_if=lambda v: v is None)
+    #: 这一年实际用来评分的规格的内容身份（``LifeScoringSpec.content_fingerprint``）；没有给评分输入时为空。
+    scoring_content_fingerprint: Sha256 | None = None
     binding_fingerprint: Sha256
     _sealed: bool = PrivateAttr(default=False)
 
@@ -95,14 +89,7 @@ class ScoredYear(ContractModel):
         return self._sealed
 
     def evidence(self) -> dict[str, object]:
-        """参与 ``binding_fingerprint`` 的全部依据（按名字排序后取 SHA-256）。r3 多一项实际评分内容身份；
-        r2 的依据与修复前逐字节相同。"""
-        out = self._evidence_r2()
-        if self.feedback_revision == SCORING_CONTENT_HANDOFF_REVISION:
-            out["scoring_content"] = self.scoring_content_fingerprint
-        return out
-
-    def _evidence_r2(self) -> dict[str, object]:
+        """参与 ``binding_fingerprint`` 的全部依据（按名字排序后取 SHA-256）。"""
         return {
             "feedback_revision": self.feedback_revision,
             "person_id": self.person_id,
@@ -118,6 +105,7 @@ class ScoredYear(ContractModel):
             "outcome": self.outcome_fingerprint,
             "candidate": self.candidate_fingerprint,
             "score": self.score_fingerprint,
+            "scoring_content": self.scoring_content_fingerprint,
         }
 
     def expected_binding_fingerprint(self) -> str:
@@ -154,15 +142,8 @@ class ScoredYear(ContractModel):
                 out.append(f"{name}与绑定时记下的指纹不一致")
         if self.score is not None and self.score_problem is not None:
             out.append("有分数就不该有评分问题说明")
-        if (
-            self.feedback_revision != SCORING_CONTENT_HANDOFF_REVISION
-            and self.scoring_content_fingerprint is not None
-        ):
-            out.append("只有 r3 的年度绑定记评分内容身份")
-        if self.feedback_revision == SCORING_CONTENT_HANDOFF_REVISION and (
-            self.scoring_inputs_fingerprint is None
-        ) != (self.scoring_content_fingerprint is None):
-            out.append("r3 下给了评分输入就必须记下实际评分规格的内容身份，没给就不能记")
+        if (self.scoring_inputs_fingerprint is None) != (self.scoring_content_fingerprint is None):
+            out.append("给了评分输入就必须记下实际评分规格的内容身份，没给就不能记")
         if self.binding_fingerprint != self.expected_binding_fingerprint():
             out.append("绑定指纹与依据不一致")
         return out
@@ -232,18 +213,18 @@ class EnergyFeedbackRecord(ContractModel):
     #: 声明的上限 base × (1 + α)。
     quota_upper_bound: ExactAmount
     quantization: Literal["floor_to_0.01"]
-    #: 这一年结算结果与评分的 SHA-256（原样序列化后计算）。r2 起它们来自年度绑定 ``ScoredYear``，
+    #: 这一年结算结果与评分的 SHA-256（原样序列化后计算）。它们来自年度绑定 ``ScoredYear``，
     #: 分数与账目的对应由绑定保证，不由这两个指纹单独证明。
     outcome_fingerprint: Annotated[str, Field(pattern=_SHA256)] | None = None
     score_fingerprint: Annotated[str, Field(pattern=_SHA256)] | None = None
-    #: r2：反馈政策的内容指纹、年度绑定的指纹、这次交接对应的候选状态的指纹、执行修订。
+    #: 反馈政策的内容指纹、年度绑定的指纹、这次交接对应的候选状态的指纹、执行修订。
     #: 反馈只能写回 ``candidate_fingerprint`` 指向的那一份候选状态。
     policy_fingerprint: Sha256
     binding_fingerprint: Sha256
     candidate_fingerprint: Sha256 | None = None
     feedback_revision: HandoffRevision
-    #: r3：政策声明、年度交接核对过的评分内容身份——下一年额度的来源评分内容。r2 不写；没有用到时不序列化。
-    scoring_content_fingerprint: Sha256 | None = Field(default=None, exclude_if=lambda v: v is None)
+    #: 政策声明、年度交接核对过的评分内容身份——下一年额度的来源评分内容。
+    scoring_content_fingerprint: Sha256
     reasons: tuple[Annotated[str, Field(min_length=1, max_length=400)], ...] = ()
 
     @model_validator(mode="after")
@@ -278,10 +259,6 @@ class EnergyFeedbackRecord(ContractModel):
             raise ValueError("确定了下一年额度的交接必须指向对应的候选状态")
         if d == "blocked" and not self.reasons:
             raise ValueError("反馈信息不足必须列出原因")
-        if (self.feedback_revision == SCORING_CONTENT_HANDOFF_REVISION) != (
-            self.scoring_content_fingerprint is not None
-        ):
-            raise ValueError("r3 的反馈记录必须写评分内容身份，r2 的不能写")
         return self
 
 
@@ -315,7 +292,7 @@ class LifeYearResult(ContractModel):
     resource_rules_revision: str
     feedback_policy_id: IdStr
     feedback_policy_version: str
-    #: r2：年度交接的执行修订与这一次年度绑定的指纹（与反馈记录里的一致）。r3 见 DECISIONS/0025。
+    #: 年度交接的执行修订与这一次年度绑定的指纹（与反馈记录里的一致）。
     feedback_revision: HandoffRevision
     binding_fingerprint: Sha256
     handoff: Handoff
@@ -370,7 +347,5 @@ def internal_feedback_models() -> tuple[type[ContractModel], ...]:
     return (EnergyFeedbackPolicy, EnergyFeedbackRecord, LifeYearResult, ScoredYear)
 
 
-# 上面三处 HandoffRevision 与常量保持一致
-assert FEEDBACK_HANDOFF_REVISION == "r2-2026-10-08"
-assert FEEDBACK_HANDOFF_REVISIONS == (FEEDBACK_HANDOFF_REVISION, SCORING_CONTENT_HANDOFF_REVISION)
-assert SCORING_CONTENT_HANDOFF_REVISION == "r3-2026-10-09"
+# HandoffRevision 与常量保持一致
+assert FEEDBACK_HANDOFF_REVISION == "r3-2026-10-09"
