@@ -54,7 +54,6 @@ from econ.life_evaluation import evaluate_clone
 from econ.life_settlement import binding_from_policy, check_year_plan
 from econ.life_year import ScoringInputs, run_life_year
 from orchestration.life_runner import (
-    KEY_SOURCES,
     RunOutcome,
     RunRefusedError,
     RunWorld,
@@ -742,9 +741,8 @@ def main() -> int:
             "generated_at_utc": dt.datetime.now(dt.UTC).isoformat(timespec="seconds"),
             "git_head": _git("rev-parse", "HEAD"),
             "git_dirty": None if status is None else bool(status),
-            "note": "工作区未提交时，git_head 不能代表实际运行的代码；以下指纹才是实际输入。运行归档本身不带时间戳，可以逐字节复现",
+            "note": "工作区未提交时，git_head 不能代表实际运行的代码；以下是输入文件的指纹。运行归档本身不带时间戳，可以逐字节复现",
             "fingerprints_sha256": {
-                **{f"src/{rel}": _sha256(REPO / "src" / rel) for rel in KEY_SOURCES},
                 **{f_: _sha256(REPO / f_) for f_ in inputs},
                 "scripts/demo_life_e1_7a.py": _sha256(REPO / "scripts/demo_life_e1_7a.py"),
             },

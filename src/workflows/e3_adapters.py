@@ -66,6 +66,7 @@ from common.product_contracts import (
     ProductResult,
     RunSubmission,
 )
+from common.run_store import RunStore
 from orchestration.life_outcome import FINISHED_WITH_REPORT, outcome_from_archive
 from orchestration.life_runner import RunRefusedError, RunWorld, resume_run, start_run
 from orchestration.life_runner import preflight as e1_preflight
@@ -549,10 +550,11 @@ class E1RunAdapter:
                 run_id=run_id, kind="needs_attention", code=code, audit_ref=f"wf-run-{run_id}"
             )
         if p.status in FINISHED_WITH_REPORT:
+            accepted = "\n".join(RunStore(run_dir).bodies("accepted")).encode("utf-8")
             data = b"".join(
-                (run_dir / name).read_bytes()
-                for name in ("progress.json", "accepted.jsonl", "reports/arm.main.json")
-                if (run_dir / name).is_file()
+                accepted if name == "accepted" else (run_dir / name).read_bytes()
+                for name in ("progress.json", "accepted", "reports/arm.main.json")
+                if name == "accepted" or (run_dir / name).is_file()
             )
             return RunInspection(
                 run_id=run_id,

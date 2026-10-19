@@ -10,13 +10,40 @@ tests/econ/conftest.py 用同名 fixture 覆盖了 core / persona 等，那边�
 
 from __future__ import annotations
 
-import pytest
+import os
 
-from worlds.difficulty import Tier, instantiate
-from worlds.generator import WorldGenerator
-from worlds.personas import PersonaGenerator, reference_persona
+# 并行测试（pytest -n auto，每个核一个进程）时，numpy 背后的 OpenBLAS / MKL 默认又按核数各开一批线程，
+# 20 个进程 × 20 个线程会把内存分配挤爆（OpenBLAS: Memory allocation still failed）。测试里一律单线程；
+# 必须在任何 import numpy 之前设置，子进程（scripts/ 的命令行测试）继承同一份环境。
+for _var in ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS"):
+    os.environ.setdefault(_var, "1")
+
+import pytest  # noqa: E402
+
+from worlds.difficulty import Tier, instantiate  # noqa: E402
+from worlds.generator import WorldGenerator  # noqa: E402
+from worlds.personas import PersonaGenerator, reference_persona  # noqa: E402
 
 SEED = 20260902
+
+#: 研究线（M2 静态福利模型、M3 合成世界、M5 估计与门）的测试：开发期（所有者 2026-10-18）日常不跑，统一标 slow，
+#: 用 pytest -m slow 显式打开。生活模型、产品、工作流与共用模块（common.money、common.ids 等）的测试照常跑。
+RESEARCH_TESTS = (
+    "tests/eval/",
+    "tests/econ/",
+    "tests/worlds/",
+    "tests/test_baselines.py",
+    "tests/test_perturbation.py",
+    "tests/test_weights.py",
+)
+
+
+def pytest_collection_modifyitems(config, items):
+    root = config.rootpath
+    for item in items:
+        rel = item.path.relative_to(root).as_posix()
+        if rel.startswith(RESEARCH_TESTS):
+            item.add_marker(pytest.mark.slow)
 
 
 @pytest.fixture(scope="session")

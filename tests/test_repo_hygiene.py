@@ -27,6 +27,10 @@ KEY_SHAPES = [
     re.compile(r"(?i)(api[_-]?key|secret|token|password)\s*[:=]\s*['\"][A-Za-z0-9_\-]{24,}['\"]"),
 ]
 
+#: 测试与本机探针里故意写的假密钥都带这些字样之一（离线测试用来检查"密钥不进日志"）；
+#: 真密钥不会含这些词。新增假值时用其中一个词，不要把真密钥加进来。
+FAKE_MARKERS = ("fake", "probe-local-only", "notforclaude", "must-not-be-used", "offlinetest")
+
 TEXT_SUFFIXES = {
     ".py",
     ".toml",
@@ -99,9 +103,11 @@ def test_no_tracked_file_looks_like_it_contains_a_key():
         except (UnicodeDecodeError, OSError):
             continue
         for pattern in KEY_SHAPES:
-            m = pattern.search(text)
-            if m:
+            for m in pattern.finditer(text):
+                if any(marker in m.group().lower() for marker in FAKE_MARKERS):
+                    continue  # 测试与探针里明写的假值
                 offenders.append(f"{name}: {pattern.pattern} matched {m.group()[:12]}...")
+                break
     assert not offenders, "possible credentials in tracked files:\n" + "\n".join(offenders)
 
 

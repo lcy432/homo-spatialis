@@ -18,8 +18,8 @@
 
 现在按**普通软件项目**开发，不按研究项目。开发完成后冻结版本（git tag），再按研究标准一次性重跑研究问题。
 
-- 每次改动跑全量自动化测试与 lint：`uv run pytest`、`uv run ruff check src tests scripts`、`uv run ruff format --check src tests scripts`（`runs/` 里的历史脚本不在 lint 范围）。
-- git 是历史与回退手段。提交、推送由所有者做；不要自行 `git add`、提交或推送，保留其他窗口的未提交修改。
+- 每次改动跑全量自动化测试与 lint：`uv run pytest -n auto`（日常全量手动加 `-n auto` 并行，约 1 分钟；它故意不写进默认配置，单跑一个文件时不加，免得白白启动一批进程。研究线测试标了 slow，默认不跑，要跑用 `-m slow`）、`uv run ruff check src tests scripts`、`uv run ruff format --check src tests scripts`（`runs/` 里的历史脚本不在 lint 范围）。
+- 每实现完一个功能（feature），全量测试与 lint 通过后就 `git commit` 一次：只 `git add` 这次改动的文件（不用 `git add .` / `-A`，不把其他窗口的未提交修改带进去），提交信息写清做了什么。推送（`git push`）仍由所有者决定。
 - 不再做：旧版本逐字节比较、源码快照、每轮变异检查、每轮证据目录与 prompt 归档、为保留旧路径而开新版本号、新旧代码永久并存、把旧归档钉死的测试。旧代码直接改或删；`runs/` 可以清理、覆盖。
 - 只在真正的设计决定时写简短 ADR（`DECISIONS/`），状态写进 docs/INDEX.md，不在多份文档里重复写。
 - 新增或改变环境数值、资料映射、评价方法或代理信息条件时，同步更新 [参数与假设目录](docs/design/parameter-assumption-register.md) 的相关条目。

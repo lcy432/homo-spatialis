@@ -126,37 +126,6 @@ from orchestration.life_budget import (
     read_ledger,
 )
 
-#: 运行清单里记指纹的关键代码（规则在代码里）：改了它们，就不能冒充原运行继续。
-_SRC = Path(__file__).resolve().parent.parent
-KEY_SOURCES: tuple[str, ...] = (
-    "econ/life_settlement.py",
-    "econ/life_resources.py",
-    "econ/life_health.py",
-    "econ/life_career.py",
-    "econ/life_savings.py",
-    "econ/life_scoring.py",
-    "econ/life_feedback.py",
-    "econ/life_year.py",
-    "econ/life_evaluation.py",
-    "econ/life_terminal_value.py",
-    "econ/life_aggregation.py",
-    "agentlayer/life_views.py",
-    "agentlayer/life_planning.py",
-    "agentlayer/life_mock.py",
-    "agentlayer/life_llm.py",
-    "orchestration/life_runner.py",
-    "orchestration/life_budget.py",
-    "orchestration/life_archive.py",
-)
-
-#: E3-A 收尾 F1（DECISIONS/0034 第九节）：六维产品画像的运行另外记下产品规则代码的身份。只加在产品运行上（名单里有六维产品
-#: 画像）；旧协议、旧输入的运行清单一个字段都不多，历史归档照旧核对。
-#: 绑定边界：这里只列**运行时**把画像变成评分输入的代码——``common/life_product_profile.py`` 的 ``dimension_fractions`` /
-#: ``material_fractions`` 与精确点数的规范化（偏好转换本身在 ``econ/life_scoring.py``，已在 ``KEY_SOURCES``；观察、提示与 mock
-#: 也已在里面）。产品层的答案审阅、编译与资料编译（``src/product/``）只产生冻结进归档的输入文件，它们一变，冻结输入、协议、目录或
-#: 名单的身份就变，不需要另记源码；结果投影在生活之后，不影响运行语义。
-PRODUCT_SOURCE_SET = "e3a-product-sources-r1"
-PRODUCT_KEY_SOURCES: tuple[str, ...] = ("common/life_product_profile.py",)
 #: 执行前检查在 plan 阶段发现的问题里，身份与年份由运行器填写——出错是运行器的程序错误，不能交给规划器修订。
 RUNNER_OWNED_CODES: frozenset[str] = frozenset({"identity", "year_mismatch", "year_beyond_horizon"})
 #: 没有新随机事件的试算里，规划器能改的资料问题：要治疗而本城治疗资料未知（改成不治即可；资料本身仍是缺口）。
@@ -206,10 +175,6 @@ class RunWorld:
     @property
     def order(self) -> tuple[str, ...]:
         return tuple(e.clone_id for e in self.roster.entries)
-
-
-def _source_fingerprint(rel: str) -> str:
-    return hashlib.sha256((_SRC / rel).read_bytes()).hexdigest()
 
 
 def _tax_policy(bundle: LifeBundle, city: str) -> SyntheticTaxPolicy:
@@ -296,12 +261,6 @@ def _identities(
         ids[f"tax:{c.city}"] = tax_binding_fingerprint(_tax(bundle, str(c.city)))
     for arm_id, spec in specs.items():
         ids[f"evaluation:{arm_id}"] = spec.content_fingerprint
-    for rel in KEY_SOURCES:
-        ids[f"source:{rel}"] = _source_fingerprint(rel)
-    if bundle.product_profiles:
-        ids["source_set"] = PRODUCT_SOURCE_SET
-        for rel in PRODUCT_KEY_SOURCES:
-            ids[f"source:{rel}"] = _source_fingerprint(rel)
     if input_files:
         ids["input_files"] = canonical_fingerprint({k: v[1] for k, v in input_files.items()})
     return ids
@@ -1941,8 +1900,8 @@ def _attach(planner: object, archive: RunArchive, run_id: str) -> None:
 def _check_manifest(world: RunWorld, archive: RunArchive) -> RunManifest:
     manifest = RunManifest.model_validate(archive.read_json("manifest.json"))
     want = _manifest(world, manifest.run_id)
-    # 开发期（所有者 2026-10-18）：源码指纹照常记进运行清单，但不再拦截续跑或重放——改了代码，旧运行仍可接着跑；配置、规则、
-    # 事实、初态、许可、模型等内容身份照旧逐项核对。研究定稿时再恢复按源码拦截。
+    # 开发期（所有者 2026-10-18）：运行清单不再记源码指纹，改了代码旧运行仍可接着跑；配置、规则、事实、初态、许可、模型等
+    # 内容身份照旧逐项核对。之前的归档里还留着 source:* / source_set 两类键，核对时忽略。
     diff = sorted(
         k
         for k in set(manifest.identities) | set(want.identities)
@@ -1954,7 +1913,7 @@ def _check_manifest(world: RunWorld, archive: RunArchive) -> RunManifest:
             diff.append(name)
     if diff:
         raise RunRefusedError(
-            "运行清单与现在的配置、规则、事实、初态、许可或代码不同（"
+            "运行清单与现在的配置、规则、事实、初态或许可不同（"
             + "、".join(diff[:12])
             + (" 等" if len(diff) > 12 else "")
             + "）：不能冒充原运行继续或重放"

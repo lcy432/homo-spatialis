@@ -31,6 +31,9 @@ from eval.floors.scheme_a import (
     require_formal_protocol,
 )
 
+#: 研究线（M5）从命令行真跑一遍，准备就要约 90 秒：日常默认不跑，用 -m slow 显式打开。
+pytestmark = pytest.mark.slow
+
 REPO = Path(__file__).resolve().parents[2]
 
 

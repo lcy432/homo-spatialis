@@ -36,6 +36,7 @@ dev = [
     "pytest>=8.2",
     "ruff>=0.6",
     "pre-commit>=3.7",
+    "pytest-xdist>=3.8.0",
 ]
 
 [tool.uv]
@@ -46,9 +47,10 @@ package = false
 [tool.pytest.ini_options]
 pythonpath = ["src", "."]
 testpaths = ["tests"]
-addopts = "-q --strict-markers -m 'not live'"
+addopts = "-q --strict-markers -m 'not live and not slow'"
 markers = [
     "live: hits a real language-model or data endpoint; deselected by default, run with -m live",
+    "slow: research-line tests (M2/M3/M5, see RESEARCH_TESTS in tests/conftest.py); deselected by default, run with -m slow",
 ]
 
 [tool.ruff]
