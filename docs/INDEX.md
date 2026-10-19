@@ -65,6 +65,7 @@
 | agent-03 | — | 产品角色用 Qwen3.8 Flash | 已实现 | 曾通过审核 | [0032](../DECISIONS/0032-product-planner-default-qwen3-8-flash.md) |
 | agent-04 | — | 真实 LLM 测试用 Claude Haiku 5.5：Agent SDK 单轮调用、厂商适配的传输层、可选计费 | 已实现 | 真实试跑结果待汇总 | [0035](../DECISIONS/0035-haiku-test-planner-agent-sdk.md) |
 | agent-05 | — | 按规模选测试模型：非全量真实 LLM 测试用 Sonnet 5.5 effort max；全规模产品流程测试用 Qwen 最新 Flash（`scripts/run_product_full.py`） | 已实现 | 离线测试通过 | [0038](../DECISIONS/0038-test-models-by-scale.md) |
+| agent-06 | — | 每个分身并行地过生活：发送前占调用名额、批次状态只升不降、恢复先核对再并行、Claude 环境锁只罩住启动 | 已实现 | 离线测试通过 | [0039](../DECISIONS/0039-parallel-clones.md) |
 
 ### 接入层
 

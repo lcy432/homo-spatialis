@@ -32,7 +32,9 @@ from __future__ import annotations
 import contextlib
 import hashlib
 import shutil
+import threading
 from collections.abc import Sequence
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -99,6 +101,7 @@ from common.life_planning_contracts import (
     AttemptRecord,
     CloneRunRecord,
     LifeRunConfig,
+    PendingYear,
     PlannerIdentity,
     PlannerSpec,
     RunManifest,
@@ -147,6 +150,21 @@ class _ProgramError(Exception):
 
 class _BudgetExhausted(Exception):  # noqa: N818
     pass
+
+
+class _Suspended(Exception):  # noqa: N818 - 控制信号
+    """并行运行时，批次在别的分身那里中断或停下：这个分身在下一次规划调用之前停住，现场保留（可以恢复），不记结局。"""
+
+
+class _ReplayFrontier(Exception):  # noqa: N818 - 控制信号
+    """恢复的核对阶段：这个分身已经重放到需要新调用或新记录的地方，核对到此为止。"""
+
+
+#: 并行运行的默认上限（同时在过生活的分身数）。``start_run`` / ``resume_run`` 不写 ``workers`` 时是 1（顺序，结果与记录顺序都确定）；
+#: 入口脚本默认所有分身并行，最多这么多个。
+DEFAULT_MAX_WORKERS = 16
+#: 批次状态的优先级：几个分身各自遇到不同情况时，结局取最高的那一个。
+_STATUS_RANK = {"running": 0, "interrupted": 1, "halted": 2, "budget_exhausted": 3, "paused": 4}
 
 
 # ---------------------------------------------------------------------- 运行前
@@ -635,11 +653,17 @@ class RunOutcome:
 
 
 class LifeRunner:
-    """顺序调度一个批次。一次运行一个实例。
+    """调度一个批次。一次运行一个实例。
 
-    恢复（``resume_run``）时先装好核对过的归档记录，再从第一个分身起按同一套代码重走已经记录的路径：已记录的调用直接复用原始
-    响应，解析、执行前检查、处置与执行都重新做一遍，得到的检查记录、已接受的行动与分身结局逐项和归档比较（E1-7A 收尾 F1）。
-    重放阶段不写任何文件、不调用规划器；第一次需要写新记录或调用规划器之前，所有已有记录都必须已经重放到（``_leave_replay``）。"""
+    ``workers`` 是同时在过生活的分身数：1 是顺序（名单顺序，记录顺序确定）；大于 1 时每个分身一个线程任务，彼此独立地规划、
+    执行与写记录（分身的生活只取决于自己的计划与运气，不取决于别的分身，所以结果与顺序运行相同，只有归档里记录的先后不同）。
+    共享的只有：全局调用上限（发送前在锁里占位，不会超过）、批次状态（中断、停下、暂停、调用上限用尽）与进度文件（锁里写）。
+    批次在某个分身那里中断或停下时，其他分身在各自的下一次规划调用之前停住，现场保留，可以恢复；某个分身的程序错误让批次
+    暂停：还没开始的分身记为未运行，正在过的分身照常过完。
+
+    恢复（``resume_run``）分两步：先按名单顺序、一个分身一个分身地用同一套代码重走已经记录的路径（复用原始响应，解析、执行前
+    检查、处置与执行都重新做一遍，逐项和归档比较；E1-7A 收尾 F1），直到每个分身都走到需要新调用或新记录的地方，并且归档里的
+    记录都被用到——这一步不写任何文件、不调用规划器，有冲突就拒绝；然后再按 ``workers`` 继续（已记录的部分照样重放，不重复写）。"""
 
     def __init__(
         self,
@@ -652,9 +676,19 @@ class LifeRunner:
         stop_after_commits: int | None = None,
         records: ArchiveRecords | None = None,
         expected: Sequence[CloneRunRecord] = (),
+        workers: int = 1,
     ) -> None:
         _check_planner(world, planner)
+        if workers < 1:
+            raise ValueError("workers 至少是 1")
         self.world, self.planner, self.archive, self.run_id = world, planner, archive, run_id
+        self.workers = workers
+        self._lock = threading.RLock()
+        self._in_flight = 0
+        self._aborted = False
+        #: 每个分身正在规划、还没有接受行动的那一年：分身 → (年份, 已用尝试次数)
+        self._pending: dict[str, tuple[int, int]] = {}
+        self._clones: dict[str, _Clone] = {}
         self.stop_after_calls = stop_after_calls
         self.stop_after_commits = stop_after_commits
         self.commits_made = 0
@@ -688,7 +722,6 @@ class LifeRunner:
             or self.accepted_archive
             or self.expected_records
         )
-        self._pending: tuple[str, int, int] | None = None
 
     # ------------------------------------------------------------------ 小工具
 
@@ -714,6 +747,10 @@ class LifeRunner:
         不在这次运行的路径上（多出、错位或属于别的分支），拒绝，不能冒充原运行继续。"""
         if not self._replaying:
             return
+        raise _ReplayFrontier(what)
+
+    def _replay_leftovers(self) -> None:
+        """核对阶段之后：归档里的每一条记录都必须被重放用到。剩下的不在这次运行的路径上（多出、错位或属于别的分支），拒绝。"""
         left = {
             "调用": [_where(k) for k in self.recorded if k not in self._used_calls],
             "检查记录": [_where(k) for k in self.recorded_attempts if k not in self._used_attempts],
@@ -727,29 +764,46 @@ class LifeRunner:
         if any(left.values()):
             shown = "；".join(f"{name} {'、'.join(v[:4])}" for name, v in left.items() if v)
             raise RunRefusedError(
-                f"恢复时在{what}之前，归档里还有没有重放到的记录（{shown}）：它们不在这次运行的路径上，"
+                f"恢复时所有分身都重放到继续的地方之后，归档里还有没有重放到的记录（{shown}）：它们不在这次运行的路径上，"
                 "不能冒充原运行继续"
             )
-        self._replaying = False
 
     def _write_progress(self) -> None:
         if self._replaying:  # 重放已有记录时不写进度：拒绝时原归档保持不变
             return
-        pending_clone, pending_year, pending_attempts = self._pending or (None, None, 0)
-        progress = RunProgress(
-            run_id=self.run_id,
-            status=self.status,  # type: ignore[arg-type]
-            calls_used=self.calls_used,
-            call_limit=self.world.config.planning.global_call_limit,
-            order=self.world.order,
-            clones=tuple(self.records[c] for c in self.world.order if c in self.records),
-            pending_clone=pending_clone,
-            pending_year=pending_year,
-            pending_attempts=pending_attempts,
-            pause_reason=self.pause_reason,
-            halt_kind=self.halt_kind,  # type: ignore[arg-type]
-        )
-        self.archive.write_json("progress.json", progress.model_dump(mode="json"))
+        with self._lock:
+            progress = RunProgress(
+                run_id=self.run_id,
+                status=self.status,  # type: ignore[arg-type]
+                calls_used=self.calls_used,
+                call_limit=self.world.config.planning.global_call_limit,
+                order=self.world.order,
+                clones=tuple(self.records[c] for c in self.world.order if c in self.records),
+                pending=tuple(
+                    PendingYear(clone_id=c, year_index=y, attempts_used=n)
+                    for c in self.world.order
+                    if c in self._pending
+                    for y, n in (self._pending[c],)
+                ),
+                pause_reason=self.pause_reason,
+                halt_kind=self.halt_kind,  # type: ignore[arg-type]
+            )
+            self.archive.write_json("progress.json", progress.model_dump(mode="json"))
+
+    def _set_status(
+        self, status: str, *, reason: str | None = None, halt_kind: str | None = None
+    ) -> None:
+        """批次状态只升不降（``_STATUS_RANK``）；原因记第一次升到这一级时的那一条。"""
+        with self._lock:
+            if _STATUS_RANK[status] <= _STATUS_RANK.get(self.status, 0):
+                return
+            self.status = status
+            self.pause_reason = reason if status in ("paused", "halted") else None
+            self.halt_kind = halt_kind if status == "halted" else None
+
+    def _halting(self) -> bool:
+        """别的分身让批次中断或停下了：这个分身不再发起新的规划调用。"""
+        return self._aborted or self.status in ("interrupted", "halted")
 
     def _record(
         self,
@@ -773,6 +827,18 @@ class LifeRunner:
             failure=failure,
             detail=detail[:600],
         )
+        with self._lock:
+            self._store_record(c, record, stop=stop, failure=failure, keep_lives=keep_lives)
+
+    def _store_record(
+        self,
+        c: _Clone,
+        record: CloneRunRecord,
+        *,
+        stop: PlanningStop | None,
+        failure: RunFailure | None,
+        keep_lives: bool,
+    ) -> None:
         expected = self.expected_records.get(c.clone_id)
         if expected is not None:  # 恢复：进度里已经结束的分身，重放得到的结局必须相同
             old, new = expected.model_dump(mode="json"), record.model_dump(mode="json")
@@ -811,21 +877,65 @@ class LifeRunner:
 
     # ------------------------------------------------------------------ 主循环
 
-    def run(self) -> RunOutcome:
-        bundle = self.world.bundle
+    def _new_clone(self, entry: Any) -> _Clone:
+        state = self.world.bundle.initial_state(entry.clone_id)
+        assert state is not None
+        c = _Clone(
+            clone_id=entry.clone_id,
+            user_id=entry.user_id,
+            person_id=entry.person_id,
+            city=str(entry.city),
+            repeat_index=entry.repeat_index,
+            state=state,
+        )
+        self._clones[c.clone_id] = c
+        return c
+
+    def _verify_replay(self) -> None:
+        """恢复的第一步：按名单顺序逐个重放已有记录，直到每个分身都走到需要新调用或新记录的地方；然后所有记录都必须用到。
+        不写任何文件、不调用规划器；有冲突就拒绝。核对得到的分身对象与结局都丢掉，第二步从头再走一遍（同样的确定路径）。"""
         for entry in self.world.roster.entries:
-            if entry.clone_id in self.records:
-                continue
-            state = bundle.initial_state(entry.clone_id)
-            assert state is not None
-            c = _Clone(
-                clone_id=entry.clone_id,
-                user_id=entry.user_id,
-                person_id=entry.person_id,
-                city=str(entry.city),
-                repeat_index=entry.repeat_index,
-                state=state,
-            )
+            c = self._new_clone(entry)
+            with contextlib.suppress(_ReplayFrontier):
+                self._run_clone(c)
+        self._replay_leftovers()
+        self._replaying = False
+        self.records.clear()
+        self.lives.clear()
+        self.stops.clear()
+        self.failures.clear()
+        self._verified_records.clear()
+        self._clones.clear()
+
+    def run(self) -> RunOutcome:
+        if self._replaying:
+            self._verify_replay()
+        entries = list(self.world.roster.entries)
+        if self.workers == 1 or len(entries) <= 1:
+            for entry in entries:
+                self._run_entry(entry)
+        else:
+            with ThreadPoolExecutor(
+                max_workers=min(self.workers, len(entries)), thread_name_prefix="clone"
+            ) as pool:
+                futures = [pool.submit(self._run_entry, entry) for entry in entries]
+            for f in futures:
+                f.result()  # 归档冲突（RunRefusedError）在这里抛出；别的分身已经在下一次调用之前停住
+        if self.status in ("interrupted", "halted"):
+            self._write_progress()
+            return self._outcome(evaluate=False)
+        self._record_suspended()
+        if self.status == "running":
+            self.status = "completed"
+        self._write_progress()
+        return self._outcome(evaluate=True)
+
+    def _run_entry(self, entry: Any) -> None:
+        """一个分身的整段生活（顺序运行时在主线程，并行时在线程池里）。分身自己的结局记在 records；批次层面的情况改批次状态。"""
+        c = self._new_clone(entry)
+        with self._lock:
+            if self._halting():
+                return  # 还没开始：不记结局，恢复时从头开始
             if self.status in ("paused", "budget_exhausted"):
                 reason = (
                     "全局调用上限已经用完，没有轮到"
@@ -833,47 +943,74 @@ class LifeRunner:
                     else f"批次已暂停（{self.pause_reason}），没有轮到"
                 )
                 self._record(c, "not_run", reason)
-                continue
-            try:
-                self._run_clone(c)
-            except RunInterrupted:
-                self.status = "interrupted"
-                self._write_progress()
-                return self._outcome(evaluate=False)
-            except PlannerHalt as exc:
-                # 服务失败、预算、输入超限、发送状态不确定、请求检查没有通过：整个批次停下，保存现场。不是生活结果，
-                # 不记成这个分身的程序错误，也不替它生成计划；所有者决定之后可以恢复（尝试次数与预算都不清零）。
-                pending = self._pending
-                self.status = "halted"
-                self.halt_kind = exc.kind
+                return
+        try:
+            self._run_clone(c)
+        except _Suspended:
+            return  # 现场保留：正在规划的年份记在进度里
+        except RunInterrupted:
+            self._set_status("interrupted")
+            self._write_progress()
+            return
+        except PlannerHalt as exc:
+            # 服务失败、预算、输入超限、发送状态不确定、请求检查没有通过：整个批次停下，保存现场。不是生活结果，
+            # 不记成这个分身的程序错误，也不替它生成计划；所有者决定之后可以恢复（尝试次数与预算都不清零）。
+            with self._lock:
+                pending = self._pending.get(c.clone_id)
                 where = (
                     ""
                     if pending is None
-                    else f"{pending[0]} 第 {pending[1]} 年第 {pending[2] + 1} 份候选："
+                    else f"{c.clone_id} 第 {pending[0]} 年第 {pending[1] + 1} 份候选："
                 )
-                self.pause_reason = f"{where}{exc.message}"[:600]
-                self._write_progress()
-                return self._outcome(evaluate=False)
-            except _BudgetExhausted:
-                self.status = "budget_exhausted"
-                self._pending = None
-            except _ProgramError as exc:
-                self._program_error(c, exc.stage, exc.kind, exc.message)
-            except RunRefusedError:
-                raise
-            except (
-                LifeContractError
-            ) as exc:  # 配置在运行前都检查过：到这里是没想到的契约冲突，同样暂停批次
-                self._program_error(c, "life", "contract", f"{type(exc).__name__}: {exc}")
-            except Exception as exc:
-                self._program_error(c, "life", "unexpected", f"{type(exc).__name__}: {exc}")
-            self._pending = None
+                self._set_status("halted", reason=f"{where}{exc.message}"[:600], halt_kind=exc.kind)
             self._write_progress()
-        self._leave_replay("结束这次运行")
-        if self.status == "running":
-            self.status = "completed"
+            return
+        except _BudgetExhausted:
+            self._set_status("budget_exhausted")
+        except _ProgramError as exc:
+            self._program_error(c, exc.stage, exc.kind, exc.message)
+        except RunRefusedError:
+            with self._lock:
+                self._aborted = True
+            raise
+        except (
+            LifeContractError
+        ) as exc:  # 配置在运行前都检查过：到这里是没想到的契约冲突，同样暂停批次
+            self._program_error(c, "life", "contract", f"{type(exc).__name__}: {exc}")
+        except Exception as exc:
+            self._program_error(c, "life", "unexpected", f"{type(exc).__name__}: {exc}")
+        with self._lock:
+            self._pending.pop(c.clone_id, None)
         self._write_progress()
-        return self._outcome(evaluate=True)
+
+    def _record_suspended(self) -> None:
+        """批次结局不能恢复（调用上限用尽或暂停盖过了中断）时，之前在下一次调用前停住的分身也要有结局，原计划名单不缩小。"""
+        limit = self.world.config.planning.global_call_limit
+        for clone_id in self.world.order:
+            c = self._clones.get(clone_id)
+            if c is None or clone_id in self.records:
+                continue
+            year = len(c.results) + 1
+            used = c.attempts[-1] if len(c.attempts) == year else 0
+            if self.status == "budget_exhausted" and (c.results or used):
+                self._stop_planning(
+                    c,
+                    PlanningStop(
+                        year_index=year,
+                        kind="budget_exhausted",
+                        attempts=used,
+                        detail=f"全局调用上限 {limit} 次已经用完，第 {year} 年的计划还没有被接受",
+                    ),
+                )
+            else:
+                self._record(
+                    c,
+                    "not_run",
+                    f"批次{'调用上限用尽' if self.status == 'budget_exhausted' else '暂停'}时停在第 {year} 年之前"
+                    f"（已提交 {len(c.results)} 年），不进入评价",
+                    keep_lives=False,
+                )
+            self._pending.pop(clone_id, None)
 
     def _program_error(self, c: _Clone, stage: str, kind: str, message: str) -> None:
         # 重放已有记录时出错：归档与现在的执行对不上，不记成这个分身的程序错误，也不写任何东西
@@ -882,10 +1019,12 @@ class LifeRunner:
                 f"恢复时重放 {c.clone_id} 的已有记录出错（{stage}：{message}）：归档与现在的执行对不上，"
                 "不能冒充原运行继续"
             )
-        self.status = "paused"
-        self.pause_reason = (
-            f"{c.clone_id} 遇到{'意外程序错误' if kind == 'unexpected' else '内部配置或契约错误'}（{stage}）：{message}"
-        )[:600]
+        self._set_status(
+            "paused",
+            reason=(
+                f"{c.clone_id} 遇到{'意外程序错误' if kind == 'unexpected' else '内部配置或契约错误'}（{stage}）：{message}"
+            )[:600],
+        )
         failure = RunFailure(
             clone_id=c.clone_id,
             stage=stage,  # type: ignore[arg-type]
@@ -1023,6 +1162,20 @@ class LifeRunner:
 
     # ------------------------------------------------------------------ 一年的规划
 
+    def _reserve_call(self, c: _Clone, year: int, attempt: int) -> None:
+        """发送之前在锁里占一个调用名额：并行时也不会超过全局上限或"停在第 N 次调用之后"。批次已经在别处中断或停下，就停住。"""
+        policy = self.world.config.planning
+        with self._lock:
+            self._pending[c.clone_id] = (year, attempt - 1)
+            if self._halting():
+                raise _Suspended()
+            used = self.calls_used + self._in_flight
+            if used >= policy.global_call_limit:
+                raise _BudgetExhausted()
+            if self.stop_after_calls is not None and used >= self.stop_after_calls:
+                raise RunInterrupted(f"在第 {used} 次规划调用之后停下")
+            self._in_flight += 1
+
     def _plan_year(self, c: _Clone, year: int, catalog: Any, tax: LifeTaxBinding) -> _YearPlan:
         w = self.world
         policy = w.config.planning
@@ -1066,41 +1219,42 @@ class LifeRunner:
                 transport_attempts = int(recorded.get("transport_attempts", 1))
                 self._used_calls.add((c.clone_id, year, attempt))
             else:
-                self._leave_replay(f"第 {self.calls_used + 1} 次规划调用")
-                if self.calls_used >= policy.global_call_limit:
-                    self._pending = (c.clone_id, year, attempt - 1)
-                    raise _BudgetExhausted()
-                if self.stop_after_calls is not None and self.calls_used >= self.stop_after_calls:
-                    self._pending = (c.clone_id, year, attempt - 1)
-                    raise RunInterrupted(f"在第 {self.calls_used} 次规划调用之后停下")
-                system, user = render_prompt(payload)
-                call = PlannerCall(request_id, system, user, payload)
-                self._pending = (c.clone_id, year, attempt - 1)
-                self._check_request(tax, request, call)
-                text, error, finish_reason, transport_attempts = None, None, None, 1
-                usage: dict[str, Any] | None = None
+                self._leave_replay(f"{c.clone_id} 第 {year} 年第 {attempt} 份候选的规划调用")
+                self._reserve_call(c, year, attempt)
+                counted = False
                 try:
-                    reply = self.planner.plan(call)
-                except (RunInterrupted, PlannerHalt):
-                    raise
-                except ServiceRecordMismatchError as exc:
-                    # 服务明细与这次请求对不上：归档问题，不是规划器异常——不写调用记录、不执行生活，拒绝继续
-                    raise RunRefusedError(
-                        f"{request_id}：服务请求明细与这次请求对不上，不能冒充原运行继续：{exc}"[
-                            :900
-                        ]
-                    ) from exc
-                except Exception as exc:
-                    error = f"{type(exc).__name__}: {exc}"[:600]
-                else:
-                    if isinstance(reply, PlannerReply):
-                        text, finish_reason = reply.text, reply.finish_reason
-                        transport_attempts, usage = reply.transport_attempts, reply.usage
-                    elif isinstance(reply, str):
-                        text = reply
+                    system, user = render_prompt(payload)
+                    call = PlannerCall(request_id, system, user, payload)
+                    self._check_request(tax, request, call)
+                    text, error, finish_reason, transport_attempts = None, None, None, 1
+                    usage: dict[str, Any] | None = None
+                    try:
+                        reply = self.planner.plan(call)
+                    except (RunInterrupted, PlannerHalt):
+                        raise
+                    except ServiceRecordMismatchError as exc:
+                        # 服务明细与这次请求对不上：归档问题，不是规划器异常——不写调用记录、不执行生活，拒绝继续
+                        raise RunRefusedError(
+                            f"{request_id}：服务请求明细与这次请求对不上，不能冒充原运行继续：{exc}"[
+                                :900
+                            ]
+                        ) from exc
+                    except Exception as exc:
+                        error = f"{type(exc).__name__}: {exc}"[:600]
                     else:
-                        error = f"规划器返回了 {type(reply).__name__}，不是文字或 PlannerReply"
-                self.calls_used += 1
+                        if isinstance(reply, PlannerReply):
+                            text, finish_reason = reply.text, reply.finish_reason
+                            transport_attempts, usage = reply.transport_attempts, reply.usage
+                        elif isinstance(reply, str):
+                            text = reply
+                        else:
+                            error = f"规划器返回了 {type(reply).__name__}，不是文字或 PlannerReply"
+                    counted = True
+                finally:
+                    with self._lock:
+                        self._in_flight -= 1
+                        if counted:
+                            self.calls_used += 1
                 self.archive.append(
                     "calls",
                     {
@@ -1121,7 +1275,8 @@ class LifeRunner:
                     },
                 )
             c.attempts[-1] = attempt
-            self._pending = (c.clone_id, year, attempt)
+            with self._lock:
+                self._pending[c.clone_id] = (year, attempt)
             base = dict(
                 request_id=request_id,
                 clone_id=c.clone_id,
@@ -1355,10 +1510,15 @@ class LifeRunner:
             assert nxt is not None
             c.state = nxt
         if archived is None:  # 重放归档的年份不改写进度文件（拒绝时原归档保持不变）
-            self._pending = None
+            with self._lock:
+                self._pending.pop(c.clone_id, None)
+                self.commits_made += 1
+                done = (
+                    self.stop_after_commits is not None
+                    and self.commits_made >= self.stop_after_commits
+                )
             self._write_progress()
-            self.commits_made += 1
-            if self.stop_after_commits is not None and self.commits_made >= self.stop_after_commits:
+            if done:
                 # 先导试跑：提交够了就在年度边界停下（之后可以恢复，也可以只读重放已提交的年份）
                 raise RunInterrupted(f"提交 {self.commits_made} 个年度之后停下")
 
@@ -1388,7 +1548,7 @@ class LifeRunner:
             status=self.status,
             calls_used=self.calls_used,
             records=tuple(self.records[c] for c in self.world.order if c in self.records),
-            lives=dict(self.lives),
+            lives={c: self.lives[c] for c in self.world.order if c in self.lives},
             evaluations=evaluations,
             failures=failures,
             reports=reports,
@@ -1501,8 +1661,9 @@ def load_archive_records(
     3. 检查记录：有对应的调用；请求编号与请求指纹相同；原始响应重算的指纹等于 ``response_fingerprint``——检查记录说的就是这份响应。
     4. 已接受的行动：指向处置为 accepted 的那一份候选；行动、它记下的行动指纹与检查记录的行动指纹相同；请求编号与需求摘要相同；
        用已有的解析器（``parse_output``）解析那份原始响应，得到的就是这份行动。
-    5. 中断位置：只有最后一次调用可以还没有检查记录（响应已落盘、检查尚未落盘），也只有它的 accepted 检查可以还没有已接受的
-       行动（检查已落盘、年度尚未执行）。其他位置的缺口不是本程序支持的中断状态，拒绝。``pending_ok=False``（重放已经结束的
+    5. 中断位置：每个分身只有它自己的最后一次调用可以还没有检查记录（响应已落盘、检查尚未落盘），也只有它的 accepted 检查
+       可以还没有已接受的行动（检查已落盘、年度尚未执行）——并行运行时几个分身可能同时停在半途。其他位置的缺口不是本程序支持
+       的中断状态，拒绝。``pending_ok=False``（重放已经结束的
        运行）时一处缺口也不允许，``exempt`` 里的分身（记为程序错误、本来就停在半途）除外。
 
     这里只核对记录彼此一致，不另写计划判断：检查结果与处置在恢复时由 ``LifeRunner`` 用同一份解析、执行前检查与处置代码重新得出、
@@ -1639,16 +1800,17 @@ def load_archive_records(
     if world.config.planner.identity.kind == "llm":
         problems += service_archive_problems(world, archive, run_id, calls, pending_ok=pending_ok)
 
-    keys = list(calls)
-    last = keys[-1] if keys else None
-    for key in keys:
+    last: dict[str, tuple[str, int, int]] = {}
+    for key in calls:  # 每个分身自己的最后一次调用（同一个分身的记录总是按先后写的）
+        last[key[0]] = key
+    for key in calls:
         if key[0] in exempt:
             continue
-        allowed = pending_ok and key == last
+        allowed = pending_ok and key == last[key[0]]
         rec = attempts.get(key)
         if rec is None and not allowed:
             problems.append(
-                f"{_where(key)}：有原始响应但没有检查记录——只有最后一次调用可以停在“响应已落盘、检查尚未落盘”"
+                f"{_where(key)}：有原始响应但没有检查记录——每个分身只有最后一次调用可以停在“响应已落盘、检查尚未落盘”"
             )
         if (
             rec is not None
@@ -1657,7 +1819,7 @@ def load_archive_records(
             and not allowed
         ):
             problems.append(
-                f"{_where(key)}：检查记录说已接受，却没有已接受的行动——只有最后一次调用可以停在“检查已落盘、年度尚未执行”"
+                f"{_where(key)}：检查记录说已接受，却没有已接受的行动——每个分身只有最后一次调用可以停在“检查已落盘、年度尚未执行”"
             )
     if problems:
         shown = problems[:20] + ([f"……共 {len(problems)} 处"] if len(problems) > 20 else [])
@@ -1682,7 +1844,7 @@ def service_archive_problems(
       模型或输出上限都对不上）；运行、分身、年份、候选、设定指纹与报价版本相同；意图与结果按顺序配对；有原始回复的规划记录必须
       对应一份**可用**的成功回复（返回模型符合 ``returned_model_accepted`` 的规则），原文、服务尝试序号与结束原因相同。
     * 没有规划记录的服务历史（回复已落盘而规划记录还没写、发送状态不确定、服务失败或返回模型不同而停下）：只在允许中断时存在、
-      最多一份，同样逐项核对（请求正文里取回的载荷必须就是这份候选）。
+      每个分身最多一份（并行运行时几个分身可能同时停在半途），同样逐项核对（请求正文里取回的载荷必须就是这份候选）。
     * 明细里不能有别的运行的记录。"""
     llm, budget = world.config.planner.llm, world.config.paid_budget
     assert llm is not None
@@ -1734,9 +1896,15 @@ def service_archive_problems(
         problems.append(
             f"服务请求明细里有没有规划记录的请求（这次运行已经结束，不该有）：{leftover[:3]}"
         )
-    if len(leftover) > 1:
+    per_clone: dict[str, list[str]] = {}
+    for rid in leftover:
+        parts = rid.split("/")
+        per_clone.setdefault(parts[-3] if len(parts) >= 3 else rid, []).append(rid)
+    crowded = {c: rids for c, rids in per_clone.items() if len(rids) > 1}
+    if crowded:
         problems.append(
-            f"服务请求明细里有 {len(leftover)} 个请求没有规划记录（合法的中断最多一个）：{leftover[:3]}"
+            "服务请求明细里同一个分身有不止一个请求没有规划记录（合法的中断每个分身最多一个）："
+            + "；".join(f"{c}：{rids[:3]}" for c, rids in sorted(crowded.items()))
         )
     for rid in leftover:
         hist = service_history(
@@ -1819,9 +1987,10 @@ def start_run(
     run_id: str | None = None,
     stop_after_calls: int | None = None,
     stop_after_commits: int | None = None,
+    workers: int = 1,
 ) -> RunOutcome:
     """新运行：先核对实际规划器与运行配置的声明（不一致就拒绝，不建归档），再建归档（目录已存在就拒绝）、写运行清单与运行前
-    说明、冻结输入文件（第一次规划调用之前），然后顺序调度。"""
+    说明、冻结输入文件（第一次规划调用之前），然后调度（``workers`` 个分身同时过，1 是顺序）。"""
     _check_planner(world, planner)
     archive = RunArchive(out_dir, create=True)
     rid = run_id or new_run_id()
@@ -1843,6 +2012,7 @@ def start_run(
         rid,
         stop_after_calls=stop_after_calls,
         stop_after_commits=stop_after_commits,
+        workers=workers,
     )
     runner._write_progress()
     return runner.run()
@@ -1923,6 +2093,7 @@ def resume_run(
     *,
     stop_after_calls: int | None = None,
     stop_after_commits: int | None = None,
+    workers: int = 1,
 ) -> RunOutcome:
     """从年度边界或两份候选之间恢复（E1-7A 收尾 F1）。
 
@@ -1961,6 +2132,7 @@ def resume_run(
         stop_after_commits=stop_after_commits,
         records=records,
         expected=progress.clones,
+        workers=workers,
     )
     runner.calls_used = len(records.calls)
     _attach(planner, archive, manifest.run_id)

@@ -34,6 +34,7 @@
 from __future__ import annotations
 
 import json
+import threading
 from collections.abc import Sequence
 from fractions import Fraction
 from typing import Any
@@ -206,6 +207,7 @@ class ProductMockPlanner:
     def __init__(self, scripts: Sequence[MockScript] = ()) -> None:
         self.scripts = tuple(scripts)
         self.calls = 0
+        self._calls_lock = threading.Lock()  # 并行运行时几个分身同时调用
 
     def effective_spec(self) -> PlannerSpec:
         """实际生效的设定：身份与这个对象真正持有的受控行为（运行器拿它与运行配置的声明比较，E1-7A 收尾 F2）。"""
@@ -215,7 +217,8 @@ class ProductMockPlanner:
         return {s.behavior for s in self.scripts if s.clone_id == clone and year in s.years}
 
     def plan(self, call: PlannerCall) -> str:
-        self.calls += 1
+        with self._calls_lock:
+            self.calls += 1
         p = call.payload
         behaviors = self._behaviors(p["clone_id"], p["year_index"])
         if "raise_error" in behaviors:

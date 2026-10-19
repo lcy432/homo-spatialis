@@ -165,9 +165,9 @@ def test_b_resume_and_replay_use_the_archive_model_and_refuse_a_config_flag(monk
     driver = _driver()
     seen: list[tuple[str, object]] = []
     monkeypatch.setattr(
-        driver, "cmd_live", lambda kind, out, config, run_id: seen.append((kind, config))
+        driver, "cmd_live", lambda kind, out, config, run_id, **kw: seen.append((kind, config))
     )
-    monkeypatch.setattr(driver, "cmd_resume", lambda out, stop: seen.append(("resume", None)))
+    monkeypatch.setattr(driver, "cmd_resume", lambda out, stop, **kw: seen.append(("resume", None)))
     monkeypatch.setattr(driver, "cmd_replay", lambda out, report: seen.append(("replay", None)))
     for argv in (
         ["resume", "--out", "o", "--config", str(FLASH_CONFIG)],

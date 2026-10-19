@@ -1,5 +1,7 @@
 # 0030 生活模型 E1-7A——代理规划、事实记忆与合成城市闭环（mock）
 
+> ⚠ “顺序调度（名单顺序）”已被 [DECISIONS/0039](0039-parallel-clones.md) 取代：每个分身可以并行地过生活。
+
 **状态**：已实现、自测通过，**待独立复核**（2026-10-12，所有者经 [E1-7A prompt](../docs/design/prompts/2026-10-12-e1-7a-agent-loop.md) 授权：为接线修改
 common、ledger、agentlayer，新增编排模块、配置、测试、演示与文档；为区分"执行前计划问题"与"实际生活中的事件"，允许对
 `econ/life_settlement.py`、`econ/life_year.py` 及评价交接接口做最小的接口提取或元数据补充；为表达"规划阶段失败但已有部分轨迹"，允许最小契约

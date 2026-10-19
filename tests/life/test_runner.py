@@ -531,11 +531,7 @@ def test_resume_in_the_middle_of_a_year_keeps_the_attempt_count(main, tmp_path):
     first = start_run(world, p1, tmp_path / "run", run_id=RUN_ID)
     progress = json.loads((tmp_path / "run/progress.json").read_text(encoding="utf-8"))
     assert first.status == "interrupted"
-    assert (
-        progress["pending_clone"],
-        progress["pending_year"],
-        progress["pending_attempts"],
-    ) == (K, 1, 1)
+    assert progress["pending"] == [{"clone_id": K, "year_index": 1, "attempts_used": 1}]
     p2 = ProductMockPlanner(world.config.planner.scripts)
     resume_run(world, p2, tmp_path / "run")
     assert p2.calls == CALLS - 1  # 第 1 份候选的回答复用归档，不重问
@@ -830,12 +826,13 @@ def test_a_missing_check_in_the_middle_is_not_a_supported_interruption(main, tmp
 
 
 def test_records_off_the_replayed_path_are_refused(main, tmp_path):
-    """中断在第 1 次调用之后；归档末尾又多了 M52 第 1 年的一整组记录（取自同一次完整运行，彼此完全自洽）。按确定的路径重放到
-    下一次调用时，它们一条都没有被用到——不在这次运行的路径上，恢复在调用规划器之前拒绝。"""
+    """中断在第 1 次调用之后；归档末尾又多了 M52 **第 2 年**的一整组记录（取自同一次完整运行，彼此自洽），却没有它的第 1 年。
+    M52 重放到第 1 年就要新调用，第 2 年的记录一条都用不到——不在这个分身的路径上，恢复在调用规划器之前拒绝。（并行运行时
+    别的分身同时过完第 1 年是合法的，那样的记录在它自己的路径上，会被用到。）"""
     world, out, _, _ = main
     path = _interrupted(world, tmp_path / "run", 1)
     for name in ("calls", "attempts", "accepted"):
-        extra = [r for r in records(out, name) if r["clone_id"] == M and r["year_index"] == 1]
+        extra = [r for r in records(out, name) if r["clone_id"] == M and r["year_index"] == 2]
         assert extra
         write_records(path, name, records(path, name) + extra)
     _refused(world, path, "没有重放到的记录")

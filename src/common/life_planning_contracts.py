@@ -733,6 +733,14 @@ HaltKind = Literal[
 ]
 
 
+class PendingYear(ContractModel):
+    """一个分身正在规划、还没有接受行动的那一年（并行运行时每个分身最多一条）。"""
+
+    clone_id: IdStr
+    year_index: YearIndex
+    attempts_used: Annotated[int, Field(ge=0)]
+
+
 class RunProgress(ContractModel):
     """运行进度（每个年度边界与结束时写盘）。恢复只能从这里继续，尝试次数与预算不清零。"""
 
@@ -742,10 +750,8 @@ class RunProgress(ContractModel):
     call_limit: Annotated[int, Field(ge=1)]
     order: tuple[IdStr, ...]
     clones: tuple[CloneRunRecord, ...]
-    #: 中断时正在规划、还没有接受行动的那一年：(分身, 年份, 已用尝试次数)。
-    pending_clone: IdStr | None = None
-    pending_year: YearIndex | None = None
-    pending_attempts: Annotated[int, Field(ge=0)] = 0
+    #: 停下时正在规划、还没有接受行动的年份（每个分身最多一条，按名单顺序）。
+    pending: tuple[PendingYear, ...] = ()
     pause_reason: str | None = Field(default=None, max_length=600)
     halt_kind: HaltKind | None = Field(default=None, exclude_if=lambda v: v is None)
 
@@ -753,8 +759,9 @@ class RunProgress(ContractModel):
     def _consistent(self) -> RunProgress:
         if self.calls_used > self.call_limit:
             raise ValueError("用掉的调用次数超过了全局上限")
-        if (self.pending_clone is None) != (self.pending_year is None):
-            raise ValueError("中断中的分身与年份要么都写，要么都不写")
+        ids = [p.clone_id for p in self.pending]
+        if len(ids) != len(set(ids)):
+            raise ValueError("同一个分身只能有一条正在规划的年份")
         if (self.status in ("paused", "halted")) != (self.pause_reason is not None):
             raise ValueError("只有暂停或停下的批次写原因，暂停或停下必须写原因")
         if (self.status == "halted") != (self.halt_kind is not None):

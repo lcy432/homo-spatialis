@@ -494,11 +494,8 @@ def test_8_service_retries_are_capped_and_halt_the_batch(repo, tmp_path):
     progress = RunProgress.model_validate(
         json.loads((out / "progress.json").read_text(encoding="utf-8"))
     )
-    assert (progress.status, progress.pending_clone, progress.pending_attempts) == (
-        "halted",
-        FIRST,
-        0,
-    )
+    assert progress.status == "halted"
+    assert [(p.clone_id, p.attempts_used) for p in progress.pending] == [(FIRST, 0)]
     assert progress.clones == ()  # 不是任何人的生活结果；没有轮到的分身保留原名单
     assert not has_records(out, "attempts")
 
@@ -552,7 +549,7 @@ def test_9_an_exhausted_budget_sends_nothing_new(tmp_path, monkeypatch):
     assert (outcome.status, outcome.halt_kind) == ("halted", "budget")
     assert len(t.bodies) == 1
     progress = json.loads((out / "progress.json").read_text(encoding="utf-8"))
-    assert (progress["pending_clone"], progress["pending_attempts"]) == (FIRST, 1)
+    assert [(p["clone_id"], p["attempts_used"]) for p in progress["pending"]] == [(FIRST, 1)]
 
     def tiny(r):
         r["paid_budget"]["max_cost_cny"] = 0.01

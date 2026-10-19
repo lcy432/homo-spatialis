@@ -997,8 +997,9 @@ SUBSCRIPTION_ENV_EXTRA = ("USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "HOM
 
 @contextmanager
 def _isolated_environ(extra: Sequence[str] = ()) -> Iterator[None]:
-    """启动命令行期间只保留白名单里的系统变量（SDK 会把本进程的环境整份传给命令行，只能这样去掉不该继承的变量）。串行使用；结束后
-    原样恢复。"""
+    """启动命令行期间只保留白名单里的系统变量（SDK 会把本进程的环境整份传给命令行，只能这样去掉不该继承的变量）。进程全局的环境
+    只能一个线程换：锁只罩住启动子进程那一下（``_isolated_cli_transport``），子进程拿到环境的副本以后马上恢复，几个分身的调用
+    可以同时进行。"""
     with _ENV_LOCK:
         saved = dict(os.environ)
         try:
@@ -1014,6 +1015,19 @@ def _isolated_environ(extra: Sequence[str] = ()) -> Iterator[None]:
         finally:
             os.environ.clear()
             os.environ.update(saved)
+
+
+def _isolated_cli_transport(prompt: str, options: Any, extra: Sequence[str]) -> Any:
+    """SDK 自己的子进程传输层，只把 ``connect()``（读环境、启动命令行）放进隔离环境与锁里。命令行参数仍由 SDK 按 ``options`` 生成，
+    与不传 ``transport`` 时相同；本项目不用工具许可回调或会话恢复，所以不受"自定义传输层不套用这两项"的影响。"""
+    from claude_agent_sdk._internal.transport.subprocess_cli import SubprocessCLITransport
+
+    class _IsolatedCLITransport(SubprocessCLITransport):
+        async def connect(self) -> None:
+            with _isolated_environ(extra):
+                await super().connect()
+
+    return _IsolatedCLITransport(prompt=prompt, options=options)
 
 
 class ClaudeAgentSdkTransport:
@@ -1065,16 +1079,16 @@ class ClaudeAgentSdkTransport:
                 max_output_tokens=int(body["max_tokens"]),
                 timeout_seconds=timeout,
             )
-            with _isolated_environ(SUBSCRIPTION_ENV_EXTRA if subscription else ()):
-                try:
-                    events = asyncio.run(
-                        asyncio.wait_for(
-                            self._run(body, messages, sdk, workdir, env),
-                            timeout=timeout + self.startup_margin_seconds,
-                        )
+            extra = SUBSCRIPTION_ENV_EXTRA if subscription else ()
+            try:
+                events = asyncio.run(
+                    asyncio.wait_for(
+                        self._run(body, messages, sdk, workdir, env, extra),
+                        timeout=timeout + self.startup_margin_seconds,
                     )
-                except TimeoutError:
-                    raise TransportError("timeout", retryable=True) from None
+                )
+            except TimeoutError:
+                raise TransportError("timeout", retryable=True) from None
         return self._response(events)
 
     async def _run(
@@ -1084,6 +1098,7 @@ class ClaudeAgentSdkTransport:
         sdk: dict[str, Any],
         workdir: str,
         env: dict[str, str],
+        extra: Sequence[str],
     ) -> list[Any]:
         from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKError, ResultError, query
 
@@ -1100,11 +1115,18 @@ class ClaudeAgentSdkTransport:
             env=env,
             cli_path=self._cli_path,
         )
-        run = self._query_fn or query
+        prompt = messages[1]["content"]
         events: list[Any] = []
         try:
-            async for message in run(prompt=messages[1]["content"], options=options):
-                events.append(message)
+            if self._query_fn is None:
+                transport = _isolated_cli_transport(prompt, options, extra)
+                async for message in query(prompt=prompt, options=options, transport=transport):
+                    events.append(message)
+            else:
+                # 注入的替身没有子进程可以挂钩：整次调用在隔离环境里进行（只用于离线测试）
+                with _isolated_environ(extra):
+                    async for message in self._query_fn(prompt=prompt, options=options):
+                        events.append(message)
         except ResultError:
             # 命令行报告了失败的结果之后以非零状态退出：结果消息已经收到，按它判断失败种类
             if not events:

@@ -13,6 +13,7 @@
     uv run python scripts/run_product_full.py --out runs/<日期>-product-full --years 5       模拟 5 年
     uv run python scripts/run_product_full.py --out <目录> --mock                            同一条产品链，mock 规划器（零网络、零费用）
 
+每个分身各自并行地过（``--workers``，默认所有分身，最多 16 个；1 是顺序）：分身的生活只取决于自己的计划，结果与顺序运行相同。
 运行中每 15 秒报一次进度与用时；结束时写 ``<out>/summary.json``。
 """
 
@@ -38,7 +39,13 @@ from agentlayer.life_mock import mock_planner_for
 from common.config import ModelsConfig
 from common.life_planning_contracts import LlmSettings
 from orchestration.life_budget import RoundBudget
-from orchestration.life_runner import RunOutcome, RunWorld, preflight, start_run
+from orchestration.life_runner import (
+    DEFAULT_MAX_WORKERS,
+    RunOutcome,
+    RunWorld,
+    preflight,
+    start_run,
+)
 from product import scenarios as sc
 from product.pack import DataPack
 
@@ -183,6 +190,12 @@ def main() -> None:
         "--mock", action="store_true", help="同一条产品链，mock 规划器（零网络、零费用）"
     )
     ap.add_argument("--run-id", default=None)
+    ap.add_argument(
+        "--workers",
+        type=int,
+        default=None,
+        help=f"同时过生活的分身数（默认所有分身，最多 {DEFAULT_MAX_WORKERS}；1 是顺序）",
+    )
     args = ap.parse_args()
     if args.repeats < MIN_REPEATS:
         raise SystemExit(
@@ -201,8 +214,10 @@ def main() -> None:
     years = world.bundle.protocol.simulation_years
     planned = len(world.order) * years
     cities = sorted({str(e.city) for e in world.roster.entries})
+    workers = args.workers or min(len(world.order), DEFAULT_MAX_WORKERS)
     print(
-        f"名单：{len(cities)} 座城 × 每城 {args.repeats} 个分身 × {years} 年 = {planned} 个年度",
+        f"名单：{len(cities)} 座城 × 每城 {args.repeats} 个分身 × {years} 年 = {planned} 个年度；"
+        f"{workers} 个分身同时过",
         flush=True,
     )
     stamp = dt.datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -235,7 +250,7 @@ def main() -> None:
 
         threading.Thread(target=report, daemon=True).start()
         try:
-            outcome: RunOutcome = start_run(world, planner, archive, run_id=run_id)
+            outcome: RunOutcome = start_run(world, planner, archive, run_id=run_id, workers=workers)
         finally:
             done.set()
     total = int(time.monotonic() - t0)
@@ -251,6 +266,7 @@ def main() -> None:
         "years": years,
         "planned_years": planned,
         "status": outcome.status,
+        "workers": workers,
         "seconds": total,
         "progress": progress(archive / "archive.sqlite", planned),
         "clones": clones,

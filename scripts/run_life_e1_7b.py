@@ -46,6 +46,7 @@ from agentlayer.life_planning import PlannerCall, render_prompt
 from common.config import ModelsConfig
 from orchestration.life_budget import RoundBudget
 from orchestration.life_runner import (
+    DEFAULT_MAX_WORKERS,
     RunOutcome,
     RunWorld,
     _forbidden_texts,
@@ -211,28 +212,45 @@ def cmd_offline_check(out: Path, config: Path, mock_config: Path) -> None:
     print(_dump({k: v for k, v in report.items() if k not in ("rows", "identities_live")}))
 
 
-def cmd_live(kind: str, out: Path, config: Path, run_id: str) -> None:
+def _workers(world: RunWorld, requested: int | None) -> int:
+    """并行的分身数：不写时所有分身同时过（最多 ``DEFAULT_MAX_WORKERS`` 个）。"""
+    return requested or min(len(world.order), DEFAULT_MAX_WORKERS)
+
+
+def cmd_live(
+    kind: str, out: Path, config: Path, run_id: str, *, workers: int | None = None
+) -> None:
     world = preflight(config)
     planner = _live_planner(world)
     stop = 1 if kind == "pilot" else None
-    outcome = start_run(world, planner, out, run_id=run_id, stop_after_commits=stop)
+    # 先导只跑名单第一项的第 1 年：顺序执行，不让别的分身同时多花调用
+    n = 1 if kind == "pilot" else _workers(world, workers)
+    outcome = start_run(world, planner, out, run_id=run_id, stop_after_commits=stop, workers=n)
     summary = _summary(outcome, world) | {"requests_sent_this_process": planner.requests_sent}
     _write(out.parent / f"{out.name}.summary.json", summary)
     print(_dump(summary))
 
 
-def cmd_resume(out: Path, stop_after_commits: int | None) -> None:
+def cmd_resume(out: Path, stop_after_commits: int | None, *, workers: int | None = None) -> None:
     world = preflight_from_snapshot(out)
     planner = _live_planner(world)
-    outcome = resume_run(world, planner, out, stop_after_commits=stop_after_commits)
+    outcome = resume_run(
+        world,
+        planner,
+        out,
+        stop_after_commits=stop_after_commits,
+        workers=1 if stop_after_commits else _workers(world, workers),
+    )
     summary = _summary(outcome, world) | {"requests_sent_this_process": planner.requests_sent}
     _write(out.parent / f"{out.name}.resume.summary.json", summary)
     print(_dump(summary))
 
 
-def cmd_mock(out: Path, mock_config: Path, run_id: str) -> None:
+def cmd_mock(out: Path, mock_config: Path, run_id: str, *, workers: int | None = None) -> None:
     world = preflight(mock_config)
-    outcome = start_run(world, _mock_planner(world), out, run_id=run_id)
+    outcome = start_run(
+        world, _mock_planner(world), out, run_id=run_id, workers=_workers(world, workers)
+    )
     summary = _summary(outcome, world)
     _write(out.parent / f"{out.name}.summary.json", summary)
     print(_dump(summary))
@@ -266,6 +284,12 @@ def main() -> None:
     )
     ap.add_argument("--out", type=Path)
     ap.add_argument("--stop-after-commits", type=int, default=None)
+    ap.add_argument(
+        "--workers",
+        type=int,
+        default=None,
+        help=f"main / resume / mock 同时过生活的分身数（默认所有分身，最多 {DEFAULT_MAX_WORKERS}；pilot 固定 1）",
+    )
     ap.add_argument(
         "--report", type=Path, default=None, help="replay：结果写到这里（默认写在归档旁边）"
     )
@@ -303,11 +327,11 @@ def main() -> None:
     if args.command == "offline-check":
         cmd_offline_check(args.out, config, mock_config)
     elif args.command in ("pilot", "main"):
-        cmd_live(args.command, args.out, config, args.run_id)
+        cmd_live(args.command, args.out, config, args.run_id, workers=args.workers)
     elif args.command == "resume":
-        cmd_resume(args.out, args.stop_after_commits)
+        cmd_resume(args.out, args.stop_after_commits, workers=args.workers)
     elif args.command == "mock":
-        cmd_mock(args.out, mock_config, args.run_id or MOCK_RUN_ID)
+        cmd_mock(args.out, mock_config, args.run_id or MOCK_RUN_ID, workers=args.workers)
     elif args.command == "replay":
         cmd_replay(args.out, args.report)
     else:
