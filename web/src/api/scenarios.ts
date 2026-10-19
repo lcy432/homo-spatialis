@@ -1,5 +1,7 @@
 // 样例场景：每个场景用到哪几份 E3 公共样例（contracts/product/v2/samples/）。适配器只按这里挑选并原样返回，不编造回复。
 // 只有正常场景有原始草稿样例（02）；其余审阅场景没有草稿（已请 E3 补，需求 A7），直接从确认页开始演示。
+// 运行编号从样例本身读，不在这里抄写：E3 重新生成样例时运行编号会变。
+import { sample } from "../contract/samples";
 
 export type ScenarioEntry = "fill" | "confirm" | "progress" | "result" | "fragment";
 
@@ -22,6 +24,41 @@ export interface Scenario {
 
 export const CAPABILITIES_SAMPLE = "01";
 
+/** 一份样例里的运行编号（回执、进度与结果样例都带 run_id）。 */
+export function runIdOf(sampleId: string): string {
+  const runId = (sample(sampleId).payload as { run_id?: unknown }).run_id;
+  if (typeof runId !== "string" || runId === "") throw new Error(`样例 ${sampleId} 没有运行编号`);
+  return runId;
+}
+
+/**
+ * 每个运行用到的样例：progress 是进度样例（第一个是平时的回复；断线之后再查询返回第二个，即契约示例 32），result 是结果样例。
+ * 同一组的样例必须是同一个运行。
+ */
+const RUN_SAMPLES: { progress?: string[]; result?: string }[] = [
+  { progress: ["09", "32"], result: "10" },
+  { result: "21" },
+  { result: "23" },
+  { result: "24" },
+  { progress: ["26"], result: "25" },
+  { progress: ["27"], result: "27b" },
+  { progress: ["33"] },
+];
+
+/** 运行编号 → 进度样例。 */
+export const PROGRESS_BY_RUN: Record<string, string[]> = {};
+/** 运行编号 → 结果样例。 */
+export const RESULT_BY_RUN: Record<string, string> = {};
+for (const group of RUN_SAMPLES) {
+  const ids = [...(group.progress ?? []), ...(group.result ? [group.result] : [])];
+  const runId = runIdOf(ids[0] as string);
+  const other = ids.find((id) => runIdOf(id) !== runId);
+  if (other) throw new Error(`样例 ${ids.join("、")} 应当是同一个运行，但样例 ${other} 的运行编号是 ${runIdOf(other)}`);
+  if (runId in PROGRESS_BY_RUN || runId in RESULT_BY_RUN) throw new Error(`运行 ${runId} 在样例表里出现了两次`);
+  if (group.progress) PROGRESS_BY_RUN[runId] = group.progress;
+  if (group.result) RESULT_BY_RUN[runId] = group.result;
+}
+
 export const SCENARIOS: Scenario[] = [
   {
     id: "normal",
@@ -33,7 +70,7 @@ export const SCENARIOS: Scenario[] = [
     confirmed: "04",
     preflight: "05",
     receipts: { first: "07", repeat: "08" },
-    runId: "run-e3a-33299bbc42cf707b",
+    runId: runIdOf("10"),
   },
   { id: "occupation_ambiguous", title: "职业歧义", note: "一段描述对应三个可读候选，等用户选", entry: "confirm", review: "11" },
   {
@@ -82,38 +119,20 @@ export const SCENARIOS: Scenario[] = [
     preflight: "05",
     receipts: { first: "31" },
   },
-  { id: "no_purchase", title: "没有购买", note: "没买任何便利方案：便利分是确定的 0，轨迹照常评分", entry: "result", runId: "run-e3a-5884ccd92ff1d359" },
+  { id: "no_purchase", title: "没有购买", note: "没买任何便利方案：便利分是确定的 0，轨迹照常评分", entry: "result", runId: runIdOf("21") },
   { id: "partial_service", title: "部分月份没买到服务", note: "逐年生活事实片段（受控夹具）", entry: "fragment", fragment: "22" },
   {
     id: "mixed_cem",
     title: "C / E / M 混合",
     note: "K51 一个完整、一个出局；M52 一个模拟问题、一个出局，所以 M52 的 C = 0",
     entry: "result",
-    runId: "run-e3a-f3ca55e83e2949ee",
+    runId: runIdOf("23"),
   },
-  { id: "all_exit", title: "全部出局", note: "均值与模拟缺失范围都为空（不补 0）", entry: "result", runId: "run-e3a-d0fd8111df059813" },
-  { id: "interrupted", title: "中断，评价还没生成", note: "运行在两次规划调用之间中断；还没有评价，不擅自分类", entry: "progress", runId: "run-e3a-38d99f75a43e2889" },
-  { id: "paused", title: "程序错误暂停", note: "出错的分身记程序错误，没轮到的分身保留为未运行；都是模拟问题", entry: "progress", runId: "run-e3a-16acfe6b35dbda3e" },
-  { id: "halted", title: "服务失败停下（契约示例）", note: "模型服务暂时不可用，批次停下；手写的契约示例，不是运行结果", entry: "progress", runId: "run-e3a-example-halted" },
+  { id: "all_exit", title: "全部出局", note: "均值与模拟缺失范围都为空（不补 0）", entry: "result", runId: runIdOf("24") },
+  { id: "interrupted", title: "中断，评价还没生成", note: "运行在两次规划调用之间中断；还没有评价，不擅自分类", entry: "progress", runId: runIdOf("26") },
+  { id: "paused", title: "程序错误暂停", note: "出错的分身记程序错误，没轮到的分身保留为未运行；都是模拟问题", entry: "progress", runId: runIdOf("27") },
+  { id: "halted", title: "服务失败停下（契约示例）", note: "模型服务暂时不可用，批次停下；手写的契约示例，不是运行结果", entry: "progress", runId: runIdOf("33") },
 ];
-
-/** 运行编号 → 进度样例（第一个是平时的回复；断线之后再查询返回第二个，即契约示例 32）。 */
-export const PROGRESS_BY_RUN: Record<string, string[]> = {
-  "run-e3a-33299bbc42cf707b": ["09", "32"],
-  "run-e3a-38d99f75a43e2889": ["26"],
-  "run-e3a-16acfe6b35dbda3e": ["27"],
-  "run-e3a-example-halted": ["33"],
-};
-
-/** 运行编号 → 结果样例。 */
-export const RESULT_BY_RUN: Record<string, string> = {
-  "run-e3a-33299bbc42cf707b": "10",
-  "run-e3a-5884ccd92ff1d359": "21",
-  "run-e3a-f3ca55e83e2949ee": "23",
-  "run-e3a-d0fd8111df059813": "24",
-  "run-e3a-38d99f75a43e2889": "25",
-  "run-e3a-16acfe6b35dbda3e": "27b",
-};
 
 export const DEFAULT_SCENARIO = "normal";
 

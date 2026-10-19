@@ -1,4 +1,4 @@
-import { mkdirSync } from "node:fs";
+import { mkdirSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { type Page, type TestInfo, expect } from "@playwright/test";
@@ -6,6 +6,20 @@ import { type Page, type TestInfo, expect } from "@playwright/test";
 const here = path.dirname(fileURLToPath(import.meta.url));
 /** 截图、导出的草稿与可访问性报告写在仓库的 runs/web-e2e/（运行输出，不进版本管理，每次运行覆盖）。 */
 export const EVIDENCE = path.resolve(here, "..", "..", "runs", "web-e2e");
+
+const SAMPLES = path.resolve(here, "..", "..", "contracts", "product", "v2", "samples");
+
+/** 一份公共样例里的运行编号。从样例文件读，E3 重新生成样例（运行编号随之改变）时不用改测试。 */
+export function sampleRunId(sampleId: string): string {
+  const file = readdirSync(SAMPLES).find((f) => f.startsWith(`${sampleId}_`));
+  if (!file) throw new Error(`没有编号为 ${sampleId} 的公共样例`);
+  const runId = JSON.parse(readFileSync(path.join(SAMPLES, file), "utf-8")).payload?.run_id;
+  if (typeof runId !== "string") throw new Error(`样例 ${sampleId} 没有运行编号`);
+  return runId;
+}
+
+/** 正常闭环（样例 07–10）的运行编号。 */
+export const NORMAL_RUN = sampleRunId("10");
 
 export function evidencePath(...parts: string[]): string {
   const p = path.join(EVIDENCE, ...parts);

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { expectNoHorizontalScroll, fresh, shot, submissions, tabTo } from "./helpers";
+import { NORMAL_RUN, expectNoHorizontalScroll, fresh, shot, submissions, tabTo } from "./helpers";
 
 test("只用键盘走完正常闭环：载入样例 → 四步 → 确认 → 预检查 → 双击运行 → 进度 → 结果 → 分身故事", async ({ page }, info) => {
   await fresh(page, "/fill/1");
@@ -41,7 +41,7 @@ test("只用键盘走完正常闭环：载入样例 → 四步 → 确认 → �
   await tabTo(page, (e) => e.tag === "button" && e.text === "查看样例运行");
   await page.keyboard.press("Enter");
   await page.keyboard.press("Enter");
-  await expect(page).toHaveURL(/\/runs\/run-e3a-33299bbc42cf707b$/);
+  await expect(page).toHaveURL(new RegExp(`/runs/${NORMAL_RUN}$`));
   const subs = await submissions(page);
   expect(subs.map((s) => s.replied)).toEqual(["07"]);
 
@@ -71,7 +71,7 @@ test("只用键盘走完正常闭环：载入样例 → 四步 → 确认 → �
   // 回到确认页再点一次：同一个幂等键，回执 08，同一个运行
   await page.goto("/fill/4");
   await page.getByRole("button", { name: "查看样例运行" }).click();
-  await expect(page).toHaveURL(/\/runs\/run-e3a-33299bbc42cf707b$/);
+  await expect(page).toHaveURL(new RegExp(`/runs/${NORMAL_RUN}$`));
   const subs2 = await submissions(page);
   expect(subs2.map((s) => s.replied)).toEqual(["07", "08"]);
   expect(new Set(subs2.map((s) => s.idempotencyKey)).size).toBe(1);

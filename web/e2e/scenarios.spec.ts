@@ -1,5 +1,5 @@
 import { type Page, expect, test } from "@playwright/test";
-import { expectNoHorizontalScroll, fresh, shot } from "./helpers";
+import { expectNoHorizontalScroll, fresh, sampleRunId, shot } from "./helpers";
 
 async function openScenario(page: Page, id: string) {
   await fresh(page, "/dev/samples");
@@ -41,7 +41,7 @@ test("中断（样例 26 → 25）：可以恢复但没有恢复按钮；评价�
   await expect(page.getByRole("button", { name: /恢复/ })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "查看结果" })).toHaveCount(0);
   await shot(page, info, "progress-26-interrupted");
-  await page.goto("/runs/run-e3a-38d99f75a43e2889/result");
+  await page.goto(`/runs/${sampleRunId("25")}/result`);
   await expect(page.getByText("这次运行还没有生成评价：不显示任何城市分类、均值或范围。")).toBeVisible();
   await expect(page.locator("[data-city]")).toHaveCount(0);
   await shot(page, info, "result-25-not-generated");

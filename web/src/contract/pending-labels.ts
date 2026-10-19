@@ -45,7 +45,7 @@ export const REQUIREMENT_NEED: Table = {
   },
 };
 
-const PLAN_SOURCE = "configs/life/evaluation_e1_convenience.yaml 里各模板的 label";
+const PLAN_SOURCE = "configs/life/evaluation_product.yaml 里各模板的 label";
 /** 期末估值选中的参考方案（CloneResult.reference_plan）。 */
 export const REFERENCE_PLAN: Table = {
   p1_current_basic: { text: "现职 + 基本生活", source: PLAN_SOURCE },
@@ -56,7 +56,7 @@ export const REFERENCE_PLAN: Table = {
   p6_qualified_service: { text: "改做已具资格的岗位 + 较舒适的生活 + 人工杂务服务", source: PLAN_SOURCE },
 };
 
-const TASK_SOURCE = "configs/life/synthetic_e1_convenience.yaml 的 household_tasks[].description（冒号前的部分）";
+const TASK_SOURCE = "configs/life/synthetic_product.yaml 的 household_tasks[].description（冒号前的部分）";
 /** 家务任务（HouseholdHours.task）。 */
 export const HOUSEHOLD_TASK: Table = {
   laundry: { text: "洗衣", source: TASK_SOURCE },

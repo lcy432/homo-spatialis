@@ -1,12 +1,12 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import { writeFileSync } from "node:fs";
-import { evidencePath, fresh } from "./helpers";
+import { NORMAL_RUN, evidencePath, fresh } from "./helpers";
 
 test("关键页面没有可访问性问题（axe：严重、致命、中等都是 0）", async ({ page }, info) => {
   await fresh(page, "/fill/1");
   await page.getByRole("button", { name: "载入样例用户 u501 的答案" }).click();
-  const pages = ["/fill/1", "/fill/2", "/fill/3", "/fill/4", "/runs/run-e3a-33299bbc42cf707b", "/runs/run-e3a-33299bbc42cf707b/result"];
+  const pages = ["/fill/1", "/fill/2", "/fill/3", "/fill/4", `/runs/${NORMAL_RUN}`, `/runs/${NORMAL_RUN}/result`];
   const report: Record<string, unknown[]> = {};
   for (const url of pages) {
     await page.goto(url);

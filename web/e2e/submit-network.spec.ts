@@ -1,5 +1,5 @@
 import { type Page, expect, test } from "@playwright/test";
-import { fresh, setTransport, shot, submissions } from "./helpers";
+import { NORMAL_RUN, fresh, setTransport, shot, submissions } from "./helpers";
 
 async function confirmSample(page: Page) {
   await fresh(page, "/fill/1");
@@ -28,7 +28,7 @@ test("断网时提交没有送达；回执丢失后用同一个幂等键重试�
   const key = subs[0]!.idempotencyKey;
 
   await page.getByRole("button", { name: "查看样例运行" }).click();
-  await expect(page).toHaveURL(/\/runs\/run-e3a-33299bbc42cf707b$/);
+  await expect(page).toHaveURL(new RegExp(`/runs/${NORMAL_RUN}$`));
   subs = await submissions(page);
   expect(subs.map((s) => s.replied)).toEqual(["lost", "08"]);
   expect(subs.every((s) => s.idempotencyKey === key)).toBe(true);
