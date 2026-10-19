@@ -170,8 +170,8 @@ def progress(pack: DataPack, run_dir: Path, *, sample: SampleLabel | None = None
             )
             for c in p.clones
         ),
-        # E3-A 收尾 F5：按进度的结构化状态生成说明，不透传 pause_reason 原文（那里可能有异常内容）
-        pause=progress_pause(p),
+        # 按进度的结构化状态生成说明，不透传 pause_reason 原文（那里可能有异常内容）；报告与恢复两句按实际情况写
+        pause=progress_pause(p, report_available=report, resumable=resumable),
         cost=CostStatus(
             kind="offline_mock_zero_cost",
             calls_used=p.calls_used,

@@ -5,11 +5,14 @@
 
 * 报价记录币种、基年、当地价口径、计费周期与计价单位；口径与资料包不同不编入；**单次上门不能无依据变成月套餐**（``per_visit``
   不编入）。报价未知但其余结构齐全 → 编成 ``availability = unknown``（分身看到资料未知、不能购买；不当免费）。计价单位缺失不编入，
-  **不自动补**成 appliance-set 或 service-month（收尾 F2）。
+  **不自动补**成 appliance-set 或 service-month（收尾 F2）。金额按实际数值判断能否精确表示为最小记账单位（“1e-3”同样拒绝，不四舍五入）。
+* 报价来源的单位必须与候选的**计费周期和计价对象**都对上（``_SOURCE_DENOMINATORS``、``_PER_UNIT_KIND`` 两张小表）：“216 美元/次”的
+  来源不能支持“216 美元/月”的候选，按台的来源不能支持按套的候选；没有登记的计价对象或计价单位不猜，按候选拒绝。
 * 设备寿命必须是明确的 1–30 整数年并写明生效时点；未知或非整数年**不补值、不取整**，不编入——也不改写成“确定买不到”，真实供给
   状态（``market_status``）原样保留在未编入记录里。
 * 减负效果是“本人处理整项家务后仍需的月小时”，按协议的共同任务定义（同一单位“小时/月”）；效果未知**不能**删掉替代字段伪装成
-  确定无效果，不编入。服务本人的参与时间未知也不编入（不当 0）；参与小时与每小时负担必须是不小于 0 的数（收尾 F2）。
+  确定无效果，不编入。同一项家务在一个候选里只能有一条残余（重复的，包括内容完全相同的，在候选阶段拒绝，不交给 E1 去抛异常）。
+  服务本人的参与时间未知也不编入（不当 0）；参与小时与每小时负担必须是不小于 0 的数（收尾 F2）。
 * **每个实际用到的已知字段都要有来源**（收尾 F2）：报价、寿命、效果、本人参与各自引用资料包里的来源事实；事实必须存在、记录的
   就是这个字段（跨字段推导本版没有登记任何方法，不接受）、单位对得上；报价与寿命这类单个数值还要有一条事实的原始值等于它，或
   是写明了换算方法的派生 / 估计事实。缺来源就不编入——不自动生成“合成”来源或空泛的假设说明。合成事实本身必须写假设说明
@@ -60,8 +63,31 @@ _FIELD_LABEL = {
 }
 
 
-def _decimal_places(text: str) -> int:
-    return len(text.split(".")[1]) if "." in text else 0
+#: 报价来源单位写成“<币种>_<基年>_LOCAL/<计价对象>”。计价对象 → （计费周期，计价对象类别）。只认这里登记过的写法：
+#: 没有登记的不猜它是按次、按月还是按台，按候选拒绝。
+_SOURCE_DENOMINATORS: dict[str, tuple[str, str]] = {
+    "月": ("per_month", "service_month"),
+    "次": ("per_visit", "visit"),
+    "套": ("one_time", "set"),
+    "台": ("one_time", "machine"),
+}
+#: 候选的计价单位（E1 机会的 ``unit``）→ 计价对象类别：单件家电按“台”，成套设备按“套”，按月服务按“月”，上门按“次”。
+_PER_UNIT_KIND: dict[str, str] = {
+    "service-month": "service_month",
+    "visit": "visit",
+    "appliance-set": "set",
+    "machine": "machine",
+    "washer": "machine",
+    "dryer": "machine",
+    "robot": "machine",
+}
+_PERIOD_LABEL = {"per_month": "按月", "per_visit": "按次", "one_time": "一次性"}
+_KIND_LABEL = {"service_month": "服务月", "visit": "次", "set": "套", "machine": "台"}
+
+
+def _finer_than(value: Fraction, digits: int) -> bool:
+    """按实际数值判断是否细于 ``digits`` 位小数（乘以 10^digits 之后不是整数）；“1e-3”这种写法也照样识别。"""
+    return (value * 10**digits).denominator != 1
 
 
 def _number(text: str | None) -> Fraction | None:
@@ -95,14 +121,54 @@ def _task_definitions(
     return tuple(out)
 
 
-def _unit_ok(pack: DataPack, field: str, unit: str) -> bool:
-    """来源事实的单位与它支持的字段对得上（不换算：报价用资料包的当地基年价口径，寿命用年，效果与参与用 小时/月）。"""
-    mb = pack.body.money_basis
-    if field == "price":
-        return unit.startswith(f"{mb.currency}_{mb.base_year}_LOCAL/")
+def _unit_problem(
+    pack: DataPack, c: OpportunityCandidate, field: str, f: SourceFact
+) -> tuple[str, str] | None:
+    """来源事实的单位能不能支持候选的这个字段；不能时返回（代码，原因）。不换算。
+
+    报价要三样都对上：口径（资料包的币种、基年、当地价）、计费周期（按次 / 按月 / 一次性，与候选的 ``billing`` 相同）与计价对象
+    （套 / 台 / 服务月，与候选的计价单位相同）。寿命用年，效果与参与用 小时/月。"""
+    label = _FIELD_LABEL[field]
     if field == "lifetime":
-        return unit == "年"
-    return unit.startswith("小时/月")
+        ok = f.unit == "年"
+    elif field != "price":
+        ok = f.unit.startswith("小时/月")
+    else:
+        mb = pack.body.money_basis
+        basis, _, denom = f.unit.partition("/")
+        if basis != f"{mb.currency}_{mb.base_year}_LOCAL" or not denom:
+            return (
+                "source_unit_mismatch",
+                f"{label}引用的事实 {f.fact_id} 单位是“{f.unit}”，币种、基年或当地价口径与资料包的 "
+                f"{mb.currency}_{mb.base_year}_LOCAL 不同（不自动换算）",
+            )
+        if denom not in _SOURCE_DENOMINATORS:
+            return (
+                "source_unit_unregistered",
+                f"{label}引用的事实 {f.fact_id} 按“{denom}”计价，这种计价对象没有登记：不能判断它是按次、按月还是一次性的价格（不猜）",
+            )
+        period, kind = _SOURCE_DENOMINATORS[denom]
+        if period != c.price.billing:
+            return (
+                "source_billing_mismatch",
+                f"{label}的来源 {f.fact_id} 是{_PERIOD_LABEL[period]}的价格（{f.unit}），候选是"
+                f"{_PERIOD_LABEL.get(c.price.billing or '', c.price.billing)}的价格：没有明确的换算依据（例如每月几次），"
+                "不把一种周期的价格当成另一种",
+            )
+        want = _PER_UNIT_KIND.get(c.price.per_unit or "")
+        if want is not None and want != kind:
+            return (
+                "source_object_mismatch",
+                f"{label}的来源 {f.fact_id} 按“{_KIND_LABEL[kind]}”计价，候选的计价单位 {c.price.per_unit} 按"
+                f"“{_KIND_LABEL[want]}”计价：不是同一个计价对象，不自动换算",
+            )
+        return None  # 计价单位没登记的情况在 _candidate_problems 里单独报一次
+    if ok:
+        return None
+    return (
+        "source_unit_mismatch",
+        f"{label}引用的事实 {f.fact_id} 单位是“{f.unit}”，与{label}要求的单位不一致（不自动换算）",
+    )
 
 
 def _source_problems(
@@ -151,14 +217,15 @@ def _source_problems(
                     f"引用记录{label}本身的事实",
                 )
             )
-        elif not _unit_ok(pack, field, f.unit):
+        elif (problem := _unit_problem(pack, c, field, f)) is not None:
+            code, message = problem
             out.append(
                 issue(
-                    "source_unit_mismatch",
+                    code,
                     where,
-                    f"{label}引用的事实 {ref} 单位是“{f.unit}”，与{label}要求的单位不一致（不自动换算）",
-                    "这项候选不能编入目录",
-                    "引用同一单位的事实，或先登记可审计的换算",
+                    message,
+                    "这项候选不能编入目录，也不标为资料完整",
+                    "引用计价口径、周期与对象都相同的事实，或先登记可审计的换算",
                 )
             )
         else:
@@ -269,6 +336,16 @@ def _candidate_problems(
                         "核对计费周期",
                     )
                 )
+            if p.per_unit and p.per_unit not in _PER_UNIT_KIND:
+                out.append(
+                    issue(
+                        "price_unit_unregistered",
+                        f"{where}.price.per_unit",
+                        f"计价单位“{p.per_unit}”没有登记它对应的计价对象（套 / 台 / 服务月 / 次）：不能核对报价来源是不是按同一对象计价",
+                        "这项候选不能编入目录，也不标为资料完整",
+                        "改用已登记的计价单位，或先登记这个计价单位对应的计价对象",
+                    )
+                )
             amount = p.amount_text
             value = _number(amount)
             if value is None or value < 0:
@@ -281,14 +358,14 @@ def _candidate_problems(
                         "核对报价",
                     )
                 )
-            elif _decimal_places(amount or "") > mb.minor_unit_digits:
+            elif _finer_than(value, mb.minor_unit_digits):
                 out.append(
                     issue(
                         "price_too_precise",
                         f"{where}.price.amount_text",
-                        f"报价 {amount} 的精度细于最小记账单位",
-                        "不能编入",
-                        "核对报价",
+                        f"报价 {amount} 不能精确表示为最小记账单位（{mb.minor_unit_digits} 位小数）：不四舍五入",
+                        "这项候选不能编入目录（其他候选照常编译）",
+                        "核对报价，写成最多两位小数的金额",
                     )
                 )
             else:
@@ -358,7 +435,25 @@ def _candidate_problems(
         )
     else:
         effect_ok = True
+        seen: dict[str, list[str]] = {}
         for r in e.residuals:
+            seen.setdefault(r.task, []).append(r.residual_hours_per_month)
+        for task, values in seen.items():
+            if len(values) > 1:
+                effect_ok = False
+                out.append(
+                    issue(
+                        "residual_task_duplicated",
+                        f"{where}.effect.{task}",
+                        f"家务 {task} 在减负效果里出现了 {len(values)} 次（{'、'.join(values)} 小时/月）：同一项家务只能有一个残余小时，"
+                        "系统不替你选，也不取最小值（内容完全相同的重复也拒绝）",
+                        "这项候选不能编入目录（其他候选照常编译）",
+                        "每项家务只保留一条残余小时",
+                    )
+                )
+        for r in e.residuals:
+            if len(seen[r.task]) > 1:
+                continue
             base = tasks.get(r.task)
             v = _number(r.residual_hours_per_month)
             if base is None:
@@ -372,7 +467,7 @@ def _candidate_problems(
                         "只用协议声明的代表性杂务",
                     )
                 )
-            elif v is None or v < 0 or v > base or _decimal_places(r.residual_hours_per_month) > 2:
+            elif v is None or v < 0 or v > base or _finer_than(v, 2):
                 effect_ok = False
                 out.append(
                     issue(
@@ -405,7 +500,7 @@ def _candidate_problems(
                     ("每月小时", part.hours_text),
                     ("每小时负担", part.burden_per_hour_text),
                 )
-                if (_number(text) is None or _number(text) < 0 or _decimal_places(text) > 2)
+                if (n := _number(text)) is None or n < 0 or _finer_than(n, 2)
             ]
             if bad:
                 out.append(

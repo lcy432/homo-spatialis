@@ -47,8 +47,8 @@
   "pause": {
    "audit_ref": "run:run-e3a-70043aee54b4119d record:progress.json, failures.json",
    "category": "batch_paused_program_error",
-   "impact_zh": "还没有生成评价与汇总；已经提交的年份保留在归档里",
-   "next_action_zh": "维护者按审计编号查看内部记录并修复；修复后的代码不能冒充原运行续跑，需要用新的运行重跑",
+   "impact_zh": "这两类分身都是模拟缺失（不是生活出局），不进完成者平均；评价与汇总已经生成，可以查看结果（C / E / M 按上面的分类）",
+   "next_action_zh": "维护者按审计编号查看内部记录并修复；这次运行不能恢复，处理之后用新的运行重跑",
    "reason_zh": "批次因程序或配置问题暂停：出错的分身记为程序错误，还没轮到的分身保留为未运行"
   },
   "report_available": true,

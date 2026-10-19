@@ -313,3 +313,133 @@ def test_not_offered_supply_unknown_and_price_unknown_are_told_apart(tmp_path):
     )
     assert dryer.unknown_reason == "price_unknown" and price.data_status == "price_unknown"
     assert "报价未知" in price.reason_zh
+
+
+# ---------------------------------------------------------------------- 报价单位、重复任务、低于最小单位的报价
+
+
+def _price_fact(body, cand_id):
+    ref = _cand(body, cand_id)["price"]["facts"][0]
+    return next(f for f in body["facts"] if f["fact_id"] == ref)
+
+
+def _codes(comp, cid):
+    return [r.code for r in next(u for u in comp.uncompiled if u.candidate_id == cid).reasons]
+
+
+def test_quote_source_must_match_the_billing_period_and_the_priced_object(in_ws):
+    """来源“216 美元/次”不能支持候选“216 美元/月”；按台的来源不能支持按套的候选；口径（币种、基年）不同、计价对象没登记的
+    同样拒绝。每次只坏一个候选：它进覆盖报告的未解决、资料不完整，其余候选照常编译；原样的同单位报价照常通过。"""
+    chores, pack_k51 = "cand.k51.service.chores", "cand.k51.device.convenience-pack"
+    comp, by_city, _ = _variant(lambda body: None)
+    assert {chores, pack_k51} <= {c.candidate_id for c in comp.compiled}  # 月对月、套对套：通过
+    chores_opp = next(o for o in by_city[K51] if o["opportunity_id"] == "k51.service.chores")
+    assert chores_opp["price"]["billing"] == "per_month" and chores_opp["unit"] == "service-month"
+
+    def unit(cid, value):
+        def mutate(body):
+            _price_fact(body, cid)["unit"] = value
+
+        return mutate
+
+    def per_unit(body):
+        _cand(body, pack_k51)["price"]["per_unit"] = "vacuum"
+
+    for mutate, cid, code in (
+        (unit(chores, "USD_2024_LOCAL/次"), chores, "source_billing_mismatch"),
+        (unit(pack_k51, "USD_2024_LOCAL/台"), pack_k51, "source_object_mismatch"),
+        (unit(pack_k51, "USD_2024_LOCAL/月"), pack_k51, "source_billing_mismatch"),
+        (unit(chores, "USD_2023_LOCAL/月"), chores, "source_unit_mismatch"),
+        (unit(chores, "CNY_2024_LOCAL/月"), chores, "source_unit_mismatch"),
+        (unit(chores, "USD_2024_LOCAL/周"), chores, "source_unit_unregistered"),
+        (per_unit, pack_k51, "price_unit_unregistered"),
+    ):
+        comp, by_city, inv = _variant(mutate)
+        assert _codes(comp, cid) == [code], (cid, code)
+        other = chores if cid == pack_k51 else pack_k51
+        assert other in {c.candidate_id for c in comp.compiled}
+        item = next(i for city in inv.cities for i in city.items if i.candidate_id == cid)
+        assert (item.outcome, item.data_status, item.compile_status) == (
+            "unresolved",
+            "incomplete",
+            "not_compiled",
+        )
+    comp, _, _ = _variant(unit(chores, "USD_2024_LOCAL/次"))
+    reason = next(u for u in comp.uncompiled if u.candidate_id == chores).reasons[0]
+    assert "按次" in reason.message_zh and "按月" in reason.message_zh
+
+
+def test_duplicate_tasks_and_sub_cent_quotes_are_candidate_errors(in_ws):
+    """同一项家务写了两条残余（内容完全相同也算）、报价“1e-3”或“0.005”（细于 1 美分）：都在候选阶段拒绝，不交给 E1 抛异常；
+    其余候选照常编译。“1e3”是 1,000 美元，可以精确记账，照常通过。"""
+    pack_k51, chores = "cand.k51.device.convenience-pack", "cand.k51.service.chores"
+
+    def duplicate(same: bool):
+        def mutate(body):
+            residuals = _cand(body, pack_k51)["effect"]["residuals"]
+            first = dict(residuals[0])
+            residuals.append(first if same else {**first, "residual_hours_per_month": "3"})
+
+        return mutate
+
+    def quote(text):
+        def mutate(body):
+            _cand(body, chores)["price"]["amount_text"] = text
+            _price_fact(body, chores)["raw_value"] = text
+
+        return mutate
+
+    for mutate, cid, code in (
+        (duplicate(True), pack_k51, "residual_task_duplicated"),
+        (duplicate(False), pack_k51, "residual_task_duplicated"),
+        (quote("1e-3"), chores, "price_too_precise"),
+        (quote("0.005"), chores, "price_too_precise"),
+    ):
+        comp, by_city, _ = _variant(mutate)
+        assert _codes(comp, cid) == [code], (cid, code)
+        other = chores if cid == pack_k51 else pack_k51
+        assert other in {c.candidate_id for c in comp.compiled}
+    comp, _, _ = _variant(duplicate(True))
+    reason = next(u for u in comp.uncompiled if u.candidate_id == pack_k51).reasons[0]
+    assert reason.field.endswith(".effect.laundry") and "2 次" in reason.message_zh
+    comp, by_city, _ = _variant(quote("1e3"))
+    opp = next(o for o in by_city[K51] if o["opportunity_id"] == "k51.service.chores")
+    assert opp["price"]["amount"]["amount"] == 1000
+
+
+def test_bad_candidates_do_not_break_the_preflight(tmp_path):
+    """在合法候选旁边加两个坏候选——重复任务的设备、“1e-3”报价的服务：预检查不抛异常、照常可以启动，两项按候选拒绝并留在
+    覆盖报告里，原有候选照常编进 E1。（坏的若恰好是参考估值模板绑定的那项方案，E1 会结构化地拒绝整次比较，不是异常。）"""
+    import copy
+
+    def mutate(body):
+        dev = copy.deepcopy(_cand(body, "cand.k51.device.convenience-pack"))
+        dev["candidate_id"], dev["target_opportunity_id"] = "cand.k51.device.dup", "k51.durable.dup"
+        dev["effect"]["residuals"].append(dict(dev["effect"]["residuals"][0]))
+        svc = copy.deepcopy(_cand(body, "cand.k51.service.chores"))
+        svc["candidate_id"], svc["target_opportunity_id"] = (
+            "cand.k51.service.tiny",
+            "k51.service.tiny",
+        )
+        svc["price"]["amount_text"] = "1e-3"
+        fact = copy.deepcopy(_price_fact(body, "cand.k51.service.chores"))
+        fact["fact_id"], fact["raw_value"] = "f.k51.tiny.price", "1e-3"
+        svc["price"]["facts"] = ["f.k51.tiny.price"]
+        body["facts"].append(fact)
+        body["candidates"] += [dev, svc]
+
+    s = sc.preflight_only(
+        tmp_path, "bad_candidates", mutate_pack=mutate, origin="controlled_fixture"
+    )
+    assert s.pre.preflight.status == "ready"
+    comp = s.pre.compiled.catalog
+    assert _codes(comp, "cand.k51.device.dup") == ["residual_task_duplicated"]
+    assert _codes(comp, "cand.k51.service.tiny") == ["price_too_precise"]
+    k51 = {o.opportunity_id for o in s.pre.world.bundle.catalog_for(K51).opportunities}
+    assert {"k51.durable.convenience_pack", "k51.service.chores", "k51.durable.dryer"} <= k51
+    assert not {"k51.durable.dup", "k51.service.tiny"} & k51
+    items = {i.candidate_id: i for c in s.pre.inventory.cities for i in c.items}
+    assert items["cand.k51.device.dup"].data_status == "incomplete"
+    assert (
+        next(c for c in s.pre.inventory.cities if c.city_ref == K51).surveyed == 7
+    )  # 5 + 2，分母不变

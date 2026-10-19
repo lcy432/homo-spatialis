@@ -289,6 +289,17 @@ def test_not_generated_and_paused_runs_do_not_invent_classifications(tmp_path):
         scripts=(MockScript(clone_id="u606.k51.r0", behavior="raise_error", years=(1,)),),
     )
     assert paused.progress.stage == "paused"
+    # 程序错误暂停：E1 把名单跑完并写出 C / E / M 报告，这次运行不能恢复——公开说明照实写，不再同时说“还没有生成”
+    pp = paused.progress
+    assert (
+        pp.report_available and not pp.resumable and paused.result.evaluation_status == "generated"
+    )
+    assert "已经生成" in pp.pause.impact_zh and "还没有生成" not in pp.pause.model_dump_json()
+    assert "不能恢复" in pp.pause.next_action_zh
+    # 中断：没有报告、可以恢复
+    sp = stop.progress
+    assert "还没有生成" in sp.pause.impact_zh and "已经生成" not in sp.pause.impact_zh
+    assert "可以恢复" in sp.pause.next_action_zh
     reasons = {c.clone_ref: (c.category, c.missing_reason) for c in paused.result.clones}
     assert reasons == {
         "u606.k51.r0": ("M", "input_config_program_error"),
@@ -353,6 +364,7 @@ def test_internal_exception_text_never_reaches_public_progress_or_results(tmp_pa
     assert outcome.status == "paused" and public_progress.stage == "paused"
     assert public_progress.pause.category == "batch_paused_program_error"
     assert public_progress.pause.audit_ref.startswith("run:run-leak")
+    assert public_progress.report_available and "已经生成" in public_progress.pause.impact_zh
     assert result.evaluation_status == "generated"  # 暂停批次照旧生成报告（原有含义不变）
     kinds = {
         c.clone_ref: (c.category, c.missing_reason, c.explanation.category) for c in result.clones

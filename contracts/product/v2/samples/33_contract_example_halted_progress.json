@@ -32,8 +32,8 @@
   "pause": {
    "audit_ref": "run:run-e3a-example-halted record:progress.json",
    "category": "batch_halted_service_unavailable",
-   "impact_zh": "不是生活结果；还没有生成评价与汇总；已用的调用次数与预算不清零",
-   "next_action_zh": "维护者处理之后可以恢复同一次运行，或换新的运行；系统不会替分身生成计划",
+   "impact_zh": "不是生活结果；还没有生成评价与汇总，不擅自给出分类或分数",
+   "next_action_zh": "维护者处理服务、凭证、预算或请求的问题；可以恢复同一次运行（恢复前逐条核对归档，已用的调用次数与预算不清零）；系统不会替分身生成计划",
    "reason_zh": "模型服务暂时不可用（超时、断连、限流或服务端错误），批次停下"
   },
   "report_available": false,

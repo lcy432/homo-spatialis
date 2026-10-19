@@ -78,3 +78,28 @@ def test_the_offline_bridge_refuses_a_real_model_planner():
     )
     with pytest.raises(ValueError, match="只接受 mock"):
         run_offline(world, None, "run-x")  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize("status", ["paused", "budget_exhausted", "interrupted", "halted"])
+@pytest.mark.parametrize("report", [True, False])
+@pytest.mark.parametrize("resumable", [True, False])
+def test_pause_text_follows_the_actual_report_and_resume_state(status, report, resumable):
+    """暂停类说明里“有没有报告”“能不能恢复”两句只跟实际状态走：不会一边 report_available = true、一边写“还没有生成”；
+    进度里的原因原文（可能有内部内容）不进公开说明。"""
+    from common.life_planning_contracts import RunProgress as E1RunProgress
+    from product.public_errors import progress_pause
+
+    p = E1RunProgress.model_construct(
+        run_id="run-x",
+        status=status,
+        halt_kind="service_unavailable" if status == "halted" else None,
+        pause_reason="OSError: C:/secret/internal.yaml INTERNAL_SENTINEL",
+    )
+    text = progress_pause(p, report_available=report, resumable=resumable)
+    dumped = text.model_dump_json()
+    assert "INTERNAL_SENTINEL" not in dumped and "secret" not in dumped
+    assert ("已经生成" in text.impact_zh) is report and (
+        "还没有生成" in text.impact_zh
+    ) is not report
+    assert ("可以恢复" in text.next_action_zh) is resumable
+    assert ("不能恢复" in text.next_action_zh) is not resumable

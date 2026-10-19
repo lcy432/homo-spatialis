@@ -32,8 +32,8 @@
   "pause": {
    "audit_ref": "run:run-e3a-0bf072d135595130 record:progress.json",
    "category": "interrupted",
-   "impact_zh": "还没有生成评价与汇总；已经提交的年份保留在归档里",
-   "next_action_zh": "可以从中断处恢复同一次运行（恢复前逐条核对归档）",
+   "impact_zh": "已经提交的年份保留在归档里；还没有生成评价与汇总，不擅自给出分类或分数",
+   "next_action_zh": "可以恢复同一次运行（恢复前逐条核对归档，已用的调用次数与预算不清零）；系统不会替分身生成计划",
    "reason_zh": "运行在两次规划调用之间中断"
   },
   "report_available": false,

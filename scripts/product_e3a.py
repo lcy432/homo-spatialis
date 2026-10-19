@@ -630,7 +630,7 @@ def generate_samples(out: Path, work: Path) -> None:
         run_id="run-e3a-example-halted",
         stage="halted",
         stage_zh="批次停下（服务、预算或请求检查）",
-        pause=progress_pause(e1_halted),
+        pause=progress_pause(e1_halted, report_available=False, resumable=True),
         cost=CostStatus(
             kind="estimated_from_quote",
             calls_used=3,

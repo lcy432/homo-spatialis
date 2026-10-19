@@ -215,16 +215,22 @@ def preflight_only(
     *,
     person: str = "u501",
     mutate_life_input: Any = None,
+    mutate_pack: Any = None,
     origin: str = "offline_run",
     **draft_kwargs: Any,
 ) -> Scenario:
-    """审阅 → 确认 → 编译 → E1 预检查。``mutate_life_input`` 是受控夹具：在 E1 预检查之前改编译出的生活输入（例如往开局塞旧物）。"""
+    """审阅 → 确认 → 编译 → E1 预检查。``mutate_life_input`` 是受控夹具：在 E1 预检查之前改编译出的生活输入（例如往开局塞旧物）。
+    ``mutate_pack`` 也是受控夹具：在内存里改资料包副本（``pack`` 一节），磁盘上的资料包不动。"""
     work = workspace(work)
     sample = label(
         origin, f"product.scenarios.preflight_only({name})", "预检查的实际输出（没有运行生活）"
     )
     with contextlib.chdir(work):
         pack = load_pack()
+        if mutate_pack is not None:
+            raw = copy.deepcopy(pack.raw)
+            mutate_pack(raw["pack"])
+            pack = DataPack(raw, pack.path)
         draft = make_draft(pack, draft_id=f"draft.{person}.{name}", **draft_kwargs)
         review = review_draft(pack, draft)
         confirmed = confirm_profile(

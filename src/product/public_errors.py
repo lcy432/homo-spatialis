@@ -126,47 +126,70 @@ def clone_explanation(entry: EntryRecord, run_id: str) -> PublicExplanation:
     )
 
 
-def progress_pause(p: E1RunProgress) -> PublicExplanation | None:
-    """运行进度的公开说明：只看进度的结构化状态（``status``、``halt_kind``），不读 ``pause_reason`` 原文。"""
+#: 未正常完成的运行状态 → （公开类别，原因，这种状态本身的影响，维护者要做的事）。报告有没有生成、能不能恢复两句**不写死在这里**，
+#: 由 ``progress_pause`` 按运行归档的实际情况补上：E1 的程序错误暂停与调用上限用尽会把名单跑完并写出 C / E / M 报告，停下与中断
+#: 不写报告；恢复规则在 E1（``resume_run``），这里只照实转述。
+_PAUSE_TEXT: dict[str, tuple[str, str, str, str]] = {
+    "paused": (
+        "batch_paused_program_error",
+        "批次因程序或配置问题暂停：出错的分身记为程序错误，还没轮到的分身保留为未运行",
+        "这两类分身都是模拟缺失（不是生活出局），不进完成者平均",
+        "维护者按审计编号查看内部记录并修复",
+    ),
+    "budget_exhausted": (
+        "call_limit_reached",
+        "全局调用上限用尽，后面的分身没有运行",
+        "没有运行的分身记为未运行（模拟缺失），不写成生活出局",
+        "由所有者决定是否提高上限",
+    ),
+    "interrupted": (
+        "interrupted",
+        "运行在两次规划调用之间中断",
+        "已经提交的年份保留在归档里",
+        "",
+    ),
+}
+
+
+def progress_pause(
+    p: E1RunProgress, *, report_available: bool, resumable: bool
+) -> PublicExplanation | None:
+    """运行进度的公开说明：只看进度的结构化状态（``status``、``halt_kind``），不读 ``pause_reason`` 原文。
+
+    “评价与汇总生成了没有”“能不能恢复”按调用方传入的实际情况写（``report_available`` 是归档里有没有报告，``resumable`` 是 E1
+    的恢复规则允不允许），所以同一份进度消息不会一边说有报告、一边说没生成。"""
     ref = f"run:{p.run_id} record:progress.json"
     if p.status in ("completed", "running"):
         return None
-    if p.status == "paused":
-        return PublicExplanation(
-            category="batch_paused_program_error",
-            reason_zh="批次因程序或配置问题暂停：出错的分身记为程序错误，还没轮到的分身保留为未运行",
-            impact_zh="还没有生成评价与汇总；已经提交的年份保留在归档里",
-            next_action_zh="维护者按审计编号查看内部记录并修复；修复后的代码不能冒充原运行续跑，需要用新的运行重跑",
-            audit_ref=f"{ref}, failures.json",
-        )
     if p.status == "halted":
         kind = p.halt_kind or ""
         if kind not in _HALT_TEXT:
             raise KeyError(f"批次停下的原因 {kind!r} 没有登记公开说明")
-        return PublicExplanation(
-            category=f"batch_halted_{kind}",
-            reason_zh=_HALT_TEXT[kind],
-            impact_zh="不是生活结果；还没有生成评价与汇总；已用的调用次数与预算不清零",
-            next_action_zh="维护者处理之后可以恢复同一次运行，或换新的运行；系统不会替分身生成计划",
-            audit_ref=ref,
-        )
-    if p.status == "budget_exhausted":
-        return PublicExplanation(
-            category="call_limit_reached",
-            reason_zh="全局调用上限用尽，后面的分身没有运行",
-            impact_zh="没有运行的分身记为未运行（模拟问题），不写成生活出局",
-            next_action_zh="由所有者决定是否提高上限，再用新的运行重跑",
-            audit_ref=ref,
-        )
-    if p.status == "interrupted":
-        return PublicExplanation(
-            category="interrupted",
-            reason_zh="运行在两次规划调用之间中断",
-            impact_zh="还没有生成评价与汇总；已经提交的年份保留在归档里",
-            next_action_zh="可以从中断处恢复同一次运行（恢复前逐条核对归档）",
-            audit_ref=ref,
-        )
-    raise KeyError(f"运行状态 {p.status!r} 没有登记公开说明")
+        category, reason = f"batch_halted_{kind}", _HALT_TEXT[kind]
+        impact, step = "不是生活结果", "维护者处理服务、凭证、预算或请求的问题"
+        audit = ref
+    elif p.status in _PAUSE_TEXT:
+        category, reason, impact, step = _PAUSE_TEXT[p.status]
+        audit = f"{ref}, failures.json" if p.status == "paused" else ref
+    else:
+        raise KeyError(f"运行状态 {p.status!r} 没有登记公开说明")
+    report = (
+        "评价与汇总已经生成，可以查看结果（C / E / M 按上面的分类）"
+        if report_available
+        else "还没有生成评价与汇总，不擅自给出分类或分数"
+    )
+    resume = (
+        "可以恢复同一次运行（恢复前逐条核对归档，已用的调用次数与预算不清零）；系统不会替分身生成计划"
+        if resumable
+        else "这次运行不能恢复，处理之后用新的运行重跑"
+    )
+    return PublicExplanation(
+        category=category,
+        reason_zh=reason,
+        impact_zh=f"{impact}；{report}",
+        next_action_zh=f"{step}；{resume}" if step else resume,
+        audit_ref=audit,
+    )
 
 
 def record_internal(

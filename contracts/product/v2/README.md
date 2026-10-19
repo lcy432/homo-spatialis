@@ -62,7 +62,7 @@ uv run python scripts/product_e3a.py samples
 | `ConfirmedProfile` | E3 | 已确认的语义、精确分数（`"50/3"`）与显示值、来源、内容身份；答案改过就失效 |
 | `ProductPreflight` | E3 | 开局摘要、逐城与总体的可执行 / 可评分 / 可反馈、资料缺口、选项目录覆盖状态、人数与年数、规划器与费用、运行绑定 |
 | `RunSubmission` / `RunReceipt` | E5 提交 / E3 | 确认与预检查引用、幂等键；accepted / duplicate_same_run / rejected 与原因 |
-| `RunProgress` | E3 | 阶段、每个分身已执行年度、暂停说明（`pause`）、费用状态、能否恢复、报告是否可用 |
+| `RunProgress` | E3 | 阶段、每个分身已执行年度、暂停说明（`pause`，其中“评价与汇总生成了没有”“能不能恢复”两句与 `report_available`、`resumable` 一致）、费用状态、能否恢复、报告是否可用 |
 | `ProductResult` | E3 | E1 报告的白名单投影：C / E / M、分母、空值、L / V / J、每个分身的公开说明（`explanation`）、事件链、硬要求、逐年生活事实、选项目录覆盖、来源与限制 |
 | `SourceFact`、`OpportunityCandidate`、`CatalogCompilation`、`OptionInventoryCoverage` | E3（资料侧） | 来源事实、可不完整的候选、编入 E1 的机会与未编入原因、声明范围内的选项目录覆盖（三种状态） |
 
