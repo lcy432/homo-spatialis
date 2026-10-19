@@ -7,11 +7,14 @@
 from __future__ import annotations
 
 import json
+import sqlite3
+from contextlib import closing
 from pathlib import Path
 
 import pytest
 
 from common.product_contracts import ProductResult
+from orchestration.life_archive import RunArchive
 from workflows.e3_adapters import E3Context, E3Workspace, RunRequest, e3_services, seed_example
 from workflows.ports import NotWiredError, WorkflowServices
 from workflows.runtime import WorkflowRefusedError, WorkflowRuntime
@@ -275,10 +278,8 @@ def test_crash_inside_e1_resumes_through_the_e1_resume_entry(tmp_path):
     ]["run_id"]
     assert len(first) == 3 and _progress(ws, run_id)["status"] == "running"
     archived_before = {
-        json.loads(x)["request_id"]
-        for x in (ws.root / "archive" / run_id / "calls.jsonl")
-        .read_text(encoding="utf-8")
-        .splitlines()
+        r["request_id"]
+        for r in RunArchive(ws.root / "archive" / run_id, create=False).records("calls")
     }
     assert len(archived_before) == 2
     code, done = cli_e3(w, "resume", "--workflow-id", "W", fault="count_calls")
@@ -369,12 +370,12 @@ def _halted(tmp_path):
 
 def test_tampered_e1_archive_is_refused_without_rewriting_it(tmp_path):
     ws, rt, run_id = _halted(tmp_path)
-    accepted = ws.root / "archive" / run_id / "accepted.jsonl"
-    accepted.write_text(
-        accepted.read_text(encoding="utf-8").replace('"quantity":1.0', '"quantity":2.0', 1),
-        encoding="utf-8",
-        newline="\n",
-    )
+    db = ws.root / "archive" / run_id / "archive.sqlite"
+    with closing(sqlite3.connect(db)) as con, con:  # 有人改了 E1 已经接受的一条年度行动
+        seq, body = con.execute("SELECT seq, body FROM accepted ORDER BY seq LIMIT 1").fetchone()
+        assert '"quantity":1.0' in body
+        changed = body.replace('"quantity":1.0', '"quantity":2.0', 1)
+        con.execute("UPDATE accepted SET body = ? WHERE seq = ?", (changed, seq))
     before = tree(ws.root / "archive")
     with rt:
         out = rt.resolve("W", "retry")
