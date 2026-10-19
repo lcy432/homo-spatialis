@@ -4,7 +4,8 @@ import { fileURLToPath } from "node:url";
 import { type Page, type TestInfo, expect } from "@playwright/test";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-export const EVIDENCE = path.resolve(here, "..", "..", "runs", "2026-10-18-e5-a-offline-ui");
+/** 截图、导出的草稿与可访问性报告写在仓库的 runs/web-e2e/（运行输出，不进版本管理，每次运行覆盖）。 */
+export const EVIDENCE = path.resolve(here, "..", "..", "runs", "web-e2e");
 
 export function evidencePath(...parts: string[]): string {
   const p = path.join(EVIDENCE, ...parts);

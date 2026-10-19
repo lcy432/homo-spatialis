@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 // 端到端检查：Playwright 自己起开发服务器（端口 5180，避免与手动打开的 5173 冲突）。
-// 两种尺寸：手机 360×740、桌面 1280×800。截图与导出的草稿写进证据目录 runs/2026-10-18-e5-a-offline-ui/。
+// 两种尺寸：手机 360×740、桌面 1280×800。截图与导出的草稿写进 runs/web-e2e/（运行输出，每次覆盖）。
 const PORT = 5180;
 
 export default defineConfig({

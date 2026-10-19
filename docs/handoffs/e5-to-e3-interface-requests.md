@@ -11,8 +11,30 @@
 | 组 | 什么时候需要 | 条目 |
 |---|---|---|
 | A | 影响 E5-A 的呈现与可用性观察，越早越好 | A1–A10 |
-| B | E5-B 接线之前必须有 | B1–B7 |
+| B | E5-B 接线之前必须有 | B1–B8 |
 | C | E5-C 上线之前要定 | C1–C4 |
+
+### LangGraph 外层流程原型之后（2026-10-19 补）
+
+接入层的 LangGraph 外层流程原型（intake-04，[说明](../design/langgraph-product-workflow.md)）已经覆盖或改变了下面几条。界面层接服务时以流程为准，
+仍经 E3 的接口回复（流程说明第 10 节第 7 条）：
+
+| 条目 | 流程原型之后 | 还缺什么 |
+|---|---|---|
+| B2 进度：由谁处理 | 公开视图有 `waiting_for`（confirmation / revision / resolution）与 `needs_attention` | 运行中的当前位置与更新时间仍要 E3 在 RunProgress 里给（界面要写“正在过第几年”） |
+| B3 恢复入口 | `resume` 只在 E1 可恢复时接上；`resolve` 由人发起重试或放弃，“恢复”不会自己重试 | E3-C 决定谁能调用；界面只显示“需要处理”与审计编号 |
+| B4 提交与幂等 | 幂等键在 `start` 时传入；确认带回 `confirm_with`；同一个键的两个流程绑定同一个运行 | “同一份预检查、换了一个键”仍会开新运行（第 3 点的服务端保护仍需要） |
+| B6 预检查请求 | 预检查由 `start` 产生，请求只带已确认画像与本次输入的引用 | — |
+
+新增：
+
+### B8 流程的公开视图收进共享结构
+
+- **界面场景**：小林点“开始运行”之前，页面要知道流程是在等他确认（显示预检查与“开始运行”）、在等他改条件，还是在等维护者处理。
+- **现在**：流程原型的公开视图（`stage` / `stage_zh`、`waiting_for`、`preflight.public` 与 `confirm_with`、`run_id` / `progress` / `result`、
+  `attention` / `notice` / `error`）由 `src/workflows/runtime.py` 输出，不在 `contracts/product/` 里，没有 schema，也不在 `index.json` 的哈希核对里。
+- **建议**：E3 把它（至少公开部分）收进共享结构、导出 schema 与样例（等待确认、运行中、需要处理、已交付、被拒），或者在 RunProgress 里加提交前的阶段
+  （流程说明第 10 节第 2 条）。界面在这之前不接一份没有 schema 的 JSON。
 
 ## A. 影响 E5-A 呈现
 

@@ -53,5 +53,7 @@ src/flow/       确认画像、预检查、知悉项、幂等键
 src/pages/      四步填写、确认、进度、结果、分身故事、样例面板
 src/components/ 分配器、审阅、预检查、结果、分身故事、进度、对话框
 tests/          Vitest（单元与组件）
-e2e/            Playwright（手机 360×740 与桌面 1280×800；截图与导出的草稿写进 runs/2026-10-18-e5-a-offline-ui/）
+e2e/            Playwright（手机 360×740 与桌面 1280×800；截图、导出的草稿与可访问性报告写进仓库的 runs/web-e2e/，每次覆盖）
+tests/fixtures/drafts/  界面生成的草稿样本，接入层用 tests/product/test_web_drafts.py 核对 E3 读到的答案状态
+                        （有意改了草稿写法之后：UPDATE_DRAFT_FIXTURES=1 npx vitest run tests/draft-fixtures.test.ts）
 ```

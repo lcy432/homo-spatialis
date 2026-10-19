@@ -10,9 +10,7 @@
 
 **2026-10-18 收尾补记：** 请改用 [contracts/product/v2/](../../contracts/product/v2/README.md)（结构 `e3a-product-schema-v2`，39 份样例；v1 保留为历史导出）。要同步的字段在其 README 第 3 节：分身说明 `detail_zh` → `explanation`、批次暂停 `pause_reason` → `pause`（都只有按类别生成的原因、影响、下一步与审计编号，不会出现异常原文或服务器路径）、问题的 `audit_ref`、覆盖条目的三种状态、能力清单的金额写法 `money_input_rule_zh`，以及新的问题代码（金额写法、重复答案、资料来源）。前端提示与防重只帮忙，正式检查在服务端。收尾已实现、离线自测通过，待独立复核（ADR0034 第九节）。
 
-**2026-10-18 E5 首轮讨论补记：** 所有者确认了“合并版”方案：前端用 React + TypeScript + Vite 做成静态单页，放在新目录 `web/`；类型由 v2 的 schema 生成、用 Ajv（2020-12 版本）校验，页面只通过一个业务访问层取数据（E5-A 用样例适配器，E5-B 换成接 E3-C 的 HTTP 适配器）；不用 React Hook Form。E5-A 不对任意修改后的输入给出新的模拟结果（自由填写只做回显与草稿导出，后续流程用样例演示）；草稿只保存在当前标签页。E5-A 的工程任务见 [prompt](../design/prompts/2026-10-18-e5-a-offline-ui.md)，给 E3 的接口需求见 [e5-to-e3-interface-requests.md](e5-to-e3-interface-requests.md)。
-
-**2026-10-18 E5-A 补记：** 离线界面原型已实现、自测通过，**待审核**（[ADR0036](../../DECISIONS/0036-e5a-offline-ui.md)、[技术说明](../design/e5-a-offline-ui.md)、[web/README.md](../../web/README.md)、证据 `runs/2026-10-18-e5-a-offline-ui/`）。用户能在浏览器里走完四步填写、确认、运行前说明、进度、结果与分身故事；后半段只能用样例演示。E5-B 从 `web/src/api/httpAdapter.ts` 接 E3-C 开始。
+**界面层现在在哪里、接服务先读什么：** 离线原型在 `web/`（[技术说明](../design/e5-a-offline-ui.md)、[web/README.md](../../web/README.md)、设计决定 [ADR0036](../../DECISIONS/0036-e5a-offline-ui.md)；状态只看 [docs/INDEX.md](../INDEX.md)）。接服务之前先读 [LangGraph 外层流程](../design/langgraph-product-workflow.md)第 5、11 节：界面经 E3-C 调用流程的 `start` / `confirm` / `status`，确认时原样带回 `confirm_with`；流程阶段与生活结果分开显示；`needs_attention` 只显示中文说明与审计编号，不提供自动重试。给 E3 的接口需求见 [e5-to-e3-interface-requests.md](e5-to-e3-interface-requests.md)（B8：流程的公开视图先收进共享结构）。
 
 ## 1. 新窗口先读什么
 

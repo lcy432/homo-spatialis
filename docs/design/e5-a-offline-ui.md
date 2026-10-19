@@ -1,10 +1,10 @@
 # E5-A 技术说明：离线界面原型
 
-更新：2026-10-18（本地时区 UTC−7）。规则见 [ADR0036](../../DECISIONS/0036-e5a-offline-ui.md)，任务原文见 [prompt 归档](prompts/2026-10-18-e5-a-offline-ui.md)，
-证据见 [runs/2026-10-18-e5-a-offline-ui](../../runs/2026-10-18-e5-a-offline-ui/README.md)，运行方法见 [web/README.md](../../web/README.md)。
+更新：2026-10-19（本地时区 UTC−7）。设计决定见 [ADR0036](../../DECISIONS/0036-e5a-offline-ui.md)，运行方法见 [web/README.md](../../web/README.md)，
+状态见 [docs/INDEX.md](../INDEX.md)（界面层 ui-01）。
 
-**状态：已实现、自测通过，待审核。** 全部是 E3 的合成公共样例与 mock 规划器的结果；界面没有接任何服务。共享语义以
-[E3/E5 共享约定](e3-e5-product-contract.md)与 [contracts/product/v2](../../contracts/product/v2/README.md) 为准，本文只讲界面怎样消费它们。
+界面读的全部是接入层的合成公共样例与 mock 规划器的结果，没有接任何服务。共享语义以 [E3/E5 共享约定](e3-e5-product-contract.md)与
+[contracts/product/v2](../../contracts/product/v2/README.md) 为准，本文只讲界面怎样消费它们。
 
 ## 1. 用户能做什么
 
@@ -72,12 +72,29 @@
 * 断网：提交没有送达，页面写“网络断了，提交没有完成”；再点用同一个键。回执丢失：提交已送达但回执丢了，再点用同一个键，得到“重复提交、同一个运行”（样例 08）。
 * 刷新进度页：网址里带 run_id，只查询，不重新提交。
 
-## 6. 以后怎样换成真实服务（E5-B）
+## 6. 以后怎样接真实服务（ui-02）
 
-1. 在 `web/src/api/httpAdapter.ts` 实现同一组方法，回复照样过 Ajv；在 `web/src/api/context.tsx` 按配置选择适配器。页面不改。
-2. 先等 E3 定下确认请求、进度里的“由谁处理”、恢复入口与回执的托管取值（需求 B1–B4）。
-3. 用同一组端到端测试跑两个适配器：双击只发一次、回执丢失后同一个键拿到同一个运行、改答案之后旧预检查失效、C = 0 不显示 0。
-4. 托管时由 E3-C 的 Python 服务同时提供 `/api` 与构建好的页面（同一个网址），不需要 Node 服务器；LangGraph 在服务内部，界面看不到它的状态。
+接入层的 LangGraph 外层流程原型（intake-04，[说明](langgraph-product-workflow.md)第 5、11 节）已经把“预检查 → 等用户确认 → 幂等登记 →
+启动或恢复生活引擎 → 交付结果”串起来。界面只调用 E3-C 包在它外面的服务、读它的公开视图，不读 checkpoint、内部图状态或 E1 文件。
+页面上的动作与流程操作的对应：
+
+| 页面上的动作 | 流程操作（经 E3-C 服务） | 界面显示什么 |
+|---|---|---|
+| “确认我的信息”之后 | `start`：带已确认画像与幂等键；同一次“开始”的重复点击用同一个键 | 流程停在等用户确认（`waiting_for = confirmation`），显示公开视图里原样转交的 ProductPreflight（`preflight.public`） |
+| “开始运行” | `confirm`：原样带回 `confirm_with`（用户看到的那份检查的身份） | 检查已经不是最新的，就显示新的检查，不开跑 |
+| 回去改了答案 | 重新确认画像，再 `revise` | 旧检查作废 |
+| 进度页 | `status`；断线重连只查询 | 流程阶段（`stage_zh`、`waiting_for`）与 E3 的 RunProgress 分开显示；`needs_attention` 时显示 `attention` 的中文说明与审计编号，不提供“自动重试” |
+| 结果页 | `status` 到 `delivered` | E3 的 ProductResult，按本文第 1、4 节的规则呈现；“已交付”不等于每个分身都正常完成 |
+
+要改的地方：
+
+1. **业务访问层的接口**：现在的 `ProductApi`（`web/src/api/types.ts`）按 E3 的消息分成 review / confirm / preflight / submit / progress / result。接流程之后，
+   预检查由 `start` 产生，“开始运行”变成带 `confirm_with` 的确认，幂等键要在 `start` 之前生成（现在是点“查看样例运行”时才生成），界面不再直接发
+   `RunSubmission`。页面消费的仍是同一套共享消息，样例适配器跟着改成同样的接口。
+2. **公开视图要先进共享结构**：流程阶段、在等谁、待处理事项现在只在流程原型里定义，还不在 `contracts/product/` 里（需求 B8）。E3 收进去之前，
+   界面不接一份没有 schema 的 JSON。
+3. **恢复与处理由维护者发起**（`resume`、`resolve`）；界面只显示“需要处理”与审计编号（需求 B3）。
+4. 托管时由 E3-C 的 Python 服务同时提供 `/api` 与构建好的页面（同一个网址），不需要 Node 服务器。
 
 ## 7. 待 E3 的临时显示文字
 
@@ -99,3 +116,12 @@
 * **没有恢复按钮、没有“我的运行”、没有登录**：E5-B / E5-C。
 * **确认页在手机上很长**：审阅、知悉、确认画像与预检查都在一页；使用观察时看用户会不会迷路，再决定要不要折叠或拆页。
 * **模型理由不展示**：契约里还没有带归属的字段（需求 B7）。
+
+## 9. 怎样检查
+
+* `npm test`（在 `web/` 里）：先核对共享结构（哈希与生成的类型），再跑单元与组件测试（精确分数、草稿状态、分配器、样例适配器、结果与进度组件）。
+* `npm run test:e2e`：手机 360×740 与桌面 1280×800 各跑一遍，包括只用键盘走完正常闭环、断网与回执丢失、各样例场景、可访问性扫描；截图、导出的草稿与
+  扫描报告写在 `runs/web-e2e/`（运行输出，每次覆盖）。
+* **界面与接入层对同一份草稿的理解**：`web/tests/draft-fixtures.test.ts` 用页面同一个状态更新函数、按页面操作生成 4 份草稿样本，存在
+  `web/tests/fixtures/drafts/`；`tests/product/test_web_drafts.py` 把它们交给 E3 的 `review_draft`，核对未答、0、无所谓、暂不确定、均分之后多出的
+  10/3 与金额写法。任何一边改了理解，这两个测试之一就会失败；有意的改动之后用 `UPDATE_DRAFT_FIXTURES=1` 重新生成样本。
