@@ -1,26 +1,28 @@
 # E1-7 代理规划闭环
 
+> **2026-10-19 起只保留产品版（[ADR0037](../../DECISIONS/0037-life-keep-only-product-version.md)）：** 本文的手算例子与配置名来自当时的样例（`synthetic_e1_*`、`run_e1_7b_*` 等），这些配置与旧版本的规则、评分、模板已从仓库删除；机制与公式仍是现行代码的说明，现行样例是 `configs/life/*_product.yaml`。
+
 > 长期技术说明。E1-7A（2026-10-12）：**已实现、自测通过，待独立复核**；规则见 [ADR0030](../../DECISIONS/0030-life-e1-7a-agent-planning-loop.md)，任务原文见
-> [prompt 归档](prompts/2026-10-12-e1-7a-agent-loop.md)，运行证据见 `runs/2026-10-12-e1-7a-agent-loop/`。E1-7B（真实模型接线与付费试跑）**未开始**。
+> [prompt 归档](prompts/2026-10-12-e1-7a-agent-loop.md)。E1-7B（真实模型接线与付费试跑）**未开始**。
 > 参数与假设见[目录](parameter-assumption-register.md#agent-loop) AG-01–12、MP-03。
 >
-> 2026-10-12 收尾：独立审核（`runs/2026-10-12-e1-7a-review/`）发现 F1–F3，执行修订 `e1-7a-r2` 已实现、自测通过，**待独立复核**——恢复前逐条核对
+> 2026-10-12 收尾：独立审核（本机运行记录）发现 F1–F3，执行修订 `e1-7a-r2` 已实现、自测通过，**待独立复核**——恢复前逐条核对
 > 归档并按同一套代码重放比较（第 9 节）、核对实际规划器的有效设置（第 4 节）、事实记忆按真实领薪月份写区间（第 5 节）。规则见
 > [ADR0030 第六节](../../DECISIONS/0030-life-e1-7a-agent-planning-loop.md)，任务原文见 [收尾 prompt](prompts/2026-10-12-e1-7a-closeout.md)，
-> 证据见 `runs/2026-10-12-e1-7a-closeout-fixes/`。E1-7B 仍未开始。
+> 证据见 本机运行记录。E1-7B 仍未开始。
 >
-> 当前结论（2026-10-13 补记）：E1-7A 收尾已在声明的 V1 合成离线范围内通过独立复核（[审核摘要](../../runs/2026-10-12-e1-7a-closeout-review/audit.json)）。
+> 当前结论（2026-10-13 补记）：E1-7A 收尾已在声明的 V1 合成离线范围内通过独立复核（审核摘要（本机记录））。
 > **E1-7B（真实千问模型接入、输入说明补齐与小规模试跑）已实现、离线验收通过、先导与三年小规模试跑已完成，待独立复核**——见第 15 节、
-> [ADR0031](../../DECISIONS/0031-life-e1-7b-live-model-pilot.md)、[任务原文](prompts/2026-10-13-e1-7b-live-pilot.md)与 `runs/2026-10-13-e1-7b-live-pilot/`；
+> [ADR0031](../../DECISIONS/0031-life-e1-7b-live-model-pilot.md)、[任务原文](prompts/2026-10-13-e1-7b-live-pilot.md)与 本机运行记录；
 > 参数见目录 AG-13–20。下面第 1–14 节写的是 mock 时期的设计，仍然有效；与第 15 节冲突处以第 15 节为准。
 >
-> 2026-10-13 收尾：独立审核（`runs/2026-10-13-e1-7b-review/`）发现 F1–F3，执行修订 `e1-7b-r2` 已实现、离线验收通过，**待独立复核**——见第 15.9 节、
+> 2026-10-13 收尾：独立审核（本机运行记录）发现 F1–F3，执行修订 `e1-7b-r2` 已实现、离线验收通过，**待独立复核**——见第 15.9 节、
 > [ADR0031 第八节](../../DECISIONS/0031-life-e1-7b-live-model-pilot.md)与 [收尾 prompt](prompts/2026-10-13-e1-7b-closeout.md)；本轮真实 API 调用 0 次。
 >
 > 2026-10-13 产品默认模型：后续产品运行默认用 **Qwen3.8 Flash**（`qwen3.8-flash`，滚动型号，只在产品角色 `product_planner`）；旧 Max 配置要显式选。
 > 已实现、离线验收通过、最小真实试跑（1 次请求）已完成，**待独立复核**——见第 16 节、[ADR0032](../../DECISIONS/0032-product-planner-default-qwen3-8-flash.md)；参数见目录 AG-13、AG-19、AG-21。
 >
-> 2026-10-18 日常生活便利（[ADR0033](../../DECISIONS/0033-life-daily-convenience.md)）：新提示模板 `e1-convenience-prompt-v1`（说明书多一节日常杂务）、新 mock 规则、入口的 `--mock-config` 与限额真实试跑（6 次请求）——见第 17 节；旧模板与旧 mock 规则不变。已实现、自测通过，**待独立复核**。2026-10-18 补记：在声明的 V1 合成范围内通过[独立审核](../../runs/2026-10-18-e1-daily-convenience-review/README.md)，可以交接 E3；真实资料接入和参数标定尚未完成；CLI 默认配置没有改（见 17.4）。
+> 2026-10-18 日常生活便利（[ADR0033](../../DECISIONS/0033-life-daily-convenience.md)）：新提示模板 `e1-convenience-prompt-v1`（说明书多一节日常杂务）、新 mock 规则、入口的 `--mock-config` 与限额真实试跑（6 次请求）——见第 17 节；旧模板与旧 mock 规则不变。已实现、自测通过，**待独立复核**。2026-10-18 补记：在声明的 V1 合成范围内通过独立审核（本机记录），可以交接 E3；真实资料接入和参数标定尚未完成；CLI 默认配置没有改（见 17.4）。
 
 >
 > 2026-10-18 真实 LLM 测试（[ADR0035](../../DECISIONS/0035-haiku-test-planner-agent-sdk.md)）：要真实调用大语言模型的测试与试跑一律用 **Claude Haiku 5.5**
@@ -81,7 +83,7 @@ flowchart TD
 ### 3.1 城市背景事实为什么要单独建
 
 E1-7 之前，安全、发展机会、休闲与环境这些城市背景只存在于评分条件 `CityScoringConditions` 里，与隐藏的 b、c、η 记在一起，分身完全
-看不到。不能为了让分身了解城市就把评分条件整份放出去，也不能把 b 换个字段名发给分身。所以分成两份（[城市事实](../../configs/life/city_facts_e1_7a.yaml)）：
+看不到。不能为了让分身了解城市就把评分条件整份放出去，也不能把 b 换个字段名发给分身。所以分成两份（城市事实（`city_facts_e1_7a.yaml`，已删除））：
 
 * **事实表**（可见）：每条事实写明含义、数值或类别、单位、已知 / 确定不存在 / 资料未知、时间口径与来源性质；城市范围取来源记录。
   本样例每座城 4 条合成指数（安全 6、发展 4、休闲 8、环境 6，0–10），**明确标成合成设定**。
@@ -303,9 +305,9 @@ a95.training.accounting_course 48（负担点）"。隐藏精力时只说超了�
 ## 13. 代码、配置、测试与证据
 
 * 代码：见第 2 节表格。
-* 配置：[运行配置](../../configs/life/run_e1_7a.yaml)、[原计划名单](../../configs/life/roster_e1_7a.yaml)、
-  [生活样例](../../configs/life/synthetic_e1_7a_loop.yaml)（由 E1-6B 样例复制，没有预先写好的计划；订正了继承下来的城市名笔误"B94"）、[评分](../../configs/life/scoring_e1_7a_loop.yaml)、
-  [评价规格](../../configs/life/evaluation_e1_7a.yaml)、[城市事实](../../configs/life/city_facts_e1_7a.yaml)。
+* 配置：运行配置（`run_e1_7a.yaml`，已删除）、原计划名单（`roster_e1_7a.yaml`，已删除）、
+  生活样例（`synthetic_e1_7a_loop.yaml`，已删除）（由 E1-6B 样例复制，没有预先写好的计划；订正了继承下来的城市名笔误"B94"）、评分（`scoring_e1_7a_loop.yaml`，已删除）、
+  评价规格（`evaluation_e1_7a.yaml`，已删除）、城市事实（`city_facts_e1_7a.yaml`，已删除）。
 * 测试：`tests/life/test_city_facts.py`（事实与评分条件对齐）、`tests/life/test_planning_interface.py`（请求、解析、诊断、记忆、mock、
   检查阶段）、`tests/life/test_planning_runner.py`（16 项验收与预算、城市资料、拒绝启动）、`tests/life/test_planning_closeout.py`（收尾
   F1–F3：归档核对与重放比较、合法中断、规划器设定、领薪月份）。
@@ -372,7 +374,7 @@ a95.training.accounting_course 48（负担点）"。隐藏精力时只说超了�
 
 ### 15.4 钱怎么管
 
-一本账（`runs/2026-10-13-e1-7b-live-pilot/budget/`）管先导、主试跑与任何诊断：上限 150 次、50 元，报价 12 / 36 元每百万输入 / 输出 token（官方页面
+一本账（本机运行记录）管先导、主试跑与任何诊断：上限 150 次、50 元，报价 12 / 36 元每百万输入 / 输出 token（官方页面
 2026-10-09 更新，按未命中缓存的标价）。每次发送前按"输入估计 × 12 + 4,096 × 36"预留，返回后按实际用量核算；超时等没有用量的请求保留预留、不记零；
 换运行目录、重启或换 run_id 都读同一本账。这是按报价执行的**应用侧**控制，不是供应商的账单上限；没有账单之前，费用都写"按报价估算"。
 
@@ -426,12 +428,12 @@ a95.training.accounting_course 48（负担点）"。隐藏精力时只说超了�
   `orchestration/life_archive.py`、`common/life_planning_contracts.py`、`common/runlog.py`、`ledger/life_run_config.py`；`src/econ/` 没有改。
 * 配置：`configs/life/{synthetic_e1_7b_pilot, scoring_e1_7b_pilot, evaluation_e1_7b, city_facts_e1_7b, roster_e1_7b, run_e1_7b_live, run_e1_7b_mock}.yaml`。
 * 测试：`tests/life/test_e1_7b_live_offline.py`（16 项离线验收，离线替身）、`tests/life/test_e1_7b_saved_responses.py`（用主试跑已保存的回复离线
-  重建与恢复，读 `runs/2026-10-13-e1-7b-live-pilot/main/`）。
+  重建与恢复，读 本机运行记录）。
 * 入口：`uv run python scripts/run_life_e1_7b.py {offline-check|pilot|main|resume|mock|replay|budget}`。
 
 ### 15.9 收尾（独立审核 F1–F3，执行修订 `e1-7b-r2`，2026-10-13）
 
-> 已实现、离线验收通过，**待独立复核**。规则见 [ADR0031 第八节](../../DECISIONS/0031-life-e1-7b-live-model-pilot.md)，证据见 `runs/2026-10-13-e1-7b-closeout/`。
+> 已实现、离线验收通过，**待独立复核**。规则见 [ADR0031 第八节](../../DECISIONS/0031-life-e1-7b-live-model-pilot.md)。
 > 本轮没有任何真实 API 调用。
 
 **F1——错模型的计划重新开机后仍不能执行。** 以前：服务返回一份格式合法的计划，但返回的模型名不是设定的那个；第一次运行正确停下，可这份回复已经被记成
@@ -465,7 +467,7 @@ a95.training.accounting_course 48（负担点）"。隐藏精力时只说超了�
 ## 16. 产品规划器的默认模型：Qwen3.8 Flash（2026-10-13）
 
 > 已实现、离线验收通过、最小真实试跑已完成，**待独立复核**。规则见 [ADR0032](../../DECISIONS/0032-product-planner-default-qwen3-8-flash.md)，证据见
-> `runs/2026-10-13-product-flash-switch/`，执行范围见 [prompt 归档](prompts/2026-10-13-product-flash-switch.md)。生活、评分、评价与汇总的数学没有变。
+> 本机运行记录，执行范围见 [prompt 归档](prompts/2026-10-13-product-flash-switch.md)。生活、评分、评价与汇总的数学没有变。
 
 > ⚠ 本节"产品运行（默认）"一行已被 [ADR0035](../../DECISIONS/0035-haiku-test-planner-agent-sdk.md) 推翻：2026-10-18 起入口不写 `--config` 时读 Haiku 测试
 > 配置（第 18 节）；要跑 Flash 显式写 `--config configs/life/run_e1_7b_flash.yaml`。产品角色本身不变。
@@ -508,13 +510,13 @@ a95.training.accounting_course 48（负担点）"。隐藏精力时只说超了�
 `common/config.py`（`ProductModelSpec`、`product_planner` 角色、找不到角色报错）、`common/life_planning_contracts.py`（`model_role`、`version_policy`）、
 `agentlayer/life_llm.py`（`returned_model_accepted`、按角色的规划器编号）、`ledger/life_run_config.py`（版本策略核对）、`orchestration/life_runner.py`（`model_profile.json`）、
 `scripts/run_life_e1_7b.py`（默认产品配置、`--config`、`--run-id`）、`configs/models.yaml`（`product_planner`）、`configs/life/run_e1_7b_flash.yaml`；
-测试 `tests/life/test_product_flash.py` 与 `tests/life/live_support.py`；证据 `runs/2026-10-13-product-flash-switch/`。
+测试 `tests/life/test_product_flash.py` 与 `tests/life/live_support.py`；证据 本机运行记录。
 
 ## 17. 日常生活便利：说明书、mock、入口与限额试跑（2026-10-18）
 
 > 已实现、自测通过，**待独立复核**。规则见 [ADR0033](../../DECISIONS/0033-life-daily-convenience.md)，评分见 [E1-3 技术说明](e1-3-life-model.md)第 21 节，证据见
-> `runs/2026-10-18-e1-daily-convenience/`。
-> 2026-10-18 补记：在声明的 V1 合成范围内通过独立审核，可以交接 E3；真实资料接入和参数标定尚未完成（[审核说明](../../runs/2026-10-18-e1-daily-convenience-review/README.md)、ADR0033 第八节）。
+> 本机运行记录。
+> 2026-10-18 补记：在声明的 V1 合成范围内通过独立审核，可以交接 E3；真实资料接入和参数标定尚未完成（审核说明（本机记录）、ADR0033 第八节）。
 
 ### 17.1 提示模板与说明书
 
@@ -564,7 +566,7 @@ uv run python scripts/run_life_e1_7b.py resume --out <同一目录>
 ## 18. 真实 LLM 测试用 Claude Haiku 5.5：Agent SDK 单轮调用、厂商适配与可选计费（2026-10-18）
 
 > 已实现、离线自测通过；最小真实试跑见证据目录。规则见 [ADR0035](../../DECISIONS/0035-haiku-test-planner-agent-sdk.md)，证据见
-> `runs/2026-10-18-haiku-test-planner/`，执行范围见 [prompt 归档](prompts/2026-10-18-haiku-test-planner.md)。生活、评分、评价与汇总的数学没有变。
+> 本机运行记录，执行范围见 [prompt 归档](prompts/2026-10-18-haiku-test-planner.md)。生活、评分、评价与汇总的数学没有变。
 
 ### 18.1 以后用哪个模型
 
@@ -604,7 +606,7 @@ uv run python scripts/run_life_e1_7b.py resume --out <同一目录>
 请求里没有 CLAUDE.md、项目路径、本机记忆或别的密钥；工具列表为空；输出上限生效。命令行另加两样：系统提示前一句 Agent SDK 自我介绍，用户消息后
 一段运行环境说明（临时目录、系统版本、当天日期）；并且把思考固定为自适应（关不掉，effort 写 `low`）。所以 Haiku 收到的提示比 Flash 多了这些内容，
 两者不是同一个信息条件。effort 由配置决定（所有者指定 Haiku `max`、Sonnet `medium`），命令行照写；思考 token 与回答共用输出上限，所以 Claude
-配置不另设上限，用模型最大值 128,000（命令行不设时也自动填这个数），超时 600 秒。升级 `claude-agent-sdk` 之前要重跑 `runs/2026-10-18-haiku-test-planner/probe/probe_transport.py`。
+配置不另设上限，用模型最大值 128,000（命令行不设时也自动填这个数），超时 600 秒。升级 `claude-agent-sdk` 之前要重跑 本机运行记录。
 
 ### 18.4 计费可选与美元账本
 
@@ -625,4 +627,4 @@ uv run python scripts/run_life_e1_7b.py resume --out <同一目录>
 `common/runlog.py`（`reserved_usd`、`cost_usd`、`provider_usage`）、`orchestration/life_budget.py`（按币种记账、分档）、`orchestration/life_runner.py`
 （支持范围说明与不记账的对账）、`scripts/run_life_e1_7b.py`（默认配置、按服务商选传输层）、`configs/models.yaml`、
 `configs/life/run_e1_7b_haiku.yaml`、`configs/life/run_e1_convenience_haiku.yaml`、`configs/life/run_e1_7b_sonnet.yaml`；测试 `tests/life/test_haiku_test_planner.py`；证据
-`runs/2026-10-18-haiku-test-planner/`。
+本机运行记录。

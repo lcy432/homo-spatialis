@@ -106,8 +106,8 @@
 | 年度状态 | `EnvironmentOutcome.settlement_status` 的注释 |
 | 硬要求的汇总 | `RequirementTrajectory.requirement_summary` 与 `requirement_trajectories` 的注释 |
 | 硬要求的需求键 | `configs/product/e3a_synthetic_pack.yaml` 的 `hard_requirement_options` |
-| 参考方案 | `configs/life/evaluation_e1_convenience.yaml` 各模板的 `label` |
-| 家务任务 | `configs/life/synthetic_e1_convenience.yaml` 的 `household_tasks[].description` |
+| 参考方案 | `configs/life/evaluation_product.yaml` 各模板的 `label` |
+| 家务任务 | `configs/life/synthetic_product.yaml` 的 `household_tasks[].description` |
 
 ## 8. 省略了什么，影响谁
 
@@ -121,7 +121,7 @@
 
 * `npm test`（在 `web/` 里）：先核对共享结构（哈希与生成的类型），再跑单元与组件测试（精确分数、草稿状态、分配器、样例适配器、结果与进度组件）。
 * `npm run test:e2e`：手机 360×740 与桌面 1280×800 各跑一遍，包括只用键盘走完正常闭环、断网与回执丢失、各样例场景、可访问性扫描；截图、导出的草稿与
-  扫描报告写在 `runs/web-e2e/`（运行输出，每次覆盖）。
+  扫描报告写在 本机运行记录（运行输出，每次覆盖）。
 * **界面与接入层对同一份草稿的理解**：`web/tests/draft-fixtures.test.ts` 用页面同一个状态更新函数、按页面操作生成 4 份草稿样本，存在
   `web/tests/fixtures/drafts/`；`tests/product/test_web_drafts.py` 把它们交给 E3 的 `review_draft`，核对未答、0、无所谓、暂不确定、均分之后多出的
   10/3 与金额写法。任何一边改了理解，这两个测试之一就会失败；有意的改动之后用 `UPDATE_DRAFT_FIXTURES=1` 重新生成样本。

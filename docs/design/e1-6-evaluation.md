@@ -1,5 +1,7 @@
 # E1-6 跨期评价：技术说明
 
+> **2026-10-19 起只保留产品版（[ADR0037](../../DECISIONS/0037-life-keep-only-product-version.md)）：** 本文的手算例子与配置名来自当时的样例（`synthetic_e1_*`、`run_e1_7b_*` 等），这些配置与旧版本的规则、评分、模板已从仓库删除；机制与公式仍是现行代码的说明，现行样例是 `configs/life/*_product.yaml`。
+
 > **过去过得怎样，留下的资源还能支持怎样的生活；一座城里的分身们，谁完成了、谁出局了、谁还算不出来。**
 
 参数导航（2026-10-12 更新）：[参数与假设目录](parameter-assumption-register.md#evaluation) 的 EV-01–11 是 A 的参数与规则（2026-10-12 改了 EV-04–06、
@@ -7,10 +9,10 @@ EV-09），EV-12–17 是 B 的口径（新增；2026-10-12 收尾改了 EV-12�
 [ADR0029](../../DECISIONS/0029-life-e1-6a-closeout-and-city-aggregation.md)（A 收尾与 B），任务原文见 [A 的 prompt](prompts/2026-10-11-e1-6a-evaluation.md)
 与 [收尾与 B 的 prompt](prompts/2026-10-12-e1-6b-aggregation.md)、[B 的最小收尾 prompt](prompts/2026-10-12-e1-6b-closeout.md)。
 
-更新：2026-10-12（E1-6A 收尾与 E1-6B 已实现；E1-6B 的独立审核发现 R1–R3，最小收尾已实现、本轮自测通过，**待独立复核**——见 9.1、9.3、9.6、9.8；E1-6A 主体 2026-10-11）。补记（2026-10-12）：最小收尾同日在合成范围内通过独立复核（[审核摘要](../../runs/2026-10-12-e1-6b-closeout-review/audit.json)），E1-6 的 V1 工程范围结束；下一步 E1-7A 见 [E1-7 技术说明](e1-7-agent-loop.md)。读者：项目所有者、架构讨论者与 coding
+更新：2026-10-12（E1-6A 收尾与 E1-6B 已实现；E1-6B 的独立审核发现 R1–R3，最小收尾已实现、本轮自测通过，**待独立复核**——见 9.1、9.3、9.6、9.8；E1-6A 主体 2026-10-11）。补记（2026-10-12）：最小收尾同日在合成范围内通过独立复核（审核摘要（本机记录）），E1-6 的 V1 工程范围结束；下一步 E1-7A 见 [E1-7 技术说明](e1-7-agent-loop.md)。读者：项目所有者、架构讨论者与 coding
 agent；数学只用到加减乘除和加权平均。
 
-补记（2026-10-18）：日常生活便利（[ADR0033](../../DECISIONS/0033-life-daily-convenience.md)）的评价规格用六个基础生活模板（两种岗位 × 三种生活方案），见第 10 节；评价数学与 E1-6B 的口径都没有变。同日在声明的 V1 合成范围内通过[独立审核](../../runs/2026-10-18-e1-daily-convenience-review/README.md)，可以交接 E3；真实资料接入和参数标定尚未完成。
+补记（2026-10-18）：日常生活便利（[ADR0033](../../DECISIONS/0033-life-daily-convenience.md)）的评价规格用六个基础生活模板（两种岗位 × 三种生活方案），见第 10 节；评价数学与 E1-6B 的口径都没有变。同日在声明的 V1 合成范围内通过独立审核（本机记录），可以交接 E3；真实资料接入和参数标定尚未完成。
 
 ## 阅读与效力
 
@@ -292,7 +294,7 @@ A95、B96 的绑定；B 的名单（两位用户、每城 5 / 2 个重复分身�
 | B 的合成样例、评分配置、评价规格、名单 | `configs/life/synthetic_e1_6b_aggregation.yaml`、`scoring_e1_6b_aggregation.yaml`、`evaluation_e1_6b.yaml`、`evaluation_e1_6b_delta099.yaml`、`evaluation_e1_6b_basic_only.yaml`、`roster_e1_6b.yaml` |
 | 演示 | `scripts/demo_life_e1_6a.py`、`scripts/demo_life_e1_6b.py`（`uv run python scripts/demo_life_e1_6b.py --out runs/<新目录>`） |
 | 测试 | `tests/life/test_evaluation_actual.py`、`test_evaluation_terminal.py`、`test_evaluation_integrity.py`、`test_evaluation_closeout.py`（辅助 `evaluation_support.py`）；`test_aggregation.py`、`test_aggregation_boundaries.py`（标准开局、冻结前检查、证据配对；辅助 `aggregation_support.py`） |
-| 运行证据 | `runs/2026-10-11-e1-6a-evaluation/`（A）；`runs/2026-10-11-e1-6a-review/`（独立审核，只读）；`runs/2026-10-12-e1-6b-aggregation/`（A 收尾与 B）；`runs/2026-10-12-e1-6b-review/`（B 的独立审核，只读）；`runs/2026-10-12-e1-6b-closeout/`
+| 运行证据 | 本机运行记录（A）；本机运行记录（独立审核，只读）；本机运行记录（A 收尾与 B）；本机运行记录（B 的独立审核，只读）；本机运行记录
 （R1–R3 收尾） |
 
 ## 9. E1-6B：城市汇总
@@ -500,5 +502,5 @@ W_actual = 36，W_future = 12。下界 (14.4 + 12 × 0) ÷ 48 = **0.3**，上界
 例（离线故事 6，K51，全职文员）：第 1 年买了设备包、之后不再买的分身，期末设备还剩 24 个月——p2 不再买（"照用旧的"），p1 也有便利分（0.554427），高于从来
 没有设备的分身的 p1（0.469094）；没有设备的分身在 p2 的估值期第 1 月买一套，p3 按月付费。真实试跑里 K51 分身三年都按月买服务，参考集合里最好的是 p3（V 0.676239）。
 
-独立审核（2026-10-18，[审核说明](../../runs/2026-10-18-e1-daily-convenience-review/README.md)）另跑了一个期末估值探针（`runtime/probe_terminal.py`）：设备期末只剩 5 个月时按剩余寿命用到到期，人工服务
+独立审核（2026-10-18，审核说明（本机记录））另跑了一个期末估值探针（`runtime/probe_terminal.py`）：设备期末只剩 5 个月时按剩余寿命用到到期，人工服务
 全年按月收费，通过。真实模型没有执行设备购买，设备路径的期末估值由离线与 mock 验证；M52 没有开始实际生活（M，不是 E），没有期末估值。

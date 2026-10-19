@@ -1,5 +1,7 @@
 # 参数与假设目录：合成世界、数据抽象与代理认知
 
+> **2026-10-19 起只保留产品版（[ADR0037](../../DECISIONS/0037-life-keep-only-product-version.md)）：** 本文的手算例子与配置名来自当时的样例（`synthetic_e1_*`、`run_e1_7b_*` 等），这些配置与旧版本的规则、评分、模板已从仓库删除；机制与公式仍是现行代码的说明，现行样例是 `configs/life/*_product.yaml`。
+
 > 超参数附录，登记基线：2026-10-08。本文记录“我们设定了什么、它改变什么、以后怎样检查”，不代表这些设定已经被现实验证。
 
 **阅读入口：** [README](../../README.md) 讲愿景；[PLAN](../../PLAN.md) 讲阶段；[ADR0022](../../DECISIONS/0022-parameter-register-and-e1-5-scope.md) 规定登记义务；本目录把分散在配置、代码和讨论里的参数与假设放到一起。公式细节仍见 [E1-3](e1-3-life-model.md) 和 [E1-4](e1-4-time-energy.md)。
@@ -53,7 +55,7 @@
 <a id="scoring"></a>
 ## 2. 当前生活评分：一座城市怎样贡献满足感
 
-位置：[评分契约](../../src/common/life_scoring_contracts.py)、[评分器](../../src/econ/life_scoring.py)、[评分配置](../../configs/life/)。数值例子主要来自 [E1-4B 评分样例](../../configs/life/scoring_e1_4b.yaml) 与 [E1-3 增补样例](../../configs/life/scoring_e1_3s.yaml)。
+位置：[评分契约](../../src/common/life_scoring_contracts.py)、[评分器](../../src/econ/life_scoring.py)、[评分配置](../../configs/life/)。数值例子主要来自 E1-4B 评分样例（`scoring_e1_4b.yaml`，已删除） 与 E1-3 增补样例（`scoring_e1_3s.yaml`，已删除）。
 
 一般分项先得到生活条件，再转成满足感：
 
@@ -112,7 +114,7 @@ z=b+\sum_j\eta_jx_j,\qquad s=\min\left(c,\frac{z}{z+\tau}\right).
 <a id="resources"></a>
 ## 4. 当前时间、精力与反馈
 
-位置：[资源算法](../../src/econ/life_resources.py)、[反馈算法](../../src/econ/life_feedback.py)、[年度交接](../../src/econ/life_year.py)；以下例值来自 [E1-4B 生活样例](../../configs/life/synthetic_e1_4b.yaml)。它们均未作现实标定。
+位置：[资源算法](../../src/econ/life_resources.py)、[反馈算法](../../src/econ/life_feedback.py)、[年度交接](../../src/econ/life_year.py)；以下例值来自 E1-4B 生活样例（`synthetic_e1_4b.yaml`，已删除）。它们均未作现实标定。
 
 | ID / 类型 | 当前字段/规则与例值 | 直观影响与后续依据 |
 |---|---|---|
@@ -170,11 +172,11 @@ z=b+\sum_j\eta_jx_j,\qquad s=\min\left(c,\frac{z}{z+\tau}\right).
 <a id="long-term"></a>
 ## 7. E1-5：职业、储蓄、风险
 
-7.1（E1-5A）已在合成范围内实现（2026-10-08，[ADR0023](../../DECISIONS/0023-life-training-abilities-jobs.md)，2026-10-09 通过独立审核（`runs/2026-10-09-e1-5a-review/audit.json`）；成长满足感与广义交通的补充见 [ADR0024](../../DECISIONS/0024-life-growth-satisfaction-and-transport.md)，未提交、待审核；说明见 [E1-5 技术说明](e1-5-career-savings-risk.md) A 部分）。7.2（E1-5B 目标储蓄）2026-10-09 已实现、自测通过、待独立复核（[ADR0026](../../DECISIONS/0026-life-savings-goals.md)；2026-10-11 补记：2026-10-09 在合成范围内通过独立复核，见[审核摘要](../../runs/2026-10-09-e1-5ab-review/audit.json)，ADR0025 收尾同）；7.3 仍未实现，列名是设计概念，不承诺已经存在同名配置/API。V1 用少量明确规则，数值作为合成情景登记，不为每项建立独立机器学习模型；E1-5A 的数值都没有经过现实标定。
+7.1（E1-5A）已在合成范围内实现（2026-10-08，[ADR0023](../../DECISIONS/0023-life-training-abilities-jobs.md)，2026-10-09 通过独立审核（本机运行记录）；成长满足感与广义交通的补充见 [ADR0024](../../DECISIONS/0024-life-growth-satisfaction-and-transport.md)，未提交、待审核；说明见 [E1-5 技术说明](e1-5-career-savings-risk.md) A 部分）。7.2（E1-5B 目标储蓄）2026-10-09 已实现、自测通过、待独立复核（[ADR0026](../../DECISIONS/0026-life-savings-goals.md)；2026-10-11 补记：2026-10-09 在合成范围内通过独立复核，见审核摘要（本机记录），ADR0025 收尾同）；7.3 仍未实现，列名是设计概念，不承诺已经存在同名配置/API。V1 用少量明确规则，数值作为合成情景登记，不为每项建立独立机器学习模型；E1-5A 的数值都没有经过现实标定。
 
 ### 7.1 培训与技能（E1-5A，当前：合成）
 
-位置：[生活契约](../../src/common/life_contracts.py)（`CareerRules`、`AbilityScope`、`HeldAbility`、`EmploymentRecord`、`qualification_gaps`）、[加载检查](../../src/ledger/life_catalog.py)（`career_catalog_problems`、`career_state_problems`）、[职业纯函数](../../src/econ/life_career.py)、[结算](../../src/econ/life_settlement.py)、[可见投影](../../src/agentlayer/life_views.py)；例值来自 [E1-5A 生活样例](../../configs/life/synthetic_e1_5a.yaml)（城市 A71）。协议 `life-v1-e1-5a`、生活规则 `e1-5a-monthly-career-v1`、职业规则 `e1-5a-career-v1`；旧协议不读这些字段。
+位置：[生活契约](../../src/common/life_contracts.py)（`CareerRules`、`AbilityScope`、`HeldAbility`、`EmploymentRecord`、`qualification_gaps`）、[加载检查](../../src/ledger/life_catalog.py)（`career_catalog_problems`、`career_state_problems`）、[职业纯函数](../../src/econ/life_career.py)、[结算](../../src/econ/life_settlement.py)、[可见投影](../../src/agentlayer/life_views.py)；例值来自 E1-5A 生活样例（`synthetic_e1_5a.yaml`，已删除）（城市 A71）。协议 `life-v1-e1-5a`、生活规则 `e1-5a-monthly-career-v1`、职业规则 `e1-5a-career-v1`；旧协议不读这些字段。
 
 | ID / 类型 | 当前字段、规则与例值 | 影响、依据与未实现；受影响的人 |
 |---|---|---|
@@ -187,7 +189,7 @@ z=b+\sum_j\eta_jx_j,\qquad s=\min\left(c,\frac{z}{z+\tau}\right).
 
 ### 7.2 目标储蓄（E1-5B，当前：合成）
 
-位置：[生活契约](../../src/common/life_contracts.py)（目标储蓄一节：`SavingsRules`、`SavingsGoal`、`GoalQuote`、`SavingsGoalDirective`、`savings_goal_kind`）、[报价换算](../../src/common/life_billing.py)（`goal_quote`、`one_time_total_minor`）、[加载检查](../../src/ledger/life_catalog.py)（`savings_state_problems`、`goal_target_problems`）、[目标记录器](../../src/econ/life_savings.py)、[可见投影](../../src/agentlayer/life_views.py)；例值来自 [E1-5B 生活样例](../../configs/life/synthetic_e1_5b_savings.yaml)（城市 A81）。协议 `life-v1-e1-5b-savings`、生活规则 `e1-5b-monthly-savings-v1`、目标规则 `e1-5b-savings-goals-v1`；旧协议不读这些字段。下表把四种不同性质的内容分开写——**用户声明的目标（P）、报价资料（M）、固定金额换算（N）、本项目选择的行为规则（W）**——它们都不是可以训练或调优的超参数。
+位置：[生活契约](../../src/common/life_contracts.py)（目标储蓄一节：`SavingsRules`、`SavingsGoal`、`GoalQuote`、`SavingsGoalDirective`、`savings_goal_kind`）、[报价换算](../../src/common/life_billing.py)（`goal_quote`、`one_time_total_minor`）、[加载检查](../../src/ledger/life_catalog.py)（`savings_state_problems`、`goal_target_problems`）、[目标记录器](../../src/econ/life_savings.py)、[可见投影](../../src/agentlayer/life_views.py)；例值来自 E1-5B 生活样例（`synthetic_e1_5b_savings.yaml`，已删除）（城市 A81）。协议 `life-v1-e1-5b-savings`、生活规则 `e1-5b-monthly-savings-v1`、目标规则 `e1-5b-savings-goals-v1`；旧协议不读这些字段。下表把四种不同性质的内容分开写——**用户声明的目标（P）、报价资料（M）、固定金额换算（N）、本项目选择的行为规则（W）**——它们都不是可以训练或调优的超参数。
 
 | ID / 类型 | 当前字段、规则与例值 | 影响、依据与未实现；受影响的人 |
 |---|---|---|
@@ -201,7 +203,7 @@ z=b+\sum_j\eta_jx_j,\qquad s=\min\left(c,\frac{z}{z+\tau}\right).
 位置：[生活契约](../../src/common/life_contracts.py)（E1-5C 一节：`HealthRules`、`RiskTable`、`IllnessEventSource`、`HealthInputDeclaration`、
 `TreatmentOffer`、`EmergencyPlan`、`HealthState`、`HealthYear`、`StopRecord`）、[疾病处理器](../../src/econ/life_health.py)、
 [结算](../../src/econ/life_settlement.py)、[评分](../../src/econ/life_scoring.py)（`e1-5c-health-v1`）、[可见投影](../../src/agentlayer/life_views.py)；
-例值来自 [E1-5C 生活样例](../../configs/life/synthetic_e1_5c_health.yaml)（城市 A91、B92）与[评分配置](../../configs/life/scoring_e1_5c_health.yaml)。
+例值来自 E1-5C 生活样例（`synthetic_e1_5c_health.yaml`，已删除）（城市 A91、B92）与评分配置（`scoring_e1_5c_health.yaml`，已删除）。
 协议 `life-v1-e1-5c-health`、生活规则 `e1-5c-monthly-health-v1`、疾病规则 `e1-5c-health-v1`；规则见 [ADR0027](../../DECISIONS/0027-life-illness-emergency-recovery.md)。下表把**世界规则（W）、评价规则（E）、
 用户输入（P）、代理行动（A，记在 W 的条目里）、城市事实（M）、实验设置（X）与固定会计（N）**分开写。全部**没有标定**；旧七维偏好回收的结论
 不适用于新的健康输入。
@@ -243,7 +245,7 @@ z=b+\sum_j\eta_jx_j,\qquad s=\min\left(c,\frac{z}{z+\tau}\right).
 
 位置：[评价契约](../../src/common/life_evaluation_contracts.py)（`EvaluationSpec`、`LifeTemplate`、`CitySlotBinding`、结果形状）、
 [配置检查](../../src/ledger/life_evaluation_config.py)、[轨迹核对与汇总](../../src/econ/life_evaluation.py)、[期末估值](../../src/econ/life_terminal_value.py)；
-例值来自[评价规格 v2](../../configs/life/evaluation_e1_6a_v2.yaml)与 [E1-6A 生活样例](../../configs/life/synthetic_e1_6a_evaluation.yaml)（城市 A93、B94）。
+例值来自评价规格 v2（`evaluation_e1_6a_v2.yaml`，已删除）与 E1-6A 生活样例（`synthetic_e1_6a_evaluation.yaml`，已删除）（城市 A93、B94）。
 评价版本 `e1-6a-evaluation-v2`、执行修订 `e1-6a-r2`（2026-10-12 收尾，[ADR0029](../../DECISIONS/0029-life-e1-6a-closeout-and-city-aggregation.md)；
 v1 / r1 与旧配置 `evaluation_e1_6a.yaml` 原样保留作历史，当前代码拒绝执行）；规则见 [ADR0028](../../DECISIONS/0028-life-single-clone-evaluation.md)，
 说明见 [E1-6 技术说明](e1-6-evaluation.md)。下表把四种性质分开写：**评价参数与结构假设（E，含实验设置 X）**、**用户输入（P）**、**数据事实（M）**、
@@ -267,8 +269,8 @@ H = 12、参考集合内最佳可行方案、估值期没有新发疾病都是**
 ### 8.2 城市汇总（E1-6B，当前：合成）
 
 位置：[汇总契约](../../src/common/life_aggregation_contracts.py)、[名单加载与跨对象检查](../../src/ledger/life_roster.py)、
-[冻结、核对、分类、均值、范围与比较](../../src/econ/life_aggregation.py)；例值来自[原计划名单](../../configs/life/roster_e1_6b.yaml)与
-[E1-6B 生活样例](../../configs/life/synthetic_e1_6b_aggregation.yaml)（城市 A95、B96）。汇总版本 `e1-6b-aggregation-v1`，分类规则
+[冻结、核对、分类、均值、范围与比较](../../src/econ/life_aggregation.py)；例值来自原计划名单（`roster_e1_6b.yaml`，已删除）与
+E1-6B 生活样例（`synthetic_e1_6b_aggregation.yaml`，已删除）（城市 A95、B96）。汇总版本 `e1-6b-aggregation-v1`，分类规则
 `c_e_m_owner_2026_10_12_v1`，范围规则 `known_months_plus_unit_bounds_v1`（两者的名字进入冻结名单的内容身份，改了就换名字）；规则见
 [ADR0029](../../DECISIONS/0029-life-e1-6a-closeout-and-city-aggregation.md)，说明见 [E1-6 技术说明](e1-6-evaluation.md)第 9 节。
 
@@ -299,7 +301,7 @@ H = 12、参考集合内最佳可行方案、估值期没有新发疾病都是**
 
 位置：[规划契约](../../src/common/life_planning_contracts.py)、[城市事实契约](../../src/common/life_city_facts.py)、[事实检查](../../src/ledger/life_city_facts.py)、
 [规划接口](../../src/agentlayer/life_planning.py)、[mock](../../src/agentlayer/life_mock.py)、[运行器](../../src/orchestration/life_runner.py)；配置
-[运行配置](../../configs/life/run_e1_7a.yaml)、[城市事实](../../configs/life/city_facts_e1_7a.yaml)、[名单](../../configs/life/roster_e1_7a.yaml)。规则见
+运行配置（`run_e1_7a.yaml`，已删除）、城市事实（`city_facts_e1_7a.yaml`，已删除）、名单（`roster_e1_7a.yaml`，已删除）。规则见
 [ADR0030](../../DECISIONS/0030-life-e1-7a-agent-planning-loop.md)，说明见 [E1-7 技术说明](e1-7-agent-loop.md)。**规划器是可控的 mock**：本节登记的
 是接口、工程政策与实验设置，不是模型行为参数；没有一项经过现实标定。类别照第 1.1 节：P 用户输入、B 信息与认知条件、X 实验设计、N 数值与工程、
 M 数据映射、E 评价规则——**它们不都是可训练的超参数**。
@@ -323,9 +325,9 @@ M 数据映射、E 评价规则——**它们不都是可训练的超参数**。
 
 位置：[真实模型规划器](../../src/agentlayer/life_llm.py)、[付费账本](../../src/orchestration/life_budget.py)、[规划接口](../../src/agentlayer/life_planning.py)
 （公开税说明、行动说明书）、[运行器](../../src/orchestration/life_runner.py)（发送前检查、停下、输入冻结）；配置
-[真实模型运行](../../configs/life/run_e1_7b_live.yaml)（2026-10-13 起产品默认改用 [Flash 运行配置](../../configs/life/run_e1_7b_flash.yaml)，见 AG-21）、[mock 对照](../../configs/life/run_e1_7b_mock.yaml)、[样例](../../configs/life/synthetic_e1_7b_pilot.yaml)、
-[名单](../../configs/life/roster_e1_7b.yaml)。规则见 [ADR0031](../../DECISIONS/0031-life-e1-7b-live-model-pilot.md)，说明见 [E1-7 技术说明](e1-7-agent-loop.md)第 15 节，
-证据 `runs/2026-10-13-e1-7b-live-pilot/`。三类分开写：**模型行为设置**（影响模型怎样回答）、**实验条件**（这次试跑的设计）、**工程保护**（防失控与
+真实模型运行（`run_e1_7b_live.yaml`，已删除）（2026-10-13 起产品默认改用 Flash 运行配置（`run_e1_7b_flash.yaml`，已删除），见 AG-21）、mock 对照（`run_e1_7b_mock.yaml`，已删除）、样例（`synthetic_e1_7b_pilot.yaml`，已删除）、
+名单（`roster_e1_7b.yaml`，已删除）。规则见 [ADR0031](../../DECISIONS/0031-life-e1-7b-live-model-pilot.md)，说明见 [E1-7 技术说明](e1-7-agent-loop.md)第 15 节，
+证据 本机运行记录。三类分开写：**模型行为设置**（影响模型怎样回答）、**实验条件**（这次试跑的设计）、**工程保护**（防失控与
 可核对，不是行为参数）。没有一项是可训练的超参数，也没有一项经过现实标定。
 
 | ID / 类型 | 当前字段、规则与例值 | 影响、依据与未实现；受影响的人 |
@@ -336,10 +338,10 @@ M 数据映射、E 评价规则——**它们不都是可训练的超参数**。
 | AG-16 · B | **年度行动说明书 `e1-7b-action-guide-v1`**：六节（时间字段与数量、最低生活兜底、工作与学习、资金目标与 `goal_id`、生病与应急的四种治疗状态与两种应急声明、"钱够报价 ≠ 付了钱 ≠ 学会了 ≠ 获得服务"），局部示例，编号不存在 | 说明书写得越具体，模型越可能照搬示例的写法（不是照搬选择——示例的选择标明"只是示例，不是建议"）。受影响：所有用户 |
 | AG-17 · N（工程保护） | **输入估计与上限**：规则 `ascii1_nonascii2_v1`（ASCII × 1、非 ASCII × 2、每条消息 + 16、请求 + 16）；上限 64,000（所有者建议值）；超过就在本地拒绝、不删减事实。实际 token 只认返回的用量，事后核对估计 ÷ 实际 | 估计不是实际 token；汉字部分不是严格上界（罕见字可能多于 2 个 token）。样例最大一份请求估计约 5.1 万。未实现：真正的分词器（本机没有安装任何分词库） |
 | AG-18 · N（工程保护） | **服务重试与停下**（2026-10-13 收尾补充：服务回复能否用来规划由一份一致性检查判断——身份、设定、请求正文、意图与结果的配对、返回模型；返回模型不同的回复保留服务与费用事实、永远停在"模型不符"；已预留而发送意图没落盘时沿用那份预留；合法中断的处理见 ADR0031 第 8.3 节。这些是工程一致性规则，不是行为参数）：SDK 自动重试关闭；超时 90 秒；每份候选最多再试 1 次（只对超时、断连、限流、服务端错误，等 5 秒）；凭证、账户、请求配置错误不重试；用完或不可重试就停下整个批次（`halted` + 种类），不替分身生成计划、不换模型；发送状态不确定时不自动重发 | 与计划修订（AG-06）分开计数：服务重试不消耗修订机会，修订不多给服务重试。停下不是生活结果，不进 C / E / M。未实现：长时间的退避与自动续跑、多供应商切换 |
-| AG-19 · N（工程保护） | **付费预算账本 `e1-7b-budget-v1`**（2026-10-13 收尾补充：规划器实际持有的账本必须就是声明的那一本——额度、报价全文、账本绝对路径与头文件；恢复之前本运行的服务明细与账本逐条对上，缺预留、缺核算、金额矛盾都拒绝；只读对账不创建账本）：本轮共用 150 次请求、50 元；报价 `qwen3.7-max-2026-06-08@beijing@2026-10-09`（输入 12、输出 36 元 / 百万 token，按未命中缓存的标价）；发送前预留（输入估计 × 12 + 4,096 × 36，向上取到 0.000001 元），返回后按用量核算；没有用量保留预留；额度写在账本头文件里，换目录、重启、换 run_id 都不重置 | 应用侧控制，不是供应商级账单上限；费用以供应商账单为准。最后一次请求的实际输入若高于估计，核算值可能超过它的预留（账本标出）。受影响：预算不够时排在名单后面的分身（没轮到的保留为未运行，原名单不缩小）。2026-10-13 产品默认模型（ADR0032）：新账本 `runs/2026-10-13-product-flash-switch/budget`，上限 3 次请求、1 元；报价 `qwen3.8-flash@beijing@2026-10-09`（输入 0.8、输出 2.7 元 / 百万 token，官方页面 2026-10-09 更新、2026-10-13 核对，按未命中缓存的标价，不假设缓存优惠或促销；页面没有按输入长度分档）；旧账本不动、不清零 |
+| AG-19 · N（工程保护） | **付费预算账本 `e1-7b-budget-v1`**（2026-10-13 收尾补充：规划器实际持有的账本必须就是声明的那一本——额度、报价全文、账本绝对路径与头文件；恢复之前本运行的服务明细与账本逐条对上，缺预留、缺核算、金额矛盾都拒绝；只读对账不创建账本）：本轮共用 150 次请求、50 元；报价 `qwen3.7-max-2026-06-08@beijing@2026-10-09`（输入 12、输出 36 元 / 百万 token，按未命中缓存的标价）；发送前预留（输入估计 × 12 + 4,096 × 36，向上取到 0.000001 元），返回后按用量核算；没有用量保留预留；额度写在账本头文件里，换目录、重启、换 run_id 都不重置 | 应用侧控制，不是供应商级账单上限；费用以供应商账单为准。最后一次请求的实际输入若高于估计，核算值可能超过它的预留（账本标出）。受影响：预算不够时排在名单后面的分身（没轮到的保留为未运行，原名单不缩小）。2026-10-13 产品默认模型（ADR0032）：新账本 本机运行记录，上限 3 次请求、1 元；报价 `qwen3.8-flash@beijing@2026-10-09`（输入 0.8、输出 2.7 元 / 百万 token，官方页面 2026-10-09 更新、2026-10-13 核对，按未命中缓存的标价，不假设缓存优惠或促销；页面没有按输入长度分档）；旧账本不动、不清零 |
 | AG-20 · X（实验条件） | **小规模试跑设计**（调用之前冻结）：协议 `life-v1-e1-7b-pilot`；两座合成城 C97、D98（D98 物价与工资都低一些、远处住房往返 90 分钟、背景事实安全 5、发展 5、休闲 6、环境 7，b = 0.5 × 指数）；合成税表 `tax.synth.e17b`；两位合成用户 u201（看重发展）与 u202（看重舒适与交通），35 岁、开局 3,000、门店兼职；每城 r0、r1 两个分身，3 年；r1 第 2 年第 5 月指定大病（分身事先不知道）。先导 = 名单第一项第 1 年（≤ 6 次请求）；主试跑 8 个分身（≤ 144 次请求）；mock 用同一名单离线对照 | 两个画像、两座城、每格两个分身，只能看接线与少量行为，不能估计任何总体量或比较城市；正式请求发出之后不改画像、城市、事件或设置。随机疾病只由离线测试覆盖，没有付费随机臂。受影响：所有结论——不能外推到真实城市或其他人 |
 | AG-21 · N/B | **产品规划器的模型角色与版本策略**（2026-10-13，[ADR0032](../../DECISIONS/0032-product-planner-default-qwen3-8-flash.md)）：`configs/models.yaml` 的 `product_planner`（`ProductModelSpec`：必须声明 `version_policy`，`rolling` 必须写理由）；运行配置 `model_role` / `version_policy`；返回型号规则 `returned_model_accepted`——固定版本只认同名，滚动型号认同名或同名后接一个快照日期（`-YYYY-MM-DD` / `-YYYYMMDD` / `-MMDD`），别的一律不认；找不到角色报错、不回退；`resume` / `replay` 只按归档冻结的配置；每次运行写 `model_profile.json` | 工程规则与复现边界，不是行为参数。滚动型号意味着同名模型可能变，比较两次运行要先看 `model_profile.json` 与 `provider_calls.jsonl` 里的实际返回型号与时间。接受"同名 + 快照日期"是本地选择（ADR0032 第四节第 1 条，待所有者复核）。研究角色不受影响（硬规则 6）。受影响：所有产品用户——同样的输入，以后不一定得到今天的计划 |
-| AG-22 · B/N | **真实 LLM 测试的模型与调用方式**（2026-10-18，[ADR0035](../../DECISIONS/0035-haiku-test-planner-agent-sdk.md)）：`configs/models.yaml` 的测试角色 `test_planner`——`claude-haiku-5-5`（滚动型号，Anthropic 只发布这一个型号名）、服务商 `claude_agent_sdk`、端点 `https://api.anthropic.com`、密钥 `ANTHROPIC_API_KEY`；入口不写 `--config` 时读 `configs/life/run_e1_7b_haiku.yaml`（便利版 `run_e1_convenience_haiku.yaml`）。模型行为设置：不设温度（Haiku 只接受默认值）、思考由命令行固定为自适应、effort `max`（所有者 2026-10-18 指定）、`response_format: prompt_only`（只靠提示要求一个 JSON 对象）、输出不另设上限（模型最大值 128,000，思考 token 与回答共用）、超时 600 秒（所有者 2026-10-18）、每份候选最多 1 次服务重试。调用方式：Claude Agent SDK 单轮（`max_turns=1`、`tools=[]`、`setting_sources=[]`、`strict_mcp_config`、隔离目录、白名单环境、命令行内部重试与提示缓存关闭）。工程保护：结束原因与错误翻译成统一写法；计费可选（`paid_budget` 与 `unmetered_reason` 二选一）；美元账本 `runs/2026-10-18-haiku-test-planner/budget`（额度可选，不设次数与费用上限——所有者 2026-10-18）；报价 `claude-haiku-5-5@anthropic-api@2026-10-18`（提示不超过 100,000 token 时输入 0.10、输出 0.50 美元每百万 token，`max_input_tokens_at_price: 100000`）。本轮在 Haiku 之后的对照测试（只这一轮）：角色 `test_planner_sonnet`（`claude-sonnet-5-5`，effort `medium`，`configs/life/run_e1_7b_sonnet.yaml`，单独账本 `budget-sonnet`、不设额度上限；报价输入 2、输出 10 美元每百万 token，不分档） | 模型与解码设置是另一个实验条件：命令行另加 Agent SDK 自我介绍与运行环境说明（含当天日期、临时目录）并强制自适应思考，所以 Haiku 与 Flash 不是同一个信息条件，E4 比较两者要另行处理。effort `low`、关闭提示缓存、白名单环境、进程失败不重试是本地选择（ADR0035 第四节，待所有者复核）；effort 档位是所有者指定。"一轮一个请求"由本机抓包核对，不是 SDK 的保证；400 时命令行最多共发 3 次（不计费）。研究角色与 `-m live` 的研究基座测试不受影响（硬规则 6）。受影响：所有用 Haiku 跑的真实测试结论——只说明这个滚动型号在这次合成试跑里的表现 |
+| AG-22 · B/N | **真实 LLM 测试的模型与调用方式**（2026-10-18，[ADR0035](../../DECISIONS/0035-haiku-test-planner-agent-sdk.md)）：`configs/models.yaml` 的测试角色 `test_planner`——`claude-haiku-5-5`（滚动型号，Anthropic 只发布这一个型号名）、服务商 `claude_agent_sdk`、端点 `https://api.anthropic.com`、密钥 `ANTHROPIC_API_KEY`；入口不写 `--config` 时读 `configs/life/run_product_haiku.yaml`（2026-10-19 起唯一一份 Haiku 配置）。模型行为设置：不设温度（Haiku 只接受默认值）、思考由命令行固定为自适应、effort `max`（所有者 2026-10-18 指定）、`response_format: prompt_only`（只靠提示要求一个 JSON 对象）、输出不另设上限（模型最大值 128,000，思考 token 与回答共用）、超时 600 秒（所有者 2026-10-18）、每份候选最多 1 次服务重试。调用方式：Claude Agent SDK 单轮（`max_turns=1`、`tools=[]`、`setting_sources=[]`、`strict_mcp_config`、隔离目录、白名单环境、命令行内部重试与提示缓存关闭）。工程保护：结束原因与错误翻译成统一写法；计费可选（`paid_budget` 与 `unmetered_reason` 二选一）；美元账本 本机运行记录（额度可选，不设次数与费用上限——所有者 2026-10-18）；报价 `claude-haiku-5-5@anthropic-api@2026-10-18`（提示不超过 100,000 token 时输入 0.10、输出 0.50 美元每百万 token，`max_input_tokens_at_price: 100000`）。本轮在 Haiku 之后的对照测试（只这一轮）：角色 `test_planner_sonnet`（`claude-sonnet-5-5`，effort `medium`，`configs/life/run_e1_7b_sonnet.yaml`，单独账本 `budget-sonnet`、不设额度上限；报价输入 2、输出 10 美元每百万 token，不分档） | 模型与解码设置是另一个实验条件：命令行另加 Agent SDK 自我介绍与运行环境说明（含当天日期、临时目录）并强制自适应思考，所以 Haiku 与 Flash 不是同一个信息条件，E4 比较两者要另行处理。effort `low`、关闭提示缓存、白名单环境、进程失败不重试是本地选择（ADR0035 第四节，待所有者复核）；effort 档位是所有者指定。"一轮一个请求"由本机抓包核对，不是 SDK 的保证；400 时命令行最多共发 3 次（不计费）。研究角色与 `-m live` 的研究基座测试不受影响（硬规则 6）。受影响：所有用 Haiku 跑的真实测试结论——只说明这个滚动型号在这次合成试跑里的表现 |
 
 <a id="legacy"></a>
 ## 10. 旧经济模型、合成世界与研究工具
@@ -481,6 +483,8 @@ M 数据映射、E 评价规则——**它们不都是可训练的超参数**。
 每轮收尾回答四句：新增/改变哪些 ID；哪些仍为合成或未定；哪些只登记尚未实现；是否改变观察、评分、状态或研究可比性。具体配置值以运行快照为准，改动有测试/证据的位置就在条目旁补链接；旧结果留原路径。
 
 对过去实现发现的缺口先登记所属轮次，不借整理目录改动生产数学。E1-5 继续采用最小机制；完整参数拟合与现实验证属于后续独立研究。
+
+**2026-10-19 只保留产品版（[ADR0037](../../DECISIONS/0037-life-keep-only-product-version.md)）：** 不新增 ID、不改任何数值；改变 AG-22 的默认配置名。各条目的例值仍按当时的样例写（这些样例配置已删除）；现行唯一样例 `configs/life/synthetic_product.yaml` 沿用便利版样例的全部数值（SC-16–SC-20、RE、FB、CA、HK 各条），评分内容指纹因去掉空的 plan_commute 字段改为 `fdf920f4…`，数学不变。信息条件只剩产品条件（IN 条目里的 research_text_only 已删除）。
 
 **2026-10-18 真实 LLM 测试改用 Claude Haiku 5.5（[ADR0035](../../DECISIONS/0035-haiku-test-planner-agent-sdk.md)）：** 新增 AG-22（测试角色与本轮的 Sonnet 对照角色、Agent SDK 单轮调用、模型行为设置、可选计费与美元账本、分档报价）。改变 AG-13（新增测试角色；千问的设置不变）、AG-19（账本可以按美元记、报价可以分档、计费可选、次数与费用上限也可选——Claude 配置都不设；人民币账本格式不变）与 AG-21（入口默认不再是 Flash，产品角色本身不变）。分类：模型行为设置（AG-22 的温度、思考、effort、输出格式）、工程保护与复现边界（调用方式、账本、分档、翻译规则）。没有新的可训练参数；**没有改变评分、结算、反馈或评价数学**。未标定：effort 档位的影响、命令行另加内容对规划的影响。
 

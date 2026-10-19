@@ -3,8 +3,8 @@
 更新：2026-10-18（本地时区 UTC−7）。分支 `langgraph-workflow-prototype`（独立 worktree `C:/dev/homo-spatialis-langgraph`）。任务原文与
 两次补充指示见 [prompt 归档](prompts/2026-10-18-langgraph-product-workflow.md)。证据分两轮：
 
-* [第一轮：流程骨架](../../runs/2026-10-18-langgraph-workflow-skeleton/README.md)——E3 当时还在改，E3 / E1 的调用先留占位，只验证流程本身；
-* [第二轮：接入真实 E3 / E1](../../runs/2026-10-18-langgraph-e3-wiring/README.md)——E3-A 收尾之后接入，做直接路径与 LangGraph 路径的逐项对照。
+* 第一轮：流程骨架（本机记录）——E3 当时还在改，E3 / E1 的调用先留占位，只验证流程本身；
+* 第二轮：接入真实 E3 / E1（本机记录）——E3-A 收尾之后接入，做直接路径与 LangGraph 路径的逐项对照。
 
 **状态：已接入 E3-A 最终版与 E1，离线自测通过，待独立复核。** 规划器只用资料包声明的离线 mock（零网络、零费用，真实 API 调用 0 次）；
 没有真实数据、前端、托管服务、账号或并发。这是原型：能证明“外层流程不会让同一次模拟跑两遍、不会重复请求已经保存的回复、出问题时
@@ -148,9 +148,9 @@ ProductPreflight，没有冒用 `RunProgress.paused`，也没有给 E3 的结构
 
 ## 8. 直接路径与 LangGraph 路径的对照
 
-规则在比较之前写下（[expected_differences.md](../../runs/2026-10-18-langgraph-e3-wiring/expected_differences.md)）：只允许 E3 消息里的
+规则在比较之前写下（expected_differences.md（本机记录））：只允许 E3 消息里的
 `meta.sample`、归档目录名、直接路径故意多做的第二次登记、流程自己的文件四项不同。对照脚本
-`runs/2026-10-18-langgraph-e3-wiring/equivalence/compare_paths.py`，结果 `compare_paths.json`：
+本机运行记录，结果 `compare_paths.json`：
 
 | 对照 | 结果 |
 |---|---|

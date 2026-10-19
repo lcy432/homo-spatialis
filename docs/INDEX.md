@@ -2,7 +2,7 @@
 
 **层与命名、轮次与状态、默认入口都只在这里写一次。** 其他文档不再各写一遍状态，只链接过来。改了状态、默认配置或命名，只改这一份。
 
-更新：2026-10-18。
+更新：2026-10-19。
 
 ## 0. 现在怎么工作（开发期）
 
@@ -54,6 +54,7 @@
 | engine-06a | E1-6A | 单分身跨期评价 L / V / J | 已实现 | | [0028](../DECISIONS/0028-life-single-clone-evaluation.md) |
 | engine-06b | E1-6B | 城市汇总 C / E / M | 已实现 | 曾通过审核 | [0029](../DECISIONS/0029-life-e1-6a-closeout-and-city-aggregation.md) |
 | engine-07 | E1 补充 | 洗衣推广为日常生活便利 | 已实现 | 曾通过审核；交给接入层的说明见 [交接](handoffs/e1-daily-convenience-to-e3.md) | [0033](../DECISIONS/0033-life-daily-convenience.md) |
+| engine-08 | — | 只保留产品版：每部分一套（规则、评分、模板、mock、样例），旧版本与兼容路径删除；测试改为产品样例上的精简套件 | 已实现 | 删除前的代码：git 标签 `pre-legacy-removal` | [0037](../DECISIONS/0037-life-keep-only-product-version.md) |
 
 ### 代理层
 
@@ -71,7 +72,7 @@
 | intake-01 | E3-A | 六维＋独立健康的输入适配、共享消息结构（v2） | 已实现 | | [0034](../DECISIONS/0034-e3a-product-input-contract.md) |
 | intake-02 | E3-B | 全国性来源批量获取，统一地理、年份、职业与单位口径 | 计划中 | | |
 | intake-03 | E3-C | 真实税与公开说明同源；资料包与确认画像接上运行入口，向界面层提供运行与结果 | 计划中 | | |
-| intake-04 | — | LangGraph 外层运行流程：预检查 → 等用户确认 → 幂等登记 → 启动或恢复生活引擎 → 交付结果；SQLite 持久化，接上接入层（E3-A）的预检查、登记与投影和代理层的启动、恢复 | 已实现 | 原型：只接离线 mock 规划器，没有并发锁与托管；说明见 [LangGraph 外层流程](design/langgraph-product-workflow.md)，证据见 [runs/2026-10-18-langgraph-e3-wiring](../runs/2026-10-18-langgraph-e3-wiring/README.md) | |
+| intake-04 | — | LangGraph 外层运行流程：预检查 → 等用户确认 → 幂等登记 → 启动或恢复生活引擎 → 交付结果；SQLite 持久化，接上接入层（E3-A）的预检查、登记与投影和代理层的启动、恢复 | 已实现 | 原型：只接离线 mock 规划器，没有并发锁与托管；说明见 [LangGraph 外层流程](design/langgraph-product-workflow.md)；接线由 `tests/workflows` 覆盖 | |
 
 ### 界面层
 
@@ -88,12 +89,11 @@ P8 / P9 / P10 已实现，门一已过，门二与门三待真实输入；开发
 
 | 用途 | 配置 |
 |---|---|
-| 真实 LLM 测试（`scripts/run_life_e1_7b.py` 不写 `--config`） | `configs/life/run_e1_7b_haiku.yaml`（Claude Haiku 5.5，effort max） |
-| 日常生活便利版的真实测试 | `configs/life/run_e1_convenience_haiku.yaml` |
-| Sonnet 5.5 对照（2026-10-18 一次性，effort medium） | `configs/life/run_e1_7b_sonnet.yaml` |
-| 产品角色 Flash / 旧 Max（只在所有者明确要求时） | `run_e1_7b_flash.yaml` / `run_e1_7b_live.yaml` |
-| 离线 mock 对照 | `run_e1_7b_mock.yaml`、`run_e1_convenience_mock.yaml` |
-| 接入层产品链 | `scripts/product_e3a.py` 显式编译便利版整套配置 |
+| 生活样例（唯一一份，测试、命令行与资料包共用） | `configs/life/synthetic_product.yaml`，评分 `scoring_product.yaml`、评价 `evaluation_product.yaml`、名单 `roster_product.yaml`、城市事实 `city_facts_product.yaml` |
+| 真实 LLM 测试（`scripts/run_life_e1_7b.py` 不写 `--config`） | `configs/life/run_product_haiku.yaml`（Claude Haiku 5.5，effort max） |
+| 产品角色 Flash（只在所有者明确要求时） | `configs/life/run_product_flash.yaml`（账本 `ledgers/qwen-flash-convenience/`） |
+| 离线 mock 对照 | `configs/life/run_product_mock.yaml` |
+| 接入层产品链 | `scripts/product_e3a.py` 显式编译产品样例 |
 
 模型角色在 `configs/models.yaml`：研究基座 `base_a` / `base_b`，产品 `product_planner`（Flash），测试 `test_planner`（Haiku）与 `test_planner_sonnet`（Sonnet）。密钥在 `.env`。
 
@@ -108,7 +108,8 @@ P8 / P9 / P10 已实现，门一已过，门二与门三待真实输入；开发
 | [DECISIONS/](../DECISIONS/) | 为什么这样定（只在真正的设计决定时写） |
 | [docs/design/](design/README.md) | 公式、代码位置、手算例子、省略了什么 |
 | [参数与假设目录](design/parameter-assumption-register.md) | 参数的含义、取值与是否标定 |
-| `runs/` | 运行输出；开发期可以清理、覆盖 |
+| `runs/` | 运行输出；只在本机、不进 git，开发期可以清理、覆盖 |
+| `ledgers/` | 付费预算账本（每本一个 `ledger.sqlite`，进 git） |
 | [docs/history/](history/) | 旧版文档的完整存档（2026-10-18 重构之前的 CLAUDE.md、PLAN、README、设计索引） |
 
 历史文档里的"PLAN §3.0.x"指存档里的 [旧 PLAN](history/pre-dev-refactor-2026-10-18/PLAN.md)。

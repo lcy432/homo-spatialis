@@ -1,20 +1,25 @@
 # E1 → E3 交接：物质偏好的"日常生活便利"
 
-更新：2026-10-18（同日审核通过后补记第 0 节与几处说明）。供 E3 讨论与 coding agent 会话读取。规则见 [ADR0033](../../DECISIONS/0033-life-daily-convenience.md)，任务原文见
-[prompt 归档](../design/prompts/2026-10-18-e1-daily-convenience.md)，证据见 [runs/2026-10-18-e1-daily-convenience](../../runs/2026-10-18-e1-daily-convenience/README.md)。
+> **2026-10-19 起只保留产品版（[ADR0037](../../DECISIONS/0037-life-keep-only-product-version.md)）：** 本文的手算例子与配置名来自当时的样例（`synthetic_e1_*`、`run_e1_7b_*` 等），这些配置与旧版本的规则、评分、模板已从仓库删除；机制与公式仍是现行代码的说明，现行样例是 `configs/life/*_product.yaml`。
 
-**状态：E1 内核已实现、自测通过，待独立复核。** 2026-10-18 补记：在声明的 V1 合成范围内通过独立审核，可以交接 E3；真实资料接入和参数标定尚未完成（[审核说明](../../runs/2026-10-18-e1-daily-convenience-review/README.md)、[audit.json](../../runs/2026-10-18-e1-daily-convenience-review/audit.json)；审核核查了什么、没有重跑什么，见 ADR0033 第八节）。本文是一份**可核验的交接说明**，不是共享接口本身：共享消息与词表由 E3 统一维护（见
+更新：2026-10-18（同日审核通过后补记第 0 节与几处说明）。供 E3 讨论与 coding agent 会话读取。规则见 [ADR0033](../../DECISIONS/0033-life-daily-convenience.md)，任务原文见
+[prompt 归档](../design/prompts/2026-10-18-e1-daily-convenience.md)。
+
+**状态：E1 内核已实现、自测通过，待独立复核。** 2026-10-18 补记：在声明的 V1 合成范围内通过独立审核，可以交接 E3；真实资料接入和参数标定尚未完成（审核说明（本机记录）、audit.json（本机记录）；审核核查了什么、没有重跑什么，见 ADR0033 第八节）。本文是一份**可核验的交接说明**，不是共享接口本身：共享消息与词表由 E3 统一维护（见
 [E3/E5 共享约定](../design/e3-e5-product-contract.md)第 2 节），本文不另造一套定义。待本轮独立复核之后，由所有者转交 E3 更新共同接口（复核已通过，见上）。
 
-## 0. 先看：新便利版与旧默认配置
+## 0. 先看：现在的配置（2026-10-19 更新）
+
+便利版已经并入产品版，旧默认配置已删除（ADR0037）。现在只有一套：
 
 | 用途 | 当前配置与身份 |
 |---|---|
-| 现有 CLI 默认运行 | `configs/life/run_e1_7b_flash.yaml`，仍使用原生活配置（名单 `roster_e1_7b.yaml` → 协议 `life-v1-e1-7b-pilot`、评分 `e1-5c-health-v1`、提示模板 `e1-7b-prompt-v1`） |
-| 本轮便利版合成运行 | `configs/life/run_e1_convenience_flash.yaml`（名单 `roster_e1_convenience.yaml`；mock 对照 `run_e1_convenience_mock.yaml`） |
-| 便利版协议 | `life-v1-e1-convenience`（`synthetic_e1_convenience.yaml`） |
-| 便利版评分 | `e1-convenience-v1`（`scoring_e1_convenience.yaml`） |
-| 便利版提示模板 | `e1-convenience-prompt-v1` |
+| CLI 默认运行（真实 LLM 测试） | `configs/life/run_product_haiku.yaml`；产品角色 Flash 是 `run_product_flash.yaml`，mock 对照是 `run_product_mock.yaml` |
+| 协议 | `life-v1-e3a-product`（`synthetic_product.yaml`，城市 K51、M52） |
+| 评分 | `e1-convenience-v1`（`scoring_product.yaml`） |
+| 提示模板 | `e3a-product-prompt-v1` |
+
+下面第 1–4 条是 2026-10-18 审核时的说明，留作历史：
 
 1. "旧默认"指生活配置与协议，不代表回退到 Max；两份运行配置的产品模型都是 Flash（产品角色 `product_planner`、`qwen3.8-flash`）。
 2. 本轮通过审核没有自动改变 CLI 默认配置：`scripts/run_life_e1_7b.py` 不写 `--config` 时仍是 `run_e1_7b_flash.yaml`。
@@ -26,7 +31,7 @@
 6. 旧配置与旧归档保留，维持历史复现。本轮不改变默认入口。
 
 **E3 应读取的文件**：本文；[ADR0033](../../DECISIONS/0033-life-daily-convenience.md)（规则、本地选择与第八节审核结论）；
-[E3/E5 共享约定](../design/e3-e5-product-contract.md)；[审核说明](../../runs/2026-10-18-e1-daily-convenience-review/README.md)；[E1-3 技术说明第 21 节](../design/e1-3-life-model.md#daily-convenience)
+[E3/E5 共享约定](../design/e3-e5-product-contract.md)；审核说明（本机记录）；[E1-3 技术说明第 21 节](../design/e1-3-life-model.md#daily-convenience)
 与参数目录 SC-16–SC-20；便利版七份配置 `configs/life/{synthetic,scoring,city_facts,evaluation,roster}_e1_convenience.yaml`、`run_e1_convenience_flash.yaml`、
 `run_e1_convenience_mock.yaml`；代码入口 `src/common/life_scoring_contracts.py`（版本与规格）、`src/ledger/life_scoring_config.py`（加载检查）、
 `src/econ/life_scoring.py`（便利分）、`src/agentlayer/life_planning.py`（说明书）；测试 `tests/life/test_daily_convenience.py`。
