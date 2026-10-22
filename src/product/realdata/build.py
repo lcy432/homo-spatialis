@@ -29,6 +29,7 @@ from common.intake_contracts import (
     MethodSpec,
     Opportunity,
     StdRecord,
+    applies_to,
     canonical_json,
     content_identity,
 )
@@ -50,12 +51,16 @@ from product.realdata import (
     training,
 )
 from product.realdata.config import BuildConfig
-from product.realdata.fetch import DEFAULT_CACHE, Fetched, Mode, fetch
+from product.realdata.fetch import DEFAULT_CACHE, Mode, fetch
 
 #: 改了获取阶段的记录方式（例如没取得的来源怎样说明原因）就升这个版本。
 FETCH_VERSION = "2"
 #: 改了标准化的语义（字段、过滤、文字清理）就升这个版本：否则同一身份会复用旧产物。
-STANDARDIZE_VERSION = "3"
+#: 4 = 官方顶码表、家电适用市场、活动年龄限制、标准化读取绑定获取阶段的原始指纹。
+STANDARDIZE_VERSION = "4"
+#: 改了映射阶段的语义（机会怎样生成、编译缺口怎样分类、来源分类）就升这个版本。
+#: 3 = 中位数与标准误成对、官方顶码下的可识别规则与说明、派生的食材机会、资料缺口与 E1 缺口分开。
+MAP_VERSION = "3"
 STAGES = ("configure", "fetch", "standardize", "map", "catalog", "check", "freeze")
 
 
@@ -69,6 +74,8 @@ def pipeline_identity(config: BuildConfig) -> str:
             "schema": INTAKE_SCHEMA_VERSION,
             "fetch": FETCH_VERSION,
             "standardize": STANDARDIZE_VERSION,
+            "map": MAP_VERSION,
+            "menu_rules": menus.MENU_RULES_VERSION,
             "methods": [m.ref for m in all_methods()],
             "assumptions": [a.assumption_id for a in all_assumptions()],
             "reports": reports.REPORT_VERSION,
@@ -83,6 +90,7 @@ def all_methods() -> list[MethodSpec]:
         prices.ADJHSG_METHOD,
         housing.CLASSIFY,
         mapping_b.HOUSING_METHOD,
+        acs.TOPCODE_METHOD,
         mapping_b.COMMUTE_METHOD,
         mapping_b.JOBS_METHOD,
         mapping_a.HOUSING_GRID,
@@ -103,7 +111,6 @@ def all_assumptions() -> list[AssumptionSpec]:
         mapping_b.ROUNDTRIP,
         jobs.EMPLOYMENT_PROXY,
         food.BASKET,
-        menus.RECURRENCE,
         e1_export.BURDEN,
     ]
 
@@ -315,8 +322,33 @@ def stage_fetch(ctx: BuildContext, configure: StageRef) -> StageRef:
     return _run_stage(ctx, "fetch", identity, body)
 
 
-def _get(ctx: BuildContext, req) -> Fetched:
-    return fetch(req, ctx.cache, "offline")
+class RawChangedError(RuntimeError):
+    """获取阶段记下的原始文件与现在缓存里的不同（缓存被刷新或改动）。不读新内容冒充旧来源：这个构建不能继续，新资料用新构建。"""
+
+
+def _bound(ctx: BuildContext, name: str, req, log: dict[str, FetchRecord]) -> bytes:
+    """按获取阶段记下的指纹读原始文件：请求键与 SHA-256 都要对上，否则拒绝（不悄悄读到另一份内容）。"""
+    rec = log.get(name)
+    if rec is None or rec.status != "ok" or rec.raw_sha256 is None:
+        raise RuntimeError(f"{name} 在获取阶段没有取得，不能读")
+    if req.key != rec.request_key:
+        raise RawChangedError(f"{name}：请求与获取阶段记下的不同（配置或代码变了）：用新构建")
+    r = fetch(req, ctx.cache, "offline")
+    if not r.ok:
+        raise RawChangedError(
+            f"{name}：缓存里读不到获取阶段那份原始文件（{r.record.status}）：用新构建"
+        )
+    if r.record.raw_sha256 != rec.raw_sha256:
+        raise RawChangedError(
+            f"{name}：缓存里的内容（SHA-256 {r.record.raw_sha256[:12]}…）不是获取阶段记下的那一份"
+            f"（{rec.raw_sha256[:12]}…）：不读新内容冒充旧来源，用新构建"
+        )
+    return r.content  # type: ignore[return-value]
+
+
+def _states_from_log(log: dict[str, FetchRecord]) -> list[str]:
+    """获取阶段请求过的州（PUMS 请求名里的州代码）：后续阶段不再重读划定文件来推算。"""
+    return sorted({n.split(":", 1)[1] for n in log if n.startswith("pums_h:")})
 
 
 # =========================================================================== 3 标准化
@@ -339,13 +371,10 @@ def stage_standardize(ctx: BuildContext, fetched: StageRef) -> StageRef:
             return log.get(name) is not None and log[name].status == "ok"
 
         def content(name: str, req) -> bytes:
-            r = _get(ctx, req)
-            if not r.ok:
-                raise RuntimeError(f"{name} 在获取阶段是 ok，读缓存却失败：{r.record.note}")
-            return r.content  # type: ignore[return-value]
+            return _bound(ctx, name, req, log)
 
-        # ---- 地理
-        states = _states(ctx)
+        # ---- 地理（州来自获取阶段的请求，不重读划定文件）
+        states = _states_from_log(log)
         reqs = sources.all_requests(cfg, states)
         if not all(ok(n) for n in ("cbsa_delineation", "tract_puma", "acs_geos")):
             raise RuntimeError("地理来源不完整（划定文件、普查区→PUMA、ACS 地理对照）：不能继续")
@@ -369,6 +398,12 @@ def stage_standardize(ctx: BuildContext, fetched: StageRef) -> StageRef:
             if ok("pums_dictionary")
             else {}
         )
+        official = (
+            acs.parse_topcodes(content("pums_topcodes", reqs["pums_topcodes"]))
+            if ok("pums_topcodes")
+            else {}
+        )
+        rules: dict[str, acs.TopcodeRule] = {}
         housing_records: list[StdRecord] = []
         h_cache: dict[str, bytes] = {}
         p_cache: dict[str, bytes] = {}
@@ -382,24 +417,39 @@ def stage_standardize(ctx: BuildContext, fetched: StageRef) -> StageRef:
                     continue
                 pumas = {p.puma for p in g.pumas if p.state == st}
                 h_cache.setdefault(st, content(f"pums_h:{st}", reqs[f"pums_h:{st}"]))
+                if st not in rules:
+                    rules[st] = official.get(st) or acs.TopcodeRule(
+                        st, "missing", *(None, None), *acs.rent_top_values(h_cache[st])
+                    )
                 p_cache.setdefault(st, content(f"pums_p:{st}", reqs[f"pums_p:{st}"]))
                 parts_h.append(acs.read_pums_housing(h_cache[st], pumas, cfg.pums.housing_vars))
                 parts_p.append(acs.read_pums_persons(p_cache[st], pumas, cfg.pums.person_vars))
             if not parts_h:
                 continue
-            hdf = housing.prepare(pd.concat(parts_h, ignore_index=True), g)
+            hdf = housing.prepare(pd.concat(parts_h, ignore_index=True), g, rules)
             pdf = pd.concat(parts_p, ignore_index=True).assign(cbsa=m.cbsa)
             hdf.to_parquet(d / f"housing_{m.cbsa}.parquet", index=False)
             pdf.to_parquet(d / f"persons_{m.cbsa}.parquet", index=False)
             persons_all.append(pdf)
             housing_records += list(
-                housing.records(hdf, g, labels, {st: sha.get(f"pums_h:{st}") for st in g.states})
+                housing.records(
+                    hdf, g, labels, {st: sha.get(f"pums_h:{st}") for st in g.states}, rules
+                )
             )
             step += 1
             _maybe_fail(ctx, "standardize", step)
         summary["records"]["housing"] = _write_jsonl(
             d / "records_housing.jsonl.gz", housing_records
         )
+        _write_json(
+            d / "topcodes.json",
+            {
+                "source": "pums_topcodes" if official else None,
+                "source_sha256": sha.get("pums_topcodes") if official else None,
+                "rules": {st: vars(r) for st, r in sorted(rules.items())},
+            },
+        )
+        summary["topcodes"] = {st: r.status for st, r in sorted(rules.items())}
         del housing_records, h_cache, p_cache
 
         # ---- 职业
@@ -548,7 +598,7 @@ def _osm_food_elements(
     """合并查询优先；合并查询没取得而配置了分开查询的，就合并分开查询的结果（缺哪一类照实记在摘要里）。"""
     name = f"osm_food:{m.cbsa}"
     if log.get(name) is not None and log[name].status == "ok":
-        elements, snap = food.parse_osm(_get(ctx, reqs[name]).content)  # type: ignore[arg-type]
+        elements, snap = food.parse_osm(_bound(ctx, name, reqs[name], log))
         return elements, snap, log[name].raw_sha256
     elements: list[dict] = []
     snap = None
@@ -556,7 +606,7 @@ def _osm_food_elements(
     for amenity in sources.FOOD_AMENITIES:
         part = f"osm_food_split:{m.cbsa}:{amenity}"
         if log.get(part) is not None and log[part].status == "ok":
-            e, s = food.parse_osm(_get(ctx, reqs[part]).content)  # type: ignore[arg-type]
+            e, s = food.parse_osm(_bound(ctx, part, reqs[part], log))
             elements += e
             snap = snap or s
             shas.append(log[part].raw_sha256)
@@ -574,6 +624,7 @@ def stage_map(ctx: BuildContext, std: StageRef) -> StageRef:
     identity = content_identity(
         {
             "standardize": std.identity,
+            "map": MAP_VERSION,
             "methods": [m.ref for m in all_methods()],
             "mapping": ctx.config.mapping,
         }
@@ -716,8 +767,14 @@ def _cell_table(cell: mapping_b.RentCell) -> dict[str, Any]:
         "weight_sum": cell.weight_sum,
         "n_eff": round(cell.n_eff, 2),
         "quantiles": cell.quantiles,
-        "se_median": None if cell.se_median is None else round(cell.se_median, 2),
+        "median_step": cell.median_step,
+        "se_median_step": None if cell.se_median_step is None else round(cell.se_median_step, 2),
+        "median_interpolated": cell.median_interpolated,
+        "se_median_interpolated": None
+        if cell.se_median_interpolated is None
+        else round(cell.se_median_interpolated, 2),
         "censored_share": round(cell.censored_share, 4),
+        "censor_bound_min": cell.censor_bound_min,
         "structure_mix": cell.structure_mix,
         "utilities_median": cell.utilities_median,
         "record_ids": list(cell.record_ids),
@@ -752,6 +809,7 @@ def stage_catalog(ctx: BuildContext, mapped: StageRef) -> StageRef:
     identity = content_identity(
         {
             "map": mapped.identity,
+            "rules": menus.MENU_RULES_VERSION,
             "menus": ctx.config.menus.model_dump(mode="json"),
             "seed": ctx.config.build.seed,
         }
@@ -765,9 +823,9 @@ def stage_catalog(ctx: BuildContext, mapped: StageRef) -> StageRef:
         ]
         by_key: dict[tuple[str, str], list[Opportunity]] = {}
         for o in opps:
-            cities = [o.cbsa] if o.cbsa else [m.cbsa for m in cfg.metros]
-            for c in cities:
-                by_key.setdefault((c, o.sector), []).append(o)
+            for m in cfg.metros:
+                if applies_to(o, m.cbsa, cfg.build.country):
+                    by_key.setdefault((m.cbsa, o.sector), []).append(o)
         out: list[Menu] = []
         for m in cfg.metros:
             for sector, raw_policy in sorted(cfg.menus.policies.items()):
@@ -816,6 +874,7 @@ def stage_check(ctx: BuildContext, std: StageRef, mapped: StageRef, catalog: Sta
             metro_cbsas=[m.cbsa for m in ctx.config.metros],
             methods={m.ref for m in all_methods()},
             assumptions={a.assumption_id for a in all_assumptions()},
+            country=ctx.config.build.country,
         )
         _write_json(d / "problems.json", problems)
         if problems:
@@ -849,6 +908,7 @@ def stage_freeze(ctx: BuildContext, refs: dict[str, StageRef]) -> StageRef:
                 {
                     "build_id": build_id,
                     "schema": INTAKE_SCHEMA_VERSION,
+                    "country": cfg.build.country,
                     "config_identity": cfg.identity,
                     **{f"stage_{k}": v.identity for k, v in refs.items()},
                 },

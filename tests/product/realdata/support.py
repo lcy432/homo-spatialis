@@ -19,8 +19,8 @@ CONFIG = FIXTURES / "config_chicago.yaml"
 CACHE = FIXTURES / "cache"
 
 
-def fixture_ctx(work: Path, **kwargs) -> BuildContext:
-    return BuildContext(config=load_config(CONFIG), work=work, cache=CACHE, **kwargs)
+def fixture_ctx(work: Path, cache: Path = CACHE, **kwargs) -> BuildContext:
+    return BuildContext(config=load_config(CONFIG), work=work, cache=cache, **kwargs)
 
 
 def _refuse(*_args, **_kwargs):

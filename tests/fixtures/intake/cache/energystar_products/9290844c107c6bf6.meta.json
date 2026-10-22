@@ -3,12 +3,12 @@
  "url": "https://data.energystar.gov/resource/q8py-6w3f.json?$limit=50000&$order=:id",
  "method": "GET",
  "http_status": 200,
- "sha256": "0915ae452ca04151c70388334f2779f4b38b4db96f30f295e900016b3f0f89f9",
- "bytes": 5695,
+ "sha256": "e383114fc342384e6b5ef51e7a09ac41a6f7807d8aa5448378f6de38598e4fb3",
+ "bytes": 9470,
  "retrieved_at": "2026-10-22T08:05:14Z",
  "subset_of": {
   "sha256": "d2d0786ba7d059b790511c0091ddfadf09b2852b721d63377cc28db59d4b4f83",
   "bytes": 679684
  },
- "subset_rule": "文件里的前 6 个型号"
+ "subset_rule": "文件里的前 6 个型号，加上只在美国、只在加拿大、美加共同市场的各前 2 个"
 }

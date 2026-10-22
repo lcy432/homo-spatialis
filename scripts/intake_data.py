@@ -26,7 +26,7 @@ from typing import Any
 
 import _bootstrap  # noqa: F401
 from product.realdata import geo, publish, query, store
-from product.realdata.build import STAGES, BuildContext
+from product.realdata.build import STAGES, BuildContext, RawChangedError
 from product.realdata.config import DEFAULT_CONFIG, BuildConfig, load_config
 from product.realdata.fetch import DEFAULT_CACHE, fetch
 from product.realdata.sources import all_requests
@@ -111,6 +111,9 @@ def cmd_build(args: argparse.Namespace) -> int:
         except DataBuildRefusedError as exc:
             print(f"拒绝：{exc.code} {exc.message_zh}", file=sys.stderr)
             return 3
+        except RawChangedError as exc:
+            print(f"拒绝：raw_changed {exc}", file=sys.stderr)
+            return 3
         _print(_short(st))
     return 0
 
@@ -151,7 +154,7 @@ def cmd_query(args: argparse.Namespace) -> int:
             "per_page": page.per_page,
             "items": [
                 {k: o[k] for k in ("opportunity_id", "label", "data_status", "supply_status")}
-                | {"compile": o["compile"]["status"], "price": _price(o)}
+                | {"compile": o["compile"]["status"], "amount": _amount(o)}
                 for o in page.items
             ],
         }
@@ -159,16 +162,22 @@ def cmd_query(args: argparse.Namespace) -> int:
     return 0
 
 
-def _price(o: dict[str, Any]) -> str | None:
+def _amount(o: dict[str, Any]) -> dict[str, Any] | None:
+    """机会的金额（月租、年薪、活动收费、每月食品费用、单价、学费……）：按机会登记的金额事实读，保留含义、单位、计价口径与性质；
+    缺失就显示状态与原因（零是有值，不是缺失）。没有金额的机会（例如城市背景）返回 None。"""
     name = o.get("price_fact")
-    for f in o["facts"]:
-        if f["name"] == name:
-            return (
-                f"{f['value']} {f.get('unit') or ''} {f.get('numeraire') or ''}".strip()
-                if f["status"] == "present"
-                else f["status"]
-            )
-    return None
+    f = next((x for x in o["facts"] if x["name"] == name), None) if name else None
+    if f is None:
+        return None
+    if f["status"] == "present":
+        return {
+            "fact": name,
+            "value": f["value"],
+            "unit": f.get("unit"),
+            "numeraire": f.get("numeraire"),
+            "kind": f.get("kind"),
+        }
+    return {"fact": name, "status": f["status"], "reason": f.get("reason")}
 
 
 def cmd_menu(args: argparse.Namespace) -> int:
@@ -190,7 +199,7 @@ def cmd_menu(args: argparse.Namespace) -> int:
             "total": page.total,
             "page": page.page,
             "items": [
-                {"opportunity_id": o["opportunity_id"], "label": o["label"], "price": _price(o)}
+                {"opportunity_id": o["opportunity_id"], "label": o["label"], "amount": _amount(o)}
                 for o in page.items
             ],
         }

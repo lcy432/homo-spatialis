@@ -13,7 +13,6 @@ import datetime as _dt
 from collections.abc import Iterator
 
 from common.intake_contracts import (
-    CompileInfo,
     FieldValue,
     GeoRef,
     Period,
@@ -43,6 +42,35 @@ NATION = GeoRef(
     cbsa=None,
     relation="contains",
 )
+CANADA = GeoRef(
+    country="CA",
+    scheme="Nation",
+    code="CA",
+    level="national",
+    label="Canada",
+    cbsa=None,
+    relation="contains",
+)
+#: 市场未知：资料来自美国的 ENERGY STAR 数据库，但这一型号没有写销售市场。不当成美国确定可得，也不当成不可得——地理只是代理。
+NATION_MARKET_UNKNOWN = NATION.model_copy(
+    update={"label": "United States (market not stated)", "relation": "proxy"}
+)
+MARKET_GEO = {"us": NATION, "us_ca": NATION, "ca": CANADA, "unknown": NATION_MARKET_UNKNOWN}
+
+
+def market_scope(raw: object) -> str:
+    """ENERGY STAR 的 ``markets`` 原文 → 适用市场：美国、美加共同、只有加拿大、未知（没写或看不懂）。"""
+    parts = {p.strip().lower() for p in str(raw or "").split(",") if p.strip()}
+    us, ca = "united states" in parts, "canada" in parts
+    if us and ca:
+        return "us_ca"
+    if us:
+        return "us"
+    if ca and parts == {"canada"}:
+        return "ca"
+    return "unknown"
+
+
 SPEC_FIELDS = {
     "clothes_washer": (
         ("volume_cubic_feet", "capacity", "cubic feet"),
@@ -114,12 +142,13 @@ def records(rows: list[dict], category: str, raw_sha: str | None) -> Iterator[St
             *dims,
         )
         brand, model = str(r.get("brand_name", "")).strip(), str(r.get("model_number", "")).strip()
+        scope = market_scope(r.get("markets"))
         yield StdRecord(
             record_id=f"goods.energystar.{category}.{str(r['pd_id']).lower()}",
             sector="goods",
             record_type="appliance_model",
             label=f"{brand} {model}（{CATEGORY_ZH[category]}）"[:200],
-            geo=NATION,
+            geo=MARKET_GEO[scope],
             period=Period(label="ENERGY STAR certification date", start=d, end=d),
             source=SourceRef(
                 source_id="energystar_products",
@@ -139,6 +168,7 @@ def records(rows: list[dict], category: str, raw_sha: str | None) -> Iterator[St
                     or None
                 ),
                 "markets": r.get("markets"),
+                "market_scope": scope,
                 "connected": r.get("connected") or r.get("connected_capable"),
                 "energy_star_model_identifier": r.get("energy_star_model_identifier"),
                 "e1_task": E1_TASK[category],
@@ -163,11 +193,8 @@ def opportunity(rec: StdRecord):
         required=("capacity",),
         supply_status="unknown",
         menu_policy="full_catalog",
-        compile=CompileInfo(
-            status="not_compilable",
-            reasons=("price_unknown", "lifetime_unknown", "relief_effect_unknown"),
-            e1_category="durable",
-        ),
+        e1_category="durable",
+        e1_needs=("lifetime_years", "relief_hours"),
         attributes=dict(rec.attributes),
         terms=dict(rec.terms),
         price_fact="price",

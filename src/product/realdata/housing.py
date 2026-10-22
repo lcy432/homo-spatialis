@@ -29,6 +29,7 @@ from common.intake_contracts import (
     StdRecord,
     missing,
 )
+from product.realdata.acs import TOPCODE_METHOD, TopcodeRule
 from product.realdata.geo import MetroGeo
 from product.realdata.mapping_b import PRICE_POSITIONS
 from product.realdata.prices import ADJHSG_METHOD
@@ -85,8 +86,10 @@ def segment(ten: float, vacs: float, mv: float) -> str:
     return "stock"
 
 
-def prepare(frame: pd.DataFrame, geo: MetroGeo) -> pd.DataFrame:
-    """一个都会区的住房样本 → 分析表（分类、市场段、是否完整在内的 PUMA、是否可能顶码）。"""
+def prepare(frame: pd.DataFrame, geo: MetroGeo, rules: dict[str, TopcodeRule]) -> pd.DataFrame:
+    """一个都会区的住房样本 → 分析表（分类、市场段、是否完整在内的 PUMA、顶码状态与真实值下界）。
+
+    顶码按官方州别阈值与替代值识别（``rules``，每个州一条），**不**按筛选后样本的最大值猜。"""
     df = frame.copy()
     df["cbsa"] = geo.cbsa
     df["puma_code"] = df["STATE"] + df["PUMA"]
@@ -100,9 +103,14 @@ def prepare(frame: pd.DataFrame, geo: MetroGeo) -> pd.DataFrame:
     adj = df["ADJHSG"].astype(float) / 1_000_000
     df["rent_contract"] = (df["RNTP"].astype(float) * adj).round(2)
     df["rent_gross"] = (pd.to_numeric(df["GRNTP"], errors="coerce") * adj).round(2)
-    # 顶码：PUMS 把州内最高的一段租金换成同一个值（顶码组的平均）。同州最高值的记录标为“可能顶码”。
-    state_max = df.groupby("STATE")["RNTP"].transform("max")
-    df["topcoded"] = df["RNTP"] == state_max
+    status, bound = [], []
+    for st, v in zip(df["STATE"], df["RNTP"].astype(float), strict=True):
+        s, b = rules[st].classify(v)
+        status.append(s)
+        bound.append(b)
+    df["topcode_status"] = status
+    df["censored"] = df["topcode_status"] != "not_topcoded"
+    df["censor_bound"] = pd.array(bound, dtype="Float64").astype(float)
     df["record_id"] = "housing.acs2024." + df["SERIALNO"].str.lower()
     return df
 
@@ -121,8 +129,37 @@ def _money(name: str, raw: float, adjhsg: str, value: float) -> FieldValue:
     )
 
 
+def _censored_rent(name: str, row, rules: dict[str, TopcodeRule]) -> FieldValue:
+    rule = rules[row.STATE]
+    if row.topcode_status == "topcoded":
+        reason = (
+            f"顶码：真实租金高于本州官方阈值 {rule.threshold:g} 美元/月；{rule.replacement:g} 是州内顶码组的平均（官方替代值），"
+            "不是这条记录的真实值（Census 2024 PUMS top and bottom coded values）"
+        )
+    else:
+        reason = f"是否顶码未知：{reason_state(rule)}；{float(row.RNTP):g} 可能是替代值，真实值只知道高于 {float(row.censor_bound):g}"
+    if name == "gross_rent_month":
+        reason = "毛租金含顶码（或可能顶码）的合同租金：" + reason
+    return FieldValue(
+        name=name,
+        status="suppressed",
+        raw=str(int(row.RNTP)) if name == "contract_rent_month" else None,
+        raw_unit="USD/month（ACS 2024 报告值）",
+        reason=reason[:300],
+        method=TOPCODE_METHOD.ref,
+    )
+
+
+def reason_state(rule: TopcodeRule) -> str:
+    return "官方顶码表里没有这个州" if rule.status == "missing" else "官方阈值以上却不等于替代值"
+
+
 def records(
-    df: pd.DataFrame, geo: MetroGeo, labels: dict[str, dict[str, str]], raw_sha: dict[str, str]
+    df: pd.DataFrame,
+    geo: MetroGeo,
+    labels: dict[str, dict[str, str]],
+    raw_sha: dict[str, str],
+    rules: dict[str, TopcodeRule],
 ) -> Iterator[StdRecord]:
     """分析表 → 标准化记录（每个样本住房单位一条）。``raw_sha`` 是各州原始文件的 SHA-256。"""
     bld_label = labels.get("BLD", {})
@@ -133,9 +170,13 @@ def records(
         name = member.name if member and member.name else f"PUMA {st}{puma}"
         bld = str(row.BLD).zfill(2)
         fields = [
-            _money("contract_rent_month", row.RNTP, str(row.ADJHSG), row.rent_contract),
+            _censored_rent("contract_rent_month", row, rules)
+            if row.censored
+            else _money("contract_rent_month", row.RNTP, str(row.ADJHSG), row.rent_contract),
             (
-                _money("gross_rent_month", float(row.GRNTP), str(row.ADJHSG), row.rent_gross)
+                _censored_rent("gross_rent_month", row, rules)
+                if row.censored and row.segment != "vacant_for_rent"
+                else _money("gross_rent_month", float(row.GRNTP), str(row.ADJHSG), row.rent_gross)
                 if row.segment != "vacant_for_rent" and pd.notna(row.GRNTP) and float(row.GRNTP) > 0
                 else missing(
                     "gross_rent_month",
@@ -216,7 +257,11 @@ def records(
                 "bedroom_class": row.bed_class,
                 "structure_class": row.struct_class,
                 "meals_included": None if pd.isna(row.RNTM) else int(row.RNTM) == 1,
-                "possibly_topcoded": bool(row.topcoded),
+                "topcode_status": row.topcode_status,
+                "topcode_threshold": rules[row.STATE].threshold,
+                "topcode_lower_bound": None
+                if pd.isna(row.censor_bound)
+                else float(row.censor_bound),
                 "full_puma": bool(row.full_puma),
             },
             terms=terms,
@@ -233,7 +278,9 @@ POSITION_ZH = {
     "5/6": "这一类里偏高的三分之一",
 }
 TIER_ZH = {"core": "通勤较短的居住区", "middle": "通勤中等的居住区", "outer": "通勤较长的居住区"}
-HOUSING_COMPILE_REASONS = ("floor_area_unknown", "commute_is_resident_median_not_unit_specific")
+#: E1 的住房要面积（住房空间评分读它）；ACS 不测面积，所以缺。通勤是居民去各自工作地点的中位数，不是这套房到岗位的通勤。
+HOUSING_E1_NEEDS = ("floor_area",)
+HOUSING_DATA_GAPS = ("commute_is_resident_median_not_unit_specific",)
 REQUIRED = ("monthly_rent", "bedrooms_class")
 
 
@@ -243,7 +290,9 @@ def _rent_fact(cell, position: str, method: str) -> FieldValue:
     value = cell.quantiles.get(position)
     if value is None:
         return missing(
-            "monthly_rent", "suppressed", "落在州内顶码值以上：只知道不低于顶码值，不填数"
+            "monthly_rent",
+            "suppressed",
+            "这一价位不可识别：格内有顶码记录，它们的真实租金只知道高于本州官方阈值（跨州的格取最低阈值），这一位置的分位数落在阈值以上，不填数",
         )
     return FieldValue(
         name="monthly_rent",
@@ -313,7 +362,6 @@ def _common_facts(bed: str) -> list[FieldValue]:
 
 def b_opportunities(df: pd.DataFrame, model, commute: dict, geo: MetroGeo) -> list:
     """B：每个（完整在内的 PUMA × 卧室）格生成三个价位的候选；价格取本格或回退层的条件分布，通勤取这个 PUMA 的居民通勤。"""
-    from common.intake_contracts import CompileInfo
     from product.realdata.mapping_b import COMMUTE_METHOD, HOUSING_METHOD
     from product.realdata.registry import make_opportunity, weight_text
 
@@ -364,11 +412,9 @@ def b_opportunities(df: pd.DataFrame, model, commute: dict, geo: MetroGeo) -> li
                     required=REQUIRED,
                     supply_status="offered",
                     menu_policy="annual_exposure_sample",
-                    compile=CompileInfo(
-                        status="needs_e1_extension",
-                        reasons=HOUSING_COMPILE_REASONS,
-                        e1_category="housing",
-                    ),
+                    e1_category="housing",
+                    e1_needs=HOUSING_E1_NEEDS,
+                    data_gaps=HOUSING_DATA_GAPS,
                     attributes={
                         "tier": tier,
                         "price_level_used": cell.level if cell else None,
@@ -395,7 +441,6 @@ def b_opportunities(df: pd.DataFrame, model, commute: dict, geo: MetroGeo) -> li
 
 def a_opportunities(points, tier_commute: dict, geo: MetroGeo) -> list:
     """A：共同覆盖网格的候选。网格里不支持的组合不生成（由调用方计数）。"""
-    from common.intake_contracts import CompileInfo
     from product.realdata.mapping_a import HOUSING_GRID
     from product.realdata.mapping_b import COMMUTE_METHOD
     from product.realdata.registry import make_opportunity, weight_text
@@ -433,11 +478,9 @@ def a_opportunities(points, tier_commute: dict, geo: MetroGeo) -> list:
                 required=REQUIRED,
                 supply_status="offered" if p.weight > 0 else "unknown",
                 menu_policy="annual_exposure_sample",
-                compile=CompileInfo(
-                    status="needs_e1_extension",
-                    reasons=HOUSING_COMPILE_REASONS,
-                    e1_category="housing",
-                ),
+                e1_category="housing",
+                e1_needs=HOUSING_E1_NEEDS,
+                data_gaps=HOUSING_DATA_GAPS,
                 attributes={
                     "tier": p.tier,
                     "structure_class": p.struct,

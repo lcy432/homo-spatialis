@@ -25,7 +25,6 @@ from decimal import Decimal
 import pandas as pd
 
 from common.intake_contracts import (
-    CompileInfo,
     FieldValue,
     GeoRef,
     MethodSpec,
@@ -617,10 +616,7 @@ def opportunity(rec: StdRecord):
         required=(),
         supply_status="unknown",
         menu_policy="full_catalog",
-        compile=CompileInfo(
-            status="needs_e1_extension",
-            reasons=("city_fact_to_scoring_mapping_not_registered",),
-            e1_category="city_fact",
-        ),
+        e1_category="city_fact",
+        reference_only=True,  # 城市背景是参考事实，不是可选的行动；怎样进入环境或评分另行登记
         attributes=dict(rec.attributes),
     )

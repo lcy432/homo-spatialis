@@ -1,19 +1,19 @@
 {
  "assumptions": [
-  "calendar_recurs_annually",
   "commute_roundtrip_is_twice_oneway",
   "e1_activity_burden_per_hour",
   "food_basket_quantities_v1",
   "housing_new_market_proxy",
   "jobs_employment_share_exposure"
  ],
- "build_id": "aec7c4c5d414bad1e0f294da7dcdc81630ee5f9e0194617abdd3eeb107fd3aba",
- "config_identity": "734324a840ed1e517dd8cfa64020f8f275d70bb3189c348d14836e149f90af17",
+ "build_id": "562c32339bbae67fd1917b7ac67f4b5b28f55d07e88a8c78ee6fe371ed863691",
+ "config_identity": "924566ed677b2cc1d05ec4b4d7a6ac51ad428868796a32b875aac1338baadb1d",
+ "country": "US",
  "counts": {
   "capabilities_by_sector": {
    "activities": {
     "collected": 28992,
-    "executable": 773,
+    "executable": 0,
     "planning_reference": 28992,
     "scorable": 0,
     "total": 28992
@@ -26,7 +26,7 @@
     "total": 72
    },
    "food": {
-    "collected": 33635,
+    "collected": 33311,
     "executable": 0,
     "planning_reference": 33641,
     "scorable": 0,
@@ -42,7 +42,7 @@
    "housing": {
     "collected": 0,
     "executable": 0,
-    "planning_reference": 5503,
+    "planning_reference": 5413,
     "scorable": 0,
     "total": 5553
    },
@@ -67,15 +67,17 @@
    "full_catalog": 108
   },
   "opportunities_by_compile_status": {
-   "compilable": 773,
-   "needs_e1_extension": 80550,
-   "not_compilable": 3993
+   "needs_data": 21474,
+   "needs_data_and_e1_extension": 55149,
+   "needs_e1_extension": 8621,
+   "reference_only": 72
   },
   "opportunities_by_sector_origin": {
    "activities|record": 28992,
    "background|record": 72,
+   "food|derived": 324,
    "food|mapping_a": 18,
-   "food|record": 33635,
+   "food|record": 33311,
    "goods|record": 1875,
    "housing|mapping_a": 648,
    "housing|mapping_b": 4905,
@@ -96,6 +98,7 @@
  "methods": [
   "acs_adjhsg_constant_dollars@1",
   "acs_bins_share@1",
+  "acs_official_topcodes@1",
   "ap_annual_mean@1",
   "aqi_share@1",
   "aqi_sum@1",
@@ -106,7 +109,7 @@
   "e1_export_single_session_experience@1",
   "food_plan_from_regional_prices@1",
   "housing_coverage_grid@1",
-  "housing_rent_conditional@1",
+  "housing_rent_conditional@2",
   "housing_unit_classification@1",
   "job_hours_wfh_by_occupation_group@1",
   "jurisdiction_paths@1",
@@ -185,10 +188,11 @@
    "pums_p:36": "2026-10-22T08:04:55Z",
    "pums_p:48": "2026-10-22T08:05:01Z",
    "pums_p:53": "2026-10-22T08:05:03Z",
+   "pums_topcodes": "2026-10-22T10:36:50Z",
    "tract_puma": "2026-10-22T08:00:20Z"
   }
  },
- "schema": "intake-data-v1",
+ "schema": "intake-data-v2",
  "sources": [
   {
    "bytes": 1065169,
@@ -749,6 +753,15 @@
    "url": "https://www2.census.gov/programs-surveys/acs/data/pums/2024/1-Year/csv_pwa.zip"
   },
   {
+   "bytes": 14935,
+   "name": "pums_topcodes",
+   "note": "",
+   "raw_sha256": "d8defa2e318abe924dfd208beb52920426c60a3ba063ee8057cbc6f2a8fc35db",
+   "source_id": "census_acs1_pums_2024",
+   "status": "ok",
+   "url": "https://www2.census.gov/programs-surveys/acs/tech_docs/pums/top_coded_values/2024_pums_top_and_bottom_coded_values.csv"
+  },
+  {
    "bytes": 1709076,
    "name": "tract_puma",
    "note": "",
@@ -759,11 +772,11 @@
   }
  ],
  "stages": {
-  "catalog": "011cf566dc4bf854d95daf96ac24d9142709d8eee7e6dd361c777c3778a63504",
-  "check": "49ce1c161dccc22394eca42e759ed7640360ef7c5cdca1ed6b43ffd2604003f8",
-  "configure": "3087c5b3fa97661eb0b178d05f080035a5d0696000a5475cd6564cfb0e59c270",
-  "fetch": "8bb4aa739e4c948379c90745e573809030c57c830e72c11797e6d01868ee8bac",
-  "map": "a0b786e09765ce19c0b2964f4a4bf525fabbde8f297912be4a4c5b2da2ffe9bb",
-  "standardize": "31113a3f273a4d3c23cd2892197816c66f1f9513346baa78c318547f702557ca"
+  "catalog": "f3dfdcac9821d05cf8ac7754156a9cfe7b19778514e83f3ccf7feeaed562c4ec",
+  "check": "aa21e8f2b9906ac219f141213e34ca863c420ca25669cebf308673bbbfe34c81",
+  "configure": "c13a522e09d69a9737d344275ce37285a69002f05b33b88845f2a7bf6d84ac7e",
+  "fetch": "5d8d66b7d177e85a24411ae648ca2205db1a3a9aae02c8e61f4647ab92c861fa",
+  "map": "a5a4607fa9dd387662a02bfdc0d51bfb00973253cebc5ff01fa2f2ceaa8422f2",
+  "standardize": "94eca6c3ab1962a9dd366fe236ff71788f8b6f2c98027c195cb908d988392e4e"
  }
 }

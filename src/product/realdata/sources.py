@@ -50,6 +50,15 @@ def pums_dictionary_request(year: int) -> Request:
     )
 
 
+def pums_topcodes_request(year: int) -> Request:
+    """官方 PUMS 顶码与底码表（每州的阈值与替代值）。"""
+    return Request(
+        "census_acs1_pums_2024",
+        f"https://www2.census.gov/programs-surveys/acs/tech_docs/pums/top_coded_values/{year}_pums_top_and_bottom_coded_values.csv",
+        expect="text",
+    )
+
+
 def acs_table_request(year: int, table: str) -> Request:
     return Request(
         "census_acs1_tables_2024",
@@ -217,6 +226,7 @@ def all_requests(config: BuildConfig, states: list[str]) -> dict[str, Request]:
         "gazetteer": geo.gazetteer_request(),
         "acs_geos": geo.acs_geos_request(year),
         "pums_dictionary": pums_dictionary_request(year),
+        "pums_topcodes": pums_topcodes_request(year),
         "oews": oews_request(),
         "ep_education": ep_education_request(),
         "cpi": cpi_request(),

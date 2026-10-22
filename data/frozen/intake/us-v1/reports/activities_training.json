@@ -2,9 +2,16 @@
  "metros": {
   "16980": {
    "programs": 9002,
+   "programs_age": {
+    "all_ages": 538,
+    "restricted": 8343,
+    "unknown": 121
+   },
+   "programs_compilable": 0,
+   "programs_dated": 9002,
    "programs_fee_median": 14.9,
    "programs_free": 2195,
-   "programs_single_session_compilable": 773,
+   "programs_single_day": 1142,
    "training_programs": 402,
    "training_related_occupations_mapped": 217,
    "training_tuition_median": 13020.97,
@@ -23,9 +30,12 @@
   },
   "26420": {
    "programs": 0,
+   "programs_age": {},
+   "programs_compilable": 0,
+   "programs_dated": 0,
    "programs_fee_median": null,
    "programs_free": 0,
-   "programs_single_session_compilable": 0,
+   "programs_single_day": 0,
    "training_programs": 204,
    "training_related_occupations_mapped": 107,
    "training_tuition_median": 17631.51,
@@ -44,9 +54,12 @@
   },
   "31080": {
    "programs": 0,
+   "programs_age": {},
+   "programs_compilable": 0,
+   "programs_dated": 0,
    "programs_fee_median": null,
    "programs_free": 0,
-   "programs_single_session_compilable": 0,
+   "programs_single_day": 0,
    "training_programs": 684,
    "training_related_occupations_mapped": 480,
    "training_tuition_median": 17217.07,
@@ -65,9 +78,12 @@
   },
   "35620": {
    "programs": 0,
+   "programs_age": {},
+   "programs_compilable": 0,
+   "programs_dated": 0,
    "programs_fee_median": null,
    "programs_free": 0,
-   "programs_single_session_compilable": 0,
+   "programs_single_day": 0,
    "training_programs": 636,
    "training_related_occupations_mapped": 358,
    "training_tuition_median": 12716.98,
@@ -86,9 +102,12 @@
   },
   "41860": {
    "programs": 0,
+   "programs_age": {},
+   "programs_compilable": 0,
+   "programs_dated": 0,
    "programs_fee_median": null,
    "programs_free": 0,
-   "programs_single_session_compilable": 0,
+   "programs_single_day": 0,
    "training_programs": 114,
    "training_related_occupations_mapped": 67,
    "training_tuition_median": 14205.53,
@@ -107,9 +126,12 @@
   },
   "42660": {
    "programs": 0,
+   "programs_age": {},
+   "programs_compilable": 0,
+   "programs_dated": 0,
    "programs_fee_median": null,
    "programs_free": 0,
-   "programs_single_session_compilable": 0,
+   "programs_single_day": 0,
    "training_programs": 60,
    "training_related_occupations_mapped": 37,
    "training_tuition_median": 17328.53,
@@ -127,5 +149,5 @@
    "venues_with_opening_hours": 205
   }
  },
- "note_zh": "只有芝加哥有带价格与日历的城市开放资料；其他城市的活动只有场所（价格未知）。这是来源覆盖的差异，不是城市之间的真实差异。"
+ "note_zh": "只有芝加哥有带价格与日历的城市开放资料；其他城市的活动只有场所（价格未知）。这是来源覆盖的差异，不是城市之间的真实差异。芝加哥的活动都有具体日期，不少还有年龄限制：E1 的体验没有日期窗口、资格标签不求值，模拟年份与真实日期的对应也没定义，所以现在一项都不能原样编进 E1（programs_compilable）；原始日历与年龄限制照存（programs_dated、programs_age）。"
 }

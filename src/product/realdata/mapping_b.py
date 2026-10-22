@@ -1,14 +1,16 @@
 """B 映射：由真实资料估计的条件关系。
 
-**住房（``housing_rent_conditional@1``）**：在一个都会区里，按 卧室数 × 地点（PUMA 或通勤三分位层）× 楼型 估计月租的条件分布。
+**住房（``housing_rent_conditional@2``）**：在一个都会区里，按 卧室数 × 地点（PUMA 或通勤三分位层）× 楼型 估计月租的条件分布。
 
 * 目标人群是“新租市场的代理”：空置待租房的要价 ∪ 过去 12 个月内迁入的租住户的合同租金（ACS 住房权重 WGTP 加权）。居民存量
   租金不直接当市场价：只有在市场代理样本不足时作为最后一层回退，并标明人群换了。
 * 加权分位数取“累计权重第一次达到 q × 总权重”的那个**真实观测值**（阶梯函数，不插值），所以每个分位数都是某条样本的实际租金。
-* 标准误用 ACS 的连续差分重复权重（WGTP1–WGTP80）：SE = √(4/80 × Σ(θ_r − θ)²)。
+* 标准误用 ACS 的连续差分重复权重（WGTP1–WGTP80）：SE = √(4/80 × Σ(θ_r − θ)²)，θ 与 θ_r 用同一个估计方法。中位数成对报告：
+  阶梯中位数 + 阶梯法的重复权重标准误（候选价格用阶梯法），插值中位数 + 插值法的重复权重标准误；两对不混写。
 * 每格要求未加权样本数 ≥ ``min_unweighted_n``（默认 30）；不够就按层级回退：(PUMA, 卧室) → (通勤层, 卧室, 楼型) → (通勤层, 卧室)
   → (都会区, 卧室) → (都会区, 卧室, 存量人群) → 不支持。用了哪一层记在机会里，不悄悄抹掉。
-* 顶码：PUMS 把州内最高一段租金换成同一个值；分位数落在顶码值上就标为“截断”（只知道不低于它）。
+* 顶码按官方州别阈值与替代值识别（``acs_official_topcodes@1``）：顶码记录的真实值只知道高于本州阈值，替代值不是下界的近似。
+  分位数只有不高于格内顶码记录的最低阈值才可识别，否则不填数；格里没有顶码记录时，最大值就是普通观测值，照常使用。
 * 房间数不是面积：ACS 没有面积，面积一律缺失，不从卧室数推。
 
 **通勤（``commute_by_residence_puma@1``）**：按居住地 PUMA，在职且不在家工作的人（JWMNP > 0）单程通勤分钟的加权分布（PWGTP），
@@ -20,6 +22,7 @@
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from fractions import Fraction
 
@@ -30,11 +33,11 @@ from common.intake_contracts import AssumptionSpec, MethodSpec
 
 HOUSING_METHOD = MethodSpec(
     method_id="housing_rent_conditional",
-    version="1",
+    version="2",
     family="mapping_b",
     summary_zh=(
         "按 卧室数 × 地点 × 楼型 估计月租（合同租金或要价）的条件分布：新租市场代理人群（空置待租 ∪ 12 个月内迁入）、WGTP 加权、"
-        "阶梯加权分位数（取真实观测值）、重复权重标准误、样本不足按层级回退。"
+        "阶梯加权分位数（取真实观测值）、中位数与重复权重标准误按同一估计方法成对（阶梯 / 插值）、官方州别顶码阈值、样本不足按层级回退。"
     ),
     inputs=("census_acs1_pums_2024",),
     known_biases_zh=(
@@ -69,7 +72,7 @@ MARKET_PROXY = AssumptionSpec(
     assumption_id="housing_new_market_proxy",
     kind="exploratory_proxy",
     statement_zh="空置待租房的要价与过去 12 个月内迁入者的合同租金，近似一个新来的人在这座城会看到的租金分布。",
-    applies_to=("housing_rent_conditional@1", "housing_coverage_grid@1"),
+    applies_to=("housing_rent_conditional@2", "housing_coverage_grid@1"),
     why_not_measured_zh="没有可用的公开房源成交资料；HUD 公平市场租金文件访问被拒（反爬挑战）。",
 )
 ROUNDTRIP = AssumptionSpec(
@@ -113,17 +116,63 @@ def wquantile_smooth(values: np.ndarray, weights: np.ndarray, q: float) -> float
     return float(np.interp(q, cdf, edges))
 
 
-def replicate_se(values: np.ndarray, rep: np.ndarray, weights: np.ndarray, q: float) -> float:
-    """ACS 连续差分重复权重的标准误：√(4/80 × Σ(θ_r − θ)²)，θ 用插值分位数。``rep`` 是 n × 80 的重复权重。"""
-    est = wquantile_smooth(values, weights, q)
-    thetas = np.array(
-        [wquantile_smooth(values, np.clip(rep[:, r], 0, None), q) for r in range(rep.shape[1])]
-    )
-    return float(np.sqrt(4.0 / rep.shape[1] * np.sum((thetas - est) ** 2)))
+def step_quantile(
+    values: np.ndarray, weights: np.ndarray, q: float, limit: float = math.inf
+) -> float | None:
+    """有顶码时的阶梯分位数：按报告值算（顶码记录排在替代值处），结果不高于格内顶码记录真实值下界的最小值 ``limit`` 才可识别——
+    这时所有顶码记录的真实值都在它上面，累计权重不受影响；否则 None。没有顶码记录时 ``limit`` 是无穷。"""
+    v = wquantile(values, weights, q)
+    return v if v <= limit else None
+
+
+def interpolated_quantile(
+    values: np.ndarray, weights: np.ndarray, q: float, limit: float = math.inf
+) -> float | None:
+    """有顶码时的插值分位数。插值区间的上端是这个报告值与**下一个**报告值的中点，所以除了结果不高于 ``limit``，下一个报告值也要
+    不高于 ``limit``（是已知值）：否则一条顶码记录的真实值可能正好落在中间，改变区间与累计权重，结果不可识别。"""
+    v = wquantile_smooth(values, weights, q)
+    if math.isinf(limit):
+        return v
+    if v > limit:
+        return None
+    uniq, inv = np.unique(values, return_inverse=True)
+    wsum = np.bincount(inv, weights=weights)
+    cdf = np.concatenate([[0.0], np.cumsum(wsum) / wsum.sum()])
+    j = max(int(np.searchsorted(cdf, q, side="left")) - 1, 0)
+    if j + 1 >= len(uniq) or uniq[j + 1] > limit:
+        return None
+    return v
+
+
+def replicate_se(
+    values: np.ndarray,
+    rep: np.ndarray,
+    weights: np.ndarray,
+    q: float,
+    estimator=None,
+    limit: float = math.inf,
+) -> float | None:
+    """ACS 连续差分重复权重的标准误：√(4/R × Σ(θ_r − θ)²)，R 是重复权重个数（ACS 是 80）。θ 与 θ_r 必须用**同一个**估计方法
+    （``estimator``：``step_quantile`` 或 ``interpolated_quantile``，默认插值）——点估计与标准误成对，不混用。
+    主估计或任何一个重复估计不可识别（顶码）就返回 ``None``，不给一个看似精确的标准误。"""
+    est_fn = estimator or interpolated_quantile
+    est = est_fn(values, weights, q, limit)
+    thetas = [est_fn(values, np.clip(rep[:, r], 0, None), q, limit) for r in range(rep.shape[1])]
+    if est is None or any(t is None for t in thetas):
+        return None
+    diffs = np.array(thetas, dtype=float) - est
+    return float(np.sqrt(4.0 / rep.shape[1] * np.sum(diffs**2)))
 
 
 def money_text(x: float) -> str:
     return f"{x:.2f}"
+
+
+def step_quantile_text(
+    values: np.ndarray, weights: np.ndarray, q: float, limit: float
+) -> str | None:
+    v = step_quantile(values, weights, q, limit)
+    return None if v is None else money_text(v)
 
 
 @dataclass(frozen=True)
@@ -210,8 +259,15 @@ class RentCell:
     weight_sum: int
     n_eff: float
     quantiles: dict[str, str | None]
-    se_median: float | None
+    #: 中位数的两种估计，各自配自己的重复权重标准误（不混写）：阶梯法 = 累计权重第一次过半的真实观测值（候选价格用它）；
+    #: 插值法 = 把每个报告值当成到相邻值中点的均匀区间后线性插值。落在顶码下界以上（不可识别）时为 None。
+    median_step: float | None
+    se_median_step: float | None
+    median_interpolated: float | None
+    se_median_interpolated: float | None
     censored_share: float
+    #: 格内顶码（或是否顶码未知）记录的真实值下界的最小值；分位数只有不高于它才可识别。没有这类记录时为 None。
+    censor_bound_min: float | None
     structure_mix: dict[str, str]
     utilities_median: str | None
     record_ids: tuple[str, ...] = field(repr=False, default=())
@@ -237,25 +293,26 @@ def estimate_cell(
 ) -> RentCell:
     vals = g["rent_contract"].to_numpy(float)
     w = g["WGTP"].to_numpy(float)
-    topcoded = g["topcoded"].to_numpy(bool)
-    cw_sorted = None
-    quantiles: dict[str, str | None] = {}
-    order = np.argsort(vals, kind="stable")
-    cw_sorted = np.cumsum(w[order]) / w.sum()
-    top_from = None
-    if topcoded.any():
-        first_top = np.argmax(topcoded[order])
-        top_from = cw_sorted[first_top - 1] if first_top > 0 else 0.0
-    for label, q in _quantile_keys(qs):
-        v = wquantile(vals, w, q)
-        quantiles[label] = None if (top_from is not None and q > top_from) else money_text(v)
-    se = (
-        replicate_se(vals, g[rep_cols].to_numpy(float), w, 0.5) if rep_cols and len(g) > 1 else None
+    censored = g["censored"].to_numpy(bool)
+    limit = (
+        float(np.nanmin(g["censor_bound"].to_numpy(float)[censored]))
+        if censored.any()
+        else math.inf
     )
+    quantiles: dict[str, str | None] = {}
+    for label, q in _quantile_keys(qs):
+        quantiles[label] = step_quantile_text(vals, w, q, limit)
+    m_step = step_quantile(vals, w, 0.5, limit)
+    m_interp = interpolated_quantile(vals, w, 0.5, limit)
+    rep = g[rep_cols].to_numpy(float) if rep_cols and len(g) > 1 else None
+
+    def se_of(estimator) -> float | None:
+        return None if rep is None else replicate_se(vals, rep, w, 0.5, estimator, limit)
+
     mix = g.groupby("struct_class")["WGTP"].sum()
     mix_share = {k: f"{v / mix.sum():.4f}" for k, v in sorted(mix.items())}
     util = (g["rent_gross"] - g["rent_contract"]).where(g["rent_gross"].notna())
-    util_ok = util.notna() & (util >= 0)
+    util_ok = util.notna() & (util >= 0) & ~g["censored"]
     util_med = (
         money_text(wquantile(util[util_ok].to_numpy(float), w[util_ok.to_numpy()], 0.5))
         if util_ok.sum() >= 1
@@ -271,8 +328,12 @@ def estimate_cell(
         weight_sum=int(w.sum()),
         n_eff=float(w.sum() ** 2 / (w**2).sum()),
         quantiles=quantiles,
-        se_median=se,
-        censored_share=float(w[topcoded].sum() / w.sum()),
+        median_step=m_step,
+        se_median_step=se_of(step_quantile),
+        median_interpolated=None if m_interp is None else round(m_interp, 2),
+        se_median_interpolated=se_of(interpolated_quantile),
+        censored_share=float(w[censored].sum() / w.sum()),
+        censor_bound_min=None if math.isinf(limit) else limit,
         structure_mix=mix_share,
         utilities_median=util_med,
         record_ids=tuple(sorted(g["record_id"])),
@@ -304,7 +365,7 @@ class RentModel:
         return None, tried
 
 
-#: 候选价位：每一格租金分布三等分区间的中点。它是 ``housing_rent_conditional@1`` 与 ``housing_coverage_grid@1`` 定义的一部分
+#: 候选价位：每一格租金分布三等分区间的中点。它是 ``housing_rent_conditional@2`` 与 ``housing_coverage_grid@1`` 定义的一部分
 #: （每个候选代表这一格三分之一的目标人群）；要改价位就升方法版本，不只改配置。
 PRICE_POSITIONS = ("1/6", "1/2", "5/6")
 

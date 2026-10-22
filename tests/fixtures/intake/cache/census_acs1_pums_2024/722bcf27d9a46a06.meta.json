@@ -1,0 +1,14 @@
+{
+ "source_id": "census_acs1_pums_2024",
+ "url": "https://www2.census.gov/programs-surveys/acs/tech_docs/pums/top_coded_values/2024_pums_top_and_bottom_coded_values.csv",
+ "method": "GET",
+ "http_status": 200,
+ "sha256": "14190ac831120c7deb8e65e8f2fecb9e4c47c655d4a50d14249878872e22d922",
+ "bytes": 934,
+ "retrieved_at": "2026-10-22T10:36:50Z",
+ "subset_of": {
+  "sha256": "d8defa2e318abe924dfd208beb52920426c60a3ba063ee8057cbc6f2a8fc35db",
+  "bytes": 14935
+ },
+ "subset_rule": "表头 + 伊利诺伊（17）与印第安纳（18）两州的行"
+}

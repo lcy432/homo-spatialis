@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import gzip
 import json
+import math
 import statistics
 from collections import Counter, defaultdict
 from fractions import Fraction
@@ -17,10 +18,10 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from common.intake_contracts import Menu, MenuPolicy, Opportunity, StdRecord
+from common.intake_contracts import Menu, MenuPolicy, Opportunity, StdRecord, applies_to
 from product.realdata import mapping_b, menus
 
-REPORT_VERSION = "intake-reports-v1"
+REPORT_VERSION = "intake-reports-v2"
 
 
 def _jsonl(path: Path):
@@ -51,6 +52,7 @@ def build_reports(config, std_dir: Path, map_dir: Path, catalog_dir: Path) -> di
         "activities_training": activity_training_diagnostics(config, opps),
         "menus": menu_diagnostics(config, opps, menu_docs, tables),
         "capabilities": capability_summary(opps),
+        "gaps": gap_summary(opps),
     }
 
 
@@ -65,13 +67,17 @@ def coverage(config, std_dir: Path, opps: list[Opportunity]) -> dict[str, Any]:
             cbsa = d["geo"].get("cbsa")
             if cbsa:
                 rec_counts[(cbsa, d["sector"])] += 1
-            else:
+            elif d["geo"]["country"] == config.build.country:
                 rec_national[d["sector"]] += 1
     cells: dict[str, dict[str, Any]] = {}
     for m in config.metros:
         row: dict[str, Any] = {}
         for sector in ("housing", "jobs", "training", "food", "goods", "activities", "background"):
-            mine = [o for o in opps if o.sector == sector and (o.cbsa == m.cbsa or o.cbsa is None)]
+            mine = [
+                o
+                for o in opps
+                if o.sector == sector and applies_to(o, m.cbsa, config.build.country)
+            ]
             row[sector] = {
                 "records_in_metro": rec_counts.get((m.cbsa, sector), 0),
                 "records_national_applicable": rec_national.get(sector, 0),
@@ -84,8 +90,14 @@ def coverage(config, std_dir: Path, opps: list[Opportunity]) -> dict[str, Any]:
                     o.weakest_kind in ("estimated", "assumption") for o in mine
                 ),
                 "compilable": sum(o.compile.status == "compilable" for o in mine),
-                "needs_e1_extension": sum(o.compile.status == "needs_e1_extension" for o in mine),
-                "not_compilable": sum(o.compile.status == "not_compilable" for o in mine),
+                "needs_data_only": sum(o.compile.status == "needs_data" for o in mine),
+                "needs_e1_only": sum(o.compile.status == "needs_e1_extension" for o in mine),
+                "needs_data_and_e1": sum(
+                    o.compile.status == "needs_data_and_e1_extension" for o in mine
+                ),
+                "reference_only": sum(o.compile.status == "reference_only" for o in mine),
+                "any_data_gap": sum(bool(o.compile.data_gaps) for o in mine),
+                "any_e1_gap": sum(bool(o.compile.e1_gaps) for o in mine),
                 "planning_reference": sum(o.capabilities.planning_reference for o in mine),
                 "executable": sum(o.capabilities.executable for o in mine),
                 "scorable": sum(o.capabilities.scorable for o in mine),
@@ -94,10 +106,56 @@ def coverage(config, std_dir: Path, opps: list[Opportunity]) -> dict[str, Any]:
     return {
         "note_zh": (
             "records_in_metro = 这座都会区里实际取得的真实记录；records_national_applicable = 全国性的记录（例如全国认证的家电型号、全国均价），"
-            "适用于每座城但不是本地观测；opportunities 里 mapping_a / mapping_b 是映射生成的候选，不是真实样本量。"
-            "estimated_or_assumed = 机会里最弱的来源是估计或假设；needs_e1_extension / not_compilable = 当前引擎不能执行。"
+            "适用于同一国家的每座城但不是本地观测；只在加拿大销售的家电型号不算。opportunities 里 derived 是由真实记录经确定换算得到的"
+            "（例如全国食材均价按地区价格水平换到本都会区），mapping_a / mapping_b 是映射生成的候选，都不是本地真实观测。"
+            "estimated_or_assumed = 机会里最弱的来源是估计或假设。编译状态五选一、互不重叠、相加等于 opportunities："
+            "compilable（现在就能编进 E1）、needs_data_only（只缺资料）、needs_e1_only（只缺 E1 表达能力）、needs_data_and_e1"
+            "（两样都缺）、reference_only（城市背景这类参考事实）。any_data_gap / any_e1_gap 是“至少有一项资料缺口 / E1 缺口”的"
+            "条数，两者重叠，分母都是 opportunities，不能相加当总数。"
         ),
+        "goods_markets": goods_markets(opps, config.build.country),
         "metros": cells,
+    }
+
+
+def goods_markets(opps: list[Opportunity], country: str) -> dict[str, Any]:
+    goods = [o for o in opps if o.sector == "goods"]
+    by_scope = Counter(str(o.attributes.get("market_scope")) for o in goods)
+    return {
+        "total_models": len(goods),
+        "by_market_scope": dict(sorted(by_scope.items())),
+        "in_us_catalog": sum(1 for o in goods if o.geo.country == country),
+        "note_zh": (
+            "us = 只在美国、us_ca = 美加共同市场：进美国目录；ca = 只在加拿大销售：留在资料库（地理是加拿大），不进美国目录、"
+            "不计入美国覆盖；unknown = 来源没写市场：进美国目录但标为市场未知（地理是代理），不当成确定可得，也不当成确定不可得。"
+        ),
+    }
+
+
+def gap_summary(opps: list[Opportunity]) -> dict[str, Any]:
+    """注册表里每项机会（不按城市重复计）的编译缺口：五种状态的分项（互不重叠）与各原因的条数（重叠，分母是板块总数）。"""
+    out: dict[str, Any] = {}
+    for sector in sorted({o.sector for o in opps}):
+        mine = [o for o in opps if o.sector == sector]
+        out[sector] = {
+            "total": len(mine),
+            "status": dict(sorted(Counter(o.compile.status for o in mine).items())),
+            "any_data_gap": sum(bool(o.compile.data_gaps) for o in mine),
+            "any_e1_gap": sum(bool(o.compile.e1_gaps) for o in mine),
+            "data_gap_reasons": dict(
+                Counter(r for o in mine for r in o.compile.data_gaps).most_common()
+            ),
+            "e1_gap_reasons": dict(
+                Counter(r for o in mine for r in o.compile.e1_gaps).most_common()
+            ),
+        }
+    return {
+        "note_zh": (
+            "每项机会只数一次（全国性的不按城市重复）。status 五种互不重叠、相加等于 total；any_data_gap、any_e1_gap 与各原因的"
+            "条数互相重叠（一条机会可以同时缺价格、缺日历，还要 E1 适配），分母都是 total，不能相加。只缺 E1 表达的才是“改 E1 就能执行”；"
+            "缺资料的改 E1 也执行不了。"
+        ),
+        "sectors": out,
     }
 
 
@@ -179,7 +237,10 @@ def housing_diagnostics(
                     "bedrooms": bed,
                     "market_proxy_median_contract": mk["quantiles"].get("0.50") if mk else None,
                     "market_n": mk["n"] if mk else 0,
-                    "market_se_median": mk["se_median"] if mk else None,
+                    "market_median_step": mk["median_step"] if mk else None,
+                    "market_se_median_step": mk["se_median_step"] if mk else None,
+                    "market_median_interpolated": mk["median_interpolated"] if mk else None,
+                    "market_se_median_interpolated": mk["se_median_interpolated"] if mk else None,
                     "stock_median_contract": st["quantiles"].get("0.50") if st else None,
                     "stock_n": st["n"] if st else 0,
                 }
@@ -199,8 +260,23 @@ def housing_diagnostics(
             cv = [float(o.fact("monthly_rent").value) for o in cand]  # type: ignore[union-attr]
             cw = [float(o.target_weight or 0) for o in cand]
             row = {"bedrooms": bed, "source_n": len(src), "candidates": len(cand)}
+            cens = src["censored"].to_numpy(bool)
+            limit = (
+                float(np.nanmin(src["censor_bound"].to_numpy(float)[cens]))
+                if cens.any()
+                else math.inf
+            )
             for q in (0.25, 0.5, 0.75):
-                row[f"source_q{q}"] = _wq(src["rent_contract"].tolist(), src["WGTP"].tolist(), q)
+                row[f"source_q{q}"] = (
+                    mapping_b.step_quantile(
+                        src["rent_contract"].to_numpy(float),
+                        src["WGTP"].to_numpy(float),
+                        q,
+                        limit,
+                    )
+                    if len(src)
+                    else None
+                )
                 row[f"candidates_q{q}"] = _wq(cv, cw, q)
             comparison.append(row)
         levels = Counter(str(o.attributes.get("price_level_used")) for o in b)
@@ -329,8 +405,24 @@ def activity_training_diagnostics(config, opps: list[Opportunity]) -> dict[str, 
             "programs": len(progs),
             "programs_free": sum(1 for f in fees if f == 0),
             "programs_fee_median": statistics.median(fees) if fees else None,
-            "programs_single_session_compilable": sum(
-                1 for o in progs if o.compile.status == "compilable"
+            "programs_compilable": sum(1 for o in progs if o.compile.status == "compilable"),
+            "programs_dated": sum(
+                1 for o in progs if o.calendar is not None and o.calendar.known and o.calendar.start
+            ),
+            "programs_single_day": sum(
+                1
+                for o in progs
+                if o.calendar and o.calendar.start and o.calendar.start == o.calendar.end
+            ),
+            "programs_age": dict(
+                sorted(
+                    Counter(
+                        "unknown"
+                        if o.attributes.get("age_restricted") is None
+                        else ("restricted" if o.attributes.get("age_restricted") else "all_ages")
+                        for o in progs
+                    ).items()
+                )
             ),
             "venues": len(venues),
             "venues_with_opening_hours": sum(
@@ -349,7 +441,11 @@ def activity_training_diagnostics(config, opps: list[Opportunity]) -> dict[str, 
             ),
         }
     return {
-        "note_zh": "只有芝加哥有带价格与日历的城市开放资料；其他城市的活动只有场所（价格未知）。这是来源覆盖的差异，不是城市之间的真实差异。",
+        "note_zh": (
+            "只有芝加哥有带价格与日历的城市开放资料；其他城市的活动只有场所（价格未知）。这是来源覆盖的差异，不是城市之间的真实差异。"
+            "芝加哥的活动都有具体日期，不少还有年龄限制：E1 的体验没有日期窗口、资格标签不求值，模拟年份与真实日期的对应也没定义，"
+            "所以现在一项都不能原样编进 E1（programs_compilable）；原始日历与年龄限制照存（programs_dated、programs_age）。"
+        ),
         "metros": out,
     }
 
@@ -453,6 +549,21 @@ def menu_diagnostics(
         "size_diagnostic": size_rows,
         "inclusion": inclusion,
         "menus_per_policy": dict(Counter(mnu.policy for mnu in menu_docs)),
+        "calendar_menus": {
+            "filter": dict(
+                Counter(mnu.calendar_filter for mnu in menu_docs if mnu.policy == "calendar_open")
+            ),
+            "year1_env0": {
+                f"{mnu.cbsa}:{mnu.sector}": {
+                    "listed": mnu.n_eligible,
+                    "calendar_known": mnu.n_calendar_known,
+                    "calendar_unknown": mnu.n_calendar_unknown,
+                }
+                for mnu in menu_docs
+                if mnu.policy == "calendar_open" and mnu.year == 1 and mnu.env_repeat == 0
+            },
+            "note_zh": "按日历开放的菜单现在没有按日历筛选（pending_mapping：模拟年份与真实日期的对应还没定义），只列出观测到的项目及原始日历；日历已知与未知分开数。",
+        },
         "shared_menus": shared,
     }
 

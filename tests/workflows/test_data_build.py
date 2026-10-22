@@ -5,11 +5,18 @@
 
 from __future__ import annotations
 
+import gzip
+import hashlib
+import json
+import shutil
+from pathlib import Path
+
 import pytest
 
-from product.realdata import build
-from product.realdata.build import STAGES, InjectedInterruptError
-from tests.product.realdata.support import block_network, fixture_ctx
+from product.realdata import build, geo, sources
+from product.realdata.build import STAGES, InjectedInterruptError, RawChangedError
+from product.realdata.fetch import read_cached
+from tests.product.realdata.support import CACHE, block_network, fixture_ctx
 from workflows.data_build import DataBuildRefusedError, DataBuildRuntime
 from workflows.runtime import TRACING_ENV, WorkflowRefusedError
 
@@ -21,6 +28,10 @@ def _offline(monkeypatch):
 
 def _identities(status):
     return {s["stage"]: s.get("identity") for s in status["stages"]}
+
+
+def _paths(status):
+    return {s["stage"]: s.get("path") for s in status["stages"]}
 
 
 def test_interrupted_build_resumes_from_the_failed_stage_and_matches_the_direct_build(tmp_path):
@@ -52,6 +63,9 @@ def test_interrupted_build_resumes_from_the_failed_stage_and_matches_the_direct_
 
     direct = build.run_all(fixture_ctx(tmp_path / "direct"))
     assert _identities(done)["freeze"] == direct["freeze"].identity  # 经过图与不经过图是同一个构建
+    menus_resumed = (work / _paths(done)["catalog"] / "menus.jsonl.gz").read_bytes()
+    menus_direct = (tmp_path / "direct" / direct["catalog"].path / "menus.jsonl.gz").read_bytes()
+    assert gzip.decompress(menus_resumed) == gzip.decompress(menus_direct)  # 恢复不改变菜单
 
 
 def test_checkpoint_holds_only_stage_references(tmp_path):
@@ -137,3 +151,65 @@ def test_external_tracing_must_be_off(tmp_path, monkeypatch, name):
         DataBuildRuntime(tmp_path / "flow.sqlite", fixture_ctx(tmp_path / "work"))
     assert e.value.code == "external_tracing_enabled"
     assert not (tmp_path / "flow.sqlite").exists()
+
+
+# --------------------------------------------------------------------------- F1：恢复只读获取阶段记下的那一份原始文件
+
+
+def _private_cache(tmp_path: Path) -> Path:
+    dst = tmp_path / "cache"
+    shutil.copytree(CACHE, dst)
+    return dst
+
+
+def _refresh(cache: Path, req, content: bytes) -> str:
+    """改变缓存里的原始文件，并写出合法的元数据（SHA-256 与大小都对得上），模拟缓存被重新获取。返回新内容的 SHA-256。"""
+    base = cache / req.source_id / req.key[:16]
+    base.with_suffix(".bin").write_bytes(content)
+    meta = json.loads(base.with_suffix(".meta.json").read_text(encoding="utf-8"))
+    digest = hashlib.sha256(content).hexdigest()
+    meta.update(sha256=digest, bytes=len(content))
+    base.with_suffix(".meta.json").write_text(json.dumps(meta), encoding="utf-8")
+    return digest
+
+
+def _goods_records(work: Path, status) -> list[dict]:
+    path = next(s["path"] for s in status["stages"] if s["stage"] == "standardize")
+    with gzip.open(work / path / "records_goods.jsonl.gz", "rt", encoding="utf-8") as f:
+        return [json.loads(ln) for ln in f if ln.strip()]
+
+
+def test_refreshed_cache_cannot_feed_new_content_into_an_old_build(tmp_path):
+    cache, work, db = _private_cache(tmp_path), tmp_path / "work", tmp_path / "flow.sqlite"
+    with DataBuildRuntime(db, fixture_ctx(work, cache=cache)) as rt:
+        old = rt.run("t1", stop_after="fetch")
+    req = sources.energystar_request("dishwasher")
+    rows = json.loads(read_cached(req, cache).content)
+    new_sha = _refresh(cache, req, json.dumps(rows[1:]).encode("utf-8"))
+    with DataBuildRuntime(db, fixture_ctx(work, cache=cache)) as rt:
+        with pytest.raises(RawChangedError, match="energystar:dishwasher"):
+            rt.run("t1")
+        st = rt.status("t1")
+    assert st["status"] == "paused" and st["next"] == ["standardize"]
+    assert not list(work.glob("standardize/*/done.json"))  # 没有产生“新内容 + 旧指纹”的标准化产物
+    # 新资料走新构建：获取阶段的身份变了，记录里写的是新内容的指纹
+    with DataBuildRuntime(db, fixture_ctx(work, cache=cache)) as rt:
+        fresh = rt.run("t2")
+    ids_old, ids_new = _identities(old), _identities(fresh)
+    assert ids_new["fetch"] != ids_old["fetch"] and fresh["status"] == "frozen"
+    dish = [r for r in _goods_records(work, fresh) if r["attributes"]["category"] == "dishwasher"]
+    assert len(dish) == len(rows) - 1 and {r["source"]["raw_sha256"] for r in dish} == {new_sha}
+
+
+def test_geography_files_are_bound_to_the_fetched_fingerprint_too(tmp_path):
+    cache, work, db = _private_cache(tmp_path), tmp_path / "work", tmp_path / "flow.sqlite"
+    with DataBuildRuntime(db, fixture_ctx(work, cache=cache)) as rt:
+        rt.run("t1", stop_after="fetch")
+    req = geo.acs_geos_request(2024)
+    text = read_cached(req, cache).content.decode("latin-1")
+    _refresh(cache, req, text.replace("Chicago", "Chicagoland", 1).encode("latin-1"))
+    with (
+        DataBuildRuntime(db, fixture_ctx(work, cache=cache)) as rt,
+        pytest.raises(RawChangedError, match="acs_geos"),
+    ):
+        rt.run("t1")

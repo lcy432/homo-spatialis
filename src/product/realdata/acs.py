@@ -9,8 +9,12 @@ from __future__ import annotations
 import csv
 import io
 import zipfile
+from dataclasses import dataclass
+from typing import Literal
 
 import pandas as pd
+
+from common.intake_contracts import MethodSpec
 
 REP_WEIGHTS = tuple(f"WGTP{i}" for i in range(1, 81))
 
@@ -74,3 +78,68 @@ def dictionary_labels(content: bytes) -> dict[str, dict[str, str]]:
         if len(row) >= 7 and row[0] == "VAL" and row[4] == row[5]:
             out.setdefault(row[1], {})[row[4]] = row[6]
     return out
+
+
+# --------------------------------------------------------------------------- 官方顶码表
+
+TOPCODE_METHOD = MethodSpec(
+    method_id="acs_official_topcodes",
+    version="1",
+    family="classification",
+    summary_zh=(
+        "按 Census 官方 2024 PUMS 顶码表识别合同租金顶码：州内超过阈值（RNTTPCT）的租金被换成同一个替代值（T_RNT，"
+        "超过阈值的那些租金的平均）。替代值不是每条记录的真实值，只知道真实值高于本州阈值。官方表里没有的州：只把整州文件里"
+        "的最大值标为“是否顶码未知”，它的真实值只知道高于整州第二大的租金。"
+    ),
+    inputs=("census_acs1_pums_2024",),
+    known_biases_zh=("跨州混合的格子里，可识别的分位数上限取格内顶码记录所在州的最低阈值",),
+)
+
+
+@dataclass(frozen=True)
+class TopcodeRule:
+    """一个州的合同租金顶码规则。``official``：官方阈值与替代值；``missing``：官方表里没有这个州，只有整州文件的最大与第二大值。"""
+
+    state: str
+    status: Literal["official", "missing"]
+    threshold: float | None = None
+    replacement: float | None = None
+    file_max: float | None = None
+    file_second: float | None = None
+
+    def classify(self, rntp: float) -> tuple[str, float | None]:
+        """一条记录 → （顶码状态，真实值的下界）。状态：``topcoded`` / ``unknown`` / ``not_topcoded``。"""
+        if self.status == "official":
+            assert self.threshold is not None and self.replacement is not None
+            if rntp == self.replacement and self.replacement > self.threshold:
+                return "topcoded", self.threshold
+            if (
+                rntp > self.threshold
+            ):  # 官方说超过阈值的都被替换了；出现别的值说明对不上，按未知处理
+                return "unknown", self.threshold
+            return "not_topcoded", None
+        if self.file_max is not None and rntp == self.file_max:
+            return "unknown", self.file_second if self.file_second is not None else 0.0
+        return "not_topcoded", None
+
+
+def parse_topcodes(content: bytes) -> dict[str, TopcodeRule]:
+    """官方顶码表（每州一行；合同租金是 RNTTPCT = 阈值、T_RNT = 替代值）→ 州代码 → 规则。"""
+    out: dict[str, TopcodeRule] = {}
+    for row in csv.DictReader(io.StringIO(content.decode("utf-8-sig"))):
+        st = str(row.get("STATE", "")).strip().zfill(2)
+        try:
+            t, r = float(row["RNTTPCT"]), float(row["T_RNT"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        out[st] = TopcodeRule(state=st, status="official", threshold=t, replacement=r)
+    return out
+
+
+def rent_top_values(content: bytes) -> tuple[float | None, float | None]:
+    """整州住房文件里合同租金的最大值与第二大的不同值（只在官方表缺这个州时使用）。"""
+    z, name = _csv_member(content, "psam_h")
+    with z.open(name) as f:
+        rent = pd.read_csv(f, usecols=["RNTP"])["RNTP"]
+    vals = sorted({float(v) for v in rent.dropna() if v > 0})
+    return (vals[-1] if vals else None), (vals[-2] if len(vals) > 1 else None)

@@ -18,7 +18,6 @@ from fractions import Fraction
 
 from common.intake_contracts import (
     Calendar,
-    CompileInfo,
     FieldValue,
     GeoRef,
     MethodSpec,
@@ -198,24 +197,22 @@ def program_opportunity(rec: StdRecord):
         season=str(rec.attributes.get("season"))[:40] if rec.attributes.get("season") else None,
     )
     cancelled = bool(rec.attributes.get("cancelled"))
-    fee, hours = rec.field("program_fee"), rec.field("session_hours")
-    single = (
-        rec.period.start == rec.period.end
-        and fee is not None
-        and fee.status == "present"
-        and hours is not None
+    hours = rec.field("session_hours")
+    age = age_eligibility(rec.attributes.get("age_range"))
+    data_gaps = ["age_eligibility_unknown"] if age["age_restricted"] is None else []
+    # E1 的体验没有日期或月份窗口（availability 只有 available / unavailable / unknown），资格标签只记录、不求值，
+    # 模拟年份与真实日期的对应也还没定义：带日期或年龄限制的活动不能当成任意月份、任意年龄都能参加的普通体验导出。
+    e1_gaps = ["dated_calendar_not_expressible"]
+    if age["age_restricted"]:
+        e1_gaps.append("age_eligibility_not_expressible")
+    if rec.period.start != rec.period.end:
+        e1_gaps.append("repeated_sessions_not_expressible")
+    if (
+        hours is not None
         and hours.status == "present"
-        and (Fraction(hours.value) * 100).denominator == 1  # type: ignore[arg-type]
-    )
-    compile_info = (
-        CompileInfo(status="compilable", e1_category="experience")
-        if single
-        else CompileInfo(
-            status="needs_e1_extension",
-            reasons=("calendar_bound_repeated_sessions_not_expressible",),
-            e1_category="experience",
-        )
-    )
+        and (Fraction(hours.value) * 100).denominator != 1
+    ):  # type: ignore[arg-type]
+        e1_gaps.append("session_hours_precision_not_expressible")
     return make_opportunity(
         opportunity_id=rec.record_id.replace(
             "activities.chicago_parks.", "activities.program.16980.", 1
@@ -231,12 +228,57 @@ def program_opportunity(rec: StdRecord):
         required=("program_fee",),
         supply_status="not_offered" if cancelled else "offered",
         menu_policy="calendar_open",
-        compile=compile_info,
-        attributes=dict(rec.attributes),
+        e1_category="experience",
+        e1_needs=("session_hours",),
+        data_gaps=tuple(data_gaps),
+        e1_gaps=tuple(e1_gaps),
+        attributes={**rec.attributes, **age},
         terms=dict(rec.terms),
         calendar=cal,
         price_fact="program_fee",
     )
+
+
+AGE_RANGE = re.compile(
+    r"^At least (\d+)(?: years? (\d+) months?)? but less than (\d+)$", flags=re.I
+)
+AGE_UP = re.compile(r"^(\d+) and up$", flags=re.I)
+AGE_UNDER = re.compile(r"^(\d+) and under$", flags=re.I)
+
+
+def age_eligibility(text: object) -> dict[str, str | bool | None]:
+    """芝加哥活动的年龄限制原文 → 结构化限制（原文照存）。只有原文写了数字才写数字年龄；“Adult”“Early Childhood”这类类别
+    原文没有给数字，就只记类别，不替它编年龄范围。没写年龄 → 限制未知（不当成不限年龄）。"""
+    raw = _text(text)
+    out: dict[str, str | bool | None] = {
+        "age_rule": raw,
+        "age_min_years": None,
+        "age_max_years_exclusive": None,
+        "age_max_years_inclusive": None,
+        "age_group": None,
+        "age_restricted": None,
+    }
+    if raw is None:
+        return out
+    if raw.lower() == "all ages":
+        return {**out, "age_restricted": False}
+    if m := AGE_RANGE.match(raw):
+        lo = Fraction(int(m.group(1))) + Fraction(int(m.group(2) or 0), 12)
+        return {
+            **out,
+            "age_min_years": _num(lo),
+            "age_max_years_exclusive": m.group(3),
+            "age_restricted": True,
+        }
+    if m := AGE_UP.match(raw):
+        return {**out, "age_min_years": m.group(1), "age_restricted": True}
+    if m := AGE_UNDER.match(raw):
+        return {**out, "age_max_years_inclusive": m.group(1), "age_restricted": True}
+    return {**out, "age_group": raw, "age_restricted": True}
+
+
+def _num(x: Fraction) -> str:
+    return str(x.numerator) if x.denominator == 1 else str(float(x))
 
 
 def venue_records(
@@ -315,11 +357,9 @@ def venue_opportunity(rec: StdRecord):
         required=(),
         supply_status="offered",
         menu_policy="calendar_open",
-        compile=CompileInfo(
-            status="needs_e1_extension",
-            reasons=("price_unknown", "e1_has_no_venue_visit_choice"),
-            e1_category="experience",
-        ),
+        e1_category="experience",
+        data_gaps=() if cal.known else ("calendar_unknown",),
+        e1_gaps=("e1_has_no_venue_visit_choice",),
         attributes=dict(rec.attributes),
         calendar=cal,
         price_fact="price",

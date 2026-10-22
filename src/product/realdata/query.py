@@ -12,6 +12,8 @@ import sqlite3
 from dataclasses import dataclass
 from typing import Any
 
+from product.realdata import store
+
 
 @dataclass(frozen=True)
 class Page:
@@ -54,8 +56,13 @@ def opportunities(
         where.append("sector = ?")
         args.append(sector)
     if cbsa:
-        where.append("(cbsa = ? OR cbsa IS NULL)" if include_national else "cbsa = ?")
-        args.append(cbsa)
+        if include_national:
+            # 全国性的机会只算进同一国家的都会区（只在加拿大销售的家电型号不进美国都会区），与目录、菜单同一条规则
+            where.append("(cbsa = ? OR (cbsa IS NULL AND country = ?))")
+            args += [cbsa, store.meta(conn)["country"]]
+        else:
+            where.append("cbsa = ?")
+            args.append(cbsa)
     if kind:
         where.append("kind = ?")
         args.append(kind)

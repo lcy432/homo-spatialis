@@ -21,7 +21,6 @@ import pandas as pd
 
 from common.intake_contracts import (
     AssumptionSpec,
-    CompileInfo,
     FieldValue,
     GeoRef,
     Period,
@@ -58,11 +57,8 @@ EMPLOYMENT_PROXY = AssumptionSpec(
     applies_to=("menus.jobs",),
     why_not_measured_zh="没有公开的都会区 × 职业招聘或空缺频率资料；就业存量份额不是招聘频率，也不是录用概率。",
 )
-JOB_COMPILE_REASONS = (
-    "job_arrangement_not_observed",
-    "workdays_and_onsite_days_not_observed",
-    "employer_not_identified",
-)
+#: E1 的岗位要到岗安排（工作日与到岗天数）与雇主；OEWS 只有职业 × 地区的汇总，两样都没有。
+JOB_E1_NEEDS = ("work_arrangement", "employer")
 
 
 def parse_oews(content: bytes, cbsas: set[str]) -> pd.DataFrame:
@@ -285,9 +281,8 @@ def opportunities(rec: StdRecord, hours: dict, ep: dict[str, dict[str, str]]) ->
                 if emp is not None and emp.status == "present"
                 else "unknown",
                 menu_policy="annual_exposure_sample",
-                compile=CompileInfo(
-                    status="needs_e1_extension", reasons=JOB_COMPILE_REASONS, e1_category="job"
-                ),
+                e1_category="job",
+                e1_needs=JOB_E1_NEEDS,
                 attributes={
                     "occupation_scheme": "SOC2018",
                     "occupation_code": soc,

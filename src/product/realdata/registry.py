@@ -7,6 +7,9 @@
 * 可执行：能编进当前引擎（``compile = compilable``）、供给已知有卖、报价已知。
 * 可评分：能对应现有评分项而且评分要读的资料齐全（由板块明确声明；默认否）。
 
+**编译缺口分两类**（``CompileInfo``）：资料缺口自动包含必需事实、金额事实与“E1 需要的事实”里缺的那些（``missing:<事实名>``），
+板块再补充其他资料缺口（例如通勤不是按房源算的）；E1 表达能力的缺口由板块写明。状态由两类缺口推出来。
+
 **资料状态**：必需事实有缺 → ``insufficient``；必需的齐、可选的有缺 → ``partial``；全部齐 → ``complete``。缺失、隐去、无法映射、
 访问受限都算缺；``not_applicable`` 不算。
 """
@@ -74,7 +77,11 @@ def make_opportunity(
     required: tuple[str, ...],
     supply_status: SupplyStatus,
     menu_policy: MenuPolicyKind,
-    compile: CompileInfo,
+    e1_category: str | None,
+    e1_needs: tuple[str, ...] = (),
+    data_gaps: tuple[str, ...] = (),
+    e1_gaps: tuple[str, ...] = (),
+    reference_only: bool = False,
     method: str | None = None,
     attributes: dict[str, Scalar] | None = None,
     terms: dict[str, Terms] | None = None,
@@ -86,9 +93,16 @@ def make_opportunity(
     price_fact: str | None = None,
 ) -> Opportunity:
     status, missing = data_status(facts, required)
-    price_known = price_fact is None or any(
-        f.name == price_fact and f.status == "present" for f in facts
+    present = {f.name for f in facts if f.status == "present"}
+    needed = [*required, *([price_fact] if price_fact else []), *e1_needs]
+    auto = [f"missing:{name}" for name in dict.fromkeys(needed) if name not in present]
+    compile = CompileInfo.of(
+        data_gaps=(*auto, *data_gaps),
+        e1_gaps=e1_gaps,
+        e1_category=e1_category,
+        reference_only=reference_only,
     )
+    price_known = price_fact is None or price_fact in present
     executable = compile.status == "compilable" and supply_status == "offered" and price_known
     return Opportunity(
         opportunity_id=opportunity_id,
@@ -119,4 +133,5 @@ def make_opportunity(
         ),
         compile=compile,
         weakest_kind=weakest_kind(facts),
+        price_fact=price_fact,
     )

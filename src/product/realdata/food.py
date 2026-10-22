@@ -25,7 +25,6 @@ import pandas as pd
 
 from common.intake_contracts import (
     AssumptionSpec,
-    CompileInfo,
     FieldValue,
     GeoRef,
     MethodSpec,
@@ -255,17 +254,17 @@ def item_opportunities(records: list[StdRecord], metro: Metro, factor: Fraction 
                     cbsa=metro.cbsa,
                     relation="exact",
                 ),
-                origin="record",
+                # 都会区价格是全国均价按地区价格水平换算的估计，不是本地观测：机会是派生的，不算“已采集”。
+                origin="derived",
+                method=RPP_METHOD.ref,
                 lineage=tuple(r.record_id for r in (us, region) if r is not None),
                 facts=tuple(facts),
                 required=("price",),
                 supply_status="unknown",
                 menu_policy="full_catalog",
-                compile=CompileInfo(
-                    status="needs_e1_extension",
-                    reasons=("single_food_item_not_a_monthly_plan",),
-                    e1_category="food",
-                ),
+                e1_category="food",
+                e1_gaps=("single_food_item_not_a_monthly_plan",),
+                price_fact="price",
                 attributes={
                     "unit_text": us.attributes["unit_text"],
                     "preparation": "ingredient",
@@ -353,11 +352,9 @@ def plan_opportunities(items: list, metro: Metro, baskets: dict) -> list:
                 required=("monthly_food_cost",),
                 supply_status="unknown",
                 menu_policy="full_catalog",
-                compile=CompileInfo(
-                    status="not_compilable",
-                    reasons=("prep_hours_missing", "fresh_meals_per_week_missing"),
-                    e1_category="food",
-                ),
+                e1_category="food",
+                e1_needs=("prep_hours_month", "fresh_meals_per_week"),
+                price_fact="monthly_food_cost",
                 attributes={
                     "preparation": "home_cooked",
                     "channel": "grocery_retail",
@@ -473,11 +470,9 @@ def restaurant_opportunity(rec: StdRecord):
         required=(),
         supply_status="offered",
         menu_policy="full_catalog",
-        compile=CompileInfo(
-            status="needs_e1_extension",
-            reasons=("price_unknown", "e1_has_no_meal_level_choice"),
-            e1_category="food",
-        ),
+        e1_category="food",
+        e1_gaps=("e1_has_no_meal_level_choice",),
+        price_fact="price",
         attributes=dict(rec.attributes),
         terms={
             "sales_tax": "unknown",

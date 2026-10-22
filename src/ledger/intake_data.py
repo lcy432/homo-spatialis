@@ -7,7 +7,8 @@
    不能直接标成 ``USD_2024_LOCAL``（换口径要有方法）。
 3. 机会的溯源（``lineage``）都能找到对应的记录或条件表；映射生成的机会写了登记过的方法。
 4. 菜单只引用注册表里的机会；同一（都会区、年份、板块、环境重复）只有一份菜单；按同一条合格规则重算合格集合，数量与内容身份都要
-   对得上；列出的菜单选中的都在合格集合里。
+   对得上；列出的菜单选中的都在合格集合里。全国性的机会只算进同一国家的都会区（``common.intake_contracts.applies_to``）。
+5. 日历菜单写明没有按日历筛选，日历已知 + 未知 = 合格数（结构本身在 ``Menu`` 里校验）。
 """
 
 from __future__ import annotations
@@ -21,7 +22,7 @@ from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
-from common.intake_contracts import Menu, Opportunity, StdRecord, canonical_json
+from common.intake_contracts import Menu, Opportunity, StdRecord, applies_to, canonical_json
 
 ALLOWED_NUMERAIRES = frozenset({"USD_2024_LOCAL", "USD_2024_US_AVG", "USD_2024_CENSUS_REGION"})
 #: 原样保留在原始时期的名义金额（没有换口径）：只能当事实展示，不能和 ``USD_2024_LOCAL`` 直接相加或比较。
@@ -80,11 +81,13 @@ def check_fields(
 
 
 def _eligible(o: Opportunity, policy: str) -> bool:
+    """与菜单生成同一条合格规则（这里独立写一遍，用来核对）：抽样要在供应、权重为正、资料不是“不足”；列表只去掉确定不供应的。"""
     if policy == "annual_exposure_sample":
         return (
             o.supply_status == "offered"
             and o.target_weight is not None
             and float(o.target_weight) > 0
+            and o.data_status != "insufficient"
         )
     return o.supply_status != "not_offered"
 
@@ -98,6 +101,7 @@ def check_build(
     metro_cbsas: list[str],
     methods: set[str],
     assumptions: set[str],
+    country: str,
 ) -> list[str]:
     problems: list[str] = []
     record_ids: set[str] = set()
@@ -125,8 +129,9 @@ def check_build(
             if ref not in record_ids and ref not in table_ids:
                 problems.append(f"{o.opportunity_id}: 溯源 {ref} 找不到对应的记录或条件表")
         problems += check_fields(o.opportunity_id, doc["facts"], methods, assumptions, None)
-        for c in [o.cbsa] if o.cbsa else metro_cbsas:
-            by_city_sector.setdefault((c, o.sector), []).append(o.opportunity_id)
+        for c in metro_cbsas:
+            if applies_to(o, c, country):
+                by_city_sector.setdefault((c, o.sector), []).append(o.opportunity_id)
         if len(problems) > MAX_PROBLEMS:
             return problems
     seen: Counter[tuple[str, int, str, int]] = Counter()

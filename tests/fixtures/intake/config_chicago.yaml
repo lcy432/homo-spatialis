@@ -55,7 +55,7 @@ sources:
 - source_id: census_acs1_pums_2024
   publisher: U.S. Census Bureau
   dataset: American Community Survey 2024 1-year PUMS, state CSV files (housing and
-    person) and data dictionary
+    person), data dictionary, and the official state top-coded values table
   url: https://www2.census.gov/programs-surveys/acs/data/pums/2024/1-Year/
   license: U.S. federal government work (public domain)
   access: open

@@ -37,7 +37,7 @@ CREATE TABLE tables (table_id TEXT PRIMARY KEY, method TEXT NOT NULL, cbsa TEXT,
 CREATE TABLE table_records (table_id TEXT NOT NULL, record_id TEXT NOT NULL);
 CREATE INDEX table_records_table ON table_records (table_id);
 CREATE TABLE opportunities (
-    opportunity_id TEXT PRIMARY KEY, sector TEXT NOT NULL, kind TEXT NOT NULL, cbsa TEXT,
+    opportunity_id TEXT PRIMARY KEY, sector TEXT NOT NULL, kind TEXT NOT NULL, cbsa TEXT, country TEXT NOT NULL,
     origin TEXT NOT NULL, stratum TEXT, menu_policy TEXT NOT NULL, supply_status TEXT NOT NULL,
     data_status TEXT NOT NULL, compile_status TEXT NOT NULL, collected INTEGER NOT NULL,
     planning_reference INTEGER NOT NULL, executable INTEGER NOT NULL, scorable INTEGER NOT NULL,
@@ -122,6 +122,7 @@ def put_opportunities(conn: sqlite3.Connection, opps: Iterable[Opportunity]) -> 
             o.sector,
             o.kind,
             o.cbsa,
+            o.geo.country,
             o.origin,
             o.stratum,
             o.menu_policy,
@@ -137,7 +138,7 @@ def put_opportunities(conn: sqlite3.Connection, opps: Iterable[Opportunity]) -> 
         )
         for o in opps
     ]
-    conn.executemany("INSERT INTO opportunities VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", rows)
+    conn.executemany("INSERT INTO opportunities VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", rows)
     return len(rows)
 
 

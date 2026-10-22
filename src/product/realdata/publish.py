@@ -114,16 +114,18 @@ def coverage_markdown(coverage: dict[str, Any], fetches: list[dict[str, Any]]) -
         "",
         "* **记录**：真实取得的标准化记录（本都会区的 + 全国适用的，例如全国登记的家电型号、全国均价）。",
         "* **机会**：注册表里的候选；其中“映射生成”的是 A / B 映射按资料生成的候选，不是真实房源或真实岗位。",
-        "* **资料完整 / 部分 / 不足**：候选必需的事实是否都在；不足的不进抽样，也不补数。",
+        "* **机会（真实记录 / 派生 / 映射生成）**：派生是由真实记录经确定换算得到的（例如全国食材均价换到本都会区），映射生成是 A / B 映射的候选；都不是本地真实观测。",
+        "* **资料完整 / 部分 / 不足**：候选必需的事实是否都在；不足的不进抽样（列表类菜单照样列出并标明），也不补数。",
         "* **估计或设定**：至少一项事实是估计值或设定值（例如租金是新租市场代理、食材价是地区价格水平调整后的估计）。",
-        "* **可编译 / 需扩展 / 不可编译**：现在的 E1 能否原样执行；需扩展的是 E1 缺少对应的行动或字段（见扩展声明）。",
+        "* **编译状态**（互不重叠，相加等于机会数）：可编译 = 现在就能编进 E1；只缺资料 = 改 E1 也执行不了，要新资料；只缺 E1 = 资料够了，"
+        "差 E1 的表达能力；两样都缺；参考事实 = 城市背景这类不是行动的事实。各原因的明细（互相重叠）见 `reports/gaps.json`。",
         "",
     ]
     for sector in SECTORS:
         lines += [
             f"## {SECTOR_ZH[sector]}（{sector}）",
             "",
-            "| 都会区 | 记录（本地 / 全国适用） | 机会（真实记录 / 映射生成） | 资料完整 / 部分 / 不足 | 估计或设定 | 可编译 / 需扩展 / 不可编译 | 能供规划参考 | 可执行 |",
+            "| 都会区 | 记录（本地 / 全国适用） | 机会（真实记录 / 派生 / 映射生成） | 资料完整 / 部分 / 不足 | 估计或设定 | 可编译 / 只缺资料 / 只缺 E1 / 两样都缺 / 参考事实 | 能供规划参考 | 可执行 |",
             "|---|---|---|---|---|---|---|---|",
         ]
         for cbsa, m in coverage["metros"].items():
@@ -134,13 +136,21 @@ def coverage_markdown(coverage: dict[str, Any], fetches: list[dict[str, Any]]) -
             generated = origin.get("mapping_a", 0) + origin.get("mapping_b", 0)
             lines.append(
                 f"| {m['label_zh']}（{cbsa}） | {v['records_in_metro']} / {v['records_national_applicable']} "
-                f"| {origin.get('record', 0)} / {generated} "
+                f"| {origin.get('record', 0)} / {origin.get('derived', 0)} / {generated} "
                 f"| {v['data_complete']} / {v['data_partial']} / {v['data_insufficient']} "
                 f"| {v['estimated_or_assumed']} "
-                f"| {v['compilable']} / {v['needs_e1_extension']} / {v['not_compilable']} "
+                f"| {v['compilable']} / {v['needs_data_only']} / {v['needs_e1_only']} / {v['needs_data_and_e1']} / {v['reference_only']} "
                 f"| {v['planning_reference']} | {v['executable']} |"
             )
         lines.append("")
+    gm = coverage.get("goods_markets")
+    if gm:
+        lines += [
+            "## 家电型号的适用市场",
+            "",
+            f"共 {gm['total_models']} 个型号；按来源的 markets 字段：{gm['by_market_scope']}；进美国目录的 {gm['in_us_catalog']} 个。{gm['note_zh']}",
+            "",
+        ]
     bad = [f for f in fetches if f["status"] != "ok"]
     lines += ["## 没有取得的来源请求", ""]
     if not bad:
@@ -168,6 +178,7 @@ def write_summary(db_path: Path, out_dir: Path, *, repro: list[str]) -> dict[str
             "stages": {
                 k[len("stage_") :]: v for k, v in sorted(meta.items()) if k.startswith("stage_")
             },
+            "country": meta.get("country"),
             "counts": _counts(conn),
             "sources": fetches,
             "methods": [r for (r,) in conn.execute("SELECT ref FROM methods ORDER BY ref")],

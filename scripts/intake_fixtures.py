@@ -27,7 +27,7 @@ import pandas as pd
 import yaml
 
 import _bootstrap  # noqa: F401
-from product.realdata import geo, sources
+from product.realdata import acs, geo, sources
 from product.realdata.acs import REP_WEIGHTS
 from product.realdata.activities import PRIVATE_ACCESS
 from product.realdata.background import AP_ENERGY
@@ -39,6 +39,7 @@ PUMS_STATE = "17"
 N_PUMAS = 4
 N_OTHER_RENTERS = 40
 N_INSTITUTIONS = 8
+N_TOPCODED = 5
 FIXED_TIME = (2024, 1, 1, 0, 0, 0)
 
 
@@ -150,17 +151,29 @@ def cut_pums(
     pumas: list[str],
     hvars: tuple[str, ...],
     pvars: tuple[str, ...],
+    metro_pumas: list[str],
+    replacement: float,
 ) -> tuple[bytes, bytes, str]:
     zh = zipfile.ZipFile(io.BytesIO(h_content))
     hname = next(n for n in zh.namelist() if n.lower().startswith("psam_h") and n.endswith(".csv"))
     cols = list(dict.fromkeys([*hvars, *REP_WEIGHTS]))
-    h = pd.read_csv(zh.open(hname), dtype=str, usecols=cols, keep_default_na=False)[cols]
-    h = h[h["PUMA"].str.zfill(5).isin(pumas)]
+    h_all = pd.read_csv(zh.open(hname), dtype=str, usecols=cols, keep_default_na=False)[cols]
+    h = h_all[h_all["PUMA"].str.zfill(5).isin(pumas)]
+    top = (
+        h_all[
+            h_all["PUMA"].str.zfill(5).isin(metro_pumas)
+            & (pd.to_numeric(h_all["RNTP"], errors="coerce") == replacement)
+            & (h_all["TEN"] == "3")
+        ]
+        .sort_values("SERIALNO")
+        .head(N_TOPCODED)
+    )
     rent = pd.to_numeric(h["RNTP"], errors="coerce")
     renter_or_vacant = ((h["TEN"] == "3") | (h["VACS"] == "1")) & (rent > 0)
     market = renter_or_vacant & ((h["VACS"] == "1") | ((h["TEN"] == "3") & (h["MV"] == "1")))
     others = h[renter_or_vacant & ~market].groupby("PUMA", sort=True).head(N_OTHER_RENTERS)
-    kept = pd.concat([h[market], others]).sort_index()
+    kept = pd.concat([h[market], others, top])
+    kept = kept[~kept.index.duplicated()].sort_index()
     zp = zipfile.ZipFile(io.BytesIO(p_content))
     pname = next(n for n in zp.namelist() if n.lower().startswith("psam_p") and n.endswith(".csv"))
     p = pd.read_csv(zp.open(pname), dtype=str, usecols=list(pvars), keep_default_na=False)[
@@ -169,7 +182,8 @@ def cut_pums(
     p = p[p["SERIALNO"].isin(set(kept["SERIALNO"]))]
     rule = (
         f"PUMA {', '.join(pumas)}（完整在芝加哥都会区内、编号最小的 {N_PUMAS} 个）：全部空置待租与 12 个月内迁入的租住户，"
-        f"加上每个 PUMA 前 {N_OTHER_RENTERS} 户其他租住户；只留配置用到的列与 80 个重复权重；人员文件留这些住户的所有人"
+        f"加上每个 PUMA 前 {N_OTHER_RENTERS} 户其他租住户，以及都会区内合同租金等于本州官方顶码替代值（{replacement:g}）的前 "
+        f"{N_TOPCODED} 户租住户（检验顶码）；只留配置用到的列与 80 个重复权重；人员文件留这些住户的所有人"
     )
     return (
         rezip({hname: kept.to_csv(index=False, lineterminator="\n").encode("utf-8")}),
@@ -304,10 +318,16 @@ def cut_chicago(content: bytes) -> tuple[bytes, str]:
         (lambda r: not has_fee(r), 5),
         (lambda r: r.get("event_cancelled") == "Y", 5),
         (lambda r: "&amp;" in json.dumps(r), 5),
+        (lambda r: r.get("age_range") == "Early Childhood" and has_fee(r), 3),
+        (lambda r: str(r.get("age_range") or "").startswith("At least 1 years"), 2),
+        (lambda r: single_day(r) and has_fee(r) and r.get("age_range") == "All Ages", 2),
     ):
         picks += [r for r in rows if rule(r) and r not in picks][:n]
     picks.sort(key=lambda r: str(r.get("activity_id")))
-    rule_text = "按活动编号排序后：单日有价且写了时段的前 15 个、多日有价的前 15 个、没写价格的前 5 个、已取消的前 5 个、文字带 HTML 实体的前 5 个"
+    rule_text = (
+        "按活动编号排序后：单日有价且写了时段的前 15 个、多日有价的前 15 个、没写价格的前 5 个、已取消的前 5 个、文字带 HTML 实体的前 5 个、"
+        "有价的幼儿（Early Childhood）活动前 3 个、年龄写成“至少 1 岁 6 个月”的前 2 个、单日有价且不限年龄的前 2 个"
+    )
     return json.dumps(picks, ensure_ascii=False).encode("utf-8"), rule_text
 
 
@@ -415,12 +435,21 @@ def main() -> int:
         None,
     )[CBSA]
     chosen = sorted(p.puma for p in g.pumas if p.full and p.state == PUMS_STATE)[:N_PUMAS]
+    topcodes = real(reqs["pums_topcodes"])
+    save(
+        "pums_topcodes",
+        lines_keep(topcodes.content, lambda ln: ln.split(",", 1)[0].strip() in ("17", "18")),
+        "表头 + 伊利诺伊（17）与印第安纳（18）两州的行",
+    )
+    il_rule = acs.parse_topcodes(topcodes.content)[PUMS_STATE]
     h_bytes, p_bytes, pums_rule = cut_pums(
         real(reqs[f"pums_h:{PUMS_STATE}"]).content,
         real(reqs[f"pums_p:{PUMS_STATE}"]).content,
         chosen,
         cfg.pums.housing_vars,
         cfg.pums.person_vars,
+        sorted(p.puma for p in g.pumas if p.state == PUMS_STATE),
+        float(il_rule.replacement),
     )
     save(f"pums_h:{PUMS_STATE}", h_bytes, pums_rule)
     save(f"pums_p:{PUMS_STATE}", p_bytes, pums_rule)
@@ -470,7 +499,17 @@ def main() -> int:
     for cat in sources.ENERGYSTAR:
         name = f"energystar:{cat}"
         rows = json.loads(real(reqs[name]).content)
-        save(name, json.dumps(rows[:6], ensure_ascii=False).encode("utf-8"), "文件里的前 6 个型号")
+        by_market = [
+            r
+            for m in ("United States", "Canada", "United States, Canada")
+            for r in [x for x in rows if x.get("markets") == m][:2]
+        ]
+        rows = rows[:6] + [r for r in by_market if r not in rows[:6]]
+        save(
+            name,
+            json.dumps(rows, ensure_ascii=False).encode("utf-8"),
+            "文件里的前 6 个型号，加上只在美国、只在加拿大、美加共同市场的各前 2 个",
+        )
     chi_bytes, chi_rule = cut_chicago(real(reqs["chicago_activities"]).content)
     save("chicago_activities", chi_bytes, chi_rule)
     save(

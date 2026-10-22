@@ -1,0 +1,117 @@
+{
+ "note_zh": "每项机会只数一次（全国性的不按城市重复）。status 五种互不重叠、相加等于 total；any_data_gap、any_e1_gap 与各原因的条数互相重叠（一条机会可以同时缺价格、缺日历，还要 E1 适配），分母都是 total，不能相加。只缺 E1 表达的才是“改 E1 就能执行”；缺资料的改 E1 也执行不了。",
+ "sectors": {
+  "activities": {
+   "any_data_gap": 20683,
+   "any_e1_gap": 28992,
+   "data_gap_reasons": {
+    "age_eligibility_unknown": 121,
+    "calendar_unknown": 18455,
+    "missing:price": 19990,
+    "missing:session_hours": 693
+   },
+   "e1_gap_reasons": {
+    "age_eligibility_not_expressible": 8343,
+    "dated_calendar_not_expressible": 9002,
+    "e1_has_no_venue_visit_choice": 19990,
+    "repeated_sessions_not_expressible": 7860,
+    "session_hours_precision_not_expressible": 186
+   },
+   "status": {
+    "needs_data_and_e1_extension": 20683,
+    "needs_e1_extension": 8309
+   },
+   "total": 28992
+  },
+  "background": {
+   "any_data_gap": 0,
+   "any_e1_gap": 0,
+   "data_gap_reasons": {},
+   "e1_gap_reasons": {},
+   "status": {
+    "reference_only": 72
+   },
+   "total": 72
+  },
+  "food": {
+   "any_data_gap": 33341,
+   "any_e1_gap": 33635,
+   "data_gap_reasons": {
+    "missing:fresh_meals_per_week": 18,
+    "missing:prep_hours_month": 18,
+    "missing:price": 33323
+   },
+   "e1_gap_reasons": {
+    "e1_has_no_meal_level_choice": 33311,
+    "single_food_item_not_a_monthly_plan": 324
+   },
+   "status": {
+    "needs_data": 18,
+    "needs_data_and_e1_extension": 33323,
+    "needs_e1_extension": 312
+   },
+   "total": 33653
+  },
+  "goods": {
+   "any_data_gap": 1875,
+   "any_e1_gap": 0,
+   "data_gap_reasons": {
+    "missing:lifetime_years": 1875,
+    "missing:price": 1875,
+    "missing:relief_hours": 1875
+   },
+   "e1_gap_reasons": {},
+   "status": {
+    "needs_data": 1875
+   },
+   "total": 1875
+  },
+  "housing": {
+   "any_data_gap": 5553,
+   "any_e1_gap": 0,
+   "data_gap_reasons": {
+    "commute_is_resident_median_not_unit_specific": 5553,
+    "missing:floor_area": 5553,
+    "missing:monthly_rent": 140
+   },
+   "e1_gap_reasons": {},
+   "status": {
+    "needs_data": 5553
+   },
+   "total": 5553
+  },
+  "jobs": {
+   "any_data_gap": 13071,
+   "any_e1_gap": 0,
+   "data_gap_reasons": {
+    "missing:annual_wage": 389,
+    "missing:employer": 13071,
+    "missing:work_arrangement": 13071
+   },
+   "e1_gap_reasons": {},
+   "status": {
+    "needs_data": 13071
+   },
+   "total": 13071
+  },
+  "training": {
+   "any_data_gap": 2100,
+   "any_e1_gap": 1143,
+   "data_gap_reasons": {
+    "calendar_unknown": 2100,
+    "missing:months_to_complete": 825,
+    "missing:start_dates": 2100,
+    "missing:tuition_fees": 1166,
+    "missing:weekly_hours": 2100
+   },
+   "e1_gap_reasons": {
+    "length_not_whole_years": 1143
+   },
+   "status": {
+    "needs_data": 957,
+    "needs_data_and_e1_extension": 1143
+   },
+   "total": 2100
+  }
+ }
+}

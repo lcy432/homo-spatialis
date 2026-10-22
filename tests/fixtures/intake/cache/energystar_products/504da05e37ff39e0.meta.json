@@ -3,12 +3,12 @@
  "url": "https://data.energystar.gov/resource/t9u7-4d2j.json?$limit=50000&$order=:id",
  "method": "GET",
  "http_status": 200,
- "sha256": "52bc55081a4979b6a1c4382041d19529573fb925bc682a0df5bbbcf645127868",
- "bytes": 5873,
+ "sha256": "f6ade80d891c5a56138a5092bbeb7162e11a106708a7e596542c63100541e79b",
+ "bytes": 10485,
  "retrieved_at": "2026-10-22T08:05:13Z",
  "subset_of": {
   "sha256": "8319583f4983ca4b47a225cf69fe66a30966cf445b6a3296b234138c1478a777",
   "bytes": 688012
  },
- "subset_rule": "文件里的前 6 个型号"
+ "subset_rule": "文件里的前 6 个型号，加上只在美国、只在加拿大、美加共同市场的各前 2 个"
 }

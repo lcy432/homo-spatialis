@@ -21,7 +21,6 @@ import pandas as pd
 
 from common.intake_contracts import (
     Calendar,
-    CompileInfo,
     FieldValue,
     GeoRef,
     MethodSpec,
@@ -197,14 +196,15 @@ def opportunity(rec: StdRecord):
     from product.realdata.registry import make_opportunity
 
     months_f = rec.field("months_to_complete")
-    reasons = ["participation_hours_missing", "start_dates_unknown"]
+    data_gaps: list[str] = []
+    e1_gaps: list[str] = []
     if months_f is not None and months_f.status == "present":
         try:
             m = Fraction(months_f.value)  # type: ignore[arg-type]
             if m.denominator != 1 or m % 12 != 0:
-                reasons.append("length_not_whole_years")
+                e1_gaps.append("length_not_whole_years")  # E1 的培训按整年计
         except (ValueError, ZeroDivisionError):
-            reasons.append("length_unreadable")
+            data_gaps.append("length_unreadable")
     return make_opportunity(
         opportunity_id=rec.record_id.replace(
             "training.ipeds2023.", f"training.program.{rec.geo.cbsa}.", 1
@@ -220,9 +220,10 @@ def opportunity(rec: StdRecord):
         required=("tuition_fees",),
         supply_status="offered",
         menu_policy="calendar_open",
-        compile=CompileInfo(
-            status="not_compilable", reasons=tuple(reasons), e1_category="training"
-        ),
+        e1_category="training",
+        e1_needs=("weekly_hours", "start_dates", "months_to_complete"),
+        data_gaps=("calendar_unknown", *data_gaps),
+        e1_gaps=tuple(e1_gaps),
         attributes=dict(rec.attributes),
         terms=dict(rec.terms),
         calendar=Calendar(known=False, reason="IPEDS 不记开课日期"),

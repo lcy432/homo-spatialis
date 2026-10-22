@@ -3,7 +3,7 @@
  "sectors": {
   "activities": {
    "collected": 28992,
-   "executable": 773,
+   "executable": 0,
    "planning_reference": 28992,
    "scorable": 0,
    "total": 28992
@@ -16,7 +16,7 @@
    "total": 72
   },
   "food": {
-   "collected": 33635,
+   "collected": 33311,
    "executable": 0,
    "planning_reference": 33641,
    "scorable": 0,
@@ -32,7 +32,7 @@
   "housing": {
    "collected": 0,
    "executable": 0,
-   "planning_reference": 5503,
+   "planning_reference": 5413,
    "scorable": 0,
    "total": 5553
   },

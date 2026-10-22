@@ -28,7 +28,7 @@ HOUSING_GRID = MethodSpec(
         "每座城同一张住房网格：卧室数 × 楼型 × 通勤层 × 价位（三等分区间中点）；价格与通勤由本城 B 条件表校准、层级回退；目标权重 = "
         "所在格新租市场代理权重 ÷ 3，与候选生成密度分开。"
     ),
-    inputs=("housing_rent_conditional@1", "commute_by_residence_puma@1"),
+    inputs=("housing_rent_conditional@2", "commute_by_residence_puma@1"),
     known_biases_zh=(
         "网格是覆盖设计，不是现实分布；网格格数不代表市场份额",
         "回退到较粗层级时，这一格的价格反映的是更大范围的分布",

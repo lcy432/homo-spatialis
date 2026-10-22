@@ -3,12 +3,12 @@
  "url": "https://data.energystar.gov/resource/bghd-e2wd.json?$limit=50000&$order=:id",
  "method": "GET",
  "http_status": 200,
- "sha256": "1d6c61386ecdd90461a3afbbe162036c1d261fb76cdcf2e65e10b6f2ced49095",
- "bytes": 5812,
+ "sha256": "b13edc0f79dd76c233502e529ca124d5ebb38674301c9c57b9d8d22a1d3caf93",
+ "bytes": 7298,
  "retrieved_at": "2026-10-22T08:05:09Z",
  "subset_of": {
   "sha256": "16995afbcd93813eb247a39f4a57bfdb4ad5159b86cf3206684217a3d9d8d35f",
   "bytes": 364804
  },
- "subset_rule": "文件里的前 6 个型号"
+ "subset_rule": "文件里的前 6 个型号，加上只在美国、只在加拿大、美加共同市场的各前 2 个"
 }

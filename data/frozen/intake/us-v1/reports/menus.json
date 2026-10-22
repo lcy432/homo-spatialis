@@ -1,4 +1,72 @@
 {
+ "calendar_menus": {
+  "filter": {
+   "pending_mapping": 72
+  },
+  "note_zh": "按日历开放的菜单现在没有按日历筛选（pending_mapping：模拟年份与真实日期的对应还没定义），只列出观测到的项目及原始日历；日历已知与未知分开数。",
+  "year1_env0": {
+   "16980:activities": {
+    "calendar_known": 9206,
+    "calendar_unknown": 1027,
+    "listed": 10233
+   },
+   "16980:training": {
+    "calendar_known": 0,
+    "calendar_unknown": 402,
+    "listed": 402
+   },
+   "26420:activities": {
+    "calendar_known": 76,
+    "calendar_unknown": 3074,
+    "listed": 3150
+   },
+   "26420:training": {
+    "calendar_known": 0,
+    "calendar_unknown": 204,
+    "listed": 204
+   },
+   "31080:activities": {
+    "calendar_known": 175,
+    "calendar_unknown": 9575,
+    "listed": 9750
+   },
+   "31080:training": {
+    "calendar_known": 0,
+    "calendar_unknown": 684,
+    "listed": 684
+   },
+   "35620:activities": {
+    "calendar_known": 730,
+    "calendar_unknown": 3548,
+    "listed": 4278
+   },
+   "35620:training": {
+    "calendar_known": 0,
+    "calendar_unknown": 636,
+    "listed": 636
+   },
+   "41860:activities": {
+    "calendar_known": 141,
+    "calendar_unknown": 598,
+    "listed": 739
+   },
+   "41860:training": {
+    "calendar_known": 0,
+    "calendar_unknown": 114,
+    "listed": 114
+   },
+   "42660:activities": {
+    "calendar_known": 205,
+    "calendar_unknown": 633,
+    "listed": 838
+   },
+   "42660:training": {
+    "calendar_known": 0,
+    "calendar_unknown": 60,
+    "listed": 60
+   }
+  }
+ },
  "inclusion": {
   "16980": {
    "candidates": 183,
@@ -240,163 +308,163 @@
  "size_diagnostic": {
   "16980": [
    {
-    "mean_cheapest_over_market_median": 1.0868,
+    "mean_cheapest_over_market_median": 0.9902,
     "mean_share_roundtrip_le_60min": 1.0,
     "per_stratum": 1
    },
    {
-    "mean_cheapest_over_market_median": 0.8991,
-    "mean_share_roundtrip_le_60min": 1.0,
+    "mean_cheapest_over_market_median": 0.8143,
+    "mean_share_roundtrip_le_60min": 0.9938,
     "per_stratum": 2
    },
    {
-    "mean_cheapest_over_market_median": 0.7985,
-    "mean_share_roundtrip_le_60min": 1.0,
+    "mean_cheapest_over_market_median": 0.7598,
+    "mean_share_roundtrip_le_60min": 0.9958,
     "per_stratum": 3
    },
    {
-    "mean_cheapest_over_market_median": 0.6886,
-    "mean_share_roundtrip_le_60min": 1.0,
+    "mean_cheapest_over_market_median": 0.6559,
+    "mean_share_roundtrip_le_60min": 0.995,
     "per_stratum": 5
    },
    {
-    "mean_cheapest_over_market_median": 0.6047,
-    "mean_share_roundtrip_le_60min": 1.0,
+    "mean_cheapest_over_market_median": 0.5847,
+    "mean_share_roundtrip_le_60min": 0.9953,
     "per_stratum": 8
    }
   ],
   "26420": [
    {
-    "mean_cheapest_over_market_median": 1.0856,
-    "mean_share_roundtrip_le_60min": 0.9875,
+    "mean_cheapest_over_market_median": 1.0081,
+    "mean_share_roundtrip_le_60min": 0.9625,
     "per_stratum": 1
    },
    {
-    "mean_cheapest_over_market_median": 0.8833,
-    "mean_share_roundtrip_le_60min": 0.9875,
+    "mean_cheapest_over_market_median": 0.8868,
+    "mean_share_roundtrip_le_60min": 0.9812,
     "per_stratum": 2
    },
    {
-    "mean_cheapest_over_market_median": 0.7943,
-    "mean_share_roundtrip_le_60min": 0.9833,
+    "mean_cheapest_over_market_median": 0.8046,
+    "mean_share_roundtrip_le_60min": 0.9792,
     "per_stratum": 3
    },
    {
-    "mean_cheapest_over_market_median": 0.7352,
-    "mean_share_roundtrip_le_60min": 0.98,
+    "mean_cheapest_over_market_median": 0.7343,
+    "mean_share_roundtrip_le_60min": 0.9725,
     "per_stratum": 5
    },
    {
-    "mean_cheapest_over_market_median": 0.6915,
-    "mean_share_roundtrip_le_60min": 0.9844,
+    "mean_cheapest_over_market_median": 0.7102,
+    "mean_share_roundtrip_le_60min": 0.9797,
     "per_stratum": 8
    }
   ],
   "31080": [
    {
-    "mean_cheapest_over_market_median": 1.0464,
+    "mean_cheapest_over_market_median": 0.9752,
     "mean_share_roundtrip_le_60min": 1.0,
     "per_stratum": 1
    },
    {
-    "mean_cheapest_over_market_median": 0.8332,
+    "mean_cheapest_over_market_median": 0.7706,
     "mean_share_roundtrip_le_60min": 1.0,
     "per_stratum": 2
    },
    {
-    "mean_cheapest_over_market_median": 0.747,
+    "mean_cheapest_over_market_median": 0.7135,
     "mean_share_roundtrip_le_60min": 1.0,
     "per_stratum": 3
    },
    {
-    "mean_cheapest_over_market_median": 0.6733,
+    "mean_cheapest_over_market_median": 0.6451,
     "mean_share_roundtrip_le_60min": 1.0,
     "per_stratum": 5
    },
    {
-    "mean_cheapest_over_market_median": 0.6084,
+    "mean_cheapest_over_market_median": 0.5998,
     "mean_share_roundtrip_le_60min": 1.0,
     "per_stratum": 8
    }
   ],
   "35620": [
    {
-    "mean_cheapest_over_market_median": 1.2076,
-    "mean_share_roundtrip_le_60min": 0.6125,
+    "mean_cheapest_over_market_median": 1.1267,
+    "mean_share_roundtrip_le_60min": 0.6625,
     "per_stratum": 1
    },
    {
-    "mean_cheapest_over_market_median": 0.8336,
-    "mean_share_roundtrip_le_60min": 0.6,
+    "mean_cheapest_over_market_median": 0.8134,
+    "mean_share_roundtrip_le_60min": 0.6562,
     "per_stratum": 2
    },
    {
-    "mean_cheapest_over_market_median": 0.7208,
-    "mean_share_roundtrip_le_60min": 0.6,
+    "mean_cheapest_over_market_median": 0.748,
+    "mean_share_roundtrip_le_60min": 0.6417,
     "per_stratum": 3
    },
    {
-    "mean_cheapest_over_market_median": 0.6044,
-    "mean_share_roundtrip_le_60min": 0.615,
+    "mean_cheapest_over_market_median": 0.6136,
+    "mean_share_roundtrip_le_60min": 0.64,
     "per_stratum": 5
    },
    {
-    "mean_cheapest_over_market_median": 0.5329,
-    "mean_share_roundtrip_le_60min": 0.625,
+    "mean_cheapest_over_market_median": 0.5473,
+    "mean_share_roundtrip_le_60min": 0.6453,
     "per_stratum": 8
    }
   ],
   "41860": [
    {
-    "mean_cheapest_over_market_median": 0.9335,
-    "mean_share_roundtrip_le_60min": 0.95,
+    "mean_cheapest_over_market_median": 0.9218,
+    "mean_share_roundtrip_le_60min": 0.9375,
     "per_stratum": 1
    },
    {
-    "mean_cheapest_over_market_median": 0.7964,
-    "mean_share_roundtrip_le_60min": 0.9563,
+    "mean_cheapest_over_market_median": 0.7843,
+    "mean_share_roundtrip_le_60min": 0.9437,
     "per_stratum": 2
    },
    {
-    "mean_cheapest_over_market_median": 0.7146,
-    "mean_share_roundtrip_le_60min": 0.9583,
+    "mean_cheapest_over_market_median": 0.7094,
+    "mean_share_roundtrip_le_60min": 0.95,
     "per_stratum": 3
    },
    {
-    "mean_cheapest_over_market_median": 0.6476,
-    "mean_share_roundtrip_le_60min": 0.9575,
+    "mean_cheapest_over_market_median": 0.6376,
+    "mean_share_roundtrip_le_60min": 0.9475,
     "per_stratum": 5
    },
    {
-    "mean_cheapest_over_market_median": 0.6113,
-    "mean_share_roundtrip_le_60min": 0.9563,
+    "mean_cheapest_over_market_median": 0.6032,
+    "mean_share_roundtrip_le_60min": 0.95,
     "per_stratum": 8
    }
   ],
   "42660": [
    {
-    "mean_cheapest_over_market_median": 0.9862,
+    "mean_cheapest_over_market_median": 1.0158,
     "mean_share_roundtrip_le_60min": 1.0,
     "per_stratum": 1
    },
    {
-    "mean_cheapest_over_market_median": 0.8533,
-    "mean_share_roundtrip_le_60min": 0.9812,
+    "mean_cheapest_over_market_median": 0.8686,
+    "mean_share_roundtrip_le_60min": 0.975,
     "per_stratum": 2
    },
    {
-    "mean_cheapest_over_market_median": 0.7863,
-    "mean_share_roundtrip_le_60min": 0.9833,
+    "mean_cheapest_over_market_median": 0.8208,
+    "mean_share_roundtrip_le_60min": 0.9667,
     "per_stratum": 3
    },
    {
-    "mean_cheapest_over_market_median": 0.754,
-    "mean_share_roundtrip_le_60min": 0.975,
+    "mean_cheapest_over_market_median": 0.752,
+    "mean_share_roundtrip_le_60min": 0.9725,
     "per_stratum": 5
    },
    {
-    "mean_cheapest_over_market_median": 0.7092,
-    "mean_share_roundtrip_le_60min": 0.9797,
+    "mean_cheapest_over_market_median": 0.7077,
+    "mean_share_roundtrip_le_60min": 0.9781,
     "per_stratum": 8
    }
   ]

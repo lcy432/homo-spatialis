@@ -5,17 +5,19 @@
 * ``full_catalog``（食品、普通商品、常规服务、城市背景）：菜单 = 本资料包成功映射的全部合格机会，不随机删减。为了不在每一年每一份
   菜单里重复抄几万个编号，菜单只记“全部合格”与合格集合的内容身份；查询时分页读取。完整可访问 ≠ 单轮请求能容纳全部记录，两件事
   分开报告。
-* ``calendar_open``（培训、活动）：按事实日历开放。日历已知的列出；日历未知的（例如 IPEDS 不记开课日期）照样列出并在机会里标明
-  “日历未知”，不藏起来。第 1 年对应资料观测到的那一轮日历；第 2、3 年假设同样的日历每年重复（登记为探索性设定），没有观测的
-  未来日历不编造。
-* ``annual_exposure_sample``（住房、新岗位）：抽取本年接触到的机会。只模拟接触机会，不抽成交或录用。
+* ``calendar_open``（培训、活动）：目标是按事实日历开放，但**模拟年份与真实日期的对应还没定义**，所以现在不按日历筛选：菜单
+  列出全部观测到的项目及其原始日历，标明 ``calendar_filter = pending_mapping``，并分开数日历已知与未知（例如 IPEDS 不记开课
+  日期）。不声称已经按日历筛过；没有观测的未来日历也不编造。
+* ``annual_exposure_sample``（住房、新岗位）：抽取本年接触到的机会。只模拟接触机会，不抽成交或录用。资料不足（必需事实缺，
+  例如回退之后仍没有租金）的候选不进抽样。
 
 **抽样算法 ``weighted_keyed_sample@1``**（Efraimidis–Spirakis 加权无放回抽样）：每个合格机会的键 = u^(1/w)，u 由
 SHA-256(种子, 机会编号) 映射到 (0, 1)，w 是目标权重；每层取键最大的 k 个。种子 = SHA-256(资料身份, 都会区, 年份, 板块, 环境重复,
 算法版本, 配置种子)——**不含分身编号**：同一环境重复下的分身共享同一份菜单；恢复、重新查询、修改计划都得到同一份，不重抽。
 抽样权重不是入选概率：无放回抽样里权重大的机会入选概率小于“权重 × k”，报告里用模拟估计实际入选概率。
 
-住房：每个卧室层从 B 候选里抽；某一层没有 B 候选时才用这一层的 A 网格候选补（A 补共同覆盖）。权重为 0 或未知的机会不合格。
+住房：每个卧室层从 B 候选里抽；某一层没有 B 候选时才用这一层的 A 网格候选补（A 补共同覆盖）。权重为 0 或未知、供给不确定、
+资料不足的机会不合格。合格规则与检查器（``ledger.intake_data``）共用同一条定义：改了规则要升 ``MENU_RULES_VERSION``。
 """
 
 from __future__ import annotations
@@ -26,7 +28,6 @@ from collections import defaultdict
 from collections.abc import Iterable
 
 from common.intake_contracts import (
-    AssumptionSpec,
     Menu,
     MenuPolicy,
     MethodSpec,
@@ -43,13 +44,18 @@ ALGORITHM = MethodSpec(
     summary_zh="Efraimidis–Spirakis 加权无放回抽样：键 = u^(1/w)，u = SHA-256(种子, 机会编号) → (0,1)；每层取键最大的 k 个；种子不含分身编号。",
     known_biases_zh=("权重不是入选概率：无放回抽样里权重大的机会入选概率被压低",),
 )
-RECURRENCE = AssumptionSpec(
-    assumption_id="calendar_recurs_annually",
-    kind="exploratory_proxy",
-    statement_zh="第 2、3 年的活动与培训日历假设与资料观测到的那一轮相同（每年重复）。",
-    applies_to=("menus.calendar_open",),
-    why_not_measured_zh="未来年份的开课与活动日历还没有发布；不编造新的日历。",
-)
+#: 合格规则的版本（进目录阶段的身份）：2 = 抽样排除资料不足的候选；全国性的机会只进同一国家的都会区；日历菜单写明未筛选。
+MENU_RULES_VERSION = "2"
+
+
+def sample_eligible(o: Opportunity) -> bool:
+    """抽取本年接触机会的合格规则：在供应、目标权重为正、资料不是“不足”。"""
+    return o.supply_status == "offered" and _weight(o) > 0 and o.data_status != "insufficient"
+
+
+def listing_eligible(o: Opportunity) -> bool:
+    """完整目录与日历菜单的合格规则：除了确定不供应的，全部列出（资料不足的也列出并标明，不藏起来）。"""
+    return o.supply_status != "not_offered"
 
 
 def menu_seed(
@@ -104,7 +110,7 @@ def build_menu(
     seed = menu_seed(build_id, cbsa, year, sector, env_repeat, global_seed)
     menu_id = f"menu.{cbsa}.y{year}.{sector}.r{env_repeat}"
     if policy.kind == "full_catalog":
-        ids = [o.opportunity_id for o in opportunities if o.supply_status != "not_offered"]
+        ids = [o.opportunity_id for o in opportunities if listing_eligible(o)]
         return Menu(
             menu_id=menu_id,
             build_id=build_id,
@@ -122,11 +128,13 @@ def build_menu(
             inclusion_note_zh="完整目录：本资料包成功映射的全部合格机会（确定不可得的除外），分页查询；不随机删减。",
         )
     if policy.kind == "calendar_open":
-        ids = sorted(o.opportunity_id for o in opportunities if o.supply_status != "not_offered")
-        unknown = sum(1 for o in opportunities if o.calendar is not None and not o.calendar.known)
-        note = f"按事实日历开放：{len(ids)} 项，其中日历未知 {unknown} 项（照样列出并标明）。"
-        if year > 1:
-            note += f"第 {year} 年沿用观测到的日历（假设 {RECURRENCE.assumption_id}）。"
+        listed = [o for o in opportunities if listing_eligible(o)]
+        ids = sorted(o.opportunity_id for o in listed)
+        known = sum(1 for o in listed if o.calendar is not None and o.calendar.known)
+        note = (
+            f"日历待适配：模拟年份与真实日期的对应还没定义，本菜单没有按日历筛选，只列出观测到的 {len(ids)} 项及其原始日历"
+            f"（日历已知 {known} 项、未知 {len(ids) - known} 项）。"
+        )
         return Menu(
             menu_id=menu_id,
             build_id=build_id,
@@ -142,9 +150,12 @@ def build_menu(
             selection="listed",
             selected=tuple(ids),
             inclusion_note_zh=note[:400],
+            calendar_filter="pending_mapping",
+            n_calendar_known=known,
+            n_calendar_unknown=len(ids) - known,
         )
     # 抽取本年接触机会
-    eligible = [o for o in opportunities if _weight(o) > 0 and o.supply_status == "offered"]
+    eligible = [o for o in opportunities if sample_eligible(o)]
     selected: list[str] = []
     if policy.per_stratum:
         primary = [o for o in eligible if o.origin != "mapping_a"]
@@ -183,6 +194,6 @@ def build_menu(
         selection="listed",
         selected=tuple(selected),
         inclusion_note_zh=(
-            f"抽取本年接触机会：{rule}，按目标权重加权无放回；权重不是入选概率（见菜单诊断）。只模拟接触，不抽成交或录用。"
+            f"抽取本年接触机会：{rule}，按目标权重加权无放回；资料不足、供给不确定、权重为 0 的不进抽样；权重不是入选概率（见菜单诊断）。只模拟接触，不抽成交或录用。"
         )[:400],
     )

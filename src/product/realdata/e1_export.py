@@ -21,7 +21,7 @@ from typing import Any
 from common.intake_contracts import AssumptionSpec, MethodSpec, Opportunity
 from common.life_contracts import LifeOpportunity
 
-EXPORT_VERSION = "e1-export-v1"
+EXPORT_VERSION = "e1-export-v2"
 EXPORT_METHOD = MethodSpec(
     method_id="e1_export_single_session_experience",
     version="1",
@@ -44,6 +44,12 @@ def _two_decimals(text: str) -> bool:
 
 
 def to_life_opportunity(o: Opportunity) -> dict[str, Any]:
+    """只导出 E1 能原样表达的单次活动。带日期或年龄限制的活动不导出：E1 的体验没有日期窗口、资格标签不求值，
+    导出就会变成任意月份、任意年龄都能参加的普通体验。"""
+    if o.calendar is not None and o.calendar.known and (o.calendar.start or o.calendar.end):
+        raise ValueError("dated_calendar_not_expressible")
+    if o.attributes.get("age_restricted") is not False:
+        raise ValueError("age_eligibility_not_expressible_or_unknown")
     fee = o.fact("program_fee")
     hours = o.fact("session_hours")
     assert (

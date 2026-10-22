@@ -22,7 +22,7 @@ from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-INTAKE_SCHEMA_VERSION = "intake-data-v1"
+INTAKE_SCHEMA_VERSION = "intake-data-v2"
 
 #: 数值的来源性质：观测（原样取自来源）、派生（确定的换算，例如年薪 ÷ 12、同期换单位）、估计（有误差的统计或时期换算）、
 #: 假设（登记过的设定，不是测量）。整条机会的来源性质取它用到的字段里最弱的一种（与 E3-A 编译器同一规则）。
@@ -58,9 +58,19 @@ GeoLevel = Literal[
 GeoRelation = Literal["exact", "within", "contains", "overlaps", "proxy"]
 SupplyStatus = Literal["offered", "not_offered", "unknown"]
 DataStatus = Literal["complete", "partial", "insufficient"]
-Origin = Literal["record", "mapping_a", "mapping_b"]
+#: 机会从哪来：真实记录本身；由真实记录经确定换算得到（例如全国均价按地区价格水平换到某个都会区，不是本地观测）；
+#: A 映射（先设计覆盖再校准）；B 映射（由资料估计的条件关系）。后三种都必须写方法。
+Origin = Literal["record", "derived", "mapping_a", "mapping_b"]
 MenuPolicyKind = Literal["full_catalog", "calendar_open", "annual_exposure_sample"]
-CompileStatus = Literal["compilable", "needs_e1_extension", "not_compilable"]
+#: 能否编进当前 E1：可以；只差 E1 的表达能力；只差资料；两样都差；本来就不是可选的行动（城市背景事实）。
+#: 由两张原因表推出来（``CompileInfo.of``），不单独手写。
+CompileStatus = Literal[
+    "compilable",
+    "needs_e1_extension",
+    "needs_data",
+    "needs_data_and_e1_extension",
+    "reference_only",
+]
 Terms = Literal["included", "excluded", "unknown"]
 
 Scalar = str | int | float | bool | None
@@ -296,17 +306,61 @@ class Capabilities(IntakeModel):
 
 
 class CompileInfo(IntakeModel):
-    """能否编进当前引擎（E1 的 ``LifeOpportunity``）：可以 / 需要 E1 扩展 / 不能，以及原因代码。"""
+    """能否编进当前引擎（E1 的 ``LifeOpportunity``），两类原因分开记：
+
+    * ``data_gaps``：资料缺口（例如 ``missing:price``、``calendar_unknown``）——改 E1 也补不上，要新资料；
+    * ``e1_gaps``：E1 表达能力的缺口（例如 E1 的体验没有日期窗口）——资料齐了也要改 E1。
+
+    一条机会可以两类都有；状态由两张表推出来，不把“缺资料”说成“改 E1 就能执行”。"""
 
     status: CompileStatus
-    reasons: tuple[str, ...] = ()
+    data_gaps: tuple[str, ...] = ()
+    e1_gaps: tuple[str, ...] = ()
     e1_category: str | None = None
 
+    @staticmethod
+    def derive(
+        data_gaps: tuple[str, ...], e1_gaps: tuple[str, ...], reference_only: bool
+    ) -> CompileStatus:
+        if reference_only:
+            return "reference_only"
+        if data_gaps and e1_gaps:
+            return "needs_data_and_e1_extension"
+        if data_gaps:
+            return "needs_data"
+        if e1_gaps:
+            return "needs_e1_extension"
+        return "compilable"
+
+    @classmethod
+    def of(
+        cls,
+        *,
+        data_gaps: tuple[str, ...] = (),
+        e1_gaps: tuple[str, ...] = (),
+        e1_category: str | None = None,
+        reference_only: bool = False,
+    ) -> CompileInfo:
+        d, e = tuple(dict.fromkeys(data_gaps)), tuple(dict.fromkeys(e1_gaps))
+        return cls(
+            status=cls.derive(d, e, reference_only), data_gaps=d, e1_gaps=e, e1_category=e1_category
+        )
+
     @model_validator(mode="after")
-    def _reasons(self) -> CompileInfo:
-        if self.status != "compilable" and not self.reasons:
-            raise ValueError("不能直接编译时必须写原因")
+    def _status_follows_gaps(self) -> CompileInfo:
+        if self.status == "reference_only":
+            if self.data_gaps or self.e1_gaps:
+                raise ValueError("城市背景这类参考事实不写编译缺口")
+            return self
+        if self.status != self.derive(self.data_gaps, self.e1_gaps, False):
+            raise ValueError(
+                f"编译状态 {self.status} 与原因表对不上（资料 {self.data_gaps}，E1 {self.e1_gaps}）"
+            )
         return self
+
+    @property
+    def reasons(self) -> tuple[str, ...]:
+        return self.data_gaps + self.e1_gaps
 
 
 class Opportunity(IntakeModel):
@@ -340,11 +394,15 @@ class Opportunity(IntakeModel):
     capabilities: Capabilities
     compile: CompileInfo
     weakest_kind: FactKind
+    #: 哪个事实是这项机会的金额（月租、年薪、活动收费、每月食品费用、单价、学费……）；查询与展示按它读，没有金额的机会为空。
+    price_fact: str | None = None
 
     @model_validator(mode="after")
     def _consistent(self) -> Opportunity:
         if self.origin != "record" and not self.method:
-            raise ValueError(f"{self.opportunity_id}: 映射生成的机会必须写方法")
+            raise ValueError(f"{self.opportunity_id}: 不是真实记录本身的机会必须写方法")
+        if self.price_fact is not None and self.fact(self.price_fact) is None:
+            raise ValueError(f"{self.opportunity_id}: 金额事实 {self.price_fact} 不在事实里")
         if (self.target_weight is None) != (self.weight_basis is None):
             raise ValueError(f"{self.opportunity_id}: 目标权重与权重依据必须同时有或同时没有")
         if self.capabilities.executable and self.compile.status != "compilable":
@@ -402,6 +460,12 @@ class Menu(IntakeModel):
     selection: Literal["listed", "all_eligible"]
     selected: tuple[str, ...]
     inclusion_note_zh: str = Field(default="", max_length=400)
+    #: 按日历开放的菜单是否真的按日历筛过：模拟年份与真实日期的对应还没定义时是 ``pending_mapping``——只列出观测到的项目
+    #: 及其原始日历，没有按年份筛选。其他政策是 ``not_applicable``。
+    calendar_filter: Literal["not_applicable", "pending_mapping"] = "not_applicable"
+    #: 列出的项目里日历已知 / 未知各几项（只对按日历开放的菜单有意义）。
+    n_calendar_known: int | None = Field(default=None, ge=0)
+    n_calendar_unknown: int | None = Field(default=None, ge=0)
 
     @model_validator(mode="after")
     def _unique(self) -> Menu:
@@ -411,7 +475,26 @@ class Menu(IntakeModel):
             raise ValueError(f"{self.menu_id}: 完整目录不逐条列编号")
         if self.selection == "listed" and len(self.selected) > self.n_eligible:
             raise ValueError(f"{self.menu_id}: 选中的比合格的还多")
+        if self.policy == "calendar_open":
+            if (
+                self.calendar_filter != "pending_mapping"
+                or self.n_calendar_known is None
+                or self.n_calendar_unknown is None
+            ):
+                raise ValueError(
+                    f"{self.menu_id}: 按日历开放的菜单必须写明是否筛过日历，并分开数日历已知 / 未知"
+                )
+            if self.n_calendar_known + self.n_calendar_unknown != self.n_eligible:
+                raise ValueError(f"{self.menu_id}: 日历已知 + 未知 ≠ 合格数")
+        elif self.calendar_filter != "not_applicable":
+            raise ValueError(f"{self.menu_id}: 只有按日历开放的菜单有日历筛选状态")
         return self
+
+
+def applies_to(o: Opportunity, cbsa: str, country: str) -> bool:
+    """一项机会是否适用于某个验证都会区：本都会区的，或全国性的而且国家相同（例如只在加拿大市场销售的家电型号不进美国目录）。
+    目录、菜单、覆盖统计、检查器与查询都用这一条规则。"""
+    return o.cbsa == cbsa or (o.cbsa is None and o.geo.country == country)
 
 
 def as_dict(model: BaseModel) -> dict[str, Any]:

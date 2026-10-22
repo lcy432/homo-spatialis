@@ -27,10 +27,10 @@
     },
     {
      "bedrooms": "1",
-     "candidates": 183,
-     "candidates_q0.25": 1200.0,
-     "candidates_q0.5": 1700.0,
-     "candidates_q0.75": 2000.0,
+     "candidates": 165,
+     "candidates_q0.25": 1000.0,
+     "candidates_q0.5": 1500.0,
+     "candidates_q0.75": 1800.0,
      "source_n": 571,
      "source_q0.25": 1100.0,
      "source_q0.5": 1500.0,
@@ -49,46 +49,58 @@
     },
     {
      "bedrooms": "3plus",
-     "candidates": 173,
+     "candidates": 149,
      "candidates_q0.25": 1100.0,
      "candidates_q0.5": 1700.0,
-     "candidates_q0.75": 2000.0,
+     "candidates_q0.75": 1800.0,
      "source_n": 394,
      "source_q0.25": 1300.0,
      "source_q0.5": 1800.0,
-     "source_q0.75": 2500.0
+     "source_q0.75": null
     }
    ],
    "market_vs_stock": [
     {
      "bedrooms": "0",
+     "market_median_interpolated": 1459.93,
+     "market_median_step": 1500.0,
      "market_n": 222,
      "market_proxy_median_contract": "1500.00",
-     "market_se_median": 47.11,
+     "market_se_median_interpolated": 47.11,
+     "market_se_median_step": 111.8,
      "stock_median_contract": "1200.00",
      "stock_n": 662
     },
     {
      "bedrooms": "1",
+     "market_median_interpolated": 1500.01,
+     "market_median_step": 1500.0,
      "market_n": 571,
      "market_proxy_median_contract": "1500.00",
-     "market_se_median": 32.76,
+     "market_se_median_interpolated": 32.76,
+     "market_se_median_step": 0.0,
      "stock_median_contract": "1200.00",
      "stock_n": 2252
     },
     {
      "bedrooms": "2",
+     "market_median_interpolated": 1689.12,
+     "market_median_step": 1700.0,
      "market_n": 688,
      "market_proxy_median_contract": "1700.00",
-     "market_se_median": 39.08,
+     "market_se_median_interpolated": 39.08,
+     "market_se_median_step": 38.73,
      "stock_median_contract": "1300.00",
      "stock_n": 2803
     },
     {
      "bedrooms": "3plus",
+     "market_median_interpolated": 1797.97,
+     "market_median_step": 1800.0,
      "market_n": 394,
      "market_proxy_median_contract": "1800.00",
-     "market_se_median": 67.75,
+     "market_se_median_interpolated": 67.75,
+     "market_se_median_step": 70.71,
      "stock_median_contract": "1500.00",
      "stock_n": 1750
     }
@@ -201,33 +213,45 @@
    "market_vs_stock": [
     {
      "bedrooms": "0",
+     "market_median_interpolated": 1212.06,
+     "market_median_step": 1200.0,
      "market_n": 232,
      "market_proxy_median_contract": "1200.00",
-     "market_se_median": 29.96,
+     "market_se_median_interpolated": 29.96,
+     "market_se_median_step": 22.36,
      "stock_median_contract": "1100.00",
      "stock_n": 487
     },
     {
      "bedrooms": "1",
+     "market_median_interpolated": 1155.14,
+     "market_median_step": 1200.0,
      "market_n": 1053,
      "market_proxy_median_contract": "1200.00",
-     "market_se_median": 19.73,
+     "market_se_median_interpolated": 19.73,
+     "market_se_median_step": 104.88,
      "stock_median_contract": "1100.00",
      "stock_n": 2175
     },
     {
      "bedrooms": "2",
+     "market_median_interpolated": 1358.61,
+     "market_median_step": 1400.0,
      "market_n": 903,
      "market_proxy_median_contract": "1400.00",
-     "market_se_median": 23.09,
+     "market_se_median_interpolated": 23.09,
+     "market_se_median_step": 100.0,
      "stock_median_contract": "1300.00",
      "stock_n": 2173
     },
     {
      "bedrooms": "3plus",
+     "market_median_interpolated": 1805.16,
+     "market_median_step": 1800.0,
      "market_n": 649,
      "market_proxy_median_contract": "1800.00",
-     "market_se_median": 34.95,
+     "market_se_median_interpolated": 34.95,
+     "market_se_median_step": 0.0,
      "stock_median_contract": "1600.00",
      "stock_n": 1856
     }
@@ -340,33 +364,45 @@
    "market_vs_stock": [
     {
      "bedrooms": "0",
+     "market_median_interpolated": 1837.74,
+     "market_median_step": 1800.0,
      "market_n": 648,
      "market_proxy_median_contract": "1800.00",
-     "market_se_median": 45.12,
+     "market_se_median_interpolated": 45.12,
+     "market_se_median_step": 97.47,
      "stock_median_contract": "1500.00",
      "stock_n": 2418
     },
     {
      "bedrooms": "1",
+     "market_median_interpolated": 2121.63,
+     "market_median_step": 2100.0,
      "market_n": 1167,
      "market_proxy_median_contract": "2100.00",
-     "market_se_median": 34.98,
+     "market_se_median_interpolated": 34.98,
+     "market_se_median_step": 31.62,
      "stock_median_contract": "1700.00",
      "stock_n": 5658
     },
     {
      "bedrooms": "2",
+     "market_median_interpolated": 2549.61,
+     "market_median_step": 2500.0,
      "market_n": 1253,
      "market_proxy_median_contract": "2500.00",
-     "market_se_median": 34.82,
+     "market_se_median_interpolated": 34.82,
+     "market_se_median_step": 132.29,
      "stock_median_contract": "2100.00",
      "stock_n": 7472
     },
     {
      "bedrooms": "3plus",
+     "market_median_interpolated": 3291.01,
+     "market_median_step": 3300.0,
      "market_n": 677,
      "market_proxy_median_contract": "3300.00",
-     "market_se_median": 68.35,
+     "market_se_median_interpolated": 68.35,
+     "market_se_median_step": 86.6,
      "stock_median_contract": "2400.00",
      "stock_n": 4018
     }
@@ -466,7 +502,7 @@
     },
     {
      "bedrooms": "3plus",
-     "candidates": 426,
+     "candidates": 382,
      "candidates_q0.25": 1700.0,
      "candidates_q0.5": 2500.0,
      "candidates_q0.75": 3600.0,
@@ -479,33 +515,45 @@
    "market_vs_stock": [
     {
      "bedrooms": "0",
+     "market_median_interpolated": 2016.54,
+     "market_median_step": 2000.0,
      "market_n": 622,
      "market_proxy_median_contract": "2000.00",
-     "market_se_median": 58.13,
+     "market_se_median_interpolated": 58.13,
+     "market_se_median_step": 70.71,
      "stock_median_contract": "1500.00",
      "stock_n": 2650
     },
     {
      "bedrooms": "1",
+     "market_median_interpolated": 2037.75,
+     "market_median_step": 2000.0,
      "market_n": 1570,
      "market_proxy_median_contract": "2000.00",
-     "market_se_median": 34.25,
+     "market_se_median_interpolated": 34.25,
+     "market_se_median_step": 100.0,
      "stock_median_contract": "1600.00",
      "stock_n": 8615
     },
     {
      "bedrooms": "2",
+     "market_median_interpolated": 2291.01,
+     "market_median_step": 2300.0,
      "market_n": 1404,
      "market_proxy_median_contract": "2300.00",
-     "market_se_median": 33.61,
+     "market_se_median_interpolated": 33.61,
+     "market_se_median_step": 0.0,
      "stock_median_contract": "1700.00",
      "stock_n": 8647
     },
     {
      "bedrooms": "3plus",
+     "market_median_interpolated": 2515.73,
+     "market_median_step": 2500.0,
      "market_n": 862,
      "market_proxy_median_contract": "2500.00",
-     "market_se_median": 38.23,
+     "market_se_median_interpolated": 38.23,
+     "market_se_median_step": 44.72,
      "stock_median_contract": "2000.00",
      "stock_n": 4948
     }
@@ -618,33 +666,45 @@
    "market_vs_stock": [
     {
      "bedrooms": "0",
+     "market_median_interpolated": 1956.39,
+     "market_median_step": 2000.0,
      "market_n": 290,
      "market_proxy_median_contract": "2000.00",
-     "market_se_median": 50.29,
+     "market_se_median_interpolated": 50.29,
+     "market_se_median_step": 124.5,
      "stock_median_contract": "1700.00",
      "stock_n": 876
     },
     {
      "bedrooms": "1",
+     "market_median_interpolated": 2301.2,
+     "market_median_step": 2300.0,
      "market_n": 539,
      "market_proxy_median_contract": "2300.00",
-     "market_se_median": 32.54,
+     "market_se_median_interpolated": 32.54,
+     "market_se_median_step": 0.0,
      "stock_median_contract": "2100.00",
      "stock_n": 2064
     },
     {
      "bedrooms": "2",
+     "market_median_interpolated": 2867.61,
+     "market_median_step": 2900.0,
      "market_n": 570,
      "market_proxy_median_contract": "2900.00",
-     "market_se_median": 73.19,
+     "market_se_median_interpolated": 73.19,
+     "market_se_median_step": 120.42,
      "stock_median_contract": "2500.00",
      "stock_n": 2347
     },
     {
      "bedrooms": "3plus",
+     "market_median_interpolated": 3663.09,
+     "market_median_step": 3700.0,
      "market_n": 320,
      "market_proxy_median_contract": "3700.00",
-     "market_se_median": 197.54,
+     "market_se_median_interpolated": 197.54,
+     "market_se_median_step": 245.97,
      "stock_median_contract": "3000.00",
      "stock_n": 1515
     }
@@ -757,33 +817,45 @@
    "market_vs_stock": [
     {
      "bedrooms": "0",
+     "market_median_interpolated": 1679.09,
+     "market_median_step": 1700.0,
      "market_n": 239,
      "market_proxy_median_contract": "1700.00",
-     "market_se_median": 39.4,
+     "market_se_median_interpolated": 39.4,
+     "market_se_median_step": 31.62,
      "stock_median_contract": "1600.00",
      "stock_n": 614
     },
     {
      "bedrooms": "1",
+     "market_median_interpolated": 1765.6,
+     "market_median_step": 1800.0,
      "market_n": 480,
      "market_proxy_median_contract": "1800.00",
-     "market_se_median": 30.89,
+     "market_se_median_interpolated": 30.89,
+     "market_se_median_step": 83.67,
      "stock_median_contract": "1700.00",
      "stock_n": 1403
     },
     {
      "bedrooms": "2",
+     "market_median_interpolated": 2123.24,
+     "market_median_step": 2100.0,
      "market_n": 497,
      "market_proxy_median_contract": "2100.00",
-     "market_se_median": 47.76,
+     "market_se_median_interpolated": 47.76,
+     "market_se_median_step": 67.08,
      "stock_median_contract": "2000.00",
      "stock_n": 1664
     },
     {
      "bedrooms": "3plus",
+     "market_median_interpolated": 2637.51,
+     "market_median_step": 2600.0,
      "market_n": 353,
      "market_proxy_median_contract": "2600.00",
-     "market_se_median": 57.74,
+     "market_se_median_interpolated": 57.74,
+     "market_se_median_step": 111.8,
      "stock_median_contract": "2500.00",
      "stock_n": 1219
     }
