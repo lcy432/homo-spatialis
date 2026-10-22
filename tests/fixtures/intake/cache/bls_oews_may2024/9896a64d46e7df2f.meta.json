@@ -1,0 +1,14 @@
+{
+ "source_id": "bls_oews_may2024",
+ "url": "https://www.bls.gov/oes/special-requests/oesm24ma.zip",
+ "method": "GET",
+ "http_status": 200,
+ "sha256": "82dfb836ea9c7b6221c96fdba291a173a5ce7fe91be50cb53c749449140fbd55",
+ "bytes": 18288,
+ "retrieved_at": "2026-10-22T08:04:20Z",
+ "subset_of": {
+  "sha256": "7bf915fc47e464983c5b8b8200d63a733ef90275c7af0576b78875e5b04d35d9",
+  "bytes": 40189821
+ },
+ "subset_rule": "AREA = 16980：总计与大类行、按职业代码排序的前 60 个细类、带 # / * / ** 标记的前 10 个细类"
+}

@@ -1,0 +1,14 @@
+{
+ "source_id": "bls_ap",
+ "url": "https://download.bls.gov/pub/time.series/ap/ap.item",
+ "method": "GET",
+ "http_status": 200,
+ "sha256": "4e96f3bca741f65692971fdec8053a44f7ee20f47a02eace4c4d3d9a1dd148f6",
+ "bytes": 9242,
+ "retrieved_at": "2026-10-22T08:04:34Z",
+ "subset_of": {
+  "sha256": "4e96f3bca741f65692971fdec8053a44f7ee20f47a02eace4c4d3d9a1dd148f6",
+  "bytes": 9242
+ },
+ "subset_rule": "原文件（很小，不切）"
+}

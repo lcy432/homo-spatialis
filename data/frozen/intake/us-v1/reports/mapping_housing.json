@@ -1,0 +1,839 @@
+{
+ "metros": {
+  "16980": {
+   "a_grid": {
+    "generated": 108,
+    "levels": {
+     "tier_bed": 39,
+     "tier_bed_struct": 69
+    },
+    "zero_weight": 3
+   },
+   "b_price_level_used": {
+    "puma_bed": 30,
+    "tier_bed": 687
+   },
+   "candidates_vs_source_distribution": [
+    {
+     "bedrooms": "0",
+     "candidates": 144,
+     "candidates_q0.25": 1200.0,
+     "candidates_q0.5": 1600.0,
+     "candidates_q0.75": 1800.0,
+     "source_n": 222,
+     "source_q0.25": 1100.0,
+     "source_q0.5": 1500.0,
+     "source_q0.75": 1900.0
+    },
+    {
+     "bedrooms": "1",
+     "candidates": 183,
+     "candidates_q0.25": 1200.0,
+     "candidates_q0.5": 1700.0,
+     "candidates_q0.75": 2000.0,
+     "source_n": 571,
+     "source_q0.25": 1100.0,
+     "source_q0.5": 1500.0,
+     "source_q0.75": 2000.0
+    },
+    {
+     "bedrooms": "2",
+     "candidates": 195,
+     "candidates_q0.25": 1400.0,
+     "candidates_q0.5": 1500.0,
+     "candidates_q0.75": 2200.0,
+     "source_n": 688,
+     "source_q0.25": 1300.0,
+     "source_q0.5": 1700.0,
+     "source_q0.75": 2300.0
+    },
+    {
+     "bedrooms": "3plus",
+     "candidates": 173,
+     "candidates_q0.25": 1100.0,
+     "candidates_q0.5": 1700.0,
+     "candidates_q0.75": 2000.0,
+     "source_n": 394,
+     "source_q0.25": 1300.0,
+     "source_q0.5": 1800.0,
+     "source_q0.75": 2500.0
+    }
+   ],
+   "market_vs_stock": [
+    {
+     "bedrooms": "0",
+     "market_n": 222,
+     "market_proxy_median_contract": "1500.00",
+     "market_se_median": 47.11,
+     "stock_median_contract": "1200.00",
+     "stock_n": 662
+    },
+    {
+     "bedrooms": "1",
+     "market_n": 571,
+     "market_proxy_median_contract": "1500.00",
+     "market_se_median": 32.76,
+     "stock_median_contract": "1200.00",
+     "stock_n": 2252
+    },
+    {
+     "bedrooms": "2",
+     "market_n": 688,
+     "market_proxy_median_contract": "1700.00",
+     "market_se_median": 39.08,
+     "stock_median_contract": "1300.00",
+     "stock_n": 2803
+    },
+    {
+     "bedrooms": "3plus",
+     "market_n": 394,
+     "market_proxy_median_contract": "1800.00",
+     "market_se_median": 67.75,
+     "stock_median_contract": "1500.00",
+     "stock_n": 1750
+    }
+   ],
+   "partial_pumas_excluded": 419,
+   "validation_vs_published": [
+    {
+     "bedrooms": "all",
+     "difference": 1.0,
+     "published_b25031": 1469.0,
+     "pums_stock_median_gross": 1470.0
+    },
+    {
+     "bedrooms": "0",
+     "difference": -27.0,
+     "published_b25031": 1277.0,
+     "pums_stock_median_gross": 1250.0
+    },
+    {
+     "bedrooms": "1",
+     "difference": 30.0,
+     "published_b25031": 1310.0,
+     "pums_stock_median_gross": 1340.0
+    },
+    {
+     "bedrooms": "2",
+     "difference": 5.0,
+     "published_b25031": 1485.0,
+     "pums_stock_median_gross": 1490.0
+    },
+    {
+     "bedrooms": "3",
+     "difference": -39.0,
+     "published_b25031": 1706.0,
+     "pums_stock_median_gross": 1667.0
+    },
+    {
+     "bedrooms": "4",
+     "difference": -21.0,
+     "published_b25031": 1889.0,
+     "pums_stock_median_gross": 1868.0
+    },
+    {
+     "bedrooms": "5",
+     "difference": 104.0,
+     "published_b25031": 1876.0,
+     "pums_stock_median_gross": 1980.0
+    }
+   ]
+  },
+  "26420": {
+   "a_grid": {
+    "generated": 108,
+    "levels": {
+     "tier_bed": 45,
+     "tier_bed_struct": 63
+    },
+    "zero_weight": 0
+   },
+   "b_price_level_used": {
+    "puma_bed": 39,
+    "tier_bed": 612
+   },
+   "candidates_vs_source_distribution": [
+    {
+     "bedrooms": "0",
+     "candidates": 156,
+     "candidates_q0.25": 820.0,
+     "candidates_q0.5": 1200.0,
+     "candidates_q0.75": 1400.0,
+     "source_n": 232,
+     "source_q0.25": 910.0,
+     "source_q0.5": 1200.0,
+     "source_q0.75": 1400.0
+    },
+    {
+     "bedrooms": "1",
+     "candidates": 165,
+     "candidates_q0.25": 900.0,
+     "candidates_q0.5": 1200.0,
+     "candidates_q0.75": 1400.0,
+     "source_n": 1053,
+     "source_q0.25": 900.0,
+     "source_q0.5": 1200.0,
+     "source_q0.75": 1400.0
+    },
+    {
+     "bedrooms": "2",
+     "candidates": 165,
+     "candidates_q0.25": 1100.0,
+     "candidates_q0.5": 1400.0,
+     "candidates_q0.75": 1700.0,
+     "source_n": 903,
+     "source_q0.25": 1100.0,
+     "source_q0.5": 1400.0,
+     "source_q0.75": 1700.0
+    },
+    {
+     "bedrooms": "3plus",
+     "candidates": 165,
+     "candidates_q0.25": 1500.0,
+     "candidates_q0.5": 1700.0,
+     "candidates_q0.75": 2400.0,
+     "source_n": 649,
+     "source_q0.25": 1400.0,
+     "source_q0.5": 1800.0,
+     "source_q0.75": 2300.0
+    }
+   ],
+   "market_vs_stock": [
+    {
+     "bedrooms": "0",
+     "market_n": 232,
+     "market_proxy_median_contract": "1200.00",
+     "market_se_median": 29.96,
+     "stock_median_contract": "1100.00",
+     "stock_n": 487
+    },
+    {
+     "bedrooms": "1",
+     "market_n": 1053,
+     "market_proxy_median_contract": "1200.00",
+     "market_se_median": 19.73,
+     "stock_median_contract": "1100.00",
+     "stock_n": 2175
+    },
+    {
+     "bedrooms": "2",
+     "market_n": 903,
+     "market_proxy_median_contract": "1400.00",
+     "market_se_median": 23.09,
+     "stock_median_contract": "1300.00",
+     "stock_n": 2173
+    },
+    {
+     "bedrooms": "3plus",
+     "market_n": 649,
+     "market_proxy_median_contract": "1800.00",
+     "market_se_median": 34.95,
+     "stock_median_contract": "1600.00",
+     "stock_n": 1856
+    }
+   ],
+   "partial_pumas_excluded": 292,
+   "validation_vs_published": [
+    {
+     "bedrooms": "all",
+     "difference": -7.0,
+     "published_b25031": 1469.0,
+     "pums_stock_median_gross": 1462.0
+    },
+    {
+     "bedrooms": "0",
+     "difference": -31.0,
+     "published_b25031": 1219.0,
+     "pums_stock_median_gross": 1188.0
+    },
+    {
+     "bedrooms": "1",
+     "difference": 3.0,
+     "published_b25031": 1273.0,
+     "pums_stock_median_gross": 1276.0
+    },
+    {
+     "bedrooms": "2",
+     "difference": -17.0,
+     "published_b25031": 1476.0,
+     "pums_stock_median_gross": 1459.0
+    },
+    {
+     "bedrooms": "3",
+     "difference": -28.0,
+     "published_b25031": 1836.0,
+     "pums_stock_median_gross": 1808.0
+    },
+    {
+     "bedrooms": "4",
+     "difference": 12.0,
+     "published_b25031": 2233.0,
+     "pums_stock_median_gross": 2245.0
+    },
+    {
+     "bedrooms": "5",
+     "difference": -25.0,
+     "published_b25031": 2535.0,
+     "pums_stock_median_gross": 2510.0
+    }
+   ]
+  },
+  "31080": {
+   "a_grid": {
+    "generated": 108,
+    "levels": {
+     "tier_bed": 21,
+     "tier_bed_struct": 87
+    },
+    "zero_weight": 0
+   },
+   "b_price_level_used": {
+    "puma_bed": 57,
+    "tier_bed": 1017
+   },
+   "candidates_vs_source_distribution": [
+    {
+     "bedrooms": "0",
+     "candidates": 261,
+     "candidates_q0.25": 1400.0,
+     "candidates_q0.5": 1900.0,
+     "candidates_q0.75": 2400.0,
+     "source_n": 648,
+     "source_q0.25": 1400.0,
+     "source_q0.5": 1800.0,
+     "source_q0.75": 2300.0
+    },
+    {
+     "bedrooms": "1",
+     "candidates": 270,
+     "candidates_q0.25": 1700.0,
+     "candidates_q0.5": 2100.0,
+     "candidates_q0.75": 2700.0,
+     "source_n": 1167,
+     "source_q0.25": 1800.0,
+     "source_q0.5": 2100.0,
+     "source_q0.75": 2500.0
+    },
+    {
+     "bedrooms": "2",
+     "candidates": 273,
+     "candidates_q0.25": 2000.0,
+     "candidates_q0.5": 2700.0,
+     "candidates_q0.75": 3500.0,
+     "source_n": 1253,
+     "source_q0.25": 2100.0,
+     "source_q0.5": 2500.0,
+     "source_q0.75": 3300.0
+    },
+    {
+     "bedrooms": "3plus",
+     "candidates": 270,
+     "candidates_q0.25": 2000.0,
+     "candidates_q0.5": 3300.0,
+     "candidates_q0.75": 5100.0,
+     "source_n": 677,
+     "source_q0.25": 2100.0,
+     "source_q0.5": 3300.0,
+     "source_q0.75": 4500.0
+    }
+   ],
+   "market_vs_stock": [
+    {
+     "bedrooms": "0",
+     "market_n": 648,
+     "market_proxy_median_contract": "1800.00",
+     "market_se_median": 45.12,
+     "stock_median_contract": "1500.00",
+     "stock_n": 2418
+    },
+    {
+     "bedrooms": "1",
+     "market_n": 1167,
+     "market_proxy_median_contract": "2100.00",
+     "market_se_median": 34.98,
+     "stock_median_contract": "1700.00",
+     "stock_n": 5658
+    },
+    {
+     "bedrooms": "2",
+     "market_n": 1253,
+     "market_proxy_median_contract": "2500.00",
+     "market_se_median": 34.82,
+     "stock_median_contract": "2100.00",
+     "stock_n": 7472
+    },
+    {
+     "bedrooms": "3plus",
+     "market_n": 677,
+     "market_proxy_median_contract": "3300.00",
+     "market_se_median": 68.35,
+     "stock_median_contract": "2400.00",
+     "stock_n": 4018
+    }
+   ],
+   "partial_pumas_excluded": 0,
+   "validation_vs_published": [
+    {
+     "bedrooms": "all",
+     "difference": -4.0,
+     "published_b25031": 2114.0,
+     "pums_stock_median_gross": 2110.0
+    },
+    {
+     "bedrooms": "0",
+     "difference": -6.0,
+     "published_b25031": 1636.0,
+     "pums_stock_median_gross": 1630.0
+    },
+    {
+     "bedrooms": "1",
+     "difference": 8.0,
+     "published_b25031": 1822.0,
+     "pums_stock_median_gross": 1830.0
+    },
+    {
+     "bedrooms": "2",
+     "difference": -13.0,
+     "published_b25031": 2263.0,
+     "pums_stock_median_gross": 2250.0
+    },
+    {
+     "bedrooms": "3",
+     "difference": 2.0,
+     "published_b25031": 2683.0,
+     "pums_stock_median_gross": 2685.0
+    },
+    {
+     "bedrooms": "4",
+     "difference": -33.0,
+     "published_b25031": 3083.0,
+     "pums_stock_median_gross": 3050.0
+    },
+    {
+     "bedrooms": "5",
+     "difference": 34.0,
+     "published_b25031": 2858.0,
+     "pums_stock_median_gross": 2892.0
+    }
+   ]
+  },
+  "35620": {
+   "a_grid": {
+    "generated": 108,
+    "levels": {
+     "tier_bed": 27,
+     "tier_bed_struct": 81
+    },
+    "zero_weight": 0
+   },
+   "b_price_level_used": {
+    "puma_bed": 45,
+    "tier_bed": 1590
+   },
+   "candidates_vs_source_distribution": [
+    {
+     "bedrooms": "0",
+     "candidates": 342,
+     "candidates_q0.25": 1200.0,
+     "candidates_q0.5": 2100.0,
+     "candidates_q0.75": 3600.0,
+     "source_n": 622,
+     "source_q0.25": 1400.0,
+     "source_q0.5": 2000.0,
+     "source_q0.75": 2900.0
+    },
+    {
+     "bedrooms": "1",
+     "candidates": 431,
+     "candidates_q0.25": 1400.0,
+     "candidates_q0.5": 2300.0,
+     "candidates_q0.75": 3600.0,
+     "source_n": 1570,
+     "source_q0.25": 1500.0,
+     "source_q0.5": 2000.0,
+     "source_q0.75": 2900.0
+    },
+    {
+     "bedrooms": "2",
+     "candidates": 434,
+     "candidates_q0.25": 1400.0,
+     "candidates_q0.5": 2300.0,
+     "candidates_q0.75": 2900.0,
+     "source_n": 1404,
+     "source_q0.25": 1700.0,
+     "source_q0.5": 2300.0,
+     "source_q0.75": 3000.0
+    },
+    {
+     "bedrooms": "3plus",
+     "candidates": 426,
+     "candidates_q0.25": 1700.0,
+     "candidates_q0.5": 2500.0,
+     "candidates_q0.75": 3600.0,
+     "source_n": 862,
+     "source_q0.25": 1800.0,
+     "source_q0.5": 2500.0,
+     "source_q0.75": 3600.0
+    }
+   ],
+   "market_vs_stock": [
+    {
+     "bedrooms": "0",
+     "market_n": 622,
+     "market_proxy_median_contract": "2000.00",
+     "market_se_median": 58.13,
+     "stock_median_contract": "1500.00",
+     "stock_n": 2650
+    },
+    {
+     "bedrooms": "1",
+     "market_n": 1570,
+     "market_proxy_median_contract": "2000.00",
+     "market_se_median": 34.25,
+     "stock_median_contract": "1600.00",
+     "stock_n": 8615
+    },
+    {
+     "bedrooms": "2",
+     "market_n": 1404,
+     "market_proxy_median_contract": "2300.00",
+     "market_se_median": 33.61,
+     "stock_median_contract": "1700.00",
+     "stock_n": 8647
+    },
+    {
+     "bedrooms": "3plus",
+     "market_n": 862,
+     "market_proxy_median_contract": "2500.00",
+     "market_se_median": 38.23,
+     "stock_median_contract": "2000.00",
+     "stock_n": 4948
+    }
+   ],
+   "partial_pumas_excluded": 65,
+   "validation_vs_published": [
+    {
+     "bedrooms": "all",
+     "difference": -1.0,
+     "published_b25031": 1851.0,
+     "pums_stock_median_gross": 1850.0
+    },
+    {
+     "bedrooms": "0",
+     "difference": -1.0,
+     "published_b25031": 1631.0,
+     "pums_stock_median_gross": 1630.0
+    },
+    {
+     "bedrooms": "1",
+     "difference": -8.0,
+     "published_b25031": 1708.0,
+     "pums_stock_median_gross": 1700.0
+    },
+    {
+     "bedrooms": "2",
+     "difference": 13.0,
+     "published_b25031": 1887.0,
+     "pums_stock_median_gross": 1900.0
+    },
+    {
+     "bedrooms": "3",
+     "difference": 13.0,
+     "published_b25031": 2187.0,
+     "pums_stock_median_gross": 2200.0
+    },
+    {
+     "bedrooms": "4",
+     "difference": -17.0,
+     "published_b25031": 2597.0,
+     "pums_stock_median_gross": 2580.0
+    },
+    {
+     "bedrooms": "5",
+     "difference": -43.0,
+     "published_b25031": 2590.0,
+     "pums_stock_median_gross": 2547.0
+    }
+   ]
+  },
+  "41860": {
+   "a_grid": {
+    "generated": 108,
+    "levels": {
+     "tier_bed": 51,
+     "tier_bed_struct": 57
+    },
+    "zero_weight": 0
+   },
+   "b_price_level_used": {
+    "puma_bed": 33,
+    "tier_bed": 420
+   },
+   "candidates_vs_source_distribution": [
+    {
+     "bedrooms": "0",
+     "candidates": 102,
+     "candidates_q0.25": 1400.0,
+     "candidates_q0.5": 2000.0,
+     "candidates_q0.75": 2600.0,
+     "source_n": 290,
+     "source_q0.25": 1500.0,
+     "source_q0.5": 2000.0,
+     "source_q0.75": 2400.0
+    },
+    {
+     "bedrooms": "1",
+     "candidates": 117,
+     "candidates_q0.25": 1900.0,
+     "candidates_q0.5": 2300.0,
+     "candidates_q0.75": 3000.0,
+     "source_n": 539,
+     "source_q0.25": 1900.0,
+     "source_q0.5": 2300.0,
+     "source_q0.75": 2900.0
+    },
+    {
+     "bedrooms": "2",
+     "candidates": 117,
+     "candidates_q0.25": 2200.0,
+     "candidates_q0.5": 3000.0,
+     "candidates_q0.75": 3900.0,
+     "source_n": 570,
+     "source_q0.25": 2200.0,
+     "source_q0.5": 2900.0,
+     "source_q0.75": 3600.0
+    },
+    {
+     "bedrooms": "3plus",
+     "candidates": 106,
+     "candidates_q0.25": 2000.0,
+     "candidates_q0.5": 3500.0,
+     "candidates_q0.75": 4500.0,
+     "source_n": 320,
+     "source_q0.25": 2500.0,
+     "source_q0.5": 3700.0,
+     "source_q0.75": 4500.0
+    }
+   ],
+   "market_vs_stock": [
+    {
+     "bedrooms": "0",
+     "market_n": 290,
+     "market_proxy_median_contract": "2000.00",
+     "market_se_median": 50.29,
+     "stock_median_contract": "1700.00",
+     "stock_n": 876
+    },
+    {
+     "bedrooms": "1",
+     "market_n": 539,
+     "market_proxy_median_contract": "2300.00",
+     "market_se_median": 32.54,
+     "stock_median_contract": "2100.00",
+     "stock_n": 2064
+    },
+    {
+     "bedrooms": "2",
+     "market_n": 570,
+     "market_proxy_median_contract": "2900.00",
+     "market_se_median": 73.19,
+     "stock_median_contract": "2500.00",
+     "stock_n": 2347
+    },
+    {
+     "bedrooms": "3plus",
+     "market_n": 320,
+     "market_proxy_median_contract": "3700.00",
+     "market_se_median": 197.54,
+     "stock_median_contract": "3000.00",
+     "stock_n": 1515
+    }
+   ],
+   "partial_pumas_excluded": 0,
+   "validation_vs_published": [
+    {
+     "bedrooms": "all",
+     "difference": 15.0,
+     "published_b25031": 2435.0,
+     "pums_stock_median_gross": 2450.0
+    },
+    {
+     "bedrooms": "0",
+     "difference": 31.0,
+     "published_b25031": 1769.0,
+     "pums_stock_median_gross": 1800.0
+    },
+    {
+     "bedrooms": "1",
+     "difference": 20.0,
+     "published_b25031": 2180.0,
+     "pums_stock_median_gross": 2200.0
+    },
+    {
+     "bedrooms": "2",
+     "difference": -28.0,
+     "published_b25031": 2676.0,
+     "pums_stock_median_gross": 2648.0
+    },
+    {
+     "bedrooms": "3",
+     "difference": 46.0,
+     "published_b25031": 3187.0,
+     "pums_stock_median_gross": 3233.0
+    },
+    {
+     "bedrooms": "4",
+     "difference": 216.0,
+     "published_b25031": 3501.0,
+     "pums_stock_median_gross": 3717.0
+    },
+    {
+     "bedrooms": "5",
+     "difference": 313.0,
+     "published_b25031": 2796.0,
+     "pums_stock_median_gross": 3109.0
+    }
+   ]
+  },
+  "42660": {
+   "a_grid": {
+    "generated": 108,
+    "levels": {
+     "tier_bed": 57,
+     "tier_bed_struct": 51
+    },
+    "zero_weight": 0
+   },
+   "b_price_level_used": {
+    "puma_bed": 24,
+    "tier_bed": 351
+   },
+   "candidates_vs_source_distribution": [
+    {
+     "bedrooms": "0",
+     "candidates": 93,
+     "candidates_q0.25": 1300.0,
+     "candidates_q0.5": 1600.0,
+     "candidates_q0.75": 1900.0,
+     "source_n": 239,
+     "source_q0.25": 1400.0,
+     "source_q0.5": 1700.0,
+     "source_q0.75": 2000.0
+    },
+    {
+     "bedrooms": "1",
+     "candidates": 90,
+     "candidates_q0.25": 1500.0,
+     "candidates_q0.5": 1600.0,
+     "candidates_q0.75": 2100.0,
+     "source_n": 480,
+     "source_q0.25": 1500.0,
+     "source_q0.5": 1800.0,
+     "source_q0.75": 2100.0
+    },
+    {
+     "bedrooms": "2",
+     "candidates": 96,
+     "candidates_q0.25": 1900.0,
+     "candidates_q0.5": 2000.0,
+     "candidates_q0.75": 2700.0,
+     "source_n": 497,
+     "source_q0.25": 1800.0,
+     "source_q0.5": 2100.0,
+     "source_q0.75": 2700.0
+    },
+    {
+     "bedrooms": "3plus",
+     "candidates": 90,
+     "candidates_q0.25": 2000.0,
+     "candidates_q0.5": 2500.0,
+     "candidates_q0.75": 3200.0,
+     "source_n": 353,
+     "source_q0.25": 2000.0,
+     "source_q0.5": 2600.0,
+     "source_q0.75": 3400.0
+    }
+   ],
+   "market_vs_stock": [
+    {
+     "bedrooms": "0",
+     "market_n": 239,
+     "market_proxy_median_contract": "1700.00",
+     "market_se_median": 39.4,
+     "stock_median_contract": "1600.00",
+     "stock_n": 614
+    },
+    {
+     "bedrooms": "1",
+     "market_n": 480,
+     "market_proxy_median_contract": "1800.00",
+     "market_se_median": 30.89,
+     "stock_median_contract": "1700.00",
+     "stock_n": 1403
+    },
+    {
+     "bedrooms": "2",
+     "market_n": 497,
+     "market_proxy_median_contract": "2100.00",
+     "market_se_median": 47.76,
+     "stock_median_contract": "2000.00",
+     "stock_n": 1664
+    },
+    {
+     "bedrooms": "3plus",
+     "market_n": 353,
+     "market_proxy_median_contract": "2600.00",
+     "market_se_median": 57.74,
+     "stock_median_contract": "2500.00",
+     "stock_n": 1219
+    }
+   ],
+   "partial_pumas_excluded": 0,
+   "validation_vs_published": [
+    {
+     "bedrooms": "all",
+     "difference": 3.0,
+     "published_b25031": 2050.0,
+     "pums_stock_median_gross": 2053.0
+    },
+    {
+     "bedrooms": "0",
+     "difference": -9.0,
+     "published_b25031": 1669.0,
+     "pums_stock_median_gross": 1660.0
+    },
+    {
+     "bedrooms": "1",
+     "difference": 3.0,
+     "published_b25031": 1814.0,
+     "pums_stock_median_gross": 1817.0
+    },
+    {
+     "bedrooms": "2",
+     "difference": -32.0,
+     "published_b25031": 2162.0,
+     "pums_stock_median_gross": 2130.0
+    },
+    {
+     "bedrooms": "3",
+     "difference": 39.0,
+     "published_b25031": 2518.0,
+     "pums_stock_median_gross": 2557.0
+    },
+    {
+     "bedrooms": "4",
+     "difference": -46.0,
+     "published_b25031": 3068.0,
+     "pums_stock_median_gross": 3022.0
+    },
+    {
+     "bedrooms": "5",
+     "difference": 143.0,
+     "published_b25031": 3057.0,
+     "pums_stock_median_gross": 3200.0
+    }
+   ]
+  }
+ },
+ "note_zh": "validation_vs_published：用同一套筛选与权重从 PUMS 算出的存量毛租金中位数，对照 ACS 独立发布的 B25031（发布表在分箱内插值，差几美元正常）；它检验的是权重与筛选，不检验新租市场代理。market_vs_stock：新租市场代理比存量高多少——这就是不能拿存量当报价的原因。candidates_vs_source_distribution：按目标权重加权的候选租金分布对照来源样本分布；回退层级越粗，差异越大。"
+}

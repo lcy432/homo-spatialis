@@ -1,0 +1,14 @@
+{
+ "source_id": "chicago_park_activities",
+ "url": "https://data.cityofchicago.org/resource/tn7v-6rnw.json?$limit=50000&$order=activity_id",
+ "method": "GET",
+ "http_status": 200,
+ "sha256": "8280e54781994cbb6e7406b76288f8f76721a69ab71c42fd96a4340bd3be5f46",
+ "bytes": 35277,
+ "retrieved_at": "2026-10-22T08:04:34Z",
+ "subset_of": {
+  "sha256": "7cee342c3b4e904d1a03c642a3695dc9ec704d302c1d970e6f6cb5fed0b3d108",
+  "bytes": 7433582
+ },
+ "subset_rule": "按活动编号排序后：单日有价且写了时段的前 15 个、多日有价的前 15 个、没写价格的前 5 个、已取消的前 5 个、文字带 HTML 实体的前 5 个"
+}

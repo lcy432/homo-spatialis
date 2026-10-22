@@ -1,0 +1,14 @@
+{
+ "source_id": "bea_rpp_msa",
+ "url": "https://apps.bea.gov/regional/zip/MARPP.zip",
+ "method": "GET",
+ "http_status": 200,
+ "sha256": "0064c6d48b46c1951c573a6f48bc17789bf5680efd3bfaed39d3e7f74dc3e6b2",
+ "bytes": 957,
+ "retrieved_at": "2026-10-22T08:15:23Z",
+ "subset_of": {
+  "sha256": "5dbf2e6ac2af222cc9abc205586c9b480344d89392752eb689c3ec823a34c83e",
+  "bytes": 146479
+ },
+ "subset_rule": "MARPP_MSA 文件里 GeoFIPS = 00000（全美）与 16980 的行"
+}

@@ -1,0 +1,14 @@
+{
+ "source_id": "nces_cip_soc_2020",
+ "url": "https://nces.ed.gov/ipeds/cipcode/Files/CIP2020_SOC2018_Crosswalk.xlsx",
+ "method": "GET",
+ "http_status": 200,
+ "sha256": "07754ba40cc16f17e603bdecd252735ba8b8ec58d1cf148aa05b1588f08f4c34",
+ "bytes": 5480,
+ "retrieved_at": "2026-10-22T08:04:23Z",
+ "subset_of": {
+  "sha256": "ba3d59a191b9d977a5c457a66b9348c4f2f7963aafacf72c0b80113b46bf0ab8",
+  "bytes": 428901
+ },
+ "subset_rule": "上述项目的 CIP 代码的对照行"
+}

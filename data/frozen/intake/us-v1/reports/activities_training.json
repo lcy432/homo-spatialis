@@ -1,0 +1,131 @@
+{
+ "metros": {
+  "16980": {
+   "programs": 9002,
+   "programs_fee_median": 14.9,
+   "programs_free": 2195,
+   "programs_single_session_compilable": 773,
+   "training_programs": 402,
+   "training_related_occupations_mapped": 217,
+   "training_tuition_median": 13020.97,
+   "venue_types": {
+    "community_centre": 93,
+    "fitness_centre": 227,
+    "gallery": 56,
+    "library": 105,
+    "museum": 71,
+    "sports_centre": 290,
+    "swimming_pool": 155,
+    "theatre": 105
+   },
+   "venues": 1235,
+   "venues_with_opening_hours": 208
+  },
+  "26420": {
+   "programs": 0,
+   "programs_fee_median": null,
+   "programs_free": 0,
+   "programs_single_session_compilable": 0,
+   "training_programs": 204,
+   "training_related_occupations_mapped": 107,
+   "training_tuition_median": 17631.51,
+   "venue_types": {
+    "community_centre": 131,
+    "fitness_centre": 112,
+    "golf_course": 26,
+    "library": 55,
+    "museum": 45,
+    "sports_centre": 255,
+    "swimming_pool": 2435,
+    "theatre": 35
+   },
+   "venues": 3150,
+   "venues_with_opening_hours": 76
+  },
+  "31080": {
+   "programs": 0,
+   "programs_fee_median": null,
+   "programs_free": 0,
+   "programs_single_session_compilable": 0,
+   "training_programs": 684,
+   "training_related_occupations_mapped": 480,
+   "training_tuition_median": 17217.07,
+   "venue_types": {
+    "community_centre": 120,
+    "fitness_centre": 240,
+    "gallery": 63,
+    "library": 113,
+    "museum": 108,
+    "sports_centre": 159,
+    "swimming_pool": 8631,
+    "theatre": 162
+   },
+   "venues": 9750,
+   "venues_with_opening_hours": 175
+  },
+  "35620": {
+   "programs": 0,
+   "programs_fee_median": null,
+   "programs_free": 0,
+   "programs_single_session_compilable": 0,
+   "training_programs": 636,
+   "training_related_occupations_mapped": 358,
+   "training_tuition_median": 12716.98,
+   "venue_types": {
+    "arts_centre": 149,
+    "fitness_centre": 670,
+    "gallery": 333,
+    "library": 254,
+    "museum": 164,
+    "sports_centre": 269,
+    "swimming_pool": 1784,
+    "theatre": 288
+   },
+   "venues": 4278,
+   "venues_with_opening_hours": 730
+  },
+  "41860": {
+   "programs": 0,
+   "programs_fee_median": null,
+   "programs_free": 0,
+   "programs_single_session_compilable": 0,
+   "training_programs": 114,
+   "training_related_occupations_mapped": 67,
+   "training_tuition_median": 14205.53,
+   "venue_types": {
+    "community_centre": 61,
+    "fitness_centre": 171,
+    "gallery": 77,
+    "library": 48,
+    "museum": 51,
+    "sports_centre": 118,
+    "swimming_pool": 48,
+    "theatre": 81
+   },
+   "venues": 739,
+   "venues_with_opening_hours": 141
+  },
+  "42660": {
+   "programs": 0,
+   "programs_fee_median": null,
+   "programs_free": 0,
+   "programs_single_session_compilable": 0,
+   "training_programs": 60,
+   "training_related_occupations_mapped": 37,
+   "training_tuition_median": 17328.53,
+   "venue_types": {
+    "arts_centre": 35,
+    "community_centre": 81,
+    "fitness_centre": 295,
+    "gallery": 27,
+    "library": 51,
+    "sports_centre": 62,
+    "swimming_pool": 149,
+    "theatre": 58
+   },
+   "venues": 838,
+   "venues_with_opening_hours": 205
+  }
+ },
+ "note_zh": "只有芝加哥有带价格与日历的城市开放资料；其他城市的活动只有场所（价格未知）。这是来源覆盖的差异，不是城市之间的真实差异。"
+}

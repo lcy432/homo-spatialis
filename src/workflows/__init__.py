@@ -12,6 +12,7 @@
 * ``runtime``：带 SQLite 持久化的操作入口（开始、确认、拒绝、修改、恢复、处理、查询）；
 * ``e3_adapters``：真实 E3 / E1 的接入层（2026-10-18 接入 E3-A 最终版；规划器只接受资料包声明的离线 mock）；
 * ``synthetic``：合成替身（文件持久化、可注入故障），只用于检验流程本身，不是 E1 或 E3。
+* ``data_build``：真实资料构建流程（intake-02）：来源配置 → 获取或读缓存 → 标准化 → A/B 映射 → 目录与菜单 → 检查 → 冻结；与用户模拟流程无关。
 
 依赖方向：本包可以调用 ``product`` 与 ``orchestration``；``common``、``econ``、``ledger``、``agentlayer``、``product``、
 ``orchestration`` 都不得反过来依赖本包或 LangGraph（``tests/workflows/test_isolation.py`` 检查）。

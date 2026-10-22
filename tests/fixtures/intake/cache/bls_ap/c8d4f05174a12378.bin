@@ -1,0 +1,52 @@
+series_id        	area_code	item_code	series_title	footnote_codes	begin_year	begin_period	end_year	end_period
+APU0000701312    	0000	701312	Rice, white, long grain, uncooked, per lb. (453.6 gm) in U.S. city average, average price, not seasonally adjusted		1980	M01	2026	M09
+APU0000701322    	0000	701322	Spaghetti and macaroni, per lb. (453.6 gm) in U.S. city average, average price, not seasonally adjusted		1984	M01	2026	M09
+APU0000702111    	0000	702111	Bread, white, pan, per lb. (453.6 gm) in U.S. city average, average price, not seasonally adjusted		1980	M01	2026	M09
+APU0000703112    	0000	703112	Ground beef, 100% beef, per lb. (453.6 gm) in U.S. city average, average price, not seasonally adjusted		1984	M01	2026	M09
+APU0000703613    	0000	703613	Steak, sirloin, USDA Choice, boneless, per lb. (453.6 gm) in U.S. city average, average price, not seasonally adjusted		1989	M01	2026	M09
+APU0000704212    	0000	704212	Chops, boneless, per lb. (453.6 gm) in U.S. city average, average price, not seasonally adjusted		1995	M07	2026	M09
+APU0000706111    	0000	706111	Chicken, fresh, whole, per lb. (453.6 gm) in U.S. city average, average price, not seasonally adjusted		1980	M01	2026	M09
+APU0000708111    	0000	708111	Eggs, grade A, large, per doz. in U.S. city average, average price, not seasonally adjusted		1980	M01	2026	M09
+APU0000709112    	0000	709112	Milk, fresh, whole, fortified, per gal. (3.8 lit) in U.S. city average, average price, not seasonally adjusted		1995	M07	2026	M09
+APU0000710212    	0000	710212	Cheddar cheese, natural, per lb. (453.6 gm) in U.S. city average, average price, not seasonally adjusted		1984	M01	2026	M09
+APU0000711211    	0000	711211	Bananas, per lb. (453.6 gm) in U.S. city average, average price, not seasonally adjusted		1980	M01	2026	M09
+APU0000711311    	0000	711311	Oranges, Navel, per lb. (453.6 gm) in U.S. city average, average price, not seasonally adjusted		1980	M01	2026	M09
+APU0000711415    	0000	711415	Strawberries, dry pint, per 12 oz. (340.2 gm) in U.S. city average, average price, not seasonally adjusted		1980	M04	2026	M09
+APU0000712112    	0000	712112	Potatoes, white, per lb. (453.6 gm) in U.S. city average, average price, not seasonally adjusted		1986	M03	2026	M09
+APU0000712311    	0000	712311	Tomatoes, field grown, per lb. (453.6 gm) in U.S. city average, average price, not seasonally adjusted		1980	M01	2026	M09
+APU0000714233    	0000	714233	Beans, dried, any type, all sizes, per lb. (453.6 gm) in U.S. city average, average price, not seasonally adjusted		1995	M07	2026	M09
+APU0000717311    	0000	717311	Coffee, 100%, ground roast, all sizes, per lb. (453.6 gm) in U.S. city average, average price, not seasonally adjusted		1980	M01	2026	M09
+APU000072610     	0000	72610	Electricity per KWH in U.S. city average, average price, not seasonally adjusted		1978	M11	2026	M09
+APU000072620     	0000	72620	Utility (piped) gas per therm in U.S. city average, average price, not seasonally adjusted		1978	M11	2026	M09
+APU000074714     	0000	74714	Gasoline, unleaded regular, per gallon/3.785 liters in U.S. city average, average price, not seasonally adjusted		1976	M01	2026	M09
+APU0000FF1101    	0000	FF1101	Chicken breast, boneless, per lb. (453.6 gm) in U.S. city average, average price, not seasonally adjusted		2006	M01	2026	M09
+APU0000FJ1101    	0000	FJ1101	Milk, fresh, low-fat, reduced fat, skim, per gal. (3.8 lit) in U.S. city average, average price, not seasonally adjusted		2018	M04	2026	M09
+APU0000FJ4101    	0000	FJ4101	Yogurt, per 8 oz. (226.8 gm) in U.S. city average, average price, not seasonally adjusted		2018	M04	2026	M09
+APU0000FL2101    	0000	FL2101	Lettuce, romaine, per lb. (453.6 gm) in U.S. city average, average price, not seasonally adjusted		2006	M01	2026	M09
+APU0200701312    	0200	701312	Rice, white, long grain, uncooked, per lb. (453.6 gm) in Midwest, average price, not seasonally adjusted		2021	M11	2025	M10
+APU0200701322    	0200	701322	Spaghetti and macaroni, per lb. (453.6 gm) in Midwest urban, average price, not seasonally adjusted		1984	M01	2025	M10
+APU0200702111    	0200	702111	Bread, white, pan, per lb. (453.6 gm) in Midwest urban, average price, not seasonally adjusted		1980	M01	2026	M05
+APU0200703112    	0200	703112	Ground beef, 100% beef, per lb. (453.6 gm) in Midwest urban, average price, not seasonally adjusted		1984	M01	2026	M09
+APU0200703613    	0200	703613	Steak, sirloin, USDA Choice, boneless, per lb. (453.6 gm) in Midwest urban, average price, not seasonally adjusted		1989	M01	2026	M09
+APU0200704212    	0200	704212	Chops, boneless, per lb. (453.6 gm) in Midwest urban, average price, not seasonally adjusted		1995	M07	2026	M09
+APU0200706111    	0200	706111	Chicken, fresh, whole, per lb. (453.6 gm) in Midwest urban, average price, not seasonally adjusted		1980	M01	2026	M09
+APU0200708111    	0200	708111	Eggs, grade A, large, per doz. in Midwest urban, average price, not seasonally adjusted		1980	M01	2025	M10
+APU0200709112    	0200	709112	Milk, fresh, whole, fortified, per gal. (3.8 lit) in Midwest urban, average price, not seasonally adjusted		1995	M07	2025	M10
+APU0200710212    	0200	710212	Cheddar cheese, natural, per lb. (453.6 gm) in Midwest urban, average price, not seasonally adjusted		1984	M01	2025	M10
+APU0200711211    	0200	711211	Bananas, per lb. (453.6 gm) in Midwest urban, average price, not seasonally adjusted		1980	M01	2026	M09
+APU0200711311    	0200	711311	Oranges, Navel, per lb. (453.6 gm) in Midwest urban, average price, not seasonally adjusted		1980	M01	2026	M09
+APU0200711415    	0200	711415	Strawberries, dry pint, per 12 oz. (340.2 gm) in Midwest urban, average price, not seasonally adjusted		1980	M04	2025	M10
+APU0200712112    	0200	712112	Potatoes, white, per lb. (453.6 gm) in Midwest urban, average price, not seasonally adjusted		1986	M03	2026	M09
+APU0200712311    	0200	712311	Tomatoes, field grown, per lb. (453.6 gm) in Midwest urban, average price, not seasonally adjusted		1980	M01	2026	M09
+APU0200714233    	0200	714233	Beans, dried, any type, all sizes, per lb. (453.6 gm) in Midwest urban, average price, not seasonally adjusted		1995	M11	2025	M10
+APU0200717311    	0200	717311	Coffee, 100%, ground roast, all sizes, per lb. (453.6 gm) in Midwest urban, average price, not seasonally adjusted		1980	M01	2025	M10
+APU020072610     	0200	72610	Electricity per KWH in Midwest urban, average price, not seasonally adjusted		1978	M11	2026	M09
+APU020072620     	0200	72620	Utility (piped) gas per therm in Midwest urban, average price, not seasonally adjusted		1978	M11	2026	M09
+APU020074714     	0200	74714	Gasoline, unleaded regular, per gallon/3.785 liters in Midwest urban, average price, not seasonally adjusted		1978	M01	2026	M09
+APU0200FF1101    	0200	FF1101	Chicken breast, boneless, per lb. (453.6 gm) in Midwest urban, average price, not seasonally adjusted		2006	M01	2026	M09
+APU0200FJ1101    	0200	FJ1101	Milk, fresh, low-fat, reduced fat, skim, per gal. (3.8 lit) in Midwest, average price, not seasonally adjusted		2018	M04	2025	M10
+APU0200FJ4101    	0200	FJ4101	Yogurt, per 8 oz. (226.8 gm) in Midwest, average price, not seasonally adjusted		2018	M04	2025	M10
+APU0200FL2101    	0200	FL2101	Lettuce, romaine, per lb. (453.6 gm) in Midwest urban, average price, not seasonally adjusted		2006	M06	2025	M10
+APUS23A72610     	S23A	72610	Electricity per KWH in Chicago-Naperville-Elgin, IL-IN-WI, average price, not seasonally adjusted		1978	M11	2024	M12
+APUS23A72620     	S23A	72620	Utility (piped) gas per therm in Chicago-Naperville-Elgin, IL-IN-WI, average price, not seasonally adjusted		1978	M11	2024	M12
+APUS23A74714     	S23A	74714	Gasoline, unleaded regular, per gallon/3.785 liters in Chicago-Naperville-Elgin, IL-IN-WI, average price, not seasonally adjusted		1978	M01	2026	M09

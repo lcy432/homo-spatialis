@@ -1,0 +1,404 @@
+{
+ "inclusion": {
+  "16980": {
+   "candidates": 183,
+   "k": 3,
+   "top5": [
+    {
+     "k_times_share": 0.11926,
+     "opportunity_id": "housing.b.16980.1703160.1.q1",
+     "simulated_inclusion": 0.12,
+     "weight_share": 0.03975
+    },
+    {
+     "k_times_share": 0.11926,
+     "opportunity_id": "housing.b.16980.1703160.1.q3",
+     "simulated_inclusion": 0.1175,
+     "weight_share": 0.03975
+    },
+    {
+     "k_times_share": 0.11926,
+     "opportunity_id": "housing.b.16980.1703160.1.q2",
+     "simulated_inclusion": 0.125,
+     "weight_share": 0.03975
+    },
+    {
+     "k_times_share": 0.07768,
+     "opportunity_id": "housing.b.16980.1703154.1.q2",
+     "simulated_inclusion": 0.0925,
+     "weight_share": 0.02589
+    },
+    {
+     "k_times_share": 0.07768,
+     "opportunity_id": "housing.b.16980.1703154.1.q1",
+     "simulated_inclusion": 0.07,
+     "weight_share": 0.02589
+    }
+   ]
+  },
+  "26420": {
+   "candidates": 165,
+   "k": 3,
+   "top5": [
+    {
+     "k_times_share": 0.08039,
+     "opportunity_id": "housing.b.26420.4804637.1.q2",
+     "simulated_inclusion": 0.095,
+     "weight_share": 0.0268
+    },
+    {
+     "k_times_share": 0.08039,
+     "opportunity_id": "housing.b.26420.4804637.1.q3",
+     "simulated_inclusion": 0.085,
+     "weight_share": 0.0268
+    },
+    {
+     "k_times_share": 0.08039,
+     "opportunity_id": "housing.b.26420.4804637.1.q1",
+     "simulated_inclusion": 0.0875,
+     "weight_share": 0.0268
+    },
+    {
+     "k_times_share": 0.07049,
+     "opportunity_id": "housing.b.26420.4804614.1.q3",
+     "simulated_inclusion": 0.075,
+     "weight_share": 0.0235
+    },
+    {
+     "k_times_share": 0.07049,
+     "opportunity_id": "housing.b.26420.4804614.1.q2",
+     "simulated_inclusion": 0.0825,
+     "weight_share": 0.0235
+    }
+   ]
+  },
+  "31080": {
+   "candidates": 270,
+   "k": 3,
+   "top5": [
+    {
+     "k_times_share": 0.0547,
+     "opportunity_id": "housing.b.31080.0603732.1.q2",
+     "simulated_inclusion": 0.055,
+     "weight_share": 0.01823
+    },
+    {
+     "k_times_share": 0.0547,
+     "opportunity_id": "housing.b.31080.0603732.1.q3",
+     "simulated_inclusion": 0.05,
+     "weight_share": 0.01823
+    },
+    {
+     "k_times_share": 0.0547,
+     "opportunity_id": "housing.b.31080.0603732.1.q1",
+     "simulated_inclusion": 0.06,
+     "weight_share": 0.01823
+    },
+    {
+     "k_times_share": 0.03507,
+     "opportunity_id": "housing.b.31080.0603730.1.q2",
+     "simulated_inclusion": 0.0325,
+     "weight_share": 0.01169
+    },
+    {
+     "k_times_share": 0.03507,
+     "opportunity_id": "housing.b.31080.0603730.1.q1",
+     "simulated_inclusion": 0.025,
+     "weight_share": 0.01169
+    }
+   ]
+  },
+  "35620": {
+   "candidates": 432,
+   "k": 3,
+   "top5": [
+    {
+     "k_times_share": 0.04818,
+     "opportunity_id": "housing.b.35620.3604165.1.q3",
+     "simulated_inclusion": 0.0575,
+     "weight_share": 0.01606
+    },
+    {
+     "k_times_share": 0.04818,
+     "opportunity_id": "housing.b.35620.3604165.1.q1",
+     "simulated_inclusion": 0.05,
+     "weight_share": 0.01606
+    },
+    {
+     "k_times_share": 0.04818,
+     "opportunity_id": "housing.b.35620.3604165.1.q2",
+     "simulated_inclusion": 0.0325,
+     "weight_share": 0.01606
+    },
+    {
+     "k_times_share": 0.04335,
+     "opportunity_id": "housing.b.35620.3604104.1.q3",
+     "simulated_inclusion": 0.03,
+     "weight_share": 0.01445
+    },
+    {
+     "k_times_share": 0.04335,
+     "opportunity_id": "housing.b.35620.3604104.1.q2",
+     "simulated_inclusion": 0.035,
+     "weight_share": 0.01445
+    }
+   ]
+  },
+  "41860": {
+   "candidates": 117,
+   "k": 3,
+   "top5": [
+    {
+     "k_times_share": 0.10395,
+     "opportunity_id": "housing.b.41860.0600111.1.q1",
+     "simulated_inclusion": 0.13,
+     "weight_share": 0.03465
+    },
+    {
+     "k_times_share": 0.10395,
+     "opportunity_id": "housing.b.41860.0600111.1.q2",
+     "simulated_inclusion": 0.0975,
+     "weight_share": 0.03465
+    },
+    {
+     "k_times_share": 0.10395,
+     "opportunity_id": "housing.b.41860.0600111.1.q3",
+     "simulated_inclusion": 0.12,
+     "weight_share": 0.03465
+    },
+    {
+     "k_times_share": 0.08936,
+     "opportunity_id": "housing.b.41860.0607509.1.q2",
+     "simulated_inclusion": 0.095,
+     "weight_share": 0.02979
+    },
+    {
+     "k_times_share": 0.08936,
+     "opportunity_id": "housing.b.41860.0607509.1.q3",
+     "simulated_inclusion": 0.0775,
+     "weight_share": 0.02979
+    }
+   ]
+  },
+  "42660": {
+   "candidates": 90,
+   "k": 3,
+   "top5": [
+    {
+     "k_times_share": 0.13009,
+     "opportunity_id": "housing.b.42660.5323315.1.q2",
+     "simulated_inclusion": 0.135,
+     "weight_share": 0.04336
+    },
+    {
+     "k_times_share": 0.13009,
+     "opportunity_id": "housing.b.42660.5323315.1.q3",
+     "simulated_inclusion": 0.1675,
+     "weight_share": 0.04336
+    },
+    {
+     "k_times_share": 0.13009,
+     "opportunity_id": "housing.b.42660.5323315.1.q1",
+     "simulated_inclusion": 0.1225,
+     "weight_share": 0.04336
+    },
+    {
+     "k_times_share": 0.10043,
+     "opportunity_id": "housing.b.42660.5323314.1.q3",
+     "simulated_inclusion": 0.095,
+     "weight_share": 0.03348
+    },
+    {
+     "k_times_share": 0.10043,
+     "opportunity_id": "housing.b.42660.5323314.1.q2",
+     "simulated_inclusion": 0.0925,
+     "weight_share": 0.03348
+    }
+   ]
+  }
+ },
+ "menus_per_policy": {
+  "annual_exposure_sample": 72,
+  "calendar_open": 72,
+  "full_catalog": 108
+ },
+ "note_zh": "菜单大小诊断：同一城市用不同的每层名额 k 各抽 20 次（环境重复 100–119），看最便宜的一套相对新租市场中位数、往返 ≤ 60 分钟的比例怎样变。k 越大，最便宜的那套越便宜——所以各城必须用同一个 k，不能靠给某座城多抽来制造优势。inclusion：无放回加权抽样里，权重最大的候选的实际入选频率（400 次模拟）与“k × 权重份额”的对照；权重不是入选概率。",
+ "shared_menus": {
+  "distinct_seed_per_env_repeat": true,
+  "duplicate_menus": 0,
+  "note_zh": "种子不含分身编号：同一环境重复下的分身拿到同一份菜单；恢复与重新查询读冻结的菜单，不重抽。",
+  "seed_inputs": [
+   "build_id",
+   "cbsa",
+   "year",
+   "sector",
+   "env_repeat",
+   "algorithm",
+   "config_seed"
+  ]
+ },
+ "size_diagnostic": {
+  "16980": [
+   {
+    "mean_cheapest_over_market_median": 1.0868,
+    "mean_share_roundtrip_le_60min": 1.0,
+    "per_stratum": 1
+   },
+   {
+    "mean_cheapest_over_market_median": 0.8991,
+    "mean_share_roundtrip_le_60min": 1.0,
+    "per_stratum": 2
+   },
+   {
+    "mean_cheapest_over_market_median": 0.7985,
+    "mean_share_roundtrip_le_60min": 1.0,
+    "per_stratum": 3
+   },
+   {
+    "mean_cheapest_over_market_median": 0.6886,
+    "mean_share_roundtrip_le_60min": 1.0,
+    "per_stratum": 5
+   },
+   {
+    "mean_cheapest_over_market_median": 0.6047,
+    "mean_share_roundtrip_le_60min": 1.0,
+    "per_stratum": 8
+   }
+  ],
+  "26420": [
+   {
+    "mean_cheapest_over_market_median": 1.0856,
+    "mean_share_roundtrip_le_60min": 0.9875,
+    "per_stratum": 1
+   },
+   {
+    "mean_cheapest_over_market_median": 0.8833,
+    "mean_share_roundtrip_le_60min": 0.9875,
+    "per_stratum": 2
+   },
+   {
+    "mean_cheapest_over_market_median": 0.7943,
+    "mean_share_roundtrip_le_60min": 0.9833,
+    "per_stratum": 3
+   },
+   {
+    "mean_cheapest_over_market_median": 0.7352,
+    "mean_share_roundtrip_le_60min": 0.98,
+    "per_stratum": 5
+   },
+   {
+    "mean_cheapest_over_market_median": 0.6915,
+    "mean_share_roundtrip_le_60min": 0.9844,
+    "per_stratum": 8
+   }
+  ],
+  "31080": [
+   {
+    "mean_cheapest_over_market_median": 1.0464,
+    "mean_share_roundtrip_le_60min": 1.0,
+    "per_stratum": 1
+   },
+   {
+    "mean_cheapest_over_market_median": 0.8332,
+    "mean_share_roundtrip_le_60min": 1.0,
+    "per_stratum": 2
+   },
+   {
+    "mean_cheapest_over_market_median": 0.747,
+    "mean_share_roundtrip_le_60min": 1.0,
+    "per_stratum": 3
+   },
+   {
+    "mean_cheapest_over_market_median": 0.6733,
+    "mean_share_roundtrip_le_60min": 1.0,
+    "per_stratum": 5
+   },
+   {
+    "mean_cheapest_over_market_median": 0.6084,
+    "mean_share_roundtrip_le_60min": 1.0,
+    "per_stratum": 8
+   }
+  ],
+  "35620": [
+   {
+    "mean_cheapest_over_market_median": 1.2076,
+    "mean_share_roundtrip_le_60min": 0.6125,
+    "per_stratum": 1
+   },
+   {
+    "mean_cheapest_over_market_median": 0.8336,
+    "mean_share_roundtrip_le_60min": 0.6,
+    "per_stratum": 2
+   },
+   {
+    "mean_cheapest_over_market_median": 0.7208,
+    "mean_share_roundtrip_le_60min": 0.6,
+    "per_stratum": 3
+   },
+   {
+    "mean_cheapest_over_market_median": 0.6044,
+    "mean_share_roundtrip_le_60min": 0.615,
+    "per_stratum": 5
+   },
+   {
+    "mean_cheapest_over_market_median": 0.5329,
+    "mean_share_roundtrip_le_60min": 0.625,
+    "per_stratum": 8
+   }
+  ],
+  "41860": [
+   {
+    "mean_cheapest_over_market_median": 0.9335,
+    "mean_share_roundtrip_le_60min": 0.95,
+    "per_stratum": 1
+   },
+   {
+    "mean_cheapest_over_market_median": 0.7964,
+    "mean_share_roundtrip_le_60min": 0.9563,
+    "per_stratum": 2
+   },
+   {
+    "mean_cheapest_over_market_median": 0.7146,
+    "mean_share_roundtrip_le_60min": 0.9583,
+    "per_stratum": 3
+   },
+   {
+    "mean_cheapest_over_market_median": 0.6476,
+    "mean_share_roundtrip_le_60min": 0.9575,
+    "per_stratum": 5
+   },
+   {
+    "mean_cheapest_over_market_median": 0.6113,
+    "mean_share_roundtrip_le_60min": 0.9563,
+    "per_stratum": 8
+   }
+  ],
+  "42660": [
+   {
+    "mean_cheapest_over_market_median": 0.9862,
+    "mean_share_roundtrip_le_60min": 1.0,
+    "per_stratum": 1
+   },
+   {
+    "mean_cheapest_over_market_median": 0.8533,
+    "mean_share_roundtrip_le_60min": 0.9812,
+    "per_stratum": 2
+   },
+   {
+    "mean_cheapest_over_market_median": 0.7863,
+    "mean_share_roundtrip_le_60min": 0.9833,
+    "per_stratum": 3
+   },
+   {
+    "mean_cheapest_over_market_median": 0.754,
+    "mean_share_roundtrip_le_60min": 0.975,
+    "per_stratum": 5
+   },
+   {
+    "mean_cheapest_over_market_median": 0.7092,
+    "mean_share_roundtrip_le_60min": 0.9797,
+    "per_stratum": 8
+   }
+  ]
+ }
+}

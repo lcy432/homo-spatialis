@@ -1,0 +1,150 @@
+{
+ "bea_rpp_msa": {
+  "access": "open",
+  "publisher": "U.S. Bureau of Economic Analysis",
+  "records": {
+   "city_fact_table": 6
+  },
+  "total": 6
+ },
+ "bls_ap": {
+  "access": "open",
+  "publisher": "U.S. Bureau of Labor Statistics",
+  "records": {
+   "city_fact_table": 6,
+   "food_item_avg_price": 210
+  },
+  "total": 216
+ },
+ "bls_ce_msa_2023_2024": {
+  "access": "open",
+  "publisher": "U.S. Bureau of Labor Statistics",
+  "records": {
+   "city_fact_table": 6
+  },
+  "total": 6
+ },
+ "bls_cpi_u": {
+  "access": "open",
+  "note": "",
+  "publisher": "U.S. Bureau of Labor Statistics",
+  "records": {},
+  "total": 0
+ },
+ "bls_ep_education": {
+  "access": "open",
+  "note": "",
+  "publisher": "U.S. Bureau of Labor Statistics",
+  "records": {},
+  "total": 0
+ },
+ "bls_oews_may2024": {
+  "access": "open",
+  "publisher": "U.S. Bureau of Labor Statistics",
+  "records": {
+   "occupation_wage_distribution": 4357
+  },
+  "total": 4357
+ },
+ "census_acs1_pums_2024": {
+  "access": "open",
+  "publisher": "U.S. Census Bureau",
+  "records": {
+   "rental_unit_sample": 73826
+  },
+  "total": 73826
+ },
+ "census_acs1_tables_2024": {
+  "access": "open",
+  "publisher": "U.S. Census Bureau",
+  "records": {
+   "city_fact_table": 24
+  },
+  "total": 24
+ },
+ "census_cbsa_2023": {
+  "access": "open",
+  "publisher": "U.S. Census Bureau",
+  "records": {
+   "city_fact_table": 18
+  },
+  "total": 18
+ },
+ "census_gazetteer_cbsa_2024": {
+  "access": "open",
+  "note": "",
+  "publisher": "U.S. Census Bureau",
+  "records": {},
+  "total": 0
+ },
+ "census_tract_puma_2020": {
+  "access": "open",
+  "note": "",
+  "publisher": "U.S. Census Bureau",
+  "records": {},
+  "total": 0
+ },
+ "chicago_park_activities": {
+  "access": "open_rate_limited",
+  "publisher": "City of Chicago / Chicago Park District",
+  "records": {
+   "activity_program": 9002
+  },
+  "total": 9002
+ },
+ "energystar_products": {
+  "access": "open_rate_limited",
+  "publisher": "U.S. EPA ENERGY STAR",
+  "records": {
+   "appliance_model": 1875
+  },
+  "total": 1875
+ },
+ "epa_aqi_cbsa_2025": {
+  "access": "open",
+  "publisher": "U.S. EPA Air Quality System",
+  "records": {
+   "city_fact_table": 6
+  },
+  "total": 6
+ },
+ "fbi_cde": {
+  "access": "requires_key",
+  "publisher": "FBI Crime Data Explorer",
+  "records": {
+   "city_fact_table": 6
+  },
+  "total": 6
+ },
+ "hud_fmr_fy2026": {
+  "access": "blocked",
+  "note": "the file answered HTTP 202 with an empty body (a bot-check challenge) during the probe; the HUD API needs a registered token, which we do not have. Not bypassed; ACS published tables are used as the validation benchmark instead.",
+  "publisher": "U.S. Department of Housing and Urban Development",
+  "records": {},
+  "total": 0
+ },
+ "ipeds_2023": {
+  "access": "open",
+  "publisher": "NCES (IPEDS)",
+  "records": {
+   "training_program": 2100
+  },
+  "total": 2100
+ },
+ "nces_cip_soc_2020": {
+  "access": "open",
+  "note": "",
+  "publisher": "NCES / BLS",
+  "records": {},
+  "total": 0
+ },
+ "osm_overpass": {
+  "access": "open_rate_limited",
+  "publisher": "OpenStreetMap contributors (via Overpass API mirror)",
+  "records": {
+   "activity_venue": 19990,
+   "restaurant_venue": 33311
+  },
+  "total": 53301
+ }
+}

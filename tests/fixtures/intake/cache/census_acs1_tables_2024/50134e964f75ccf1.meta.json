@@ -1,0 +1,14 @@
+{
+ "source_id": "census_acs1_tables_2024",
+ "url": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/1YRData/acsdt1y2024-b25031.dat",
+ "method": "GET",
+ "http_status": 200,
+ "sha256": "8c48a3a82e93c6f24219cedb5bbab29bb9db52bdd74a3ee9cfdc6509a86739d5",
+ "bytes": 247,
+ "retrieved_at": "2026-10-22T08:05:03Z",
+ "subset_of": {
+  "sha256": "d8283555516e0a757a51aa8ea6164c25c58e54ba88c5e339e964160633907a80",
+  "bytes": 702160
+ },
+ "subset_rule": "表头 + GEO_ID = 310M700US16980"
+}

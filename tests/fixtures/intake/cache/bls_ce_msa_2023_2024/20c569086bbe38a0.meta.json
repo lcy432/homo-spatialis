@@ -1,0 +1,14 @@
+{
+ "source_id": "bls_ce_msa_2023_2024",
+ "url": "https://www.bls.gov/cex/tables/geographic/mean/cu-msa-midwest-2-year-average-2023-2024.xlsx",
+ "method": "GET",
+ "http_status": 200,
+ "sha256": "5ae71adbacdacbe6205c05a4412871c4eecbaae7cb1f7e0ee4e82c2d6733e390",
+ "bytes": 6836,
+ "retrieved_at": "2026-10-22T08:05:05Z",
+ "subset_of": {
+  "sha256": "5ae71adbacdacbe6205c05a4412871c4eecbaae7cb1f7e0ee4e82c2d6733e390",
+  "bytes": 6836
+ },
+ "subset_rule": "原文件（很小，不切）"
+}

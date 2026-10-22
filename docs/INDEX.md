@@ -27,7 +27,7 @@
 |---|---|---|---|---|---|
 | **生活引擎** engine | 分身按月过日子：结算、评分、时间精力、职业、储蓄、疾病、跨期评价、城市汇总 | E1-1 – E1-6、E1 补充；E2 已并入 | M2 的生活部分 | `src/econ/life_*`、`src/common/life_*`、`src/ledger/life_*` | [e1-3](design/e1-3-life-model.md)、[e1-4](design/e1-4-time-energy.md)、[e1-5](design/e1-5-career-savings-risk.md)、[e1-6](design/e1-6-evaluation.md) |
 | **代理层** agent | 规划接口、事实记忆、mock 与真实模型、传输层、预算、归档与重放 | E1-7A / E1-7B | M4 | `src/agentlayer/`、`src/orchestration/` | [e1-7](design/e1-7-agent-loop.md) |
-| **接入层** intake | 用户输入、职业匹配、标准初态、真实资料、共享消息结构 | E3（含 E3-A） | M1、M1.5 | `src/product/`、`src/common/product_contracts.py`、`contracts/product/` | [共享约定](design/e3-e5-product-contract.md)、[E3-A](design/e3a-product-input.md) |
+| **接入层** intake | 用户输入、职业匹配、标准初态、真实资料、共享消息结构 | E3（含 E3-A） | M1、M1.5 | `src/product/`、`src/common/product_contracts.py`、`src/common/intake_contracts.py`、`contracts/product/` | [共享约定](design/e3-e5-product-contract.md)、[E3-A](design/e3a-product-input.md)、[intake-02 真实资料](design/intake-02-real-data.md) |
 | **界面层** ui | 表单、进度、结果展示、网页入口 | E5 | M6 | `web/`（`src/ui/` 未使用） | [E5 交接](handoffs/e5-product-handoff.md)、[E5-A](design/e5-a-offline-ui.md) |
 | **研究线** research | 大模型偏好理解评估（P8/P9/P10、三个门）、合成世界与人设、信息条件实验 | R、E4 | M3、M5 | `src/eval/`、`src/worlds/` | [README](../README.md) 第 3、7、10、11 章 |
 
@@ -72,7 +72,7 @@
 | 编号 | 旧编号 | 内容 | 状态 | 备注 | ADR |
 |---|---|---|---|---|---|
 | intake-01 | E3-A | 六维＋独立健康的输入适配、共享消息结构（v2） | 已实现 | | [0034](../DECISIONS/0034-e3a-product-input-contract.md) |
-| intake-02 | E3-B | 全国性来源批量获取，统一地理、年份、职业与单位口径 | 计划中 | | |
+| intake-02 | E3-B | 真实资料与机会数据库：六个验证都会区的官方与公开来源批量获取、标准化与溯源，住房 B 映射（ACS 加权条件分布）与 A 覆盖网格，按板块的机会注册表、分页查询与菜单（共享、不重抽），LangGraph 资料构建流程（可恢复、按内容身份复用、冻结） | 已实现 | 真实记录 144,743、机会 85,316（映射生成 18,642）、菜单 252；现在能编进 E1 的只有芝加哥 773 个单次活动，其余要 E1 扩展（只声明，未改 E1）；HUD 被拒、FBI 要密钥、旧金山快餐与咖啡 504；冻结库只在本机，清单与报告在 `data/frozen/intake/us-v1/`；说明见 [intake-02 技术说明](design/intake-02-real-data.md) | [0040](../DECISIONS/0040-intake-02-real-data-database.md) |
 | intake-03 | E3-C | 真实税与公开说明同源；资料包与确认画像接上运行入口，向界面层提供运行与结果 | 计划中 | | |
 | intake-04 | — | LangGraph 外层运行流程：预检查 → 等用户确认 → 幂等登记 → 启动或恢复生活引擎 → 交付结果；SQLite 持久化，接上接入层（E3-A）的预检查、登记与投影和代理层的启动、恢复 | 已实现 | 原型：只接离线 mock 规划器，没有并发锁与托管；说明见 [LangGraph 外层流程](design/langgraph-product-workflow.md)；接线由 `tests/workflows` 覆盖 | |
 
@@ -97,6 +97,7 @@ P8 / P9 / P10 已实现，门一已过，门二与门三待真实输入；开发
 | 产品样例的 Flash 配置 / Haiku 测试配置（显式 `--config`） | `configs/life/run_product_flash.yaml`（账本 `ledgers/qwen-flash-convenience/`）/ `configs/life/run_product_haiku.yaml` |
 | 离线 mock 对照 | `configs/life/run_product_mock.yaml` |
 | 接入层产品链 | `scripts/product_e3a.py` 显式编译产品样例 |
+| 真实资料构建（intake-02） | 配置 `configs/intake/us_v1.yaml`；`scripts/intake_data.py`：`fetch`（唯一联网的命令）→ `build`（LangGraph，离线，可恢复）→ `export`；`query` / `menu` / `lineage` 查冻结库；测试样本由 `scripts/intake_fixtures.py` 生成 |
 
 模型角色在 `configs/models.yaml`：研究基座 `base_a` / `base_b`，产品 `product_planner`（Flash，全规模测试也用它），测试 `test_planner_sonnet`（Sonnet，非全量测试默认）与 `test_planner`（Haiku）。密钥在 `.env`。
 

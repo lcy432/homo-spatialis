@@ -1,0 +1,14 @@
+{
+ "source_id": "energystar_products",
+ "url": "https://data.energystar.gov/resource/t9u7-4d2j.json?$limit=50000&$order=:id",
+ "method": "GET",
+ "http_status": 200,
+ "sha256": "52bc55081a4979b6a1c4382041d19529573fb925bc682a0df5bbbcf645127868",
+ "bytes": 5873,
+ "retrieved_at": "2026-10-22T08:05:13Z",
+ "subset_of": {
+  "sha256": "8319583f4983ca4b47a225cf69fe66a30966cf445b6a3296b234138c1478a777",
+  "bytes": 688012
+ },
+ "subset_rule": "文件里的前 6 个型号"
+}

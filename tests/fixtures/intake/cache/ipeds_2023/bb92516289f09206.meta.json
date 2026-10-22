@@ -1,0 +1,14 @@
+{
+ "source_id": "ipeds_2023",
+ "url": "https://nces.ed.gov/ipeds/datacenter/data/IC2023_PY.zip",
+ "method": "GET",
+ "http_status": 200,
+ "sha256": "1b630c7167264cf8780940d89c8f0484a28d7ebd6bdb113d3a7449fe518c3b7e",
+ "bytes": 1018,
+ "retrieved_at": "2026-10-22T08:04:29Z",
+ "subset_of": {
+  "sha256": "05f944ee4179da344876cbc0b5b56e85ce721134508ef42c10f6480b801b6135",
+  "bytes": 147477
+ },
+ "subset_rule": "同上院校的项目行"
+}

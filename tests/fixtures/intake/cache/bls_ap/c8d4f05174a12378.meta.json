@@ -1,0 +1,14 @@
+{
+ "source_id": "bls_ap",
+ "url": "https://download.bls.gov/pub/time.series/ap/ap.series",
+ "method": "GET",
+ "http_status": 200,
+ "sha256": "b08b3e695aed02bad610ed144c3eeb81d755ae0062f9ebf32c24067c548a3b1d",
+ "bytes": 7824,
+ "retrieved_at": "2026-10-22T07:57:18Z",
+ "subset_of": {
+  "sha256": "9b3ad0b00e10b7872e76c09c620b655f24e76220f4ac5730069449979fc08eee",
+  "bytes": 231046
+ },
+ "subset_rule": "地区 ['0000', '0200', 'S23A'] × 食品篮子用到的项目与能源项目"
+}

@@ -1,0 +1,347 @@
+# intake-02（E3-B）美国资料构建配置。
+#
+# 六个验证都会区只是资料工程的验证范围，不是首发城市裁决。都会区用 OMB 2023 年划定（CBSA2023）的正式代码与边界：
+# 旧金山都会区（41860）只有五个县，不含圣何塞（41940）——不是整个湾区；市行政区（纽约市、洛杉矶市……）只用于城市级开放资料，
+# 记为“在都会区里面”（within），不当作都会区。
+#
+# 改了这里的任何内容（来源、方法参数、菜单政策、种子），构建身份都会变。
+
+build:
+  name: us-v1
+  country: US
+  geo_scheme: CBSA2023
+  money_target: USD_2024_LOCAL
+  base_year: 2024
+  seed: intake-us-v1-seed-2026-10-22
+
+metros:
+  - cbsa: "35620"
+    key: nyc
+    label: New York-Newark-Jersey City, NY-NJ
+    label_zh: 纽约
+    principal_city: {name: New York, wikidata: Q60}
+    census_region: "0100"
+    ap_metro_area: S12A
+    ce_region_file: northeast
+  - cbsa: "31080"
+    key: la
+    label: Los Angeles-Long Beach-Anaheim, CA
+    label_zh: 洛杉矶
+    principal_city: {name: Los Angeles, wikidata: Q65}
+    census_region: "0400"
+    ap_metro_area: S49A
+    ce_region_file: west
+  - cbsa: "41860"
+    key: sf
+    label: San Francisco-Oakland-Fremont, CA
+    label_zh: 旧金山
+    principal_city: {name: San Francisco, wikidata: Q62}
+    census_region: "0400"
+    ap_metro_area: S49B
+    ce_region_file: west
+  - cbsa: "16980"
+    key: chi
+    label: Chicago-Naperville-Elgin, IL-IN
+    label_zh: 芝加哥
+    principal_city: {name: Chicago, wikidata: Q1297}
+    census_region: "0200"
+    ap_metro_area: S23A
+    ce_region_file: midwest
+  - cbsa: "26420"
+    key: hou
+    label: Houston-Pasadena-The Woodlands, TX
+    label_zh: 休斯敦
+    principal_city: {name: Houston, wikidata: Q16555}
+    census_region: "0300"
+    ap_metro_area: S37B
+    ce_region_file: south
+  - cbsa: "42660"
+    key: sea
+    label: Seattle-Tacoma-Bellevue, WA
+    label_zh: 西雅图
+    principal_city: {name: Seattle, wikidata: Q5083}
+    census_region: "0400"
+    ap_metro_area: S49D
+    ce_region_file: west
+
+# 来源清单：许可与使用条件写的是我们核对到的情况，不是法律意见。access = blocked / requires_key 的来源照实报告，不绕过。
+sources:
+  - source_id: census_cbsa_2023
+    publisher: U.S. Census Bureau
+    dataset: 2023 CBSA delineation file (list1_2023)
+    url: https://www2.census.gov/programs-surveys/metro-micro/geographies/reference-files/2023/delineation-files/list1_2023.xlsx
+    license: U.S. federal government work (public domain)
+    access: open
+    period: OMB Bulletin 23-01 (July 2023)
+    geography: CBSA → counties
+    sectors: [background, housing]
+  - source_id: census_tract_puma_2020
+    publisher: U.S. Census Bureau
+    dataset: 2020 Census Tract to 2020 PUMA relationship file
+    url: https://www2.census.gov/geo/docs/maps-data/data/rel2020/2020_Census_Tract_to_2020_PUMA.txt
+    license: U.S. federal government work (public domain)
+    access: open
+    period: 2020 PUMA vintage (used by ACS 2022+)
+    geography: tract → PUMA
+    sectors: [housing]
+  - source_id: census_gazetteer_cbsa_2024
+    publisher: U.S. Census Bureau
+    dataset: 2024 Gazetteer file, CBSA
+    url: https://www2.census.gov/geo/docs/maps-data/data/gazetteer/2024_Gazetteer/2024_Gaz_cbsa_national.zip
+    license: U.S. federal government work (public domain)
+    access: open
+    period: 2024 vintage
+    geography: CBSA
+    sectors: [background]
+  - source_id: census_acs1_pums_2024
+    publisher: U.S. Census Bureau
+    dataset: American Community Survey 2024 1-year PUMS, state CSV files (housing and person) and data dictionary
+    url: https://www2.census.gov/programs-surveys/acs/data/pums/2024/1-Year/
+    license: U.S. federal government work (public domain)
+    access: open
+    period: calendar 2024 (ADJHSG = 1.000000)
+    geography: PUMA (2020 definitions)
+    sectors: [housing, jobs]
+    note: the Census data API now answers data queries with a "Missing Key" page; the keyless bulk files are used instead
+  - source_id: census_acs1_tables_2024
+    publisher: U.S. Census Bureau
+    dataset: American Community Survey 2024 1-year table-based summary files (B25031, B25064, B08303, B08301, B01003, B19013) and geography file
+    url: https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/
+    license: U.S. federal government work (public domain)
+    access: open
+    period: calendar 2024
+    geography: CBSA, PUMA
+    sectors: [background, housing]
+  - source_id: bls_oews_may2024
+    publisher: U.S. Bureau of Labor Statistics
+    dataset: Occupational Employment and Wage Statistics, May 2024, metropolitan areas
+    url: https://www.bls.gov/oes/special-requests/oesm24ma.zip
+    license: U.S. federal government work (public domain)
+    access: open
+    period: May 2024 (estimates combine six survey panels, Nov 2021 – May 2024)
+    geography: MSA (OEWS area code)
+    sectors: [jobs]
+  - source_id: bls_ep_education
+    publisher: U.S. Bureau of Labor Statistics
+    dataset: Employment Projections, education and training assignments by detailed occupation
+    url: https://www.bls.gov/emp/ind-occ-matrix/education.xlsx
+    license: U.S. federal government work (public domain)
+    access: open
+    period: 2024–34 projections cycle
+    geography: national
+    sectors: [jobs]
+  - source_id: bls_cpi_u
+    publisher: U.S. Bureau of Labor Statistics
+    dataset: CPI-U all items, U.S. city average (flat file)
+    url: https://download.bls.gov/pub/time.series/cu/cu.data.1.AllItems
+    license: U.S. federal government work (public domain)
+    access: open
+    period: monthly
+    geography: national
+    sectors: [jobs, training, food]
+  - source_id: bls_ap
+    publisher: U.S. Bureau of Labor Statistics
+    dataset: CPI Average Price Data (flat files)
+    url: https://download.bls.gov/pub/time.series/ap/
+    license: U.S. federal government work (public domain)
+    access: open
+    period: monthly
+    geography: U.S. city average, Census regions; metro areas for energy items only
+    sectors: [food, background]
+  - source_id: bls_ce_msa_2023_2024
+    publisher: U.S. Bureau of Labor Statistics
+    dataset: Consumer Expenditure Surveys, MSA tables, two-year average 2023–2024
+    url: https://www.bls.gov/cex/tables/geographic/mean.htm
+    license: U.S. federal government work (public domain)
+    access: open
+    period: 2023–2024 two-year average
+    geography: selected MSAs (CE definitions)
+    sectors: [food]
+  - source_id: bea_rpp_msa
+    publisher: U.S. Bureau of Economic Analysis
+    dataset: Regional Price Parities by MSA (MARPP bulk file)
+    url: https://apps.bea.gov/regional/zip/MARPP.zip
+    license: U.S. federal government work (public domain)
+    access: open
+    period: annual (latest year in file)
+    geography: MSA (BEA definitions)
+    sectors: [food, goods]
+    note: used only as a spatial scaling factor applied to an observed U.S. average price (an estimate, labelled as such); never as a payment price
+  - source_id: osm_overpass
+    publisher: OpenStreetMap contributors (via Overpass API mirror)
+    dataset: OSM points of interest (restaurants, cafes, leisure, culture)
+    url: https://maps.mail.ru/osm/tools/overpass/api/interpreter
+    license: ODbL 1.0 (attribution "© OpenStreetMap contributors"; share-alike for derived databases)
+    access: open_rate_limited
+    period: snapshot at retrieval (timestamp_osm_base recorded)
+    geography: principal city administrative boundary (within the CBSA, not the whole metro)
+    sectors: [food, activities]
+    note: overpass-api.de main instance answered 502 (at capacity) during the probe; the mail.ru public mirror answered
+  - source_id: energystar_products
+    publisher: U.S. EPA ENERGY STAR
+    dataset: ENERGY STAR certified residential clothes washers, dryers, dishwashers, combo washer-dryers (Socrata API)
+    url: https://data.energystar.gov
+    license: U.S. federal government data (public); brand and model names are trademarks of their owners
+    access: open_rate_limited
+    period: certified product list at retrieval
+    geography: national market (United States / Canada flags)
+    sectors: [goods]
+  - source_id: chicago_park_activities
+    publisher: City of Chicago / Chicago Park District
+    dataset: Chicago Park District Activities (Socrata tn7v-6rnw)
+    url: https://data.cityofchicago.org/resource/tn7v-6rnw.json
+    license: City of Chicago data portal terms of use (open data)
+    access: open_rate_limited
+    period: current listings at retrieval
+    geography: City of Chicago parks (within CBSA 16980)
+    sectors: [activities]
+  - source_id: ipeds_2023
+    publisher: NCES (IPEDS)
+    dataset: IPEDS 2023–24 Institutional Characteristics (HD2023, IC2023_PY)
+    url: https://nces.ed.gov/ipeds/datacenter/data/
+    license: U.S. federal government work (public domain)
+    access: open
+    period: academic year 2023–24
+    geography: institution address (CBSA code from HD2023)
+    sectors: [training]
+  - source_id: nces_cip_soc_2020
+    publisher: NCES / BLS
+    dataset: CIP 2020 to SOC 2018 crosswalk
+    url: https://nces.ed.gov/ipeds/cipcode/Files/CIP2020_SOC2018_Crosswalk.xlsx
+    license: U.S. federal government work (public domain)
+    access: open
+    period: CIP 2020 / SOC 2018
+    geography: national
+    sectors: [training, jobs]
+  - source_id: epa_aqi_cbsa_2025
+    publisher: U.S. EPA Air Quality System
+    dataset: Annual AQI by CBSA, 2025
+    url: https://aqs.epa.gov/aqsweb/airdata/annual_aqi_by_cbsa_2025.zip
+    license: U.S. federal government work (public domain)
+    access: open
+    period: calendar 2025
+    geography: CBSA (EPA naming)
+    sectors: [background]
+  - source_id: hud_fmr_fy2026
+    publisher: U.S. Department of Housing and Urban Development
+    dataset: FY2026 Fair Market Rents
+    url: https://www.huduser.gov/portal/datasets/fmr/fmr2026/FY26_FMRs.xlsx
+    license: U.S. federal government work (public domain)
+    access: blocked
+    period: FY2026
+    geography: HUD FMR areas
+    sectors: [housing]
+    note: the file answered HTTP 202 with an empty body (a bot-check challenge) during the probe; the HUD API needs a registered token, which we do not have. Not bypassed; ACS published tables are used as the validation benchmark instead.
+  - source_id: fbi_cde
+    publisher: FBI Crime Data Explorer
+    dataset: Crime data API (summarized agency data)
+    url: https://api.usa.gov/crime/fbi/cde/
+    license: U.S. federal government data (public); the API requires an api.data.gov key
+    access: requires_key
+    period: n/a
+    geography: police agency
+    sectors: [background]
+    note: not requested (needs a key we do not have); MSA tables of Crime in the U.S. were not found at the old static URLs. Safety facts are therefore reported as not acquired.
+
+pums:
+  year: 2024
+  # 住房记录：租住（TEN=3）或空置待租（VACS=1）。RNTP 对“待租”空置房是要价（rent asked），对租住户是合同租金。
+  housing_vars: [SERIALNO, STATE, PUMA, WGTP, TEN, VACS, RNTP, GRNTP, BDSP, RMSP, BLD, YRBLT, MV, NP, RNTM, ADJHSG, ELEFP, GASFP, WATFP]
+  # 人员记录：在职（ESR = 1、2），按通勤与工时整理（只取汇总需要的字段）。
+  person_vars: [SERIALNO, SPORDER, STATE, PUMA, PWGTP, ESR, SOCP, WKHP, JWMNP, JWTRNS, WAGP, ADJINC]
+
+mapping:
+  osm:
+    # 合并的餐馆查询在 Overpass 镜像上超时（HTTP 504）的城市：分三次查，构建时合并。
+    split_food_queries: ["41860"]
+  b_housing:
+    method: housing_rent_conditional
+    version: "1"
+    target_population: new_market_proxy   # 空置待租房的要价 ∪ 过去 12 个月内迁入的租住户
+    min_unweighted_n: 30
+    quantiles: ["0.10", "0.25", "0.50", "0.75", "0.90"]
+    replicate_weights: 80
+  b_commute:
+    method: commute_by_residence_puma
+    version: "1"
+    min_unweighted_n: 30
+  b_jobs:
+    method: job_hours_wfh_by_occupation_group
+    version: "1"
+    min_unweighted_n: 30
+  a_housing:
+    method: housing_coverage_grid
+    version: "1"
+    bedrooms: ["0", "1", "2", "3plus"]
+    structures: [large_multifamily, small_multifamily, single_family]
+    location_tiers: [core, middle, outer]
+    price_positions: ["1/6", "1/2", "5/6"]   # 三等分区间的中点：每个候选代表这一格三分之一的目标人群
+  a_food:
+    method: food_plan_from_regional_prices
+    version: "1"
+    # 每周、一个成年人的食材数量（单位跟 BLS 均价的计价单位走：lb、doz、gal、8 oz、12 oz）。这是覆盖不同做饭方式的**设定**，
+    # 不是营养方案或真实家庭消费；登记为假设 food_basket_quantities_v1。价格来自本都会区的食材估计价。
+    baskets:
+      staples_home:
+        label: 主食为主、自己做（米面、整鸡、鸡蛋、土豆）
+        items:
+          - {item: "701312", qty: "1.0"}
+          - {item: "701322", qty: "0.5"}
+          - {item: "702111", qty: "1.0"}
+          - {item: "706111", qty: "1.5"}
+          - {item: "708111", qty: "0.5"}
+          - {item: "709112", qty: "0.5"}
+          - {item: "711211", qty: "1.5"}
+          - {item: "712112", qty: "2.0"}
+          - {item: "712311", qty: "1.0"}
+          - {item: "714233", qty: "0.5"}
+      varied_home:
+        label: 荤素搭配、自己做（牛肉、鸡胸、奶酪、酸奶、水果蔬菜）
+        items:
+          - {item: "701312", qty: "0.5"}
+          - {item: "702111", qty: "1.0"}
+          - {item: "703112", qty: "1.0"}
+          - {item: FF1101, qty: "1.0"}
+          - {item: "704212", qty: "0.5"}
+          - {item: "708111", qty: "0.5"}
+          - {item: FJ1101, qty: "0.5"}
+          - {item: "710212", qty: "0.5"}
+          - {item: FJ4101, qty: "3"}
+          - {item: "711211", qty: "1.0"}
+          - {item: "711311", qty: "1.0"}
+          - {item: "712112", qty: "1.0"}
+          - {item: "712311", qty: "1.0"}
+          - {item: FL2101, qty: "0.5"}
+          - {item: "717311", qty: "0.25"}
+      fresh_protein_home:
+        label: 鲜肉蔬果较多、自己做（鸡胸、牛排、草莓、生菜）
+        items:
+          - {item: FF1101, qty: "1.5"}
+          - {item: "703613", qty: "0.5"}
+          - {item: "704212", qty: "0.75"}
+          - {item: "708111", qty: "1.0"}
+          - {item: FJ4101, qty: "4"}
+          - {item: "711211", qty: "1.0"}
+          - {item: "711311", qty: "1.5"}
+          - {item: "711415", qty: "1"}
+          - {item: "712311", qty: "1.5"}
+          - {item: FL2101, qty: "1.0"}
+          - {item: "712112", qty: "1.0"}
+          - {item: "701312", qty: "0.5"}
+
+menus:
+  algorithm: weighted_keyed_sample
+  algorithm_version: "1"
+  env_repeats: 2
+  years: [1, 2, 3]
+  policies:
+    housing: {kind: annual_exposure_sample, strata_key: bedrooms, per_stratum: 3}
+    jobs: {kind: annual_exposure_sample, strata_key: soc_major, size: 30}
+    training: {kind: calendar_open}
+    food: {kind: full_catalog}
+    goods: {kind: full_catalog}
+    activities: {kind: calendar_open}
+    background: {kind: full_catalog}
+  size_diagnostic:
+    housing_per_stratum: [1, 2, 3, 5, 8]
+    repeats: 20

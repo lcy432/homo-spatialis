@@ -1,0 +1,14 @@
+{
+ "source_id": "osm_overpass",
+ "url": "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
+ "method": "POST",
+ "http_status": 200,
+ "sha256": "068e0a9af599fd312a1e8d6bbca1d029cdc8b7debe32bb52ec88ee6677c9b347",
+ "bytes": 15690,
+ "retrieved_at": "2026-10-22T08:23:43Z",
+ "subset_of": {
+  "sha256": "6fe2efb42dfbc6b2d60d2e3ff5f5124c0e33a4eb612d882d6973a9519c30a639",
+  "bytes": 2447875
+ },
+ "subset_rule": "前 20 个带标签的元素 + 写了外带 / 外送 / 得来速的前 10 个"
+}

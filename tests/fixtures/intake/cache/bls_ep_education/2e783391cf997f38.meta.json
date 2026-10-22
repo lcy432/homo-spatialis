@@ -1,0 +1,14 @@
+{
+ "source_id": "bls_ep_education",
+ "url": "https://www.bls.gov/emp/ind-occ-matrix/education.xlsx",
+ "method": "GET",
+ "http_status": 200,
+ "sha256": "67b78dbccc8d6002e6c30f39a75d381380e2e9347bd2d87d71c3c98e7f36a531",
+ "bytes": 118332,
+ "retrieved_at": "2026-10-22T08:04:20Z",
+ "subset_of": {
+  "sha256": "67b78dbccc8d6002e6c30f39a75d381380e2e9347bd2d87d71c3c98e7f36a531",
+  "bytes": 118332
+ },
+ "subset_rule": "原文件（118 KB，不切）"
+}

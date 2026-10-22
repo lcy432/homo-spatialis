@@ -1,0 +1,14 @@
+{
+ "source_id": "census_tract_puma_2020",
+ "url": "https://www2.census.gov/geo/docs/maps-data/data/rel2020/2020_Census_Tract_to_2020_PUMA.txt",
+ "method": "GET",
+ "http_status": 200,
+ "sha256": "9f7ef11f96e749210cf2e31ff263df25ec20f5bc9e83364bea61a530feacb39e",
+ "bytes": 47076,
+ "retrieved_at": "2026-10-22T08:00:20Z",
+ "subset_of": {
+  "sha256": "5262f460b2c8dbe86b00549e916317b1791fdc595c9af72ab18f6f6a67040531",
+  "bytes": 1709076
+ },
+ "subset_rule": "与芝加哥都会区的县有交集的 PUMA 的全部普查区（含都会区外的普查区，保证完整 / 部分判定不变）"
+}

@@ -1,0 +1,14 @@
+{
+ "source_id": "census_acs1_tables_2024",
+ "url": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/documentation/Geos20241YR.txt",
+ "method": "GET",
+ "http_status": 200,
+ "sha256": "8d3b6a5ed4f43b33131cec5c4cb61ec8e22b1ad478c6d5281c52b2057acf4834",
+ "bytes": 11174,
+ "retrieved_at": "2026-10-22T08:04:15Z",
+ "subset_of": {
+  "sha256": "2155acb3c81672eee9b0bd971cca60cd77d8b66222b34973928f57c087ea4afe",
+  "bytes": 1065169
+ },
+ "subset_rule": "CBSA 16980 与上述 PUMA 的地理行"
+}

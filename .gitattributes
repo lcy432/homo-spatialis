@@ -10,3 +10,6 @@
 *.png     binary
 *.jpg     binary
 *.pdf     binary
+
+# Raw-file test samples are content-addressed by SHA-256 (intake-02): keep their bytes exactly.
+tests/fixtures/intake/cache/** binary

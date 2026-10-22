@@ -1,0 +1,14 @@
+{
+ "source_id": "bls_cpi_u",
+ "url": "https://download.bls.gov/pub/time.series/cu/cu.data.1.AllItems",
+ "method": "GET",
+ "http_status": 200,
+ "sha256": "100ddac8ac0ba3d1e0b0b0895f23bb8c0b2e7ec35fe9f882ced77bd2ae6de178",
+ "bytes": 2622,
+ "retrieved_at": "2026-10-22T08:04:20Z",
+ "subset_of": {
+  "sha256": "f3c22c8592d9134fa5ab305fa2df6e37dfd2388f10168985fdbc84082deb4ff0",
+  "bytes": 2690809
+ },
+ "subset_rule": "CUUR0000SA0 在 2022 年及以后的行"
+}

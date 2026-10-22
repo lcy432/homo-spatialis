@@ -1,0 +1,14 @@
+{
+ "source_id": "energystar_products",
+ "url": "https://data.energystar.gov/resource/9jai-gs6t.json?$limit=50000&$order=:id",
+ "method": "GET",
+ "http_status": 200,
+ "sha256": "67737f254bd050f027f14d45b0ea1926b8bb360bb7bbe6180f620498f593bcf7",
+ "bytes": 9248,
+ "retrieved_at": "2026-10-22T08:05:19Z",
+ "subset_of": {
+  "sha256": "901b7a85484ed5b0a1df0cfa69222771d93093f694e4eda8a666150578160b09",
+  "bytes": 17917
+ },
+ "subset_rule": "文件里的前 6 个型号"
+}

@@ -1,0 +1,14 @@
+{
+ "source_id": "census_gazetteer_cbsa_2024",
+ "url": "https://www2.census.gov/geo/docs/maps-data/data/gazetteer/2024_Gazetteer/2024_Gaz_cbsa_national.zip",
+ "method": "GET",
+ "http_status": 200,
+ "sha256": "c5f0b4ac76d5ef7a89b25dfdff63d311e463b866827de80bc72bc964cbc2fe5a",
+ "bytes": 218,
+ "retrieved_at": "2026-10-22T08:00:20Z",
+ "subset_of": {
+  "sha256": "0ec21c5d83982467903f1500fbbae87311edc81f09bed8ec1bbded80bce7eec3",
+  "bytes": 46177
+ },
+ "subset_rule": "表头 + GEOID = 16980"
+}

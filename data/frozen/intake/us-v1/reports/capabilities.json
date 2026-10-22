@@ -1,0 +1,54 @@
+{
+ "note_zh": "已采集 = 机会本身是真实记录；能供规划参考 = 必需事实齐全；可执行 = 能编进当前引擎、供给已知、报价已知；可评分 = 能对应现有评分项。四者分开数。",
+ "sectors": {
+  "activities": {
+   "collected": 28992,
+   "executable": 773,
+   "planning_reference": 28992,
+   "scorable": 0,
+   "total": 28992
+  },
+  "background": {
+   "collected": 72,
+   "executable": 0,
+   "planning_reference": 72,
+   "scorable": 0,
+   "total": 72
+  },
+  "food": {
+   "collected": 33635,
+   "executable": 0,
+   "planning_reference": 33641,
+   "scorable": 0,
+   "total": 33653
+  },
+  "goods": {
+   "collected": 1875,
+   "executable": 0,
+   "planning_reference": 1875,
+   "scorable": 0,
+   "total": 1875
+  },
+  "housing": {
+   "collected": 0,
+   "executable": 0,
+   "planning_reference": 5503,
+   "scorable": 0,
+   "total": 5553
+  },
+  "jobs": {
+   "collected": 0,
+   "executable": 0,
+   "planning_reference": 12682,
+   "scorable": 0,
+   "total": 13071
+  },
+  "training": {
+   "collected": 2100,
+   "executable": 0,
+   "planning_reference": 934,
+   "scorable": 0,
+   "total": 2100
+  }
+ }
+}

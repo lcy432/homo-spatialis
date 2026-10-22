@@ -1,0 +1,14 @@
+{
+ "source_id": "epa_aqi_cbsa_2025",
+ "url": "https://aqs.epa.gov/aqsweb/airdata/annual_aqi_by_cbsa_2025.zip",
+ "method": "GET",
+ "http_status": 200,
+ "sha256": "ec65622f09905628bc6c6356410279ff26264b4dc7b013bfa918ff30f9d7d5f0",
+ "bytes": 383,
+ "retrieved_at": "2026-10-22T08:04:29Z",
+ "subset_of": {
+  "sha256": "623ffb9794260cf95e2697d940ab024f200048d37cb86354a8e059a2b99b11a4",
+  "bytes": 14162
+ },
+ "subset_rule": "表头 + CBSA Code = 16980"
+}

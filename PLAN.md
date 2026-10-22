@@ -2,7 +2,7 @@
 
 只写**当前阶段与下一步**。层与命名、各轮状态、默认入口见 [docs/INDEX.md](docs/INDEX.md)；愿景与方法见 [README](README.md)。2026-10-18 之前的完整计划（逐轮记录、P1–P10 账本、V1 各阶段验收细则）存档在 [docs/history/pre-dev-refactor-2026-10-18/PLAN.md](docs/history/pre-dev-refactor-2026-10-18/PLAN.md)；旧文档里的"PLAN §3.0.x"指那份存档。
 
-更新：2026-10-18。
+更新：2026-10-22。
 
 ## 当前阶段
 
@@ -10,7 +10,7 @@
 
 ## 下一步
 
-1. **接入层**（intake-02、intake-03）：全国性资料批量获取与统一口径；真实税与公开说明同源；资料包与确认画像接上运行入口。共享消息结构由接入层统一维护（[共享约定](docs/design/e3-e5-product-contract.md)、[E3 交接](docs/handoffs/e3-data-input-handoff.md)）。
+1. **接入层**（intake-03）：真实税与公开说明同源；资料包与确认画像接上运行入口。真实资料数据库（intake-02）已经建成，下一步是把它接进生活运行：先由所有者决定 [intake-02 技术说明](docs/design/intake-02-real-data.md) 第 9 节的 E1 扩展（菜单约束观察与权威检查、同一机会按月重复、续租与已持有的东西、开局工作选法、食品方案、属性分类、菜单身份），再补资料缺口（住房面积、按房源与岗位配对的通勤、做饭时间、家电价格与寿命、其他城市的活动日历、税率）。共享消息结构由接入层统一维护（[共享约定](docs/design/e3-e5-product-contract.md)、[E3 交接](docs/handoffs/e3-data-input-handoff.md)）。
 2. **界面层**（ui-02）：在离线原型之上接接入层服务与运行器；串行排队、服务端密钥、预算与轻量部署（[E5 交接](docs/handoffs/e5-product-handoff.md)）。
 3. **代理层**：汇总 Haiku / Sonnet 的真实试跑结果；后续的真实 LLM 测试默认用 Haiku（见 INDEX 第 3 节）。
 4. **工程卫生**：

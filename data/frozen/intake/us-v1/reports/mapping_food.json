@@ -1,0 +1,131 @@
+{
+ "metros": {
+  "16980": {
+   "channel_known": {
+    "delivery": 164,
+    "outdoor_seating": 448,
+    "takeaway": 1436
+   },
+   "cuisine_known": 3796,
+   "estimate_over_regional_observed": {
+    "max": 1.2625,
+    "median": 1.0816,
+    "min": 0.9445,
+    "n": 26
+   },
+   "items": 54,
+   "plan_monthly_cost": {
+    "fresh_protein_home": "177.94",
+    "staples_home": "74.73",
+    "varied_home": "156.81"
+   },
+   "restaurants": 4746
+  },
+  "26420": {
+   "channel_known": {
+    "delivery": 198,
+    "outdoor_seating": 314,
+    "takeaway": 1215
+   },
+   "cuisine_known": 2614,
+   "estimate_over_regional_observed": {
+    "max": 1.1596,
+    "median": 1.0433,
+    "min": 0.8995,
+    "n": 45
+   },
+   "items": 54,
+   "plan_monthly_cost": {
+    "fresh_protein_home": "166.95",
+    "staples_home": "70.13",
+    "varied_home": "147.13"
+   },
+   "restaurants": 3107
+  },
+  "31080": {
+   "channel_known": {
+    "delivery": 217,
+    "outdoor_seating": 526,
+    "takeaway": 1678
+   },
+   "cuisine_known": 4478,
+   "estimate_over_regional_observed": {
+    "max": 1.2993,
+    "median": 1.0153,
+    "min": 0.8956,
+    "n": 31
+   },
+   "items": 54,
+   "plan_monthly_cost": {
+    "fresh_protein_home": "176.88",
+    "staples_home": "74.30",
+    "varied_home": "155.87"
+   },
+   "restaurants": 5598
+  },
+  "35620": {
+   "channel_known": {
+    "delivery": 2900,
+    "outdoor_seating": 2903,
+    "takeaway": 5425
+   },
+   "cuisine_known": 12329,
+   "estimate_over_regional_observed": {
+    "max": 1.2532,
+    "median": 1.1155,
+    "min": 0.9456,
+    "n": 20
+   },
+   "items": 54,
+   "plan_monthly_cost": {
+    "fresh_protein_home": "182.92",
+    "staples_home": "76.83",
+    "varied_home": "161.20"
+   },
+   "restaurants": 15329
+  },
+  "41860": {
+   "channel_known": {
+    "delivery": 58,
+    "outdoor_seating": 363,
+    "takeaway": 202
+   },
+   "cuisine_known": 1594,
+   "estimate_over_regional_observed": {
+    "max": 1.3216,
+    "median": 1.0328,
+    "min": 0.9111,
+    "n": 31
+   },
+   "items": 54,
+   "plan_monthly_cost": {
+    "fresh_protein_home": "179.92",
+    "staples_home": "75.57",
+    "varied_home": "158.56"
+   },
+   "restaurants": 1924
+  },
+  "42660": {
+   "channel_known": {
+    "delivery": 94,
+    "outdoor_seating": 588,
+    "takeaway": 566
+   },
+   "cuisine_known": 2174,
+   "estimate_over_regional_observed": {
+    "max": 1.2676,
+    "median": 0.9899,
+    "min": 0.8733,
+    "n": 31
+   },
+   "items": 54,
+   "plan_monthly_cost": {
+    "fresh_protein_home": "172.47",
+    "staples_home": "72.43",
+    "varied_home": "151.99"
+   },
+   "restaurants": 2607
+  }
+ },
+ "note_zh": "都会区食材价格是估计（全国均价 × 本都会区商品类 RPP ÷ 全国）；estimate_over_regional_observed 是估计价与本大区观测均价之比，接近 1 说明空间换算与大区观测大体一致，偏离说明商品类 RPP 与食品价格差异不同步。方案费用里的数量是登记的假设。渠道（自取、配送）只有 OSM 写了才算知道；没写的是未知，不是不提供。"
+}

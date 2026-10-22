@@ -1,0 +1,769 @@
+{
+ "assumptions": [
+  "calendar_recurs_annually",
+  "commute_roundtrip_is_twice_oneway",
+  "e1_activity_burden_per_hour",
+  "food_basket_quantities_v1",
+  "housing_new_market_proxy",
+  "jobs_employment_share_exposure"
+ ],
+ "build_id": "aec7c4c5d414bad1e0f294da7dcdc81630ee5f9e0194617abdd3eeb107fd3aba",
+ "config_identity": "734324a840ed1e517dd8cfa64020f8f275d70bb3189c348d14836e149f90af17",
+ "counts": {
+  "capabilities_by_sector": {
+   "activities": {
+    "collected": 28992,
+    "executable": 773,
+    "planning_reference": 28992,
+    "scorable": 0,
+    "total": 28992
+   },
+   "background": {
+    "collected": 72,
+    "executable": 0,
+    "planning_reference": 72,
+    "scorable": 0,
+    "total": 72
+   },
+   "food": {
+    "collected": 33635,
+    "executable": 0,
+    "planning_reference": 33641,
+    "scorable": 0,
+    "total": 33653
+   },
+   "goods": {
+    "collected": 1875,
+    "executable": 0,
+    "planning_reference": 1875,
+    "scorable": 0,
+    "total": 1875
+   },
+   "housing": {
+    "collected": 0,
+    "executable": 0,
+    "planning_reference": 5503,
+    "scorable": 0,
+    "total": 5553
+   },
+   "jobs": {
+    "collected": 0,
+    "executable": 0,
+    "planning_reference": 12682,
+    "scorable": 0,
+    "total": 13071
+   },
+   "training": {
+    "collected": 2100,
+    "executable": 0,
+    "planning_reference": 934,
+    "scorable": 0,
+    "total": 2100
+   }
+  },
+  "menus_by_policy": {
+   "annual_exposure_sample": 72,
+   "calendar_open": 72,
+   "full_catalog": 108
+  },
+  "opportunities_by_compile_status": {
+   "compilable": 773,
+   "needs_e1_extension": 80550,
+   "not_compilable": 3993
+  },
+  "opportunities_by_sector_origin": {
+   "activities|record": 28992,
+   "background|record": 72,
+   "food|mapping_a": 18,
+   "food|record": 33635,
+   "goods|record": 1875,
+   "housing|mapping_a": 648,
+   "housing|mapping_b": 4905,
+   "jobs|mapping_b": 13071,
+   "training|record": 2100
+  },
+  "records_by_sector": {
+   "activities": 28992,
+   "background": 72,
+   "food": 33521,
+   "goods": 1875,
+   "housing": 73826,
+   "jobs": 4357,
+   "training": 2100
+  },
+  "tables": 2592
+ },
+ "methods": [
+  "acs_adjhsg_constant_dollars@1",
+  "acs_bins_share@1",
+  "ap_annual_mean@1",
+  "aqi_share@1",
+  "aqi_sum@1",
+  "cip_soc_related_occupations@1",
+  "commute_by_residence_puma@1",
+  "count@1",
+  "cpi_u_period_conversion@1",
+  "e1_export_single_session_experience@1",
+  "food_plan_from_regional_prices@1",
+  "housing_coverage_grid@1",
+  "housing_rent_conditional@1",
+  "housing_unit_classification@1",
+  "job_hours_wfh_by_occupation_group@1",
+  "jurisdiction_paths@1",
+  "parse_date_notes@1",
+  "rpp_goods_spatial_adjustment@1",
+  "weighted_keyed_sample@1"
+ ],
+ "repro": [
+  "uv sync",
+  "uv run python scripts/intake_data.py fetch            # 联网获取原始文件（显式；SF 的分类查询偶尔超时，可以单独重试）",
+  "uv run python scripts/intake_data.py build            # 离线：标准化 → A/B 映射 → 目录与菜单 → 检查 → 冻结",
+  "uv run python scripts/intake_data.py export           # 把清单与报告写到 data/frozen/intake/us-v1"
+ ],
+ "run_metadata": {
+  "note_zh": "获取时间是运行元数据，不进构建身份；同一份原始文件（SHA-256 相同）重新获取不改变构建身份。",
+  "retrieved_at": {
+   "acs_geos": "2026-10-22T08:04:15Z",
+   "acs_table:b01003": "2026-10-22T08:05:04Z",
+   "acs_table:b08301": "2026-10-22T08:05:04Z",
+   "acs_table:b08303": "2026-10-22T08:05:04Z",
+   "acs_table:b19013": "2026-10-22T08:05:04Z",
+   "acs_table:b25031": "2026-10-22T08:05:03Z",
+   "acs_table:b25064": "2026-10-22T08:05:03Z",
+   "ap:ap.area": "2026-10-22T08:04:34Z",
+   "ap:ap.data.0.Current": "2026-10-22T07:57:54Z",
+   "ap:ap.item": "2026-10-22T08:04:34Z",
+   "ap:ap.series": "2026-10-22T07:57:18Z",
+   "aqi": "2026-10-22T08:04:29Z",
+   "aqi_2024": "2026-10-22T08:21:28Z",
+   "bea_rpp": "2026-10-22T08:15:23Z",
+   "cbsa_delineation": "2026-10-22T08:00:19Z",
+   "ce:midwest": "2026-10-22T08:05:05Z",
+   "ce:northeast": "2026-10-22T08:05:05Z",
+   "ce:south": "2026-10-22T08:05:05Z",
+   "ce:west": "2026-10-22T08:05:06Z",
+   "chicago_activities": "2026-10-22T08:04:34Z",
+   "cip_soc": "2026-10-22T08:04:23Z",
+   "cpi": "2026-10-22T08:04:20Z",
+   "energystar:clothes_dryer": "2026-10-22T08:05:13Z",
+   "energystar:clothes_washer": "2026-10-22T08:05:09Z",
+   "energystar:combo_washer_dryer": "2026-10-22T08:05:19Z",
+   "energystar:dishwasher": "2026-10-22T08:05:14Z",
+   "ep_education": "2026-10-22T08:04:20Z",
+   "gazetteer": "2026-10-22T08:00:20Z",
+   "hud_fmr": null,
+   "ipeds_hd": "2026-10-22T08:04:28Z",
+   "ipeds_ic_py": "2026-10-22T08:04:29Z",
+   "oews": "2026-10-22T08:04:20Z",
+   "osm_food:16980": "2026-10-22T08:23:43Z",
+   "osm_food:26420": "2026-10-22T08:18:20Z",
+   "osm_food:31080": "2026-10-22T08:08:46Z",
+   "osm_food:35620": "2026-10-22T08:06:28Z",
+   "osm_food:41860": null,
+   "osm_food:42660": "2026-10-22T08:20:23Z",
+   "osm_food_split:41860:cafe": null,
+   "osm_food_split:41860:fast_food": null,
+   "osm_food_split:41860:restaurant": "2026-10-22T08:24:29Z",
+   "osm_leisure:16980": "2026-10-22T08:16:29Z",
+   "osm_leisure:26420": "2026-10-22T08:18:56Z",
+   "osm_leisure:31080": "2026-10-22T08:11:41Z",
+   "osm_leisure:35620": "2026-10-22T08:08:16Z",
+   "osm_leisure:41860": "2026-10-22T08:13:12Z",
+   "osm_leisure:42660": "2026-10-22T08:21:51Z",
+   "pums_dictionary": "2026-10-22T08:02:40Z",
+   "pums_h:06": "2026-10-22T08:04:37Z",
+   "pums_h:17": "2026-10-22T08:04:43Z",
+   "pums_h:18": "2026-10-22T08:04:46Z",
+   "pums_h:34": "2026-10-22T08:04:48Z",
+   "pums_h:36": "2026-10-22T08:04:52Z",
+   "pums_h:48": "2026-10-22T08:04:57Z",
+   "pums_h:53": "2026-10-22T08:05:02Z",
+   "pums_p:06": "2026-10-22T08:04:42Z",
+   "pums_p:17": "2026-10-22T08:04:45Z",
+   "pums_p:18": "2026-10-22T08:04:47Z",
+   "pums_p:34": "2026-10-22T08:04:50Z",
+   "pums_p:36": "2026-10-22T08:04:55Z",
+   "pums_p:48": "2026-10-22T08:05:01Z",
+   "pums_p:53": "2026-10-22T08:05:03Z",
+   "tract_puma": "2026-10-22T08:00:20Z"
+  }
+ },
+ "schema": "intake-data-v1",
+ "sources": [
+  {
+   "bytes": 1065169,
+   "name": "acs_geos",
+   "note": "",
+   "raw_sha256": "2155acb3c81672eee9b0bd971cca60cd77d8b66222b34973928f57c087ea4afe",
+   "source_id": "census_acs1_tables_2024",
+   "status": "ok",
+   "url": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/documentation/Geos20241YR.txt"
+  },
+  {
+   "bytes": 240811,
+   "name": "acs_table:b01003",
+   "note": "",
+   "raw_sha256": "3f04d8c2ad77dab54085f014b795c33c19463eede4539e110247bb329d1025fd",
+   "source_id": "census_acs1_tables_2024",
+   "status": "ok",
+   "url": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/1YRData/acsdt1y2024-b01003.dat"
+  },
+  {
+   "bytes": 838587,
+   "name": "acs_table:b08301",
+   "note": "",
+   "raw_sha256": "2b5a42085a9c3aae74f36f6f8be4b6412bb337ffa65856b514671bf5d039147f",
+   "source_id": "census_acs1_tables_2024",
+   "status": "ok",
+   "url": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/1YRData/acsdt1y2024-b08301.dat"
+  },
+  {
+   "bytes": 1197431,
+   "name": "acs_table:b08303",
+   "note": "",
+   "raw_sha256": "f9c204d17880a5a597663a07c6a1f7a2ed5948633ccf0f45214e0807b95c4b30",
+   "source_id": "census_acs1_tables_2024",
+   "status": "ok",
+   "url": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/1YRData/acsdt1y2024-b08303.dat"
+  },
+  {
+   "bytes": 224344,
+   "name": "acs_table:b19013",
+   "note": "",
+   "raw_sha256": "f78748dc0221551890494e08d8239d7aecbfff9777e96a18d24f5df6a570cd86",
+   "source_id": "census_acs1_tables_2024",
+   "status": "ok",
+   "url": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/1YRData/acsdt1y2024-b19013.dat"
+  },
+  {
+   "bytes": 702160,
+   "name": "acs_table:b25031",
+   "note": "",
+   "raw_sha256": "d8283555516e0a757a51aa8ea6164c25c58e54ba88c5e339e964160633907a80",
+   "source_id": "census_acs1_tables_2024",
+   "status": "ok",
+   "url": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/1YRData/acsdt1y2024-b25031.dat"
+  },
+  {
+   "bytes": 198370,
+   "name": "acs_table:b25064",
+   "note": "",
+   "raw_sha256": "8624f9775add1e22ac3a015a753207e0d752bc4c967dda04c22cd9e17ac94b57",
+   "source_id": "census_acs1_tables_2024",
+   "status": "ok",
+   "url": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/1YRData/acsdt1y2024-b25064.dat"
+  },
+  {
+   "bytes": 2114,
+   "name": "ap:ap.area",
+   "note": "",
+   "raw_sha256": "1137036146970cc9320065ed0f94902f710709b6693ca0abf82c9fda3cf51042",
+   "source_id": "bls_ap",
+   "status": "ok",
+   "url": "https://download.bls.gov/pub/time.series/ap/ap.area"
+  },
+  {
+   "bytes": 8976664,
+   "name": "ap:ap.data.0.Current",
+   "note": "",
+   "raw_sha256": "957044dea3350ef95023c3577b10a8c5c6aaad1c3f2452062901761cec2080eb",
+   "source_id": "bls_ap",
+   "status": "ok",
+   "url": "https://download.bls.gov/pub/time.series/ap/ap.data.0.Current"
+  },
+  {
+   "bytes": 9242,
+   "name": "ap:ap.item",
+   "note": "",
+   "raw_sha256": "4e96f3bca741f65692971fdec8053a44f7ee20f47a02eace4c4d3d9a1dd148f6",
+   "source_id": "bls_ap",
+   "status": "ok",
+   "url": "https://download.bls.gov/pub/time.series/ap/ap.item"
+  },
+  {
+   "bytes": 231046,
+   "name": "ap:ap.series",
+   "note": "",
+   "raw_sha256": "9b3ad0b00e10b7872e76c09c620b655f24e76220f4ac5730069449979fc08eee",
+   "source_id": "bls_ap",
+   "status": "ok",
+   "url": "https://download.bls.gov/pub/time.series/ap/ap.series"
+  },
+  {
+   "bytes": 14162,
+   "name": "aqi",
+   "note": "",
+   "raw_sha256": "623ffb9794260cf95e2697d940ab024f200048d37cb86354a8e059a2b99b11a4",
+   "source_id": "epa_aqi_cbsa_2025",
+   "status": "ok",
+   "url": "https://aqs.epa.gov/aqsweb/airdata/annual_aqi_by_cbsa_2025.zip"
+  },
+  {
+   "bytes": 14222,
+   "name": "aqi_2024",
+   "note": "",
+   "raw_sha256": "9ddc908e796ff219cc161d8c7b817ee21e6ce1950ae1ee41b5d23a9f065a8d7b",
+   "source_id": "epa_aqi_cbsa_2025",
+   "status": "ok",
+   "url": "https://aqs.epa.gov/aqsweb/airdata/annual_aqi_by_cbsa_2024.zip"
+  },
+  {
+   "bytes": 146479,
+   "name": "bea_rpp",
+   "note": "",
+   "raw_sha256": "5dbf2e6ac2af222cc9abc205586c9b480344d89392752eb689c3ec823a34c83e",
+   "source_id": "bea_rpp_msa",
+   "status": "ok",
+   "url": "https://apps.bea.gov/regional/zip/MARPP.zip"
+  },
+  {
+   "bytes": 143798,
+   "name": "cbsa_delineation",
+   "note": "",
+   "raw_sha256": "952c4b1e78acbb54e6ec9412434b7602fedacbf021736351a63c181bdb753629",
+   "source_id": "census_cbsa_2023",
+   "status": "ok",
+   "url": "https://www2.census.gov/programs-surveys/metro-micro/geographies/reference-files/2023/delineation-files/list1_2023.xlsx"
+  },
+  {
+   "bytes": 6836,
+   "name": "ce:midwest",
+   "note": "",
+   "raw_sha256": "5ae71adbacdacbe6205c05a4412871c4eecbaae7cb1f7e0ee4e82c2d6733e390",
+   "source_id": "bls_ce_msa_2023_2024",
+   "status": "ok",
+   "url": "https://www.bls.gov/cex/tables/geographic/mean/cu-msa-midwest-2-year-average-2023-2024.xlsx"
+  },
+  {
+   "bytes": 6584,
+   "name": "ce:northeast",
+   "note": "",
+   "raw_sha256": "f29a7652a9e8927e88753b6bc7b053ad342636189a00bcb3d3dddc6122456e84",
+   "source_id": "bls_ce_msa_2023_2024",
+   "status": "ok",
+   "url": "https://www.bls.gov/cex/tables/geographic/mean/cu-msa-northeast-2-year-average-2023-2024.xlsx"
+  },
+  {
+   "bytes": 7714,
+   "name": "ce:south",
+   "note": "",
+   "raw_sha256": "2acc875e3964b604b3b749e6aa792bc1aee9b70769e82554beec397c40eb2803",
+   "source_id": "bls_ce_msa_2023_2024",
+   "status": "ok",
+   "url": "https://www.bls.gov/cex/tables/geographic/mean/cu-msa-south-2-year-average-2023-2024.xlsx"
+  },
+  {
+   "bytes": 7838,
+   "name": "ce:west",
+   "note": "",
+   "raw_sha256": "253858090623e5a0ec86ed6314b4e9b813069c87410f9648620315be561ae8e8",
+   "source_id": "bls_ce_msa_2023_2024",
+   "status": "ok",
+   "url": "https://www.bls.gov/cex/tables/geographic/mean/cu-msa-west-2-year-average-2023-2024.xlsx"
+  },
+  {
+   "bytes": 7433582,
+   "name": "chicago_activities",
+   "note": "",
+   "raw_sha256": "7cee342c3b4e904d1a03c642a3695dc9ec704d302c1d970e6f6cb5fed0b3d108",
+   "source_id": "chicago_park_activities",
+   "status": "ok",
+   "url": "https://data.cityofchicago.org/resource/tn7v-6rnw.json?$limit=50000&$order=activity_id"
+  },
+  {
+   "bytes": 428901,
+   "name": "cip_soc",
+   "note": "",
+   "raw_sha256": "ba3d59a191b9d977a5c457a66b9348c4f2f7963aafacf72c0b80113b46bf0ab8",
+   "source_id": "nces_cip_soc_2020",
+   "status": "ok",
+   "url": "https://nces.ed.gov/ipeds/cipcode/Files/CIP2020_SOC2018_Crosswalk.xlsx"
+  },
+  {
+   "bytes": 2690809,
+   "name": "cpi",
+   "note": "",
+   "raw_sha256": "f3c22c8592d9134fa5ab305fa2df6e37dfd2388f10168985fdbc84082deb4ff0",
+   "source_id": "bls_cpi_u",
+   "status": "ok",
+   "url": "https://download.bls.gov/pub/time.series/cu/cu.data.1.AllItems"
+  },
+  {
+   "bytes": 688012,
+   "name": "energystar:clothes_dryer",
+   "note": "",
+   "raw_sha256": "8319583f4983ca4b47a225cf69fe66a30966cf445b6a3296b234138c1478a777",
+   "source_id": "energystar_products",
+   "status": "ok",
+   "url": "https://data.energystar.gov/resource/t9u7-4d2j.json?$limit=50000&$order=:id"
+  },
+  {
+   "bytes": 364804,
+   "name": "energystar:clothes_washer",
+   "note": "",
+   "raw_sha256": "16995afbcd93813eb247a39f4a57bfdb4ad5159b86cf3206684217a3d9d8d35f",
+   "source_id": "energystar_products",
+   "status": "ok",
+   "url": "https://data.energystar.gov/resource/bghd-e2wd.json?$limit=50000&$order=:id"
+  },
+  {
+   "bytes": 17917,
+   "name": "energystar:combo_washer_dryer",
+   "note": "",
+   "raw_sha256": "901b7a85484ed5b0a1df0cfa69222771d93093f694e4eda8a666150578160b09",
+   "source_id": "energystar_products",
+   "status": "ok",
+   "url": "https://data.energystar.gov/resource/9jai-gs6t.json?$limit=50000&$order=:id"
+  },
+  {
+   "bytes": 679684,
+   "name": "energystar:dishwasher",
+   "note": "",
+   "raw_sha256": "d2d0786ba7d059b790511c0091ddfadf09b2852b721d63377cc28db59d4b4f83",
+   "source_id": "energystar_products",
+   "status": "ok",
+   "url": "https://data.energystar.gov/resource/q8py-6w3f.json?$limit=50000&$order=:id"
+  },
+  {
+   "bytes": 118332,
+   "name": "ep_education",
+   "note": "",
+   "raw_sha256": "67b78dbccc8d6002e6c30f39a75d381380e2e9347bd2d87d71c3c98e7f36a531",
+   "source_id": "bls_ep_education",
+   "status": "ok",
+   "url": "https://www.bls.gov/emp/ind-occ-matrix/education.xlsx"
+  },
+  {
+   "bytes": 46177,
+   "name": "gazetteer",
+   "note": "",
+   "raw_sha256": "0ec21c5d83982467903f1500fbbae87311edc81f09bed8ec1bbded80bce7eec3",
+   "source_id": "census_gazetteer_cbsa_2024",
+   "status": "ok",
+   "url": "https://www2.census.gov/geo/docs/maps-data/data/gazetteer/2024_Gazetteer/2024_Gaz_cbsa_national.zip"
+  },
+  {
+   "bytes": null,
+   "name": "hud_fmr",
+   "note": "缓存里没有这份原始文件；离线模式不联网（先运行显式的获取命令）；最近一次联网获取没有成功：blocked 202 来源拒绝或要求验证（例如反爬挑战、需要凭证、限流）：不绕过",
+   "raw_sha256": null,
+   "source_id": "hud_fmr_fy2026",
+   "status": "not_cached",
+   "url": "https://www.huduser.gov/portal/datasets/fmr/fmr2026/FY26_FMRs.xlsx"
+  },
+  {
+   "bytes": 1110720,
+   "name": "ipeds_hd",
+   "note": "",
+   "raw_sha256": "e11d35af6f50fbe2f51d8ddd5a9d4f49860abbab7d73beae1f8524f13ad8945b",
+   "source_id": "ipeds_2023",
+   "status": "ok",
+   "url": "https://nces.ed.gov/ipeds/datacenter/data/HD2023.zip"
+  },
+  {
+   "bytes": 147477,
+   "name": "ipeds_ic_py",
+   "note": "",
+   "raw_sha256": "05f944ee4179da344876cbc0b5b56e85ce721134508ef42c10f6480b801b6135",
+   "source_id": "ipeds_2023",
+   "status": "ok",
+   "url": "https://nces.ed.gov/ipeds/datacenter/data/IC2023_PY.zip"
+  },
+  {
+   "bytes": 40189821,
+   "name": "oews",
+   "note": "",
+   "raw_sha256": "7bf915fc47e464983c5b8b8200d63a733ef90275c7af0576b78875e5b04d35d9",
+   "source_id": "bls_oews_may2024",
+   "status": "ok",
+   "url": "https://www.bls.gov/oes/special-requests/oesm24ma.zip"
+  },
+  {
+   "bytes": 2447875,
+   "name": "osm_food:16980",
+   "note": "",
+   "raw_sha256": "6fe2efb42dfbc6b2d60d2e3ff5f5124c0e33a4eb612d882d6973a9519c30a639",
+   "source_id": "osm_overpass",
+   "status": "ok",
+   "url": "https://maps.mail.ru/osm/tools/overpass/api/interpreter"
+  },
+  {
+   "bytes": 1480235,
+   "name": "osm_food:26420",
+   "note": "",
+   "raw_sha256": "75ad3fdba3ac95d013a4ba909fa1e03c89bb68a8d59bcee444f2fa46a962d482",
+   "source_id": "osm_overpass",
+   "status": "ok",
+   "url": "https://maps.mail.ru/osm/tools/overpass/api/interpreter"
+  },
+  {
+   "bytes": 2554674,
+   "name": "osm_food:31080",
+   "note": "",
+   "raw_sha256": "6a974f05c54550579a8289eb92b06c5b5d3836ea925ad0e3a88ed01dd01eaead",
+   "source_id": "osm_overpass",
+   "status": "ok",
+   "url": "https://maps.mail.ru/osm/tools/overpass/api/interpreter"
+  },
+  {
+   "bytes": 6892845,
+   "name": "osm_food:35620",
+   "note": "",
+   "raw_sha256": "7b2887869c897970a43b66278ebe36d2ff1bd66bb13121bd96930c89ff56ba12",
+   "source_id": "osm_overpass",
+   "status": "ok",
+   "url": "https://maps.mail.ru/osm/tools/overpass/api/interpreter"
+  },
+  {
+   "bytes": null,
+   "name": "osm_food:41860",
+   "note": "缓存里没有这份原始文件；离线模式不联网（先运行显式的获取命令）；最近一次联网获取没有成功：http_error 504 HTTP 504",
+   "raw_sha256": null,
+   "source_id": "osm_overpass",
+   "status": "not_cached",
+   "url": "https://maps.mail.ru/osm/tools/overpass/api/interpreter"
+  },
+  {
+   "bytes": 1424572,
+   "name": "osm_food:42660",
+   "note": "",
+   "raw_sha256": "c36d717cda44b0b1054fc3252163a5ed4933d4749c63b5cf57beda759db3281e",
+   "source_id": "osm_overpass",
+   "status": "ok",
+   "url": "https://maps.mail.ru/osm/tools/overpass/api/interpreter"
+  },
+  {
+   "bytes": null,
+   "name": "osm_food_split:41860:cafe",
+   "note": "缓存里没有这份原始文件；离线模式不联网（先运行显式的获取命令）；最近一次联网获取没有成功：http_error 504 HTTP 504",
+   "raw_sha256": null,
+   "source_id": "osm_overpass",
+   "status": "not_cached",
+   "url": "https://maps.mail.ru/osm/tools/overpass/api/interpreter"
+  },
+  {
+   "bytes": null,
+   "name": "osm_food_split:41860:fast_food",
+   "note": "缓存里没有这份原始文件；离线模式不联网（先运行显式的获取命令）；最近一次联网获取没有成功：http_error 504 HTTP 504",
+   "raw_sha256": null,
+   "source_id": "osm_overpass",
+   "status": "not_cached",
+   "url": "https://maps.mail.ru/osm/tools/overpass/api/interpreter"
+  },
+  {
+   "bytes": 877922,
+   "name": "osm_food_split:41860:restaurant",
+   "note": "",
+   "raw_sha256": "9ed55dfd3de2895026ed96850e3d5455bce3c3d84d4f32745ad2562bff6f41e6",
+   "source_id": "osm_overpass",
+   "status": "ok",
+   "url": "https://maps.mail.ru/osm/tools/overpass/api/interpreter"
+  },
+  {
+   "bytes": 700409,
+   "name": "osm_leisure:16980",
+   "note": "",
+   "raw_sha256": "d0971109bff71d3aa7c06498d187acb0ac12b64577ee0df47a9f1eb2be3c3464",
+   "source_id": "osm_overpass",
+   "status": "ok",
+   "url": "https://maps.mail.ru/osm/tools/overpass/api/interpreter"
+  },
+  {
+   "bytes": 906932,
+   "name": "osm_leisure:26420",
+   "note": "",
+   "raw_sha256": "c5c69bd69e19fba55b04099cf3cd5926af2e42422a8061d05ef32533d840a8e6",
+   "source_id": "osm_overpass",
+   "status": "ok",
+   "url": "https://maps.mail.ru/osm/tools/overpass/api/interpreter"
+  },
+  {
+   "bytes": 2444005,
+   "name": "osm_leisure:31080",
+   "note": "",
+   "raw_sha256": "64153d44738c0a58c312fde30f166a681e4ebc2a0da5c2981befaacddc7e7f92",
+   "source_id": "osm_overpass",
+   "status": "ok",
+   "url": "https://maps.mail.ru/osm/tools/overpass/api/interpreter"
+  },
+  {
+   "bytes": 10220119,
+   "name": "osm_leisure:35620",
+   "note": "",
+   "raw_sha256": "6d28ed364b5c444f4c34cc39aa5cef785675d6f2a3b058d19e1d24d9308ab4ca",
+   "source_id": "osm_overpass",
+   "status": "ok",
+   "url": "https://maps.mail.ru/osm/tools/overpass/api/interpreter"
+  },
+  {
+   "bytes": 307000,
+   "name": "osm_leisure:41860",
+   "note": "",
+   "raw_sha256": "80e5aa4cf12b76061c61bafe6694ec9ee24c8f4dca8900a16f947154380f680f",
+   "source_id": "osm_overpass",
+   "status": "ok",
+   "url": "https://maps.mail.ru/osm/tools/overpass/api/interpreter"
+  },
+  {
+   "bytes": 397610,
+   "name": "osm_leisure:42660",
+   "note": "",
+   "raw_sha256": "0469f2c3352022d9833b0fe048974eb5a6b7e2bdaab55890db2d1a835eb6f8a8",
+   "source_id": "osm_overpass",
+   "status": "ok",
+   "url": "https://maps.mail.ru/osm/tools/overpass/api/interpreter"
+  },
+  {
+   "bytes": 329514,
+   "name": "pums_dictionary",
+   "note": "",
+   "raw_sha256": "cd562a3719c6cdf79736bd9cfbacf8c20e650d641c62abd7e67fd131da036e18",
+   "source_id": "census_acs1_pums_2024",
+   "status": "ok",
+   "url": "https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMS_Data_Dictionary_2024.csv"
+  },
+  {
+   "bytes": 26050998,
+   "name": "pums_h:06",
+   "note": "",
+   "raw_sha256": "6228aeac46ebf09cad5c330c18fa761e2ee23390d42bca38e5eeeded5c2c8a80",
+   "source_id": "census_acs1_pums_2024",
+   "status": "ok",
+   "url": "https://www2.census.gov/programs-surveys/acs/data/pums/2024/1-Year/csv_hca.zip"
+  },
+  {
+   "bytes": 9624913,
+   "name": "pums_h:17",
+   "note": "",
+   "raw_sha256": "a3d31bd4102fb7d7180215a2266ad195c093bd23f46244bcf1b3de9a50710d81",
+   "source_id": "census_acs1_pums_2024",
+   "status": "ok",
+   "url": "https://www2.census.gov/programs-surveys/acs/data/pums/2024/1-Year/csv_hil.zip"
+  },
+  {
+   "bytes": 5361799,
+   "name": "pums_h:18",
+   "note": "",
+   "raw_sha256": "0a44aa9caf5f02fe7824547bcdfda0010d82a8890bbed8859fe6734ad57aeb6d",
+   "source_id": "census_acs1_pums_2024",
+   "status": "ok",
+   "url": "https://www2.census.gov/programs-surveys/acs/data/pums/2024/1-Year/csv_hin.zip"
+  },
+  {
+   "bytes": 6751864,
+   "name": "pums_h:34",
+   "note": "",
+   "raw_sha256": "60a9b91253616001bb3ab326cdd28f79e272e934fb92cac3d9946d8beaa5ce30",
+   "source_id": "census_acs1_pums_2024",
+   "status": "ok",
+   "url": "https://www2.census.gov/programs-surveys/acs/data/pums/2024/1-Year/csv_hnj.zip"
+  },
+  {
+   "bytes": 15234632,
+   "name": "pums_h:36",
+   "note": "",
+   "raw_sha256": "36fc963fad086f3ebe37ea05dbe926826d5196ce2c2177e86a49547bc0871eb6",
+   "source_id": "census_acs1_pums_2024",
+   "status": "ok",
+   "url": "https://www2.census.gov/programs-surveys/acs/data/pums/2024/1-Year/csv_hny.zip"
+  },
+  {
+   "bytes": 20893068,
+   "name": "pums_h:48",
+   "note": "",
+   "raw_sha256": "59274006389de6f8d6ee5f6e2eb48f7f1ccd4d3c9f730df857be641d5ef65b94",
+   "source_id": "census_acs1_pums_2024",
+   "status": "ok",
+   "url": "https://www2.census.gov/programs-surveys/acs/data/pums/2024/1-Year/csv_htx.zip"
+  },
+  {
+   "bytes": 6000194,
+   "name": "pums_h:53",
+   "note": "",
+   "raw_sha256": "802cf04eefa7c8c093f9b82fd177ff902fcb4d20081af4caf53cf693994d7935",
+   "source_id": "census_acs1_pums_2024",
+   "status": "ok",
+   "url": "https://www2.census.gov/programs-surveys/acs/data/pums/2024/1-Year/csv_hwa.zip"
+  },
+  {
+   "bytes": 70114146,
+   "name": "pums_p:06",
+   "note": "",
+   "raw_sha256": "fa3e473e13b09bb6d9f915c7f5c58b8405a8e48d22c43f30d43055a8a6c52882",
+   "source_id": "census_acs1_pums_2024",
+   "status": "ok",
+   "url": "https://www2.census.gov/programs-surveys/acs/data/pums/2024/1-Year/csv_pca.zip"
+  },
+  {
+   "bytes": 22775093,
+   "name": "pums_p:17",
+   "note": "",
+   "raw_sha256": "197c1b07c3d95b2d2d62940e1b9db0c96b9c932e4f842262d3e29d382150b849",
+   "source_id": "census_acs1_pums_2024",
+   "status": "ok",
+   "url": "https://www2.census.gov/programs-surveys/acs/data/pums/2024/1-Year/csv_pil.zip"
+  },
+  {
+   "bytes": 12512276,
+   "name": "pums_p:18",
+   "note": "",
+   "raw_sha256": "b75875743ce3e193c7ab74562481c67e3195222151479d1dc701ec2ebc411786",
+   "source_id": "census_acs1_pums_2024",
+   "status": "ok",
+   "url": "https://www2.census.gov/programs-surveys/acs/data/pums/2024/1-Year/csv_pin.zip"
+  },
+  {
+   "bytes": 16969210,
+   "name": "pums_p:34",
+   "note": "",
+   "raw_sha256": "f57ef6363b3492514ae419051aa0dcfa90eede88d45231e1868d97b57399346f",
+   "source_id": "census_acs1_pums_2024",
+   "status": "ok",
+   "url": "https://www2.census.gov/programs-surveys/acs/data/pums/2024/1-Year/csv_pnj.zip"
+  },
+  {
+   "bytes": 37187628,
+   "name": "pums_p:36",
+   "note": "",
+   "raw_sha256": "89d73997653d2a1d1b535a4a6618987819390b57a6022a167ec76fb8c7bf6699",
+   "source_id": "census_acs1_pums_2024",
+   "status": "ok",
+   "url": "https://www2.census.gov/programs-surveys/acs/data/pums/2024/1-Year/csv_pny.zip"
+  },
+  {
+   "bytes": 52105719,
+   "name": "pums_p:48",
+   "note": "",
+   "raw_sha256": "42ad7127988234d7dd30c23df8ada371b2135b5db912d2e634a6f901477afe63",
+   "source_id": "census_acs1_pums_2024",
+   "status": "ok",
+   "url": "https://www2.census.gov/programs-surveys/acs/data/pums/2024/1-Year/csv_ptx.zip"
+  },
+  {
+   "bytes": 14716206,
+   "name": "pums_p:53",
+   "note": "",
+   "raw_sha256": "669cd9b43461037303f904e99a77091a24eca715549b6f248c381ec991af136d",
+   "source_id": "census_acs1_pums_2024",
+   "status": "ok",
+   "url": "https://www2.census.gov/programs-surveys/acs/data/pums/2024/1-Year/csv_pwa.zip"
+  },
+  {
+   "bytes": 1709076,
+   "name": "tract_puma",
+   "note": "",
+   "raw_sha256": "5262f460b2c8dbe86b00549e916317b1791fdc595c9af72ab18f6f6a67040531",
+   "source_id": "census_tract_puma_2020",
+   "status": "ok",
+   "url": "https://www2.census.gov/geo/docs/maps-data/data/rel2020/2020_Census_Tract_to_2020_PUMA.txt"
+  }
+ ],
+ "stages": {
+  "catalog": "011cf566dc4bf854d95daf96ac24d9142709d8eee7e6dd361c777c3778a63504",
+  "check": "49ce1c161dccc22394eca42e759ed7640360ef7c5cdca1ed6b43ffd2604003f8",
+  "configure": "3087c5b3fa97661eb0b178d05f080035a5d0696000a5475cd6564cfb0e59c270",
+  "fetch": "8bb4aa739e4c948379c90745e573809030c57c830e72c11797e6d01868ee8bac",
+  "map": "a0b786e09765ce19c0b2964f4a4bf525fabbde8f297912be4a4c5b2da2ffe9bb",
+  "standardize": "31113a3f273a4d3c23cd2892197816c66f1f9513346baa78c318547f702557ca"
+ }
+}

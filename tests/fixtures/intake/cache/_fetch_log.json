@@ -1,0 +1,14 @@
+{
+ "hud_fmr": {
+  "bytes": null,
+  "from_cache": false,
+  "http_status": 202,
+  "note": "来源拒绝或要求验证（例如反爬挑战、需要凭证、限流）：不绕过",
+  "raw_sha256": null,
+  "request_key": "30c3853a1b587339d9f20d8168392c6c29821086dae049d3e74305fe7c1b6ba0",
+  "retrieved_at": null,
+  "source_id": "hud_fmr_fy2026",
+  "status": "blocked",
+  "url": "https://www.huduser.gov/portal/datasets/fmr/fmr2026/FY26_FMRs.xlsx"
+ }
+}

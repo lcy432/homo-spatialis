@@ -1,0 +1,14 @@
+{
+ "source_id": "ipeds_2023",
+ "url": "https://nces.ed.gov/ipeds/datacenter/data/HD2023.zip",
+ "method": "GET",
+ "http_status": 200,
+ "sha256": "097fc0ea28b0d2f99f051f96d9935c8e12f0b8b892ea2d102008de562032a38c",
+ "bytes": 2007,
+ "retrieved_at": "2026-10-22T08:04:28Z",
+ "subset_of": {
+  "sha256": "e11d35af6f50fbe2f51d8ddd5a9d4f49860abbab7d73beae1f8524f13ad8945b",
+  "bytes": 1110720
+ },
+ "subset_rule": "CBSA = 16980 且有按项目报告学费的院校中编号最小的 8 所"
+}

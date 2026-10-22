@@ -1,0 +1,14 @@
+{
+ "source_id": "osm_overpass",
+ "url": "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
+ "method": "POST",
+ "http_status": 200,
+ "sha256": "01e7e3065aaad2c871a7d16ecf396f228581adfadc9ac0f948b85eadcf8c13b0",
+ "bytes": 11912,
+ "retrieved_at": "2026-10-22T08:16:29Z",
+ "subset_of": {
+  "sha256": "d0971109bff71d3aa7c06498d187acb0ac12b64577ee0df47a9f1eb2be3c3464",
+  "bytes": 700409
+ },
+ "subset_rule": "前 30 个带标签的元素 + 私人场所的前 3 个（检验过滤）"
+}

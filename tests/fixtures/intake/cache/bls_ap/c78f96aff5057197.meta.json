@@ -1,0 +1,14 @@
+{
+ "source_id": "bls_ap",
+ "url": "https://download.bls.gov/pub/time.series/ap/ap.area",
+ "method": "GET",
+ "http_status": 200,
+ "sha256": "1137036146970cc9320065ed0f94902f710709b6693ca0abf82c9fda3cf51042",
+ "bytes": 2114,
+ "retrieved_at": "2026-10-22T08:04:34Z",
+ "subset_of": {
+  "sha256": "1137036146970cc9320065ed0f94902f710709b6693ca0abf82c9fda3cf51042",
+  "bytes": 2114
+ },
+ "subset_rule": "原文件（很小，不切）"
+}

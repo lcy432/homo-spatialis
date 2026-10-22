@@ -1,0 +1,14 @@
+{
+ "source_id": "census_cbsa_2023",
+ "url": "https://www2.census.gov/programs-surveys/metro-micro/geographies/reference-files/2023/delineation-files/list1_2023.xlsx",
+ "method": "GET",
+ "http_status": 200,
+ "sha256": "e63c65b4086309f1f28681af26fc4169836dd51fd633e3bb9e1f7ea1b1fbd710",
+ "bytes": 5973,
+ "retrieved_at": "2026-10-22T08:00:19Z",
+ "subset_of": {
+  "sha256": "952c4b1e78acbb54e6ec9412434b7602fedacbf021736351a63c181bdb753629",
+  "bytes": 143798
+ },
+ "subset_rule": "表头三行 + CBSA Code = 16980 的县"
+}

@@ -1,0 +1,809 @@
+{
+ "metros": {
+  "16980": {
+   "label": "Chicago-Naperville-Elgin, IL-IN",
+   "label_zh": "芝加哥",
+   "sectors": {
+    "activities": {
+     "by_origin": {
+      "record": 10237
+     },
+     "compilable": 773,
+     "data_complete": 0,
+     "data_insufficient": 0,
+     "data_partial": 10237,
+     "estimated_or_assumed": 9002,
+     "executable": 773,
+     "needs_e1_extension": 9464,
+     "not_compilable": 0,
+     "opportunities": 10237,
+     "planning_reference": 10237,
+     "records_in_metro": 10237,
+     "records_national_applicable": 0,
+     "scorable": 0
+    },
+    "background": {
+     "by_origin": {
+      "record": 12
+     },
+     "compilable": 0,
+     "data_complete": 9,
+     "data_insufficient": 0,
+     "data_partial": 3,
+     "estimated_or_assumed": 0,
+     "executable": 0,
+     "needs_e1_extension": 12,
+     "not_compilable": 0,
+     "opportunities": 12,
+     "planning_reference": 12,
+     "records_in_metro": 12,
+     "records_national_applicable": 0,
+     "scorable": 0
+    },
+    "food": {
+     "by_origin": {
+      "mapping_a": 3,
+      "record": 4800
+     },
+     "compilable": 0,
+     "data_complete": 26,
+     "data_insufficient": 2,
+     "data_partial": 4775,
+     "estimated_or_assumed": 55,
+     "executable": 0,
+     "needs_e1_extension": 4800,
+     "not_compilable": 3,
+     "opportunities": 4803,
+     "planning_reference": 4801,
+     "records_in_metro": 4746,
+     "records_national_applicable": 210,
+     "scorable": 0
+    },
+    "goods": {
+     "by_origin": {
+      "record": 1875
+     },
+     "compilable": 0,
+     "data_complete": 0,
+     "data_insufficient": 0,
+     "data_partial": 1875,
+     "estimated_or_assumed": 0,
+     "executable": 0,
+     "needs_e1_extension": 0,
+     "not_compilable": 1875,
+     "opportunities": 1875,
+     "planning_reference": 1875,
+     "records_in_metro": 0,
+     "records_national_applicable": 1875,
+     "scorable": 0
+    },
+    "housing": {
+     "by_origin": {
+      "mapping_a": 108,
+      "mapping_b": 717
+     },
+     "compilable": 0,
+     "data_complete": 0,
+     "data_insufficient": 23,
+     "data_partial": 802,
+     "estimated_or_assumed": 825,
+     "executable": 0,
+     "needs_e1_extension": 825,
+     "not_compilable": 0,
+     "opportunities": 825,
+     "planning_reference": 802,
+     "records_in_metro": 8128,
+     "records_national_applicable": 0,
+     "scorable": 0
+    },
+    "jobs": {
+     "by_origin": {
+      "mapping_b": 2169
+     },
+     "compilable": 0,
+     "data_complete": 0,
+     "data_insufficient": 68,
+     "data_partial": 2101,
+     "estimated_or_assumed": 2169,
+     "executable": 0,
+     "needs_e1_extension": 2169,
+     "not_compilable": 0,
+     "opportunities": 2169,
+     "planning_reference": 2101,
+     "records_in_metro": 723,
+     "records_national_applicable": 0,
+     "scorable": 0
+    },
+    "training": {
+     "by_origin": {
+      "record": 402
+     },
+     "compilable": 0,
+     "data_complete": 0,
+     "data_insufficient": 247,
+     "data_partial": 155,
+     "estimated_or_assumed": 155,
+     "executable": 0,
+     "needs_e1_extension": 0,
+     "not_compilable": 402,
+     "opportunities": 402,
+     "planning_reference": 155,
+     "records_in_metro": 402,
+     "records_national_applicable": 0,
+     "scorable": 0
+    }
+   }
+  },
+  "26420": {
+   "label": "Houston-Pasadena-The Woodlands, TX",
+   "label_zh": "休斯敦",
+   "sectors": {
+    "activities": {
+     "by_origin": {
+      "record": 3150
+     },
+     "compilable": 0,
+     "data_complete": 0,
+     "data_insufficient": 0,
+     "data_partial": 3150,
+     "estimated_or_assumed": 0,
+     "executable": 0,
+     "needs_e1_extension": 3150,
+     "not_compilable": 0,
+     "opportunities": 3150,
+     "planning_reference": 3150,
+     "records_in_metro": 3150,
+     "records_national_applicable": 0,
+     "scorable": 0
+    },
+    "background": {
+     "by_origin": {
+      "record": 12
+     },
+     "compilable": 0,
+     "data_complete": 8,
+     "data_insufficient": 0,
+     "data_partial": 4,
+     "estimated_or_assumed": 0,
+     "executable": 0,
+     "needs_e1_extension": 12,
+     "not_compilable": 0,
+     "opportunities": 12,
+     "planning_reference": 12,
+     "records_in_metro": 12,
+     "records_national_applicable": 0,
+     "scorable": 0
+    },
+    "food": {
+     "by_origin": {
+      "mapping_a": 3,
+      "record": 3161
+     },
+     "compilable": 0,
+     "data_complete": 45,
+     "data_insufficient": 2,
+     "data_partial": 3117,
+     "estimated_or_assumed": 55,
+     "executable": 0,
+     "needs_e1_extension": 3161,
+     "not_compilable": 3,
+     "opportunities": 3164,
+     "planning_reference": 3162,
+     "records_in_metro": 3107,
+     "records_national_applicable": 210,
+     "scorable": 0
+    },
+    "goods": {
+     "by_origin": {
+      "record": 1875
+     },
+     "compilable": 0,
+     "data_complete": 0,
+     "data_insufficient": 0,
+     "data_partial": 1875,
+     "estimated_or_assumed": 0,
+     "executable": 0,
+     "needs_e1_extension": 0,
+     "not_compilable": 1875,
+     "opportunities": 1875,
+     "planning_reference": 1875,
+     "records_in_metro": 0,
+     "records_national_applicable": 1875,
+     "scorable": 0
+    },
+    "housing": {
+     "by_origin": {
+      "mapping_a": 108,
+      "mapping_b": 651
+     },
+     "compilable": 0,
+     "data_complete": 0,
+     "data_insufficient": 0,
+     "data_partial": 759,
+     "estimated_or_assumed": 759,
+     "executable": 0,
+     "needs_e1_extension": 759,
+     "not_compilable": 0,
+     "opportunities": 759,
+     "planning_reference": 759,
+     "records_in_metro": 7778,
+     "records_national_applicable": 0,
+     "scorable": 0
+    },
+    "jobs": {
+     "by_origin": {
+      "mapping_b": 2088
+     },
+     "compilable": 0,
+     "data_complete": 0,
+     "data_insufficient": 53,
+     "data_partial": 2035,
+     "estimated_or_assumed": 2088,
+     "executable": 0,
+     "needs_e1_extension": 2088,
+     "not_compilable": 0,
+     "opportunities": 2088,
+     "planning_reference": 2035,
+     "records_in_metro": 696,
+     "records_national_applicable": 0,
+     "scorable": 0
+    },
+    "training": {
+     "by_origin": {
+      "record": 204
+     },
+     "compilable": 0,
+     "data_complete": 0,
+     "data_insufficient": 130,
+     "data_partial": 74,
+     "estimated_or_assumed": 74,
+     "executable": 0,
+     "needs_e1_extension": 0,
+     "not_compilable": 204,
+     "opportunities": 204,
+     "planning_reference": 74,
+     "records_in_metro": 204,
+     "records_national_applicable": 0,
+     "scorable": 0
+    }
+   }
+  },
+  "31080": {
+   "label": "Los Angeles-Long Beach-Anaheim, CA",
+   "label_zh": "洛杉矶",
+   "sectors": {
+    "activities": {
+     "by_origin": {
+      "record": 9750
+     },
+     "compilable": 0,
+     "data_complete": 0,
+     "data_insufficient": 0,
+     "data_partial": 9750,
+     "estimated_or_assumed": 0,
+     "executable": 0,
+     "needs_e1_extension": 9750,
+     "not_compilable": 0,
+     "opportunities": 9750,
+     "planning_reference": 9750,
+     "records_in_metro": 9750,
+     "records_national_applicable": 0,
+     "scorable": 0
+    },
+    "background": {
+     "by_origin": {
+      "record": 12
+     },
+     "compilable": 0,
+     "data_complete": 9,
+     "data_insufficient": 0,
+     "data_partial": 3,
+     "estimated_or_assumed": 0,
+     "executable": 0,
+     "needs_e1_extension": 12,
+     "not_compilable": 0,
+     "opportunities": 12,
+     "planning_reference": 12,
+     "records_in_metro": 12,
+     "records_national_applicable": 0,
+     "scorable": 0
+    },
+    "food": {
+     "by_origin": {
+      "mapping_a": 3,
+      "record": 5652
+     },
+     "compilable": 0,
+     "data_complete": 31,
+     "data_insufficient": 2,
+     "data_partial": 5622,
+     "estimated_or_assumed": 55,
+     "executable": 0,
+     "needs_e1_extension": 5652,
+     "not_compilable": 3,
+     "opportunities": 5655,
+     "planning_reference": 5653,
+     "records_in_metro": 5598,
+     "records_national_applicable": 210,
+     "scorable": 0
+    },
+    "goods": {
+     "by_origin": {
+      "record": 1875
+     },
+     "compilable": 0,
+     "data_complete": 0,
+     "data_insufficient": 0,
+     "data_partial": 1875,
+     "estimated_or_assumed": 0,
+     "executable": 0,
+     "needs_e1_extension": 0,
+     "not_compilable": 1875,
+     "opportunities": 1875,
+     "planning_reference": 1875,
+     "records_in_metro": 0,
+     "records_national_applicable": 1875,
+     "scorable": 0
+    },
+    "housing": {
+     "by_origin": {
+      "mapping_a": 108,
+      "mapping_b": 1074
+     },
+     "compilable": 0,
+     "data_complete": 0,
+     "data_insufficient": 1,
+     "data_partial": 1181,
+     "estimated_or_assumed": 1182,
+     "executable": 0,
+     "needs_e1_extension": 1182,
+     "not_compilable": 0,
+     "opportunities": 1182,
+     "planning_reference": 1181,
+     "records_in_metro": 20108,
+     "records_national_applicable": 0,
+     "scorable": 0
+    },
+    "jobs": {
+     "by_origin": {
+      "mapping_b": 2265
+     },
+     "compilable": 0,
+     "data_complete": 0,
+     "data_insufficient": 64,
+     "data_partial": 2201,
+     "estimated_or_assumed": 2265,
+     "executable": 0,
+     "needs_e1_extension": 2265,
+     "not_compilable": 0,
+     "opportunities": 2265,
+     "planning_reference": 2201,
+     "records_in_metro": 755,
+     "records_national_applicable": 0,
+     "scorable": 0
+    },
+    "training": {
+     "by_origin": {
+      "record": 684
+     },
+     "compilable": 0,
+     "data_complete": 0,
+     "data_insufficient": 310,
+     "data_partial": 374,
+     "estimated_or_assumed": 374,
+     "executable": 0,
+     "needs_e1_extension": 0,
+     "not_compilable": 684,
+     "opportunities": 684,
+     "planning_reference": 374,
+     "records_in_metro": 684,
+     "records_national_applicable": 0,
+     "scorable": 0
+    }
+   }
+  },
+  "35620": {
+   "label": "New York-Newark-Jersey City, NY-NJ",
+   "label_zh": "纽约",
+   "sectors": {
+    "activities": {
+     "by_origin": {
+      "record": 4278
+     },
+     "compilable": 0,
+     "data_complete": 0,
+     "data_insufficient": 0,
+     "data_partial": 4278,
+     "estimated_or_assumed": 0,
+     "executable": 0,
+     "needs_e1_extension": 4278,
+     "not_compilable": 0,
+     "opportunities": 4278,
+     "planning_reference": 4278,
+     "records_in_metro": 4278,
+     "records_national_applicable": 0,
+     "scorable": 0
+    },
+    "background": {
+     "by_origin": {
+      "record": 12
+     },
+     "compilable": 0,
+     "data_complete": 9,
+     "data_insufficient": 0,
+     "data_partial": 3,
+     "estimated_or_assumed": 0,
+     "executable": 0,
+     "needs_e1_extension": 12,
+     "not_compilable": 0,
+     "opportunities": 12,
+     "planning_reference": 12,
+     "records_in_metro": 12,
+     "records_national_applicable": 0,
+     "scorable": 0
+    },
+    "food": {
+     "by_origin": {
+      "mapping_a": 3,
+      "record": 15383
+     },
+     "compilable": 0,
+     "data_complete": 20,
+     "data_insufficient": 2,
+     "data_partial": 15364,
+     "estimated_or_assumed": 55,
+     "executable": 0,
+     "needs_e1_extension": 15383,
+     "not_compilable": 3,
+     "opportunities": 15386,
+     "planning_reference": 15384,
+     "records_in_metro": 15329,
+     "records_national_applicable": 210,
+     "scorable": 0
+    },
+    "goods": {
+     "by_origin": {
+      "record": 1875
+     },
+     "compilable": 0,
+     "data_complete": 0,
+     "data_insufficient": 0,
+     "data_partial": 1875,
+     "estimated_or_assumed": 0,
+     "executable": 0,
+     "needs_e1_extension": 0,
+     "not_compilable": 1875,
+     "opportunities": 1875,
+     "planning_reference": 1875,
+     "records_in_metro": 0,
+     "records_national_applicable": 1875,
+     "scorable": 0
+    },
+    "housing": {
+     "by_origin": {
+      "mapping_a": 108,
+      "mapping_b": 1635
+     },
+     "compilable": 0,
+     "data_complete": 0,
+     "data_insufficient": 4,
+     "data_partial": 1739,
+     "estimated_or_assumed": 1743,
+     "executable": 0,
+     "needs_e1_extension": 1743,
+     "not_compilable": 0,
+     "opportunities": 1743,
+     "planning_reference": 1739,
+     "records_in_metro": 25699,
+     "records_national_applicable": 0,
+     "scorable": 0
+    },
+    "jobs": {
+     "by_origin": {
+      "mapping_b": 2313
+     },
+     "compilable": 0,
+     "data_complete": 0,
+     "data_insufficient": 67,
+     "data_partial": 2246,
+     "estimated_or_assumed": 2313,
+     "executable": 0,
+     "needs_e1_extension": 2313,
+     "not_compilable": 0,
+     "opportunities": 2313,
+     "planning_reference": 2246,
+     "records_in_metro": 771,
+     "records_national_applicable": 0,
+     "scorable": 0
+    },
+    "training": {
+     "by_origin": {
+      "record": 636
+     },
+     "compilable": 0,
+     "data_complete": 0,
+     "data_insufficient": 379,
+     "data_partial": 257,
+     "estimated_or_assumed": 257,
+     "executable": 0,
+     "needs_e1_extension": 0,
+     "not_compilable": 636,
+     "opportunities": 636,
+     "planning_reference": 257,
+     "records_in_metro": 636,
+     "records_national_applicable": 0,
+     "scorable": 0
+    }
+   }
+  },
+  "41860": {
+   "label": "San Francisco-Oakland-Fremont, CA",
+   "label_zh": "旧金山",
+   "sectors": {
+    "activities": {
+     "by_origin": {
+      "record": 739
+     },
+     "compilable": 0,
+     "data_complete": 0,
+     "data_insufficient": 0,
+     "data_partial": 739,
+     "estimated_or_assumed": 0,
+     "executable": 0,
+     "needs_e1_extension": 739,
+     "not_compilable": 0,
+     "opportunities": 739,
+     "planning_reference": 739,
+     "records_in_metro": 739,
+     "records_national_applicable": 0,
+     "scorable": 0
+    },
+    "background": {
+     "by_origin": {
+      "record": 12
+     },
+     "compilable": 0,
+     "data_complete": 9,
+     "data_insufficient": 0,
+     "data_partial": 3,
+     "estimated_or_assumed": 0,
+     "executable": 0,
+     "needs_e1_extension": 12,
+     "not_compilable": 0,
+     "opportunities": 12,
+     "planning_reference": 12,
+     "records_in_metro": 12,
+     "records_national_applicable": 0,
+     "scorable": 0
+    },
+    "food": {
+     "by_origin": {
+      "mapping_a": 3,
+      "record": 1978
+     },
+     "compilable": 0,
+     "data_complete": 31,
+     "data_insufficient": 2,
+     "data_partial": 1948,
+     "estimated_or_assumed": 55,
+     "executable": 0,
+     "needs_e1_extension": 1978,
+     "not_compilable": 3,
+     "opportunities": 1981,
+     "planning_reference": 1979,
+     "records_in_metro": 1924,
+     "records_national_applicable": 210,
+     "scorable": 0
+    },
+    "goods": {
+     "by_origin": {
+      "record": 1875
+     },
+     "compilable": 0,
+     "data_complete": 0,
+     "data_insufficient": 0,
+     "data_partial": 1875,
+     "estimated_or_assumed": 0,
+     "executable": 0,
+     "needs_e1_extension": 0,
+     "not_compilable": 1875,
+     "opportunities": 1875,
+     "planning_reference": 1875,
+     "records_in_metro": 0,
+     "records_national_applicable": 1875,
+     "scorable": 0
+    },
+    "housing": {
+     "by_origin": {
+      "mapping_a": 108,
+      "mapping_b": 453
+     },
+     "compilable": 0,
+     "data_complete": 0,
+     "data_insufficient": 13,
+     "data_partial": 548,
+     "estimated_or_assumed": 561,
+     "executable": 0,
+     "needs_e1_extension": 561,
+     "not_compilable": 0,
+     "opportunities": 561,
+     "planning_reference": 548,
+     "records_in_metro": 7061,
+     "records_national_applicable": 0,
+     "scorable": 0
+    },
+    "jobs": {
+     "by_origin": {
+      "mapping_b": 2106
+     },
+     "compilable": 0,
+     "data_complete": 0,
+     "data_insufficient": 69,
+     "data_partial": 2037,
+     "estimated_or_assumed": 2106,
+     "executable": 0,
+     "needs_e1_extension": 2106,
+     "not_compilable": 0,
+     "opportunities": 2106,
+     "planning_reference": 2037,
+     "records_in_metro": 702,
+     "records_national_applicable": 0,
+     "scorable": 0
+    },
+    "training": {
+     "by_origin": {
+      "record": 114
+     },
+     "compilable": 0,
+     "data_complete": 0,
+     "data_insufficient": 67,
+     "data_partial": 47,
+     "estimated_or_assumed": 47,
+     "executable": 0,
+     "needs_e1_extension": 0,
+     "not_compilable": 114,
+     "opportunities": 114,
+     "planning_reference": 47,
+     "records_in_metro": 114,
+     "records_national_applicable": 0,
+     "scorable": 0
+    }
+   }
+  },
+  "42660": {
+   "label": "Seattle-Tacoma-Bellevue, WA",
+   "label_zh": "西雅图",
+   "sectors": {
+    "activities": {
+     "by_origin": {
+      "record": 838
+     },
+     "compilable": 0,
+     "data_complete": 0,
+     "data_insufficient": 0,
+     "data_partial": 838,
+     "estimated_or_assumed": 0,
+     "executable": 0,
+     "needs_e1_extension": 838,
+     "not_compilable": 0,
+     "opportunities": 838,
+     "planning_reference": 838,
+     "records_in_metro": 838,
+     "records_national_applicable": 0,
+     "scorable": 0
+    },
+    "background": {
+     "by_origin": {
+      "record": 12
+     },
+     "compilable": 0,
+     "data_complete": 9,
+     "data_insufficient": 0,
+     "data_partial": 3,
+     "estimated_or_assumed": 0,
+     "executable": 0,
+     "needs_e1_extension": 12,
+     "not_compilable": 0,
+     "opportunities": 12,
+     "planning_reference": 12,
+     "records_in_metro": 12,
+     "records_national_applicable": 0,
+     "scorable": 0
+    },
+    "food": {
+     "by_origin": {
+      "mapping_a": 3,
+      "record": 2661
+     },
+     "compilable": 0,
+     "data_complete": 31,
+     "data_insufficient": 2,
+     "data_partial": 2631,
+     "estimated_or_assumed": 55,
+     "executable": 0,
+     "needs_e1_extension": 2661,
+     "not_compilable": 3,
+     "opportunities": 2664,
+     "planning_reference": 2662,
+     "records_in_metro": 2607,
+     "records_national_applicable": 210,
+     "scorable": 0
+    },
+    "goods": {
+     "by_origin": {
+      "record": 1875
+     },
+     "compilable": 0,
+     "data_complete": 0,
+     "data_insufficient": 0,
+     "data_partial": 1875,
+     "estimated_or_assumed": 0,
+     "executable": 0,
+     "needs_e1_extension": 0,
+     "not_compilable": 1875,
+     "opportunities": 1875,
+     "planning_reference": 1875,
+     "records_in_metro": 0,
+     "records_national_applicable": 1875,
+     "scorable": 0
+    },
+    "housing": {
+     "by_origin": {
+      "mapping_a": 108,
+      "mapping_b": 375
+     },
+     "compilable": 0,
+     "data_complete": 0,
+     "data_insufficient": 9,
+     "data_partial": 474,
+     "estimated_or_assumed": 483,
+     "executable": 0,
+     "needs_e1_extension": 483,
+     "not_compilable": 0,
+     "opportunities": 483,
+     "planning_reference": 474,
+     "records_in_metro": 5052,
+     "records_national_applicable": 0,
+     "scorable": 0
+    },
+    "jobs": {
+     "by_origin": {
+      "mapping_b": 2130
+     },
+     "compilable": 0,
+     "data_complete": 0,
+     "data_insufficient": 68,
+     "data_partial": 2062,
+     "estimated_or_assumed": 2130,
+     "executable": 0,
+     "needs_e1_extension": 2130,
+     "not_compilable": 0,
+     "opportunities": 2130,
+     "planning_reference": 2062,
+     "records_in_metro": 710,
+     "records_national_applicable": 0,
+     "scorable": 0
+    },
+    "training": {
+     "by_origin": {
+      "record": 60
+     },
+     "compilable": 0,
+     "data_complete": 0,
+     "data_insufficient": 33,
+     "data_partial": 27,
+     "estimated_or_assumed": 27,
+     "executable": 0,
+     "needs_e1_extension": 0,
+     "not_compilable": 60,
+     "opportunities": 60,
+     "planning_reference": 27,
+     "records_in_metro": 60,
+     "records_national_applicable": 0,
+     "scorable": 0
+    }
+   }
+  }
+ },
+ "note_zh": "records_in_metro = 这座都会区里实际取得的真实记录；records_national_applicable = 全国性的记录（例如全国认证的家电型号、全国均价），适用于每座城但不是本地观测；opportunities 里 mapping_a / mapping_b 是映射生成的候选，不是真实样本量。estimated_or_assumed = 机会里最弱的来源是估计或假设；needs_e1_extension / not_compilable = 当前引擎不能执行。"
+}

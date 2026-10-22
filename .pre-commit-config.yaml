@@ -4,6 +4,8 @@
 # runs/ and the doc archives are frozen evidence (saved diffs, logs, review
 # copies of old code): formatters would rewrite them, so only the secret and
 # size checks look there.
+# tests/fixtures/intake/cache holds raw-file samples addressed by SHA-256
+# (intake-02): the whitespace fixers would change their bytes and break them.
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.14.5
@@ -24,6 +26,6 @@ repos:
       - id: check-yaml
       - id: check-toml
       - id: end-of-file-fixer
-        exclude: ^(runs|docs/history|docs/design/(history|prompts))/
+        exclude: ^(runs|docs/history|docs/design/(history|prompts)|tests/fixtures/intake/cache)/
       - id: trailing-whitespace
-        exclude: ^(runs|docs/history|docs/design/(history|prompts))/
+        exclude: ^(runs|docs/history|docs/design/(history|prompts)|tests/fixtures/intake/cache)/

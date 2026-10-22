@@ -1,0 +1,65 @@
+{
+ "metros": {
+  "16980": {
+   "employment_suppressed": 32,
+   "hours_level": {
+    "metro_major": 22
+   },
+   "occupations": 723,
+   "wage_not_published": 11,
+   "wage_present": 700,
+   "wage_suppressed_topcoded": 12
+  },
+  "26420": {
+   "employment_suppressed": 26,
+   "hours_level": {
+    "metro_major": 22
+   },
+   "occupations": 696,
+   "wage_not_published": 10,
+   "wage_present": 677,
+   "wage_suppressed_topcoded": 9
+  },
+  "31080": {
+   "employment_suppressed": 42,
+   "hours_level": {
+    "metro_major": 22
+   },
+   "occupations": 755,
+   "wage_not_published": 9,
+   "wage_present": 733,
+   "wage_suppressed_topcoded": 13
+  },
+  "35620": {
+   "employment_suppressed": 29,
+   "hours_level": {
+    "metro_major": 22
+   },
+   "occupations": 771,
+   "wage_not_published": 8,
+   "wage_present": 750,
+   "wage_suppressed_topcoded": 13
+  },
+  "41860": {
+   "employment_suppressed": 19,
+   "hours_level": {
+    "metro_major": 22
+   },
+   "occupations": 702,
+   "wage_not_published": 12,
+   "wage_present": 681,
+   "wage_suppressed_topcoded": 9
+  },
+  "42660": {
+   "employment_suppressed": 32,
+   "hours_level": {
+    "metro_major": 22
+   },
+   "occupations": 710,
+   "wage_not_published": 10,
+   "wage_present": 687,
+   "wage_suppressed_topcoded": 13
+  }
+ },
+ "note_zh": "工资是 OEWS 的观测分位数（换到 2024 年平均价格是估计）；工时与在家工作比例按 SOC 大类，样本不足回退到六城合并。"
+}

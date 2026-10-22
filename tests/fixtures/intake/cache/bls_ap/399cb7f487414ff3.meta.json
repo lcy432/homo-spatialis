@@ -1,0 +1,14 @@
+{
+ "source_id": "bls_ap",
+ "url": "https://download.bls.gov/pub/time.series/ap/ap.data.0.Current",
+ "method": "GET",
+ "http_status": 200,
+ "sha256": "c4a3398cfb475378fab22a1a7a6d3f79c1db1d7c0d46bd4cbe2a6db6b196e392",
+ "bytes": 80031,
+ "retrieved_at": "2026-10-22T07:57:54Z",
+ "subset_of": {
+  "sha256": "957044dea3350ef95023c3577b10a8c5c6aaad1c3f2452062901761cec2080eb",
+  "bytes": 8976664
+ },
+ "subset_rule": "上述序列在 2023 年及以后的行"
+}

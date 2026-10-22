@@ -1,0 +1,473 @@
+{
+ "by_sector": {
+  "activities": {
+   "compilable": 773,
+   "needs_e1_extension": 28219
+  },
+  "background": {
+   "needs_e1_extension": 72
+  },
+  "food": {
+   "needs_e1_extension": 33635,
+   "not_compilable": 18
+  },
+  "goods": {
+   "not_compilable": 1875
+  },
+  "housing": {
+   "needs_e1_extension": 5553
+  },
+  "jobs": {
+   "needs_e1_extension": 13071
+  },
+  "training": {
+   "not_compilable": 2100
+  }
+ },
+ "failed": [],
+ "note_zh": "独立导出与合法性检查（LifeOpportunity 校验）；没有写进任何运行配置，不代表产品链已接真实资料。",
+ "reasons": {
+  "activities:calendar_bound_repeated_sessions_not_expressible": 8229,
+  "activities:e1_has_no_venue_visit_choice": 19990,
+  "activities:price_unknown": 19990,
+  "background:city_fact_to_scoring_mapping_not_registered": 72,
+  "food:e1_has_no_meal_level_choice": 33311,
+  "food:fresh_meals_per_week_missing": 18,
+  "food:prep_hours_missing": 18,
+  "food:price_unknown": 33311,
+  "food:single_food_item_not_a_monthly_plan": 324,
+  "goods:lifetime_unknown": 1875,
+  "goods:price_unknown": 1875,
+  "goods:relief_effect_unknown": 1875,
+  "housing:commute_is_resident_median_not_unit_specific": 5553,
+  "housing:floor_area_unknown": 5553,
+  "jobs:employer_not_identified": 13071,
+  "jobs:job_arrangement_not_observed": 13071,
+  "jobs:workdays_and_onsite_days_not_observed": 13071,
+  "training:length_not_whole_years": 1143,
+  "training:participation_hours_missing": 2100,
+  "training:start_dates_unknown": 2100
+ },
+ "sample": [
+  {
+   "attributes": {
+    "activity_category": "Fun & Games",
+    "age_range": "All Ages"
+   },
+   "availability": "available",
+   "category": "experience",
+   "duration": {
+    "kind": "one_time_experience",
+    "lasts_years": 0
+   },
+   "label": "Family Night Out at McKiernan Playground",
+   "opportunity_id": "chi.activity.584948",
+   "price": {
+    "amount": {
+     "amount": 1.86,
+     "numeraire": "USD_2024_LOCAL"
+    },
+    "billing": "one_time",
+    "per_unit": "registration"
+   },
+   "quality": "Fun & Games；McKiernan (David) Park；2026-10-22 当天",
+   "resource": {
+    "basis": "per_occurrence",
+    "burden_per_hour": 1.0,
+    "hours": 0.75,
+    "note": "一次活动的时段；负担是登记的 E1 合成设定",
+    "quantity_scales": true
+   },
+   "source": {
+    "geography_scope": "City of Chicago parks (within CBSA 16980)",
+    "inputs": [
+     "activities.chicago_parks.584948"
+    ],
+    "kind": "estimated",
+    "mapping_version": "e1_export_single_session_experience@1",
+    "observed_on": "2026-10-22",
+    "rule": "收费按 CPI-U 换到 2024 年当地价（cpi_u_period_conversion@1（2026-09 → 2024 年平均，×0.930994））；每小时负担 = 1.0（假设 e1_activity_burden_per_hour）"
+   },
+   "unit": "registration"
+  },
+  {
+   "attributes": {
+    "activity_category": "Fun & Games",
+    "age_range": "All Ages"
+   },
+   "availability": "available",
+   "category": "experience",
+   "duration": {
+    "kind": "one_time_experience",
+    "lasts_years": 0
+   },
+   "label": "Family Night Out at McKiernan Playground",
+   "opportunity_id": "chi.activity.584949",
+   "price": {
+    "amount": {
+     "amount": 1.86,
+     "numeraire": "USD_2024_LOCAL"
+    },
+    "billing": "one_time",
+    "per_unit": "registration"
+   },
+   "quality": "Fun & Games；McKiernan (David) Park；2026-12-17 当天",
+   "resource": {
+    "basis": "per_occurrence",
+    "burden_per_hour": 1.0,
+    "hours": 0.75,
+    "note": "一次活动的时段；负担是登记的 E1 合成设定",
+    "quantity_scales": true
+   },
+   "source": {
+    "geography_scope": "City of Chicago parks (within CBSA 16980)",
+    "inputs": [
+     "activities.chicago_parks.584949"
+    ],
+    "kind": "estimated",
+    "mapping_version": "e1_export_single_session_experience@1",
+    "observed_on": "2026-12-17",
+    "rule": "收费按 CPI-U 换到 2024 年当地价（cpi_u_period_conversion@1（2026-09 → 2024 年平均，×0.930994））；每小时负担 = 1.0（假设 e1_activity_burden_per_hour）"
+   },
+   "unit": "registration"
+  },
+  {
+   "attributes": {
+    "activity_category": "Educational/Self-Help",
+    "age_range": "Youth"
+   },
+   "availability": "available",
+   "category": "experience",
+   "duration": {
+    "kind": "one_time_experience",
+    "lasts_years": 0
+   },
+   "label": "Deaf Family Coding (Deaf & HOH) at Park No. 596",
+   "opportunity_id": "chi.activity.587609",
+   "price": {
+    "amount": {
+     "amount": 0.0,
+     "numeraire": "USD_2024_LOCAL"
+    },
+    "billing": "one_time",
+    "per_unit": "registration"
+   },
+   "quality": "Educational/Self-Help；Brighton Park Community Campus (Park No. 596)；2026-11-21 当天",
+   "resource": {
+    "basis": "per_occurrence",
+    "burden_per_hour": 1.0,
+    "hours": 2.0,
+    "note": "一次活动的时段；负担是登记的 E1 合成设定",
+    "quantity_scales": true
+   },
+   "source": {
+    "geography_scope": "City of Chicago parks (within CBSA 16980)",
+    "inputs": [
+     "activities.chicago_parks.587609"
+    ],
+    "kind": "estimated",
+    "mapping_version": "e1_export_single_session_experience@1",
+    "observed_on": "2026-11-21",
+    "rule": "收费按 CPI-U 换到 2024 年当地价（cpi_u_period_conversion@1（2026-09 → 2024 年平均，×0.930994））；每小时负担 = 1.0（假设 e1_activity_burden_per_hour）"
+   },
+   "unit": "registration"
+  },
+  {
+   "attributes": {
+    "activity_category": "Sports - Track & Field",
+    "age_range": "Youth"
+   },
+   "availability": "available",
+   "category": "experience",
+   "duration": {
+    "kind": "one_time_experience",
+    "lasts_years": 0
+   },
+   "label": "Pole Vault (ASMG) - Open at Gately",
+   "opportunity_id": "chi.activity.591358",
+   "price": {
+    "amount": {
+     "amount": 11.17,
+     "numeraire": "USD_2024_LOCAL"
+    },
+    "billing": "one_time",
+    "per_unit": "registration"
+   },
+   "quality": "Sports - Track & Field；Gately (James) Park；2026-10-25 当天",
+   "resource": {
+    "basis": "per_occurrence",
+    "burden_per_hour": 1.0,
+    "hours": 2.0,
+    "note": "一次活动的时段；负担是登记的 E1 合成设定",
+    "quantity_scales": true
+   },
+   "source": {
+    "geography_scope": "City of Chicago parks (within CBSA 16980)",
+    "inputs": [
+     "activities.chicago_parks.591358"
+    ],
+    "kind": "estimated",
+    "mapping_version": "e1_export_single_session_experience@1",
+    "observed_on": "2026-10-25",
+    "rule": "收费按 CPI-U 换到 2024 年当地价（cpi_u_period_conversion@1（2026-09 → 2024 年平均，×0.930994））；每小时负担 = 1.0（假设 e1_activity_burden_per_hour）"
+   },
+   "unit": "registration"
+  },
+  {
+   "attributes": {
+    "activity_category": "Sports - Basketball",
+    "age_range": "Adult"
+   },
+   "availability": "available",
+   "category": "experience",
+   "duration": {
+    "kind": "one_time_experience",
+    "lasts_years": 0
+   },
+   "label": "Basketball - Open at Addams",
+   "opportunity_id": "chi.activity.591493",
+   "price": {
+    "amount": {
+     "amount": 5.59,
+     "numeraire": "USD_2024_LOCAL"
+    },
+    "billing": "one_time",
+    "per_unit": "registration"
+   },
+   "quality": "Sports - Basketball；Addams (Jane) Park；2026-10-26 当天",
+   "resource": {
+    "basis": "per_occurrence",
+    "burden_per_hour": 1.0,
+    "hours": 2.0,
+    "note": "一次活动的时段；负担是登记的 E1 合成设定",
+    "quantity_scales": true
+   },
+   "source": {
+    "geography_scope": "City of Chicago parks (within CBSA 16980)",
+    "inputs": [
+     "activities.chicago_parks.591493"
+    ],
+    "kind": "estimated",
+    "mapping_version": "e1_export_single_session_experience@1",
+    "observed_on": "2026-10-26",
+    "rule": "收费按 CPI-U 换到 2024 年当地价（cpi_u_period_conversion@1（2026-09 → 2024 年平均，×0.930994））；每小时负担 = 1.0（假设 e1_activity_burden_per_hour）"
+   },
+   "unit": "registration"
+  },
+  {
+   "attributes": {
+    "activity_category": "Sports - Basketball",
+    "age_range": "Adult"
+   },
+   "availability": "available",
+   "category": "experience",
+   "duration": {
+    "kind": "one_time_experience",
+    "lasts_years": 0
+   },
+   "label": "Basketball - Open at Addams",
+   "opportunity_id": "chi.activity.591501",
+   "price": {
+    "amount": {
+     "amount": 5.59,
+     "numeraire": "USD_2024_LOCAL"
+    },
+    "billing": "one_time",
+    "per_unit": "registration"
+   },
+   "quality": "Sports - Basketball；Addams (Jane) Park；2026-10-26 当天",
+   "resource": {
+    "basis": "per_occurrence",
+    "burden_per_hour": 1.0,
+    "hours": 2.0,
+    "note": "一次活动的时段；负担是登记的 E1 合成设定",
+    "quantity_scales": true
+   },
+   "source": {
+    "geography_scope": "City of Chicago parks (within CBSA 16980)",
+    "inputs": [
+     "activities.chicago_parks.591501"
+    ],
+    "kind": "estimated",
+    "mapping_version": "e1_export_single_session_experience@1",
+    "observed_on": "2026-10-26",
+    "rule": "收费按 CPI-U 换到 2024 年当地价（cpi_u_period_conversion@1（2026-09 → 2024 年平均，×0.930994））；每小时负担 = 1.0（假设 e1_activity_burden_per_hour）"
+   },
+   "unit": "registration"
+  },
+  {
+   "attributes": {
+    "activity_category": "Sports - Basketball",
+    "age_range": "Teen"
+   },
+   "availability": "available",
+   "category": "experience",
+   "duration": {
+    "kind": "one_time_experience",
+    "lasts_years": 0
+   },
+   "label": "Basketball - Open at Addams",
+   "opportunity_id": "chi.activity.591510",
+   "price": {
+    "amount": {
+     "amount": 5.59,
+     "numeraire": "USD_2024_LOCAL"
+    },
+    "billing": "one_time",
+    "per_unit": "registration"
+   },
+   "quality": "Sports - Basketball；Addams (Jane) Park；2026-10-24 当天",
+   "resource": {
+    "basis": "per_occurrence",
+    "burden_per_hour": 1.0,
+    "hours": 1.0,
+    "note": "一次活动的时段；负担是登记的 E1 合成设定",
+    "quantity_scales": true
+   },
+   "source": {
+    "geography_scope": "City of Chicago parks (within CBSA 16980)",
+    "inputs": [
+     "activities.chicago_parks.591510"
+    ],
+    "kind": "estimated",
+    "mapping_version": "e1_export_single_session_experience@1",
+    "observed_on": "2026-10-24",
+    "rule": "收费按 CPI-U 换到 2024 年当地价（cpi_u_period_conversion@1（2026-09 → 2024 年平均，×0.930994））；每小时负担 = 1.0（假设 e1_activity_burden_per_hour）"
+   },
+   "unit": "registration"
+  },
+  {
+   "attributes": {
+    "activity_category": "Sports - Basketball",
+    "age_range": "Adult"
+   },
+   "availability": "available",
+   "category": "experience",
+   "duration": {
+    "kind": "one_time_experience",
+    "lasts_years": 0
+   },
+   "label": "Basketball - Open at Addams",
+   "opportunity_id": "chi.activity.591518",
+   "price": {
+    "amount": {
+     "amount": 5.59,
+     "numeraire": "USD_2024_LOCAL"
+    },
+    "billing": "one_time",
+    "per_unit": "registration"
+   },
+   "quality": "Sports - Basketball；Addams (Jane) Park；2026-10-22 当天",
+   "resource": {
+    "basis": "per_occurrence",
+    "burden_per_hour": 1.0,
+    "hours": 2.0,
+    "note": "一次活动的时段；负担是登记的 E1 合成设定",
+    "quantity_scales": true
+   },
+   "source": {
+    "geography_scope": "City of Chicago parks (within CBSA 16980)",
+    "inputs": [
+     "activities.chicago_parks.591518"
+    ],
+    "kind": "estimated",
+    "mapping_version": "e1_export_single_session_experience@1",
+    "observed_on": "2026-10-22",
+    "rule": "收费按 CPI-U 换到 2024 年当地价（cpi_u_period_conversion@1（2026-09 → 2024 年平均，×0.930994））；每小时负担 = 1.0（假设 e1_activity_burden_per_hour）"
+   },
+   "unit": "registration"
+  },
+  {
+   "attributes": {
+    "activity_category": "Sports - Basketball",
+    "age_range": "Adult"
+   },
+   "availability": "available",
+   "category": "experience",
+   "duration": {
+    "kind": "one_time_experience",
+    "lasts_years": 0
+   },
+   "label": "Basketball - Open at Addams",
+   "opportunity_id": "chi.activity.591534",
+   "price": {
+    "amount": {
+     "amount": 5.59,
+     "numeraire": "USD_2024_LOCAL"
+    },
+    "billing": "one_time",
+    "per_unit": "registration"
+   },
+   "quality": "Sports - Basketball；Addams (Jane) Park；2026-10-21 当天",
+   "resource": {
+    "basis": "per_occurrence",
+    "burden_per_hour": 1.0,
+    "hours": 2.0,
+    "note": "一次活动的时段；负担是登记的 E1 合成设定",
+    "quantity_scales": true
+   },
+   "source": {
+    "geography_scope": "City of Chicago parks (within CBSA 16980)",
+    "inputs": [
+     "activities.chicago_parks.591534"
+    ],
+    "kind": "estimated",
+    "mapping_version": "e1_export_single_session_experience@1",
+    "observed_on": "2026-10-21",
+    "rule": "收费按 CPI-U 换到 2024 年当地价（cpi_u_period_conversion@1（2026-09 → 2024 年平均，×0.930994））；每小时负担 = 1.0（假设 e1_activity_burden_per_hour）"
+   },
+   "unit": "registration"
+  },
+  {
+   "attributes": {
+    "activity_category": "Sports - Pickleball",
+    "age_range": "Adult"
+   },
+   "availability": "available",
+   "category": "experience",
+   "duration": {
+    "kind": "one_time_experience",
+    "lasts_years": 0
+   },
+   "label": "Pickleball - Open at Addams",
+   "opportunity_id": "chi.activity.591621",
+   "price": {
+    "amount": {
+     "amount": 5.59,
+     "numeraire": "USD_2024_LOCAL"
+    },
+    "billing": "one_time",
+    "per_unit": "registration"
+   },
+   "quality": "Sports - Pickleball；Addams (Jane) Park；2026-10-22 当天",
+   "resource": {
+    "basis": "per_occurrence",
+    "burden_per_hour": 1.0,
+    "hours": 2.0,
+    "note": "一次活动的时段；负担是登记的 E1 合成设定",
+    "quantity_scales": true
+   },
+   "source": {
+    "geography_scope": "City of Chicago parks (within CBSA 16980)",
+    "inputs": [
+     "activities.chicago_parks.591621"
+    ],
+    "kind": "estimated",
+    "mapping_version": "e1_export_single_session_experience@1",
+    "observed_on": "2026-10-22",
+    "rule": "收费按 CPI-U 换到 2024 年当地价（cpi_u_period_conversion@1（2026-09 → 2024 年平均，×0.930994））；每小时负担 = 1.0（假设 e1_activity_burden_per_hour）"
+   },
+   "unit": "registration"
+  }
+ ],
+ "summary": {
+  "by_status": {
+   "compilable": 773,
+   "needs_e1_extension": 80550,
+   "not_compilable": 3993
+  },
+  "compiled": 773,
+  "failed": 0
+ },
+ "version": "e1-export-v1"
+}
