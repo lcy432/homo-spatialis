@@ -214,4 +214,4 @@ uv run python scripts/intake_data.py lineage housing.b.16980.1703160.1.q2
 uv run python scripts/intake_fixtures.py
 ```
 
-冻结库（SQLite，约 300 MB）只在本机；仓库里是它的清单与报告（`data/frozen/intake/us-v1/`：构建身份、各阶段身份、每份原始文件的 SHA-256、计数、覆盖矩阵、映射诊断、菜单索引）。同样的原始文件与代码重建应当得到同一个构建身份。
+冻结库（SQLite，约 690 MB）只在本机；仓库里是它的清单与报告（`data/frozen/intake/us-v1/`：构建身份、各阶段身份、每份原始文件的 SHA-256、计数、覆盖矩阵、映射诊断、菜单索引）。同样的原始文件与代码重建应当得到同一个构建身份。
