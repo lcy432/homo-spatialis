@@ -303,7 +303,8 @@ def run_preflight(
         planner=_planner(pack, calls),
         binding=binding,
         issues=tuple(compiled.issues) + tuple(g for c in cities for g in c.data_gaps),
-        scope_zh=tuple(world.scope["数据与参数"]) + pack.body.limits,
+        # 收尾 R7：这次按什么个性化、哪些没有（未答、暂不确定、没有固定爱好、通用评价分开写）
+        scope_zh=tuple(world.scope["数据与参数"]) + pack.body.limits + confirmed.interests.scope_zh,
     )
     unsealed = ProductPreflight.model_construct(**fields, preflight_fingerprint="0" * 64)
     pre = ProductPreflight(**fields, preflight_fingerprint=content_fingerprint(unsealed.content()))

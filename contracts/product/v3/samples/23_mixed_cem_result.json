@@ -611,7 +611,7 @@
     "clone_ref": "u503.m52.r0",
     "event_chain": [],
     "explanation": {
-     "audit_ref": "run:run-e3a-4677dc562ec61ee7 clone:u503.m52.r0 record:progress.json",
+     "audit_ref": "run:run-e3a-f843e7d7f0e7a6dc clone:u503.m52.r0 record:progress.json",
      "category": "plan_or_execution_incomplete",
      "impact_zh": "不进完成者平均；城市的模拟缺失范围把它当作未知（0 到 1 之间都保留），不写成生活出局",
      "next_action_zh": "这是规划或模拟的问题，不是生活出局；改进规划器或说明之后重跑",
@@ -804,13 +804,15 @@
   ],
   "confirmed": {
    "confirmed_id": "confirmed.draft.u503.r1",
-   "content_fingerprint": "63b62e2852002ee936efa383bab7b3239e927a1002a2f99f1400d6e2d0791120"
+   "content_fingerprint": "4b6eb503839b20bd5b784ba4d354f3b9f586114d2acad000154d1b62134abde0"
   },
   "evaluation_status": "generated",
   "limitations_zh": [
    "城市、报价、工资、税、疾病与治疗全部是合成设定；结果不排序真实城市，也不是现实推荐",
    "离线规划器是可控的 mock，不代表真实大语言模型的能力或偏好理解",
    "问卷文案与参考改善范围是暂定稿，没有做认知访谈与量表验证",
+   "休闲兴趣：你没有回答，本次不按具体兴趣个性化（按中性规则评价）",
+   "口味与菜系：你没有回答，本次不按具体菜系个性化（只看新鲜餐）",
    "选项目录覆盖只说明声明范围内调查过的候选资料齐不齐，不保证穷尽整个城市市场",
    "结果只给用户看，不回灌给仍在生活中的分身"
   ],
@@ -863,7 +865,7 @@
    "planner_kind": "mock"
   },
   "preflight": {
-   "preflight_fingerprint": "55a9fb30c0819cc52c7c4c82d72c4feb12c7c3b444a57b3956b5bea773c55dfd",
+   "preflight_fingerprint": "770cbd7edcc751f63dddc09511fff9cbd68a7764ce3005a8e497b2d6234a87d3",
    "preflight_id": "preflight.confirmed.draft.u503.r1"
   },
   "reading_guide_zh": [
@@ -877,9 +879,9 @@
    "分数是当前合成模型下、按你确认的陈述偏好计算的结果；小数末位的差异不构成可靠的排序"
   ],
   "real_model_calls": 0,
-  "result_fingerprint": "d3428b6a241ad4b78dcb19d5d89fa48969fd17eb7ad0d8fe6f024c252817a8b5",
-  "result_id": "result.run-e3a-4677dc562ec61ee7",
-  "run_id": "run-e3a-4677dc562ec61ee7",
+  "result_fingerprint": "3a4a0b4ca0a10efc39345057638d14802e86aa6826f4a04670ab06bd3b732315",
+  "result_id": "result.run-e3a-f843e7d7f0e7a6dc",
+  "run_id": "run-e3a-f843e7d7f0e7a6dc",
   "run_stage": "completed",
   "sources_zh": [
    "生活事实：E1 结算记录（钱、岗位、住房、食品、服务月份）与月度资源账（本人家务小时）",

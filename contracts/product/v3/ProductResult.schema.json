@@ -355,6 +355,14 @@
      ],
      "default": null
     },
+    "valuation_scope": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/ValuationScopeNote"
+     },
+     "title": "Valuation Scope",
+     "type": "array"
+    },
     "years": {
      "default": [],
      "items": {
@@ -1120,6 +1128,57 @@
     "note"
    ],
    "title": "SampleLabel",
+   "type": "object"
+  },
+  "ValuationScopeNote": {
+   "additionalProperties": false,
+   "description": "期末估值的范围说明（DECISIONS/0041 R8）：期末持有的一件装备，参考模板有没有考虑它的用途。公开的安全投影：只有物品、\n能力键、剩余月数与固定写法的说明，没有参数、方案比较或未来事件。“模板没有考虑”不是“装备没有价值”。",
+   "properties": {
+    "capabilities": {
+     "items": {
+      "type": "string"
+     },
+     "minItems": 1,
+     "title": "Capabilities",
+     "type": "array"
+    },
+    "kind": {
+     "enum": [
+      "equipment_use_valued",
+      "equipment_use_not_in_templates"
+     ],
+     "title": "Kind",
+     "type": "string"
+    },
+    "label": {
+     "title": "Label",
+     "type": "string"
+    },
+    "months_left": {
+     "minimum": 1,
+     "title": "Months Left",
+     "type": "integer"
+    },
+    "opportunity_id": {
+     "title": "Opportunity Id",
+     "type": "string"
+    },
+    "text_zh": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Text Zh",
+     "type": "string"
+    }
+   },
+   "required": [
+    "kind",
+    "opportunity_id",
+    "label",
+    "capabilities",
+    "months_left",
+    "text_zh"
+   ],
+   "title": "ValuationScopeNote",
    "type": "object"
   },
   "YearFacts": {

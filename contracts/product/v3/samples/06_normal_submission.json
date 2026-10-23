@@ -4,7 +4,7 @@
  "payload": {
   "confirmed": {
    "confirmed_id": "confirmed.draft.u501.r1",
-   "content_fingerprint": "9d5188bb6d08a214ad924672da99e79ea66dbf11e8aa39a3116e395472a35f8d"
+   "content_fingerprint": "cbdb1aecb05c1980b768a47c6669a6376e99997b43c3e023473e620861e95ceb"
   },
   "idempotency_key": "idem-u501-normal",
   "meta": {
@@ -27,7 +27,7 @@
    "vocabulary_version": "e3a-vocabulary-v2"
   },
   "preflight": {
-   "preflight_fingerprint": "5cc1e5b2e0fa40b9581e833f3d7f0a9ca1ec32353f0bfb68db3a395df14599b4",
+   "preflight_fingerprint": "ab489ae641f95cdbb79a059075d1ef282fbe4e846fd1f77064a39f51de0d13e6",
    "preflight_id": "preflight.confirmed.draft.u501.r1"
   }
  }

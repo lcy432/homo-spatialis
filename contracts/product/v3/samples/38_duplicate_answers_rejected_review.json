@@ -330,6 +330,7 @@
    "status": "explicit"
   },
   "pending_confirmations": [
+   "ack:interests_not_personalized",
    "ack:standard_start"
   ],
   "review_id": "review.draft.u511.duplicates.r1",

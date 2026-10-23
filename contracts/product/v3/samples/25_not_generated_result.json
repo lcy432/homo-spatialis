@@ -7,13 +7,15 @@
   "comparisons": [],
   "confirmed": {
    "confirmed_id": "confirmed.draft.u506.r1",
-   "content_fingerprint": "237cc30693bff5b122dd2c244ee6b1023be8c8a3642e82afea5fa59eed20ca43"
+   "content_fingerprint": "0407b3ec9c78800564f9fec84e9f14493ca2b472fb87036088db7f06f56984e2"
   },
   "evaluation_status": "not_generated",
   "limitations_zh": [
    "城市、报价、工资、税、疾病与治疗全部是合成设定；结果不排序真实城市，也不是现实推荐",
    "离线规划器是可控的 mock，不代表真实大语言模型的能力或偏好理解",
    "问卷文案与参考改善范围是暂定稿，没有做认知访谈与量表验证",
+   "休闲兴趣：你没有回答，本次不按具体兴趣个性化（按中性规则评价）",
+   "口味与菜系：你没有回答，本次不按具体菜系个性化（只看新鲜餐）",
    "选项目录覆盖只说明声明范围内调查过的候选资料齐不齐，不保证穷尽整个城市市场",
    "结果只给用户看，不回灌给仍在生活中的分身"
   ],
@@ -66,7 +68,7 @@
    "planner_kind": "mock"
   },
   "preflight": {
-   "preflight_fingerprint": "dc5be60bf9c35ed60d579fd10ab7c655e48ce7838ec6c6eb9cf9e8a8a0be7593",
+   "preflight_fingerprint": "f93e2cd0111cb72c062df808ae48e3117031e55215d913a7aab39726c1d8e877",
    "preflight_id": "preflight.confirmed.draft.u506.r1"
   },
   "reading_guide_zh": [
@@ -80,9 +82,9 @@
    "分数是当前合成模型下、按你确认的陈述偏好计算的结果；小数末位的差异不构成可靠的排序"
   ],
   "real_model_calls": 0,
-  "result_fingerprint": "3a43ed11e64334dbcf08c0307b43903c43b0642753cbe0b2c1a71bf52065f199",
-  "result_id": "result.run-e3a-e48fe5ade165dfe6",
-  "run_id": "run-e3a-e48fe5ade165dfe6",
+  "result_fingerprint": "7f5d86bf5ea8526fef96334d6b327bdb0352bfc00f5edc07e81edcb14b67ebd3",
+  "result_id": "result.run-e3a-de1f7b43dad58aa2",
+  "run_id": "run-e3a-de1f7b43dad58aa2",
   "run_stage": "interrupted",
   "sources_zh": [
    "生活事实：E1 结算记录（钱、岗位、住房、食品、服务月份）与月度资源账（本人家务小时）",

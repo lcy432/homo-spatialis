@@ -4,13 +4,13 @@
  "payload": {
   "binding": {
    "compiled_inputs": {
-    "life_input": "6d59b6b640c492af9022677ee47ad538fb52f4381e0127acbe640a6629180d31",
+    "life_input": "024a3b7e6085b0ff4ab872a846741b6b62bccb1eae4138fcac78c9d15ab0fbeb",
     "roster": "780f9aa813b4a76aa1da6cbbb87d46a5b1d29b8b8cf5367b48529591e8a20a85",
     "run_config": "d6c9db72233436ce8671b1411e2ea9671921459dd5cf144a58be4a47238f1035",
     "scoring_config": "84d9ffc3cf8f6c1c3de23291abed3e8a4ceb612e2d34b146202125116ced2695"
    },
    "evaluation_spec_id": "eval.e1-life.main",
-   "identities_fingerprint": "b9bd97f09a0d37f77a861eadf3584e3be5e69855f22d7ea262866c0ce2131934",
+   "identities_fingerprint": "7ff3f63f4a9bbb7d60ad211a2fe02334ae2299e5e7cb3f5f5e9f2b6c6f9b3324",
    "planner_id": "mock.rules.e3a-product",
    "planner_kind": "mock",
    "prompt_template": "e3a-product-prompt-v2",
@@ -117,7 +117,7 @@
   "clones_per_city": 1,
   "confirmed": {
    "confirmed_id": "confirmed.draft.u510.unknown_safety.r1",
-   "content_fingerprint": "15d9bdc3110008f20de52fef35c0c910dbb2bea375f45f72c66f21e285b2fb2b"
+   "content_fingerprint": "671dfa286dc9dc078fbbb8f55b8f8d8e704d54320917dea19d452dd03a8eda21"
   },
   "executable": {
    "reasons": [
@@ -169,7 +169,7 @@
    "planner_id": "mock.rules.e3a-product",
    "planner_kind": "mock"
   },
-  "preflight_fingerprint": "03f741e05fc80b498dd5fccd9673eed7f0a47d9db40c72dcba7f66de6d1ad4e2",
+  "preflight_fingerprint": "e9cba8d5f2bc2f3aed5fdfcf82809216e4fa19a90f0f052a1438cc247f96055e",
   "preflight_id": "preflight.confirmed.draft.u510.unknown_safety.r1",
   "scope_zh": [
    "生活协议 life-v1-e3a-product（状态 synthetic_fixture_only）、评分 score.e1-life.explore（探索版）：城市、报价、工资、疾病、治疗与评分参数全部是合成设定，不是现实城市，不排序真实城市",
@@ -177,7 +177,9 @@
    "评价沿用 E1-6：完整者均值只用完整评价的分身；生活出局另报比例与事件链；模拟问题进入缺失范围（不是置信区间）",
    "城市、报价、工资、税、疾病与治疗全部是合成设定；结果不排序真实城市，也不是现实推荐",
    "离线规划器是可控的 mock，不代表真实大语言模型的能力或偏好理解",
-   "问卷文案与参考改善范围是暂定稿，没有做认知访谈与量表验证"
+   "问卷文案与参考改善范围是暂定稿，没有做认知访谈与量表验证",
+   "休闲兴趣：你没有回答，本次不按具体兴趣个性化（按中性规则评价）",
+   "口味与菜系：你没有回答，本次不按具体菜系个性化（只看新鲜餐）"
   ],
   "scorable": {
    "reasons": [

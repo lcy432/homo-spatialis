@@ -733,8 +733,12 @@ def generate_samples(out: Path, work: Path) -> None:
         (
             "41_interest_generic_review",
             "interest_generic",
-            {"leisure": {"state": "generic"}, "taste": {"state": "no_preference"}},
-            "选择通用休闲评价（城市有什么合适的就体验什么）、明确没有口味偏好：按中性规则评价；可以确认",
+            {
+                "leisure": {"state": "generic", "text": "喜欢冲浪"},
+                "taste": {"state": "no_preference"},
+            },
+            "只写了“喜欢冲浪”（本版不支持）并选择通用休闲评价、明确没有口味偏好：原文留存为本版未支持的描述；按中性规则评价；"
+            "可以确认，但要知悉“本次不按具体兴趣或口味个性化”",
         ),
         (
             "42_interest_unknown_review",
@@ -747,6 +751,12 @@ def generate_samples(out: Path, work: Path) -> None:
             "interest_unsupported",
             {"leisure": {"state": "described", "text": "冲浪", "selected": ["surfing"]}},
             "选中了词表外的类别：本版不支持，不能进入评分；审阅阻断",
+        ),
+        (
+            "49_interest_duplicate_review",
+            "interest_duplicate",
+            {"leisure": {"state": "described", "text": "吉他", "selected": ["music", "music"]}},
+            "同一兴趣选了两次：审阅阶段就拒绝（不先确认成功、再在编译时失败），系统不替用户去重",
         ),
     )
     for name, case, kwargs, text in interest_cases:
@@ -788,9 +798,28 @@ def generate_samples(out: Path, work: Path) -> None:
         out,
         "48_life_item_compilation",
         "LifeItemCompilation",
-        "生活扩展候选的编译检查：川味家常方案、社区合唱、吉他可以编进 E1；只有食材价格的篮子（没有做饭时间）、带日期与年龄限制的公园课、"
-        "代替正餐的品鉴晚餐、寿命不明的球拍被拒；词表外的“高级水疗”本版未支持；报价未知的按摩是资料未知",
+        "生活扩展候选的编译检查（编译器 v2）：食品、装备、享受服务与免费合唱各有一项可以交给 E1；确定不可得的标为不可得；没有活动"
+        "事实的活动、标成食品方案的合唱、带年龄限制的活动、报价口径不对、类别没有声明、只有食材价格的篮子、调用方转来日期限制的公园课、"
+        "代替正餐的品鉴晚餐、寿命不明的球拍被拒；词表外的“高级水疗”本版未支持；报价未知的按摩与新鲜餐数未知的方案是资料未知",
         dump(sc.life_item_compilation(work / "life_items")),
+    )
+    from common.life_planning_contracts import MockScript
+
+    hobby = sc.closed_loop(
+        work / "hobby_gear",
+        "hobby_gear",
+        person="u512",
+        origin="controlled_fixture",
+        note="受控夹具：mock 在 K51 分身第 3 年第 1 月买下目录里的爱好装备（吉他、网球拍）",
+        scripts=(MockScript(clone_id="u512.k51.r0", behavior="buy_hobby_gear", years=(3,)),),
+    )
+    _sample_file(
+        out,
+        "50_valuation_scope_result",
+        "ProductResult",
+        "期末估值的范围说明：K51 分身期末持有吉他与网球拍；参考模板按能力继续安排音乐练习（吉他），但没有考虑网球的用途——说明是"
+        "参考模板的范围限制，不是装备没有价值；V 的算法与 C / E / M 分类不变",
+        dump(hobby.result),
     )
     print(f"写出 {len(list(out.glob('*.json')))} 份样例到 {out}")
 

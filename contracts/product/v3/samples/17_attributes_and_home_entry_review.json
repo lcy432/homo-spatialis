@@ -316,6 +316,7 @@
    "ack:retained:pref.brand",
    "ack:retained:pref.cuisine",
    "ack:retained:pref.no_strangers",
+   "ack:interests_not_personalized",
    "ack:standard_start"
   ],
   "review_id": "review.draft.u501.attributes.r1",

@@ -742,14 +742,24 @@ class ConfirmedInterests(ProductModel):
     """确认后的兴趣与口味（DECISIONS/0041）。只有 ``confirmed`` 带类别；其余状态分开保存、都按中性规则评分。
 
     类别只进入共同、有限的匹配规则（系数是公开登记的模型假设，不是对个人效用的测量）；不改变六维点数、现金、资格或硬要求。
-    没认出的文字原样保留在 ``unrecognized_text``（本版未支持），不交给评分。"""
+    用户写的原文不管选了哪种作答状态都原样保留（``leisure_text`` / ``taste_text``）；没认出的片段另列在 ``unrecognized_text``
+    （本版未支持），不交给评分。``scope_zh`` 逐项说明这次按什么个性化、哪些没有个性化（未答、暂不确定、没有固定爱好、通用评价
+    分开写，不宣称已经个性化）。"""
 
     leisure_status: Literal["unanswered", "unsure", "no_fixed_hobby", "generic", "confirmed"]
     leisure_categories: tuple[str, ...] = ()
     taste_status: Literal["unanswered", "unsure", "no_preference", "confirmed"]
     cuisines: tuple[str, ...] = ()
+    leisure_text: str | None = Field(default=None, max_length=300)
+    taste_text: str | None = Field(default=None, max_length=300)
     unrecognized_text: tuple[str, ...] = ()
+    scope_zh: tuple[str, ...] = Field(min_length=2)
     matching_note_zh: str = Field(min_length=1, max_length=400)
+
+    @property
+    def personalized(self) -> bool:
+        """休闲兴趣与口味都按用户确认的类别个性化了吗。"""
+        return self.leisure_status == "confirmed" and self.taste_status == "confirmed"
 
     @model_validator(mode="after")
     def _shape(self) -> ConfirmedInterests:
@@ -757,6 +767,10 @@ class ConfirmedInterests(ProductModel):
             raise ValueError("只有确认的休闲兴趣才带类别")
         if (self.taste_status == "confirmed") != bool(self.cuisines):
             raise ValueError("只有确认的口味才带菜系")
+        for name in ("leisure_categories", "cuisines"):
+            seq = getattr(self, name)
+            if len(set(seq)) != len(seq):
+                raise ValueError(f"{name} 重复：审阅阶段就该拒绝")
         return self
 
 
@@ -1079,6 +1093,18 @@ class RequirementLine(ProductModel):
     months_not_lived: int
 
 
+class ValuationScopeNote(ProductModel):
+    """期末估值的范围说明（DECISIONS/0041 R8）：期末持有的一件装备，参考模板有没有考虑它的用途。公开的安全投影：只有物品、
+    能力键、剩余月数与固定写法的说明，没有参数、方案比较或未来事件。“模板没有考虑”不是“装备没有价值”。"""
+
+    kind: Literal["equipment_use_valued", "equipment_use_not_in_templates"]
+    opportunity_id: str
+    label: str
+    capabilities: tuple[str, ...] = Field(min_length=1)
+    months_left: Annotated[int, Field(ge=1)]
+    text_zh: str = Field(min_length=1, max_length=300)
+
+
 class CloneResult(ProductModel):
     """一个分身：C / E / M 分类与原因、L / V / J（精确值与显示值）、事件链与硬要求核验、生活事实。"""
 
@@ -1100,6 +1126,10 @@ class CloneResult(ProductModel):
     event_chain: tuple[str, ...] = ()
     hard_requirements: tuple[RequirementLine, ...] = ()
     years: tuple[YearFacts, ...] = ()
+    #: 期末估值的范围说明（收尾 R8）：期末持有的装备，参考模板考虑了哪些用途、哪些没有考虑。没有时不序列化。
+    valuation_scope: tuple[ValuationScopeNote, ...] = Field(
+        default=(), exclude_if=lambda v: v == ()
+    )
 
 
 class MissingReasonLine(ProductModel):
@@ -1419,18 +1449,18 @@ class OptionInventoryCoverage(ProductModel):
 # ==========================================================================
 
 
-#: 消息名 → 类。``scripts/product_e3a.py export-schema`` 按这份清单导出，``check-schema`` 按它核对。
 class LifeItemVerdict(ProductModel):
-    """一项生活扩展候选（完整食品方案、休闲活动、装备、享受型用品或服务）能不能编进 E1（DECISIONS/0041）。
+    """一项生活扩展候选（完整食品方案、休闲活动、装备、享受型用品或服务）能不能交给 E1 执行（DECISIONS/0041）。
 
-    ``executable``：E1 契约与词表都接受；``rejected``：缺必需的事实或违反规则（例如没有做饭时间、带日期或年龄限制、代替正餐的
-    套餐、寿命不明）；``unsupported``：用了本版词表没有的类别或功能；``data_unknown``：报价未知（不当零价，也不当可得）。
-    原因是固定写法或契约的拒绝说明，不含本机路径。"""
+    ``executable``：放进这座城目录的副本之后，E1 的契约、目录、跨对象与可结算检查都接受，种类与 E1 的执行角色一致；
+    ``rejected``：缺必需的事实或违反规则（例如没有做饭时间、种类与事实对不上、带日期或年龄限制、代替正餐的套餐、寿命不明、
+    金额口径不对、类别没有声明）；``unavailable``：确定不可得（保留记录，不能执行）；``unsupported``：用了本版词表没有的类别或
+    功能；``data_unknown``：报价或评分要读的事实未知（不当零价，也不当已知）。原因是固定写法或 E1 的拒绝说明，不含本机路径。"""
 
     candidate_id: Annotated[str, Field(pattern=r"^[a-z0-9][a-z0-9_.\-]{0,79}$")]
     kind: Literal["food_plan", "activity", "equipment", "enjoyment"]
     label: str = Field(min_length=1, max_length=120)
-    status: Literal["executable", "rejected", "unsupported", "data_unknown"]
+    status: Literal["executable", "rejected", "unavailable", "unsupported", "data_unknown"]
     reasons_zh: tuple[Annotated[str, Field(max_length=400)], ...] = ()
 
     @model_validator(mode="after")
@@ -1452,6 +1482,7 @@ class LifeItemCompilation(ProductModel):
     compilation_fingerprint: Sha256
 
 
+#: 消息名 → 类。``scripts/product_e3a.py export-schema`` 按这份清单导出，``check-schema`` 按它核对。
 PRODUCT_MESSAGES: dict[str, type[ProductModel]] = {
     "ProductCapabilities": ProductCapabilities,
     "UserInputDraft": UserInputDraft,

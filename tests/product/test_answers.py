@@ -34,6 +34,10 @@ def pack(tmp_path_factory) -> DataPack:
         return load_pack()
 
 
+#: 默认草稿要知悉的两项：没有按具体兴趣或口味个性化（收尾 R7）与标准开局
+ACKS = ("ack:interests_not_personalized", "ack:standard_start")
+
+
 def codes(review) -> list[str]:
     return [i.code for i in review.issues]
 
@@ -42,10 +46,11 @@ def lines(review, which="six_dimensions"):
     return {ln.key: ln for ln in getattr(review, which).lines}
 
 
-def test_normal_draft_is_confirmable_and_only_needs_the_standard_start_acknowledgement(pack):
+def test_normal_draft_is_confirmable_and_needs_the_standard_acknowledgements(pack):
+    """默认草稿没有回答兴趣与口味：可以确认，但要知悉“本次不按具体兴趣或口味个性化”与标准开局（收尾 R7）。"""
     review = review_draft(pack, make_draft(pack))
     assert review.confirmable and codes(review) == []
-    assert review.pending_confirmations == ("ack:standard_start",)
+    assert review.pending_confirmations == ("ack:interests_not_personalized", "ack:standard_start")
     assert review.six_dimensions.total.exact == "100"
     assert review.occupation.status == "explicit"
     assert review.money.converted.amount_minor == 300000
@@ -302,7 +307,7 @@ def test_attribute_preferences_are_retained_and_an_unenforceable_hard_requiremen
         review.pending_confirmations
     )
     with pytest.raises(ConfirmationRefusedError):  # 没有知悉就不能确认
-        confirm_profile(pack, draft, person_ref="u1", acknowledged=("ack:standard_start",))
+        confirm_profile(pack, draft, person_ref="u1", acknowledged=ACKS)
     confirmed = confirm_profile(
         pack, draft, person_ref="u1", acknowledged=review.pending_confirmations
     )
@@ -317,7 +322,7 @@ def test_attribute_preferences_are_retained_and_an_unenforceable_hard_requiremen
     assert (
         confirmed.six_dimensions.points
         == confirm_profile(
-            pack, make_draft(pack), person_ref="u1", acknowledged=("ack:standard_start",)
+            pack, make_draft(pack), person_ref="u1", acknowledged=ACKS
         ).six_dimensions.points
     )
 
@@ -336,7 +341,7 @@ def test_unsupported_hard_requirement_text_is_retained(pack):
 
 def test_editing_an_answer_invalidates_the_confirmation_and_tampering_is_detected(pack):
     draft = make_draft(pack)
-    confirmed = confirm_profile(pack, draft, person_ref="u1", acknowledged=("ack:standard_start",))
+    confirmed = confirm_profile(pack, draft, person_ref="u1", acknowledged=ACKS)
     assert confirmation_problems(pack, confirmed, draft) == []
     edited = make_draft(
         pack,
@@ -367,7 +372,7 @@ def test_editing_an_answer_invalidates_the_confirmation_and_tampering_is_detecte
 
 def test_changing_the_vocabulary_or_pack_invalidates_old_confirmations(pack):
     draft = make_draft(pack)
-    confirmed = confirm_profile(pack, draft, person_ref="u1", acknowledged=("ack:standard_start",))
+    confirmed = confirm_profile(pack, draft, person_ref="u1", acknowledged=ACKS)
     raw = copy.deepcopy(pack.raw)
     raw["pack"]["dimensions"][1]["definition"] = "改过的安全题干"
     changed = DataPack(raw, pack.path)
@@ -379,9 +384,7 @@ def test_changing_the_vocabulary_or_pack_invalidates_old_confirmations(pack):
 def test_confirmed_profile_compiles_to_a_six_dimension_profile_without_healthcare(pack, tmp_path):
     from product.compile import product_profile
 
-    confirmed = confirm_profile(
-        pack, make_draft(pack), person_ref="u1", acknowledged=("ack:standard_start",)
-    )
+    confirmed = confirm_profile(pack, make_draft(pack), person_ref="u1", acknowledged=ACKS)
     profile = product_profile(pack, confirmed, [])
     assert isinstance(profile, ProductLifeProfile)
     assert "healthcare" not in profile.dimension_points

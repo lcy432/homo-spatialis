@@ -6,7 +6,7 @@ v3 取代 [v2](../v2/README.md)（v2 目录原样保留为历史导出，界面�
 
 * `*.schema.json`：14 份消息的 JSON Schema，由唯一权威结构 [src/common/product_contracts.py](../../../src/common/product_contracts.py) 导出，**不要手改**。
 * `index.json`：结构版本、问卷 / 词表 / 健康问卷 / 转换版本，以及每份 schema 的 SHA-256。
-* `samples/`：49 份公共样例，每份是 `{"message", "description_zh", "payload"}`，`payload` 按对应 schema 校验。
+* `samples/`：51 份公共样例，每份是 `{"message", "description_zh", "payload"}`，`payload` 按对应 schema 校验。
 
 ```bash
 uv run python scripts/product_e3a.py check-schema
@@ -25,6 +25,10 @@ uv run python scripts/product_e3a.py check-schema
 
 | 样例 | 消息 | 演示 |
 |---|---|---|
-| 39–43 | ProfileReview | 兴趣与口味：确认（含没认出与有歧义的片段、品牌只留存）、未答、通用评价、没认出、词表外 |
+| 39–43 | ProfileReview | 兴趣与口味：确认（含没认出与有歧义的片段、品牌只留存）、未答、通用评价（只写了本版不支持的“喜欢冲浪”，原文留存）、没认出、词表外 |
 | 44–47 | YearFacts | 买到并当月练琴、买了没练、生病取消与暂停 + 网球套餐 + 没有吉他练不成、年初旧吉他到期 |
-| 48 | LifeItemCompilation | 生活扩展候选的编译检查：可执行、拒绝、本版未支持、资料未知 |
+| 48 | LifeItemCompilation | 生活扩展候选的编译检查（v2）：可执行、拒绝、不可得、本版未支持、资料未知 |
+| 49 | ProfileReview | 同一兴趣选了两次：审阅阶段拒绝 |
+| 50 | ProductResult | 期末估值的范围说明：吉他按能力继续用，网球拍的用途参考模板没有考虑 |
+
+v3 在独立复核之前按收尾修复（ADR0041 收尾一节）修订过一次；界面层还没有读 v3，所以没有另开 v4。

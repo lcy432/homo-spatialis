@@ -1,5 +1,5 @@
 {
- "description_zh": "选择通用休闲评价（城市有什么合适的就体验什么）、明确没有口味偏好：按中性规则评价；可以确认",
+ "description_zh": "只写了“喜欢冲浪”（本版不支持）并选择通用休闲评价、明确没有口味偏好：原文留存为本版未支持的描述；按中性规则评价；可以确认，但要知悉“本次不按具体兴趣或口味个性化”",
  "message": "ProfileReview",
  "payload": {
   "abilities": [],
@@ -10,7 +10,7 @@
   ],
   "confirmable": true,
   "draft": {
-   "draft_fingerprint": "635abf8023731c1f87017a9442025f3b8d543af0d5c349ea3675b882615074c4",
+   "draft_fingerprint": "01ae341250f6a4af51c55ed31f93a4a317a0c66152416c9fbbeee0d69354d383",
    "draft_id": "draft.u501.interest_generic",
    "revision": 1
   },
@@ -162,7 +162,7 @@
     "execution_guaranteed": null,
     "item": "leisure_interest",
     "label": "休闲兴趣",
-    "note": "休闲兴趣：选择通用休闲评价：城市有什么合适的就体验什么（按中性规则评价）",
+    "note": "休闲兴趣：选择通用休闲评价：城市有什么合适的就体验什么（按中性规则评价）；你写的原文原样保留为本版未支持的描述（没有采用为类别，不进评分）",
     "support": "partially_supported",
     "usage": [
      "planning"
@@ -184,12 +184,14 @@
   "leisure_interest": {
    "ambiguous": [],
    "candidates": [],
-   "message_zh": "休闲兴趣：选择通用休闲评价：城市有什么合适的就体验什么（按中性规则评价）",
+   "message_zh": "休闲兴趣：选择通用休闲评价：城市有什么合适的就体验什么（按中性规则评价）；你写的原文原样保留为本版未支持的描述（没有采用为类别，不进评分）",
    "selected": [],
    "state": "generic",
    "status": "confirmable",
-   "text": null,
-   "unrecognized": []
+   "text": "喜欢冲浪",
+   "unrecognized": [
+    "喜欢冲浪"
+   ]
   },
   "material": {
    "lines": [
@@ -303,6 +305,7 @@
    "status": "explicit"
   },
   "pending_confirmations": [
+   "ack:interests_not_personalized",
    "ack:standard_start"
   ],
   "review_id": "review.draft.u501.interest_generic.r1",

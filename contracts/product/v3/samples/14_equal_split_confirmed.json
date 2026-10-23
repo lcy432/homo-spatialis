@@ -10,7 +10,7 @@
   ],
   "confirmation_source": "user_form",
   "confirmed_id": "confirmed.draft.u501.equal_split.r1",
-  "content_fingerprint": "16c60ad09bbf8899a6d0f3cd56248f92baee898a6fe82c9d6b8b493bf267443f",
+  "content_fingerprint": "62c23966e3c5228eb93d1670a8a60e687444e9165e8be5326d1282813d893a54",
   "draft": {
    "draft_fingerprint": "068e4285e5a086997522a5c22c32710f7a397d66947b3bb2ba3257aa62b724ae",
    "draft_id": "draft.u501.equal_split",
@@ -60,8 +60,14 @@
    "cuisines": [],
    "leisure_categories": [],
    "leisure_status": "unanswered",
+   "leisure_text": null,
    "matching_note_zh": "确认的兴趣只在同样的实际参与时间下带来适度更高的满足（模型假设：多 50%，有上限）；确认的菜系只让实际吃到的合口味餐多计一点。 这些系数是公开登记的模型假设，不是对你个人的测量；不改变你的点数、现金或资格，也不让贵的东西自动更好",
+   "scope_zh": [
+    "休闲兴趣：你没有回答，本次不按具体兴趣个性化（按中性规则评价）",
+    "口味与菜系：你没有回答，本次不按具体菜系个性化（只看新鲜餐）"
+   ],
    "taste_status": "unanswered",
+   "taste_text": null,
    "unrecognized_text": []
   },
   "material": {

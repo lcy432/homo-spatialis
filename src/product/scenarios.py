@@ -981,8 +981,8 @@ def life_extension_year_facts(work: Path) -> dict[str, YearFacts]:
 
 
 def life_item_compilation(work: Path) -> Any:
-    """受控夹具（DECISIONS/0041）：生活扩展候选的编译检查。可执行的候选取自合成样例目录；被拒的候选按真实资料的典型缺口改写
-    （食材篮子没有做饭时间与新鲜餐数、活动带日期与年龄限制、代替正餐的品鉴套餐、寿命不明的装备、词表外的享受功能、报价未知）。"""
+    """受控夹具（DECISIONS/0041）：生活扩展候选的编译检查。通过的例子（食品、装备、享受服务、免费活动）取自合成样例目录、改了
+    编号；被拒或标为缺口的例子按独立审核的反例与真实资料的典型缺口改写（不是真实资料）。"""
     from product.life_items import LifeItemCandidate, compile_life_items
 
     s = preflight_only(work, "life_items", person="u508", hard_requirements=())
@@ -994,47 +994,125 @@ def life_item_compilation(work: Path) -> Any:
         catalog = bundle.catalog_for(K51)
         assert catalog is not None
 
-        def item(oid: str) -> dict[str, Any]:
+        def item(oid: str, new_id: str, **change: Any) -> dict[str, Any]:
             o = catalog.opportunity(oid)
             assert o is not None
-            return o.model_dump(mode="json")
+            data = o.model_dump(mode="json")
+            data["opportunity_id"] = new_id
+            data.update(change)
+            return data
 
-        basket = item("k51.food.sichuan_home")
-        basket["opportunity_id"] = "k51.food.basket_regional"
+        basket = item("k51.food.sichuan_home", "k51.food.basket_regional")
         for key in ("prep_hours_per_month", "dining_hours_per_month"):
             del basket["food_plan"][key]
-        tasting = item("k51.experience.cooking_class")
-        tasting["opportunity_id"] = "k51.experience.tasting_dinner"
+        fresh_unknown = item("k51.food.sichuan_home", "k51.food.sichuan_fresh_unknown")
+        fresh_unknown["food_plan"]["parts"][0]["fresh_meals_per_week"] = None
+        tasting = item("k51.experience.cooking_class", "k51.experience.tasting_dinner")
         tasting["activity"]["replaces_meals_per_session"] = 1
-        park = item("k51.experience.community_choir")
-        park["opportunity_id"] = "k51.experience.park_class"
-        gear = item("k51.durable.guitar")
-        gear["opportunity_id"] = "k51.durable.racket_unknown_life"
-        gear["duration"] = {"kind": "durable_good"}
-        gear["equipment"] = {"provides": ["racket_playable"], "note": "球拍；资料没有写能用几年"}
-        spa = item("k51.service.massage")
-        spa["opportunity_id"] = "k51.service.luxury_spa"
+        no_facts = item("k51.experience.gallery_tour", "k51.experience.gallery_no_facts")
+        del no_facts["activity"]
+        gear = item(
+            "k51.durable.guitar",
+            "k51.durable.racket_unknown_life",
+            duration={"kind": "durable_good"},
+            equipment={"provides": ["racket_playable"], "note": "球拍；资料没有写能用几年"},
+        )
+        spa = item("k51.service.massage", "k51.service.luxury_spa")
         spa["enjoyment"][0]["function"] = "luxury_spa"
-        unknown = item("k51.service.massage")
-        unknown["opportunity_id"] = "k51.service.massage_unknown_price"
-        unknown["availability"] = "unknown"
-        unknown["price"] = None
         candidates = (
+            # 通过的例子：每种一项（合唱免费，价格明确为 0）
             LifeItemCandidate(
-                "food.sichuan_home", "food_plan", "川味家常方案", item("k51.food.sichuan_home")
+                "food.sichuan_home",
+                "food_plan",
+                "川味家常方案",
+                item("k51.food.sichuan_home", "k51.food.sichuan_home_cand"),
             ),
             LifeItemCandidate(
-                "activity.choir", "activity", "社区合唱排练", item("k51.experience.community_choir")
+                "equipment.guitar",
+                "equipment",
+                "吉他",
+                item("k51.durable.guitar", "k51.durable.guitar_cand"),
             ),
-            LifeItemCandidate("equipment.guitar", "equipment", "吉他", item("k51.durable.guitar")),
+            LifeItemCandidate(
+                "enjoyment.massage",
+                "enjoyment",
+                "按摩（每月两次）",
+                item("k51.service.massage", "k51.service.massage_cand"),
+            ),
+            LifeItemCandidate(
+                "activity.choir",
+                "activity",
+                "社区合唱排练（免费）",
+                item("k51.experience.community_choir", "k51.experience.choir_cand"),
+            ),
+            # 独立审核的四个反例
+            LifeItemCandidate(
+                "activity.choir_unavailable",
+                "activity",
+                "社区合唱（本城确定没有）",
+                item(
+                    "k51.experience.community_choir",
+                    "k51.experience.choir_unavailable",
+                    availability="unavailable",
+                    price=None,
+                ),
+            ),
+            LifeItemCandidate(
+                "activity.no_facts", "activity", "美术馆导览（没有活动事实）", no_facts
+            ),
+            LifeItemCandidate(
+                "food.choir_mislabeled",
+                "food_plan",
+                "社区合唱（标成了食品方案）",
+                item("k51.experience.community_choir", "k51.experience.choir_as_food"),
+            ),
+            LifeItemCandidate(
+                "activity.age_limited",
+                "activity",
+                "少儿合唱（带年龄限制）",
+                item(
+                    "k51.experience.community_choir",
+                    "k51.experience.choir_kids",
+                    attributes={"age_range": "At least 6 but less than 12"},
+                ),
+            ),
+            # 绕不过 E1 的其他检查
+            LifeItemCandidate(
+                "food.wrong_currency",
+                "food_plan",
+                "川味家常方案（报价口径不对）",
+                item(
+                    "k51.food.sichuan_home",
+                    "k51.food.sichuan_wrong_currency",
+                    price={
+                        "amount": {"amount": 400, "numeraire": "USD_2023_LOCAL"},
+                        "billing": "per_month",
+                        "per_unit": "plan-month",
+                    },
+                ),
+            ),
+            LifeItemCandidate(
+                "activity.undeclared_category",
+                "activity",
+                "合唱（类别没有声明）",
+                item(
+                    "k51.experience.community_choir",
+                    "k51.experience.choir_mystery",
+                    category="mystery_class",
+                ),
+            ),
+            # 真实资料的典型缺口
             LifeItemCandidate(
                 "food.basket_regional", "food_plan", "地区食材篮子（只有食材价格）", basket
             ),
             LifeItemCandidate(
+                "food.fresh_unknown", "food_plan", "川味家常方案（新鲜餐数未知）", fresh_unknown
+            ),
+            LifeItemCandidate(
                 "activity.park_class",
                 "activity",
-                "公园活动课（有日期与年龄限制）",
-                park,
+                "公园活动课（调用方转来的日期与年龄限制）",
+                item("k51.experience.community_choir", "k51.experience.park_class"),
                 ("2025-06-02 至 2025-08-15，每周一 from 9 to 10", "Ages 6-12"),
             ),
             LifeItemCandidate(
@@ -1043,18 +1121,29 @@ def life_item_compilation(work: Path) -> Any:
             LifeItemCandidate("equipment.racket", "equipment", "球拍（寿命不明）", gear),
             LifeItemCandidate("enjoyment.luxury_spa", "enjoyment", "高级水疗", spa),
             LifeItemCandidate(
-                "enjoyment.massage_unknown", "enjoyment", "按摩（报价未知）", unknown
+                "enjoyment.massage_unknown",
+                "enjoyment",
+                "按摩（报价未知）",
+                item(
+                    "k51.service.massage",
+                    "k51.service.massage_unknown_price",
+                    availability="unknown",
+                    price=None,
+                ),
             ),
         )
         sample = label(
             "controlled_fixture",
             "product.scenarios.life_item_compilation",
-            "合成样例的候选与按真实资料典型缺口改写的候选（不是真实资料）",
+            "合成样例的候选与按审核反例、真实资料典型缺口改写的候选（不是真实资料）",
         )
         return compile_life_items(
             bundle,
             candidates,
             meta=s.pack.meta(sample),
             city_ref=K51,
-            scope_zh="生活扩展候选：完整食品方案、休闲活动、装备与享受型用品或服务；只检查能不能编进 E1，不补价格、寿命或时间",
+            scope_zh=(
+                "生活扩展候选：完整食品方案、休闲活动、装备与享受型用品或服务；检查能不能交给 E1 执行，不补价格、寿命、时间或限制；"
+                "只有受控样例，还没有接真实资料导出"
+            ),
         )

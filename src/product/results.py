@@ -46,6 +46,7 @@ from common.product_contracts import (
     RequirementLine,
     RequirementSummaryLine,
     SampleLabel,
+    ValuationScopeNote,
     YearFacts,
     content_fingerprint,
 )
@@ -284,7 +285,55 @@ def _months_text(months: tuple[int, ...]) -> str:
     return "、".join(ranges)
 
 
-def _clone(entry: EntryRecord, years: tuple[YearFacts, ...], run_id: str) -> CloneResult:
+def _valuation_scope(world: RunWorld, city: str, lives: Any) -> tuple[ValuationScopeNote, ...]:
+    """期末持有的装备：参考模板考虑了哪些用途、哪些没有（收尾 R8）。只读真实终态与评价规格；不改 V，也不把估值对象交出去。"""
+    from econ.life_terminal_value import equipment_valuation_scope
+
+    terminal = lives[-1].next_state if lives else None
+    spec = world.specs.get("arm.main")
+    catalog = world.bundle.catalog_for(city)
+    if terminal is None or terminal.status != "terminal" or spec is None or catalog is None:
+        return ()
+    out: list[ValuationScopeNote] = []
+    for s in equipment_valuation_scope(terminal, spec, catalog):
+        label = _label(world, city, s.opportunity_id)
+        if s.covered:
+            out.append(
+                ValuationScopeNote(
+                    kind="equipment_use_valued",
+                    opportunity_id=s.opportunity_id,
+                    label=label,
+                    capabilities=s.covered,
+                    months_left=s.months_left,
+                    text_zh=(
+                        f"期末持有的「{label}」还能用 {s.months_left} 个月：期末参考生活按它的能力（{'、'.join(s.covered)}）"
+                        "继续安排相应活动，剩余寿命内照用、不重复购买"
+                    ),
+                )
+            )
+        if s.uncovered:
+            out.append(
+                ValuationScopeNote(
+                    kind="equipment_use_not_in_templates",
+                    opportunity_id=s.opportunity_id,
+                    label=label,
+                    capabilities=s.uncovered,
+                    months_left=s.months_left,
+                    text_zh=(
+                        f"期末持有的「{label}」还能用 {s.months_left} 个月：参考模板没有考虑它的用途（{'、'.join(s.uncovered)}），"
+                        "期末估值没有计入这项用途——这是参考模板的范围限制，不是说这件装备没有价值"
+                    ),
+                )
+            )
+    return tuple(out)
+
+
+def _clone(
+    entry: EntryRecord,
+    years: tuple[YearFacts, ...],
+    run_id: str,
+    scope: tuple[ValuationScopeNote, ...] = (),
+) -> CloneResult:
     return CloneResult(
         clone_ref=entry.clone_id,
         city_ref=str(entry.city),
@@ -318,6 +367,7 @@ def _clone(entry: EntryRecord, years: tuple[YearFacts, ...], run_id: str) -> Clo
             for h in entry.hard_requirements
         ),
         years=years,
+        valuation_scope=scope,
     )
 
 
@@ -404,7 +454,8 @@ def project_result(
             years = tuple(
                 year_facts(world, str(e.city), r) for r in lives if r.settlement.outcome is not None
             )
-            clones.append(_clone(entry, years, outcome.run_id))
+            scope = _valuation_scope(world, str(e.city), lives)
+            clones.append(_clone(entry, years, outcome.run_id, scope))
         cities = [_city(world, cr) for cr in report.city_reports]
         comparisons = [
             ComparisonLine(
@@ -464,6 +515,7 @@ def project_result(
         reading_guide_zh=READING_GUIDE,
         limitations_zh=(
             *pack.body.limits,
+            *confirmed.interests.scope_zh,
             "选项目录覆盖只说明声明范围内调查过的候选资料齐不齐，不保证穷尽整个城市市场",
             "结果只给用户看，不回灌给仍在生活中的分身",
         ),

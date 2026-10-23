@@ -180,7 +180,7 @@
   },
   "ConfirmedInterests": {
    "additionalProperties": false,
-   "description": "确认后的兴趣与口味（DECISIONS/0041）。只有 ``confirmed`` 带类别；其余状态分开保存、都按中性规则评分。\n\n类别只进入共同、有限的匹配规则（系数是公开登记的模型假设，不是对个人效用的测量）；不改变六维点数、现金、资格或硬要求。\n没认出的文字原样保留在 ``unrecognized_text``（本版未支持），不交给评分。",
+   "description": "确认后的兴趣与口味（DECISIONS/0041）。只有 ``confirmed`` 带类别；其余状态分开保存、都按中性规则评分。\n\n类别只进入共同、有限的匹配规则（系数是公开登记的模型假设，不是对个人效用的测量）；不改变六维点数、现金、资格或硬要求。\n用户写的原文不管选了哪种作答状态都原样保留（``leisure_text`` / ``taste_text``）；没认出的片段另列在 ``unrecognized_text``\n（本版未支持），不交给评分。``scope_zh`` 逐项说明这次按什么个性化、哪些没有个性化（未答、暂不确定、没有固定爱好、通用评价\n分开写，不宣称已经个性化）。",
    "properties": {
     "cuisines": {
      "default": [],
@@ -209,11 +209,32 @@
      "title": "Leisure Status",
      "type": "string"
     },
+    "leisure_text": {
+     "anyOf": [
+      {
+       "maxLength": 300,
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Leisure Text"
+    },
     "matching_note_zh": {
      "maxLength": 400,
      "minLength": 1,
      "title": "Matching Note Zh",
      "type": "string"
+    },
+    "scope_zh": {
+     "items": {
+      "type": "string"
+     },
+     "minItems": 2,
+     "title": "Scope Zh",
+     "type": "array"
     },
     "taste_status": {
      "enum": [
@@ -224,6 +245,19 @@
      ],
      "title": "Taste Status",
      "type": "string"
+    },
+    "taste_text": {
+     "anyOf": [
+      {
+       "maxLength": 300,
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Taste Text"
     },
     "unrecognized_text": {
      "default": [],
@@ -237,6 +271,7 @@
    "required": [
     "leisure_status",
     "taste_status",
+    "scope_zh",
     "matching_note_zh"
    ],
    "title": "ConfirmedInterests",

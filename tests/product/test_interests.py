@@ -161,3 +161,107 @@ def test_material_is_four_items_and_old_confirmations_are_reviewed_again(pack):
         ),
     )
     assert not three.confirmable  # 旧的三项物质分配必须重新回答四项，不自动换算
+
+
+# --------------------------------------------------------------------------- 收尾 R7：原文留存、重复类别、未个性化的确认
+
+
+def test_r7_a_generic_choice_keeps_an_unsupported_hobby_as_original_text(pack):
+    """审核复现：只写“喜欢冲浪”再改选通用评价，原文被丢掉。现在原文留存为本版未支持的描述，明确接受通用评价后能完成确认。"""
+    draft = with_interests(pack, LeisureInterestAnswer(state="generic", text="喜欢冲浪"))
+    review = review_draft(pack, draft)
+    assert review.confirmable and review.leisure_interest.text == "喜欢冲浪"
+    assert review.leisure_interest.unrecognized == ("喜欢冲浪",)
+    assert "ack:interests_not_personalized" in review.pending_confirmations
+    with pytest.raises(ConfirmationRefusedError):  # 不知悉“本次不按具体兴趣个性化”就不能确认
+        confirm_profile(pack, draft, person_ref="u1", acknowledged=("ack:standard_start",))
+    confirmed = confirm_profile(
+        pack, draft, person_ref="u1", acknowledged=review.pending_confirmations
+    )
+    i = confirmed.interests
+    assert (i.leisure_status, i.leisure_text, i.unrecognized_text) == (
+        "generic",
+        "喜欢冲浪",
+        ("喜欢冲浪",),
+    )
+    assert not i.personalized and any("通用休闲评价" in s for s in i.scope_zh)
+    assert any("喜欢冲浪" in s for s in i.scope_zh)
+    profile = product_profile(pack, confirmed, [])
+    assert profile.leisure_interests == () and any(
+        "喜欢冲浪" in r for r in profile.unsupported_requests
+    )
+
+
+@pytest.mark.parametrize("state, selected", [("described", ("music",)), ("generic", ())])
+def test_r7_mixed_supported_and_unsupported_text_is_kept(pack, state, selected):
+    leisure = LeisureInterestAnswer(state=state, text="吉他和冲浪", selected=selected)
+    review, confirmed = confirm(pack, with_interests(pack, leisure))
+    assert confirmed.interests.leisure_text == "吉他和冲浪"
+    assert confirmed.interests.unrecognized_text == ("冲浪",)
+    assert confirmed.interests.leisure_categories == selected  # 没有选中就不采用候选
+    assert review.leisure_interest.candidates == ("music",)
+
+
+@pytest.mark.parametrize("kind", ["leisure", "taste"])
+def test_r7_a_repeated_category_is_refused_at_review_not_at_compile(pack, kind):
+    """审核复现：重复选中同一兴趣先确认成功、编译时才失败。现在审阅阶段就拒绝。"""
+    if kind == "leisure":
+        draft = with_interests(
+            pack, LeisureInterestAnswer(state="described", text="吉他", selected=("music", "music"))
+        )
+    else:
+        draft = with_interests(
+            pack, taste=TasteAnswer(state="described", text="川菜", selected=("sichuan", "sichuan"))
+        )
+    review = review_draft(pack, draft)
+    assert not review.confirmable
+    assert "interest_duplicate_selection" in [x.code for x in review.issues]
+    with pytest.raises(ConfirmationRefusedError):
+        confirm_profile(pack, draft, person_ref="u1", acknowledged=review.pending_confirmations)
+
+
+def test_r7_unanswered_and_an_explicit_generic_choice_stay_distinguishable(pack):
+    plain = review_draft(pack, with_interests(pack))
+    chosen = review_draft(pack, with_interests(pack, LeisureInterestAnswer(state="generic")))
+    assert plain.leisure_interest.message_zh != chosen.leisure_interest.message_zh
+    _, a = confirm(pack, with_interests(pack))
+    _, b = confirm(pack, with_interests(pack, LeisureInterestAnswer(state="generic")))
+    assert (a.interests.leisure_status, b.interests.leisure_status) == ("unanswered", "generic")
+    assert a.interests.scope_zh[0] != b.interests.scope_zh[0]
+    assert "没有回答" in a.interests.scope_zh[0] and "通用休闲评价" in b.interests.scope_zh[0]
+
+
+def test_r7_preflight_and_result_state_the_personalization_scope(tmp_path):
+    from product import scenarios as sc
+
+    s = sc.closed_loop(
+        tmp_path / "generic",
+        "generic_scope",
+        person="u511",
+        draft_kwargs={"leisure": {"state": "generic", "text": "喜欢冲浪"}},
+    )
+    assert s.result is not None and s.pre is not None
+    for lines in (s.pre.preflight.scope_zh, s.result.limitations_zh):
+        assert any("通用休闲评价" in x for x in lines)
+        assert any("口味与菜系：你没有回答" in x for x in lines)
+        assert any("喜欢冲浪" in x for x in lines)
+
+
+def test_r7_unknown_descriptions_change_no_points_cash_or_eligibility(pack):
+    _, plain = confirm(pack, with_interests(pack))
+    _, surfer = confirm(
+        pack, with_interests(pack, LeisureInterestAnswer(state="generic", text="喜欢冲浪"))
+    )
+    assert surfer.six_dimensions == plain.six_dimensions and surfer.material == plain.material
+    assert surfer.money == plain.money and surfer.hard_requirements == plain.hard_requirements
+    assert surfer.abilities == plain.abilities
+
+
+def test_r7_capability_texts_match_what_is_supported(pack):
+    from product.capabilities import build_capabilities
+
+    caps = build_capabilities(pack)
+    kinds = {a.kind: a for a in caps.attribute_kinds}
+    assert kinds["brand"].support == "unsupported" and "不交给分身" in kinds["brand"].note
+    assert kinds["cuisine"].support == "unsupported" and "口味与菜系" in kinds["cuisine"].note
+    assert {t.key for t in caps.interests.cuisines} == {"home_style", "sichuan", "italian"}

@@ -912,6 +912,10 @@ def review_draft(
                 note=r.message_zh[:300],
             )
         )
+    from product.interests import NOT_PERSONALIZED_ACK, needs_not_personalized_ack
+
+    if needs_not_personalized_ack(leisure_review, taste_review):
+        pending.append(NOT_PERSONALIZED_ACK)
     pending.append("ack:standard_start")
     confirmable = not any(i.severity == "error" for i in issues)
     if confirmable:
@@ -1193,7 +1197,13 @@ def confirm_profile(
         retained=tuple(retained),
         sources=sources,
         interests=confirmed_interests(
-            review.leisure_interest, review.taste, pack.body.interests.matching_note_zh
+            review.leisure_interest,
+            review.taste,
+            pack.body.interests.matching_note_zh,
+            {
+                "leisure": {t.key: t.label for t in pack.body.interests.leisure_categories},
+                "taste": {t.key: t.label for t in pack.body.interests.cuisines},
+            },
         ),
     )
     unsealed = ConfirmedProfile.model_construct(**fields, content_fingerprint="0" * 64)
@@ -1207,6 +1217,11 @@ def _ack_text(key: str) -> str:
         )
     if key.startswith("ack:retained:"):
         return f"陈述 {key.split(':', 2)[2]} 本版不评分、不保证执行，只留存原文"
+    if key == "ack:interests_not_personalized":
+        return (
+            "本次不按具体兴趣或口味个性化的部分按中性规则评价（未答、暂不确定、没有固定爱好或通用评价各自记下）；"
+            "写了但本版不支持的描述只留存原文"
+        )
     return key
 
 

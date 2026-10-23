@@ -1,11 +1,11 @@
 {
- "description_zh": "生活扩展候选的编译检查：川味家常方案、社区合唱、吉他可以编进 E1；只有食材价格的篮子（没有做饭时间）、带日期与年龄限制的公园课、代替正餐的品鉴晚餐、寿命不明的球拍被拒；词表外的“高级水疗”本版未支持；报价未知的按摩是资料未知",
+ "description_zh": "生活扩展候选的编译检查（编译器 v2）：食品、装备、享受服务与免费合唱各有一项可以交给 E1；确定不可得的标为不可得；没有活动事实的活动、标成食品方案的合唱、带年龄限制的活动、报价口径不对、类别没有声明、只有食材价格的篮子、调用方转来日期限制的公园课、代替正餐的品鉴晚餐、寿命不明的球拍被拒；词表外的“高级水疗”本版未支持；报价未知的按摩与新鲜餐数未知的方案是资料未知",
  "message": "LifeItemCompilation",
  "payload": {
   "city_ref": "US:SYNTH2026:K51",
-  "compilation_fingerprint": "efad6147985314d4ea31f7865662d4e087f7fd54c5fb9b4942568c8e98fb9313",
-  "compilation_id": "life-items.efad61479853",
-  "compiler_version": "e3-life-item-compiler-v1",
+  "compilation_fingerprint": "4a257e962ff4010841f91bba5236268a1712d1b3b53dfa4009e42f8e7e91533c",
+  "compilation_id": "life-items.4a257e962ff4",
+  "compiler_version": "e3-life-item-compiler-v2",
   "meta": {
    "conversion_version": "e3a-conversion-v2",
    "data_pack": {
@@ -17,7 +17,7 @@
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
    "questionnaire_version": "e3a-questionnaire-v0.2-draft",
    "sample": {
-    "note": "合成样例的候选与按真实资料典型缺口改写的候选（不是真实资料）",
+    "note": "合成样例的候选与按审核反例、真实资料典型缺口改写的候选（不是真实资料）",
     "origin": "controlled_fixture",
     "produced_by": "product.scenarios.life_item_compilation",
     "synthetic": true
@@ -25,7 +25,7 @@
    "schema_version": "e3a-product-schema-v3",
    "vocabulary_version": "e3a-vocabulary-v2"
   },
-  "scope_zh": "生活扩展候选：完整食品方案、休闲活动、装备与享受型用品或服务；只检查能不能编进 E1，不补价格、寿命或时间",
+  "scope_zh": "生活扩展候选：完整食品方案、休闲活动、装备与享受型用品或服务；检查能不能交给 E1 执行，不补价格、寿命、时间或限制；只有受控样例，还没有接真实资料导出",
   "verdicts": [
    {
     "candidate_id": "food.sichuan_home",
@@ -35,18 +35,80 @@
     "status": "executable"
    },
    {
-    "candidate_id": "activity.choir",
-    "kind": "activity",
-    "label": "社区合唱排练",
-    "reasons_zh": [],
-    "status": "executable"
-   },
-   {
     "candidate_id": "equipment.guitar",
     "kind": "equipment",
     "label": "吉他",
     "reasons_zh": [],
     "status": "executable"
+   },
+   {
+    "candidate_id": "enjoyment.massage",
+    "kind": "enjoyment",
+    "label": "按摩（每月两次）",
+    "reasons_zh": [],
+    "status": "executable"
+   },
+   {
+    "candidate_id": "activity.choir",
+    "kind": "activity",
+    "label": "社区合唱排练（免费）",
+    "reasons_zh": [],
+    "status": "executable"
+   },
+   {
+    "candidate_id": "activity.choir_unavailable",
+    "kind": "activity",
+    "label": "社区合唱（本城确定没有）",
+    "reasons_zh": [
+     "确定不可得：本城没有这一项（保留记录，不能执行，也不能补价格）"
+    ],
+    "status": "unavailable"
+   },
+   {
+    "candidate_id": "activity.no_facts",
+    "kind": "activity",
+    "label": "美术馆导览（没有活动事实）",
+    "reasons_zh": [
+     "标成休闲活动，却没有活动事实（参与小时、准备往返小时、类别）：E1 无法记录参与，也无法评价"
+    ],
+    "status": "rejected"
+   },
+   {
+    "candidate_id": "food.choir_mislabeled",
+    "kind": "food_plan",
+    "label": "社区合唱（标成了食品方案）",
+    "reasons_zh": [
+     "标成完整食品方案，却没有食品方案事实（组成、每周餐数、新鲜餐、菜系、做饭与外食小时）"
+    ],
+    "status": "rejected"
+   },
+   {
+    "candidate_id": "activity.age_limited",
+    "kind": "activity",
+    "label": "少儿合唱（带年龄限制）",
+    "reasons_zh": [
+     "带日期、年龄或资格限制：E1 的体验没有日期窗口、资格标签不求值，也不能删掉限制假装可执行",
+     "限制：attributes.age_range = 'At least 6 but less than 12'（年龄限制或是否限制未知）"
+    ],
+    "status": "rejected"
+   },
+   {
+    "candidate_id": "food.wrong_currency",
+    "kind": "food_plan",
+    "label": "川味家常方案（报价口径不对）",
+    "reasons_zh": [
+     "US:SYNTH2026:K51/k51.food.sichuan_wrong_currency: 金额口径 USD_2023_LOCAL 与目录口径 USD_2024_LOCAL 不一致——不同口径的钱不能进同一本账"
+    ],
+    "status": "rejected"
+   },
+   {
+    "candidate_id": "activity.undeclared_category",
+    "kind": "activity",
+    "label": "合唱（类别没有声明）",
+    "reasons_zh": [
+     "US:SYNTH2026:K51/k51.experience.choir_mystery: 类别 'mystery_class' 没有声明"
+    ],
+    "status": "rejected"
    },
    {
     "candidate_id": "food.basket_regional",
@@ -59,13 +121,22 @@
     "status": "rejected"
    },
    {
+    "candidate_id": "food.fresh_unknown",
+    "kind": "food_plan",
+    "label": "川味家常方案（新鲜餐数未知）",
+    "reasons_zh": [
+     "['home.fresh_meals_per_week'] 是资料未知：E1 能执行这份方案，但饮食生活评分会是未知（不当 0）"
+    ],
+    "status": "data_unknown"
+   },
+   {
     "candidate_id": "activity.park_class",
     "kind": "activity",
-    "label": "公园活动课（有日期与年龄限制）",
+    "label": "公园活动课（调用方转来的日期与年龄限制）",
     "reasons_zh": [
-     "原文带日期窗口或年龄限制：E1 的体验没有日期窗口、资格标签不求值，也不能删掉限制假装可执行",
-     "原文：2025-06-02 至 2025-08-15，每周一 from 9 to 10",
-     "原文：Ages 6-12"
+     "带日期、年龄或资格限制：E1 的体验没有日期窗口、资格标签不求值，也不能删掉限制假装可执行",
+     "限制：2025-06-02 至 2025-08-15，每周一 from 9 to 10",
+     "限制：Ages 6-12"
     ],
     "status": "rejected"
    },

@@ -316,6 +316,7 @@
    "status": "explicit"
   },
   "pending_confirmations": [
+   "ack:interests_not_personalized",
    "ack:standard_start"
   ],
   "review_id": "review.draft.u501.interest_unknown.r1",
