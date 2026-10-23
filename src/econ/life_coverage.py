@@ -107,11 +107,12 @@ def _city_dependencies(
         for o in available:
             role = item_role(catalog, o)
             if role == "housing":
-                v = o.spec.get(ts.minutes_key)
-                if isinstance(v, bool) or not isinstance(v, (int, float)) or v < 0:
-                    gaps.append(f"{city}/{o.opportunity_id}: 缺 {ts.minutes_key}（非负分钟）")
+                area = catalog.area(o.area) if o.area is not None else None
+                if area is None or area.typical_roundtrip_minutes is None:
+                    gaps.append(f"{city}/{o.opportunity_id}: 住处片区缺居民平时的往返分钟")
                 else:
-                    facts.append(o.source.kind)
+                    assert area.typical_source is not None
+                    facts.append(area.typical_source.kind)
             elif role == "job":
                 if o.resource is None or o.resource.job is None:
                     gaps.append(f"{city}/{o.opportunity_id}: 缺岗位方案（到岗次数）")

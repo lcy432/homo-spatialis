@@ -28,11 +28,11 @@ pack:
     city_facts: configs/life/city_facts_product.yaml
     protocol_id: life-v1-e3a-product
     scoring_version: e1-life-v1
-    scoring_content_fingerprint: bd1e3578b0b7013043fd4470b3d4ee0fe64d9cd3c470381851d64b0831ef8fa9
-    prompt_template: e3a-product-prompt-v2
+    scoring_content_fingerprint: 180fd9389343bac1da0fac4528e4eb6e9c6d7e069bddd56ea47acdcc4380bce0
+    prompt_template: e3b-product-prompt-v1
 
   run:
-    prompt_template: e3a-product-prompt-v2
+    prompt_template: e3b-product-prompt-v1
     repeat_indexes: [0]
     max_revisions_per_year: 2
     permission_version: e3a-product-v1
@@ -226,7 +226,7 @@ pack:
       maximum: 180
       step: 5
       need: commute_limit
-      compiles_to: E1 硬要求：住房类别、规格 commute_roundtrip_minutes ≤ 给定分钟（每个月检查实际所住住房）
+      compiles_to: E1 硬要求：住房类别、通勤执行记录里最长的往返分钟 ≤ 给定分钟（每个月检查；没有到岗的月份是 0）
       verification: 每月检查实际所住住房的往返分钟：满足、不满足、无法判断单独报告；不进分数，也不拦截计划
 
   attribute_kinds:

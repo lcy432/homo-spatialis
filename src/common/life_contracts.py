@@ -446,8 +446,8 @@ class MonthlyResourceRules(ContractModel):
     * 时间：每月预算 = 年度净可分配小时 / 12（12 个标准月，月与月之间不借用）。``reserved_time``
       写明净可分配小时已经预留了什么——那些不再进活动账；
     * 精力：每月实际活动负担 ≤ 每月可承受额度；单位 ``energy_unit``，尺度 ``energy_scale_version``；
-    * 通勤：住房规格 ``commute_minutes_key`` 是到 ``commute_reference`` 所说的工作地点的往返分钟；
-      当月通勤小时 = 往返分钟 × 到岗日 / 60，负担 = 小时 × ``commute_burden_per_hour``；
+    * 通勤（DECISIONS/0042）：往返分钟读这个月的通勤执行记录（目录的通勤关系表：住处片区 × 就业片区 × 方式）；
+      当月通勤小时 = 往返分钟 × 到岗次数 / 60，负担 = 小时 × ``commute_burden_per_hour``；
     * 家务：``household_tasks`` 的基准小时与每小时负担；设备或服务只给替代后的残余用时。
     """
 
@@ -457,8 +457,6 @@ class MonthlyResourceRules(ContractModel):
     reserved_time: str = Field(min_length=1, max_length=400)
     energy_unit: KeyStr
     energy_scale_version: Literal["e1-4a-monthly-quota-v1"]
-    commute_minutes_key: KeyStr
-    commute_reference: str = Field(min_length=1, max_length=400)
     commute_burden_per_hour: Annotated[float, Field(ge=0)]
     household_tasks: tuple[HouseholdTask, ...] = ()
     input_decimals: Literal[2] = RESOURCE_INPUT_DECIMALS
@@ -2140,6 +2138,113 @@ class AreaDecl(ContractModel):
     label: str = Field(min_length=1, max_length=120)
     kind: Literal["home", "work", "home_work"]
     note: str = Field(min_length=1, max_length=280)
+    #: 居住片区的居民平时上班往返多少分钟（资料或估计）。交通评分在这个月没有到岗时读它：不上班也有出行，住得偏的地方
+    #: 出门更远。只写给居住片区；没有就是未知（不当 0）。
+    typical_roundtrip_minutes: Annotated[int, Field(ge=0, le=600)] | None = Field(
+        default=None, exclude_if=lambda v: v is None
+    )
+    typical_source: SourceRecord | None = Field(default=None, exclude_if=lambda v: v is None)
+
+    @model_validator(mode="after")
+    def _typical_consistent(self) -> AreaDecl:
+        if (self.typical_roundtrip_minutes is None) != (self.typical_source is None):
+            raise ValueError(f"{self.area_id}: 居民平时的往返分钟与它的来源要一起写")
+        if self.typical_roundtrip_minutes is not None and self.kind == "work":
+            raise ValueError(f"{self.area_id}: 就业片区没有“居民平时的往返分钟”")
+        return self
+
+
+#: 通勤方式（DECISIONS/0042）。固定顺序也是分钟与花费都相同时的取舍顺序。
+CommuteMode = Literal["walk_bike", "transit", "drive"]
+COMMUTE_MODES: tuple[str, ...] = ("walk_bike", "transit", "drive")
+COMMUTE_MODE_LABEL: dict[str, str] = {
+    "walk_bike": "步行或骑车",
+    "transit": "公共交通",
+    "drive": "开车",
+}
+
+
+def _commute_money(v: Money, what: str) -> Money:
+    _finite(v.amount, what)
+    if v.amount < 0:
+        raise ValueError(f"{what}不能为负")
+    require_life_numeraire(v.numeraire, what)
+    return v
+
+
+class CommuteLeg(ContractModel):
+    """通勤关系表的一格（DECISIONS/0042）：住在一个居住片区、到一个就业片区上班、用一种方式走一次往返。
+
+    分钟与每次往返的花费都是片区级的资料或估计（某类居民的实际通勤），不是某套房到某个工位的路线模拟；``source`` 写明性质与
+    依据。同一格只写一条；表里没有的组合就是这种方式在这条线上不可用（不当 0 分钟）。公交时间与开车时间各是各的格。"""
+
+    home_area: IdStr
+    work_area: IdStr
+    mode: CommuteMode
+    roundtrip_minutes: Annotated[int, Field(ge=0, le=600)]
+    #: 一次往返的花费：公交是两次单程票价，开车是油费估计（用车权本身另是一项按月付费的机会），步行骑车是 0。
+    cost_per_roundtrip: Money
+    source: SourceRecord
+
+    @field_validator("cost_per_roundtrip")
+    @classmethod
+    def _cost_ok(cls, v: Money) -> Money:
+        return _commute_money(v, "每次往返的花费")
+
+
+class CommuteModeRule(ContractModel):
+    """一种通勤方式的使用条件与月度封顶（DECISIONS/0042）。"""
+
+    mode: CommuteMode
+    #: 这个月要有在用的、提供这项功能的机会（例如开车要“用车权”）才能用这种方式；不写就是没有条件。
+    requires_function: KeyStr | None = None
+    #: 一个月里这种方式的往返花费合计的上限（月票或票价封顶）；不写就是不封顶。
+    monthly_cap: Money | None = None
+    note: str = Field(min_length=1, max_length=400)
+    source: SourceRecord
+
+    @field_validator("monthly_cap")
+    @classmethod
+    def _cap_ok(cls, v: Money | None) -> Money | None:
+        return None if v is None else _commute_money(v, "月度封顶")
+
+
+class CommuteRelation(ContractModel):
+    """一座城的通勤关系（DECISIONS/0042）：方式的条件与片区之间的往返。
+
+    选择规则 ``fastest_available_v1``：每个到岗岗位，在这个月可用的方式里取往返分钟最少的一种；分钟相同取每次花费低的，再相同按
+    ``COMMUTE_MODES`` 的顺序。可用 = 关系表里有这一格，并且方式的条件这个月满足。不按偏好挑，不做路线模拟。"""
+
+    choice_rule: Literal["fastest_available_v1"] = "fastest_available_v1"
+    modes: tuple[CommuteModeRule, ...] = Field(min_length=1)
+    legs: tuple[CommuteLeg, ...] = Field(min_length=1)
+    note: str = Field(min_length=1, max_length=400)
+
+    @model_validator(mode="after")
+    def _relation_consistent(self) -> CommuteRelation:
+        modes = [m.mode for m in self.modes]
+        if len(modes) != len(set(modes)):
+            raise ValueError("通勤方式的规则重复")
+        cells = [(g.home_area, g.work_area, g.mode) for g in self.legs]
+        if len(cells) != len(set(cells)):
+            raise ValueError("通勤关系表的同一格（住处片区、就业片区、方式）写了不止一条")
+        stray = sorted({g.mode for g in self.legs} - set(modes))
+        if stray:
+            raise ValueError(f"通勤关系表用了没有规则的方式 {stray}")
+        return self
+
+    def leg(self, home_area: str, work_area: str, mode: str) -> CommuteLeg | None:
+        return next(
+            (
+                g
+                for g in self.legs
+                if (g.home_area, g.work_area, g.mode) == (home_area, work_area, mode)
+            ),
+            None,
+        )
+
+    def mode_rule(self, mode: str) -> CommuteModeRule | None:
+        return next((m for m in self.modes if m.mode == mode), None)
 
 
 class LifeOpportunity(ContractModel):
@@ -2395,6 +2500,8 @@ class CityLifeCatalog(ContractModel):
     minimum_living: tuple[MinimumNeedSpec, ...] = ()
     #: 城市内部的片区（DECISIONS/0042）。机会写了 ``area`` 就必须在这里声明；没有用到时不序列化。
     areas: tuple[AreaDecl, ...] = Field(default=(), exclude_if=lambda v: v == ())
+    #: 通勤关系（DECISIONS/0042）：住处片区 × 就业片区 × 方式。有需要到岗的岗位就必须有（加载器检查）。
+    commute: CommuteRelation | None = Field(default=None, exclude_if=lambda v: v is None)
     #: 这座城适用的合成税策略。缺了**不能结算**——没有配置不等于零税。
     tax_policy_id: IdStr | None = None
     #: E1-3 增补订正：各项需求功能的供给资料是否完整。目录里没有记录不等于确定没有。
@@ -2485,6 +2592,30 @@ class CityLifeCatalog(ContractModel):
                 raise ValueError(f"{self.city}/{o.opportunity_id}: 住房写的 {o.area} 是就业片区")
             if o.occupation is not None and kind == "home":
                 raise ValueError(f"{self.city}/{o.opportunity_id}: 岗位写的 {o.area} 是居住片区")
+        if self.commute is not None:
+            for g in self.commute.legs:
+                for area, bad, what in (
+                    (g.home_area, "work", "住处"),
+                    (g.work_area, "home", "工作地"),
+                ):
+                    kind = kinds.get(area)
+                    if kind is None:
+                        raise ValueError(
+                            f"{self.city}: 通勤关系表的{what}片区 {area} 没有在 areas 里声明"
+                        )
+                    if kind == bad:
+                        raise ValueError(f"{self.city}: 通勤关系表把 {area} 当{what}片区，它不是")
+                q = g.cost_per_roundtrip
+                if q.numeraire != want or exact_minor_units(q.amount, digits) is None:
+                    raise ValueError(
+                        f"{self.city}: 通勤 {g.home_area}→{g.work_area}（{g.mode}）的花费口径或精度不对"
+                    )
+            for r in self.commute.modes:
+                if r.monthly_cap is not None and (
+                    r.monthly_cap.numeraire != want
+                    or exact_minor_units(r.monthly_cap.amount, digits) is None
+                ):
+                    raise ValueError(f"{self.city}: {r.mode} 的月度封顶口径或精度不对")
         return self
 
     def area(self, area_id: str) -> AreaDecl | None:
@@ -3455,10 +3586,65 @@ ResourceCategory = Literal[
 #:   blocked            停止月（E1-5C）：生病之后声明的应急规则仍满足不了时间或精力、或要用的资料缺失，这个月的执行
 #:                      没有提交（诊断在停止记录里）；不是完整月份，也没有用量。
 ResourceCheck = Literal["complete", "known_lower_bound", "not_reached", "blocked"]
-#: 通勤怎么定的：computed（实际住房的往返分钟 × 各到岗岗位的到岗次数）、no_onsite_work（这个月没有需要
+#: 通勤怎么定的：computed（实际住处片区 × 各到岗岗位的就业片区，按通勤关系表执行）、no_onsite_work（这个月没有需要
 #: 到岗的工作，通勤确定为零）、unknown_no_housing（出局当月没有获得住房，通勤依据缺失，记为未知而不是零）、
 #: not_reached。
 CommuteStatus = Literal["computed", "no_onsite_work", "unknown_no_housing", "not_reached"]
+
+
+class CommuteUse(ContractModel):
+    """这个月一个到岗岗位实际执行的通勤（DECISIONS/0042）：哪条线、什么方式、往返几次、花了多少（封顶之前）。"""
+
+    job_opportunity_id: IdStr
+    home_area: IdStr
+    work_area: IdStr
+    mode: CommuteMode
+    roundtrip_minutes: Annotated[int, Field(ge=0)]
+    onsite_visits: Annotated[int, Field(ge=1)]
+    cost: Money
+    #: 为什么是这种方式（可用的方式与分钟），可以手查。
+    basis: str = Field(min_length=1, max_length=280)
+
+
+class MonthCommute(ContractModel):
+    """一个月的通勤执行记录（DECISIONS/0042）：唯一的执行事实。
+
+    结算按 ``paid`` 付通勤费；资源账按 ``uses`` 记通勤小时与负担；交通评分读往返分钟与到岗次数；通勤上限读最长的往返。
+    ``paid`` = 各方式（这个月花费合计与月度封顶取小）之和。"""
+
+    month: Month
+    status: CommuteStatus
+    housing_opportunity_id: IdStr | None = None
+    home_area: IdStr | None = None
+    uses: tuple[CommuteUse, ...] = ()
+    paid: Money | None = None
+    notes: tuple[Annotated[str, Field(max_length=MAX_SUMMARY_CHARS)], ...] = ()
+
+    @model_validator(mode="after")
+    def _status_consistent(self) -> MonthCommute:
+        if self.status == "computed":
+            if not self.uses or self.paid is None or self.home_area is None:
+                raise ValueError(
+                    f"第 {self.month} 月：执行了的通勤要有住处片区、每个岗位的记录与付款"
+                )
+        elif self.uses or self.paid is not None:
+            raise ValueError(f"第 {self.month} 月：通勤是 {self.status}，不能有执行记录或付款")
+        return self
+
+    @property
+    def onsite_visits(self) -> int:
+        return sum(u.onsite_visits for u in self.uses)
+
+    @property
+    def longest_roundtrip_minutes(self) -> int | None:
+        return max((u.roundtrip_minutes for u in self.uses), default=None)
+
+    def visit_weighted_minutes(self) -> Fraction | None:
+        """按到岗次数加权的平均往返分钟（交通评分的 T）；没有到岗时是 None。"""
+        visits = self.onsite_visits
+        if visits == 0:
+            return None
+        return Fraction(sum(u.roundtrip_minutes * u.onsite_visits for u in self.uses), visits)
 
 
 class ResourceContribution(ContractModel):
@@ -3498,10 +3684,11 @@ class MonthResources(ContractModel):
     within_limits: bool | None = None
     contributions: tuple[ResourceContribution, ...] = ()
     housing_opportunity_id: IdStr | None = None
-    commute_roundtrip_minutes: Annotated[int, Field(ge=0)] | None = None
     job_workdays_sum: Annotated[int, Field(ge=0)] = 0
     onsite_visits: Annotated[int, Field(ge=0)] = 0
     commute_status: CommuteStatus
+    #: 这个月的通勤执行记录（DECISIONS/0042）；没有发生的月份没有。
+    commute: MonthCommute | None = None
     #: 给 E1-5：当月工作负担 / 额度；通勤负担 / 额度；总负担 / 额度。本轮不换算成疾病概率或幸福分。
     work_relative_burden: ExactAmount | None = None
     commute_relative_burden: ExactAmount | None = None
@@ -3526,6 +3713,14 @@ class MonthResources(ContractModel):
             self.contributions or any(x is not None for x in (*totals, *remaining))
         ):
             raise ValueError(f"第 {m} 月：没有发生的月份没有资源记录")
+        if self.commute is not None:
+            if self.commute.status != self.commute_status or self.commute.month != m:
+                raise ValueError(f"第 {m} 月：通勤执行记录与资源账的通勤状态对不上")
+            if (
+                self.commute.status == "computed"
+                and self.commute.onsite_visits != self.onsite_visits
+            ):
+                raise ValueError(f"第 {m} 月：通勤执行记录的到岗次数与资源账对不上")
         if c == "blocked" and (
             self.contributions or any(x is not None for x in (*totals, *remaining))
         ):
@@ -3749,6 +3944,16 @@ class HealthYear(ContractModel):
         return next((x for x in self.months if x.month == m), None)
 
 
+class VisibleCommuteUse(ContractModel):
+    """**代理可见**的一个岗位一个月的实际通勤（逐字段取自 ``CommuteUse``，DECISIONS/0042）。片区从住房与岗位读，
+    花费合计在 ``VisibleMonthResources.commute_paid``（每次往返的花费在通勤关系表里）。"""
+
+    job_opportunity_id: IdStr
+    mode: CommuteMode
+    roundtrip_minutes: Annotated[int, Field(ge=0)]
+    onsite_visits: Annotated[int, Field(ge=1)]
+
+
 class VisibleMonthResources(ContractModel):
     """**代理可见**的一个月资源事实（逐字段取自 ``MonthResources``）。
 
@@ -3768,9 +3973,11 @@ class VisibleMonthResources(ContractModel):
     hours_by_category: dict[str, ExactAmount] = Field(default_factory=dict)
     burden_by_category: dict[str, ExactAmount] | None = None
     housing_opportunity_id: IdStr | None = None
-    commute_roundtrip_minutes: Annotated[int, Field(ge=0)] | None = None
     onsite_visits: Annotated[int, Field(ge=0)] = 0
     commute_status: CommuteStatus
+    #: 这个月实际执行的通勤与付的通勤费（DECISIONS/0042）；没有到岗时不序列化。
+    commute: tuple[VisibleCommuteUse, ...] = Field(default=(), exclude_if=lambda v: v == ())
+    commute_paid: Money | None = Field(default=None, exclude_if=lambda v: v is None)
     notes: tuple[Annotated[str, Field(max_length=MAX_SUMMARY_CHARS)], ...] = ()
 
     @model_validator(mode="after")

@@ -145,7 +145,7 @@
   "free_text_max_chars": 2000,
   "hard_requirement_options": [
    {
-    "compiles_to": "E1 硬要求：住房类别、规格 commute_roundtrip_minutes ≤ 给定分钟（每个月检查实际所住住房）",
+    "compiles_to": "E1 硬要求：住房类别、通勤执行记录里最长的往返分钟 ≤ 给定分钟（每个月检查；没有到岗的月份是 0）",
     "enforced_by_execution": false,
     "label": "住处到就业中心的往返时间不超过（分钟）",
     "maximum": 180,
@@ -352,7 +352,7 @@
   "meta": {
    "conversion_version": "e3a-conversion-v2",
    "data_pack": {
-    "content_fingerprint": "3d2958eb00de1de411186249bba0fb6bba6d411af265f9714736afa5511c964b",
+    "content_fingerprint": "a9e3aee4966ceeeb322c6ef77375df3d4f076d847bd0237d84c3a2c197224c47",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
     "pack_id": "pack.e3a.synthetic-v2",
     "status": "synthetic_fixture_only"

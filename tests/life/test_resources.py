@@ -64,7 +64,8 @@ def test_the_base_month_by_hand(bundle):
     assert (hours["laundry"], hours["cleaning"]) == (12, 10)
     burden = _by(m, "burden")
     assert burden["commute"] == Fraction(35, 2) and burden["laundry"] == burden["cleaning"] == 6
-    assert (m.commute_roundtrip_minutes, m.onsite_visits) == (70, 20)
+    assert (m.commute.longest_roundtrip_minutes, m.onsite_visits) == (70, 20)
+    assert m.commute.uses[0].mode == "transit" and m.commute.paid.amount == 0
 
 
 def test_living_near_work_saves_commute_hours_but_costs_rent(bundle):

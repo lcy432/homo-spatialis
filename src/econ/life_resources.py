@@ -44,6 +44,7 @@ from common.life_contracts import (
     ExactAmount,
     LifeContractError,
     LifeOpportunity,
+    MonthCommute,
     MonthlyResourceRules,
     MonthResources,
     ParticipationRecord,
@@ -188,6 +189,7 @@ def month_resources(
     *,
     exit_month: bool = False,
     extra: Sequence[Any] = (),
+    commute: MonthCommute | None = None,
 ) -> tuple[MonthResources, list[ResourceShortfall]]:
     """一个月的资源账与超限诊断。``activities`` 只能是这个月**实际**执行或在服务期内的东西。
 
@@ -195,6 +197,9 @@ def month_resources(
 
     ``extra``（E1-5C）：生病月份的恢复与接受治疗那个月的就医（``econ.life_health.ExtraLoad``：类别、小时、每小时负担、
     依据）。它们和别的活动一样按"小时 × 每小时负担"计入同一本账、同一个预算与额度，不另写算法；出局当月不计。
+
+    ``commute``（DECISIONS/0042）：这个月的通勤执行记录（结算按它付了钱）。通勤小时只从它来：每个到岗岗位一行，往返分钟 ×
+    到岗次数 ÷ 60；过完的月份有到岗岗位却没有执行记录是程序错误。
     """
     budget = monthly_time_budget(state)
     quota = monthly_energy_quota(state)
@@ -225,7 +230,6 @@ def month_resources(
             visits += job.onsite_days_per_month
 
     housing_id: str | None = None
-    minutes: int | None = None
     if not onsite_jobs:
         commute_status = "no_onsite_work"
     elif exit_month or not homes:
@@ -234,24 +238,27 @@ def month_resources(
     else:
         if len(homes) != 1:
             raise LifeContractError(f"第 {month} 月实际住房有 {len(homes)} 处，不是恰好一处")
-        home = homes[0].opp
-        housing_id = home.opportunity_id
-        value = home.spec.get(rules.commute_minutes_key)
-        if isinstance(value, bool) or not isinstance(value, int):
+        housing_id = homes[0].opp.opportunity_id
+        if commute is None or commute.status != "computed":
+            raise LifeContractError(f"第 {month} 月有到岗岗位，却没有执行过的通勤记录")
+        if commute.housing_opportunity_id != housing_id:
             raise LifeContractError(
-                f"{housing_id} 没有整数的 {rules.commute_minutes_key}：通勤分钟缺失不当零"
+                f"第 {month} 月：通勤记录的住处 {commute.housing_opportunity_id} 不是实际住房 {housing_id}"
             )
-        minutes = value
+        if {u.job_opportunity_id for u in commute.uses} != {
+            a.opp.opportunity_id for a, _ in onsite_jobs
+        }:
+            raise LifeContractError(f"第 {month} 月：通勤记录的岗位与实际到岗的岗位对不上")
         rate = to_fraction(rules.commute_burden_per_hour)
-        for job_activity, job in onsite_jobs:  # 每个岗位每次到岗一趟完整往返，岗位之间不合并
+        for u in commute.uses:  # 每个岗位每次到岗一趟完整往返，岗位之间不合并
             rows.append(
                 _row(
                     "commute",
-                    job_activity.opp.opportunity_id,
-                    commute_hours(minutes, job.onsite_days_per_month),
+                    u.job_opportunity_id,
+                    commute_hours(u.roundtrip_minutes, u.onsite_visits),
                     rate,
-                    f"实际住房 {housing_id} 往返 {minutes} 分钟 × 这个岗位到岗 "
-                    f"{job.onsite_days_per_month} 次 ÷ 60",
+                    f"{u.home_area}→{u.work_area} {u.mode} 往返 {u.roundtrip_minutes} 分钟 × 到岗 "
+                    f"{u.onsite_visits} 次 ÷ 60",
                 )
             )
         commute_status = "computed"
@@ -262,6 +269,14 @@ def month_resources(
             )
     if housing_id is None and homes:
         housing_id = homes[0].opp.opportunity_id
+    if commute is None or commute.status != commute_status:
+        # 没有到岗或出局当月：记录照实写（不是零分钟的“执行”）
+        commute = MonthCommute(
+            month=month,
+            status=commute_status,  # type: ignore[arg-type]
+            housing_opportunity_id=housing_id if commute_status == "no_onsite_work" else None,
+            home_area=(homes[0].opp.area if commute_status == "no_onsite_work" and homes else None),
+        )
 
     if exit_month:
         notes.append(
@@ -279,10 +294,10 @@ def month_resources(
             energy_used=ExactAmount.of(_sum(rows, "burden")),
             contributions=tuple(rows),
             housing_opportunity_id=None,
-            commute_roundtrip_minutes=None,
             job_workdays_sum=job_days,
             onsite_visits=visits,
             commute_status=commute_status,  # type: ignore[arg-type]
+            commute=commute,
             work_relative_burden=ExactAmount.of(_burden_of(rows, "work") / quota),
             commute_relative_burden=ExactAmount.of(Fraction(0))
             if commute_status == "no_onsite_work"
@@ -363,7 +378,7 @@ def month_resources(
         within_limits=used_t <= budget and used_e <= quota,
         contributions=tuple(rows),
         housing_opportunity_id=housing_id,
-        commute_roundtrip_minutes=minutes,
+        commute=commute,
         job_workdays_sum=job_days,
         onsite_visits=visits,
         commute_status=commute_status,  # type: ignore[arg-type]

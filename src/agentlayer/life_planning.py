@@ -288,7 +288,7 @@ def household_guide_section(protocol: LifeProtocol) -> VisibleGuideSection:
 
 
 def product_statement_guide_section() -> VisibleGuideSection:
-    """说明书 e3a-product-action-guide-v2 的第一节（DECISIONS/0034、DECISIONS/0041）：六维产品画像怎样读。只讲字段含义——点数的精确写法、物质分配
+    """说明书 e3b-product-action-guide-v1 的第一节（DECISIONS/0034、DECISIONS/0041）：六维产品画像怎样读。只讲字段含义——点数的精确写法、物质分配
     不是预算、健康回答独立且不是治疗指令、未答与不确定没有明确指令；不说该怎样生活，也不给任何评分参数。"""
     return VisibleGuideSection(
         topic="你的用户陈述：六维、物质分配与独立健康回答",
@@ -372,6 +372,19 @@ def action_guide(
             examples=(_ex("声明兜底", {"minimum_fallback": ["housing", "food"]}),),
         ),
     ]
+    sections.append(
+        VisibleGuideSection(
+            topic="住处、片区与通勤（DECISIONS/0042）",
+            rules=(
+                "住房与岗位各写了所在片区（area）；通勤按 observation.commute 的关系表：住处片区 × 岗位就业片区 × 方式 → 往返"
+                "分钟与每次往返的花费；表里没有的线路走不通，选了这样的住处与岗位，计划会退回",
+                "每个需要到岗的岗位自动取这个月可用方式里最快的一种；开车要有在用的用车权（一项按月付费的机会），不买就不能开车",
+                "通勤费 = 到岗次数 × 每次往返的花费（同一方式超过月度封顶按封顶付），在每月的购买之后结清；现金不够计划就退回",
+                "居住条件看房子本身（卧室推断的空间等级、同片区同户型里的条件档次）；安全与环境按住处所在片区，租金与通勤各算各的",
+            ),
+            examples=(),
+        )
+    )
     sections.append(
         VisibleGuideSection(
             topic="工作与学习",

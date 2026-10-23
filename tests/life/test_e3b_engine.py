@@ -7,6 +7,8 @@
 
 from __future__ import annotations
 
+from fractions import Fraction
+
 import pytest
 
 from common.life_contracts import CityLifeCatalog
@@ -36,8 +38,8 @@ def comp(year, month: int, cid: str):
     return next(c for c in m.components if c.component_id == cid)
 
 
-def scored(bundle, scoring, state, items, *, catalog=None, conditions=None):
-    """结算并评分一年；可以换掉这座城的评分条件（评分规格不变，所以反馈政策的内容身份照旧对得上）。"""
+def scored(bundle, scoring, state, items, *, catalog=None, conditions=None, hard=None):
+    """结算并评分一年；可以换掉这座城的评分条件（评分规格不变，所以反馈政策的内容身份照旧对得上）与硬要求。"""
     from econ.life_year import ScoringInputs, run_life_year
 
     from .conftest import tax_for, year_action
@@ -47,7 +49,7 @@ def scored(bundle, scoring, state, items, *, catalog=None, conditions=None):
         spec=scoring.spec,
         conditions=conditions or scoring.conditions_for(K51),
         preference_input=p,
-        hard_requirements=p.hard_requirements,
+        hard_requirements=p.hard_requirements if hard is None else hard,
     )
     return run_life_year(
         protocol=bundle.protocol,
@@ -117,11 +119,26 @@ def test_changing_only_the_rent_keeps_the_housing_score(bundle, scoring, start):
 # --------------------------------------------------------------------------- 按片区的地区条件
 
 
+def add_home_area(d: dict, area_id: str, minutes: int) -> None:
+    """加一个居住片区，并给它一条到就业中心的公共交通（往返 ``minutes`` 分钟、票价 0），通勤照样走得通。"""
+    src = d["areas"][0]["typical_source"]
+    d["areas"].append(
+        {
+            "area_id": area_id,
+            "label": area_id,
+            "kind": "home",
+            "note": "测试片区",
+            "typical_roundtrip_minutes": minutes,
+            "typical_source": src,
+        }
+    )
+    leg = dict(d["commute"]["legs"][0])
+    d["commute"]["legs"].append({**leg, "home_area": area_id, "roundtrip_minutes": minutes})
+
+
 def with_areas(d: dict) -> None:
-    d["areas"] = [
-        {"area_id": "k51.area.north", "label": "北片", "kind": "home", "note": "测试片区"},
-        {"area_id": "k51.area.south", "label": "南片", "kind": "home", "note": "测试片区"},
-    ]
+    add_home_area(d, "k51.area.north", 70)
+    add_home_area(d, "k51.area.south", 30)
     opp(d, "k51.housing.far")["area"] = "k51.area.north"
     opp(d, "k51.housing.near")["area"] = "k51.area.south"
 
@@ -166,9 +183,7 @@ def test_only_city_level_evidence_gives_every_area_the_same_value(bundle, scorin
 def test_a_home_outside_the_area_table_is_unknown_not_the_city_value(bundle, scoring, start):
     def partial(d: dict) -> None:
         with_areas(d)
-        d["areas"].append(
-            {"area_id": "k51.area.east", "label": "东片", "kind": "home", "note": "测试"}
-        )
+        add_home_area(d, "k51.area.east", 70)
         opp(d, "k51.housing.far")["area"] = "k51.area.east"
 
     cat = catalog_with(bundle, partial)
@@ -182,3 +197,187 @@ def test_a_home_outside_the_area_table_is_unknown_not_the_city_value(bundle, sco
 def test_an_undeclared_area_is_refused(bundle):
     with pytest.raises(ValueError, match="没有在 areas 里声明"):
         catalog_with(bundle, lambda d: opp(d, "k51.housing.far").update(area="k51.area.nowhere"))
+
+
+# --------------------------------------------------------------------------- 通勤关系（DECISIONS/0042）
+#
+# 样例：远处片区到就业中心公共交通往返 70 分钟、近处 30 分钟，票价 0；文员每月到岗 20 次。下面的补丁加一条开车（远处 40 分钟、
+# 每次往返油费 5.00，要有在用的 car_access）与一项每月 300 的用车权。
+
+
+def with_car(d: dict, *, drive_minutes: int = 40, fuel: float = 5.0) -> None:
+    rel = d["commute"]
+    src = rel["modes"][0]["source"]
+    rel["modes"].append(
+        {
+            "mode": "drive",
+            "requires_function": "car_access",
+            "note": "测试：要有用车权",
+            "source": src,
+        }
+    )
+    leg = dict(rel["legs"][1])  # 远处 → 就业中心
+    rel["legs"].append(
+        {
+            **leg,
+            "mode": "drive",
+            "roundtrip_minutes": drive_minutes,
+            "cost_per_roundtrip": {"amount": fuel, "numeraire": "USD_2024_LOCAL"},
+        }
+    )
+    car = dict(opp(d, "k51.service.chores"))
+    car.update(
+        opportunity_id="k51.service.car_access",
+        label="用车权（测试）",
+        quality="按月付费的用车权：车辆、保险与登记",
+        price={
+            "amount": {"amount": 300, "numeraire": "USD_2024_LOCAL"},
+            "billing": "per_month",
+            "per_unit": "service-month",
+        },
+        functions=["car_access"],
+        resource={
+            "basis": "per_service_month",
+            "hours": 0,
+            "burden_per_hour": 0,
+            "quantity_scales": False,
+            "note": "不占时间",
+        },
+    )
+    d["opportunities"].append(car)
+
+
+def month_res(year, month: int = 1):
+    return next(m for m in year.settlement.outcome.resources.months if m.month == month)
+
+
+def commute_flows(year) -> list:
+    return [f for f in year.settlement.outcome.cash_flows if f.label.startswith("通勤")]
+
+
+def test_without_car_access_the_transit_line_is_used(bundle, scoring, start):
+    cat = catalog_with(bundle, with_car)
+    y = live_year(bundle, scoring, start, plan(), catalog=cat)
+    c = month_res(y).commute
+    assert [(u.mode, u.roundtrip_minutes, u.onsite_visits) for u in c.uses] == [("transit", 70, 20)]
+    assert c.paid.amount == 0 and not commute_flows(y)
+
+
+def test_with_car_access_the_fastest_mode_is_driving_and_costs_fuel(bundle, scoring, start):
+    cat = catalog_with(bundle, with_car)
+    y = live_year(
+        bundle, scoring, start, plan(extra=[whole("k51.service.car_access")]), catalog=cat
+    )
+    m = month_res(y)
+    c = m.commute
+    assert [(u.mode, u.roundtrip_minutes) for u in c.uses] == [("drive", 40)]
+    assert c.paid.amount == pytest.approx(100.0)  # 20 次 × 5.00
+    hours = {r.category: r.hours.fraction() for r in m.contributions if r.category == "commute"}
+    assert hours["commute"] == Fraction(40 * 20, 60)  # 时间账读同一份记录
+    flows = [f for f in commute_flows(y) if f.month == 1]
+    assert len(flows) == 1 and flows[0].amount.amount == pytest.approx(-100.0)
+    t = comp(y, 1, "commute").transport
+    assert t.minutes == 40 and t.onsite_visits == 20  # 交通评分也读它
+
+
+def max_commute(minutes: int):
+    from common.life_contracts import HardRequirement
+
+    return (
+        HardRequirement(
+            need="housing_commute",
+            requirement={"category": "housing", "max_commute_roundtrip_minutes": minutes},
+        ),
+    )
+
+
+def test_the_commute_hard_requirement_reads_the_executed_trip(bundle, scoring, start):
+    cat = catalog_with(bundle, with_car)
+    transit = scored(bundle, scoring, start, plan(), catalog=cat, hard=max_commute(60))
+    car = scored(
+        bundle,
+        scoring,
+        start,
+        plan(extra=[whole("k51.service.car_access")]),
+        catalog=cat,
+        hard=max_commute(60),
+    )
+    (t_req,) = transit.score.hard_requirements
+    (c_req,) = car.score.hard_requirements
+    assert t_req.summary == "not_satisfied"  # 公交 70 分钟 > 60
+    assert c_req.summary == "satisfied_every_month"  # 开车 40 分钟
+
+
+def test_a_monthly_cap_limits_the_fare(bundle, scoring, start):
+    def capped(d: dict) -> None:
+        rel = d["commute"]
+        rel["modes"][0]["monthly_cap"] = {"amount": 100, "numeraire": "USD_2024_LOCAL"}
+        for g in rel["legs"]:
+            g["cost_per_roundtrip"] = {"amount": 5.8, "numeraire": "USD_2024_LOCAL"}
+
+    y = live_year(bundle, scoring, start, plan(), catalog=catalog_with(bundle, capped))
+    c = month_res(y).commute
+    assert c.uses[0].cost.amount == pytest.approx(116.0)  # 20 × 5.80，封顶之前
+    assert c.paid.amount == pytest.approx(100.0) and c.notes
+
+
+def test_a_home_with_no_line_to_the_job_is_infeasible_not_zero_minutes(bundle, start):
+    from econ.life_settlement import settle_year
+
+    from .conftest import tax_for, year_action
+
+    def no_line(d: dict) -> None:
+        d["commute"]["legs"] = [g for g in d["commute"]["legs"] if g["home_area"] != "k51.area.far"]
+
+    cat = catalog_with(bundle, no_line)
+    r = settle_year(
+        protocol=bundle.protocol,
+        state=start,
+        action=year_action(start, plan()),
+        catalog=cat,
+        tax=tax_for(bundle, K51),
+    )
+    assert r.status == "plan_infeasible"
+    assert [p.code for p in r.problems] == ["commute_unavailable"]
+
+
+def test_an_unaffordable_fare_is_infeasible(bundle, start):
+    from econ.life_settlement import settle_year
+
+    from .conftest import tax_for, year_action
+
+    def dear(d: dict) -> None:
+        for g in d["commute"]["legs"]:
+            g["cost_per_roundtrip"] = {"amount": 900, "numeraire": "USD_2024_LOCAL"}
+
+    r = settle_year(
+        protocol=bundle.protocol,
+        state=start,
+        action=year_action(start, plan()),
+        catalog=catalog_with(bundle, dear),
+        tax=tax_for(bundle, K51),
+    )
+    assert r.status == "plan_infeasible"
+    assert r.problems[0].code == "commute_unaffordable"
+
+
+def test_a_month_without_onsite_work_reads_the_area_typical_minutes(bundle, scoring, start):
+    items = [whole("k51.housing.far"), whole("k51.food.basic")]
+    y = scored(bundle, scoring, start, items, hard=max_commute(60))
+    m = month_res(y)
+    assert m.commute.status == "no_onsite_work" and m.commute.home_area == "k51.area.far"
+    t = comp(y, 1, "commute").transport
+    assert t.minutes == 70 and t.onsite_visits == 0  # 远处片区的居民平时往返 70 分钟
+    (req,) = y.score.hard_requirements
+    assert req.months_satisfied and not req.months_not_satisfied and not req.months_unknown
+    assert (
+        1 in req.months_satisfied
+    )  # 没有到岗：最长往返是 0（没有收入，钱花完后出局，之后的月份是没有继续生活）
+
+
+def test_an_undeclared_commute_area_is_refused(bundle):
+    def stray(d: dict) -> None:
+        d["commute"]["legs"][0]["home_area"] = "k51.area.nowhere"
+
+    with pytest.raises(ValueError, match="没有在 areas 里声明"):
+        catalog_with(bundle, stray)

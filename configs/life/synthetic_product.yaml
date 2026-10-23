@@ -79,10 +79,6 @@ protocol:
       这些不再进活动账
     energy_unit: burden_point
     energy_scale_version: e1-4a-monthly-quota-v1
-    commute_minutes_key: commute_roundtrip_minutes
-    commute_reference: >-
-      每座合成城只有一个到岗工作地点（城市就业中心的抽象）：住房写明的往返分钟就是到那里的往返，
-      所有需要到岗的岗位都在那里；不做地图与路线规划
     commute_burden_per_hour: 0.75
     household_tasks:
       - {task: laundry, baseline_hours_per_month: 12, burden_per_hour: 0.5,
@@ -107,7 +103,7 @@ protocol:
     scoring_version: e1-life-v1
     # 评分内容身份（DECISIONS/0025）：scoring_product.yaml 的规格的内容身份。规格一改（τ、c、任务组合……）这里就要换，
     # 并从共同初始状态重跑。
-    scoring_content_fingerprint: bd1e3578b0b7013043fd4470b3d4ee0fe64d9cd3c470381851d64b0831ef8fa9
+    scoring_content_fingerprint: 180fd9389343bac1da0fac4528e4eb6e9c6d7e069bddd56ea47acdcc4380bce0
     preference_source: product_confirmed_six_dim
     quantization: floor_to_0.01
     source: *rules
@@ -243,6 +239,23 @@ catalogs:
     label: 合成城 K51
     money_basis: {currency: USD, base_year: 2024}
     tax_policy_id: tax.synth.e1conv
+    # DECISIONS/0042：两个居住片区、一个就业片区（城市就业中心的抽象）；通勤只有公共交通一种方式、票价未建模（合成）。
+    # 分钟与旧版住房规格里写的往返分钟相同，所以旧的手算值不变
+    areas:
+      - {area_id: k51.area.near, label: 近处居住片区, kind: home, note: 合成片区，离就业中心近,
+         typical_roundtrip_minutes: 30, typical_source: &synth_area {kind: synthetic, observed_on: 2026-10-23, geography_scope: synthetic city (no real geography), mapping_version: synthetic-e3b-areas, synthetic_note: 手工设定的片区与通勤分钟，与旧版住房规格里的往返分钟相同；不来自任何真实地理或交通资料}}
+      - {area_id: k51.area.far, label: 远处居住片区, kind: home, note: 合成片区，离就业中心远,
+         typical_roundtrip_minutes: 70, typical_source: *synth_area}
+      - {area_id: k51.area.center, label: 就业中心, kind: work, note: 合成城市里所有需要到岗的岗位都在这里}
+    commute:
+      note: 合成通勤关系：只有公共交通，票价未建模（每次往返 0）；不做地图与路线规划
+      modes:
+        - {mode: transit, note: 合成城的公共交通，没有使用条件、不封顶, source: *synth_area}
+      legs:
+        - {home_area: k51.area.near, work_area: k51.area.center, mode: transit, roundtrip_minutes: 30,
+           cost_per_roundtrip: {amount: 0, numeraire: USD_2024_LOCAL}, source: *synth_area}
+        - {home_area: k51.area.far, work_area: k51.area.center, mode: transit, roundtrip_minutes: 70,
+           cost_per_roundtrip: {amount: 0, numeraire: USD_2024_LOCAL}, source: *synth_area}
     minimum_living:
       - need: housing
         baseline_opportunity_id: k51.housing.far
@@ -283,15 +296,16 @@ catalogs:
     opportunities:
       - opportunity_id: k51.housing.near
         category: housing
+        area: k51.area.near
         label: 一居室（离工作地近）
-        spec: {bedrooms: 1, space_level: 2, quality_level: 2, exclusive: true, basic_facilities: true, home_office: false, commute_roundtrip_minutes: 30}
+        spec: {bedrooms: 1, space_level: 2, quality_level: 2, exclusive: true, basic_facilities: true, home_office: false}
         functions: [housing]
         unit: dwelling
         quality: 独占一居室；到就业中心往返约 30 分钟
         availability: available
         price: {amount: {amount: 1400, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: dwelling-month}
         duration: {kind: ongoing_service}
-        resource: {basis: passive, note: 住房本身不占时间；每次去上班按这里写的往返分钟算通勤}
+        resource: {basis: passive, note: 住房本身不占时间；每次去上班按通勤关系表从这里所在片区算通勤}
         source: &synth
           kind: synthetic
           observed_on: 2026-10-18
@@ -300,15 +314,16 @@ catalogs:
           synthetic_note: 手工设定的数值，不来自任何真实城市、商品、服务、雇主、数据源或 LLM
       - opportunity_id: k51.housing.far
         category: housing
+        area: k51.area.far
         label: 一居室（离工作地远）
-        spec: {bedrooms: 1, space_level: 2, quality_level: 2, exclusive: true, basic_facilities: true, home_office: false, commute_roundtrip_minutes: 70}
+        spec: {bedrooms: 1, space_level: 2, quality_level: 2, exclusive: true, basic_facilities: true, home_office: false}
         functions: [housing]
         unit: dwelling
         quality: 与近处同样大小的一居室；到就业中心往返约 70 分钟
         availability: available
         price: {amount: {amount: 1000, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: dwelling-month}
         duration: {kind: ongoing_service}
-        resource: {basis: passive, note: 住房本身不占时间；每次去上班按这里写的往返分钟算通勤}
+        resource: {basis: passive, note: 住房本身不占时间；每次去上班按通勤关系表从这里所在片区算通勤}
         source: *synth
       - opportunity_id: k51.food.basic
         category: food
@@ -558,6 +573,7 @@ catalogs:
         source: *synth
       - opportunity_id: k51.job.clerk
         category: job
+        area: k51.area.center
         label: 全职文员（合成写字楼）
         spec: {work_mode: onsite}
         unit: position
@@ -574,6 +590,7 @@ catalogs:
         source: *synth
       - opportunity_id: k51.job.shop_parttime
         category: job
+        area: k51.area.center
         label: 门店兼职（合成百货）
         spec: {work_mode: onsite}
         unit: position
@@ -590,6 +607,7 @@ catalogs:
         source: *synth
       - opportunity_id: k51.job.accountant
         category: job
+        area: k51.area.center
         label: 会计（合成会计事务所）
         spec: {work_mode: onsite}
         unit: position
@@ -623,6 +641,23 @@ catalogs:
     label: 合成城 M52
     money_basis: {currency: USD, base_year: 2024}
     tax_policy_id: tax.synth.e1conv
+    # DECISIONS/0042：两个居住片区、一个就业片区（城市就业中心的抽象）；通勤只有公共交通一种方式、票价未建模（合成）。
+    # 分钟与旧版住房规格里写的往返分钟相同，所以旧的手算值不变
+    areas:
+      - {area_id: m52.area.near, label: 近处居住片区, kind: home, note: 合成片区，离就业中心近,
+         typical_roundtrip_minutes: 30, typical_source: *synth_area}
+      - {area_id: m52.area.far, label: 远处居住片区, kind: home, note: 合成片区，离就业中心远,
+         typical_roundtrip_minutes: 70, typical_source: *synth_area}
+      - {area_id: m52.area.center, label: 就业中心, kind: work, note: 合成城市里所有需要到岗的岗位都在这里}
+    commute:
+      note: 合成通勤关系：只有公共交通，票价未建模（每次往返 0）；不做地图与路线规划
+      modes:
+        - {mode: transit, note: 合成城的公共交通，没有使用条件、不封顶, source: *synth_area}
+      legs:
+        - {home_area: m52.area.near, work_area: m52.area.center, mode: transit, roundtrip_minutes: 30,
+           cost_per_roundtrip: {amount: 0, numeraire: USD_2024_LOCAL}, source: *synth_area}
+        - {home_area: m52.area.far, work_area: m52.area.center, mode: transit, roundtrip_minutes: 70,
+           cost_per_roundtrip: {amount: 0, numeraire: USD_2024_LOCAL}, source: *synth_area}
     minimum_living:
       - need: housing
         baseline_opportunity_id: m52.housing.far
@@ -646,27 +681,29 @@ catalogs:
     opportunities:
       - opportunity_id: m52.housing.near
         category: housing
+        area: m52.area.near
         label: 一居室（离工作地近）
-        spec: {bedrooms: 1, space_level: 2, quality_level: 2, exclusive: true, basic_facilities: true, home_office: false, commute_roundtrip_minutes: 30}
+        spec: {bedrooms: 1, space_level: 2, quality_level: 2, exclusive: true, basic_facilities: true, home_office: false}
         functions: [housing]
         unit: dwelling
         quality: 独占一居室；到就业中心往返约 30 分钟
         availability: available
         price: {amount: {amount: 1400, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: dwelling-month}
         duration: {kind: ongoing_service}
-        resource: {basis: passive, note: 住房本身不占时间；每次去上班按这里写的往返分钟算通勤}
+        resource: {basis: passive, note: 住房本身不占时间；每次去上班按通勤关系表从这里所在片区算通勤}
         source: *synth
       - opportunity_id: m52.housing.far
         category: housing
+        area: m52.area.far
         label: 一居室（离工作地远）
-        spec: {bedrooms: 1, space_level: 2, quality_level: 2, exclusive: true, basic_facilities: true, home_office: false, commute_roundtrip_minutes: 70}
+        spec: {bedrooms: 1, space_level: 2, quality_level: 2, exclusive: true, basic_facilities: true, home_office: false}
         functions: [housing]
         unit: dwelling
         quality: 与近处同样大小的一居室；到就业中心往返约 70 分钟
         availability: available
         price: {amount: {amount: 1000, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: dwelling-month}
         duration: {kind: ongoing_service}
-        resource: {basis: passive, note: 住房本身不占时间；每次去上班按这里写的往返分钟算通勤}
+        resource: {basis: passive, note: 住房本身不占时间；每次去上班按通勤关系表从这里所在片区算通勤}
         source: *synth
       - opportunity_id: m52.food.basic
         category: food
@@ -916,6 +953,7 @@ catalogs:
         source: *synth
       - opportunity_id: m52.job.clerk
         category: job
+        area: m52.area.center
         label: 全职文员（合成写字楼）
         spec: {work_mode: onsite}
         unit: position
@@ -932,6 +970,7 @@ catalogs:
         source: *synth
       - opportunity_id: m52.job.shop_parttime
         category: job
+        area: m52.area.center
         label: 门店兼职（合成百货）
         spec: {work_mode: onsite}
         unit: position
@@ -948,6 +987,7 @@ catalogs:
         source: *synth
       - opportunity_id: m52.job.accountant
         category: job
+        area: m52.area.center
         label: 会计（合成会计事务所）
         spec: {work_mode: onsite}
         unit: position

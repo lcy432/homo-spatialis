@@ -181,19 +181,9 @@ def scoring_config_problems(
 
 
 def growth_transport_protocol_problems(spec: LifeScoringSpec, protocol: LifeProtocol) -> list[str]:
-    """广义交通读的住房往返分钟字段，必须就是资源账计通勤用的那一个（``resource_rules.commute_minutes_key``，DECISIONS/0024）
-    ——评分与时间账读同一份事实，不另起一套。加载器与评分器（``econ.life_scoring.score_year``）共用这一份检查。
-    """
-    out: list[str] = []
-    rules = protocol.resource_rules
-    for comp in spec.components:
-        ts = comp.transport
-        if ts is not None and rules.commute_minutes_key != ts.minutes_key:
-            out.append(
-                f"分项 {comp.component_id} 的广义交通读住房字段 {ts.minutes_key}，资源账计通勤用的是 "
-                f"{rules.commute_minutes_key}——评分与时间账必须读同一个往返分钟字段"
-            )
-    return out
+    """广义交通与时间账读同一份通勤执行记录（DECISIONS/0042），不再有各读各的规格字段；这里只留一个钩子，加载器与评分器
+    （``econ.life_scoring.score_year``）共用。"""
+    return []
 
 
 def convenience_protocol_problems(spec: LifeScoringSpec, protocol: LifeProtocol) -> list[str]:
@@ -318,7 +308,6 @@ def comparison_group_problems(config: ScoringConfig, bundle: LifeBundle) -> list
                     "目录里没有记录不等于确定没有"
                 )
         if g.commute_granularity == "plan_level" and commute.transport is not None:
-            ts = commute.transport
             ccond = cond.condition(commute.component_id)
             if ccond is None or ccond.status != "plan_level":
                 out.append(f"{key}: 广义交通要求城市条件写 plan_level")
@@ -326,17 +315,12 @@ def comparison_group_problems(config: ScoringConfig, bundle: LifeBundle) -> list
                 if o.availability != "available":
                     continue
                 role = item_role(cat, o)
-                if ts.minutes_key in o.arrangement_options:
-                    out.append(
-                        f"{key}/{o.opportunity_id}: {ts.minutes_key} 被列成可选安排——往返分钟是住房方案的"
-                        "事实，不能另选（那就是远处租金配近处通勤的拆配）"
-                    )
                 if role == "housing":
-                    v = o.spec.get(ts.minutes_key)
-                    if isinstance(v, bool) or not isinstance(v, (int, float)) or v < 0:
+                    area = cat.area(o.area) if o.area is not None else None
+                    if area is None or area.typical_roundtrip_minutes is None:
                         out.append(
-                            f"{key}/{o.opportunity_id}: 广义交通要求每个可得住房写明 {ts.minutes_key}"
-                            "（非负分钟）——全组通过才启用"
+                            f"{key}/{o.opportunity_id}: 广义交通要求每个可得住房所在的居住片区写明居民平时的往返"
+                            "分钟（没有到岗的月份读它）——全组通过才启用"
                         )
                 elif role == "job" and o.resource.job is None:
                     out.append(
@@ -348,8 +332,6 @@ def comparison_group_problems(config: ScoringConfig, bundle: LifeBundle) -> list
     for comp in spec.components:
         for src in comp.sources:
             used.update(k for k in (src.spec_key, src.requires_spec_key) if k)
-        if comp.transport is not None:
-            used.add(comp.transport.minutes_key)
     for k in sorted(used - set(g.units)):
         out.append(f"评分用到的规格键 {k} 没有写进比较组的单位表")
     out.extend(unit_problems(spec, g.units))
@@ -428,9 +410,6 @@ def unit_problems(spec: LifeScoringSpec, units: dict[str, str]) -> list[str]:
                 same(src.spec_key, src.unit, f"{comp.component_id}/{src.source_id}")
             if src.requires_spec_key is not None and src.requires_spec_key != src.spec_key:
                 data_unit(src.requires_spec_key)
-        ts = comp.transport
-        if ts is not None:
-            same(ts.minutes_key, ts.unit, f"{comp.component_id} 的广义交通")
     return out
 
 

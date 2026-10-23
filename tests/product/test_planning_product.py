@@ -47,7 +47,7 @@ def ready(tmp_path_factory):
     return s
 
 
-def _request(s, perm=None, template="e3a-product-prompt-v2", profile=None):
+def _request(s, perm=None, template="e3b-product-prompt-v1", profile=None):
     w = s.pre.world
     with contextlib.chdir(s.work):
         catalog = w.bundle.catalog_for(K51)
@@ -97,7 +97,7 @@ def test_observation_carries_exact_six_points_material_allocation_and_health_ans
     states = [h["answer_state"] for h in profile["health_answers"]]
     assert states == ["provided", "provided", "unsure"]
     assert "没有这一项的明确指令" in profile["health_answers"][2]["planning_note"]
-    assert payload["guide"]["version"] == "e3a-product-action-guide-v2"
+    assert payload["guide"]["version"] == "e3b-product-action-guide-v1"
     topics = [s["topic"] for s in payload["guide"]["sections"]]
     assert topics[0].startswith("你的用户陈述") and "日常杂务：设备与人工服务（可选）" in topics
 

@@ -111,6 +111,7 @@ from common.life_contracts import (
     TreatmentOutcome,
     TreatmentRecord,
     VisibleCareerYear,
+    VisibleCommuteUse,
     VisibleFeedback,
     VisibleGoalEvent,
     VisibleGoalProgress,
@@ -260,6 +261,8 @@ class VisibleOpportunity(ContractModel):
     #: 雇主（没有雇主的不序列化）、学习完成后授予的能力，以及"按年初状态现在能不能选、还缺什么"（DECISIONS/0023）。
     employer_id: str | None = Field(default=None, exclude_if=lambda v: v is None)
     grants: tuple[str, ...] = Field(exclude_if=lambda v: not v)
+    #: 片区（DECISIONS/0042）：住房是住处所在的居住片区，岗位是工作所在的就业片区。没有的不序列化。
+    area: str | None = Field(default=None, exclude_if=lambda v: v is None)
     #: 没有资格要求的机会不序列化。
     qualification: VisibleQualification | None = Field(default=None, exclude_if=lambda v: v is None)
     #: 生活扩展（DECISIONS/0041）：食品方案、享受、装备、活动的公开事实。没有的不序列化。
@@ -273,6 +276,41 @@ class VisibleOpportunity(ContractModel):
         """期限与时间精力事实里空的项（null、空列表）不写进请求：键不出现就是“没有”（收尾 R1：只省重复，不删事实）。"""
         data = value.model_dump(mode="json")
         return {k: v for k, v in data.items() if v is not None and v != [] and v != {}}
+
+
+class VisibleArea(ContractModel):
+    """一个片区的公开事实（DECISIONS/0042）。片区本身不加分；居民平时的往返分钟是资料或估计（``nature``）。"""
+
+    area_id: str
+    label: str
+    kind: Literal["home", "work", "home_work"]
+    note: str
+    typical_roundtrip_minutes: int | None = Field(default=None, exclude_if=lambda v: v is None)
+    nature: str | None = Field(default=None, exclude_if=lambda v: v is None)
+
+
+class VisibleCommuteMode(ContractModel):
+    mode: str
+    requires_function: str | None = Field(default=None, exclude_if=lambda v: v is None)
+    monthly_cap: Money | None = Field(default=None, exclude_if=lambda v: v is None)
+    note: str
+
+
+class VisibleCommuteLeg(ContractModel):
+    home_area: str
+    work_area: str
+    mode: str
+    roundtrip_minutes: int
+    cost_per_roundtrip: Money
+    nature: str
+
+
+class VisibleCommute(ContractModel):
+    """这座城的通勤关系（DECISIONS/0042）：方式的条件与月度封顶、片区之间的往返分钟与每次往返的花费。选择规则写在行动
+    说明书“住处、片区与通勤”一节（不在每份观察里重复）。"""
+
+    modes: tuple[VisibleCommuteMode, ...]
+    legs: tuple[VisibleCommuteLeg, ...]
 
 
 class VisibleHolding(ContractModel):
@@ -421,7 +459,6 @@ class VisibleResourceBudget(ContractModel):
     monthly_energy_quota: ExactAmount | None
     energy_rule: str
     commute_rule: str
-    commute_reference: str
     commute_burden_per_hour: float
     household_rule: str
     household_tasks: tuple[VisibleHouseholdTask, ...]
@@ -565,6 +602,9 @@ class AgentObservation(ContractModel):
     profile: VisibleProfile
     opportunities: tuple[VisibleOpportunity, ...]
     minimum_living: tuple[VisibleMinimumNeed, ...]
+    #: 城市内部的片区与通勤关系（DECISIONS/0042）；没有时不序列化。
+    areas: tuple[VisibleArea, ...] = Field(default=(), exclude_if=lambda v: v == ())
+    commute: VisibleCommute | None = Field(default=None, exclude_if=lambda v: v is None)
     last_feedback: VisibleFeedback | None
     #: 月度资源规则与预算（DECISIONS/0020）。
     resources: VisibleResourceBudget
@@ -970,6 +1010,7 @@ def _visible_opportunity(
         time_energy=o.resource,
         employer_id=o.employer_id,
         grants=tuple(o.grants),
+        area=o.area,
         qualification=_qualification(o, state, catalog, rules),
         food_plan=None if o.food_plan is None else _visible_food_plan(o.food_plan),
         enjoyment=tuple(
@@ -1056,11 +1097,10 @@ def _visible_resources(
         else None,
         energy_rule=_energy_rule(rules, feedback),
         commute_rule=(
-            "当月通勤小时 = 实际所住住房的往返分钟 × 每个到岗岗位的到岗次数 / 60，几个岗位相加；每个岗位"
-            "每次到岗算一趟完整往返，不合并行程；远程岗位不通勤，混合岗位只算到岗的次数。住房降级后按实际"
-            "住的房计算"
+            "当月通勤小时 = 通勤关系表里实际住处片区到各岗位就业片区、实际所用方式的往返分钟 × 这个岗位的到岗次数 / 60，"
+            "几个岗位相加；每个岗位每次到岗算一趟完整往返，不合并行程；远程岗位不通勤，混合岗位只算到岗的次数。住房降级后"
+            "按实际住的房所在片区计算"
         ),
-        commute_reference=rules.commute_reference,
         commute_burden_per_hour=rules.commute_burden_per_hour,
         household_rule=(
             "本人每月家务小时 = min(基准, 当月实际在用的各完整替代方案的残余)；残余是本人处理整项家务"
@@ -1233,6 +1273,18 @@ def build_observation(
             )
             for m in catalog.minimum_living
         ),
+        areas=tuple(
+            VisibleArea(
+                area_id=a.area_id,
+                label=a.label,
+                kind=a.kind,
+                note=a.note,
+                typical_roundtrip_minutes=a.typical_roundtrip_minutes,
+                nature=None if a.typical_source is None else a.typical_source.kind,
+            )
+            for a in catalog.areas
+        ),
+        commute=_visible_commute(catalog),
         last_feedback=last_feedback,
         resources=_visible_resources(resource_rules, state, p.show_energy_level, energy_feedback),
         channels=_channels(p, energy_feedback),
@@ -1244,6 +1296,34 @@ def build_observation(
     )
     assert_payload_clean(obs)
     return obs
+
+
+def _visible_commute(catalog: CityLifeCatalog) -> VisibleCommute | None:
+    rel = catalog.commute
+    if rel is None:
+        return None
+    return VisibleCommute(
+        modes=tuple(
+            VisibleCommuteMode(
+                mode=m.mode,
+                requires_function=m.requires_function,
+                monthly_cap=m.monthly_cap,
+                note=m.note,
+            )
+            for m in rel.modes
+        ),
+        legs=tuple(
+            VisibleCommuteLeg(
+                home_area=g.home_area,
+                work_area=g.work_area,
+                mode=g.mode,
+                roundtrip_minutes=g.roundtrip_minutes,
+                cost_per_roundtrip=g.cost_per_roundtrip,
+                nature=g.source.kind,
+            )
+            for g in rel.legs
+        ),
+    )
 
 
 def _visible_product_profile(
@@ -1466,9 +1546,18 @@ def _visible_month(r: MonthResources) -> VisibleMonthResources:
         hours_by_category=_by_category(r, "hours"),
         burden_by_category=_by_category(r, "burden"),
         housing_opportunity_id=r.housing_opportunity_id,
-        commute_roundtrip_minutes=r.commute_roundtrip_minutes,
         onsite_visits=r.onsite_visits,
         commute_status=r.commute_status,
+        commute=tuple(
+            VisibleCommuteUse(
+                job_opportunity_id=u.job_opportunity_id,
+                mode=u.mode,
+                roundtrip_minutes=u.roundtrip_minutes,
+                onsite_visits=u.onsite_visits,
+            )
+            for u in (r.commute.uses if r.commute is not None else ())
+        ),
+        commute_paid=r.commute.paid if r.commute is not None else None,
         notes=r.notes,
     )
 

@@ -172,7 +172,7 @@ def test_compiled_bundle_uses_the_product_protocol_and_the_unchanged_scoring_con
     assert p.energy_feedback.preference_source == "product_confirmed_six_dim"
     assert (
         scoring.spec.content_fingerprint
-        == "bd1e3578b0b7013043fd4470b3d4ee0fe64d9cd3c470381851d64b0831ef8fa9"
+        == "180fd9389343bac1da0fac4528e4eb6e9c6d7e069bddd56ea47acdcc4380bce0"
     )
     assert [x.person_id for x in bundle.product_profiles] == ["u601"]
     assert report.contract_valid and report.settlement_ready

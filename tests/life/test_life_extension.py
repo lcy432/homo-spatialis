@@ -892,7 +892,7 @@ def request_for(
         last_feedback=memory_years[-1].feedback if memory_years else None,
         revision=revision,
         tax_policy=bundle.tax_policy(catalog.tax_policy_id),
-        prompt_template="e3a-product-prompt-v2",
+        prompt_template="e3b-product-prompt-v1",
     )
     return request_payload(req)
 

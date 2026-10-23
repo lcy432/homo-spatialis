@@ -10,9 +10,9 @@
   ],
   "confirmation_source": "user_form",
   "confirmed_id": "confirmed.draft.u501.r1",
-  "content_fingerprint": "21231943f774524e7552238f38c0ee4f04dcd028e9cd134205ab34c1f1b1b3f0",
+  "content_fingerprint": "03fcca6ee6bf4a0841444ef159d26bf4dfa36e9b5a029fe653ca964104b0ae12",
   "draft": {
-   "draft_fingerprint": "5bd1eb60ce1d9157a96fcc0f5b2b32c4bd0b2a602c0630cc3750763a66fafc71",
+   "draft_fingerprint": "bda532e1c3e76f8659a107d8006b7ed3dfc481b582036100a82efd1f652c77bf",
    "draft_id": "draft.u501",
    "revision": 1
   },
@@ -91,7 +91,7 @@
   "meta": {
    "conversion_version": "e3a-conversion-v2",
    "data_pack": {
-    "content_fingerprint": "3d2958eb00de1de411186249bba0fb6bba6d411af265f9714736afa5511c964b",
+    "content_fingerprint": "a9e3aee4966ceeeb322c6ef77375df3d4f076d847bd0237d84c3a2c197224c47",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
     "pack_id": "pack.e3a.synthetic-v2",
     "status": "synthetic_fixture_only"

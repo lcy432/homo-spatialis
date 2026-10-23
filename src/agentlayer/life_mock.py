@@ -176,6 +176,44 @@ class _View:
         ]
         return min(limits) if limits else None
 
+    def commute_for(self, house: dict[str, Any], job_ids: list[str]) -> tuple[float, float] | None:
+        """mock 的通勤推算（DECISIONS/0042），只读公开的通勤表：不买用车权，每个到岗岗位取最快的、没有条件的方式；任一岗位
+        走不通就是 None。返回（最长往返分钟，每月通勤费，按封顶）。"""
+        onsite = []
+        for j in job_ids:
+            o = self.opps.get(j, {})
+            days = ((o.get("time_energy") or {}).get("job") or {}).get("onsite_days_per_month", 0)
+            if days:
+                onsite.append((o, days))
+        if not onsite:
+            return 0.0, 0.0
+        rel = self.obs.get("commute")
+        if rel is None:
+            return None
+        conditional = {m["mode"] for m in rel["modes"] if m.get("requires_function")}
+        caps = {m["mode"]: m.get("monthly_cap") for m in rel["modes"]}
+        longest, by_mode = 0.0, {}
+        for o, days in onsite:
+            legs = [
+                g
+                for g in rel["legs"]
+                if g["home_area"] == house.get("area")
+                and g["work_area"] == o.get("area")
+                and g["mode"] not in conditional
+            ]
+            if not legs:
+                return None
+            g = min(legs, key=lambda x: (x["roundtrip_minutes"], x["cost_per_roundtrip"]["amount"]))
+            longest = max(longest, float(g["roundtrip_minutes"]))
+            by_mode[g["mode"]] = by_mode.get(g["mode"], 0.0) + days * float(
+                g["cost_per_roundtrip"]["amount"]
+            )
+        cost = sum(
+            min(total, float(caps[m]["amount"])) if caps.get(m) else total
+            for m, total in by_mode.items()
+        )
+        return longest, cost
+
     def held_ids(self) -> set[str]:
         return {h["opportunity_id"] for h in self.obs.get("holdings", [])}
 
@@ -273,14 +311,25 @@ class ProductMockPlanner:
         food = foods[0]
         floor = v.min_living()
         houses = v.qualifying("housing")
+        commute = {h["opportunity_id"]: v.commute_for(h, chosen_jobs) for h in houses}
+        reachable = [h for h in houses if commute[h["opportunity_id"]] is not None]
+        if reachable:
+            houses = reachable
+        else:
+            notes.append(
+                "M1 通勤：合格住房到所选岗位都没有可用的通勤方式（通勤表里没有这条线），计划会被退回"
+            )
         cap = v.max_commute()
         home = houses[0]
+
+        def fare(h: dict[str, Any]) -> float:
+            c = commute.get(h["opportunity_id"])
+            return 0.0 if c is None else c[1]
+
         if cap is not None:
-            ok = [
-                h for h in houses if h.get("spec", {}).get("commute_roundtrip_minutes", 1e9) <= cap
-            ]
+            ok = [h for h in houses if (commute.get(h["opportunity_id"]) or (1e9, 0.0))[0] <= cap]
             if ok:
-                end = v.cash + 12 * (income - _monthly(ok[0]) - _monthly(food))  # type: ignore[operator]
+                end = v.cash + 12 * (income - _monthly(ok[0]) - _monthly(food) - fare(ok[0]))  # type: ignore[operator]
                 if end >= floor:
                     home = ok[0]
                     notes.append(
@@ -296,7 +345,7 @@ class ProductMockPlanner:
         else:
             notes.append(f"M1 住房：没有住房硬要求，选最便宜的合格住房 {home['opportunity_id']}")
         notes.append(f"M2 食品：最便宜的合格食品 {food['opportunity_id']}")
-        monthly_net = income - _monthly(home) - _monthly(food)  # type: ignore[operator]
+        monthly_net = income - _monthly(home) - _monthly(food) - fare(home)  # type: ignore[operator]
         items = [
             _period(home["opportunity_id"], 1, 12),
             _period(food["opportunity_id"], 1, 12),

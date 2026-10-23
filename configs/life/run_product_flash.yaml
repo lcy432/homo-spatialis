@@ -76,6 +76,6 @@ run:
       rule: >-
         官方页面（2026-10-09 更新，2026-10-18 发送前再次核对）的标价：输入 0.8 元 / 百万 token、输出 2.7 元 / 百万 token，页面没有按输入长度
         分档；每个输入 token 都按未命中缓存的标价估算，不假设缓存折扣或促销。核对记录见 runs/2026-10-18-e1-daily-convenience/pricing/
-  prompt_template: e3a-product-prompt-v2
+  prompt_template: e3b-product-prompt-v1
   memory_policy: e1-life-memory-v2
   note: 产品协议样例的真实模型配置（产品角色 Qwen3.8 Flash）；接着用 ledgers/qwen-flash-convenience 这本账（12 次、2 元以内）。

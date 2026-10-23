@@ -267,13 +267,20 @@ def resource_catalog_problems(protocol: LifeProtocol, catalog: CityLifeCatalog) 
                 out.append(
                     f"{where}: 规格 work_mode = {mode!r} 与岗位方案 {r.job.work_mode} 不一致"
                 )
-        if role == "housing" and o.availability == "available":
-            v = o.spec.get(rules.commute_minutes_key)
-            if isinstance(v, bool) or not isinstance(v, int) or v < 0:
-                out.append(
-                    f"{where}: 住房必须写整数的 {rules.commute_minutes_key}（往返分钟，非负）——"
-                    "缺了不能补成零"
-                )
+        if role == "housing" and o.availability == "available" and o.area is None:
+            out.append(
+                f"{where}: 住房必须写居住片区（DECISIONS/0042）——通勤与地区条件都按片区读，缺了不能补"
+            )
+        if (
+            role == "job"
+            and o.availability == "available"
+            and r.job is not None
+            and r.job.onsite_days_per_month > 0
+        ):
+            if o.area is None:
+                out.append(f"{where}: 需要到岗的岗位必须写就业片区（DECISIONS/0042）")
+            if catalog.commute is None:
+                out.append(f"{where}: 需要到岗的岗位所在城市必须有通勤关系表（DECISIONS/0042）")
     return out
 
 
@@ -1588,6 +1595,11 @@ def cross_validate(bundle: LifeBundle) -> ContractReport:
                     f"超出协议的 N = {n} 年——模拟期内永远完成不了"
                 )
         errors.extend(function_supply_problems(cat, functions))
+        for rule in cat.commute.modes if cat.commute is not None else ():
+            if rule.requires_function is not None and rule.requires_function not in functions:
+                errors.append(
+                    f"{cat.city}: 通勤方式 {rule.mode} 要求的功能 {rule.requires_function!r} 没有在 functions 里声明"
+                )
         errors.extend(resource_catalog_problems(protocol, cat))
         errors.extend(career_catalog_problems(protocol, cat))
         errors.extend(health_catalog_problems(protocol, cat))

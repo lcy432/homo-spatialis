@@ -611,7 +611,7 @@
     "clone_ref": "u503.m52.r0",
     "event_chain": [],
     "explanation": {
-     "audit_ref": "run:run-e3a-d4029d98272a80d8 clone:u503.m52.r0 record:progress.json",
+     "audit_ref": "run:run-e3a-ddfe1a59629f8fd2 clone:u503.m52.r0 record:progress.json",
      "category": "plan_or_execution_incomplete",
      "impact_zh": "不进完成者平均；城市的模拟缺失范围把它当作未知（0 到 1 之间都保留），不写成生活出局",
      "next_action_zh": "这是规划或模拟的问题，不是生活出局；改进规划器或说明之后重跑",
@@ -804,7 +804,7 @@
   ],
   "confirmed": {
    "confirmed_id": "confirmed.draft.u503.r1",
-   "content_fingerprint": "b1151891f5d8bcb69179d2019f90ad9f2cb64be44ba34bd1f36022ec804ba2d3"
+   "content_fingerprint": "c6f742ec92f2d4468d28af7f32df309f7d6af4172bbaad9ab8aa5acf01f0c71d"
   },
   "evaluation_status": "generated",
   "limitations_zh": [
@@ -819,7 +819,7 @@
   "meta": {
    "conversion_version": "e3a-conversion-v2",
    "data_pack": {
-    "content_fingerprint": "670814e4d30497cbee4cf8364354009b4a2b82658d9cb671002aba849bd499c6",
+    "content_fingerprint": "7ba5d4c0840f3c9e874c3bcc3b56a7e1324bc37c51d09ca7273a166fe76ccb8d",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
     "pack_id": "pack.e3a.synthetic-v2",
     "status": "synthetic_fixture_only"
@@ -865,7 +865,7 @@
    "planner_kind": "mock"
   },
   "preflight": {
-   "preflight_fingerprint": "6bcd943cbe4f69b58016b3f378d4209baafb021d5ce5f53e4bb96718b9ffc9cc",
+   "preflight_fingerprint": "41da1e4a843e4828eb273ed798289b15e41d3de828b4a9deb78756aae22fc544",
    "preflight_id": "preflight.confirmed.draft.u503.r1"
   },
   "reading_guide_zh": [
@@ -879,14 +879,14 @@
    "分数是当前合成模型下、按你确认的陈述偏好计算的结果；小数末位的差异不构成可靠的排序"
   ],
   "real_model_calls": 0,
-  "result_fingerprint": "beffcc282c524638972436f88e90ce5cdccdd723d9e49b5ee6d1bb2ffec3db99",
-  "result_id": "result.run-e3a-d4029d98272a80d8",
-  "run_id": "run-e3a-d4029d98272a80d8",
+  "result_fingerprint": "cf485f12b614293e935dbdcb810dd28d66e4010477eb084bf4e1266306dbcf3d",
+  "result_id": "result.run-e3a-ddfe1a59629f8fd2",
+  "run_id": "run-e3a-ddfe1a59629f8fd2",
   "run_stage": "completed",
   "sources_zh": [
    "生活事实：E1 结算记录（钱、岗位、住房、食品、服务月份）与月度资源账（本人家务小时）",
    "评价：E1-6A 单分身跨期评价（L / V / J）；汇总：E1-6B 城市报告（C / E / M、均值、模拟缺失范围、事件链、硬要求）",
-   "资料：合成资料包 pack.e3a.synthetic-v2（670814e4d304…）与产品协议的基础样例；全部是合成设定"
+   "资料：合成资料包 pack.e3a.synthetic-v2（7ba5d4c0840f…）与产品协议的基础样例；全部是合成设定"
   ]
  }
 }

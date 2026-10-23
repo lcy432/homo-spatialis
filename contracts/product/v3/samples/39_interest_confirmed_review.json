@@ -10,7 +10,7 @@
   ],
   "confirmable": true,
   "draft": {
-   "draft_fingerprint": "7ddaa2fb066096b54c5e73a209c8ff02ee896c48d0b27b8b08e3048c8b2f15dd",
+   "draft_fingerprint": "dab4145fdd2ab42a9b3588104a09b700ca888f9a9cc68b84b90d43da6fe6f7b7",
    "draft_id": "draft.u501.interest_confirmed",
    "revision": 1
   },
@@ -262,7 +262,7 @@
   "meta": {
    "conversion_version": "e3a-conversion-v2",
    "data_pack": {
-    "content_fingerprint": "3d2958eb00de1de411186249bba0fb6bba6d411af265f9714736afa5511c964b",
+    "content_fingerprint": "a9e3aee4966ceeeb322c6ef77375df3d4f076d847bd0237d84c3a2c197224c47",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
     "pack_id": "pack.e3a.synthetic-v2",
     "status": "synthetic_fixture_only"

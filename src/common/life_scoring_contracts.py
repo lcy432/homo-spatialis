@@ -243,7 +243,8 @@ class TransportSpec(ContractModel):
 
         k_m = ρ + (1 − ρ) · D_m / D_ref        T_eq = k_m · T_m        S = τ_T / (τ_T + T_eq)
 
-    * T_m：这个月实际所住住房（含兜底）在规格 ``minutes_key`` 里写的往返分钟——与资源账计通勤用的是同一个字段；
+    * T_m（DECISIONS/0042）：读这个月的通勤执行记录——有到岗时是按到岗次数加权的往返分钟（时间账用的同一份记录）；
+      没有到岗时是实际住处所在居住片区的居民平时往返分钟（``AreaDecl.typical_roundtrip_minutes``）；
     * D_m：这个月实际累计到岗次数，读资源账的 ``onsite_visits``（时间账用的同一个计数，多岗位相加）；
     * ρ：不因上班消失的交通影响（无工作、纯远程时 k = ρ）；D_ref：参考到岗次数。
 
@@ -251,7 +252,6 @@ class TransportSpec(ContractModel):
     条件是合成映射假设：购物、社交、就医与公共交通可及性没有单独建模。ρ、D_ref 全组共用，只写在评分规格里。
     """
 
-    minutes_key: KeyStr
     rho: Annotated[float, Field(ge=0, le=1, allow_inf_nan=False)]
     reference_visits: Annotated[int, Field(ge=1, le=62)]
     unit: str = Field(min_length=1, max_length=80)
@@ -1371,7 +1371,6 @@ RESERVED_SCORING_KEYS: frozenset[str] = frozenset(
         "efficiencies",
         "a_nature",
         "base_includes_landscape",
-        "minutes_key",
         "work_mode_key",
         "onsite_value",
         "spec_key",

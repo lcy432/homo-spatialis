@@ -161,7 +161,6 @@ spec:
         交通便捷程度及出行对生活的影响（维度键沿用 commute）。按这个月实际所住住房的往返分钟与实际累计到岗次数评分；
         大病病假的月份没有到岗，只剩 ρ 份不因上班消失的出行影响。时间与负担由月度资源账另算。
       transport:
-        minutes_key: commute_roundtrip_minutes
         rho: 0.25
         reference_visits: 20
         unit: 分钟/工作日往返
@@ -212,7 +211,6 @@ comparison_group:
     space_level: 级
     quality_level: 级
     visits_per_month: 次/月
-    commute_roundtrip_minutes: 分钟/工作日往返
   note: >-
     合成比较组：两座城，全部用合成设定、同一地理口径、同一币种与基年；家务任务与基准由协议统一声明，两城的便利设备包与日常杂务服务
     效果定义（残余小时、寿命）逐项相同、只有价格不同；治疗目录按同一套需求定义与计价粒度写明。

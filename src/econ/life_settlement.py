@@ -125,6 +125,7 @@ from common.life_contracts import (
     LifeContractError,
     LifeOpportunity,
     LifeProtocol,
+    MonthCommute,
     MonthPause,
     MonthRecord,
     MonthRejection,
@@ -150,6 +151,7 @@ from common.life_contracts import (
 from common.money import Money, NumeraireMismatchError
 from common.providers import TaxFunction
 from econ.life_career import Completion, employment_after_year, grant_abilities
+from econ.life_commute import CommuteUnavailableError, OnsiteJob, executed_commute
 from econ.life_health import (
     ExtraLoad,
     HealthYearTracker,
@@ -654,6 +656,8 @@ class _Year:
         self.ytd_tax = 0
         self.flows: list[_Flow] = []
         self.months: list[MonthRecord] = []
+        #: 每个月唯一的通勤执行记录（DECISIONS/0042）；资源账、交通评分与通勤上限都读它。
+        self.commutes: dict[int, MonthCommute] = {}
         self.exit: ExitRecord | None = None
         self.events: list[str] = []
         self.base: dict[str, LifeOpportunity] = {}
@@ -833,6 +837,7 @@ class _Year:
         "held",
         "training",
         "resource_months",
+        "commutes",
         "savings",
         "goal_line",
         "participation",
@@ -1219,6 +1224,12 @@ class _Year:
         for ln in deferred:
             self._buy_once(ln, m)
 
+        # 第 6b 步（DECISIONS/0042）：通勤——实际住处 × 这个月到岗的岗位 × 在用的功能 → 唯一的通勤执行记录，按它付通勤费。
+        # 放在这个月的购买之后：同月买到、当月生效的东西（例如用车权）当月就算在用
+        stop = self._commute_step(m)
+        if stop is not None:
+            return stop
+
         # 第 7 步：持有物服务、培训参与、月末余额
         self._serve_holdings(m)
         self._attend_training(m)
@@ -1235,6 +1246,85 @@ class _Year:
             link_cancelled=self._goal_line_cancelled(m),
         )
         return self._check_resources(m)
+
+    # ------------------------------------------------------------------ 通勤（DECISIONS/0042）
+
+    def _home_in(self, m: int) -> LifeOpportunity | None:
+        """这个月实际住的那一处（含兜底）；没有就是 None。"""
+        homes = [
+            rec.opp
+            for ln in self.lines
+            for rec in (ln, ln.fallback)
+            if rec is not None and rec.role == "housing" and m in rec.covered
+        ]
+        if len(homes) > 1:
+            raise LifeContractError(f"第 {m} 月实际住房有 {len(homes)} 处，不是恰好一处")
+        return homes[0] if homes else None
+
+    def _onsite_jobs(self, m: int) -> list[OnsiteJob]:
+        """这个月实际上了班（拿到工资）、需要到岗的岗位。病假与没有执行的岗位不在里面。"""
+        out = []
+        for ln in self.lines:
+            if ln.role != "job" or m not in ln.covered:
+                continue
+            job = ln.opp.resource.job if ln.opp.resource is not None else None
+            if job is not None and job.onsite_days_per_month > 0:
+                out.append(OnsiteJob(ln.opp, job.onsite_days_per_month))
+        return out
+
+    def _functions_in_use(self, m: int) -> frozenset[str]:
+        """这个月在用的机会提供的功能：这个月付了款的按月服务，与这个月在服务期内、没有暂停的持有物（含当月买到、当月生效的）。
+        只查不扣寿命。"""
+        out: set[str] = set()
+        for ln in self.lines:
+            if ln.role == "periodic_service" and m in ln.covered:
+                out.update(ln.opp.functions)
+        for h in self.held:
+            if h.expired or h.remaining <= 0:
+                continue
+            if h.in_service_from_year is not None and h.in_service_from_year > self.year:
+                continue
+            if self._paused_kind(h.opp, h.kind) is None:
+                out.update(h.opp.functions)
+        return frozenset(out)
+
+    def _commute_step(self, m: int) -> SettlementResult | None:
+        try:
+            record = executed_commute(
+                self.catalog, m, self._home_in(m), self._onsite_jobs(m), self._functions_in_use(m)
+            )
+        except CommuteUnavailableError as exc:
+            return _failed(
+                "plan_infeasible", [_problem("commute_unavailable", f"第 {m} 月：{exc}", month=m)]
+            )
+        except LifeContractError as exc:
+            return _failed(
+                "data_error",
+                [_problem("commute_data", f"第 {m} 月的通勤资料不足：{exc}", month=m)],
+            )
+        cost = 0
+        if record.paid is not None:
+            cost = exact_minor_units(record.paid.amount, self.digits) or 0
+        if cost > self.cash:
+            return _failed(
+                "plan_infeasible",
+                [
+                    _problem(
+                        "commute_unaffordable",
+                        f"第 {m} 月：通勤费 {self._fmt(cost)}，付完这个月的其他开支后现金只剩 {self._fmt(self.cash)}"
+                        "（通勤费在每月的购买之后结清）",
+                        month=m,
+                        cash_available=self._money(self.cash),
+                        required=self._money(cost),
+                    )
+                ],
+            )
+        if cost:
+            self.cash -= cost
+            modes = sorted({u.mode for u in record.uses})
+            self._flow(m, "expense", None, f"通勤（{'、'.join(modes)}）", -cost)
+        self.commutes[m] = record
+        return None
 
     # ------------------------------------------------------------------ 资金目标（E1-5B）
 
@@ -1322,6 +1412,7 @@ class _Year:
                 self._activities(m, exit_month),
                 exit_month=exit_month,
                 extra=extra,
+                commute=self.commutes.get(m),
             )
         except LifeContractError as exc:
             return _failed(

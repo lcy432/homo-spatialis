@@ -437,12 +437,13 @@ def _score_transport(
     cond: CityComponentCondition,
     in_use: list[_InUse],
     resources: MonthResources | None,
+    catalog: CityLifeCatalog | None,
 ) -> ComponentMonth:
     """通勤维（交通便捷程度）：k = ρ + (1 − ρ)·D/D_ref，T_eq = k·T，S = τ_T/(τ_T + T_eq)。
 
-    T 读这个月实际所住住房（含兜底）的往返分钟；D 读资源账这个月的累计到岗次数（时间账用的同一个计数，
-    多岗位相加，没执行的岗位不在里面）。住房分钟或资源账缺失报未知，不补 0；资源账与评分读到的住房对不上
-    是记录错误。T_eq 只是评分中间量，时间与负担账不乘 k。
+    T 与 D 都读这个月的通勤执行记录（DECISIONS/0042，时间账与通勤费用的同一份记录）：有到岗时 T 是按到岗次数加权的往返
+    分钟，D 是累计到岗次数；没有到岗时 T 是实际住处所在居住片区的居民平时往返分钟。记录、片区或片区的平时分钟缺失报未知，
+    不补 0；资源账与评分读到的住房对不上是记录错误。T_eq 只是评分中间量，时间与负担账不乘 k。
     """
     head = _head(comp)
     ts = comp.transport
@@ -461,13 +462,6 @@ def _score_transport(
     if len(homes) != 1:
         return unknown(f"这个月实际住房记录有 {len(homes)} 处，不是恰好一处")
     home = homes[0].opp
-    minutes = _num(home.spec.get(ts.minutes_key))
-    if minutes is None:
-        return unknown(
-            f"住房 {home.opportunity_id} 的规格缺 {ts.minutes_key}（或不是数值）——往返分钟未知不当 0"
-        )
-    if minutes < 0:
-        raise LifeContractError(f"{home.opportunity_id} 的往返分钟为负")
     if resources is None:
         return unknown(
             "这个月没有资源账记录：到岗次数未知（不当 0，也不按工作方式字样或岗位数量猜）"
@@ -479,23 +473,37 @@ def _score_transport(
             f"第 {resources.month} 月：资源账记的实际住房是 {resources.housing_opportunity_id}，评分读到的是 "
             f"{home.opportunity_id}——不是同一次生活的记录"
         )
-    if (
-        resources.commute_roundtrip_minutes is not None
-        and resources.commute_roundtrip_minutes != minutes
-    ):
+    record = resources.commute
+    if record is None or record.status not in ("computed", "no_onsite_work"):
+        return unknown("这个月没有可用的通勤执行记录：往返分钟与到岗次数未知")
+    if record.housing_opportunity_id not in (None, home.opportunity_id):
         raise LifeContractError(
-            f"第 {resources.month} 月：资源账的往返分钟 {resources.commute_roundtrip_minutes} 与住房规格 "
-            f"{minutes:g} 不一致"
+            f"第 {resources.month} 月：通勤记录的住处是 {record.housing_opportunity_id}，评分读到的是 "
+            f"{home.opportunity_id}——不是同一次生活的记录"
         )
+    weighted = record.visit_weighted_minutes()
+    if weighted is not None:
+        minutes_exact = weighted
+        t_source = "通勤执行记录里按到岗次数加权的往返分钟"
+    else:
+        area = catalog.area(home.area) if catalog is not None and home.area is not None else None
+        if area is None or area.typical_roundtrip_minutes is None:
+            return unknown(
+                f"这个月没有到岗，住处 {home.opportunity_id} 所在片区没有居民平时的往返分钟——未知，不当 0"
+            )
+        minutes_exact = Fraction(area.typical_roundtrip_minutes)
+        t_source = f"没有到岗：住处所在片区 {area.area_id} 的居民平时往返分钟"
+    minutes = float(minutes_exact)
     visits = resources.onsite_visits
     rho = to_fraction(ts.rho)
     k = rho + (1 - rho) * Fraction(visits, ts.reference_visits)
-    t_eq = k * to_fraction(minutes)
+    t_eq = k * minutes_exact
     tau = to_fraction(comp.tau)
     s_value = float(tau / (tau + t_eq))
     reasons = [
         "广义交通：k = ρ + (1 − ρ)·D/D_ref，T_eq = k·T（评分中间量，不是实际出行分钟），"
-        "S = τ_T/(τ_T + T_eq)；D 读资源账的到岗次数，时间与负担账不变"
+        "S = τ_T/(τ_T + T_eq)；D 读资源账的到岗次数，时间与负担账不变",
+        f"T 取自{t_source}",
     ]
     if visits == 0:
         reasons.append("这个月没有到岗（没有工作或纯远程）：k = ρ，只剩不因上班消失的出行影响")
@@ -883,12 +891,13 @@ def _score_component(
     rules: MonthlyResourceRules | None = None,
     participation: list[ParticipationRecord] | None = None,
     pref: ScoringPreference | None = None,
+    catalog: CityLifeCatalog | None = None,
 ) -> ComponentMonth:
     """一个分项一个月的评分。``supply`` 是这座城各项功能的供给声明（功能 → 状态）；``growth`` 是这个月的
     成长（只有成长项分项用）；``resources`` 是这个月的资源账（广义交通读其中的到岗次数，日常生活便利读其中的家务行）；
     ``rules`` 是协议的月度资源规则（日常生活便利读其中的家务基准）。"""
     if comp.transport is not None:
-        return _score_transport(comp, cond, in_use, resources)
+        return _score_transport(comp, cond, in_use, resources, catalog)
     if comp.convenience is not None:
         return _score_convenience(comp, cond, resources, rules)
     if comp.food_life is not None:
@@ -1159,14 +1168,39 @@ def _aggregate(
 # ==========================================================================
 
 
-def _item_meets(cond: dict[str, object], opp: LifeOpportunity) -> str:
-    """一个在用项目是否满足一组条件：yes / no / unknown（规格缺要比较的键）。"""
+#: 读执行事实而不是规格的条件键（DECISIONS/0042）：住房的通勤往返分钟来自这个月的通勤执行记录（最长的那一趟往返；
+#: 没有到岗是 0），不来自房子的规格。
+EXECUTED_FACT_KEYS: frozenset[str] = frozenset({"commute_roundtrip_minutes"})
+
+
+def _executed_facts(r: _InUse, resources: MonthResources | None) -> dict[str, object]:
+    if r.record != "housing" or resources is None or resources.commute is None:
+        return {}
+    c = resources.commute
+    if c.housing_opportunity_id not in (None, r.opp.opportunity_id):
+        return {}
+    if c.status == "computed":
+        return {"commute_roundtrip_minutes": c.longest_roundtrip_minutes}
+    if c.status == "no_onsite_work":
+        return {"commute_roundtrip_minutes": 0}
+    return {}
+
+
+def _item_meets(
+    cond: dict[str, object], opp: LifeOpportunity, executed: dict[str, object] | None = None
+) -> str:
+    """一个在用项目是否满足一组条件：yes / no / unknown（规格缺要比较的键）。执行事实键只读 ``executed``。"""
     missing = False
+    executed = executed or {}
+
+    def value(key: str) -> object:
+        return executed.get(key) if key in EXECUTED_FACT_KEYS else opp.spec.get(key)
+
     for key, want in cond.items():
         if key == "category":
             continue
         if key.startswith(("min_", "max_")):
-            have = opp.spec.get(key[4:])
+            have = value(key[4:])
             hv, wv = _num(have), _num(want)
             if hv is None or wv is None:
                 missing = True
@@ -1174,7 +1208,7 @@ def _item_meets(cond: dict[str, object], opp: LifeOpportunity) -> str:
             if (key.startswith("min_") and hv < wv) or (key.startswith("max_") and hv > wv):
                 return "no"
         else:
-            have = opp.spec.get(key)
+            have = value(key)
             if have is None:
                 missing = True
                 continue
@@ -1184,7 +1218,7 @@ def _item_meets(cond: dict[str, object], opp: LifeOpportunity) -> str:
 
 
 def _condition_status(
-    cond: dict[str, object], in_use: list[_InUse]
+    cond: dict[str, object], in_use: list[_InUse], resources: MonthResources | None = None
 ) -> tuple[str, tuple[str, ...], str | None]:
     category = cond.get("category")
     if category is None:
@@ -1195,7 +1229,7 @@ def _condition_status(
     yes: list[str] = []
     unsure: list[str] = []
     for r in candidates:
-        verdict = _item_meets(cond, r.opp)
+        verdict = _item_meets(cond, r.opp, _executed_facts(r, resources))
         if verdict == "yes":
             yes.append(r.opp.opportunity_id)
         elif verdict == "unknown":
@@ -1208,7 +1242,10 @@ def _condition_status(
 
 
 def _requirement(
-    req: HardRequirement, by_month: dict[int, list[_InUse]], lived: list[int]
+    req: HardRequirement,
+    by_month: dict[int, list[_InUse]],
+    lived: list[int],
+    resources: dict[int, MonthResources] | None = None,
 ) -> HardRequirementResult:
     alternatives = [dict(req.requirement)] + [
         dict(s.satisfies_with) for s in req.acceptable_substitutes
@@ -1222,7 +1259,8 @@ def _requirement(
                 )
             )
             continue
-        results = [_condition_status(a, by_month[m]) for a in alternatives]
+        month_res = (resources or {}).get(m)
+        results = [_condition_status(a, by_month[m], month_res) for a in alternatives]
         sat = [r for r in results if r[0] == "satisfied"]
         if sat:
             items = tuple(sorted({i for r in sat for i in r[1]}))
@@ -1403,6 +1441,7 @@ def score_year(
                 rules=protocol.resource_rules,
                 participation=[p for p in outcome.participation if p.month == m],
                 pref=preference,
+                catalog=catalog,
             )
             comps[comp.component_id] = cm
             contributed.update(
@@ -1472,7 +1511,7 @@ def score_year(
         annual_mean = math.fsum(x.u for x in months if x.u is not None) / MONTHS_PER_YEAR
 
     lived = [x.month for x in months if x.status in ("scored", "incomplete")]
-    requirements = tuple(_requirement(r, by_month, lived) for r in hard_requirements)
+    requirements = tuple(_requirement(r, by_month, lived, resources) for r in hard_requirements)
 
     notes = [
         "探索评分（合成参数，ADR0018）：不是现实城市的幸福估计，不能据此排序城市",
