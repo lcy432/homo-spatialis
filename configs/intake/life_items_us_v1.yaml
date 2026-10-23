@@ -1,0 +1,323 @@
+# E3B（DECISIONS/0042）六城真实生活资料包的“物品与活动”一侧：完整食品方案、杂务服务、设备、享受型服务、爱好装备与活动。
+# 编译代码在 src/product/realdata/life_items.py，说明在 docs/design/e3b-items-data.md。
+#
+# 数从哪来分三种，写在每一项旁边：
+#   * 资料：intake-02 冻结库（构建身份见 intake_build_id）与原始文件缓存里的公开资料（BLS AP / CE / OEWS、BEA RPP、OSM、
+#     ENERGY STAR、芝加哥公园管理局、USDA FoodData Central SR Legacy、BLS ATUS）；
+#   * 规则：确定的换算（52 ÷ 12 周、OEWS 年薪 = 时薪 × 2,080、四舍五入到分）；
+#   * 设定：下面 assumptions 里登记的探索设定（编号、性质、依据），在看任何 mock 结果之前写定；不是测量，不能据此排序真实城市。
+# 语言模型不生成任何数：设定值是本配置作者写下、登记、可审阅的；代码只做确定的换算。
+
+version: life-items-us-v1
+intake_build_id: 562c32339bbae67fd1917b7ac67f4b5b28f55d07e88a8c78ee6fe371ed863691
+numeraire: USD_2024_LOCAL
+mapping_version: e3b-life-items-v1
+#: 纯设定类机会的来源日期（配置写定的日子）
+assumptions_written_on: 2026-10-23
+metros:
+  - {cbsa: "35620", key: nyc, label: New York-Newark-Jersey City 都会区, city: 纽约}
+  - {cbsa: "31080", key: la, label: Los Angeles-Long Beach-Anaheim 都会区, city: 洛杉矶}
+  - {cbsa: "41860", key: sf, label: San Francisco-Oakland-Fremont 都会区, city: 旧金山}
+  - {cbsa: "16980", key: chi, label: Chicago-Naperville-Elgin 都会区, city: 芝加哥}
+  - {cbsa: "26420", key: hou, label: Houston-Pasadena-The Woodlands 都会区, city: 休斯敦}
+  - {cbsa: "42660", key: sea, label: Seattle-Tacoma-Bellevue 都会区, city: 西雅图}
+
+# 词表（建议并入资料包的生活输入；现有合成样例的键都保留）
+vocabulary:
+  cuisines: [home_style, chinese, italian, mexican, japanese, indian, thai, korean, vietnamese, mediterranean]
+  leisure_categories: [music, racket_sports, arts_culture, culinary, fitness]
+  capabilities: [guitar_playable, racket_playable]
+  enjoyment_functions: [personal_care]
+  household_tasks: [laundry, cleaning]
+
+# ============================================================================ 食品
+food:
+  # 篮子数量直接读 intake 的配置（configs/intake/us_v1.yaml 的 mapping.a_food.baskets，假设 food_basket_quantities_v1），
+  # 价格读冻结库里本都会区的食材估计价（food.item.<cbsa>.<代码>，rpp_goods_spatial_adjustment@1）。
+  intake_config: configs/intake/us_v1.yaml
+  # 按热量补齐成完整的一周（规则 food_energy_completion_v1）：篮子自己的热量不够每周参照量时，差额用 complement 篮子按
+  # “每千卡的花费”补上；篮子本身已经够就不补、不缩。热量 = 购买重量 × SR Legacy 每 100 克能量（不扣不可食部分，见 bias）。
+  energy_reference_kcal_per_day: 2000
+  complement_basket: staples_home
+  # BLS AP 食材 → USDA FoodData Central SR Legacy（2018-04）条目。克数：单位原文写了克就用原文；“per doz.” 用 SR 的
+  # “1 large” 克重 × 12；“per gal.” 用 SR 的 “1 quart” 克重 × 4（1 加仑 = 4 夸脱）。咖啡不计热量（冲泡饮品，不是食物热量）。
+  item_energy:
+    "701312": {fdc_id: "168877", note: 长粒白米（生、强化）}
+    "701322": {fdc_id: "169736", note: 干意面（强化）}
+    "702111": {fdc_id: "174924", note: 白面包}
+    "706111": {fdc_id: "171047", note: 整鸡（肉、皮与内脏，生）}
+    "708111": {fdc_id: "171287", per_unit: {portion: large, count: 12}, note: 大号鸡蛋一打}
+    "709112": {fdc_id: "171265", per_unit: {portion: quart, count: 4}, note: 全脂牛奶一加仑}
+    "711211": {fdc_id: "173944", note: 香蕉}
+    "712112": {fdc_id: "170026", note: 土豆（连皮）}
+    "712311": {fdc_id: "170457", note: 番茄}
+    "714233": {fdc_id: "175199", note: 干豆（以斑豆为代表）}
+    "703112": {fdc_id: "174036", note: 牛肉末（80/20，生）}
+    FF1101: {fdc_id: "171077", note: 去骨去皮鸡胸（生）}
+    "704212": {fdc_id: "168286", note: 去骨猪排（生）}
+    FJ1101: {fdc_id: "171267", per_unit: {portion: quart, count: 4}, note: 低脂牛奶一加仑（以 2% 为代表）}
+    "710212": {fdc_id: "173414", note: 切达奶酪}
+    FJ4101: {fdc_id: "171284", note: 酸奶（原味全脂为代表）}
+    "711311": {fdc_id: "169917", note: 脐橙}
+    FL2101: {fdc_id: "169247", note: 罗马生菜}
+    "717311": {zero_energy: true, note: 研磨咖啡：冲泡饮品，不计食物热量}
+    "703613": {fdc_id: "168728", note: 西冷牛排（choice，生）}
+    "711415": {fdc_id: "167762", note: 草莓}
+  burden_per_hour: 0.5
+  shopping_hours_per_week: 2
+  # 自己做的完整方案：一个篮子、21 餐；新鲜餐数与每餐做饭分钟是设定（food_plan_composition_v1）
+  home_plans:
+    - {plan: home_staples, basket: staples_home, fresh_meals_per_week: 4, minutes_per_meal: 20,
+       label: 自己做·主食为主, quality: 米面、整鸡、鸡蛋、土豆为主，按热量补齐到一个人一周的量}
+    - {plan: home_varied, basket: varied_home, fresh_meals_per_week: 10, minutes_per_meal: 25,
+       label: 自己做·荤素搭配, quality: 牛肉、鸡胸、奶酪、酸奶与蔬果搭配，不够的热量用主食补齐}
+    - {plan: home_fresh, basket: fresh_protein_home, fresh_meals_per_week: 17, minutes_per_meal: 30,
+       label: 自己做·鲜肉蔬果较多, quality: 鸡胸、牛排、草莓、生菜较多，不够的热量用主食补齐}
+  # 家里做 + 外送 / 外食的混合方案：家里部分用 varied 篮子补齐后的一周费用 × 家里餐数 ÷ 21（food_home_share_by_meals_v1）
+  mixed_plans:
+    - {plan: cook_delivery, home_basket: varied_home, home_meals: 17, home_fresh: 8, minutes_per_meal: 25,
+       out_mode: delivery, out_meals: 4, out_fresh: 4, label: 家里做 + 每周 4 顿外送}
+    - {plan: cook_dine, home_basket: varied_home, home_meals: 14, home_fresh: 7, minutes_per_meal: 25,
+       out_mode: dine_out, out_meals: 7, out_fresh: 7, label: 家里做 + 每周 7 顿外食}
+  dining:
+    # 每顿外食的平均花费 = CE 都会区每户“在外饮食”年支出（2023–24 名义）× CPI 换到 2024 年平均 ÷ 每户人数 ÷ 52 ÷ 每人每周外食餐数
+    meals_away_per_person_week: 3
+    dine_out_hours_per_meal: 1.25
+    delivery_hours_per_meal: 0.25
+    # 菜系只在本城 OSM 的 amenity=restaurant 里至少有 min_restaurants 家写了这个菜系标签时提供（只数 restaurant：旧金山只有这一类）
+    min_restaurants: 20
+    max_cuisines_per_city: 6
+    osm_cuisine_tags:
+      chinese: [chinese]
+      italian: [italian]
+      mexican: [mexican, tex-mex]
+      japanese: [japanese, sushi, ramen]
+      indian: [indian]
+      thai: [thai]
+      korean: [korean]
+      vietnamese: [vietnamese]
+      mediterranean: [mediterranean, greek, middle_eastern]
+    cuisine_labels:
+      chinese: 中餐
+      italian: 意式
+      mexican: 墨西哥菜
+      japanese: 日料
+      indian: 印度菜
+      thai: 泰国菜
+      korean: 韩国菜
+      vietnamese: 越南菜
+      mediterranean: 地中海菜
+      home_style: 家常
+
+# ============================================================================ 人工服务与享受
+services:
+  # OEWS 年薪 ÷ 2,080 = 时薪（BLS OEWS 的换算约定）；都会区中位数；价格 = 时薪 × 工人小时 × 人工费用倍率（labor_overhead_v1）
+  hours_per_year: 2080
+  labor_overhead_multiplier: 2.0
+  chores:
+    - {service: laundry_pickup, soc: 51-6011, worker_hours_per_month: 3, client_hours_per_month: 0,
+       substitutes: {laundry: 2}, label: 洗衣取送（每周一次）,
+       quality: 每周上门取送，洗、烘、叠由洗衣店完成；本人每月还要约 2 小时分拣、交接与收纳}
+    - {service: cleaning_biweekly, soc: 37-2012, worker_hours_per_month: 6, client_hours_per_month: 0,
+       substitutes: {cleaning: 4}, label: 上门保洁（每两周一次）,
+       quality: 每两周上门打扫约 3 小时；两次之间本人每月还要约 4 小时日常整理}
+    - {service: cleaning_weekly, soc: 37-2012, worker_hours_per_month: 10, client_hours_per_month: 0,
+       substitutes: {cleaning: 2}, label: 上门保洁（每周一次）,
+       quality: 每周上门打扫约 2.5 小时；本人每月还要约 2 小时日常整理}
+  enjoyment:
+    - {service: massage_studio_1, soc: 31-9011, sessions_per_month: 1, worker_hours_per_session: 1.25,
+       client_hours_per_session: 1.5, burden_per_hour: 0.2, label: 按摩（店里，每月一次）,
+       quality: 每月一次约 1 小时的放松按摩；往返约半小时}
+    - {service: massage_studio_2, soc: 31-9011, sessions_per_month: 2, worker_hours_per_session: 1.25,
+       client_hours_per_session: 1.5, burden_per_hour: 0.2, label: 按摩（店里，每月两次）,
+       quality: 每月两次、每次约 1 小时的放松按摩；每次往返约半小时}
+    - {service: massage_home_1, soc: 31-9011, sessions_per_month: 1, worker_hours_per_session: 2,
+       client_hours_per_session: 1, burden_per_hour: 0.2, label: 上门按摩（每月一次）,
+       quality: 按摩师上门，每月一次约 1 小时；按摩师的路上时间计进价格，本人不用出门}
+
+# ============================================================================ 设备（ENERGY STAR 型号 + 类别设定）
+devices:
+  # 型号只用适用市场确定包括美国的（us、us_ca）；每个（类别 × 类型）取年耗电中位的型号作代表（并列取型号标识最小的）。
+  # 价格是全国类别设定 × intake 的商品类空间换算系数；寿命、效果与故障都是类别设定（device_category_v1）。
+  markets: [us, us_ca]
+  offers:
+    - {offer: washer_top, parts: [{category: clothes_washer, type: Top Load}], price_usd_2024_national: 700,
+       lifetime_years: 10, substitutes: {laundry: 7}, label: 顶开洗衣机,
+       quality: 自己洗，不用去洗衣店；还要晾干、叠放与收纳（每月约 7 小时）}
+    - {offer: washer_front, parts: [{category: clothes_washer, type: Front Load}], price_usd_2024_national: 1000,
+       lifetime_years: 10, substitutes: {laundry: 7}, label: 前开洗衣机,
+       quality: 自己洗，不用去洗衣店；还要晾干、叠放与收纳（每月约 7 小时）}
+    - {offer: pair_top_dryer, parts: [{category: clothes_washer, type: Top Load}, {category: clothes_dryer, type: Electric}],
+       price_usd_2024_national: 1400, lifetime_years: 10, substitutes: {laundry: 4}, label: 顶开洗衣机 + 电烘干机一套,
+       quality: 洗与烘都在家里；本人每月还要约 4 小时分拣、叠放与收纳}
+    - {offer: pair_front_dryer, parts: [{category: clothes_washer, type: Front Load}, {category: clothes_dryer, type: Electric}],
+       price_usd_2024_national: 1700, lifetime_years: 10, substitutes: {laundry: 4}, label: 前开洗衣机 + 电烘干机一套,
+       quality: 洗与烘都在家里；本人每月还要约 4 小时分拣、叠放与收纳}
+    - {offer: combo, parts: [{category: combo_washer_dryer, type: Front Load}], price_usd_2024_national: 1600,
+       lifetime_years: 10, substitutes: {laundry: 4}, label: 洗烘一体机,
+       quality: 一台机器洗完直接烘干；本人每月还要约 4 小时分拣、叠放与收纳}
+  # 每个类别的故障设定（引擎的故障字段由主会话加；这里只作纯数据输出）。保修不是故障分布。
+  failure:
+    clothes_washer: {rule: none_within_horizon, annual_hazard: null,
+                     basis: 没有公开的型号或类别故障率资料（ENERGY STAR 只有认证事实，保修条款不是故障分布）；设定寿命 10 年，3 年模拟期内不建模随机故障}
+    clothes_dryer: {rule: none_within_horizon, annual_hazard: null,
+                    basis: 同洗衣机：没有公开故障率资料，设定寿命 10 年，3 年模拟期内不建模随机故障}
+    combo_washer_dryer: {rule: none_within_horizon, annual_hazard: null,
+                         basis: 同洗衣机：没有公开故障率资料，设定寿命 10 年，3 年模拟期内不建模随机故障}
+    dishwasher: {rule: none_within_horizon, annual_hazard: null,
+                 basis: 洗碗机本轮不进目录（见 gaps）；同样没有公开故障率资料}
+  # 不进目录的类别与原因（报告为缺口，不删记录）
+  not_offered:
+    dishwasher: 洗碗的时间在食品方案的“买菜、做饭与收拾”小时里，协议没有可以替代的“洗碗”家务，洗碗机的效果在 E1 里表达不了
+    gas_dryer: 燃气烘干机要燃气接口，住房资料没有这项条件；本轮只用电烘干机
+  installation_note: 住房资料（ACS）没有洗衣机接口与烘干机排风的条件；设备按“可以安装”设定（device_installable_v1），这是缺口
+
+# ============================================================================ 爱好装备
+equipment:
+  - {item: tennis_racket, provides: [racket_playable], price_usd_2024_national: 100, lifetime_years: 5, label: 网球拍,
+     quality: 一次买下、能用 5 年；自带球拍去打网球，不用再租}
+  - {item: acoustic_guitar, provides: [guitar_playable], price_usd_2024_national: 200, lifetime_years: 8, label: 民谣吉他,
+     quality: 一次买下、能用 8 年；放在家里本身不带来娱乐，要自己练或上课才有收获}
+
+# ============================================================================ 活动
+activities:
+  burden_assumption: e1_activity_burden_per_hour   # intake 已登记：每小时负担 1.0
+  burden_per_hour: 1.0
+  # 场所证据：本城 OSM 记录（主城市边界内）里至少有 min_count 处
+  venue_rules:
+    fitness_centre: {venue_types: [fitness_centre], named_only: true, min_count: 1}
+    yoga: {sports: [yoga], min_count: 1}
+    tennis: {sports: [tennis], min_count: 1}
+    public_pool: {venue_types: [swimming_pool], access: ["yes", permissive], min_count: 1}
+    arts_centre: {venue_types: [arts_centre], min_count: 1}
+    community_centre: {venue_types: [community_centre], min_count: 1}
+    museum: {venue_types: [museum], min_count: 1}
+  # 模型活动（每城同一套模板，标成模型方案）：费用 = 人工（OEWS 都会区中位时薪 × 老师小时 ÷ 人数 × 人工费用倍率）
+  # + 场地（全国设定 × 小时 × RPP 总水平 ÷ 100）+ 器材或材料（全国设定 × 商品类空间换算系数）
+  templates:
+    - {template: group_fitness, category: fitness, venue: fitness_centre, soc: 39-9031, instructor_hours: 1, participants: 12,
+       venue_per_participant_hour: 6, participation_hours: 1, overhead_hours: 0.75, label: 团体健身课（一次）,
+       quality: 健身房的团体课 1 小时，往返与换衣约 45 分钟}
+    - {template: yoga_class, category: fitness, venue: yoga, soc: 39-9031, instructor_hours: 1.25, participants: 10,
+       venue_per_participant_hour: 6, participation_hours: 1.25, overhead_hours: 0.75, label: 瑜伽课（一次）,
+       quality: 瑜伽馆的课 75 分钟，往返约 45 分钟}
+    - {template: lap_swim, category: fitness, venue: public_pool, soc: 33-9092, instructor_hours: 1, participants: 15,
+       venue_per_participant_hour: 3, participation_hours: 1, overhead_hours: 0.75, label: 公共泳池游泳（一次）,
+       quality: 公共泳池游 1 小时（有救生员），往返与换衣约 45 分钟}
+    - {template: tennis_rental, category: racket_sports, venue: tennis, venue_per_participant_hour: 10,
+       rental_usd_2024_national: 5, requires: [racket_playable], kit_provides: [racket_playable],
+       participation_hours: 1.5, overhead_hours: 1, label: 网球场地连球拍租借（一次）,
+       quality: 场地 1.5 小时，含本次租的球拍；往返与换衣约 1 小时；结束后球拍要还}
+    - {template: tennis_own, category: racket_sports, venue: tennis, venue_per_participant_hour: 10,
+       requires: [racket_playable], participation_hours: 1.5, overhead_hours: 1, label: 网球场地（自带球拍，一次）,
+       quality: 场地 1.5 小时，要自己带球拍；往返与换衣约 1 小时}
+    - {template: guitar_lesson, category: music, venue: arts_centre, soc: 25-3021, instructor_hours: 1, participants: 4,
+       venue_per_participant_hour: 4, requires: [guitar_playable], participation_hours: 1, overhead_hours: 0.75,
+       label: 吉他小班课（一次）, quality: 四人小班 1 小时，要自己带吉他；往返约 45 分钟}
+    - {template: guitar_practice, category: music, venue: null, participation_hours: 1, overhead_hours: 0,
+       requires: [guitar_playable], free: true, label: 在家练吉他（一次 1 小时）, quality: 在家自己练，不收费；需要一把能弹的吉他}
+    - {template: art_class, category: arts_culture, venue: arts_centre, soc: 25-3021, instructor_hours: 2, participants: 10,
+       venue_per_participant_hour: 4, materials_usd_2024_national: 8, participation_hours: 2, overhead_hours: 0.75,
+       label: 绘画课（一次）, quality: 十人班 2 小时，含本次材料；往返约 45 分钟}
+    - {template: cooking_class, category: culinary, venue: community_centre, soc: 25-3021, instructor_hours: 2.5, participants: 10,
+       venue_per_participant_hour: 4, materials_usd_2024_national: 12, participation_hours: 2.5, overhead_hours: 0.5,
+       label: 烹饪课（一次，不代替正餐）, quality: 十人班 2.5 小时，含本次食材；做的是试吃小份，不算一顿正餐；往返约半小时}
+    - {template: museum_visit, category: arts_culture, venue: museum, price_unknown: true, participation_hours: 2,
+       overhead_hours: 0.75, label: 参观博物馆（一次）, quality: 参观约 2 小时，往返约 45 分钟；门票资料里没有}
+  # 芝加哥公园管理局的真实活动：原样保留日期、星期、时段、年龄、季节与报名费（CPI 换到 2024 年）
+  chicago:
+    travel_hours_per_session: 0.5
+    adult_age_rules: [Adult, All Ages, Young Adult, 18 and up, 16 and up, 10 and up, 8 and up, 6 and up, 3 and up]
+    unknown_age_rules: [Senior, null]
+    excluded_types: [Permit Application Fee, Internal Staff Offering, Camp, League (Team), Partnership Group]
+    categories:
+      racket_sports: [Sports - Tennis, Sports - Pickleball, Sports - Badminton, Sports - Table Tennis, Sports - Racquetball]
+      fitness: [Fitness, Yoga, Aerobics, Aquatics - Fitness, Aquatics - Lessons, Aquatics - All, Walking, Sports - Weightlifting,
+                Wellness, Sports - Boxing, Self-Defense]
+      music: [Music, "Music, Night Out in the Parks", "Music, Night Out in the Parks, Arts & Culture"]
+      arts_culture: [Theater, "Theater, Night Out in the Parks", Drawing, Painting, Sculpture, Printmaking, Photography,
+                     Decorative Arts, Textiles, Woodworking, Creative Writing, Dance, "Dance, Night Out in the Parks", Video]
+      culinary: [Nutrition]
+
+# ============================================================================ 登记的设定与规则（参数目录的行草稿在设计说明里）
+assumptions:
+  - id: food_energy_completion_v1
+    nature: rule
+    statement_zh: 篮子每周热量不够参照量时，差额按 complement 篮子（主食为主）每千卡的花费补上；够了不补不缩
+    basis_zh: intake 的篮子只是“这类做法的代表食材”，不是一个人一周吃的全部；补齐后才能声明覆盖整月基本饮食。不是营养方案
+  - id: food_energy_reference_v1
+    nature: assumption
+    value: 每人每天 2,000 千卡（每周 14,000）
+    basis_zh: 美国食品标签的参照热量（FDA 营养成分表“2,000 calories a day is used for general nutrition advice”）；只作“吃饱的量”，不是营养声明
+  - id: ap_item_energy_match_v1
+    nature: assumption
+    statement_zh: 每种 BLS AP 食材对应一条 USDA SR Legacy 条目（见 food.item_energy），按购买重量算热量
+    basis_zh: 资料里的能量（nutrient 1008，千卡/100 克）与份量克重；对应关系是本配置写定的；不扣骨头、果皮等不可食部分（FDC 的 CSV 没有可食比例），所以整鸡、香蕉、橙子、草莓、生菜、番茄的热量偏高、补齐的主食偏少
+  - id: food_plan_composition_v1
+    nature: assumption
+    statement_zh: 每个方案的每周新鲜餐数与每顿做饭分钟（food.home_plans / mixed_plans），外食与外送的餐都按新鲜餐计（与合成样例 SC-25 相同的口径）
+    basis_zh: 篮子是“主食为主 / 荤素搭配 / 鲜肉蔬果较多”的设定，新鲜餐数按篮子里生鲜食材的多少写定；量级核对：BLS ATUS 2025 年平均，做饭的人每天花 1.09 小时在做饭与收拾上（见 food_time_check_v1）
+  - id: food_shopping_hours_v1
+    nature: assumption
+    value: 买菜每周 2 小时
+    basis_zh: BLS ATUS 2025 年平均，购物的人每天 0.87 小时购买消费品（不只是食品）；只作量级
+  - id: food_home_share_by_meals_v1
+    nature: rule
+    statement_zh: 混合方案里家里部分的费用 = 同一篮子补齐后的一周费用 × 家里餐数 ÷ 21
+  - id: fafh_meals_per_person_week_v1
+    nature: assumption
+    value: 每人每周 3 顿在外饮食
+    basis_zh: 没有公开的都会区“每人外食餐数”资料；CE 的在外饮食支出含零食与饮品，除以这个数得到的是“平均每顿外食花费”，不是菜单价；同一个数用于六城，城市差异只来自 CE
+  - id: fafh_delivery_same_average_v1
+    nature: assumption
+    statement_zh: 外送的一顿按同一“平均每顿外食花费”计；配送费与小费没有资料，不另加（terms 写 unknown）
+  - id: dining_hours_v1
+    nature: assumption
+    value: 外食每顿 1.25 小时（含往返），外送每顿 0.25 小时（下单与收取）
+  - id: cuisine_presence_threshold_v1
+    nature: assumption
+    value: 本城至少 20 家 OSM restaurant 写了这个菜系标签；每城最多 6 个菜系（按家数从多到少）
+    basis_zh: 只有确实看得到的菜系才提供对应外食方案；家数只说明存在，不说明质量或价格
+  - id: home_style_cuisine_v1
+    nature: assumption
+    statement_zh: 自己做的饭菜系按“家常”（home_style）计
+  - id: food_prep_burden_v1
+    nature: assumption
+    value: 食品方案每小时负担 0.5
+    basis_zh: 与合成样例的做饭负担相同；负担是 E1 的合成尺度，不能测量
+  - id: oews_hourly_from_annual_v1
+    nature: rule
+    statement_zh: 时薪 = OEWS 年薪 ÷ 2,080（OEWS 对按小时计酬职业的年薪就是时薪 × 2,080）
+  - id: labor_overhead_v1
+    nature: assumption
+    value: 服务价格 = 工人工资 × 2.0
+    basis_zh: 倍率覆盖雇主的福利与税费、交通、用品、管理与利润；没有本地服务价格资料，倍率是量级设定
+  - id: service_hours_v1
+    nature: assumption
+    statement_zh: 每项服务的工人小时、本人小时与替代后残余家务小时（services.chores / enjoyment）
+    basis_zh: 量级设定，与合成样例的残余写法相同（洗衣服务残余 2 小时）；协议的家务基准由资料包定，残余不能超过基准
+  - id: device_category_v1
+    nature: assumption
+    statement_zh: 设备类别的全国价格、寿命与替代后残余（devices.offers）；价格 × intake 的商品类空间换算系数
+    basis_zh: ENERGY STAR 不记价格、寿命与效果；这些是类别设定，不是型号报价；同一类别的型号价格相同
+  - id: device_failure_v1
+    nature: assumption
+    statement_zh: 每个设备类别 3 年内不建模随机故障（none_within_horizon），见 devices.failure
+    basis_zh: 没有公开的故障率资料；保修条款不是故障分布
+  - id: device_installable_v1
+    nature: assumption
+    statement_zh: 设备按“住处可以安装”设定
+    basis_zh: 住房资料没有洗衣机接口与排风条件；这是缺口，不是事实
+  - id: equipment_category_v1
+    nature: assumption
+    statement_zh: 爱好装备的全国价格与寿命（equipment）× 商品类空间换算系数
+  - id: activity_template_v1
+    nature: assumption
+    statement_zh: 模型活动的老师小时、人数、场地与器材设定（activities.templates）；场地设定 × RPP 总水平 ÷ 100
+    basis_zh: 只在本城 OSM 看得到相应场所时提供；标成模型方案，不是某个场所的真实报价
+  - id: activity_travel_hours_v1
+    nature: assumption
+    value: 芝加哥公园活动每次往返 0.5 小时
+  - id: chicago_session_price_v1
+    nature: rule
+    statement_zh: 每次课的价格 = 报名费（CPI 换到 2024 年）÷ 按日期说明数出来的上课次数，四舍五入到分；只能整期报名，所以这条机会在 E1 有“整期报名”与日期窗口之前不可执行

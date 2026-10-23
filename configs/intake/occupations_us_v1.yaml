@@ -1,0 +1,151 @@
+# E3B（DECISIONS/0042）六城真实生活资料包的“职业与岗位”一侧：支持的职业范围、每个职业需要的能力、确认的经历怎样对应已有能力、
+# 哪些培训项目授予哪些能力、岗位的工资档与工作安排、开局岗位规则。编译代码在 src/product/realdata/occupations.py，说明在
+# docs/design/e3b-items-data.md。
+#
+# 资料：BLS OEWS 2024 年 5 月（都会区工资分位与就业，CPI 换到 2024 年平均，intake 已做）、BLS 就业预测表 5.4（入职教育、经验、
+# 在职培训，全国口径）、intake 的工时表 job_hours_wfh_by_occupation_group@1（都会区 × SOC 大类的通常每周工时中位数与在家工作
+# 比例）、IPEDS 2023 项目与 CIP 2020 → SOC 2018 对照。职业与行业分开：OEWS 都会区表是“全部行业”里这个职业的工资，岗位只按职业
+# 记，不写行业，也不从行业推职业。
+
+version: occupations-us-v1
+intake_build_id: 562c32339bbae67fd1917b7ac67f4b5b28f55d07e88a8c78ee6fe371ed863691
+numeraire: USD_2024_LOCAL
+scheme: SOC2018
+#: 能力定义的来源日期：intake 获取 EP 表 5.4（education.xlsx）的日子（表本身没有在冻结库里记版本年份）
+ep_observed_on: 2026-10-22
+
+# 入职教育（EP 原文）→ 岗位要求的能力。学历按“至少达到”记：确认的最高学历授予它和它以下的各级（education_at_least_v1）。
+# “中学后非学位证书”是职业专属的（award_<职业>），只能由确认的证书或 CIP → SOC 对应的培训项目授予，不从职称或自由文字推。
+education:
+  - {ep: No formal educational credential, level: none}
+  - {ep: High school diploma or equivalent, level: hs, ability: edu_at_least_hs, label: 高中毕业或同等学力}
+  - {ep: "Some college, no degree", level: some_college, ability: edu_at_least_some_college, label: 读过大学（未取得学位）}
+  - {ep: Postsecondary nondegree award, level: award, occupation_award: true}
+  - {ep: "Associate's degree", level: associate, ability: edu_at_least_associate, label: 副学士学位}
+  - {ep: "Bachelor's degree", level: bachelor, ability: edu_at_least_bachelor, label: 学士学位}
+  - {ep: "Master's degree", level: master, ability: edu_at_least_master, label: 硕士学位}
+  - {ep: Doctoral or professional degree, level: doctoral, ability: edu_at_least_doctoral, label: 博士或专业学位}
+
+# EP 的“相关职业经验”→ 能力 exp_related_<职业>；只能由确认的、在相关职业里的经历（年数够）授予（related_experience_v1）。
+# E1 没有“在职积累经验”的机制：模拟期里干满几年不会自动得到它（契约缺口，见设计说明）。
+experience:
+  "Less than 5 years": {min_years: 1}
+  "5 years or more": {min_years: 5}
+
+# 工作安排（job_arrangement_v1）：每周工时取 intake 工时表（都会区 × SOC 大类的中位数）；每月工时 = 每周 × 52 ÷ 12，四舍五入到
+# 0.01；每周 5 个工作日，每月工作日 = 5 × 52 ÷ 12 四舍五入到整数（22）；hybrid 的到岗日 = 工作日 × 3 ÷ 5 四舍五入；薪酬 = OEWS
+# 年薪 × 每周工时 ÷ 40（年薪是时薪 × 2,080 = 时薪 × 40 × 52），四舍五入到分。
+arrangement:
+  days_per_week: 5
+  hybrid_onsite_share: "3/5"
+  burden_per_work_hour: 1.0
+  tiers:
+    - {tier: p25, field: annual_wage_p25, label: 工资在本职业 25 分位}
+    - {tier: median, field: annual_wage_median, label: 工资在本职业中位数}
+    - {tier: p75, field: annual_wage_p75, label: 工资在本职业 75 分位}
+
+# 培训（ipeds_training_v1）：IPEDS 按项目报告学费的院校项目；CIP → SOC 对照到范围内需要“中学后非学位证书”的职业，就授予那个职业的
+# award 能力。只收全日制完成月数是整年的项目（E1 的培训按整年计）；每周 24 小时（联邦对按学时计的全日制定义的下限，
+# 34 CFR 668.2），每月 = 24 × 52 ÷ 12 = 104 小时；开课日期资料里没有（按“任何月份可以开始”设定，缺口）。
+training:
+  weekly_hours: 24
+  burden_per_hour: 1.2
+  whole_years_only: true
+
+# 支持的职业（job_scope_v1）。work_mode 是设定（onsite / hybrid），依据写在设计说明；related 是可以算作“相关职业经验”的职业。
+# 不在这里的职业一律拒绝并说明原因，不替换成别的职业。
+supported:
+  - {soc: 35-3023, label: 快餐与柜台服务员, work_mode: onsite}
+  - {soc: 41-2011, label: 收银员, work_mode: onsite}
+  - {soc: 41-2031, label: 零售销售员, work_mode: onsite}
+  - {soc: 35-3031, label: 餐厅服务员, work_mode: onsite}
+  - {soc: 35-9021, label: 洗碗工, work_mode: onsite}
+  - {soc: 35-2014, label: 餐厅厨师, work_mode: onsite, related: [35-3023, 35-3031, 35-9021]}
+  - {soc: 37-2011, label: 清洁工（楼宇）, work_mode: onsite}
+  - {soc: 37-2012, label: 家政与客房清洁员, work_mode: onsite}
+  - {soc: 37-3011, label: 园林绿化工, work_mode: onsite}
+  - {soc: 53-7062, label: 搬运与装卸工, work_mode: onsite}
+  - {soc: 53-7065, label: 理货与拣货员, work_mode: onsite}
+  - {soc: 51-6011, label: 洗衣与干洗工, work_mode: onsite}
+  - {soc: 43-9061, label: 办公室文员, work_mode: onsite}
+  - {soc: 43-4051, label: 客服代表, work_mode: hybrid}
+  - {soc: 43-6014, label: 秘书与行政助理, work_mode: onsite}
+  - {soc: 43-4171, label: 前台与咨询员, work_mode: onsite}
+  - {soc: 43-5071, label: 收发与库存文员, work_mode: onsite}
+  - {soc: 43-3071, label: 银行柜员, work_mode: onsite}
+  - {soc: 49-9071, label: 综合维修工, work_mode: onsite}
+  - {soc: 51-4121, label: 焊工, work_mode: onsite}
+  - {soc: 39-9031, label: 健身教练与团体课老师, work_mode: onsite}
+  - {soc: 41-3091, label: 服务类销售代表, work_mode: hybrid}
+  - {soc: 43-3031, label: 记账员, work_mode: hybrid}
+  - {soc: 15-1232, label: 电脑用户支持专员, work_mode: hybrid}
+  - {soc: 49-3023, label: 汽车维修技师, work_mode: onsite}
+  - {soc: 49-2022, label: 通信设备安装维修工, work_mode: onsite}
+  - {soc: 27-4011, label: 音视频技术员, work_mode: onsite}
+  - {soc: 23-2011, label: 律师助理, work_mode: hybrid}
+  - {soc: 15-1231, label: 网络支持专员, work_mode: hybrid}
+  - {soc: 13-2011, label: 会计与审计师, work_mode: hybrid}
+  - {soc: 15-1252, label: 软件开发工程师, work_mode: hybrid}
+  - {soc: 13-1161, label: 市场研究与营销专员, work_mode: hybrid}
+  - {soc: 13-1071, label: 人力资源专员, work_mode: hybrid}
+  - {soc: 15-1211, label: 计算机系统分析师, work_mode: hybrid}
+  - {soc: 13-2051, label: 金融与投资分析师, work_mode: hybrid}
+  - {soc: 27-1024, label: 平面设计师, work_mode: hybrid}
+  - {soc: 13-1082, label: 项目管理专员, work_mode: hybrid}
+  - {soc: 41-1011, label: 零售主管, work_mode: onsite, related: [41-2011, 41-2031]}
+  - {soc: 43-1011, label: 办公室行政主管, work_mode: onsite,
+     related: [43-9061, 43-4051, 43-6014, 43-4171, 43-5071, 43-3071, 43-3031]}
+  - {soc: 35-1012, label: 餐饮主管, work_mode: onsite, related: [35-3023, 35-3031, 35-9021, 35-2014]}
+
+# 不在范围里的常见职业与原因（举例；未列出的职业统一报“不在支持范围”）
+excluded:
+  31-9011: 按摩师在六城所在州都要州执照，执照资料没有结构化来源（按摩服务的价格仍用这个职业的工资）
+  39-5012: 美发与美容师要州执照
+  33-9032: 保安在六城所在州都要州执照或登记
+  53-3033: 送货司机要驾照，驾照不是这里的能力
+  31-9092: 医疗助理在华盛顿州要州认证
+  31-9091: 牙科助理的州要求不一（加州要执照）
+  49-9021: 暖通空调技工处理制冷剂要联邦 EPA 认证
+  25-2011: 学前教师要州资格
+  29-1141: 注册护士要州执照
+  27-2042: OEWS 只有时薪、没有年薪分位，工资档与工时不能按同一规则换算
+  25-9045: OEWS 只有学年年薪，没有时薪，工资与工时不能按同一规则换算
+
+assumptions:
+  - id: job_scope_v1
+    nature: assumption
+    statement_zh: 支持 40 个 SOC 职业（supported）；入选条件：六城 OEWS 都有 25 / 50 / 75 分位年薪、有时薪口径、EP 有入职要求、进入时不需要州执照
+  - id: ep_typical_education_as_requirement_v1
+    nature: assumption
+    statement_zh: EP 的“典型入职教育”当作岗位的资格要求（全国口径）；“典型”不是法律要求，所以这是保守的设定
+  - id: education_at_least_v1
+    nature: rule
+    statement_zh: 确认的最高学历授予它和它以下的各级“至少达到”能力；学位只从结构化的学历确认来，不从职称或自由文字推
+  - id: related_experience_v1
+    nature: assumption
+    statement_zh: EP 写了“相关职业经验”的职业，相关职业按 supported.related 列出；“少于 5 年”按至少 1 年、“5 年以上”按至少 5 年
+  - id: confirmed_experience_mapping_v1
+    nature: rule
+    statement_zh: 确认的现职 X 只说明“在 X 工作过”：授予 X 列为相关的职业的经验能力（年数够时），不授予学历、证书或执照；开局岗位仍要求用户确认 X 的入职能力
+  - id: job_arrangement_v1
+    nature: rule
+    statement_zh: 每周工时取工时表；每月 = 每周 × 52 ÷ 12（0.01）；每周 5 天、每月 22 个工作日；薪酬 = 年薪 × 每周工时 ÷ 40（分）
+  - id: job_work_mode_v1
+    nature: assumption
+    statement_zh: 每个职业的到岗方式（supported.work_mode）；hybrid 每 5 个工作日到岗 3 天
+    basis_zh: 资料里没有单个岗位的到岗安排；量级核对用工时表里 SOC 大类的在家工作比例（13、15、23、27 大类在 0.2 以上，其余多在 0.2 以下），按职业的工作内容是否必须到场写定
+  - id: job_burden_v1
+    nature: assumption
+    value: 每工时负担 1.0
+    basis_zh: 与合成样例的文员相同；负担是 E1 的合成尺度
+  - id: start_job_median_v1
+    nature: rule
+    statement_zh: 开局岗位 = 开局城市里用户确认职业的中位数档；职业不在范围或本城没有这个职业的工资资料就拒绝并说明原因，不替换
+  - id: ipeds_training_v1
+    nature: assumption
+    statement_zh: IPEDS 项目经 CIP → SOC 对照授予范围内职业的 award 能力；只收整年项目；每周 24 小时（34 CFR 668.2 全日制下限）；开课月份不限
+    basis_zh: IPEDS 不记开课日期与每周上课小时；“任何月份可以开始”是缺口
+  - id: training_burden_v1
+    nature: assumption
+    value: 培训每小时负担 1.2
+    basis_zh: 与合成样例的会计课相同
