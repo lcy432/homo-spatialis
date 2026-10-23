@@ -1,6 +1,6 @@
 # 产品共享结构 v3（生活扩展）
 
-v3 取代 [v2](../v2/README.md)（v2 目录原样保留为历史导出，界面层改读 v3 之前仍在用）。全部样例的人物都是合成的；01–50 用合成城市，51–54 用冻结的 E3B 六城真实资料包（`real_data_frozen`，[ADR0042](../../../DECISIONS/0042-e3b-real-life-pack.md)）；离线规划器是 mock，不是真实大语言模型。规则见 [ADR0041](../../../DECISIONS/0041-life-extension-food-enjoyment-hobbies.md)，技术说明见 [生活扩展](../../../docs/design/e1-8-life-extension.md)，给界面层的改动清单见 [交接](../../../docs/handoffs/e3-to-e5-life-extension.md)。
+v3 取代 [v2](../v2/README.md)（v2 目录原样保留为历史导出，界面层改读 v3 之前仍在用）。全部样例的人物都是合成的；01–50 用合成城市，51–55 用冻结的 E3B 六城真实资料包（`real_data_frozen`，[ADR0042](../../../DECISIONS/0042-e3b-real-life-pack.md)）；离线规划器是 mock，不是真实大语言模型。规则见 [ADR0041](../../../DECISIONS/0041-life-extension-food-enjoyment-hobbies.md)，技术说明见 [生活扩展](../../../docs/design/e1-8-life-extension.md)，给界面层的改动清单见 [交接](../../../docs/handoffs/e3-to-e5-life-extension.md)。
 
 ## 1. 这里有什么
 
@@ -39,7 +39,8 @@ v3 在独立复核之前按收尾修复（ADR0041 收尾一节）修订过一次
 
 | 样例 | 消息 | 演示 |
 |---|---|---|
-| 51 | ProductPreflight | 真实资料包的预检查（休斯敦、西雅图）：逐城的资料性质 `data_nature` 与结构化范围说明 `scope_notes` |
+| 51 | ProductPreflight | 真实资料包的预检查（休斯敦、西雅图）：逐城的资料性质 `data_nature` 与结构化范围说明 `scope_notes`（含 `topic = data` 的治安资料逐城覆盖） |
 | 52 | ProductResult | 真实资料包的结果：每年的住处与片区、逐月通勤、用车权、按哪份官方税规则预扣；逐城资料性质 |
 | 53 | ProductPreflight | 旧金山的通勤关系表没有公共交通：警告 `commute_mode_missing` 与范围说明，预检查仍通过 |
 | 54 | ProductPreflight | 没有确认高中学历：开局岗位要求的资格不从职称或自由文字授予，预检查阻断 |
+| 55 | ProductResult | 旧金山（没有公交资料）：一个分身步行骑车上班；另一个分身两年买用车权开车上班（月费不含油费、油费按次），两个都完整 |

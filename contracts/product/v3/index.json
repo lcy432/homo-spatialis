@@ -28,11 +28,11 @@
   },
   "ProductPreflight": {
    "file": "ProductPreflight.schema.json",
-   "sha256": "3788ae26352f925bcba62c8186105866120ae37d82b1457a91e1f52e99de9821"
+   "sha256": "41b1906ddd729882a545039f4f44a1407573959f57ee8d3eb9d475a5c577af7a"
   },
   "ProductResult": {
    "file": "ProductResult.schema.json",
-   "sha256": "507df310a312f5a1304cef050376bb66aa58ca1d4063ed7f3dd4408ba4c8d3c4"
+   "sha256": "1c1904ce64d7720515764a90f1f7126f0174605971d98d4e626d2e562834087b"
   },
   "ProfileReview": {
    "file": "ProfileReview.schema.json",

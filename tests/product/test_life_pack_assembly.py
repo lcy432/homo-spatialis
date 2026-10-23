@@ -160,6 +160,20 @@ def test_internal_safety_parameters_stay_out_of_the_agent_view(loaded):
         text = json.dumps(
             [f.model_dump(mode="json") for f in visible_city_facts(sheet)], ensure_ascii=False
         )
-        for secret in ("w_violent", "fbi_relative_rate", "national_index", "0.5 ×", "b = "):
-            assert secret not in text
-        assert "治安" in text and "暴力犯罪率" in text
+        # 权重、全国参照锚点、换算公式与评分参数都不进观察（审核：可见文字原来写着“全国平均水平是 6”）
+        for secret in (
+            "w_violent",
+            "fbi_relative_rate",
+            "national_index",
+            "全国平均",
+            "6/r",
+            "min(",
+            "0.5 ×",
+            "b = ",
+            "× 4",
+            "× 10",
+        ):
+            assert secret not in text, secret
+        # 保留含义、方向、两项犯罪率与资料覆盖
+        assert "治安" in text and "越高越安全" in text and "犯罪率越高指数越低" in text
+        assert "暴力犯罪率" in text and "财产犯罪率" in text and "治安资料覆盖范围" in text

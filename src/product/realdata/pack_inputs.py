@@ -31,7 +31,7 @@ from common.life_contracts import canonical_fingerprint
 from product.realdata.fetch import Request, fetch
 
 #: 组装规则的版本：改了组装代码里的任何规则（片区、菜单、参考生活的绑定、背景换算、可见文字……）就改它，让构建身份跟着变。
-ASSEMBLY_RULES_VERSION = "life-pack-assembly-2026-10-23-f3"
+ASSEMBLY_RULES_VERSION = "life-pack-assembly-2026-10-23-f6"
 
 
 class InputIdentityError(RuntimeError):

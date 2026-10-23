@@ -23,20 +23,20 @@
       "violated": 0
      }
     ],
-    "headline_zh": "休斯敦：原计划 1 个分身——1 个完成且可评价、0 个生活出局、0 个模拟问题；1 个完成且可评价分身的平均 J 为 0.5354（分母只数完成且可评价的分身，不是原计划的全部分身）",
+    "headline_zh": "休斯敦：原计划 1 个分身——1 个完成且可评价、0 个生活出局、0 个模拟问题；1 个完成且可评价分身的平均 J 为 0.5170（分母只数完成且可评价的分身，不是原计划的全部分身）",
     "label": "休斯敦",
     "mean_denominator": 1,
     "mean_j": {
-     "display": "0.5354",
-     "exact": "21414416519957753/40000000000000000"
+     "display": "0.5170",
+     "exact": "25850732224821899/50000000000000000"
     },
     "mean_l": {
-     "display": "0.5165",
-     "exact": "7746909132342389/15000000000000000"
+     "display": "0.4933",
+     "exact": "36993845562052133/75000000000000000"
     },
     "mean_v": {
-     "display": "0.5921",
-     "exact": "236823930210919/400000000000000"
+     "display": "0.5883",
+     "exact": "2941523777518333/5000000000000000"
     },
     "missing": 0,
     "missing_reasons": [],
@@ -50,12 +50,12 @@
     "planned": 1,
     "range_denominator": 1,
     "range_lower": {
-     "display": "0.5354",
-     "exact": "21414416519957753/40000000000000000"
+     "display": "0.5170",
+     "exact": "25850732224821899/50000000000000000"
     },
     "range_upper": {
-     "display": "0.5354",
-     "exact": "21414416519957753/40000000000000000"
+     "display": "0.5170",
+     "exact": "25850732224821899/50000000000000000"
     }
    },
    {
@@ -78,20 +78,20 @@
       "violated": 0
      }
     ],
-    "headline_zh": "西雅图：原计划 1 个分身——1 个完成且可评价、0 个生活出局、0 个模拟问题；1 个完成且可评价分身的平均 J 为 0.5678（分母只数完成且可评价的分身，不是原计划的全部分身）",
+    "headline_zh": "西雅图：原计划 1 个分身——1 个完成且可评价、0 个生活出局、0 个模拟问题；1 个完成且可评价分身的平均 J 为 0.5416（分母只数完成且可评价的分身，不是原计划的全部分身）",
     "label": "西雅图",
     "mean_denominator": 1,
     "mean_j": {
-     "display": "0.5678",
-     "exact": "4542649570539221/8000000000000000"
+     "display": "0.5416",
+     "exact": "21664632563211489/40000000000000000"
     },
     "mean_l": {
-     "display": "0.5465",
-     "exact": "2732696957521159/5000000000000000"
+     "display": "0.5178",
+     "exact": "7766346923188151/15000000000000000"
     },
     "mean_v": {
-     "display": "0.6317",
-     "exact": "6317066107569151/10000000000000000"
+     "display": "0.6132",
+     "exact": "6131938716835187/10000000000000000"
     },
     "missing": 0,
     "missing_reasons": [],
@@ -105,12 +105,12 @@
     "planned": 1,
     "range_denominator": 1,
     "range_lower": {
-     "display": "0.5678",
-     "exact": "4542649570539221/8000000000000000"
+     "display": "0.5416",
+     "exact": "21664632563211489/40000000000000000"
     },
     "range_upper": {
-     "display": "0.5678",
-     "exact": "4542649570539221/8000000000000000"
+     "display": "0.5416",
+     "exact": "21664632563211489/40000000000000000"
     }
    }
   ],
@@ -139,28 +139,28 @@
      }
     ],
     "j": {
-     "display": "0.5354",
-     "exact": "21414416519957753/40000000000000000"
+     "display": "0.5170",
+     "exact": "25850732224821899/50000000000000000"
     },
     "l_actual": {
-     "display": "0.5165",
-     "exact": "7746909132342389/15000000000000000"
+     "display": "0.4933",
+     "exact": "36993845562052133/75000000000000000"
     },
     "missing_reason": null,
     "missing_reason_zh": null,
     "range_lower": {
-     "display": "0.5354",
-     "exact": "21414416519957753/40000000000000000"
+     "display": "0.5170",
+     "exact": "25850732224821899/50000000000000000"
     },
     "range_upper": {
-     "display": "0.5354",
-     "exact": "21414416519957753/40000000000000000"
+     "display": "0.5170",
+     "exact": "25850732224821899/50000000000000000"
     },
     "reference_plan": "p3_service",
     "repeat_index": 0,
     "v_reference": {
-     "display": "0.5921",
-     "exact": "236823930210919/400000000000000"
+     "display": "0.5883",
+     "exact": "2941523777518333/5000000000000000"
     },
     "years": [
      {
@@ -170,9 +170,9 @@
        "status": "not_bought"
       },
       "cash_end": {
-       "amount_minor": 3427063,
+       "amount_minor": 4989454,
        "currency": "USD",
-       "display": "34,270.63",
+       "display": "49,894.54",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
@@ -209,8 +209,8 @@
         "status_zh": "按通勤关系表执行：实际住处片区到各个到岗岗位的就业片区，取可用方式里往返最少的一种",
         "trips": [
          {
-          "job_label": "服务类销售代表·工资在本职业中位数",
-          "job_opportunity_id": "hou.job.41-3091.p50",
+          "job_label": "服务类销售代表·工资在本职业 75 分位",
+          "job_opportunity_id": "hou.job.41-3091.p75",
           "mode": "walk_bike",
           "mode_zh": "步行或骑车",
           "onsite_visits": 13,
@@ -263,7 +263,7 @@
         "area_id": "hou.area.h.4804604",
         "area_label": "居住片区·Houston City (West Central)--South of I-10 & Inside Loop I-610 PUMA（PUMA 4804604）",
         "area_typical_roundtrip_minutes": 40,
-        "label": "开间整套租住（Houston City (West Central)--South of I-10 & Inside Loop I-6，中档）",
+        "label": "1 卧整套租住（Houston City (West Central)--South of I-10 & Inside Loop I-6，中档）",
         "months": [
          1,
          2,
@@ -278,7 +278,7 @@
          11,
          12
         ],
-        "opportunity_id": "hou.housing.4804604.0.1-2"
+        "opportunity_id": "hou.housing.4804604.1.1-2"
        }
       ],
       "household": [
@@ -318,17 +318,17 @@
        }
       ],
       "housing": [
-       "开间整套租住（Houston City (West Central)--South of I-10 & Inside Loop I-6，中档）（1–12 月）"
+       "1 卧整套租住（Houston City (West Central)--South of I-10 & Inside Loop I-6，中档）（1–12 月）"
       ],
       "jobs": [
-       "服务类销售代表·工资在本职业中位数（1–12 月）"
+       "服务类销售代表·工资在本职业 75 分位（1–12 月）"
       ],
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 1870454,
+       "amount_minor": 2362454,
        "currency": "USD",
-       "display": "18,704.54",
+       "display": "23,624.54",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [],
@@ -348,21 +348,21 @@
        "status": "not_bought"
       },
       "cash_end": {
-       "amount_minor": 9240271,
+       "amount_minor": 10658662,
        "currency": "USD",
-       "display": "92,402.71",
+       "display": "106,586.62",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
-       "amount_minor": 3427063,
+       "amount_minor": 4989454,
        "currency": "USD",
-       "display": "34,270.63",
+       "display": "49,894.54",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "commute": [
        {
-        "home_area_id": "hou.area.h.4804601",
-        "home_area_label": "居住片区·Houston City (North Central)--North of I-10 & Inside Loop I-610 PUMA（PUMA 4804601）",
+        "home_area_id": "hou.area.h.4804620",
+        "home_area_label": "居住片区·Houston (Southeast) & Webster Cities PUMA（PUMA 4804620）",
         "monthly_paid": {
          "amount_minor": 3250,
          "currency": "USD",
@@ -438,10 +438,10 @@
       ],
       "homes": [
        {
-        "area_id": "hou.area.h.4804601",
-        "area_label": "居住片区·Houston City (North Central)--North of I-10 & Inside Loop I-610 PUMA（PUMA 4804601）",
-        "area_typical_roundtrip_minutes": 50,
-        "label": "开间整套租住（Houston City (North Central)--North of I-10 & Inside Loop I-，低档）",
+        "area_id": "hou.area.h.4804620",
+        "area_label": "居住片区·Houston (Southeast) & Webster Cities PUMA（PUMA 4804620）",
+        "area_typical_roundtrip_minutes": 40,
+        "label": "1 卧整套租住（Houston (Southeast) & Webster Cities，低档）",
         "months": [
          1,
          2,
@@ -456,7 +456,7 @@
          11,
          12
         ],
-        "opportunity_id": "hou.housing.4804601.0.1-6"
+        "opportunity_id": "hou.housing.4804620.1.1-6"
        }
       ],
       "household": [
@@ -496,7 +496,7 @@
        }
       ],
       "housing": [
-       "开间整套租住（Houston City (North Central)--North of I-10 & Inside Loop I-，低档）（1–12 月）"
+       "1 卧整套租住（Houston (Southeast) & Webster Cities，低档）（1–12 月）"
       ],
       "jobs": [
        "服务类销售代表·工资在本职业 75 分位（1–12 月）"
@@ -504,9 +504,9 @@
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 1238700,
+       "amount_minor": 1382700,
        "currency": "USD",
-       "display": "12,387.00",
+       "display": "13,827.00",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [],
@@ -526,21 +526,21 @@
        "status": "not_bought"
       },
       "cash_end": {
-       "amount_minor": 15053479,
+       "amount_minor": 16327870,
        "currency": "USD",
-       "display": "150,534.79",
+       "display": "163,278.70",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
-       "amount_minor": 9240271,
+       "amount_minor": 10658662,
        "currency": "USD",
-       "display": "92,402.71",
+       "display": "106,586.62",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "commute": [
        {
-        "home_area_id": "hou.area.h.4804601",
-        "home_area_label": "居住片区·Houston City (North Central)--North of I-10 & Inside Loop I-610 PUMA（PUMA 4804601）",
+        "home_area_id": "hou.area.h.4804620",
+        "home_area_label": "居住片区·Houston (Southeast) & Webster Cities PUMA（PUMA 4804620）",
         "monthly_paid": {
          "amount_minor": 3250,
          "currency": "USD",
@@ -616,10 +616,10 @@
       ],
       "homes": [
        {
-        "area_id": "hou.area.h.4804601",
-        "area_label": "居住片区·Houston City (North Central)--North of I-10 & Inside Loop I-610 PUMA（PUMA 4804601）",
-        "area_typical_roundtrip_minutes": 50,
-        "label": "开间整套租住（Houston City (North Central)--North of I-10 & Inside Loop I-，低档）",
+        "area_id": "hou.area.h.4804620",
+        "area_label": "居住片区·Houston (Southeast) & Webster Cities PUMA（PUMA 4804620）",
+        "area_typical_roundtrip_minutes": 40,
+        "label": "1 卧整套租住（Houston (Southeast) & Webster Cities，低档）",
         "months": [
          1,
          2,
@@ -634,7 +634,7 @@
          11,
          12
         ],
-        "opportunity_id": "hou.housing.4804601.0.1-6"
+        "opportunity_id": "hou.housing.4804620.1.1-6"
        }
       ],
       "household": [
@@ -674,7 +674,7 @@
        }
       ],
       "housing": [
-       "开间整套租住（Houston City (North Central)--North of I-10 & Inside Loop I-，低档）（1–12 月）"
+       "1 卧整套租住（Houston (Southeast) & Webster Cities，低档）（1–12 月）"
       ],
       "jobs": [
        "服务类销售代表·工资在本职业 75 分位（1–12 月）"
@@ -682,9 +682,9 @@
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 1238700,
+       "amount_minor": 1382700,
        "currency": "USD",
-       "display": "12,387.00",
+       "display": "13,827.00",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [],
@@ -723,28 +723,28 @@
      }
     ],
     "j": {
-     "display": "0.5678",
-     "exact": "4542649570539221/8000000000000000"
+     "display": "0.5416",
+     "exact": "21664632563211489/40000000000000000"
     },
     "l_actual": {
-     "display": "0.5465",
-     "exact": "2732696957521159/5000000000000000"
+     "display": "0.5178",
+     "exact": "7766346923188151/15000000000000000"
     },
     "missing_reason": null,
     "missing_reason_zh": null,
     "range_lower": {
-     "display": "0.5678",
-     "exact": "4542649570539221/8000000000000000"
+     "display": "0.5416",
+     "exact": "21664632563211489/40000000000000000"
     },
     "range_upper": {
-     "display": "0.5678",
-     "exact": "4542649570539221/8000000000000000"
+     "display": "0.5416",
+     "exact": "21664632563211489/40000000000000000"
     },
     "reference_plan": "p3_service",
     "repeat_index": 0,
     "v_reference": {
-     "display": "0.6317",
-     "exact": "6317066107569151/10000000000000000"
+     "display": "0.6132",
+     "exact": "6131938716835187/10000000000000000"
     },
     "years": [
      {
@@ -754,9 +754,9 @@
        "status": "not_bought"
       },
       "cash_end": {
-       "amount_minor": 5942459,
+       "amount_minor": 4228026,
        "currency": "USD",
-       "display": "59,424.59",
+       "display": "42,280.26",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
@@ -767,8 +767,8 @@
       },
       "commute": [
        {
-        "home_area_id": "sea.area.h.5323314",
-        "home_area_label": "居住片区·Seattle City (Central) PUMA（PUMA 5323314）",
+        "home_area_id": "sea.area.h.5323304",
+        "home_area_label": "居住片区·King County (Northwest Central)--Greater Bellevue City PUMA（PUMA 5323304）",
         "monthly_paid": {
          "amount_minor": 0,
          "currency": "USD",
@@ -793,11 +793,11 @@
         "status_zh": "按通勤关系表执行：实际住处片区到各个到岗岗位的就业片区，取可用方式里往返最少的一种",
         "trips": [
          {
-          "job_label": "服务类销售代表·工资在本职业中位数",
-          "job_opportunity_id": "sea.job.41-3091.p50",
+          "job_label": "综合维修工·工资在本职业 75 分位",
+          "job_opportunity_id": "sea.job.49-9071.p75",
           "mode": "walk_bike",
           "mode_zh": "步行或骑车",
-          "onsite_visits": 13,
+          "onsite_visits": 22,
           "roundtrip_minutes": 30,
           "work_area_id": "sea.area.w.5323300",
           "work_area_label": "就业片区·King County"
@@ -844,10 +844,10 @@
       ],
       "homes": [
        {
-        "area_id": "sea.area.h.5323314",
-        "area_label": "居住片区·Seattle City (Central) PUMA（PUMA 5323314）",
+        "area_id": "sea.area.h.5323304",
+        "area_label": "居住片区·King County (Northwest Central)--Greater Bellevue City PUMA（PUMA 5323304）",
         "area_typical_roundtrip_minutes": 40,
-        "label": "开间整套租住（Seattle City (Central)，低档）",
+        "label": "开间整套租住（King County (Northwest Central)--Greater Bellevue City，低档）",
         "months": [
          1,
          2,
@@ -862,7 +862,7 @@
          11,
          12
         ],
-        "opportunity_id": "sea.housing.5323314.0.1-6"
+        "opportunity_id": "sea.housing.5323304.0.1-6"
        }
       ],
       "household": [
@@ -902,17 +902,17 @@
        }
       ],
       "housing": [
-       "开间整套租住（Seattle City (Central)，低档）（1–12 月）"
+       "开间整套租住（King County (Northwest Central)--Greater Bellevue City，低档）（1–12 月）"
       ],
       "jobs": [
-       "服务类销售代表·工资在本职业中位数（1–12 月）"
+       "综合维修工·工资在本职业 75 分位（1–12 月）"
       ],
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 1657529,
+       "amount_minor": 1874729,
        "currency": "USD",
-       "display": "16,575.29",
+       "display": "18,747.29",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [],
@@ -932,15 +932,15 @@
        "status": "not_bought"
       },
       "cash_end": {
-       "amount_minor": 11658015,
+       "amount_minor": 11993238,
        "currency": "USD",
-       "display": "116,580.15",
+       "display": "119,932.38",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
-       "amount_minor": 5942459,
+       "amount_minor": 4228026,
        "currency": "USD",
-       "display": "59,424.59",
+       "display": "42,280.26",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "commute": [
@@ -971,8 +971,8 @@
         "status_zh": "按通勤关系表执行：实际住处片区到各个到岗岗位的就业片区，取可用方式里往返最少的一种",
         "trips": [
          {
-          "job_label": "服务类销售代表·工资在本职业中位数",
-          "job_opportunity_id": "sea.job.41-3091.p50",
+          "job_label": "服务类销售代表·工资在本职业 75 分位",
+          "job_opportunity_id": "sea.job.41-3091.p75",
           "mode": "walk_bike",
           "mode_zh": "步行或骑车",
           "onsite_visits": 13,
@@ -1083,7 +1083,7 @@
        "开间整套租住（Seattle City (Central)，低档）（1–12 月）"
       ],
       "jobs": [
-       "服务类销售代表·工资在本职业中位数（1–12 月）"
+       "服务类销售代表·工资在本职业 75 分位（1–12 月）"
       ],
       "months_lived": 12,
       "notes": [],
@@ -1110,15 +1110,15 @@
        "status": "not_bought"
       },
       "cash_end": {
-       "amount_minor": 17373571,
+       "amount_minor": 19758450,
        "currency": "USD",
-       "display": "173,735.71",
+       "display": "197,584.50",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
-       "amount_minor": 11658015,
+       "amount_minor": 11993238,
        "currency": "USD",
-       "display": "116,580.15",
+       "display": "119,932.38",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "commute": [
@@ -1149,8 +1149,8 @@
         "status_zh": "按通勤关系表执行：实际住处片区到各个到岗岗位的就业片区，取可用方式里往返最少的一种",
         "trips": [
          {
-          "job_label": "服务类销售代表·工资在本职业中位数",
-          "job_opportunity_id": "sea.job.41-3091.p50",
+          "job_label": "服务类销售代表·工资在本职业 75 分位",
+          "job_opportunity_id": "sea.job.41-3091.p75",
           "mode": "walk_bike",
           "mode_zh": "步行或骑车",
           "onsite_visits": 13,
@@ -1261,7 +1261,7 @@
        "开间整套租住（Seattle City (Central)，低档）（1–12 月）"
       ],
       "jobs": [
-       "服务类销售代表·工资在本职业中位数（1–12 月）"
+       "服务类销售代表·工资在本职业 75 分位（1–12 月）"
       ],
       "months_lived": 12,
       "notes": [],
@@ -1291,18 +1291,18 @@
     "direction": "b_higher",
     "note_zh": "在这些缺失范围下 B 城始终更高：方向一致；不是显著性检验，也不是总体因果结论。出局比例 A 0%、B 0%，有效分身数 A 1/1、B 1/1",
     "range_difference_high": {
-     "display": "-0.0325",
-     "exact": "-81176958296147/2500000000000000"
+     "display": "-0.0246",
+     "exact": "-4920233916769849/200000000000000000"
     },
     "range_difference_low": {
-     "display": "-0.0325",
-     "exact": "-81176958296147/2500000000000000"
+     "display": "-0.0246",
+     "exact": "-4920233916769849/200000000000000000"
     }
    }
   ],
   "confirmed": {
    "confirmed_id": "confirmed.draft.u501.r1",
-   "content_fingerprint": "af691f3d07eb9b5d63ccd6116d750f45f1236182795a39c2b2b7d6195dab7a17"
+   "content_fingerprint": "f38d6ecb696a48ab7db8132cab867d7342f4e6fa4bd0e14a1611fc248b0291ab"
   },
   "data_nature": [
    {
@@ -1328,7 +1328,7 @@
       "label_zh": "可执行的住房候选"
      },
      {
-      "count": 64,
+      "count": 68,
       "key": "housing_in_catalog",
       "label_zh": "放进目录的住房"
      },
@@ -1387,14 +1387,9 @@
     "city_ref": "US:CBSA2023:26420",
     "common_priors": [
      {
-      "fact_id": "safety_index",
-      "label": "安全条件（共同先验）",
-      "meaning_zh": "安全条件指数，0–10，越高越安全。六城没有可比的安全资料，这里是登记的共同先验（六城、各片区同值），不是任何城市的犯罪统计"
-     },
-     {
       "fact_id": "leisure_index",
-      "label": "休闲条件（共同先验）",
-      "meaning_zh": "不花钱也能享受的休闲条件指数，0–10；六城没有可比资料，这里是登记的共同先验。健身、课程等活动另外安排、另外付费"
+      "label": "基本休闲条件（共同先验）",
+      "meaning_zh": "住在一座城市就有的少量基本休闲条件，0–10；六城没有可比资料，这里是登记的共同先验。主要的休闲满足来自实际参加的活动（健身、课程、爱好等另外安排、另外付费）"
      }
     ],
     "commute_modes": [
@@ -1484,7 +1479,7 @@
         "kind": "derived"
        },
        {
-        "count": 64,
+        "count": 68,
         "kind": "estimated"
        },
        {
@@ -1493,7 +1488,7 @@
        }
       ],
       "category": "housing",
-      "total": 64
+      "total": 68
      },
      {
       "by_kind": [
@@ -1629,7 +1624,7 @@
      }
     ],
     "pack_status": "real_data_frozen",
-    "summary_zh": "休斯敦：目录 226 项机会里，观测 0、派生 1、估计 214、合成设定 11。城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定，不据此排序真实城市",
+    "summary_zh": "休斯敦：目录 230 项机会里，观测 0、派生 1、估计 218、合成设定 11。城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定，不据此排序真实城市",
     "tax": {
      "absent_zh": [
       "德州没有州个人所得税"
@@ -1661,7 +1656,7 @@
       "kind": "derived"
      },
      {
-      "count": 214,
+      "count": 218,
       "kind": "estimated"
      },
      {
@@ -1702,7 +1697,7 @@
       "label_zh": "可执行的住房候选"
      },
      {
-      "count": 60,
+      "count": 68,
       "key": "housing_in_catalog",
       "label_zh": "放进目录的住房"
      },
@@ -1756,14 +1751,9 @@
     "city_ref": "US:CBSA2023:42660",
     "common_priors": [
      {
-      "fact_id": "safety_index",
-      "label": "安全条件（共同先验）",
-      "meaning_zh": "安全条件指数，0–10，越高越安全。六城没有可比的安全资料，这里是登记的共同先验（六城、各片区同值），不是任何城市的犯罪统计"
-     },
-     {
       "fact_id": "leisure_index",
-      "label": "休闲条件（共同先验）",
-      "meaning_zh": "不花钱也能享受的休闲条件指数，0–10；六城没有可比资料，这里是登记的共同先验。健身、课程等活动另外安排、另外付费"
+      "label": "基本休闲条件（共同先验）",
+      "meaning_zh": "住在一座城市就有的少量基本休闲条件，0–10；六城没有可比资料，这里是登记的共同先验。主要的休闲满足来自实际参加的活动（健身、课程、爱好等另外安排、另外付费）"
      }
     ],
     "commute_modes": [
@@ -1853,7 +1843,7 @@
         "kind": "derived"
        },
        {
-        "count": 60,
+        "count": 68,
         "kind": "estimated"
        },
        {
@@ -1862,7 +1852,7 @@
        }
       ],
       "category": "housing",
-      "total": 60
+      "total": 68
      },
      {
       "by_kind": [
@@ -1998,7 +1988,7 @@
      }
     ],
     "pack_status": "real_data_frozen",
-    "summary_zh": "西雅图：目录 220 项机会里，观测 0、派生 2、估计 207、合成设定 11。城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定，不据此排序真实城市",
+    "summary_zh": "西雅图：目录 228 项机会里，观测 0、派生 2、估计 215、合成设定 11。城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定，不据此排序真实城市",
     "tax": {
      "absent_zh": [
       "华盛顿州 2024 年没有个人所得税"
@@ -2033,7 +2023,7 @@
       "kind": "derived"
      },
      {
-      "count": 207,
+      "count": 215,
       "kind": "estimated"
      },
      {
@@ -2050,7 +2040,7 @@
   "evaluation_status": "generated",
   "limitations_zh": [
    "城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定：结果不排序真实城市，也不是现实推荐",
-   "安全与休闲背景是六城共同先验（没有可比资料）；治疗价格是共同假设；外食、服务、设备寿命与活动价格含登记的模型设定",
+   "安全背景按各都会区 2024 年犯罪统计换算（统计代理，不是个人遭遇犯罪的概率；纽约只覆盖都会区的纽约州部分）；休闲背景是六城共同设定；治疗价格是共同假设；外食、服务、设备寿命与活动价格含登记的模型设定",
    "离线规划器是可控的 mock，不代表真实大语言模型的能力或偏好理解",
    "问卷文案与参考改善范围是暂定稿，没有做认知访谈与量表验证",
    "休闲兴趣：你没有回答，本次不按具体兴趣个性化（按中性规则评价）",
@@ -2061,7 +2051,7 @@
   "meta": {
    "conversion_version": "e3a-conversion-v2",
    "data_pack": {
-    "content_fingerprint": "e96d87e9031cbfbd999b7e55f5a9f80b26e698c21b3abd6c9572c7f9ae15d9f9",
+    "content_fingerprint": "0c3f67971ff8ba83d39fdc0ad41a2f3279d2029d7a646c61c262112bd6472d39",
     "note": "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定",
     "pack_id": "pack.e3b.us-v1",
     "status": "real_data_frozen"
@@ -2107,7 +2097,7 @@
    "planner_kind": "mock"
   },
   "preflight": {
-   "preflight_fingerprint": "3be25f8d41b028b22f92a45bbf8235eb3e33dd93ddc0552ccb60058a5ffc9036",
+   "preflight_fingerprint": "e84a860a34eaf104560e4da922e5cb08fc5a33787be1faa16740545ae07c7cff",
    "preflight_id": "preflight.confirmed.draft.u501.r1"
   },
   "reading_guide_zh": [
@@ -2121,15 +2111,15 @@
    "分数是当前合成模型下、按你确认的陈述偏好计算的结果；小数末位的差异不构成可靠的排序"
   ],
   "real_model_calls": 0,
-  "result_fingerprint": "0be5f01d89b13c9cb9b26bf5ea71bb08cf5e9b7e5a6622014aa328bbe0b57f6a",
-  "result_id": "result.run-e3a-697b1a2aa0a44f87",
-  "run_id": "run-e3a-697b1a2aa0a44f87",
+  "result_fingerprint": "30e510c21ebcf4ccabae083f08dfdc0a898185fcc3f9712cbf37a6eaab612fcf",
+  "result_id": "result.run-e3a-ecd04e299221665f",
+  "run_id": "run-e3a-ecd04e299221665f",
   "run_stage": "completed",
   "sources_zh": [
    "生活事实：E1 结算记录（钱、岗位、住房、食品、服务月份）与月度资源账（本人家务小时）",
    "片区、通勤、用车权、设备故障与税：E1 月度资源账里每月唯一的通勤记录与结算记录（不含故障抽签）",
    "评价：E1-6A 单分身跨期评价（L / V / J）；汇总：E1-6B 城市报告（C / E / M、均值、模拟缺失范围、事件链、硬要求）",
-   "资料：冻结的真实资料包 pack.e3b.us-v1（e96d87e9031c…）：城市资料来自公开来源与登记的模型设定（逐城的来源性质见 data_nature）；生活规则、评分与评价参数是合成探索设定"
+   "资料：冻结的真实资料包 pack.e3b.us-v1（0c3f67971ff8…）：城市资料来自公开来源与登记的模型设定（逐城的来源性质见 data_nature）；生活规则、评分与评价参数是合成探索设定"
   ]
  }
 }

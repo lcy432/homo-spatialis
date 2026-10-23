@@ -292,8 +292,9 @@ def safety_inputs(
                 scope=f"纽约都会区的纽约州部分（{len(names)} 个县：{'、'.join(names)}）",
                 nature="observed",
                 coverage=(
-                    f"FBI 表 6 没有纽约都会区：DCJS 2024 县合计（各执法机构报告的汇总，缺报不补），覆盖都会区人口的 "
-                    f"{Decimal(part.population) * 100 / Decimal(metro_pop):.1f}%；新泽西与宾州的县没有可比的免密钥资料，不在内"
+                    f"FBI 表 6 没有纽约都会区：用 DCJS 2024 县合计。地理覆盖：这些县的人口占都会区的 "
+                    f"{Decimal(part.population) * 100 / Decimal(metro_pop):.1f}%（这是县的人口占比，不是报案完整率；县合计是各执法"
+                    "机构实际报告的汇总，缺报不补）；新泽西与宾州的县没有可比的免密钥资料，不在内"
                 ),
                 inputs=["ny_dcjs_county_totals:2024", "census_pep_county_2024:POPESTIMATE2024"],
                 residence=residence_relation(

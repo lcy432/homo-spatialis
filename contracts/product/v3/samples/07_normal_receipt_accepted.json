@@ -6,7 +6,7 @@
   "meta": {
    "conversion_version": "e3a-conversion-v2",
    "data_pack": {
-    "content_fingerprint": "a9e3aee4966ceeeb322c6ef77375df3d4f076d847bd0237d84c3a2c197224c47",
+    "content_fingerprint": "726c75d7b9d0f879c1f41f17dd23ecabc58e9417af0317e8a140745fc41bbca8",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
     "pack_id": "pack.e3a.synthetic-v2",
     "status": "synthetic_fixture_only"
@@ -23,7 +23,7 @@
    "vocabulary_version": "e3a-vocabulary-v3"
   },
   "reasons": [],
-  "run_id": "run-e3a-ce8331360534724d",
+  "run_id": "run-e3a-92db3ca11973fbf1",
   "service": "offline_bridge",
   "status": "accepted"
  }

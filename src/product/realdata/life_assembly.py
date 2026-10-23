@@ -609,8 +609,8 @@ def build_scoring(
     base = _yaml(BASE_SCORING)
     out = copy.deepcopy(base)
     out["scoring_notice"] = (
-        "E3B 六城真实资料包的评分配置：评分规格与参数仍是合成探索设定（与产品基础样例相同）；城市背景按登记的规则从公开资料或"
-        "共同先验得到。不能据此排序真实城市"
+        "E3B 六城真实资料包的评分配置：评分规格与参数仍是合成探索设定（与产品基础样例相同）；城市背景按登记的规则得到——安全按"
+        "各都会区的犯罪资料换算，环境与发展按公开资料的固定尺度，休闲是六城共同设定。不能据此排序真实城市"
     )
     group = out["comparison_group"]
     group.update(
@@ -620,14 +620,16 @@ def build_scoring(
         allowed_source_kinds=["observed", "derived", "estimated", "synthetic"],
         note=(
             "六城真实资料比较组：同一地理口径（都会区 × 支持范围内的 PUMA）、同一币种与基年（USD_2024_LOCAL）；住房、通勤、食品、"
-            "服务、设备、活动与岗位来自公开资料与登记的模型设定；安全与休闲背景是共同先验，环境按 AQI 的固定尺度"
+            "服务、设备、活动与岗位来自公开资料与登记的模型设定；安全按各都会区的犯罪资料换算，环境按 AQI 的固定尺度，休闲背景是"
+            "六城共同设定"
         ),
     )
-    prior = _source(
-        "synthetic",
-        "六城共同先验",
+    missing = _source(
+        "derived",
+        "六城比较组",
         "life-pack-us-v1",
-        synthetic_note=cfg["conditions"]["safety"]["note"],
+        inputs=["life_pack_us_v1"],
+        rule="这一项没有可用资料：报未知，不当零，也不用他城平均填补",
     )
     leisure_prior = _source(
         "synthetic",
@@ -651,7 +653,7 @@ def build_scoring(
                         "component_id": cid,
                         "status": "unknown",
                         "unknown_reason": (s.missing if s is not None else "没有安全资料")[:280],
-                        "source": prior,
+                        "source": missing,
                     }
                 else:
                     b = float(n["safety"][1])
@@ -683,7 +685,7 @@ def build_scoring(
                         "component_id": cid,
                         "status": "unknown",
                         "unknown_reason": "没有有效年份的 AQI",
-                        "source": prior,
+                        "source": missing,
                     }
                 else:
                     b = float(n["environment"][1])
@@ -983,14 +985,15 @@ FACT_PERIOD = "2024 基年情景（AQI 用 2025 年有效资料）"
 FACT_DEFS = {
     "safety_index": (
         "都会区治安背景",
-        "0–10，越高越安全：这个都会区 2024 年暴力犯罪与财产犯罪人口发生率相对全国平均的综合（全国平均水平是 6）。它只描述都会区的"
-        "治安背景对居住与出行安排里安全考虑的影响，不是你个人遭遇犯罪或死亡的概率，也不区分街区或交通方式",
+        "0–10，越高越安全：由这个都会区 2024 年暴力犯罪与财产犯罪的报案人口发生率得到，犯罪率越高指数越低（两项犯罪率与资料覆盖"
+        "范围另列）。它只描述都会区的治安背景对居住与出行安排里安全考虑的影响，不是你个人遭遇犯罪或死亡的概率，也不区分街区或"
+        "交通方式",
         "指数（0–10）",
         "safety",
     ),
     "development_index": (
         "发展机会（支持职业覆盖）",
-        "0–10：本都会区有岗位资料的支持职业占比 × 4 + 有本都会区培训项目的支持职业占比 × 4。不含你自己的学习进度；不是就业统计",
+        "0–10，越高越多：由本都会区支持职业里有岗位资料的占比与有本都会区培训项目的占比合成。不含你自己的学习进度；不是就业统计",
         "指数（0–10）",
         "opportunity",
     ),
@@ -1002,8 +1005,9 @@ FACT_DEFS = {
         "leisure",
     ),
     "environment_index": (
-        "空气质量（好天比例 × 10）",
-        "0–10：一年里 EPA 空气质量指数为“好”（AQI ≤ 50）的天数比例 × 10，越高越好；只反映空气，不含绿地与噪声",
+        "空气质量（全年好天比例）",
+        "0–10，越高越好：一年里 EPA 空气质量指数为“好”（AQI ≤ 50）的天数占全年的比例（10 表示全年都是好天）；只反映空气，"
+        "不含绿地与噪声",
         "指数（0–10）",
         "environment",
     ),
@@ -1043,7 +1047,7 @@ def _fact_source(comp: str, cbsa: str) -> dict[str, Any]:
 def _scope_category(s: SafetyInput) -> str:
     """代理可见的覆盖范围（一句话，不带内部参数）。"""
     if not s.scope.startswith("整个"):
-        return "都会区的纽约州部分（约 2/3 人口，含纽约市五区）"
+        return "都会区的纽约州部分（县人口约占都会区 2/3，含纽约市五区）"
     if s.residence.startswith("资料范围与模拟居住范围相同"):
         return "整个都会区"
     return "整个都会区（含本模拟不居住的外州部分）"
@@ -1155,7 +1159,8 @@ def build_city_facts(cfg: dict[str, Any], numbers: dict[str, dict[str, Any]]) ->
     return {
         "city_facts": {
             "facts_notice": (
-                "E3B 六城的城市背景事实：环境与发展来自公开资料的固定尺度换算，安全与休闲是登记的共同先验。事实表可见；"
+                "E3B 六城的城市背景事实：安全按各都会区 2024 年犯罪资料换算，环境与发展来自公开资料的固定尺度换算，休闲是六城共同"
+                "设定。事实表可见；"
                 "到评分输入的换算（b = 0.5 × 指数）不进观察"
             ),
             "version": base["version"],

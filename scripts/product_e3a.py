@@ -849,6 +849,14 @@ def _e3b_samples(out: Path, work: Path) -> None:
         sf = sc.preflight_only(
             work / "e3b_sf", "e3b_sf", abilities=("edu_at_least_hs",), cities=(SF, HOU)
         )
+        sf_car = sc.closed_loop(
+            work / "e3b_sf_car",
+            "e3b_sf_car",
+            draft_kwargs={"abilities": ("edu_at_least_hs",), "cities": (SF,)},
+            repeat_indexes=(0, 1),
+            note="离线闭环实际执行的结果（mock 规划器，零网络）；旧金山没有公交资料，不用车到不了岗位的年份买用车权开车上班",
+        )
+        assert sf_car.result is not None
         nohs = sc.preflight_only(work / "e3b_nohs", "e3b_nohs", cities=(HOU,))
     finally:
         sc.PACK_PATH = saved
@@ -857,8 +865,8 @@ def _e3b_samples(out: Path, work: Path) -> None:
         "51_e3b_preflight_ready",
         "ProductPreflight",
         "E3B 真实资料包（real_data_frozen）的预检查：休斯敦、西雅图各一个分身、三年；办公室文员的开局岗位要求高中学历（用户在资格一栏"
-        "确认了）；逐城的资料性质（来源性质计数、登记的模型设定、安全与休闲的共同先验、治疗共同假设、片区、通勤方式、菜单、官方 2024 "
-        "年税的范围、构建报告计数）与结构化的范围说明（职业、税、通勤、年度菜单、本版不支持）",
+        "确认了）；逐城的资料性质（来源性质计数、登记的模型设定、休闲的共同设定、治疗共同假设、片区、通勤方式、菜单、官方 2024 "
+        "年税的范围、构建报告计数）与结构化的范围说明（职业、税、通勤、治安资料的逐城覆盖、年度菜单、本版不支持）",
         dump(n.pre.preflight),
     )
     _sample_file(
@@ -876,6 +884,15 @@ def _e3b_samples(out: Path, work: Path) -> None:
         "E3B 预检查：旧金山的通勤关系表里没有公共交通（官方票价网站拒绝访问，资料缺失），比较组别的城市有——逐城报告为警告与范围"
         "说明，不当 0 分钟、也不当免费；预检查仍可通过",
         dump(sf.pre.preflight),
+    )
+    _sample_file(
+        out,
+        "55_e3b_sf_car_result",
+        "ProductResult",
+        "E3B 真实资料包：旧金山没有公交资料。一个分身住在能步行或骑车到岗的地方，不买车；另一个分身的菜单上没有不用车就能到岗"
+        "的住房，那两年买用车权开车上班（月费不含油费，油费按每次往返付），第三年换到不用车的住处就不再买——两个分身都完整，"
+        "往返 60 分钟的硬要求每个月都满足；参考生活是用车的那一组（旧金山没有不用车就能到达全部参考岗位的住房）",
+        dump(sf_car.result),
     )
     _sample_file(
         out,

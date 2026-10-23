@@ -1,16 +1,16 @@
 {
- "description_zh": "E3B 真实资料包（real_data_frozen）的预检查：休斯敦、西雅图各一个分身、三年；办公室文员的开局岗位要求高中学历（用户在资格一栏确认了）；逐城的资料性质（来源性质计数、登记的模型设定、安全与休闲的共同先验、治疗共同假设、片区、通勤方式、菜单、官方 2024 年税的范围、构建报告计数）与结构化的范围说明（职业、税、通勤、年度菜单、本版不支持）",
+ "description_zh": "E3B 真实资料包（real_data_frozen）的预检查：休斯敦、西雅图各一个分身、三年；办公室文员的开局岗位要求高中学历（用户在资格一栏确认了）；逐城的资料性质（来源性质计数、登记的模型设定、休闲的共同设定、治疗共同假设、片区、通勤方式、菜单、官方 2024 年税的范围、构建报告计数）与结构化的范围说明（职业、税、通勤、治安资料的逐城覆盖、年度菜单、本版不支持）",
  "message": "ProductPreflight",
  "payload": {
   "binding": {
    "compiled_inputs": {
-    "life_input": "c300e6b797cf600ff33af064e8c26da8fc39f8ba020778ab67269fa6cc74aa82",
+    "life_input": "9f9736966d70be27285388f40a82d0a072dce255d06486e97808f4826d741274",
     "roster": "51dca4668a02721eced9efb166cdf68afd71cea4f2cf61af72f0694bfbfba255",
-    "run_config": "ef8cb5b1dbdc64824f46be668abbe52e8cb23674d735a8699b5d1366142afd55",
-    "scoring_config": "c2f97d712be91c25f1957d2e97b24c99668f0d2385c2f4a1b21d31448481e26f"
+    "run_config": "b7a04d4a81d6ff7eef8f30c657b5c7369745e805c857b7d88e1fc384f0285ff1",
+    "scoring_config": "b30d32b6b5439b25a0bba197f662db3eb8566635e5c9b8f9054928f59d29f590"
    },
    "evaluation_spec_id": "eval.e3b-us.main",
-   "identities_fingerprint": "2a0cf134147c46c577cc30f1baafa0da7b73c353c96d5be9b346ce1aca3f616d",
+   "identities_fingerprint": "f04910fe42ff3818f091a7d25132b665e6a8375ce9ec8fb540091be346ae5b1d",
    "planner_id": "mock.rules.e3a-product",
    "planner_kind": "mock",
    "prompt_template": "e3b-product-prompt-v1",
@@ -61,7 +61,7 @@
        "label_zh": "可执行的住房候选"
       },
       {
-       "count": 64,
+       "count": 68,
        "key": "housing_in_catalog",
        "label_zh": "放进目录的住房"
       },
@@ -120,14 +120,9 @@
      "city_ref": "US:CBSA2023:26420",
      "common_priors": [
       {
-       "fact_id": "safety_index",
-       "label": "安全条件（共同先验）",
-       "meaning_zh": "安全条件指数，0–10，越高越安全。六城没有可比的安全资料，这里是登记的共同先验（六城、各片区同值），不是任何城市的犯罪统计"
-      },
-      {
        "fact_id": "leisure_index",
-       "label": "休闲条件（共同先验）",
-       "meaning_zh": "不花钱也能享受的休闲条件指数，0–10；六城没有可比资料，这里是登记的共同先验。健身、课程等活动另外安排、另外付费"
+       "label": "基本休闲条件（共同先验）",
+       "meaning_zh": "住在一座城市就有的少量基本休闲条件，0–10；六城没有可比资料，这里是登记的共同先验。主要的休闲满足来自实际参加的活动（健身、课程、爱好等另外安排、另外付费）"
       }
      ],
      "commute_modes": [
@@ -217,7 +212,7 @@
          "kind": "derived"
         },
         {
-         "count": 64,
+         "count": 68,
          "kind": "estimated"
         },
         {
@@ -226,7 +221,7 @@
         }
        ],
        "category": "housing",
-       "total": 64
+       "total": 68
       },
       {
        "by_kind": [
@@ -362,7 +357,7 @@
       }
      ],
      "pack_status": "real_data_frozen",
-     "summary_zh": "休斯敦：目录 226 项机会里，观测 0、派生 1、估计 214、合成设定 11。城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定，不据此排序真实城市",
+     "summary_zh": "休斯敦：目录 230 项机会里，观测 0、派生 1、估计 218、合成设定 11。城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定，不据此排序真实城市",
      "tax": {
       "absent_zh": [
        "德州没有州个人所得税"
@@ -394,7 +389,7 @@
        "kind": "derived"
       },
       {
-       "count": 214,
+       "count": 218,
        "kind": "estimated"
       },
       {
@@ -476,7 +471,7 @@
        "label_zh": "可执行的住房候选"
       },
       {
-       "count": 60,
+       "count": 68,
        "key": "housing_in_catalog",
        "label_zh": "放进目录的住房"
       },
@@ -530,14 +525,9 @@
      "city_ref": "US:CBSA2023:42660",
      "common_priors": [
       {
-       "fact_id": "safety_index",
-       "label": "安全条件（共同先验）",
-       "meaning_zh": "安全条件指数，0–10，越高越安全。六城没有可比的安全资料，这里是登记的共同先验（六城、各片区同值），不是任何城市的犯罪统计"
-      },
-      {
        "fact_id": "leisure_index",
-       "label": "休闲条件（共同先验）",
-       "meaning_zh": "不花钱也能享受的休闲条件指数，0–10；六城没有可比资料，这里是登记的共同先验。健身、课程等活动另外安排、另外付费"
+       "label": "基本休闲条件（共同先验）",
+       "meaning_zh": "住在一座城市就有的少量基本休闲条件，0–10；六城没有可比资料，这里是登记的共同先验。主要的休闲满足来自实际参加的活动（健身、课程、爱好等另外安排、另外付费）"
       }
      ],
      "commute_modes": [
@@ -627,7 +617,7 @@
          "kind": "derived"
         },
         {
-         "count": 60,
+         "count": 68,
          "kind": "estimated"
         },
         {
@@ -636,7 +626,7 @@
         }
        ],
        "category": "housing",
-       "total": 60
+       "total": 68
       },
       {
        "by_kind": [
@@ -772,7 +762,7 @@
       }
      ],
      "pack_status": "real_data_frozen",
-     "summary_zh": "西雅图：目录 220 项机会里，观测 0、派生 2、估计 207、合成设定 11。城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定，不据此排序真实城市",
+     "summary_zh": "西雅图：目录 228 项机会里，观测 0、派生 2、估计 215、合成设定 11。城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定，不据此排序真实城市",
      "tax": {
       "absent_zh": [
        "华盛顿州 2024 年没有个人所得税"
@@ -807,7 +797,7 @@
        "kind": "derived"
       },
       {
-       "count": 207,
+       "count": 215,
        "kind": "estimated"
       },
       {
@@ -846,7 +836,7 @@
   "clones_per_city": 1,
   "confirmed": {
    "confirmed_id": "confirmed.draft.u501.r1",
-   "content_fingerprint": "af691f3d07eb9b5d63ccd6116d750f45f1236182795a39c2b2b7d6195dab7a17"
+   "content_fingerprint": "f38d6ecb696a48ab7db8132cab867d7342f4e6fa4bd0e14a1611fc248b0291ab"
   },
   "executable": {
    "reasons": [
@@ -864,7 +854,7 @@
   "meta": {
    "conversion_version": "e3a-conversion-v2",
    "data_pack": {
-    "content_fingerprint": "e96d87e9031cbfbd999b7e55f5a9f80b26e698c21b3abd6c9572c7f9ae15d9f9",
+    "content_fingerprint": "0c3f67971ff8ba83d39fdc0ad41a2f3279d2029d7a646c61c262112bd6472d39",
     "note": "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定",
     "pack_id": "pack.e3b.us-v1",
     "status": "real_data_frozen"
@@ -888,7 +878,7 @@
    "planner_id": "mock.rules.e3a-product",
    "planner_kind": "mock"
   },
-  "preflight_fingerprint": "3be25f8d41b028b22f92a45bbf8235eb3e33dd93ddc0552ccb60058a5ffc9036",
+  "preflight_fingerprint": "e84a860a34eaf104560e4da922e5cb08fc5a33787be1faa16740545ae07c7cff",
   "preflight_id": "preflight.confirmed.draft.u501.r1",
   "scope_notes": [
    {
@@ -918,6 +908,28 @@
     "text_zh": "通勤按每座城的片区关系表执行：住处片区 × 岗位的就业片区 × 方式 → 一次往返的分钟与花费（片区级资料或估计，不是路线模拟）。每个月在可用的方式里取往返最少的一种，分钟相同取花费低的；开车要这个月有在用的用车权（另一项按月付费的机会）。关系表里没有的线或方式不能走，不当 0 分钟；停车与过路费没有建模",
     "title_zh": "通勤怎么算",
     "topic": "commute"
+   },
+   {
+    "cities": [],
+    "text_zh": "每个都会区一个治安背景（城内所有居住片区相同），由这个都会区 2024 年暴力犯罪与财产犯罪的报案人口发生率得到，犯罪率越高背景越低。它是统计代理，不是个人遭遇犯罪或伤亡的概率；不随住处片区或交通方式变化，模拟里也不抽犯罪事件。休闲背景是六城共同的登记设定（住在城里就有的少量基本条件），主要的休闲来自实际参加的活动",
+    "title_zh": "治安背景怎么来",
+    "topic": "data"
+   },
+   {
+    "cities": [
+     "US:CBSA2023:26420"
+    ],
+    "text_zh": "休斯敦：整个都会区（Houston-Pasadena-The Woodlands, TX，FBI 表 6）。FBI 估计总数：实际报告的机构覆盖 99.9% 人口，其余由 FBI 估算。资料范围与模拟居住范围相同（整个都会区）。2024 年每 10 万人暴力犯罪 563.92、财产犯罪 2546.12（报案数，不是全部发生的犯罪）",
+    "title_zh": "治安资料的覆盖",
+    "topic": "data"
+   },
+   {
+    "cities": [
+     "US:CBSA2023:42660"
+    ],
+    "text_zh": "西雅图：整个都会区（Seattle-Tacoma-Bellevue, WA，FBI 表 6）。FBI 估计总数：实际报告的机构覆盖 99.8% 人口，其余由 FBI 估算。资料范围与模拟居住范围相同（整个都会区）。2024 年每 10 万人暴力犯罪 385.49、财产犯罪 2971.53（报案数，不是全部发生的犯罪）",
+    "title_zh": "治安资料的覆盖",
+    "topic": "data"
    },
    {
     "cities": [
@@ -967,10 +979,10 @@
   ],
   "scope_zh": [
    "生活协议 life-v1-e3b-us（状态 synthetic_fixture_only）、评分 score.e1-life.explore（探索版）：城市、报价、工资、疾病、治疗与评分参数全部是合成设定，不是现实城市，不排序真实城市",
-   "城市背景事实 e1-7a-city-facts-v1：每座城 4 条合成指数，换算到评分条件的规则是内部合成设定",
+   "城市背景事实 e1-7a-city-facts-v1：每座城 7 条合成指数，换算到评分条件的规则是内部合成设定",
    "评价沿用 E1-6：完整者均值只用完整评价的分身；生活出局另报比例与事件链；模拟问题进入缺失范围（不是置信区间）",
    "城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定：结果不排序真实城市，也不是现实推荐",
-   "安全与休闲背景是六城共同先验（没有可比资料）；治疗价格是共同假设；外食、服务、设备寿命与活动价格含登记的模型设定",
+   "安全背景按各都会区 2024 年犯罪统计换算（统计代理，不是个人遭遇犯罪的概率；纽约只覆盖都会区的纽约州部分）；休闲背景是六城共同设定；治疗价格是共同假设；外食、服务、设备寿命与活动价格含登记的模型设定",
    "离线规划器是可控的 mock，不代表真实大语言模型的能力或偏好理解",
    "问卷文案与参考改善范围是暂定稿，没有做认知访谈与量表验证",
    "休闲兴趣：你没有回答，本次不按具体兴趣个性化（按中性规则评价）",

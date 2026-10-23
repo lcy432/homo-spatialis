@@ -4,13 +4,13 @@
  "payload": {
   "binding": {
    "compiled_inputs": {
-    "life_input": "f87b783f1ceea7a8a8315c4eedeb513f561cf89236a3f82b440652a9b539c175",
+    "life_input": "eaca6f16efd7c9045e236001a911134b08367451f7e90e5db039fad3e27a9416",
     "roster": "837ef513e4116b24f75b2f29c0edd9b0ea40b12dfa12c8c3979c7074e8b59b4c",
-    "run_config": "3953ba72a256aad82f902e6d34ef101c771a7e4836427374a16b9933e27fa020",
+    "run_config": "65332df48551eff1b65f1fd12742ed598fade9e5f9b63d633eab09905c34727a",
     "scoring_config": "130e822068dd45e7fe265d4220999b8f8530789d2be3073e39085014156efdea"
    },
    "evaluation_spec_id": "eval.e1-life.main",
-   "identities_fingerprint": "980d230ea59e4ea362865b16d23382c6d5bd220a9e27813a7cc358ab5e153004",
+   "identities_fingerprint": "c74652862e727bae62f231427f1ea530258d93969ba3d27d59bf25e917b0dc75",
    "planner_id": "mock.rules.e3a-product",
    "planner_kind": "mock",
    "prompt_template": "e3b-product-prompt-v1",
@@ -662,7 +662,7 @@
   "clones_per_city": 1,
   "confirmed": {
    "confirmed_id": "confirmed.draft.u501.r1",
-   "content_fingerprint": "418c7a1fb85f9b3934a0ba799d21282dca0820b6d84dfc229e5af1f9f5e12941"
+   "content_fingerprint": "e46da82ce8e348e5ddcf6cea12f89e00feecf891fdcb883e0e544874e1bf4e02"
   },
   "executable": {
    "reasons": [
@@ -680,7 +680,7 @@
   "meta": {
    "conversion_version": "e3a-conversion-v2",
    "data_pack": {
-    "content_fingerprint": "a9e3aee4966ceeeb322c6ef77375df3d4f076d847bd0237d84c3a2c197224c47",
+    "content_fingerprint": "726c75d7b9d0f879c1f41f17dd23ecabc58e9417af0317e8a140745fc41bbca8",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
     "pack_id": "pack.e3a.synthetic-v2",
     "status": "synthetic_fixture_only"
@@ -704,7 +704,7 @@
    "planner_id": "mock.rules.e3a-product",
    "planner_kind": "mock"
   },
-  "preflight_fingerprint": "74671f8ab6a821695e94ed6c10a2bca925f3bdc2f3e70a14eb9d1b376568989b",
+  "preflight_fingerprint": "f545a9207b4d76452e42896403320c5f7e2b022a1b8c98efb73cf0742fb7c034",
   "preflight_id": "preflight.confirmed.draft.u501.r1",
   "scope_zh": [
    "生活协议 life-v1-e3a-product（状态 synthetic_fixture_only）、评分 score.e1-life.explore（探索版）：城市、报价、工资、疾病、治疗与评分参数全部是合成设定，不是现实城市，不排序真实城市",

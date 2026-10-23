@@ -893,7 +893,8 @@ class NamedAssumption(ProductModel):
 
 
 class CommonPrior(ProductModel):
-    """一项比较组各城共用的背景设定（没有可比资料时登记的共同先验，例如安全与休闲）：事实的名称与含义。不制造城市差异；
+    """一项比较组各城共用的背景设定（没有可比资料时登记的共同先验，例如休闲；安全按各都会区的犯罪资料换算，不在这里）：事实的
+    名称与含义。不制造城市差异；
     这里不写它换算成评分输入的规则与参数。"""
 
     fact_id: str = Field(min_length=1, max_length=64)

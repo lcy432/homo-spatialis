@@ -124,16 +124,60 @@ def _common_priors(world: RunWorld, city: str) -> tuple[CommonPrior, ...]:
     return tuple(out)
 
 
-def _report_counts(pack: DataPack, world: RunWorld, city: str) -> tuple[BuildCount, ...]:
-    """冻结资料包的构建报告（与生活输入同一个目录）里这座城的计数。报告缺失、记下的生活输入身份与这份资料包的不同，或认不出
-    这座城时返回空（未知，不是 0）。城市在报告里按编号前缀（``{key}.area.*``、``{key}.food.*`` 的共同约定）对上。"""
+def _pack_report(pack: DataPack) -> dict[str, Any] | None:
+    """冻结资料包的构建报告；缺失或记下的生活输入身份与这份资料包的不同时为 None（未知）。"""
     life = Path(pack.body.e1_base.life_input)
     path = life.parent / "report.json"
     if not path.is_file() or not life.is_file():
-        return ()
+        return None
     report = json.loads(path.read_text(encoding="utf-8"))
-    digest = hashlib.sha256(life.read_bytes()).hexdigest()
-    if (report.get("files") or {}).get(life.name) != digest:
+    if (report.get("files") or {}).get(life.name) != hashlib.sha256(life.read_bytes()).hexdigest():
+        return None
+    return report
+
+
+def safety_notes(pack: DataPack, world: RunWorld, cities: tuple[str, ...]) -> list[ScopeNote]:
+    """治安背景的范围说明（DECISIONS/0042 第 9 条）：一条总的说明，加上每座城用了什么资料、覆盖到哪里、与模拟居住范围的关系
+    （来自资料包构建报告）。只有资料与覆盖，没有换算参数；报告读不到时只写总的说明。"""
+    out = [
+        ScopeNote(
+            topic="data",
+            title_zh="治安背景怎么来",
+            text_zh=(
+                "每个都会区一个治安背景（城内所有居住片区相同），由这个都会区 2024 年暴力犯罪与财产犯罪的报案人口发生率得到，"
+                "犯罪率越高背景越低。它是统计代理，不是个人遭遇犯罪或伤亡的概率；不随住处片区或交通方式变化，模拟里也不抽犯罪"
+                "事件。休闲背景是六城共同的登记设定（住在城里就有的少量基本条件），主要的休闲来自实际参加的活动"
+            ),
+        )
+    ]
+    report = _pack_report(pack)
+    inputs = (report or {}).get("safety_inputs") or {}
+    for ref in cities:
+        cat = world.bundle.catalog_for(ref)
+        if cat is None:
+            continue
+        key = next(iter({o.opportunity_id.split(".")[0] for o in cat.opportunities}), None)
+        s = inputs.get(key) if key else None
+        if not isinstance(s, dict):
+            continue
+        if s.get("missing"):
+            text = f"{cat.label}：{s['missing']}"
+        else:
+            text = (
+                f"{cat.label}：{s['scope']}。{s['coverage']}。{s['residence']}。2024 年每 10 万人暴力犯罪 "
+                f"{s['violent_rate']}、财产犯罪 {s['property_rate']}（报案数，不是全部发生的犯罪）"
+            )
+        out.append(
+            ScopeNote(topic="data", title_zh="治安资料的覆盖", text_zh=text[:600], cities=(ref,))
+        )
+    return out
+
+
+def _report_counts(pack: DataPack, world: RunWorld, city: str) -> tuple[BuildCount, ...]:
+    """冻结资料包的构建报告（与生活输入同一个目录）里这座城的计数。报告缺失、记下的生活输入身份与这份资料包的不同，或认不出
+    这座城时返回空（未知，不是 0）。城市在报告里按编号前缀（``{key}.area.*``、``{key}.food.*`` 的共同约定）对上。"""
+    report = _pack_report(pack)
+    if report is None:
         return ()
     cat = world.bundle.catalog_for(city)
     assert cat is not None
@@ -309,6 +353,7 @@ def scope_notes(
                 ),
             )
         )
+        out += safety_notes(pack, world, cities)
         for ref in cities:
             for gap in commute_gaps(world, ref):
                 out.append(

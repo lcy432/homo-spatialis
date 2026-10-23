@@ -2,8 +2,8 @@
 
 * 真实资料包的部分用旧金山与休斯敦的预检查（不过生活，快）；生活事实在真实资料包上的完整链路在 ``test_e3b_product_flow.py`` 的
   闭环里逐字段核对 E1 的记录。
-* 设备故障与“买了用车权”用合成样例 K51 上的受控计划（写好的计划，不是规划器输出）：真实资料包里的设备都是模拟期内不随机坏，
-  mock 也不买用车权。手算口径同 ``tests/life/test_e3b_engine.py``：开车远处 40 分钟、每次往返油费 5.00、文员每月到岗 20 次。
+* 设备故障与“买了用车权”用合成样例 K51 上的受控计划（写好的计划，不是规划器输出）：真实资料包里的设备都是模拟期内不随机坏；
+  mock 只在不用车到不了岗位或满足不了硬要求时才买用车权（旧金山的情形见 ``test_mock_car.py``）。手算口径同 ``tests/life/test_e3b_engine.py``：开车远处 40 分钟、每次往返油费 5.00、文员每月到岗 20 次。
 """
 
 from __future__ import annotations
@@ -414,3 +414,52 @@ def test_a_device_failure_and_its_replacement_are_reported_without_the_draw(synt
     )
     assert f.replacement_label == f.label and "下个月" in f.replacement_status_zh
     assert not _keys(facts.model_dump(mode="json")) & INTERNAL_KEYS
+
+
+# --------------------------------------------------------------------------- 治安资料的逐城说明（审核 F6）
+
+NYC, CHI = "US:CBSA2023:35620", "US:CBSA2023:16980"
+#: 安全背景的内部换算：权重、全国参照锚点、换算公式与中间量都不进公开消息与样例
+SAFETY_SECRETS = (
+    "fbi_relative_rate",
+    "w_violent",
+    "w_property",
+    "national_index",
+    "全国平均水平",
+    "6/r",
+    "min(10",
+    "safety_r",
+)
+
+
+def test_every_city_gets_a_safety_coverage_note_without_internal_parameters(tmp_path):
+    saved = sc.PACK_PATH
+    sc.PACK_PATH = E3B
+    try:
+        s = sc.preflight_only(
+            tmp_path, "safety", abilities=("edu_at_least_hs",), cities=(NYC, CHI, HOU)
+        )
+    finally:
+        sc.PACK_PATH = saved
+    notes = [n for n in s.pre.preflight.scope_notes if n.topic == "data"]
+    (general,) = [n for n in notes if not n.cities]
+    assert "统计代理" in general.text_zh and "不是个人遭遇犯罪" in general.text_zh
+    assert "休闲背景是六城共同" in general.text_zh
+    by_city = {n.cities[0]: n.text_zh for n in notes if n.cities}
+    assert set(by_city) == {NYC, CHI, HOU}
+    # 纽约只覆盖都会区的纽约州部分；64.5% 是县的人口占比，不是报案完整率
+    assert "纽约州部分" in by_city[NYC] and "64.5%" in by_city[NYC]
+    assert "不是报案完整率" in by_city[NYC] and "新泽西" in by_city[NYC]
+    # 芝加哥的资料含模拟居住范围以外的印第安纳州县
+    assert "Indiana" in by_city[CHI] and "不在模拟居住范围" in by_city[CHI]
+    assert "整个都会区" in by_city[HOU] and "资料范围与模拟居住范围相同" in by_city[HOU]
+    text = json.dumps([n.model_dump(mode="json") for n in notes], ensure_ascii=False)
+    for secret in SAFETY_SECRETS:
+        assert secret not in text
+
+
+def test_public_samples_carry_no_internal_safety_parameters():
+    for p in sorted(Path("contracts/product/v3/samples").glob("*.json")):
+        text = p.read_text(encoding="utf-8")
+        for secret in SAFETY_SECRETS:
+            assert secret not in text, (p.name, secret)
