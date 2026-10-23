@@ -77,6 +77,12 @@ _DEFS: tuple[tuple[UnitDef, tuple[str, ...]], ...] = (
         UnitDef("enjoyment_index", "enjoyment", 1.0, "享受功能（折算）"),
         ("享受功能（折算）", "功能（折算）", "enjoyment index"),
     ),
+    # DECISIONS/0042：居住条件按等级描述（空间够用程度、同片区同户型里的条件档次），经各自的 η 折算成居住条件分；
+    # 等级不是面积，不与平方英尺换算
+    (
+        UnitDef("housing_level", "housing_level", 1.0, "居住条件等级"),
+        ("居住条件等级", "级", "居住条件等级（折算）", "housing level"),
+    ),
 )
 
 UNITS: dict[str, UnitDef] = {d.unit_id: d for d, _ in _DEFS}
@@ -92,6 +98,7 @@ for _d, _names in _DEFS:
 NUMERIC_DIMENSIONS: frozenset[str] = frozenset(
     {
         "area",
+        "housing_level",
         "volume",
         "duration",
         "meal_rate",

@@ -6,7 +6,7 @@
 # 或 LLM；只用来检验生活引擎、规划接线与产品链路，不是城市评价，不排序真实城市。
 #
 # 规则：生活规则 e1-5c-monthly-health-v1（月度时间与精力、满足感反馈、学习与岗位、目标储蓄、疾病与应急），评分 e1-convenience-v1
-# （六维＋独立健康项，物质三项 housing_space、fresh_food、daily_convenience）。偏好是六维产品画像（用户确认的陈述，健康回答独立、
+# （六维＋独立健康项，物质四项 housing_condition、food_life、daily_convenience、personal_enjoyment）。偏好是六维产品画像（用户确认的陈述，健康回答独立、
 # 不占六维 100 分）。
 #   * 两座合成城 K51、M52：住房、食品、岗位、课程、治疗与背景事实相同，只有两种减少杂务的方式价格不同——K51 的设备便宜、人工服务贵，
 #     M52 反过来；
@@ -107,7 +107,7 @@ protocol:
     scoring_version: e1-life-v1
     # 评分内容身份（DECISIONS/0025）：scoring_product.yaml 的规格的内容身份。规格一改（τ、c、任务组合……）这里就要换，
     # 并从共同初始状态重跑。
-    scoring_content_fingerprint: 8444d8d20d88e0bacf492990dc66d4183983e973a840e6473718287b73f2baa8
+    scoring_content_fingerprint: bd1e3578b0b7013043fd4470b3d4ee0fe64d9cd3c470381851d64b0831ef8fa9
     preference_source: product_confirmed_six_dim
     quantization: floor_to_0.01
     source: *rules
@@ -217,7 +217,7 @@ protocol:
       健康回答是独立的健康风险应对问卷（e3a-health-coping-q-v0.1-draft），不占六维 100 分、不是第七个评分权重；只供分身做计划，
       结算、风险抽签与评分都不读它
 
-consumption_needs: [housing_space, food_life, daily_convenience, personal_enjoyment]
+consumption_needs: [housing_condition, food_life, daily_convenience, personal_enjoyment]
 categories: [housing, food, durable, job, training, experience, service]
 functions: [housing, food]
 # 生活扩展（DECISIONS/0041）的公开词表：菜系、休闲活动类别、装备能力、享受功能。机会只能用这里声明过的键；怎样换算成满足感只在评分规格里。
@@ -284,7 +284,7 @@ catalogs:
       - opportunity_id: k51.housing.near
         category: housing
         label: 一居室（离工作地近）
-        spec: {floor_area_sqft: 600, rooms: 1, exclusive: true, basic_facilities: true, home_office: false, commute_roundtrip_minutes: 30}
+        spec: {bedrooms: 1, space_level: 2, quality_level: 2, exclusive: true, basic_facilities: true, home_office: false, commute_roundtrip_minutes: 30}
         functions: [housing]
         unit: dwelling
         quality: 独占一居室；到就业中心往返约 30 分钟
@@ -301,7 +301,7 @@ catalogs:
       - opportunity_id: k51.housing.far
         category: housing
         label: 一居室（离工作地远）
-        spec: {floor_area_sqft: 600, rooms: 1, exclusive: true, basic_facilities: true, home_office: false, commute_roundtrip_minutes: 70}
+        spec: {bedrooms: 1, space_level: 2, quality_level: 2, exclusive: true, basic_facilities: true, home_office: false, commute_roundtrip_minutes: 70}
         functions: [housing]
         unit: dwelling
         quality: 与近处同样大小的一居室；到就业中心往返约 70 分钟
@@ -647,7 +647,7 @@ catalogs:
       - opportunity_id: m52.housing.near
         category: housing
         label: 一居室（离工作地近）
-        spec: {floor_area_sqft: 600, rooms: 1, exclusive: true, basic_facilities: true, home_office: false, commute_roundtrip_minutes: 30}
+        spec: {bedrooms: 1, space_level: 2, quality_level: 2, exclusive: true, basic_facilities: true, home_office: false, commute_roundtrip_minutes: 30}
         functions: [housing]
         unit: dwelling
         quality: 独占一居室；到就业中心往返约 30 分钟
@@ -659,7 +659,7 @@ catalogs:
       - opportunity_id: m52.housing.far
         category: housing
         label: 一居室（离工作地远）
-        spec: {floor_area_sqft: 600, rooms: 1, exclusive: true, basic_facilities: true, home_office: false, commute_roundtrip_minutes: 70}
+        spec: {bedrooms: 1, space_level: 2, quality_level: 2, exclusive: true, basic_facilities: true, home_office: false, commute_roundtrip_minutes: 70}
         functions: [housing]
         unit: dwelling
         quality: 与近处同样大小的一居室；到就业中心往返约 70 分钟
@@ -984,7 +984,7 @@ product_profiles:
     confirmed_profile_fingerprint: "0000000000000000000000000000000000000000000000000000000000000301"
     dimension_points: {material: "45", safety: "5", opportunity: "10", leisure: "15", environment: "5", commute: "20"}
     material_status: allocated
-    material_points: {housing_space: "25", food_life: "25", daily_convenience: "30", personal_enjoyment: "20"}
+    material_points: {housing_condition: "25", food_life: "25", daily_convenience: "30", personal_enjoyment: "20"}
     health_questionnaire_version: e3a-health-coping-q-v0.1-draft
     health_answers:
       - question_id: hc_more_pay_more_sick_risk

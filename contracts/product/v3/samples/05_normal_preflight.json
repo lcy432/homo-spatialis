@@ -4,18 +4,18 @@
  "payload": {
   "binding": {
    "compiled_inputs": {
-    "life_input": "d18af15e91dc9c521cbda76721b98de67cf31068eab8cb85dc887623d9e1ed1e",
+    "life_input": "576b824bc30df5487b630be8048929c092db7b3733e6c1dee0d1423f24ebba56",
     "roster": "837ef513e4116b24f75b2f29c0edd9b0ea40b12dfa12c8c3979c7074e8b59b4c",
     "run_config": "4f9556d1770f64b570dfe1120ca0395fed20425d7a88f9b14cd581ee3b1c280b",
-    "scoring_config": "44dcc1f38fa8779bbe903c7890282207a6d8bc7bea29dde89b012e6b815d06fe"
+    "scoring_config": "1261d6ca3387e87360ce6c5032c4a2644ecf6ee27bc623b20fa2d549640af28c"
    },
    "evaluation_spec_id": "eval.e1-life.main",
-   "identities_fingerprint": "a015296d0fd67385149d54e4093bc3c248200029e6bf756f745ac82dcae958d0",
+   "identities_fingerprint": "b878f7f9d683a753da1146dc51812a785279242e5b0a818490c5c21dada6bc02",
    "planner_id": "mock.rules.e3a-product",
    "planner_kind": "mock",
    "prompt_template": "e3a-product-prompt-v2",
    "protocol_id": "life-v1-e3a-product",
-   "scoring_content_fingerprint": "8444d8d20d88e0bacf492990dc66d4183983e973a840e6473718287b73f2baa8",
+   "scoring_content_fingerprint": "bd1e3578b0b7013043fd4470b3d4ee0fe64d9cd3c470381851d64b0831ef8fa9",
    "scoring_version": "e1-life-v1"
   },
   "cities": [
@@ -105,7 +105,7 @@
   "clones_per_city": 1,
   "confirmed": {
    "confirmed_id": "confirmed.draft.u501.r1",
-   "content_fingerprint": "cbdb1aecb05c1980b768a47c6669a6376e99997b43c3e023473e620861e95ceb"
+   "content_fingerprint": "21231943f774524e7552238f38c0ee4f04dcd028e9cd134205ab34c1f1b1b3f0"
   },
   "executable": {
    "reasons": [
@@ -123,7 +123,7 @@
   "meta": {
    "conversion_version": "e3a-conversion-v2",
    "data_pack": {
-    "content_fingerprint": "ff26a0e51fecbeb0e534b06db93ef69cf8dd4c94542cbf4060030f9ed83242c4",
+    "content_fingerprint": "3d2958eb00de1de411186249bba0fb6bba6d411af265f9714736afa5511c964b",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
     "pack_id": "pack.e3a.synthetic-v2",
     "status": "synthetic_fixture_only"
@@ -137,7 +137,7 @@
     "synthetic": true
    },
    "schema_version": "e3a-product-schema-v3",
-   "vocabulary_version": "e3a-vocabulary-v2"
+   "vocabulary_version": "e3a-vocabulary-v3"
   },
   "planner": {
    "call_limit": 18,
@@ -147,7 +147,7 @@
    "planner_id": "mock.rules.e3a-product",
    "planner_kind": "mock"
   },
-  "preflight_fingerprint": "ab489ae641f95cdbb79a059075d1ef282fbe4e846fd1f77064a39f51de0d13e6",
+  "preflight_fingerprint": "9d34f2d97b1c41f95ff15dc94e098aca8b0fbd18b57ccbcefaef0aba0389877f",
   "preflight_id": "preflight.confirmed.draft.u501.r1",
   "scope_zh": [
    "生活协议 life-v1-e3a-product（状态 synthetic_fixture_only）、评分 score.e1-life.explore（探索版）：城市、报价、工资、疾病、治疗与评分参数全部是合成设定，不是现实城市，不排序真实城市",

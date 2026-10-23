@@ -10,9 +10,9 @@
   ],
   "confirmation_source": "user_form",
   "confirmed_id": "confirmed.draft.u501.health_unsure.r1",
-  "content_fingerprint": "5f3ab1a6cccea7cea802ed6a341383a24ce3e4d2dd70705fc508ba5d43660571",
+  "content_fingerprint": "985d9d63125c473520bbf35b77c02683b2e1f936cf9b397bc8d3d83be7def438",
   "draft": {
-   "draft_fingerprint": "9dd2c7d7bd2ccacce84cbf9cead93e5860213f86ac06865e1f221c49f0c80052",
+   "draft_fingerprint": "f9bad57a113c5ba506808270dad94d4712d2e18f0d4b50acc3f40bf12e84c9d8",
    "draft_id": "draft.u501.health_unsure",
    "revision": 1
   },
@@ -75,14 +75,14 @@
     "display": {
      "daily_convenience": "30.0",
      "food_life": "25.0",
-     "housing_space": "25.0",
+     "housing_condition": "25.0",
      "personal_enjoyment": "20.0"
     },
     "mode": "manual",
     "points": {
      "daily_convenience": "30",
      "food_life": "25",
-     "housing_space": "25",
+     "housing_condition": "25",
      "personal_enjoyment": "20"
     }
    },
@@ -91,7 +91,7 @@
   "meta": {
    "conversion_version": "e3a-conversion-v2",
    "data_pack": {
-    "content_fingerprint": "ff26a0e51fecbeb0e534b06db93ef69cf8dd4c94542cbf4060030f9ed83242c4",
+    "content_fingerprint": "3d2958eb00de1de411186249bba0fb6bba6d411af265f9714736afa5511c964b",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
     "pack_id": "pack.e3a.synthetic-v2",
     "status": "synthetic_fixture_only"
@@ -105,7 +105,7 @@
     "synthetic": true
    },
    "schema_version": "e3a-product-schema-v3",
-   "vocabulary_version": "e3a-vocabulary-v2"
+   "vocabulary_version": "e3a-vocabulary-v3"
   },
   "money": {
    "amount_text": "3000",

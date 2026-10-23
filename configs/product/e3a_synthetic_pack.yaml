@@ -28,7 +28,7 @@ pack:
     city_facts: configs/life/city_facts_product.yaml
     protocol_id: life-v1-e3a-product
     scoring_version: e1-life-v1
-    scoring_content_fingerprint: 8444d8d20d88e0bacf492990dc66d4183983e973a840e6473718287b73f2baa8
+    scoring_content_fingerprint: bd1e3578b0b7013043fd4470b3d4ee0fe64d9cd3c470381851d64b0831ef8fa9
     prompt_template: e3a-product-prompt-v2
 
   run:
@@ -154,11 +154,11 @@ pack:
       support_note: 按实际所住住房的往返分钟与实际到岗次数评分；非工作出行本版没有细化
 
   material_leaves:
-    - key: housing_space
-      label: 居住空间
-      definition: 实际住的那一处有多大
+    - key: housing_condition
+      label: 居住条件
+      definition: 实际住的那一处房子本身的条件：空间够不够用、同类房子里条件好不好
       support: supported
-      note: 只看面积；房租与通勤不在这一项
+      note: 只看房子本身；房租、通勤、地区的安全与环境不在这一项（安全、环境按住处所在片区另算）；旧版的“居住空间（只看面积）”含义不同，旧的确认要重新审阅
     - key: food_life
       label: 饮食生活
       definition: 实际吃的完整食品方案（自己做、外食都可以）新鲜不新鲜、合不合你确认的口味

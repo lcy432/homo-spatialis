@@ -961,6 +961,17 @@ def _score_component(
             counted = {best}
             if len(terms) > 1:
                 reasons.append("max：只取最好的一项来源")
+    elif comp.combine == "sum_of_source_max":
+        # DECISIONS/0042：每个来源取在用东西里最好的一项，不同来源相加（同一处住房的几项条件各算一次）
+        if unknown:
+            return ComponentMonth(
+                **head, status="unknown", base=cond.base, cap=cond.cap, reasons=tuple(unknown)
+            )
+        for sid in dict.fromkeys(t.source_id for t in terms):
+            mine = [i for i, t in enumerate(terms) if t.source_id == sid]
+            counted.add(max(mine, key=lambda i: (terms[i].contribution, -i)))
+        if len(counted) < len(terms):
+            reasons.append("每个来源只取最好的一项，不同来源相加")
     else:  # any：布尔替代
         first = next((i for i, t in enumerate(terms) if t.x == 1.0), None)
         if first is not None:
@@ -972,7 +983,32 @@ def _score_component(
                 **head, status="unknown", base=cond.base, cap=cond.cap, reasons=tuple(unknown)
             )
     terms = [t.model_copy(update={"counted": i in counted}) for i, t in enumerate(terms)]
-    z = cond.base + math.fsum(t.contribution for t in terms if t.counted)
+    base = cond.base
+    if cond.area_bases:
+        # DECISIONS/0042：地区条件读这个月实际住处所在片区的值，取代城市背景（不在城市值上再叠一次）
+        homes = [r for r in in_use if r.record == "housing"]
+        if len(homes) != 1:
+            return ComponentMonth(
+                **head,
+                status="unknown",
+                cap=cond.cap,
+                reasons=(
+                    f"这个月实际住处有 {len(homes)} 处，不是恰好一处：地区条件无从读取（不沿用城市值）",
+                ),
+            )
+        area = homes[0].opp.area
+        if area is None or area not in cond.area_bases:
+            return ComponentMonth(
+                **head,
+                status="unknown",
+                cap=cond.cap,
+                reasons=(
+                    f"实际住处 {homes[0].opp.opportunity_id} 所在片区 {area} 没有这一项的地区值：未知，不沿用城市值，也不当 0",
+                ),
+            )
+        base = cond.area_bases[area]
+        reasons.append(f"地区条件：读这个月实际住处所在片区 {area} 的值（{cond.area_basis}）")
+    z = base + math.fsum(t.contribution for t in terms if t.counted)
     part: ParticipationTerm | None = None
     if comp.participation is not None:
         assert pref is not None

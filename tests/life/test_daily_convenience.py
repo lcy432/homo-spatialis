@@ -594,7 +594,7 @@ def test_convenience_makes_the_course_plan_feasible_without_changing_learning(w)
 
 def test_zero_weight_keeps_the_time_saving_but_adds_no_score(w):
     zero = w.profile.model_copy(
-        update={"material_points": {"housing_space": "50", "food_life": "50"}}
+        update={"material_points": {"housing_condition": "50", "food_life": "50"}}
     )
     s0 = w.start(K51)
     none = w.year(s0, base(), profile=zero)
@@ -705,7 +705,7 @@ def test_mock_picks_the_cheaper_way_per_hour_from_public_facts(w):
     assert items == [
         whole("m52.service.chores")
     ]  # 108 / 18 = 6.0 每小时，设备 6,000 / 60 / 12 ≈ 8.3
-    items, _ = _m5(w, K51, material={"housing_space": "50", "food_life": "50"})
+    items, _ = _m5(w, K51, material={"housing_condition": "50", "food_life": "50"})
     assert items == []  # 用户没有给便利点数：不买
     held = (
         Holding(

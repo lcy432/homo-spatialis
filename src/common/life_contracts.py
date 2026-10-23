@@ -2130,6 +2130,18 @@ class ActivityFacts(ContractModel):
         return tuple(c for c in self.requires if c not in have)
 
 
+class AreaDecl(ContractModel):
+    """城市内部的一个片区（DECISIONS/0042）：住处所在的居住片区，或岗位所在的就业片区。
+
+    片区是资料的地理单位（例如 ACS 的 PUMA、按工作地 PUMA 合成的就业片区），不是街区或楼栋；它只用来把住处、岗位、地区条件
+    与通勤关系对上。片区本身不加分：地区的安全、环境读评分条件里这个片区的值，通勤读关系表。"""
+
+    area_id: IdStr
+    label: str = Field(min_length=1, max_length=120)
+    kind: Literal["home", "work", "home_work"]
+    note: str = Field(min_length=1, max_length=280)
+
+
 class LifeOpportunity(ContractModel):
     """一座城市里的一项生活机会：一种商品、方案、服务、培训或工作。
 
@@ -2169,6 +2181,8 @@ class LifeOpportunity(ContractModel):
     #: E1-5A：培训完成后授予哪些能力（能力在 ``CareerRules.abilities`` 里声明）。只有培训可以写。
     grants: tuple[KeyStr, ...] = Field(default=(), exclude_if=lambda v: v == ())
     #: 生活扩展（DECISIONS/0041）的公开事实；没有用到时不序列化（原有机会的内容身份不变）。
+    #: 片区（DECISIONS/0042）：住房是住处所在的居住片区，岗位是工作所在的就业片区。没有用到时不序列化。
+    area: IdStr | None = Field(default=None, exclude_if=lambda v: v is None)
     food_plan: FoodPlanFacts | None = Field(default=None, exclude_if=lambda v: v is None)
     enjoyment: tuple[EnjoymentProvision, ...] = Field(default=(), exclude_if=lambda v: v == ())
     equipment: EquipmentFacts | None = Field(default=None, exclude_if=lambda v: v is None)
@@ -2379,6 +2393,8 @@ class CityLifeCatalog(ContractModel):
     material_coverage: tuple[MaterialNeedCoverage, ...] = ()
     #: 最低住房与食品的数据声明（E1-2）。缺了不影响结构有效，但这座城**不能结算**。
     minimum_living: tuple[MinimumNeedSpec, ...] = ()
+    #: 城市内部的片区（DECISIONS/0042）。机会写了 ``area`` 就必须在这里声明；没有用到时不序列化。
+    areas: tuple[AreaDecl, ...] = Field(default=(), exclude_if=lambda v: v == ())
     #: 这座城适用的合成税策略。缺了**不能结算**——没有配置不等于零税。
     tax_policy_id: IdStr | None = None
     #: E1-3 增补订正：各项需求功能的供给资料是否完整。目录里没有记录不等于确定没有。
@@ -2454,7 +2470,25 @@ class CityLifeCatalog(ContractModel):
         funcs = [f.function for f in self.function_supply]
         if len(funcs) != len(set(funcs)):
             raise ValueError(f"{self.city}: function_supply 的功能重复")
+        kinds = {a.area_id: a.kind for a in self.areas}
+        if len(kinds) != len(self.areas):
+            raise ValueError(f"{self.city}: 片区编号重复")
+        for o in self.opportunities:
+            if o.area is None:
+                continue
+            kind = kinds.get(o.area)
+            if kind is None:
+                raise ValueError(
+                    f"{self.city}/{o.opportunity_id}: 片区 {o.area} 没有在 areas 里声明"
+                )
+            if o.category == "housing" and kind == "work":
+                raise ValueError(f"{self.city}/{o.opportunity_id}: 住房写的 {o.area} 是就业片区")
+            if o.occupation is not None and kind == "home":
+                raise ValueError(f"{self.city}/{o.opportunity_id}: 岗位写的 {o.area} 是居住片区")
         return self
+
+    def area(self, area_id: str) -> AreaDecl | None:
+        return next((a for a in self.areas if a.area_id == area_id), None)
 
     def supply_for(self, function: str) -> FunctionSupply | None:
         return next((f for f in self.function_supply if f.function == function), None)

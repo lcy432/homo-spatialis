@@ -355,7 +355,7 @@ def test_tags_do_not_stack_and_splitting_records_does_not_add():
             "environment": 0.1,
             "commute": 0.1,
         },
-        material_weights={"housing_space": 1.0},
+        material_weights={"housing_condition": 1.0},
         derivation="测试",
         leisure_interests=("music", "arts_culture"),
     )

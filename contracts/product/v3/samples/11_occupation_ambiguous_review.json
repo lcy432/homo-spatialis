@@ -10,7 +10,7 @@
   ],
   "confirmable": false,
   "draft": {
-   "draft_fingerprint": "a23a14ef97b72f0df589beaec07e9fb0160496b7ffb1ecfe254d9b677f73ce4f",
+   "draft_fingerprint": "5e186b52dc641372a40845f52e4d47dc5d55a42cbde59ced56cb7676e779f066",
    "draft_id": "draft.u501.ambiguous",
    "revision": 1
   },
@@ -206,8 +206,8 @@
     {
      "display": "25.0",
      "exact": "25",
-     "key": "housing_space",
-     "label": "居住空间",
+     "key": "housing_condition",
+     "label": "居住条件",
      "state": "provided",
      "support": "supported",
      "usage": [
@@ -262,7 +262,7 @@
   "meta": {
    "conversion_version": "e3a-conversion-v2",
    "data_pack": {
-    "content_fingerprint": "ff26a0e51fecbeb0e534b06db93ef69cf8dd4c94542cbf4060030f9ed83242c4",
+    "content_fingerprint": "3d2958eb00de1de411186249bba0fb6bba6d411af265f9714736afa5511c964b",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
     "pack_id": "pack.e3a.synthetic-v2",
     "status": "synthetic_fixture_only"
@@ -276,7 +276,7 @@
     "synthetic": true
    },
    "schema_version": "e3a-product-schema-v3",
-   "vocabulary_version": "e3a-vocabulary-v2"
+   "vocabulary_version": "e3a-vocabulary-v3"
   },
   "money": {
    "amount_text": "3000",

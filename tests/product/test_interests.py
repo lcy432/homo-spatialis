@@ -144,7 +144,7 @@ def test_interests_and_brands_do_not_change_points_cash_or_eligibility(pack):
 def test_material_is_four_items_and_old_confirmations_are_reviewed_again(pack):
     _, confirmed = confirm(pack, with_interests(pack))
     assert set(confirmed.material.allocation.points) == {
-        "housing_space",
+        "housing_condition",
         "food_life",
         "daily_convenience",
         "personal_enjoyment",
@@ -157,7 +157,8 @@ def test_material_is_four_items_and_old_confirmations_are_reviewed_again(pack):
     three = review_draft(
         pack,
         with_interests(
-            pack, material={"housing_space": "30", "fresh_food": "30", "daily_convenience": "40"}
+            pack,
+            material={"housing_condition": "30", "fresh_food": "30", "daily_convenience": "40"},
         ),
     )
     assert not three.confirmable  # 旧的三项物质分配必须重新回答四项，不自动换算

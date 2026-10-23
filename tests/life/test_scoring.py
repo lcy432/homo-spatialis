@@ -45,7 +45,7 @@ def _year(bundle, scoring, items, **kw):
 def test_a_healthy_base_month_by_hand(first_year):
     m = first_year.score.months[0]
     assert m.status == "scored"
-    assert _component(m, "housing_space").s == pytest.approx(0.5, abs=1e-12)
+    assert _component(m, "housing_condition").s == pytest.approx(0.5, abs=1e-12)
     assert _component(m, "food_life").s == pytest.approx(0.3, abs=1e-12)
     assert _component(m, "daily_convenience").s == 0
     assert _component(m, "personal_enjoyment").s == 0  # 没有在用的享受：确定的 0，不是未知
@@ -71,7 +71,7 @@ def test_the_dimension_weights_are_exactly_the_stated_points(bundle, scoring):
     )
     assert pref.material_weights == pytest.approx(
         {
-            "housing_space": 0.25,
+            "housing_condition": 0.25,
             "food_life": 0.25,
             "daily_convenience": 0.3,
             "personal_enjoyment": 0.2,
@@ -172,5 +172,5 @@ def test_a_mismatched_scoring_content_is_refused(bundle, scoring):
         }
     )
     other = type(scoring)(**{**scoring.__dict__, "spec": changed})
-    with pytest.raises(LifeContractError, match="8444d8d20d88"):  # 协议记着的旧身份
+    with pytest.raises(LifeContractError, match="bd1e3578b0b7"):  # 协议记着的旧身份
         live_year(bundle, other, bundle.initial_state(CLONE_K), base_items())

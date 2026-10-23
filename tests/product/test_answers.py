@@ -239,7 +239,7 @@ def test_healthcare_is_not_a_seventh_dimension_and_laundry_is_not_convenience(pa
     )
     review = review_draft(
         pack,
-        make_draft(pack, material={"housing_space": "30", "food_life": "30", "laundry": "40"}),
+        make_draft(pack, material={"housing_condition": "30", "food_life": "30", "laundry": "40"}),
     )
     assert "legacy_laundry_key" in codes(review) and not review.confirmable
 

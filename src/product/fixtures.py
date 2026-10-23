@@ -45,7 +45,7 @@ NORMAL_SIX = {
     "commute": "10",
 }
 NORMAL_MATERIAL = {
-    "housing_space": "25",
+    "housing_condition": "25",
     "food_life": "25",
     "daily_convenience": "30",
     "personal_enjoyment": "20",

@@ -285,6 +285,28 @@ def comparison_group_problems(config: ScoringConfig, bundle: LifeBundle) -> list
                 out.append(
                     f"{where}: 来源类型 {src.kind} 不在比较组允许的 {list(g.allowed_source_kinds)} 里"
                 )
+        # DECISIONS/0042：按片区的基础量要覆盖这座城每个可得住处所在的片区，片区要在目录里声明
+        homes = {
+            o.area
+            for o in cat.opportunities
+            if o.availability == "available" and item_role(cat, o) == "housing"
+        }
+        declared = {a.area_id for a in cat.areas}
+        for c in cond.components:
+            if not c.area_bases:
+                continue
+            stray = sorted(set(c.area_bases) - declared)
+            if stray:
+                out.append(f"{key}/评分条件 {c.component_id}: 片区 {stray} 没有在目录里声明")
+            missing = sorted(a for a in homes if a is not None and a not in c.area_bases)
+            if None in homes:
+                out.append(
+                    f"{key}/评分条件 {c.component_id}: 有可得住房没有写片区，按片区的地区值读不到"
+                )
+            if missing:
+                out.append(
+                    f"{key}/评分条件 {c.component_id}: 可得住房所在片区 {missing} 没有地区值"
+                )
         roles = {item_role(cat, o) for o in cat.opportunities}
         for role in g.action_roles:
             if role not in roles:

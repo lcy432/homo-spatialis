@@ -6,7 +6,7 @@
    "US:SYNTH2026:K51",
    "US:SYNTH2026:M52"
   ],
-  "compilation_fingerprint": "b5766605d0d88e3a170c154a49901d9209c13472f6e91b1afdb51f968213c197",
+  "compilation_fingerprint": "142754d72eea0d357ea3ff4ba0e7da569cdcd30abe5a7e1b0a4ed50b0092aa30",
   "compilation_id": "catalog.pack.e3a.synthetic-v2",
   "compiled": [
    {
@@ -295,7 +295,7 @@
   "meta": {
    "conversion_version": "e3a-conversion-v2",
    "data_pack": {
-    "content_fingerprint": "ff26a0e51fecbeb0e534b06db93ef69cf8dd4c94542cbf4060030f9ed83242c4",
+    "content_fingerprint": "3d2958eb00de1de411186249bba0fb6bba6d411af265f9714736afa5511c964b",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
     "pack_id": "pack.e3a.synthetic-v2",
     "status": "synthetic_fixture_only"
@@ -309,7 +309,7 @@
     "synthetic": true
    },
    "schema_version": "e3a-product-schema-v3",
-   "vocabulary_version": "e3a-vocabulary-v2"
+   "vocabulary_version": "e3a-vocabulary-v3"
   },
   "scope_zh": "合成资料包里两座城的“日常杂务”设备与人工服务：只调查能替代洗衣或打扫（协议的代表性杂务组合）的方案；做饭、照护、维修等不在 本次调查范围。调查范围之外的东西不计入分母，也不代表城市没有。",
   "tasks": [

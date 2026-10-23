@@ -89,7 +89,7 @@ def test_observation_carries_exact_six_points_material_allocation_and_health_ans
     assert "skills" not in payload["observation"]
     assert payload["planning_version"] == "product-planning-v1"
     assert profile["material_allocation"] == {
-        "housing_space": "25",
+        "housing_condition": "25",
         "food_life": "25",
         "daily_convenience": "30",
         "personal_enjoyment": "20",

@@ -272,7 +272,7 @@ def generate_samples(out: Path, work: Path) -> None:
             "commute": "30",
         },
         material={
-            "housing_space": "50",
+            "housing_condition": "50",
             "food_life": "50",
             "daily_convenience": "0",
             "personal_enjoyment": "0",
@@ -321,7 +321,7 @@ def generate_samples(out: Path, work: Path) -> None:
     laundry = sc.review_only(
         work / "laundry",
         "legacy_laundry",
-        material={"housing_space": "30", "food_life": "30", "laundry": "40"},
+        material={"housing_condition": "30", "food_life": "30", "laundry": "40"},
     )
     _sample_file(
         out,
@@ -401,7 +401,7 @@ def generate_samples(out: Path, work: Path) -> None:
         person="u502",
         draft_kwargs={
             "material": {
-                "housing_space": "50",
+                "housing_condition": "50",
                 "food_life": "50",
                 "daily_convenience": "0",
                 "personal_enjoyment": "0",

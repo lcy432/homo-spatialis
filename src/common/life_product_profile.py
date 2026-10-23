@@ -4,7 +4,7 @@
 
 * **六维定和 100**：``material / safety / opportunity / leisure / environment / commute``。点数用**精确分数**写，规范写法是
   约分后的 ``"30"``、``"50/3"``——六维均分每项 ``50/3``，不能让排在前面的维度多拿 1 分；显示时四舍五入只是显示，不回流计算。
-* **物质细分**：物质父项为正时，细项（当前词表 ``housing_space / food_life / daily_convenience / personal_enjoyment``）另分 100；父项明确为 0 时细分
+* **物质细分**：物质父项为正时，细项（当前词表 ``housing_condition / food_life / daily_convenience / personal_enjoyment``）另分 100；父项明确为 0 时细分
   不适用（``not_applicable_parent_zero``），不伪造三个回答。
 * **独立健康回答**：一份有版本的健康风险应对问卷，**不占**六维 100 分，也**不是**第七个评分权重；只作为分身做计划的信息，
   不改变疾病规则、γ、H、账目或满足感。未答与“暂不确定”照实保存，观察里说明没有相应的明确指令。

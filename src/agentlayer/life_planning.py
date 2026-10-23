@@ -296,7 +296,7 @@ def product_statement_guide_section() -> VisibleGuideSection:
             "observation.profile.six_dimension_points 是用户确认的六个方面的重要程度，合计 100 分：material（物质生活）、safety（安全）、"
             'opportunity（发展机会）、leisure（休闲）、environment（环境）、commute（交通便捷程度）。点数用精确分数写，"50/3" 就是 '
             "16⅔ 分；0 是用户明确给的 0。这份画像没有 healthcare 一项",
-            "material_allocation 是物质生活内部的相对重要性（housing_space 居住空间、food_life 饮食生活、daily_convenience 日常生活"
+            "material_allocation 是物质生活内部的相对重要性（housing_condition 居住条件、food_life 饮食生活、daily_convenience 日常生活"
             "便利、personal_enjoyment 个人消费与享受），合计 100。它不是开支比例或预算，也不是必须购买的指令；"
             "material_allocation_status = not_applicable_parent_zero 表示用户给物质生活 0 分，细分不适用",
             "leisure_interest_status 与 leisure_interests 是用户确认的休闲兴趣类别；taste_status 与 cuisines 是确认的菜系。只有 confirmed "

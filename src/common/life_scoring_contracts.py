@@ -80,7 +80,9 @@ ScoringRecord = Literal[
 #: * ``sum``：可相加的改善（同一单位）；
 #: * ``max``：只取最好的一个来源；
 #: * ``any``：布尔替代——任何一个来源满足就算满足，**同一需求多处满足只计一次**。
-CombineRule = Literal["sum", "max", "any"]
+#: ``sum_of_source_max``（DECISIONS/0042）：每个来源先在这个月在用的东西里取最好的一项，再把不同来源相加——同一处住房的几项
+#: 条件（空间等级、条件档次）各算一次再平滑相加；同一来源的两件东西不会相加（两处住房不会把空间加倍）。
+CombineRule = Literal["sum", "max", "any", "sum_of_source_max"]
 #: 来源的取值方式：规格里的数值、规格里的是/否条件、数量，或"存在"（E1-3 增补：只要这个月
 #: 有一件在用的候选就取 1，配合功能过滤与 any 使用，第二件同功能的物品不再加分）。
 ValueMode = Literal["spec_number", "spec_flag", "quantity", "present"]
@@ -129,9 +131,9 @@ _MEASURE_VALUES: dict[str, frozenset[str]] = {
     "count": frozenset({"quantity"}),
 }
 _MEASURE_COMBINES: dict[str, frozenset[str]] = {
-    "presence": frozenset({"any", "max"}),
-    "capacity": frozenset({"sum", "max"}),
-    "level": frozenset({"max"}),
+    "presence": frozenset({"any", "max", "sum_of_source_max"}),
+    "capacity": frozenset({"sum", "max", "sum_of_source_max"}),
+    "level": frozenset({"max", "sum_of_source_max"}),
     "count": frozenset({"sum"}),
 }
 
@@ -810,6 +812,12 @@ class CityComponentCondition(ContractModel):
     source: SourceRecord
     #: 只用于启用了景观加分的环境分项。
     nature: NatureCondition | None = None
+    #: 按住处所在片区取的基础量（DECISIONS/0042）：写了就**取代**城市背景 ``base``，不在城市背景上再叠一次。这个月读实际住处
+    #: 所在片区的值；住处没有片区、或片区不在表里，这一项这个月未知（不沿用城市值，也不当 0）。只有城市级资料时各片区写同一个值。
+    area_bases: dict[IdStr, Annotated[float, Field(ge=0, allow_inf_nan=False)]] = Field(
+        default_factory=dict, exclude_if=lambda v: v == {}
+    )
+    area_basis: str | None = Field(default=None, max_length=400, exclude_if=lambda v: v is None)
 
     @model_validator(mode="after")
     def _status_consistent(self) -> CityComponentCondition:
@@ -838,6 +846,10 @@ class CityComponentCondition(ContractModel):
         ids = [e.source_id for e in self.efficiencies]
         if len(ids) != len(set(ids)):
             raise ValueError(f"{self.component_id}: 改善效率的来源重复")
+        if self.area_bases and self.status != "known":
+            raise ValueError(f"{self.component_id}: 只有已知条件才能写按片区的基础量")
+        if bool(self.area_bases) != (self.area_basis is not None):
+            raise ValueError(f"{self.component_id}: 按片区的基础量与它的依据说明要一起写")
         return self
 
     def eta_for(self, source_id: str) -> float | None:

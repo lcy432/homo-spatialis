@@ -38,7 +38,7 @@ PRODUCT_SCHEMA_VERSION = "e3a-product-schema-v3"
 #: 问卷 / 题干语义版本：六维与物质的题干、定义、参考改善范围与控件规则。题干一变，旧确认失效、需要重新确认。
 QUESTIONNAIRE_VERSION = "e3a-questionnaire-v0.2-draft"
 #: 词表版本：六维键、物质键、职业受控词表、硬要求选项与属性偏好种类。
-VOCABULARY_VERSION = "e3a-vocabulary-v2"
+VOCABULARY_VERSION = "e3a-vocabulary-v3"
 #: 独立健康问卷版本（暂定文案，未经量表验证）。
 HEALTH_QUESTIONNAIRE_VERSION = "e3a-health-coping-q-v0.1-draft"
 #: 转换版本：原始答案 → 确认画像 → E1 输入的规则（精确分数、规范写法、金额换算、标准开局编译）。

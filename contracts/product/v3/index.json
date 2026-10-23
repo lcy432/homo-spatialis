@@ -62,5 +62,5 @@
  "questionnaire_version": "e3a-questionnaire-v0.2-draft",
  "schema_version": "e3a-product-schema-v3",
  "source": "src/common/product_contracts.py（唯一权威结构；这些文件由 scripts/product_e3a.py export-schema 导出，不要手改）",
- "vocabulary_version": "e3a-vocabulary-v2"
+ "vocabulary_version": "e3a-vocabulary-v3"
 }

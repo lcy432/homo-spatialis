@@ -321,10 +321,10 @@
   ],
   "material_leaves": [
    {
-    "definition": "实际住的那一处有多大",
-    "key": "housing_space",
-    "label": "居住空间",
-    "note": "只看面积；房租与通勤不在这一项",
+    "definition": "实际住的那一处房子本身的条件：空间够不够用、同类房子里条件好不好",
+    "key": "housing_condition",
+    "label": "居住条件",
+    "note": "只看房子本身；房租、通勤、地区的安全与环境不在这一项（安全、环境按住处所在片区另算）；旧版的“居住空间（只看面积）”含义不同，旧的确认要重新审阅",
     "support": "supported"
    },
    {
@@ -352,7 +352,7 @@
   "meta": {
    "conversion_version": "e3a-conversion-v2",
    "data_pack": {
-    "content_fingerprint": "ff26a0e51fecbeb0e534b06db93ef69cf8dd4c94542cbf4060030f9ed83242c4",
+    "content_fingerprint": "3d2958eb00de1de411186249bba0fb6bba6d411af265f9714736afa5511c964b",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
     "pack_id": "pack.e3a.synthetic-v2",
     "status": "synthetic_fixture_only"
@@ -366,7 +366,7 @@
     "synthetic": true
    },
    "schema_version": "e3a-product-schema-v3",
-   "vocabulary_version": "e3a-vocabulary-v2"
+   "vocabulary_version": "e3a-vocabulary-v3"
   },
   "money_bases": [
    {
@@ -389,7 +389,7 @@
    "method": "controlled_vocabulary_alias_match_v1",
    "note": "用自然语言描述你的工作；系统按受控词表的别名给出少量可读候选（名称与职责），由你确认。分类代码只在内部保留，不需要、也不会请你填写；匹配不到时说明原因，不自动改成“普通白领”",
    "users_enter_codes": false,
-   "vocabulary_version": "e3a-vocabulary-v2"
+   "vocabulary_version": "e3a-vocabulary-v3"
   },
   "points": {
    "canonical_form": "约分后的整数（30）或 分子/分母（50/3）；计算与比较都用它，显示四舍五入到 1 位小数，显示值不回流计算",
