@@ -55,7 +55,7 @@
 | engine-06b | E1-6B | 城市汇总 C / E / M | 已实现 | 曾通过审核 | [0029](../DECISIONS/0029-life-e1-6a-closeout-and-city-aggregation.md) |
 | engine-07 | E1 补充 | 洗衣推广为日常生活便利 | 已实现 | 曾通过审核；交给接入层的说明见 [交接](handoffs/e1-daily-convenience-to-e3.md) | [0033](../DECISIONS/0033-life-daily-convenience.md) |
 | engine-08 | — | 只保留产品版：每部分一套（规则、评分、模板、mock、样例），旧版本与兼容路径删除；测试改为产品样例上的精简套件 | 已实现 | 删除前的代码：git 标签 `pre-legacy-removal` | [0037](../DECISIONS/0037-life-keep-only-product-version.md) |
-| engine-09 | — | 生活扩展：完整食品方案、个人消费与享受、装备与爱好（同月买同月用、套餐、寿命与替换、参与事实）；物质四项与兴趣、口味的接入；期末参考生活按能力使用期末装备；代理看到新事实、看不到评分 | 已实现 | 实现及离线自测完成，待独立审核。评分 `e1-life-v1`、评价 `e1-life-evaluation-v3`、记忆 `e1-life-memory-v2`、提示模板 `e3a-product-prompt-v2`、共享结构 `e3a-product-schema-v3`（`contracts/product/v3/`）；界面层仍读 v2（网页草稿测试暂时跳过，见 [交接](handoffs/e3-to-e5-life-extension.md)）；只在合成样例上可执行（真实资料缺做饭时间与活动参与时间）；说明见 [生活扩展](design/e1-8-life-extension.md) | [0041](../DECISIONS/0041-life-extension-food-enjoyment-hobbies.md) |
+| engine-09 | — | 生活扩展：完整食品方案、个人消费与享受、装备与爱好（同月买同月用、套餐、寿命与替换、参与事实）；物质四项与兴趣、口味的接入；期末参考生活按能力使用期末装备；代理看到新事实、看不到评分 | 已实现 | 独立审核 R1–R9 的收尾修复及离线自测完成，待独立复核（[ADR0041](../DECISIONS/0041-life-extension-food-enjoyment-hobbies.md) 收尾一节）。单次输入上限 Flash 与 Sonnet 128,000、Haiku 72,000；评分 `e1-life-v1`、评价 `e1-life-evaluation-v3`、记忆 `e1-life-memory-v2`、提示模板 `e3a-product-prompt-v2`、共享结构 `e3a-product-schema-v3`（`contracts/product/v3/`）；界面层仍读 v2（网页草稿测试暂时跳过，见 [交接](handoffs/e3-to-e5-life-extension.md)）；只在合成样例上可执行（真实资料缺做饭时间与活动参与时间）；说明见 [生活扩展](design/e1-8-life-extension.md) | [0041](../DECISIONS/0041-life-extension-food-enjoyment-hobbies.md) |
 
 ### 代理层
 

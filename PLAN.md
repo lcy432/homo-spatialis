@@ -11,7 +11,7 @@
 ## 下一步
 
 1. **接入层**（intake-03）：真实税与公开说明同源；资料包与确认画像接上运行入口。真实资料数据库（intake-02）已经建成，下一步是把它接进生活运行：先由所有者决定 [intake-02 技术说明](docs/design/intake-02-real-data.md) 第 9 节的 E1 扩展（菜单约束观察与权威检查、同一机会按月重复、续租与已持有的东西、开局工作选法、食品方案、属性分类、菜单身份），再补资料缺口（住房面积、按房源与岗位配对的通勤、做饭时间、家电价格与寿命、其他城市的活动日历、税率）。共享消息结构由接入层统一维护（[共享约定](docs/design/e3-e5-product-contract.md)、[E3 交接](docs/handoffs/e3-data-input-handoff.md)）。
-2. **生活扩展**（engine-09）：待独立审核；界面层把页面改读 `contracts/product/v3/`（物质四项、兴趣与口味的作答与审阅、生活事实里的其他耐用品 / 没买成的购买 / 活动参与、生活扩展候选的编译检查；[交接](docs/handoffs/e3-to-e5-life-extension.md)）；真实资料补做饭时间、每周新鲜餐数与活动参与时间之后，把 intake-02 的导出接上编译检查（`src/product/life_items.py`）。
+2. **生活扩展**（engine-09）：收尾修复（R1–R9）待独立复核；界面层把页面改读 `contracts/product/v3/`（物质四项、兴趣与口味的作答与审阅、生活事实里的其他耐用品 / 没买成的购买 / 活动参与、生活扩展候选的编译检查；[交接](docs/handoffs/e3-to-e5-life-extension.md)）；真实资料补做饭时间、每周新鲜餐数与活动参与时间之后，把 intake-02 的导出接上编译检查（`src/product/life_items.py`）。
 3. **界面层**（ui-02）：在离线原型之上接接入层服务与运行器；串行排队、服务端密钥、预算与轻量部署（[E5 交接](docs/handoffs/e5-product-handoff.md)）。
 4. **代理层**：汇总 Haiku / Sonnet 的真实试跑结果；后续的真实 LLM 测试默认用 Haiku（见 INDEX 第 3 节）。
 5. **工程卫生**：
