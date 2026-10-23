@@ -109,7 +109,72 @@
    ]
   }
  },
- "build_identity": "ccbd9f66427e8275dfa44a2ed04a893654587e481e759980bbfffb24d8ad0d61",
+ "build_identity": "f03e2e7b704cd5dffa339577171dbd65ca68b0b02eb5333b4163eaee2d71cd0d",
+ "build_inputs": {
+  "base_files": {
+   "configs/intake/life_pack_us_v1.yaml": "29f1aba8e78405d605c772532d1d5b48a9d066eca0cba037d50de89373fa1312",
+   "configs/intake/occupations_us_v1.yaml": "d5b325bfa7c1d62586d659444b01b3dd413cf090d1530a516cb5f6a578d421b7",
+   "configs/intake/tax_us_2024.yaml": "8023942148aaebac6f5d35e62697e79d96216a8f087039766bac7bf2c3153bc5",
+   "configs/life/city_facts_product.yaml": "e98654fc23b6cce39dba90b2907a48abea7875e719d978e842bc0fa040d095e4",
+   "configs/life/evaluation_product.yaml": "fdcbb21c0c277acf622ebb5ee43b3324c29066366c8d90b503c65424d9e160b0",
+   "configs/life/scoring_product.yaml": "814b1c4e4918ccc3bb3fe969b827c82d5e89509dbfb09fdb08d412f997384239",
+   "configs/life/synthetic_product.yaml": "72521724a098aa0a32cf1c32e9cc5150877114e6fcf6959d61f558ff772e227a",
+   "configs/product/e3a_synthetic_pack.yaml": "700da7cf1a5c491e7ae33c0f1b243e8854acfc0422081ab019d29f28f575c2a1"
+  },
+  "commute": {
+   "chi": "23758cd61204b4d06563706dcb66ed6b22ed6690f075af83489df4e6a539da09",
+   "hou": "56cfc8319e213a7b2c8e53514210694ce10c273cbce760f89fadc65ef93cb0f9",
+   "la": "2fd773fb316d8f79a3424a5f3e1d270bacb12d49f8e5ad1586a44e10caa779da",
+   "nyc": "3dd16e7ca7839b80e5db212af64a52d245561a76af20fbdf2c82aad78132c7b9",
+   "sea": "12875ef0f9662d4f620e2b8bf955653963c6b9705d1a76365f81d6aa52b7b33d",
+   "sf": "847a1e23cdf6aba3cf3c8f04a11b76b28642657145c4ed6001ef789c6a3a6aa5"
+  },
+  "config": "b70f27f8114d6b4e3f478783c8bfb5104074f951cebaf85cd7d76b72aab29fee",
+  "intake_build": "562c32339bbae67fd1917b7ac67f4b5b28f55d07e88a8c78ee6fe371ed863691",
+  "intake_reads": {
+   "16980": {
+    "city_facts": "2123b0a5efcf23c8fd39c30bf83dc0bdaa0741f893cec08906a9851f5da3ef6e",
+    "rental_candidates": "522a9d543ce6ee7fa1ee2f4742a433285219414831c48b0592e115b68f89b6e4"
+   },
+   "26420": {
+    "city_facts": "ffebb89bc5be0d8c91322b41418e0bfa017266fcafd0b990fc88b7d87f254d0e",
+    "rental_candidates": "41f021912cd0ca01bbc53719a3434cf94ef22b6130ee0b77bdc121e01191db85"
+   },
+   "31080": {
+    "city_facts": "72ea3c7ae941275d0c56fd11df8995b43212bf24adcfcd9baee04fae6d6aed8f",
+    "rental_candidates": "06338c08776bbd041c7aca2dec33b7ba7f24f5fa12af52e04ba52361e272fd86"
+   },
+   "35620": {
+    "city_facts": "83aa76fbf09a3cb26302f7c5127c4c5ae84ad68f3cdd1daaf578b15c3981495f",
+    "rental_candidates": "3ff94ff7e04043d522e604c2579a0c8f89dca67637b382b353dfefd9b8b25746"
+   },
+   "41860": {
+    "city_facts": "eb5bfc9cf931b526c99b6e31c9531f69b8c8084c413a33f142acbb13fbe91ba6",
+    "rental_candidates": "59c3d6e7f557914c5012b826a2311e455ce4f4343bd13cdbec84b2c2aefd6ae1"
+   },
+   "42660": {
+    "city_facts": "15884e6f33e3562cf1f51a08e453748f5c81e21829b06a562fc25870bc814a16",
+    "rental_candidates": "b891a80f5a5b39af9df0b93be4d96c667bb7e2c6490db293e8f70023d2cb8876"
+   }
+  },
+  "items": "cf5ceaf809d8b8a4ed382194eec9d0d2166073cc14197b678e83517ad0863d5b",
+  "raw_geography": {
+   "cbsa_delineation": "952c4b1e78acbb54e6ec9412434b7602fedacbf021736351a63c181bdb753629",
+   "tract_puma": "5262f460b2c8dbe86b00549e916317b1791fdc595c9af72ab18f6f6a67040531"
+  },
+  "safety_sources": {
+   "census_pep_county_2024": "abcc8720d669e793bbfdcd440eeec37a78db3b452adbe4ccd1eadf7c72b522b9",
+   "fbi_cius_2024": "f41696bc4e52df8ca43b1dbb2346f7de382b533e5f471e14168835345a16071f",
+   "ny_dcjs_county_totals": "f7a2cf3c809265ccd1014e8407fdca857fa9802a1f9252868ad864f846695779"
+  },
+  "tax": {
+   "tax.us2024.ca": "b3ce6e4d0ba2fddf7e960b2b1cdd235d1eee9a1723f124e5987208078f8136fb",
+   "tax.us2024.il": "909b399cfbccf197907bab36c072744afe1194c44f13a71562ef47a6dd252af0",
+   "tax.us2024.nyc": "f4707eec6f3381e7fa429fd2e7a1a8a5fca31f56c1983c2b71bcc77d98b2d184",
+   "tax.us2024.tx": "15e625efc917880e5ee8016b4c7f08063e21f84772539ce3c2c75f946499aea1",
+   "tax.us2024.wa": "80778bbf4764fe17e450d399cfea20877294dafa804999c9e6c73616a80312d1"
+  }
+ },
  "cities": {
   "chi": {
    "counts": {

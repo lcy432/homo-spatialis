@@ -28,10 +28,21 @@ import yaml
 from product.realdata import geo
 from product.realdata.fetch import DEFAULT_CACHE, fetch
 from product.realdata.life_pack import (
-    environment_base,
+    PACK_CONFIG,
     housing_items,
     load_pack_config,
     stratified_menus,
+)
+from product.realdata.pack_inputs import (
+    build_identity,
+    file_digests,
+    intake_fetch_log,
+    menu_settings_identity,
+    pinned_raw_files,
+    rows_digest,
+    verify_commute,
+    verify_intake_build,
+    verify_items,
 )
 from product.realdata.safety import (
     CrimeCount,
@@ -40,7 +51,7 @@ from product.realdata.safety import (
     safety_inputs,
     source_digests,
 )
-from product.realdata.tax_rules import compile_tax
+from product.realdata.tax_rules import TAX_CONFIG, compile_tax
 
 FROZEN = Path("data/frozen/life/us-v1")
 BASE_LIFE_INPUT = Path("configs/life/synthetic_product.yaml")
@@ -125,6 +136,28 @@ class PackBuild:
     cities: dict[str, CityBuild]
     tax_blocked: dict[str, list[str]]
     identity: str = ""
+    #: 构建身份的组成（每份输入核对过的身份），写进报告
+    inputs: dict[str, Any] = field(default_factory=dict)
+    #: 每城核对过的生活机会文件与 intake 里的城市事实（城市背景要用，不再另读一遍）
+    items: dict[str, dict[str, Any]] = field(default_factory=dict)
+    backgrounds: dict[str, dict[str, Any]] = field(default_factory=dict)
+    manifest: dict[str, Any] = field(default_factory=dict)
+
+
+def base_files() -> tuple[Path, ...]:
+    """会影响产物的基础配置与模板（内容摘要进构建身份）。产品配置的模板在 ``product_pack`` 里（它反过来用本模块，这里延迟导入）。"""
+    from product.realdata.product_pack import OCCUPATIONS, SYNTH_PACK
+
+    return (
+        BASE_LIFE_INPUT,
+        BASE_SCORING,
+        BASE_EVALUATION,
+        BASE_FACTS,
+        PACK_CONFIG,
+        TAX_CONFIG,
+        SYNTH_PACK,
+        OCCUPATIONS,
+    )
 
 
 def _treatments(key: str, numeraire: str) -> list[dict[str, Any]]:
@@ -346,62 +379,72 @@ def assemble(
     frozen: Path = FROZEN,
 ) -> PackBuild:
     cfg = cfg or load_pack_config()
-    manifest = _json(frozen / "items" / "manifest.json")
+    # 独立审核 F2：每份输入按实际内容核对它声明的身份，构建身份只用核对过的身份（不信文件里写着的 content_identity）
+    items = verify_items(frozen / "items", [c["cbsa"] for c in cfg["cities"]])
+    manifest = items.manifest
+    commute = verify_commute(frozen / "commute", [c["key"] for c in cfg["cities"]])
     tax = compile_tax(cache=cache)
-    d = fetch(geo.delineation_request(), cache, "offline")
-    tp = fetch(geo.tract_puma_request(), cache, "offline")
-    if not (d.ok and tp.ok):
-        raise FileNotFoundError(
-            "缓存里没有 CBSA 划定或普查区—PUMA 对照（先运行 intake 的获取命令）"
+    con = sqlite3.connect(f"file:{Path(intake_db).as_posix()}?mode=ro", uri=True)
+    try:
+        intake_build = verify_intake_build(
+            con,
+            {manifest["intake_build_id"]}
+            | {payload["inputs"]["intake_build_id"] for payload, _ in commute.values()},
         )
-    all_geo = geo.parse_delineation(d.content)  # type: ignore[arg-type]
-    tract_puma = geo.parse_tract_puma(tp.content)  # type: ignore[arg-type]
-    # 菜单种子只取菜单设定（算法、配置种子、每层个数、年数、环境重复数），不含任何资料身份、评分条件或税：加权无放回抽样的
-    # 键按“种子 + 编号”逐项算，所以资料改动只经由抽样池本身（候选与权重）改变菜单——改背景值、油费或税不会重抽别的住房与岗位
-    menu_identity = canonical_identity(
-        {
-            "menus": cfg["menus"],
-            "simulation_years": cfg["simulation_years"],
-            "env_repeats": cfg["env_repeats"],
+        raw, raw_digests = pinned_raw_files(
+            {"cbsa_delineation": geo.delineation_request(), "tract_puma": geo.tract_puma_request()},
+            cache,
+            intake_fetch_log(con),
+        )
+        candidates = {
+            c["cbsa"]: [
+                json.loads(j)
+                for (j,) in con.execute(
+                    "select json from opportunities where kind='rental_listing_candidate' and cbsa=? order by opportunity_id",
+                    (c["cbsa"],),
+                )
+            ]
+            for c in cfg["cities"]
         }
-    )
+        backgrounds = {c["cbsa"]: city_background(con, c["cbsa"]) for c in cfg["cities"]}
+    finally:
+        con.close()
+    all_geo = geo.parse_delineation(raw["cbsa_delineation"])
+    tract_puma = geo.parse_tract_puma(raw["tract_puma"])
+    menu_identity = menu_settings_identity(cfg)
     identity_inputs = {
         "config": canonical_identity(cfg),
-        "items": manifest["content_identity"],
-        "commute": {
-            c["key"]: _json(frozen / "commute" / f"{c['key']}.json")["content_identity"]
-            for c in cfg["cities"]
+        "items": items.identity,
+        "commute": {key: ident for key, (_, ident) in commute.items()},
+        "intake_build": intake_build,
+        "intake_reads": {
+            cbsa: {
+                "rental_candidates": rows_digest(candidates[cbsa]),
+                "city_facts": rows_digest(backgrounds[cbsa]),
+            }
+            for cbsa in candidates
         },
+        "raw_geography": raw_digests,
         "tax": {
             pid: canonical_identity(p.model_dump(mode="json"))
             for pid, p in sorted(tax.policies.items())
         },
         "safety_sources": source_digests(cache),
-        "intake_build": manifest["intake_build_id"],
+        "base_files": file_digests(base_files()),
     }
-    build_identity = canonical_identity(identity_inputs)
-    con = sqlite3.connect(f"file:{intake_db}?mode=ro", uri=True)
     cities: dict[str, CityBuild] = {}
     for city in cfg["cities"]:
         g = geo.attach_pumas(all_geo[city["cbsa"]], tract_puma)
         counties = {p.code: tuple(p.counties) for p in g.pumas}
-        cands = [
-            json.loads(j)
-            for (j,) in con.execute(
-                "select json from opportunities where kind='rental_listing_candidate' and cbsa=? order by opportunity_id",
-                (city["cbsa"],),
-            )
-        ]
         cities[city["key"]] = assemble_city(
             city,
             cfg,
-            candidates=cands,
+            candidates=candidates[city["cbsa"]],
             puma_counties=counties,
-            commute=_json(frozen / "commute" / f"{city['key']}.json"),
-            items=_json(frozen / "items" / f"{city['cbsa']}.json"),
+            commute=commute[city["key"]][0],
+            items=items.cities[city["cbsa"]],
             settings_identity=menu_identity,
         )
-    con.close()
     vocab = manifest["vocabulary"]
     life = _yaml(BASE_LIFE_INPUT)
     functions = sorted(
@@ -431,21 +474,12 @@ def assemble(
         life_input=life_input,
         cities=cities,
         tax_blocked=tax.blocked,
-        identity=build_identity,
+        identity=build_identity(identity_inputs),
+        inputs=identity_inputs,
+        items=items.cities,
+        backgrounds=backgrounds,
+        manifest=manifest,
     )
-
-
-def area_conditions(
-    cfg: dict[str, Any], catalog: dict[str, Any], share_good_days: float | None
-) -> dict[str, Any]:
-    """一城的评分条件里按片区的部分：安全（共同先验）与环境（AQI 固定尺度）对每个居住片区写同一个城市值。"""
-    homes = sorted(a["area_id"] for a in catalog["areas"] if a["kind"] in ("home", "home_work"))
-    c = cfg["conditions"]
-    env = environment_base(cfg, share_good_days)
-    return {
-        "safety": {a: c["safety"]["base"] for a in homes},
-        "environment": None if env is None else {a: env for a in homes},
-    }
 
 
 def _default(obj: Any) -> Any:
@@ -1115,18 +1149,16 @@ def build_all(
     cfg = load_pack_config()
     pack = assemble(cfg, intake_db=intake_db, cache=cache)
     safety, national = metro_safety_inputs(cfg, cache)
-    con = sqlite3.connect(f"file:{intake_db}?mode=ro", uri=True)
     numbers = {
         c["key"]: background_numbers(
             cfg,
-            city_background(con, c["cbsa"]),
-            _json(FROZEN / "items" / f"{c['cbsa']}.json"),
+            pack.backgrounds[c["cbsa"]],
+            pack.items[c["cbsa"]],
             safety.get(c["cbsa"]),
             national,
         )
         for c in cfg["cities"]
     }
-    con.close()
     scoring = build_scoring(cfg, pack, numbers)
     # 评分规格绑定到 E3B 协议之后内容身份变了：反馈政策钉住的身份一起换（DECISIONS/0025）
     pack.life_input["protocol"]["energy_feedback"]["scoring_content_fingerprint"] = (
@@ -1142,6 +1174,7 @@ def build_all(
     report = {
         "schema": "e3b-life-pack-report-v1",
         "build_identity": pack.identity,
+        "build_inputs": pack.inputs,
         "files": digests,
         "tax_blocked": pack.tax_blocked,
         "cities": {
@@ -1199,7 +1232,7 @@ def build_all(
             scoring_fingerprint=pack.life_input["protocol"]["energy_feedback"][
                 "scoring_content_fingerprint"
             ],
-            manifest=_json(FROZEN / "items" / "manifest.json"),
+            manifest=pack.manifest,
             cities=cfg["cities"],
         )
     )
