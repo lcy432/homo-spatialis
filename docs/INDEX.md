@@ -74,7 +74,8 @@
 |---|---|---|---|---|---|
 | intake-01 | E3-A | 六维＋独立健康的输入适配、共享消息结构（v2） | 已实现 | | [0034](../DECISIONS/0034-e3a-product-input-contract.md) |
 | intake-02 | E3-B | 真实资料与机会数据库：六个验证都会区的官方与公开来源批量获取、标准化与溯源，住房 B 映射（ACS 加权条件分布，中位数与标准误成对，官方州别顶码）与 A 覆盖网格，按板块的机会注册表（资料缺口与 E1 缺口分开）、分页查询与菜单（共享、不重抽），LangGraph 资料构建流程（可恢复、按内容身份复用、原始文件指纹约束读取、冻结） | 已实现；收尾修复（独立审核 F1–F6 与两处口径）离线自测通过，待独立复核 | 构建 `562c3233…`：真实记录 144,743、机会 85,316（真实记录本身 66,350、派生 324、映射生成 18,642）、菜单 252；现在能编进 E1 的 0 项（活动的日期与年龄限制 E1 表达不了），只缺资料 21,474 / 只缺 E1 8,621 / 两样都缺 55,149 / 参考事实 72；美国目录的家电 1,634 个（241 个只在加拿大销售的不计）；HUD 被拒、FBI 要密钥、旧金山快餐与咖啡 504；冻结库只在本机，清单与报告在 `data/frozen/intake/us-v1/`；说明见 [intake-02 技术说明](design/intake-02-real-data.md) | [0040](../DECISIONS/0040-intake-02-real-data-database.md) |
-| intake-03 | E3-C | 真实税与公开说明同源；资料包与确认画像接上运行入口，向界面层提供运行与结果 | 计划中 | | |
+| intake-03 | E3-B 收尾 | 六城可执行生活资料包与最小引擎适配：片区与居住条件、按住处片区的地区条件、通勤关系表与每月执行记录、官方 2024 年税（摘句核对）、设备故障与预先声明的替换、年度菜单与续租；六城组装、冻结与产品链（mock、LangGraph、恢复、零调用重放） | 已实现；收尾离线自测完成，待独立复核 | 资料包 `data/frozen/life/us-v1/pack/`（构建 `39240c28…`），产品配置 `configs/product/e3b_us_v1_pack.yaml`（`real_data_frozen`）；提示模板 `e3b-product-prompt-v1`；缺口：旧金山公交、芝加哥公园真实活动、四城培训、博物馆价格、安全资料；说明见 [E3B 资料包](design/e3b-life-pack.md)、[通勤资料](design/e3b-commute-data.md)、[生活机会与职业](design/e3b-items-data.md) | [0042](../DECISIONS/0042-e3b-real-life-pack.md) |
+| intake-05 | E3-C | 资料缺口补齐与 E1 扩展（活动日历、整期报名、年龄资格；在职积累经验）；向界面层提供真实资料包的运行与结果 | 计划中 | | |
 | intake-04 | — | LangGraph 外层运行流程：预检查 → 等用户确认 → 幂等登记 → 启动或恢复生活引擎 → 交付结果；SQLite 持久化，接上接入层（E3-A）的预检查、登记与投影和代理层的启动、恢复 | 已实现 | 原型：只接离线 mock 规划器，没有并发锁与托管；说明见 [LangGraph 外层流程](design/langgraph-product-workflow.md)；接线由 `tests/workflows` 覆盖 | |
 
 ### 界面层
@@ -98,6 +99,7 @@ P8 / P9 / P10 已实现，门一已过，门二与门三待真实输入；开发
 | 产品样例的 Flash 配置 / Haiku 测试配置（显式 `--config`） | `configs/life/run_product_flash.yaml`（账本 `ledgers/qwen-flash-convenience/`）/ `configs/life/run_product_haiku.yaml` |
 | 离线 mock 对照 | `configs/life/run_product_mock.yaml` |
 | 接入层产品链 | `scripts/product_e3a.py` 显式编译产品样例 |
+| 六城真实生活资料包（E3B） | `scripts/life_pack_us.py`：`fetch-tax`（联网）→ `check-tax` → `build`（离线，读 intake 冻结库与两份冻结资料，写 `data/frozen/life/us-v1/pack/` 与产品配置）；产品链 `scripts/run_product_full.py --mock --pack configs/product/e3b_us_v1_pack.yaml --abilities edu_at_least_hs`；敏感性 `scripts/life_pack_sensitivity.py` |
 | 真实资料构建（intake-02） | 配置 `configs/intake/us_v1.yaml`；`scripts/intake_data.py`：`fetch`（唯一联网的命令）→ `build`（LangGraph，离线，可恢复）→ `export`；`query` / `menu` / `lineage` 查冻结库；测试样本由 `scripts/intake_fixtures.py` 生成 |
 
 模型角色在 `configs/models.yaml`：研究基座 `base_a` / `base_b`，产品 `product_planner`（Flash，全规模测试也用它），测试 `test_planner_sonnet`（Sonnet，非全量测试默认）与 `test_planner`（Haiku）。密钥在 `.env`。
