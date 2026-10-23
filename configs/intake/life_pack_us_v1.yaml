@@ -39,9 +39,15 @@ menus:
 # 地区与城市条件（SC-27）。固定参考尺度：第七座城不会改变前六座的值。
 conditions:
   safety:
-    rule: common_prior_v1
-    base: 3
-    note: 没有可比的安全资料（FBI 犯罪资料接口要密钥，没有注册；城市开放资料口径与覆盖不同、也不覆盖整个都会区）：六城、各片区同一个登记的共同先验，不制造差异
+    # 所有者 2026-10-23：每个都会区一个安全背景值（城内各居住片区共用）。资料：FBI CIUS 2024 表 6（都会区估计总数）；表 6 没有纽约
+    # 都会区，用 DCJS 2024 县合计汇总都会区的纽约州部分（标明覆盖）。全国参照：FBI CIUS 2024 表 1。换算 fbi_relative_rate_v1：
+    # r = w_v × 暴力率/全国暴力率 + w_p × 财产率/全国财产率；指数 = min(cap, national_index / r)；b = 指数 / 2。权重与指数尺度是登记的模型设定
+    rule: fbi_relative_rate_v1
+    w_violent: "0.5"
+    w_property: "0.5"
+    national_index: "6"
+    cap: "10"
+    note: 都会区治安背景：这个都会区的治安情况对居住与出行安排里安全考虑的影响；不是个人遭遇犯罪或死亡的概率
   environment:
     rule: aqi_good_share_fixed_scale_v1
     # base = scale × 一年里 AQI 为“好”的天数比例（EPA 年度 AQI，有效天数 ≥ 330 的最近一年）；城市级证据，各片区同值。
@@ -49,8 +55,10 @@ conditions:
     scale: 5
   leisure:
     rule: common_prior_v1
-    base: 4
-    note: 休闲的城市背景用登记的共同先验（与合成样例相同）；实际参与的活动另按小时计
+    # 所有者 2026-10-23：从 4 降到 1。住在一座城市只得到少量基本休闲条件，主要的休闲满足来自实际参加活动；τ = 12 时没有参加活动的
+    # 背景分由 4/16 = 0.25 降到 1/13 ≈ 0.077。活动的参与小时、兴趣匹配加成与用户权重都不变
+    base: 1
+    note: 休闲的城市背景是登记的共同先验（六城同值，所有者 2026-10-23 定为 1）：少量基本休闲条件；实际参加的活动另按小时计
   opportunity:
     rule: supported_occupation_coverage_v1
     # base = scale_jobs × 支持职业里本都会区有已发布 OEWS 工资记录的比例 + scale_training × 有本都会区培训项目的比例

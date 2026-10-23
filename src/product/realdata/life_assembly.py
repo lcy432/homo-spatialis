@@ -33,6 +33,13 @@ from product.realdata.life_pack import (
     load_pack_config,
     stratified_menus,
 )
+from product.realdata.safety import (
+    CrimeCount,
+    SafetyInput,
+    relative_index,
+    safety_inputs,
+    source_digests,
+)
 from product.realdata.tax_rules import compile_tax
 
 FROZEN = Path("data/frozen/life/us-v1")
@@ -349,6 +356,18 @@ def assemble(
         )
     all_geo = geo.parse_delineation(d.content)  # type: ignore[arg-type]
     tract_puma = geo.parse_tract_puma(tp.content)  # type: ignore[arg-type]
+    # 菜单种子只取资料与菜单设定的身份（不含评分条件与税）：改背景值或税不重抽住房与岗位菜单，生活的接触面不变
+    menu_identity = canonical_identity(
+        {
+            "config": canonical_identity({k: v for k, v in cfg.items() if k != "conditions"}),
+            "items": manifest["content_identity"],
+            "commute": {
+                c["key"]: _json(frozen / "commute" / f"{c['key']}.json")["content_identity"]
+                for c in cfg["cities"]
+            },
+            "intake_build": manifest["intake_build_id"],
+        }
+    )
     identity_inputs = {
         "config": canonical_identity(cfg),
         "items": manifest["content_identity"],
@@ -360,6 +379,7 @@ def assemble(
             pid: canonical_identity(p.model_dump(mode="json"))
             for pid, p in sorted(tax.policies.items())
         },
+        "safety_sources": source_digests(cache),
         "intake_build": manifest["intake_build_id"],
     }
     build_identity = canonical_identity(identity_inputs)
@@ -382,7 +402,7 @@ def assemble(
             puma_counties=counties,
             commute=_json(frozen / "commute" / f"{city['key']}.json"),
             items=_json(frozen / "items" / f"{city['cbsa']}.json"),
-            build_identity=build_identity,
+            build_identity=menu_identity,
         )
     con.close()
     vocab = manifest["vocabulary"]
@@ -469,8 +489,28 @@ def _decimal(x: Any) -> Decimal:
     return Decimal(str(x))
 
 
+def safety_pair(cfg: dict[str, Any], s: SafetyInput | None, national: CrimeCount | None):
+    """一城的安全（指数，b，r）：资料缺失就是 None（未知，不当零犯罪，也不用他城平均填补）。"""
+    if s is None or s.count is None or national is None:
+        return None
+    c = cfg["conditions"]["safety"]
+    r, index = relative_index(
+        s.count,
+        national,
+        w_violent=_decimal(c["w_violent"]),
+        w_property=_decimal(c["w_property"]),
+        national_index=_decimal(c["national_index"]),
+        cap=_decimal(c["cap"]),
+    )
+    return index, index / 2, r
+
+
 def background_numbers(
-    cfg: dict[str, Any], bg: dict[str, Any], items: dict[str, Any]
+    cfg: dict[str, Any],
+    bg: dict[str, Any],
+    items: dict[str, Any],
+    safety: SafetyInput | None = None,
+    national: CrimeCount | None = None,
 ) -> dict[str, Any]:
     """四个城市背景的 0–10 指数与评分条件里的 b（b = 0.5 × 指数，逐位相等）。"""
     c = cfg["conditions"]
@@ -492,8 +532,11 @@ def background_numbers(
         supported
     ) + _decimal(c["opportunity"]["scale_training"]) * Decimal(len(trained)) / Decimal(supported)
     dev_index = (dev_base * 2).quantize(Decimal("0.001"))
+    pair = safety_pair(cfg, safety, national)
     return {
-        "safety": (_decimal(c["safety"]["base"]) * 2, _decimal(c["safety"]["base"])),
+        "safety": None if pair is None else (pair[0], pair[1]),
+        "safety_r": None if pair is None else pair[2],
+        "safety_input": safety,
         "environment": None if env_index is None else (env_index, env_index / 2),
         "leisure": (_decimal(c["leisure"]["base"]) * 2, _decimal(c["leisure"]["base"])),
         "opportunity": (dev_index, dev_index / 2),
@@ -556,13 +599,38 @@ def build_scoring(
         for comp in copy.deepcopy(template):
             cid = comp["component_id"]
             if cid == "safety":
-                b = float(n["safety"][1])
-                comp.update(
-                    base=b,
-                    area_bases={a: b for a in homes},
-                    area_basis="共同先验：只有城市级（其实是六城共同）的值，各片区同值，不制造片区差异",
-                    source=prior,
-                )
+                s = n["safety_input"]
+                if n["safety"] is None:
+                    comp = {
+                        "component_id": cid,
+                        "status": "unknown",
+                        "unknown_reason": (s.missing if s is not None else "没有安全资料")[:280],
+                        "source": prior,
+                    }
+                else:
+                    b = float(n["safety"][1])
+                    comp.update(
+                        base=b,
+                        area_bases={a: b for a in homes},
+                        area_basis=(
+                            "都会区共同背景：每个都会区一个值（FBI 2024 或 DCJS 县合计的犯罪人口发生率相对全国），城内各居住片区共用；"
+                            "不按住宅、街区或交通方式区分"
+                        ),
+                        source=_source(
+                            "derived",
+                            s.scope,
+                            "fbi_relative_rate_v1",
+                            inputs=[
+                                *s.inputs,
+                                f"violent {s.count.violent} / property {s.count.property} / population {s.count.population}",
+                                f"r {n['safety_r'].quantize(Decimal('0.0001'))}",
+                            ],
+                            rule=(
+                                "r = 0.5 × 暴力率/全国暴力率 + 0.5 × 财产率/全国财产率（全国：FBI CIUS 2024 表 1）；"
+                                "指数 = min(10, 6/r)；b = 指数/2"
+                            ),
+                        ),
+                    )
             elif cid == "environment":
                 if n["environment"] is None:
                     comp = {
@@ -845,8 +913,9 @@ def build_evaluation(cfg: dict[str, Any], pack: PackBuild) -> dict[str, Any]:
 FACT_PERIOD = "2024 基年情景（AQI 用 2025 年有效资料）"
 FACT_DEFS = {
     "safety_index": (
-        "安全条件（共同先验）",
-        "安全条件指数，0–10，越高越安全。六城没有可比的安全资料，这里是登记的共同先验（六城、各片区同值），不是任何城市的犯罪统计",
+        "都会区治安背景",
+        "0–10，越高越安全：这个都会区 2024 年暴力犯罪与财产犯罪人口发生率相对全国平均的综合（全国平均水平是 6）。它只描述都会区的"
+        "治安背景对居住与出行安排里安全考虑的影响，不是你个人遭遇犯罪或死亡的概率，也不区分街区或交通方式",
         "指数（0–10）",
         "safety",
     ),
@@ -857,8 +926,9 @@ FACT_DEFS = {
         "opportunity",
     ),
     "leisure_index": (
-        "休闲条件（共同先验）",
-        "不花钱也能享受的休闲条件指数，0–10；六城没有可比资料，这里是登记的共同先验。健身、课程等活动另外安排、另外付费",
+        "基本休闲条件（共同先验）",
+        "住在一座城市就有的少量基本休闲条件，0–10；六城没有可比资料，这里是登记的共同先验。主要的休闲满足来自实际参加的活动"
+        "（健身、课程、爱好等另外安排、另外付费）",
         "指数（0–10）",
         "leisure",
     ),
@@ -872,6 +942,14 @@ FACT_DEFS = {
 
 
 def _fact_source(comp: str, cbsa: str) -> dict[str, Any]:
+    if comp == "safety":
+        return _source(
+            "derived",
+            f"CBSA {cbsa}",
+            "life-pack-us-v1",
+            inputs=["fbi_cius_2024 或 ny_dcjs_county_totals"],
+            rule="FBI 2024 相对全国的综合犯罪水平 r；指数 = min(10, 6/r)",
+        )
     if comp == "environment":
         return _source(
             "derived",
@@ -891,6 +969,77 @@ def _fact_source(comp: str, cbsa: str) -> dict[str, Any]:
     return _source(
         "synthetic", "六城共同先验", "life-pack-us-v1", synthetic_note="登记的共同先验，不是资料"
     )
+
+
+def _scope_category(s: SafetyInput) -> str:
+    """代理可见的覆盖范围（一句话，不带内部参数）。"""
+    if not s.scope.startswith("整个"):
+        return "都会区的纽约州部分（约 2/3 人口，含纽约市五区）"
+    if s.residence.startswith("资料范围与模拟居住范围相同"):
+        return "整个都会区"
+    return "整个都会区（含本模拟不居住的外州部分）"
+
+
+def _crime_facts(cbsa: str, s: SafetyInput | None) -> list[dict[str, Any]]:
+    """可读的治安背景说明（代理可见）：两类犯罪的人口发生率与资料覆盖范围。不写换算权重与评分参数，也不说哪种出行方式更安全。"""
+    base = {"period": "2024 年", "value_kind": "number", "unit": "起 / 10 万人 / 年"}
+    known = s is not None and s.count is not None
+    if known and s.nature == "estimated":
+        src = _source(
+            "estimated",
+            f"CBSA {cbsa}",
+            "life-pack-us-v1",
+            inputs=s.inputs,
+            rule="FBI 表 6 的估计总数（报告不全的机构由 FBI 估算）÷ 都会区人口 × 100,000",
+        )
+    else:
+        src = _source(
+            "derived",
+            f"CBSA {cbsa}",
+            "life-pack-us-v1",
+            inputs=s.inputs if known else ["没有资料"],
+            rule="合计案件数 ÷ 合计人口 × 100,000（不平均各地的率）",
+        )
+    out = []
+    for fid, label, meaning, attr in (
+        (
+            "violent_crime_rate",
+            "暴力犯罪率",
+            "谋杀、强奸、抢劫与严重伤害的报案数按人口折算；报案数不是全部发生的犯罪",
+            "violent_rate",
+        ),
+        (
+            "property_crime_rate",
+            "财产犯罪率",
+            "入室盗窃、盗窃与机动车盗窃的报案数按人口折算；报案数不是全部发生的犯罪",
+            "property_rate",
+        ),
+    ):
+        head = {"fact_id": fid, "label": label, "meaning": meaning, **base, "source": src}
+        if known:
+            out.append(
+                {
+                    **head,
+                    "status": "known",
+                    "number": float(getattr(s.count, attr).quantize(Decimal("0.1"))),
+                }
+            )
+        else:
+            out.append({**head, "status": "unknown", "unknown_reason": "没有资料：不当零犯罪"})
+    out.append(
+        {
+            "fact_id": "safety_data_scope",
+            "label": "治安资料覆盖范围",
+            "meaning": "上面两项与治安背景所依据的资料覆盖到哪里（整个都会区，或只有一部分县）",
+            "value_kind": "category",
+            "unit": "范围",
+            "period": "2024 年",
+            "status": "known" if known else "unknown",
+            **({"category": _scope_category(s)} if known else {"unknown_reason": "没有资料"}),
+            "source": src,
+        }
+    )
+    return out
 
 
 def build_city_facts(cfg: dict[str, Any], numbers: dict[str, dict[str, Any]]) -> dict[str, Any]:
@@ -914,6 +1063,7 @@ def build_city_facts(cfg: dict[str, Any], numbers: dict[str, dict[str, Any]]) ->
                 facts.append({**head, "status": "unknown", "unknown_reason": "没有有效资料"})
             else:
                 facts.append({**head, "status": "known", "number": float(pair[0])})
+        facts += _crime_facts(c["cbsa"], n["safety_input"])
         sheets.append({"city": city_ref(c["cbsa"]), "label": c["label"], "facts": facts})
     link_src = _source(
         "synthetic",
@@ -947,16 +1097,35 @@ def build_city_facts(cfg: dict[str, Any], numbers: dict[str, dict[str, Any]]) ->
     }
 
 
+def metro_safety_inputs(
+    cfg: dict[str, Any], cache: Path = DEFAULT_CACHE
+) -> tuple[dict[str, SafetyInput], CrimeCount]:
+    """六城的安全输入与全国参照（离线，只读缓存）：都会区名称与县来自 CBSA 2023 划定文件。"""
+    d = fetch(geo.delineation_request(), cache, "offline")
+    all_geo = geo.parse_delineation(d.content)  # type: ignore[arg-type]
+    titles = {c["cbsa"]: all_geo[c["cbsa"]].title for c in cfg["cities"]}
+    counties = {
+        c["cbsa"]: [(k.fips, f"{k.name}, {k.state_name}") for k in all_geo[c["cbsa"]].counties]
+        for c in cfg["cities"]
+    }
+    return safety_inputs(cfg["cities"], counties, titles, cache)
+
+
 def build_all(
     out_dir: Path, *, intake_db: Path = INTAKE_DB, cache: Path = DEFAULT_CACHE
 ) -> dict[str, Any]:
     """组装并写出四份文件与报告（规范 JSON）。返回报告。"""
     cfg = load_pack_config()
     pack = assemble(cfg, intake_db=intake_db, cache=cache)
+    safety, national = metro_safety_inputs(cfg, cache)
     con = sqlite3.connect(f"file:{intake_db}?mode=ro", uri=True)
     numbers = {
         c["key"]: background_numbers(
-            cfg, city_background(con, c["cbsa"]), _json(FROZEN / "items" / f"{c['cbsa']}.json")
+            cfg,
+            city_background(con, c["cbsa"]),
+            _json(FROZEN / "items" / f"{c['cbsa']}.json"),
+            safety.get(c["cbsa"]),
+            national,
         )
         for c in cfg["cities"]
     }
@@ -988,6 +1157,40 @@ def build_all(
                 for comp, v in n.items()
                 if comp in ("safety", "environment", "leisure", "opportunity")
             }
+            for k, n in numbers.items()
+        },
+        "safety_sources_sha256": source_digests(cache),
+        "safety_national_2024": {
+            "population": national.population,
+            "violent": national.violent,
+            "property": national.property,
+            "violent_rate": str(national.violent_rate.quantize(Decimal("0.01"))),
+            "property_rate": str(national.property_rate.quantize(Decimal("0.01"))),
+            "source": "FBI CIUS 2024 表 1",
+        },
+        "safety_inputs": {
+            k: (
+                None
+                if n["safety_input"] is None or n["safety_input"].count is None
+                else {
+                    "scope": n["safety_input"].scope,
+                    "nature": n["safety_input"].nature,
+                    "coverage": n["safety_input"].coverage,
+                    "residence": n["safety_input"].residence,
+                    "population": n["safety_input"].count.population,
+                    "violent": n["safety_input"].count.violent,
+                    "property": n["safety_input"].count.property,
+                    "violent_rate": str(
+                        n["safety_input"].count.violent_rate.quantize(Decimal("0.01"))
+                    ),
+                    "property_rate": str(
+                        n["safety_input"].count.property_rate.quantize(Decimal("0.01"))
+                    ),
+                    "r": str(n["safety_r"].quantize(Decimal("0.0001"))),
+                    "index": str(n["safety"][0]),
+                    "b": str(n["safety"][1]),
+                }
+            )
             for k, n in numbers.items()
         },
     }

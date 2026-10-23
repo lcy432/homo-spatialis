@@ -6,16 +6,16 @@
     "1.493"
    ],
    "leisure": [
-    "8",
-    "4"
+    "2",
+    "1"
    ],
    "opportunity": [
     "4.000",
     "2.000"
    ],
    "safety": [
-    "6",
-    "3"
+    "6.783",
+    "3.3915"
    ]
   },
   "hou": {
@@ -24,16 +24,16 @@
     "0.507"
    ],
    "leisure": [
-    "8",
-    "4"
+    "2",
+    "1"
    ],
    "opportunity": [
     "4.200",
     "2.100"
    ],
    "safety": [
-    "6",
-    "3"
+    "3.978",
+    "1.989"
    ]
   },
   "la": {
@@ -42,16 +42,16 @@
     "0.534"
    ],
    "leisure": [
-    "8",
-    "4"
+    "2",
+    "1"
    ],
    "opportunity": [
     "4.000",
     "2.000"
    ],
    "safety": [
-    "6",
-    "3"
+    "4.693",
+    "2.3465"
    ]
   },
   "nyc": {
@@ -60,16 +60,16 @@
     "2.1095"
    ],
    "leisure": [
-    "8",
-    "4"
+    "2",
+    "1"
    ],
    "opportunity": [
     "4.200",
     "2.100"
    ],
    "safety": [
-    "6",
-    "3"
+    "4.946",
+    "2.473"
    ]
   },
   "sea": {
@@ -78,16 +78,16 @@
     "2.7945"
    ],
    "leisure": [
-    "8",
-    "4"
+    "2",
+    "1"
    ],
    "opportunity": [
     "4.000",
     "2.000"
    ],
    "safety": [
-    "6",
-    "3"
+    "4.345",
+    "2.1725"
    ]
   },
   "sf": {
@@ -96,20 +96,20 @@
     "2.0355"
    ],
    "leisure": [
-    "8",
-    "4"
+    "2",
+    "1"
    ],
    "opportunity": [
     "4.000",
     "2.000"
    ],
    "safety": [
-    "6",
-    "3"
+    "3.630",
+    "1.815"
    ]
   }
  },
- "build_identity": "39240c2829e8f92c0438bdd43dc9dbbe962f46d74c4f787b929469369c897f88",
+ "build_identity": "7abf315c1ed857cefdfe4759fcbe7b6456c725ad10b16310f30e5d0dcce8aa5e",
  "cities": {
   "chi": {
    "counts": {
@@ -117,7 +117,7 @@
     "commute_legs": 394,
     "housing_candidates": 717,
     "housing_executable": 601,
-    "housing_in_catalog": 63,
+    "housing_in_catalog": 67,
     "items_by_domain": {
      "activity": 10,
      "device": 5,
@@ -141,7 +141,7 @@
     "commute_legs": 258,
     "housing_candidates": 651,
     "housing_executable": 651,
-    "housing_in_catalog": 64,
+    "housing_in_catalog": 65,
     "items_by_domain": {
      "activity": 10,
      "device": 5,
@@ -163,7 +163,7 @@
     "commute_legs": 303,
     "housing_candidates": 1074,
     "housing_executable": 1074,
-    "housing_in_catalog": 68,
+    "housing_in_catalog": 69,
     "items_by_domain": {
      "activity": 10,
      "device": 5,
@@ -184,7 +184,7 @@
     "commute_legs": 690,
     "housing_candidates": 1635,
     "housing_executable": 628,
-    "housing_in_catalog": 68,
+    "housing_in_catalog": 65,
     "items_by_domain": {
      "activity": 10,
      "device": 5,
@@ -209,7 +209,7 @@
     "commute_legs": 147,
     "housing_candidates": 375,
     "housing_executable": 369,
-    "housing_in_catalog": 60,
+    "housing_in_catalog": 65,
     "items_by_domain": {
      "activity": 10,
      "device": 5,
@@ -232,7 +232,7 @@
     "commute_legs": 197,
     "housing_candidates": 453,
     "housing_executable": 442,
-    "housing_in_catalog": 61,
+    "housing_in_catalog": 67,
     "items_by_domain": {
      "activity": 9,
      "device": 5,
@@ -251,10 +251,109 @@
   }
  },
  "files": {
-  "city_facts.json": "c67ef066b00799fa1765f7163c87b7bd00134ce84f6df7934af4f0cb19264472",
-  "evaluation.json": "5c1acf8440ccf03c5cb74ca46c4ef263c43dac036d2ad795b2cdfbcb4b948639",
-  "life_input.json": "1e4952a8d50a59e871ffc42deb80659f6548b251618b8315b22975580bb422b9",
-  "scoring.json": "0f43f9ffd187d7c9eafbb2353355125bdfd016b6d0f6e616f8d9d0ad9248965e"
+  "city_facts.json": "f42ccc9d72dc77565240f8afce906d36269adc9ce099efe3281192880ee532e8",
+  "evaluation.json": "4f135a2a48ed6e2e7972c58281e0181fa3f1dce995bbc17f0d500fbc23df7617",
+  "life_input.json": "c0c5867e147d075b011484f660b0d31a89d4842223a50993cdfad79a66c796d2",
+  "scoring.json": "408bc64bc66437e07d6a4853936d2225ff24206162f878f5a62b38b28d365aca"
+ },
+ "safety_inputs": {
+  "chi": {
+   "b": "3.3915",
+   "coverage": "FBI 估计总数：实际报告的机构覆盖 96.7% 人口，其余由 FBI 估算",
+   "index": "6.783",
+   "nature": "estimated",
+   "population": 9373214,
+   "property": 167959,
+   "property_rate": "1791.90",
+   "r": "0.8846",
+   "residence": "模拟居住范围（9 个县）都在资料范围里；资料另含 4 个不在模拟居住范围里的县（Jasper County, Indiana、Lake County, Indiana、Newton County, Indiana、Porter County, Indiana），背景值是整个资料范围的综合水平",
+   "scope": "整个都会区（Chicago-Naperville-Elgin, IL-IN，FBI 表 6）",
+   "violent": 25285,
+   "violent_rate": "269.76"
+  },
+  "hou": {
+   "b": "1.989",
+   "coverage": "FBI 估计总数：实际报告的机构覆盖 99.9% 人口，其余由 FBI 估算",
+   "index": "3.978",
+   "nature": "estimated",
+   "population": 7713658,
+   "property": 196399,
+   "property_rate": "2546.12",
+   "r": "1.5085",
+   "residence": "资料范围与模拟居住范围相同（整个都会区）",
+   "scope": "整个都会区（Houston-Pasadena-The Woodlands, TX，FBI 表 6）",
+   "violent": 43499,
+   "violent_rate": "563.92"
+  },
+  "la": {
+   "b": "2.3465",
+   "coverage": "FBI 估计总数：实际报告的机构覆盖 99.2% 人口，其余由 FBI 估算",
+   "index": "4.693",
+   "nature": "estimated",
+   "population": 12883860,
+   "property": 251971,
+   "property_rate": "1955.71",
+   "r": "1.2786",
+   "residence": "资料范围与模拟居住范围相同（整个都会区）",
+   "scope": "整个都会区（Los Angeles-Long Beach-Anaheim, CA，FBI 表 6）",
+   "violent": 66906,
+   "violent_rate": "519.30"
+  },
+  "nyc": {
+   "b": "2.473",
+   "coverage": "FBI 表 6 没有纽约都会区：DCJS 2024 县合计（各执法机构报告的汇总，缺报不补），覆盖都会区人口的 64.5%；新泽西与宾州的县没有可比的免密钥资料，不在内",
+   "index": "4.946",
+   "nature": "observed",
+   "population": 12859419,
+   "property": 233848,
+   "property_rate": "1818.50",
+   "r": "1.2130",
+   "residence": "模拟居住范围（5 个县）都在资料范围里；资料另含 5 个不在模拟居住范围里的县（Nassau County, New York、Putnam County, New York、Rockland County, New York、Suffolk County, New York、Westchester County, New York），背景值是整个资料范围的综合水平",
+   "scope": "纽约都会区的纽约州部分（10 个县：Nassau、Suffolk、Bronx、Kings、New York、Putnam、Queens、Richmond、Rockland、Westchester）",
+   "violent": 64319,
+   "violent_rate": "500.17"
+  },
+  "sea": {
+   "b": "2.1725",
+   "coverage": "FBI 估计总数：实际报告的机构覆盖 99.8% 人口，其余由 FBI 估算",
+   "index": "4.345",
+   "nature": "estimated",
+   "population": 4110067,
+   "property": 122132,
+   "property_rate": "2971.53",
+   "r": "1.3809",
+   "residence": "资料范围与模拟居住范围相同（整个都会区）",
+   "scope": "整个都会区（Seattle-Tacoma-Bellevue, WA，FBI 表 6）",
+   "violent": 15844,
+   "violent_rate": "385.49"
+  },
+  "sf": {
+   "b": "1.815",
+   "coverage": "全部机构报告（100%），FBI 实际报告合计",
+   "index": "3.630",
+   "nature": "observed",
+   "population": 4585588,
+   "property": 144028,
+   "property_rate": "3140.88",
+   "r": "1.6529",
+   "residence": "资料范围与模拟居住范围相同（整个都会区）",
+   "scope": "整个都会区（San Francisco-Oakland-Fremont, CA，FBI 表 6）",
+   "violent": 25051,
+   "violent_rate": "546.30"
+  }
+ },
+ "safety_national_2024": {
+  "population": 340110988,
+  "property": 5986400,
+  "property_rate": "1760.13",
+  "source": "FBI CIUS 2024 表 1",
+  "violent": 1221345,
+  "violent_rate": "359.10"
+ },
+ "safety_sources_sha256": {
+  "census_pep_county_2024": "abcc8720d669e793bbfdcd440eeec37a78db3b452adbe4ccd1eadf7c72b522b9",
+  "fbi_cius_2024": "f41696bc4e52df8ca43b1dbb2346f7de382b533e5f471e14168835345a16071f",
+  "ny_dcjs_county_totals": "f7a2cf3c809265ccd1014e8407fdca857fa9802a1f9252868ad864f846695779"
  },
  "schema": "e3b-life-pack-report-v1",
  "tax_blocked": {}

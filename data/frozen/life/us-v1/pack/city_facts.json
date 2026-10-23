@@ -66,16 +66,20 @@
     "facts": [
      {
       "fact_id": "safety_index",
-      "label": "安全条件（共同先验）",
-      "meaning": "安全条件指数，0–10，越高越安全。六城没有可比的安全资料，这里是登记的共同先验（六城、各片区同值），不是任何城市的犯罪统计",
-      "number": 6.0,
+      "label": "都会区治安背景",
+      "meaning": "0–10，越高越安全：这个都会区 2024 年暴力犯罪与财产犯罪人口发生率相对全国平均的综合（全国平均水平是 6）。它只描述都会区的治安背景对居住与出行安排里安全考虑的影响，不是你个人遭遇犯罪或死亡的概率，也不区分街区或交通方式",
+      "number": 4.946,
       "period": "2024 基年情景（AQI 用 2025 年有效资料）",
       "source": {
        "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
-       "kind": "synthetic",
+       "inputs": [
+        "fbi_cius_2024 或 ny_dcjs_county_totals",
+        "geography: CBSA 35620"
+       ],
+       "kind": "derived",
        "mapping_version": "life-pack-us-v1",
        "observed_on": "2026-10-23",
-       "synthetic_note": "登记的共同先验，不是资料（geography: 六城共同先验）"
+       "rule": "FBI 2024 相对全国的综合犯罪水平 r；指数 = min(10, 6/r)"
       },
       "status": "known",
       "unit": "指数（0–10）",
@@ -105,9 +109,9 @@
      },
      {
       "fact_id": "leisure_index",
-      "label": "休闲条件（共同先验）",
-      "meaning": "不花钱也能享受的休闲条件指数，0–10；六城没有可比资料，这里是登记的共同先验。健身、课程等活动另外安排、另外付费",
-      "number": 8.0,
+      "label": "基本休闲条件（共同先验）",
+      "meaning": "住在一座城市就有的少量基本休闲条件，0–10；六城没有可比资料，这里是登记的共同先验。主要的休闲满足来自实际参加的活动（健身、课程、爱好等另外安排、另外付费）",
+      "number": 2.0,
       "period": "2024 基年情景（AQI 用 2025 年有效资料）",
       "source": {
        "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
@@ -140,6 +144,72 @@
       "status": "known",
       "unit": "指数（0–10）",
       "value_kind": "number"
+     },
+     {
+      "fact_id": "violent_crime_rate",
+      "label": "暴力犯罪率",
+      "meaning": "谋杀、强奸、抢劫与严重伤害的报案数按人口折算；报案数不是全部发生的犯罪",
+      "number": 500.2,
+      "period": "2024 年",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "inputs": [
+        "ny_dcjs_county_totals:2024",
+        "census_pep_county_2024:POPESTIMATE2024",
+        "geography: CBSA 35620"
+       ],
+       "kind": "derived",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "rule": "合计案件数 ÷ 合计人口 × 100,000（不平均各地的率）"
+      },
+      "status": "known",
+      "unit": "起 / 10 万人 / 年",
+      "value_kind": "number"
+     },
+     {
+      "fact_id": "property_crime_rate",
+      "label": "财产犯罪率",
+      "meaning": "入室盗窃、盗窃与机动车盗窃的报案数按人口折算；报案数不是全部发生的犯罪",
+      "number": 1818.5,
+      "period": "2024 年",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "inputs": [
+        "ny_dcjs_county_totals:2024",
+        "census_pep_county_2024:POPESTIMATE2024",
+        "geography: CBSA 35620"
+       ],
+       "kind": "derived",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "rule": "合计案件数 ÷ 合计人口 × 100,000（不平均各地的率）"
+      },
+      "status": "known",
+      "unit": "起 / 10 万人 / 年",
+      "value_kind": "number"
+     },
+     {
+      "category": "都会区的纽约州部分（约 2/3 人口，含纽约市五区）",
+      "fact_id": "safety_data_scope",
+      "label": "治安资料覆盖范围",
+      "meaning": "上面两项与治安背景所依据的资料覆盖到哪里（整个都会区，或只有一部分县）",
+      "period": "2024 年",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "inputs": [
+        "ny_dcjs_county_totals:2024",
+        "census_pep_county_2024:POPESTIMATE2024",
+        "geography: CBSA 35620"
+       ],
+       "kind": "derived",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "rule": "合计案件数 ÷ 合计人口 × 100,000（不平均各地的率）"
+      },
+      "status": "known",
+      "unit": "范围",
+      "value_kind": "category"
      }
     ],
     "label": "纽约（纽约市五区居民）"
@@ -153,16 +223,20 @@
     "facts": [
      {
       "fact_id": "safety_index",
-      "label": "安全条件（共同先验）",
-      "meaning": "安全条件指数，0–10，越高越安全。六城没有可比的安全资料，这里是登记的共同先验（六城、各片区同值），不是任何城市的犯罪统计",
-      "number": 6.0,
+      "label": "都会区治安背景",
+      "meaning": "0–10，越高越安全：这个都会区 2024 年暴力犯罪与财产犯罪人口发生率相对全国平均的综合（全国平均水平是 6）。它只描述都会区的治安背景对居住与出行安排里安全考虑的影响，不是你个人遭遇犯罪或死亡的概率，也不区分街区或交通方式",
+      "number": 4.693,
       "period": "2024 基年情景（AQI 用 2025 年有效资料）",
       "source": {
        "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
-       "kind": "synthetic",
+       "inputs": [
+        "fbi_cius_2024 或 ny_dcjs_county_totals",
+        "geography: CBSA 31080"
+       ],
+       "kind": "derived",
        "mapping_version": "life-pack-us-v1",
        "observed_on": "2026-10-23",
-       "synthetic_note": "登记的共同先验，不是资料（geography: 六城共同先验）"
+       "rule": "FBI 2024 相对全国的综合犯罪水平 r；指数 = min(10, 6/r)"
       },
       "status": "known",
       "unit": "指数（0–10）",
@@ -192,9 +266,9 @@
      },
      {
       "fact_id": "leisure_index",
-      "label": "休闲条件（共同先验）",
-      "meaning": "不花钱也能享受的休闲条件指数，0–10；六城没有可比资料，这里是登记的共同先验。健身、课程等活动另外安排、另外付费",
-      "number": 8.0,
+      "label": "基本休闲条件（共同先验）",
+      "meaning": "住在一座城市就有的少量基本休闲条件，0–10；六城没有可比资料，这里是登记的共同先验。主要的休闲满足来自实际参加的活动（健身、课程、爱好等另外安排、另外付费）",
+      "number": 2.0,
       "period": "2024 基年情景（AQI 用 2025 年有效资料）",
       "source": {
        "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
@@ -227,6 +301,69 @@
       "status": "known",
       "unit": "指数（0–10）",
       "value_kind": "number"
+     },
+     {
+      "fact_id": "violent_crime_rate",
+      "label": "暴力犯罪率",
+      "meaning": "谋杀、强奸、抢劫与严重伤害的报案数按人口折算；报案数不是全部发生的犯罪",
+      "number": 519.3,
+      "period": "2024 年",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "inputs": [
+        "fbi_cius_2024:CIUS_Table_6_Crime_in_the_United_States_by_Metropolitan_Statistical_Area_2024.xlsx:Los Angeles-Long Beach-Anaheim, CA:Estimated total",
+        "geography: CBSA 31080"
+       ],
+       "kind": "estimated",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "rule": "FBI 表 6 的估计总数（报告不全的机构由 FBI 估算）÷ 都会区人口 × 100,000"
+      },
+      "status": "known",
+      "unit": "起 / 10 万人 / 年",
+      "value_kind": "number"
+     },
+     {
+      "fact_id": "property_crime_rate",
+      "label": "财产犯罪率",
+      "meaning": "入室盗窃、盗窃与机动车盗窃的报案数按人口折算；报案数不是全部发生的犯罪",
+      "number": 1955.7,
+      "period": "2024 年",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "inputs": [
+        "fbi_cius_2024:CIUS_Table_6_Crime_in_the_United_States_by_Metropolitan_Statistical_Area_2024.xlsx:Los Angeles-Long Beach-Anaheim, CA:Estimated total",
+        "geography: CBSA 31080"
+       ],
+       "kind": "estimated",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "rule": "FBI 表 6 的估计总数（报告不全的机构由 FBI 估算）÷ 都会区人口 × 100,000"
+      },
+      "status": "known",
+      "unit": "起 / 10 万人 / 年",
+      "value_kind": "number"
+     },
+     {
+      "category": "整个都会区",
+      "fact_id": "safety_data_scope",
+      "label": "治安资料覆盖范围",
+      "meaning": "上面两项与治安背景所依据的资料覆盖到哪里（整个都会区，或只有一部分县）",
+      "period": "2024 年",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "inputs": [
+        "fbi_cius_2024:CIUS_Table_6_Crime_in_the_United_States_by_Metropolitan_Statistical_Area_2024.xlsx:Los Angeles-Long Beach-Anaheim, CA:Estimated total",
+        "geography: CBSA 31080"
+       ],
+       "kind": "estimated",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "rule": "FBI 表 6 的估计总数（报告不全的机构由 FBI 估算）÷ 都会区人口 × 100,000"
+      },
+      "status": "known",
+      "unit": "范围",
+      "value_kind": "category"
      }
     ],
     "label": "洛杉矶"
@@ -240,16 +377,20 @@
     "facts": [
      {
       "fact_id": "safety_index",
-      "label": "安全条件（共同先验）",
-      "meaning": "安全条件指数，0–10，越高越安全。六城没有可比的安全资料，这里是登记的共同先验（六城、各片区同值），不是任何城市的犯罪统计",
-      "number": 6.0,
+      "label": "都会区治安背景",
+      "meaning": "0–10，越高越安全：这个都会区 2024 年暴力犯罪与财产犯罪人口发生率相对全国平均的综合（全国平均水平是 6）。它只描述都会区的治安背景对居住与出行安排里安全考虑的影响，不是你个人遭遇犯罪或死亡的概率，也不区分街区或交通方式",
+      "number": 3.63,
       "period": "2024 基年情景（AQI 用 2025 年有效资料）",
       "source": {
        "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
-       "kind": "synthetic",
+       "inputs": [
+        "fbi_cius_2024 或 ny_dcjs_county_totals",
+        "geography: CBSA 41860"
+       ],
+       "kind": "derived",
        "mapping_version": "life-pack-us-v1",
        "observed_on": "2026-10-23",
-       "synthetic_note": "登记的共同先验，不是资料（geography: 六城共同先验）"
+       "rule": "FBI 2024 相对全国的综合犯罪水平 r；指数 = min(10, 6/r)"
       },
       "status": "known",
       "unit": "指数（0–10）",
@@ -279,9 +420,9 @@
      },
      {
       "fact_id": "leisure_index",
-      "label": "休闲条件（共同先验）",
-      "meaning": "不花钱也能享受的休闲条件指数，0–10；六城没有可比资料，这里是登记的共同先验。健身、课程等活动另外安排、另外付费",
-      "number": 8.0,
+      "label": "基本休闲条件（共同先验）",
+      "meaning": "住在一座城市就有的少量基本休闲条件，0–10；六城没有可比资料，这里是登记的共同先验。主要的休闲满足来自实际参加的活动（健身、课程、爱好等另外安排、另外付费）",
+      "number": 2.0,
       "period": "2024 基年情景（AQI 用 2025 年有效资料）",
       "source": {
        "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
@@ -314,6 +455,69 @@
       "status": "known",
       "unit": "指数（0–10）",
       "value_kind": "number"
+     },
+     {
+      "fact_id": "violent_crime_rate",
+      "label": "暴力犯罪率",
+      "meaning": "谋杀、强奸、抢劫与严重伤害的报案数按人口折算；报案数不是全部发生的犯罪",
+      "number": 546.3,
+      "period": "2024 年",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "inputs": [
+        "fbi_cius_2024:CIUS_Table_6_Crime_in_the_United_States_by_Metropolitan_Statistical_Area_2024.xlsx:San Francisco-Oakland-Fremont, CA:Total area actually reporting",
+        "geography: CBSA 41860"
+       ],
+       "kind": "derived",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "rule": "合计案件数 ÷ 合计人口 × 100,000（不平均各地的率）"
+      },
+      "status": "known",
+      "unit": "起 / 10 万人 / 年",
+      "value_kind": "number"
+     },
+     {
+      "fact_id": "property_crime_rate",
+      "label": "财产犯罪率",
+      "meaning": "入室盗窃、盗窃与机动车盗窃的报案数按人口折算；报案数不是全部发生的犯罪",
+      "number": 3140.9,
+      "period": "2024 年",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "inputs": [
+        "fbi_cius_2024:CIUS_Table_6_Crime_in_the_United_States_by_Metropolitan_Statistical_Area_2024.xlsx:San Francisco-Oakland-Fremont, CA:Total area actually reporting",
+        "geography: CBSA 41860"
+       ],
+       "kind": "derived",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "rule": "合计案件数 ÷ 合计人口 × 100,000（不平均各地的率）"
+      },
+      "status": "known",
+      "unit": "起 / 10 万人 / 年",
+      "value_kind": "number"
+     },
+     {
+      "category": "整个都会区",
+      "fact_id": "safety_data_scope",
+      "label": "治安资料覆盖范围",
+      "meaning": "上面两项与治安背景所依据的资料覆盖到哪里（整个都会区，或只有一部分县）",
+      "period": "2024 年",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "inputs": [
+        "fbi_cius_2024:CIUS_Table_6_Crime_in_the_United_States_by_Metropolitan_Statistical_Area_2024.xlsx:San Francisco-Oakland-Fremont, CA:Total area actually reporting",
+        "geography: CBSA 41860"
+       ],
+       "kind": "derived",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "rule": "合计案件数 ÷ 合计人口 × 100,000（不平均各地的率）"
+      },
+      "status": "known",
+      "unit": "范围",
+      "value_kind": "category"
      }
     ],
     "label": "旧金山"
@@ -327,16 +531,20 @@
     "facts": [
      {
       "fact_id": "safety_index",
-      "label": "安全条件（共同先验）",
-      "meaning": "安全条件指数，0–10，越高越安全。六城没有可比的安全资料，这里是登记的共同先验（六城、各片区同值），不是任何城市的犯罪统计",
-      "number": 6.0,
+      "label": "都会区治安背景",
+      "meaning": "0–10，越高越安全：这个都会区 2024 年暴力犯罪与财产犯罪人口发生率相对全国平均的综合（全国平均水平是 6）。它只描述都会区的治安背景对居住与出行安排里安全考虑的影响，不是你个人遭遇犯罪或死亡的概率，也不区分街区或交通方式",
+      "number": 6.783,
       "period": "2024 基年情景（AQI 用 2025 年有效资料）",
       "source": {
        "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
-       "kind": "synthetic",
+       "inputs": [
+        "fbi_cius_2024 或 ny_dcjs_county_totals",
+        "geography: CBSA 16980"
+       ],
+       "kind": "derived",
        "mapping_version": "life-pack-us-v1",
        "observed_on": "2026-10-23",
-       "synthetic_note": "登记的共同先验，不是资料（geography: 六城共同先验）"
+       "rule": "FBI 2024 相对全国的综合犯罪水平 r；指数 = min(10, 6/r)"
       },
       "status": "known",
       "unit": "指数（0–10）",
@@ -366,9 +574,9 @@
      },
      {
       "fact_id": "leisure_index",
-      "label": "休闲条件（共同先验）",
-      "meaning": "不花钱也能享受的休闲条件指数，0–10；六城没有可比资料，这里是登记的共同先验。健身、课程等活动另外安排、另外付费",
-      "number": 8.0,
+      "label": "基本休闲条件（共同先验）",
+      "meaning": "住在一座城市就有的少量基本休闲条件，0–10；六城没有可比资料，这里是登记的共同先验。主要的休闲满足来自实际参加的活动（健身、课程、爱好等另外安排、另外付费）",
+      "number": 2.0,
       "period": "2024 基年情景（AQI 用 2025 年有效资料）",
       "source": {
        "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
@@ -401,6 +609,69 @@
       "status": "known",
       "unit": "指数（0–10）",
       "value_kind": "number"
+     },
+     {
+      "fact_id": "violent_crime_rate",
+      "label": "暴力犯罪率",
+      "meaning": "谋杀、强奸、抢劫与严重伤害的报案数按人口折算；报案数不是全部发生的犯罪",
+      "number": 269.8,
+      "period": "2024 年",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "inputs": [
+        "fbi_cius_2024:CIUS_Table_6_Crime_in_the_United_States_by_Metropolitan_Statistical_Area_2024.xlsx:Chicago-Naperville-Elgin, IL-IN:Estimated total",
+        "geography: CBSA 16980"
+       ],
+       "kind": "estimated",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "rule": "FBI 表 6 的估计总数（报告不全的机构由 FBI 估算）÷ 都会区人口 × 100,000"
+      },
+      "status": "known",
+      "unit": "起 / 10 万人 / 年",
+      "value_kind": "number"
+     },
+     {
+      "fact_id": "property_crime_rate",
+      "label": "财产犯罪率",
+      "meaning": "入室盗窃、盗窃与机动车盗窃的报案数按人口折算；报案数不是全部发生的犯罪",
+      "number": 1791.9,
+      "period": "2024 年",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "inputs": [
+        "fbi_cius_2024:CIUS_Table_6_Crime_in_the_United_States_by_Metropolitan_Statistical_Area_2024.xlsx:Chicago-Naperville-Elgin, IL-IN:Estimated total",
+        "geography: CBSA 16980"
+       ],
+       "kind": "estimated",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "rule": "FBI 表 6 的估计总数（报告不全的机构由 FBI 估算）÷ 都会区人口 × 100,000"
+      },
+      "status": "known",
+      "unit": "起 / 10 万人 / 年",
+      "value_kind": "number"
+     },
+     {
+      "category": "整个都会区（含本模拟不居住的外州部分）",
+      "fact_id": "safety_data_scope",
+      "label": "治安资料覆盖范围",
+      "meaning": "上面两项与治安背景所依据的资料覆盖到哪里（整个都会区，或只有一部分县）",
+      "period": "2024 年",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "inputs": [
+        "fbi_cius_2024:CIUS_Table_6_Crime_in_the_United_States_by_Metropolitan_Statistical_Area_2024.xlsx:Chicago-Naperville-Elgin, IL-IN:Estimated total",
+        "geography: CBSA 16980"
+       ],
+       "kind": "estimated",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "rule": "FBI 表 6 的估计总数（报告不全的机构由 FBI 估算）÷ 都会区人口 × 100,000"
+      },
+      "status": "known",
+      "unit": "范围",
+      "value_kind": "category"
      }
     ],
     "label": "芝加哥（伊利诺伊州部分）"
@@ -414,16 +685,20 @@
     "facts": [
      {
       "fact_id": "safety_index",
-      "label": "安全条件（共同先验）",
-      "meaning": "安全条件指数，0–10，越高越安全。六城没有可比的安全资料，这里是登记的共同先验（六城、各片区同值），不是任何城市的犯罪统计",
-      "number": 6.0,
+      "label": "都会区治安背景",
+      "meaning": "0–10，越高越安全：这个都会区 2024 年暴力犯罪与财产犯罪人口发生率相对全国平均的综合（全国平均水平是 6）。它只描述都会区的治安背景对居住与出行安排里安全考虑的影响，不是你个人遭遇犯罪或死亡的概率，也不区分街区或交通方式",
+      "number": 3.978,
       "period": "2024 基年情景（AQI 用 2025 年有效资料）",
       "source": {
        "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
-       "kind": "synthetic",
+       "inputs": [
+        "fbi_cius_2024 或 ny_dcjs_county_totals",
+        "geography: CBSA 26420"
+       ],
+       "kind": "derived",
        "mapping_version": "life-pack-us-v1",
        "observed_on": "2026-10-23",
-       "synthetic_note": "登记的共同先验，不是资料（geography: 六城共同先验）"
+       "rule": "FBI 2024 相对全国的综合犯罪水平 r；指数 = min(10, 6/r)"
       },
       "status": "known",
       "unit": "指数（0–10）",
@@ -453,9 +728,9 @@
      },
      {
       "fact_id": "leisure_index",
-      "label": "休闲条件（共同先验）",
-      "meaning": "不花钱也能享受的休闲条件指数，0–10；六城没有可比资料，这里是登记的共同先验。健身、课程等活动另外安排、另外付费",
-      "number": 8.0,
+      "label": "基本休闲条件（共同先验）",
+      "meaning": "住在一座城市就有的少量基本休闲条件，0–10；六城没有可比资料，这里是登记的共同先验。主要的休闲满足来自实际参加的活动（健身、课程、爱好等另外安排、另外付费）",
+      "number": 2.0,
       "period": "2024 基年情景（AQI 用 2025 年有效资料）",
       "source": {
        "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
@@ -488,6 +763,69 @@
       "status": "known",
       "unit": "指数（0–10）",
       "value_kind": "number"
+     },
+     {
+      "fact_id": "violent_crime_rate",
+      "label": "暴力犯罪率",
+      "meaning": "谋杀、强奸、抢劫与严重伤害的报案数按人口折算；报案数不是全部发生的犯罪",
+      "number": 563.9,
+      "period": "2024 年",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "inputs": [
+        "fbi_cius_2024:CIUS_Table_6_Crime_in_the_United_States_by_Metropolitan_Statistical_Area_2024.xlsx:Houston-Pasadena-The Woodlands, TX:Estimated total",
+        "geography: CBSA 26420"
+       ],
+       "kind": "estimated",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "rule": "FBI 表 6 的估计总数（报告不全的机构由 FBI 估算）÷ 都会区人口 × 100,000"
+      },
+      "status": "known",
+      "unit": "起 / 10 万人 / 年",
+      "value_kind": "number"
+     },
+     {
+      "fact_id": "property_crime_rate",
+      "label": "财产犯罪率",
+      "meaning": "入室盗窃、盗窃与机动车盗窃的报案数按人口折算；报案数不是全部发生的犯罪",
+      "number": 2546.1,
+      "period": "2024 年",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "inputs": [
+        "fbi_cius_2024:CIUS_Table_6_Crime_in_the_United_States_by_Metropolitan_Statistical_Area_2024.xlsx:Houston-Pasadena-The Woodlands, TX:Estimated total",
+        "geography: CBSA 26420"
+       ],
+       "kind": "estimated",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "rule": "FBI 表 6 的估计总数（报告不全的机构由 FBI 估算）÷ 都会区人口 × 100,000"
+      },
+      "status": "known",
+      "unit": "起 / 10 万人 / 年",
+      "value_kind": "number"
+     },
+     {
+      "category": "整个都会区",
+      "fact_id": "safety_data_scope",
+      "label": "治安资料覆盖范围",
+      "meaning": "上面两项与治安背景所依据的资料覆盖到哪里（整个都会区，或只有一部分县）",
+      "period": "2024 年",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "inputs": [
+        "fbi_cius_2024:CIUS_Table_6_Crime_in_the_United_States_by_Metropolitan_Statistical_Area_2024.xlsx:Houston-Pasadena-The Woodlands, TX:Estimated total",
+        "geography: CBSA 26420"
+       ],
+       "kind": "estimated",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "rule": "FBI 表 6 的估计总数（报告不全的机构由 FBI 估算）÷ 都会区人口 × 100,000"
+      },
+      "status": "known",
+      "unit": "范围",
+      "value_kind": "category"
      }
     ],
     "label": "休斯敦"
@@ -501,16 +839,20 @@
     "facts": [
      {
       "fact_id": "safety_index",
-      "label": "安全条件（共同先验）",
-      "meaning": "安全条件指数，0–10，越高越安全。六城没有可比的安全资料，这里是登记的共同先验（六城、各片区同值），不是任何城市的犯罪统计",
-      "number": 6.0,
+      "label": "都会区治安背景",
+      "meaning": "0–10，越高越安全：这个都会区 2024 年暴力犯罪与财产犯罪人口发生率相对全国平均的综合（全国平均水平是 6）。它只描述都会区的治安背景对居住与出行安排里安全考虑的影响，不是你个人遭遇犯罪或死亡的概率，也不区分街区或交通方式",
+      "number": 4.345,
       "period": "2024 基年情景（AQI 用 2025 年有效资料）",
       "source": {
        "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
-       "kind": "synthetic",
+       "inputs": [
+        "fbi_cius_2024 或 ny_dcjs_county_totals",
+        "geography: CBSA 42660"
+       ],
+       "kind": "derived",
        "mapping_version": "life-pack-us-v1",
        "observed_on": "2026-10-23",
-       "synthetic_note": "登记的共同先验，不是资料（geography: 六城共同先验）"
+       "rule": "FBI 2024 相对全国的综合犯罪水平 r；指数 = min(10, 6/r)"
       },
       "status": "known",
       "unit": "指数（0–10）",
@@ -540,9 +882,9 @@
      },
      {
       "fact_id": "leisure_index",
-      "label": "休闲条件（共同先验）",
-      "meaning": "不花钱也能享受的休闲条件指数，0–10；六城没有可比资料，这里是登记的共同先验。健身、课程等活动另外安排、另外付费",
-      "number": 8.0,
+      "label": "基本休闲条件（共同先验）",
+      "meaning": "住在一座城市就有的少量基本休闲条件，0–10；六城没有可比资料，这里是登记的共同先验。主要的休闲满足来自实际参加的活动（健身、课程、爱好等另外安排、另外付费）",
+      "number": 2.0,
       "period": "2024 基年情景（AQI 用 2025 年有效资料）",
       "source": {
        "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
@@ -575,6 +917,69 @@
       "status": "known",
       "unit": "指数（0–10）",
       "value_kind": "number"
+     },
+     {
+      "fact_id": "violent_crime_rate",
+      "label": "暴力犯罪率",
+      "meaning": "谋杀、强奸、抢劫与严重伤害的报案数按人口折算；报案数不是全部发生的犯罪",
+      "number": 385.5,
+      "period": "2024 年",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "inputs": [
+        "fbi_cius_2024:CIUS_Table_6_Crime_in_the_United_States_by_Metropolitan_Statistical_Area_2024.xlsx:Seattle-Tacoma-Bellevue, WA:Estimated total",
+        "geography: CBSA 42660"
+       ],
+       "kind": "estimated",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "rule": "FBI 表 6 的估计总数（报告不全的机构由 FBI 估算）÷ 都会区人口 × 100,000"
+      },
+      "status": "known",
+      "unit": "起 / 10 万人 / 年",
+      "value_kind": "number"
+     },
+     {
+      "fact_id": "property_crime_rate",
+      "label": "财产犯罪率",
+      "meaning": "入室盗窃、盗窃与机动车盗窃的报案数按人口折算；报案数不是全部发生的犯罪",
+      "number": 2971.5,
+      "period": "2024 年",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "inputs": [
+        "fbi_cius_2024:CIUS_Table_6_Crime_in_the_United_States_by_Metropolitan_Statistical_Area_2024.xlsx:Seattle-Tacoma-Bellevue, WA:Estimated total",
+        "geography: CBSA 42660"
+       ],
+       "kind": "estimated",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "rule": "FBI 表 6 的估计总数（报告不全的机构由 FBI 估算）÷ 都会区人口 × 100,000"
+      },
+      "status": "known",
+      "unit": "起 / 10 万人 / 年",
+      "value_kind": "number"
+     },
+     {
+      "category": "整个都会区",
+      "fact_id": "safety_data_scope",
+      "label": "治安资料覆盖范围",
+      "meaning": "上面两项与治安背景所依据的资料覆盖到哪里（整个都会区，或只有一部分县）",
+      "period": "2024 年",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "inputs": [
+        "fbi_cius_2024:CIUS_Table_6_Crime_in_the_United_States_by_Metropolitan_Statistical_Area_2024.xlsx:Seattle-Tacoma-Bellevue, WA:Estimated total",
+        "geography: CBSA 42660"
+       ],
+       "kind": "estimated",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "rule": "FBI 表 6 的估计总数（报告不全的机构由 FBI 估算）÷ 都会区人口 × 100,000"
+      },
+      "status": "known",
+      "unit": "范围",
+      "value_kind": "category"
      }
     ],
     "label": "西雅图"

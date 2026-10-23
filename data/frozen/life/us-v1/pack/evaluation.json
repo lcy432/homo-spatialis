@@ -15,7 +15,7 @@
       "status": "opportunity"
      },
      {
-      "opportunity_id": "nyc.housing.3604165.1.1-2",
+      "opportunity_id": "nyc.housing.3604104.1.1-2",
       "slot_id": "housing_comfort",
       "status": "opportunity"
      },
@@ -84,7 +84,7 @@
       "status": "opportunity"
      },
      {
-      "opportunity_id": "la.housing.0603770.1.1-2",
+      "opportunity_id": "la.housing.0603767.1.1-2",
       "slot_id": "housing_comfort",
       "status": "opportunity"
      },
@@ -153,7 +153,7 @@
       "status": "opportunity"
      },
      {
-      "opportunity_id": "sf.housing.0600123.1.1-2",
+      "opportunity_id": "sf.housing.0607509.1.1-2",
       "slot_id": "housing_comfort",
       "status": "opportunity"
      },
@@ -222,7 +222,7 @@
       "status": "opportunity"
      },
      {
-      "opportunity_id": "chi.housing.1704304.1.1-2",
+      "opportunity_id": "chi.housing.1703160.1.1-2",
       "slot_id": "housing_comfort",
       "status": "opportunity"
      },
@@ -291,7 +291,7 @@
       "status": "opportunity"
      },
      {
-      "opportunity_id": "hou.housing.4804613.1.1-2",
+      "opportunity_id": "hou.housing.4804623.1.1-2",
       "slot_id": "housing_comfort",
       "status": "opportunity"
      },
@@ -360,7 +360,7 @@
       "status": "opportunity"
      },
      {
-      "opportunity_id": "sea.housing.5323315.1.1-2",
+      "opportunity_id": "sea.housing.5323313.1.1-2",
       "slot_id": "housing_comfort",
       "status": "opportunity"
      },

@@ -62,8 +62,15 @@ def test_background_numbers_by_hand():
     )  # 指数 = 10 × 好天比例，b = 0.5 × 指数
     # 两个支持职业都有岗位、一个有培训：b = 2 × 1 + 2 × 0.5 = 3，指数 6
     assert n["opportunity"] == (Decimal("6.000"), Decimal("3.000"))
-    assert n["safety"] == (Decimal(6), Decimal(3)) and n["leisure"] == (Decimal(8), Decimal(4))
+    assert n["leisure"] == (Decimal(2), Decimal(1))  # 共同休闲背景 b = 1（所有者 2026-10-23）
+    assert n["safety"] is None  # 没有给治安资料：未知，不当零犯罪，也不用他城平均填补
     assert background_numbers(CFG, {}, items)["environment"] is None  # 没有 AQI：未知，不当 0
+    from product.realdata.safety import CrimeCount, SafetyInput
+
+    national = CrimeCount(population=1000000, violent=4000, property=20000)
+    s = SafetyInput("x", CrimeCount(100000, 400, 2000), "整个都会区", "observed", "100%")
+    n = background_numbers(CFG, {}, items, s, national)
+    assert n["safety"] == (Decimal("6.000"), Decimal("3.000"))  # 与全国一样：r = 1，指数 6，b = 3
 
 
 # --------------------------------------------------------------------------- 冻结资料包的整体检查
@@ -114,5 +121,45 @@ def test_scoring_reads_area_values_and_the_group_is_six_real_cities(loaded):
         safety = cond.condition("safety")
         assert (
             safety.area_bases and len(set(safety.area_bases.values())) == 1
-        )  # 共同先验：各片区同值
+        )  # 都会区共同值：各片区同值
     assert facts is not None
+
+
+def test_safety_inputs_are_traceable_per_metro_and_shared_by_areas(loaded):
+    _, scoring, *_ = loaded
+    rep = json.loads((PACK / "report.json").read_text(encoding="utf-8"))
+    nat = rep["safety_national_2024"]
+    # FBI CIUS 2024 表 1 的数与人口重算的率（表里印的是取到 0.1 的 359.1、1760.1）
+    assert (nat["violent_rate"], nat["property_rate"]) == ("359.10", "1760.13")
+    inputs = rep["safety_inputs"]
+    assert set(inputs) == {"nyc", "la", "sf", "chi", "hou", "sea"}
+    assert inputs["nyc"]["scope"].startswith("纽约都会区的纽约州部分")  # 部分覆盖照实标出
+    assert all(
+        inputs[k]["scope"].startswith("整个都会区") for k in ("la", "sf", "chi", "hou", "sea")
+    )
+    for city in scoring.comparison_group.cities:
+        key = {
+            "35620": "nyc",
+            "31080": "la",
+            "41860": "sf",
+            "16980": "chi",
+            "26420": "hou",
+            "42660": "sea",
+        }[city.code]
+        safety = scoring.conditions_for(str(city)).condition("safety")
+        assert set(safety.area_bases.values()) == {float(inputs[key]["b"])}  # 城内各片区同值
+        leisure = scoring.conditions_for(str(city)).condition("leisure")
+        assert leisure.base == 1
+
+
+def test_internal_safety_parameters_stay_out_of_the_agent_view(loaded):
+    from agentlayer.life_planning import visible_city_facts
+
+    _, _, facts, _ = loaded
+    for sheet in facts.sheets:
+        text = json.dumps(
+            [f.model_dump(mode="json") for f in visible_city_facts(sheet)], ensure_ascii=False
+        )
+        for secret in ("w_violent", "fbi_relative_rate", "national_index", "0.5 ×", "b = "):
+            assert secret not in text
+        assert "治安" in text and "暴力犯罪率" in text

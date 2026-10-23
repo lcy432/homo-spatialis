@@ -610,3 +610,61 @@ def test_the_valuation_period_keeps_year_n_menus_and_draws_no_failures(bundle):
     assert all(m.menu_id.endswith(".valuation") for m in year3)
     vprotocol, _ = _derived_protocol(failing_protocol(bundle))
     assert vprotocol.device_failures is None
+
+
+# --------------------------------------------------------------------------- 休闲背景（所有者 2026-10-23）
+
+
+def test_lowering_the_leisure_background_moves_only_the_background_term(bundle, scoring, start):
+    """休闲的城市背景 b 从 4 降到 1（E3B 资料包的共同先验；合成样例仍写 4，这里在评分条件上改）：结算、参与小时与其他各项都
+    不变，休闲 z 每月正好少 3。没有活动的月份 s 从 4/16 = 1/4 变成 1/13；3 月合唱 2 小时（兴趣匹配 ×1.5，折 3 小时）从
+    (4 + 3)/(7 + 12) = 7/19 变成 (1 + 3)/(4 + 12) = 1/4。"""
+    cond = scoring.conditions_for(K51)
+    data = cond.model_dump(mode="json")
+    leisure = next(c for c in data["components"] if c["component_id"] == "leisure")
+    assert leisure["base"] == 4 and not leisure.get("area_bases")
+    leisure["base"] = 1
+    low = type(cond).model_validate(data)
+    items = plan(extra=[once("k51.experience.community_choir", 3)])
+    old = scored(bundle, scoring, start, items)
+    new = scored(bundle, scoring, start, items, conditions=low)
+    assert new.settlement.outcome == old.settlement.outcome  # 结算不读评分条件
+
+    def others(year, month):
+        m = next(x for x in year.score.months if x.month == month)
+        return [(c.component_id, c.s) for c in m.components if c.component_id != "leisure"]
+
+    for month in range(1, 13):
+        a, b = comp(old, month, "leisure"), comp(new, month, "leisure")
+        assert a.z - b.z == pytest.approx(3, abs=TOL)
+        assert a.participation == b.participation  # 活动的参与小时与兴趣加成不变
+        assert others(old, month) == others(new, month)
+    assert comp(old, 2, "leisure").s == pytest.approx(1 / 4, abs=TOL)
+    assert comp(new, 2, "leisure").s == pytest.approx(1 / 13, abs=TOL)
+    assert comp(old, 3, "leisure").s == pytest.approx(7 / 19, abs=TOL)
+    assert comp(new, 3, "leisure").s == pytest.approx(1 / 4, abs=TOL)
+
+
+def test_the_safety_background_never_touches_cash_illness_or_exit(bundle, scoring, start):
+    """安全背景只进评分的安全一项：把 K51 的安全 b 从 3 改成 1.5（像换了一个犯罪率更高的都会区），结算的现金流、病情、出局
+    与每月资源一字不差，别的评分项也不变；安全 s 从 3/6 变成 1.5/4.5。"""
+    cond = scoring.conditions_for(K51)
+    data = cond.model_dump(mode="json")
+    safety = next(c for c in data["components"] if c["component_id"] == "safety")
+    assert safety["base"] == 3
+    safety["base"] = 1.5
+    low = type(cond).model_validate(data)
+    old = scored(bundle, scoring, start, plan())
+    new = scored(bundle, scoring, start, plan(), conditions=low)
+    o, n = old.settlement.outcome, new.settlement.outcome
+    assert (n.cash_flows, n.health, n.exit, n.resources) == (
+        o.cash_flows,
+        o.health,
+        o.exit,
+        o.resources,
+    )
+    for month in range(1, 13):
+        assert comp(old, month, "safety").s == pytest.approx(1 / 2, abs=TOL)
+        assert comp(new, month, "safety").s == pytest.approx(1 / 3, abs=TOL)
+        for cid in ("leisure", "commute", "housing_condition", "environment"):
+            assert comp(old, month, cid).s == comp(new, month, cid).s
