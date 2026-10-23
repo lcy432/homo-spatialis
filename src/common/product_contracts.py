@@ -33,8 +33,9 @@ from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-#: 结构版本（字段形状）。字段含义或形状一变就换名字，并在 ADR 记录。
-PRODUCT_SCHEMA_VERSION = "e3a-product-schema-v3"
+#: 结构版本（字段形状）。字段含义或形状一变就换名字，并在 ADR 记录。v3.1（DECISIONS/0042）：结果里的住处、通勤、用车权、
+#: 设备故障与税，逐城的资料性质，预检查的范围说明——都是新增的可选字段，v3 的字段含义不变；目录仍是 contracts/product/v3。
+PRODUCT_SCHEMA_VERSION = "e3a-product-schema-v3.1"
 #: 问卷 / 题干语义版本：六维与物质的题干、定义、参考改善范围与控件规则。题干一变，旧确认失效、需要重新确认。
 QUESTIONNAIRE_VERSION = "e3a-questionnaire-v0.2-draft"
 #: 词表版本：六维键、物质键、职业受控词表、硬要求选项与属性偏好种类。
@@ -85,12 +86,16 @@ def identity_content(model: BaseModel, fingerprint_field: str) -> dict[str, Any]
 # ==========================================================================
 
 
+#: 资料包状态：合成测试资料，或冻结的真实资料包（DECISIONS/0042：城市资料来自公开来源与登记的模型设定）。
+PackStatus = Literal["synthetic_fixture_only", "real_data_frozen"]
+
+
 class DataPackRef(ProductModel):
-    """一份资料包的身份：编号与内容指纹。本轮只有合成资料包（``synthetic_fixture_only``）。"""
+    """一份资料包的身份：编号、内容指纹与状态（合成测试资料，或冻结的真实资料包）。"""
 
     pack_id: RefStr
     content_fingerprint: Sha256
-    status: Literal["synthetic_fixture_only", "real_data_frozen"]
+    status: PackStatus
     note: str = Field(min_length=1, max_length=400)
 
 
@@ -111,7 +116,7 @@ class SampleLabel(ProductModel):
 class ProductMeta(ProductModel):
     """每条产品消息都带的共同元数据：结构、问卷、词表、健康问卷、转换的版本与资料包身份。"""
 
-    schema_version: Literal["e3a-product-schema-v3"]
+    schema_version: Literal["e3a-product-schema-v3.1"]
     questionnaire_version: str = Field(min_length=1, max_length=80)
     vocabulary_version: str = Field(min_length=1, max_length=80)
     health_questionnaire_version: str = Field(min_length=1, max_length=80)
@@ -860,6 +865,127 @@ class CityCoverageSummary(ProductModel):
     label: str
 
 
+#: 一条资料的来源性质（与 E1 的 ``SourceRecord.kind`` 同一套词）：观测、可审计派生、统计估计、合成设定。
+SourceKindName = Literal["observed", "derived", "estimated", "synthetic"]
+#: 通勤方式（与 E1 的 ``CommuteMode`` 同一套词）。
+CommuteModeKey = Literal["walk_bike", "transit", "drive"]
+
+
+class SourceKindCount(ProductModel):
+    kind: SourceKindName
+    count: Annotated[int, Field(ge=0)]
+
+
+class CategorySources(ProductModel):
+    """目录里一类机会（住房、岗位、食品、服务……）的条数，按来源性质分开数（四种性质都列，没有的写 0）。"""
+
+    category: str = Field(min_length=1, max_length=48)
+    total: Annotated[int, Field(ge=0)]
+    by_kind: tuple[SourceKindCount, ...] = Field(min_length=4, max_length=4)
+
+
+class NamedAssumption(ProductModel):
+    """一条登记的模型设定（来源性质是合成）：设定说明的原文、用到它的机会条数与几个例子。不是资料，也不是某个商品或场所的报价。"""
+
+    note_zh: str = Field(min_length=1, max_length=400)
+    count: Annotated[int, Field(ge=1)]
+    examples: tuple[str, ...] = Field(min_length=1, max_length=3)
+
+
+class CommonPrior(ProductModel):
+    """一项比较组各城共用的背景设定（没有可比资料时登记的共同先验，例如安全与休闲）：事实的名称与含义。不制造城市差异；
+    这里不写它换算成评分输入的规则与参数。"""
+
+    fact_id: str = Field(min_length=1, max_length=64)
+    label: str = Field(min_length=1, max_length=80)
+    meaning_zh: str = Field(min_length=1, max_length=400)
+
+
+class CommuteModeAvailability(ProductModel):
+    """这座城的通勤关系表里有没有一种方式：有几条片区之间的线、使用条件与封顶的说明（与给分身看的同一份公开说明）。
+
+    ``in_relation = False``：关系表里没有这种方式（资料缺失或本城不建模），到岗时不能用它——不当 0 分钟，也不当免费。"""
+
+    mode: CommuteModeKey
+    mode_zh: str = Field(min_length=1, max_length=20)
+    in_relation: bool
+    lines: Annotated[int, Field(ge=0)]
+    condition_zh: str | None = Field(default=None, max_length=400)
+
+
+class MenuSummary(ProductModel):
+    """一类机会的年度菜单（DECISIONS/0042）：每年、每个环境重复给分身看的一份抽样。菜单是接触机会，不是成交或录用。"""
+
+    category: str = Field(min_length=1, max_length=48)
+    years: Annotated[int, Field(ge=1)]
+    env_repeats: Annotated[int, Field(ge=1)]
+    items_min: Annotated[int, Field(ge=1)]
+    items_max: Annotated[int, Field(ge=1)]
+
+
+class TaxScope(ProductModel):
+    """这座城适用的税（DECISIONS/0042）：官方 2024 年规则（单身、只有工资收入、标准扣除）或合成测试替身；支持的居住与工作地、
+    规则名称、官方说明没有的税，以及没有建模的部分（照实写，不当作已经覆盖）。"""
+
+    policy_id: str = Field(min_length=1, max_length=80)
+    status: Literal["official_2024_rules", "synthetic_test_double"]
+    status_zh: str = Field(min_length=1, max_length=120)
+    residence_scope_zh: str | None = Field(default=None, max_length=400)
+    rules_zh: tuple[str, ...] = ()
+    absent_zh: tuple[str, ...] = ()
+    not_modeled_zh: tuple[str, ...] = ()
+
+
+class BuildCount(ProductModel):
+    """资料包构建报告里的一个计数（片区、通勤线、住房候选与排除的原因、放进目录的岗位、菜单……）。"""
+
+    key: str = Field(min_length=1, max_length=64)
+    label_zh: str = Field(min_length=1, max_length=80)
+    count: Annotated[int, Field(ge=0)]
+
+
+class CityDataNature(ProductModel):
+    """一座城的资料是怎么来的（DECISIONS/0042）：目录各类机会按来源性质的条数、登记的模型设定、共同先验、治疗的共同假设、
+    模型活动设定、片区、通勤方式、菜单、税的范围，以及资料包构建报告的计数。
+
+    只有公开的来源性质与说明：没有评分参数（η、τ、c、背景量）、抽签或内部状态。``build_status = not_available`` 表示构建报告
+    不在这份资料包里或与目录对不上——计数未知，不是 0。"""
+
+    city_ref: str
+    label: str
+    pack_status: PackStatus
+    summary_zh: str = Field(min_length=1, max_length=400)
+    opportunities: tuple[CategorySources, ...] = ()
+    totals: tuple[SourceKindCount, ...] = Field(min_length=4, max_length=4)
+    named_assumptions: tuple[NamedAssumption, ...] = ()
+    common_priors: tuple[CommonPrior, ...] = ()
+    treatment_assumptions_zh: tuple[str, ...] = ()
+    model_plan_activities: tuple[str, ...] = ()
+    home_areas: Annotated[int, Field(ge=0)] = 0
+    work_areas: Annotated[int, Field(ge=0)] = 0
+    commute_modes: tuple[CommuteModeAvailability, ...] = ()
+    menus: tuple[MenuSummary, ...] = ()
+    tax: TaxScope | None = None
+    build_status: Literal["from_pack_report", "not_available"]
+    build: tuple[BuildCount, ...] = ()
+
+    @model_validator(mode="after")
+    def _build(self) -> CityDataNature:
+        if (self.build_status == "from_pack_report") != bool(self.build):
+            raise ValueError("只有读到构建报告时才写构建计数；读不到时计数未知，不写 0")
+        return self
+
+
+class ScopeNote(ProductModel):
+    """预检查的一条范围说明（DECISIONS/0042）：这版支持什么、不支持什么、为什么。``cities`` 为空表示对全部候选城市都适用。
+    E5 原样展示中文，不另写解释。"""
+
+    topic: Literal["occupations", "tax", "commute", "menus", "unsupported", "data"]
+    title_zh: str = Field(min_length=1, max_length=80)
+    text_zh: str = Field(min_length=1, max_length=600)
+    cities: tuple[str, ...] = ()
+
+
 class CityPreflight(ProductModel):
     city_ref: RefStr
     label: str
@@ -870,6 +996,8 @@ class CityPreflight(ProductModel):
     coverage: CityCoverageSummary | None = None
     option_inventory_status: Literal["complete_for_declared_scope", "partial", "not_assessed"]
     data_gaps: tuple[ProductIssue, ...] = ()
+    #: 这座城的资料是怎么来的（DECISIONS/0042）。预检查没有走到 E1 加载时为空，不序列化。
+    data_nature: CityDataNature | None = Field(default=None, exclude_if=lambda v: v is None)
 
 
 class RunBinding(ProductModel):
@@ -913,6 +1041,8 @@ class ProductPreflight(ProductModel):
     binding: RunBinding | None = None
     issues: tuple[ProductIssue, ...] = ()
     scope_zh: tuple[str, ...] = ()
+    #: 结构化的范围说明（DECISIONS/0042）：职业、税、通勤、菜单与本版不支持的内容。真实资料包才有；没有时不序列化。
+    scope_notes: tuple[ScopeNote, ...] = Field(default=(), exclude_if=lambda v: v == ())
     preflight_fingerprint: Sha256
 
     def content(self) -> dict[str, Any]:
@@ -1057,6 +1187,78 @@ class ActivityLine(ProductModel):
     not_done_zh: str | None = None
 
 
+class HomeFact(ProductModel):
+    """这一年实际住过的一处住房（DECISIONS/0042）：住了哪几个月、在哪个片区，以及这个片区的居民平时上班往返多少分钟（资料或
+    估计；没有就为空，不当 0）。片区是资料的地理单位（例如 PUMA），不是街区或楼栋，本身不加分。"""
+
+    opportunity_id: str
+    label: str
+    months: tuple[int, ...] = Field(min_length=1)
+    area_id: str | None = None
+    area_label: str | None = None
+    area_typical_roundtrip_minutes: Annotated[int, Field(ge=0)] | None = None
+
+
+class CommuteTrip(ProductModel):
+    """一个到岗岗位一个月实际执行的通勤（取自 E1 的月度通勤记录）：岗位、就业片区、方式、一次往返的分钟与这个月的到岗次数。"""
+
+    job_opportunity_id: str
+    job_label: str
+    work_area_id: str
+    work_area_label: str
+    mode: CommuteModeKey
+    mode_zh: str
+    roundtrip_minutes: Annotated[int, Field(ge=0)]
+    onsite_visits: Annotated[int, Field(ge=1)]
+
+
+class CommuteMonths(ProductModel):
+    """几个月相同的通勤执行事实（DECISIONS/0042）：E1 每个月唯一的通勤记录，内容完全相同的月份合成一行。
+
+    ``monthly_paid`` 是这几个月里**每个月**付的通勤费（各方式按月封顶之后的合计）。没有需要到岗的工作、出局当月没有住房时
+    不写行程与付款（后者是未知，不是 0）；出局或停止之后没有发生的月份不列。"""
+
+    months: tuple[int, ...] = Field(min_length=1)
+    status: Literal["computed", "no_onsite_work", "unknown_no_housing"]
+    status_zh: str
+    home_area_id: str | None = None
+    home_area_label: str | None = None
+    trips: tuple[CommuteTrip, ...] = ()
+    monthly_paid: ProductMoney | None = None
+
+
+class CarAccessFact(ProductModel):
+    """用车权（DECISIONS/0042）：开车通勤要这个月有在用的用车权——一项按月付费的普通机会，不买就不能开车。只在这座城的通勤
+    关系里有需要它的方式时出现。``bought`` = 今年至少有一个月用上了。"""
+
+    status: Literal["bought", "not_bought"]
+    lines: tuple[ConvenienceService, ...] = ()
+    note_zh: str = Field(min_length=1, max_length=300)
+
+
+class DeviceFailureFact(ProductModel):
+    """一次设备故障与替换结果（DECISIONS/0042）：第几个月月末坏了（下个月起不能用，剩余寿命作废）、坏了几件，预先声明的替换
+    有没有在下个月按普通购买买到。不含抽签的随机数、月度风险与键。"""
+
+    opportunity_id: str
+    label: str
+    month: Annotated[int, Field(ge=1, le=12)]
+    units_failed: Annotated[int, Field(ge=1)]
+    replacement_id: str | None = None
+    replacement_label: str | None = None
+    replacement_status: Literal["not_declared", "bought", "rejected", "next_year", "not_reached"]
+    replacement_status_zh: str
+    replacement_month: Annotated[int, Field(ge=1, le=12)] | None = None
+
+
+class TaxFact(ProductModel):
+    """这一年的工资按哪一份税规则预扣（DECISIONS/0042）：官方 2024 年规则，或合成测试替身。范围与没有建模的部分见资料性质。"""
+
+    policy_id: str
+    status: Literal["official_2024_rules", "synthetic_test_double"]
+    status_zh: str
+
+
 class YearFacts(ProductModel):
     """一个分身一年的生活事实（取自 E1 的结算记录与资源账；不含模型理由与内部评分对象）。"""
 
@@ -1082,6 +1284,12 @@ class YearFacts(ProductModel):
         default=(), exclude_if=lambda v: v == ()
     )
     activities: tuple[ActivityLine, ...] = Field(default=(), exclude_if=lambda v: v == ())
+    #: 片区、通勤、用车权、设备故障与税（DECISIONS/0042）。没有时不序列化。
+    homes: tuple[HomeFact, ...] = Field(default=(), exclude_if=lambda v: v == ())
+    commute: tuple[CommuteMonths, ...] = Field(default=(), exclude_if=lambda v: v == ())
+    car_access: CarAccessFact | None = Field(default=None, exclude_if=lambda v: v is None)
+    device_failures: tuple[DeviceFailureFact, ...] = Field(default=(), exclude_if=lambda v: v == ())
+    tax: TaxFact | None = Field(default=None, exclude_if=lambda v: v is None)
 
 
 class RequirementLine(ProductModel):
@@ -1223,6 +1431,8 @@ class ProductResult(ProductModel):
     clones: tuple[CloneResult, ...] = ()
     comparisons: tuple[ComparisonLine, ...] = ()
     option_coverage: tuple[OptionCoverageLine, ...] = ()
+    #: 逐城的资料性质（DECISIONS/0042），与预检查里的同一份投影。没有时不序列化。
+    data_nature: tuple[CityDataNature, ...] = Field(default=(), exclude_if=lambda v: v == ())
     reading_guide_zh: tuple[str, ...] = ()
     limitations_zh: tuple[str, ...] = ()
     sources_zh: tuple[str, ...] = ()

@@ -821,7 +821,70 @@ def generate_samples(out: Path, work: Path) -> None:
         "参考模板的范围限制，不是装备没有价值；V 的算法与 C / E / M 分类不变",
         dump(hobby.result),
     )
+    _e3b_samples(out, work)
     print(f"写出 {len(list(out.glob('*.json')))} 份样例到 {out}")
+
+
+#: E3B 六城真实资料包（DECISIONS/0042）与样例里用的城市：休斯敦、西雅图（三年都完整）与旧金山（通勤关系表没有公交）。
+E3B_PACK = Path("configs/product/e3b_us_v1_pack.yaml")
+HOU, SEA, SF = "US:CBSA2023:26420", "US:CBSA2023:42660", "US:CBSA2023:41860"
+
+
+def _e3b_samples(out: Path, work: Path) -> None:
+    """E3B 样例：同一位合成文员 u501 在冻结的真实资料包上走产品链（每城一个分身，零网络、零费用）。"""
+    from product import scenarios as sc
+
+    dump = lambda m: m.model_dump(mode="json")  # noqa: E731
+    saved = sc.PACK_PATH
+    sc.PACK_PATH = E3B_PACK
+    try:
+        n = sc.closed_loop(
+            work / "e3b",
+            "e3b",
+            draft_kwargs={"abilities": ("edu_at_least_hs",), "cities": (HOU, SEA)},
+            repeat_indexes=(0,),
+            note="离线闭环实际执行的结果（mock 规划器，零网络）；人物是合成的，城市资料是冻结的 E3B 真实资料包",
+        )
+        assert n.result is not None and n.pre is not None
+        sf = sc.preflight_only(
+            work / "e3b_sf", "e3b_sf", abilities=("edu_at_least_hs",), cities=(SF, HOU)
+        )
+        nohs = sc.preflight_only(work / "e3b_nohs", "e3b_nohs", cities=(HOU,))
+    finally:
+        sc.PACK_PATH = saved
+    _sample_file(
+        out,
+        "51_e3b_preflight_ready",
+        "ProductPreflight",
+        "E3B 真实资料包（real_data_frozen）的预检查：休斯敦、西雅图各一个分身、三年；办公室文员的开局岗位要求高中学历（用户在资格一栏"
+        "确认了）；逐城的资料性质（来源性质计数、登记的模型设定、安全与休闲的共同先验、治疗共同假设、片区、通勤方式、菜单、官方 2024 "
+        "年税的范围、构建报告计数）与结构化的范围说明（职业、税、通勤、年度菜单、本版不支持）",
+        dump(n.pre.preflight),
+    )
+    _sample_file(
+        out,
+        "52_e3b_result",
+        "ProductResult",
+        "E3B 真实资料包的产品结果：两座城各 1 个完整分身；每年实际住的房子与片区（片区居民平时的往返分钟）、逐月通勤（方式、往返分钟、"
+        "到岗次数、每月通勤费）、用车权没有买、按哪份官方税规则预扣；资料包里的设备都是模拟期内不随机坏，所以没有故障记录",
+        dump(n.result),
+    )
+    _sample_file(
+        out,
+        "53_e3b_sf_transit_missing_preflight",
+        "ProductPreflight",
+        "E3B 预检查：旧金山的通勤关系表里没有公共交通（官方票价网站拒绝访问，资料缺失），比较组别的城市有——逐城报告为警告与范围"
+        "说明，不当 0 分钟、也不当免费；预检查仍可通过",
+        dump(sf.pre.preflight),
+    )
+    _sample_file(
+        out,
+        "54_e3b_credential_blocked_preflight",
+        "ProductPreflight",
+        "E3B 预检查被阻断：自由文字写了“写字楼文员”，但没有在资格一栏确认高中学历；休斯敦办公室文员的岗位要求这项资格，系统不从"
+        "职称或自由文字授予——不换成别的职业；范围说明照样列出支持的职业与本版不支持的内容",
+        dump(nohs.pre.preflight),
+    )
 
 
 def _script(clone: str, behavior: str, years: tuple[int, ...]) -> Any:

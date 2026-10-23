@@ -41,14 +41,14 @@
     "produced_by": "product.scenarios.closed_loop(normal)",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3",
+   "schema_version": "e3a-product-schema-v3.1",
    "vocabulary_version": "e3a-vocabulary-v3"
   },
   "pause": null,
   "report_available": true,
   "resumable": false,
   "resume_note": "这次运行已经结束，没有可以恢复的部分",
-  "run_id": "run-e3a-e00571bb01e02fe4",
+  "run_id": "run-e3a-ce8331360534724d",
   "stage": "completed",
   "stage_zh": "已完成"
  }

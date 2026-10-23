@@ -4,15 +4,15 @@
  "messages": {
   "CatalogCompilation": {
    "file": "CatalogCompilation.schema.json",
-   "sha256": "6435cc8b01c466bed8e56ef0c7dd2ba1e0fed8ec045998a8816748213d555c37"
+   "sha256": "f30a4e2d360fe0c8b6a3eebc9d09a7291feb707b486263b9349ce5aac59a8ddd"
   },
   "ConfirmedProfile": {
    "file": "ConfirmedProfile.schema.json",
-   "sha256": "1cf7f967fc65734ca60010a81c11d3ab828825d5053c2644e587198eee6a1672"
+   "sha256": "23f0dea6a9d2a7cfaab7d03e422bbdf24d4abdf05093773afbc0f3b8260d6e4c"
   },
   "LifeItemCompilation": {
    "file": "LifeItemCompilation.schema.json",
-   "sha256": "3a3603eef3915869ef7158a53748ce76a27f5f317bfd4601d7b9bca97e51da73"
+   "sha256": "de90341135f470a63276af3810c1d4a1c744680f2780ac54e54e86d2b00f12b3"
   },
   "OpportunityCandidate": {
    "file": "OpportunityCandidate.schema.json",
@@ -20,35 +20,35 @@
   },
   "OptionInventoryCoverage": {
    "file": "OptionInventoryCoverage.schema.json",
-   "sha256": "c3f4edb372eb2bee6783fb95afa5c41b26b5b6d2d82a1b96a60ba2c559fa73bf"
+   "sha256": "f53295e4b0157db1dade643f117a4171c2bbfd5e0889e492c6a85e2b04ae6ffb"
   },
   "ProductCapabilities": {
    "file": "ProductCapabilities.schema.json",
-   "sha256": "dadbfecc0cff6f6069a7f551bb946cd4731e2aa3ffc0f6ca3d79c71b65569a35"
+   "sha256": "dcef20e3fbad5a93b6c69536aa9e8cab2e4d8ba1fd1f8cadb688f695ef81ef32"
   },
   "ProductPreflight": {
    "file": "ProductPreflight.schema.json",
-   "sha256": "05c09003cffb9d839cd03eb8d58c72a5302b0d57c3946fef6467f61c98836917"
+   "sha256": "3788ae26352f925bcba62c8186105866120ae37d82b1457a91e1f52e99de9821"
   },
   "ProductResult": {
    "file": "ProductResult.schema.json",
-   "sha256": "9fdc043316e629572c8d5c15da7e1b0633df27c1660c7a15c677be5e088a6ddd"
+   "sha256": "507df310a312f5a1304cef050376bb66aa58ca1d4063ed7f3dd4408ba4c8d3c4"
   },
   "ProfileReview": {
    "file": "ProfileReview.schema.json",
-   "sha256": "d82542c01d9c8ae1492f8e94ef15256cbe62bd9e3ddfe62b55a68e048d79439e"
+   "sha256": "1603d52ac1f9bd536f4f47e0a4b0e71f905cd493b7cc34da2f5d4c1db1aafe24"
   },
   "RunProgress": {
    "file": "RunProgress.schema.json",
-   "sha256": "c9f79d2f8a827d3bf9d51c60a5f44d7e566396e83d13787dd8e2992de6d2c066"
+   "sha256": "9d48379a4692eb3c1232c6dec688ca71ddac0f84525553448af88ae8b70601f3"
   },
   "RunReceipt": {
    "file": "RunReceipt.schema.json",
-   "sha256": "3df6e1387d6791cef01136d644ea3ef0e88fc172e04cc6d5bb49eab993829de7"
+   "sha256": "320c356ff4a8724cc2d10725afa8e30889deb22270d96991199bf8968195b402"
   },
   "RunSubmission": {
    "file": "RunSubmission.schema.json",
-   "sha256": "432b76f4433ca01ca743b9c34bf2eabe5edf937a9b5bf8785d92f1b6e8b88d44"
+   "sha256": "024d5a1de5f7fee754ee0d6ec601e76fb55be14d85fff73436a1ec93c3e4881b"
   },
   "SourceFact": {
    "file": "SourceFact.schema.json",
@@ -56,11 +56,11 @@
   },
   "UserInputDraft": {
    "file": "UserInputDraft.schema.json",
-   "sha256": "ceaf0740ef2ab9c699b33abc74280a26a05727eb273f26ea70832c937c9deb54"
+   "sha256": "05c78eac7c847269cfb1f9bdb325a1c0f1eea40425f27d23e92995892bbea7b6"
   }
  },
  "questionnaire_version": "e3a-questionnaire-v0.2-draft",
- "schema_version": "e3a-product-schema-v3",
+ "schema_version": "e3a-product-schema-v3.1",
  "source": "src/common/product_contracts.py（唯一权威结构；这些文件由 scripts/product_e3a.py export-schema 导出，不要手改）",
  "vocabulary_version": "e3a-vocabulary-v3"
 }

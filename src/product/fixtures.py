@@ -165,6 +165,8 @@ WORKSPACE_FILES = (
     "data/frozen/life/us-v1/pack/scoring.json",
     "data/frozen/life/us-v1/pack/evaluation.json",
     "data/frozen/life/us-v1/pack/city_facts.json",
+    # 构建报告：产品消息里的资料性质读它的计数（product.pack_facts）
+    "data/frozen/life/us-v1/pack/report.json",
 )
 
 

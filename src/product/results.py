@@ -5,6 +5,9 @@
 * 事件链取自 E1 核对过的环境事实（``ChainStep``），不是模型理由；硬要求单独报告已核验与未核验的人数，不扣分、不删人。
 * 生活事实（实际支付、在用设备、实际服务月份、本人每月家务小时、病情）取自结算记录与资源账；不透传内部评分对象与参数，也不
   把模型的需求摘要或理由当成事实。
+* 片区、通勤、用车权、设备故障与税（DECISIONS/0042）取自资源账里每月唯一的通勤记录与结算记录：住处所在片区与片区居民平时的
+  往返分钟、每月实际的方式 / 往返分钟 / 到岗次数 / 通勤费、用车权有没有用上、坏了什么与替换结果、按哪份税规则预扣。不含故障
+  抽签的随机数与月度风险。逐城的资料性质与预检查是同一份投影（``product.pack_facts``）。
 * 不新增排序规则、最低完成比例或现实推荐结论；结果不回灌给仍在生活中的分身（生活已经结束，结果只给用户看）。
 """
 
@@ -20,19 +23,24 @@ from common.life_aggregation_contracts import (
     CityReport,
     EntryRecord,
 )
-from common.life_contracts import ExactAmount, Money
+from common.life_contracts import COMMUTE_MODE_LABEL, ExactAmount, Money
 from common.life_feedback_contracts import LifeYearResult
 from common.product_contracts import (
     ActivityLine,
+    CarAccessFact,
     CityResult,
     CloneResult,
+    CommuteMonths,
+    CommuteTrip,
     ComparisonLine,
     ConfirmedProfile,
     ConfirmedRef,
     ConvenienceDevice,
     ConvenienceService,
+    DeviceFailureFact,
     ExactNumber,
     GoodsLine,
+    HomeFact,
     HouseholdHours,
     MissingReasonLine,
     OptionCoverageLine,
@@ -46,6 +54,7 @@ from common.product_contracts import (
     RequirementLine,
     RequirementSummaryLine,
     SampleLabel,
+    TaxFact,
     ValuationScopeNote,
     YearFacts,
     content_fingerprint,
@@ -53,6 +62,7 @@ from common.product_contracts import (
 from orchestration.life_runner import RunOutcome, RunWorld
 from product.exact import canonical, display, money_display
 from product.pack import DataPack
+from product.pack_facts import TAX_STATUS_ZH, city_data_nature
 from product.public_errors import clone_explanation
 
 CATEGORY_TEXT = {"C": "完成且评价完整", "E": "确认的生活出局", "M": "模拟问题，无法完整评价"}
@@ -194,6 +204,7 @@ def year_facts(world: RunWorld, city: str, result: LifeYearResult) -> YearFacts:
         goods=goods,
         purchases_not_made=not_made,
         activities=activities,
+        **_area_facts(world, city, out),
     )
 
 
@@ -268,6 +279,145 @@ def _life_extension_facts(
             )
         )
     return goods, not_made, tuple(activities)
+
+
+#: 通勤记录的状态（固定的公开说明）。
+_COMMUTE_STATUS_ZH = {
+    "computed": "按通勤关系表执行：实际住处片区到各个到岗岗位的就业片区，取可用方式里往返最少的一种",
+    "no_onsite_work": "这个月没有需要到岗的工作：通勤为零",
+    "unknown_no_housing": "出局当月没有住房：通勤依据缺失，记为未知（不是 0）",
+}
+#: 设备故障之后的替换结果（固定的公开说明）。
+_REPLACEMENT_ZH = {
+    "not_declared": "年度计划没有预先声明替换：坏了之后就没有这件东西了",
+    "bought": "按年度计划预先声明的替换，在下个月按普通购买买到",
+    "rejected": "预先声明了替换，但下个月买不起或计划不可执行：没有买成，不顺延",
+    "next_year": "第 12 月坏的：替换留给下一年的计划",
+    "not_reached": "替换那个月之前已经出局或停止：没有发生",
+}
+
+
+def _area_facts(world: RunWorld, city: str, out: Any) -> dict[str, Any]:
+    """片区、通勤、用车权、设备故障与税（DECISIONS/0042），逐字段取自资源账的月度通勤记录与结算记录。"""
+    cat = world.bundle.catalog_for(city)
+    assert cat is not None
+    areas = {a.area_id: a for a in cat.areas}
+
+    def area_label(area_id: str | None) -> str | None:
+        a = None if area_id is None else areas.get(area_id)
+        return area_id if a is None else a.label
+
+    lived: dict[str, list[int]] = {}
+    groups: dict[tuple[Any, ...], tuple[Any, list[int]]] = {}
+    for m in out.resources.months if out.resources is not None else ():
+        if m.housing_opportunity_id is not None:
+            lived.setdefault(m.housing_opportunity_id, []).append(m.month)
+        c = m.commute
+        if c is None or c.status == "not_reached":
+            continue
+        key = (
+            c.status,
+            c.home_area,
+            tuple(
+                (u.job_opportunity_id, u.work_area, u.mode, u.roundtrip_minutes, u.onsite_visits)
+                for u in c.uses
+            ),
+            None if c.paid is None else _money(c.paid).amount_minor,
+        )
+        groups.setdefault(key, (c, []))[1].append(m.month)
+    homes = []
+    for oid, months in lived.items():
+        o = cat.opportunity(oid)
+        area = None if o is None or o.area is None else areas.get(o.area)
+        homes.append(
+            HomeFact(
+                opportunity_id=oid,
+                label=_label(world, city, oid),
+                months=tuple(months),
+                area_id=None if o is None else o.area,
+                area_label=None if area is None else area.label,
+                area_typical_roundtrip_minutes=None
+                if area is None
+                else area.typical_roundtrip_minutes,
+            )
+        )
+    commute = tuple(
+        CommuteMonths(
+            months=tuple(months),
+            status=c.status,
+            status_zh=_COMMUTE_STATUS_ZH[c.status],
+            home_area_id=c.home_area,
+            home_area_label=area_label(c.home_area),
+            trips=tuple(
+                CommuteTrip(
+                    job_opportunity_id=u.job_opportunity_id,
+                    job_label=_label(world, city, u.job_opportunity_id),
+                    work_area_id=u.work_area,
+                    work_area_label=area_label(u.work_area) or u.work_area,
+                    mode=u.mode,
+                    mode_zh=COMMUTE_MODE_LABEL[u.mode],
+                    roundtrip_minutes=u.roundtrip_minutes,
+                    onsite_visits=u.onsite_visits,
+                )
+                for u in c.uses
+            ),
+            monthly_paid=None if c.paid is None else _money(c.paid),
+        )
+        for c, months in groups.values()
+    )
+    facts: dict[str, Any] = {"homes": tuple(homes), "commute": commute}
+    # 用车权：开车这种方式要求的那项功能（DECISIONS/0042）；关系表里没有这种条件的城市（合成样例）不写
+    drive = None if cat.commute is None else cat.commute.mode_rule("drive")
+    if drive is not None and drive.requires_function is not None:
+        providers = {
+            o.opportunity_id for o in cat.opportunities if drive.requires_function in o.functions
+        }
+        lines = tuple(
+            ConvenienceService(
+                opportunity_id=it.opportunity_id,
+                label=_label(world, city, it.opportunity_id),
+                months_planned=tuple(it.requested_months),
+                months_covered=tuple(it.covered_months),
+                months_not_obtained=tuple(
+                    m for m in it.requested_months if m not in it.covered_months
+                ),
+            )
+            for it in out.items
+            if it.opportunity_id in providers
+        )
+        bought = any(x.months_covered for x in lines)
+        facts["car_access"] = CarAccessFact(
+            status="bought" if bought else "not_bought",
+            lines=lines,
+            note_zh=(
+                "开车通勤要这个月有在用的用车权（按月付费）：用上的月份里，到岗时在可用方式里取往返最少的一种"
+                if bought
+                else "今年没有用上用车权：这一年不能开车通勤，到岗只用通勤关系表里不需要用车权的方式"
+            ),
+        )
+    facts["device_failures"] = tuple(
+        DeviceFailureFact(
+            opportunity_id=f.opportunity_id,
+            label=_label(world, city, f.opportunity_id),
+            month=f.month,
+            units_failed=f.units_failed,
+            replacement_id=f.replacement_id,
+            replacement_label=None
+            if f.replacement_id is None
+            else _label(world, city, f.replacement_id),
+            replacement_status=f.replacement_status,
+            replacement_status_zh=_REPLACEMENT_ZH[f.replacement_status],
+            replacement_month=f.replacement_month,
+        )
+        for f in out.device_failures
+    )
+    if out.tax_policy_id is not None and out.tax_status in TAX_STATUS_ZH:
+        facts["tax"] = TaxFact(
+            policy_id=out.tax_policy_id,
+            status=out.tax_status,
+            status_zh=TAX_STATUS_ZH[out.tax_status],
+        )
+    return facts
 
 
 def _months_text(months: tuple[int, ...]) -> str:
@@ -512,6 +662,9 @@ def project_result(
         clones=tuple(clones) if generated else (),
         comparisons=tuple(comparisons),
         option_coverage=coverage,
+        data_nature=tuple(city_data_nature(pack, world, ref) for ref in confirmed.cities)
+        if generated
+        else (),
         reading_guide_zh=READING_GUIDE,
         limitations_zh=(
             *pack.body.limits,
@@ -521,8 +674,12 @@ def project_result(
         ),
         sources_zh=(
             "生活事实：E1 结算记录（钱、岗位、住房、食品、服务月份）与月度资源账（本人家务小时）",
+            "片区、通勤、用车权、设备故障与税：E1 月度资源账里每月唯一的通勤记录与结算记录（不含故障抽签）",
             "评价：E1-6A 单分身跨期评价（L / V / J）；汇总：E1-6B 城市报告（C / E / M、均值、模拟缺失范围、事件链、硬要求）",
-            f"资料：合成资料包 {pack.body.pack_id}（{pack.fingerprint[:12]}…）与产品协议的基础样例；全部是合成设定",
+            f"资料：合成资料包 {pack.body.pack_id}（{pack.fingerprint[:12]}…）与产品协议的基础样例；全部是合成设定"
+            if pack.body.status == "synthetic_fixture_only"
+            else f"资料：冻结的真实资料包 {pack.body.pack_id}（{pack.fingerprint[:12]}…）：城市资料来自公开来源与登记的模型"
+            "设定（逐城的来源性质见 data_nature）；生活规则、评分与评价参数是合成探索设定",
         ),
         planner=planner,
         real_model_calls=real_model_calls,

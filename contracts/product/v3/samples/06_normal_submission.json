@@ -4,7 +4,7 @@
  "payload": {
   "confirmed": {
    "confirmed_id": "confirmed.draft.u501.r1",
-   "content_fingerprint": "03fcca6ee6bf4a0841444ef159d26bf4dfa36e9b5a029fe653ca964104b0ae12"
+   "content_fingerprint": "418c7a1fb85f9b3934a0ba799d21282dca0820b6d84dfc229e5af1f9f5e12941"
   },
   "idempotency_key": "idem-u501-normal",
   "meta": {
@@ -23,11 +23,11 @@
     "produced_by": "product.scenarios.closed_loop(normal)",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3",
+   "schema_version": "e3a-product-schema-v3.1",
    "vocabulary_version": "e3a-vocabulary-v3"
   },
   "preflight": {
-   "preflight_fingerprint": "c9e57ac6e35fc9d427988454a913cb7d12379d602ec4c4d34622d1fe7bd2bab3",
+   "preflight_fingerprint": "74671f8ab6a821695e94ed6c10a2bca925f3bdc2f3e70a14eb9d1b376568989b",
    "preflight_id": "preflight.confirmed.draft.u501.r1"
   }
  }

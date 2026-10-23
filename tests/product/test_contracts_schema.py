@@ -43,7 +43,7 @@ def test_every_message_exports_a_schema_and_the_committed_files_match():
         assert path.exists(), f"缺少 {name}：先运行 export-schema"
         assert path.read_text(encoding="utf-8") == text, f"{name} 与权威结构不一致"
     index = json.loads(texts["index.json"])
-    assert index["schema_version"] == "e3a-product-schema-v3"
+    assert index["schema_version"] == "e3a-product-schema-v3.1"  # E3B 的公开事实（DECISIONS/0042）
     assert index["conversion_version"] == "e3a-conversion-v2"  # 收尾 F3：金额写法规则变了
     assert index["health_questionnaire_version"] == "e3a-health-coping-q-v0.1-draft"
 
