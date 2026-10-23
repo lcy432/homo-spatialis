@@ -1,0 +1,1064 @@
+{
+ "schema": "e3b-life-items-frozen-v1",
+ "versions": {
+  "items": "e3b-life-items-v1",
+  "occupations": "e3b-occupations-v1"
+ },
+ "intake_build_id": "562c32339bbae67fd1917b7ac67f4b5b28f55d07e88a8c78ee6fe371ed863691",
+ "raw_sha256": {
+  "bls_atus": "4fe7b39ff435416aee80ac1c23a95a7067e9c6c23dd5c99d9631dda9b567ba6c",
+  "bls_cpi_u": "f3c22c8592d9134fa5ab305fa2df6e37dfd2388f10168985fdbc84082deb4ff0",
+  "chicago_park_activities": "7cee342c3b4e904d1a03c642a3695dc9ec704d302c1d970e6f6cb5fed0b3d108",
+  "usda_fdc_sr_legacy": "b80817294b8850530aaedf2e515c02593b1824f763a0ff356e5c2081643e6fd0"
+ },
+ "identities": {
+  "items_config": "edd6fc814b93981a2f6d9dbbdac24e2237b986630fcf30f7538601f1015fa04f",
+  "occupations_config": "e0df112a3a9db4a81c54b1a3046fff88ac766fe6edf76bc42abaea8abb76ecdf",
+  "baskets": "8714cbfd8ebb7dfbd39fb6f9bd9bcc2489d4841fe6caefbbdb88bbac1388d19f",
+  "slice": "b88559d4d698d701f018b0054d066120d327ffb04f2312baa2c31086a8fcc243"
+ },
+ "numeraire": "USD_2024_LOCAL",
+ "vocabulary": {
+  "cuisines": [
+   "home_style",
+   "chinese",
+   "italian",
+   "mexican",
+   "japanese",
+   "indian",
+   "thai",
+   "korean",
+   "vietnamese",
+   "mediterranean"
+  ],
+  "leisure_categories": [
+   "music",
+   "racket_sports",
+   "arts_culture",
+   "culinary",
+   "fitness"
+  ],
+  "capabilities": [
+   "guitar_playable",
+   "racket_playable"
+  ],
+  "enjoyment_functions": [
+   "personal_care"
+  ],
+  "household_tasks": [
+   "laundry",
+   "cleaning"
+  ],
+  "attribute_keys": [
+   "activity_type",
+   "age_rule",
+   "away_meal_average",
+   "basket",
+   "basket_energy_share",
+   "chicago_category",
+   "cip",
+   "date_notes",
+   "days",
+   "delivery_fee",
+   "employer",
+   "employment",
+   "end_date",
+   "entry_education",
+   "equipment_requirements",
+   "facility",
+   "group_wfh_share",
+   "hourly_wage_median",
+   "hours_table_level",
+   "installation",
+   "institution",
+   "model_plan",
+   "months_to_complete",
+   "on_the_job_training",
+   "osm_restaurants_with_cuisine",
+   "price_basis",
+   "registration_fee",
+   "related_experience",
+   "related_socs",
+   "season",
+   "sessions_per_registration",
+   "soc_title",
+   "start_calendar",
+   "start_date",
+   "tip",
+   "venue_evidence",
+   "wage_soc"
+  ]
+ },
+ "abilities": [
+  {
+   "ability_id": "edu_at_least_hs",
+   "kind": "credential",
+   "label": "高中毕业或同等学力",
+   "description": "最高学历至少达到“高中毕业或同等学力”（用户确认的结构化学历；更高的学历也满足）",
+   "scope": {
+    "kind": "general",
+    "occupation": null,
+    "employer_id": null
+   },
+   "source": {
+    "kind": "derived",
+    "observed_on": "2026-10-22",
+    "geography_scope": "US national (BLS Employment Projections table 5.4)",
+    "mapping_version": "e3b-life-items-v1",
+    "provenance": null,
+    "synthetic_note": null,
+    "inputs": [
+     "bls_ep_education",
+     "configs/intake/occupations_us_v1.yaml"
+    ],
+    "rule": "EP 典型入职教育与相关职业经验 → 能力（ep_typical_education_as_requirement_v1、related_experience_v1）"
+   }
+  },
+  {
+   "ability_id": "edu_at_least_some_college",
+   "kind": "credential",
+   "label": "读过大学（未取得学位）",
+   "description": "最高学历至少达到“读过大学（未取得学位）”（用户确认的结构化学历；更高的学历也满足）",
+   "scope": {
+    "kind": "general",
+    "occupation": null,
+    "employer_id": null
+   },
+   "source": {
+    "kind": "derived",
+    "observed_on": "2026-10-22",
+    "geography_scope": "US national (BLS Employment Projections table 5.4)",
+    "mapping_version": "e3b-life-items-v1",
+    "provenance": null,
+    "synthetic_note": null,
+    "inputs": [
+     "bls_ep_education",
+     "configs/intake/occupations_us_v1.yaml"
+    ],
+    "rule": "EP 典型入职教育与相关职业经验 → 能力（ep_typical_education_as_requirement_v1、related_experience_v1）"
+   }
+  },
+  {
+   "ability_id": "edu_at_least_associate",
+   "kind": "credential",
+   "label": "副学士学位",
+   "description": "最高学历至少达到“副学士学位”（用户确认的结构化学历；更高的学历也满足）",
+   "scope": {
+    "kind": "general",
+    "occupation": null,
+    "employer_id": null
+   },
+   "source": {
+    "kind": "derived",
+    "observed_on": "2026-10-22",
+    "geography_scope": "US national (BLS Employment Projections table 5.4)",
+    "mapping_version": "e3b-life-items-v1",
+    "provenance": null,
+    "synthetic_note": null,
+    "inputs": [
+     "bls_ep_education",
+     "configs/intake/occupations_us_v1.yaml"
+    ],
+    "rule": "EP 典型入职教育与相关职业经验 → 能力（ep_typical_education_as_requirement_v1、related_experience_v1）"
+   }
+  },
+  {
+   "ability_id": "edu_at_least_bachelor",
+   "kind": "credential",
+   "label": "学士学位",
+   "description": "最高学历至少达到“学士学位”（用户确认的结构化学历；更高的学历也满足）",
+   "scope": {
+    "kind": "general",
+    "occupation": null,
+    "employer_id": null
+   },
+   "source": {
+    "kind": "derived",
+    "observed_on": "2026-10-22",
+    "geography_scope": "US national (BLS Employment Projections table 5.4)",
+    "mapping_version": "e3b-life-items-v1",
+    "provenance": null,
+    "synthetic_note": null,
+    "inputs": [
+     "bls_ep_education",
+     "configs/intake/occupations_us_v1.yaml"
+    ],
+    "rule": "EP 典型入职教育与相关职业经验 → 能力（ep_typical_education_as_requirement_v1、related_experience_v1）"
+   }
+  },
+  {
+   "ability_id": "edu_at_least_master",
+   "kind": "credential",
+   "label": "硕士学位",
+   "description": "最高学历至少达到“硕士学位”（用户确认的结构化学历；更高的学历也满足）",
+   "scope": {
+    "kind": "general",
+    "occupation": null,
+    "employer_id": null
+   },
+   "source": {
+    "kind": "derived",
+    "observed_on": "2026-10-22",
+    "geography_scope": "US national (BLS Employment Projections table 5.4)",
+    "mapping_version": "e3b-life-items-v1",
+    "provenance": null,
+    "synthetic_note": null,
+    "inputs": [
+     "bls_ep_education",
+     "configs/intake/occupations_us_v1.yaml"
+    ],
+    "rule": "EP 典型入职教育与相关职业经验 → 能力（ep_typical_education_as_requirement_v1、related_experience_v1）"
+   }
+  },
+  {
+   "ability_id": "edu_at_least_doctoral",
+   "kind": "credential",
+   "label": "博士或专业学位",
+   "description": "最高学历至少达到“博士或专业学位”（用户确认的结构化学历；更高的学历也满足）",
+   "scope": {
+    "kind": "general",
+    "occupation": null,
+    "employer_id": null
+   },
+   "source": {
+    "kind": "derived",
+    "observed_on": "2026-10-22",
+    "geography_scope": "US national (BLS Employment Projections table 5.4)",
+    "mapping_version": "e3b-life-items-v1",
+    "provenance": null,
+    "synthetic_note": null,
+    "inputs": [
+     "bls_ep_education",
+     "configs/intake/occupations_us_v1.yaml"
+    ],
+    "rule": "EP 典型入职教育与相关职业经验 → 能力（ep_typical_education_as_requirement_v1、related_experience_v1）"
+   }
+  },
+  {
+   "ability_id": "award_27_4011",
+   "kind": "credential",
+   "label": "音视频技术员的中学后证书",
+   "description": "与 27-4011 对应的中学后非学位证书（用户确认，或完成 CIP 对应到 27-4011 的培训项目）",
+   "scope": {
+    "kind": "occupation",
+    "occupation": {
+     "scheme": "SOC2018",
+     "code": "27-4011"
+    },
+    "employer_id": null
+   },
+   "source": {
+    "kind": "derived",
+    "observed_on": "2026-10-22",
+    "geography_scope": "US national (BLS Employment Projections table 5.4)",
+    "mapping_version": "e3b-life-items-v1",
+    "provenance": null,
+    "synthetic_note": null,
+    "inputs": [
+     "bls_ep_education",
+     "configs/intake/occupations_us_v1.yaml"
+    ],
+    "rule": "EP 典型入职教育与相关职业经验 → 能力（ep_typical_education_as_requirement_v1、related_experience_v1）"
+   }
+  },
+  {
+   "ability_id": "exp_related_35_1012",
+   "kind": "knowledge",
+   "label": "餐饮主管的相关工作经验",
+   "description": "在相关职业（35-3023, 35-3031, 35-9021, 35-2014）工作至少 1 年（用户确认的经历；模拟期里不会自动积累）",
+   "scope": {
+    "kind": "occupation",
+    "occupation": {
+     "scheme": "SOC2018",
+     "code": "35-1012"
+    },
+    "employer_id": null
+   },
+   "source": {
+    "kind": "derived",
+    "observed_on": "2026-10-22",
+    "geography_scope": "US national (BLS Employment Projections table 5.4)",
+    "mapping_version": "e3b-life-items-v1",
+    "provenance": null,
+    "synthetic_note": null,
+    "inputs": [
+     "bls_ep_education",
+     "configs/intake/occupations_us_v1.yaml"
+    ],
+    "rule": "EP 典型入职教育与相关职业经验 → 能力（ep_typical_education_as_requirement_v1、related_experience_v1）"
+   }
+  },
+  {
+   "ability_id": "exp_related_35_2014",
+   "kind": "knowledge",
+   "label": "餐厅厨师的相关工作经验",
+   "description": "在相关职业（35-3023, 35-3031, 35-9021）工作至少 1 年（用户确认的经历；模拟期里不会自动积累）",
+   "scope": {
+    "kind": "occupation",
+    "occupation": {
+     "scheme": "SOC2018",
+     "code": "35-2014"
+    },
+    "employer_id": null
+   },
+   "source": {
+    "kind": "derived",
+    "observed_on": "2026-10-22",
+    "geography_scope": "US national (BLS Employment Projections table 5.4)",
+    "mapping_version": "e3b-life-items-v1",
+    "provenance": null,
+    "synthetic_note": null,
+    "inputs": [
+     "bls_ep_education",
+     "configs/intake/occupations_us_v1.yaml"
+    ],
+    "rule": "EP 典型入职教育与相关职业经验 → 能力（ep_typical_education_as_requirement_v1、related_experience_v1）"
+   }
+  },
+  {
+   "ability_id": "exp_related_41_1011",
+   "kind": "knowledge",
+   "label": "零售主管的相关工作经验",
+   "description": "在相关职业（41-2011, 41-2031）工作至少 1 年（用户确认的经历；模拟期里不会自动积累）",
+   "scope": {
+    "kind": "occupation",
+    "occupation": {
+     "scheme": "SOC2018",
+     "code": "41-1011"
+    },
+    "employer_id": null
+   },
+   "source": {
+    "kind": "derived",
+    "observed_on": "2026-10-22",
+    "geography_scope": "US national (BLS Employment Projections table 5.4)",
+    "mapping_version": "e3b-life-items-v1",
+    "provenance": null,
+    "synthetic_note": null,
+    "inputs": [
+     "bls_ep_education",
+     "configs/intake/occupations_us_v1.yaml"
+    ],
+    "rule": "EP 典型入职教育与相关职业经验 → 能力（ep_typical_education_as_requirement_v1、related_experience_v1）"
+   }
+  },
+  {
+   "ability_id": "exp_related_43_1011",
+   "kind": "knowledge",
+   "label": "办公室行政主管的相关工作经验",
+   "description": "在相关职业（43-9061, 43-4051, 43-6014, 43-4171, 43-5071, 43-3071, 43-3031）工作至少 1 年（用户确认的经历；模拟期里不会自动积累）",
+   "scope": {
+    "kind": "occupation",
+    "occupation": {
+     "scheme": "SOC2018",
+     "code": "43-1011"
+    },
+    "employer_id": null
+   },
+   "source": {
+    "kind": "derived",
+    "observed_on": "2026-10-22",
+    "geography_scope": "US national (BLS Employment Projections table 5.4)",
+    "mapping_version": "e3b-life-items-v1",
+    "provenance": null,
+    "synthetic_note": null,
+    "inputs": [
+     "bls_ep_education",
+     "configs/intake/occupations_us_v1.yaml"
+    ],
+    "rule": "EP 典型入职教育与相关职业经验 → 能力（ep_typical_education_as_requirement_v1、related_experience_v1）"
+   }
+  },
+  {
+   "ability_id": "award_49_2022",
+   "kind": "credential",
+   "label": "通信设备安装维修工的中学后证书",
+   "description": "与 49-2022 对应的中学后非学位证书（用户确认，或完成 CIP 对应到 49-2022 的培训项目）",
+   "scope": {
+    "kind": "occupation",
+    "occupation": {
+     "scheme": "SOC2018",
+     "code": "49-2022"
+    },
+    "employer_id": null
+   },
+   "source": {
+    "kind": "derived",
+    "observed_on": "2026-10-22",
+    "geography_scope": "US national (BLS Employment Projections table 5.4)",
+    "mapping_version": "e3b-life-items-v1",
+    "provenance": null,
+    "synthetic_note": null,
+    "inputs": [
+     "bls_ep_education",
+     "configs/intake/occupations_us_v1.yaml"
+    ],
+    "rule": "EP 典型入职教育与相关职业经验 → 能力（ep_typical_education_as_requirement_v1、related_experience_v1）"
+   }
+  },
+  {
+   "ability_id": "award_49_3023",
+   "kind": "credential",
+   "label": "汽车维修技师的中学后证书",
+   "description": "与 49-3023 对应的中学后非学位证书（用户确认，或完成 CIP 对应到 49-3023 的培训项目）",
+   "scope": {
+    "kind": "occupation",
+    "occupation": {
+     "scheme": "SOC2018",
+     "code": "49-3023"
+    },
+    "employer_id": null
+   },
+   "source": {
+    "kind": "derived",
+    "observed_on": "2026-10-22",
+    "geography_scope": "US national (BLS Employment Projections table 5.4)",
+    "mapping_version": "e3b-life-items-v1",
+    "provenance": null,
+    "synthetic_note": null,
+    "inputs": [
+     "bls_ep_education",
+     "configs/intake/occupations_us_v1.yaml"
+    ],
+    "rule": "EP 典型入职教育与相关职业经验 → 能力（ep_typical_education_as_requirement_v1、related_experience_v1）"
+   }
+  }
+ ],
+ "device_failure": {
+  "clothes_washer": {
+   "rule": "none_within_horizon",
+   "annual_hazard": null,
+   "basis": "没有公开的型号或类别故障率资料（ENERGY STAR 只有认证事实，保修条款不是故障分布）；设定寿命 10 年，3 年模拟期内不建模随机故障",
+   "assumption": "device_failure_v1",
+   "offers": [
+    "washer_top",
+    "washer_front",
+    "pair_top_dryer",
+    "pair_front_dryer"
+   ]
+  },
+  "clothes_dryer": {
+   "rule": "none_within_horizon",
+   "annual_hazard": null,
+   "basis": "同洗衣机：没有公开故障率资料，设定寿命 10 年，3 年模拟期内不建模随机故障",
+   "assumption": "device_failure_v1",
+   "offers": [
+    "pair_top_dryer",
+    "pair_front_dryer"
+   ]
+  },
+  "combo_washer_dryer": {
+   "rule": "none_within_horizon",
+   "annual_hazard": null,
+   "basis": "同洗衣机：没有公开故障率资料，设定寿命 10 年，3 年模拟期内不建模随机故障",
+   "assumption": "device_failure_v1",
+   "offers": [
+    "combo"
+   ]
+  },
+  "dishwasher": {
+   "rule": "none_within_horizon",
+   "annual_hazard": null,
+   "basis": "洗碗机本轮不进目录（见 gaps）；同样没有公开故障率资料",
+   "assumption": "device_failure_v1",
+   "offers": []
+  }
+ },
+ "atus_magnitude_check": {
+  "rows": {
+   "consumer_goods": {
+    "avg_hours_per_day_all": "0.30",
+    "hours_per_day_engaged_all": "0.87",
+    "quote": "Consumer goods purchases 0.30 0.26 0.35 34.8 32.3 37.2 0.87 0.79 0.93",
+    "share_engaged_all": "34.8"
+   },
+   "food_prep": {
+    "avg_hours_per_day_all": "0.71",
+    "hours_per_day_engaged_all": "1.09",
+    "quote": "Food preparation and cleanup 0.71 0.51 0.91 65.2 57.9 72.2 1.09 0.88 1.26",
+    "share_engaged_all": "65.2"
+   }
+  },
+  "title": "Table 1. Time spent in primary activities and percent of the civilian population engaging in each activity, averages per day by sex, 2025 annual averages"
+ },
+ "assumptions": [
+  {
+   "id": "food_energy_completion_v1",
+   "nature": "rule",
+   "statement_zh": "篮子每周热量不够参照量时，差额按 complement 篮子（主食为主）每千卡的花费补上；够了不补不缩",
+   "basis_zh": "intake 的篮子只是“这类做法的代表食材”，不是一个人一周吃的全部；补齐后才能声明覆盖整月基本饮食。不是营养方案",
+   "config": "life-items-us-v1"
+  },
+  {
+   "id": "food_energy_reference_v1",
+   "nature": "assumption",
+   "value": "每人每天 2,000 千卡（每周 14,000）",
+   "basis_zh": "美国食品标签的参照热量（FDA 营养成分表“2,000 calories a day is used for general nutrition advice”）；只作“吃饱的量”，不是营养声明",
+   "config": "life-items-us-v1"
+  },
+  {
+   "id": "ap_item_energy_match_v1",
+   "nature": "assumption",
+   "statement_zh": "每种 BLS AP 食材对应一条 USDA SR Legacy 条目（见 food.item_energy），按购买重量算热量",
+   "basis_zh": "资料里的能量（nutrient 1008，千卡/100 克）与份量克重；对应关系是本配置写定的；不扣骨头、果皮等不可食部分（FDC 的 CSV 没有可食比例），所以整鸡、香蕉、橙子、草莓、生菜、番茄的热量偏高、补齐的主食偏少",
+   "config": "life-items-us-v1"
+  },
+  {
+   "id": "food_plan_composition_v1",
+   "nature": "assumption",
+   "statement_zh": "每个方案的每周新鲜餐数与每顿做饭分钟（food.home_plans / mixed_plans），外食与外送的餐都按新鲜餐计（与合成样例 SC-25 相同的口径）",
+   "basis_zh": "篮子是“主食为主 / 荤素搭配 / 鲜肉蔬果较多”的设定，新鲜餐数按篮子里生鲜食材的多少写定；量级核对：BLS ATUS 2025 年平均，做饭的人每天花 1.09 小时在做饭与收拾上（见 food_time_check_v1）",
+   "config": "life-items-us-v1"
+  },
+  {
+   "id": "food_shopping_hours_v1",
+   "nature": "assumption",
+   "value": "买菜每周 2 小时",
+   "basis_zh": "BLS ATUS 2025 年平均，购物的人每天 0.87 小时购买消费品（不只是食品）；只作量级",
+   "config": "life-items-us-v1"
+  },
+  {
+   "id": "food_home_share_by_meals_v1",
+   "nature": "rule",
+   "statement_zh": "混合方案里家里部分的费用 = 同一篮子补齐后的一周费用 × 家里餐数 ÷ 21",
+   "config": "life-items-us-v1"
+  },
+  {
+   "id": "fafh_meals_per_person_week_v1",
+   "nature": "assumption",
+   "value": "每人每周 3 顿在外饮食",
+   "basis_zh": "没有公开的都会区“每人外食餐数”资料；CE 的在外饮食支出含零食与饮品，除以这个数得到的是“平均每顿外食花费”，不是菜单价；同一个数用于六城，城市差异只来自 CE",
+   "config": "life-items-us-v1"
+  },
+  {
+   "id": "fafh_delivery_same_average_v1",
+   "nature": "assumption",
+   "statement_zh": "外送的一顿按同一“平均每顿外食花费”计；配送费与小费没有资料，不另加（terms 写 unknown）",
+   "config": "life-items-us-v1"
+  },
+  {
+   "id": "dining_hours_v1",
+   "nature": "assumption",
+   "value": "外食每顿 1.25 小时（含往返），外送每顿 0.25 小时（下单与收取）",
+   "config": "life-items-us-v1"
+  },
+  {
+   "id": "cuisine_presence_threshold_v1",
+   "nature": "assumption",
+   "value": "本城至少 20 家 OSM restaurant 写了这个菜系标签；每城最多 6 个菜系（按家数从多到少）",
+   "basis_zh": "只有确实看得到的菜系才提供对应外食方案；家数只说明存在，不说明质量或价格",
+   "config": "life-items-us-v1"
+  },
+  {
+   "id": "home_style_cuisine_v1",
+   "nature": "assumption",
+   "statement_zh": "自己做的饭菜系按“家常”（home_style）计",
+   "config": "life-items-us-v1"
+  },
+  {
+   "id": "food_prep_burden_v1",
+   "nature": "assumption",
+   "value": "食品方案每小时负担 0.5",
+   "basis_zh": "与合成样例的做饭负担相同；负担是 E1 的合成尺度，不能测量",
+   "config": "life-items-us-v1"
+  },
+  {
+   "id": "oews_hourly_from_annual_v1",
+   "nature": "rule",
+   "statement_zh": "时薪 = OEWS 年薪 ÷ 2,080（OEWS 对按小时计酬职业的年薪就是时薪 × 2,080）",
+   "config": "life-items-us-v1"
+  },
+  {
+   "id": "labor_overhead_v1",
+   "nature": "assumption",
+   "value": "服务价格 = 工人工资 × 2.0",
+   "basis_zh": "倍率覆盖雇主的福利与税费、交通、用品、管理与利润；没有本地服务价格资料，倍率是量级设定",
+   "config": "life-items-us-v1"
+  },
+  {
+   "id": "service_hours_v1",
+   "nature": "assumption",
+   "statement_zh": "每项服务的工人小时、本人小时与替代后残余家务小时（services.chores / enjoyment）",
+   "basis_zh": "量级设定，与合成样例的残余写法相同（洗衣服务残余 2 小时）；协议的家务基准由资料包定，残余不能超过基准",
+   "config": "life-items-us-v1"
+  },
+  {
+   "id": "device_category_v1",
+   "nature": "assumption",
+   "statement_zh": "设备类别的全国价格、寿命与替代后残余（devices.offers）；价格 × intake 的商品类空间换算系数",
+   "basis_zh": "ENERGY STAR 不记价格、寿命与效果；这些是类别设定，不是型号报价；同一类别的型号价格相同",
+   "config": "life-items-us-v1"
+  },
+  {
+   "id": "device_failure_v1",
+   "nature": "assumption",
+   "statement_zh": "每个设备类别 3 年内不建模随机故障（none_within_horizon），见 devices.failure",
+   "basis_zh": "没有公开的故障率资料；保修条款不是故障分布",
+   "config": "life-items-us-v1"
+  },
+  {
+   "id": "device_installable_v1",
+   "nature": "assumption",
+   "statement_zh": "设备按“住处可以安装”设定",
+   "basis_zh": "住房资料没有洗衣机接口与排风条件；这是缺口，不是事实",
+   "config": "life-items-us-v1"
+  },
+  {
+   "id": "equipment_category_v1",
+   "nature": "assumption",
+   "statement_zh": "爱好装备的全国价格与寿命（equipment）× 商品类空间换算系数",
+   "config": "life-items-us-v1"
+  },
+  {
+   "id": "activity_template_v1",
+   "nature": "assumption",
+   "statement_zh": "模型活动的老师小时、人数、场地与器材设定（activities.templates）；场地设定 × RPP 总水平 ÷ 100",
+   "basis_zh": "只在本城 OSM 看得到相应场所时提供；标成模型方案，不是某个场所的真实报价",
+   "config": "life-items-us-v1"
+  },
+  {
+   "id": "activity_travel_hours_v1",
+   "nature": "assumption",
+   "value": "芝加哥公园活动每次往返 0.5 小时",
+   "config": "life-items-us-v1"
+  },
+  {
+   "id": "chicago_session_price_v1",
+   "nature": "rule",
+   "statement_zh": "每次课的价格 = 报名费（CPI 换到 2024 年）÷ 按日期说明数出来的上课次数，四舍五入到分；只能整期报名，所以这条机会在 E1 有“整期报名”与日期窗口之前不可执行",
+   "config": "life-items-us-v1"
+  },
+  {
+   "id": "job_scope_v1",
+   "nature": "assumption",
+   "statement_zh": "支持 40 个 SOC 职业（supported）；入选条件：六城 OEWS 都有 25 / 50 / 75 分位年薪、有时薪口径、EP 有入职要求、进入时不需要州执照",
+   "config": "occupations-us-v1"
+  },
+  {
+   "id": "ep_typical_education_as_requirement_v1",
+   "nature": "assumption",
+   "statement_zh": "EP 的“典型入职教育”当作岗位的资格要求（全国口径）；“典型”不是法律要求，所以这是保守的设定",
+   "config": "occupations-us-v1"
+  },
+  {
+   "id": "education_at_least_v1",
+   "nature": "rule",
+   "statement_zh": "确认的最高学历授予它和它以下的各级“至少达到”能力；学位只从结构化的学历确认来，不从职称或自由文字推",
+   "config": "occupations-us-v1"
+  },
+  {
+   "id": "related_experience_v1",
+   "nature": "assumption",
+   "statement_zh": "EP 写了“相关职业经验”的职业，相关职业按 supported.related 列出；“少于 5 年”按至少 1 年、“5 年以上”按至少 5 年",
+   "config": "occupations-us-v1"
+  },
+  {
+   "id": "confirmed_experience_mapping_v1",
+   "nature": "rule",
+   "statement_zh": "确认的现职 X 只说明“在 X 工作过”：授予 X 列为相关的职业的经验能力（年数够时），不授予学历、证书或执照；开局岗位仍要求用户确认 X 的入职能力",
+   "config": "occupations-us-v1"
+  },
+  {
+   "id": "job_arrangement_v1",
+   "nature": "rule",
+   "statement_zh": "每周工时取工时表；每月 = 每周 × 52 ÷ 12（0.01）；每周 5 天、每月 22 个工作日；薪酬 = 年薪 × 每周工时 ÷ 40（分）",
+   "config": "occupations-us-v1"
+  },
+  {
+   "id": "job_work_mode_v1",
+   "nature": "assumption",
+   "statement_zh": "每个职业的到岗方式（supported.work_mode）；hybrid 每 5 个工作日到岗 3 天",
+   "basis_zh": "资料里没有单个岗位的到岗安排；量级核对用工时表里 SOC 大类的在家工作比例（13、15、23、27 大类在 0.2 以上，其余多在 0.2 以下），按职业的工作内容是否必须到场写定",
+   "config": "occupations-us-v1"
+  },
+  {
+   "id": "job_burden_v1",
+   "nature": "assumption",
+   "value": "每工时负担 1.0",
+   "basis_zh": "与合成样例的文员相同；负担是 E1 的合成尺度",
+   "config": "occupations-us-v1"
+  },
+  {
+   "id": "start_job_median_v1",
+   "nature": "rule",
+   "statement_zh": "开局岗位 = 开局城市里用户确认职业的中位数档；职业不在范围或本城没有这个职业的工资资料就拒绝并说明原因，不替换",
+   "config": "occupations-us-v1"
+  },
+  {
+   "id": "ipeds_training_v1",
+   "nature": "assumption",
+   "statement_zh": "IPEDS 项目经 CIP → SOC 对照授予范围内职业的 award 能力；只收整年项目；每周 24 小时（34 CFR 668.2 全日制下限）；开课月份不限",
+   "basis_zh": "IPEDS 不记开课日期与每周上课小时；“任何月份可以开始”是缺口",
+   "config": "occupations-us-v1"
+  },
+  {
+   "id": "training_burden_v1",
+   "nature": "assumption",
+   "value": "培训每小时负担 1.2",
+   "basis_zh": "与合成样例的会计课相同",
+   "config": "occupations-us-v1"
+  }
+ ],
+ "cities": {
+  "35620": {
+   "content_identity": "ff93172ec9cf0f21fe66a7eb2157f9e3be51172094698a1e7fe2245552c0097f",
+   "counts": {
+    "raw_inputs": {
+     "intake_records_referenced": 84,
+     "food_item_prices": 52,
+     "osm_restaurants": 7936,
+     "osm_venues": 4278,
+     "oews_occupations": 53,
+     "chicago_programs": 0,
+     "ipeds_programs": 636,
+     "energy_star_us_models": 917
+    },
+    "generated": {
+     "activity": 10,
+     "device": 5,
+     "enjoyment": 3,
+     "equipment": 2,
+     "food": 15,
+     "job": 120,
+     "service": 3,
+     "training": 3
+    },
+    "by_status": {
+     "executable": 40,
+     "needs_area": 120,
+     "needs_e1_extension": 0,
+     "data_unknown": 1
+    },
+    "by_domain_status": {
+     "activity": {
+      "data_unknown": 1,
+      "executable": 9
+     },
+     "device": {
+      "executable": 5
+     },
+     "enjoyment": {
+      "executable": 3
+     },
+     "equipment": {
+      "executable": 2
+     },
+     "food": {
+      "executable": 15
+     },
+     "job": {
+      "needs_area": 120
+     },
+     "service": {
+      "executable": 3
+     },
+     "training": {
+      "executable": 3
+     }
+    },
+    "not_generated": {
+     "gap": 16,
+     "not_applicable": 619
+    }
+   }
+  },
+  "31080": {
+   "content_identity": "62b481df85cb2bf2ecb58caac6727dc5ef533d03b84761b8bfab07a466e5e0a6",
+   "counts": {
+    "raw_inputs": {
+     "intake_records_referenced": 81,
+     "food_item_prices": 52,
+     "osm_restaurants": 2904,
+     "osm_venues": 9750,
+     "oews_occupations": 52,
+     "chicago_programs": 0,
+     "ipeds_programs": 684,
+     "energy_star_us_models": 917
+    },
+    "generated": {
+     "activity": 10,
+     "device": 5,
+     "enjoyment": 3,
+     "equipment": 2,
+     "food": 15,
+     "job": 120,
+     "service": 3
+    },
+    "by_status": {
+     "executable": 37,
+     "needs_area": 120,
+     "needs_e1_extension": 0,
+     "data_unknown": 1
+    },
+    "by_domain_status": {
+     "activity": {
+      "data_unknown": 1,
+      "executable": 9
+     },
+     "device": {
+      "executable": 5
+     },
+     "enjoyment": {
+      "executable": 3
+     },
+     "equipment": {
+      "executable": 2
+     },
+     "food": {
+      "executable": 15
+     },
+     "job": {
+      "needs_area": 120
+     },
+     "service": {
+      "executable": 3
+     }
+    },
+    "not_generated": {
+     "gap": 9,
+     "not_applicable": 677
+    }
+   }
+  },
+  "41860": {
+   "content_identity": "9dd54ecad1b77bab59d8079484642fa5ff3f53d2eb156d090fe414a2bd7053e7",
+   "counts": {
+    "raw_inputs": {
+     "intake_records_referenced": 80,
+     "food_item_prices": 52,
+     "osm_restaurants": 1924,
+     "osm_venues": 739,
+     "oews_occupations": 53,
+     "chicago_programs": 0,
+     "ipeds_programs": 114,
+     "energy_star_us_models": 917
+    },
+    "generated": {
+     "activity": 9,
+     "device": 5,
+     "enjoyment": 3,
+     "equipment": 2,
+     "food": 15,
+     "job": 120,
+     "service": 3
+    },
+    "by_status": {
+     "executable": 36,
+     "needs_area": 120,
+     "needs_e1_extension": 0,
+     "data_unknown": 1
+    },
+    "by_domain_status": {
+     "activity": {
+      "data_unknown": 1,
+      "executable": 8
+     },
+     "device": {
+      "executable": 5
+     },
+     "enjoyment": {
+      "executable": 3
+     },
+     "equipment": {
+      "executable": 2
+     },
+     "food": {
+      "executable": 15
+     },
+     "job": {
+      "needs_area": 120
+     },
+     "service": {
+      "executable": 3
+     }
+    },
+    "not_generated": {
+     "gap": 2,
+     "not_applicable": 114,
+     "not_offered": 1
+    }
+   }
+  },
+  "16980": {
+   "content_identity": "dc378f45d44aca29446050d311d1468ca6e9c25b523ff66bc89a1d7c959600e9",
+   "counts": {
+    "raw_inputs": {
+     "intake_records_referenced": 1779,
+     "food_item_prices": 52,
+     "osm_restaurants": 2405,
+     "osm_venues": 1235,
+     "oews_occupations": 53,
+     "chicago_programs": 9002,
+     "ipeds_programs": 402,
+     "energy_star_us_models": 917
+    },
+    "generated": {
+     "activity": 1708,
+     "device": 5,
+     "enjoyment": 3,
+     "equipment": 2,
+     "food": 15,
+     "job": 120,
+     "service": 3
+    },
+    "by_status": {
+     "executable": 37,
+     "needs_area": 120,
+     "needs_e1_extension": 1698,
+     "data_unknown": 1
+    },
+    "by_domain_status": {
+     "activity": {
+      "data_unknown": 1,
+      "executable": 9,
+      "needs_e1_extension": 1698
+     },
+     "device": {
+      "executable": 5
+     },
+     "enjoyment": {
+      "executable": 3
+     },
+     "equipment": {
+      "executable": 2
+     },
+     "food": {
+      "executable": 15
+     },
+     "job": {
+      "needs_area": 120
+     },
+     "service": {
+      "executable": 3
+     }
+    },
+    "not_generated": {
+     "gap": 117,
+     "not_applicable": 6219,
+     "unsupported": 1375
+    }
+   }
+  },
+  "26420": {
+   "content_identity": "46c76e4a3371a5c5e1275e2e17b14b7df1fa11a9e3bc85d16cce8ec68f8783e5",
+   "counts": {
+    "raw_inputs": {
+     "intake_records_referenced": 84,
+     "food_item_prices": 52,
+     "osm_restaurants": 1543,
+     "osm_venues": 3150,
+     "oews_occupations": 53,
+     "chicago_programs": 0,
+     "ipeds_programs": 204,
+     "energy_star_us_models": 917
+    },
+    "generated": {
+     "activity": 10,
+     "device": 5,
+     "enjoyment": 3,
+     "equipment": 2,
+     "food": 15,
+     "job": 120,
+     "service": 3,
+     "training": 3
+    },
+    "by_status": {
+     "executable": 40,
+     "needs_area": 120,
+     "needs_e1_extension": 0,
+     "data_unknown": 1
+    },
+    "by_domain_status": {
+     "activity": {
+      "data_unknown": 1,
+      "executable": 9
+     },
+     "device": {
+      "executable": 5
+     },
+     "enjoyment": {
+      "executable": 3
+     },
+     "equipment": {
+      "executable": 2
+     },
+     "food": {
+      "executable": 15
+     },
+     "job": {
+      "needs_area": 120
+     },
+     "service": {
+      "executable": 3
+     },
+     "training": {
+      "executable": 3
+     }
+    },
+    "not_generated": {
+     "gap": 8,
+     "not_applicable": 195
+    }
+   }
+  },
+  "42660": {
+   "content_identity": "5093d1fbf8f180e0d38e49747cee39066b11b050142e13c35e969721dcbc3087",
+   "counts": {
+    "raw_inputs": {
+     "intake_records_referenced": 81,
+     "food_item_prices": 52,
+     "osm_restaurants": 1419,
+     "osm_venues": 838,
+     "oews_occupations": 53,
+     "chicago_programs": 0,
+     "ipeds_programs": 60,
+     "energy_star_us_models": 917
+    },
+    "generated": {
+     "activity": 10,
+     "device": 5,
+     "enjoyment": 3,
+     "equipment": 2,
+     "food": 15,
+     "job": 120,
+     "service": 3
+    },
+    "by_status": {
+     "executable": 37,
+     "needs_area": 120,
+     "needs_e1_extension": 0,
+     "data_unknown": 1
+    },
+    "by_domain_status": {
+     "activity": {
+      "data_unknown": 1,
+      "executable": 9
+     },
+     "device": {
+      "executable": 5
+     },
+     "enjoyment": {
+      "executable": 3
+     },
+     "equipment": {
+      "executable": 2
+     },
+     "food": {
+      "executable": 15
+     },
+     "job": {
+      "needs_area": 120
+     },
+     "service": {
+      "executable": 3
+     }
+    },
+    "not_generated": {
+     "gap": 3,
+     "not_applicable": 59
+    }
+   }
+  }
+ },
+ "content_identity": "67014c0e1928be19a1b7770fa2a43889c126255bac8337c62110db08809e7109"
+}
