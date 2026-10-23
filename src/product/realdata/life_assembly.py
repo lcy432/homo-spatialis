@@ -171,7 +171,7 @@ def assemble_city(
     puma_counties: dict[str, tuple[str, ...]],
     commute: dict[str, Any],
     items: dict[str, Any],
-    build_identity: str,
+    settings_identity: str,
 ) -> CityBuild:
     key, cbsa, numeraire = city["key"], city["cbsa"], cfg["numeraire"]
     out_excluded: Counter[str] = Counter()
@@ -248,7 +248,7 @@ def assemble_city(
         years=years,
         env_repeats=envs,
         seed=cfg["menus"]["seed"],
-        build_identity=build_identity,
+        settings_identity=settings_identity,
     ) + stratified_menus(
         key=key,
         cbsa=cbsa,
@@ -260,7 +260,7 @@ def assemble_city(
         years=years,
         env_repeats=envs,
         seed=cfg["menus"]["seed"],
-        build_identity=build_identity,
+        settings_identity=settings_identity,
     )
 
     cheapest = min(housing, key=lambda h: (h.price.amount.amount, h.opportunity_id))
@@ -356,16 +356,13 @@ def assemble(
         )
     all_geo = geo.parse_delineation(d.content)  # type: ignore[arg-type]
     tract_puma = geo.parse_tract_puma(tp.content)  # type: ignore[arg-type]
-    # 菜单种子只取资料与菜单设定的身份（不含评分条件与税）：改背景值或税不重抽住房与岗位菜单，生活的接触面不变
+    # 菜单种子只取菜单设定（算法、配置种子、每层个数、年数、环境重复数），不含任何资料身份、评分条件或税：加权无放回抽样的
+    # 键按“种子 + 编号”逐项算，所以资料改动只经由抽样池本身（候选与权重）改变菜单——改背景值、油费或税不会重抽别的住房与岗位
     menu_identity = canonical_identity(
         {
-            "config": canonical_identity({k: v for k, v in cfg.items() if k != "conditions"}),
-            "items": manifest["content_identity"],
-            "commute": {
-                c["key"]: _json(frozen / "commute" / f"{c['key']}.json")["content_identity"]
-                for c in cfg["cities"]
-            },
-            "intake_build": manifest["intake_build_id"],
+            "menus": cfg["menus"],
+            "simulation_years": cfg["simulation_years"],
+            "env_repeats": cfg["env_repeats"],
         }
     )
     identity_inputs = {
@@ -402,7 +399,7 @@ def assemble(
             puma_counties=counties,
             commute=_json(frozen / "commute" / f"{city['key']}.json"),
             items=_json(frozen / "items" / f"{city['cbsa']}.json"),
-            build_identity=menu_identity,
+            settings_identity=menu_identity,
         )
     con.close()
     vocab = manifest["vocabulary"]

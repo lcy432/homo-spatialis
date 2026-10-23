@@ -20,6 +20,7 @@ from product.realdata.commute import (
     COMMUTE_CONFIG,
     FROZEN_DIR,
     CostBuild,
+    car_fuel_split,
     codelist_request,
     compile_all,
     compile_costs,
@@ -56,8 +57,14 @@ def _report(b: CostBuild) -> int:
         print(f"阻断   {key} 公交：")
         for w in why:
             print(f"         {w}")
-    if b.mpg and b.car_annual:
-        print(f"通过   开车：{b.mpg.value} mpg，用车权年费用 {b.car_annual.value}")
+    if b.mpg and b.car_annual and b.car_miles and b.car_fuel_cents:
+        fuel, monthly = car_fuel_split(
+            b.car_annual.value, b.car_miles.value, b.car_fuel_cents.value
+        )
+        print(
+            f"通过   开车：{b.mpg.value} mpg；用车权年费用 {b.car_annual.value} − {b.car_miles.value} 英里 × "
+            f"{b.car_fuel_cents.value} 美分的油费 {fuel} = 不含油费的月费 {monthly}"
+        )
     for w in b.drive_blocked:
         print(f"阻断   开车：{w}")
     print(

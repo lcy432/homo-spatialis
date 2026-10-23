@@ -97,7 +97,7 @@ def test_observation_carries_exact_six_points_material_allocation_and_health_ans
     states = [h["answer_state"] for h in profile["health_answers"]]
     assert states == ["provided", "provided", "unsure"]
     assert "没有这一项的明确指令" in profile["health_answers"][2]["planning_note"]
-    assert payload["guide"]["version"] == "e3b-product-action-guide-v1"
+    assert payload["guide"]["version"] == "e3b-product-action-guide-v2"
     topics = [s["topic"] for s in payload["guide"]["sections"]]
     assert topics[0].startswith("你的用户陈述") and "日常杂务：设备与人工服务（可选）" in topics
 

@@ -22,6 +22,7 @@ import io
 import json
 import sqlite3
 import zipfile
+import zlib
 from decimal import Decimal
 from pathlib import Path
 
@@ -64,10 +65,20 @@ M, K, N = "nyc.area.w.3604100", "nyc.area.w.3604300", "nyc.area.w.3603200"
 OTHER = "nyc.area.w.other"
 
 
+def fake_pdf(text: str) -> bytes:
+    """一份最小的 PDF：一个 Flate 压缩的内容流，正文是一个字面字符串（括号与反斜杠按 PDF 规则转义）。"""
+    lit = text.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
+    stream = zlib.compress(b"BT (" + lit.encode("cp1252") + b") Tj ET")
+    head = f"%PDF-1.7\n1 0 obj << /Length {len(stream)} /Filter /FlateDecode >>\nstream\n"
+    return head.encode("ascii") + stream + b"\nendstream\nendobj\n%EOF\n"
+
+
 def fake_cost_cache(tmp: Path, cfg: dict, *, drop: str | None = None) -> Path:
-    """每份来源一页：正文是配置里引用它的全部摘句（``drop`` 那一句不写进去）。被拒的来源不放进缓存。"""
+    """每份来源一页：正文是配置里引用它的全部摘句（``drop`` 那一句不写进去）。被拒的来源不放进缓存；``format: pdf`` 的来源
+    存成 PDF。"""
     quotes: dict[str, list[str]] = {sid: [] for sid in cfg["sources"]}
-    specs = [cfg["drive"]["mpg"], cfg["drive"]["car_access"]["annual"]]
+    car = cfg["drive"]["car_access"]
+    specs = [cfg["drive"]["mpg"], car["annual"], car["annual_miles"], car["fuel_cents_per_mile"]]
     for c in cfg["cities"]:
         t = c["transit"]
         specs += [s for s in (t.get("fare"), t.get("monthly_pass")) if s]
@@ -77,7 +88,11 @@ def fake_cost_cache(tmp: Path, cfg: dict, *, drop: str | None = None) -> Path:
     for sid, req in cost_requests(cfg).items():
         if not quotes[sid]:
             continue
-        body = " <p> ".join(q for q in quotes[sid] if q != drop)
+        kept = [q for q in quotes[sid] if q != drop]
+        if cfg["sources"][sid].get("format") == "pdf":
+            _store(tmp, req, fake_pdf(" ".join(kept)), 200, "application/pdf")
+            continue
+        body = " <p> ".join(kept)
         _store(tmp, req, f"<html><body>{body}</body></html>".encode(), 200, "text/html")
     return tmp
 
@@ -254,6 +269,9 @@ def test_cost_quotes_pass_and_the_blocked_agency_is_reported(costs):
     assert nyc.fare.value == Decimal("2.9") and nyc.monthly_pass.value == Decimal("132")
     assert costs.transit["la"].monthly_pass is None
     assert costs.mpg.value == Decimal("23.4") and costs.car_annual.value == Decimal("8886")
+    assert costs.car_miles.value == Decimal("15000") and costs.car_fuel_cents.value == Decimal(
+        "11.12"
+    )
     for c in nyc.fare.citations:
         assert c["url"].startswith("https://") and len(c["raw_sha256"]) == 64
 
@@ -373,7 +391,8 @@ def test_car_access_is_one_monthly_service(city):
     car = LifeOpportunity.model_validate(city["car_access"])
     assert car.opportunity_id == "nyc.service.car_access"
     assert car.functions == ("car_access",) and car.duration.kind == "ongoing_service"
-    assert car.price.amount.amount == 740.5 and car.price.billing == "per_month"
+    # 月费只取非燃油部分：(8,886 − 15,000 × 0.1112) ÷ 12 = 601.50；油费按每次开车往返另付（独立审核 F1）
+    assert car.price.amount.amount == 601.5 and car.price.billing == "per_month"
     assert car.resource.basis == "per_service_month" and car.resource.hours == 0
 
 

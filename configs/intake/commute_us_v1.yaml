@@ -72,9 +72,20 @@ drive:
       cite:
         - {source: aaa_driving_costs_2024, quote: "This year, the total annual cost to drive a new vehicle 15,000 miles came out to $12,297"}
         - {source: aaa_driving_costs_2024, quote: "With thriftier price tags and higher fuel efficiency, insurance and gas cost less. Examples include the Honda Civic, Hyundai Elantra, and Toyota Corolla. ANNUAL COST: $8,886"}
-    derivation: 每月 = 小型轿车的年度总费用 8,886 ÷ 12 = 740.50
-    assumption_id: car_access_aaa_small_sedan_2024
-    statement: 用车权的月费 = AAA 2024 年小型轿车（新车、每年 15,000 英里）的年度总费用 ÷ 12；全美平均，不分城市
+    # 独立审核 F1（2026-10-23）：年度总费用里含 15,000 英里的油费，开车通勤又按次付油费——同一笔油费付了两次。月费只取
+    # 非燃油部分；拆分用 AAA 同一份研究的小册子（小型轿车每英里油费），小册子的年度总费用 8,886 与官网相同
+    annual_miles:
+      value: 15000
+      cite:
+        - {source: aaa_driving_costs_2024, quote: "This year, the total annual cost to drive a new vehicle 15,000 miles came out to $12,297"}
+    fuel_cents_per_mile:
+      value: 11.12
+      cite:
+        - {source: aaa_ydc_brochure_2024, quote: "Small Sedan Medium Sedan Subcompact SUV Compact SUV (FWD) Medium SUV (4WD) Operating Costs fuel 11.12¢"}
+        - {source: aaa_ydc_brochure_2024, quote: "Total Cost – 15k mi/yr operating cost $3,100 $3,515 $3,514 $3,534 $4,133 ownership cost $5,786 $7,042 $6,613 $7,122 $8,442 total cost per year $8,886"}
+    derivation: 每月 = （小型轿车年度总费用 8,886 − 15,000 英里 × 11.12 美分 = 1,668 的油费）÷ 12 = 601.50
+    assumption_id: car_access_aaa_small_sedan_non_fuel_2024
+    statement: 用车权的月费 = AAA 2024 年小型轿车（新车、每年 15,000 英里）的年度总费用减去其中的油费，÷ 12（折旧、贷款利息、保险、登记与按 15,000 英里折算的保养）；全美平均，不分城市。油费只在开车通勤时按每次往返另付，同一笔油费不付两次
 
 sources:
   mta_fares_2023: {cache_source: official_transit_fares_2024, publisher: Metropolitan Transportation Authority, url: "https://www.mta.info/press-release/reminder-new-fares-subway-buses-and-commuter-railroads-begin-aug-20"}
@@ -85,6 +96,9 @@ sources:
   kcm_fare_change_2025: {cache_source: official_transit_fares_2024, publisher: King County Metro, url: "https://kingcountymetro.blog/2025/07/28/king-county-metro-water-taxi-and-seattle-streetcar-adult-fares-change-sept-1-2025/"}
   fhwa_vm1_2024: {cache_source: drive_costs_2024, publisher: Federal Highway Administration, url: "https://www.fhwa.dot.gov/policyinformation/statistics/2024/vm1.cfm"}
   aaa_driving_costs_2024: {cache_source: drive_costs_2024, publisher: AAA (Automobile Club of Southern California), url: "https://www.ace.aaa.com/content/ace-www/en/automotive/advocacy/cost-of-driving.html"}
+  # AAA 2024 Your Driving Costs 小册子（PDF）。AAA 官网没有这一年的分项表；这份是行业媒体 Repairer Driven News 转载的 AAA 原件，
+  # 年度总费用 8,886 与官网一致。正文按 PDF 字面字符串读出，摘句去掉空白后核对
+  aaa_ydc_brochure_2024: {cache_source: drive_costs_2024, publisher: AAA（Your Driving Costs 2024 小册子；Repairer Driven News 转载的副本）, url: "https://www.repairerdrivennews.com/wp-content/uploads/2024/08/YDC-Brochure-FINAL-9.2024.pdf", format: pdf}
 
 # 每座城：居住片区的税支持范围（DECISIONS/0042 决定 5）、工作地支持的州、主要公交机构的 2024 年票价（每次往返 = 两次单程）与
 # 月票（当作公交的月度封顶）。没有月票的城市不封顶。
@@ -196,7 +210,7 @@ cities:
 # 没有建模、要向读者说明的事项（每城的结果里都会列出）。
 not_modeled:
   - 停车费、过路费与拥堵费没有建模；用车权是全美平均，不分城市（保险、停车在各城差别很大）
-  - AAA 小型轿车的年度费用已经含每年 15,000 英里的油费；开车通勤另按次付油费，所以开车的花费有一部分重复（偏高）
+  - 用车权月费是 AAA 小型轿车年度费用去掉油费后的部分，保养按每年 15,000 英里折进月费；不开车上班的月份照样付月费，非通勤的开车没有建模
   - 按距离或区间计价的公交（通勤铁路、BART、快线公交）按主要机构的单程票价计；换乘加价没有建模
   - 往返分钟是实际选了这种方式的人的分钟（自选择）：没开车的人如果开车不一定是这个分钟，公交同理
   - 工作地只到县（2020 年工作地 PUMA 的粒度）；同一个县里去不同地点的人合在一格

@@ -92,7 +92,7 @@ def test_menus_are_shared_by_seed_without_clone_ids_and_stratified():
         years=3,
         env_repeats=2,
         seed="s",
-        build_identity="b",
+        settings_identity="b",
     )
     a, b = stratified_menus(**kw), stratified_menus(**kw)
     assert a == b and len(a) == 6  # 同样的输入得到同样的菜单（没有分身编号可以进种子）

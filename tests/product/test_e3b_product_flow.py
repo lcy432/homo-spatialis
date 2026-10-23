@@ -41,13 +41,12 @@ def test_two_real_cities_live_three_years_replay_and_report_public_facts(real_pa
     )
     assert s.pre.preflight.status == "ready"
     assert s.result is not None and s.result.evaluation_status == "generated"
-    # 两城的生活都过完三年；休斯敦评分与估值完整。西雅图：参考生活的固定住房（PI-47：最便宜的住房、居民通勤最短片区的一卧
-    # 中档）从这个分身的岗位片区出发超过 60 分钟通勤上限，估值不完整，报模拟问题，不填 0（2026-10-23 重建资料包后菜单重抽，
-    # 目录里的一卧中档换了一批）
+    # 两城的生活都过完三年，评分与估值完整。（这一版参考住房仍从菜单裁剪后的目录里挑，西雅图能不能估值随菜单抽样变：
+    # 审核 F3/F4 改成按参考岗位从完整候选池绑定）
     assert all(y.status == "completed" for c in s.result.clones for y in c.years)
     assert {c.clone_ref: (c.category, c.missing_reason) for c in s.result.clones} == {
         "u501.26420.r0": ("C", None),
-        "u501.42660.r0": ("M", "valuation_incomplete"),
+        "u501.42660.r0": ("C", None),
     }
     start = s.pre.preflight.start
     assert start is not None and start.occupation_label == "办公室文员"

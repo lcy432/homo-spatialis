@@ -156,11 +156,13 @@ def housing_items(
     return out
 
 
-def menu_seed(build_identity: str, cbsa: str, year: int, category: str, env: int, seed: str) -> str:
-    """菜单种子：资料身份、城市、年、类别、环境重复、配置种子。不含分身编号。"""
+def menu_seed(
+    settings_identity: str, cbsa: str, year: int, category: str, env: int, seed: str
+) -> str:
+    """菜单种子：菜单设定的身份、城市、年、类别、环境重复、配置种子。不含资料身份与分身编号。"""
     text = json.dumps(
         {
-            "build": build_identity,
+            "build": settings_identity,
             "cbsa": cbsa,
             "year": year,
             "category": category,
@@ -185,13 +187,13 @@ def stratified_menus(
     years: int,
     env_repeats: int,
     seed: str,
-    build_identity: str,
+    settings_identity: str,
 ) -> list[MenuDecl]:
     """每年 × 每个环境重复一份菜单：分层时每层按权重无放回抽 ``per_stratum`` 个，不分层时一共抽 ``size`` 个。权重 ≤ 0 的不进抽样。"""
     out: list[MenuDecl] = []
     for year in range(1, years + 1):
         for env in range(1, env_repeats + 1):
-            s = menu_seed(build_identity, cbsa, year, category, env, seed)
+            s = menu_seed(settings_identity, cbsa, year, category, env, seed)
             if strata is not None:
                 assert per_stratum is not None
                 chosen: list[str] = []
@@ -212,7 +214,7 @@ def stratified_menus(
                     opportunity_ids=tuple(chosen),
                     basis=(
                         f"weighted_keyed_sample@1：{'按卧室分层，每层 ' + str(per_stratum) if strata else '一共 ' + str(size)} 个，"
-                        f"按目标权重加权无放回；种子 {s[:16]}…（资料身份、城市、年、类别、环境重复、配置种子，不含分身编号）；"
+                        f"按目标权重加权无放回；种子 {s[:16]}…（菜单设定、城市、年、类别、环境重复，不含资料身份与分身编号）；"
                         "菜单是接触，不是成交或录用"
                     )[:400],
                 )

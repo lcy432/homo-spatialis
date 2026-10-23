@@ -53,6 +53,7 @@ from product.realdata.build import RawChangedError
 from product.realdata.config import DEFAULT_CONFIG, load_config
 from product.realdata.fetch import DEFAULT_CACHE, Fetched, Mode, Request, fetch
 from product.realdata.mapping_b import wquantile
+from product.realdata.pdf_text import is_pdf, pdf_text, squash
 from product.realdata.sources import all_requests
 from product.realdata.tax_rules import numbers_in, page_text
 
@@ -135,6 +136,8 @@ class CostBuild:
     transit_blocked: dict[str, list[str]] = field(default_factory=dict)
     mpg: Cited | None = None
     car_annual: Cited | None = None
+    car_miles: Cited | None = None
+    car_fuel_cents: Cited | None = None
     drive_blocked: list[str] = field(default_factory=list)
     sources: dict[str, dict[str, Any]] = field(default_factory=dict)
 
@@ -146,7 +149,8 @@ def verify_cited(
     fetched: dict[str, Fetched],
     sources: dict[str, dict[str, Any]],
 ) -> tuple[Cited | None, list[str]]:
-    """核对一个数：每条摘句逐字在那份网页的正文里，这个数出现在某条摘句里。"""
+    """核对一个数：每条摘句逐字在那份网页的正文里，这个数出现在某条摘句里。PDF 来源（``format: pdf``）的正文是去掉全部
+    空白的文字（排版会把词与数字拆开），摘句也去掉空白再比较。"""
     problems: list[str] = []
     cites: list[dict[str, Any]] = []
     for c in spec["cite"]:
@@ -154,7 +158,8 @@ def verify_cited(
         if sid not in texts:
             problems.append(f"来源 {sid} 没有可用的原始网页（{sources[sid]['status']}）")
             continue
-        if c["quote"] not in texts[sid]:
+        pdf = cfg["sources"][sid].get("format") == "pdf"
+        if (squash(c["quote"]) if pdf else c["quote"]) not in texts[sid]:
             problems.append(
                 f"摘句没有逐字出现在 {cfg['sources'][sid]['url']} 的正文里：{c['quote'][:80]!r}"
             )
@@ -196,7 +201,7 @@ def compile_costs(
         out.sources[sid] = f.record.model_dump(mode="json")
         if f.ok:
             assert f.content is not None
-            texts[sid] = page_text(f.content)
+            texts[sid] = squash(pdf_text(f.content)) if is_pdf(f.content) else page_text(f.content)
 
     for city in cfg["cities"]:
         key, t = city["key"], city["transit"]
@@ -231,6 +236,14 @@ def compile_costs(
     out.drive_blocked += [f"每加仑英里数：{w}" for w in why]
     out.car_annual, why = verify_cited(d["car_access"]["annual"], cfg, texts, fetched, out.sources)
     out.drive_blocked += [f"用车权年费用：{w}" for w in why]
+    out.car_miles, why = verify_cited(
+        d["car_access"]["annual_miles"], cfg, texts, fetched, out.sources
+    )
+    out.drive_blocked += [f"年度费用对应的里程：{w}" for w in why]
+    out.car_fuel_cents, why = verify_cited(
+        d["car_access"]["fuel_cents_per_mile"], cfg, texts, fetched, out.sources
+    )
+    out.drive_blocked += [f"小型轿车每英里油费：{w}" for w in why]
     return out
 
 
@@ -924,19 +937,29 @@ def _leg(
     )
 
 
-def car_access_item(cfg: dict[str, Any], key: str, annual: Cited) -> LifeOpportunity:
-    """用车权：一项按月付费的普通机会（``ongoing_service``，提供 ``car_access`` 功能），月费 = 年度费用 ÷ 12。"""
+def car_fuel_split(annual: Decimal, miles: Decimal, fuel_cents: Decimal) -> tuple[Decimal, Decimal]:
+    """（年度油费，非燃油月费）：年度油费 = 里程 × 每英里油费；非燃油月费 = (年度总费用 − 年度油费) ÷ 12，四舍五入到分。"""
+    fuel = (miles * fuel_cents / 100).quantize(CENT, rounding=ROUND_HALF_UP)
+    return fuel, ((annual - fuel) / 12).quantize(CENT, rounding=ROUND_HALF_UP)
+
+
+def car_access_item(
+    cfg: dict[str, Any], key: str, annual: Cited, miles: Cited, fuel_cents: Cited
+) -> LifeOpportunity:
+    """用车权：一项按月付费的普通机会（``ongoing_service``，提供 ``car_access`` 功能）。月费只取 AAA 年度总费用里的非燃油
+    部分（折旧、贷款利息、保险、登记与按每年里程折算的保养）；油费只在开车通勤时按每次往返另付，同一笔油费不付两次。"""
     d = cfg["drive"]
-    monthly = (annual.value / 12).quantize(CENT, rounding=ROUND_HALF_UP)
+    fuel, monthly = car_fuel_split(annual.value, miles.value, fuel_cents.value)
     cite = annual.citations[-1]
+    brochure = fuel_cents.citations[0]
     return LifeOpportunity(
         opportunity_id=f"{key}.{d['car_access']['opportunity_suffix']}",
         category="service",
         label="用车权（一辆小型轿车，按月）",
         unit="service-month",
         quality=_cut(
-            f"按月付费的用车权：一辆小型轿车的折旧、贷款利息、保险、登记与保养（AAA 2024 年全美平均，年 {annual.value} "
-            "美元 ÷ 12）；开车通勤每次另付油费",
+            f"按月付费的用车权：一辆小型轿车的折旧、贷款利息、保险、登记与保养（AAA 2024 年全美平均：年度总费用 {annual.value:,} "
+            f"减去其中 {miles.value:,} 英里的油费 {fuel:,}，÷ 12）。月费不含油费；开车通勤每次往返另付油费",
             280,
         ),
         availability="available",
@@ -962,8 +985,13 @@ def car_access_item(cfg: dict[str, Any], key: str, annual: Cited) -> LifeOpportu
             inputs=(
                 f"{cite['publisher']} 2024 Your Driving Costs：小型轿车年度总费用 {annual.value}（摘句见 inputs.drive_costs）",
                 _cut(f"{cite['url']}@{cite['raw_sha256'][:12]}", 200),
+                f"AAA 2024 小册子：小型轿车油费 {fuel_cents.value} 美分/英里 × {miles.value:,} 英里 = {fuel:,}（从年度总费用里扣掉）",
+                _cut(f"{brochure['url']}@{brochure['raw_sha256'][:12]}", 200),
             ),
-            rule=f"{d['car_access']['derivation']}（假设 {d['car_access']['assumption_id']}；年度费用已含每年 15,000 英里的油费）",
+            rule=_cut(
+                f"{d['car_access']['derivation']}（{d['car_access']['assumption_id']}；油费只按开车通勤的往返另付）",
+                280,
+            ),
         ),
     )
 
@@ -1014,7 +1042,11 @@ def build_city(
     gas = intake.gasoline.get(cbsa)
     drive = (
         DrivePrice(_dec(cfg["drive"]["speed_mph"]["value"]), costs.mpg.value, gas)
-        if costs.mpg is not None and costs.car_annual is not None and gas is not None
+        if costs.mpg is not None
+        and costs.car_annual is not None
+        and costs.car_miles is not None
+        and costs.car_fuel_cents is not None
+        and gas is not None
         else None
     )
     blocked: dict[str, list[str]] = {}
@@ -1042,8 +1074,8 @@ def build_city(
     )
     car = None
     if drive is not None:
-        assert costs.car_annual is not None
-        car = car_access_item(cfg, key, costs.car_annual)
+        assert costs.car_annual and costs.car_miles and costs.car_fuel_cents
+        car = car_access_item(cfg, key, costs.car_annual, costs.car_miles, costs.car_fuel_cents)
 
     not_modeled = res[res["work"].notna() & res["mode"].isna()]
     diag = {
@@ -1131,6 +1163,8 @@ def build_city(
             "drive_costs": {
                 "mpg": _cited_json(costs.mpg),
                 "car_annual": _cited_json(costs.car_annual),
+                "car_annual_miles": _cited_json(costs.car_miles),
+                "car_fuel_cents_per_mile": _cited_json(costs.car_fuel_cents),
                 "speed_mph": str(cfg["drive"]["speed_mph"]["value"]),
             },
         },
