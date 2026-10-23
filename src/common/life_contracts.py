@@ -194,6 +194,10 @@ class LifeProtocol(ContractModel):
     health_rules: HealthRules
     illness_events: IllnessEventSource
     health_input: IndependentHealthInputDeclaration
+    #: 持续物品的随机故障从哪里来（实验设置，DECISIONS/0042）；不写就是不发生随机故障。
+    device_failures: DeviceFailureSource | None = Field(
+        default=None, exclude_if=lambda v: v is None
+    )
 
     @property
     def terminal_year_index(self) -> int:
@@ -1475,6 +1479,26 @@ class InjectedIllness(ContractModel):
     note: str = Field(min_length=1, max_length=200)
 
 
+class DeviceFailureSource(ContractModel):
+    """持续物品的随机故障从哪里来（实验设置，DECISIONS/0042）：``none`` 不发生；``random`` 按每件物品的故障规则与配对随机数抽
+    （键与疾病同一套做法，见 ``econ.life_failures``）。"""
+
+    mode: Literal["none", "random"]
+    stream_version: Literal["e3b-device-failure-stream-v1"] = "e3b-device-failure-stream-v1"
+    pairing_id: IdStr | None = None
+    seed: Annotated[int, Field(ge=0, le=2**63 - 1)] | None = None
+    note: str = Field(min_length=1, max_length=400)
+
+    @model_validator(mode="after")
+    def _mode_consistent(self) -> DeviceFailureSource:
+        has = (self.pairing_id is not None, self.seed is not None)
+        if self.mode == "random" and has != (True, True):
+            raise ValueError("random 必须写配对身份 pairing_id 与种子 seed")
+        if self.mode == "none" and has != (False, False):
+            raise ValueError("none 不写配对身份与种子")
+        return self
+
+
 class IllnessEventSource(ContractModel):
     """新疾病事件从哪里来（实验设置，不是世界规则）：
 
@@ -2128,6 +2152,22 @@ class ActivityFacts(ContractModel):
         return tuple(c for c in self.requires if c not in have)
 
 
+class FailureSpec(ContractModel):
+    """一件持续物品在模拟期内会不会随机坏（DECISIONS/0042）。``none_within_horizon``：三年内不随机坏，只按寿命到期；
+    ``annual_hazard``：每年坏的概率（登记的类别假设；保修期不是故障分布）。规则本身是公开事实，将来哪个月坏不公开。"""
+
+    kind: Literal["none_within_horizon", "annual_hazard"]
+    annual_probability: Annotated[float, Field(gt=0, lt=1, allow_inf_nan=False)] | None = None
+    note: str = Field(min_length=1, max_length=280)
+    source: SourceRecord
+
+    @model_validator(mode="after")
+    def _kind_consistent(self) -> FailureSpec:
+        if (self.kind == "annual_hazard") != (self.annual_probability is not None):
+            raise ValueError("只有 annual_hazard 写年故障概率，而且必须写")
+        return self
+
+
 class AreaDecl(ContractModel):
     """城市内部的一个片区（DECISIONS/0042）：住处所在的居住片区，或岗位所在的就业片区。
 
@@ -2288,6 +2328,8 @@ class LifeOpportunity(ContractModel):
     #: 生活扩展（DECISIONS/0041）的公开事实；没有用到时不序列化（原有机会的内容身份不变）。
     #: 片区（DECISIONS/0042）：住房是住处所在的居住片区，岗位是工作所在的就业片区。没有用到时不序列化。
     area: IdStr | None = Field(default=None, exclude_if=lambda v: v is None)
+    #: 故障规则（DECISIONS/0042）：只给持续物品；没有写就是模拟期内不随机坏。
+    failure: FailureSpec | None = Field(default=None, exclude_if=lambda v: v is None)
     food_plan: FoodPlanFacts | None = Field(default=None, exclude_if=lambda v: v is None)
     enjoyment: tuple[EnjoymentProvision, ...] = Field(default=(), exclude_if=lambda v: v == ())
     equipment: EquipmentFacts | None = Field(default=None, exclude_if=lambda v: v is None)
@@ -2324,6 +2366,8 @@ class LifeOpportunity(ContractModel):
                 raise ValueError(
                     f"{oid}: 同一项体验不同时算休闲活动与享受型服务；确有两种独立改善时拆成两项并各写依据"
                 )
+        if self.failure is not None and kind != "durable_good":
+            raise ValueError(f"{oid}: 只有持续物品有故障规则")
         if self.equipment is not None:
             if kind != "durable_good":
                 raise ValueError(f"{oid}: 活动装备是持续物品（durable_good）")
@@ -3404,6 +3448,15 @@ class ActionItem(ContractModel):
         return v
 
 
+class ReplacementRule(ContractModel):
+    """年度计划里预先写好的替换（DECISIONS/0042）：``held`` 这件持续物品今年坏了，就在坏的下一个月按普通购买检查买
+    ``replacement``（报价、可得、现金）。不另外调用规划器；第 12 月坏的留给下一年的计划。"""
+
+    held: IdStr
+    replacement: IdStr
+    quantity: Annotated[int, Field(ge=1, le=10)] = 1
+
+
 class YearAction(ContractModel):
     """一个分身一年的生活计划。**一年只有一份**；环境按月执行，不增加月度调用。
 
@@ -3425,6 +3478,8 @@ class YearAction(ContractModel):
     #: 这一年的应急安排（生病时治不治、时间精力不够时按什么顺序暂停哪些活动；DECISIONS/0027）。由规划器写，必须写：漏写是
     #: 格式问题（可修改重试），不默认总是治疗，也不由健康回答替它生成。
     emergency: EmergencyPlan
+    #: 持续物品坏了怎么替换（DECISIONS/0042）；没有写就是坏了不替换。
+    replacements: tuple[ReplacementRule, ...] = Field(default=(), exclude_if=lambda v: v == ())
 
     @model_validator(mode="after")
     def _unique_items(self) -> YearAction:
@@ -3433,6 +3488,9 @@ class YearAction(ContractModel):
             raise ValueError(f"{self.clone_id}: 同一机会出现多次；合并成一条并写数量")
         if len(set(self.minimum_fallback)) != len(self.minimum_fallback):
             raise ValueError(f"{self.clone_id}: minimum_fallback 重复")
+        held = [r.held for r in self.replacements]
+        if len(held) != len(set(held)):
+            raise ValueError(f"{self.clone_id}: 同一件物品写了不止一条替换")
         linked = [i.opportunity_id for i in self.items if i.goal_id is not None]
         if len(linked) > 1:
             raise ValueError(
@@ -4118,6 +4176,24 @@ class CareerYear(ContractModel):
     current_position_ids: tuple[IdStr, ...] = ()
 
 
+class DeviceFailure(ContractModel):
+    """一次故障（DECISIONS/0042）：这件物品第 ``month`` 月月末坏了，下个月起不能用，剩余寿命作废。抽签的 u、h 与键的
+    SHA-256 是审计字段，不给代理看。"""
+
+    opportunity_id: IdStr
+    acquired_year: Annotated[int, Field(ge=0, le=MAX_SIMULATION_YEARS)]
+    acquired_month: Month | None = None
+    month: Month
+    units_failed: Annotated[int, Field(ge=1)]
+    monthly_hazard: ExactAmount
+    uniform: ExactAmount
+    key_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
+    replacement_id: IdStr | None = None
+    replacement_status: Literal["not_declared", "bought", "rejected", "next_year", "not_reached"]
+    replacement_month: Month | None = None
+    note: str = Field(default="", max_length=280)
+
+
 class EnvironmentOutcome(ContractModel):
     """**实际**环境结果（评分侧可读）。由 ``econ.life_settlement`` 产生。
 
@@ -4144,6 +4220,8 @@ class EnvironmentOutcome(ContractModel):
     holdings_service: tuple[HoldingService, ...] = ()
     #: 生活扩展（DECISIONS/0041）：休闲活动的实际参与（每项活动每个请求月一条）。没有用到时不序列化。
     participation: tuple[ParticipationRecord, ...] = Field(default=(), exclude_if=lambda v: v == ())
+    #: 持续物品的故障与替换（DECISIONS/0042）。没有时不序列化。
+    device_failures: tuple[DeviceFailure, ...] = Field(default=(), exclude_if=lambda v: v == ())
     exit: ExitRecord | None = None
     tax_policy_id: str | None = None
     tax_status: str | None = None
@@ -4450,6 +4528,17 @@ class VisibleParticipation(ContractModel):
     overhead_hours_total: float
 
 
+class VisibleDeviceFailure(ContractModel):
+    """**代理可见**的一次故障（逐字段取自 ``DeviceFailure``，不含抽签数字）。"""
+
+    opportunity_id: IdStr
+    month: Month
+    units_failed: int
+    replacement_id: IdStr | None = None
+    replacement_status: str
+    replacement_month: Month | None = None
+
+
 class VisibleFeedback(ContractModel):
     """**代理可见**的事实反馈。与实际结果、内部评分是三个不同的类型。
 
@@ -4473,6 +4562,10 @@ class VisibleFeedback(ContractModel):
     health: VisibleHealthYear
     #: 生活扩展（DECISIONS/0041）：休闲活动的实际参与。没有活动时不序列化。
     participation: tuple[VisibleParticipation, ...] = Field(
+        default=(), exclude_if=lambda v: v == ()
+    )
+    #: 去年的持续物品故障与替换（DECISIONS/0042）。没有时不序列化。
+    device_failures: tuple[VisibleDeviceFailure, ...] = Field(
         default=(), exclude_if=lambda v: v == ()
     )
 

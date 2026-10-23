@@ -1197,6 +1197,15 @@ def plan_problems(
     """
     out: list[SettlementProblem] = []
     who = f"{action.clone_id} 第 {action.year_index} 年"
+    for r in action.replacements:  # DECISIONS/0042：替换只能是本城的持续物品
+        o = catalog.opportunity(r.replacement)
+        if o is None or o.duration.kind != "durable_good":
+            out.append(
+                _p(
+                    "bad_replacement",
+                    f"{who}: 替换 {r.held} 的 {r.replacement} 不是 {catalog.city} 目录里的持续物品",
+                )
+            )
     if action.year_index > protocol.simulation_years:
         out.append(
             _p(

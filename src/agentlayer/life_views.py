@@ -112,6 +112,7 @@ from common.life_contracts import (
     TreatmentRecord,
     VisibleCareerYear,
     VisibleCommuteUse,
+    VisibleDeviceFailure,
     VisibleFeedback,
     VisibleGoalEvent,
     VisibleGoalProgress,
@@ -263,6 +264,7 @@ class VisibleOpportunity(ContractModel):
     grants: tuple[str, ...] = Field(exclude_if=lambda v: not v)
     #: 片区（DECISIONS/0042）：住房是住处所在的居住片区，岗位是工作所在的就业片区。没有的不序列化。
     area: str | None = Field(default=None, exclude_if=lambda v: v is None)
+    failure: VisibleFailureRule | None = Field(default=None, exclude_if=lambda v: v is None)
     #: 没有资格要求的机会不序列化。
     qualification: VisibleQualification | None = Field(default=None, exclude_if=lambda v: v is None)
     #: 生活扩展（DECISIONS/0041）：食品方案、享受、装备、活动的公开事实。没有的不序列化。
@@ -276,6 +278,14 @@ class VisibleOpportunity(ContractModel):
         """期限与时间精力事实里空的项（null、空列表）不写进请求：键不出现就是“没有”（收尾 R1：只省重复，不删事实）。"""
         data = value.model_dump(mode="json")
         return {k: v for k, v in data.items() if v is not None and v != [] and v != {}}
+
+
+class VisibleFailureRule(ContractModel):
+    """一件持续物品的故障规则（公开事实，DECISIONS/0042）；将来哪个月坏不公开。"""
+
+    kind: str
+    annual_probability: float | None = Field(default=None, exclude_if=lambda v: v is None)
+    note: str
 
 
 class VisibleArea(ContractModel):
@@ -1011,6 +1021,13 @@ def _visible_opportunity(
         employer_id=o.employer_id,
         grants=tuple(o.grants),
         area=o.area,
+        failure=None
+        if o.failure is None
+        else VisibleFailureRule(
+            kind=o.failure.kind,
+            annual_probability=o.failure.annual_probability,
+            note=o.failure.note,
+        ),
         qualification=_qualification(o, state, catalog, rules),
         food_plan=None if o.food_plan is None else _visible_food_plan(o.food_plan),
         enjoyment=tuple(
@@ -1097,9 +1114,8 @@ def _visible_resources(
         else None,
         energy_rule=_energy_rule(rules, feedback),
         commute_rule=(
-            "当月通勤小时 = 通勤关系表里实际住处片区到各岗位就业片区、实际所用方式的往返分钟 × 这个岗位的到岗次数 / 60，"
-            "几个岗位相加；每个岗位每次到岗算一趟完整往返，不合并行程；远程岗位不通勤，混合岗位只算到岗的次数。住房降级后"
-            "按实际住的房所在片区计算"
+            "当月通勤小时 = 实际所用方式的往返分钟（通勤表）× 每个到岗岗位的到岗次数 / 60，几个岗位相加，不合并行程；远程岗位"
+            "不通勤，混合岗位只算到岗的次数"
         ),
         commute_burden_per_hour=rules.commute_burden_per_hour,
         household_rule=(
@@ -1458,6 +1474,17 @@ def visible_feedback(result: SettlementResult) -> VisibleFeedback:
         savings=_visible_savings_year(out.savings),
         health=_visible_health_year(out),
         participation=_visible_participation(out.participation),
+        device_failures=tuple(
+            VisibleDeviceFailure(
+                opportunity_id=f.opportunity_id,
+                month=f.month,
+                units_failed=f.units_failed,
+                replacement_id=f.replacement_id,
+                replacement_status=f.replacement_status,
+                replacement_month=f.replacement_month,
+            )
+            for f in out.device_failures
+        ),
     )
     assert_payload_clean(feedback)
     return feedback
