@@ -10,6 +10,10 @@
    "file": "ConfirmedProfile.schema.json",
    "sha256": "1123bfa88ab6b86e05d15fc76bf8c77645f102c12c9d3f53782388efe9713719"
   },
+  "LifeItemCompilation": {
+   "file": "LifeItemCompilation.schema.json",
+   "sha256": "ce8d022078583f918098cfdc3fa05a7cc948b5b14b573c7f086094b06e0fb259"
+  },
   "OpportunityCandidate": {
    "file": "OpportunityCandidate.schema.json",
    "sha256": "a748141b6602111d542dd1c81a841d3e0e71d26933017b1b04f42357c106e070"
@@ -28,7 +32,7 @@
   },
   "ProductResult": {
    "file": "ProductResult.schema.json",
-   "sha256": "b5e74ee1711b2a981a43ea1cdf38db1ebaee7add53224e4d8715487adf683f1a"
+   "sha256": "352b57bcefb3a210143ed8bcfa583d5e393db0baac29d10cfbf684199bee4e08"
   },
   "ProfileReview": {
    "file": "ProfileReview.schema.json",

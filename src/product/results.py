@@ -23,6 +23,7 @@ from common.life_aggregation_contracts import (
 from common.life_contracts import ExactAmount, Money
 from common.life_feedback_contracts import LifeYearResult
 from common.product_contracts import (
+    ActivityLine,
     CityResult,
     CloneResult,
     ComparisonLine,
@@ -31,6 +32,7 @@ from common.product_contracts import (
     ConvenienceDevice,
     ConvenienceService,
     ExactNumber,
+    GoodsLine,
     HouseholdHours,
     MissingReasonLine,
     OptionCoverageLine,
@@ -40,6 +42,7 @@ from common.product_contracts import (
     ProductMoney,
     ProductPreflight,
     ProductResult,
+    PurchaseNotMade,
     RequirementLine,
     RequirementSummaryLine,
     SampleLabel,
@@ -161,6 +164,7 @@ def year_facts(world: RunWorld, city: str, result: LifeYearResult) -> YearFacts:
                     "—" if row is None or m.resource_check != "complete" else row.hours.exact
                 )
             household.append(HouseholdHours(task=task, monthly_hours=tuple(hours)))
+    goods, not_made, activities = _life_extension_facts(world, city, out, substitutes)
     spent = sum((Decimal(repr(m.spent.amount)) for m in out.months), Decimal(0))
     numeraire = out.money_basis_id
     notes: list[str] = []
@@ -186,7 +190,83 @@ def year_facts(world: RunWorld, city: str, result: LifeYearResult) -> YearFacts:
         household=tuple(household),
         health_months=tuple(m.state for m in out.health.months) if out.health is not None else (),
         notes=tuple(notes),
+        goods=goods,
+        purchases_not_made=not_made,
+        activities=activities,
     )
+
+
+#: 没成交的一次性购买与没能进行的活动：固定的公开说明（不透传结算里的内部原因文字）。
+_NOT_MADE_ZH = {
+    "rejected": "没有买成：那个月付不起或计划不可执行；没有扣款，也没有得到这件东西",
+    "cancelled_when_ill": "按年度应急安排，购买那个月生着病就取消：没有扣款，不顺延、不补购",
+    "paused": "那个月生病暂停：没有购买",
+    "not_reached": "那个月之前已经出局或停止：没有发生",
+}
+_NOT_DONE_ZH = "缺少需要的装备能力（家里没有在用的装备，这次也没有套餐提供）：没有进行，也没有收费"
+
+
+def _life_extension_facts(
+    world: RunWorld, city: str, out: Any, substitutes: set[str]
+) -> tuple[tuple[GoodsLine, ...], tuple[PurchaseNotMade, ...], tuple[ActivityLine, ...]]:
+    """生活扩展的三类事实（白名单，逐字段取自结算记录）：其他耐用品、没买成的购买、休闲活动的参与。"""
+    purchase = {
+        it.opportunity_id: it.requested_months[0]
+        for it in out.items
+        if it.role == "durable_good" and it.status == "executed" and it.requested_months
+    }
+
+    def bought(h: Any) -> int | None:
+        # 今年买的那一件：服务从购买月开始（下一年才生效的还没有服务月）；年初就有、今年到期的旧的一件不是
+        m = purchase.get(h.opportunity_id)
+        first = h.covered_months[0] if h.covered_months else None
+        return m if m is not None and first in (None, m) else None
+
+    goods = tuple(
+        GoodsLine(
+            opportunity_id=h.opportunity_id,
+            label=_label(world, city, h.opportunity_id),
+            bought_month=bought(h),
+            months_in_service=tuple(h.covered_months),
+            expired=h.expired,
+            months_left_after_year=h.remaining_months_after,
+        )
+        for h in out.holdings_service
+        if h.kind == "durable_good" and h.opportunity_id not in substitutes
+    )
+    not_made = tuple(
+        PurchaseNotMade(
+            opportunity_id=it.opportunity_id,
+            label=_label(world, city, it.opportunity_id),
+            month=it.requested_months[0] if it.requested_months else None,
+            status=it.status,
+            status_zh=_NOT_MADE_ZH[it.status],
+        )
+        for it in out.items
+        if it.role == "durable_good" and it.status in _NOT_MADE_ZH
+    )
+    by: dict[str, list[Any]] = {}
+    for p in out.participation:
+        by.setdefault(p.opportunity_id, []).append(p)
+    activities = []
+    for oid, rows in by.items():
+        done = [p for p in rows if p.status == "completed"]
+        failed = [p.month for p in rows if p.status == "failed"]
+        activities.append(
+            ActivityLine(
+                opportunity_id=oid,
+                label=_label(world, city, oid),
+                months_done=tuple(p.month for p in done),
+                sessions=canonical(Fraction(repr(sum(p.sessions for p in done)))),
+                participation_hours=canonical(
+                    Fraction(repr(sum(p.participation_hours for p in done)))
+                ),
+                months_paused=tuple(p.month for p in rows if p.status == "paused"),
+                months_not_done=tuple(failed),
+                not_done_zh=_NOT_DONE_ZH if failed else None,
+            )
+        )
+    return goods, not_made, tuple(activities)
 
 
 def _months_text(months: tuple[int, ...]) -> str:

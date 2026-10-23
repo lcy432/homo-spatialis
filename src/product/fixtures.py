@@ -21,9 +21,11 @@ from common.product_contracts import (
     HardRequirementAnswer,
     HealthAnswers,
     HealthItemAnswer,
+    LeisureInterestAnswer,
     OccupationAnswer,
     PointEntry,
     SampleLabel,
+    TasteAnswer,
     UserInputDraft,
 )
 from product.pack import DataPack
@@ -105,6 +107,8 @@ def make_draft(
         },
     ),
     sample: SampleLabel | None = None,
+    leisure: dict[str, Any] | None = None,
+    taste: dict[str, Any] | None = None,
 ) -> UserInputDraft:
     """一份合成草稿；默认就是主故事里的 u501（全职文员、看重省事、健康问卷一题暂不确定、通勤上限 60 分钟）。"""
     amount, currency, period = cash
@@ -140,6 +144,8 @@ def make_draft(
         attribute_preferences=tuple(AttributePreferenceAnswer(**a) for a in attributes),
         abilities=tuple(AbilityClaim(ability_id=a, state="provided") for a in abilities),
         hard_requirements=tuple(HardRequirementAnswer(**h) for h in hard_requirements),
+        leisure_interest=LeisureInterestAnswer(**(leisure or {})),
+        taste=TasteAnswer(**(taste or {})),
     )
 
 

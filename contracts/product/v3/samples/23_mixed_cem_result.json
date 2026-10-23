@@ -588,6 +588,15 @@
        "display": "2,980.00",
        "numeraire_id": "USD_2024_LOCAL"
       },
+      "purchases_not_made": [
+       {
+        "label": "便利设备包（洗烘一体机＋扫地机器人）",
+        "month": 1,
+        "opportunity_id": "k51.durable.convenience_pack",
+        "status": "cancelled_when_ill",
+        "status_zh": "按年度应急安排，购买那个月生着病就取消：没有扣款，不顺延、不补购"
+       }
+      ],
       "services": [],
       "status": "exited",
       "training": [],
@@ -868,7 +877,7 @@
    "分数是当前合成模型下、按你确认的陈述偏好计算的结果；小数末位的差异不构成可靠的排序"
   ],
   "real_model_calls": 0,
-  "result_fingerprint": "f65b0abaac9d32c5a0899d63d3b36c67caee2ebde38f3cc1bbf4f3a58546367f",
+  "result_fingerprint": "d3428b6a241ad4b78dcb19d5d89fa48969fd17eb7ad0d8fe6f024c252817a8b5",
   "result_id": "result.run-e3a-4677dc562ec61ee7",
   "run_id": "run-e3a-4677dc562ec61ee7",
   "run_stage": "completed",

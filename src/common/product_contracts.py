@@ -1007,6 +1007,42 @@ class HouseholdHours(ProductModel):
     monthly_hours: tuple[str, ...]
 
 
+class GoodsLine(ProductModel):
+    """一件不是省家务设备的耐用品（舒适用品、爱好装备）这一年的事实（DECISIONS/0041）：今年买到的月份、在用的月份、年末是否
+    到期与之后还剩几个月。买到、在用与实际用它参加活动是三件事：装备放在家里不等于参加了活动（见 ``ActivityLine``）。"""
+
+    opportunity_id: str
+    label: str
+    bought_month: int | None = None
+    months_in_service: tuple[int, ...] = ()
+    expired: bool
+    months_left_after_year: int
+
+
+class PurchaseNotMade(ProductModel):
+    """计划里的一次性购买没有成交（DECISIONS/0041）：没有扣款，也没有生成持有物。文字是固定的公开说明，不透传内部原因。"""
+
+    opportunity_id: str
+    label: str
+    month: int | None = None
+    status: Literal["rejected", "cancelled_when_ill", "paused", "not_reached"]
+    status_zh: str
+
+
+class ActivityLine(ProductModel):
+    """一项休闲活动这一年的实际参与（DECISIONS/0041）：参加的月份、次数与参与小时（不含往返与准备），生病暂停的月份，
+    没能进行的月份（缺少需要的装备能力：没有收费）。次数与小时是精确写法（整数或“分子/分母”）。"""
+
+    opportunity_id: str
+    label: str
+    months_done: tuple[int, ...] = ()
+    sessions: str
+    participation_hours: str
+    months_paused: tuple[int, ...] = ()
+    months_not_done: tuple[int, ...] = ()
+    not_done_zh: str | None = None
+
+
 class YearFacts(ProductModel):
     """一个分身一年的生活事实（取自 E1 的结算记录与资源账；不含模型理由与内部评分对象）。"""
 
@@ -1026,6 +1062,12 @@ class YearFacts(ProductModel):
     household: tuple[HouseholdHours, ...] = ()
     health_months: tuple[str, ...] = ()
     notes: tuple[str, ...] = ()
+    #: 生活扩展（DECISIONS/0041）：其他耐用品、没买成的购买、休闲活动。没有时不序列化。
+    goods: tuple[GoodsLine, ...] = Field(default=(), exclude_if=lambda v: v == ())
+    purchases_not_made: tuple[PurchaseNotMade, ...] = Field(
+        default=(), exclude_if=lambda v: v == ()
+    )
+    activities: tuple[ActivityLine, ...] = Field(default=(), exclude_if=lambda v: v == ())
 
 
 class RequirementLine(ProductModel):
@@ -1376,7 +1418,40 @@ class OptionInventoryCoverage(ProductModel):
 # 注册：导出 schema 与样例校验用同一份清单
 # ==========================================================================
 
+
 #: 消息名 → 类。``scripts/product_e3a.py export-schema`` 按这份清单导出，``check-schema`` 按它核对。
+class LifeItemVerdict(ProductModel):
+    """一项生活扩展候选（完整食品方案、休闲活动、装备、享受型用品或服务）能不能编进 E1（DECISIONS/0041）。
+
+    ``executable``：E1 契约与词表都接受；``rejected``：缺必需的事实或违反规则（例如没有做饭时间、带日期或年龄限制、代替正餐的
+    套餐、寿命不明）；``unsupported``：用了本版词表没有的类别或功能；``data_unknown``：报价未知（不当零价，也不当可得）。
+    原因是固定写法或契约的拒绝说明，不含本机路径。"""
+
+    candidate_id: Annotated[str, Field(pattern=r"^[a-z0-9][a-z0-9_.\-]{0,79}$")]
+    kind: Literal["food_plan", "activity", "equipment", "enjoyment"]
+    label: str = Field(min_length=1, max_length=120)
+    status: Literal["executable", "rejected", "unsupported", "data_unknown"]
+    reasons_zh: tuple[Annotated[str, Field(max_length=400)], ...] = ()
+
+    @model_validator(mode="after")
+    def _reasons(self) -> LifeItemVerdict:
+        if (self.status == "executable") == bool(self.reasons_zh):
+            raise ValueError(f"{self.candidate_id}: 可执行的候选不写原因，其余必须写明原因")
+        return self
+
+
+class LifeItemCompilation(ProductModel):
+    """生活扩展候选的编译检查（编译器 ``e3-life-item-compiler-v1``）。编译产物有自己的内容身份 ``compilation_fingerprint``。"""
+
+    meta: ProductMeta
+    compilation_id: RefStr
+    compiler_version: str
+    scope_zh: str
+    city_ref: str
+    verdicts: tuple[LifeItemVerdict, ...]
+    compilation_fingerprint: Sha256
+
+
 PRODUCT_MESSAGES: dict[str, type[ProductModel]] = {
     "ProductCapabilities": ProductCapabilities,
     "UserInputDraft": UserInputDraft,
@@ -1391,6 +1466,7 @@ PRODUCT_MESSAGES: dict[str, type[ProductModel]] = {
     "OpportunityCandidate": OpportunityCandidate,
     "CatalogCompilation": CatalogCompilation,
     "OptionInventoryCoverage": OptionInventoryCoverage,
+    "LifeItemCompilation": LifeItemCompilation,
 }
 
 

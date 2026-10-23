@@ -2,7 +2,7 @@
 
 **层与命名、轮次与状态、默认入口都只在这里写一次。** 其他文档不再各写一遍状态，只链接过来。改了状态、默认配置或命名，只改这一份。
 
-更新：2026-10-19。
+更新：2026-10-22。
 
 ## 0. 现在怎么工作（开发期）
 
@@ -25,7 +25,7 @@
 
 | 层 | 做什么 | 旧 E 编号 | 旧 M 编号 | 代码 | 主要说明 |
 |---|---|---|---|---|---|
-| **生活引擎** engine | 分身按月过日子：结算、评分、时间精力、职业、储蓄、疾病、跨期评价、城市汇总 | E1-1 – E1-6、E1 补充；E2 已并入 | M2 的生活部分 | `src/econ/life_*`、`src/common/life_*`、`src/ledger/life_*` | [e1-3](design/e1-3-life-model.md)、[e1-4](design/e1-4-time-energy.md)、[e1-5](design/e1-5-career-savings-risk.md)、[e1-6](design/e1-6-evaluation.md) |
+| **生活引擎** engine | 分身按月过日子：结算、评分、时间精力、职业、储蓄、疾病、跨期评价、城市汇总 | E1-1 – E1-6、E1 补充；E2 已并入 | M2 的生活部分 | `src/econ/life_*`、`src/common/life_*`、`src/ledger/life_*` | [e1-3](design/e1-3-life-model.md)、[e1-4](design/e1-4-time-energy.md)、[e1-5](design/e1-5-career-savings-risk.md)、[e1-6](design/e1-6-evaluation.md)、[生活扩展](design/e1-8-life-extension.md) |
 | **代理层** agent | 规划接口、事实记忆、mock 与真实模型、传输层、预算、归档与重放 | E1-7A / E1-7B | M4 | `src/agentlayer/`、`src/orchestration/` | [e1-7](design/e1-7-agent-loop.md) |
 | **接入层** intake | 用户输入、职业匹配、标准初态、真实资料、共享消息结构 | E3（含 E3-A） | M1、M1.5 | `src/product/`、`src/common/product_contracts.py`、`src/common/intake_contracts.py`、`contracts/product/` | [共享约定](design/e3-e5-product-contract.md)、[E3-A](design/e3a-product-input.md)、[intake-02 真实资料](design/intake-02-real-data.md) |
 | **界面层** ui | 表单、进度、结果展示、网页入口 | E5 | M6 | `web/`（`src/ui/` 未使用） | [E5 交接](handoffs/e5-product-handoff.md)、[E5-A](design/e5-a-offline-ui.md) |
@@ -55,6 +55,7 @@
 | engine-06b | E1-6B | 城市汇总 C / E / M | 已实现 | 曾通过审核 | [0029](../DECISIONS/0029-life-e1-6a-closeout-and-city-aggregation.md) |
 | engine-07 | E1 补充 | 洗衣推广为日常生活便利 | 已实现 | 曾通过审核；交给接入层的说明见 [交接](handoffs/e1-daily-convenience-to-e3.md) | [0033](../DECISIONS/0033-life-daily-convenience.md) |
 | engine-08 | — | 只保留产品版：每部分一套（规则、评分、模板、mock、样例），旧版本与兼容路径删除；测试改为产品样例上的精简套件 | 已实现 | 删除前的代码：git 标签 `pre-legacy-removal` | [0037](../DECISIONS/0037-life-keep-only-product-version.md) |
+| engine-09 | — | 生活扩展：完整食品方案、个人消费与享受、装备与爱好（同月买同月用、套餐、寿命与替换、参与事实）；物质四项与兴趣、口味的接入；期末参考生活按能力使用期末装备；代理看到新事实、看不到评分 | 已实现 | 实现及离线自测完成，待独立审核。评分 `e1-life-v1`、评价 `e1-life-evaluation-v3`、记忆 `e1-life-memory-v2`、提示模板 `e3a-product-prompt-v2`、共享结构 `e3a-product-schema-v3`（`contracts/product/v3/`）；界面层仍读 v2（网页草稿测试暂时跳过，见 [交接](handoffs/e3-to-e5-life-extension.md)）；只在合成样例上可执行（真实资料缺做饭时间与活动参与时间）；说明见 [生活扩展](design/e1-8-life-extension.md) | [0041](../DECISIONS/0041-life-extension-food-enjoyment-hobbies.md) |
 
 ### 代理层
 

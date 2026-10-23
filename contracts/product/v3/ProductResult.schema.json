@@ -1,5 +1,71 @@
 {
  "$defs": {
+  "ActivityLine": {
+   "additionalProperties": false,
+   "description": "一项休闲活动这一年的实际参与（DECISIONS/0041）：参加的月份、次数与参与小时（不含往返与准备），生病暂停的月份，\n没能进行的月份（缺少需要的装备能力：没有收费）。次数与小时是精确写法（整数或“分子/分母”）。",
+   "properties": {
+    "label": {
+     "title": "Label",
+     "type": "string"
+    },
+    "months_done": {
+     "default": [],
+     "items": {
+      "type": "integer"
+     },
+     "title": "Months Done",
+     "type": "array"
+    },
+    "months_not_done": {
+     "default": [],
+     "items": {
+      "type": "integer"
+     },
+     "title": "Months Not Done",
+     "type": "array"
+    },
+    "months_paused": {
+     "default": [],
+     "items": {
+      "type": "integer"
+     },
+     "title": "Months Paused",
+     "type": "array"
+    },
+    "not_done_zh": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Not Done Zh"
+    },
+    "opportunity_id": {
+     "title": "Opportunity Id",
+     "type": "string"
+    },
+    "participation_hours": {
+     "title": "Participation Hours",
+     "type": "string"
+    },
+    "sessions": {
+     "title": "Sessions",
+     "type": "string"
+    }
+   },
+   "required": [
+    "opportunity_id",
+    "label",
+    "sessions",
+    "participation_hours"
+   ],
+   "title": "ActivityLine",
+   "type": "object"
+  },
   "CityResult": {
    "additionalProperties": false,
    "description": "一座城的结果：原计划 N = C + E + M；完整者均值的分母是 C；模拟缺失范围的分母是 C + M（出局者不进）。空值保持为空。",
@@ -517,6 +583,56 @@
    "title": "ExactNumber",
    "type": "object"
   },
+  "GoodsLine": {
+   "additionalProperties": false,
+   "description": "一件不是省家务设备的耐用品（舒适用品、爱好装备）这一年的事实（DECISIONS/0041）：今年买到的月份、在用的月份、年末是否\n到期与之后还剩几个月。买到、在用与实际用它参加活动是三件事：装备放在家里不等于参加了活动（见 ``ActivityLine``）。",
+   "properties": {
+    "bought_month": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Bought Month"
+    },
+    "expired": {
+     "title": "Expired",
+     "type": "boolean"
+    },
+    "label": {
+     "title": "Label",
+     "type": "string"
+    },
+    "months_in_service": {
+     "default": [],
+     "items": {
+      "type": "integer"
+     },
+     "title": "Months In Service",
+     "type": "array"
+    },
+    "months_left_after_year": {
+     "title": "Months Left After Year",
+     "type": "integer"
+    },
+    "opportunity_id": {
+     "title": "Opportunity Id",
+     "type": "string"
+    }
+   },
+   "required": [
+    "opportunity_id",
+    "label",
+    "expired",
+    "months_left_after_year"
+   ],
+   "title": "GoodsLine",
+   "type": "object"
+  },
   "HouseholdHours": {
    "additionalProperties": false,
    "description": "本人每月实际做的家务小时（资源账的事实，精确值）。",
@@ -829,6 +945,54 @@
    "title": "PublicExplanation",
    "type": "object"
   },
+  "PurchaseNotMade": {
+   "additionalProperties": false,
+   "description": "计划里的一次性购买没有成交（DECISIONS/0041）：没有扣款，也没有生成持有物。文字是固定的公开说明，不透传内部原因。",
+   "properties": {
+    "label": {
+     "title": "Label",
+     "type": "string"
+    },
+    "month": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Month"
+    },
+    "opportunity_id": {
+     "title": "Opportunity Id",
+     "type": "string"
+    },
+    "status": {
+     "enum": [
+      "rejected",
+      "cancelled_when_ill",
+      "paused",
+      "not_reached"
+     ],
+     "title": "Status",
+     "type": "string"
+    },
+    "status_zh": {
+     "title": "Status Zh",
+     "type": "string"
+    }
+   },
+   "required": [
+    "opportunity_id",
+    "label",
+    "status",
+    "status_zh"
+   ],
+   "title": "PurchaseNotMade",
+   "type": "object"
+  },
   "RequirementLine": {
    "additionalProperties": false,
    "properties": {
@@ -962,6 +1126,14 @@
    "additionalProperties": false,
    "description": "一个分身一年的生活事实（取自 E1 的结算记录与资源账；不含模型理由与内部评分对象）。",
    "properties": {
+    "activities": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/ActivityLine"
+     },
+     "title": "Activities",
+     "type": "array"
+    },
     "cash_end": {
      "anyOf": [
       {
@@ -990,6 +1162,14 @@
       "type": "string"
      },
      "title": "Food",
+     "type": "array"
+    },
+    "goods": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/GoodsLine"
+     },
+     "title": "Goods",
      "type": "array"
     },
     "health_months": {
@@ -1040,6 +1220,14 @@
     },
     "paid_total": {
      "$ref": "#/$defs/ProductMoney"
+    },
+    "purchases_not_made": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/PurchaseNotMade"
+     },
+     "title": "Purchases Not Made",
+     "type": "array"
     },
     "services": {
      "default": [],

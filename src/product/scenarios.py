@@ -854,3 +854,207 @@ def partial_service_months(work: Path) -> tuple[YearFacts, dict[str, Any]]:
             ],
         }
         return facts, info
+
+
+def life_extension_year_facts(work: Path) -> dict[str, YearFacts]:
+    """受控夹具（DECISIONS/0041）：在编译出的产品输入上执行几份写好的计划，演示买到、在用、实际参加、生病暂停与取消、套餐与
+    到期。走 E1 的正式年度入口 ``run_life_year``，结果投影成产品的生活事实；计划不是规划器的输出，不代表模型会这样选。"""
+    from common.life_contracts import Holding, IllnessEventSource, InjectedIllness
+
+    s = preflight_only(work, "life_extension", person="u506", hard_requirements=())
+    assert s.pre is not None and s.pre.compiled is not None
+    with contextlib.chdir(s.work):
+        bundle, _ = load_life_bundle(
+            s.pre.compiled.paths["life_input"], require_settlement_ready=True
+        )
+        scoring, _ = load_scoring_config(s.pre.compiled.paths["scoring_config"], bundle)
+        start = bundle.initial_state("u506.k51.r0")
+        catalog = bundle.catalog_for(K51)
+        assert start is not None and catalog is not None
+        profile = bundle.product_profiles[0]
+        from orchestration.life_runner import preflight
+
+        world = preflight(s.pre.compiled.paths["run_config"])
+
+        def whole(oid: str) -> dict[str, Any]:
+            return {"opportunity_id": oid, "quantity": 1, "start_month": 1, "end_month": 12}
+
+        base = [whole("k51.housing.far"), whole("k51.food.basic"), whole("k51.job.clerk")]
+
+        def live(
+            items: list[dict[str, Any]],
+            *,
+            state: Any = None,
+            protocol: Any = None,
+            emergency: dict[str, Any] | None = None,
+        ) -> YearFacts:
+            st = state or start
+            action = YearAction.model_validate(
+                {
+                    "person_id": st.person_id,
+                    "clone_id": st.clone_id,
+                    "year_index": st.year_index,
+                    "items": [*base, *items],
+                    "minimum_fallback": ["housing", "food"],
+                    "emergency": emergency
+                    or {"minor": "decline", "major": "decline", "pause_order": []},
+                    "rationale": "受控夹具：预先写好的计划（不是规划器的输出）",
+                }
+            )
+            result = run_life_year(
+                protocol=protocol or bundle.protocol,
+                state=st,
+                action=action,
+                catalog=catalog,
+                tax=binding_from_policy(bundle.tax_policy(catalog.tax_policy_id)),  # type: ignore[arg-type]
+                scoring=ScoringInputs(
+                    spec=scoring.spec,
+                    conditions=scoring.conditions_for(K51),  # type: ignore[arg-type]
+                    preference_input=profile,
+                    hard_requirements=profile.hard_requirements,
+                ),
+            )
+            return year_facts(world, K51, result)
+
+        practice = "k51.experience.guitar_practice"
+        ill = IllnessEventSource(
+            mode="injected",
+            stream_version="e1-5c-illness-stream-v1",
+            injected=(
+                InjectedIllness(
+                    person_id="u506",
+                    repeat_index=0,
+                    year_index=1,
+                    month=3,
+                    severity="major",
+                    note="受控夹具：第 3 月月初大病",
+                ),
+            ),
+            note="受控夹具：注入大病",
+        )
+        expiring = start.model_copy(
+            update={
+                "holdings": (
+                    Holding(
+                        opportunity_id="k51.durable.guitar",
+                        quantity=1,
+                        acquired_year=0,
+                        remaining_months=3,
+                    ),
+                )
+            }
+        )
+        return {
+            "bought_and_played": live(
+                [
+                    {"opportunity_id": "k51.durable.guitar", "quantity": 1, "month": 2},
+                    {"opportunity_id": practice, "quantity": 2, "months": [2, 5, 9]},
+                    {"opportunity_id": "k51.durable.comfort_chair", "quantity": 1, "month": 1},
+                ]
+            ),
+            "bought_not_played": live(
+                [{"opportunity_id": "k51.durable.guitar", "quantity": 1, "month": 2}]
+            ),
+            "paused_cancelled_kit": live(
+                [
+                    {"opportunity_id": "k51.durable.guitar", "quantity": 1, "month": 3},
+                    {"opportunity_id": "k51.experience.cooking_class", "quantity": 1, "month": 3},
+                    {
+                        "opportunity_id": "k51.experience.tennis_with_rental",
+                        "quantity": 1,
+                        "month": 7,
+                    },
+                    {"opportunity_id": practice, "quantity": 1, "months": [8]},
+                ],
+                protocol=bundle.protocol.model_copy(update={"illness_events": ill}),
+                emergency={
+                    "minor": "decline",
+                    "major": "treat_if_possible",
+                    "pause_order": [],
+                    "cancel_purchases_when_ill": ["k51.durable.guitar"],
+                },
+            ),
+            "expired": live(
+                [{"opportunity_id": practice, "quantity": 1, "months": [2, 6]}], state=expiring
+            ),
+        }
+
+
+def life_item_compilation(work: Path) -> Any:
+    """受控夹具（DECISIONS/0041）：生活扩展候选的编译检查。可执行的候选取自合成样例目录；被拒的候选按真实资料的典型缺口改写
+    （食材篮子没有做饭时间与新鲜餐数、活动带日期与年龄限制、代替正餐的品鉴套餐、寿命不明的装备、词表外的享受功能、报价未知）。"""
+    from product.life_items import LifeItemCandidate, compile_life_items
+
+    s = preflight_only(work, "life_items", person="u508", hard_requirements=())
+    assert s.pre is not None and s.pre.compiled is not None
+    with contextlib.chdir(s.work):
+        bundle, _ = load_life_bundle(
+            s.pre.compiled.paths["life_input"], require_settlement_ready=True
+        )
+        catalog = bundle.catalog_for(K51)
+        assert catalog is not None
+
+        def item(oid: str) -> dict[str, Any]:
+            o = catalog.opportunity(oid)
+            assert o is not None
+            return o.model_dump(mode="json")
+
+        basket = item("k51.food.sichuan_home")
+        basket["opportunity_id"] = "k51.food.basket_regional"
+        for key in ("prep_hours_per_month", "dining_hours_per_month"):
+            del basket["food_plan"][key]
+        tasting = item("k51.experience.cooking_class")
+        tasting["opportunity_id"] = "k51.experience.tasting_dinner"
+        tasting["activity"]["replaces_meals_per_session"] = 1
+        park = item("k51.experience.community_choir")
+        park["opportunity_id"] = "k51.experience.park_class"
+        gear = item("k51.durable.guitar")
+        gear["opportunity_id"] = "k51.durable.racket_unknown_life"
+        gear["duration"] = {"kind": "durable_good"}
+        gear["equipment"] = {"provides": ["racket_playable"], "note": "球拍；资料没有写能用几年"}
+        spa = item("k51.service.massage")
+        spa["opportunity_id"] = "k51.service.luxury_spa"
+        spa["enjoyment"][0]["function"] = "luxury_spa"
+        unknown = item("k51.service.massage")
+        unknown["opportunity_id"] = "k51.service.massage_unknown_price"
+        unknown["availability"] = "unknown"
+        unknown["price"] = None
+        candidates = (
+            LifeItemCandidate(
+                "food.sichuan_home", "food_plan", "川味家常方案", item("k51.food.sichuan_home")
+            ),
+            LifeItemCandidate(
+                "activity.choir", "activity", "社区合唱排练", item("k51.experience.community_choir")
+            ),
+            LifeItemCandidate("equipment.guitar", "equipment", "吉他", item("k51.durable.guitar")),
+            LifeItemCandidate(
+                "food.basket_regional", "food_plan", "地区食材篮子（只有食材价格）", basket
+            ),
+            LifeItemCandidate(
+                "activity.park_class",
+                "activity",
+                "公园活动课（有日期与年龄限制）",
+                park,
+                ("2025-06-02 至 2025-08-15，每周一 from 9 to 10", "Ages 6-12"),
+            ),
+            LifeItemCandidate(
+                "activity.tasting_dinner", "activity", "品鉴晚餐（代替一顿晚餐）", tasting
+            ),
+            LifeItemCandidate("equipment.racket", "equipment", "球拍（寿命不明）", gear),
+            LifeItemCandidate("enjoyment.luxury_spa", "enjoyment", "高级水疗", spa),
+            LifeItemCandidate(
+                "enjoyment.massage_unknown", "enjoyment", "按摩（报价未知）", unknown
+            ),
+        )
+        sample = label(
+            "controlled_fixture",
+            "product.scenarios.life_item_compilation",
+            "合成样例的候选与按真实资料典型缺口改写的候选（不是真实资料）",
+        )
+        return compile_life_items(
+            bundle,
+            candidates,
+            meta=s.pack.meta(sample),
+            city_ref=K51,
+            scope_zh="生活扩展候选：完整食品方案、休闲活动、装备与享受型用品或服务；只检查能不能编进 E1，不补价格、寿命或时间",
+        )

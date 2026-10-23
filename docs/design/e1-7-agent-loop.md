@@ -133,7 +133,7 @@ E1-7 之前，安全、发展机会、休闲与环境这些城市背景只存在
 
 ## 5. 记忆：保留发生过的生活，不让自述变成事实
 
-记忆政策 `e1-7a-memory-v1`（[`build_memory`](../../src/agentlayer/life_planning.py)）：
+记忆政策 `e1-life-memory-v2`（v1 加一类活动参与事实，见 [生活扩展](e1-8-life-extension.md)；[`build_memory`](../../src/agentlayer/life_planning.py)）：
 
 * **事实**取自每一年的可见反馈（环境记录）：最近 3 年，每年最多 8 条，按"现金与状态 → 收支 → 岗位 → 学习 → 健康 → 被拒或暂停的
   行动 → 目标 → 说明"的固定顺序，每条最多 240 字。例："第 1 年：课程 a95.training.accounting_course 实付学费 1,200.00，参加 12 个月，

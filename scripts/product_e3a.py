@@ -699,6 +699,99 @@ def generate_samples(out: Path, work: Path) -> None:
         "受控夹具：同一健康题两个答案、同一资格两条、两条通勤上限——确认前全部拒绝，不按最后一个算，也不自动取更严格的上限",
         dump(dup.review),
     )
+    # 生活扩展（DECISIONS/0041）：兴趣与口味的作答状态
+    brand = (
+        {
+            "preference_id": "pref.brand",
+            "need": "personal_enjoyment",
+            "kind": "brand",
+            "raw_text": "吉他想要某个牌子的",
+        },
+    )
+    interest_cases = (
+        (
+            "39_interest_confirmed_review",
+            "interest_confirmed",
+            {
+                "leisure": {
+                    "state": "described",
+                    "text": "喜欢弹吉他，还有冲浪、听音乐会",
+                    "selected": ["music"],
+                },
+                "taste": {"state": "described", "text": "川菜，偶尔意面", "selected": ["sichuan"]},
+                "attributes": brand,
+            },
+            "兴趣用文字描述并选中“音乐”、口味选中“川菜”：可以确认；“冲浪”没认出（原样保留、本版不评分），“听音乐会”有歧义（列出、"
+            "不替用户选），品牌只留存",
+        ),
+        (
+            "40_interest_unanswered_review",
+            "interest_unanswered",
+            {},
+            "兴趣与口味都没有回答：按中性规则评价，不会被当成“通用评价”的选择；可以确认",
+        ),
+        (
+            "41_interest_generic_review",
+            "interest_generic",
+            {"leisure": {"state": "generic"}, "taste": {"state": "no_preference"}},
+            "选择通用休闲评价（城市有什么合适的就体验什么）、明确没有口味偏好：按中性规则评价；可以确认",
+        ),
+        (
+            "42_interest_unknown_review",
+            "interest_unknown",
+            {"leisure": {"state": "described", "text": "冲浪和攀岩"}},
+            "兴趣文字一个类别都没认出、也没有选中：审阅阻断（没核对的解释不进评分），请从词表选中类别或改选通用评价 / 暂不确定",
+        ),
+        (
+            "43_interest_unsupported_review",
+            "interest_unsupported",
+            {"leisure": {"state": "described", "text": "冲浪", "selected": ["surfing"]}},
+            "选中了词表外的类别：本版不支持，不能进入评分；审阅阻断",
+        ),
+    )
+    for name, case, kwargs, text in interest_cases:
+        r = sc.review_only(work / case, case, **kwargs)
+        _sample_file(out, name, "ProfileReview", text, dump(r.review))
+    life = sc.life_extension_year_facts(work / "life_extension")
+    fixture = dump(
+        label(
+            "controlled_fixture",
+            "product.scenarios.life_extension_year_facts",
+            "写好的计划（不是规划器输出），不代表模型会这样选",
+        )
+    )
+    for name, key, text in (
+        (
+            "44_bought_and_played_year_facts",
+            "bought_and_played",
+            "第 1 月买舒适椅、第 2 月买吉他并当月开始练（2、5、9 月各 2 次）：买到、在用与实际参加分开记；吉他放在家里不算参加",
+        ),
+        (
+            "45_bought_not_played_year_facts",
+            "bought_not_played",
+            "第 2 月买了吉他但一次也没练：吉他在用（服务月照常流逝），活动一栏是空的——买了不等于体验了",
+        ),
+        (
+            "46_paused_cancelled_kit_year_facts",
+            "paused_cancelled_kit",
+            "第 3 月大病：按应急安排取消当月买吉他（不扣款、不补购），烹饪课暂停；第 7 月网球套餐自带球拍（之后没有球拍）；第 8 月想练"
+            "吉他但家里没有吉他，没有进行、也没有收费",
+        ),
+        (
+            "47_expired_year_facts",
+            "expired",
+            "年初持有一把还剩 3 个月的吉他：第 2 月练成，第 6 月吉他已经到期、没能进行；到期的吉他不带入下一年",
+        ),
+    ):
+        _sample_file(out, name, "YearFacts", text, dump(life[key]), sample=fixture)
+    _sample_file(
+        out,
+        "48_life_item_compilation",
+        "LifeItemCompilation",
+        "生活扩展候选的编译检查：川味家常方案、社区合唱、吉他可以编进 E1；只有食材价格的篮子（没有做饭时间）、带日期与年龄限制的公园课、"
+        "代替正餐的品鉴晚餐、寿命不明的球拍被拒；词表外的“高级水疗”本版未支持；报价未知的按摩是资料未知",
+        dump(sc.life_item_compilation(work / "life_items")),
+    )
     print(f"写出 {len(list(out.glob('*.json')))} 份样例到 {out}")
 
 

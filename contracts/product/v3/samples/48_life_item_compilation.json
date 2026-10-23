@@ -1,0 +1,110 @@
+{
+ "description_zh": "生活扩展候选的编译检查：川味家常方案、社区合唱、吉他可以编进 E1；只有食材价格的篮子（没有做饭时间）、带日期与年龄限制的公园课、代替正餐的品鉴晚餐、寿命不明的球拍被拒；词表外的“高级水疗”本版未支持；报价未知的按摩是资料未知",
+ "message": "LifeItemCompilation",
+ "payload": {
+  "city_ref": "US:SYNTH2026:K51",
+  "compilation_fingerprint": "efad6147985314d4ea31f7865662d4e087f7fd54c5fb9b4942568c8e98fb9313",
+  "compilation_id": "life-items.efad61479853",
+  "compiler_version": "e3-life-item-compiler-v1",
+  "meta": {
+   "conversion_version": "e3a-conversion-v2",
+   "data_pack": {
+    "content_fingerprint": "ff26a0e51fecbeb0e534b06db93ef69cf8dd4c94542cbf4060030f9ed83242c4",
+    "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
+    "pack_id": "pack.e3a.synthetic-v2",
+    "status": "synthetic_fixture_only"
+   },
+   "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.2-draft",
+   "sample": {
+    "note": "合成样例的候选与按真实资料典型缺口改写的候选（不是真实资料）",
+    "origin": "controlled_fixture",
+    "produced_by": "product.scenarios.life_item_compilation",
+    "synthetic": true
+   },
+   "schema_version": "e3a-product-schema-v3",
+   "vocabulary_version": "e3a-vocabulary-v2"
+  },
+  "scope_zh": "生活扩展候选：完整食品方案、休闲活动、装备与享受型用品或服务；只检查能不能编进 E1，不补价格、寿命或时间",
+  "verdicts": [
+   {
+    "candidate_id": "food.sichuan_home",
+    "kind": "food_plan",
+    "label": "川味家常方案",
+    "reasons_zh": [],
+    "status": "executable"
+   },
+   {
+    "candidate_id": "activity.choir",
+    "kind": "activity",
+    "label": "社区合唱排练",
+    "reasons_zh": [],
+    "status": "executable"
+   },
+   {
+    "candidate_id": "equipment.guitar",
+    "kind": "equipment",
+    "label": "吉他",
+    "reasons_zh": [],
+    "status": "executable"
+   },
+   {
+    "candidate_id": "food.basket_regional",
+    "kind": "food_plan",
+    "label": "地区食材篮子（只有食材价格）",
+    "reasons_zh": [
+     "food_plan.prep_hours_per_month: Field required",
+     "food_plan.dining_hours_per_month: Field required"
+    ],
+    "status": "rejected"
+   },
+   {
+    "candidate_id": "activity.park_class",
+    "kind": "activity",
+    "label": "公园活动课（有日期与年龄限制）",
+    "reasons_zh": [
+     "原文带日期窗口或年龄限制：E1 的体验没有日期窗口、资格标签不求值，也不能删掉限制假装可执行",
+     "原文：2025-06-02 至 2025-08-15，每周一 from 9 to 10",
+     "原文：Ages 6-12"
+    ],
+    "status": "rejected"
+   },
+   {
+    "candidate_id": "activity.tasting_dinner",
+    "kind": "activity",
+    "label": "品鉴晚餐（代替一顿晚餐）",
+    "reasons_zh": [
+     "activity: 同时替代正餐的活动套餐本轮不支持：餐食覆盖、费用与时间的归属没有组合规则，不临场猜抵扣"
+    ],
+    "status": "rejected"
+   },
+   {
+    "candidate_id": "equipment.racket",
+    "kind": "equipment",
+    "label": "球拍（寿命不明）",
+    "reasons_zh": [
+     "duration: 持续物品的 lasts_years 必须在 1–30 年之间，得到 None（月写成年了？）"
+    ],
+    "status": "rejected"
+   },
+   {
+    "candidate_id": "enjoyment.luxury_spa",
+    "kind": "enjoyment",
+    "label": "高级水疗",
+    "reasons_zh": [
+     "enjoyment.luxury_spa: 享受功能 'luxury_spa' 没有在词表里声明"
+    ],
+    "status": "unsupported"
+   },
+   {
+    "candidate_id": "enjoyment.massage_unknown",
+    "kind": "enjoyment",
+    "label": "按摩（报价未知）",
+    "reasons_zh": [
+     "报价未知：不当零价，也不当可得"
+    ],
+    "status": "data_unknown"
+   }
+  ]
+ }
+}

@@ -1,0 +1,118 @@
+{
+ "description_zh": "第 2 月买了吉他但一次也没练：吉他在用（服务月照常流逝），活动一栏是空的——买了不等于体验了",
+ "message": "YearFacts",
+ "payload": {
+  "cash_end": {
+   "amount_minor": 1440000,
+   "currency": "USD",
+   "display": "14,400.00",
+   "numeraire_id": "USD_2024_LOCAL"
+  },
+  "cash_start": {
+   "amount_minor": 300000,
+   "currency": "USD",
+   "display": "3,000.00",
+   "numeraire_id": "USD_2024_LOCAL"
+  },
+  "devices": [],
+  "food": [
+   "基本食品方案（自己做）（1–12 月）"
+  ],
+  "goods": [
+   {
+    "bought_month": 2,
+    "expired": false,
+    "label": "民谣吉他",
+    "months_in_service": [
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9,
+     10,
+     11,
+     12
+    ],
+    "months_left_after_year": 25,
+    "opportunity_id": "k51.durable.guitar"
+   }
+  ],
+  "health_months": [
+   "healthy",
+   "healthy",
+   "healthy",
+   "healthy",
+   "healthy",
+   "healthy",
+   "healthy",
+   "healthy",
+   "healthy",
+   "healthy",
+   "healthy",
+   "healthy"
+  ],
+  "household": [
+   {
+    "monthly_hours": [
+     "10",
+     "10",
+     "10",
+     "10",
+     "10",
+     "10",
+     "10",
+     "10",
+     "10",
+     "10",
+     "10",
+     "10"
+    ],
+    "task": "cleaning"
+   },
+   {
+    "monthly_hours": [
+     "12",
+     "12",
+     "12",
+     "12",
+     "12",
+     "12",
+     "12",
+     "12",
+     "12",
+     "12",
+     "12",
+     "12"
+    ],
+    "task": "laundry"
+   }
+  ],
+  "housing": [
+   "一居室（离工作地远）（1–12 月）"
+  ],
+  "jobs": [
+   "全职文员（合成写字楼）（1–12 月）"
+  ],
+  "months_lived": 12,
+  "notes": [],
+  "paid_total": {
+   "amount_minor": 1680000,
+   "currency": "USD",
+   "display": "16,800.00",
+   "numeraire_id": "USD_2024_LOCAL"
+  },
+  "services": [],
+  "status": "completed",
+  "training": [],
+  "year_index": 1
+ },
+ "sample": {
+  "note": "写好的计划（不是规划器输出），不代表模型会这样选",
+  "origin": "controlled_fixture",
+  "produced_by": "product.scenarios.life_extension_year_facts",
+  "synthetic": true
+ }
+}

@@ -1,0 +1,143 @@
+{
+ "description_zh": "第 3 月大病：按应急安排取消当月买吉他（不扣款、不补购），烹饪课暂停；第 7 月网球套餐自带球拍（之后没有球拍）；第 8 月想练吉他但家里没有吉他，没有进行、也没有收费",
+ "message": "YearFacts",
+ "payload": {
+  "activities": [
+   {
+    "label": "烹饪课（一次，不代替正餐）",
+    "months_done": [],
+    "months_not_done": [],
+    "months_paused": [
+     3
+    ],
+    "not_done_zh": null,
+    "opportunity_id": "k51.experience.cooking_class",
+    "participation_hours": "0",
+    "sessions": "0"
+   },
+   {
+    "label": "网球场地连球拍租借（一次）",
+    "months_done": [
+     7
+    ],
+    "months_not_done": [],
+    "months_paused": [],
+    "not_done_zh": null,
+    "opportunity_id": "k51.experience.tennis_with_rental",
+    "participation_hours": "3/2",
+    "sessions": "1"
+   },
+   {
+    "label": "在家练吉他（一次 2 小时）",
+    "months_done": [],
+    "months_not_done": [
+     8
+    ],
+    "months_paused": [],
+    "not_done_zh": "缺少需要的装备能力（家里没有在用的装备，这次也没有套餐提供）：没有进行，也没有收费",
+    "opportunity_id": "k51.experience.guitar_practice",
+    "participation_hours": "0",
+    "sessions": "0"
+   }
+  ],
+  "cash_end": {
+   "amount_minor": 1036000,
+   "currency": "USD",
+   "display": "10,360.00",
+   "numeraire_id": "USD_2024_LOCAL"
+  },
+  "cash_start": {
+   "amount_minor": 300000,
+   "currency": "USD",
+   "display": "3,000.00",
+   "numeraire_id": "USD_2024_LOCAL"
+  },
+  "devices": [],
+  "food": [
+   "基本食品方案（自己做）（1–12 月）"
+  ],
+  "health_months": [
+   "healthy",
+   "healthy",
+   "major",
+   "healthy",
+   "healthy",
+   "healthy",
+   "healthy",
+   "healthy",
+   "healthy",
+   "healthy",
+   "healthy",
+   "healthy"
+  ],
+  "household": [
+   {
+    "monthly_hours": [
+     "10",
+     "10",
+     "10",
+     "10",
+     "10",
+     "10",
+     "10",
+     "10",
+     "10",
+     "10",
+     "10",
+     "10"
+    ],
+    "task": "cleaning"
+   },
+   {
+    "monthly_hours": [
+     "12",
+     "12",
+     "12",
+     "12",
+     "12",
+     "12",
+     "12",
+     "12",
+     "12",
+     "12",
+     "12",
+     "12"
+    ],
+    "task": "laundry"
+   }
+  ],
+  "housing": [
+   "一居室（离工作地远）（1–12 月）"
+  ],
+  "jobs": [
+   "全职文员（合成写字楼）（1–2 月、4–12 月）"
+  ],
+  "months_lived": 12,
+  "notes": [],
+  "paid_total": {
+   "amount_minor": 1859000,
+   "currency": "USD",
+   "display": "18,590.00",
+   "numeraire_id": "USD_2024_LOCAL"
+  },
+  "purchases_not_made": [
+   {
+    "label": "民谣吉他",
+    "month": 3,
+    "opportunity_id": "k51.durable.guitar",
+    "status": "cancelled_when_ill",
+    "status_zh": "按年度应急安排，购买那个月生着病就取消：没有扣款，不顺延、不补购"
+   }
+  ],
+  "services": [],
+  "status": "completed",
+  "training": [],
+  "year_index": 1
+ },
+ "sample": {
+  "note": "写好的计划（不是规划器输出），不代表模型会这样选",
+  "origin": "controlled_fixture",
+  "produced_by": "product.scenarios.life_extension_year_facts",
+  "synthetic": true
+ }
+}

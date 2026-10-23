@@ -1,0 +1,242 @@
+{
+ "$defs": {
+  "DataPackRef": {
+   "additionalProperties": false,
+   "description": "一份资料包的身份：编号与内容指纹。本轮只有合成资料包（``synthetic_fixture_only``）。",
+   "properties": {
+    "content_fingerprint": {
+     "pattern": "^[0-9a-f]{64}$",
+     "title": "Content Fingerprint",
+     "type": "string"
+    },
+    "note": {
+     "maxLength": 400,
+     "minLength": 1,
+     "title": "Note",
+     "type": "string"
+    },
+    "pack_id": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+     "title": "Pack Id",
+     "type": "string"
+    },
+    "status": {
+     "enum": [
+      "synthetic_fixture_only",
+      "real_data_frozen"
+     ],
+     "title": "Status",
+     "type": "string"
+    }
+   },
+   "required": [
+    "pack_id",
+    "content_fingerprint",
+    "status",
+    "note"
+   ],
+   "title": "DataPackRef",
+   "type": "object"
+  },
+  "LifeItemVerdict": {
+   "additionalProperties": false,
+   "description": "一项生活扩展候选（完整食品方案、休闲活动、装备、享受型用品或服务）能不能编进 E1（DECISIONS/0041）。\n\n``executable``：E1 契约与词表都接受；``rejected``：缺必需的事实或违反规则（例如没有做饭时间、带日期或年龄限制、代替正餐的\n套餐、寿命不明）；``unsupported``：用了本版词表没有的类别或功能；``data_unknown``：报价未知（不当零价，也不当可得）。\n原因是固定写法或契约的拒绝说明，不含本机路径。",
+   "properties": {
+    "candidate_id": {
+     "pattern": "^[a-z0-9][a-z0-9_.\\-]{0,79}$",
+     "title": "Candidate Id",
+     "type": "string"
+    },
+    "kind": {
+     "enum": [
+      "food_plan",
+      "activity",
+      "equipment",
+      "enjoyment"
+     ],
+     "title": "Kind",
+     "type": "string"
+    },
+    "label": {
+     "maxLength": 120,
+     "minLength": 1,
+     "title": "Label",
+     "type": "string"
+    },
+    "reasons_zh": {
+     "default": [],
+     "items": {
+      "maxLength": 400,
+      "type": "string"
+     },
+     "title": "Reasons Zh",
+     "type": "array"
+    },
+    "status": {
+     "enum": [
+      "executable",
+      "rejected",
+      "unsupported",
+      "data_unknown"
+     ],
+     "title": "Status",
+     "type": "string"
+    }
+   },
+   "required": [
+    "candidate_id",
+    "kind",
+    "label",
+    "status"
+   ],
+   "title": "LifeItemVerdict",
+   "type": "object"
+  },
+  "ProductMeta": {
+   "additionalProperties": false,
+   "description": "每条产品消息都带的共同元数据：结构、问卷、词表、健康问卷、转换的版本与资料包身份。",
+   "properties": {
+    "conversion_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Conversion Version",
+     "type": "string"
+    },
+    "data_pack": {
+     "$ref": "#/$defs/DataPackRef"
+    },
+    "health_questionnaire_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Health Questionnaire Version",
+     "type": "string"
+    },
+    "questionnaire_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Questionnaire Version",
+     "type": "string"
+    },
+    "sample": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/SampleLabel"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "schema_version": {
+     "const": "e3a-product-schema-v3",
+     "title": "Schema Version",
+     "type": "string"
+    },
+    "vocabulary_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Vocabulary Version",
+     "type": "string"
+    }
+   },
+   "required": [
+    "schema_version",
+    "questionnaire_version",
+    "vocabulary_version",
+    "health_questionnaire_version",
+    "conversion_version",
+    "data_pack"
+   ],
+   "title": "ProductMeta",
+   "type": "object"
+  },
+  "SampleLabel": {
+   "additionalProperties": false,
+   "description": "公共样例的出处标签（只出现在样例里；真实运行的消息不写）。\n\n* ``offline_run``：由离线闭环实际执行产生；\n* ``controlled_fixture``：受控测试夹具（例如写好的计划、注入的事件、构造的资料缺口），标明来源；\n* ``contract_example``：线上服务（幂等提交、查询、断线恢复）尚未实现，这里只是**标明为示例**的契约响应。",
+   "properties": {
+    "note": {
+     "maxLength": 600,
+     "minLength": 1,
+     "title": "Note",
+     "type": "string"
+    },
+    "origin": {
+     "enum": [
+      "offline_run",
+      "controlled_fixture",
+      "contract_example"
+     ],
+     "title": "Origin",
+     "type": "string"
+    },
+    "produced_by": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Produced By",
+     "type": "string"
+    },
+    "synthetic": {
+     "const": true,
+     "default": true,
+     "title": "Synthetic",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "origin",
+    "produced_by",
+    "note"
+   ],
+   "title": "SampleLabel",
+   "type": "object"
+  }
+ },
+ "additionalProperties": false,
+ "description": "生活扩展候选的编译检查（编译器 ``e3-life-item-compiler-v1``）。编译产物有自己的内容身份 ``compilation_fingerprint``。",
+ "properties": {
+  "city_ref": {
+   "title": "City Ref",
+   "type": "string"
+  },
+  "compilation_fingerprint": {
+   "pattern": "^[0-9a-f]{64}$",
+   "title": "Compilation Fingerprint",
+   "type": "string"
+  },
+  "compilation_id": {
+   "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+   "title": "Compilation Id",
+   "type": "string"
+  },
+  "compiler_version": {
+   "title": "Compiler Version",
+   "type": "string"
+  },
+  "meta": {
+   "$ref": "#/$defs/ProductMeta"
+  },
+  "scope_zh": {
+   "title": "Scope Zh",
+   "type": "string"
+  },
+  "verdicts": {
+   "items": {
+    "$ref": "#/$defs/LifeItemVerdict"
+   },
+   "title": "Verdicts",
+   "type": "array"
+  }
+ },
+ "required": [
+  "meta",
+  "compilation_id",
+  "compiler_version",
+  "scope_zh",
+  "city_ref",
+  "verdicts",
+  "compilation_fingerprint"
+ ],
+ "title": "LifeItemCompilation",
+ "type": "object"
+}
