@@ -133,11 +133,13 @@ from common.life_contracts import (
     PausedActivity,
     PersonYearState,
     PlanCheck,
+    RealTaxPolicy,
     ResourceShortfall,
     SettlementProblem,
     SettlementResult,
     StopRecord,
     SyntheticTaxPolicy,
+    TaxRule,
     TrainingProgress,
     TreatmentOffer,
     TreatmentOutcome,
@@ -220,6 +222,61 @@ class SyntheticBracketTax:
 
 
 @dataclass(frozen=True)
+class OfficialRulesTax:
+    """按 ``RealTaxPolicy`` 的官方规则计累计应缴（DECISIONS/0042）。实现 ``TaxFunction``；口径或税区不符时报错。
+
+    每条规则各算各的（所得税对“累计工资 − 扣除”累进；工资扣款按比例，计上限、起征线与年度上限），全部相加。十进制计算，
+    舍入由结算统一做。"""
+
+    policy: RealTaxPolicy
+
+    def tax(self, gross: Money, jurisdiction: Jurisdiction, year: int) -> Money:
+        p = self.policy
+        if gross.numeraire != p.money_basis_id:
+            raise NumeraireMismatchError(
+                f"税策略 {p.policy_id} 只接受 {p.money_basis_id}，得到 {gross.numeraire}"
+            )
+        if jurisdiction != p.applies_to:
+            raise ValueError(f"税策略 {p.policy_id} 适用于 {p.applies_to}，得到 {jurisdiction}")
+        wages = Decimal(repr(float(gross.amount)))
+        if wages < 0:
+            raise ValueError("累计税前收入不能为负")
+        return Money(float(sum((rule_tax(r, wages) for r in p.rules), Decimal(0))), gross.numeraire)
+
+
+def _dec(x: float) -> Decimal:
+    return Decimal(repr(float(x)))
+
+
+def rule_tax(rule: TaxRule, wages: Decimal) -> Decimal:
+    """一条官方规则对全年累计工资 ``wages`` 的累计应缴（十进制，不舍入）。"""
+    if rule.kind == "income_brackets":
+        income = max(Decimal(0), wages - _dec(rule.deduction))
+        lows = [_dec(b.lower) for b in rule.brackets]
+        owed = Decimal(0)
+        for i, bracket in enumerate(rule.brackets):
+            if income <= lows[i]:
+                break
+            top = income if i + 1 == len(lows) else min(income, lows[i + 1])
+            owed += (top - lows[i]) * _dec(bracket.rate)
+        return owed
+    assert rule.rate is not None
+    base = wages
+    if rule.wage_cap is not None:
+        base = min(base, _dec(rule.wage_cap))
+    if rule.threshold is not None:
+        base = max(Decimal(0), base - _dec(rule.threshold))
+    owed = base * _dec(rule.rate)
+    if rule.annual_max is not None:
+        owed = min(owed, _dec(rule.annual_max))
+    return owed
+
+
+#: 结算接受的税绑定状态：合成测试替身，或带官方出处、构建时核对过摘句的 2024 年官方规则（DECISIONS/0042）。
+TAX_BINDING_STATUSES: frozenset[str] = frozenset({"synthetic_test_double", "official_2024_rules"})
+
+
+@dataclass(frozen=True)
 class LifeTaxBinding:
     """一次结算用的税：函数（``TaxFunction`` 注入接口）加上它**声明**的身份。
 
@@ -235,12 +292,13 @@ class LifeTaxBinding:
     jurisdiction: Jurisdiction
 
     def __post_init__(self) -> None:
-        if self.status != "synthetic_test_double":
+        if self.status not in TAX_BINDING_STATUSES:
             raise LifeContractError(
-                f"税绑定 {self.policy_id} 的状态是 {self.status!r}；本轮只接受合成测试替身 "
-                "synthetic_test_double。真实税表须先通过 V2 前核查（币种、基年、当地 vs 平减"
-                "收入、税辖区、适用年份、月度预扣与年度汇总）"
+                f"税绑定 {self.policy_id} 的状态是 {self.status!r}；只接受合成测试替身 synthetic_test_double "
+                "与带官方出处的 official_2024_rules（DECISIONS/0042）"
             )
+        if self.status == "official_2024_rules" and not isinstance(self.function, OfficialRulesTax):
+            raise LifeContractError("官方规则的税绑定只能用按同一份规则计税的 OfficialRulesTax")
         require_life_numeraire(self.money_basis_id, f"税绑定 {self.policy_id}")
         if not isinstance(self.function, TaxFunction):
             raise LifeContractError("税函数必须实现 common.providers.TaxFunction")
@@ -251,10 +309,12 @@ class LifeTaxBinding:
             )
 
 
-def binding_from_policy(policy: SyntheticTaxPolicy) -> LifeTaxBinding:
-    """由一条合成税策略构造绑定。身份字段全部取自策略本身，不另行声明。"""
+def binding_from_policy(policy: SyntheticTaxPolicy | RealTaxPolicy) -> LifeTaxBinding:
+    """由一条税策略构造绑定。身份字段全部取自策略本身，不另行声明。"""
     return LifeTaxBinding(
-        function=SyntheticBracketTax(policy),
+        function=SyntheticBracketTax(policy)
+        if isinstance(policy, SyntheticTaxPolicy)
+        else OfficialRulesTax(policy),
         policy_id=policy.policy_id,
         status=policy.status,
         money_basis_id=policy.money_basis_id,
@@ -1181,7 +1241,8 @@ class _Year:
         tax = tax_to_date - self.ytd_tax
         self.ytd_tax = tax_to_date
         if tax:
-            self._flow(m, "income_tax", None, f"合成税（{self.tax.policy_id}，年内累计预扣）", -tax)
+            kind = "合成税" if self.tax.status == "synthetic_test_double" else "税与工资扣款"
+            self._flow(m, "income_tax", None, f"{kind}（{self.tax.policy_id}，年内累计预扣）", -tax)
         # 第 3 步：入账
         self.cash += gross - tax
         after_income = self.cash

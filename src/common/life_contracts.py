@@ -2482,6 +2482,97 @@ class SyntheticTaxPolicy(ContractModel):
         return self
 
 
+class TaxCitation(ContractModel):
+    """一条税规则的官方出处（DECISIONS/0042）：网址、取得日期、原始文件的 SHA-256 与原文摘句。构建时核对摘句确实在那份原始
+    文件里、规则里的每个数都出现在摘句里（数是读出来的，不是生成的）。"""
+
+    publisher: str = Field(min_length=1, max_length=120)
+    url: str = Field(min_length=1, max_length=400)
+    retrieved_on: _dt.date
+    raw_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    quote: str = Field(min_length=1, max_length=1000)
+
+
+class TaxAbsence(ContractModel):
+    """官方说明某一级没有个人所得税（DECISIONS/0042）：没有规则也要有出处，不是“没找到就当没有”。"""
+
+    label: str = Field(min_length=1, max_length=120)
+    citation: TaxCitation
+
+
+class TaxRule(ContractModel):
+    """一条官方的税或工资扣款规则（DECISIONS/0042），按日历年、对累计工资计：
+
+    * ``income_brackets``：应税收入 = max(0, 累计工资 − ``deduction``)，按 ``brackets`` 累进；
+    * ``flat_on_wages``：计税工资 = 累计工资（有 ``wage_cap`` 就只算上限以内；有 ``threshold`` 就只算超过的部分）× ``rate``，
+      有 ``annual_max`` 就一年最多扣这么多。
+
+    同一份记录既算预扣，也生成给代理看的说明。"""
+
+    rule_id: IdStr
+    label: str = Field(min_length=1, max_length=120)
+    level: Literal["federal", "state", "local", "payroll"]
+    kind: Literal["income_brackets", "flat_on_wages"]
+    deduction: Annotated[float, Field(ge=0)] = 0.0
+    brackets: tuple[TaxBracket, ...] = ()
+    rate: Annotated[float, Field(ge=0, lt=1)] | None = None
+    wage_cap: Annotated[float, Field(gt=0)] | None = None
+    threshold: Annotated[float, Field(gt=0)] | None = None
+    annual_max: Annotated[float, Field(gt=0)] | None = None
+    #: 由摘句换算出来的数怎么来的（例如“每周 0.60 × 52 周”）；直接读出来的不写。
+    derivation: str | None = Field(default=None, max_length=280)
+    citations: tuple[TaxCitation, ...] = Field(min_length=1)
+    note: str = Field(default="", max_length=400)
+
+    @model_validator(mode="after")
+    def _kind_consistent(self) -> TaxRule:
+        if self.kind == "income_brackets":
+            if not self.brackets or self.rate is not None:
+                raise ValueError(f"{self.rule_id}: 所得税按档计，要写 brackets、不写 rate")
+            lows = [b.lower for b in self.brackets]
+            if lows[0] != 0 or any(b <= a for a, b in itertools.pairwise(lows)):
+                raise ValueError(f"{self.rule_id}: 税档从 0 开始、下限严格递增")
+            if any(x is not None for x in (self.wage_cap, self.threshold, self.annual_max)):
+                raise ValueError(f"{self.rule_id}: 所得税没有工资上限、起征线或年度上限")
+        else:
+            if self.rate is None or self.brackets or self.deduction:
+                raise ValueError(f"{self.rule_id}: 工资扣款按比例计，要写 rate、不写税档与扣除")
+        return self
+
+
+class RealTaxPolicy(ContractModel):
+    """一座城适用的**官方** 2024 年税与工资扣款（DECISIONS/0042）。支持范围只有一种：单身、只有工资收入、按标准扣除、
+    在支持的居住地与工作地（``residence_scope``）。没有建模的抵免、附加税与特殊情形逐条写在 ``not_modeled``——它们让结果
+    与真实税单有差别，照实说明，不当作已经覆盖。"""
+
+    policy_id: IdStr
+    status: Literal["official_2024_rules"]
+    money_basis_id: str
+    applies_to: Jurisdiction
+    tax_year: Literal[2024] = 2024
+    filing: Literal["single_wage_earner"] = "single_wage_earner"
+    period: Literal["calendar_year"] = "calendar_year"
+    withholding: Literal["cumulative_year_to_date"] = "cumulative_year_to_date"
+    rules: tuple[TaxRule, ...] = Field(min_length=1)
+    #: 官方说明这一城没有的税（例如没有州个人所得税）与出处。
+    absent_taxes: tuple[TaxAbsence, ...] = ()
+    residence_scope: str = Field(min_length=1, max_length=400)
+    not_modeled: tuple[Annotated[str, Field(min_length=1, max_length=280)], ...] = ()
+    note: str = Field(min_length=1, max_length=400)
+
+    @model_validator(mode="after")
+    def _rules_ok(self) -> RealTaxPolicy:
+        require_life_numeraire(self.money_basis_id, f"税策略 {self.policy_id}")
+        ids = [r.rule_id for r in self.rules]
+        if len(ids) != len(set(ids)):
+            raise ValueError(f"{self.policy_id}: 税规则编号重复")
+        return self
+
+
+#: 一座城的税：合成测试替身或官方规则（按 ``status`` 区分）。
+TaxPolicy = Annotated[SyntheticTaxPolicy | RealTaxPolicy, Field(discriminator="status")]
+
+
 class CityLifeCatalog(ContractModel):
     """一座城市的生活机会目录。
 

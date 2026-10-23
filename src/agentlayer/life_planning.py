@@ -45,6 +45,7 @@ from common.life_contracts import (
     LifeProtocol,
     PersonYearState,
     PlanCheck,
+    RealTaxPolicy,
     SettlementProblem,
     SyntheticTaxPolicy,
     VisibleFeedback,
@@ -66,6 +67,7 @@ from common.life_planning_contracts import (
     PROMPT_TEMPLATE_GUIDES,
     PROMPT_TEMPLATE_VERSION,
     SELF_REPORT_YEARS,
+    VISIBLE_OFFICIAL_TAX_VERSION,
     VISIBLE_TAX_VERSION,
     MemoryFact,
     PlannerIdentity,
@@ -81,6 +83,7 @@ from common.life_planning_contracts import (
     VisibleMemory,
     VisibleRevision,
     VisibleTaxBracket,
+    VisibleTaxComponent,
     VisibleTaxRules,
 )
 from common.life_product_profile import ProductLifeProfile
@@ -192,7 +195,10 @@ def visible_city_facts(sheet: CityFactSheet) -> tuple[VisibleCityFact, ...]:
     )
 
 
-_TAX_STATUS_LABEL = {"synthetic_test_double": "合成测试替身（不是任何真实国家或地区的税表）"}
+_TAX_STATUS_LABEL = {
+    "synthetic_test_double": "合成测试替身（不是任何真实国家或地区的税表）",
+    "official_2024_rules": "2024 年官方规则（单身、只有工资收入、标准扣除；每条规则写着出处）",
+}
 
 
 def _percent(rate: float) -> str:
@@ -211,11 +217,62 @@ def _first_bracket_text(policy: SyntheticTaxPolicy) -> str:
     )
 
 
-def visible_tax_rules(policy: SyntheticTaxPolicy) -> VisibleTaxRules:
-    """本城实际使用的合成税制（E1-7B）：从环境结算用的同一份税声明逐字段投影；规则说明按声明里的口径字段生成，不另写计税
-    公式。运行器在每次请求之前把它与实际税绑定核对。"""
+def _official_tax_rules(policy: RealTaxPolicy) -> VisibleTaxRules:
+    """官方规则（DECISIONS/0042）：每条规则逐字段投影，说明由同一份记录生成；没有建模的部分照实列出。"""
+    components = tuple(
+        VisibleTaxComponent(
+            label=r.label,
+            level=r.level,
+            kind=r.kind,
+            deduction=r.deduction,
+            brackets=tuple(VisibleTaxBracket(lower=b.lower, rate=b.rate) for b in r.brackets),
+            rate=r.rate,
+            wage_cap=r.wage_cap,
+            threshold=r.threshold,
+            annual_max=r.annual_max,
+            source="；".join(dict.fromkeys(f"{c.publisher} {c.url}" for c in r.citations))[:400],
+        )
+        for r in policy.rules
+    )
+    rules = (
+        "只按岗位工资计：单身、只有工资收入、标准扣除；每个领薪月发年薪的 1/12（病假等没有领薪的月份没有工资），所有岗位合并",
+        "每条规则各算各的再相加：income_brackets 对“全年累计工资 − deduction”按档累进；flat_on_wages 按 rate 乘工资，"
+        "写了 wage_cap 只算上限以内的工资，写了 threshold 只算超过的部分，写了 annual_max 一年最多扣这么多",
+        "每个月把当月工资加进全年累计，按全部规则算出到目前为止应缴的总额，减去之前各月已经预扣的，差额就是这个月预扣的；"
+        "所以年初几个月扣得少、年底扣得多，全年合计等于全年应缴；第二年从 0 重新累计",
+        "预扣发生在每个月的第一步（工资与税），然后才付住房、食品与其他费用；到手的是工资减去当月预扣",
+        f"金额口径 {policy.money_basis_id}（当地价格水平、基年不变价）；税额四舍五入到分；三年都按 2024 年规则（固定实际价格情景）",
+        "没有建模（与真实税单会有差别）：" + "；".join(policy.not_modeled)
+        if policy.not_modeled
+        else "没有列出未建模的部分",
+    )
+    return VisibleTaxRules(
+        version=VISIBLE_OFFICIAL_TAX_VERSION,
+        policy_id=policy.policy_id,
+        status=policy.status,
+        status_label=_TAX_STATUS_LABEL[policy.status],
+        money_basis_id=policy.money_basis_id,
+        jurisdiction=str(policy.applies_to),
+        period=policy.period,
+        withholding=policy.withholding,
+        brackets=(),
+        components=components,
+        rules=rules,
+        note=(policy.residence_scope + "；" + policy.note)[:300],
+    )
+
+
+def visible_tax_rules(policy: SyntheticTaxPolicy | RealTaxPolicy) -> VisibleTaxRules:
+    """本城实际使用的税制（E1-7B；官方规则见 DECISIONS/0042）：从环境结算用的同一份税声明逐字段投影；规则说明按声明里的口径
+    字段生成，不另写计税公式。运行器在每次请求之前把它与实际税绑定核对。"""
+    if type(policy) is RealTaxPolicy:
+        if (policy.period, policy.withholding) != ("calendar_year", "cumulative_year_to_date"):
+            raise LifeContractError(f"税声明 {policy.policy_id} 的口径没有对应的公开说明")
+        return _official_tax_rules(policy)
     if type(policy) is not SyntheticTaxPolicy:
-        raise LifeContractError(f"税声明必须是 SyntheticTaxPolicy，得到 {type(policy).__name__}")
+        raise LifeContractError(
+            f"税声明必须是 SyntheticTaxPolicy 或 RealTaxPolicy，得到 {type(policy).__name__}"
+        )
     if (policy.period, policy.withholding) != ("calendar_year", "cumulative_year_to_date"):
         raise LifeContractError(f"税声明 {policy.policy_id} 的口径没有对应的公开说明")
     brackets = tuple(VisibleTaxBracket(lower=b.lower, rate=b.rate) for b in policy.brackets)
@@ -571,7 +628,7 @@ def build_request(
     memory: VisibleMemory,
     last_feedback: VisibleFeedback | None,
     revision: VisibleRevision | None,
-    tax_policy: SyntheticTaxPolicy,
+    tax_policy: SyntheticTaxPolicy | RealTaxPolicy,
     prompt_template: str = PROMPT_TEMPLATE_VERSION,
 ) -> PlanningRequest:
     """构造一次规划请求。观察完全沿用 ``build_observation``（许可、类型与状态检查都在那里）；城市事实、记忆与修订诊断都是
@@ -579,7 +636,10 @@ def build_request(
 
     ``tax_policy`` 必须是这座城目录声明的那一份（``catalog.tax_policy_id``）；运行器另在发送之前核对它与结算用的税绑定。
     ``prompt_template`` 是运行配置声明的提示模板，决定行动说明书的版本。"""
-    if type(tax_policy) is not SyntheticTaxPolicy or tax_policy.policy_id != catalog.tax_policy_id:
+    if (
+        type(tax_policy) not in (SyntheticTaxPolicy, RealTaxPolicy)
+        or tax_policy.policy_id != catalog.tax_policy_id
+    ):
         raise LifeContractError(
             f"税声明 {getattr(tax_policy, 'policy_id', None)} 不是 {catalog.city} 目录声明的 {catalog.tax_policy_id}"
         )

@@ -79,6 +79,7 @@ from common.life_contracts import (
     LifeContractError,
     PersonYearState,
     PlanCheck,
+    RealTaxPolicy,
     SyntheticTaxPolicy,
     VisibleFeedback,
     YearAction,
@@ -194,7 +195,7 @@ class RunWorld:
         return tuple(e.clone_id for e in self.roster.entries)
 
 
-def _tax_policy(bundle: LifeBundle, city: str) -> SyntheticTaxPolicy:
+def _tax_policy(bundle: LifeBundle, city: str) -> SyntheticTaxPolicy | RealTaxPolicy:
     catalog = bundle.catalog_for(city)
     assert catalog is not None
     policy = bundle.tax_policy(catalog.tax_policy_id)
@@ -1144,7 +1145,10 @@ class LifeRunner:
         凭证、写给开发者的说明）。不通过就停下（``request_check``），什么都不发送。"""
         problems: list[str] = []
         policy = getattr(tax.function, "policy", None)
-        if not isinstance(policy, SyntheticTaxPolicy) or visible_tax_rules(policy) != request.tax:
+        if (
+            not isinstance(policy, (SyntheticTaxPolicy, RealTaxPolicy))
+            or visible_tax_rules(policy) != request.tax
+        ):
             problems.append(
                 "请求里的税费说明不是由执行用的税务绑定投影出来的：分身看到的税与环境扣的税必须是同一份"
             )

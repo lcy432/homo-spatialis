@@ -1,0 +1,254 @@
+# E3B（DECISIONS/0042）：2024 年官方税与工资扣款规则。只支持一种情形：单身、只有工资收入、标准扣除。
+#
+# 每个数都读自 sources 里那份官方网页的摘句（quote）。构建时离线核对：摘句确实在缓存的原始网页里（去掉标签、合并空白之后
+# 逐字出现），规则里的每个数都出现在它的摘句里（税率按百分数或小数）；用文字写的数（例如 one half of one percent）在
+# word_values 里写明读法；由摘句换算出来的数写 derivation。核对不过就不生成这一城的税（报具体的阻断原因），不拿合成税顶替。
+#
+# 原始网页用 scripts/life_pack_us.py fetch-tax 获取（显式联网），存在 data/raw/intake/official_tax_2024/（不进仓库）。
+# 三年都按 2024 年规则（固定实际价格情景）。
+
+version: tax-us-2024-v1
+tax_year: 2024
+money_basis_id: USD_2024_LOCAL
+
+sources:
+  irs_ir_2023_208: {publisher: Internal Revenue Service, url: "https://www.irs.gov/newsroom/irs-provides-tax-inflation-adjustments-for-tax-year-2024"}
+  ssa_cbb: {publisher: Social Security Administration, url: "https://www.ssa.gov/oact/cola/cbb.html"}
+  ssa_tax_rates: {publisher: Social Security Administration, url: "https://www.ssa.gov/oact/progdata/taxRates.html"}
+  irs_addl_medicare: {publisher: Internal Revenue Service, url: "https://www.irs.gov/businesses/small-businesses-self-employed/questions-and-answers-for-the-additional-medicare-tax"}
+  ny_it201i_2024: {publisher: New York State Department of Taxation and Finance, url: "https://www.tax.ny.gov/forms/html-instructions/2024/it/it201i-2024.htm"}
+  ny_dfs_pfl_2024: {publisher: New York State Department of Financial Services, url: "https://www.dfs.ny.gov/apps_and_licensing/health_insurers/pfl_rate_decision_2024_page"}
+  ny_wcb_db: {publisher: New York State Workers' Compensation Board, url: "https://www.wcb.ny.gov/content/main/DisabilityBenefits/employee-disability-benefits.jsp"}
+  ca_ftb_540_2024: {publisher: California Franchise Tax Board, url: "https://www.ftb.ca.gov/forms/2024/2024-540-booklet.html"}
+  ca_edd_rates: {publisher: California Employment Development Department, url: "https://edd.ca.gov/en/payroll_taxes/rates_and_withholding/"}
+  il_rates: {publisher: Illinois Department of Revenue, url: "https://tax.illinois.gov/research/taxrates/income.html"}
+  il_bulletin_fy2024_18: {publisher: Illinois Department of Revenue, url: "https://taxarchive.illinois.gov/research/dated-publications/informational-bulletins-archive/fy-2024-18.html"}
+  wa_jlarc_pfml_2024: {publisher: Washington Joint Legislative Audit and Review Committee, url: "https://leg.wa.gov/jlarc/reports/2024/PFML/f_01/default.html"}
+  wa_rcw_50b_04_080: {publisher: Washington State Legislature (RCW 50B.04.080), url: "https://app.leg.wa.gov/RCW/default.aspx?cite=50B.04.080"}
+  wa_dor_income_tax: {publisher: Washington State Department of Revenue, url: "https://dor.wa.gov/taxes-rates/income-tax"}
+  tx_comptroller_small_biz: {publisher: Texas Comptroller of Public Accounts, url: "https://comptroller.texas.gov/economy/fiscal-notes/industry/2025/small-biz-info/"}
+
+rules:
+  us_federal_income:
+    label: 联邦个人所得税
+    level: federal
+    kind: income_brackets
+    deduction: 14600
+    brackets:
+      - {lower: 0, rate: 0.10}
+      - {lower: 11600, rate: 0.12}
+      - {lower: 47150, rate: 0.22}
+      - {lower: 100525, rate: 0.24}
+      - {lower: 191950, rate: 0.32}
+      - {lower: 243725, rate: 0.35}
+      - {lower: 609350, rate: 0.37}
+    cite:
+      - {source: irs_ir_2023_208, quote: "For single taxpayers and married individuals filing separately, the standard deduction rises to $14,600 for 2024"}
+      - {source: irs_ir_2023_208, quote: "the top tax rate remains 37% for individual single taxpayers with incomes greater than $609,350"}
+      - {source: irs_ir_2023_208, quote: "35% for incomes over $243,725"}
+      - {source: irs_ir_2023_208, quote: "32% for incomes over $191,950"}
+      - {source: irs_ir_2023_208, quote: "24% for incomes over $100,525"}
+      - {source: irs_ir_2023_208, quote: "22% for incomes over $47,150"}
+      - {source: irs_ir_2023_208, quote: "12% for incomes over $11,600"}
+      - {source: irs_ir_2023_208, quote: "The lowest rate is 10% for incomes of single individuals with incomes of $11,600 or less"}
+    note: 应税收入 = 工资 − 标准扣除；官方 10 万美元以下用 50 美元一档的税表，这里统一用税率表（差几美元）
+  us_social_security:
+    label: 社会保障税（雇员部分）
+    level: payroll
+    kind: flat_on_wages
+    rate: 0.062
+    wage_cap: 168600
+    cite:
+      - {source: ssa_tax_rates, quote: "1990 and later b , c 6.200 1.450 7.650"}
+      - {source: ssa_cbb, quote: "2024 168,600"}
+    note: 雇员税率 6.2%（表里 1990 年起的雇员一栏）；只算全年工资基数上限以内的部分
+  us_medicare:
+    label: 联邦医疗保险税（雇员部分）
+    level: payroll
+    kind: flat_on_wages
+    rate: 0.0145
+    cite:
+      - {source: ssa_tax_rates, quote: "1990 and later b , c 6.200 1.450 7.650"}
+    note: 雇员税率 1.45%（表里 1990 年起的雇员一栏），没有工资上限
+  us_additional_medicare:
+    label: 联邦附加医疗保险税
+    level: payroll
+    kind: flat_on_wages
+    rate: 0.009
+    threshold: 200000
+    cite:
+      - {source: irs_addl_medicare, quote: "What is the rate of Additional Medicare Tax? The rate is 0.9 percent."}
+      - {source: irs_addl_medicare, quote: "Single $200,000"}
+    note: 只对超过单身起征线的工资计
+  ny_state_income:
+    label: 纽约州个人所得税
+    level: state
+    kind: income_brackets
+    deduction: 8000
+    brackets:
+      - {lower: 0, rate: 0.04}
+      - {lower: 8500, rate: 0.045}
+      - {lower: 11700, rate: 0.0525}
+      - {lower: 13900, rate: 0.055}
+      - {lower: 80650, rate: 0.06}
+      - {lower: 215400, rate: 0.0685}
+      - {lower: 1077550, rate: 0.0965}
+      - {lower: 5000000, rate: 0.103}
+      - {lower: 25000000, rate: 0.109}
+    cite:
+      - {source: ny_it201i_2024, quote: "Single and you marked item C No $8,000"}
+      - {source: ny_it201i_2024, quote: "$0 $8,500 4% of line 38 8,500 11,700 $340 plus 4.5% of the excess over $8,500 11,700 13,900 484 plus 5.25% of the excess over 11,700 13,900 80,650 600 plus 5.5% of the excess over 13,900 80,650 215,400 4,271 plus 6% of the excess over 80,650 215,400 1,077,550 12,356 plus 6.85% of the excess over 215,400 1,077,550 5,000,000 71,413 plus 9.65% of the excess over 1,077,550 5,000,000 25,000,000 449,929 plus 10.3% of the excess over 5,000,000 25,000,000 ---- 2,509,929 plus 10.9% of the excess over 25,000,000"}
+    note: 单身、不被他人申报为受抚养人的标准扣除；税率表逐档计（官方表里各档起点税额取整，差不到 1 美元）
+  nyc_resident_income:
+    label: 纽约市居民所得税
+    level: local
+    kind: income_brackets
+    deduction: 8000
+    brackets:
+      - {lower: 0, rate: 0.03078}
+      - {lower: 12000, rate: 0.03762}
+      - {lower: 25000, rate: 0.03819}
+      - {lower: 50000, rate: 0.03876}
+    cite:
+      - {source: ny_it201i_2024, quote: "Single and you marked item C No $8,000"}
+      - {source: ny_it201i_2024, quote: "Single and married filing separately—filing status ① and ③ If line 47 is: The tax is: over but not over $0 $12,000 3.078% of line 47 12,000 25,000 $369 plus 3.762% of the excess over $12,000 25,000 50,000 858 plus 3.819% of the excess over 25,000 50,000 ---- 1,813 plus 3.876% of the excess over 50,000"}
+    note: 纽约市应税收入沿用纽约州应税收入（工资减纽约州标准扣除）
+  ny_sdi:
+    label: 纽约州短期残障保险（雇员缴费）
+    level: payroll
+    kind: flat_on_wages
+    rate: 0.005
+    annual_max: 31.2
+    word_values: {rate: "one half of one percent"}
+    derivation: 每周最多 60 美分 × 52 周 = 31.20（按年合计处理，月度路径前倾）
+    cite:
+      - {source: ny_wcb_db, quote: "Your contribution is calculated at the rate of one half of one percent of your wages, but no more than 60 cents a week (WCL §209)."}
+    note: 法律允许、不强制雇主收取；这里假设雇主收取（真实缴费可能更少，最多差 31.20）
+  ny_pfl:
+    label: 纽约州带薪家事假（雇员缴费）
+    level: payroll
+    kind: flat_on_wages
+    rate: 0.00373
+    annual_max: 333.25
+    cite:
+      - {source: ny_dfs_pfl_2024, quote: "The rate will be set at 0.373% of an employee’s wages each pay period up to and not to exceed an annual maximum employee contribution of $333.25."}
+  ca_income:
+    label: 加州个人所得税
+    level: state
+    kind: income_brackets
+    deduction: 5540
+    brackets:
+      - {lower: 0, rate: 0.01}
+      - {lower: 10756, rate: 0.02}
+      - {lower: 25499, rate: 0.04}
+      - {lower: 40245, rate: 0.06}
+      - {lower: 55866, rate: 0.08}
+      - {lower: 70606, rate: 0.093}
+      - {lower: 360659, rate: 0.103}
+      - {lower: 432787, rate: 0.113}
+      - {lower: 721314, rate: 0.123}
+    cite:
+      - {source: ca_ftb_540_2024, quote: "1 – Single $5,540"}
+      - {source: ca_ftb_540_2024, quote: "Schedule X Use if your filing status is Single or Married/RDP Filing Separately If the amount on Form 540, line 19 is Enter on Form 540, line 31 over – but not over – $0 $10,756 $0.00 + 1.00% of the amount over $0 10,756 25,499 107.56 + 2.00% of the amount over 10,756 25,499 40,245 402.42 + 4.00% of the amount over 25,499 40,245 55,866 992.26 + 6.00% of the amount over 40,245 55,866 70,606 1,929.52 + 8.00% of the amount over 55,866 70,606 360,659 3,108.72 + 9.30% of the amount over 70,606 360,659 432,787 30,083.65 + 10.30% of the amount over 360,659 432,787 721,314 37,512.83 + 11.30% of the amount over 432,787 721,314 AND OVER 70,116.38 + 12.30% of the amount over 721,314"}
+    note: 单身标准扣除；个人免税额抵免没有建模（加州税略微多算）
+  ca_mental_health:
+    label: 加州精神健康服务税
+    level: state
+    kind: income_brackets
+    deduction: 5540
+    brackets:
+      - {lower: 0, rate: 0}
+      - {lower: 1000000, rate: 0.01}
+    cite:
+      - {source: ca_ftb_540_2024, quote: "1 – Single $5,540"}
+      - {source: ca_ftb_540_2024, quote: "If your taxable income is more than $1,000,000, compute the Mental Health Services Tax using whole dollars only : Taxable income from Form 540, line 19. Less: $(1,000,000) Subtotal Tax rate – 1%: .01"}
+    note: 应税收入超过一百万美元的部分加 1%
+  ca_sdi:
+    label: 加州州残障保险（雇员缴费）
+    level: payroll
+    kind: flat_on_wages
+    rate: 0.011
+    cite:
+      - {source: ca_edd_rates, quote: "The SDI withholding rate for 2024 is 1.1 percent. Effective January 1, 2024, Senate Bill 951 removes the taxable wage limit and maximum withholdings for each employee subject to SDI contributions."}
+    note: 2024 年起没有工资上限
+  il_income:
+    label: 伊利诺伊州个人所得税
+    level: state
+    kind: income_brackets
+    deduction: 2775
+    brackets:
+      - {lower: 0, rate: 0.0495}
+    cite:
+      - {source: il_rates, quote: "Individual Income Tax Effective July 1, 2017: 4.95 percent of net income"}
+      - {source: il_bulletin_fy2024_18, quote: "The personal exemption amount for tax year 2024 will increase to $2,775."}
+    note: 单一税率；个人免税额从工资里扣
+  wa_pfml:
+    label: 华盛顿州带薪家事与病假保险（雇员缴费）
+    level: payroll
+    kind: flat_on_wages
+    rate: 0.0053
+    wage_cap: 168600
+    cite:
+      - {source: wa_jlarc_pfml_2024, quote: "Of the 0.74% rate: Employees paid 0.53%."}
+      - {source: wa_jlarc_pfml_2024, quote: "Employers apply the premium rate to each employee’s gross wages, up to the Social Security cap ($168,600 in 2024)."}
+    note: 雇员部分按州议会审计报告写的 0.53%（报告取到两位小数）
+  wa_cares:
+    label: 华盛顿州长期护理保险 WA Cares（雇员缴费）
+    level: payroll
+    kind: flat_on_wages
+    rate: 0.0058
+    cite:
+      - {source: wa_rcw_50b_04_080, quote: "The initial premium rate is .58 percent of the individual's wages."}
+    note: 没有工资上限；申请豁免的人不缴，这里不考虑豁免
+
+absences:
+  tx_no_income_tax: {label: 德州没有州个人所得税, source: tx_comptroller_small_biz, quote: "Texas has no state income tax."}
+  wa_no_income_tax: {label: 华盛顿州 2024 年没有个人所得税, source: wa_dor_income_tax, quote: "Washington does not currently have an individual income tax."}
+
+federal_not_modeled: &federal_nm
+  - 联邦与州的税表（收入较低时按 50 美元一档、取档中点）没有用，统一用税率表，差几美元
+  - 抵免（劳动所得抵免 EITC 等）、税前扣除（401(k)、医疗保险费）与逐项扣除都没有建模
+  - 只有工资收入：利息、股息、资本利得与副业收入不在支持范围
+  - 预扣按全年累计工资每月重算（年初少扣、年底多扣），全年合计等于全年应缴；没有年终退税或补税的时点
+
+policies:
+  - policy_id: tax.us2024.nyc
+    applies_to: [US, NY, NYC]
+    rules: [us_federal_income, us_social_security, us_medicare, us_additional_medicare, ny_state_income, nyc_resident_income, ny_sdi, ny_pfl]
+    residence_scope: 纽约市五个区（Bronx、Kings、New York、Queens、Richmond 县）的居民；工作地在纽约州境内（新泽西、宾州的就业片区不支持）
+    not_modeled:
+      - 纽约州 AGI 超过 107,650 时的税收优惠回收（supplemental tax）没有建模：高收入的人纽约州税少算
+      - 纽约州与纽约市的家庭抵免、学校税抵免与 EITC 没有建模
+      - 纽约州短期残障保险按年合计 31.20 处理（真实是每周最多 60 美分）
+    note: 纽约都会区的新泽西、宾州与纽约州其他县的居民不在支持范围（跨州税与非纽约市居民的规则没有建模）
+  - policy_id: tax.us2024.ca
+    applies_to: [US, CA]
+    rules: [us_federal_income, us_social_security, us_medicare, us_additional_medicare, ca_income, ca_mental_health, ca_sdi]
+    residence_scope: 加州居民、工作地在加州（洛杉矶都会区与旧金山都会区全部在加州）
+    not_modeled:
+      - 加州个人免税额抵免与它在高收入时的递减没有建模
+      - 加州租房者抵免、加州 EITC 与幼儿抵免没有建模
+    note: 洛杉矶、旧金山都会区都没有对雇员工资征收的地方所得税
+  - policy_id: tax.us2024.il
+    applies_to: [US, IL]
+    rules: [us_federal_income, us_social_security, us_medicare, us_additional_medicare, il_income]
+    residence_scope: 芝加哥都会区的伊利诺伊州部分；居住地与工作地都在伊利诺伊州（印第安纳州的县不支持）
+    not_modeled:
+      - 伊利诺伊州个人免税额在 AGI 超过 250,000 时取消，没有建模
+      - 伊利诺伊州 EITC 等抵免没有建模
+    note: 芝加哥与库克县没有对雇员工资征收的地方所得税
+  - policy_id: tax.us2024.tx
+    applies_to: [US, TX]
+    rules: [us_federal_income, us_social_security, us_medicare, us_additional_medicare]
+    absences: [tx_no_income_tax]
+    residence_scope: 德州居民、工作地在德州（休斯敦都会区全部在德州）
+    not_modeled: []
+    note: 德州没有州个人所得税，休斯敦没有地方工资所得税
+  - policy_id: tax.us2024.wa
+    applies_to: [US, WA]
+    rules: [us_federal_income, us_social_security, us_medicare, us_additional_medicare, wa_pfml, wa_cares]
+    absences: [wa_no_income_tax]
+    residence_scope: 华盛顿州居民、工作地在华盛顿州（西雅图都会区全部在华盛顿州）
+    not_modeled:
+      - WA Cares 的豁免（已有长期护理保险等）没有建模
+    note: 华盛顿州 2024 年没有个人所得税；西雅图没有地方工资所得税

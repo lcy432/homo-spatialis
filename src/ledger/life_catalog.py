@@ -49,10 +49,12 @@ from common.life_contracts import (
     LifeProtocol,
     MinimumNeedSpec,
     PersonYearState,
+    RealTaxPolicy,
     SavingsGoal,
     SavingsGoalDirective,
     SettlementProblem,
     SyntheticTaxPolicy,
+    TaxPolicy,
     YearAction,
     energy_quota_problems,
     exact_minor_units,
@@ -103,7 +105,7 @@ class LifeBundle(ContractModel):
     product_profiles: tuple[ProductLifeProfile, ...]
     initial_states: tuple[PersonYearState, ...]
     example_actions: tuple[YearAction, ...] = ()
-    tax_policies: tuple[SyntheticTaxPolicy, ...] = ()
+    tax_policies: tuple[TaxPolicy, ...] = ()
     plans: tuple[YearAction, ...] = ()
     fixture_notice: str = Field(min_length=1)
 
@@ -138,7 +140,7 @@ class LifeBundle(ContractModel):
     def catalog_for(self, city_key: str) -> CityLifeCatalog | None:
         return next((c for c in self.catalogs if str(c.city) == city_key), None)
 
-    def tax_policy(self, policy_id: str | None) -> SyntheticTaxPolicy | None:
+    def tax_policy(self, policy_id: str | None) -> SyntheticTaxPolicy | RealTaxPolicy | None:
         return next((t for t in self.tax_policies if t.policy_id == policy_id), None)
 
     def plans_for(self, clone_id: str) -> tuple[YearAction, ...]:
@@ -1011,7 +1013,9 @@ def _emergency_plan_state(
     ]
 
 
-def tax_reference_problems(catalog: CityLifeCatalog, policy: SyntheticTaxPolicy) -> list[str]:
+def tax_reference_problems(
+    catalog: CityLifeCatalog, policy: SyntheticTaxPolicy | RealTaxPolicy
+) -> list[str]:
     """城市引用的税策略与城市的口径、税区是否一致。不一致不做任何转换或改标签。"""
     out: list[str] = []
     if policy.money_basis_id != catalog.money_basis.numeraire_id:

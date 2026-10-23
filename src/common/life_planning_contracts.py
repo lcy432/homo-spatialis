@@ -63,6 +63,8 @@ MEMORY_POLICY_VERSION = "e1-life-memory-v2"
 EXECUTION_REVISION = "e1-7b-r2"
 #: 可见税制说明的版本（按实际第一档税率写说明）。
 VISIBLE_TAX_VERSION = "e1-7b-visible-tax-v2"
+#: 官方规则（DECISIONS/0042）的可见税制版本：每条规则一项，说明由同一份记录生成。
+VISIBLE_OFFICIAL_TAX_VERSION = "e3b-visible-tax-v1"
 #: 输入 token 的保守估计规则（E1-7B，AG-13）：ASCII 字符每个记 1 个 token（字节级 BPE 的一个 token 至少覆盖 1 个字节，所以这是
 #: ASCII 部分的严格上界），非 ASCII 字符每个记 2 个 token（千问词表里常用汉字多是 1 个 token，按 2 留余量；罕见字可能更多，
 #: 所以整体**不是**严格上界），每条消息另加 16、每个请求另加 16。它不是实际 token；实际 token 只认供应商返回的用量。
@@ -231,11 +233,26 @@ class VisibleTaxBracket(ContractModel):
     rate: float
 
 
+class VisibleTaxComponent(ContractModel):
+    """**代理可见**的一条官方税或工资扣款规则（DECISIONS/0042），逐字段取自 ``TaxRule``；出处写发布机构与网址。"""
+
+    label: str
+    level: str
+    kind: str
+    deduction: float = Field(default=0.0, exclude_if=lambda v: v == 0)
+    brackets: tuple[VisibleTaxBracket, ...] = Field(default=(), exclude_if=lambda v: v == ())
+    rate: float | None = Field(default=None, exclude_if=lambda v: v is None)
+    wage_cap: float | None = Field(default=None, exclude_if=lambda v: v is None)
+    threshold: float | None = Field(default=None, exclude_if=lambda v: v is None)
+    annual_max: float | None = Field(default=None, exclude_if=lambda v: v is None)
+    source: str
+
+
 class VisibleTaxRules(ContractModel):
     """**代理可见**的本城合成税制（E1-7B）。从环境结算实际使用的那一份税声明逐字段投影，不手写另一份税表；运行器在每次
     请求之前与实际税绑定核对，不一致就不发送。这是合成测试替身，不是任何真实国家或地区的税表。"""
 
-    version: Literal["e1-7b-visible-tax-v2"]
+    version: Literal["e1-7b-visible-tax-v2", "e3b-visible-tax-v1"]
     policy_id: str
     status: str
     status_label: str
@@ -244,6 +261,8 @@ class VisibleTaxRules(ContractModel):
     period: str
     withholding: str
     brackets: tuple[VisibleTaxBracket, ...]
+    #: 官方规则时每条规则一项（合成税制时为空、不序列化）。
+    components: tuple[VisibleTaxComponent, ...] = Field(default=(), exclude_if=lambda v: v == ())
     rules: tuple[str, ...]
     note: str
 
