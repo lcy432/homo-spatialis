@@ -427,16 +427,18 @@ def _plan_action(
     items: list[PlanItem] = []
     skipped: list[str] = []
 
-    def add(slot: str, role: str, o: LifeOpportunity, **timing: int) -> None:
+    def add(slot: str, role: str, o: LifeOpportunity, **timing: object) -> None:
         actions.append({"opportunity_id": o.opportunity_id, **timing})
         items.append(
             PlanItem(
                 plan_slot=slot,
                 opportunity_id=o.opportunity_id,
                 slot_role=role,  # type: ignore[arg-type]
-                start_month=timing.get("start_month"),
-                end_month=timing.get("end_month"),
-                month=timing.get("month"),
+                start_month=timing.get("start_month"),  # type: ignore[arg-type]
+                end_month=timing.get("end_month"),  # type: ignore[arg-type]
+                month=timing.get("month"),  # type: ignore[arg-type]
+                months=tuple(timing.get("months", ())),  # type: ignore[arg-type]
+                quantity=timing["quantity"] if "months" in timing else None,  # type: ignore[arg-type]
             )
         )
 
@@ -500,7 +502,62 @@ def _plan_action(
         if o is None:
             return actions, items, skipped, kind, why
         add(rule.slot_id, "durable", o, quantity=1, month=rule.month)
+    for use in plan.activity_uses:
+        o, kind, why = _slot_opportunity(binding, catalog, use.activity_slot)
+        if o is None:
+            return actions, items, skipped, kind, why
+        assert o.activity is not None  # 配置加载已核对活动槽位绑定的是有活动事实的体验
+        need = set(o.activity.requires) - set(o.activity.kit_provides)
+        left = held_capability_months(state, catalog, need) if need else MONTHS_PER_YEAR
+        first_buy: int | None = None
+        if left >= MONTHS_PER_YEAR:
+            months = list(range(1, MONTHS_PER_YEAR + 1))
+            if need:
+                skipped.append(
+                    f"{o.opportunity_id}：期初持有的装备能力 {sorted(need)} 覆盖整个估值期——照用，不另买、不重置寿命"
+                )
+        elif left > 0:
+            months = list(range(1, left + 1))
+            if use.after_expiry == "replace":
+                first_buy = left + 1
+                months += list(range(first_buy, MONTHS_PER_YEAR + 1))
+            else:
+                skipped.append(
+                    f"{o.opportunity_id}：期初持有的装备能力 {sorted(need)} 还能用 {left} 个月——照用到第 {left} 个月，之后按模板停止，"
+                    "不另买"
+                )
+        elif use.when_missing == "buy":
+            first_buy = 1
+            months = list(range(1, MONTHS_PER_YEAR + 1))
+        else:
+            skipped.append(
+                f"{o.opportunity_id}：估值期初没有在用的装备能力 {sorted(need)}，模板不买——不安排这项活动"
+            )
+            continue
+        if first_buy is not None:
+            assert use.equipment_slot is not None  # 规格校验：买或替换必须写装备槽位
+            gear, kind, why = _slot_opportunity(binding, catalog, use.equipment_slot)
+            if gear is None:
+                return actions, items, skipped, kind, why
+            add(use.equipment_slot, "durable", gear, quantity=1, month=first_buy)
+        add(use.activity_slot, "activity", o, quantity=use.sessions_per_month, months=months)
     return actions, items, skipped, None, None
+
+
+def held_capability_months(state: PersonYearState, catalog: CityLifeCatalog, need: set[str]) -> int:
+    """估值期初的持有物还能连续提供 ``need`` 里全部能力多少个月（DECISIONS/0041）。按能力认，不按编号或品牌：每项能力取
+    提供它的、已在服务期内的持有物里剩余月数最长的一件，再取各项能力里最短的。商店现在卖不卖它不影响家里那件；只查不扣寿命。"""
+    best: dict[str, int] = {}
+    for h in state.holdings:
+        o = catalog.opportunity(h.opportunity_id)
+        left = h.effective_remaining_months or 0
+        if o is None or o.equipment is None or left <= 0:
+            continue
+        if h.in_service_from_year is not None and h.in_service_from_year > state.year_index:
+            continue
+        for c in o.equipment.provides:
+            best[c] = max(best.get(c, 0), left)
+    return min((best.get(c, 0) for c in need), default=MONTHS_PER_YEAR)
 
 
 def _evaluate_plan(
@@ -660,8 +717,11 @@ def _evaluate_plan(
     )
 
 
-def _not_valued(terminal: PersonYearState, horizon: int) -> tuple[str, ...]:
+def _not_valued(
+    terminal: PersonYearState, horizon: int, spec: EvaluationSpec, catalog: CityLifeCatalog
+) -> tuple[str, ...]:
     out = ["估值期之后剩下的现金与资产不再追加第二次终值（有限期，会低估更长远的收益）"]
+    out.extend(capability_scope_gaps(terminal, spec, catalog))
     for t in terminal.training:
         if not t.completed:
             out.append(
@@ -680,6 +740,37 @@ def _not_valued(terminal: PersonYearState, horizon: int) -> tuple[str, ...]:
                 f"资金目标 {g.goal_id}（{g.status}）：不按目标名称或金额加分，不自动购买；估值中的购买不回写目标历史"
             )
     return tuple(out)
+
+
+def capability_scope_gaps(
+    terminal: PersonYearState, spec: EvaluationSpec, catalog: CityLifeCatalog
+) -> list[str]:
+    """期末持有的装备能力，有没有哪个参考模板的爱好活动用得上（DECISIONS/0041）。没有就是范围缺口：估值不计这件装备能
+    支持的活动，照实写明，不按购买价补分。"""
+    binding = spec.binding_for(str(catalog.city))
+    covered: set[str] = set()
+    for p in spec.life_templates:
+        for u in p.activity_uses:
+            t = binding.target(u.activity_slot) if binding is not None else None
+            a = (
+                catalog.opportunity(t.opportunity_id)
+                if t is not None and t.opportunity_id
+                else None
+            )
+            if a is not None and a.activity is not None:
+                covered |= set(a.activity.requires) - set(a.activity.kit_provides)
+    out: list[str] = []
+    for h in terminal.holdings:
+        o = catalog.opportunity(h.opportunity_id)
+        if o is None or o.equipment is None or (h.effective_remaining_months or 0) <= 0:
+            continue
+        gap = sorted(set(o.equipment.provides) - covered)
+        if gap:
+            out.append(
+                f"持有物 {h.opportunity_id} 提供的能力 {gap} 没有参考模板安排相应活动（范围缺口）：估值不计它能支持的活动，"
+                "也不按购买价补分"
+            )
+    return out
 
 
 def value_terminal(
@@ -730,7 +821,7 @@ def value_terminal(
         )
 
     quota = _valuation_quota(protocol, terminal, last_year)
-    not_valued = _not_valued(terminal, spec.valuation_horizon_months)
+    not_valued = _not_valued(terminal, spec.valuation_horizon_months, spec, catalog)
     if isinstance(quota, str):
         return TerminalValuation(
             status="incomplete",

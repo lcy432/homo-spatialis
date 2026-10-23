@@ -41,9 +41,10 @@ from common.life_contracts import (
 from common.money import Money
 
 #: 评价规格的版本、执行修订与内容格式（DECISIONS/0028、0029）。改变任何一项计算语义都换修订号，并在 ADR 里记录。
-EVALUATION_VERSION = "e1-6a-evaluation-v2"
-EVALUATION_REVISION = "e1-6a-r2"
-EVALUATION_CONTENT_SCHEMA = "e1-6a-evaluation-content-v2"
+#: 生活扩展（DECISIONS/0041）：模板可以安排爱好活动，按能力使用期末持有的装备——换了版本、修订与内容格式。
+EVALUATION_VERSION = "e1-life-evaluation-v3"
+EVALUATION_REVISION = "e1-life-r3"
+EVALUATION_CONTENT_SCHEMA = "e1-life-evaluation-content-v3"
 #: 本轮只支持 12 个月的估值期；其他长度明确拒绝，不静默改成 12。
 SUPPORTED_HORIZON_MONTHS = 12
 #: 最多几个基础生活模板；估值期初健康时每个模板一次试算（≤ 6），带病时每个模板两次（≤ 12）。
@@ -54,7 +55,7 @@ _SHA256 = r"^[0-9a-f]{64}$"
 Sha256 = Annotated[str, Field(pattern=_SHA256)]
 
 #: 生活模板里一个"槽位"扮演的角色。槽位在比较组里共用，各城只写它绑定到目录里的哪一项。
-SlotRole = Literal["job", "housing", "food", "service", "durable"]
+SlotRole = Literal["job", "housing", "food", "service", "durable", "activity"]
 #: 一个估值分支的治疗选择：估值期初健康时"未触发"（没有新发疾病，治疗选择不起作用，不代表用户偏好）；带病时"条件允许
 #: 就治"或"不治疗"，只针对正在延续的这场病。
 TreatmentBranch = Literal["untriggered", "treat_if_possible", "decline"]
@@ -75,6 +76,31 @@ class DurablePurchaseRule(ContractModel):
     slot_id: KeyStr
     month: Month
     rule: Literal["buy_if_not_held"]
+
+
+class ActivityUseRule(ContractModel):
+    """参考生活里的一项爱好活动（DECISIONS/0041）：每月 ``sessions_per_month`` 次 ``activity_slot`` 绑定的活动。
+
+    活动需要的装备能力（扣掉套餐本次提供的）**按能力**从估值期初的持有物里找——任何一件在服务期内、提供这项能力的持有物
+    都算，不认品牌或编号，商店现在卖不卖它也不影响家里那件。能力覆盖的月份就照用（不另买、不重置寿命）；之后按
+    ``after_expiry``：``replace`` 在下一个月买一件 ``equipment_slot`` 绑定的装备接着用，``stop`` 停止这项活动。估值期初
+    完全没有这项能力时按 ``when_missing``：``buy`` 第 1 个月买一件，``skip`` 不安排这项活动。不需要持有能力的活动（例如
+    套餐自带装备）每个月都安排。"""
+
+    activity_slot: KeyStr
+    sessions_per_month: Annotated[int, Field(ge=1, le=31)]
+    equipment_slot: KeyStr | None = None
+    when_missing: Literal["buy", "skip"]
+    after_expiry: Literal["replace", "stop"]
+
+    @model_validator(mode="after")
+    def _shape(self) -> ActivityUseRule:
+        buys = self.when_missing == "buy" or self.after_expiry == "replace"
+        if buys and self.equipment_slot is None:
+            raise ValueError(
+                f"{self.activity_slot}: 要买或替换装备（when_missing = buy 或 after_expiry = replace）就必须写 equipment_slot"
+            )
+        return self
 
 
 class LifeTemplate(ContractModel):
@@ -98,6 +124,8 @@ class LifeTemplate(ContractModel):
     food_slot: KeyStr
     service_slots: tuple[KeyStr, ...] = ()
     durable_purchases: tuple[DurablePurchaseRule, ...] = ()
+    #: 爱好活动（DECISIONS/0041）。没有用到时不序列化。
+    activity_uses: tuple[ActivityUseRule, ...] = Field(default=(), exclude_if=lambda v: v == ())
     description: str = Field(min_length=1, max_length=400)
 
     @model_validator(mode="after")
@@ -116,6 +144,8 @@ class LifeTemplate(ContractModel):
     def used_slots(self) -> tuple[str, ...]:
         out = [self.housing_slot, self.food_slot, *self.service_slots]
         out += [d.slot_id for d in self.durable_purchases]
+        out += [u.activity_slot for u in self.activity_uses]
+        out += [u.equipment_slot for u in self.activity_uses if u.equipment_slot is not None]
         if self.job_slot is not None:
             out.append(self.job_slot)
         return tuple(out)
@@ -178,9 +208,9 @@ class EvaluationSpec(ContractModel):
     ``note``、标签与说明文字不参与。同一个编号改了计算内容，就是另一个身份。δ 按数值参与（"1" 与 "1.0" 是同一个值）。"""
 
     spec_id: IdStr
-    version: Literal["e1-6a-evaluation-v2"]
+    version: Literal["e1-life-evaluation-v3"]
     status: Literal["exploratory_synthetic"]
-    execution_revision: Literal["e1-6a-r2"]
+    execution_revision: Literal["e1-life-r3"]
     monthly_discount_factor: str = Field(min_length=1, max_length=20)
     valuation_horizon_months: int
     valuation_event_condition: Literal["no_new_illness"]
@@ -217,6 +247,12 @@ class EvaluationSpec(ContractModel):
             want = [(p.housing_slot, "housing"), (p.food_slot, "food")]
             want += [(s, "service") for s in p.service_slots]
             want += [(d.slot_id, "durable") for d in p.durable_purchases]
+            want += [(u.activity_slot, "activity") for u in p.activity_uses]
+            want += [
+                (u.equipment_slot, "durable")
+                for u in p.activity_uses
+                if u.equipment_slot is not None
+            ]
             if p.job_slot is not None:
                 want.append((p.job_slot, "job"))
             used = [s for s, _ in want]
@@ -564,6 +600,11 @@ class PlanItem(ContractModel):
     start_month: Month | None = None
     end_month: Month | None = None
     month: Month | None = None
+    #: 爱好活动（DECISIONS/0041）：安排的月份与每月次数。没有用到时不序列化。
+    months: tuple[Month, ...] = Field(default=(), exclude_if=lambda v: v == ())
+    quantity: Annotated[int, Field(ge=1)] | None = Field(
+        default=None, exclude_if=lambda v: v is None
+    )
 
 
 class PlanEvaluation(ContractModel):

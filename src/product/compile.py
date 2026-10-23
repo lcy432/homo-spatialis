@@ -495,6 +495,7 @@ def compile_inputs(
                 "show_stated_material_points": True,
                 "permission_version": b.run.permission_version,
                 "show_health_answers": b.run.show_health_answers,
+                "show_interests": True,
             },
             "planning": {
                 "plans_per_year": 1,
@@ -509,7 +510,7 @@ def compile_inputs(
                 "scripts": [s.model_dump(mode="json", exclude_none=True) for s in scripts],
             },
             "prompt_template": b.run.prompt_template,
-            "memory_policy": "e1-7a-memory-v1",
+            "memory_policy": "e1-life-memory-v2",
             "note": "E3-A 离线闭环：新增真实模型调用 0 次、费用 0。",
         },
     }

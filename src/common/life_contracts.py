@@ -4057,6 +4057,20 @@ class VisibleHealthYear(ContractModel):
     )
 
 
+class VisibleParticipation(ContractModel):
+    """**代理可见**的一条活动参与事实（DECISIONS/0041）：逐字段取自结算的参与记录。没有满足感、匹配或评分系数。"""
+
+    opportunity_id: str
+    month: Month
+    status: ParticipationStatus
+    sessions: float
+    participation_hours: float
+    overhead_hours: float
+    equipment_used: tuple[str, ...] = Field(default=(), exclude_if=lambda v: v == ())
+    kit_capabilities: tuple[str, ...] = Field(default=(), exclude_if=lambda v: v == ())
+    reason: str | None = Field(default=None, exclude_if=lambda v: v is None)
+
+
 class VisibleFeedback(ContractModel):
     """**代理可见**的事实反馈。与实际结果、内部评分是三个不同的类型。
 
@@ -4078,6 +4092,10 @@ class VisibleFeedback(ContractModel):
     career: VisibleCareerYear
     savings: VisibleSavingsYear
     health: VisibleHealthYear
+    #: 生活扩展（DECISIONS/0041）：休闲活动的实际参与。没有活动时不序列化。
+    participation: tuple[VisibleParticipation, ...] = Field(
+        default=(), exclude_if=lambda v: v == ()
+    )
 
     @field_validator("cash_balance")
     @classmethod

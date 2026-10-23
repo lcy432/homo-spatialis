@@ -934,7 +934,9 @@ class _Year:
             if ln.role == "training":
                 return m in ln.months
             if ln.role == "experience":
-                return ln.month == m
+                return (
+                    m in ln.months
+                )  # 一次体验是 [month]；不连续的几个月是 months（DECISIONS/0041）
             if ln.role == "periodic_service":
                 return m in ln.months and participation_activity(self.catalog, ln.opp)
             if ln.role == "prepaid_service":

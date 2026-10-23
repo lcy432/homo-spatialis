@@ -23,20 +23,20 @@
       "violated": 0
      }
     ],
-    "headline_zh": "合成城 K51：原计划 2 个分身——1 个完成且可评价、1 个生活出局、0 个模拟问题；1 个完成且可评价分身的平均 J 为 0.5819（分母只数完成且可评价的分身，不是原计划的全部分身）",
+    "headline_zh": "合成城 K51：原计划 2 个分身——1 个完成且可评价、1 个生活出局、0 个模拟问题；1 个完成且可评价分身的平均 J 为 0.5867（分母只数完成且可评价的分身，不是原计划的全部分身）",
     "label": "合成城 K51",
     "mean_denominator": 1,
     "mean_j": {
-     "display": "0.5819",
-     "exact": "23277794871794871/40000000000000000"
+     "display": "0.5867",
+     "exact": "23469794871794871/40000000000000000"
     },
     "mean_l": {
      "display": "0.5699",
      "exact": "17095999999999999/30000000000000000"
     },
     "mean_v": {
-     "display": "0.6182",
-     "exact": "772724358974359/1250000000000000"
+     "display": "0.6374",
+     "exact": "796724358974359/1250000000000000"
     },
     "missing": 0,
     "missing_reasons": [],
@@ -50,12 +50,12 @@
     "planned": 2,
     "range_denominator": 1,
     "range_lower": {
-     "display": "0.5819",
-     "exact": "23277794871794871/40000000000000000"
+     "display": "0.5867",
+     "exact": "23469794871794871/40000000000000000"
     },
     "range_upper": {
-     "display": "0.5819",
-     "exact": "23277794871794871/40000000000000000"
+     "display": "0.5867",
+     "exact": "23469794871794871/40000000000000000"
     }
    },
    {
@@ -137,8 +137,8 @@
      }
     ],
     "j": {
-     "display": "0.5819",
-     "exact": "23277794871794871/40000000000000000"
+     "display": "0.5867",
+     "exact": "23469794871794871/40000000000000000"
     },
     "l_actual": {
      "display": "0.5699",
@@ -147,18 +147,18 @@
     "missing_reason": null,
     "missing_reason_zh": null,
     "range_lower": {
-     "display": "0.5819",
-     "exact": "23277794871794871/40000000000000000"
+     "display": "0.5867",
+     "exact": "23469794871794871/40000000000000000"
     },
     "range_upper": {
-     "display": "0.5819",
-     "exact": "23277794871794871/40000000000000000"
+     "display": "0.5867",
+     "exact": "23469794871794871/40000000000000000"
     },
     "reference_plan": "p3_current_service",
     "repeat_index": 0,
     "v_reference": {
-     "display": "0.6182",
-     "exact": "772724358974359/1250000000000000"
+     "display": "0.6374",
+     "exact": "796724358974359/1250000000000000"
     },
     "years": [
      {
@@ -602,7 +602,7 @@
     "clone_ref": "u503.m52.r0",
     "event_chain": [],
     "explanation": {
-     "audit_ref": "run:run-e3a-3aecff94659ebdee clone:u503.m52.r0 record:progress.json",
+     "audit_ref": "run:run-e3a-4677dc562ec61ee7 clone:u503.m52.r0 record:progress.json",
      "category": "plan_or_execution_incomplete",
      "impact_zh": "不进完成者平均；城市的模拟缺失范围把它当作未知（0 到 1 之间都保留），不写成生活出局",
      "next_action_zh": "这是规划或模拟的问题，不是生活出局；改进规划器或说明之后重跑",
@@ -784,12 +784,12 @@
     "direction": "undetermined",
     "note_zh": "范围差含 0：在这些缺失范围下不能确定方向。出局比例 A 50%、B 50%，有效分身数 A 1/2、B 0/2",
     "range_difference_high": {
-     "display": "0.5819",
-     "exact": "23277794871794871/40000000000000000"
+     "display": "0.5867",
+     "exact": "23469794871794871/40000000000000000"
     },
     "range_difference_low": {
-     "display": "-0.4181",
-     "exact": "-16722205128205129/40000000000000000"
+     "display": "-0.4133",
+     "exact": "-16530205128205129/40000000000000000"
     }
    }
   ],
@@ -854,7 +854,7 @@
    "planner_kind": "mock"
   },
   "preflight": {
-   "preflight_fingerprint": "a7153a4d3a39d84d41c1a6fc57e23b2cafe693fb1609e9b5439179de16af0688",
+   "preflight_fingerprint": "55a9fb30c0819cc52c7c4c82d72c4feb12c7c3b444a57b3956b5bea773c55dfd",
    "preflight_id": "preflight.confirmed.draft.u503.r1"
   },
   "reading_guide_zh": [
@@ -868,9 +868,9 @@
    "分数是当前合成模型下、按你确认的陈述偏好计算的结果；小数末位的差异不构成可靠的排序"
   ],
   "real_model_calls": 0,
-  "result_fingerprint": "a7b96fe950e8c0816ceae38a9d06b72bfe097de0efb76db9646fb03254dafa0c",
-  "result_id": "result.run-e3a-3aecff94659ebdee",
-  "run_id": "run-e3a-3aecff94659ebdee",
+  "result_fingerprint": "f65b0abaac9d32c5a0899d63d3b36c67caee2ebde38f3cc1bbf4f3a58546367f",
+  "result_id": "result.run-e3a-4677dc562ec61ee7",
+  "run_id": "run-e3a-4677dc562ec61ee7",
   "run_stage": "completed",
   "sources_zh": [
    "生活事实：E1 结算记录（钱、岗位、住房、食品、服务月份）与月度资源账（本人家务小时）",

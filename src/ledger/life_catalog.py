@@ -42,6 +42,7 @@ from common.life_contracts import (
     CityLifeCatalog,
     ContractModel,
     FunctionKind,
+    Holding,
     ItemRole,
     LifeContractError,
     LifeOpportunity,
@@ -1353,6 +1354,14 @@ def _resource_plan_problems(
     return out
 
 
+def _replaces_after_expiry(h: Holding, item: ActionItem, year: int) -> bool:
+    """同一件耐用品到期之后再买一件替换（DECISIONS/0041）：年初已在服务期内、剩余 r 个月，购买月晚于 r。旧的到期后不再带入
+    下一年，新的从购买月起算自己的寿命——两件的服务月不重叠，寿命不叠加、不重置。"""
+    if h.in_service_from_year is not None and h.in_service_from_year > year:
+        return False
+    return item.month is not None and item.month > (h.effective_remaining_months or 0)
+
+
 def plan_state_problems(
     protocol: LifeProtocol, state: PersonYearState, action: YearAction, catalog: CityLifeCatalog
 ) -> list[SettlementProblem]:
@@ -1385,11 +1394,16 @@ def plan_state_problems(
             continue
         role = item_role(catalog, o)
         oid = o.opportunity_id
-        if role == "durable_good" and oid in held:
+        if (
+            role == "durable_good"
+            and oid in held
+            and not _replaces_after_expiry(held[oid], item, state.year_index)
+        ):
             out.append(
                 _p(
                     "already_held",
-                    f"{who}/{oid}: 已持有同一物品；本轮不支持把不同剩余期限的同种物品叠成一件",
+                    f"{who}/{oid}: 已持有同一物品、购买月它还在服务期内；本轮不支持把不同剩余期限的同种物品叠成一件"
+                    "——要替换，就在它到期之后的月份再买",
                     item_order=i,
                 )
             )
@@ -1476,7 +1490,10 @@ def internal_leak_problems(where: str, o: LifeOpportunity) -> list[str]:
 
 
 def life_facet_vocabulary_problems(bundle: LifeBundle, where: str, o: LifeOpportunity) -> list[str]:
-    """生活扩展的公开事实只能用词表里声明过的键（菜系、活动类别、装备能力、享受功能）；说明文字里不能藏内部评分对象。"""
+    """生活扩展的公开事实只能用词表里声明过的键（菜系、活动类别、装备能力、享受功能）。
+
+    这些事实是严格的类型（多出的字段在解析时就被拒绝），里面只有数字、词表键与说明文字；说明文字（覆盖依据、时间依据、
+    备注）是审计信息，不进代理视野（``agentlayer.life_views`` 逐字段复制时不带它们）。"""
     out: list[str] = []
 
     def need(keys: tuple[str, ...] | list[str], vocab: tuple[str, ...], name: str) -> None:
@@ -1484,24 +1501,15 @@ def life_facet_vocabulary_problems(bundle: LifeBundle, where: str, o: LifeOpport
             if k not in vocab:
                 out.append(f"{where}: {name} {k!r} 没有在词表里声明")
 
-    texts: dict[str, object] = {}
     if o.food_plan is not None:
         need([p.cuisine for p in o.food_plan.parts if p.cuisine], bundle.cuisines, "菜系")
-        texts["food_plan"] = o.food_plan.coverage_basis + " " + o.food_plan.time_basis
     if o.activity is not None:
         a = o.activity
         need([a.primary_category, *a.tags], bundle.leisure_categories, "活动类别")
         need([*a.requires, *a.kit_provides], bundle.capabilities, "装备能力")
-        texts["activity"] = a.time_basis
     if o.equipment is not None:
         need(list(o.equipment.provides), bundle.capabilities, "装备能力")
-        texts["equipment"] = o.equipment.note
     need([e.function for e in o.enjoyment], bundle.enjoyment_functions, "享受功能")
-    for e in o.enjoyment:
-        texts[f"enjoyment.{e.function}"] = e.basis
-    hidden = serialized_internal(texts)
-    if hidden is not None:
-        out.append(f"{where}: 生活事实的说明里藏着原样序列化的内部评分对象 {hidden}")
     return out
 
 

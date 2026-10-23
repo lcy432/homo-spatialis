@@ -1053,6 +1053,7 @@ def _fact_lines(fb: VisibleFeedback) -> list[str]:
         )
     if fb.health.stop is not None:
         lines.append(fb.health.stop)
+    lines.extend(_participation_lines(y, fb))
     for e in fb.executed:
         if e.status in ("rejected", "partially_executed", "not_reached", "cancelled_when_ill"):
             why = "" if not e.reason else f"：{e.reason}"
@@ -1063,9 +1064,35 @@ def _fact_lines(fb: VisibleFeedback) -> list[str]:
     return lines
 
 
+def _participation_lines(y: int, fb: VisibleFeedback) -> list[str]:
+    """每项活动一条：实际参加的月份、次数与参与小时，暂停与没能进行的月份（原因）。只有事实，没有满足感。"""
+    by: dict[str, list[Any]] = {}
+    for p in fb.participation:
+        by.setdefault(p.opportunity_id, []).append(p)
+    out: list[str] = []
+    for oid, rows in by.items():
+        done = [p for p in rows if p.status == "completed"]
+        text = f"第 {y} 年：活动 {oid}"
+        if done:
+            text += (
+                f" 参加的月份 {month_ranges([p.month for p in done])}，共 {sum(p.sessions for p in done):g} 次、"
+                f"{sum(p.participation_hours for p in done):g} 参与小时"
+            )
+        paused = [p.month for p in rows if p.status == "paused"]
+        if paused:
+            text += f"；生病暂停的月份 {month_ranges(paused)}"
+        failed = [p for p in rows if p.status == "failed"]
+        if failed:
+            text += (
+                f"；没能进行的月份 {month_ranges([p.month for p in failed])}（{failed[0].reason}）"
+            )
+        out.append(text)
+    return out
+
+
 MEMORY_RULE = (
     f"记忆政策 {MEMORY_POLICY_VERSION}：事实取自每一年的可见反馈（环境记录），保留最近 {MEMORY_FACT_YEARS} 年、每年最多 "
-    f"{MAX_MEMORY_FACTS_PER_YEAR} 条（按 现金与状态 → 收支 → 岗位 → 学习 → 健康 → 被拒或暂停的行动 → 目标 → 说明 的固定顺序），"
+    f"{MAX_MEMORY_FACTS_PER_YEAR} 条（按 现金与状态 → 收支 → 岗位 → 学习 → 健康 → 活动参与 → 被拒或暂停的行动 → 目标 → 说明 的固定顺序），"
     f"每条最多 {MAX_MEMORY_FACT_CHARS} 字；代理自述只保留上一年被接受计划的需求摘要（{MAX_SELF_REPORT_NEED_CHARS} 字内）与理由"
     f"（{MAX_SELF_REPORT_RATIONALE_CHARS} 字内）。超出部分截断并写明；用户陈述不经过这一层。完整轨迹在审计记录里"
 )

@@ -23,7 +23,7 @@ import yaml
 from pydantic import Field, ValidationError
 
 from common.life_contracts import CityLifeCatalog, ContractModel, LifeContractError
-from common.life_evaluation_contracts import EvaluationSpec
+from common.life_evaluation_contracts import CitySlotBinding, EvaluationSpec
 from ledger.life_catalog import LifeBundle, item_role
 from ledger.life_scoring_config import ScoringConfig
 
@@ -34,6 +34,7 @@ SLOT_SETTLEMENT_ROLE = {
     "food": "food",
     "service": "periodic_service",
     "durable": "durable_good",
+    "activity": "experience",
 }
 
 
@@ -80,6 +81,44 @@ def city_binding_problems(spec: EvaluationSpec, catalog: CityLifeCatalog) -> lis
                 f"{where}: {o.opportunity_id} 在结算里是 {got}，槽位要的是 {want}"
                 "（住房与食品按城市最低生活声明的合格名单认定，不看类别名）"
             )
+        elif want == "experience" and o.activity is None:
+            out.append(
+                f"{where}: {o.opportunity_id} 没有活动事实（activity），不能当参考生活里的爱好活动"
+            )
+    out.extend(_activity_use_problems(spec, binding, catalog))
+    return out
+
+
+def _activity_use_problems(
+    spec: EvaluationSpec, binding: CitySlotBinding, catalog: CityLifeCatalog
+) -> list[str]:
+    """模板里的爱好活动（DECISIONS/0041）：替换或新买的装备必须提供活动需要的能力，而且买下当月就能用——否则模板按规则买了
+    也用不上，估值会悄悄少算一段活动。"""
+    out: list[str] = []
+    for p in spec.life_templates:
+        for u in p.activity_uses:
+            if u.equipment_slot is None:
+                continue
+            act, gear = binding.target(u.activity_slot), binding.target(u.equipment_slot)
+            if (
+                act is None
+                or gear is None
+                or act.status != "opportunity"
+                or gear.status != "opportunity"
+            ):
+                continue
+            a, g = catalog.opportunity(act.opportunity_id), catalog.opportunity(gear.opportunity_id)
+            if a is None or g is None or a.activity is None:
+                continue
+            where = f"{catalog.city} 模板 {p.template_id} 的活动 {u.activity_slot}"
+            need = set(a.activity.requires) - set(a.activity.kit_provides)
+            have = set(g.equipment.provides) if g.equipment is not None else set()
+            if need - have:
+                out.append(
+                    f"{where}: 装备 {g.opportunity_id} 不提供需要的能力 {sorted(need - have)}"
+                )
+            if g.duration.effective_from == "next_year":
+                out.append(f"{where}: 装备 {g.opportunity_id} 下一年才生效，估值期里买了也用不上")
     return out
 
 

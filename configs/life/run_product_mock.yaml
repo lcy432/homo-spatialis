@@ -20,6 +20,7 @@ run:
     show_stated_material_points: true
     permission_version: e3a-product-v1
     show_health_answers: true
+    show_interests: true
   planning:
     plans_per_year: 1
     max_revisions_per_year: 2
@@ -36,5 +37,5 @@ run:
       note: 可控的确定性模拟代理（六维产品画像版规则）：只检查接线、状态传递与信息隔离，不代表任何真实模型的能力；读六维精确点数与物质分配，M5 按公开报价、寿命与残余时间挑设备或按月服务；应急是固定测试政策（小病、大病都 treat_if_possible），不从健康回答推断
     scripts: []
   prompt_template: e3a-product-prompt-v2
-  memory_policy: e1-7a-memory-v1
+  memory_policy: e1-life-memory-v2
   note: 产品协议样例的 mock 运行（2 个分身、3 年），零网络调用、零费用。

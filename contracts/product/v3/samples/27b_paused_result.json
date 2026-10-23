@@ -119,7 +119,7 @@
     "clone_ref": "u507.k51.r0",
     "event_chain": [],
     "explanation": {
-     "audit_ref": "run:run-e3a-be09b976f7e758b8 clone:u507.k51.r0 record:failures.json",
+     "audit_ref": "run:run-e3a-f9f9419cb6863447 clone:u507.k51.r0 record:failures.json",
      "category": "program_error",
      "impact_zh": "不进完成者平均；城市的模拟缺失范围把它当作未知（0 到 1 之间都保留），不写成生活出局",
      "next_action_zh": "维护者按审计编号查看内部记录、修复之后用新的运行重跑；这里不显示内部错误内容",
@@ -150,7 +150,7 @@
     "clone_ref": "u507.m52.r0",
     "event_chain": [],
     "explanation": {
-     "audit_ref": "run:run-e3a-be09b976f7e758b8 clone:u507.m52.r0 record:progress.json",
+     "audit_ref": "run:run-e3a-f9f9419cb6863447 clone:u507.m52.r0 record:progress.json",
      "category": "not_run",
      "impact_zh": "不进完成者平均；城市的模拟缺失范围把它当作未知（0 到 1 之间都保留），不写成生活出局",
      "next_action_zh": "批次的问题处理之后，用新的运行重跑",
@@ -252,7 +252,7 @@
    "planner_kind": "mock"
   },
   "preflight": {
-   "preflight_fingerprint": "0e774bcf90af7caf3faa06f4506505a89be9a0ea7bfe0e86b53a84d0cbe71df5",
+   "preflight_fingerprint": "69e4243e7b45492912dd434b2413b5413c56e1f8387b4061e54addf7ac4e6fcf",
    "preflight_id": "preflight.confirmed.draft.u507.r1"
   },
   "reading_guide_zh": [
@@ -266,9 +266,9 @@
    "分数是当前合成模型下、按你确认的陈述偏好计算的结果；小数末位的差异不构成可靠的排序"
   ],
   "real_model_calls": 0,
-  "result_fingerprint": "6ae20985b36ed86782d19552339404ec5a01e7af1b9d81577e3f01f7f108fc5e",
-  "result_id": "result.run-e3a-be09b976f7e758b8",
-  "run_id": "run-e3a-be09b976f7e758b8",
+  "result_fingerprint": "866f26d06ef4305f401bb49de4ac3a4bab3eb6ca8cdc5709d7619bf2c9fd2bf1",
+  "result_id": "result.run-e3a-f9f9419cb6863447",
+  "run_id": "run-e3a-f9f9419cb6863447",
   "run_stage": "paused",
   "sources_zh": [
    "生活事实：E1 结算记录（钱、岗位、住房、食品、服务月份）与月度资源账（本人家务小时）",

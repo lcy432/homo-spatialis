@@ -22,6 +22,7 @@ run:
     show_stated_material_points: true
     permission_version: e3a-product-v1
     show_health_answers: true
+    show_interests: true
   planning:
     plans_per_year: 1
     max_revisions_per_year: 2
@@ -62,5 +63,5 @@ run:
     使用 Claude 订阅额度（auth: claude_subscription，所有者 2026-10-18：先不计算费用）；只受全局规划调用上限约束，
     token 用量照记在请求明细里
   prompt_template: e3a-product-prompt-v2
-  memory_policy: e1-7a-memory-v1
+  memory_policy: e1-life-memory-v2
   note: 产品协议样例的真实 LLM 测试配置（Claude Haiku 5.5）；mock 对照见 run_product_mock.yaml。

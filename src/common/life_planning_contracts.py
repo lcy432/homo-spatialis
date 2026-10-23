@@ -56,7 +56,7 @@ RUN_CONFIG_VERSION_LIVE = "e1-7b-run-v1"
 PROMPT_TEMPLATE_VERSION = "e3a-product-prompt-v2"
 ACTION_GUIDE_VERSION = "e3a-product-action-guide-v2"
 PROMPT_TEMPLATE_GUIDES: dict[str, str] = {PROMPT_TEMPLATE_VERSION: ACTION_GUIDE_VERSION}
-MEMORY_POLICY_VERSION = "e1-7a-memory-v1"
+MEMORY_POLICY_VERSION = "e1-life-memory-v2"
 #: 执行修订（DECISIONS/0030 第六节、0031 第八节）：恢复前逐条核对归档记录、核对实际规划器的有效设置、服务记录一致性检查、实际
 #: 预算与声明及账本历史的核对。记在运行清单里；改执行语义就换修订号。
 EXECUTION_REVISION = "e1-7b-r2"
@@ -84,7 +84,7 @@ DEVELOPER_NOTE_MARKERS: tuple[str, ...] = (
 MAX_NEED_SUMMARY_CHARS = 400
 MAX_RESPONSE_CHARS = 20000
 MAX_PREVIOUS_OUTPUT_CHARS = 4000
-#: 记忆政策 e1-7a-memory-v1（AG-04）：事实按年保留最近 3 年、每年至多 8 条、每条 240 字；代理自述只保留上一年，摘要 200 字、
+#: 记忆政策 e1-life-memory-v2（AG-04；v2 多了活动参与事实，DECISIONS/0041）：事实按年保留最近 3 年、每年至多 8 条、每条 240 字；代理自述只保留上一年，摘要 200 字、
 #: 理由 400 字。超出部分按固定规则截断并写明，不静默丢弃；用户陈述（点数、硬要求、文字）不经过这一层，不会被截断。
 MEMORY_FACT_YEARS = 3
 MAX_MEMORY_FACTS_PER_YEAR = 8
@@ -197,7 +197,7 @@ class SelfReport(ContractModel):
 class VisibleMemory(ContractModel):
     """本分身获准看到的记忆（规划上下文里有长度上限；完整轨迹在审计记录里）。"""
 
-    policy_version: Literal["e1-7a-memory-v1"]
+    policy_version: Literal["e1-life-memory-v2"]
     rule: str = Field(min_length=1, max_length=600)
     facts: tuple[MemoryFact, ...] = ()
     self_reports: tuple[SelfReport, ...] = ()
@@ -548,6 +548,8 @@ class InformationSetting(ContractModel):
     permission_version: str = Field(min_length=1, max_length=60)
     #: 六维产品画像的独立健康回答是否可见（DECISIONS/0034）。
     show_health_answers: bool
+    #: 确认的休闲兴趣与口味是否可见（DECISIONS/0041）。
+    show_interests: bool
 
 
 class PlanningPolicy(ContractModel):
@@ -579,7 +581,7 @@ class LifeRunConfig(ContractModel):
     planning: PlanningPolicy
     planner: PlannerSpec
     prompt_template: str = Field(min_length=1, max_length=60)
-    memory_policy: Literal["e1-7a-memory-v1"]
+    memory_policy: Literal["e1-life-memory-v2"]
     #: E1-7B：真实模型运行的付费预算（mock 运行不写）。
     paid_budget: PaidBudget | None = Field(default=None, exclude_if=lambda v: v is None)
     #: 计费可选（2026-10-18，DECISIONS/0035）：真实模型运行不记账时必须写明理由（例如用订阅额度、只是本机抽查），与 paid_budget

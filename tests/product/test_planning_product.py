@@ -34,6 +34,7 @@ def permission(**kw) -> ObservationPermission:
         show_stated_material_points=True,
         permission_version="e3a-product-v1",
         show_health_answers=True,
+        show_interests=True,
     )
     base.update(kw)
     return ObservationPermission(**base)

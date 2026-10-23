@@ -11,6 +11,7 @@
 
 from __future__ import annotations
 
+import copy
 import math
 
 import pytest
@@ -674,3 +675,417 @@ def test_story_a_free_favorite_beats_a_pricey_unmatched_activity(bundle, scoring
     assert comp(choir, 6, "leisure").s > comp(gallery, 6, "leisure").s
     assert math.isclose(comp(choir, 6, "leisure").s, 7 / 19, abs_tol=TOL)
     assert math.isclose(comp(gallery, 6, "leisure").s, 6 / 18, abs_tol=TOL)
+
+
+# --------------------------------------------------------------------------- 9. 期末参考生活用上期末装备
+
+
+def three_years(bundle, scoring, extra_of) -> list:
+    """K51 分身过满三年：远处住房、基本食品、全职文员，加上 extra_of(年份) 给的行动。"""
+    st, out = bundle.initial_state(CLONE_K), []
+    for y in (1, 2, 3):
+        r = live_year(bundle, scoring, st, plan(extra=extra_of(y)))
+        out.append(r)
+        st = r.next_state
+    return out
+
+
+def value(bundle, scoring, evaluation, results, catalog=None, spec=None):
+    from econ.life_terminal_value import value_terminal
+
+    from .conftest import scoring_inputs, tax_for
+
+    return value_terminal(
+        spec=spec or evaluation,
+        protocol=bundle.protocol,
+        catalog=catalog or bundle.catalog_for(K51),
+        tax=tax_for(bundle, K51),
+        scoring=scoring_inputs(bundle, scoring, K51),
+        terminal=results[-1].next_state,
+        last_year=results[-1]._scored_year,
+        trajectory_status="complete",
+    )
+
+
+def plan_of(valuation, plan_id: str):
+    return next(p for p in valuation.plans if p.plan_id == plan_id)
+
+
+def slot(p, slot_id: str):
+    return [i for i in p.items if i.plan_slot == slot_id]
+
+
+@pytest.fixture(scope="module")
+def lives(bundle, scoring):
+    """三种期末：没有吉他；第 1 年 6 月买的吉他（期末还剩 5 个月）；第 3 年 1 月买的吉他（还剩 24 个月）；外加一把舒适椅。"""
+    return {
+        "none": three_years(bundle, scoring, lambda y: []),
+        "short": three_years(
+            bundle, scoring, lambda y: [once("k51.durable.guitar", 6)] if y == 1 else []
+        ),
+        "long": three_years(
+            bundle, scoring, lambda y: [once("k51.durable.guitar", 1)] if y == 3 else []
+        ),
+        "chair": three_years(
+            bundle, scoring, lambda y: [once("k51.durable.comfort_chair", 1)] if y == 3 else []
+        ),
+    }
+
+
+def test_story_equipment_expires_during_the_reference_period(bundle, scoring, evaluation, lives):
+    (held,) = [
+        h
+        for h in lives["short"][-1].next_state.holdings
+        if h.opportunity_id == "k51.durable.guitar"
+    ]
+    assert held.effective_remaining_months == 5  # 36 − 5 − 12 − 12
+    v = value(bundle, scoring, evaluation, lives["short"])
+    stop, replace = plan_of(v, "p1_current_basic"), plan_of(v, "p2_current_device")
+    (practice,) = slot(stop, "music_practice")
+    assert (
+        practice.months == (1, 2, 3, 4, 5) and practice.quantity == 4 and slot(stop, "guitar") == []
+    )
+    assert any(
+        "还能用 5 个月" in t for t in stop.skipped_purchases
+    )  # 照用到第 5 个月，之后按模板停止
+    (practice,) = slot(replace, "music_practice")
+    (buy,) = slot(replace, "guitar")
+    assert practice.months == tuple(range(1, 13)) and buy.month == 6  # 到期后的下一个月换一把
+    assert stop.status == replace.status == "complete", (stop.reasons, replace.reasons)
+
+
+def test_held_equipment_is_used_by_ability_even_if_no_longer_sold(
+    bundle, scoring, evaluation, lives
+):
+    gone = patched(bundle, "k51.durable.guitar", availability="unavailable", price=None)
+    v = value(bundle, scoring, evaluation, lives["long"], catalog=gone)
+    for pid in ("p1_current_basic", "p2_current_device"):
+        p = plan_of(v, pid)
+        assert p.status == "complete" and slot(p, "guitar") == []
+        assert slot(p, "music_practice")[0].months == tuple(range(1, 13))
+        assert any("覆盖整个估值期" in t for t in p.skipped_purchases)
+
+
+def test_without_equipment_the_template_neither_buys_nor_schedules(
+    bundle, scoring, evaluation, lives
+):
+    v = value(bundle, scoring, evaluation, lives["none"])
+    for p in v.plans:
+        if p.status == "complete":
+            assert slot(p, "music_practice") == [] and slot(p, "guitar") == []
+            assert any("模板不买" in t for t in p.skipped_purchases)
+
+
+def test_equipment_and_comfort_count_through_use_not_purchase_price(
+    bundle, scoring, evaluation, lives
+):
+    base = value(bundle, scoring, evaluation, lives["none"])
+    guitar = value(bundle, scoring, evaluation, lives["long"])
+    chair = value(bundle, scoring, evaluation, lives["chair"])
+    p1 = "p1_current_basic"
+    assert (
+        plan_of(guitar, p1).v_plan.fraction() > plan_of(base, p1).v_plan.fraction()
+    )  # 练琴的参与小时
+    assert (
+        plan_of(chair, p1).v_plan.fraction() > plan_of(base, p1).v_plan.fraction()
+    )  # 在用的舒适椅
+    dear = patched(
+        bundle,
+        "k51.durable.guitar",
+        price={"amount": {"amount": 2400, "numeraire": "USD_2024_LOCAL"}},
+    )
+    pricier = value(bundle, scoring, evaluation, lives["long"], catalog=dear)
+    assert plan_of(pricier, p1).v_plan == plan_of(guitar, p1).v_plan  # 购买价不进估值
+
+
+def test_capabilities_no_template_uses_are_reported_as_a_scope_gap(bundle, evaluation, lives):
+    from econ.life_terminal_value import capability_scope_gaps
+
+    terminal, catalog = lives["long"][-1].next_state, bundle.catalog_for(K51)
+    assert capability_scope_gaps(terminal, evaluation, catalog) == []
+    bare = evaluation.model_copy(
+        update={
+            "life_templates": tuple(
+                t.model_copy(update={"activity_uses": ()}) for t in evaluation.life_templates
+            )
+        }
+    )
+    (gap,) = capability_scope_gaps(terminal, bare, catalog)
+    assert "guitar_playable" in gap and "范围缺口" in gap
+
+
+def test_every_city_binds_the_same_hobby_and_enjoyment_slots(evaluation):
+    for b in evaluation.city_bindings:
+        assert {t.slot_id for t in b.targets} >= {"music_practice", "guitar", "massage"}
+        assert all(
+            t.status == "opportunity"
+            for t in b.targets
+            if t.slot_id in ("music_practice", "guitar", "massage")
+        )
+
+
+def test_an_expired_item_can_be_replaced_later_in_the_same_year(bundle, scoring, start):
+    """真实生活里也一样：寿命一年的吉他第 1 年 6 月买、第 2 年第 5 个月到期；第 2 年 6 月再买一把接着练。到期之前再买同一件
+    仍然拒绝（不把不同剩余期限的同种物品叠成一件）。"""
+    short = patched(
+        bundle, "k51.durable.guitar", duration={"kind": "durable_good", "lasts_years": 1}
+    )
+    y1 = live_year(
+        bundle, scoring, start, plan(extra=[once("k51.durable.guitar", 6)]), catalog=short
+    )
+    practice = {"opportunity_id": "k51.experience.guitar_practice", "quantity": 1, "months": [4, 8]}
+    y2 = live_year(
+        bundle,
+        scoring,
+        y1.next_state,
+        plan(extra=[once("k51.durable.guitar", 6), practice]),
+        catalog=short,
+    )
+    spans = [
+        (h.covered_months, h.expired)
+        for h in y2.settlement.outcome.holdings_service
+        if h.opportunity_id == "k51.durable.guitar"
+    ]
+    assert spans == [((1, 2, 3, 4, 5), True), (tuple(range(6, 13)), False)]  # 服务月不重叠
+    assert {p.month: p.status for p in parts(y2, "k51.experience.guitar_practice")} == {
+        4: "completed",
+        8: "completed",
+    }
+    (held,) = y2.next_state.holdings
+    assert held.effective_remaining_months == 5  # 新的一把从 6 月起算自己的 12 个月
+    early = live_year(
+        bundle, scoring, y1.next_state, plan(extra=[once("k51.durable.guitar", 3)]), catalog=short
+    )
+    assert [p.code for p in early.settlement.problems] == ["already_held"]
+
+
+# --------------------------------------------------------------------------- 10. 信息隔离
+
+
+def request_for(bundle, scoring, *, permission=None, memory_years=(), state=None):
+    from agentlayer.life_planning import build_memory, build_request, request_payload
+    from agentlayer.life_views import standard_product_permission
+    from ledger.life_city_facts import load_city_facts
+
+    from .planning_support import FACTS
+
+    state = state or bundle.initial_state(CLONE_K)
+    catalog = bundle.catalog_for(K51)
+    req = build_request(
+        request_id="iso/1",
+        attempt=1,
+        attempts_allowed=3,
+        permission=permission or standard_product_permission("test-product"),
+        profile=bundle.profile_for(state.person_id),
+        state=state,
+        catalog=catalog,
+        protocol=bundle.protocol,
+        facts=load_city_facts(FACTS, bundle, scoring).sheet_for(K51),
+        memory=build_memory(
+            clone_id=state.clone_id,
+            city=K51,
+            current_year=state.year_index,
+            years=list(memory_years),
+        ),
+        last_feedback=memory_years[-1].feedback if memory_years else None,
+        revision=None,
+        tax_policy=bundle.tax_policy(catalog.tax_policy_id),
+        prompt_template="e3a-product-prompt-v2",
+    )
+    return request_payload(req)
+
+
+def keys_of(value, out=None) -> set[str]:
+    out = set() if out is None else out
+    if isinstance(value, dict):
+        for k, v in value.items():
+            out.add(k)
+            keys_of(v, out)
+    elif isinstance(value, list):
+        for v in value:
+            keys_of(v, out)
+    return out
+
+
+#: 评分侧的名字：参数、规则编号、规格与评价身份（任何一个出现在请求里都是泄漏）
+SCORING_TEXT = (
+    "food_life_fresh_taste_v1",
+    "enjoyment_by_function_v1",
+    "participation_hours_interest_match_v1",
+    "score.e1-life.explore",
+    "eval.e1-life.main",
+    "p1_current_basic",
+    "weighted_hours",
+    "match_bonus",
+    "eta_taste",
+    "eta_fresh",
+    "eta_hour",
+)
+
+
+def test_the_request_shows_life_facts_and_interests_but_no_scoring_internals(bundle, scoring):
+    import json
+
+    from common.life_scoring_contracts import RESERVED_SCORING_KEYS
+
+    payload = request_for(bundle, scoring)
+    opps = {o["opportunity_id"]: o for o in payload["observation"]["opportunities"]}
+    plan_ = opps["k51.food.home_and_dining"]["food_plan"]
+    assert [
+        (p["mode"], p["meals_per_week"], p["fresh_meals_per_week"]) for p in plan_["parts"]
+    ] == [
+        ("home_cooked", 17.0, 10.0),
+        ("dine_out", 4.0, 4.0),
+    ]
+    assert opps["k51.durable.guitar"]["equipment"] == {"provides": ["guitar_playable"]}
+    assert opps["k51.experience.guitar_practice"]["activity"]["requires"] == ["guitar_playable"]
+    assert opps["k51.experience.tennis_with_rental"]["activity"]["kit_provides"] == [
+        "racket_playable"
+    ]
+    assert opps["k51.service.massage"]["enjoyment"][0]["function"] == "personal_care"
+    profile = payload["observation"]["profile"]
+    assert (profile["leisure_interests"], profile["cuisines"]) == (["music"], ["sichuan"])
+    assert any("牌子" in r for r in profile["unsupported_requests"])
+    text = json.dumps(payload, ensure_ascii=False)
+    assert not keys_of(payload) & RESERVED_SCORING_KEYS
+    assert [t for t in SCORING_TEXT if t in text] == []
+    assert scoring.spec.content_fingerprint not in text
+    hidden = request_for(
+        bundle,
+        scoring,
+        permission=standard_permission().model_copy(update={"show_interests": False}),
+    )["observation"]["profile"]
+    assert "leisure_interests" not in hidden and "interests" in hidden["not_permitted"]
+
+
+def standard_permission():
+    from agentlayer.life_views import standard_product_permission
+
+    return standard_product_permission("test-product")
+
+
+def test_feedback_and_memory_carry_participation_facts_without_scores(bundle, scoring, start):
+    import json
+
+    from agentlayer.life_planning import MemoryYear
+    from agentlayer.life_views import visible_feedback
+
+    y = live_year(
+        bundle,
+        scoring,
+        start,
+        plan(
+            extra=[
+                {
+                    "opportunity_id": "k51.experience.community_choir",
+                    "quantity": 1,
+                    "months": [4, 9],
+                },
+                {"opportunity_id": "k51.experience.guitar_practice", "quantity": 1, "months": [6]},
+            ]
+        ),
+    )
+    fb = visible_feedback(y.settlement)
+    rows = {(p.opportunity_id, p.month): p.status for p in fb.participation}
+    assert rows == {
+        ("k51.experience.community_choir", 4): "completed",
+        ("k51.experience.community_choir", 9): "completed",
+        ("k51.experience.guitar_practice", 6): "failed",
+    }
+    memory = MemoryYear(
+        clone_id=CLONE_K, city=K51, year_index=1, feedback=fb, need_summary="测试", rationale="测试"
+    )
+    payload = request_for(bundle, scoring, memory_years=[memory], state=y.next_state)
+    facts = [f["text"] for f in payload["memory"]["facts"]]
+    assert (
+        "第 1 年：活动 k51.experience.community_choir 参加的月份 4、9 月，共 2 个月，共 2 次、4 参与小时"
+        in facts
+    )
+    assert any("k51.experience.guitar_practice" in t and "没能进行的月份 6" in t for t in facts)
+    text = json.dumps(payload, ensure_ascii=False)
+    assert [t for t in SCORING_TEXT if t in text] == []
+    assert '"s":' not in text and '"z":' not in text  # 参与只有事实，没有满足感
+
+
+def test_nested_internal_fields_are_refused(raw):
+    from pydantic import ValidationError
+
+    from ledger.life_catalog import cross_validate, parse_bundle
+
+    from .conftest import opportunity
+
+    bad = copy.deepcopy(raw)
+    opportunity(bad, "k51.experience.community_choir")["activity"]["match_bonus"] = 0.5
+    with pytest.raises((ValidationError, ValueError)):
+        parse_bundle(bad)
+    bad = copy.deepcopy(raw)
+    opportunity(bad, "k51.food.sichuan_home")["food_plan"]["parts"][0]["eta_taste"] = 0.5
+    with pytest.raises((ValidationError, ValueError)):
+        parse_bundle(bad)
+    bad = copy.deepcopy(raw)
+    opportunity(bad, "k51.experience.community_choir")["activity"]["primary_category"] = (
+        "secret_bonus"
+    )
+    report = cross_validate(parse_bundle(bad))
+    assert any("secret_bonus" in e for e in report.errors)  # 词表外的类别：不能偷偷带进匹配
+
+
+# --------------------------------------------------------------------------- 11. 新语义进入身份；重放没有副作用
+
+
+def test_new_coefficients_templates_and_interests_change_the_identities(
+    bundle, scoring, evaluation
+):
+    from common.life_scoring_contracts import scoring_content_problems
+
+    spec = scoring.spec
+    leisure = spec.component("leisure")
+    bumped = spec.model_copy(
+        update={
+            "components": tuple(
+                c.model_copy(
+                    update={
+                        "participation": c.participation.model_copy(update={"match_bonus": 0.6})
+                    }
+                )
+                if c.component_id == "leisure"
+                else c
+                for c in spec.components
+            )
+        }
+    )
+    assert leisure.participation.match_bonus == 0.5
+    assert bumped.content_fingerprint != spec.content_fingerprint
+    assert scoring_content_problems(
+        bundle.protocol.energy_feedback, bumped
+    )  # 反馈政策拒绝：要重新预检
+    assert scoring_content_problems(bundle.protocol.energy_feedback, spec) == []
+    bare = evaluation.model_copy(
+        update={
+            "life_templates": tuple(
+                t.model_copy(update={"activity_uses": ()}) for t in evaluation.life_templates
+            )
+        }
+    )
+    assert bare.content_fingerprint != evaluation.content_fingerprint
+    from econ.life_scoring import preference_from_confirmed_profile
+
+    p = bundle.product_profiles[0]
+    assert preference_from_confirmed_profile(p) != preference_from_confirmed_profile(
+        neutral(bundle)
+    )
+
+
+def test_replaying_a_year_with_equipment_gives_the_same_life(bundle, scoring, start):
+    items = plan(
+        extra=[
+            once("k51.durable.guitar", 2),
+            {"opportunity_id": "k51.experience.guitar_practice", "quantity": 2, "months": [2, 7]},
+        ]
+    )
+    a = live_year(bundle, scoring, start, items)
+    b = live_year(bundle, scoring, start, items)
+    assert a.binding_fingerprint == b.binding_fingerprint  # 结算、评分与候选状态逐字节相同
+    assert expenses(a, "k51.durable.guitar") == 24000  # 只买了一次
+    (held,) = [h for h in a.next_state.holdings if h.opportunity_id == "k51.durable.guitar"]
+    assert held.quantity == 1 and held.effective_remaining_months == 36 - 11

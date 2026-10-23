@@ -117,6 +117,7 @@ from common.life_contracts import (
     VisibleHealthYear,
     VisibleLearning,
     VisibleMonthResources,
+    VisibleParticipation,
     VisiblePause,
     VisiblePosition,
     VisibleSavingsYear,
@@ -150,6 +151,8 @@ class ObservationPermission(ContractModel):
     permission_version: str = Field(min_length=1)
     #: 独立健康回答是否可见（DECISIONS/0034）。
     show_health_answers: bool
+    #: 用户确认的休闲兴趣与口味、本版未支持的原文是否可见（DECISIONS/0041）。
+    show_interests: bool
 
 
 def standard_product_permission(permission_version: str) -> ObservationPermission:
@@ -172,37 +175,94 @@ def standard_product_permission(permission_version: str) -> ObservationPermissio
         show_stated_material_points=True,
         permission_version=permission_version,
         show_health_answers=True,
+        show_interests=True,
     )
 
 
 # ---------------------------------------------------------------------- 可见的形状
 
 
+class VisibleFoodPart(ContractModel):
+    part_id: str
+    mode: str
+    meals_per_week: float
+    fresh_meals_per_week: float
+    cuisine: str | None = Field(default=None, exclude_if=lambda v: v is None)
+
+
+class VisibleFoodPlan(ContractModel):
+    """一个月的完整食品方案（DECISIONS/0041）。月费已含方案里的外食；时间写在做饭与外食小时里。
+
+    目录里的说明文字（覆盖依据、时间依据、各部分备注）是审计信息，不复制：同样的意思已经在机会的 ``quality`` 与
+    ``time_energy.note`` 里（也让请求不超过输入长度上限）。"""
+
+    covers_basic_month: bool
+    meals_per_week: float
+    parts: tuple[VisibleFoodPart, ...]
+    prep_hours_per_month: float
+    dining_hours_per_month: float
+
+
+class VisibleEnjoyment(ContractModel):
+    """一项东西实际提供的享受（功能、方式、每月份数）。不含任何评分系数；依据文字不复制（见 ``VisibleFoodPlan``）。"""
+
+    function: str
+    mode: str
+    units_per_month: float | None = Field(default=None, exclude_if=lambda v: v is None)
+    unit_label: str | None = Field(default=None, exclude_if=lambda v: v is None)
+
+
+class VisibleEquipment(ContractModel):
+    provides: tuple[str, ...]
+
+
+class VisibleActivity(ContractModel):
+    """一次休闲活动的公开事实：类别、参与与准备往返小时、需要的装备能力、套餐本次提供的能力（空的不序列化）。"""
+
+    primary_category: str
+    tags: tuple[str, ...] = Field(default=(), exclude_if=lambda v: v == ())
+    participation_hours: float
+    overhead_hours: float
+    requires: tuple[str, ...] = Field(default=(), exclude_if=lambda v: v == ())
+    kit_provides: tuple[str, ...] = Field(default=(), exclude_if=lambda v: v == ())
+
+
 class VisibleOpportunity(ContractModel):
+    """一项机会的公开事实（逐字段复制）。空的事实——没有规格、没有工资、不是岗位、没有资格标签、没有安排选项、没有属性、
+    学完不授予能力——不序列化：键不出现就是“没有”，不是“未知”（生活扩展把样例目录扩大了一倍，这样请求才不超过输入长度
+    上限）。价格照常写出：``null`` 是没有报价（缺货或资料未知，见 ``availability``）。"""
+
     opportunity_id: str
     category: str
     label: str
-    spec: dict[str, str | int | float | bool]
+    spec: dict[str, str | int | float | bool] = Field(exclude_if=lambda v: not v)
     unit: str
     quality: str
     availability: Literal["available", "unavailable", "unknown"]
     price: PriceQuote | None
-    compensation: PriceQuote | None
-    occupation: OccupationId | None
-    eligibility: tuple[str, ...]
-    arrangement_options: dict[str, tuple[str | int | float | bool, ...]]
+    compensation: PriceQuote | None = Field(exclude_if=lambda v: v is None)
+    occupation: OccupationId | None = Field(exclude_if=lambda v: v is None)
+    eligibility: tuple[str, ...] = Field(exclude_if=lambda v: not v)
+    arrangement_options: dict[str, tuple[str | int | float | bool, ...]] = Field(
+        exclude_if=lambda v: not v
+    )
     duration: DurationSpec
     #: E1-3 增补：需求功能与方案属性是做计划要用的事实（属性本轮不评价，但可以知道）。
     functions: tuple[str, ...]
-    attributes: dict[str, str | int | float | bool]
+    attributes: dict[str, str | int | float | bool] = Field(exclude_if=lambda v: not v)
     #: E1-4A：公开的时间与精力事实（契约里的 ``resource``）——工时与到岗安排、每次或每月的小时、
     #: 使用频率、每小时负担、家务替代。可见字段不叫 resource：免得与溯源信息（source）混淆。
     time_energy: ResourceProfile
     #: 雇主（没有雇主的不序列化）、学习完成后授予的能力，以及"按年初状态现在能不能选、还缺什么"（DECISIONS/0023）。
     employer_id: str | None = Field(default=None, exclude_if=lambda v: v is None)
-    grants: tuple[str, ...]
+    grants: tuple[str, ...] = Field(exclude_if=lambda v: not v)
     #: 没有资格要求的机会不序列化。
     qualification: VisibleQualification | None = Field(default=None, exclude_if=lambda v: v is None)
+    #: 生活扩展（DECISIONS/0041）：食品方案、享受、装备、活动的公开事实。没有的不序列化。
+    food_plan: VisibleFoodPlan | None = Field(default=None, exclude_if=lambda v: v is None)
+    enjoyment: tuple[VisibleEnjoyment, ...] = Field(default=(), exclude_if=lambda v: v == ())
+    equipment: VisibleEquipment | None = Field(default=None, exclude_if=lambda v: v is None)
+    activity: VisibleActivity | None = Field(default=None, exclude_if=lambda v: v is None)
 
 
 class VisibleHolding(ContractModel):
@@ -315,6 +375,14 @@ class VisibleProfile(ContractModel):
     material_allocation: dict[str, str] | None = Field(default=None, exclude_if=lambda v: v is None)
     health_questionnaire_version: str | None = Field(default=None, exclude_if=lambda v: v is None)
     health_answers: tuple[VisibleHealthAnswer, ...] | None = Field(
+        default=None, exclude_if=lambda v: v is None
+    )
+    #: 确认的休闲兴趣与口味（DECISIONS/0041）：只有 confirmed 带类别；本版未支持的原文只留存、不评分。
+    leisure_interest_status: str | None = Field(default=None, exclude_if=lambda v: v is None)
+    leisure_interests: tuple[str, ...] | None = Field(default=None, exclude_if=lambda v: v is None)
+    taste_status: str | None = Field(default=None, exclude_if=lambda v: v is None)
+    cuisines: tuple[str, ...] | None = Field(default=None, exclude_if=lambda v: v is None)
+    unsupported_requests: tuple[str, ...] | None = Field(
         default=None, exclude_if=lambda v: v is None
     )
     #: 因为许可没有给出的字段（显式列出，免得“没有这个键”被读成“用户没有回答”）。
@@ -895,6 +963,51 @@ def _visible_opportunity(
         employer_id=o.employer_id,
         grants=tuple(o.grants),
         qualification=_qualification(o, state, catalog, rules),
+        food_plan=None if o.food_plan is None else _visible_food_plan(o.food_plan),
+        enjoyment=tuple(
+            VisibleEnjoyment(
+                function=e.function,
+                mode=e.mode,
+                units_per_month=e.units_per_month,
+                unit_label=e.unit_label,
+            )
+            for e in o.enjoyment
+        ),
+        equipment=None
+        if o.equipment is None
+        else VisibleEquipment(provides=tuple(o.equipment.provides)),
+        activity=None if o.activity is None else _visible_activity(o.activity),
+    )
+
+
+def _visible_food_plan(f: Any) -> VisibleFoodPlan:
+    return VisibleFoodPlan(
+        covers_basic_month=f.covers_basic_month,
+        meals_per_week=f.meals_per_week,
+        parts=tuple(
+            VisibleFoodPart(
+                part_id=x.part_id,
+                mode=x.mode,
+                meals_per_week=x.meals_per_week,
+                fresh_meals_per_week=x.fresh_meals_per_week,
+                cuisine=x.cuisine,
+            )
+            for x in f.parts
+        ),
+        prep_hours_per_month=f.prep_hours_per_month,
+        dining_hours_per_month=f.dining_hours_per_month,
+    )
+
+
+def _visible_activity(a: Any) -> VisibleActivity:
+    # replaces_meals_per_session 不复制：契约只接受 0（代替正餐的套餐在加载时就被拒绝）
+    return VisibleActivity(
+        primary_category=a.primary_category,
+        tags=tuple(a.tags),
+        participation_hours=a.participation_hours,
+        overhead_hours=a.overhead_hours,
+        requires=tuple(a.requires),
+        kit_provides=tuple(a.kit_provides),
     )
 
 
@@ -1158,6 +1271,11 @@ def _visible_product_profile(
         )
         if p.show_health_answers
         else None,
+        leisure_interest_status=profile.leisure_interest_status if p.show_interests else None,
+        leisure_interests=tuple(profile.leisure_interests) if p.show_interests else None,
+        taste_status=profile.taste_status if p.show_interests else None,
+        cuisines=tuple(profile.cuisines) if p.show_interests else None,
+        unsupported_requests=tuple(profile.unsupported_requests) if p.show_interests else None,
         not_permitted=tuple(
             name
             for name, shown in (
@@ -1166,6 +1284,7 @@ def _visible_product_profile(
                 ("health_answers", p.show_health_answers),
                 ("hard_requirements", p.show_hard_requirements),
                 ("free_text", p.show_free_text),
+                ("interests", p.show_interests),
             )
             if not shown
         ),
@@ -1251,6 +1370,20 @@ def visible_feedback(result: SettlementResult) -> VisibleFeedback:
         career=career,
         savings=_visible_savings_year(out.savings),
         health=_visible_health_year(out),
+        participation=tuple(
+            VisibleParticipation(
+                opportunity_id=p.opportunity_id,
+                month=p.month,
+                status=p.status,
+                sessions=p.sessions,
+                participation_hours=p.participation_hours,
+                overhead_hours=p.overhead_hours,
+                equipment_used=tuple(p.equipment_used),
+                kit_capabilities=tuple(p.kit_capabilities),
+                reason=p.reason,
+            )
+            for p in out.participation
+        ),
     )
     assert_payload_clean(feedback)
     return feedback

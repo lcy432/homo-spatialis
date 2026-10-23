@@ -130,6 +130,9 @@ def test_interests_and_brands_do_not_change_points_cash_or_eligibility(pack):
         ),
     )
     assert fan.six_dimensions == plain.six_dimensions and fan.material == plain.material
+    assert (
+        fan.content_fingerprint != plain.content_fingerprint
+    )  # 兴趣是确认内容的一部分：改了要重新确认
     assert fan.money == plain.money and fan.hard_requirements == plain.hard_requirements
     p0, p1 = product_profile(pack, plain, []), product_profile(pack, fan, [])
     assert any("吉他想要某个牌子的" in r for r in p1.unsupported_requests)
