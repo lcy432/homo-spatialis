@@ -1,0 +1,203 @@
+# E3B（DECISIONS/0042 决定 4）：六城的片区、通勤关系表与用车权。资料与编译，不改引擎。
+#
+# 分钟来自 ACS 2024 1 年期 PUMS 的人员记录（实际通勤者）；片区来自官方地理（2020 PUMA 与工作地 PUMA）；公交票价、油耗与用车
+# 费用来自官方或公开网页的摘句。构建时离线核对（与 tax_rules 同一套）：摘句逐字出现在缓存的原始网页里（去掉标签、合并空白），
+# 每个数都出现在它的摘句里；不过就阻断这一城的这种方式，不拿别的数顶替。速度是登记的探索设定（没有可用的观测来源）。
+#
+# 原始网页用 scripts/life_pack_commute.py fetch-costs 获取（显式联网），存在 data/raw/intake/<cache_source>/（不进仓库）。
+# 所有金额是 2024 年当地价（USD_2024_LOCAL），三年都按 2024 年的票价与油价（固定实际价格情景）。
+
+version: commute-us-v1
+money_basis_id: USD_2024_LOCAL
+pums_year: 2024
+
+# intake-02 的冻结库：PUMS、划定与 PUMA 对应文件的指纹按它核对；通勤层与汽油价也从它读。
+intake:
+  build_id: 562c32339bbae67fd1917b7ac67f4b5b28f55d07e88a8c78ee6fe371ed863691
+  default_db: runs/intake/us-v1/work/freeze/562c32339bbae67f/intake.sqlite
+
+# 官方 PUMS 代码表（2020–2024 5 年期，与 2024 1 年期用同一套 2020 年工作地 PUMA）：县 → PUMA → 工作地 PUMA。
+# 1 年期的代码表是旧式 .xls（没有读取它的依赖），5 年期是 .xlsx；构建时核对 2024 年资料里出现的工作地代码都在这张表里。
+codelist:
+  cache_source: census_acs_pums_codelists
+  url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/code_lists/ACSPUMS2020_2024CodeLists.xlsx
+  sha256: 634fdd565249d72f09a8f75d82fe4193b20a09d898ef64a4b8e8039348d52994
+  sheet: Geography Lookup List
+
+method:
+  # 在职（ESR 1、2）、上周不在家工作（JWTRNS ≠ 11）、有通勤分钟（JWMNP > 0）的人。与 intake 的 commute_by_residence_puma@1 同一筛选。
+  employed_esr: [1, 2]
+  min_unweighted_n: 30
+  roundtrip_factor: 2
+  # 每格回退：住处 PUMA 格 → 同一通勤层的居民合并格 → 本城全部居住片区合并格 → 缺（这条线没有这种方式，不当 0 分钟）。
+  # 合并格只给这些方式用，而且这条线本身至少要观测到 min_line_evidence 条用这种方式的记录：步行骑车的分钟强烈依赖距离，
+  # 合并别处住得近的人会让远处的线也“步行 20 分钟”；这条线上一个用户都没有，说明多半没有这种服务。
+  pooled_fallback_modes: [transit, drive]
+  min_line_evidence: 1
+  jwtrns_modes:
+    "1": drive        # Car, truck, or van
+    "2": transit      # Bus
+    "3": transit      # Subway or elevated rail
+    "4": transit      # Long-distance train or commuter rail
+    "5": transit      # Light rail, streetcar, or trolley
+    "6": transit      # Ferryboat
+    "9": walk_bike    # Bicycle
+    "10": walk_bike   # Walked
+  jwtrns_not_modeled:
+    "7": 出租车或网约车
+    "8": 摩托车
+    "12": 其他方式
+  work_areas:
+    rule: powpuma_share_v1
+    # 在本城可支持的工作地（全部所在县都在都会区内、州在税的支持范围内）里，按流入在职者的加权人数排序；份额不低于它的
+    # 工作地 PUMA 各成一个就业片区，其余合并成“其余工作地”。2020 年的工作地 PUMA 在这六个都会区都是按县（或县组）划的。
+    own_area_min_share: 0.05
+
+drive:
+  requires_function: car_access
+  speed_mph:
+    value: 25
+    assumption_id: drive_commute_speed_25mph
+    statement: 开车通勤门到门的平均速度按每小时 25 英里估计里程（探索设定）；各城拥堵的差别只通过分钟进入，不按城市调速度
+  mpg:
+    value: 23.4
+    cite:
+      - {source: fhwa_vm1_2024, quote: "2024 Average miles traveled per gallon of fuel consumed 25.6 44.0 7.5 18.5 8.1 7.1 23.4 7.5 19.2"}
+      - {source: fhwa_vm1_2024, quote: "2024 Interstate Rural 146,051 1,069 1,502 51,572 12,274 59,367 197,623 71,641 271,834"}
+    note: FHWA VM-1（2024）第 7 列“全部轻型车”的每加仑英里数；列的位置用同表里程行核对：短轴距 146,051 + 长轴距 51,572 = 第 7 列 197,623
+  car_access:
+    opportunity_suffix: service.car_access
+    annual:
+      value: 8886
+      cite:
+        - {source: aaa_driving_costs_2024, quote: "This year, the total annual cost to drive a new vehicle 15,000 miles came out to $12,297"}
+        - {source: aaa_driving_costs_2024, quote: "With thriftier price tags and higher fuel efficiency, insurance and gas cost less. Examples include the Honda Civic, Hyundai Elantra, and Toyota Corolla. ANNUAL COST: $8,886"}
+    derivation: 每月 = 小型轿车的年度总费用 8,886 ÷ 12 = 740.50
+    assumption_id: car_access_aaa_small_sedan_2024
+    statement: 用车权的月费 = AAA 2024 年小型轿车（新车、每年 15,000 英里）的年度总费用 ÷ 12；全美平均，不分城市
+
+sources:
+  mta_fares_2023: {cache_source: official_transit_fares_2024, publisher: Metropolitan Transportation Authority, url: "https://www.mta.info/press-release/reminder-new-fares-subway-buses-and-commuter-railroads-begin-aug-20"}
+  lametro_fare_capping_2023: {cache_source: official_transit_fares_2024, publisher: Los Angeles County Metropolitan Transportation Authority, url: "https://www.metro.net/?p=81861"}
+  sfmta_fares: {cache_source: official_transit_fares_2024, publisher: San Francisco Municipal Transportation Agency, url: "https://www.sfmta.com/fares"}
+  cta_fare_chart: {cache_source: official_transit_fares_2024, publisher: Chicago Transit Authority, url: "https://www.transitchicago.com/fares/"}
+  houston_metro_fares: {cache_source: official_transit_fares_2024, publisher: Metropolitan Transit Authority of Harris County, url: "https://www.ridemetro.org/fares/all-about-fares"}
+  kcm_fare_change_2025: {cache_source: official_transit_fares_2024, publisher: King County Metro, url: "https://kingcountymetro.blog/2025/07/28/king-county-metro-water-taxi-and-seattle-streetcar-adult-fares-change-sept-1-2025/"}
+  fhwa_vm1_2024: {cache_source: drive_costs_2024, publisher: Federal Highway Administration, url: "https://www.fhwa.dot.gov/policyinformation/statistics/2024/vm1.cfm"}
+  aaa_driving_costs_2024: {cache_source: drive_costs_2024, publisher: AAA (Automobile Club of Southern California), url: "https://www.ace.aaa.com/content/ace-www/en/automotive/advocacy/cost-of-driving.html"}
+
+# 每座城：居住片区的税支持范围（DECISIONS/0042 决定 5）、工作地支持的州、主要公交机构的 2024 年票价（每次往返 = 两次单程）与
+# 月票（当作公交的月度封顶）。没有月票的城市不封顶。
+cities:
+  - cbsa: "35620"
+    key: nyc
+    label_zh: 纽约
+    home_scope: {counties: ["36005", "36047", "36061", "36081", "36085"]}
+    work_states: ["36"]
+    scope_note: 纽约市五区居民、工作地在纽约州（税的支持范围）
+    transit:
+      agency: MTA 纽约市地铁与本地公交
+      fare:
+        value: 2.90
+        cite:
+          - {source: mta_fares_2023, quote: "The base fare for subways, local buses, the Staten Island Railway and Paratransit will rise to $2.90, up from the current fare of $2.75."}
+          - {source: mta_fares_2023, quote: "new fares take effect Sunday, Aug. 20"}
+      monthly_pass:
+        value: 132
+        cite:
+          - {source: mta_fares_2023, quote: "Under the fare increase, the 30-day unlimited-ride will cost $132.00."}
+      period_note: 2023-08-20 起的票价（页面是 2023 年的新闻稿）
+      not_modeled: [OMNY 每 7 天 34 美元的封顶（每周到岗 5 次以内不触发）, 快线公交 7.00 与通勤铁路（LIRR、Metro-North）按距离计价, 30 天票按 30 天、不是按日历月]
+  - cbsa: "31080"
+    key: la
+    label_zh: 洛杉矶
+    home_scope: {}
+    work_states: ["06"]
+    scope_note: 都会区全在加州
+    transit:
+      agency: 洛杉矶县都会交通局（LA Metro）
+      fare:
+        value: 1.75
+        cite:
+          - {source: lametro_fare_capping_2023, quote: "Base fares for regular riders will remain at $1.75"}
+          - {source: lametro_fare_capping_2023, quote: "until they reach their one-day fare cap of $5 or their seven-day fare cap of $18"}
+      monthly_pass: null
+      period_note: 2023-07-01 起的票价政策（取消月票、改为按日与按 7 天封顶）
+      not_modeled: [每天 5 美元、每 7 天 18 美元的封顶（每天一次往返 3.50、每周 5 次 17.50，都不触发）, 橙县交通局（OCTA）等其他机构的票价]
+  - cbsa: "41860"
+    key: sf
+    label_zh: 旧金山
+    home_scope: {}
+    work_states: ["06"]
+    scope_note: 都会区全在加州
+    transit:
+      agency: 旧金山市交通局（Muni）
+      blocked: 主要公交机构 SFMTA 的官方票价网页拒绝访问（HTTP 403，通用 User-Agent）；不绕过，也不拿别的机构或新闻报道的票价顶替
+      sources: [sfmta_fares]
+      fare: null
+      monthly_pass: null
+      period_note: 没有取得
+      not_modeled: [BART 按距离计价, AC Transit 等其他机构的票价]
+  - cbsa: "16980"
+    key: chi
+    label_zh: 芝加哥
+    home_scope: {states: ["17"]}
+    work_states: ["17"]
+    scope_note: 芝加哥都会区的伊利诺伊州部分（印第安纳不在税的支持范围）
+    transit:
+      agency: 芝加哥交通局（CTA）
+      fare:
+        value: 2.50
+        cite:
+          - {source: cta_fare_chart, quote: "Fare chart effective February 20, 2023 REGULAR FARES"}
+          - {source: cta_fare_chart, quote: "'L' train fare $2.50 * $1.25 $.75 Bus fare 2.25 1.10 .75"}
+      monthly_pass:
+        value: 75
+        cite:
+          - {source: cta_fare_chart, quote: "30-Day CTA/Pace Pass 75 $35"}
+      period_note: 2023-02-20 起的票价表（获取时仍是现行表）；单程取轻轨（'L'）票价，公交 2.25
+      not_modeled: [公交单程 2.25 比轻轨便宜 0.25, Metra 通勤铁路按区间计价, 30 天票按 30 天、不是按日历月]
+  - cbsa: "26420"
+    key: hou
+    label_zh: 休斯敦
+    home_scope: {}
+    work_states: ["48"]
+    scope_note: 都会区全在得州
+    transit:
+      agency: 哈里斯县都会交通局（METRO）
+      fare:
+        value: 1.25
+        cite:
+          - {source: houston_metro_fares, quote: "The regular fare is $1.25 and the discounted fare is 60 cents"}
+          - {source: houston_metro_fares, quote: "The Day Pass is a $3 pass that gives you unlimited rides on METRO Local Bus, METRORail"}
+      monthly_pass: null
+      period_note: 获取时（2026-10）的现行票价，页面没有写生效日期
+      not_modeled: [每天 3 美元的日票（每天一次往返 2.50 不触发）, Park & Ride 快线按区收费 2.00–4.50]
+  - cbsa: "42660"
+    key: sea
+    label_zh: 西雅图
+    home_scope: {}
+    work_states: ["53"]
+    scope_note: 都会区全在华盛顿州
+    transit:
+      agency: 金县交通局（King County Metro）
+      fare:
+        value: 2.75
+        cite:
+          - {source: kcm_fare_change_2025, quote: "Metro bus and Metro flex Adult $2.75 $3 +$0.25"}
+          - {source: kcm_fare_change_2025, quote: "This is Metro’s first adult bus fare increase since establishing a flat fare in 2018."}
+      monthly_pass:
+        value: 99
+        cite:
+          - {source: kcm_fare_change_2025, quote: "Metro Monthly Vanpool / Transit pass Adult $99 $108 +$9"}
+      period_note: 2025-09-01 调价前的成人票价与月票（2018 年统一票价以来第一次调价）
+      not_modeled: [Sound Transit 轻轨 2024-08-30 前按距离计价, 皮尔斯县与斯诺霍米什县的其他机构票价]
+
+# 没有建模、要向读者说明的事项（每城的结果里都会列出）。
+not_modeled:
+  - 停车费、过路费与拥堵费没有建模；用车权是全美平均，不分城市（保险、停车在各城差别很大）
+  - AAA 小型轿车的年度费用已经含每年 15,000 英里的油费；开车通勤另按次付油费，所以开车的花费有一部分重复（偏高）
+  - 按距离或区间计价的公交（通勤铁路、BART、快线公交）按主要机构的单程票价计；换乘加价没有建模
+  - 往返分钟是实际选了这种方式的人的分钟（自选择）：没开车的人如果开车不一定是这个分钟，公交同理
+  - 工作地只到县（2020 年工作地 PUMA 的粒度）；同一个县里去不同地点的人合在一格
+  - 居住片区是 2020 PUMA，只用完整位于都会区内的；部分在内的 PUMA 与税的支持范围以外的 PUMA 不进居住片区

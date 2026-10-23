@@ -1,0 +1,91 @@
+{
+ "schema": "e3b-commute-city-v1",
+ "cities": {
+  "nyc": {
+   "cbsa": "35620",
+   "content_identity": "a677d4c7987a6127f456a95a489c70120ade53d50c696099dbf47f5e46af11a3",
+   "status": "complete",
+   "modes": [
+    "walk_bike",
+    "transit",
+    "drive"
+   ],
+   "blocked": [],
+   "home_areas": 55,
+   "work_areas": 8,
+   "legs": 690
+  },
+  "la": {
+   "cbsa": "31080",
+   "content_identity": "9a773d9c88778a74271374cc304cd59b9b56b88fb7e3fe2bb154c929b666f0b1",
+   "status": "complete",
+   "modes": [
+    "walk_bike",
+    "transit",
+    "drive"
+   ],
+   "blocked": [],
+   "home_areas": 91,
+   "work_areas": 2,
+   "legs": 303
+  },
+  "sf": {
+   "cbsa": "41860",
+   "content_identity": "f577725c04ff2deddf6ea0d9e7599d2dd9efef764e4b20e1e4322828cce52bc6",
+   "status": "partial",
+   "modes": [
+    "walk_bike",
+    "drive"
+   ],
+   "blocked": [
+    "transit"
+   ],
+   "home_areas": 39,
+   "work_areas": 5,
+   "legs": 197
+  },
+  "chi": {
+   "cbsa": "16980",
+   "content_identity": "5be397b16fd3b69e3ea53df18f261452c3df0281075e237947c73eece7c7bf1f",
+   "status": "complete",
+   "modes": [
+    "walk_bike",
+    "transit",
+    "drive"
+   ],
+   "blocked": [],
+   "home_areas": 60,
+   "work_areas": 6,
+   "legs": 394
+  },
+  "hou": {
+   "cbsa": "26420",
+   "content_identity": "df90873ea2019cc6bc54d8730579023ee336efb17d9eeef60c0ba308b9eec4ae",
+   "status": "complete",
+   "modes": [
+    "walk_bike",
+    "transit",
+    "drive"
+   ],
+   "blocked": [],
+   "home_areas": 55,
+   "work_areas": 4,
+   "legs": 258
+  },
+  "sea": {
+   "cbsa": "42660",
+   "content_identity": "406d267f5510c2bb4742a319811e71f3dd5ce273108ad0ed136eb06638517a5d",
+   "status": "complete",
+   "modes": [
+    "walk_bike",
+    "transit",
+    "drive"
+   ],
+   "blocked": [],
+   "home_areas": 32,
+   "work_areas": 3,
+   "legs": 147
+  }
+ },
+ "content_identity": "f2f059a8e908cc4c6e66e4c245bfc4b3905b3707d9d3a413e414dc0252688b25"
+}
