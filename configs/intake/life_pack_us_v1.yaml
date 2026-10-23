@@ -44,8 +44,9 @@ conditions:
     note: 没有可比的安全资料（FBI 犯罪资料接口要密钥，没有注册；城市开放资料口径与覆盖不同、也不覆盖整个都会区）：六城、各片区同一个登记的共同先验，不制造差异
   environment:
     rule: aqi_good_share_fixed_scale_v1
-    # base = scale × 一年里 AQI 为“好”的天数比例（EPA 年度 AQI，有效天数 ≥ 330 的最近一年）；城市级证据，各片区同值
-    scale: 6
+    # base = scale × 一年里 AQI 为“好”的天数比例（EPA 年度 AQI，有效天数 ≥ 330 的最近一年）；城市级证据，各片区同值。
+    # scale = 5：好天比例 100% 时 b = 5，对应城市事实表的 0–10 指数（b = 0.5 × 指数）
+    scale: 5
   leisure:
     rule: common_prior_v1
     base: 4

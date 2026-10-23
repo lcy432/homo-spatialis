@@ -1,0 +1,1880 @@
+{
+ "city_conditions": [
+  {
+   "city": {
+    "code": "35620",
+    "country": "US",
+    "scheme": "CBSA2023"
+   },
+   "components": [
+    {
+     "base": 0,
+     "cap": 0.9,
+     "component_id": "housing_condition",
+     "efficiencies": [
+      {
+       "eta": 1.0,
+       "source_id": "space"
+      },
+      {
+       "eta": 0.5,
+       "source_id": "quality"
+      }
+     ],
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "scoring-e1-convenience",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "评分规格的合成探索参数（与产品基础样例相同），不是经验估计（geography: 六城共同（评分规格的探索参数））"
+     },
+     "status": "known"
+    },
+    {
+     "component_id": "food_life",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "scoring-e1-convenience",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "评分规格的合成探索参数（与产品基础样例相同），不是经验估计（geography: 六城共同（评分规格的探索参数））"
+     },
+     "status": "plan_level"
+    },
+    {
+     "component_id": "personal_enjoyment",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "scoring-e1-convenience",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "评分规格的合成探索参数（与产品基础样例相同），不是经验估计（geography: 六城共同（评分规格的探索参数））"
+     },
+     "status": "plan_level"
+    },
+    {
+     "component_id": "daily_convenience",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "scoring-e1-convenience",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "评分规格的合成探索参数（与产品基础样例相同），不是经验估计（geography: 六城共同（评分规格的探索参数））"
+     },
+     "status": "plan_level"
+    },
+    {
+     "area_bases": {
+      "nyc.area.h.3604103": 3.0,
+      "nyc.area.h.3604104": 3.0,
+      "nyc.area.h.3604107": 3.0,
+      "nyc.area.h.3604108": 3.0,
+      "nyc.area.h.3604109": 3.0,
+      "nyc.area.h.3604110": 3.0,
+      "nyc.area.h.3604111": 3.0,
+      "nyc.area.h.3604112": 3.0,
+      "nyc.area.h.3604121": 3.0,
+      "nyc.area.h.3604165": 3.0,
+      "nyc.area.h.3604204": 3.0,
+      "nyc.area.h.3604205": 3.0,
+      "nyc.area.h.3604207": 3.0,
+      "nyc.area.h.3604208": 3.0,
+      "nyc.area.h.3604209": 3.0,
+      "nyc.area.h.3604210": 3.0,
+      "nyc.area.h.3604211": 3.0,
+      "nyc.area.h.3604212": 3.0,
+      "nyc.area.h.3604221": 3.0,
+      "nyc.area.h.3604263": 3.0,
+      "nyc.area.h.3604301": 3.0,
+      "nyc.area.h.3604302": 3.0,
+      "nyc.area.h.3604303": 3.0,
+      "nyc.area.h.3604304": 3.0,
+      "nyc.area.h.3604305": 3.0,
+      "nyc.area.h.3604306": 3.0,
+      "nyc.area.h.3604307": 3.0,
+      "nyc.area.h.3604308": 3.0,
+      "nyc.area.h.3604309": 3.0,
+      "nyc.area.h.3604310": 3.0,
+      "nyc.area.h.3604311": 3.0,
+      "nyc.area.h.3604312": 3.0,
+      "nyc.area.h.3604313": 3.0,
+      "nyc.area.h.3604314": 3.0,
+      "nyc.area.h.3604315": 3.0,
+      "nyc.area.h.3604316": 3.0,
+      "nyc.area.h.3604317": 3.0,
+      "nyc.area.h.3604318": 3.0,
+      "nyc.area.h.3604401": 3.0,
+      "nyc.area.h.3604402": 3.0,
+      "nyc.area.h.3604403": 3.0,
+      "nyc.area.h.3604404": 3.0,
+      "nyc.area.h.3604405": 3.0,
+      "nyc.area.h.3604406": 3.0,
+      "nyc.area.h.3604407": 3.0,
+      "nyc.area.h.3604408": 3.0,
+      "nyc.area.h.3604409": 3.0,
+      "nyc.area.h.3604410": 3.0,
+      "nyc.area.h.3604411": 3.0,
+      "nyc.area.h.3604412": 3.0,
+      "nyc.area.h.3604413": 3.0,
+      "nyc.area.h.3604414": 3.0,
+      "nyc.area.h.3604501": 3.0,
+      "nyc.area.h.3604502": 3.0,
+      "nyc.area.h.3604503": 3.0
+     },
+     "area_basis": "共同先验：只有城市级（其实是六城共同）的值，各片区同值，不制造片区差异",
+     "base": 3.0,
+     "cap": 0.9,
+     "component_id": "safety",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "life-pack-us-v1",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "没有可比的安全资料（FBI 犯罪资料接口要密钥，没有注册；城市开放资料口径与覆盖不同、也不覆盖整个都会区）：六城、各片区同一个登记的共同先验，不制造差异（geography: 六城共同先验）"
+     },
+     "status": "known"
+    },
+    {
+     "base": 2.1,
+     "cap": 0.9,
+     "component_id": "opportunity",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "supported 40",
+       "with_jobs 40",
+       "with_training 2",
+       "geography: CBSA 35620"
+      ],
+      "kind": "derived",
+      "mapping_version": "supported_occupation_coverage_v1",
+      "observed_on": "2026-10-23",
+      "rule": "b = 2 × 有本都会区岗位资料的支持职业占比 + 2 × 有本都会区培训项目的支持职业占比"
+     },
+     "status": "known"
+    },
+    {
+     "base": 4.0,
+     "cap": 0.9,
+     "component_id": "leisure",
+     "efficiencies": [
+      {
+       "eta": 1.0,
+       "source_id": "usage_plan"
+      }
+     ],
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "life-pack-us-v1",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "休闲的城市背景用登记的共同先验（与合成样例相同）；实际参与的活动另按小时计（geography: 六城共同先验）"
+     },
+     "status": "known"
+    },
+    {
+     "area_bases": {
+      "nyc.area.h.3604103": 2.1095,
+      "nyc.area.h.3604104": 2.1095,
+      "nyc.area.h.3604107": 2.1095,
+      "nyc.area.h.3604108": 2.1095,
+      "nyc.area.h.3604109": 2.1095,
+      "nyc.area.h.3604110": 2.1095,
+      "nyc.area.h.3604111": 2.1095,
+      "nyc.area.h.3604112": 2.1095,
+      "nyc.area.h.3604121": 2.1095,
+      "nyc.area.h.3604165": 2.1095,
+      "nyc.area.h.3604204": 2.1095,
+      "nyc.area.h.3604205": 2.1095,
+      "nyc.area.h.3604207": 2.1095,
+      "nyc.area.h.3604208": 2.1095,
+      "nyc.area.h.3604209": 2.1095,
+      "nyc.area.h.3604210": 2.1095,
+      "nyc.area.h.3604211": 2.1095,
+      "nyc.area.h.3604212": 2.1095,
+      "nyc.area.h.3604221": 2.1095,
+      "nyc.area.h.3604263": 2.1095,
+      "nyc.area.h.3604301": 2.1095,
+      "nyc.area.h.3604302": 2.1095,
+      "nyc.area.h.3604303": 2.1095,
+      "nyc.area.h.3604304": 2.1095,
+      "nyc.area.h.3604305": 2.1095,
+      "nyc.area.h.3604306": 2.1095,
+      "nyc.area.h.3604307": 2.1095,
+      "nyc.area.h.3604308": 2.1095,
+      "nyc.area.h.3604309": 2.1095,
+      "nyc.area.h.3604310": 2.1095,
+      "nyc.area.h.3604311": 2.1095,
+      "nyc.area.h.3604312": 2.1095,
+      "nyc.area.h.3604313": 2.1095,
+      "nyc.area.h.3604314": 2.1095,
+      "nyc.area.h.3604315": 2.1095,
+      "nyc.area.h.3604316": 2.1095,
+      "nyc.area.h.3604317": 2.1095,
+      "nyc.area.h.3604318": 2.1095,
+      "nyc.area.h.3604401": 2.1095,
+      "nyc.area.h.3604402": 2.1095,
+      "nyc.area.h.3604403": 2.1095,
+      "nyc.area.h.3604404": 2.1095,
+      "nyc.area.h.3604405": 2.1095,
+      "nyc.area.h.3604406": 2.1095,
+      "nyc.area.h.3604407": 2.1095,
+      "nyc.area.h.3604408": 2.1095,
+      "nyc.area.h.3604409": 2.1095,
+      "nyc.area.h.3604410": 2.1095,
+      "nyc.area.h.3604411": 2.1095,
+      "nyc.area.h.3604412": 2.1095,
+      "nyc.area.h.3604413": 2.1095,
+      "nyc.area.h.3604414": 2.1095,
+      "nyc.area.h.3604501": 2.1095,
+      "nyc.area.h.3604502": 2.1095,
+      "nyc.area.h.3604503": 2.1095
+     },
+     "area_basis": "城市级证据（EPA 年度 AQI 的好天比例 × 5）：各片区同值",
+     "base": 2.1095,
+     "cap": 0.9,
+     "component_id": "environment",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "epa_aqi_cbsa_2025",
+       "share_good_days 0.4219",
+       "geography: CBSA 35620"
+      ],
+      "kind": "derived",
+      "mapping_version": "aqi_good_share_fixed_scale_v1",
+      "observed_on": "2026-10-23",
+      "rule": "b = 5 × 一年里 AQI 为“好”的天数比例（固定参考尺度，第七座城不改变前六座）"
+     },
+     "status": "known"
+    },
+    {
+     "component_id": "commute",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "scoring-e1-convenience",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "评分规格的合成探索参数（与产品基础样例相同），不是经验估计（geography: 六城共同（评分规格的探索参数））"
+     },
+     "status": "plan_level"
+    }
+   ],
+   "label": "纽约（纽约市五区居民）",
+   "spec_id": "score.e1-life.explore"
+  },
+  {
+   "city": {
+    "code": "31080",
+    "country": "US",
+    "scheme": "CBSA2023"
+   },
+   "components": [
+    {
+     "base": 0,
+     "cap": 0.9,
+     "component_id": "housing_condition",
+     "efficiencies": [
+      {
+       "eta": 1.0,
+       "source_id": "space"
+      },
+      {
+       "eta": 0.5,
+       "source_id": "quality"
+      }
+     ],
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "scoring-e1-convenience",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "评分规格的合成探索参数（与产品基础样例相同），不是经验估计（geography: 六城共同（评分规格的探索参数））"
+     },
+     "status": "known"
+    },
+    {
+     "component_id": "food_life",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "scoring-e1-convenience",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "评分规格的合成探索参数（与产品基础样例相同），不是经验估计（geography: 六城共同（评分规格的探索参数））"
+     },
+     "status": "plan_level"
+    },
+    {
+     "component_id": "personal_enjoyment",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "scoring-e1-convenience",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "评分规格的合成探索参数（与产品基础样例相同），不是经验估计（geography: 六城共同（评分规格的探索参数））"
+     },
+     "status": "plan_level"
+    },
+    {
+     "component_id": "daily_convenience",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "scoring-e1-convenience",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "评分规格的合成探索参数（与产品基础样例相同），不是经验估计（geography: 六城共同（评分规格的探索参数））"
+     },
+     "status": "plan_level"
+    },
+    {
+     "area_bases": {
+      "la.area.h.0603703": 3.0,
+      "la.area.h.0603704": 3.0,
+      "la.area.h.0603705": 3.0,
+      "la.area.h.0603706": 3.0,
+      "la.area.h.0603707": 3.0,
+      "la.area.h.0603708": 3.0,
+      "la.area.h.0603709": 3.0,
+      "la.area.h.0603710": 3.0,
+      "la.area.h.0603711": 3.0,
+      "la.area.h.0603712": 3.0,
+      "la.area.h.0603713": 3.0,
+      "la.area.h.0603714": 3.0,
+      "la.area.h.0603715": 3.0,
+      "la.area.h.0603716": 3.0,
+      "la.area.h.0603717": 3.0,
+      "la.area.h.0603718": 3.0,
+      "la.area.h.0603719": 3.0,
+      "la.area.h.0603720": 3.0,
+      "la.area.h.0603721": 3.0,
+      "la.area.h.0603722": 3.0,
+      "la.area.h.0603723": 3.0,
+      "la.area.h.0603724": 3.0,
+      "la.area.h.0603725": 3.0,
+      "la.area.h.0603728": 3.0,
+      "la.area.h.0603730": 3.0,
+      "la.area.h.0603731": 3.0,
+      "la.area.h.0603732": 3.0,
+      "la.area.h.0603733": 3.0,
+      "la.area.h.0603734": 3.0,
+      "la.area.h.0603735": 3.0,
+      "la.area.h.0603736": 3.0,
+      "la.area.h.0603737": 3.0,
+      "la.area.h.0603738": 3.0,
+      "la.area.h.0603739": 3.0,
+      "la.area.h.0603740": 3.0,
+      "la.area.h.0603741": 3.0,
+      "la.area.h.0603742": 3.0,
+      "la.area.h.0603743": 3.0,
+      "la.area.h.0603744": 3.0,
+      "la.area.h.0603745": 3.0,
+      "la.area.h.0603746": 3.0,
+      "la.area.h.0603747": 3.0,
+      "la.area.h.0603748": 3.0,
+      "la.area.h.0603750": 3.0,
+      "la.area.h.0603751": 3.0,
+      "la.area.h.0603752": 3.0,
+      "la.area.h.0603753": 3.0,
+      "la.area.h.0603754": 3.0,
+      "la.area.h.0603757": 3.0,
+      "la.area.h.0603758": 3.0,
+      "la.area.h.0603759": 3.0,
+      "la.area.h.0603760": 3.0,
+      "la.area.h.0603761": 3.0,
+      "la.area.h.0603762": 3.0,
+      "la.area.h.0603763": 3.0,
+      "la.area.h.0603764": 3.0,
+      "la.area.h.0603766": 3.0,
+      "la.area.h.0603767": 3.0,
+      "la.area.h.0603768": 3.0,
+      "la.area.h.0603770": 3.0,
+      "la.area.h.0603771": 3.0,
+      "la.area.h.0603772": 3.0,
+      "la.area.h.0603773": 3.0,
+      "la.area.h.0603774": 3.0,
+      "la.area.h.0603775": 3.0,
+      "la.area.h.0603776": 3.0,
+      "la.area.h.0603778": 3.0,
+      "la.area.h.0603779": 3.0,
+      "la.area.h.0603780": 3.0,
+      "la.area.h.0603781": 3.0,
+      "la.area.h.0603782": 3.0,
+      "la.area.h.0605906": 3.0,
+      "la.area.h.0605907": 3.0,
+      "la.area.h.0605908": 3.0,
+      "la.area.h.0605909": 3.0,
+      "la.area.h.0605912": 3.0,
+      "la.area.h.0605913": 3.0,
+      "la.area.h.0605914": 3.0,
+      "la.area.h.0605916": 3.0,
+      "la.area.h.0605917": 3.0,
+      "la.area.h.0605918": 3.0,
+      "la.area.h.0605919": 3.0,
+      "la.area.h.0605920": 3.0,
+      "la.area.h.0605921": 3.0,
+      "la.area.h.0605922": 3.0,
+      "la.area.h.0605923": 3.0,
+      "la.area.h.0605924": 3.0,
+      "la.area.h.0605925": 3.0,
+      "la.area.h.0605926": 3.0,
+      "la.area.h.0605927": 3.0,
+      "la.area.h.0605928": 3.0
+     },
+     "area_basis": "共同先验：只有城市级（其实是六城共同）的值，各片区同值，不制造片区差异",
+     "base": 3.0,
+     "cap": 0.9,
+     "component_id": "safety",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "life-pack-us-v1",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "没有可比的安全资料（FBI 犯罪资料接口要密钥，没有注册；城市开放资料口径与覆盖不同、也不覆盖整个都会区）：六城、各片区同一个登记的共同先验，不制造差异（geography: 六城共同先验）"
+     },
+     "status": "known"
+    },
+    {
+     "base": 2.0,
+     "cap": 0.9,
+     "component_id": "opportunity",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "supported 40",
+       "with_jobs 40",
+       "with_training 0",
+       "geography: CBSA 31080"
+      ],
+      "kind": "derived",
+      "mapping_version": "supported_occupation_coverage_v1",
+      "observed_on": "2026-10-23",
+      "rule": "b = 2 × 有本都会区岗位资料的支持职业占比 + 2 × 有本都会区培训项目的支持职业占比"
+     },
+     "status": "known"
+    },
+    {
+     "base": 4.0,
+     "cap": 0.9,
+     "component_id": "leisure",
+     "efficiencies": [
+      {
+       "eta": 1.0,
+       "source_id": "usage_plan"
+      }
+     ],
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "life-pack-us-v1",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "休闲的城市背景用登记的共同先验（与合成样例相同）；实际参与的活动另按小时计（geography: 六城共同先验）"
+     },
+     "status": "known"
+    },
+    {
+     "area_bases": {
+      "la.area.h.0603703": 0.534,
+      "la.area.h.0603704": 0.534,
+      "la.area.h.0603705": 0.534,
+      "la.area.h.0603706": 0.534,
+      "la.area.h.0603707": 0.534,
+      "la.area.h.0603708": 0.534,
+      "la.area.h.0603709": 0.534,
+      "la.area.h.0603710": 0.534,
+      "la.area.h.0603711": 0.534,
+      "la.area.h.0603712": 0.534,
+      "la.area.h.0603713": 0.534,
+      "la.area.h.0603714": 0.534,
+      "la.area.h.0603715": 0.534,
+      "la.area.h.0603716": 0.534,
+      "la.area.h.0603717": 0.534,
+      "la.area.h.0603718": 0.534,
+      "la.area.h.0603719": 0.534,
+      "la.area.h.0603720": 0.534,
+      "la.area.h.0603721": 0.534,
+      "la.area.h.0603722": 0.534,
+      "la.area.h.0603723": 0.534,
+      "la.area.h.0603724": 0.534,
+      "la.area.h.0603725": 0.534,
+      "la.area.h.0603728": 0.534,
+      "la.area.h.0603730": 0.534,
+      "la.area.h.0603731": 0.534,
+      "la.area.h.0603732": 0.534,
+      "la.area.h.0603733": 0.534,
+      "la.area.h.0603734": 0.534,
+      "la.area.h.0603735": 0.534,
+      "la.area.h.0603736": 0.534,
+      "la.area.h.0603737": 0.534,
+      "la.area.h.0603738": 0.534,
+      "la.area.h.0603739": 0.534,
+      "la.area.h.0603740": 0.534,
+      "la.area.h.0603741": 0.534,
+      "la.area.h.0603742": 0.534,
+      "la.area.h.0603743": 0.534,
+      "la.area.h.0603744": 0.534,
+      "la.area.h.0603745": 0.534,
+      "la.area.h.0603746": 0.534,
+      "la.area.h.0603747": 0.534,
+      "la.area.h.0603748": 0.534,
+      "la.area.h.0603750": 0.534,
+      "la.area.h.0603751": 0.534,
+      "la.area.h.0603752": 0.534,
+      "la.area.h.0603753": 0.534,
+      "la.area.h.0603754": 0.534,
+      "la.area.h.0603757": 0.534,
+      "la.area.h.0603758": 0.534,
+      "la.area.h.0603759": 0.534,
+      "la.area.h.0603760": 0.534,
+      "la.area.h.0603761": 0.534,
+      "la.area.h.0603762": 0.534,
+      "la.area.h.0603763": 0.534,
+      "la.area.h.0603764": 0.534,
+      "la.area.h.0603766": 0.534,
+      "la.area.h.0603767": 0.534,
+      "la.area.h.0603768": 0.534,
+      "la.area.h.0603770": 0.534,
+      "la.area.h.0603771": 0.534,
+      "la.area.h.0603772": 0.534,
+      "la.area.h.0603773": 0.534,
+      "la.area.h.0603774": 0.534,
+      "la.area.h.0603775": 0.534,
+      "la.area.h.0603776": 0.534,
+      "la.area.h.0603778": 0.534,
+      "la.area.h.0603779": 0.534,
+      "la.area.h.0603780": 0.534,
+      "la.area.h.0603781": 0.534,
+      "la.area.h.0603782": 0.534,
+      "la.area.h.0605906": 0.534,
+      "la.area.h.0605907": 0.534,
+      "la.area.h.0605908": 0.534,
+      "la.area.h.0605909": 0.534,
+      "la.area.h.0605912": 0.534,
+      "la.area.h.0605913": 0.534,
+      "la.area.h.0605914": 0.534,
+      "la.area.h.0605916": 0.534,
+      "la.area.h.0605917": 0.534,
+      "la.area.h.0605918": 0.534,
+      "la.area.h.0605919": 0.534,
+      "la.area.h.0605920": 0.534,
+      "la.area.h.0605921": 0.534,
+      "la.area.h.0605922": 0.534,
+      "la.area.h.0605923": 0.534,
+      "la.area.h.0605924": 0.534,
+      "la.area.h.0605925": 0.534,
+      "la.area.h.0605926": 0.534,
+      "la.area.h.0605927": 0.534,
+      "la.area.h.0605928": 0.534
+     },
+     "area_basis": "城市级证据（EPA 年度 AQI 的好天比例 × 5）：各片区同值",
+     "base": 0.534,
+     "cap": 0.9,
+     "component_id": "environment",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "epa_aqi_cbsa_2025",
+       "share_good_days 0.1068",
+       "geography: CBSA 31080"
+      ],
+      "kind": "derived",
+      "mapping_version": "aqi_good_share_fixed_scale_v1",
+      "observed_on": "2026-10-23",
+      "rule": "b = 5 × 一年里 AQI 为“好”的天数比例（固定参考尺度，第七座城不改变前六座）"
+     },
+     "status": "known"
+    },
+    {
+     "component_id": "commute",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "scoring-e1-convenience",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "评分规格的合成探索参数（与产品基础样例相同），不是经验估计（geography: 六城共同（评分规格的探索参数））"
+     },
+     "status": "plan_level"
+    }
+   ],
+   "label": "洛杉矶",
+   "spec_id": "score.e1-life.explore"
+  },
+  {
+   "city": {
+    "code": "41860",
+    "country": "US",
+    "scheme": "CBSA2023"
+   },
+   "components": [
+    {
+     "base": 0,
+     "cap": 0.9,
+     "component_id": "housing_condition",
+     "efficiencies": [
+      {
+       "eta": 1.0,
+       "source_id": "space"
+      },
+      {
+       "eta": 0.5,
+       "source_id": "quality"
+      }
+     ],
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "scoring-e1-convenience",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "评分规格的合成探索参数（与产品基础样例相同），不是经验估计（geography: 六城共同（评分规格的探索参数））"
+     },
+     "status": "known"
+    },
+    {
+     "component_id": "food_life",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "scoring-e1-convenience",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "评分规格的合成探索参数（与产品基础样例相同），不是经验估计（geography: 六城共同（评分规格的探索参数））"
+     },
+     "status": "plan_level"
+    },
+    {
+     "component_id": "personal_enjoyment",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "scoring-e1-convenience",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "评分规格的合成探索参数（与产品基础样例相同），不是经验估计（geography: 六城共同（评分规格的探索参数））"
+     },
+     "status": "plan_level"
+    },
+    {
+     "component_id": "daily_convenience",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "scoring-e1-convenience",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "评分规格的合成探索参数（与产品基础样例相同），不是经验估计（geography: 六城共同（评分规格的探索参数））"
+     },
+     "status": "plan_level"
+    },
+    {
+     "area_bases": {
+      "sf.area.h.0600101": 3.0,
+      "sf.area.h.0600111": 3.0,
+      "sf.area.h.0600112": 3.0,
+      "sf.area.h.0600113": 3.0,
+      "sf.area.h.0600114": 3.0,
+      "sf.area.h.0600115": 3.0,
+      "sf.area.h.0600116": 3.0,
+      "sf.area.h.0600117": 3.0,
+      "sf.area.h.0600118": 3.0,
+      "sf.area.h.0600119": 3.0,
+      "sf.area.h.0600120": 3.0,
+      "sf.area.h.0600121": 3.0,
+      "sf.area.h.0600122": 3.0,
+      "sf.area.h.0600123": 3.0,
+      "sf.area.h.0601301": 3.0,
+      "sf.area.h.0601305": 3.0,
+      "sf.area.h.0601308": 3.0,
+      "sf.area.h.0601309": 3.0,
+      "sf.area.h.0601310": 3.0,
+      "sf.area.h.0601311": 3.0,
+      "sf.area.h.0601312": 3.0,
+      "sf.area.h.0601313": 3.0,
+      "sf.area.h.0601314": 3.0,
+      "sf.area.h.0604103": 3.0,
+      "sf.area.h.0604104": 3.0,
+      "sf.area.h.0607507": 3.0,
+      "sf.area.h.0607508": 3.0,
+      "sf.area.h.0607509": 3.0,
+      "sf.area.h.0607510": 3.0,
+      "sf.area.h.0607511": 3.0,
+      "sf.area.h.0607512": 3.0,
+      "sf.area.h.0607513": 3.0,
+      "sf.area.h.0607514": 3.0,
+      "sf.area.h.0608101": 3.0,
+      "sf.area.h.0608102": 3.0,
+      "sf.area.h.0608103": 3.0,
+      "sf.area.h.0608104": 3.0,
+      "sf.area.h.0608105": 3.0,
+      "sf.area.h.0608106": 3.0
+     },
+     "area_basis": "共同先验：只有城市级（其实是六城共同）的值，各片区同值，不制造片区差异",
+     "base": 3.0,
+     "cap": 0.9,
+     "component_id": "safety",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "life-pack-us-v1",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "没有可比的安全资料（FBI 犯罪资料接口要密钥，没有注册；城市开放资料口径与覆盖不同、也不覆盖整个都会区）：六城、各片区同一个登记的共同先验，不制造差异（geography: 六城共同先验）"
+     },
+     "status": "known"
+    },
+    {
+     "base": 2.0,
+     "cap": 0.9,
+     "component_id": "opportunity",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "supported 40",
+       "with_jobs 40",
+       "with_training 0",
+       "geography: CBSA 41860"
+      ],
+      "kind": "derived",
+      "mapping_version": "supported_occupation_coverage_v1",
+      "observed_on": "2026-10-23",
+      "rule": "b = 2 × 有本都会区岗位资料的支持职业占比 + 2 × 有本都会区培训项目的支持职业占比"
+     },
+     "status": "known"
+    },
+    {
+     "base": 4.0,
+     "cap": 0.9,
+     "component_id": "leisure",
+     "efficiencies": [
+      {
+       "eta": 1.0,
+       "source_id": "usage_plan"
+      }
+     ],
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "life-pack-us-v1",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "休闲的城市背景用登记的共同先验（与合成样例相同）；实际参与的活动另按小时计（geography: 六城共同先验）"
+     },
+     "status": "known"
+    },
+    {
+     "area_bases": {
+      "sf.area.h.0600101": 2.0355,
+      "sf.area.h.0600111": 2.0355,
+      "sf.area.h.0600112": 2.0355,
+      "sf.area.h.0600113": 2.0355,
+      "sf.area.h.0600114": 2.0355,
+      "sf.area.h.0600115": 2.0355,
+      "sf.area.h.0600116": 2.0355,
+      "sf.area.h.0600117": 2.0355,
+      "sf.area.h.0600118": 2.0355,
+      "sf.area.h.0600119": 2.0355,
+      "sf.area.h.0600120": 2.0355,
+      "sf.area.h.0600121": 2.0355,
+      "sf.area.h.0600122": 2.0355,
+      "sf.area.h.0600123": 2.0355,
+      "sf.area.h.0601301": 2.0355,
+      "sf.area.h.0601305": 2.0355,
+      "sf.area.h.0601308": 2.0355,
+      "sf.area.h.0601309": 2.0355,
+      "sf.area.h.0601310": 2.0355,
+      "sf.area.h.0601311": 2.0355,
+      "sf.area.h.0601312": 2.0355,
+      "sf.area.h.0601313": 2.0355,
+      "sf.area.h.0601314": 2.0355,
+      "sf.area.h.0604103": 2.0355,
+      "sf.area.h.0604104": 2.0355,
+      "sf.area.h.0607507": 2.0355,
+      "sf.area.h.0607508": 2.0355,
+      "sf.area.h.0607509": 2.0355,
+      "sf.area.h.0607510": 2.0355,
+      "sf.area.h.0607511": 2.0355,
+      "sf.area.h.0607512": 2.0355,
+      "sf.area.h.0607513": 2.0355,
+      "sf.area.h.0607514": 2.0355,
+      "sf.area.h.0608101": 2.0355,
+      "sf.area.h.0608102": 2.0355,
+      "sf.area.h.0608103": 2.0355,
+      "sf.area.h.0608104": 2.0355,
+      "sf.area.h.0608105": 2.0355,
+      "sf.area.h.0608106": 2.0355
+     },
+     "area_basis": "城市级证据（EPA 年度 AQI 的好天比例 × 5）：各片区同值",
+     "base": 2.0355,
+     "cap": 0.9,
+     "component_id": "environment",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "epa_aqi_cbsa_2025",
+       "share_good_days 0.4071",
+       "geography: CBSA 41860"
+      ],
+      "kind": "derived",
+      "mapping_version": "aqi_good_share_fixed_scale_v1",
+      "observed_on": "2026-10-23",
+      "rule": "b = 5 × 一年里 AQI 为“好”的天数比例（固定参考尺度，第七座城不改变前六座）"
+     },
+     "status": "known"
+    },
+    {
+     "component_id": "commute",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "scoring-e1-convenience",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "评分规格的合成探索参数（与产品基础样例相同），不是经验估计（geography: 六城共同（评分规格的探索参数））"
+     },
+     "status": "plan_level"
+    }
+   ],
+   "label": "旧金山",
+   "spec_id": "score.e1-life.explore"
+  },
+  {
+   "city": {
+    "code": "16980",
+    "country": "US",
+    "scheme": "CBSA2023"
+   },
+   "components": [
+    {
+     "base": 0,
+     "cap": 0.9,
+     "component_id": "housing_condition",
+     "efficiencies": [
+      {
+       "eta": 1.0,
+       "source_id": "space"
+      },
+      {
+       "eta": 0.5,
+       "source_id": "quality"
+      }
+     ],
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "scoring-e1-convenience",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "评分规格的合成探索参数（与产品基础样例相同），不是经验估计（geography: 六城共同（评分规格的探索参数））"
+     },
+     "status": "known"
+    },
+    {
+     "component_id": "food_life",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "scoring-e1-convenience",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "评分规格的合成探索参数（与产品基础样例相同），不是经验估计（geography: 六城共同（评分规格的探索参数））"
+     },
+     "status": "plan_level"
+    },
+    {
+     "component_id": "personal_enjoyment",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "scoring-e1-convenience",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "评分规格的合成探索参数（与产品基础样例相同），不是经验估计（geography: 六城共同（评分规格的探索参数））"
+     },
+     "status": "plan_level"
+    },
+    {
+     "component_id": "daily_convenience",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "scoring-e1-convenience",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "评分规格的合成探索参数（与产品基础样例相同），不是经验估计（geography: 六城共同（评分规格的探索参数））"
+     },
+     "status": "plan_level"
+    },
+    {
+     "area_bases": {
+      "chi.area.h.1703101": 3.0,
+      "chi.area.h.1703102": 3.0,
+      "chi.area.h.1703103": 3.0,
+      "chi.area.h.1703104": 3.0,
+      "chi.area.h.1703105": 3.0,
+      "chi.area.h.1703106": 3.0,
+      "chi.area.h.1703107": 3.0,
+      "chi.area.h.1703108": 3.0,
+      "chi.area.h.1703109": 3.0,
+      "chi.area.h.1703110": 3.0,
+      "chi.area.h.1703111": 3.0,
+      "chi.area.h.1703112": 3.0,
+      "chi.area.h.1703113": 3.0,
+      "chi.area.h.1703114": 3.0,
+      "chi.area.h.1703115": 3.0,
+      "chi.area.h.1703116": 3.0,
+      "chi.area.h.1703117": 3.0,
+      "chi.area.h.1703118": 3.0,
+      "chi.area.h.1703151": 3.0,
+      "chi.area.h.1703152": 3.0,
+      "chi.area.h.1703153": 3.0,
+      "chi.area.h.1703154": 3.0,
+      "chi.area.h.1703155": 3.0,
+      "chi.area.h.1703156": 3.0,
+      "chi.area.h.1703157": 3.0,
+      "chi.area.h.1703158": 3.0,
+      "chi.area.h.1703159": 3.0,
+      "chi.area.h.1703160": 3.0,
+      "chi.area.h.1703161": 3.0,
+      "chi.area.h.1703162": 3.0,
+      "chi.area.h.1703163": 3.0,
+      "chi.area.h.1703164": 3.0,
+      "chi.area.h.1703165": 3.0,
+      "chi.area.h.1703166": 3.0,
+      "chi.area.h.1703167": 3.0,
+      "chi.area.h.1703168": 3.0,
+      "chi.area.h.1704301": 3.0,
+      "chi.area.h.1704302": 3.0,
+      "chi.area.h.1704303": 3.0,
+      "chi.area.h.1704304": 3.0,
+      "chi.area.h.1704305": 3.0,
+      "chi.area.h.1704306": 3.0,
+      "chi.area.h.1704307": 3.0,
+      "chi.area.h.1708901": 3.0,
+      "chi.area.h.1708902": 3.0,
+      "chi.area.h.1708903": 3.0,
+      "chi.area.h.1708904": 3.0,
+      "chi.area.h.1709300": 3.0,
+      "chi.area.h.1709701": 3.0,
+      "chi.area.h.1709702": 3.0,
+      "chi.area.h.1709703": 3.0,
+      "chi.area.h.1709704": 3.0,
+      "chi.area.h.1709705": 3.0,
+      "chi.area.h.1711101": 3.0,
+      "chi.area.h.1711102": 3.0,
+      "chi.area.h.1719701": 3.0,
+      "chi.area.h.1719702": 3.0,
+      "chi.area.h.1719703": 3.0,
+      "chi.area.h.1719704": 3.0,
+      "chi.area.h.1719705": 3.0
+     },
+     "area_basis": "共同先验：只有城市级（其实是六城共同）的值，各片区同值，不制造片区差异",
+     "base": 3.0,
+     "cap": 0.9,
+     "component_id": "safety",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "life-pack-us-v1",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "没有可比的安全资料（FBI 犯罪资料接口要密钥，没有注册；城市开放资料口径与覆盖不同、也不覆盖整个都会区）：六城、各片区同一个登记的共同先验，不制造差异（geography: 六城共同先验）"
+     },
+     "status": "known"
+    },
+    {
+     "base": 2.0,
+     "cap": 0.9,
+     "component_id": "opportunity",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "supported 40",
+       "with_jobs 40",
+       "with_training 0",
+       "geography: CBSA 16980"
+      ],
+      "kind": "derived",
+      "mapping_version": "supported_occupation_coverage_v1",
+      "observed_on": "2026-10-23",
+      "rule": "b = 2 × 有本都会区岗位资料的支持职业占比 + 2 × 有本都会区培训项目的支持职业占比"
+     },
+     "status": "known"
+    },
+    {
+     "base": 4.0,
+     "cap": 0.9,
+     "component_id": "leisure",
+     "efficiencies": [
+      {
+       "eta": 1.0,
+       "source_id": "usage_plan"
+      }
+     ],
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "life-pack-us-v1",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "休闲的城市背景用登记的共同先验（与合成样例相同）；实际参与的活动另按小时计（geography: 六城共同先验）"
+     },
+     "status": "known"
+    },
+    {
+     "area_bases": {
+      "chi.area.h.1703101": 1.493,
+      "chi.area.h.1703102": 1.493,
+      "chi.area.h.1703103": 1.493,
+      "chi.area.h.1703104": 1.493,
+      "chi.area.h.1703105": 1.493,
+      "chi.area.h.1703106": 1.493,
+      "chi.area.h.1703107": 1.493,
+      "chi.area.h.1703108": 1.493,
+      "chi.area.h.1703109": 1.493,
+      "chi.area.h.1703110": 1.493,
+      "chi.area.h.1703111": 1.493,
+      "chi.area.h.1703112": 1.493,
+      "chi.area.h.1703113": 1.493,
+      "chi.area.h.1703114": 1.493,
+      "chi.area.h.1703115": 1.493,
+      "chi.area.h.1703116": 1.493,
+      "chi.area.h.1703117": 1.493,
+      "chi.area.h.1703118": 1.493,
+      "chi.area.h.1703151": 1.493,
+      "chi.area.h.1703152": 1.493,
+      "chi.area.h.1703153": 1.493,
+      "chi.area.h.1703154": 1.493,
+      "chi.area.h.1703155": 1.493,
+      "chi.area.h.1703156": 1.493,
+      "chi.area.h.1703157": 1.493,
+      "chi.area.h.1703158": 1.493,
+      "chi.area.h.1703159": 1.493,
+      "chi.area.h.1703160": 1.493,
+      "chi.area.h.1703161": 1.493,
+      "chi.area.h.1703162": 1.493,
+      "chi.area.h.1703163": 1.493,
+      "chi.area.h.1703164": 1.493,
+      "chi.area.h.1703165": 1.493,
+      "chi.area.h.1703166": 1.493,
+      "chi.area.h.1703167": 1.493,
+      "chi.area.h.1703168": 1.493,
+      "chi.area.h.1704301": 1.493,
+      "chi.area.h.1704302": 1.493,
+      "chi.area.h.1704303": 1.493,
+      "chi.area.h.1704304": 1.493,
+      "chi.area.h.1704305": 1.493,
+      "chi.area.h.1704306": 1.493,
+      "chi.area.h.1704307": 1.493,
+      "chi.area.h.1708901": 1.493,
+      "chi.area.h.1708902": 1.493,
+      "chi.area.h.1708903": 1.493,
+      "chi.area.h.1708904": 1.493,
+      "chi.area.h.1709300": 1.493,
+      "chi.area.h.1709701": 1.493,
+      "chi.area.h.1709702": 1.493,
+      "chi.area.h.1709703": 1.493,
+      "chi.area.h.1709704": 1.493,
+      "chi.area.h.1709705": 1.493,
+      "chi.area.h.1711101": 1.493,
+      "chi.area.h.1711102": 1.493,
+      "chi.area.h.1719701": 1.493,
+      "chi.area.h.1719702": 1.493,
+      "chi.area.h.1719703": 1.493,
+      "chi.area.h.1719704": 1.493,
+      "chi.area.h.1719705": 1.493
+     },
+     "area_basis": "城市级证据（EPA 年度 AQI 的好天比例 × 5）：各片区同值",
+     "base": 1.493,
+     "cap": 0.9,
+     "component_id": "environment",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "epa_aqi_cbsa_2025",
+       "share_good_days 0.2986",
+       "geography: CBSA 16980"
+      ],
+      "kind": "derived",
+      "mapping_version": "aqi_good_share_fixed_scale_v1",
+      "observed_on": "2026-10-23",
+      "rule": "b = 5 × 一年里 AQI 为“好”的天数比例（固定参考尺度，第七座城不改变前六座）"
+     },
+     "status": "known"
+    },
+    {
+     "component_id": "commute",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "scoring-e1-convenience",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "评分规格的合成探索参数（与产品基础样例相同），不是经验估计（geography: 六城共同（评分规格的探索参数））"
+     },
+     "status": "plan_level"
+    }
+   ],
+   "label": "芝加哥（伊利诺伊州部分）",
+   "spec_id": "score.e1-life.explore"
+  },
+  {
+   "city": {
+    "code": "26420",
+    "country": "US",
+    "scheme": "CBSA2023"
+   },
+   "components": [
+    {
+     "base": 0,
+     "cap": 0.9,
+     "component_id": "housing_condition",
+     "efficiencies": [
+      {
+       "eta": 1.0,
+       "source_id": "space"
+      },
+      {
+       "eta": 0.5,
+       "source_id": "quality"
+      }
+     ],
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "scoring-e1-convenience",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "评分规格的合成探索参数（与产品基础样例相同），不是经验估计（geography: 六城共同（评分规格的探索参数））"
+     },
+     "status": "known"
+    },
+    {
+     "component_id": "food_life",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "scoring-e1-convenience",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "评分规格的合成探索参数（与产品基础样例相同），不是经验估计（geography: 六城共同（评分规格的探索参数））"
+     },
+     "status": "plan_level"
+    },
+    {
+     "component_id": "personal_enjoyment",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "scoring-e1-convenience",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "评分规格的合成探索参数（与产品基础样例相同），不是经验估计（geography: 六城共同（评分规格的探索参数））"
+     },
+     "status": "plan_level"
+    },
+    {
+     "component_id": "daily_convenience",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "scoring-e1-convenience",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "评分规格的合成探索参数（与产品基础样例相同），不是经验估计（geography: 六城共同（评分规格的探索参数））"
+     },
+     "status": "plan_level"
+    },
+    {
+     "area_bases": {
+      "hou.area.h.4804400": 3.0,
+      "hou.area.h.4804501": 3.0,
+      "hou.area.h.4804502": 3.0,
+      "hou.area.h.4804503": 3.0,
+      "hou.area.h.4804504": 3.0,
+      "hou.area.h.4804601": 3.0,
+      "hou.area.h.4804602": 3.0,
+      "hou.area.h.4804603": 3.0,
+      "hou.area.h.4804604": 3.0,
+      "hou.area.h.4804605": 3.0,
+      "hou.area.h.4804606": 3.0,
+      "hou.area.h.4804607": 3.0,
+      "hou.area.h.4804608": 3.0,
+      "hou.area.h.4804609": 3.0,
+      "hou.area.h.4804610": 3.0,
+      "hou.area.h.4804611": 3.0,
+      "hou.area.h.4804612": 3.0,
+      "hou.area.h.4804613": 3.0,
+      "hou.area.h.4804614": 3.0,
+      "hou.area.h.4804615": 3.0,
+      "hou.area.h.4804616": 3.0,
+      "hou.area.h.4804617": 3.0,
+      "hou.area.h.4804618": 3.0,
+      "hou.area.h.4804619": 3.0,
+      "hou.area.h.4804620": 3.0,
+      "hou.area.h.4804621": 3.0,
+      "hou.area.h.4804622": 3.0,
+      "hou.area.h.4804623": 3.0,
+      "hou.area.h.4804624": 3.0,
+      "hou.area.h.4804625": 3.0,
+      "hou.area.h.4804626": 3.0,
+      "hou.area.h.4804627": 3.0,
+      "hou.area.h.4804628": 3.0,
+      "hou.area.h.4804629": 3.0,
+      "hou.area.h.4804630": 3.0,
+      "hou.area.h.4804631": 3.0,
+      "hou.area.h.4804633": 3.0,
+      "hou.area.h.4804634": 3.0,
+      "hou.area.h.4804635": 3.0,
+      "hou.area.h.4804636": 3.0,
+      "hou.area.h.4804637": 3.0,
+      "hou.area.h.4804638": 3.0,
+      "hou.area.h.4804639": 3.0,
+      "hou.area.h.4804640": 3.0,
+      "hou.area.h.4804701": 3.0,
+      "hou.area.h.4804702": 3.0,
+      "hou.area.h.4804801": 3.0,
+      "hou.area.h.4804802": 3.0,
+      "hou.area.h.4804803": 3.0,
+      "hou.area.h.4804901": 3.0,
+      "hou.area.h.4804902": 3.0,
+      "hou.area.h.4804903": 3.0,
+      "hou.area.h.4804904": 3.0,
+      "hou.area.h.4804906": 3.0,
+      "hou.area.h.4804907": 3.0
+     },
+     "area_basis": "共同先验：只有城市级（其实是六城共同）的值，各片区同值，不制造片区差异",
+     "base": 3.0,
+     "cap": 0.9,
+     "component_id": "safety",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "life-pack-us-v1",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "没有可比的安全资料（FBI 犯罪资料接口要密钥，没有注册；城市开放资料口径与覆盖不同、也不覆盖整个都会区）：六城、各片区同一个登记的共同先验，不制造差异（geography: 六城共同先验）"
+     },
+     "status": "known"
+    },
+    {
+     "base": 2.1,
+     "cap": 0.9,
+     "component_id": "opportunity",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "supported 40",
+       "with_jobs 40",
+       "with_training 2",
+       "geography: CBSA 26420"
+      ],
+      "kind": "derived",
+      "mapping_version": "supported_occupation_coverage_v1",
+      "observed_on": "2026-10-23",
+      "rule": "b = 2 × 有本都会区岗位资料的支持职业占比 + 2 × 有本都会区培训项目的支持职业占比"
+     },
+     "status": "known"
+    },
+    {
+     "base": 4.0,
+     "cap": 0.9,
+     "component_id": "leisure",
+     "efficiencies": [
+      {
+       "eta": 1.0,
+       "source_id": "usage_plan"
+      }
+     ],
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "life-pack-us-v1",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "休闲的城市背景用登记的共同先验（与合成样例相同）；实际参与的活动另按小时计（geography: 六城共同先验）"
+     },
+     "status": "known"
+    },
+    {
+     "area_bases": {
+      "hou.area.h.4804400": 0.507,
+      "hou.area.h.4804501": 0.507,
+      "hou.area.h.4804502": 0.507,
+      "hou.area.h.4804503": 0.507,
+      "hou.area.h.4804504": 0.507,
+      "hou.area.h.4804601": 0.507,
+      "hou.area.h.4804602": 0.507,
+      "hou.area.h.4804603": 0.507,
+      "hou.area.h.4804604": 0.507,
+      "hou.area.h.4804605": 0.507,
+      "hou.area.h.4804606": 0.507,
+      "hou.area.h.4804607": 0.507,
+      "hou.area.h.4804608": 0.507,
+      "hou.area.h.4804609": 0.507,
+      "hou.area.h.4804610": 0.507,
+      "hou.area.h.4804611": 0.507,
+      "hou.area.h.4804612": 0.507,
+      "hou.area.h.4804613": 0.507,
+      "hou.area.h.4804614": 0.507,
+      "hou.area.h.4804615": 0.507,
+      "hou.area.h.4804616": 0.507,
+      "hou.area.h.4804617": 0.507,
+      "hou.area.h.4804618": 0.507,
+      "hou.area.h.4804619": 0.507,
+      "hou.area.h.4804620": 0.507,
+      "hou.area.h.4804621": 0.507,
+      "hou.area.h.4804622": 0.507,
+      "hou.area.h.4804623": 0.507,
+      "hou.area.h.4804624": 0.507,
+      "hou.area.h.4804625": 0.507,
+      "hou.area.h.4804626": 0.507,
+      "hou.area.h.4804627": 0.507,
+      "hou.area.h.4804628": 0.507,
+      "hou.area.h.4804629": 0.507,
+      "hou.area.h.4804630": 0.507,
+      "hou.area.h.4804631": 0.507,
+      "hou.area.h.4804633": 0.507,
+      "hou.area.h.4804634": 0.507,
+      "hou.area.h.4804635": 0.507,
+      "hou.area.h.4804636": 0.507,
+      "hou.area.h.4804637": 0.507,
+      "hou.area.h.4804638": 0.507,
+      "hou.area.h.4804639": 0.507,
+      "hou.area.h.4804640": 0.507,
+      "hou.area.h.4804701": 0.507,
+      "hou.area.h.4804702": 0.507,
+      "hou.area.h.4804801": 0.507,
+      "hou.area.h.4804802": 0.507,
+      "hou.area.h.4804803": 0.507,
+      "hou.area.h.4804901": 0.507,
+      "hou.area.h.4804902": 0.507,
+      "hou.area.h.4804903": 0.507,
+      "hou.area.h.4804904": 0.507,
+      "hou.area.h.4804906": 0.507,
+      "hou.area.h.4804907": 0.507
+     },
+     "area_basis": "城市级证据（EPA 年度 AQI 的好天比例 × 5）：各片区同值",
+     "base": 0.507,
+     "cap": 0.9,
+     "component_id": "environment",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "epa_aqi_cbsa_2025",
+       "share_good_days 0.1014",
+       "geography: CBSA 26420"
+      ],
+      "kind": "derived",
+      "mapping_version": "aqi_good_share_fixed_scale_v1",
+      "observed_on": "2026-10-23",
+      "rule": "b = 5 × 一年里 AQI 为“好”的天数比例（固定参考尺度，第七座城不改变前六座）"
+     },
+     "status": "known"
+    },
+    {
+     "component_id": "commute",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "scoring-e1-convenience",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "评分规格的合成探索参数（与产品基础样例相同），不是经验估计（geography: 六城共同（评分规格的探索参数））"
+     },
+     "status": "plan_level"
+    }
+   ],
+   "label": "休斯敦",
+   "spec_id": "score.e1-life.explore"
+  },
+  {
+   "city": {
+    "code": "42660",
+    "country": "US",
+    "scheme": "CBSA2023"
+   },
+   "components": [
+    {
+     "base": 0,
+     "cap": 0.9,
+     "component_id": "housing_condition",
+     "efficiencies": [
+      {
+       "eta": 1.0,
+       "source_id": "space"
+      },
+      {
+       "eta": 0.5,
+       "source_id": "quality"
+      }
+     ],
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "scoring-e1-convenience",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "评分规格的合成探索参数（与产品基础样例相同），不是经验估计（geography: 六城共同（评分规格的探索参数））"
+     },
+     "status": "known"
+    },
+    {
+     "component_id": "food_life",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "scoring-e1-convenience",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "评分规格的合成探索参数（与产品基础样例相同），不是经验估计（geography: 六城共同（评分规格的探索参数））"
+     },
+     "status": "plan_level"
+    },
+    {
+     "component_id": "personal_enjoyment",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "scoring-e1-convenience",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "评分规格的合成探索参数（与产品基础样例相同），不是经验估计（geography: 六城共同（评分规格的探索参数））"
+     },
+     "status": "plan_level"
+    },
+    {
+     "component_id": "daily_convenience",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "scoring-e1-convenience",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "评分规格的合成探索参数（与产品基础样例相同），不是经验估计（geography: 六城共同（评分规格的探索参数））"
+     },
+     "status": "plan_level"
+    },
+    {
+     "area_bases": {
+      "sea.area.h.5323301": 3.0,
+      "sea.area.h.5323302": 3.0,
+      "sea.area.h.5323303": 3.0,
+      "sea.area.h.5323304": 3.0,
+      "sea.area.h.5323305": 3.0,
+      "sea.area.h.5323306": 3.0,
+      "sea.area.h.5323307": 3.0,
+      "sea.area.h.5323308": 3.0,
+      "sea.area.h.5323309": 3.0,
+      "sea.area.h.5323310": 3.0,
+      "sea.area.h.5323311": 3.0,
+      "sea.area.h.5323312": 3.0,
+      "sea.area.h.5323313": 3.0,
+      "sea.area.h.5323314": 3.0,
+      "sea.area.h.5323315": 3.0,
+      "sea.area.h.5323316": 3.0,
+      "sea.area.h.5323317": 3.0,
+      "sea.area.h.5323318": 3.0,
+      "sea.area.h.5325301": 3.0,
+      "sea.area.h.5325302": 3.0,
+      "sea.area.h.5325303": 3.0,
+      "sea.area.h.5325304": 3.0,
+      "sea.area.h.5325305": 3.0,
+      "sea.area.h.5325306": 3.0,
+      "sea.area.h.5325307": 3.0,
+      "sea.area.h.5325308": 3.0,
+      "sea.area.h.5326101": 3.0,
+      "sea.area.h.5326102": 3.0,
+      "sea.area.h.5326103": 3.0,
+      "sea.area.h.5326104": 3.0,
+      "sea.area.h.5326105": 3.0,
+      "sea.area.h.5326106": 3.0
+     },
+     "area_basis": "共同先验：只有城市级（其实是六城共同）的值，各片区同值，不制造片区差异",
+     "base": 3.0,
+     "cap": 0.9,
+     "component_id": "safety",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "life-pack-us-v1",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "没有可比的安全资料（FBI 犯罪资料接口要密钥，没有注册；城市开放资料口径与覆盖不同、也不覆盖整个都会区）：六城、各片区同一个登记的共同先验，不制造差异（geography: 六城共同先验）"
+     },
+     "status": "known"
+    },
+    {
+     "base": 2.0,
+     "cap": 0.9,
+     "component_id": "opportunity",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "supported 40",
+       "with_jobs 40",
+       "with_training 0",
+       "geography: CBSA 42660"
+      ],
+      "kind": "derived",
+      "mapping_version": "supported_occupation_coverage_v1",
+      "observed_on": "2026-10-23",
+      "rule": "b = 2 × 有本都会区岗位资料的支持职业占比 + 2 × 有本都会区培训项目的支持职业占比"
+     },
+     "status": "known"
+    },
+    {
+     "base": 4.0,
+     "cap": 0.9,
+     "component_id": "leisure",
+     "efficiencies": [
+      {
+       "eta": 1.0,
+       "source_id": "usage_plan"
+      }
+     ],
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "life-pack-us-v1",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "休闲的城市背景用登记的共同先验（与合成样例相同）；实际参与的活动另按小时计（geography: 六城共同先验）"
+     },
+     "status": "known"
+    },
+    {
+     "area_bases": {
+      "sea.area.h.5323301": 2.7945,
+      "sea.area.h.5323302": 2.7945,
+      "sea.area.h.5323303": 2.7945,
+      "sea.area.h.5323304": 2.7945,
+      "sea.area.h.5323305": 2.7945,
+      "sea.area.h.5323306": 2.7945,
+      "sea.area.h.5323307": 2.7945,
+      "sea.area.h.5323308": 2.7945,
+      "sea.area.h.5323309": 2.7945,
+      "sea.area.h.5323310": 2.7945,
+      "sea.area.h.5323311": 2.7945,
+      "sea.area.h.5323312": 2.7945,
+      "sea.area.h.5323313": 2.7945,
+      "sea.area.h.5323314": 2.7945,
+      "sea.area.h.5323315": 2.7945,
+      "sea.area.h.5323316": 2.7945,
+      "sea.area.h.5323317": 2.7945,
+      "sea.area.h.5323318": 2.7945,
+      "sea.area.h.5325301": 2.7945,
+      "sea.area.h.5325302": 2.7945,
+      "sea.area.h.5325303": 2.7945,
+      "sea.area.h.5325304": 2.7945,
+      "sea.area.h.5325305": 2.7945,
+      "sea.area.h.5325306": 2.7945,
+      "sea.area.h.5325307": 2.7945,
+      "sea.area.h.5325308": 2.7945,
+      "sea.area.h.5326101": 2.7945,
+      "sea.area.h.5326102": 2.7945,
+      "sea.area.h.5326103": 2.7945,
+      "sea.area.h.5326104": 2.7945,
+      "sea.area.h.5326105": 2.7945,
+      "sea.area.h.5326106": 2.7945
+     },
+     "area_basis": "城市级证据（EPA 年度 AQI 的好天比例 × 5）：各片区同值",
+     "base": 2.7945,
+     "cap": 0.9,
+     "component_id": "environment",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "epa_aqi_cbsa_2025",
+       "share_good_days 0.5589",
+       "geography: CBSA 42660"
+      ],
+      "kind": "derived",
+      "mapping_version": "aqi_good_share_fixed_scale_v1",
+      "observed_on": "2026-10-23",
+      "rule": "b = 5 × 一年里 AQI 为“好”的天数比例（固定参考尺度，第七座城不改变前六座）"
+     },
+     "status": "known"
+    },
+    {
+     "component_id": "commute",
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "kind": "synthetic",
+      "mapping_version": "scoring-e1-convenience",
+      "observed_on": "2026-10-23",
+      "synthetic_note": "评分规格的合成探索参数（与产品基础样例相同），不是经验估计（geography: 六城共同（评分规格的探索参数））"
+     },
+     "status": "plan_level"
+    }
+   ],
+   "label": "西雅图",
+   "spec_id": "score.e1-life.explore"
+  }
+ ],
+ "comparison_group": {
+  "action_roles": [
+   "housing",
+   "food",
+   "job",
+   "durable_good",
+   "training",
+   "periodic_service",
+   "experience"
+  ],
+  "allowed_source_kinds": [
+   "observed",
+   "derived",
+   "estimated",
+   "synthetic"
+  ],
+  "base_year": 2024,
+  "cities": [
+   {
+    "code": "35620",
+    "country": "US",
+    "scheme": "CBSA2023"
+   },
+   {
+    "code": "31080",
+    "country": "US",
+    "scheme": "CBSA2023"
+   },
+   {
+    "code": "41860",
+    "country": "US",
+    "scheme": "CBSA2023"
+   },
+   {
+    "code": "16980",
+    "country": "US",
+    "scheme": "CBSA2023"
+   },
+   {
+    "code": "26420",
+    "country": "US",
+    "scheme": "CBSA2023"
+   },
+   {
+    "code": "42660",
+    "country": "US",
+    "scheme": "CBSA2023"
+   }
+  ],
+  "commute_granularity": "plan_level",
+  "currency": "USD",
+  "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+  "group_id": "group.e3b-us-v1",
+  "note": "六城真实资料比较组：同一地理口径（都会区 × 支持范围内的 PUMA）、同一币种与基年（USD_2024_LOCAL）；住房、通勤、食品、服务、设备、活动与岗位来自公开资料与登记的模型设定；安全与休闲背景是共同先验，环境按 AQI 的固定尺度",
+  "scoring_version": "e1-life-v1",
+  "time_basis": "2024 年不变价、当地价格水平（USD_2024_LOCAL）；年度决策、月度执行",
+  "units": {
+   "quality_level": "级",
+   "space_level": "级",
+   "visits_per_month": "次/月"
+  }
+ },
+ "scoring_notice": "E3B 六城真实资料包的评分配置：评分规格与参数仍是合成探索设定（与产品基础样例相同）；城市背景按登记的规则从公开资料或共同先验得到。不能据此排序真实城市",
+ "spec": {
+  "components": [
+   {
+    "combine": "sum_of_source_max",
+    "component_id": "housing_condition",
+    "description": "居住条件（DECISIONS/0042）：这个月实际住的那一处房子本身的条件——空间够用程度（由卧室数推断的等级，卧室数本身不再单独加分） 与同片区同户型里的条件档次。房租、通勤、地区的安全与环境都不进入这一项；多项条件平滑相加，没有一票否决。",
+    "dimension": "material",
+    "material_need": "housing_condition",
+    "sources": [
+     {
+      "measure": "level",
+      "note": "实际住的那一处的空间够用等级（单人：开间 1、一卧 2、两卧 3、三卧及以上 4）；降级后读最低方案那一处",
+      "records": [
+       "housing"
+      ],
+      "source_id": "space",
+      "spec_key": "space_level",
+      "unit": "级",
+      "value": "spec_number"
+     },
+     {
+      "measure": "level",
+      "note": "同片区同户型里的条件档次（1–3）；是含误差的估计，所以效率低于空间",
+      "records": [
+       "housing"
+      ],
+      "source_id": "quality",
+      "spec_key": "quality_level",
+      "unit": "级",
+      "value": "spec_number"
+     }
+    ],
+    "tau": 3,
+    "unit": "居住条件等级（折算）"
+   },
+   {
+    "component_id": "food_life",
+    "description": "饮食生活：这个月实际执行的完整食品方案每周有几顿新鲜餐、几顿合确认口味的餐。基本饮食覆盖是可行性（最低生活检查），不在这里 加分；价格、餐馆档次与外食次数都不是输入；降级时读最低方案。",
+    "dimension": "material",
+    "food_life": {
+     "cap": 0.9,
+     "definition": "z = η_fresh·F + η_taste·T，s = min(c, z/(z + τ))；F = 每周新鲜餐数，T = 主要菜系在确认口味里的组成每周几餐（每个组成只算 一次）。η_fresh 与原“新鲜食品”项的 1 相同（中性用户的饮食分不变）；η_taste = 0.5 是探索设定",
+     "eta_fresh": 1.0,
+     "eta_taste": 0.5,
+     "rule": "food_plan_fresh_and_taste_v1",
+     "unit": "餐/周"
+    },
+    "material_need": "food_life",
+    "tau": 7,
+    "unit": "餐/周（折算）"
+   },
+   {
+    "component_id": "daily_convenience",
+    "convenience": {
+     "cap": 0.9,
+     "definition": "q = Σ（协议家务基准小时 − 当月资源账里本人的残余小时），s = min(c, q/(q + τ))；同一项家务只取当月在用方案里残余最小的那一个 （结算写出），不读价格、付款或成交。代表性杂务组合，不含做饭、通勤、工作、学习与疾病恢复",
+     "rule": "household_baseline_minus_residual_v1",
+     "tasks": [
+      "laundry",
+      "cleaning"
+     ],
+     "unit": "小时/月"
+    },
+    "description": "日常生活便利：这个月本人实际少做了多少小时家务（洗衣与打扫这组代表性杂务）。设备（一次购买、服务期内持续）与人工服务（按月购买、 实际买到的月份）都只通过资源账里的本人残余小时起作用；成交、花钱与目标兑现不另计分。",
+    "dimension": "material",
+    "material_need": "daily_convenience",
+    "tau": 8,
+    "unit": "小时/月"
+   },
+   {
+    "component_id": "personal_enjoyment",
+    "description": "个人消费与享受：这个月实际在用的居家舒适用品与实际接受的享受型服务。按功能计：同功能的第二件用品不再加，服务按实际份数相加； 纯爱好装备没有享受功能（它只让活动可以开展）；成交、花钱与购买次数不计分。",
+    "dimension": "material",
+    "enjoyment": {
+     "cap": 0.9,
+     "definition": "v_f = 1（presence：这个月有在用的、提供功能 f 的用品）或 Σ 份数（units：实际接受的服务次数）；z = Σ η_f·v_f， s = min(c, z/(z + τ))。η 与 τ 是探索设定",
+     "functions": [
+      {
+       "eta": 1.5,
+       "function": "home_comfort",
+       "label": "居家舒适",
+       "measure": "presence",
+       "unit": "在用"
+      },
+      {
+       "eta": 1.0,
+       "function": "personal_care",
+       "label": "放松护理",
+       "measure": "units",
+       "unit": "次"
+      }
+     ],
+     "rule": "enjoyment_by_function_v1",
+     "unit": "功能（折算）"
+    },
+    "material_need": "personal_enjoyment",
+    "tau": 3,
+    "unit": "享受功能（折算）"
+   },
+   {
+    "component_id": "safety",
+    "description": "统一城市背景；当前没有行动改善机制。",
+    "dimension": "safety",
+    "tau": 3,
+    "unit": "指数（合成）"
+   },
+   {
+    "component_id": "opportunity",
+    "description": "发展维：城市的发展条件（背景 b，不由本人的学习结果回填）加上这个人这个月实际新增的能力进度。只计实际参加的学习； 生病暂停的月份不上课，也就没有成长。证书本身、换岗、职位名称与涨薪都不另加分。",
+    "dimension": "opportunity",
+    "growth": {
+     "definition": "g_m = 词表里每项能力当月新增进度之和；年初已有的能力进度为 1，未有的取授予它的课程里最高的\"实际累计参加月数 / 要求月数\"。一门课授予两项能力就有两份进度：能力拆分粒度会影响成长量（合成假设，见参数目录 CA-06）",
+     "eta": 12,
+     "progress_rule": "ability_progress_increment_v1",
+     "unit": "能力进度/月"
+    },
+    "tau": 2,
+    "unit": "指数（合成）"
+   },
+   {
+    "combine": "sum",
+    "component_id": "leisure",
+    "description": "城市基础休闲条件，加上声明了使用安排的锻炼次数与实际活动参与小时（只计参与，不计准备与往返）。确认的兴趣在同样参与小时下效率 高 κ；生病暂停的月份没有参与，也就没有改善。",
+    "dimension": "leisure",
+    "participation": {
+     "definition": "x = Σ 参与小时 × (1 + κ·1[主要类别 ∈ 确认的兴趣])，贡献 η_hour·x 加进休闲的 z。η_hour = 1/小时：原来一次 4 小时的体验 按“次”计 4，换成小时后锚点同步换成每小时 1；κ = 0.5 是探索设定，有界（0–1），只放大活动参与、不放大城市背景",
+     "eta_hour": 1.0,
+     "match_bonus": 0.5,
+     "rule": "participation_hours_interest_match_v1",
+     "unit": "参与小时"
+    },
+    "sources": [
+     {
+      "measure": "capacity",
+      "note": "使用假设：只有声明了每月锻炼次数的会员才算锻炼",
+      "per_unit": true,
+      "records": [
+       "prepaid_service",
+       "periodic_service"
+      ],
+      "requires_spec_key": "visits_per_month",
+      "source_id": "usage_plan",
+      "spec_key": "visits_per_month",
+      "unit": "次/月",
+      "value": "spec_number"
+     }
+    ],
+    "tau": 12,
+    "unit": "每月参与次数（折算）"
+   },
+   {
+    "component_id": "environment",
+    "description": "城市基础环境（显式合成）。本样例不启用自然景观加分。",
+    "dimension": "environment",
+    "tau": 3,
+    "unit": "指数（合成）"
+   },
+   {
+    "component_id": "commute",
+    "description": "交通便捷程度及出行对生活的影响（维度键沿用 commute）。按这个月实际所住住房的往返分钟与实际累计到岗次数评分； 大病病假的月份没有到岗，只剩 ρ 份不因上班消失的出行影响。时间与负担由月度资源账另算。",
+    "dimension": "commute",
+    "tau": 60,
+    "transport": {
+     "definition": "k = ρ + (1 − ρ)·D/D_ref，T_eq = k·T，S = τ_T/(τ_T + T_eq)。T：实际住房到就业中心的往返分钟；D：资源账的当月累计 到岗次数（多岗位相加；病假月份为 0）。T_eq 是评分中间量，不是实际出行分钟",
+     "reference_visits": 20,
+     "rho": 0.25,
+     "unit": "分钟/工作日往返",
+     "visits_unit": "次/月"
+    },
+    "unit": "分钟/工作日往返"
+   }
+  ],
+  "function": "saturating_capped_v1",
+  "health": {
+   "definition": "H 读这个月的月初健康状态（与工作限制同一个时点）：健康 1、小病 0.5、大病 0（合成方案）。同等病情对每个人的直接扣分都是 γ(1 − H)，不乘个人医疗点数；付医疗费不加分，没有\"没看病\"的额外惩罚；治疗只改变之后的月份",
+   "gamma": 0.2,
+   "rule": "month_start_state",
+   "state_values": {
+    "healthy": 1.0,
+    "major": 0.0,
+    "minor": 0.5
+   }
+  },
+  "note": "物质维四个叶子：居住面积、饮食生活（实际完整食品方案）、日常生活便利（这个月本人实际少做的洗衣与打扫小时）、个人消费与享受（实际 提供的享受功能与服务量）。安全、环境只有城市基础条件；休闲由城市基础条件、声明了使用安排的锻炼与实际活动参与小时改善；发展维 = 城市发展条件 + 当月实际新增的能力进度；通勤维为广义交通。医疗维没有分项；健康由 全组共用的健康项 γ·H(月初状态) 评价。工资、现金、付款、成交与剩余时间不进入满足感。",
+  "omissions": [
+   {
+    "affects": "家务负担主要不在洗衣与打扫上的人、有照护责任的人",
+    "owner": "V2（需要时间利用资料与所有者裁决）",
+    "what": "代表性杂务（洗衣、打扫）以外的家务与照护（采购、维修、照顾家人）；做饭的省时另在新鲜食品与时间账里"
+   },
+   {
+    "affects": "喜欢某类设备却不愿意请人上门（或相反）的人；看重品牌或服务质量的人",
+    "owner": "V2（商品异质性，需要同规格报价）",
+    "what": "日常生活便利把\"花钱换省事\"合成一项：设备与人工、品牌与服务质量的偏好差异、对陌生人进家的顾虑、维修与转卖都没有区分"
+   },
+   {
+    "affects": "物质偏好集中在这些方面的人、很看重品牌的人（物质维的评价会偏窄）",
+    "owner": "E3 首发词表 / V2",
+    "what": "物质生活里住房、食品、杂务、居家舒适与放松护理之外的需求（通信、储物、工作设备、衣着）；品牌偏好只保留原文"
+   },
+   {
+    "affects": "想用美食活动或套餐代替一顿正餐的人；只想租不想买装备的人",
+    "owner": "V2（需要组合规则与所有者裁决）",
+    "what": "同时替代正餐的活动套餐（餐食覆盖、费用与时间的组合规则）；装备租赁库存"
+   },
+   {
+    "affects": "不上班但出行多的人、依赖公共交通或住得离日常设施远的人",
+    "owner": "V2（需要共同粒度的出行资料）",
+    "what": "非工作出行（购物、社交、就医）的时间与满足感；公共交通可及性"
+   },
+   {
+    "affects": "很看重职位、晋升与长期成就感的人",
+    "owner": "CA-06 后续",
+    "what": "学习之外的职业成长（持续成就感、职位名称、晋升、涨薪带来的满足感）"
+   },
+   {
+    "affects": "体弱、慢性病、照护负担重或很担心健康的人",
+    "owner": "V2（需要外部资料与所有者裁决）",
+    "what": "疾病的心理后果（焦虑、对生病的担心）、疲劳累积、慢性病、多病叠加、住院以外的照护与疾病名称"
+   },
+   {
+    "affects": "模拟最后几个月生病的人、看重储蓄与未来消费的人",
+    "owner": "E1-6A 只估 12 个月期末；更远的价值与课程潜力待定",
+    "what": "期末仍未恢复的疾病、留存到期末的现金与物品的评价"
+   }
+  ],
+  "protocol_id": "life-v1-e3b-us",
+  "scoring_version": "e1-life-v1",
+  "spec_id": "score.e1-life.explore",
+  "status": "exploratory_synthetic"
+ }
+}

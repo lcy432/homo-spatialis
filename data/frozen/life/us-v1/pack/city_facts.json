@@ -1,0 +1,585 @@
+{
+ "city_facts": {
+  "comparison_group_id": "group.e3b-us-v1",
+  "facts_notice": "E3B 六城的城市背景事实：环境与发展来自公开资料的固定尺度换算，安全与休闲是登记的共同先验。事实表可见；到评分输入的换算（b = 0.5 × 指数）不进观察",
+  "links": [
+   {
+    "component_id": "safety",
+    "fact_id": "safety_index",
+    "factor": "0.5",
+    "rule": "linear_base_v1",
+    "source": {
+     "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+     "kind": "synthetic",
+     "mapping_version": "life-pack-us-v1-fact-links",
+     "observed_on": "2026-10-23",
+     "synthetic_note": "换算：评分条件里的背景量 b = 0.5 × 0–10 的指数；只是把可见事实写成已有评分条件里的 b，没有新增评分公式（geography: 六城共同）"
+    }
+   },
+   {
+    "component_id": "opportunity",
+    "fact_id": "development_index",
+    "factor": "0.5",
+    "rule": "linear_base_v1",
+    "source": {
+     "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+     "kind": "synthetic",
+     "mapping_version": "life-pack-us-v1-fact-links",
+     "observed_on": "2026-10-23",
+     "synthetic_note": "换算：评分条件里的背景量 b = 0.5 × 0–10 的指数；只是把可见事实写成已有评分条件里的 b，没有新增评分公式（geography: 六城共同）"
+    }
+   },
+   {
+    "component_id": "leisure",
+    "fact_id": "leisure_index",
+    "factor": "0.5",
+    "rule": "linear_base_v1",
+    "source": {
+     "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+     "kind": "synthetic",
+     "mapping_version": "life-pack-us-v1-fact-links",
+     "observed_on": "2026-10-23",
+     "synthetic_note": "换算：评分条件里的背景量 b = 0.5 × 0–10 的指数；只是把可见事实写成已有评分条件里的 b，没有新增评分公式（geography: 六城共同）"
+    }
+   },
+   {
+    "component_id": "environment",
+    "fact_id": "environment_index",
+    "factor": "0.5",
+    "rule": "linear_base_v1",
+    "source": {
+     "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+     "kind": "synthetic",
+     "mapping_version": "life-pack-us-v1-fact-links",
+     "observed_on": "2026-10-23",
+     "synthetic_note": "换算：评分条件里的背景量 b = 0.5 × 0–10 的指数；只是把可见事实写成已有评分条件里的 b，没有新增评分公式（geography: 六城共同）"
+    }
+   }
+  ],
+  "sheets": [
+   {
+    "city": {
+     "code": "35620",
+     "country": "US",
+     "scheme": "CBSA2023"
+    },
+    "facts": [
+     {
+      "fact_id": "safety_index",
+      "label": "安全条件（共同先验）",
+      "meaning": "安全条件指数，0–10，越高越安全。六城没有可比的安全资料，这里是登记的共同先验（六城、各片区同值），不是任何城市的犯罪统计",
+      "number": 6.0,
+      "period": "2024 基年情景（AQI 用 2025 年有效资料）",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "kind": "synthetic",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "synthetic_note": "登记的共同先验，不是资料（geography: 六城共同先验）"
+      },
+      "status": "known",
+      "unit": "指数（0–10）",
+      "value_kind": "number"
+     },
+     {
+      "fact_id": "development_index",
+      "label": "发展机会（支持职业覆盖）",
+      "meaning": "0–10：本都会区有岗位资料的支持职业占比 × 4 + 有本都会区培训项目的支持职业占比 × 4。不含你自己的学习进度；不是就业统计",
+      "number": 4.2,
+      "period": "2024 基年情景（AQI 用 2025 年有效资料）",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "inputs": [
+        "bls_oews_may2024",
+        "ipeds_2023",
+        "geography: CBSA 35620"
+       ],
+       "kind": "derived",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "rule": "支持职业覆盖 × 4（岗位）+ × 4（培训）"
+      },
+      "status": "known",
+      "unit": "指数（0–10）",
+      "value_kind": "number"
+     },
+     {
+      "fact_id": "leisure_index",
+      "label": "休闲条件（共同先验）",
+      "meaning": "不花钱也能享受的休闲条件指数，0–10；六城没有可比资料，这里是登记的共同先验。健身、课程等活动另外安排、另外付费",
+      "number": 8.0,
+      "period": "2024 基年情景（AQI 用 2025 年有效资料）",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "kind": "synthetic",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "synthetic_note": "登记的共同先验，不是资料（geography: 六城共同先验）"
+      },
+      "status": "known",
+      "unit": "指数（0–10）",
+      "value_kind": "number"
+     },
+     {
+      "fact_id": "environment_index",
+      "label": "空气质量（好天比例 × 10）",
+      "meaning": "0–10：一年里 EPA 空气质量指数为“好”（AQI ≤ 50）的天数比例 × 10，越高越好；只反映空气，不含绿地与噪声",
+      "number": 4.219,
+      "period": "2024 基年情景（AQI 用 2025 年有效资料）",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "inputs": [
+        "epa_aqi_cbsa_2025",
+        "geography: CBSA 35620"
+       ],
+       "kind": "derived",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "rule": "好天比例 × 10"
+      },
+      "status": "known",
+      "unit": "指数（0–10）",
+      "value_kind": "number"
+     }
+    ],
+    "label": "纽约（纽约市五区居民）"
+   },
+   {
+    "city": {
+     "code": "31080",
+     "country": "US",
+     "scheme": "CBSA2023"
+    },
+    "facts": [
+     {
+      "fact_id": "safety_index",
+      "label": "安全条件（共同先验）",
+      "meaning": "安全条件指数，0–10，越高越安全。六城没有可比的安全资料，这里是登记的共同先验（六城、各片区同值），不是任何城市的犯罪统计",
+      "number": 6.0,
+      "period": "2024 基年情景（AQI 用 2025 年有效资料）",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "kind": "synthetic",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "synthetic_note": "登记的共同先验，不是资料（geography: 六城共同先验）"
+      },
+      "status": "known",
+      "unit": "指数（0–10）",
+      "value_kind": "number"
+     },
+     {
+      "fact_id": "development_index",
+      "label": "发展机会（支持职业覆盖）",
+      "meaning": "0–10：本都会区有岗位资料的支持职业占比 × 4 + 有本都会区培训项目的支持职业占比 × 4。不含你自己的学习进度；不是就业统计",
+      "number": 4.0,
+      "period": "2024 基年情景（AQI 用 2025 年有效资料）",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "inputs": [
+        "bls_oews_may2024",
+        "ipeds_2023",
+        "geography: CBSA 31080"
+       ],
+       "kind": "derived",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "rule": "支持职业覆盖 × 4（岗位）+ × 4（培训）"
+      },
+      "status": "known",
+      "unit": "指数（0–10）",
+      "value_kind": "number"
+     },
+     {
+      "fact_id": "leisure_index",
+      "label": "休闲条件（共同先验）",
+      "meaning": "不花钱也能享受的休闲条件指数，0–10；六城没有可比资料，这里是登记的共同先验。健身、课程等活动另外安排、另外付费",
+      "number": 8.0,
+      "period": "2024 基年情景（AQI 用 2025 年有效资料）",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "kind": "synthetic",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "synthetic_note": "登记的共同先验，不是资料（geography: 六城共同先验）"
+      },
+      "status": "known",
+      "unit": "指数（0–10）",
+      "value_kind": "number"
+     },
+     {
+      "fact_id": "environment_index",
+      "label": "空气质量（好天比例 × 10）",
+      "meaning": "0–10：一年里 EPA 空气质量指数为“好”（AQI ≤ 50）的天数比例 × 10，越高越好；只反映空气，不含绿地与噪声",
+      "number": 1.068,
+      "period": "2024 基年情景（AQI 用 2025 年有效资料）",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "inputs": [
+        "epa_aqi_cbsa_2025",
+        "geography: CBSA 31080"
+       ],
+       "kind": "derived",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "rule": "好天比例 × 10"
+      },
+      "status": "known",
+      "unit": "指数（0–10）",
+      "value_kind": "number"
+     }
+    ],
+    "label": "洛杉矶"
+   },
+   {
+    "city": {
+     "code": "41860",
+     "country": "US",
+     "scheme": "CBSA2023"
+    },
+    "facts": [
+     {
+      "fact_id": "safety_index",
+      "label": "安全条件（共同先验）",
+      "meaning": "安全条件指数，0–10，越高越安全。六城没有可比的安全资料，这里是登记的共同先验（六城、各片区同值），不是任何城市的犯罪统计",
+      "number": 6.0,
+      "period": "2024 基年情景（AQI 用 2025 年有效资料）",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "kind": "synthetic",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "synthetic_note": "登记的共同先验，不是资料（geography: 六城共同先验）"
+      },
+      "status": "known",
+      "unit": "指数（0–10）",
+      "value_kind": "number"
+     },
+     {
+      "fact_id": "development_index",
+      "label": "发展机会（支持职业覆盖）",
+      "meaning": "0–10：本都会区有岗位资料的支持职业占比 × 4 + 有本都会区培训项目的支持职业占比 × 4。不含你自己的学习进度；不是就业统计",
+      "number": 4.0,
+      "period": "2024 基年情景（AQI 用 2025 年有效资料）",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "inputs": [
+        "bls_oews_may2024",
+        "ipeds_2023",
+        "geography: CBSA 41860"
+       ],
+       "kind": "derived",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "rule": "支持职业覆盖 × 4（岗位）+ × 4（培训）"
+      },
+      "status": "known",
+      "unit": "指数（0–10）",
+      "value_kind": "number"
+     },
+     {
+      "fact_id": "leisure_index",
+      "label": "休闲条件（共同先验）",
+      "meaning": "不花钱也能享受的休闲条件指数，0–10；六城没有可比资料，这里是登记的共同先验。健身、课程等活动另外安排、另外付费",
+      "number": 8.0,
+      "period": "2024 基年情景（AQI 用 2025 年有效资料）",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "kind": "synthetic",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "synthetic_note": "登记的共同先验，不是资料（geography: 六城共同先验）"
+      },
+      "status": "known",
+      "unit": "指数（0–10）",
+      "value_kind": "number"
+     },
+     {
+      "fact_id": "environment_index",
+      "label": "空气质量（好天比例 × 10）",
+      "meaning": "0–10：一年里 EPA 空气质量指数为“好”（AQI ≤ 50）的天数比例 × 10，越高越好；只反映空气，不含绿地与噪声",
+      "number": 4.071,
+      "period": "2024 基年情景（AQI 用 2025 年有效资料）",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "inputs": [
+        "epa_aqi_cbsa_2025",
+        "geography: CBSA 41860"
+       ],
+       "kind": "derived",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "rule": "好天比例 × 10"
+      },
+      "status": "known",
+      "unit": "指数（0–10）",
+      "value_kind": "number"
+     }
+    ],
+    "label": "旧金山"
+   },
+   {
+    "city": {
+     "code": "16980",
+     "country": "US",
+     "scheme": "CBSA2023"
+    },
+    "facts": [
+     {
+      "fact_id": "safety_index",
+      "label": "安全条件（共同先验）",
+      "meaning": "安全条件指数，0–10，越高越安全。六城没有可比的安全资料，这里是登记的共同先验（六城、各片区同值），不是任何城市的犯罪统计",
+      "number": 6.0,
+      "period": "2024 基年情景（AQI 用 2025 年有效资料）",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "kind": "synthetic",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "synthetic_note": "登记的共同先验，不是资料（geography: 六城共同先验）"
+      },
+      "status": "known",
+      "unit": "指数（0–10）",
+      "value_kind": "number"
+     },
+     {
+      "fact_id": "development_index",
+      "label": "发展机会（支持职业覆盖）",
+      "meaning": "0–10：本都会区有岗位资料的支持职业占比 × 4 + 有本都会区培训项目的支持职业占比 × 4。不含你自己的学习进度；不是就业统计",
+      "number": 4.0,
+      "period": "2024 基年情景（AQI 用 2025 年有效资料）",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "inputs": [
+        "bls_oews_may2024",
+        "ipeds_2023",
+        "geography: CBSA 16980"
+       ],
+       "kind": "derived",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "rule": "支持职业覆盖 × 4（岗位）+ × 4（培训）"
+      },
+      "status": "known",
+      "unit": "指数（0–10）",
+      "value_kind": "number"
+     },
+     {
+      "fact_id": "leisure_index",
+      "label": "休闲条件（共同先验）",
+      "meaning": "不花钱也能享受的休闲条件指数，0–10；六城没有可比资料，这里是登记的共同先验。健身、课程等活动另外安排、另外付费",
+      "number": 8.0,
+      "period": "2024 基年情景（AQI 用 2025 年有效资料）",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "kind": "synthetic",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "synthetic_note": "登记的共同先验，不是资料（geography: 六城共同先验）"
+      },
+      "status": "known",
+      "unit": "指数（0–10）",
+      "value_kind": "number"
+     },
+     {
+      "fact_id": "environment_index",
+      "label": "空气质量（好天比例 × 10）",
+      "meaning": "0–10：一年里 EPA 空气质量指数为“好”（AQI ≤ 50）的天数比例 × 10，越高越好；只反映空气，不含绿地与噪声",
+      "number": 2.986,
+      "period": "2024 基年情景（AQI 用 2025 年有效资料）",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "inputs": [
+        "epa_aqi_cbsa_2025",
+        "geography: CBSA 16980"
+       ],
+       "kind": "derived",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "rule": "好天比例 × 10"
+      },
+      "status": "known",
+      "unit": "指数（0–10）",
+      "value_kind": "number"
+     }
+    ],
+    "label": "芝加哥（伊利诺伊州部分）"
+   },
+   {
+    "city": {
+     "code": "26420",
+     "country": "US",
+     "scheme": "CBSA2023"
+    },
+    "facts": [
+     {
+      "fact_id": "safety_index",
+      "label": "安全条件（共同先验）",
+      "meaning": "安全条件指数，0–10，越高越安全。六城没有可比的安全资料，这里是登记的共同先验（六城、各片区同值），不是任何城市的犯罪统计",
+      "number": 6.0,
+      "period": "2024 基年情景（AQI 用 2025 年有效资料）",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "kind": "synthetic",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "synthetic_note": "登记的共同先验，不是资料（geography: 六城共同先验）"
+      },
+      "status": "known",
+      "unit": "指数（0–10）",
+      "value_kind": "number"
+     },
+     {
+      "fact_id": "development_index",
+      "label": "发展机会（支持职业覆盖）",
+      "meaning": "0–10：本都会区有岗位资料的支持职业占比 × 4 + 有本都会区培训项目的支持职业占比 × 4。不含你自己的学习进度；不是就业统计",
+      "number": 4.2,
+      "period": "2024 基年情景（AQI 用 2025 年有效资料）",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "inputs": [
+        "bls_oews_may2024",
+        "ipeds_2023",
+        "geography: CBSA 26420"
+       ],
+       "kind": "derived",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "rule": "支持职业覆盖 × 4（岗位）+ × 4（培训）"
+      },
+      "status": "known",
+      "unit": "指数（0–10）",
+      "value_kind": "number"
+     },
+     {
+      "fact_id": "leisure_index",
+      "label": "休闲条件（共同先验）",
+      "meaning": "不花钱也能享受的休闲条件指数，0–10；六城没有可比资料，这里是登记的共同先验。健身、课程等活动另外安排、另外付费",
+      "number": 8.0,
+      "period": "2024 基年情景（AQI 用 2025 年有效资料）",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "kind": "synthetic",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "synthetic_note": "登记的共同先验，不是资料（geography: 六城共同先验）"
+      },
+      "status": "known",
+      "unit": "指数（0–10）",
+      "value_kind": "number"
+     },
+     {
+      "fact_id": "environment_index",
+      "label": "空气质量（好天比例 × 10）",
+      "meaning": "0–10：一年里 EPA 空气质量指数为“好”（AQI ≤ 50）的天数比例 × 10，越高越好；只反映空气，不含绿地与噪声",
+      "number": 1.014,
+      "period": "2024 基年情景（AQI 用 2025 年有效资料）",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "inputs": [
+        "epa_aqi_cbsa_2025",
+        "geography: CBSA 26420"
+       ],
+       "kind": "derived",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "rule": "好天比例 × 10"
+      },
+      "status": "known",
+      "unit": "指数（0–10）",
+      "value_kind": "number"
+     }
+    ],
+    "label": "休斯敦"
+   },
+   {
+    "city": {
+     "code": "42660",
+     "country": "US",
+     "scheme": "CBSA2023"
+    },
+    "facts": [
+     {
+      "fact_id": "safety_index",
+      "label": "安全条件（共同先验）",
+      "meaning": "安全条件指数，0–10，越高越安全。六城没有可比的安全资料，这里是登记的共同先验（六城、各片区同值），不是任何城市的犯罪统计",
+      "number": 6.0,
+      "period": "2024 基年情景（AQI 用 2025 年有效资料）",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "kind": "synthetic",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "synthetic_note": "登记的共同先验，不是资料（geography: 六城共同先验）"
+      },
+      "status": "known",
+      "unit": "指数（0–10）",
+      "value_kind": "number"
+     },
+     {
+      "fact_id": "development_index",
+      "label": "发展机会（支持职业覆盖）",
+      "meaning": "0–10：本都会区有岗位资料的支持职业占比 × 4 + 有本都会区培训项目的支持职业占比 × 4。不含你自己的学习进度；不是就业统计",
+      "number": 4.0,
+      "period": "2024 基年情景（AQI 用 2025 年有效资料）",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "inputs": [
+        "bls_oews_may2024",
+        "ipeds_2023",
+        "geography: CBSA 42660"
+       ],
+       "kind": "derived",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "rule": "支持职业覆盖 × 4（岗位）+ × 4（培训）"
+      },
+      "status": "known",
+      "unit": "指数（0–10）",
+      "value_kind": "number"
+     },
+     {
+      "fact_id": "leisure_index",
+      "label": "休闲条件（共同先验）",
+      "meaning": "不花钱也能享受的休闲条件指数，0–10；六城没有可比资料，这里是登记的共同先验。健身、课程等活动另外安排、另外付费",
+      "number": 8.0,
+      "period": "2024 基年情景（AQI 用 2025 年有效资料）",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "kind": "synthetic",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "synthetic_note": "登记的共同先验，不是资料（geography: 六城共同先验）"
+      },
+      "status": "known",
+      "unit": "指数（0–10）",
+      "value_kind": "number"
+     },
+     {
+      "fact_id": "environment_index",
+      "label": "空气质量（好天比例 × 10）",
+      "meaning": "0–10：一年里 EPA 空气质量指数为“好”（AQI ≤ 50）的天数比例 × 10，越高越好；只反映空气，不含绿地与噪声",
+      "number": 5.589,
+      "period": "2024 基年情景（AQI 用 2025 年有效资料）",
+      "source": {
+       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+       "inputs": [
+        "epa_aqi_cbsa_2025",
+        "geography: CBSA 42660"
+       ],
+       "kind": "derived",
+       "mapping_version": "life-pack-us-v1",
+       "observed_on": "2026-10-23",
+       "rule": "好天比例 × 10"
+      },
+      "status": "known",
+      "unit": "指数（0–10）",
+      "value_kind": "number"
+     }
+    ],
+    "label": "西雅图"
+   }
+  ],
+  "version": "e1-7a-city-facts-v1"
+ }
+}

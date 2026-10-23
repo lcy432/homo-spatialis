@@ -105,5 +105,5 @@ def test_menus_are_shared_by_seed_without_clone_ids_and_stratified():
 
 
 def test_environment_uses_a_fixed_scale_and_unknown_stays_unknown():
-    assert environment_base(CFG, 0.5589) == pytest.approx(3.3534)
+    assert environment_base(CFG, 0.5589) == pytest.approx(2.7945)  # 5 × 0.5589
     assert environment_base(CFG, None) is None

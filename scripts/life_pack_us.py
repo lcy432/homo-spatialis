@@ -5,6 +5,7 @@
 
     uv run python scripts/life_pack_us.py fetch-tax [--mode cache_first|refresh]   # 获取官方税规则网页
     uv run python scripts/life_pack_us.py check-tax                                # 离线核对摘句与数，列出每城的税或阻断原因
+    uv run python scripts/life_pack_us.py build [--out data/frozen/life/us-v1/pack]  # 离线组装六城资料包（生活输入、评分、评价、城市事实）
 """
 
 from __future__ import annotations
@@ -34,6 +35,22 @@ def cmd_check_tax(args: argparse.Namespace) -> int:
     return _report(compile_tax(cfg, Path(args.cache)))
 
 
+def cmd_build(args: argparse.Namespace) -> int:
+    from product.realdata.life_assembly import build_all
+
+    rep = build_all(Path(args.out), intake_db=Path(args.intake_db), cache=Path(args.cache))
+    for key, c in rep["cities"].items():
+        print(
+            key,
+            json.dumps(c["counts"], ensure_ascii=False),
+            json.dumps(c["excluded"], ensure_ascii=False),
+        )
+    print(
+        "build", rep["build_identity"][:16], "files", json.dumps(rep["files"], ensure_ascii=False)
+    )
+    return 0 if not rep["tax_blocked"] else 1
+
+
 def _report(b) -> int:
     for pid, p in sorted(b.policies.items()):
         print(
@@ -59,8 +76,14 @@ def main(argv: list[str] | None = None) -> int:
     f = sub.add_parser("fetch-tax", help="联网获取官方税规则网页（显式命令）")
     f.add_argument("--mode", choices=["cache_first", "refresh"], default="cache_first")
     sub.add_parser("check-tax", help="离线核对官方税规则")
+    b = sub.add_parser("build", help="离线组装六城资料包")
+    b.add_argument("--out", default="data/frozen/life/us-v1/pack")
+    b.add_argument(
+        "--intake-db", default="runs/intake/us-v1/work/freeze/562c32339bbae67f/intake.sqlite"
+    )
     args = ap.parse_args(argv)
-    return {"fetch-tax": cmd_fetch_tax, "check-tax": cmd_check_tax}[args.cmd](args)
+    handlers = {"fetch-tax": cmd_fetch_tax, "check-tax": cmd_check_tax, "build": cmd_build}
+    return handlers[args.cmd](args)
 
 
 if __name__ == "__main__":

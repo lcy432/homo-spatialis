@@ -1,0 +1,655 @@
+{
+ "evaluation_notice": "E3B 六城的评价配置：评价规则与参数是合成探索设定；参考生活槽位绑定到真实资料包的机会。不能据此排序真实城市",
+ "spec": {
+  "city_bindings": [
+   {
+    "city": {
+     "code": "35620",
+     "country": "US",
+     "scheme": "CBSA2023"
+    },
+    "targets": [
+     {
+      "opportunity_id": "nyc.housing.3604107.1.1-6",
+      "slot_id": "housing_basic",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "nyc.housing.3604165.1.1-2",
+      "slot_id": "housing_comfort",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "nyc.food.home_staples",
+      "slot_id": "food_basic",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "nyc.food.home_fresh",
+      "slot_id": "food_comfort",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "nyc.durable.pair_top_dryer",
+      "slot_id": "convenience_device",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "nyc.service.laundry_pickup",
+      "slot_id": "laundry_service",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "nyc.service.cleaning_biweekly",
+      "slot_id": "cleaning_service",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "nyc.service.massage_studio_1",
+      "slot_id": "massage",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "nyc.experience.group_fitness",
+      "slot_id": "exercise_class",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "nyc.experience.guitar_practice",
+      "slot_id": "music_practice",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "nyc.durable.acoustic_guitar",
+      "slot_id": "guitar",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "nyc.job.49-2022.p50",
+      "slot_id": "qualified_job",
+      "status": "opportunity"
+     }
+    ]
+   },
+   {
+    "city": {
+     "code": "31080",
+     "country": "US",
+     "scheme": "CBSA2023"
+    },
+    "targets": [
+     {
+      "opportunity_id": "la.housing.0603744.0.1-6",
+      "slot_id": "housing_basic",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "la.housing.0603770.1.1-2",
+      "slot_id": "housing_comfort",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "la.food.home_staples",
+      "slot_id": "food_basic",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "la.food.home_fresh",
+      "slot_id": "food_comfort",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "la.durable.pair_top_dryer",
+      "slot_id": "convenience_device",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "la.service.laundry_pickup",
+      "slot_id": "laundry_service",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "la.service.cleaning_biweekly",
+      "slot_id": "cleaning_service",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "la.service.massage_studio_1",
+      "slot_id": "massage",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "la.experience.group_fitness",
+      "slot_id": "exercise_class",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "la.experience.guitar_practice",
+      "slot_id": "music_practice",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "la.durable.acoustic_guitar",
+      "slot_id": "guitar",
+      "status": "opportunity"
+     },
+     {
+      "reason": "本城没有能授予岗位资格的培训项目（IPEDS 里没有支持职业的整年项目），没有可作参考的“改做已具资格的岗位”",
+      "slot_id": "qualified_job",
+      "status": "unavailable"
+     }
+    ]
+   },
+   {
+    "city": {
+     "code": "41860",
+     "country": "US",
+     "scheme": "CBSA2023"
+    },
+    "targets": [
+     {
+      "opportunity_id": "sf.housing.0607509.0.1-6",
+      "slot_id": "housing_basic",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "sf.housing.0600123.1.1-2",
+      "slot_id": "housing_comfort",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "sf.food.home_staples",
+      "slot_id": "food_basic",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "sf.food.home_fresh",
+      "slot_id": "food_comfort",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "sf.durable.pair_top_dryer",
+      "slot_id": "convenience_device",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "sf.service.laundry_pickup",
+      "slot_id": "laundry_service",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "sf.service.cleaning_biweekly",
+      "slot_id": "cleaning_service",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "sf.service.massage_studio_1",
+      "slot_id": "massage",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "sf.experience.group_fitness",
+      "slot_id": "exercise_class",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "sf.experience.guitar_practice",
+      "slot_id": "music_practice",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "sf.durable.acoustic_guitar",
+      "slot_id": "guitar",
+      "status": "opportunity"
+     },
+     {
+      "reason": "本城没有能授予岗位资格的培训项目（IPEDS 里没有支持职业的整年项目），没有可作参考的“改做已具资格的岗位”",
+      "slot_id": "qualified_job",
+      "status": "unavailable"
+     }
+    ]
+   },
+   {
+    "city": {
+     "code": "16980",
+     "country": "US",
+     "scheme": "CBSA2023"
+    },
+    "targets": [
+     {
+      "opportunity_id": "chi.housing.1703161.3plus.1-6",
+      "slot_id": "housing_basic",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "chi.housing.1704304.1.1-2",
+      "slot_id": "housing_comfort",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "chi.food.home_staples",
+      "slot_id": "food_basic",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "chi.food.home_fresh",
+      "slot_id": "food_comfort",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "chi.durable.pair_top_dryer",
+      "slot_id": "convenience_device",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "chi.service.laundry_pickup",
+      "slot_id": "laundry_service",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "chi.service.cleaning_biweekly",
+      "slot_id": "cleaning_service",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "chi.service.massage_studio_1",
+      "slot_id": "massage",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "chi.experience.group_fitness",
+      "slot_id": "exercise_class",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "chi.experience.guitar_practice",
+      "slot_id": "music_practice",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "chi.durable.acoustic_guitar",
+      "slot_id": "guitar",
+      "status": "opportunity"
+     },
+     {
+      "reason": "本城没有能授予岗位资格的培训项目（IPEDS 里没有支持职业的整年项目），没有可作参考的“改做已具资格的岗位”",
+      "slot_id": "qualified_job",
+      "status": "unavailable"
+     }
+    ]
+   },
+   {
+    "city": {
+     "code": "26420",
+     "country": "US",
+     "scheme": "CBSA2023"
+    },
+    "targets": [
+     {
+      "opportunity_id": "hou.housing.4804626.1.1-6",
+      "slot_id": "housing_basic",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "hou.housing.4804613.1.1-2",
+      "slot_id": "housing_comfort",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "hou.food.home_staples",
+      "slot_id": "food_basic",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "hou.food.home_fresh",
+      "slot_id": "food_comfort",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "hou.durable.pair_top_dryer",
+      "slot_id": "convenience_device",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "hou.service.laundry_pickup",
+      "slot_id": "laundry_service",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "hou.service.cleaning_biweekly",
+      "slot_id": "cleaning_service",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "hou.service.massage_studio_1",
+      "slot_id": "massage",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "hou.experience.group_fitness",
+      "slot_id": "exercise_class",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "hou.experience.guitar_practice",
+      "slot_id": "music_practice",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "hou.durable.acoustic_guitar",
+      "slot_id": "guitar",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "hou.job.27-4011.p50",
+      "slot_id": "qualified_job",
+      "status": "opportunity"
+     }
+    ]
+   },
+   {
+    "city": {
+     "code": "42660",
+     "country": "US",
+     "scheme": "CBSA2023"
+    },
+    "targets": [
+     {
+      "opportunity_id": "sea.housing.5323306.0.1-6",
+      "slot_id": "housing_basic",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "sea.housing.5323315.1.1-2",
+      "slot_id": "housing_comfort",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "sea.food.home_staples",
+      "slot_id": "food_basic",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "sea.food.home_fresh",
+      "slot_id": "food_comfort",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "sea.durable.pair_top_dryer",
+      "slot_id": "convenience_device",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "sea.service.laundry_pickup",
+      "slot_id": "laundry_service",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "sea.service.cleaning_biweekly",
+      "slot_id": "cleaning_service",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "sea.service.massage_studio_1",
+      "slot_id": "massage",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "sea.experience.group_fitness",
+      "slot_id": "exercise_class",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "sea.experience.guitar_practice",
+      "slot_id": "music_practice",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "sea.durable.acoustic_guitar",
+      "slot_id": "guitar",
+      "status": "opportunity"
+     },
+     {
+      "reason": "本城没有能授予岗位资格的培训项目（IPEDS 里没有支持职业的整年项目），没有可作参考的“改做已具资格的岗位”",
+      "slot_id": "qualified_job",
+      "status": "unavailable"
+     }
+    ]
+   }
+  ],
+  "combination": "month_weighted_actual_plus_reference_v1",
+  "execution_revision": "e1-life-r3",
+  "life_templates": [
+   {
+    "activity_uses": [
+     {
+      "activity_slot": "music_practice",
+      "after_expiry": "stop",
+      "equipment_slot": "guitar",
+      "sessions_per_month": 4,
+      "when_missing": "skip"
+     }
+    ],
+    "description": "最便宜的住房、基本食品；已有的设备照用，不另买设备或服务；有吉他就练，到期即停",
+    "food_slot": "food_basic",
+    "housing_slot": "housing_basic",
+    "jobs": "current_positions",
+    "label": "现职 + 基本生活",
+    "template_id": "p1_basic"
+   },
+   {
+    "activity_uses": [
+     {
+      "activity_slot": "exercise_class",
+      "after_expiry": "stop",
+      "sessions_per_month": 8,
+      "when_missing": "skip"
+     },
+     {
+      "activity_slot": "music_practice",
+      "after_expiry": "replace",
+      "equipment_slot": "guitar",
+      "sessions_per_month": 4,
+      "when_missing": "skip"
+     }
+    ],
+    "description": "通勤短的一卧、新鲜食材、每月按摩、每月 8 次团体课；没有在用的洗衣设备就在第 1 月买；有吉他就练，到期换新",
+    "durable_purchases": [
+     {
+      "month": 1,
+      "rule": "buy_if_not_held",
+      "slot_id": "convenience_device"
+     }
+    ],
+    "food_slot": "food_comfort",
+    "housing_slot": "housing_comfort",
+    "jobs": "current_positions",
+    "label": "现职 + 较舒适的生活 + 洗衣设备",
+    "service_slots": [
+     "massage"
+    ],
+    "template_id": "p2_device"
+   },
+   {
+    "activity_uses": [
+     {
+      "activity_slot": "exercise_class",
+      "after_expiry": "stop",
+      "sessions_per_month": 8,
+      "when_missing": "skip"
+     },
+     {
+      "activity_slot": "music_practice",
+      "after_expiry": "replace",
+      "equipment_slot": "guitar",
+      "sessions_per_month": 4,
+      "when_missing": "skip"
+     }
+    ],
+    "description": "通勤短的一卧、新鲜食材、上门洗衣与打扫、每月按摩、每月 8 次团体课；有吉他就练，到期换新",
+    "food_slot": "food_comfort",
+    "housing_slot": "housing_comfort",
+    "jobs": "current_positions",
+    "label": "现职 + 较舒适的生活 + 人工杂务服务",
+    "service_slots": [
+     "laundry_service",
+     "cleaning_service",
+     "massage"
+    ],
+    "template_id": "p3_service"
+   },
+   {
+    "activity_uses": [
+     {
+      "activity_slot": "music_practice",
+      "after_expiry": "stop",
+      "equipment_slot": "guitar",
+      "sessions_per_month": 4,
+      "when_missing": "skip"
+     }
+    ],
+    "description": "最便宜的住房、基本食品；已有的设备照用，不另买设备或服务；有吉他就练，到期即停",
+    "food_slot": "food_basic",
+    "housing_slot": "housing_basic",
+    "job_slot": "qualified_job",
+    "jobs": "qualified_alternative",
+    "label": "改做已具资格的岗位 + 基本生活",
+    "template_id": "q1_basic"
+   },
+   {
+    "activity_uses": [
+     {
+      "activity_slot": "exercise_class",
+      "after_expiry": "stop",
+      "sessions_per_month": 8,
+      "when_missing": "skip"
+     },
+     {
+      "activity_slot": "music_practice",
+      "after_expiry": "replace",
+      "equipment_slot": "guitar",
+      "sessions_per_month": 4,
+      "when_missing": "skip"
+     }
+    ],
+    "description": "通勤短的一卧、新鲜食材、每月按摩、每月 8 次团体课；没有在用的洗衣设备就在第 1 月买；有吉他就练，到期换新",
+    "durable_purchases": [
+     {
+      "month": 1,
+      "rule": "buy_if_not_held",
+      "slot_id": "convenience_device"
+     }
+    ],
+    "food_slot": "food_comfort",
+    "housing_slot": "housing_comfort",
+    "job_slot": "qualified_job",
+    "jobs": "qualified_alternative",
+    "label": "改做已具资格的岗位 + 较舒适的生活 + 洗衣设备",
+    "service_slots": [
+     "massage"
+    ],
+    "template_id": "q2_device"
+   },
+   {
+    "activity_uses": [
+     {
+      "activity_slot": "exercise_class",
+      "after_expiry": "stop",
+      "sessions_per_month": 8,
+      "when_missing": "skip"
+     },
+     {
+      "activity_slot": "music_practice",
+      "after_expiry": "replace",
+      "equipment_slot": "guitar",
+      "sessions_per_month": 4,
+      "when_missing": "skip"
+     }
+    ],
+    "description": "通勤短的一卧、新鲜食材、上门洗衣与打扫、每月按摩、每月 8 次团体课；有吉他就练，到期换新",
+    "food_slot": "food_comfort",
+    "housing_slot": "housing_comfort",
+    "job_slot": "qualified_job",
+    "jobs": "qualified_alternative",
+    "label": "改做已具资格的岗位 + 较舒适的生活 + 人工杂务服务",
+    "service_slots": [
+     "laundry_service",
+     "cleaning_service",
+     "massage"
+    ],
+    "template_id": "q3_service"
+   }
+  ],
+  "monthly_discount_factor": "1",
+  "note": "E3B 六城的期末参考生活：模板与选择规则同产品基础样例的思路，槽位按真实目录绑定；估值期沿用第 3 年菜单、不抽设备故障；没有可绑定的槽位写确定没有并说明原因",
+  "selection_rule": "best_complete_feasible_in_reference_set",
+  "slots": [
+   {
+    "description": "基本住房：本城最便宜的住房（最低住房方案）",
+    "role": "housing",
+    "slot_id": "housing_basic"
+   },
+   {
+    "description": "较舒适的住房：居民平时通勤最短的片区里的一卧中档",
+    "role": "housing",
+    "slot_id": "housing_comfort"
+   },
+   {
+    "description": "基本食品方案（主食为主、自己做）",
+    "role": "food",
+    "slot_id": "food_basic"
+   },
+   {
+    "description": "新鲜食材较多的自己做方案",
+    "role": "food",
+    "slot_id": "food_comfort"
+   },
+   {
+    "description": "洗衣机加烘干机；估值期初还在服务期内就照用、不再买",
+    "role": "durable",
+    "slot_id": "convenience_device"
+   },
+   {
+    "description": "上门取送洗衣，按月付费",
+    "role": "service",
+    "slot_id": "laundry_service"
+   },
+   {
+    "description": "两周一次上门打扫，按月付费",
+    "role": "service",
+    "slot_id": "cleaning_service"
+   },
+   {
+    "description": "每月一次按摩（享受型服务，按月付费）",
+    "role": "service",
+    "slot_id": "massage"
+   },
+   {
+    "description": "团体健身课（按次，模型方案）",
+    "role": "activity",
+    "slot_id": "exercise_class"
+   },
+   {
+    "description": "在家弹吉他练习（要能弹的吉他）",
+    "role": "activity",
+    "slot_id": "music_practice"
+   },
+   {
+    "description": "一把吉他（只在模板规定要替换时买）",
+    "role": "durable",
+    "slot_id": "guitar"
+   },
+   {
+    "description": "要求本城培训项目所授资格的岗位（只有估值期初已经合格才适用）",
+    "role": "job",
+    "slot_id": "qualified_job"
+   }
+  ],
+  "spec_id": "eval.e3b-us.main",
+  "status": "exploratory_synthetic",
+  "treatment_branching": "by_continuing_illness_v1",
+  "valuation_event_condition": "no_new_illness",
+  "valuation_horizon_months": 12,
+  "version": "e1-life-evaluation-v3"
+ }
+}

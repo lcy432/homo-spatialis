@@ -506,7 +506,8 @@ def career_catalog_problems(protocol: LifeProtocol, catalog: CityLifeCatalog) ->
                 out.append(
                     f"{where}: {g} 是雇主 {ability.scope.employer_id} 的内部知识，只能由这家雇主的培训授予"
                 )
-        if o.duration.kind == "training_course":
+        if o.duration.kind == "training_course" and o.availability == "available":
+            # 确定不可得的条目（例如“支持范围内没有培训”，DECISIONS/0042）永远不会执行，不检查执行用的时间负担
             r = o.resource
             if (
                 r.basis != "per_service_month"

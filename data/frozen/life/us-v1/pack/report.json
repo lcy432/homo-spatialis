@@ -1,0 +1,261 @@
+{
+ "backgrounds": {
+  "chi": {
+   "environment": [
+    "2.986",
+    "1.493"
+   ],
+   "leisure": [
+    "8",
+    "4"
+   ],
+   "opportunity": [
+    "4.000",
+    "2.000"
+   ],
+   "safety": [
+    "6",
+    "3"
+   ]
+  },
+  "hou": {
+   "environment": [
+    "1.014",
+    "0.507"
+   ],
+   "leisure": [
+    "8",
+    "4"
+   ],
+   "opportunity": [
+    "4.200",
+    "2.100"
+   ],
+   "safety": [
+    "6",
+    "3"
+   ]
+  },
+  "la": {
+   "environment": [
+    "1.068",
+    "0.534"
+   ],
+   "leisure": [
+    "8",
+    "4"
+   ],
+   "opportunity": [
+    "4.000",
+    "2.000"
+   ],
+   "safety": [
+    "6",
+    "3"
+   ]
+  },
+  "nyc": {
+   "environment": [
+    "4.219",
+    "2.1095"
+   ],
+   "leisure": [
+    "8",
+    "4"
+   ],
+   "opportunity": [
+    "4.200",
+    "2.100"
+   ],
+   "safety": [
+    "6",
+    "3"
+   ]
+  },
+  "sea": {
+   "environment": [
+    "5.589",
+    "2.7945"
+   ],
+   "leisure": [
+    "8",
+    "4"
+   ],
+   "opportunity": [
+    "4.000",
+    "2.000"
+   ],
+   "safety": [
+    "6",
+    "3"
+   ]
+  },
+  "sf": {
+   "environment": [
+    "4.071",
+    "2.0355"
+   ],
+   "leisure": [
+    "8",
+    "4"
+   ],
+   "opportunity": [
+    "4.000",
+    "2.000"
+   ],
+   "safety": [
+    "6",
+    "3"
+   ]
+  }
+ },
+ "build_identity": "39240c2829e8f92c0438bdd43dc9dbbe962f46d74c4f787b929469369c897f88",
+ "cities": {
+  "chi": {
+   "counts": {
+    "areas": 66,
+    "commute_legs": 394,
+    "housing_candidates": 717,
+    "housing_executable": 601,
+    "housing_in_catalog": 63,
+    "items_by_domain": {
+     "activity": 10,
+     "device": 5,
+     "enjoyment": 3,
+     "equipment": 2,
+     "food": 15,
+     "job": 120,
+     "service": 3
+    },
+    "jobs_placed": 120,
+    "menus": 12
+   },
+   "excluded": {
+    "housing.outside_tax_scope": 57,
+    "housing.rent_unknown": 59
+   }
+  },
+  "hou": {
+   "counts": {
+    "areas": 59,
+    "commute_legs": 258,
+    "housing_candidates": 651,
+    "housing_executable": 651,
+    "housing_in_catalog": 64,
+    "items_by_domain": {
+     "activity": 10,
+     "device": 5,
+     "enjoyment": 3,
+     "equipment": 2,
+     "food": 15,
+     "job": 120,
+     "service": 3,
+     "training": 3
+    },
+    "jobs_placed": 120,
+    "menus": 12
+   },
+   "excluded": {}
+  },
+  "la": {
+   "counts": {
+    "areas": 93,
+    "commute_legs": 303,
+    "housing_candidates": 1074,
+    "housing_executable": 1074,
+    "housing_in_catalog": 68,
+    "items_by_domain": {
+     "activity": 10,
+     "device": 5,
+     "enjoyment": 3,
+     "equipment": 2,
+     "food": 15,
+     "job": 120,
+     "service": 3
+    },
+    "jobs_placed": 120,
+    "menus": 12
+   },
+   "excluded": {}
+  },
+  "nyc": {
+   "counts": {
+    "areas": 63,
+    "commute_legs": 690,
+    "housing_candidates": 1635,
+    "housing_executable": 628,
+    "housing_in_catalog": 68,
+    "items_by_domain": {
+     "activity": 10,
+     "device": 5,
+     "enjoyment": 3,
+     "equipment": 2,
+     "food": 15,
+     "job": 120,
+     "service": 3,
+     "training": 3
+    },
+    "jobs_placed": 120,
+    "menus": 12
+   },
+   "excluded": {
+    "housing.outside_tax_scope": 990,
+    "housing.rent_unknown": 17
+   }
+  },
+  "sea": {
+   "counts": {
+    "areas": 35,
+    "commute_legs": 147,
+    "housing_candidates": 375,
+    "housing_executable": 369,
+    "housing_in_catalog": 60,
+    "items_by_domain": {
+     "activity": 10,
+     "device": 5,
+     "enjoyment": 3,
+     "equipment": 2,
+     "food": 15,
+     "job": 120,
+     "service": 3
+    },
+    "jobs_placed": 120,
+    "menus": 12
+   },
+   "excluded": {
+    "housing.rent_unknown": 6
+   }
+  },
+  "sf": {
+   "counts": {
+    "areas": 44,
+    "commute_legs": 197,
+    "housing_candidates": 453,
+    "housing_executable": 442,
+    "housing_in_catalog": 61,
+    "items_by_domain": {
+     "activity": 9,
+     "device": 5,
+     "enjoyment": 3,
+     "equipment": 2,
+     "food": 15,
+     "job": 120,
+     "service": 3
+    },
+    "jobs_placed": 120,
+    "menus": 12
+   },
+   "excluded": {
+    "housing.rent_unknown": 11
+   }
+  }
+ },
+ "files": {
+  "city_facts.json": "c67ef066b00799fa1765f7163c87b7bd00134ce84f6df7934af4f0cb19264472",
+  "evaluation.json": "5c1acf8440ccf03c5cb74ca46c4ef263c43dac036d2ad795b2cdfbcb4b948639",
+  "life_input.json": "1e4952a8d50a59e871ffc42deb80659f6548b251618b8315b22975580bb422b9",
+  "scoring.json": "0f43f9ffd187d7c9eafbb2353355125bdfd016b6d0f6e616f8d9d0ad9248965e"
+ },
+ "schema": "e3b-life-pack-report-v1",
+ "tax_blocked": {}
+}
