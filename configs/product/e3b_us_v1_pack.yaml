@@ -28,8 +28,8 @@ pack:
     planner:
       kind: mock
       planner_id: mock.rules.e3a-product
-      version: e3a-product-mock-v1
-      rules_version: e3a-product-mock-rules-v1
+      version: e3b-product-mock-v2
+      rules_version: e3b-product-mock-rules-v2
   money_basis:
     currency: USD
     base_year: 2024

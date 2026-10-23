@@ -1,5 +1,5 @@
 # 产品协议样例的 mock 运行配置：与 run_product_haiku.yaml、run_product_flash.yaml 用同一份名单、事实表、信息条件、提示模板与修订
-# 上限，只把规划器换成可控的 mock（规则 e3a-product-mock-rules-v1）。它说明同一套环境在一个确定性规划器下怎样运行，作为真实模型结果的
+# 上限，只把规划器换成可控的 mock（规则 e3b-product-mock-rules-v2）。它说明同一套环境在一个确定性规划器下怎样运行，作为真实模型结果的
 # 参照；不是"正确答案"，也不代表任何模型的能力。配置版本 e1-7a-run-v1 是 mock 运行的配置结构（没有模型设定与付费预算）。
 
 run_notice: >-
@@ -32,9 +32,9 @@ run:
     identity:
       kind: mock
       planner_id: mock.rules.e3a-product
-      version: e3a-product-mock-v1
-      rules_version: e3a-product-mock-rules-v1
-      note: 可控的确定性模拟代理（六维产品画像版规则）：只检查接线、状态传递与信息隔离，不代表任何真实模型的能力；读六维精确点数与物质分配，M5 按公开报价、寿命与残余时间挑设备或按月服务；应急是固定测试政策（小病、大病都 treat_if_possible），不从健康回答推断
+      version: e3b-product-mock-v2
+      rules_version: e3b-product-mock-rules-v2
+      note: 可控的确定性模拟代理（六维产品画像版规则）：只检查接线、状态传递与信息隔离，不代表任何真实模型的能力；读六维精确点数与物质分配，M1b 不用车到不了岗位或满足不了硬要求时按公开的通勤表与报价考虑用车，M5 按公开报价、寿命与残余时间挑设备或按月服务；应急是固定测试政策（小病、大病都 treat_if_possible），不从健康回答推断
     scripts: []
   prompt_template: e3b-product-prompt-v1
   memory_policy: e1-life-memory-v2

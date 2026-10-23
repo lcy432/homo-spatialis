@@ -170,7 +170,7 @@ def _planner_identity(pack: DataPack) -> dict[str, Any]:
                     "pack.run.planner",
                     f"资料包声明的规划器 {decl.planner_id} / {decl.rules_version} 不是已登记的产品 mock",
                     "不能编译运行配置",
-                    "用 e3a-product-mock-rules-v1",
+                    "用 e3b-product-mock-rules-v2",
                 ),
             )
         )

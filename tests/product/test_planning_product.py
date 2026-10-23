@@ -228,7 +228,7 @@ def test_product_mock_reads_new_fields_and_uses_a_fixed_documented_emergency_pol
 def test_mock_identity_is_versioned():
     from common.life_planning_contracts import PlannerIdentity, PlannerSpec
 
-    assert PRODUCT_MOCK_IDENTITY.rules_version == "e3a-product-mock-rules-v1"
+    assert PRODUCT_MOCK_IDENTITY.rules_version == "e3b-product-mock-rules-v2"
     assert type(mock_planner_for(PlannerSpec(identity=PRODUCT_MOCK_IDENTITY))) is ProductMockPlanner
     old = PlannerIdentity(
         kind="mock",

@@ -40,8 +40,8 @@ pack:
     planner:
       kind: mock
       planner_id: mock.rules.e3a-product
-      version: e3a-product-mock-v1
-      rules_version: e3a-product-mock-rules-v1
+      version: e3b-product-mock-v2
+      rules_version: e3b-product-mock-rules-v2
 
   # 现金口径：本版只支持“2024 年美元、当地价格水平”的流动资金，换算是恒等（同一口径）。别的币种或时期没有合法换算，明确阻断。
   money_basis: {currency: USD, base_year: 2024, minor_unit_digits: 2}

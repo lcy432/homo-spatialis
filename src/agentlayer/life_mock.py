@@ -1,4 +1,4 @@
-"""可控的 mock 规划器（`DECISIONS/0030`；产品版规则 ``e3a-product-mock-rules-v1``，DECISIONS/0033、0034）。确定性、规则简单，
+"""可控的 mock 规划器（`DECISIONS/0030`；产品版规则 ``e3b-product-mock-rules-v2``，DECISIONS/0033、0034、0042）。确定性、规则简单，
 只读收到的请求 JSON。
 
 **它不是模型能力的证据**：只用来检查接口、状态传递、错误处理与信息隔离。它读的是 ``PlannerCall.payload``——与渲染进提示文字的是
@@ -7,6 +7,10 @@
 * M1 住房：本城合格住房（``minimum_living`` 的合格名单、明确可得、按月计价）里，能满足用户硬要求（往返分钟上限）的最便宜的
   一项——前提是按"岗位月收入 − 住房 − 最便宜食品"推算的年末现金不少于一个月最低生活费；否则选最便宜的合格住房，并在理由里
   写明硬要求今年满足不了。推算不含税。
+* M1b 用车（DECISIONS/0042，独立审核 F5）：不用车的合格住房都到不了所选岗位、或都满足不了往返分钟硬要求时，看本城公开的用车
+  机会（按月付费、提供通勤方式要求的功能）：开车能到岗（并满足硬要求）的最便宜住房，按"岗位月收入 − 住房 − 最便宜食品 − 通勤费
+  （含油费）− 用车月费"推算的年末现金不少于一个月最低生活费，就买用车权（1–12 月）、住那一处；买不起或开车也到不了就不买，
+  照 M1 选，并在理由里写明。只读请求里的通勤表、报价与功能，不读评分参数；不用车就有合格住房时不买车。
 * M2 食品：最便宜的合格食品。
 * M3 岗位：用户的物质或发展点数大于 0（点数不可见时照做）才考虑换岗：年初"现在能选"的岗位里工资最高的一份，比现职高才换；
   否则保留年初的当前岗位。
@@ -42,17 +46,18 @@ from typing import Any
 from agentlayer.life_planning import PlannerCall
 from common.life_planning_contracts import MockScript, PlannerIdentity, PlannerSpec
 
-PRODUCT_MOCK_RULES_VERSION = "e3a-product-mock-rules-v1"
+PRODUCT_MOCK_RULES_VERSION = "e3b-product-mock-rules-v2"
 #: 固定测试政策的名字（写进身份说明与需求摘要，便于审计：它不是从健康回答推断的）。
 PRODUCT_MOCK_EMERGENCY_POLICY = "fixed_treat_if_possible_test_policy_v1"
 PRODUCT_MOCK_IDENTITY = PlannerIdentity(
     kind="mock",
     planner_id="mock.rules.e3a-product",
-    version="e3a-product-mock-v1",
+    version="e3b-product-mock-v2",
     rules_version=PRODUCT_MOCK_RULES_VERSION,
     note=(
         "可控的确定性模拟代理（六维产品画像版规则）：只检查接线、状态传递与信息隔离，不代表任何真实模型的能力；读六维精确点数与物质"
-        "分配，M5 按公开报价、寿命与残余时间挑设备或按月服务；应急是固定测试政策（小病、大病都 treat_if_possible），不从健康回答推断"
+        "分配，M1b 不用车到不了岗位或满足不了硬要求时按公开的通勤表与报价考虑用车，M5 按公开报价、寿命与残余时间挑设备或按月服务；"
+        "应急是固定测试政策（小病、大病都 treat_if_possible），不从健康回答推断"
     ),
 )
 #: 修订时删项目的先后（数小的先删）：额外的第二份工作 0、有参与时间的服务 1、体验 2、课程 3、耐用品 4。
@@ -176,9 +181,23 @@ class _View:
         ]
         return min(limits) if limits else None
 
-    def commute_for(self, house: dict[str, Any], job_ids: list[str]) -> tuple[float, float] | None:
-        """mock 的通勤推算（DECISIONS/0042），只读公开的通勤表：不买用车权，每个到岗岗位取最快的、没有条件的方式；任一岗位
-        走不通就是 None。返回（最长往返分钟，每月通勤费，按封顶）。"""
+    def car_service(self) -> tuple[dict[str, Any], str] | None:
+        """本城公开的用车机会：可得、按月付费、提供通勤表里某种方式要求的功能（例如 car_access）。没有就是 None。"""
+        rel = self.obs.get("commute")
+        if rel is None:
+            return None
+        needed = {m["requires_function"] for m in rel["modes"] if m.get("requires_function")}
+        for o in sorted(self.obs["opportunities"], key=lambda x: x["opportunity_id"]):
+            fn = next((f for f in o.get("functions") or () if f in needed), None)
+            if fn is not None and _available(o) and _monthly(o) is not None:
+                return o, fn
+        return None
+
+    def commute_for(
+        self, house: dict[str, Any], job_ids: list[str], functions: frozenset[str] = frozenset()
+    ) -> tuple[float, float] | None:
+        """mock 的通勤推算（DECISIONS/0042），只读公开的通勤表：每个到岗岗位取最快的可用方式——没有条件的方式，加上 ``functions``
+        里有的功能所允许的方式（例如买了用车权才能开车）；任一岗位走不通就是 None。返回（最长往返分钟，每月通勤费，按封顶）。"""
         onsite = []
         for j in job_ids:
             o = self.opps.get(j, {})
@@ -190,7 +209,11 @@ class _View:
         rel = self.obs.get("commute")
         if rel is None:
             return None
-        conditional = {m["mode"] for m in rel["modes"] if m.get("requires_function")}
+        conditional = {
+            m["mode"]
+            for m in rel["modes"]
+            if m.get("requires_function") and m["requires_function"] not in functions
+        }
         caps = {m["mode"]: m.get("monthly_cap") for m in rel["modes"]}
         longest, by_mode = 0.0, {}
         for o, days in onsite:
@@ -311,6 +334,19 @@ class ProductMockPlanner:
         food = foods[0]
         floor = v.min_living()
         houses = v.qualifying("housing")
+        cap = v.max_commute()
+        car = self._car(v, houses, chosen_jobs, income, food, floor, cap, notes)
+        if car is not None:
+            home, car_item, fare_car = car
+            monthly_net = income - _monthly(home) - _monthly(food) - fare_car - _monthly(car_item)  # type: ignore[operator]
+            items = [
+                _period(home["opportunity_id"], 1, 12),
+                _period(food["opportunity_id"], 1, 12),
+                *(_period(j, 1, 12) for j in chosen_jobs),
+                _period(car_item["opportunity_id"], 1, 12),
+            ]
+            notes.append(f"M2 食品：最便宜的合格食品 {food['opportunity_id']}")
+            return self._finish(v, items, chosen_jobs, monthly_net, notes)
         commute = {h["opportunity_id"]: v.commute_for(h, chosen_jobs) for h in houses}
         reachable = [h for h in houses if commute[h["opportunity_id"]] is not None]
         if reachable:
@@ -319,7 +355,6 @@ class ProductMockPlanner:
             notes.append(
                 "M1 通勤：合格住房到所选岗位都没有可用的通勤方式（通勤表里没有这条线），计划会被退回"
             )
-        cap = v.max_commute()
         home = houses[0]
 
         def fare(h: dict[str, Any]) -> float:
@@ -351,6 +386,72 @@ class ProductMockPlanner:
             _period(food["opportunity_id"], 1, 12),
             *(_period(j, 1, 12) for j in chosen_jobs),
         ]
+        return self._finish(v, items, chosen_jobs, monthly_net, notes)
+
+    def _car(
+        self,
+        v: _View,
+        houses: list[dict[str, Any]],
+        jobs: list[str],
+        income: float,
+        food: dict[str, Any],
+        floor: float,
+        cap: float | None,
+        notes: list[str],
+    ) -> tuple[dict[str, Any], dict[str, Any], float] | None:
+        """M1b：不用车的合格住房都到不了岗位（或都满足不了硬要求）时，按公开的通勤表与报价看买用车权能不能解决、付不付得起。
+        返回（住房，用车机会，每月通勤费）；不需要、到不了或买不起是 None（理由写进 notes）。"""
+        no_car = {h["opportunity_id"]: v.commute_for(h, jobs) for h in houses}
+        ok = [
+            h
+            for h in houses
+            if no_car[h["opportunity_id"]] is not None
+            and (cap is None or no_car[h["opportunity_id"]][0] <= cap)  # type: ignore[index]
+        ]
+        if ok:
+            return None  # 不用车就有合格住房：不买车
+        found = v.car_service()
+        if found is None:
+            return None
+        car, fn = found
+        with_car = {h["opportunity_id"]: v.commute_for(h, jobs, frozenset({fn})) for h in houses}
+        fit = [
+            h
+            for h in houses
+            if with_car[h["opportunity_id"]] is not None
+            and (cap is None or with_car[h["opportunity_id"]][0] <= cap)  # type: ignore[index]
+        ]
+        if not fit:
+            notes.append(
+                f"M1b 用车：不用车到不了所选岗位或满足不了硬要求，买了 {car['opportunity_id']} 开车也不行——不买车"
+            )
+            return None
+        home = fit[0]
+        minutes, fare = with_car[home["opportunity_id"]]  # type: ignore[misc]
+        fee = _monthly(car) or 0.0
+        end = v.cash + 12 * (
+            income - (_monthly(home) or 0.0) - (_monthly(food) or 0.0) - fare - fee
+        )
+        if end < floor:
+            notes.append(
+                f"M1b 用车：开车能从 {home['opportunity_id']} 到岗（最长往返 {minutes:g} 分钟），但加上用车月费 {fee:,.2f} 与油费"
+                f"每月 {fare:,.2f}，推算年末现金只有约 {end:,.0f}，不到一个月最低生活费 {floor:,.0f}——买不起，不买车"
+            )
+            return None
+        notes.append(
+            f"M1b 用车：不用车的合格住房到不了所选岗位或满足不了硬要求；买 {car['opportunity_id']}（月费 {fee:,.2f}，不含油费），"
+            f"住 {home['opportunity_id']}，开车最长往返 {minutes:g} 分钟、每月油费约 {fare:,.2f}，推算年末现金约 {end:,.0f}"
+        )
+        return home, car, fare
+
+    def _finish(
+        self,
+        v: _View,
+        items: list[dict[str, Any]],
+        chosen_jobs: list[str],
+        monthly_net: float,
+        notes: list[str],
+    ) -> dict[str, Any]:
         spend = 0.0
         course = self._course(v, chosen_jobs, monthly_net, notes)
         if course is not None:
