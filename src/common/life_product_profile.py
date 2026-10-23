@@ -114,6 +114,7 @@ class ProductLifeProfile(ContractModel):
     taste_status: TasteStatus
     cuisines: tuple[KeyStr, ...] = ()
     #: 保留但本轮不支持的描述（品牌、其他要求），原样保存给用户看；不进任何评分，不产生品牌溢价或加成。
+    #: 本版未支持、只留存原文的陈述（品牌、没认出的兴趣或口味描述）：只给审计与结果说明用，不评分，也不进代理观察（收尾 R7）
     unsupported_requests: tuple[Annotated[str, Field(min_length=1, max_length=200)], ...] = ()
 
     @model_validator(mode="after")

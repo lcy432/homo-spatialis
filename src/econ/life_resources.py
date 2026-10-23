@@ -46,6 +46,7 @@ from common.life_contracts import (
     LifeOpportunity,
     MonthlyResourceRules,
     MonthResources,
+    ParticipationRecord,
     PersonYearState,
     ResourceContribution,
     ResourceProfile,
@@ -71,11 +72,15 @@ _CATEGORY_ORDER = (
 
 @dataclass(frozen=True)
 class Activity:
-    """这个月实际执行或在服务期内的一项东西。``role`` 是结算角色（``ledger.life_catalog.item_role``）。"""
+    """这个月实际执行或在服务期内的一项东西。``role`` 是结算角色（``ledger.life_catalog.item_role``）。
+
+    ``participation``：休闲活动这个月的那条完成参与记录（DECISIONS/0041 R9）。有它时占用的小时 = 记录里的参与小时 + 准备
+    往返小时（每小时负担照旧取资源事实）——次数与小时只认这一份执行事实，不从计划或资源配置另算一遍。"""
 
     role: str
     opp: LifeOpportunity
     quantity: float
+    participation: ParticipationRecord | None = None
 
 
 def monthly_time_budget(state: PersonYearState) -> Fraction:
@@ -301,15 +306,23 @@ def month_resources(
         }.get(a.role)
         if category is None:
             raise LifeContractError(f"{a.opp.opportunity_id}：结算角色 {a.role} 没有资源计量规则")
-        hours = timed_hours(p, a.quantity)
-        if p.basis == "per_use":
-            basis = f"每月 {p.uses_per_month} 次 × 每次 {p.hours:g} 小时"
-        elif p.basis == "per_occurrence":
-            basis = f"一次体验 {p.hours:g} 小时"
+        if a.participation is not None:
+            rec = a.participation
+            hours = to_fraction(rec.participation_hours) + to_fraction(rec.overhead_hours)
+            basis = (
+                f"实际参加 {rec.sessions:g} 次：参与 {rec.participation_hours:g} 小时 + 准备与往返 "
+                f"{rec.overhead_hours:g} 小时（参与记录）"
+            )
         else:
-            basis = f"每个服务月 {p.hours:g} 小时"
-        if p.quantity_scales and a.quantity != 1:
-            basis += f" × 数量 {a.quantity:g}"
+            hours = timed_hours(p, a.quantity)
+            if p.basis == "per_use":
+                basis = f"每月 {p.uses_per_month} 次 × 每次 {p.hours:g} 小时"
+            elif p.basis == "per_occurrence":
+                basis = f"一次体验 {p.hours:g} 小时"
+            else:
+                basis = f"每个服务月 {p.hours:g} 小时"
+            if p.quantity_scales and a.quantity != 1:
+                basis += f" × 数量 {a.quantity:g}"
         assert p.burden_per_hour is not None
         rows.append(
             _row(

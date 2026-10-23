@@ -80,6 +80,7 @@ from common.life_scoring_contracts import (
     ConvenienceTerm,
     DimensionMonth,
     EnjoymentFunctionTerm,
+    EnjoymentSpec,
     EnjoymentTerm,
     ExploratoryYearScore,
     FoodLifeTerm,
@@ -657,6 +658,33 @@ def _plan_level_gate(
     return None
 
 
+def food_plan_gaps(opp: LifeOpportunity, cuisines: frozenset[str]) -> tuple[str, ...]:
+    """这份食品方案为什么会让这位用户的饮食生活评分未知（空 = 事实齐全）。评分器与覆盖报告共用这一份判断（R4）。"""
+    plan = opp.food_plan
+    if plan is None:
+        return (f"{opp.opportunity_id} 没有完整方案事实（组成、新鲜餐、菜系），不当 0",)
+    missing = plan.unknown_facts(cuisines)
+    if missing:
+        return (f"{opp.opportunity_id} 的 {list(missing)} 是资料未知：不当 0，也不按已知方案评分",)
+    return ()
+
+
+def experience_gap(opp: LifeOpportunity) -> str | None:
+    """一项体验实际参加时会不会让休闲评分未知：既没有活动事实、也没有享受事实时模型无法评价（评分器与覆盖报告共用）。"""
+    if opp.activity is None and not opp.enjoyment:
+        return f"体验 {opp.opportunity_id} 没有活动事实（参与小时、类别），也没有享受事实：模型无法评价，不当 0"
+    return None
+
+
+def unsupported_enjoyment(es: EnjoymentSpec, opp: LifeOpportunity) -> list[str]:
+    """这项东西提供的、评分规格里没有计量规则的享受功能（模型未支持：不当 0，也不当未知）。"""
+    return [
+        f"{opp.opportunity_id}:{e.function}"
+        for e in opp.enjoyment
+        if es.rule_for(e.function) is None
+    ]
+
+
 def _score_food_life(
     comp: ScoringComponent,
     cond: CityComponentCondition,
@@ -684,20 +712,17 @@ def _score_food_life(
             f"{comp.component_id}: 同一个月有 {len(foods)} 份食品方案在执行——记录错误"
         )
     opp = foods[0].opp
-    plan = opp.food_plan
-    if plan is None:
-        return ComponentMonth(
-            **head,
-            status="unknown",
-            cap=fl.cap,
-            reasons=(
-                _FOOD_UNKNOWN
-                + f"{opp.opportunity_id} 没有完整方案事实（组成、新鲜餐、菜系），不当 0",
-            ),
-        )
     cuisines = frozenset(pref.cuisines)
+    gaps = food_plan_gaps(opp, cuisines)
+    if gaps:
+        return ComponentMonth(
+            **head, status="unknown", cap=fl.cap, reasons=tuple(_FOOD_UNKNOWN + g for g in gaps)
+        )
+    plan = opp.food_plan
+    assert plan is not None
     fresh = plan.fresh_meals_per_week
     taste = plan.matched_meals_per_week(cuisines)
+    assert fresh is not None and taste is not None
     matched = tuple(
         sorted({p.cuisine for p in plan.parts if p.cuisine is not None and p.cuisine in cuisines})
     )
@@ -742,10 +767,10 @@ def _score_enjoyment(
     via: dict[str, list[str]] = {}
     unsupported: list[str] = []
     for r in in_use:
+        unsupported += unsupported_enjoyment(es, r.opp)
         for e in r.opp.enjoyment:
             rule = es.rule_for(e.function)
             if rule is None:
-                unsupported.append(f"{r.opp.opportunity_id}:{e.function}")
                 continue
             expected = "presence" if e.mode == "passive_service_month" else "units"
             if rule.measure != expected:
@@ -806,10 +831,9 @@ def _participation_term(
     ps = comp.participation
     assert ps is not None
     for r in in_use:
-        if r.record == "experience" and r.opp.activity is None and not r.opp.enjoyment:
-            return None, (
-                f"体验 {r.opp.opportunity_id} 没有活动事实（参与小时、类别），也没有享受事实：模型无法评价，不当 0"
-            )
+        gap = experience_gap(r.opp) if r.record == "experience" else None
+        if gap is not None:
+            return None, gap
     interests = frozenset(pref.leisure_interests)
     done = [p for p in records if p.status == "completed"]
     executed = {

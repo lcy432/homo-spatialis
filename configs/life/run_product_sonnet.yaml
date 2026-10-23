@@ -54,7 +54,7 @@ run:
       sdk_max_retries: 0
       service_retries: 1
       retry_wait_seconds: 5
-      max_input_tokens: 64000
+      max_input_tokens: 128000
       token_estimate: ascii1_nonascii2_v1
       note: >-
         Claude Agent SDK 单轮调用：max_turns 1、无工具、不读设置、隔离的工作目录与配置目录、命令行内部重试与提示缓存关闭；输出不另设上限（用模型

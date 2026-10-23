@@ -37,7 +37,7 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Any, Literal
 
-from pydantic import Field
+from pydantic import Field, field_serializer
 
 from common.ids import CityId, OccupationId
 from common.life_aggregation_contracts import RESERVED_AGGREGATION_KEYS
@@ -86,6 +86,7 @@ from common.life_contracts import (
     MonthlyResourceRules,
     MonthPause,
     MonthResources,
+    ParticipationRecord,
     PausedActivity,
     PersonYearState,
     PlanCheck,
@@ -117,7 +118,9 @@ from common.life_contracts import (
     VisibleHealthYear,
     VisibleLearning,
     VisibleMonthResources,
+    VisibleNotDone,
     VisibleParticipation,
+    VisibleParticipationSpan,
     VisiblePause,
     VisiblePosition,
     VisibleSavingsYear,
@@ -186,8 +189,9 @@ class VisibleFoodPart(ContractModel):
     part_id: str
     mode: str
     meals_per_week: float
-    fresh_meals_per_week: float
-    cuisine: str | None = Field(default=None, exclude_if=lambda v: v is None)
+    #: ``null`` 是资料未知（不是 0）
+    fresh_meals_per_week: float | None
+    cuisine: str | None
 
 
 class VisibleFoodPlan(ContractModel):
@@ -263,6 +267,12 @@ class VisibleOpportunity(ContractModel):
     enjoyment: tuple[VisibleEnjoyment, ...] = Field(default=(), exclude_if=lambda v: v == ())
     equipment: VisibleEquipment | None = Field(default=None, exclude_if=lambda v: v is None)
     activity: VisibleActivity | None = Field(default=None, exclude_if=lambda v: v is None)
+
+    @field_serializer("duration", "time_energy", when_used="json")
+    def _compact(self, value: Any) -> dict[str, Any]:
+        """期限与时间精力事实里空的项（null、空列表）不写进请求：键不出现就是“没有”（收尾 R1：只省重复，不删事实）。"""
+        data = value.model_dump(mode="json")
+        return {k: v for k, v in data.items() if v is not None and v != [] and v != {}}
 
 
 class VisibleHolding(ContractModel):
@@ -377,14 +387,12 @@ class VisibleProfile(ContractModel):
     health_answers: tuple[VisibleHealthAnswer, ...] | None = Field(
         default=None, exclude_if=lambda v: v is None
     )
-    #: 确认的休闲兴趣与口味（DECISIONS/0041）：只有 confirmed 带类别；本版未支持的原文只留存、不评分。
+    #: 确认的休闲兴趣与口味（DECISIONS/0041）：只有 confirmed 带类别。本版未支持的原文（品牌、没认出的描述）只留存、不评分，
+    #: 也不交给分身（与能力清单的说明一致，收尾 R7）。
     leisure_interest_status: str | None = Field(default=None, exclude_if=lambda v: v is None)
     leisure_interests: tuple[str, ...] | None = Field(default=None, exclude_if=lambda v: v is None)
     taste_status: str | None = Field(default=None, exclude_if=lambda v: v is None)
     cuisines: tuple[str, ...] | None = Field(default=None, exclude_if=lambda v: v is None)
-    unsupported_requests: tuple[str, ...] | None = Field(
-        default=None, exclude_if=lambda v: v is None
-    )
     #: 因为许可没有给出的字段（显式列出，免得“没有这个键”被读成“用户没有回答”）。
     not_permitted: tuple[str, ...]
 
@@ -1275,7 +1283,6 @@ def _visible_product_profile(
         leisure_interests=tuple(profile.leisure_interests) if p.show_interests else None,
         taste_status=profile.taste_status if p.show_interests else None,
         cuisines=tuple(profile.cuisines) if p.show_interests else None,
-        unsupported_requests=tuple(profile.unsupported_requests) if p.show_interests else None,
         not_permitted=tuple(
             name
             for name, shown in (
@@ -1338,7 +1345,7 @@ def visible_feedback(result: SettlementResult) -> VisibleFeedback:
         )
     if nxt.status == "terminal":
         notes.append("这是最后一个行动年；之后是终态，不再接受行动")
-    resources = tuple(_visible_month(r) for r in out.resources.months)
+    resources = _grouped_months(out.resources.months)
     career = VisibleCareerYear(
         learning=tuple(
             VisibleLearning(
@@ -1370,20 +1377,7 @@ def visible_feedback(result: SettlementResult) -> VisibleFeedback:
         career=career,
         savings=_visible_savings_year(out.savings),
         health=_visible_health_year(out),
-        participation=tuple(
-            VisibleParticipation(
-                opportunity_id=p.opportunity_id,
-                month=p.month,
-                status=p.status,
-                sessions=p.sessions,
-                participation_hours=p.participation_hours,
-                overhead_hours=p.overhead_hours,
-                equipment_used=tuple(p.equipment_used),
-                kit_capabilities=tuple(p.kit_capabilities),
-                reason=p.reason,
-            )
-            for p in out.participation
-        ),
+        participation=_visible_participation(out.participation),
     )
     assert_payload_clean(feedback)
     return feedback
@@ -1396,10 +1390,74 @@ def _by_category(record: MonthResources, attr: str) -> dict[str, ExactAmount]:
     return {k: ExactAmount.of(v) for k, v in totals.items()}  # type: ignore[arg-type]
 
 
+def _grouped_months(months: tuple[MonthResources, ...]) -> tuple[VisibleMonthResources, ...]:
+    """逐月取出资源事实，再把内容完全相同的月份合成一条（R1：只省重复；任何一个月的数字都还在）。"""
+    groups: dict[str, list[int]] = {}
+    first: dict[str, VisibleMonthResources] = {}
+    for r in months:
+        v = _visible_month(r)
+        key = v.model_dump_json(exclude={"months"})
+        groups.setdefault(key, []).append(r.month)
+        first.setdefault(key, v)
+    out = [first[k].model_copy(update={"months": tuple(ms)}) for k, ms in groups.items()]
+    return tuple(sorted(out, key=lambda v: v.months[0]))
+
+
+def _visible_participation(
+    records: tuple[ParticipationRecord, ...],
+) -> tuple[VisibleParticipation, ...]:
+    """参与记录（每项活动每个请求月一条）→ 每项活动一条汇总：完全相同的完成月份合成一段，暂停 / 没能进行按原因合成。
+    合计直接从记录相加；不读计划，也不从资源配置另算。"""
+    by: dict[str, list[ParticipationRecord]] = {}
+    for p in records:
+        by.setdefault(p.opportunity_id, []).append(p)
+    out = []
+    for oid, rows in by.items():
+        spans: dict[tuple, list[int]] = {}
+        misses: dict[tuple, list[int]] = {}
+        for p in sorted(rows, key=lambda r: r.month):
+            if p.status == "completed":
+                key = (
+                    p.sessions,
+                    p.participation_hours,
+                    p.overhead_hours,
+                    tuple(p.equipment_used),
+                    tuple(p.kit_capabilities),
+                )
+                spans.setdefault(key, []).append(p.month)
+            else:
+                misses.setdefault((p.status, p.reason), []).append(p.month)
+        done = [p for p in rows if p.status == "completed"]
+        out.append(
+            VisibleParticipation(
+                opportunity_id=oid,
+                done=tuple(
+                    VisibleParticipationSpan(
+                        months=tuple(ms),
+                        sessions_each_month=k[0],
+                        participation_hours_each_month=k[1],
+                        overhead_hours_each_month=k[2],
+                        equipment_used=k[3],
+                        kit_capabilities=k[4],
+                    )
+                    for k, ms in sorted(spans.items(), key=lambda kv: kv[1][0])
+                ),
+                not_done=tuple(
+                    VisibleNotDone(months=tuple(ms), status=k[0], reason=k[1])
+                    for k, ms in sorted(misses.items(), key=lambda kv: kv[1][0])
+                ),
+                sessions_total=sum(p.sessions for p in done),
+                participation_hours_total=sum(p.participation_hours for p in done),
+                overhead_hours_total=sum(p.overhead_hours for p in done),
+            )
+        )
+    return tuple(out)
+
+
 def _visible_month(r: MonthResources) -> VisibleMonthResources:
     """逐字段取出一个月的资源事实；精力字段在构造观察时按许可清空。"""
     return VisibleMonthResources(
-        month=r.month,
+        months=(r.month,),
         resource_check=r.resource_check,
         time_used=r.time_used,
         time_remaining=r.time_remaining,
@@ -1473,6 +1531,8 @@ def _forbidden_types() -> tuple[type, ...]:
         PersonYearState,
         SettlementResult,
         ItemExecution,
+        # 生活扩展（DECISIONS/0041）：结算的参与记录本身不进观察；可见部分是逐字段汇总的 VisibleParticipation
+        ParticipationRecord,
         # E1-3 起：探索评分的全部内部对象（评分规格与来源、城市条件、评分偏好、各层结果、景观与
         # 通勤明细、比较组、覆盖报告）。与"原样序列化"检查共用同一份清单，新增内部类型只登记一处。
         # E1-4B 起：反馈政策、反馈记录、年度交接结果与年度绑定（r2）也在这份清单里（internal_models）。

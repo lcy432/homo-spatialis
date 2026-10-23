@@ -25,6 +25,11 @@ E1-5C 健康评分版本（`DECISIONS/0027`）：月度总分 = (1 − γ)·B + 
 
 日常生活便利（`DECISIONS/0033`）：读协议的家务基准与资源账里实际的本人家务小时，任何实际安排都能评（没有采用方案就是确定的 0）；
 城市资料只决定能选哪些设备或服务，它们的资源事实（残余小时）记作事实来源。
+
+生活扩展（`DECISIONS/0041` R4）：饮食生活读实际执行的完整食品方案，可选的食品方案缺事实（没有方案事实、新鲜餐数未知、用户确认了
+菜系而菜系未知）就是资料缺口；个人消费与享受读在用东西的享受事实，词表外的功能是“模型未支持”（单独列出，不是缺口也不是 0）；
+休闲的实际参与读活动事实，既没有活动事实也没有享受事实的体验是缺口。判断与评分器共用同一份函数（``food_plan_gaps``、
+``experience_gap``、``unsupported_enjoyment``）。覆盖说的是**可选目录**是否齐全；某条实际生活没有用到缺口方案时照样可评分。
 """
 
 from __future__ import annotations
@@ -46,8 +51,11 @@ from common.life_scoring_contracts import (
 from econ.life_scoring import (
     RECORD_OF_ROLE,
     effective_weights,
+    experience_gap,
+    food_plan_gaps,
     source_candidate,
     source_reading,
+    unsupported_enjoyment,
 )
 from ledger.life_catalog import item_role
 from worlds.dimensions import MATERIAL
@@ -72,15 +80,17 @@ def _city_dependencies(
     comp: ScoringComponent,
     cond: CityComponentCondition | None,
     catalog: CityLifeCatalog,
-) -> tuple[list[str], list[str], list[str]]:
-    """一座城在一个分项上：（资料缺口，生活事实的来源类型，评分参数的来源类型）。"""
+    cuisines: frozenset[str] = frozenset(),
+) -> tuple[list[str], list[str], list[str], list[str]]:
+    """一座城在一个分项上：（资料缺口，生活事实的来源类型，评分参数的来源类型，模型未支持的事实）。"""
     city = str(catalog.city)
     gaps: list[str] = []
     facts: list[str] = []
     params: list[str] = []
+    unsupported: list[str] = []
     if cond is None or cond.status == "unknown":
         why = cond.unknown_reason if cond is not None else "没有评分条件"
-        return [f"{city}: 城市评分条件未知（{why}）"], facts, params
+        return [f"{city}: 城市评分条件未知（{why}）"], facts, params, unsupported
     params.append(cond.source.kind)
     beta = comp.landscape.beta if comp.landscape is not None else 0.0
     if beta > 0:
@@ -119,6 +129,37 @@ def _city_dependencies(
         for o in available:
             if o.resource is not None and any(s.task in cv.tasks for s in o.resource.substitutes):
                 facts.append(o.source.kind)
+    if comp.food_life is not None:
+        # 饮食生活读这个月实际吃的完整方案：每份可选的食品方案都要有评分读到的事实（与评分器同一份判断）
+        if cond.status != "plan_level":
+            gaps.append(f"{city}: 饮食生活要求城市条件写 plan_level")
+        for o in available:
+            if item_role(catalog, o) != "food":
+                continue
+            missing = food_plan_gaps(o, cuisines)
+            if missing:
+                gaps += [f"{city}/{g}" for g in missing]
+            else:
+                facts.append(o.source.kind)
+    if comp.enjoyment is not None:
+        # 个人消费与享受读在用东西的享受事实；词表外的功能是模型未支持（不是资料缺口，也不当 0）
+        if cond.status != "plan_level":
+            gaps.append(f"{city}: 个人消费与享受要求城市条件写 plan_level")
+        for o in available:
+            if not o.enjoyment:
+                continue
+            unsupported += [f"{city}/{u}" for u in unsupported_enjoyment(comp.enjoyment, o)]
+            facts.append(o.source.kind)
+    if comp.participation is not None:
+        # 休闲的实际参与读活动事实；实际参加时无法评价的体验是缺口（与评分器同一份判断）
+        for o in available:
+            if item_role(catalog, o) != "experience":
+                continue
+            gap = experience_gap(o)
+            if gap is not None:
+                gaps.append(f"{city}/{gap}")
+            elif o.activity is not None:
+                facts.append(o.source.kind)
     for src in comp.sources:
         for o in available:
             record = RECORD_OF_ROLE.get(item_role(catalog, o))
@@ -142,7 +183,7 @@ def _city_dependencies(
         # 只有城市背景（成长项的 b 也是城市背景）：背景值 b 与映射参数 c 同记在一条评分条件里，来源只能一起报
         # （分开属于 E1-7 前的"城市可见事实与隐藏评分参数分开"任务）。
         facts.append(cond.source.kind)
-    return gaps, facts, params
+    return gaps, facts, params, unsupported
 
 
 def _leaf(
@@ -152,6 +193,7 @@ def _leaf(
     comp: ScoringComponent | None,
     conditions: Sequence[CityScoringConditions],
     catalogs: dict[str, CityLifeCatalog],
+    cuisines: frozenset[str] = frozenset(),
 ) -> LeafCoverage:
     if comp is None:
         return LeafCoverage(
@@ -172,19 +214,26 @@ def _leaf(
     facts: list[str] = []
     params: list[str] = []
     unknown: set[str] = set()
+    unsupported: list[str] = []
     for cc in conditions:
-        g, f, p = _city_dependencies(comp, cc.condition(comp.component_id), catalogs[str(cc.city)])
+        g, f, p, u = _city_dependencies(
+            comp, cc.condition(comp.component_id), catalogs[str(cc.city)], cuisines
+        )
         if g:
             unknown.add(str(cc.city))
         gaps += g
         facts += f
         params += p
+        unsupported += u
     reasons: list[str] = []
     action = (
         bool(comp.sources)
         or comp.transport is not None
         or comp.growth is not None
         or comp.convenience is not None
+        or comp.food_life is not None
+        or comp.enjoyment is not None
+        or comp.participation is not None
     )
     if not action:
         reasons.append("只有城市背景：背景已知不代表行动效果也建模了")
@@ -208,6 +257,27 @@ def _leaf(
         reasons.append(
             "日常生活便利读资源账里实际减少的家务小时：任何实际安排都能评，没有采用方案时是确定的 0（不是未知）；资料未知的方案"
             "分身选不了，不影响已发生月份的评分；任务组合是代表性的（不含做饭、通勤、工作、学习与疾病恢复）"
+        )
+    if comp.food_life is not None:
+        reasons.append(
+            "饮食生活读这个月实际执行的完整食品方案（新鲜餐与确认菜系的餐）：每份可选方案的事实齐全时任何实际安排都能评；"
+            "价格、档次与外食次数不进入"
+        )
+    if comp.enjoyment is not None:
+        reasons.append(
+            "个人消费与享受读实际在用的舒适用品与实际接受的享受型服务：没有购买或没有接受就是确定的 0（不是未知）"
+        )
+    if comp.participation is not None:
+        reasons.append(
+            "休闲读城市背景加实际参与小时：没有参加就是确定的 0；既没有活动事实也没有享受事实的体验实际参加时评分未知"
+        )
+    if unsupported:
+        reasons.append(
+            f"模型未支持的享受功能 {sorted(set(unsupported))}：在用时单独列出，不当 0，也不当资料未知"
+        )
+    if gaps and (comp.food_life is not None or comp.participation is not None):
+        reasons.append(
+            "覆盖说的是可选目录：实际生活没有用到缺口方案的月份照样可评分；用到了就那个月未知（不补 0）"
         )
     return LeafCoverage(
         leaf=leaf,
@@ -267,12 +337,15 @@ def coverage_report(
     by_need = {c.material_need: c for c in spec.material_components()}
     needs = [c.material_need for c in spec.material_components()]
     needs += sorted(n for n in preference.material_weights if n not in by_need)
+    cuisines = frozenset(preference.cuisines)
     for need in needs:
         assert need is not None
         a = w[MATERIAL] * preference.material_weights.get(need, 0.0)
-        leaves.append(_leaf(need, MATERIAL, a, by_need.get(need), conditions, by_city))
+        leaves.append(_leaf(need, MATERIAL, a, by_need.get(need), conditions, by_city, cuisines))
     for dim in spec.scored_amenities:
-        leaves.append(_leaf(dim, dim, w[dim], spec.dimension_component(dim), conditions, by_city))
+        leaves.append(
+            _leaf(dim, dim, w[dim], spec.dimension_component(dim), conditions, by_city, cuisines)
+        )
     leaves.append(
         LeafCoverage(
             leaf="health_state",

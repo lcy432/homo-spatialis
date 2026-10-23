@@ -1399,6 +1399,10 @@ RESERVED_SCORING_KEYS: frozenset[str] = frozenset(
         # E1 补充"日常生活便利"（`DECISIONS/0033`）：评分侧的减负合计与锚点（家务基准与方案残余是公开的资源事实，不收）
         "relief_hours",
         "tau_hours",
+        # 生活扩展（`DECISIONS/0041`）：口味与兴趣的匹配结果、加权小时（实际参与小时与菜系本身是公开事实，不收）
+        "weighted_hours",
+        "taste_matched_meals_per_week",
+        "matched_cuisines",
     }
 )
 
@@ -1413,6 +1417,11 @@ def internal_scoring_models() -> tuple[type[ContractModel], ...]:
         GrowthSpec,
         TransportSpec,
         ConvenienceSpec,
+        # 生活扩展（DECISIONS/0041）：饮食、享受与活动参与的评分规格
+        FoodLifeSpec,
+        EnjoymentRule,
+        EnjoymentSpec,
+        ParticipationSpec,
         Omission,
         SourceEfficiency,
         NatureCondition,
@@ -1432,6 +1441,12 @@ def internal_scoring_models() -> tuple[type[ContractModel], ...]:
         TransportTerm,
         TaskRelief,
         ConvenienceTerm,
+        # 生活扩展（DECISIONS/0041）：各月明细（匹配结果、加权小时、系数）
+        FoodLifeTerm,
+        EnjoymentFunctionTerm,
+        EnjoymentTerm,
+        ParticipationEntry,
+        ParticipationTerm,
         HealthStateValues,
         HealthScoringSpec,
         HealthTerm,

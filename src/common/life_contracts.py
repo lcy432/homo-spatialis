@@ -1979,18 +1979,23 @@ EnjoymentMode = Literal["passive_service_month", "service_units"]
 class FoodPlanPart(ContractModel):
     """完整食品方案的一个组成：怎么做（自己做 / 外食 / 外送）、每周几餐、其中几餐新鲜、主要菜系。
 
-    ``cuisine`` 是词表里的菜系键（没有标注就为空）；每个组成只有一个主要菜系，口味匹配按组成算一次，不按标签叠加。"""
+    ``fresh_meals_per_week`` 与 ``cuisine`` **必须写**：0 是“确定没有新鲜餐”，``null`` 是“资料未知”，不写就拒绝（不默认成 0，
+    免得没有资料的方案得到一个已知的低分）。未知的新鲜餐数让饮食生活评分未知；未知菜系只在用户确认了菜系时让评分未知。
+    ``cuisine`` 是词表里的菜系键；每个组成只有一个主要菜系，口味匹配按组成算一次，不按标签叠加。"""
 
     part_id: KeyStr
     mode: FoodMode
     meals_per_week: Annotated[float, Field(gt=0, le=MEALS_PER_WEEK_MAX)]
-    fresh_meals_per_week: Annotated[float, Field(ge=0)] = 0
-    cuisine: KeyStr | None = None
+    fresh_meals_per_week: Annotated[float, Field(ge=0, allow_inf_nan=False)] | None
+    cuisine: KeyStr | None
     note: str = Field(min_length=1, max_length=200)
 
     @model_validator(mode="after")
     def _fresh_within_meals(self) -> FoodPlanPart:
-        if self.fresh_meals_per_week > self.meals_per_week:
+        if (
+            self.fresh_meals_per_week is not None
+            and self.fresh_meals_per_week > self.meals_per_week
+        ):
             raise ValueError(f"{self.part_id}: 新鲜餐数不能多于这一组成的餐数")
         return self
 
@@ -2023,11 +2028,27 @@ class FoodPlanFacts(ContractModel):
         return self
 
     @property
-    def fresh_meals_per_week(self) -> float:
-        return sum(p.fresh_meals_per_week for p in self.parts)
+    def fresh_meals_per_week(self) -> float | None:
+        """每周新鲜餐数之和；有组成的新鲜餐数未知就是未知（None），不当 0。"""
+        if any(p.fresh_meals_per_week is None for p in self.parts):
+            return None
+        return sum(p.fresh_meals_per_week or 0.0 for p in self.parts)
 
-    def matched_meals_per_week(self, cuisines: frozenset[str]) -> float:
-        """主要菜系在 ``cuisines`` 里的组成每周几餐（每个组成只算一次）。"""
+    def unknown_facts(self, cuisines: frozenset[str]) -> tuple[str, ...]:
+        """会影响这位用户饮食评分、却是资料未知的事实（组成编号与字段）。菜系只在用户确认了菜系时才影响评分。"""
+        out = [
+            f"{p.part_id}.fresh_meals_per_week"
+            for p in self.parts
+            if p.fresh_meals_per_week is None
+        ]
+        if cuisines:
+            out += [f"{p.part_id}.cuisine" for p in self.parts if p.cuisine is None]
+        return tuple(out)
+
+    def matched_meals_per_week(self, cuisines: frozenset[str]) -> float | None:
+        """主要菜系在 ``cuisines`` 里的组成每周几餐（每个组成只算一次）；用户确认了菜系而有组成的菜系未知时是未知（None）。"""
+        if cuisines and any(p.cuisine is None for p in self.parts):
+            return None
         return sum(
             p.meals_per_week for p in self.parts if p.cuisine is not None and p.cuisine in cuisines
         )
@@ -2077,7 +2098,8 @@ class ActivityFacts(ContractModel):
     套餐本次提供的装备能力。
 
     每次占用 = 参与小时 + 准备、往返、排队的小时（必须等于资源事实里的每次小时）；只有参与小时进入休闲评价。套餐提供的
-    装备只对这一次活动有效，不会变成持有物。``replaces_meals_per_session`` 大于 0（同时替代正餐的套餐）本轮不支持，明确拒绝。"""
+    装备只对这一次活动有效，不会变成持有物。``replaces_meals_per_session`` **必须写**：0 是“确定不替代正餐”；大于 0（同时替代
+    正餐的套餐）本轮不支持，明确拒绝——不写不会被当成 0，免得没有说明的品鉴套餐悄悄进来。"""
 
     primary_category: KeyStr
     tags: tuple[KeyStr, ...] = ()
@@ -2085,7 +2107,7 @@ class ActivityFacts(ContractModel):
     overhead_hours: Annotated[float, Field(ge=0, le=24)]
     requires: tuple[KeyStr, ...] = ()
     kit_provides: tuple[KeyStr, ...] = ()
-    replaces_meals_per_session: Annotated[float, Field(ge=0)] = 0
+    replaces_meals_per_session: Annotated[float, Field(ge=0, allow_inf_nan=False)]
     time_basis: str = Field(min_length=1, max_length=280)
 
     @model_validator(mode="after")
@@ -3699,9 +3721,11 @@ class VisibleMonthResources(ContractModel):
     ``time_remaining`` 是未安排时间，月底作废。``resource_check = known_lower_bound`` 时用量是已知下限。
     精力字段只有许可了精力可见（``show_energy_level``）时才有值；观察构造时按许可清空。隐藏的只是额度与
     汇总——各项活动每小时负担是公开成本，代理仍可能自己推算负担。
-    """
 
-    month: Month
+    ``months``：内容（检查方式、用量、剩余、分类小时与负担、住房、通勤与说明）**完全相同**的月份合成一条，列出全部
+    月份；不同的月份各自一条（DECISIONS/0041 R1：只省重复，不删任何一个月的事实）。"""
+
+    months: tuple[Month, ...] = Field(min_length=1)
     resource_check: ResourceCheck
     time_used: ExactAmount | None = None
     time_remaining: ExactAmount | None = None
@@ -3714,6 +3738,12 @@ class VisibleMonthResources(ContractModel):
     onsite_visits: Annotated[int, Field(ge=0)] = 0
     commute_status: CommuteStatus
     notes: tuple[Annotated[str, Field(max_length=MAX_SUMMARY_CHARS)], ...] = ()
+
+    @model_validator(mode="after")
+    def _months_increasing(self) -> VisibleMonthResources:
+        if list(self.months) != sorted(set(self.months)):
+            raise ValueError("合并的月份必须严格递增、不重复")
+        return self
 
 
 class LearningYearRecord(ContractModel):
@@ -4057,18 +4087,35 @@ class VisibleHealthYear(ContractModel):
     )
 
 
-class VisibleParticipation(ContractModel):
-    """**代理可见**的一条活动参与事实（DECISIONS/0041）：逐字段取自结算的参与记录。没有满足感、匹配或评分系数。"""
+class VisibleParticipationSpan(ContractModel):
+    """几个月里**完全相同**的实际参加：每月几次、每月的参与小时与准备往返小时、用到的装备与套餐本次提供的能力。"""
 
-    opportunity_id: str
-    month: Month
-    status: ParticipationStatus
-    sessions: float
-    participation_hours: float
-    overhead_hours: float
+    months: tuple[Month, ...] = Field(min_length=1)
+    sessions_each_month: float
+    participation_hours_each_month: float
+    overhead_hours_each_month: float
     equipment_used: tuple[str, ...] = Field(default=(), exclude_if=lambda v: v == ())
     kit_capabilities: tuple[str, ...] = Field(default=(), exclude_if=lambda v: v == ())
+
+
+class VisibleNotDone(ContractModel):
+    """没有参加的月份：生病暂停（paused）或没能进行（failed，例如缺少装备能力），原因相同的合成一条。"""
+
+    months: tuple[Month, ...] = Field(min_length=1)
+    status: Literal["paused", "failed"]
     reason: str | None = Field(default=None, exclude_if=lambda v: v is None)
+
+
+class VisibleParticipation(ContractModel):
+    """**代理可见**的一项活动这一年的实际参与（DECISIONS/0041）：逐项取自结算的参与记录（每项活动每个请求月一条），
+    按活动汇总；相同的月份合成一段（R1：只省重复）。合计 = 各段月数 × 每月次数或小时。没有满足感、匹配或评分系数。"""
+
+    opportunity_id: str
+    done: tuple[VisibleParticipationSpan, ...] = Field(default=(), exclude_if=lambda v: v == ())
+    not_done: tuple[VisibleNotDone, ...] = Field(default=(), exclude_if=lambda v: v == ())
+    sessions_total: float
+    participation_hours_total: float
+    overhead_hours_total: float
 
 
 class VisibleFeedback(ContractModel):

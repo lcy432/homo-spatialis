@@ -862,7 +862,9 @@ def test_an_expired_item_can_be_replaced_later_in_the_same_year(bundle, scoring,
 # --------------------------------------------------------------------------- 10. 信息隔离
 
 
-def request_for(bundle, scoring, *, permission=None, memory_years=(), state=None):
+def request_for(
+    bundle, scoring, *, permission=None, memory_years=(), state=None, catalog=None, revision=None
+):
     from agentlayer.life_planning import build_memory, build_request, request_payload
     from agentlayer.life_views import standard_product_permission
     from ledger.life_city_facts import load_city_facts
@@ -870,10 +872,10 @@ def request_for(bundle, scoring, *, permission=None, memory_years=(), state=None
     from .planning_support import FACTS
 
     state = state or bundle.initial_state(CLONE_K)
-    catalog = bundle.catalog_for(K51)
+    catalog = catalog or bundle.catalog_for(K51)
     req = build_request(
         request_id="iso/1",
-        attempt=1,
+        attempt=1 if revision is None else revision.attempt,
         attempts_allowed=3,
         permission=permission or standard_product_permission("test-product"),
         profile=bundle.profile_for(state.person_id),
@@ -888,7 +890,7 @@ def request_for(bundle, scoring, *, permission=None, memory_years=(), state=None
             years=list(memory_years),
         ),
         last_feedback=memory_years[-1].feedback if memory_years else None,
-        revision=None,
+        revision=revision,
         tax_policy=bundle.tax_policy(catalog.tax_policy_id),
         prompt_template="e3a-product-prompt-v2",
     )
@@ -945,7 +947,8 @@ def test_the_request_shows_life_facts_and_interests_but_no_scoring_internals(bun
     assert opps["k51.service.massage"]["enjoyment"][0]["function"] == "personal_care"
     profile = payload["observation"]["profile"]
     assert (profile["leisure_interests"], profile["cuisines"]) == (["music"], ["sichuan"])
-    assert any("牌子" in r for r in profile["unsupported_requests"])
+    assert "unsupported_requests" not in profile  # 品牌与没认出的描述只留存，不交给分身（收尾 R7）
+    assert "牌子" not in json.dumps(payload, ensure_ascii=False)
     text = json.dumps(payload, ensure_ascii=False)
     assert not keys_of(payload) & RESERVED_SCORING_KEYS
     assert [t for t in SCORING_TEXT if t in text] == []
@@ -986,7 +989,17 @@ def test_feedback_and_memory_carry_participation_facts_without_scores(bundle, sc
         ),
     )
     fb = visible_feedback(y.settlement)
-    rows = {(p.opportunity_id, p.month): p.status for p in fb.participation}
+    rows = {
+        (a.opportunity_id, m): "completed"
+        for a in fb.participation
+        for sp in a.done
+        for m in sp.months
+    } | {
+        (a.opportunity_id, m): n.status
+        for a in fb.participation
+        for n in a.not_done
+        for m in n.months
+    }
     assert rows == {
         ("k51.experience.community_choir", 4): "completed",
         ("k51.experience.community_choir", 9): "completed",

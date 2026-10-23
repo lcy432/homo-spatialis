@@ -145,6 +145,7 @@ from common.life_contracts import (
     exact_minor_units,
     qualification_gaps,
     require_life_numeraire,
+    to_fraction,
 )
 from common.money import Money, NumeraireMismatchError
 from common.providers import TaxFunction
@@ -1274,7 +1275,8 @@ class _Year:
         """这个月**实际**执行或在服务期内的东西，与记钱是同一份记录。
 
         年付服务与持续物品只从持有服务读（付款记录里的覆盖月是镜像，不再算一次）；出局当月只有拿到
-        工资的工作——住房与食品没有获得，其他行动没有执行。
+        工资的工作——住房与食品没有获得，其他行动没有执行。休闲活动的次数与小时取自这个月唯一的那条参与记录
+        （DECISIONS/0041 R9）：时间账、休闲评分、反馈与记忆读的是同一份执行事实。
         """
         out: list[Activity] = []
         for ln in self.lines:
@@ -1285,12 +1287,29 @@ class _Year:
                     continue
                 if exit_month and rec.role != "job":
                     continue
+                if rec.role == "experience" and rec.opp.activity is not None:
+                    p = self._completed_participation(rec, m)
+                    out.append(Activity(rec.role, rec.opp, p.sessions, participation=p))
+                    continue
                 out.append(Activity(rec.role, rec.opp, rec.qty))
         if not exit_month:
             for h in self.held:
                 if m in h.covered:
                     out.append(Activity(h.kind, h.opp, h.quantity))
         return out
+
+    def _completed_participation(self, ln: _Line, m: int) -> ParticipationRecord:
+        """这一项活动这个月的完成记录。付了款（覆盖了这个月）却没有恰好一条完成记录是程序错误，不另行推算。"""
+        rows = [
+            p
+            for p in self.participation
+            if p.plan_order == ln.order and p.month == m and p.status == "completed"
+        ]
+        if len(rows) != 1:
+            raise LifeContractError(
+                f"{ln.opp.opportunity_id} 第 {m} 月执行了却有 {len(rows)} 条完成的参与记录：执行事实不一致"
+            )
+        return rows[0]
 
     def _check_resources(self, m: int, *, exit_month: bool = False) -> SettlementResult | None:
         # E1-5C：生病月份的恢复与就医进同一本账（出局当月不计：这个月没有过完）
@@ -1622,7 +1641,10 @@ class _Year:
         paused = self._paused_kind(ln.opp, ln.role) if ln.role == "experience" else None
         if paused is not None:  # E1-5C：生病时不去参加这次体验，也不付款（不顺延）
             self._pause(ln, ln.opp, ln.role, m, paused)
-            self._participate(ln, m, "paused", _PAUSE_WHY[paused])
+            if (
+                ln.opp.activity is not None
+            ):  # 只有休闲活动有参与记录；一次性享受服务只记暂停（DECISIONS/0041 R6）
+                self._participate(ln, m, "paused", _PAUSE_WHY[paused])
             return
         why = self._why_not(ln.opp)
         used: tuple[str, ...] = ()
@@ -1695,7 +1717,7 @@ class _Year:
         a = ln.opp.activity
         assert a is not None
         done = status == "completed"
-        n = float(ln.qty) if done else 0.0
+        n = ln.qty if done else 0
         self.participation.append(
             ParticipationRecord(
                 plan_order=ln.order,
@@ -1703,9 +1725,10 @@ class _Year:
                 month=m,
                 status=status,  # type: ignore[arg-type]
                 primary_category=a.primary_category,
-                sessions=n,
-                participation_hours=n * a.participation_hours,
-                overhead_hours=n * a.overhead_hours,
+                sessions=float(n),
+                # 精确乘积再转浮点：输入最多两位小数，浮点的最短十进制写法就是这个乘积，资源账按十进制还原时不带二进制误差
+                participation_hours=float(n * to_fraction(a.participation_hours)),
+                overhead_hours=float(n * to_fraction(a.overhead_hours)),
                 equipment_used=used,
                 kit_capabilities=tuple(a.kit_provides) if done else (),
                 reason=None if reason is None else reason[:MAX_SUMMARY_CHARS],

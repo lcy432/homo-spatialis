@@ -393,7 +393,7 @@ catalogs:
         availability: available
         price: {amount: {amount: 150, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: ticket}
         duration: {kind: one_time_experience, lasts_years: 0}
-        activity: {primary_category: arts_culture, participation_hours: 4, overhead_hours: 0,
+        activity: {primary_category: arts_culture, replaces_meals_per_session: 0, participation_hours: 4, overhead_hours: 0,
                    time_basis: 一晚演出连同往返约 4 小时；合成设定把整晚都算作参与（与原来按一次 4 小时计的资源事实相同）}
         resource: {basis: per_occurrence, hours: 4, burden_per_hour: 0.5, quantity_scales: true,
                    note: 一次 4 小时}
@@ -472,7 +472,7 @@ catalogs:
         duration: {kind: ongoing_service}
         enjoyment: [{function: personal_care, mode: service_units, units_per_month: 2, unit_label: 次, basis: 每月实际接受两次按摩（享受型服务）}]
         resource: {basis: per_service_month, hours: 2, burden_per_hour: 0.2, quantity_scales: false,
-                   note: 每月两次、每次约 1 小时；生大病的月份照样付费但暂停}
+                   note: 每月两次、每次约 1 小时；生病暂停的月份不付款、不使用}
         source: *synth
       - opportunity_id: k51.durable.guitar
         category: durable
@@ -485,6 +485,17 @@ catalogs:
         equipment: {provides: [guitar_playable], note: 能弹的吉他；买到的当月就能用}
         resource: {basis: passive, note: 持有本身不占时间}
         source: *synth
+      - opportunity_id: k51.durable.tennis_racket
+        category: durable
+        label: 网球拍
+        unit: racket
+        quality: 一次买下、能用 5 年；自带球拍去打网球，不用再租
+        availability: available
+        price: {amount: {amount: 90, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: racket}
+        duration: {kind: durable_good, lasts_years: 5}
+        equipment: {provides: [racket_playable], note: 能打网球的球拍；买到的当月就能用}
+        resource: {basis: passive, note: 持有本身不占时间}
+        source: *synth
       - opportunity_id: k51.experience.guitar_practice
         category: experience
         label: 在家练吉他（一次 2 小时）
@@ -493,7 +504,7 @@ catalogs:
         availability: available
         price: {amount: {amount: 0, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: session}
         duration: {kind: one_time_experience, lasts_years: 0}
-        activity: {primary_category: music, participation_hours: 2, overhead_hours: 0, requires: [guitar_playable],
+        activity: {primary_category: music, replaces_meals_per_session: 0, participation_hours: 2, overhead_hours: 0, requires: [guitar_playable],
                    time_basis: 在家练，一次 2 小时，没有往返}
         resource: {basis: per_occurrence, hours: 2, burden_per_hour: 0.6, quantity_scales: true, note: 一次 2 小时}
         source: *synth
@@ -505,7 +516,7 @@ catalogs:
         availability: available
         price: {amount: {amount: 30, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: session}
         duration: {kind: one_time_experience, lasts_years: 0}
-        activity: {primary_category: racket_sports, participation_hours: 1.5, overhead_hours: 1, requires: [racket_playable],
+        activity: {primary_category: racket_sports, replaces_meals_per_session: 0, participation_hours: 1.5, overhead_hours: 1, requires: [racket_playable],
                    kit_provides: [racket_playable], time_basis: 打球 1.5 小时 + 往返与换衣 1 小时}
         resource: {basis: per_occurrence, hours: 2.5, burden_per_hour: 1.0, quantity_scales: true, note: 一次 2.5 小时}
         source: *synth
@@ -517,7 +528,7 @@ catalogs:
         availability: available
         price: {amount: {amount: 0, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: session}
         duration: {kind: one_time_experience, lasts_years: 0}
-        activity: {primary_category: music, tags: [arts_culture], participation_hours: 2, overhead_hours: 0.5,
+        activity: {primary_category: music, replaces_meals_per_session: 0, tags: [arts_culture], participation_hours: 2, overhead_hours: 0.5,
                    time_basis: 排练 2 小时 + 往返半小时}
         resource: {basis: per_occurrence, hours: 2.5, burden_per_hour: 0.6, quantity_scales: true, note: 一次 2.5 小时}
         source: *synth
@@ -529,7 +540,7 @@ catalogs:
         availability: available
         price: {amount: {amount: 60, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: ticket}
         duration: {kind: one_time_experience, lasts_years: 0}
-        activity: {primary_category: arts_culture, participation_hours: 2, overhead_hours: 0.5,
+        activity: {primary_category: arts_culture, replaces_meals_per_session: 0, participation_hours: 2, overhead_hours: 0.5,
                    time_basis: 导览 2 小时 + 往返半小时}
         resource: {basis: per_occurrence, hours: 2.5, burden_per_hour: 0.5, quantity_scales: true, note: 一次 2.5 小时}
         source: *synth
@@ -541,7 +552,7 @@ catalogs:
         availability: available
         price: {amount: {amount: 45, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: class}
         duration: {kind: one_time_experience, lasts_years: 0}
-        activity: {primary_category: culinary, participation_hours: 2.5, overhead_hours: 0.5,
+        activity: {primary_category: culinary, replaces_meals_per_session: 0, participation_hours: 2.5, overhead_hours: 0.5,
                    time_basis: 上课 2.5 小时 + 往返半小时；不替代正餐}
         resource: {basis: per_occurrence, hours: 3, burden_per_hour: 0.8, quantity_scales: true, note: 一次 3 小时}
         source: *synth
@@ -740,7 +751,7 @@ catalogs:
         availability: available
         price: {amount: {amount: 150, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: ticket}
         duration: {kind: one_time_experience, lasts_years: 0}
-        activity: {primary_category: arts_culture, participation_hours: 4, overhead_hours: 0,
+        activity: {primary_category: arts_culture, replaces_meals_per_session: 0, participation_hours: 4, overhead_hours: 0,
                    time_basis: 一晚演出连同往返约 4 小时；合成设定把整晚都算作参与（与原来按一次 4 小时计的资源事实相同）}
         resource: {basis: per_occurrence, hours: 4, burden_per_hour: 0.5, quantity_scales: true,
                    note: 一次 4 小时}
@@ -819,7 +830,7 @@ catalogs:
         duration: {kind: ongoing_service}
         enjoyment: [{function: personal_care, mode: service_units, units_per_month: 2, unit_label: 次, basis: 每月实际接受两次按摩（享受型服务）}]
         resource: {basis: per_service_month, hours: 2, burden_per_hour: 0.2, quantity_scales: false,
-                   note: 每月两次、每次约 1 小时；生大病的月份照样付费但暂停}
+                   note: 每月两次、每次约 1 小时；生病暂停的月份不付款、不使用}
         source: *synth
       - opportunity_id: m52.durable.guitar
         category: durable
@@ -832,6 +843,17 @@ catalogs:
         equipment: {provides: [guitar_playable], note: 能弹的吉他；买到的当月就能用}
         resource: {basis: passive, note: 持有本身不占时间}
         source: *synth
+      - opportunity_id: m52.durable.tennis_racket
+        category: durable
+        label: 网球拍
+        unit: racket
+        quality: 一次买下、能用 5 年；自带球拍去打网球，不用再租
+        availability: available
+        price: {amount: {amount: 95, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: racket}
+        duration: {kind: durable_good, lasts_years: 5}
+        equipment: {provides: [racket_playable], note: 能打网球的球拍；买到的当月就能用}
+        resource: {basis: passive, note: 持有本身不占时间}
+        source: *synth
       - opportunity_id: m52.experience.guitar_practice
         category: experience
         label: 在家练吉他（一次 2 小时）
@@ -840,7 +862,7 @@ catalogs:
         availability: available
         price: {amount: {amount: 0, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: session}
         duration: {kind: one_time_experience, lasts_years: 0}
-        activity: {primary_category: music, participation_hours: 2, overhead_hours: 0, requires: [guitar_playable],
+        activity: {primary_category: music, replaces_meals_per_session: 0, participation_hours: 2, overhead_hours: 0, requires: [guitar_playable],
                    time_basis: 在家练，一次 2 小时，没有往返}
         resource: {basis: per_occurrence, hours: 2, burden_per_hour: 0.6, quantity_scales: true, note: 一次 2 小时}
         source: *synth
@@ -852,7 +874,7 @@ catalogs:
         availability: available
         price: {amount: {amount: 26, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: session}
         duration: {kind: one_time_experience, lasts_years: 0}
-        activity: {primary_category: racket_sports, participation_hours: 1.5, overhead_hours: 1, requires: [racket_playable],
+        activity: {primary_category: racket_sports, replaces_meals_per_session: 0, participation_hours: 1.5, overhead_hours: 1, requires: [racket_playable],
                    kit_provides: [racket_playable], time_basis: 打球 1.5 小时 + 往返与换衣 1 小时}
         resource: {basis: per_occurrence, hours: 2.5, burden_per_hour: 1.0, quantity_scales: true, note: 一次 2.5 小时}
         source: *synth
@@ -864,7 +886,7 @@ catalogs:
         availability: available
         price: {amount: {amount: 0, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: session}
         duration: {kind: one_time_experience, lasts_years: 0}
-        activity: {primary_category: music, tags: [arts_culture], participation_hours: 2, overhead_hours: 0.5,
+        activity: {primary_category: music, replaces_meals_per_session: 0, tags: [arts_culture], participation_hours: 2, overhead_hours: 0.5,
                    time_basis: 排练 2 小时 + 往返半小时}
         resource: {basis: per_occurrence, hours: 2.5, burden_per_hour: 0.6, quantity_scales: true, note: 一次 2.5 小时}
         source: *synth
@@ -876,7 +898,7 @@ catalogs:
         availability: available
         price: {amount: {amount: 55, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: ticket}
         duration: {kind: one_time_experience, lasts_years: 0}
-        activity: {primary_category: arts_culture, participation_hours: 2, overhead_hours: 0.5,
+        activity: {primary_category: arts_culture, replaces_meals_per_session: 0, participation_hours: 2, overhead_hours: 0.5,
                    time_basis: 导览 2 小时 + 往返半小时}
         resource: {basis: per_occurrence, hours: 2.5, burden_per_hour: 0.5, quantity_scales: true, note: 一次 2.5 小时}
         source: *synth
@@ -888,7 +910,7 @@ catalogs:
         availability: available
         price: {amount: {amount: 40, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: class}
         duration: {kind: one_time_experience, lasts_years: 0}
-        activity: {primary_category: culinary, participation_hours: 2.5, overhead_hours: 0.5,
+        activity: {primary_category: culinary, replaces_meals_per_session: 0, participation_hours: 2.5, overhead_hours: 0.5,
                    time_basis: 上课 2.5 小时 + 往返半小时；不替代正餐}
         resource: {basis: per_occurrence, hours: 3, burden_per_hour: 0.8, quantity_scales: true, note: 一次 3 小时}
         source: *synth

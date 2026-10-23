@@ -742,11 +742,55 @@ def _not_valued(
     return tuple(out)
 
 
+@dataclass(frozen=True)
+class EquipmentScope:
+    """一件期末持有、还在服务期内的装备：参考模板的爱好活动用得上它的哪些能力（covered）、哪些没有模板考虑（uncovered）。"""
+
+    opportunity_id: str
+    covered: tuple[str, ...]
+    uncovered: tuple[str, ...]
+    months_left: int
+
+
+def equipment_valuation_scope(
+    terminal: PersonYearState, spec: EvaluationSpec, catalog: CityLifeCatalog
+) -> list[EquipmentScope]:
+    """期末持有的装备，参考模板按能力用得上哪些用途（DECISIONS/0041 R8）。只描述估值的范围，不改 V 的算法：模板没考虑的用途
+    写成范围缺口，不按购买价补分，也不说装备没有价值。"""
+    covered = _template_capabilities(spec, catalog)
+    out: list[EquipmentScope] = []
+    for h in terminal.holdings:
+        o = catalog.opportunity(h.opportunity_id)
+        left = h.effective_remaining_months or 0
+        if o is None or o.equipment is None or left <= 0:
+            continue
+        caps = tuple(o.equipment.provides)
+        out.append(
+            EquipmentScope(
+                opportunity_id=h.opportunity_id,
+                covered=tuple(c for c in caps if c in covered),
+                uncovered=tuple(c for c in caps if c not in covered),
+                months_left=left,
+            )
+        )
+    return out
+
+
 def capability_scope_gaps(
     terminal: PersonYearState, spec: EvaluationSpec, catalog: CityLifeCatalog
 ) -> list[str]:
     """期末持有的装备能力，有没有哪个参考模板的爱好活动用得上（DECISIONS/0041）。没有就是范围缺口：估值不计这件装备能
     支持的活动，照实写明，不按购买价补分。"""
+    return [
+        f"持有物 {s.opportunity_id} 提供的能力 {sorted(s.uncovered)} 没有参考模板安排相应活动（范围缺口）：估值不计它能支持的活动，"
+        "也不按购买价补分"
+        for s in equipment_valuation_scope(terminal, spec, catalog)
+        if s.uncovered
+    ]
+
+
+def _template_capabilities(spec: EvaluationSpec, catalog: CityLifeCatalog) -> set[str]:
+    """参考模板的爱好活动在这座城会用到的装备能力（扣掉套餐本次提供的）。"""
     binding = spec.binding_for(str(catalog.city))
     covered: set[str] = set()
     for p in spec.life_templates:
@@ -759,18 +803,7 @@ def capability_scope_gaps(
             )
             if a is not None and a.activity is not None:
                 covered |= set(a.activity.requires) - set(a.activity.kit_provides)
-    out: list[str] = []
-    for h in terminal.holdings:
-        o = catalog.opportunity(h.opportunity_id)
-        if o is None or o.equipment is None or (h.effective_remaining_months or 0) <= 0:
-            continue
-        gap = sorted(set(o.equipment.provides) - covered)
-        if gap:
-            out.append(
-                f"持有物 {h.opportunity_id} 提供的能力 {gap} 没有参考模板安排相应活动（范围缺口）：估值不计它能支持的活动，"
-                "也不按购买价补分"
-            )
-    return out
+    return covered
 
 
 def value_terminal(

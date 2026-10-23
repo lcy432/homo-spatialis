@@ -236,6 +236,8 @@ class ProductMockPlanner:
                 self._overcommit(v, action, notes)
             if "unqualified_first_draft" in behaviors:
                 self._unqualified(v, action, notes)
+            if "buy_hobby_gear" in behaviors:
+                self._hobby_gear(v, action, notes)
         else:
             action = self._revise(v, revision, notes)
         alt = "alternate_wording" in behaviors
@@ -456,6 +458,19 @@ class ProductMockPlanner:
             action["items"].append(_period(j, 1, 12))
             notes.append(f"草稿：再做一份 {j}，想多挣一点（受控行为：第一份草稿多做一份工作）")
         action["emergency"] = self._emergency(v, action["items"])
+
+    def _hobby_gear(self, v: _View, action: dict[str, Any], notes: list[str]) -> None:
+        """受控行为：第 1 月买下目录里每一件可得的爱好装备（观察里有 ``equipment`` 事实的耐用品）。"""
+        held = {i["opportunity_id"] for i in action["items"]}
+        gear = sorted(
+            oid
+            for oid, o in v.opps.items()
+            if o.get("equipment") and _available(o) and oid not in held
+        )
+        for oid in gear:
+            action["items"].append({"opportunity_id": oid, "quantity": 1, "month": 1})
+        if gear:
+            notes.append(f"草稿：第 1 月买下 {gear}（受控行为：演示期末持有的爱好装备）")
 
     def _unqualified(self, v: _View, action: dict[str, Any], notes: list[str]) -> None:
         jobs = [o for o in v.of("job") if _available(o) and not _qualified(o)]

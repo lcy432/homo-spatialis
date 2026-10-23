@@ -20,6 +20,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Annotated, Any, Literal
 
 from pydantic import Field, field_validator, model_validator
@@ -296,6 +297,7 @@ MockBehavior = Literal[
     "malformed_output",
     "raise_error",
     "alternate_wording",
+    "buy_hobby_gear",
 ]
 
 
@@ -306,13 +308,50 @@ class MockScript(ContractModel):
     * ``unqualified_first_draft``：第一份草稿选一个年初还不合格的岗位；
     * ``malformed_output``：这些年份每次都返回不是 JSON 的文字（用来演示修订耗尽）；
     * ``raise_error``：这些年份调用时抛出意外异常（用来演示程序错误暂停批次）；
-    * ``alternate_wording``：行动不变，只换需求摘要与理由的措辞。
+    * ``alternate_wording``：行动不变，只换需求摘要与理由的措辞；
+    * ``buy_hobby_gear``：这些年份的草稿在第 1 月买下目录里每一件可得的爱好装备（演示期末持有的装备与估值范围，DECISIONS/0041）。
     """
 
     clone_id: IdStr
     behavior: MockBehavior
     years: tuple[YearIndex, ...] = Field(min_length=1)
     note: str | None = Field(default=None, max_length=300)
+
+
+@dataclass(frozen=True)
+class ModelLimits:
+    """一个模型已核对的长度上限：单次输入、单次输出、输入 + 输出合计（上下文）。没有写的一项就是没有核对，不检查。"""
+
+    max_input: int | None
+    max_output: int | None
+    context: int | None
+    basis: str
+
+
+#: 已核对的模型长度上限（DECISIONS/0041 R1）。运行配置的单次输入上限加输出上限不能超过上下文；没有登记的模型只受字段本身的
+#: 上限约束。来源是发送之前在本机记录的官方页面（``runs/*/pricing/``，本机证据）。
+MODEL_LIMITS: dict[str, ModelLimits] = {
+    "qwen3.8-flash": ModelLimits(
+        max_input=991_808,
+        max_output=131_072,
+        context=None,
+        basis="百炼官方模型页（2026-10-09 更新、2026-10-18 核对）：最大输入 991,808、最大输出 131,072；页面没有按输入长度分档",
+    ),
+    "claude-sonnet-5-5": ModelLimits(
+        max_input=None,
+        max_output=128_000,
+        context=1_000_000,
+        basis="Claude 官方价格页（2026-10-18 核对）：Claude 4.6 及之后的型号（Haiku 5.5 除外）按标准价提供完整 1M 上下文；"
+        "最大输出 128,000",
+    ),
+    "claude-haiku-5-5": ModelLimits(
+        max_input=None,
+        max_output=128_000,
+        context=200_000,
+        basis="本机没有 Haiku 5.5 上下文长度的核对记录：按当前 Claude 型号至少 200,000 的保守下界（这是假设）；提示超过 100,000 "
+        "token 的请求按长上下文价计费（官方价格页，2026-10-18 核对）",
+    ),
+}
 
 
 class LlmSettings(ContractModel):
@@ -408,6 +447,28 @@ class LlmSettings(ContractModel):
                 raise ValueError(
                     "claude_agent_sdk 只用在测试规划角色 test_planner / test_planner_sonnet 上（DECISIONS/0035）"
                 )
+        return self
+
+    @model_validator(mode="after")
+    def _fits_model_limits(self) -> LlmSettings:
+        """单次输入上限与输出上限都在模型已核对的长度之内，合计不超过上下文（DECISIONS/0041 R1）。"""
+        lim = MODEL_LIMITS.get(self.model)
+        if lim is None:
+            return self
+        if lim.max_input is not None and self.max_input_tokens > lim.max_input:
+            raise ValueError(
+                f"{self.model} 的单次输入上限写了 {self.max_input_tokens}，模型最多 {lim.max_input}（{lim.basis}）"
+            )
+        if lim.max_output is not None and self.max_output_tokens > lim.max_output:
+            raise ValueError(
+                f"{self.model} 的输出上限写了 {self.max_output_tokens}，模型最多 {lim.max_output}（{lim.basis}）"
+            )
+        total = self.max_input_tokens + self.max_output_tokens
+        if lim.context is not None and total > lim.context:
+            raise ValueError(
+                f"{self.model} 的输入上限 {self.max_input_tokens} + 输出上限 {self.max_output_tokens} = {total}，超过上下文 "
+                f"{lim.context}（{lim.basis}）"
+            )
         return self
 
     @model_validator(mode="after")
@@ -622,6 +683,18 @@ class LifeRunConfig(ContractModel):
             and self.paid_budget.price.model != self.planner.llm.model
         ):
             raise ValueError("报价表对应的模型与规划器的模型快照不同")
+        tier = (
+            None if self.paid_budget is None else self.paid_budget.price.max_input_tokens_at_price
+        )
+        if (
+            tier is not None
+            and self.planner.llm is not None
+            and self.planner.llm.max_input_tokens > tier
+        ):
+            raise ValueError(
+                f"单次输入上限 {self.planner.llm.max_input_tokens} 超过报价 {self.paid_budget.price.price_version} 这一档的"
+                f"适用上限 {tier}：比这一档长的请求不能按这一档的价格预留（不按低档冒充）；改用对应的报价，或把输入上限降到 {tier} 以内"
+            )
         return self
 
 

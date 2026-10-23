@@ -803,6 +803,7 @@ def internal_evaluation_models() -> tuple[type[ContractModel], ...]:
         EvaluationSpec,
         PlanSlot,
         DurablePurchaseRule,
+        ActivityUseRule,
         LifeTemplate,
         SlotTarget,
         CitySlotBinding,

@@ -1065,27 +1065,24 @@ def _fact_lines(fb: VisibleFeedback) -> list[str]:
 
 
 def _participation_lines(y: int, fb: VisibleFeedback) -> list[str]:
-    """每项活动一条：实际参加的月份、次数与参与小时，暂停与没能进行的月份（原因）。只有事实，没有满足感。"""
-    by: dict[str, list[Any]] = {}
-    for p in fb.participation:
-        by.setdefault(p.opportunity_id, []).append(p)
+    """每项活动一条：实际参加的月份、次数与参与小时，暂停与没能进行的月份（原因）。只有事实，没有满足感；次数与小时就是
+    反馈里的合计（同一份参与记录）。"""
     out: list[str] = []
-    for oid, rows in by.items():
-        done = [p for p in rows if p.status == "completed"]
-        text = f"第 {y} 年：活动 {oid}"
+    for a in fb.participation:
+        done = [m for s in a.done for m in s.months]
+        text = f"第 {y} 年：活动 {a.opportunity_id}"
         if done:
             text += (
-                f" 参加的月份 {month_ranges([p.month for p in done])}，共 {sum(p.sessions for p in done):g} 次、"
-                f"{sum(p.participation_hours for p in done):g} 参与小时"
+                f" 参加的月份 {month_ranges(done)}，共 {a.sessions_total:g} 次、"
+                f"{a.participation_hours_total:g} 参与小时"
             )
-        paused = [p.month for p in rows if p.status == "paused"]
+        paused = [m for n in a.not_done if n.status == "paused" for m in n.months]
         if paused:
             text += f"；生病暂停的月份 {month_ranges(paused)}"
-        failed = [p for p in rows if p.status == "failed"]
+        failed = [n for n in a.not_done if n.status == "failed"]
         if failed:
-            text += (
-                f"；没能进行的月份 {month_ranges([p.month for p in failed])}（{failed[0].reason}）"
-            )
+            months = [m for n in failed for m in n.months]
+            text += f"；没能进行的月份 {month_ranges(months)}（{failed[0].reason}）"
         out.append(text)
     return out
 
