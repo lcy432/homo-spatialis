@@ -1300,7 +1300,10 @@ def build_observation(
                 need=m.need,
                 baseline_opportunity_id=m.baseline_opportunity_id,
                 baseline_quantity=m.baseline_quantity,
-                qualifying_opportunity_ids=tuple(m.qualifying_opportunity_ids),
+                # 只给看这一年能写进计划的：合格名单里没上菜单的（别的年份或环境重复的菜单项、估值专用的参考住房）不进观察
+                qualifying_opportunity_ids=tuple(
+                    i for i in m.qualifying_opportunity_ids if i in offered
+                ),
                 meets=m.meets,
             )
             for m in catalog.minimum_living

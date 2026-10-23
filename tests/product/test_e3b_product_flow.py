@@ -41,8 +41,7 @@ def test_two_real_cities_live_three_years_replay_and_report_public_facts(real_pa
     )
     assert s.pre.preflight.status == "ready"
     assert s.result is not None and s.result.evaluation_status == "generated"
-    # 两城的生活都过完三年，评分与估值完整。（这一版参考住房仍从菜单裁剪后的目录里挑，西雅图能不能估值随菜单抽样变：
-    # 审核 F3/F4 改成按参考岗位从完整候选池绑定）
+    # 两城的生活都过完三年，评分与估值完整：参考住房按参考岗位与通勤关系从完整候选池绑定（审核 F3/F4），不随菜单抽样变
     assert all(y.status == "completed" for c in s.result.clones for y in c.years)
     assert {c.clone_ref: (c.category, c.missing_reason) for c in s.result.clones} == {
         "u501.26420.r0": ("C", None),

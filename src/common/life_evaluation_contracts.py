@@ -47,8 +47,9 @@ EVALUATION_REVISION = "e1-life-r3"
 EVALUATION_CONTENT_SCHEMA = "e1-life-evaluation-content-v3"
 #: 本轮只支持 12 个月的估值期；其他长度明确拒绝，不静默改成 12。
 SUPPORTED_HORIZON_MONTHS = 12
-#: 最多几个基础生活模板；估值期初健康时每个模板一次试算（≤ 6），带病时每个模板两次（≤ 12）。
-MAX_LIFE_TEMPLATES = 6
+#: 最多几个基础生活模板；估值期初健康时每个模板一次试算，带病时每个模板两次。E3B 的用车参考生活（独立审核 F3）让模板数
+#: 从 6 个变成 12 个：不用车与用车各一组，其中一组的住房槽位在每座城都确定没有，已知不可行、不进参考集合。
+MAX_LIFE_TEMPLATES = 12
 MAX_VALUATION_TRIALS = 2 * MAX_LIFE_TEMPLATES
 
 _SHA256 = r"^[0-9a-f]{64}$"

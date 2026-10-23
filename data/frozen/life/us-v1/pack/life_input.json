@@ -16088,6 +16088,7 @@
       "nyc.housing.3604110.1.1-6",
       "nyc.housing.3604111.2.5-6",
       "nyc.housing.3604111.3plus.1-2",
+      "nyc.housing.3604112.1.1-2",
       "nyc.housing.3604121.0.1-2",
       "nyc.housing.3604121.2.1-2",
       "nyc.housing.3604121.2.1-6",
@@ -17131,6 +17132,70 @@
       "exclusive": true,
       "quality_level": 2,
       "space_level": 4
+     },
+     "targets": [],
+     "unit": "dwelling"
+    },
+    {
+     "area": "nyc.area.h.3604112",
+     "arrangement_options": {},
+     "attributes": {},
+     "availability": "available",
+     "category": "housing",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "functions": [
+      "housing"
+     ],
+     "label": "1 卧整套租住（NYC-Manhattan Community District 12--Washington Heights & In，中档）",
+     "occupation": null,
+     "opportunity_id": "nyc.housing.3604112.1.1-2",
+     "price": {
+      "amount": {
+       "amount": 2400.0,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "dwelling-month"
+     },
+     "quality": "NYC-Manhattan Community District 12--Washington Heights & In的1 卧整套租住；同格租金三档里的中档（估计，格 = tier_bed）；月租含水电燃气月费中位数 100.00（估计）",
+     "resource": {
+      "basis": "passive",
+      "burden_per_hour": null,
+      "hours": null,
+      "job": null,
+      "note": "住房本身不占时间；通勤按片区关系表算",
+      "quantity_scales": null,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "census_acs1_pums_2024",
+       "intake:housing.b.35620.3604112.1.q2",
+       "geography: PUMA 3604112（CBSA 35620）"
+      ],
+      "kind": "estimated",
+      "mapping_version": "life-pack-us-v1",
+      "observed_on": "2026-10-22",
+      "provenance": null,
+      "rule": "合同租金分位（housing_rent_conditional@2，tier_bed）+ 水电燃气月费中位数（contract_quantile_plus_utilities_median_v1）；空间等级按卧室数，条件档次按同格三档位置；厨卫设施按假设 acs_rental_units_have_basic_facilities_v1",
+      "synthetic_note": null
+     },
+     "spec": {
+      "basic_facilities": true,
+      "bedrooms": 1,
+      "exclusive": true,
+      "quality_level": 2,
+      "space_level": 2
      },
      "targets": [],
      "unit": "dwelling"
@@ -42595,6 +42660,7 @@
       "la.housing.0603744.1.1-6",
       "la.housing.0603744.2.1-2",
       "la.housing.0603748.0.5-6",
+      "la.housing.0603748.1.1-2",
       "la.housing.0603748.2.1-6",
       "la.housing.0603748.2.5-6",
       "la.housing.0603759.0.5-6",
@@ -44644,6 +44710,70 @@
       "exclusive": true,
       "quality_level": 3,
       "space_level": 1
+     },
+     "targets": [],
+     "unit": "dwelling"
+    },
+    {
+     "area": "la.area.h.0603748",
+     "arrangement_options": {},
+     "attributes": {},
+     "availability": "available",
+     "category": "housing",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "functions": [
+      "housing"
+     ],
+     "label": "1 卧整套租住（Los Angeles County--LA (Southwest/Marina del Rey & Westchest，中档）",
+     "occupation": null,
+     "opportunity_id": "la.housing.0603748.1.1-2",
+     "price": {
+      "amount": {
+       "amount": 2100.0,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "dwelling-month"
+     },
+     "quality": "Los Angeles County--LA (Southwest/Marina del Rey & Westchest的1 卧整套租住；同格租金三档里的中档（估计，格 = tier_bed）；月租含水电燃气月费中位数 100.00（估计）",
+     "resource": {
+      "basis": "passive",
+      "burden_per_hour": null,
+      "hours": null,
+      "job": null,
+      "note": "住房本身不占时间；通勤按片区关系表算",
+      "quantity_scales": null,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "census_acs1_pums_2024",
+       "intake:housing.b.31080.0603748.1.q2",
+       "geography: PUMA 0603748（CBSA 31080）"
+      ],
+      "kind": "estimated",
+      "mapping_version": "life-pack-us-v1",
+      "observed_on": "2026-10-22",
+      "provenance": null,
+      "rule": "合同租金分位（housing_rent_conditional@2，tier_bed）+ 水电燃气月费中位数（contract_quantile_plus_utilities_median_v1）；空间等级按卧室数，条件档次按同格三档位置；厨卫设施按假设 acs_rental_units_have_basic_facilities_v1",
+      "synthetic_note": null
+     },
+     "spec": {
+      "basic_facilities": true,
+      "bedrooms": 1,
+      "exclusive": true,
+      "quality_level": 2,
+      "space_level": 2
      },
      "targets": [],
      "unit": "dwelling"
@@ -92586,6 +92716,7 @@
       "chi.housing.1703152.1.1-6",
       "chi.housing.1703152.3plus.1-2",
       "chi.housing.1703153.0.1-6",
+      "chi.housing.1703153.1.1-2",
       "chi.housing.1703154.0.1-2",
       "chi.housing.1703154.0.1-6",
       "chi.housing.1703154.1.1-6",
@@ -93429,6 +93560,70 @@
       "exclusive": true,
       "quality_level": 1,
       "space_level": 1
+     },
+     "targets": [],
+     "unit": "dwelling"
+    },
+    {
+     "area": "chi.area.h.1703153",
+     "arrangement_options": {},
+     "attributes": {},
+     "availability": "available",
+     "category": "housing",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "functions": [
+      "housing"
+     ],
+     "label": "1 卧整套租住（Chicago City (North)--Uptown, Edgewater & Rogers Park，中档）",
+     "occupation": null,
+     "opportunity_id": "chi.housing.1703153.1.1-2",
+     "price": {
+      "amount": {
+       "amount": 1460.0,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "dwelling-month"
+     },
+     "quality": "Chicago City (North)--Uptown, Edgewater & Rogers Park的1 卧整套租住；同格租金三档里的中档（估计，格 = puma_bed）；月租含水电燃气月费中位数 60.00（估计）",
+     "resource": {
+      "basis": "passive",
+      "burden_per_hour": null,
+      "hours": null,
+      "job": null,
+      "note": "住房本身不占时间；通勤按片区关系表算",
+      "quantity_scales": null,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "census_acs1_pums_2024",
+       "intake:housing.b.16980.1703153.1.q2",
+       "geography: PUMA 1703153（CBSA 16980）"
+      ],
+      "kind": "estimated",
+      "mapping_version": "life-pack-us-v1",
+      "observed_on": "2026-10-22",
+      "provenance": null,
+      "rule": "合同租金分位（housing_rent_conditional@2，puma_bed）+ 水电燃气月费中位数（contract_quantile_plus_utilities_median_v1）；空间等级按卧室数，条件档次按同格三档位置；厨卫设施按假设 acs_rental_units_have_basic_facilities_v1",
+      "synthetic_note": null
+     },
+     "spec": {
+      "basic_facilities": true,
+      "bedrooms": 1,
+      "exclusive": true,
+      "quality_level": 2,
+      "space_level": 2
      },
      "targets": [],
      "unit": "dwelling"
@@ -116583,6 +116778,7 @@
       "hou.housing.4804603.0.1-2",
       "hou.housing.4804603.0.1-6",
       "hou.housing.4804603.0.5-6",
+      "hou.housing.4804603.1.1-2",
       "hou.housing.4804604.0.1-2",
       "hou.housing.4804604.1.1-2",
       "hou.housing.4804604.3plus.1-6",
@@ -117370,6 +117566,70 @@
       "exclusive": true,
       "quality_level": 3,
       "space_level": 1
+     },
+     "targets": [],
+     "unit": "dwelling"
+    },
+    {
+     "area": "hou.area.h.4804603",
+     "arrangement_options": {},
+     "attributes": {},
+     "availability": "available",
+     "category": "housing",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "functions": [
+      "housing"
+     ],
+     "label": "1 卧整套租住（Houston City (South Central)--South of US-59, West of I-45 &，中档）",
+     "occupation": null,
+     "opportunity_id": "hou.housing.4804603.1.1-2",
+     "price": {
+      "amount": {
+       "amount": 1402.0,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "dwelling-month"
+     },
+     "quality": "Houston City (South Central)--South of US-59, West of I-45 &的1 卧整套租住；同格租金三档里的中档（估计，格 = puma_bed）；月租含水电燃气月费中位数 102.00（估计）",
+     "resource": {
+      "basis": "passive",
+      "burden_per_hour": null,
+      "hours": null,
+      "job": null,
+      "note": "住房本身不占时间；通勤按片区关系表算",
+      "quantity_scales": null,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "census_acs1_pums_2024",
+       "intake:housing.b.26420.4804603.1.q2",
+       "geography: PUMA 4804603（CBSA 26420）"
+      ],
+      "kind": "estimated",
+      "mapping_version": "life-pack-us-v1",
+      "observed_on": "2026-10-22",
+      "provenance": null,
+      "rule": "合同租金分位（housing_rent_conditional@2，puma_bed）+ 水电燃气月费中位数（contract_quantile_plus_utilities_median_v1）；空间等级按卧室数，条件档次按同格三档位置；厨卫设施按假设 acs_rental_units_have_basic_facilities_v1",
+      "synthetic_note": null
+     },
+     "spec": {
+      "basic_facilities": true,
+      "bedrooms": 1,
+      "exclusive": true,
+      "quality_level": 2,
+      "space_level": 2
      },
      "targets": [],
      "unit": "dwelling"

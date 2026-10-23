@@ -109,7 +109,7 @@
    ]
   }
  },
- "build_identity": "f03e2e7b704cd5dffa339577171dbd65ca68b0b02eb5333b4163eaee2d71cd0d",
+ "build_identity": "a6508bda52a77de2af63de13b1115b37c4bb935d4d538cb6039612f689d2ce9f",
  "build_inputs": {
   "base_files": {
    "configs/intake/life_pack_us_v1.yaml": "29f1aba8e78405d605c772532d1d5b48a9d066eca0cba037d50de89373fa1312",
@@ -182,7 +182,7 @@
     "commute_legs": 394,
     "housing_candidates": 717,
     "housing_executable": 601,
-    "housing_in_catalog": 60,
+    "housing_in_catalog": 61,
     "items_by_domain": {
      "activity": 10,
      "device": 5,
@@ -206,7 +206,7 @@
     "commute_legs": 258,
     "housing_candidates": 651,
     "housing_executable": 651,
-    "housing_in_catalog": 67,
+    "housing_in_catalog": 68,
     "items_by_domain": {
      "activity": 10,
      "device": 5,
@@ -228,7 +228,7 @@
     "commute_legs": 303,
     "housing_candidates": 1074,
     "housing_executable": 1074,
-    "housing_in_catalog": 69,
+    "housing_in_catalog": 70,
     "items_by_domain": {
      "activity": 10,
      "device": 5,
@@ -249,7 +249,7 @@
     "commute_legs": 690,
     "housing_candidates": 1635,
     "housing_executable": 628,
-    "housing_in_catalog": 71,
+    "housing_in_catalog": 72,
     "items_by_domain": {
      "activity": 10,
      "device": 5,
@@ -317,8 +317,8 @@
  },
  "files": {
   "city_facts.json": "f42ccc9d72dc77565240f8afce906d36269adc9ce099efe3281192880ee532e8",
-  "evaluation.json": "29319ace8db3b0c73daf4a9c350982d8bff295d83d41103e0548ff6f1e0c6c8e",
-  "life_input.json": "83909e26346ca58e93ceaa366d317046aa8ce4dbb47273eb8785e667c348e20e",
+  "evaluation.json": "31114cfc036ba3abd40a15456ad9988a55f885d86c29f36c23140ba674bb3979",
+  "life_input.json": "5fd2ea199e8ae3f5f932df8b8872a648c6e666c31f2436fb8a9b1a8e14e8ced1",
   "scoring.json": "408bc64bc66437e07d6a4853936d2225ff24206162f878f5a62b38b28d365aca"
  },
  "safety_inputs": {

@@ -15,8 +15,23 @@
       "status": "opportunity"
      },
      {
-      "opportunity_id": "nyc.housing.3604165.1.1-2",
+      "opportunity_id": "nyc.housing.3604112.1.1-2",
       "slot_id": "housing_comfort",
+      "status": "opportunity"
+     },
+     {
+      "reason": "不用车就有能到达全部参考岗位片区的合法住房：不设用车的参考生活（必要交通服务只在需要时加）",
+      "slot_id": "housing_basic_car",
+      "status": "unavailable"
+     },
+     {
+      "reason": "不用车就有能到达全部参考岗位片区的合法的一卧中档：不设用车的参考生活（必要交通服务只在需要时加）",
+      "slot_id": "housing_comfort_car",
+      "status": "unavailable"
+     },
+     {
+      "opportunity_id": "nyc.service.car_access",
+      "slot_id": "car_access",
       "status": "opportunity"
      },
      {
@@ -84,8 +99,23 @@
       "status": "opportunity"
      },
      {
-      "opportunity_id": "la.housing.0603776.1.1-2",
+      "opportunity_id": "la.housing.0603748.1.1-2",
       "slot_id": "housing_comfort",
+      "status": "opportunity"
+     },
+     {
+      "reason": "不用车就有能到达全部参考岗位片区的合法住房：不设用车的参考生活（必要交通服务只在需要时加）",
+      "slot_id": "housing_basic_car",
+      "status": "unavailable"
+     },
+     {
+      "reason": "不用车就有能到达全部参考岗位片区的合法的一卧中档：不设用车的参考生活（必要交通服务只在需要时加）",
+      "slot_id": "housing_comfort_car",
+      "status": "unavailable"
+     },
+     {
+      "opportunity_id": "la.service.car_access",
+      "slot_id": "car_access",
       "status": "opportunity"
      },
      {
@@ -148,13 +178,28 @@
     },
     "targets": [
      {
-      "opportunity_id": "sf.housing.0607509.0.1-6",
+      "reason": "完整候选池里没有不用车就能到达全部参考岗位片区（2 个）的合法住房",
       "slot_id": "housing_basic",
+      "status": "unavailable"
+     },
+     {
+      "reason": "完整候选池里没有不用车就能到达全部参考岗位片区（2 个）的合法的一卧中档",
+      "slot_id": "housing_comfort",
+      "status": "unavailable"
+     },
+     {
+      "opportunity_id": "sf.housing.0607509.0.1-6",
+      "slot_id": "housing_basic_car",
       "status": "opportunity"
      },
      {
       "opportunity_id": "sf.housing.0607509.1.1-2",
-      "slot_id": "housing_comfort",
+      "slot_id": "housing_comfort_car",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "sf.service.car_access",
+      "slot_id": "car_access",
       "status": "opportunity"
      },
      {
@@ -222,8 +267,23 @@
       "status": "opportunity"
      },
      {
-      "opportunity_id": "chi.housing.1704303.1.1-2",
+      "opportunity_id": "chi.housing.1703153.1.1-2",
       "slot_id": "housing_comfort",
+      "status": "opportunity"
+     },
+     {
+      "reason": "不用车就有能到达全部参考岗位片区的合法住房：不设用车的参考生活（必要交通服务只在需要时加）",
+      "slot_id": "housing_basic_car",
+      "status": "unavailable"
+     },
+     {
+      "reason": "不用车就有能到达全部参考岗位片区的合法的一卧中档：不设用车的参考生活（必要交通服务只在需要时加）",
+      "slot_id": "housing_comfort_car",
+      "status": "unavailable"
+     },
+     {
+      "opportunity_id": "chi.service.car_access",
+      "slot_id": "car_access",
       "status": "opportunity"
      },
      {
@@ -291,8 +351,23 @@
       "status": "opportunity"
      },
      {
-      "opportunity_id": "hou.housing.4804602.1.1-2",
+      "opportunity_id": "hou.housing.4804603.1.1-2",
       "slot_id": "housing_comfort",
+      "status": "opportunity"
+     },
+     {
+      "reason": "不用车就有能到达全部参考岗位片区的合法住房：不设用车的参考生活（必要交通服务只在需要时加）",
+      "slot_id": "housing_basic_car",
+      "status": "unavailable"
+     },
+     {
+      "reason": "不用车就有能到达全部参考岗位片区的合法的一卧中档：不设用车的参考生活（必要交通服务只在需要时加）",
+      "slot_id": "housing_comfort_car",
+      "status": "unavailable"
+     },
+     {
+      "opportunity_id": "hou.service.car_access",
+      "slot_id": "car_access",
       "status": "opportunity"
      },
      {
@@ -362,6 +437,21 @@
      {
       "opportunity_id": "sea.housing.5323315.1.1-2",
       "slot_id": "housing_comfort",
+      "status": "opportunity"
+     },
+     {
+      "reason": "不用车就有能到达全部参考岗位片区的合法住房：不设用车的参考生活（必要交通服务只在需要时加）",
+      "slot_id": "housing_basic_car",
+      "status": "unavailable"
+     },
+     {
+      "reason": "不用车就有能到达全部参考岗位片区的合法的一卧中档：不设用车的参考生活（必要交通服务只在需要时加）",
+      "slot_id": "housing_comfort_car",
+      "status": "unavailable"
+     },
+     {
+      "opportunity_id": "sea.service.car_access",
+      "slot_id": "car_access",
       "status": "opportunity"
      },
      {
@@ -508,6 +598,89 @@
       "when_missing": "skip"
      }
     ],
+    "description": "最便宜的住房、基本食品；已有的设备照用，不另买设备或服务；有吉他就练，到期即停；住处只有开车能到岗，另付用车权月费与开车油费",
+    "food_slot": "food_basic",
+    "housing_slot": "housing_basic_car",
+    "jobs": "current_positions",
+    "label": "现职 + 基本生活（用车）",
+    "service_slots": [
+     "car_access"
+    ],
+    "template_id": "p1_basic_car"
+   },
+   {
+    "activity_uses": [
+     {
+      "activity_slot": "exercise_class",
+      "after_expiry": "stop",
+      "sessions_per_month": 8,
+      "when_missing": "skip"
+     },
+     {
+      "activity_slot": "music_practice",
+      "after_expiry": "replace",
+      "equipment_slot": "guitar",
+      "sessions_per_month": 4,
+      "when_missing": "skip"
+     }
+    ],
+    "description": "通勤短的一卧、新鲜食材、每月按摩、每月 8 次团体课；没有在用的洗衣设备就在第 1 月买；有吉他就练，到期换新；住处只有开车能到岗，另付用车权月费与开车油费",
+    "durable_purchases": [
+     {
+      "month": 1,
+      "rule": "buy_if_not_held",
+      "slot_id": "convenience_device"
+     }
+    ],
+    "food_slot": "food_comfort",
+    "housing_slot": "housing_comfort_car",
+    "jobs": "current_positions",
+    "label": "现职 + 较舒适的生活 + 洗衣设备（用车）",
+    "service_slots": [
+     "massage",
+     "car_access"
+    ],
+    "template_id": "p2_device_car"
+   },
+   {
+    "activity_uses": [
+     {
+      "activity_slot": "exercise_class",
+      "after_expiry": "stop",
+      "sessions_per_month": 8,
+      "when_missing": "skip"
+     },
+     {
+      "activity_slot": "music_practice",
+      "after_expiry": "replace",
+      "equipment_slot": "guitar",
+      "sessions_per_month": 4,
+      "when_missing": "skip"
+     }
+    ],
+    "description": "通勤短的一卧、新鲜食材、上门洗衣与打扫、每月按摩、每月 8 次团体课；有吉他就练，到期换新；住处只有开车能到岗，另付用车权月费与开车油费",
+    "food_slot": "food_comfort",
+    "housing_slot": "housing_comfort_car",
+    "jobs": "current_positions",
+    "label": "现职 + 较舒适的生活 + 人工杂务服务（用车）",
+    "service_slots": [
+     "laundry_service",
+     "cleaning_service",
+     "massage",
+     "car_access"
+    ],
+    "template_id": "p3_service_car"
+   },
+   {
+    "activity_uses": [
+     {
+      "activity_slot": "music_practice",
+      "after_expiry": "stop",
+      "equipment_slot": "guitar",
+      "sessions_per_month": 4,
+      "when_missing": "skip"
+     }
+    ],
     "description": "最便宜的住房、基本食品；已有的设备照用，不另买设备或服务；有吉他就练，到期即停",
     "food_slot": "food_basic",
     "housing_slot": "housing_basic",
@@ -578,21 +751,122 @@
      "massage"
     ],
     "template_id": "q3_service"
+   },
+   {
+    "activity_uses": [
+     {
+      "activity_slot": "music_practice",
+      "after_expiry": "stop",
+      "equipment_slot": "guitar",
+      "sessions_per_month": 4,
+      "when_missing": "skip"
+     }
+    ],
+    "description": "最便宜的住房、基本食品；已有的设备照用，不另买设备或服务；有吉他就练，到期即停；住处只有开车能到岗，另付用车权月费与开车油费",
+    "food_slot": "food_basic",
+    "housing_slot": "housing_basic_car",
+    "job_slot": "qualified_job",
+    "jobs": "qualified_alternative",
+    "label": "改做已具资格的岗位 + 基本生活（用车）",
+    "service_slots": [
+     "car_access"
+    ],
+    "template_id": "q1_basic_car"
+   },
+   {
+    "activity_uses": [
+     {
+      "activity_slot": "exercise_class",
+      "after_expiry": "stop",
+      "sessions_per_month": 8,
+      "when_missing": "skip"
+     },
+     {
+      "activity_slot": "music_practice",
+      "after_expiry": "replace",
+      "equipment_slot": "guitar",
+      "sessions_per_month": 4,
+      "when_missing": "skip"
+     }
+    ],
+    "description": "通勤短的一卧、新鲜食材、每月按摩、每月 8 次团体课；没有在用的洗衣设备就在第 1 月买；有吉他就练，到期换新；住处只有开车能到岗，另付用车权月费与开车油费",
+    "durable_purchases": [
+     {
+      "month": 1,
+      "rule": "buy_if_not_held",
+      "slot_id": "convenience_device"
+     }
+    ],
+    "food_slot": "food_comfort",
+    "housing_slot": "housing_comfort_car",
+    "job_slot": "qualified_job",
+    "jobs": "qualified_alternative",
+    "label": "改做已具资格的岗位 + 较舒适的生活 + 洗衣设备（用车）",
+    "service_slots": [
+     "massage",
+     "car_access"
+    ],
+    "template_id": "q2_device_car"
+   },
+   {
+    "activity_uses": [
+     {
+      "activity_slot": "exercise_class",
+      "after_expiry": "stop",
+      "sessions_per_month": 8,
+      "when_missing": "skip"
+     },
+     {
+      "activity_slot": "music_practice",
+      "after_expiry": "replace",
+      "equipment_slot": "guitar",
+      "sessions_per_month": 4,
+      "when_missing": "skip"
+     }
+    ],
+    "description": "通勤短的一卧、新鲜食材、上门洗衣与打扫、每月按摩、每月 8 次团体课；有吉他就练，到期换新；住处只有开车能到岗，另付用车权月费与开车油费",
+    "food_slot": "food_comfort",
+    "housing_slot": "housing_comfort_car",
+    "job_slot": "qualified_job",
+    "jobs": "qualified_alternative",
+    "label": "改做已具资格的岗位 + 较舒适的生活 + 人工杂务服务（用车）",
+    "service_slots": [
+     "laundry_service",
+     "cleaning_service",
+     "massage",
+     "car_access"
+    ],
+    "template_id": "q3_service_car"
    }
   ],
   "monthly_discount_factor": "1",
-  "note": "E3B 六城的期末参考生活：模板与选择规则同产品基础样例的思路，槽位按真实目录绑定；估值期沿用第 3 年菜单、不抽设备故障；没有可绑定的槽位写确定没有并说明原因",
+  "note": "E3B 六城的期末参考生活：模板与选择规则同产品基础样例的思路，槽位按真实目录绑定；参考住房按参考岗位与通勤关系从完整候选池选（reference_housing_by_job_reach_v1），用车的参考生活只在不用车到不了参考岗位时绑定；估值期沿用第 3 年菜单加绑定的槽位机会、不抽设备故障；没有可绑定的槽位写确定没有并说明原因",
   "selection_rule": "best_complete_feasible_in_reference_set",
   "slots": [
    {
-    "description": "基本住房：本城最便宜的住房（最低住房方案）",
+    "description": "基本住房：完整候选池里不用车就能到达全部参考岗位片区的住房中最便宜的一处",
     "role": "housing",
     "slot_id": "housing_basic"
    },
    {
-    "description": "较舒适的住房：居民平时通勤最短的片区里的一卧中档",
+    "description": "较舒适的住房：不用车就能到达全部参考岗位片区的一卧中档里，最长往返最短的一处",
     "role": "housing",
     "slot_id": "housing_comfort"
+   },
+   {
+    "description": "基本住房（用车）：只在没有不用车就合法的基本住房时设；开车能到达全部参考岗位片区的住房中最便宜的一处",
+    "role": "housing",
+    "slot_id": "housing_basic_car"
+   },
+   {
+    "description": "较舒适的住房（用车）：只在没有不用车就合法的一卧中档时设；开车时最长往返最短的一卧中档",
+    "role": "housing",
+    "slot_id": "housing_comfort_car"
+   },
+   {
+    "description": "用车权（按月付费，月费不含油费；开车的油费按每次往返另付）：只出现在用车的参考生活里",
+    "role": "service",
+    "slot_id": "car_access"
    },
    {
     "description": "基本食品方案（主食为主、自己做）",

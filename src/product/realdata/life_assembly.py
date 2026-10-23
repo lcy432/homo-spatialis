@@ -44,6 +44,11 @@ from product.realdata.pack_inputs import (
     verify_intake_build,
     verify_items,
 )
+from product.realdata.reference_housing import (
+    REFERENCE_HOUSING_RULE,
+    ReferenceHousing,
+    choose_reference_housing,
+)
 from product.realdata.safety import (
     CrimeCount,
     SafetyInput,
@@ -128,6 +133,8 @@ class CityBuild:
     catalog: dict[str, Any]
     counts: dict[str, Any] = field(default_factory=dict)
     excluded: Counter[str] = field(default_factory=Counter)
+    #: 期末参考生活的住房（独立审核 F3、F4）：按参考岗位与通勤关系从完整候选池选，与菜单无关
+    reference: ReferenceHousing | None = None
 
 
 @dataclass
@@ -297,10 +304,18 @@ def assemble_city(
     )
 
     cheapest = min(housing, key=lambda h: (h.price.amount.amount, h.opportunity_id))
-    # 目录只放这次运行能接触到的住房：任一年、任一环境重复的菜单上出现过的，加上最低住房（兜底要用）。可执行的全集照样计数、
-    # 进菜单抽样（菜单的抽样池是全集）；没上任何菜单的住房分身永远看不到、也选不了，放进目录只会让文件变大
+    # 期末参考住房（独立审核 F3、F4）：从完整候选池按参考岗位与通勤关系选——在按菜单裁剪之前，所以只换菜单种子不改变参考集合
+    reference = choose_reference_housing(
+        [h.model_dump(mode="json") for h in housing],
+        [o for o in opps if o["category"] == "job"],
+        commute["commute"],
+    )
+    # 目录只放这次运行能接触到的住房：任一年、任一环境重复的菜单上出现过的，加上最低住房（兜底要用）与参考住房（估值要用）。
+    # 可执行的全集照样计数、进菜单抽样（菜单的抽样池是全集）。参考住房不加进任何菜单：分身在模拟年里看不到、也选不了它们，
+    # 只有估值期把评价规格绑定的槽位机会加进第 N 年的菜单
     reachable = {oid for m in menus if m.category == "housing" for oid in m.opportunity_ids}
     reachable.add(cheapest.opportunity_id)
+    reachable.update(reference.bound())
     opps = [o for o in opps if o["category"] != "housing" or o["opportunity_id"] in reachable]
     housing = [h for h in housing if h.opportunity_id in reachable]
     foods = [
@@ -348,7 +363,7 @@ def assemble_city(
         "areas": len(commute["areas"]),
         "commute_legs": len(commute["commute"]["legs"]),
     }
-    return CityBuild(catalog=catalog, counts=counts, excluded=out_excluded)
+    return CityBuild(catalog=catalog, counts=counts, excluded=out_excluded, reference=reference)
 
 
 def base_protocol(manifest: dict[str, Any]) -> dict[str, Any]:
@@ -738,12 +753,27 @@ EVAL_SLOTS = [
     {
         "slot_id": "housing_basic",
         "role": "housing",
-        "description": "基本住房：本城最便宜的住房（最低住房方案）",
+        "description": "基本住房：完整候选池里不用车就能到达全部参考岗位片区的住房中最便宜的一处",
     },
     {
         "slot_id": "housing_comfort",
         "role": "housing",
-        "description": "较舒适的住房：居民平时通勤最短的片区里的一卧中档",
+        "description": "较舒适的住房：不用车就能到达全部参考岗位片区的一卧中档里，最长往返最短的一处",
+    },
+    {
+        "slot_id": "housing_basic_car",
+        "role": "housing",
+        "description": "基本住房（用车）：只在没有不用车就合法的基本住房时设；开车能到达全部参考岗位片区的住房中最便宜的一处",
+    },
+    {
+        "slot_id": "housing_comfort_car",
+        "role": "housing",
+        "description": "较舒适的住房（用车）：只在没有不用车就合法的一卧中档时设；开车时最长往返最短的一卧中档",
+    },
+    {
+        "slot_id": "car_access",
+        "role": "service",
+        "description": "用车权（按月付费，月费不含油费；开车的油费按每次往返另付）：只出现在用车的参考生活里",
     },
     {"slot_id": "food_basic", "role": "food", "description": "基本食品方案（主食为主、自己做）"},
     {"slot_id": "food_comfort", "role": "food", "description": "新鲜食材较多的自己做方案"},
@@ -797,7 +827,7 @@ def _templates() -> list[dict[str, Any]]:
         ("qualified_alternative", "q", "改做已具资格的岗位"),
     ):
         extra = {"job_slot": "qualified_job"} if jobs == "qualified_alternative" else {}
-        out += [
+        base = [
             {
                 "template_id": f"{prefix}1_basic",
                 "label": f"{label} + 基本生活",
@@ -838,6 +868,20 @@ def _templates() -> list[dict[str, Any]]:
                 ),
             },
         ]
+        # 用车的参考生活（必要交通服务，独立审核 F3）：同样的基本 / 较舒适含义，住房换成用车槽位、另加用车权。只在没有不用车就
+        # 合法的住房时绑定；其余城市的用车住房槽位确定没有，这几个模板已知不可行、不进参考集合
+        cars = []
+        for t in base:
+            car = copy.deepcopy(t)
+            car["template_id"] = f"{t['template_id']}_car"
+            car["label"] = f"{t['label']}（用车）"
+            car["housing_slot"] = f"{t['housing_slot']}_car"
+            car["service_slots"] = [*t.get("service_slots", []), "car_access"]
+            car["description"] = (
+                f"{t['description']}；住处只有开车能到岗，另付用车权月费与开车油费"[:400]
+            )
+            cars.append(car)
+        out += base + cars
     return out
 
 
@@ -854,8 +898,9 @@ def build_evaluation(cfg: dict[str, Any], pack: PackBuild) -> dict[str, Any]:
     spec["slots"] = EVAL_SLOTS
     spec["life_templates"] = _templates()
     spec["note"] = (
-        "E3B 六城的期末参考生活：模板与选择规则同产品基础样例的思路，槽位按真实目录绑定；估值期沿用第 3 年菜单、不抽设备故障；"
-        "没有可绑定的槽位写确定没有并说明原因"
+        "E3B 六城的期末参考生活：模板与选择规则同产品基础样例的思路，槽位按真实目录绑定；参考住房按参考岗位与通勤关系从完整候选池"
+        f"选（{REFERENCE_HOUSING_RULE}），用车的参考生活只在不用车到不了参考岗位时绑定；估值期沿用第 3 年菜单加绑定的槽位机会、"
+        "不抽设备故障；没有可绑定的槽位写确定没有并说明原因"
     )
     bindings = []
     for c in cfg["cities"]:
@@ -863,23 +908,8 @@ def build_evaluation(cfg: dict[str, Any], pack: PackBuild) -> dict[str, Any]:
         cat = pack.cities[k].catalog
         opps = {o["opportunity_id"]: o for o in cat["opportunities"]}
         ids = set(opps)
-        typical = {a["area_id"]: a.get("typical_roundtrip_minutes") for a in cat["areas"]}
-        homes = [o for o in opps.values() if o["category"] == "housing"]
-        cheapest = cat["minimum_living"][0]["baseline_opportunity_id"]
-        mid1 = [
-            o
-            for o in homes
-            if o["spec"].get("bedrooms") == 1 and o["spec"].get("quality_level") == 2
-        ]
-        comfort = min(
-            mid1,
-            key=lambda o: (
-                typical.get(o["area"]) or 10**6,
-                o["price"]["amount"]["amount"],
-                o["opportunity_id"],
-            ),
-            default=None,
-        )
+        ref = pack.cities[k].reference
+        assert ref is not None
         award_jobs = [
             f"{k}.job.{g[4:-6].replace('_', '-')}.p50"
             for o in opps.values()
@@ -888,18 +918,26 @@ def build_evaluation(cfg: dict[str, Any], pack: PackBuild) -> dict[str, Any]:
             if g.endswith("_award")
         ]
         qualified = next((j for j in sorted(award_jobs) if j in ids), None)
+        if qualified is not None and opps[qualified].get("area") not in ref.job_areas:
+            # 换岗模板按目标岗位检查：目标岗位必须在参考岗位集合里，参考住房才对它合法
+            raise RuntimeError(
+                f"{k}: 换岗参考岗位 {qualified} 的片区不在参考岗位集合 {ref.job_areas} 里"
+            )
         no_training = "本城没有能授予岗位资格的培训项目（IPEDS 里没有支持职业的整年项目），没有可作参考的“改做已具资格的岗位”"
         bindings.append(
             {
                 "city": city_ref(c["cbsa"]),
                 "targets": [
-                    _target("housing_basic", cheapest, ids, "没有住房"),
-                    _target(
-                        "housing_comfort",
-                        comfort["opportunity_id"] if comfort else None,
-                        ids,
-                        "没有一卧中档",
+                    *(
+                        _target(slot, ref.slots[slot], ids, ref.reasons.get(slot, "没有"))
+                        for slot in (
+                            "housing_basic",
+                            "housing_comfort",
+                            "housing_basic_car",
+                            "housing_comfort_car",
+                        )
                     ),
+                    _target("car_access", f"{k}.service.car_access", ids, "本城没有用车权"),
                     _target("food_basic", f"{k}.food.home_staples", ids, "没有主食为主的方案"),
                     _target("food_comfort", f"{k}.food.home_fresh", ids, "没有鲜食较多的方案"),
                     _target(
