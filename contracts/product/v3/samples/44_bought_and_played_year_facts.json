@@ -30,6 +30,46 @@
    "display": "3,000.00",
    "numeraire_id": "USD_2024_LOCAL"
   },
+  "commute": [
+   {
+    "home_area_id": "k51.area.far",
+    "home_area_label": "远处居住片区",
+    "monthly_paid": {
+     "amount_minor": 0,
+     "currency": "USD",
+     "display": "0.00",
+     "numeraire_id": "USD_2024_LOCAL"
+    },
+    "months": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9,
+     10,
+     11,
+     12
+    ],
+    "status": "computed",
+    "status_zh": "按通勤关系表执行：实际住处片区到各个到岗岗位的就业片区，取可用方式里往返最少的一种",
+    "trips": [
+     {
+      "job_label": "全职文员（合成写字楼）",
+      "job_opportunity_id": "k51.job.clerk",
+      "mode": "transit",
+      "mode_zh": "公共交通",
+      "onsite_visits": 20,
+      "roundtrip_minutes": 70,
+      "work_area_id": "k51.area.center",
+      "work_area_label": "就业中心"
+     }
+    ]
+   }
+  ],
   "devices": [],
   "food": [
    "基本食品方案（自己做）（1–12 月）"
@@ -91,6 +131,29 @@
    "healthy",
    "healthy"
   ],
+  "homes": [
+   {
+    "area_id": "k51.area.far",
+    "area_label": "远处居住片区",
+    "area_typical_roundtrip_minutes": 70,
+    "label": "一居室（离工作地远）",
+    "months": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9,
+     10,
+     11,
+     12
+    ],
+    "opportunity_id": "k51.housing.far"
+   }
+  ],
   "household": [
    {
     "monthly_hours": [
@@ -143,6 +206,11 @@
   },
   "services": [],
   "status": "completed",
+  "tax": {
+   "policy_id": "tax.synth.e1conv",
+   "status": "synthetic_test_double",
+   "status_zh": "合成测试替身（不是真实税）"
+  },
   "training": [],
   "year_index": 1
  },

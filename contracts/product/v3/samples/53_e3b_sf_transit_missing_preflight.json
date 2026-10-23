@@ -1,0 +1,1037 @@
+{
+ "description_zh": "E3B 预检查：旧金山的通勤关系表里没有公共交通（官方票价网站拒绝访问，资料缺失），比较组别的城市有——逐城报告为警告与范围说明，不当 0 分钟、也不当免费；预检查仍可通过",
+ "message": "ProductPreflight",
+ "payload": {
+  "binding": {
+   "compiled_inputs": {
+    "life_input": "2c1540e33e31c5c7606cecc287423705b5de2cef38bbb2dcae44e2ca42f9588e",
+    "roster": "fe27d033d8e815602223784c92f75aefcf7f25ffe0887293c3b114d72283c688",
+    "run_config": "5d47c65e2ad4382926f23917a8ac73c281fcbf0e50749ec2489d2835f7c737d4",
+    "scoring_config": "e14e449288d5f15c4f3009ff793ff99aebf002bb9c2afc49c54f5e90347e0518"
+   },
+   "evaluation_spec_id": "eval.e3b-us.main",
+   "identities_fingerprint": "bef7bbd9ea3dc436dfb88d8ac8fa32deb63ef85cc1d5b4d2548f2ff2243e3076",
+   "planner_id": "mock.rules.e3a-product",
+   "planner_kind": "mock",
+   "prompt_template": "e3b-product-prompt-v1",
+   "protocol_id": "life-v1-e3b-us",
+   "scoring_content_fingerprint": "180fd9389343bac1da0fac4528e4eb6e9c6d7e069bddd56ea47acdcc4380bce0",
+   "scoring_version": "e1-life-v1"
+  },
+  "cities": [
+   {
+    "city_ref": "US:CBSA2023:41860",
+    "coverage": {
+     "common_weight": {
+      "display": "1.000",
+      "exact": "1"
+     },
+     "label": "mixed_coverage",
+     "no_component_weight": {
+      "display": "0.000",
+      "exact": "0"
+     },
+     "unknown_weight": {
+      "display": "0.000",
+      "exact": "0"
+     },
+     "unsupported_positive_leaves": []
+    },
+    "data_gaps": [
+     {
+      "audit_ref": null,
+      "code": "commute_mode_missing",
+      "field": "cities.US:CBSA2023:41860.commute",
+      "impact_zh": "这座城的分身到岗时没有这种方式可用，只能用表里有的方式；缺的方式不当 0 分钟，也不当免费",
+      "message_zh": "旧金山 的通勤关系表里没有公共交通（比较组里别的城市有）",
+      "next_action_zh": "知悉这一限制（原因见范围说明里本版不支持的内容）",
+      "severity": "warning"
+     }
+    ],
+    "data_nature": {
+     "build": [
+      {
+       "count": 44,
+       "key": "areas",
+       "label_zh": "片区（居住与就业）"
+      },
+      {
+       "count": 197,
+       "key": "commute_legs",
+       "label_zh": "通勤关系表的线（住处片区 × 就业片区 × 方式）"
+      },
+      {
+       "count": 11,
+       "key": "excluded.housing.rent_unknown",
+       "label_zh": "没有放进目录的住房：租金未知"
+      },
+      {
+       "count": 453,
+       "key": "housing_candidates",
+       "label_zh": "住房候选"
+      },
+      {
+       "count": 442,
+       "key": "housing_executable",
+       "label_zh": "可执行的住房候选"
+      },
+      {
+       "count": 61,
+       "key": "housing_in_catalog",
+       "label_zh": "放进目录的住房"
+      },
+      {
+       "count": 9,
+       "key": "items_by_domain.activity",
+       "label_zh": "生活物品候选：活动"
+      },
+      {
+       "count": 5,
+       "key": "items_by_domain.device",
+       "label_zh": "生活物品候选：省家务设备"
+      },
+      {
+       "count": 3,
+       "key": "items_by_domain.enjoyment",
+       "label_zh": "生活物品候选：享受型用品与服务"
+      },
+      {
+       "count": 2,
+       "key": "items_by_domain.equipment",
+       "label_zh": "生活物品候选：爱好装备"
+      },
+      {
+       "count": 15,
+       "key": "items_by_domain.food",
+       "label_zh": "生活物品候选：食品方案"
+      },
+      {
+       "count": 120,
+       "key": "items_by_domain.job",
+       "label_zh": "生活物品候选：岗位"
+      },
+      {
+       "count": 3,
+       "key": "items_by_domain.service",
+       "label_zh": "生活物品候选：服务"
+      },
+      {
+       "count": 120,
+       "key": "jobs_placed",
+       "label_zh": "放进目录的岗位（已补上就业片区）"
+      },
+      {
+       "count": 12,
+       "key": "menus",
+       "label_zh": "年度菜单"
+      }
+     ],
+     "build_status": "from_pack_report",
+     "city_ref": "US:CBSA2023:41860",
+     "common_priors": [
+      {
+       "fact_id": "safety_index",
+       "label": "安全条件（共同先验）",
+       "meaning_zh": "安全条件指数，0–10，越高越安全。六城没有可比的安全资料，这里是登记的共同先验（六城、各片区同值），不是任何城市的犯罪统计"
+      },
+      {
+       "fact_id": "leisure_index",
+       "label": "休闲条件（共同先验）",
+       "meaning_zh": "不花钱也能享受的休闲条件指数，0–10；六城没有可比资料，这里是登记的共同先验。健身、课程等活动另外安排、另外付费"
+      }
+     ],
+     "commute_modes": [
+      {
+       "condition_zh": "步行或骑车：没有使用条件、不封顶；每次往返记 0（不计自行车、共享单车与鞋的费用）",
+       "in_relation": true,
+       "lines": 10,
+       "mode": "walk_bike",
+       "mode_zh": "步行或骑车"
+      },
+      {
+       "condition_zh": null,
+       "in_relation": false,
+       "lines": 0,
+       "mode": "transit",
+       "mode_zh": "公共交通"
+      },
+      {
+       "condition_zh": "开车要有在用的用车权（car_access，一项按月付费的机会）；每次往返另付油费 = 往返分钟 / 60 × 25 英里每小时 ÷ 23.4 英里每加仑 × 汽油 4.864 美元每加仑；不封顶；停车与过路费没有建模",
+       "in_relation": true,
+       "lines": 187,
+       "mode": "drive",
+       "mode_zh": "开车"
+      }
+     ],
+     "home_areas": 39,
+     "label": "旧金山",
+     "menus": [
+      {
+       "category": "housing",
+       "env_repeats": 2,
+       "items_max": 12,
+       "items_min": 12,
+       "years": 3
+      },
+      {
+       "category": "job",
+       "env_repeats": 2,
+       "items_max": 30,
+       "items_min": 30,
+       "years": 3
+      }
+     ],
+     "model_plan_activities": [
+      "网球场地连球拍租借（一次）",
+      "网球场地（自带球拍，一次）",
+      "在家练吉他（一次 1 小时）",
+      "参观博物馆（一次）"
+     ],
+     "named_assumptions": [
+      {
+       "count": 5,
+       "examples": [
+        "顶开洗衣机",
+        "前开洗衣机",
+        "顶开洗衣机 + 电烘干机一套"
+       ],
+       "note_zh": "价格、寿命与替代后残余是登记的类别设定（device_category_v1），不是型号报价；型号来自 ENERGY STAR 记录（geography: CBSA2023 41860 San Francisco-Oakland-Fremont 都会区）"
+      },
+      {
+       "count": 2,
+       "examples": [
+        "网球拍",
+        "民谣吉他"
+       ],
+       "note_zh": "价格与寿命是登记的类别设定（equipment_category_v1），不是某个商品的报价（geography: CBSA2023 41860 San Francisco-Oakland-Fremont 都会区）"
+      },
+      {
+       "count": 4,
+       "examples": [
+        "网球场地连球拍租借（一次）",
+        "网球场地（自带球拍，一次）",
+        "在家练吉他（一次 1 小时）"
+       ],
+       "note_zh": "老师小时、人数、场地与器材是登记的模型活动设定（activity_template_v1），不是某个场所的真实报价（geography: CBSA2023 41860 San Francisco-Oakland-Fremont 都会区）"
+      }
+     ],
+     "opportunities": [
+      {
+       "by_kind": [
+        {
+         "count": 0,
+         "kind": "observed"
+        },
+        {
+         "count": 0,
+         "kind": "derived"
+        },
+        {
+         "count": 61,
+         "kind": "estimated"
+        },
+        {
+         "count": 0,
+         "kind": "synthetic"
+        }
+       ],
+       "category": "housing",
+       "total": 61
+      },
+      {
+       "by_kind": [
+        {
+         "count": 0,
+         "kind": "observed"
+        },
+        {
+         "count": 0,
+         "kind": "derived"
+        },
+        {
+         "count": 15,
+         "kind": "estimated"
+        },
+        {
+         "count": 0,
+         "kind": "synthetic"
+        }
+       ],
+       "category": "food",
+       "total": 15
+      },
+      {
+       "by_kind": [
+        {
+         "count": 0,
+         "kind": "observed"
+        },
+        {
+         "count": 1,
+         "kind": "derived"
+        },
+        {
+         "count": 6,
+         "kind": "estimated"
+        },
+        {
+         "count": 0,
+         "kind": "synthetic"
+        }
+       ],
+       "category": "service",
+       "total": 7
+      },
+      {
+       "by_kind": [
+        {
+         "count": 0,
+         "kind": "observed"
+        },
+        {
+         "count": 0,
+         "kind": "derived"
+        },
+        {
+         "count": 0,
+         "kind": "estimated"
+        },
+        {
+         "count": 7,
+         "kind": "synthetic"
+        }
+       ],
+       "category": "durable",
+       "total": 7
+      },
+      {
+       "by_kind": [
+        {
+         "count": 0,
+         "kind": "observed"
+        },
+        {
+         "count": 0,
+         "kind": "derived"
+        },
+        {
+         "count": 5,
+         "kind": "estimated"
+        },
+        {
+         "count": 4,
+         "kind": "synthetic"
+        }
+       ],
+       "category": "experience",
+       "total": 9
+      },
+      {
+       "by_kind": [
+        {
+         "count": 0,
+         "kind": "observed"
+        },
+        {
+         "count": 0,
+         "kind": "derived"
+        },
+        {
+         "count": 120,
+         "kind": "estimated"
+        },
+        {
+         "count": 0,
+         "kind": "synthetic"
+        }
+       ],
+       "category": "job",
+       "total": 120
+      },
+      {
+       "by_kind": [
+        {
+         "count": 0,
+         "kind": "observed"
+        },
+        {
+         "count": 1,
+         "kind": "derived"
+        },
+        {
+         "count": 0,
+         "kind": "estimated"
+        },
+        {
+         "count": 0,
+         "kind": "synthetic"
+        }
+       ],
+       "category": "training",
+       "total": 1
+      }
+     ],
+     "pack_status": "real_data_frozen",
+     "summary_zh": "旧金山：目录 220 项机会里，观测 0、派生 2、估计 207、合成设定 11。城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定，不据此排序真实城市",
+     "tax": {
+      "absent_zh": [],
+      "not_modeled_zh": [
+       "联邦与州的税表（收入较低时按 50 美元一档、取档中点）没有用，统一用税率表，差几美元",
+       "抵免（劳动所得抵免 EITC 等）、税前扣除（401(k)、医疗保险费）与逐项扣除都没有建模",
+       "只有工资收入：利息、股息、资本利得与副业收入不在支持范围",
+       "预扣按全年累计工资每月重算（年初少扣、年底多扣），全年合计等于全年应缴；没有年终退税或补税的时点",
+       "加州个人免税额抵免与它在高收入时的递减没有建模",
+       "加州租房者抵免、加州 EITC 与幼儿抵免没有建模"
+      ],
+      "policy_id": "tax.us2024.ca",
+      "residence_scope_zh": "加州居民、工作地在加州（洛杉矶都会区与旧金山都会区全部在加州）",
+      "rules_zh": [
+       "联邦个人所得税",
+       "社会保障税（雇员部分）",
+       "联邦医疗保险税（雇员部分）",
+       "联邦附加医疗保险税",
+       "加州个人所得税",
+       "加州精神健康服务税",
+       "加州州残障保险（雇员缴费）"
+      ],
+      "status": "official_2024_rules",
+      "status_zh": "官方 2024 年规则（单身、只有工资收入、标准扣除）"
+     },
+     "totals": [
+      {
+       "count": 0,
+       "kind": "observed"
+      },
+      {
+       "count": 2,
+       "kind": "derived"
+      },
+      {
+       "count": 207,
+       "kind": "estimated"
+      },
+      {
+       "count": 11,
+       "kind": "synthetic"
+      }
+     ],
+     "treatment_assumptions_zh": [
+      "没有真实医疗价格资料：六城用同一个登记的名义价与就医时间，不制造城市差异；不是任何医疗机构的报价（geography: 六城共同假设（没有真实医疗价格资料））"
+     ],
+     "work_areas": 5
+    },
+    "executable": {
+     "reasons": [
+      "标准开局通过、名单已冻结；年度计划仍由环境逐次检查，不保证每份计划都合法"
+     ],
+     "status": "yes"
+    },
+    "feedback": {
+     "reasons": [
+      "上一年 12 个月都完整评分时才更新下一年的精力额度"
+     ],
+     "status": "yes"
+    },
+    "label": "旧金山",
+    "option_inventory_status": "not_assessed",
+    "scorable": {
+     "reasons": [
+      "按当前输入，正权重的评分资料在声明范围内齐全；不保证未来每个月都能完整评分"
+     ],
+     "status": "yes"
+    },
+    "start_job_label": "办公室文员·工资在本职业中位数"
+   },
+   {
+    "city_ref": "US:CBSA2023:26420",
+    "coverage": {
+     "common_weight": {
+      "display": "1.000",
+      "exact": "1"
+     },
+     "label": "mixed_coverage",
+     "no_component_weight": {
+      "display": "0.000",
+      "exact": "0"
+     },
+     "unknown_weight": {
+      "display": "0.000",
+      "exact": "0"
+     },
+     "unsupported_positive_leaves": []
+    },
+    "data_gaps": [],
+    "data_nature": {
+     "build": [
+      {
+       "count": 59,
+       "key": "areas",
+       "label_zh": "片区（居住与就业）"
+      },
+      {
+       "count": 258,
+       "key": "commute_legs",
+       "label_zh": "通勤关系表的线（住处片区 × 就业片区 × 方式）"
+      },
+      {
+       "count": 651,
+       "key": "housing_candidates",
+       "label_zh": "住房候选"
+      },
+      {
+       "count": 651,
+       "key": "housing_executable",
+       "label_zh": "可执行的住房候选"
+      },
+      {
+       "count": 64,
+       "key": "housing_in_catalog",
+       "label_zh": "放进目录的住房"
+      },
+      {
+       "count": 10,
+       "key": "items_by_domain.activity",
+       "label_zh": "生活物品候选：活动"
+      },
+      {
+       "count": 5,
+       "key": "items_by_domain.device",
+       "label_zh": "生活物品候选：省家务设备"
+      },
+      {
+       "count": 3,
+       "key": "items_by_domain.enjoyment",
+       "label_zh": "生活物品候选：享受型用品与服务"
+      },
+      {
+       "count": 2,
+       "key": "items_by_domain.equipment",
+       "label_zh": "生活物品候选：爱好装备"
+      },
+      {
+       "count": 15,
+       "key": "items_by_domain.food",
+       "label_zh": "生活物品候选：食品方案"
+      },
+      {
+       "count": 120,
+       "key": "items_by_domain.job",
+       "label_zh": "生活物品候选：岗位"
+      },
+      {
+       "count": 3,
+       "key": "items_by_domain.service",
+       "label_zh": "生活物品候选：服务"
+      },
+      {
+       "count": 3,
+       "key": "items_by_domain.training",
+       "label_zh": "生活物品候选：培训"
+      },
+      {
+       "count": 120,
+       "key": "jobs_placed",
+       "label_zh": "放进目录的岗位（已补上就业片区）"
+      },
+      {
+       "count": 12,
+       "key": "menus",
+       "label_zh": "年度菜单"
+      }
+     ],
+     "build_status": "from_pack_report",
+     "city_ref": "US:CBSA2023:26420",
+     "common_priors": [
+      {
+       "fact_id": "safety_index",
+       "label": "安全条件（共同先验）",
+       "meaning_zh": "安全条件指数，0–10，越高越安全。六城没有可比的安全资料，这里是登记的共同先验（六城、各片区同值），不是任何城市的犯罪统计"
+      },
+      {
+       "fact_id": "leisure_index",
+       "label": "休闲条件（共同先验）",
+       "meaning_zh": "不花钱也能享受的休闲条件指数，0–10；六城没有可比资料，这里是登记的共同先验。健身、课程等活动另外安排、另外付费"
+      }
+     ],
+     "commute_modes": [
+      {
+       "condition_zh": "步行或骑车：没有使用条件、不封顶；每次往返记 0（不计自行车、共享单车与鞋的费用）",
+       "in_relation": true,
+       "lines": 2,
+       "mode": "walk_bike",
+       "mode_zh": "步行或骑车"
+      },
+      {
+       "condition_zh": "哈里斯县都会交通局（METRO）：单程 1.25，每次往返两次单程 2.50；没有月票，不封顶；获取时（2026-10）的现行票价，页面没有写生效日期",
+       "in_relation": true,
+       "lines": 50,
+       "mode": "transit",
+       "mode_zh": "公共交通"
+      },
+      {
+       "condition_zh": "开车要有在用的用车权（car_access，一项按月付费的机会）；每次往返另付油费 = 往返分钟 / 60 × 25 英里每小时 ÷ 23.4 英里每加仑 × 汽油 2.858 美元每加仑；不封顶；停车与过路费没有建模",
+       "in_relation": true,
+       "lines": 206,
+       "mode": "drive",
+       "mode_zh": "开车"
+      }
+     ],
+     "home_areas": 55,
+     "label": "休斯敦",
+     "menus": [
+      {
+       "category": "housing",
+       "env_repeats": 2,
+       "items_max": 12,
+       "items_min": 12,
+       "years": 3
+      },
+      {
+       "category": "job",
+       "env_repeats": 2,
+       "items_max": 30,
+       "items_min": 30,
+       "years": 3
+      }
+     ],
+     "model_plan_activities": [
+      "网球场地连球拍租借（一次）",
+      "网球场地（自带球拍，一次）",
+      "在家练吉他（一次 1 小时）",
+      "参观博物馆（一次）"
+     ],
+     "named_assumptions": [
+      {
+       "count": 5,
+       "examples": [
+        "顶开洗衣机",
+        "前开洗衣机",
+        "顶开洗衣机 + 电烘干机一套"
+       ],
+       "note_zh": "价格、寿命与替代后残余是登记的类别设定（device_category_v1），不是型号报价；型号来自 ENERGY STAR 记录（geography: CBSA2023 26420 Houston-Pasadena-The Woodlands 都会区）"
+      },
+      {
+       "count": 2,
+       "examples": [
+        "网球拍",
+        "民谣吉他"
+       ],
+       "note_zh": "价格与寿命是登记的类别设定（equipment_category_v1），不是某个商品的报价（geography: CBSA2023 26420 Houston-Pasadena-The Woodlands 都会区）"
+      },
+      {
+       "count": 4,
+       "examples": [
+        "网球场地连球拍租借（一次）",
+        "网球场地（自带球拍，一次）",
+        "在家练吉他（一次 1 小时）"
+       ],
+       "note_zh": "老师小时、人数、场地与器材是登记的模型活动设定（activity_template_v1），不是某个场所的真实报价（geography: CBSA2023 26420 Houston-Pasadena-The Woodlands 都会区）"
+      }
+     ],
+     "opportunities": [
+      {
+       "by_kind": [
+        {
+         "count": 0,
+         "kind": "observed"
+        },
+        {
+         "count": 0,
+         "kind": "derived"
+        },
+        {
+         "count": 64,
+         "kind": "estimated"
+        },
+        {
+         "count": 0,
+         "kind": "synthetic"
+        }
+       ],
+       "category": "housing",
+       "total": 64
+      },
+      {
+       "by_kind": [
+        {
+         "count": 0,
+         "kind": "observed"
+        },
+        {
+         "count": 0,
+         "kind": "derived"
+        },
+        {
+         "count": 15,
+         "kind": "estimated"
+        },
+        {
+         "count": 0,
+         "kind": "synthetic"
+        }
+       ],
+       "category": "food",
+       "total": 15
+      },
+      {
+       "by_kind": [
+        {
+         "count": 0,
+         "kind": "observed"
+        },
+        {
+         "count": 1,
+         "kind": "derived"
+        },
+        {
+         "count": 6,
+         "kind": "estimated"
+        },
+        {
+         "count": 0,
+         "kind": "synthetic"
+        }
+       ],
+       "category": "service",
+       "total": 7
+      },
+      {
+       "by_kind": [
+        {
+         "count": 0,
+         "kind": "observed"
+        },
+        {
+         "count": 0,
+         "kind": "derived"
+        },
+        {
+         "count": 0,
+         "kind": "estimated"
+        },
+        {
+         "count": 7,
+         "kind": "synthetic"
+        }
+       ],
+       "category": "durable",
+       "total": 7
+      },
+      {
+       "by_kind": [
+        {
+         "count": 0,
+         "kind": "observed"
+        },
+        {
+         "count": 0,
+         "kind": "derived"
+        },
+        {
+         "count": 6,
+         "kind": "estimated"
+        },
+        {
+         "count": 4,
+         "kind": "synthetic"
+        }
+       ],
+       "category": "experience",
+       "total": 10
+      },
+      {
+       "by_kind": [
+        {
+         "count": 0,
+         "kind": "observed"
+        },
+        {
+         "count": 0,
+         "kind": "derived"
+        },
+        {
+         "count": 120,
+         "kind": "estimated"
+        },
+        {
+         "count": 0,
+         "kind": "synthetic"
+        }
+       ],
+       "category": "job",
+       "total": 120
+      },
+      {
+       "by_kind": [
+        {
+         "count": 0,
+         "kind": "observed"
+        },
+        {
+         "count": 0,
+         "kind": "derived"
+        },
+        {
+         "count": 3,
+         "kind": "estimated"
+        },
+        {
+         "count": 0,
+         "kind": "synthetic"
+        }
+       ],
+       "category": "training",
+       "total": 3
+      }
+     ],
+     "pack_status": "real_data_frozen",
+     "summary_zh": "休斯敦：目录 226 项机会里，观测 0、派生 1、估计 214、合成设定 11。城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定，不据此排序真实城市",
+     "tax": {
+      "absent_zh": [
+       "德州没有州个人所得税"
+      ],
+      "not_modeled_zh": [
+       "联邦与州的税表（收入较低时按 50 美元一档、取档中点）没有用，统一用税率表，差几美元",
+       "抵免（劳动所得抵免 EITC 等）、税前扣除（401(k)、医疗保险费）与逐项扣除都没有建模",
+       "只有工资收入：利息、股息、资本利得与副业收入不在支持范围",
+       "预扣按全年累计工资每月重算（年初少扣、年底多扣），全年合计等于全年应缴；没有年终退税或补税的时点"
+      ],
+      "policy_id": "tax.us2024.tx",
+      "residence_scope_zh": "德州居民、工作地在德州（休斯敦都会区全部在德州）",
+      "rules_zh": [
+       "联邦个人所得税",
+       "社会保障税（雇员部分）",
+       "联邦医疗保险税（雇员部分）",
+       "联邦附加医疗保险税"
+      ],
+      "status": "official_2024_rules",
+      "status_zh": "官方 2024 年规则（单身、只有工资收入、标准扣除）"
+     },
+     "totals": [
+      {
+       "count": 0,
+       "kind": "observed"
+      },
+      {
+       "count": 1,
+       "kind": "derived"
+      },
+      {
+       "count": 214,
+       "kind": "estimated"
+      },
+      {
+       "count": 11,
+       "kind": "synthetic"
+      }
+     ],
+     "treatment_assumptions_zh": [
+      "没有真实医疗价格资料：六城用同一个登记的名义价与就医时间，不制造城市差异；不是任何医疗机构的报价（geography: 六城共同假设（没有真实医疗价格资料））"
+     ],
+     "work_areas": 4
+    },
+    "executable": {
+     "reasons": [
+      "标准开局通过、名单已冻结；年度计划仍由环境逐次检查，不保证每份计划都合法"
+     ],
+     "status": "yes"
+    },
+    "feedback": {
+     "reasons": [
+      "上一年 12 个月都完整评分时才更新下一年的精力额度"
+     ],
+     "status": "yes"
+    },
+    "label": "休斯敦",
+    "option_inventory_status": "not_assessed",
+    "scorable": {
+     "reasons": [
+      "按当前输入，正权重的评分资料在声明范围内齐全；不保证未来每个月都能完整评分"
+     ],
+     "status": "yes"
+    },
+    "start_job_label": "办公室文员·工资在本职业中位数"
+   }
+  ],
+  "clones_per_city": 4,
+  "confirmed": {
+   "confirmed_id": "confirmed.draft.u501.e3b_sf.r1",
+   "content_fingerprint": "0f4dd21caa59e4ac0a3c26f8de82c2771abd3022e808d360800b1639d4b572e4"
+  },
+  "executable": {
+   "reasons": [
+    "全部候选城市的标准开局与名单检查通过"
+   ],
+   "status": "yes"
+  },
+  "feedback": {
+   "reasons": [
+    "上一年完整评分才更新下一年额度；不完整时这个分身的下一年会受阻"
+   ],
+   "status": "yes"
+  },
+  "issues": [
+   {
+    "audit_ref": null,
+    "code": "commute_mode_missing",
+    "field": "cities.US:CBSA2023:41860.commute",
+    "impact_zh": "这座城的分身到岗时没有这种方式可用，只能用表里有的方式；缺的方式不当 0 分钟，也不当免费",
+    "message_zh": "旧金山 的通勤关系表里没有公共交通（比较组里别的城市有）",
+    "next_action_zh": "知悉这一限制（原因见范围说明里本版不支持的内容）",
+    "severity": "warning"
+   }
+  ],
+  "meta": {
+   "conversion_version": "e3a-conversion-v2",
+   "data_pack": {
+    "content_fingerprint": "62696b7a2a04ea91a38dcf4192f09fb0ac9532767579dc1641afa22f498b23c6",
+    "note": "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定",
+    "pack_id": "pack.e3b.us-v1",
+    "status": "real_data_frozen"
+   },
+   "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.2-draft",
+   "sample": {
+    "note": "预检查的实际输出（没有运行生活）",
+    "origin": "offline_run",
+    "produced_by": "product.scenarios.preflight_only(e3b_sf)",
+    "synthetic": true
+   },
+   "schema_version": "e3a-product-schema-v3.1",
+   "vocabulary_version": "e3a-vocabulary-v3"
+  },
+  "planner": {
+   "call_limit": 72,
+   "description_zh": "可控的确定性离线规划器（mock）：只检验接线、状态传递与信息隔离，不代表真实大语言模型的能力；没有网络调用",
+   "max_cost": null,
+   "paid": false,
+   "planner_id": "mock.rules.e3a-product",
+   "planner_kind": "mock"
+  },
+  "preflight_fingerprint": "fcf6332a48f95344e267fbbc4d0dba7997192a54107b7ba57474efca9dfea34f",
+  "preflight_id": "preflight.confirmed.draft.u501.e3b_sf.r1",
+  "scope_notes": [
+   {
+    "cities": [],
+    "text_zh": "这份资料包支持 40 种职业（受控词表；每种在内部对应一个职业分类：US SOC2018）。词表外的职业在审阅时就会被拒绝并说明原因，系统不换成别的职业；某座城的目录里没有你这一职业的岗位时，那座城报错，不自动换岗。岗位要求的学历、证书或经验只认你在资格一栏明确确认的，职称与自由文字都不授予资格",
+    "title_zh": "支持的职业",
+    "topic": "occupations"
+   },
+   {
+    "cities": [
+     "US:CBSA2023:41860"
+    ],
+    "text_zh": "按官方 2024 年规则逐月预扣（按全年累计工资），模拟的 3 年都用 2024 年规则；只支持单身、只有工资收入、按标准扣除。支持的居住与工作地：加州居民、工作地在加州（洛杉矶都会区与旧金山都会区全部在加州）。没有建模的 6 项逐条列在这座城的资料性质（data_nature.tax）里——它们让结果与真实税单有差别",
+    "title_zh": "税：tax.us2024.ca",
+    "topic": "tax"
+   },
+   {
+    "cities": [
+     "US:CBSA2023:26420"
+    ],
+    "text_zh": "按官方 2024 年规则逐月预扣（按全年累计工资），模拟的 3 年都用 2024 年规则；只支持单身、只有工资收入、按标准扣除。支持的居住与工作地：德州居民、工作地在德州（休斯敦都会区全部在德州）。没有建模的 4 项逐条列在这座城的资料性质（data_nature.tax）里——它们让结果与真实税单有差别",
+    "title_zh": "税：tax.us2024.tx",
+    "topic": "tax"
+   },
+   {
+    "cities": [],
+    "text_zh": "通勤按每座城的片区关系表执行：住处片区 × 岗位的就业片区 × 方式 → 一次往返的分钟与花费（片区级资料或估计，不是路线模拟）。每个月在可用的方式里取往返最少的一种，分钟相同取花费低的；开车要这个月有在用的用车权（另一项按月付费的机会）。关系表里没有的线或方式不能走，不当 0 分钟；停车与过路费没有建模",
+    "title_zh": "通勤怎么算",
+    "topic": "commute"
+   },
+   {
+    "cities": [
+     "US:CBSA2023:41860"
+    ],
+    "text_zh": "旧金山 的通勤关系表里没有公共交通（比较组里别的城市有）：这座城的分身到岗时没有这种方式可用，只能用表里有的方式；缺的方式不当 0 分钟，也不当免费",
+    "title_zh": "缺少的通勤方式",
+    "topic": "commute"
+   },
+   {
+    "cities": [
+     "US:CBSA2023:41860",
+     "US:CBSA2023:26420"
+    ],
+    "text_zh": "每年给分身看的住房与岗位不是整个目录，而是一份冻结的抽样菜单（每类、每年、每个环境重复一份；同城、同年、同一环境重复的分身看同一份，抽法与种子里没有分身编号）。菜单是接触机会，不是成交或录用。现住的房子可以续租、现在的岗位可以延续，最低生活的保底方案总在；菜单外的选择会被计划检查拒绝",
+    "title_zh": "年度菜单",
+    "topic": "menus"
+   },
+   {
+    "cities": [],
+    "text_zh": "多人家庭、非工资收入（利息、股息、副业）、家庭共同资产、买房与贷款",
+    "title_zh": "本版不支持",
+    "topic": "unsupported"
+   },
+   {
+    "cities": [],
+    "text_zh": "税收抵免、税前扣除与逐项扣除；纽约市以外的纽约都会区居民、芝加哥都会区的印第安纳部分、跨州组合",
+    "title_zh": "本版不支持",
+    "topic": "unsupported"
+   },
+   {
+    "cities": [],
+    "text_zh": "停车费与按距离计的公交票价；旧金山的公交票价（官方网站拒绝访问）",
+    "title_zh": "本版不支持",
+    "topic": "unsupported"
+   },
+   {
+    "cities": [],
+    "text_zh": "芝加哥公园管理局的真实活动（需要日期窗口、整期报名与年龄资格，引擎暂不支持）",
+    "title_zh": "本版不支持",
+    "topic": "unsupported"
+   },
+   {
+    "cities": [],
+    "text_zh": "品牌、制作方式、档次、服务质量与上门顾虑的评分（只记录原文）",
+    "title_zh": "本版不支持",
+    "topic": "unsupported"
+   },
+   {
+    "cities": [],
+    "text_zh": "访谈式输入（只保留来源与证据引用接口）",
+    "title_zh": "本版不支持",
+    "topic": "unsupported"
+   }
+  ],
+  "scope_zh": [
+   "生活协议 life-v1-e3b-us（状态 synthetic_fixture_only）、评分 score.e1-life.explore（探索版）：城市、报价、工资、疾病、治疗与评分参数全部是合成设定，不是现实城市，不排序真实城市",
+   "城市背景事实 e1-7a-city-facts-v1：每座城 4 条合成指数，换算到评分条件的规则是内部合成设定",
+   "评价沿用 E1-6：完整者均值只用完整评价的分身；生活出局另报比例与事件链；模拟问题进入缺失范围（不是置信区间）",
+   "城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定：结果不排序真实城市，也不是现实推荐",
+   "安全与休闲背景是六城共同先验（没有可比资料）；治疗价格是共同假设；外食、服务、设备寿命与活动价格含登记的模型设定",
+   "离线规划器是可控的 mock，不代表真实大语言模型的能力或偏好理解",
+   "问卷文案与参考改善范围是暂定稿，没有做认知访谈与量表验证",
+   "休闲兴趣：你没有回答，本次不按具体兴趣个性化（按中性规则评价）",
+   "口味与菜系：你没有回答，本次不按具体菜系个性化（只看新鲜餐）"
+  ],
+  "scorable": {
+   "reasons": [
+    "逐城说明见 cities；不保证未来每个月都能完整评分"
+   ],
+   "status": "yes"
+  },
+  "start": {
+   "abilities": [
+    "edu_at_least_hs"
+   ],
+   "age_years": 35,
+   "cash": {
+    "amount_minor": 300000,
+    "currency": "USD",
+    "display": "3,000.00",
+    "numeraire_id": "USD_2024_LOCAL"
+   },
+   "monthly_energy_note": "每月可承受 250 个负担点的活动（本版统一的模型设定）；上一年过得越满意，下一年最多多 10%",
+   "monthly_time_note": "每月可安排约 365 小时（每天 12 小时的睡眠与基本休息已经预留在外）——本版统一的模型设定，不是对你的测量",
+   "occupation_label": "办公室文员",
+   "rule": "v1_standard_start_2026_10_12",
+   "scenario_zh": [
+    "这是一次搬到候选城市重新开始的简化情景：从第 1 年、健康、没有已有物品、没有在学课程、没有资金目标开始",
+    "现实中的旧家具、病史与在学课程暂未纳入；这是模拟的假设，不是对你现实情况的判断",
+    "同一个你在各城市、各个分身里的年龄、现金、能力与基础时间精力都相同；城市里的具体岗位按当地目录匹配"
+   ]
+  },
+  "status": "ready",
+  "years": 3
+ }
+}

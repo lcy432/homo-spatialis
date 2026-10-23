@@ -137,7 +137,7 @@
   },
   "DataPackRef": {
    "additionalProperties": false,
-   "description": "一份资料包的身份：编号与内容指纹。本轮只有合成资料包（``synthetic_fixture_only``）。",
+   "description": "一份资料包的身份：编号、内容指纹与状态（合成测试资料，或冻结的真实资料包）。",
    "properties": {
     "content_fingerprint": {
      "pattern": "^[0-9a-f]{64}$",
@@ -739,7 +739,7 @@
      "default": null
     },
     "schema_version": {
-     "const": "e3a-product-schema-v3",
+     "const": "e3a-product-schema-v3.1",
      "title": "Schema Version",
      "type": "string"
     },

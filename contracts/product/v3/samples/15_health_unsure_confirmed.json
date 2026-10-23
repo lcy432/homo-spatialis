@@ -10,9 +10,9 @@
   ],
   "confirmation_source": "user_form",
   "confirmed_id": "confirmed.draft.u501.health_unsure.r1",
-  "content_fingerprint": "3b3bff40d730aa6deb719c78419806df877743f47fc4722f399bc1a939453553",
+  "content_fingerprint": "01e0b993fbb0be0b1df4b510c259b3a3bf733426a852f94d738efd9dc03e7858",
   "draft": {
-   "draft_fingerprint": "561a920a23afdfff2801a1e922dc721df86e917c75688cbea6fb72d72e2cc30f",
+   "draft_fingerprint": "4d2903d4ee6559e9ead31d480bd5e1c7afbc497bbb1fceca6d7099261e199bdc",
    "draft_id": "draft.u501.health_unsure",
    "revision": 1
   },
@@ -104,7 +104,7 @@
     "produced_by": "product.scenarios.review_only(health_unsure)",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3",
+   "schema_version": "e3a-product-schema-v3.1",
    "vocabulary_version": "e3a-vocabulary-v3"
   },
   "money": {

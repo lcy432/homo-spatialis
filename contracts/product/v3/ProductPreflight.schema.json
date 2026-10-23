@@ -1,5 +1,35 @@
 {
  "$defs": {
+  "BuildCount": {
+   "additionalProperties": false,
+   "description": "资料包构建报告里的一个计数（片区、通勤线、住房候选与排除的原因、放进目录的岗位、菜单……）。",
+   "properties": {
+    "count": {
+     "minimum": 0,
+     "title": "Count",
+     "type": "integer"
+    },
+    "key": {
+     "maxLength": 64,
+     "minLength": 1,
+     "title": "Key",
+     "type": "string"
+    },
+    "label_zh": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Label Zh",
+     "type": "string"
+    }
+   },
+   "required": [
+    "key",
+    "label_zh",
+    "count"
+   ],
+   "title": "BuildCount",
+   "type": "object"
+  },
   "CapabilityStatus": {
    "additionalProperties": false,
    "description": "一种能力在当前输入与声明范围内的状态。**不保证**未来每份计划都合法、每个月都能完整评分。",
@@ -27,6 +57,39 @@
     "status"
    ],
    "title": "CapabilityStatus",
+   "type": "object"
+  },
+  "CategorySources": {
+   "additionalProperties": false,
+   "description": "目录里一类机会（住房、岗位、食品、服务……）的条数，按来源性质分开数（四种性质都列，没有的写 0）。",
+   "properties": {
+    "by_kind": {
+     "items": {
+      "$ref": "#/$defs/SourceKindCount"
+     },
+     "maxItems": 4,
+     "minItems": 4,
+     "title": "By Kind",
+     "type": "array"
+    },
+    "category": {
+     "maxLength": 48,
+     "minLength": 1,
+     "title": "Category",
+     "type": "string"
+    },
+    "total": {
+     "minimum": 0,
+     "title": "Total",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "category",
+    "total",
+    "by_kind"
+   ],
+   "title": "CategorySources",
    "type": "object"
   },
   "CityCoverageSummary": {
@@ -64,6 +127,148 @@
    "title": "CityCoverageSummary",
    "type": "object"
   },
+  "CityDataNature": {
+   "additionalProperties": false,
+   "description": "一座城的资料是怎么来的（DECISIONS/0042）：目录各类机会按来源性质的条数、登记的模型设定、共同先验、治疗的共同假设、\n模型活动设定、片区、通勤方式、菜单、税的范围，以及资料包构建报告的计数。\n\n只有公开的来源性质与说明：没有评分参数（η、τ、c、背景量）、抽签或内部状态。``build_status = not_available`` 表示构建报告\n不在这份资料包里或与目录对不上——计数未知，不是 0。",
+   "properties": {
+    "build": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/BuildCount"
+     },
+     "title": "Build",
+     "type": "array"
+    },
+    "build_status": {
+     "enum": [
+      "from_pack_report",
+      "not_available"
+     ],
+     "title": "Build Status",
+     "type": "string"
+    },
+    "city_ref": {
+     "title": "City Ref",
+     "type": "string"
+    },
+    "common_priors": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/CommonPrior"
+     },
+     "title": "Common Priors",
+     "type": "array"
+    },
+    "commute_modes": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/CommuteModeAvailability"
+     },
+     "title": "Commute Modes",
+     "type": "array"
+    },
+    "home_areas": {
+     "default": 0,
+     "minimum": 0,
+     "title": "Home Areas",
+     "type": "integer"
+    },
+    "label": {
+     "title": "Label",
+     "type": "string"
+    },
+    "menus": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/MenuSummary"
+     },
+     "title": "Menus",
+     "type": "array"
+    },
+    "model_plan_activities": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Model Plan Activities",
+     "type": "array"
+    },
+    "named_assumptions": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/NamedAssumption"
+     },
+     "title": "Named Assumptions",
+     "type": "array"
+    },
+    "opportunities": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/CategorySources"
+     },
+     "title": "Opportunities",
+     "type": "array"
+    },
+    "pack_status": {
+     "enum": [
+      "synthetic_fixture_only",
+      "real_data_frozen"
+     ],
+     "title": "Pack Status",
+     "type": "string"
+    },
+    "summary_zh": {
+     "maxLength": 400,
+     "minLength": 1,
+     "title": "Summary Zh",
+     "type": "string"
+    },
+    "tax": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/TaxScope"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "totals": {
+     "items": {
+      "$ref": "#/$defs/SourceKindCount"
+     },
+     "maxItems": 4,
+     "minItems": 4,
+     "title": "Totals",
+     "type": "array"
+    },
+    "treatment_assumptions_zh": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Treatment Assumptions Zh",
+     "type": "array"
+    },
+    "work_areas": {
+     "default": 0,
+     "minimum": 0,
+     "title": "Work Areas",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "city_ref",
+    "label",
+    "pack_status",
+    "summary_zh",
+    "totals",
+    "build_status"
+   ],
+   "title": "CityDataNature",
+   "type": "object"
+  },
   "CityPreflight": {
    "additionalProperties": false,
    "properties": {
@@ -90,6 +295,17 @@
      },
      "title": "Data Gaps",
      "type": "array"
+    },
+    "data_nature": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/CityDataNature"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
     },
     "executable": {
      "$ref": "#/$defs/CapabilityStatus"
@@ -137,6 +353,88 @@
    "title": "CityPreflight",
    "type": "object"
   },
+  "CommonPrior": {
+   "additionalProperties": false,
+   "description": "一项比较组各城共用的背景设定（没有可比资料时登记的共同先验，例如安全与休闲）：事实的名称与含义。不制造城市差异；\n这里不写它换算成评分输入的规则与参数。",
+   "properties": {
+    "fact_id": {
+     "maxLength": 64,
+     "minLength": 1,
+     "title": "Fact Id",
+     "type": "string"
+    },
+    "label": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Label",
+     "type": "string"
+    },
+    "meaning_zh": {
+     "maxLength": 400,
+     "minLength": 1,
+     "title": "Meaning Zh",
+     "type": "string"
+    }
+   },
+   "required": [
+    "fact_id",
+    "label",
+    "meaning_zh"
+   ],
+   "title": "CommonPrior",
+   "type": "object"
+  },
+  "CommuteModeAvailability": {
+   "additionalProperties": false,
+   "description": "这座城的通勤关系表里有没有一种方式：有几条片区之间的线、使用条件与封顶的说明（与给分身看的同一份公开说明）。\n\n``in_relation = False``：关系表里没有这种方式（资料缺失或本城不建模），到岗时不能用它——不当 0 分钟，也不当免费。",
+   "properties": {
+    "condition_zh": {
+     "anyOf": [
+      {
+       "maxLength": 400,
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Condition Zh"
+    },
+    "in_relation": {
+     "title": "In Relation",
+     "type": "boolean"
+    },
+    "lines": {
+     "minimum": 0,
+     "title": "Lines",
+     "type": "integer"
+    },
+    "mode": {
+     "enum": [
+      "walk_bike",
+      "transit",
+      "drive"
+     ],
+     "title": "Mode",
+     "type": "string"
+    },
+    "mode_zh": {
+     "maxLength": 20,
+     "minLength": 1,
+     "title": "Mode Zh",
+     "type": "string"
+    }
+   },
+   "required": [
+    "mode",
+    "mode_zh",
+    "in_relation",
+    "lines"
+   ],
+   "title": "CommuteModeAvailability",
+   "type": "object"
+  },
   "ConfirmedRef": {
    "additionalProperties": false,
    "properties": {
@@ -160,7 +458,7 @@
   },
   "DataPackRef": {
    "additionalProperties": false,
-   "description": "一份资料包的身份：编号与内容指纹。本轮只有合成资料包（``synthetic_fixture_only``）。",
+   "description": "一份资料包的身份：编号、内容指纹与状态（合成测试资料，或冻结的真实资料包）。",
    "properties": {
     "content_fingerprint": {
      "pattern": "^[0-9a-f]{64}$",
@@ -217,6 +515,80 @@
     "display"
    ],
    "title": "ExactNumber",
+   "type": "object"
+  },
+  "MenuSummary": {
+   "additionalProperties": false,
+   "description": "一类机会的年度菜单（DECISIONS/0042）：每年、每个环境重复给分身看的一份抽样。菜单是接触机会，不是成交或录用。",
+   "properties": {
+    "category": {
+     "maxLength": 48,
+     "minLength": 1,
+     "title": "Category",
+     "type": "string"
+    },
+    "env_repeats": {
+     "minimum": 1,
+     "title": "Env Repeats",
+     "type": "integer"
+    },
+    "items_max": {
+     "minimum": 1,
+     "title": "Items Max",
+     "type": "integer"
+    },
+    "items_min": {
+     "minimum": 1,
+     "title": "Items Min",
+     "type": "integer"
+    },
+    "years": {
+     "minimum": 1,
+     "title": "Years",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "category",
+    "years",
+    "env_repeats",
+    "items_min",
+    "items_max"
+   ],
+   "title": "MenuSummary",
+   "type": "object"
+  },
+  "NamedAssumption": {
+   "additionalProperties": false,
+   "description": "一条登记的模型设定（来源性质是合成）：设定说明的原文、用到它的机会条数与几个例子。不是资料，也不是某个商品或场所的报价。",
+   "properties": {
+    "count": {
+     "minimum": 1,
+     "title": "Count",
+     "type": "integer"
+    },
+    "examples": {
+     "items": {
+      "type": "string"
+     },
+     "maxItems": 3,
+     "minItems": 1,
+     "title": "Examples",
+     "type": "array"
+    },
+    "note_zh": {
+     "maxLength": 400,
+     "minLength": 1,
+     "title": "Note Zh",
+     "type": "string"
+    }
+   },
+   "required": [
+    "note_zh",
+    "count",
+    "examples"
+   ],
+   "title": "NamedAssumption",
    "type": "object"
   },
   "PlannerAndCost": {
@@ -373,7 +745,7 @@
      "default": null
     },
     "schema_version": {
-     "const": "e3a-product-schema-v3",
+     "const": "e3a-product-schema-v3.1",
      "title": "Schema Version",
      "type": "string"
     },
@@ -535,6 +907,77 @@
    "title": "SampleLabel",
    "type": "object"
   },
+  "ScopeNote": {
+   "additionalProperties": false,
+   "description": "预检查的一条范围说明（DECISIONS/0042）：这版支持什么、不支持什么、为什么。``cities`` 为空表示对全部候选城市都适用。\nE5 原样展示中文，不另写解释。",
+   "properties": {
+    "cities": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Cities",
+     "type": "array"
+    },
+    "text_zh": {
+     "maxLength": 600,
+     "minLength": 1,
+     "title": "Text Zh",
+     "type": "string"
+    },
+    "title_zh": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Title Zh",
+     "type": "string"
+    },
+    "topic": {
+     "enum": [
+      "occupations",
+      "tax",
+      "commute",
+      "menus",
+      "unsupported",
+      "data"
+     ],
+     "title": "Topic",
+     "type": "string"
+    }
+   },
+   "required": [
+    "topic",
+    "title_zh",
+    "text_zh"
+   ],
+   "title": "ScopeNote",
+   "type": "object"
+  },
+  "SourceKindCount": {
+   "additionalProperties": false,
+   "properties": {
+    "count": {
+     "minimum": 0,
+     "title": "Count",
+     "type": "integer"
+    },
+    "kind": {
+     "enum": [
+      "observed",
+      "derived",
+      "estimated",
+      "synthetic"
+     ],
+     "title": "Kind",
+     "type": "string"
+    }
+   },
+   "required": [
+    "kind",
+    "count"
+   ],
+   "title": "SourceKindCount",
+   "type": "object"
+  },
   "StartSummary": {
    "additionalProperties": false,
    "description": "标准开局摘要：同一用户跨城、跨重复序号相同的个人条件。",
@@ -591,6 +1034,76 @@
     "scenario_zh"
    ],
    "title": "StartSummary",
+   "type": "object"
+  },
+  "TaxScope": {
+   "additionalProperties": false,
+   "description": "这座城适用的税（DECISIONS/0042）：官方 2024 年规则（单身、只有工资收入、标准扣除）或合成测试替身；支持的居住与工作地、\n规则名称、官方说明没有的税，以及没有建模的部分（照实写，不当作已经覆盖）。",
+   "properties": {
+    "absent_zh": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Absent Zh",
+     "type": "array"
+    },
+    "not_modeled_zh": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Not Modeled Zh",
+     "type": "array"
+    },
+    "policy_id": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Policy Id",
+     "type": "string"
+    },
+    "residence_scope_zh": {
+     "anyOf": [
+      {
+       "maxLength": 400,
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Residence Scope Zh"
+    },
+    "rules_zh": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Rules Zh",
+     "type": "array"
+    },
+    "status": {
+     "enum": [
+      "official_2024_rules",
+      "synthetic_test_double"
+     ],
+     "title": "Status",
+     "type": "string"
+    },
+    "status_zh": {
+     "maxLength": 120,
+     "minLength": 1,
+     "title": "Status Zh",
+     "type": "string"
+    }
+   },
+   "required": [
+    "policy_id",
+    "status",
+    "status_zh"
+   ],
+   "title": "TaxScope",
    "type": "object"
   }
  },
@@ -653,6 +1166,14 @@
    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
    "title": "Preflight Id",
    "type": "string"
+  },
+  "scope_notes": {
+   "default": [],
+   "items": {
+    "$ref": "#/$defs/ScopeNote"
+   },
+   "title": "Scope Notes",
+   "type": "array"
   },
   "scope_zh": {
    "default": [],

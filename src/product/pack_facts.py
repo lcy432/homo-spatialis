@@ -1,0 +1,346 @@
+"""资料包的公开事实（DECISIONS/0042）：逐城的资料性质与预检查的范围说明。预检查与产品结果共用这里的投影。
+
+* **资料性质**（``CityDataNature``）：目录各类机会按来源性质（观测 / 派生 / 估计 / 合成）的条数、登记的模型设定、比较组的共同先验、
+  治疗的共同假设、模型活动设定、片区、通勤方式、菜单与税的范围，以及冻结资料包构建报告（``report.json``，与生活输入放在同一个
+  目录）的计数。全部取自 E1 加载过的目录、城市事实表与构建报告——不写死数字；构建报告读不到或与生活输入对不上时计数是未知。
+* **范围说明**（``ScopeNote``）：真实资料包才有——支持的职业、税的范围、通勤怎么算与缺的方式、年度菜单的含义、本版不支持的内容。
+
+只投影公开的来源性质与说明：不读评分参数（η、τ、c、背景量）、抽签、研究真值或分身的内部状态。
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+from collections import Counter
+from pathlib import Path
+from typing import Any
+
+from common.life_contracts import COMMUTE_MODE_LABEL, COMMUTE_MODES, RealTaxPolicy
+from common.product_contracts import (
+    BuildCount,
+    CategorySources,
+    CityDataNature,
+    CommonPrior,
+    CommuteModeAvailability,
+    MenuSummary,
+    NamedAssumption,
+    ProductIssue,
+    ScopeNote,
+    SourceKindCount,
+    TaxScope,
+)
+from orchestration.life_runner import RunWorld
+from product.answers import issue
+from product.pack import DataPack
+
+SOURCE_KINDS = ("observed", "derived", "estimated", "synthetic")
+TAX_STATUS_ZH = {
+    "official_2024_rules": "官方 2024 年规则（单身、只有工资收入、标准扣除）",
+    "synthetic_test_double": "合成测试替身（不是真实税）",
+}
+CATEGORY_ZH = {"housing": "住房", "job": "岗位"}
+#: 构建报告（``e3b-life-pack-report-v1``）里计数的中文名；报告里新出现的键原样用键名，不丢弃。
+BUILD_LABEL_ZH = {
+    "areas": "片区（居住与就业）",
+    "commute_legs": "通勤关系表的线（住处片区 × 就业片区 × 方式）",
+    "housing_candidates": "住房候选",
+    "housing_executable": "可执行的住房候选",
+    "housing_in_catalog": "放进目录的住房",
+    "jobs_placed": "放进目录的岗位（已补上就业片区）",
+    "menus": "年度菜单",
+    "items_by_domain.activity": "生活物品候选：活动",
+    "items_by_domain.device": "生活物品候选：省家务设备",
+    "items_by_domain.enjoyment": "生活物品候选：享受型用品与服务",
+    "items_by_domain.equipment": "生活物品候选：爱好装备",
+    "items_by_domain.food": "生活物品候选：食品方案",
+    "items_by_domain.job": "生活物品候选：岗位",
+    "items_by_domain.service": "生活物品候选：服务",
+    "items_by_domain.training": "生活物品候选：培训",
+    "excluded.housing.outside_tax_scope": "没有放进目录的住房：在税务支持范围之外",
+    "excluded.housing.rent_unknown": "没有放进目录的住房：租金未知",
+}
+
+
+def _counts(counter: Counter[str]) -> tuple[SourceKindCount, ...]:
+    return tuple(SourceKindCount(kind=k, count=counter.get(k, 0)) for k in SOURCE_KINDS)  # type: ignore[arg-type]
+
+
+def tax_scope(world: RunWorld, city: str) -> TaxScope | None:
+    cat = world.bundle.catalog_for(city)
+    policy = None if cat is None else world.bundle.tax_policy(cat.tax_policy_id)
+    if policy is None:
+        return None
+    if isinstance(policy, RealTaxPolicy):
+        return TaxScope(
+            policy_id=policy.policy_id,
+            status=policy.status,
+            status_zh=TAX_STATUS_ZH[policy.status],
+            residence_scope_zh=policy.residence_scope,
+            rules_zh=tuple(r.label for r in policy.rules),
+            absent_zh=tuple(a.label for a in policy.absent_taxes),
+            not_modeled_zh=policy.not_modeled,
+        )
+    return TaxScope(
+        policy_id=policy.policy_id, status=policy.status, status_zh=TAX_STATUS_ZH[policy.status]
+    )
+
+
+def commute_modes(world: RunWorld, city: str) -> tuple[CommuteModeAvailability, ...]:
+    cat = world.bundle.catalog_for(city)
+    rel = None if cat is None else cat.commute
+    if rel is None:
+        return ()
+    out = []
+    for mode in COMMUTE_MODES:
+        rule = rel.mode_rule(mode)
+        out.append(
+            CommuteModeAvailability(
+                mode=mode,  # type: ignore[arg-type]
+                mode_zh=COMMUTE_MODE_LABEL[mode],
+                in_relation=rule is not None,
+                lines=sum(1 for g in rel.legs if g.mode == mode),
+                condition_zh=None if rule is None else rule.note,
+            )
+        )
+    return tuple(out)
+
+
+def _common_priors(world: RunWorld, city: str) -> tuple[CommonPrior, ...]:
+    """城市事实表里比较组共用的合成设定：来源是合成，而且比较组每座城的这条事实都相同（没有可比资料时登记的共同先验）。"""
+    sheet = world.facts.sheet_for(city)
+    if sheet is None:
+        return ()
+    out = []
+    for f in sheet.facts:
+        if f.source.kind != "synthetic":
+            continue
+        same = [s.fact(f.fact_id) for s in world.facts.sheets]
+        if all(
+            x is not None and (x.status, x.number, x.category) == (f.status, f.number, f.category)
+            for x in same
+        ):
+            out.append(CommonPrior(fact_id=f.fact_id, label=f.label, meaning_zh=f.meaning))
+    return tuple(out)
+
+
+def _report_counts(pack: DataPack, world: RunWorld, city: str) -> tuple[BuildCount, ...]:
+    """冻结资料包的构建报告（与生活输入同一个目录）里这座城的计数。报告缺失、记下的生活输入身份与这份资料包的不同，或认不出
+    这座城时返回空（未知，不是 0）。城市在报告里按编号前缀（``{key}.area.*``、``{key}.food.*`` 的共同约定）对上。"""
+    life = Path(pack.body.e1_base.life_input)
+    path = life.parent / "report.json"
+    if not path.is_file() or not life.is_file():
+        return ()
+    report = json.loads(path.read_text(encoding="utf-8"))
+    digest = hashlib.sha256(life.read_bytes()).hexdigest()
+    if (report.get("files") or {}).get(life.name) != digest:
+        return ()
+    cat = world.bundle.catalog_for(city)
+    assert cat is not None
+    prefixes = {a.area_id.split(".")[0] for a in cat.areas} | {
+        o.opportunity_id.split(".")[0] for o in cat.opportunities
+    }
+    entry = (report.get("cities") or {}).get(next(iter(prefixes))) if len(prefixes) == 1 else None
+    if not isinstance(entry, dict):
+        return ()
+    flat: dict[str, int] = {}
+    for k, v in (entry.get("counts") or {}).items():
+        if isinstance(v, dict):
+            flat.update({f"{k}.{d}": n for d, n in v.items()})
+        else:
+            flat[k] = v
+    flat.update({f"excluded.{k}": n for k, n in (entry.get("excluded") or {}).items()})
+    return tuple(
+        BuildCount(key=k, label_zh=BUILD_LABEL_ZH.get(k, k)[:80], count=int(n))
+        for k, n in sorted(flat.items())
+    )
+
+
+def city_data_nature(pack: DataPack, world: RunWorld, city: str) -> CityDataNature:
+    """一座城的资料性质（公开投影）。"""
+    cat = world.bundle.catalog_for(city)
+    assert cat is not None
+    by_cat: dict[str, Counter[str]] = {}
+    totals: Counter[str] = Counter()
+    notes: dict[str, list[str]] = {}
+    for o in cat.opportunities:
+        by_cat.setdefault(o.category, Counter())[o.source.kind] += 1
+        totals[o.source.kind] += 1
+        if o.source.kind == "synthetic" and o.source.synthetic_note:
+            notes.setdefault(o.source.synthetic_note, []).append(o.label)
+    treatments = tuple(
+        dict.fromkeys(
+            t.source.synthetic_note[:400]
+            for t in cat.treatments
+            if t.source.kind == "synthetic" and t.source.synthetic_note
+        )
+    )
+    menus: dict[str, list[Any]] = {}
+    for m in cat.menus:
+        menus.setdefault(m.category, []).append(m)
+    build = _report_counts(pack, world, city)
+    n = sum(totals.values())
+    if pack.body.status == "real_data_frozen":
+        summary = (
+            f"{cat.label}：目录 {n} 项机会里，观测 {totals['observed']}、派生 {totals['derived']}、估计 {totals['estimated']}、"
+            f"合成设定 {totals['synthetic']}。城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定，"
+            "不据此排序真实城市"
+        )
+    else:
+        summary = f"{cat.label}：合成资料包，目录 {n} 项机会全部是手工合成的模型设定或测试资料，不是真实城市资料"
+    return CityDataNature(
+        city_ref=city,
+        label=cat.label,
+        pack_status=pack.body.status,
+        summary_zh=summary,
+        opportunities=tuple(
+            CategorySources(category=c, total=sum(k.values()), by_kind=_counts(k))
+            for c, k in by_cat.items()
+        ),
+        totals=_counts(totals),
+        named_assumptions=tuple(
+            NamedAssumption(note_zh=note[:400], count=len(labels), examples=tuple(labels[:3]))
+            for note, labels in notes.items()
+        ),
+        common_priors=_common_priors(world, city),
+        treatment_assumptions_zh=treatments,
+        model_plan_activities=tuple(
+            o.label
+            for o in cat.opportunities
+            if o.activity is not None and o.source.kind == "synthetic"
+        ),
+        home_areas=sum(1 for a in cat.areas if a.kind in ("home", "home_work")),
+        work_areas=sum(1 for a in cat.areas if a.kind in ("work", "home_work")),
+        commute_modes=commute_modes(world, city),
+        menus=tuple(
+            MenuSummary(
+                category=c,
+                years=len({m.year for m in ms}),
+                env_repeats=len({m.env_repeat for m in ms}),
+                items_min=min(len(m.opportunity_ids) for m in ms),
+                items_max=max(len(m.opportunity_ids) for m in ms),
+            )
+            for c, ms in menus.items()
+        ),
+        tax=tax_scope(world, city),
+        build_status="from_pack_report" if build else "not_available",
+        build=build,
+    )
+
+
+def commute_gaps(world: RunWorld, city: str) -> list[ProductIssue]:
+    """这座城的通勤关系表里缺、而比较组别的城市有的方式（例如旧金山没有公交票价）：照实报告，不当 0 分钟、也不当免费。"""
+    cat = world.bundle.catalog_for(city)
+    if cat is None or cat.commute is None:
+        return []
+    elsewhere = {
+        r.mode
+        for c in world.bundle.catalogs
+        if c.commute is not None and str(c.city) != city
+        for r in c.commute.modes
+    }
+    here = {r.mode for r in cat.commute.modes}
+    return [
+        issue(
+            "commute_mode_missing",
+            f"cities.{city}.commute",
+            f"{cat.label} 的通勤关系表里没有{COMMUTE_MODE_LABEL[mode]}（比较组里别的城市有）",
+            "这座城的分身到岗时没有这种方式可用，只能用表里有的方式；缺的方式不当 0 分钟，也不当免费",
+            "知悉这一限制（原因见范围说明里本版不支持的内容）",
+            severity="warning",
+        )
+        for mode in COMMUTE_MODES
+        if mode in elsewhere and mode not in here
+    ]
+
+
+def _occupation_note(pack: DataPack) -> ScopeNote:
+    schemes = sorted({f"{m.country} {m.scheme}" for o in pack.body.occupations for m in o.mappings})
+    return ScopeNote(
+        topic="occupations",
+        title_zh="支持的职业",
+        text_zh=(
+            f"这份资料包支持 {len(pack.body.occupations)} 种职业（受控词表；每种在内部对应一个职业分类：{'、'.join(schemes)}）。"
+            "词表外的职业在审阅时就会被拒绝并说明原因，系统不换成别的职业；某座城的目录里没有你这一职业的岗位时，那座城报错，"
+            "不自动换岗。岗位要求的学历、证书或经验只认你在资格一栏明确确认的，职称与自由文字都不授予资格"
+        ),
+    )
+
+
+def scope_notes(
+    pack: DataPack, world: RunWorld | None = None, cities: tuple[str, ...] = ()
+) -> tuple[ScopeNote, ...]:
+    """真实资料包的范围说明。合成资料包没有（它的范围写在 ``limits`` 里，含义不变）。``world`` 为空（预检查没有走到 E1 加载）
+    时只写不依赖目录的几条：职业与本版不支持的内容。"""
+    if pack.body.status != "real_data_frozen":
+        return ()
+    out = [_occupation_note(pack)]
+    if world is not None:
+        years = world.bundle.protocol.simulation_years
+        by_policy: dict[str, list[str]] = {}
+        for ref in cities:
+            t = tax_scope(world, ref)
+            if t is not None:
+                by_policy.setdefault(t.policy_id, []).append(ref)
+        for refs in by_policy.values():
+            t = tax_scope(world, refs[0])
+            assert t is not None
+            if t.status == "official_2024_rules":
+                text = (
+                    f"按官方 2024 年规则逐月预扣（按全年累计工资），模拟的 {years} 年都用 2024 年规则；只支持单身、只有工资收入、"
+                    f"按标准扣除。支持的居住与工作地：{t.residence_scope_zh}。没有建模的 {len(t.not_modeled_zh)} 项逐条列在这座城"
+                    "的资料性质（data_nature.tax）里——它们让结果与真实税单有差别"
+                )
+            else:
+                text = "这座城的税是合成测试替身，不是真实税"
+            out.append(
+                ScopeNote(
+                    topic="tax", title_zh=f"税：{t.policy_id}", text_zh=text, cities=tuple(refs)
+                )
+            )
+        out.append(
+            ScopeNote(
+                topic="commute",
+                title_zh="通勤怎么算",
+                text_zh=(
+                    "通勤按每座城的片区关系表执行：住处片区 × 岗位的就业片区 × 方式 → 一次往返的分钟与花费（片区级资料或估计，"
+                    "不是路线模拟）。每个月在可用的方式里取往返最少的一种，分钟相同取花费低的；开车要这个月有在用的用车权（另一项"
+                    "按月付费的机会）。关系表里没有的线或方式不能走，不当 0 分钟；停车与过路费没有建模"
+                ),
+            )
+        )
+        for ref in cities:
+            for gap in commute_gaps(world, ref):
+                out.append(
+                    ScopeNote(
+                        topic="commute",
+                        title_zh="缺少的通勤方式",
+                        text_zh=f"{gap.message_zh}：{gap.impact_zh}",
+                        cities=(ref,),
+                    )
+                )
+        menu_cities = {
+            ref: sorted({m.category for m in cat.menus})
+            for ref in cities
+            if (cat := world.bundle.catalog_for(ref)) is not None and cat.menus
+        }
+        if menu_cities:
+            cats = sorted({c for cs in menu_cities.values() for c in cs})
+            names = "与".join(CATEGORY_ZH.get(c, c) for c in cats)
+            out.append(
+                ScopeNote(
+                    topic="menus",
+                    title_zh="年度菜单",
+                    text_zh=(
+                        f"每年给分身看的{names}不是整个目录，而是一份冻结的抽样菜单（每类、每年、每个环境重复一份；同城、同年、"
+                        "同一环境重复的分身看同一份，抽法与种子里没有分身编号）。菜单是接触机会，不是成交或录用。现住的房子可以"
+                        "续租、现在的岗位可以延续，最低生活的保底方案总在；菜单外的选择会被计划检查拒绝"
+                    ),
+                    cities=tuple(menu_cities),
+                )
+            )
+    out += [
+        ScopeNote(topic="unsupported", title_zh="本版不支持", text_zh=line)
+        for line in pack.body.unsupported
+    ]
+    return tuple(out)

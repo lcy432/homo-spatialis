@@ -50,7 +50,7 @@ def build_capabilities(pack: DataPack, *, sample: SampleLabel | None = None) -> 
                 code=c.code,
                 label=c.label,
                 geography_version=c.geography_version,
-                data_status="synthetic_fixture",
+                data_status="real_data" if b.status == "real_data_frozen" else "synthetic_fixture",
                 selectable=True,
                 note=c.note,
             )

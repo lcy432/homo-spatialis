@@ -39,6 +39,7 @@ from product.catalog import inventory_coverage
 from product.compile import CompiledInputs, CompileRefusedError, compile_inputs
 from product.exact import canonical, display
 from product.pack import DataPack
+from product.pack_facts import city_data_nature, commute_gaps, scope_notes
 from product.public_errors import e1_refusal_issue
 
 
@@ -81,6 +82,7 @@ def _blocked(
         planner=_planner(pack, 0),
         issues=tuple(issues),
         scope_zh=pack.body.limits,
+        scope_notes=scope_notes(pack),
     )
     unsealed = ProductPreflight.model_construct(**fields, preflight_fingerprint="0" * 64)
     pre = ProductPreflight(**fields, preflight_fingerprint=content_fingerprint(unsealed.content()))
@@ -207,6 +209,8 @@ def run_preflight(
                         severity="warning",
                     )
                 )
+        # DECISIONS/0042：通勤关系表里缺、比较组别的城市有的方式（不当 0 分钟、不当免费）
+        gaps += commute_gaps(world, ref)
         scor = (
             CapabilityStatus(
                 status="yes",
@@ -253,6 +257,7 @@ def run_preflight(
                 ),
                 option_inventory_status=inv[ref].status if ref in inv else "not_assessed",
                 data_gaps=tuple(gaps),
+                data_nature=city_data_nature(pack, world, ref),
             )
         )
     s = pack.body.start_model_settings
@@ -305,6 +310,7 @@ def run_preflight(
         issues=tuple(compiled.issues) + tuple(g for c in cities for g in c.data_gaps),
         # 收尾 R7：这次按什么个性化、哪些没有（未答、暂不确定、没有固定爱好、通用评价分开写）
         scope_zh=tuple(world.scope["数据与参数"]) + pack.body.limits + confirmed.interests.scope_zh,
+        scope_notes=scope_notes(pack, world, confirmed.cities),
     )
     unsealed = ProductPreflight.model_construct(**fields, preflight_fingerprint="0" * 64)
     pre = ProductPreflight(**fields, preflight_fingerprint=content_fingerprint(unsealed.content()))
