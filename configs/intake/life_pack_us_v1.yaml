@@ -1,0 +1,57 @@
+# E3B（DECISIONS/0042）六城真实生活资料包的编译设定。数值都是登记的映射或假设（参数目录 AC-14、AG-24、SC-26–SC-28 与
+# docs/design/e3b-life-pack.md），在看任何运行结果之前写定；不按排名调。
+#
+# 输入：intake-02 冻结库（只在本机）、原始文件缓存、两份并行产出的冻结资料（通勤关系、生活机会与职业），以及官方税规则。
+
+version: life-pack-us-v1
+base_year: 2024
+numeraire: USD_2024_LOCAL
+simulation_years: 3
+env_repeats: 2
+city_scheme: CBSA2023
+
+# 税务支持范围（DECISIONS/0042 第 5 条）：居住地只取这些县或州的 PUMA，岗位的就业片区只取这些州。范围外的住房在编译时排除并计数。
+cities:
+  - {cbsa: "35620", key: nyc, label: 纽约（纽约市五区居民）, jurisdiction: [US, NY, NYC], tax_policy: tax.us2024.nyc,
+     home_counties: ["36005", "36047", "36061", "36081", "36085"], work_states: ["36"]}
+  - {cbsa: "31080", key: la, label: 洛杉矶, jurisdiction: [US, CA], tax_policy: tax.us2024.ca, home_states: ["06"], work_states: ["06"]}
+  - {cbsa: "41860", key: sf, label: 旧金山, jurisdiction: [US, CA], tax_policy: tax.us2024.ca, home_states: ["06"], work_states: ["06"]}
+  - {cbsa: "16980", key: chi, label: 芝加哥（伊利诺伊州部分）, jurisdiction: [US, IL], tax_policy: tax.us2024.il, home_states: ["17"], work_states: ["17"]}
+  - {cbsa: "26420", key: hou, label: 休斯敦, jurisdiction: [US, TX], tax_policy: tax.us2024.tx, home_states: ["48"], work_states: ["48"]}
+  - {cbsa: "42660", key: sea, label: 西雅图, jurisdiction: [US, WA], tax_policy: tax.us2024.wa, home_states: ["53"], work_states: ["53"]}
+
+housing:
+  # 居住条件（SC-26）：空间等级由卧室数推断；条件档次是同格（PUMA 或回退的通勤层 × 卧室）租金三档的位置——含误差的估计。
+  space_level_by_bedrooms: {"0": 1, "1": 2, "2": 3, "3plus": 4}
+  bedrooms_by_class: {"0": 0, "1": 1, "2": 2, "3plus": 3}
+  quality_level_by_position: {"1/6": 1, "1/2": 2, "5/6": 3}
+  # 月租 = 合同租金分位（估计）+ 水电燃气月费中位数（估计，毛租金 − 合同租金）。两个估计相加不等于毛租金的同一分位，照实说明。
+  gross_rent_rule: contract_quantile_plus_utilities_median_v1
+  # ACS 租住单元是独立住房单元；厨卫设施没有核对（没有取 KIT/PLM），登记为假设 acs_rental_units_have_basic_facilities_v1
+  basic_facilities_assumption: acs_rental_units_have_basic_facilities_v1
+
+menus:
+  algorithm: weighted_keyed_sample@1
+  seed: life-pack-us-v1-menus-2026-10-23
+  housing: {strata_key: bedrooms_class, per_stratum: 3}
+  job: {size: 30}
+
+# 地区与城市条件（SC-27）。固定参考尺度：第七座城不会改变前六座的值。
+conditions:
+  safety:
+    rule: common_prior_v1
+    base: 3
+    note: 没有可比的安全资料（FBI 犯罪资料接口要密钥，没有注册；城市开放资料口径与覆盖不同、也不覆盖整个都会区）：六城、各片区同一个登记的共同先验，不制造差异
+  environment:
+    rule: aqi_good_share_fixed_scale_v1
+    # base = scale × 一年里 AQI 为“好”的天数比例（EPA 年度 AQI，有效天数 ≥ 330 的最近一年）；城市级证据，各片区同值
+    scale: 6
+  leisure:
+    rule: common_prior_v1
+    base: 4
+    note: 休闲的城市背景用登记的共同先验（与合成样例相同）；实际参与的活动另按小时计
+  opportunity:
+    rule: supported_occupation_coverage_v1
+    # base = scale_jobs × 支持职业里本都会区有已发布 OEWS 工资记录的比例 + scale_training × 有本都会区培训项目的比例
+    scale_jobs: 2
+    scale_training: 2
