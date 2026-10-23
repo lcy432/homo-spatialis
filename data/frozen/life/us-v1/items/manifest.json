@@ -12,8 +12,8 @@
   "usda_fdc_sr_legacy": "b80817294b8850530aaedf2e515c02593b1824f763a0ff356e5c2081643e6fd0"
  },
  "identities": {
-  "items_config": "edd6fc814b93981a2f6d9dbbdac24e2237b986630fcf30f7538601f1015fa04f",
-  "occupations_config": "e0df112a3a9db4a81c54b1a3046fff88ac766fe6edf76bc42abaea8abb76ecdf",
+  "items_config": "3abf5d155177fca574c0667bd621bd7250a917b6bec2c1b3956d103a3840281f",
+  "occupations_config": "494a4f01ab49c9601030badaf66be98cd40d6a27d3f718e00ba286be91b6d871",
   "baskets": "8714cbfd8ebb7dfbd39fb6f9bd9bcc2489d4841fe6caefbbdb88bbac1388d19f",
   "slice": "b88559d4d698d701f018b0054d066120d327ffb04f2312baa2c31086a8fcc243"
  },
@@ -235,7 +235,7 @@
    }
   },
   {
-   "ability_id": "award_27_4011",
+   "ability_id": "soc_27_4011_award",
    "kind": "credential",
    "label": "音视频技术员的中学后证书",
    "description": "与 27-4011 对应的中学后非学位证书（用户确认，或完成 CIP 对应到 27-4011 的培训项目）",
@@ -262,7 +262,7 @@
    }
   },
   {
-   "ability_id": "exp_related_35_1012",
+   "ability_id": "soc_35_1012_experience",
    "kind": "knowledge",
    "label": "餐饮主管的相关工作经验",
    "description": "在相关职业（35-3023, 35-3031, 35-9021, 35-2014）工作至少 1 年（用户确认的经历；模拟期里不会自动积累）",
@@ -289,7 +289,7 @@
    }
   },
   {
-   "ability_id": "exp_related_35_2014",
+   "ability_id": "soc_35_2014_experience",
    "kind": "knowledge",
    "label": "餐厅厨师的相关工作经验",
    "description": "在相关职业（35-3023, 35-3031, 35-9021）工作至少 1 年（用户确认的经历；模拟期里不会自动积累）",
@@ -316,7 +316,7 @@
    }
   },
   {
-   "ability_id": "exp_related_41_1011",
+   "ability_id": "soc_41_1011_experience",
    "kind": "knowledge",
    "label": "零售主管的相关工作经验",
    "description": "在相关职业（41-2011, 41-2031）工作至少 1 年（用户确认的经历；模拟期里不会自动积累）",
@@ -343,7 +343,7 @@
    }
   },
   {
-   "ability_id": "exp_related_43_1011",
+   "ability_id": "soc_43_1011_experience",
    "kind": "knowledge",
    "label": "办公室行政主管的相关工作经验",
    "description": "在相关职业（43-9061, 43-4051, 43-6014, 43-4171, 43-5071, 43-3071, 43-3031）工作至少 1 年（用户确认的经历；模拟期里不会自动积累）",
@@ -370,7 +370,7 @@
    }
   },
   {
-   "ability_id": "award_49_2022",
+   "ability_id": "soc_49_2022_award",
    "kind": "credential",
    "label": "通信设备安装维修工的中学后证书",
    "description": "与 49-2022 对应的中学后非学位证书（用户确认，或完成 CIP 对应到 49-2022 的培训项目）",
@@ -397,7 +397,7 @@
    }
   },
   {
-   "ability_id": "award_49_3023",
+   "ability_id": "soc_49_3023_award",
    "kind": "credential",
    "label": "汽车维修技师的中学后证书",
    "description": "与 49-3023 对应的中学后非学位证书（用户确认，或完成 CIP 对应到 49-3023 的培训项目）",
@@ -462,6 +462,24 @@
    "basis": "洗碗机本轮不进目录（见 gaps）；同样没有公开故障率资料",
    "assumption": "device_failure_v1",
    "offers": []
+  },
+  "tennis_racket": {
+   "rule": "none_within_horizon",
+   "annual_hazard": null,
+   "basis": "没有公开的故障率资料；设定寿命 5 年长于 3 年模拟期，期内不建模随机损坏",
+   "assumption": "device_failure_v1",
+   "offers": [
+    "tennis_racket"
+   ]
+  },
+  "acoustic_guitar": {
+   "rule": "none_within_horizon",
+   "annual_hazard": null,
+   "basis": "没有公开的故障率资料；设定寿命 8 年长于 3 年模拟期，期内不建模随机损坏",
+   "assumption": "device_failure_v1",
+   "offers": [
+    "acoustic_guitar"
+   ]
   }
  },
  "atus_magnitude_check": {
@@ -592,7 +610,7 @@
   {
    "id": "device_failure_v1",
    "nature": "assumption",
-   "statement_zh": "每个设备类别 3 年内不建模随机故障（none_within_horizon），见 devices.failure",
+   "statement_zh": "每个设备类别与爱好装备 3 年内不建模随机故障（none_within_horizon），见 devices.failure 与 equipment[].failure；写进机会的 failure（FailureSpec）",
    "basis_zh": "没有公开的故障率资料；保修条款不是故障分布",
    "config": "life-items-us-v1"
   },
@@ -701,7 +719,8 @@
  ],
  "cities": {
   "35620": {
-   "content_identity": "ff93172ec9cf0f21fe66a7eb2157f9e3be51172094698a1e7fe2245552c0097f",
+   "key": "nyc",
+   "content_identity": "26948b1cf5d0d323c9be3afcae180ac07a2b4ed69c59461e4ab7961d84db3370",
    "counts": {
     "raw_inputs": {
      "intake_records_referenced": 84,
@@ -763,7 +782,8 @@
    }
   },
   "31080": {
-   "content_identity": "62b481df85cb2bf2ecb58caac6727dc5ef533d03b84761b8bfab07a466e5e0a6",
+   "key": "la",
+   "content_identity": "535eed69132e9a9b43812f1ccee11e8a125b5ddb91c2c6c59252ac12b5d17111",
    "counts": {
     "raw_inputs": {
      "intake_records_referenced": 81,
@@ -821,7 +841,8 @@
    }
   },
   "41860": {
-   "content_identity": "9dd54ecad1b77bab59d8079484642fa5ff3f53d2eb156d090fe414a2bd7053e7",
+   "key": "sf",
+   "content_identity": "ee6219e1ed1986e25ce03d4fce0a3ffe77056c88d2a63b19a964dec3ac668cb5",
    "counts": {
     "raw_inputs": {
      "intake_records_referenced": 80,
@@ -880,7 +901,8 @@
    }
   },
   "16980": {
-   "content_identity": "dc378f45d44aca29446050d311d1468ca6e9c25b523ff66bc89a1d7c959600e9",
+   "key": "chi",
+   "content_identity": "e8a2ec330d4d57f6abb31acc49ccefa1c9c2d108042a784d057568c395ae9287",
    "counts": {
     "raw_inputs": {
      "intake_records_referenced": 1779,
@@ -940,7 +962,8 @@
    }
   },
   "26420": {
-   "content_identity": "46c76e4a3371a5c5e1275e2e17b14b7df1fa11a9e3bc85d16cce8ec68f8783e5",
+   "key": "hou",
+   "content_identity": "dd42ea580012bf2f161d5353d74722d16aab053cf5fb8bc2340cfe6675326e99",
    "counts": {
     "raw_inputs": {
      "intake_records_referenced": 84,
@@ -1002,7 +1025,8 @@
    }
   },
   "42660": {
-   "content_identity": "5093d1fbf8f180e0d38e49747cee39066b11b050142e13c35e969721dcbc3087",
+   "key": "sea",
+   "content_identity": "a942e4f9e511e95efe133f5c52336f35814a2a243454a750dc4bdb4854985ed0",
    "counts": {
     "raw_inputs": {
      "intake_records_referenced": 81,
@@ -1060,5 +1084,5 @@
    }
   }
  },
- "content_identity": "67014c0e1928be19a1b7770fa2a43889c126255bac8337c62110db08809e7109"
+ "content_identity": "1b6e7f19ac9b5985a92409f8a9400ddb536cb16af899f6e647277fdd2b9807cb"
 }

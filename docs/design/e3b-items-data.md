@@ -24,7 +24,7 @@ uv run python scripts/life_pack_items.py start-job --cbsa 16980 --soc 43-9061
 uv run python scripts/life_pack_items.py cut-fixture                 # 重新切测试样本
 ```
 
-当前输出的内容身份 `67014c0e1928be19…`（清单里的 `content_identity`），来自 intake 构建 `562c32339bbae67f…`。同样的冻结库、原始文件与代码重跑得到同一个身份；获取时间与本机路径不进身份。
+当前输出的内容身份 `1b6e7f19ac9b5985…`（清单里的 `content_identity`），来自 intake 构建 `562c32339bbae67f…`。同样的冻结库、原始文件与代码重跑得到同一个身份；获取时间与本机路径不进身份。
 
 ## 2. 资料
 
@@ -78,13 +78,13 @@ uv run python scripts/life_pack_items.py cut-fixture                 # 重新切
 * 型号：ENERGY STAR 里适用市场确定包括美国（us、us_ca）的型号；每个（类别 × 类型）取年耗电（下）中位数的那个作代表，并列取记录编号最小的。
 * 方案：顶开洗衣机、前开洗衣机（残余洗衣 7 小时：还要晾干叠放）；顶开 / 前开 + 电烘干机一套、洗烘一体机（残余 4 小时）。烘干机单独买不替代洗衣，只成套出售（E1 的替代规则不处理互补工序）。
 * 价格 = 全国类别设定 × intake 的商品类空间换算系数（`device_category_v1`）。纽约顶开洗衣机：700 × 1.107405 = 775.1835 → **775.18**。寿命设定 10 年。来源性质写 `synthetic`：型号是真的，价格、寿命、效果是设定。
-* **故障**（给主会话正在加的引擎字段，纯数据，在清单的 `device_failure`）：洗衣机、烘干机、洗烘一体机、洗碗机都写 `none_within_horizon`（`device_failure_v1`）——没有公开故障率资料，保修条款不是故障分布，设定寿命 10 年远长于 3 年模拟期。
+* **故障**写进每项设备与爱好装备的 `failure`（`FailureSpec`，main 的 c40ec5d）：洗衣机、烘干机、洗烘一体机都是 `none_within_horizon`（`device_failure_v1`）——没有公开故障率资料，保修条款不是故障分布，设定寿命 10 年远长于 3 年模拟期。成套设备按部件合成：部件独立、任一部件坏就整套不能用，年故障概率 = 1 − Π(1 − p)；全部部件都是 `none_within_horizon` 时整套也是。清单的 `device_failure` 是按类别的汇总。
 * 不进目录：洗碗机（洗碗时间在食品方案的“做饭与收拾”里，协议没有可以替代的家务）、燃气烘干机（要燃气接口，住房资料没有）。
 * 安装：住房资料（ACS）没有洗衣机接口与排风条件，设备按“可以安装”设定（`device_installable_v1`），每项设备都带缺口标记 `installation_condition_not_in_housing_data`。
 
 ## 6. 爱好装备
 
-网球拍（`racket_playable`，全国设定 100、5 年）、民谣吉他（`guitar_playable`，200、8 年），× 商品类空间换算系数（`equipment_category_v1`）。装备本身不带来享受，只让需要这种能力的活动可以开展。
+网球拍（`racket_playable`，全国设定 100、5 年）、民谣吉他（`guitar_playable`，200、8 年），× 商品类空间换算系数（`equipment_category_v1`）；故障同样写 `none_within_horizon`。装备本身不带来享受，只让需要这种能力的活动可以开展。
 
 ## 7. 活动
 
@@ -103,23 +103,25 @@ uv run python scripts/life_pack_items.py cut-fixture                 # 重新切
 **能力**只有三类来源，都是结构化的：
 
 1. 学历“至少达到”（`edu_at_least_hs / some_college / associate / bachelor / master / doctoral`，通用）：确认的最高学历授予它和它以下各级（`education_at_least_v1`）；
-2. 职业专属的中学后证书（`award_<职业>`，只用于那个职业）：用户确认持有，或完成 CIP 对应到这个职业的 IPEDS 项目；
-3. 相关职业经验（`exp_related_<职业>`）：确认的经历在相关职业名单里、年数够（“少于 5 年”按至少 1 年，`related_experience_v1`）。
+2. 职业专属的中学后证书（`soc_<职业>_award`，例如 `soc_49_3023_award`，只用于那个职业）：用户确认持有，或完成 CIP 对应到这个职业的 IPEDS 项目；
+3. 相关职业经验（`soc_<职业>_experience`）：确认的经历在相关职业名单里、年数够（“少于 5 年”按至少 1 年，`related_experience_v1`）。
 
 确认的现职 X 只说明“在 X 工作过”：它只按名单授予经验能力，不授予学历、证书或执照（`confirmed_experience_mapping_v1`）——当了十年会计也不会自动得到学士学位。开局岗位仍要求用户确认 X 的入职能力（与 E3-A 的“系统不从职业称呼自动授予资格”一致）。EP 的“典型入职教育”当作资格要求（`ep_typical_education_as_requirement_v1`），这是保守的设定；职业与行业分开，岗位只按职业记、不写行业。
 
-**岗位**：每个职业 × 都会区三档（p25、中位、p75）。工作安排（`job_arrangement_v1`、`job_work_mode_v1`）：每周工时取工时表（都会区 × SOC 大类的中位数），每月 = 每周 × 52 ÷ 12；每周 5 天、每月 22 个工作日；hybrid 到岗 22 × 3 ÷ 5 = 13 天；薪酬 = 年薪 × 每周工时 ÷ 40（OEWS 年薪 = 时薪 × 2,080 = 时薪 × 40 × 52）。
+**岗位**：每个职业 × 都会区三档（p25、p50、p75），编号 `{城市键}.job.{SOC}.{档}`，例如 `nyc.job.43-9061.p50`。工作安排（`job_arrangement_v1`、`job_work_mode_v1`）：每周工时取工时表（都会区 × SOC 大类的中位数），每月 = 每周 × 52 ÷ 12；每周 5 天、每月 22 个工作日；hybrid 到岗 22 × 3 ÷ 5 = 13 天；薪酬 = 年薪 × 每周工时 ÷ 40（OEWS 年薪 = 时薪 × 2,080 = 时薪 × 40 × 52）。
 
 * 纽约快餐与柜台服务员中位：35,377.14 × 36 ÷ 40 = 31,839.426 → **31,839.43**；每月 36 × 52 ÷ 12 = **156** 小时，到岗 22 天。
 * 纽约会计中位：每周 40 小时，年薪原样 **104,972.84**；每月 173.33 小时，hybrid 到岗 13 天；要求 `edu_at_least_bachelor`。
 
 `area` 不写、带 SOC：整合时按通勤会话的就业片区补上（输出状态 `needs_area`）。雇主写 `not_identifiable`（OEWS 只有职业 × 地区汇总）。
 
-**开局**（`start_job_median_v1`）：开局城市里确认职业的中位数档；输出 `start_jobs` 给每个范围内职业的岗位编号与需要用户确认的能力。不在范围就拒绝并说明原因（例如 31-9011：“按摩师在六城所在州都要州执照……不替换成别的职业”），从不换成别的职业。
+**开局**（`start_job_median_v1`）：开局城市里确认职业的中位数档（p50）；输出 `start_jobs` 给每个范围内职业的岗位编号与需要用户确认的能力。不在范围就拒绝并说明原因（例如 31-9011：“按摩师在六城所在州都要州执照……不替换成别的职业”），从不换成别的职业。
 
 **培训**（`ipeds_training_v1`）：IPEDS 按项目报告学费的院校项目，CIP → SOC 对照到范围内要求证书的职业就授予那张证书；只收全日制完成月数是整年的项目（E1 按整年计）；每周 24 小时（34 CFR 668.2 的全日制下限）= 每月 104 小时；开课日期没有资料（按“任何月份可以开始”设定，带缺口 `start_dates_unknown`）。结果很少：纽约 3 项、休斯敦 3 项、其余四城 0 项——多数相关项目不是整年，或对应的职业要执照。
 
 ## 9. 输出与计数
+
+编号按资料包的共同约定：城市键 `nyc / la / sf / chi / hou / sea`（`configs/intake/us_v1.yaml`），`{键}.food.{方案}`（混合方案再加菜系，例如 `nyc.food.cook_dine.chinese`）、`{键}.service.{服务}`、`{键}.durable.{设备或装备}`、`{键}.experience.{模板}`（芝加哥活动 `chi.experience.cpd.{活动编号}`）、`{键}.job.{SOC}.{p25|p50|p75}`、`{键}.training.ipeds.{院校}.{项目}`；学历能力是跨职业共用的 `edu_at_least_*`，职业专属的是 `soc_{SOC}_award / _experience`。每城文件带 `key` 与城市身份 `{country: US, scheme: CBSA2023, code}`。岗位清单只有声明的 40 个职业（年度菜单从里面抽，开局岗位总是可以继续）。
 
 每个机会带 `domain`、`status`、`gaps`、`assumptions`、`records`（用到的 intake 记录）与完整的 `LifeOpportunity`。状态互不重叠：`executable`（可以直接放进目录）、`needs_area`（岗位，整合时补就业片区）、`needs_e1_extension`（真实但 E1 现在表达不了）、`data_unknown`（价格资料没有）。没生成机会的写在 `not_generated`（缺口 / 不支持 / 不适用，各带原因与数量）。每城另有 `food_check`、`start_jobs` 与 `minimum_food_candidate`（最便宜的完整食品方案：E1 要求最低方案就是合格目录里最便宜的那份，六城都是“自己做·主食为主”）。
 
@@ -156,14 +158,13 @@ uv run python scripts/life_pack_items.py cut-fixture                 # 重新切
 
 1. **日期窗口与整期报名**：E1 的体验没有日期或月份窗口、没有模拟月份 ↔ 真实日期的对应，也不能表达“一次付费买一季的 N 次课”；年龄资格不求值。芝加哥 1,698 条真实活动因此不可执行。
 2. **培训只能按整年**：9、10、13 个月的项目表达不了（多数 IPEDS 证书项目）；IPEDS 也没有开课日期与每周课时。
-3. **经验不会在模拟期里积累**：只有确认的初始经历能授予 `exp_related_*`；干满一年零售销售员不会自动可以当零售主管。
+3. **经验不会在模拟期里积累**：只有确认的初始经历能授予 `soc_*_experience`；干满一年零售销售员不会自动可以当零售主管。
 4. **执照没有能力来源**：持照职业（按摩、美发、保安、司机、护士……）都不在范围。
-5. **设备故障字段**：主会话正在加；这里只在清单里给纯数据。
-6. **设备的安装条件**：住房规格没有洗衣机接口 / 排风 / 燃气接口，E1 也没有安装约束。
-7. **洗碗**：洗碗时间在食品方案的准备小时里，协议没有可以替代的家务，洗碗机的效果表达不了。
-8. **互补工序**：洗衣机与烘干机只能成套出售（`TaskSubstitution` 只处理同一项家务的完整替代方案）。
-9. **词表**：菜系要扩到 `chinese / mexican / japanese / indian / thai / korean / vietnamese / mediterranean`（合成词表只有 `home_style / sichuan / italian`）；休闲类别没有团队球类等（芝加哥 1,375 条因此不支持）；生活输入要声明清单里列出的属性键。
-10. **工作日是整数**：每周 5 天 × 52 ÷ 12 = 21.67 只能写 22。
+5. **设备的安装条件**：住房规格没有洗衣机接口 / 排风 / 燃气接口，E1 也没有安装约束。
+6. **洗碗**：洗碗时间在食品方案的准备小时里，协议没有可以替代的家务，洗碗机的效果表达不了。
+7. **互补工序**：洗衣机与烘干机只能成套出售（`TaskSubstitution` 只处理同一项家务的完整替代方案）。
+8. **词表**：菜系要扩到 `chinese / mexican / japanese / indian / thai / korean / vietnamese / mediterranean`（合成词表只有 `home_style / sichuan / italian`）；休闲类别没有团队球类等（芝加哥 1,375 条因此不支持）；生活输入要声明清单里列出的属性键。
+9. **工作日是整数**：每周 5 天 × 52 ÷ 12 = 21.67 只能写 22。
 
 ## 12. 已知问题与偏差
 

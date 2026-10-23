@@ -22,6 +22,7 @@ from product.realdata.life_items import (
     away_meal_price,
     city_cuisines,
     complete_week_cost,
+    failure_spec,
     item_grams,
     representative_model,
     session_dates,
@@ -105,7 +106,7 @@ def test_energy_completion_hand_example():
 def test_home_plans_follow_the_basket_and_its_energy_share(frozen):
     """补齐后的主食方案 = intake 篮子月费 ÷ 篮子热量占参照量的比例；荤素搭配 = 自己的篮子 + (1 − 比例) × 补齐后的主食方案。"""
     items, check = items_by_id(frozen, "35620"), city(frozen, "35620")["food_check"]["baskets"]
-    staples, varied = items["food.35620.home_staples"], items["food.35620.home_varied"]
+    staples, varied = items["nyc.food.home_staples"], items["nyc.food.home_varied"]
     s_share = Fraction(str(staples["opportunity"]["attributes"]["basket_energy_share"]))
     v_share = Fraction(str(varied["opportunity"]["attributes"]["basket_energy_share"]))
     assert check["staples_home"]["recomputed"] == float(check["staples_home"]["intake"]) == 76.83
@@ -139,7 +140,7 @@ def test_item_grams_come_from_the_unit_text_or_sr_portions(sl, cfgs):
 
 def _fake_ctx(cfgs, metro: dict, cpi=(1, 1)) -> Ctx:
     sl = {"cpi": {"ce_2023_2024_to_2024": {"numerator": cpi[0], "denominator": cpi[1]}}}
-    return Ctx("99999", "测试都会区", "测试城", cfgs[0], metro, sl)
+    return Ctx("99999", "tst", "测试都会区", "测试城", cfgs[0], metro, sl)
 
 
 def test_away_meal_price_hand_example(cfgs):
@@ -162,20 +163,20 @@ def test_cuisines_need_enough_osm_restaurants_and_count_each_restaurant_once(cfg
 
 def test_mixed_plan_splits_home_cooking_and_dining_time(frozen):
     items = items_by_id(frozen, "35620")
-    dine = next(i for k, i in items.items() if k.startswith("food.35620.cook_dine."))
+    dine = next(i for k, i in items.items() if k.startswith("nyc.food.cook_dine."))
     fp = dine["opportunity"]["food_plan"]
     # 外食 7 顿 × 1.25 小时 × 52 ÷ 12 = 37.92；家里 14 顿 × 25 分钟 + 买菜 2 小时 = 每周 7.83… × 52 ÷ 12 = 33.94
     assert fp["dining_hours_per_month"] == 37.92 and fp["prep_hours_per_month"] == 33.94
     assert dine["opportunity"]["resource"]["hours"] == 71.86
     assert [p["mode"] for p in fp["parts"]] == ["home_cooked", "dine_out"]
     assert sum(p["meals_per_week"] for p in fp["parts"]) == 21
-    delivery = next(i for k, i in items.items() if k.startswith("food.35620.cook_delivery."))
+    delivery = next(i for k, i in items.items() if k.startswith("nyc.food.cook_delivery."))
     assert delivery["opportunity"]["attributes"]["delivery_fee"] == "unknown"
     assert "fafh_delivery_same_average_v1" in delivery["assumptions"]
 
 
 def test_chore_service_is_wage_times_hours_times_overhead(frozen, sl):
-    item = items_by_id(frozen, "35620")["service.35620.laundry_pickup"]
+    item = items_by_id(frozen, "35620")["nyc.service.laundry_pickup"]
     wage = Fraction(sl["metros"]["35620"]["wages"]["51-6011"]["annual_wage_median"])
     assert amount(item) == round(float(wage / 2080 * 3 * 2), 2)
     r = item["opportunity"]["resource"]
@@ -186,13 +187,13 @@ def test_chore_service_is_wage_times_hours_times_overhead(frozen, sl):
 
 
 def test_massage_is_counted_by_sessions_received(frozen):
-    o = items_by_id(frozen, "35620")["service.35620.massage_studio_2"]["opportunity"]
+    o = items_by_id(frozen, "35620")["nyc.service.massage_studio_2"]["opportunity"]
     assert o["enjoyment"][0]["function"] == "personal_care"
     assert o["enjoyment"][0]["units_per_month"] == 2 and o["resource"]["hours"] == 3.0
 
 
 def test_device_uses_the_median_energy_model_and_a_category_price(frozen, sl):
-    item = items_by_id(frozen, "35620")["device.35620.washer_top"]
+    item = items_by_id(frozen, "35620")["nyc.durable.washer_top"]
     rep = representative_model(sl["appliances"], "clothes_washer", "Top Load")
     assert rep is not None and item["records"] == [rep["record_id"]]
     assert item["opportunity"]["spec"]["clothes_washer_model"] == rep["model_number"]
@@ -200,6 +201,9 @@ def test_device_uses_the_median_energy_model_and_a_category_price(frozen, sl):
     assert amount(item) == 775.18
     assert item["opportunity"]["source"]["kind"] == "synthetic"
     assert "installation_condition_not_in_housing_data" in item["gaps"]
+    assert item["opportunity"]["failure"]["kind"] == "none_within_horizon"
+    guitar = items_by_id(frozen, "35620")["nyc.durable.acoustic_guitar"]["opportunity"]
+    assert guitar["failure"]["kind"] == "none_within_horizon"
     failure = frozen[1]["device_failure"]
     assert failure["clothes_washer"]["rule"] == "none_within_horizon"
     assert "washer_top" in failure["clothes_washer"]["offers"]
@@ -207,18 +211,18 @@ def test_device_uses_the_median_energy_model_and_a_category_price(frozen, sl):
 
 def test_model_activities_need_a_venue_and_unknown_tickets_stay_unknown(frozen):
     ny, sf = items_by_id(frozen, "35620"), items_by_id(frozen, "41860")
-    assert "activity.35620.lap_swim" in ny and "activity.41860.lap_swim" not in sf
+    assert "nyc.experience.lap_swim" in ny and "sf.experience.lap_swim" not in sf
     assert any(
         e["key"] == "lap_swim" and e["kind"] == "not_offered"
         for e in city(frozen, "41860")["not_generated"]
     )
-    museum = ny["activity.35620.museum_visit"]
+    museum = ny["nyc.experience.museum_visit"]
     assert museum["status"] == "data_unknown"
     assert (
         museum["opportunity"]["availability"] == "unknown"
         and museum["opportunity"]["price"] is None
     )
-    practice = ny["activity.35620.guitar_practice"]["opportunity"]
+    practice = ny["nyc.experience.guitar_practice"]["opportunity"]
     assert practice["price"]["amount"]["amount"] == 0 and practice["activity"]["requires"] == [
         "guitar_playable"
     ]
@@ -228,11 +232,11 @@ def test_chicago_programs_keep_real_facts_and_are_never_executable(frozen):
     items = items_by_id(frozen, "16980")
     programs = {k: v for k, v in items.items() if ".cpd." in k}
     assert programs and all(v["status"] == "needs_e1_extension" for v in programs.values())
-    tennis = programs["activity.16980.cpd.558965"]["opportunity"]
+    tennis = programs["chi.experience.cpd.558965"]["opportunity"]
     # 2026-04-09 至 10-29 每周四 30 次，去掉 3 个例外日期（名单里重复写的同一天只算一次）= 27 次；免费
     assert tennis["attributes"]["sessions_per_registration"] == 27
     assert tennis["price"]["amount"]["amount"] == 0.0
-    yoga = programs["activity.16980.cpd.584854"]["opportunity"]
+    yoga = programs["chi.experience.cpd.584854"]["opportunity"]
     # 2026-09-08 至 12-08 每周二 14 次：报名费 13.96 ÷ 14 = 0.997… → 1.00
     assert (
         yoga["attributes"]["sessions_per_registration"] == 14
@@ -241,7 +245,7 @@ def test_chicago_programs_keep_real_facts_and_are_never_executable(frozen):
     for v in programs.values():
         assert {"calendar_window", "registration_bundle"} <= set(v["gaps"])
         assert carried_restrictions(v["opportunity"])  # E3A 的编译检查会因日期与年龄拒绝它
-    senior = programs["activity.16980.cpd.584269"]
+    senior = programs["chi.experience.cpd.584269"]
     assert "age_eligibility" in senior["gaps"]
     kinds = {(e["kind"], e["key"]) for e in city(frozen, "16980")["not_generated"]}
     assert {
@@ -307,16 +311,41 @@ def test_e1_compile_check_accepts_real_items_placed_in_a_synthetic_city(frozen):
             bundle, "US:SYNTH2026:K51", LifeItemCandidate(oid, kind, oid, items[oid]["opportunity"])
         )
 
-    assert check("food.35620.cook_dine.italian", "food_plan").status == "executable"
-    assert check("activity.35620.group_fitness", "activity").status == "executable"
-    assert check("activity.35620.tennis_rental", "activity").status == "executable"
-    assert check("equipment.35620.acoustic_guitar", "equipment").status == "executable"
-    assert check("service.35620.massage_studio_1", "enjoyment").status == "executable"
-    cheap = check("food.35620.home_staples", "food_plan")
+    assert check("nyc.food.cook_dine.italian", "food_plan").status == "executable"
+    assert check("nyc.experience.group_fitness", "activity").status == "executable"
+    assert check("nyc.experience.tennis_rental", "activity").status == "executable"
+    assert check("nyc.durable.acoustic_guitar", "equipment").status == "executable"
+    assert check("nyc.service.massage_studio_1", "enjoyment").status == "executable"
+    cheap = check("nyc.food.home_staples", "food_plan")
     assert cheap.status == "rejected" and any("最低食品方案" in r for r in cheap.reasons_zh)
     assert (
-        city(frozen, "35620")["minimum_food_candidate"]["opportunity_id"]
-        == "food.35620.home_staples"
+        city(frozen, "35620")["minimum_food_candidate"]["opportunity_id"] == "nyc.food.home_staples"
     )
-    assert check("activity.16980.cpd.584854", "activity").status == "rejected"
-    assert check("food.35620.cook_dine.chinese", "food_plan").status == "unsupported"
+    assert check("chi.experience.cpd.584854", "activity").status == "rejected"
+    assert check("nyc.food.cook_dine.chinese", "food_plan").status == "unsupported"
+
+
+def test_failure_spec_combines_parts_of_a_set(cfgs):
+    ctx = _fake_ctx(cfgs, {})
+    none = {"rule": "none_within_horizon", "annual_hazard": None, "basis": "甲"}
+    assert failure_spec(ctx, [none, none]).kind == "none_within_horizon"
+    # 洗衣机每年 0.1、烘干机每年 0.2，部件独立、任一坏就整套不能用：1 − 0.9 × 0.8 = 0.28
+    f = failure_spec(
+        ctx,
+        [
+            {"rule": "annual_hazard", "annual_hazard": "0.1", "basis": "乙"},
+            {"rule": "annual_hazard", "annual_hazard": "0.2", "basis": "丙"},
+        ],
+    )
+    assert (f.kind, f.annual_probability) == ("annual_hazard", 0.28)
+
+
+def test_city_files_carry_the_shared_city_identity_and_id_prefix(frozen):
+    for cbsa, key in (("35620", "nyc"), ("16980", "chi"), ("41860", "sf")):
+        body = city(frozen, cbsa)
+        assert body["key"] == key and body["city"] == {
+            "country": "US",
+            "scheme": "CBSA2023",
+            "code": cbsa,
+        }
+        assert all(oid.startswith(f"{key}.") for oid in items_by_id(frozen, cbsa))

@@ -64,9 +64,9 @@ def test_required_abilities_follow_ep_education_and_experience(scope):
     assert scope.required("35-3023") == ()  # 没有正式学历要求
     assert scope.required("43-9061") == ("edu_at_least_hs",)
     assert scope.required("43-3031") == ("edu_at_least_some_college",)
-    assert scope.required("49-3023") == ("award_49_3023",)  # 中学后非学位证书：职业专属
+    assert scope.required("49-3023") == ("soc_49_3023_award",)  # 中学后非学位证书：职业专属
     assert scope.required("13-2011") == ("edu_at_least_bachelor",)
-    assert scope.required("41-1011") == ("edu_at_least_hs", "exp_related_41_1011")
+    assert scope.required("41-1011") == ("edu_at_least_hs", "soc_41_1011_experience")
 
 
 def test_ability_vocabulary_is_valid_and_scoped(scope, frozen):
@@ -76,10 +76,10 @@ def test_ability_vocabulary_is_valid_and_scoped(scope, frozen):
     by = {a.ability_id: a for a in specs}
     assert by["edu_at_least_bachelor"].scope.kind == "general"
     assert (
-        by["award_49_3023"].scope.kind == "occupation"
-        and by["award_49_3023"].scope.occupation.code == "49-3023"
+        by["soc_49_3023_award"].scope.kind == "occupation"
+        and by["soc_49_3023_award"].scope.occupation.code == "49-3023"
     )
-    assert by["exp_related_35_1012"].kind == "knowledge"
+    assert by["soc_35_1012_experience"].kind == "knowledge"
     for item in by_id(frozen, "35620").values():
         for tag in item["opportunity"]["eligibility"]:
             parsed = parse_eligibility_tag(tag)
@@ -96,7 +96,7 @@ def test_confirmed_facts_map_to_abilities_without_inferring_degrees(scope):
     ]
     assert scope.from_confirmed(education_level=None, experience=(("41-2031", 2),))[
         "abilities"
-    ] == ["exp_related_41_1011"]
+    ] == ["soc_41_1011_experience"]
     assert (
         scope.from_confirmed(education_level=None, experience=(("41-2031", 0),))["abilities"] == []
     )
@@ -105,14 +105,14 @@ def test_confirmed_facts_map_to_abilities_without_inferring_degrees(scope):
         scope.from_confirmed(education_level=None, experience=(("13-2011", 10),))["abilities"] == []
     )
     r = scope.from_confirmed(education_level="hs", awards=("49-3023", "13-2011"))
-    assert r["abilities"] == ["award_49_3023", "edu_at_least_hs"] and len(r["notes"]) == 1
+    assert r["abilities"] == ["edu_at_least_hs", "soc_49_3023_award"] and len(r["notes"]) == 1
     with pytest.raises(ValueError):
         scope.from_confirmed(education_level="phd")
 
 
 def test_job_pay_and_arrangement_hand_check(frozen):
     jobs = by_id(frozen, "35620")
-    fast = jobs["job.35620.35-3023.median"]["opportunity"]
+    fast = jobs["nyc.job.35-3023.p50"]["opportunity"]
     # 中位年薪 35,377.14 × 每周 36 小时 ÷ 40 = 31,839.426 → 31,839.43；每月 36 × 52 ÷ 12 = 156 小时；每周 5 天 → 每月 22 天
     assert fast["compensation"]["amount"]["amount"] == 31839.43
     job = fast["resource"]["job"]
@@ -127,7 +127,7 @@ def test_job_pay_and_arrangement_hand_check(frozen):
         22,
         22,
     )
-    acct = jobs["job.35620.13-2011.median"]["opportunity"]
+    acct = jobs["nyc.job.13-2011.p50"]["opportunity"]
     assert acct["compensation"]["amount"]["amount"] == 104972.84  # 每周 40 小时：年薪原样
     # 40 × 52 ÷ 12 = 173.33…；hybrid 每 5 天到岗 3 天：22 × 3 ÷ 5 = 13.2 → 13
     assert acct["resource"]["job"]["work_hours_per_month"] == 173.33
@@ -136,15 +136,15 @@ def test_job_pay_and_arrangement_hand_check(frozen):
 
 
 def test_jobs_carry_the_soc_leave_the_area_for_integration_and_come_in_three_tiers(frozen, scope):
-    jobs = {k: v for k, v in by_id(frozen, "16980").items() if k.startswith("job.")}
+    jobs = {k: v for k, v in by_id(frozen, "16980").items() if k.startswith("chi.job.")}
     assert len(jobs) == 3 * len(scope.supported)
     for v in jobs.values():
         o = v["opportunity"]
         assert o.get("area") is None and o["occupation"]["scheme"] == "SOC2018"
         assert v["status"] == "needs_area" and "work_area_assigned_at_integration" in v["gaps"]
     p25, med, p75 = (
-        jobs[f"job.16980.43-9061.{t}"]["opportunity"]["compensation"]["amount"]["amount"]
-        for t in ("p25", "median", "p75")
+        jobs[f"chi.job.43-9061.{t}"]["opportunity"]["compensation"]["amount"]["amount"]
+        for t in ("p25", "p50", "p75")
     )
     assert p25 < med < p75
 
@@ -154,7 +154,7 @@ def test_start_job_uses_the_median_tier_and_never_substitutes(frozen, cfgs):
     ok = start_job(index, cfgs[1], "43-9061")
     assert ok == {
         "status": "ok",
-        "opportunity_id": "job.16980.43-9061.median",
+        "opportunity_id": "chi.job.43-9061.p50",
         "requires_confirmed_abilities": ["edu_at_least_hs"],
     }
     massage = start_job(index, cfgs[1], "31-9011")
@@ -169,20 +169,20 @@ def test_start_job_uses_the_median_tier_and_never_substitutes(frozen, cfgs):
 
 def test_training_grants_only_in_scope_awards_and_only_whole_years(frozen, sl):
     items = by_id(frozen, "35620")
-    t = items["training.35620.183725.4"]["opportunity"]
+    t = items["nyc.training.ipeds.183725.4"]["opportunity"]
     src = next(
         p
         for p in sl["metros"]["35620"]["training"]
         if p["record_id"] == "training.ipeds2023.183725.4"
     )
     assert t["grants"] == [
-        "award_49_2022"
+        "soc_49_2022_award"
     ]  # CIP 47.0103 → 49-2022 在范围内且要求证书；同一 CIP 的其他职业不在范围
     assert (
         t["duration"]["completion_years"] == 1 and t["resource"]["hours"] == 104.0
     )  # 24 × 52 ÷ 12
     assert t["price"]["amount"]["amount"] == float(Fraction(src["tuition"]))
-    assert "start_dates_unknown" in items["training.35620.183725.4"]["gaps"]
+    assert "start_dates_unknown" in items["nyc.training.ipeds.183725.4"]["gaps"]
     keys = {
         (e["kind"], e["key"])
         for e in city(frozen, "35620")["not_generated"]

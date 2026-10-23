@@ -1,12 +1,18 @@
 {
- "content_identity": "9dd54ecad1b77bab59d8079484642fa5ff3f53d2eb156d090fe414a2bd7053e7",
+ "content_identity": "ee6219e1ed1986e25ce03d4fce0a3ffe77056c88d2a63b19a964dec3ac668cb5",
  "schema": "e3b-life-items-frozen-v1",
  "cbsa": "41860",
+ "key": "sf",
+ "city": {
+  "country": "US",
+  "scheme": "CBSA2023",
+  "code": "41860"
+ },
  "label": "San Francisco-Oakland-Fremont 都会区",
  "intake_build_id": "562c32339bbae67fd1917b7ac67f4b5b28f55d07e88a8c78ee6fe371ed863691",
  "identities": {
-  "items_config": "edd6fc814b93981a2f6d9dbbdac24e2237b986630fcf30f7538601f1015fa04f",
-  "occupations_config": "e0df112a3a9db4a81c54b1a3046fff88ac766fe6edf76bc42abaea8abb76ecdf",
+  "items_config": "3abf5d155177fca574c0667bd621bd7250a917b6bec2c1b3956d103a3840281f",
+  "occupations_config": "494a4f01ab49c9601030badaf66be98cd40d6a27d3f718e00ba286be91b6d871",
   "baskets": "8714cbfd8ebb7dfbd39fb6f9bd9bcc2489d4841fe6caefbbdb88bbac1388d19f",
   "slice": "b88559d4d698d701f018b0054d066120d327ffb04f2312baa2c31086a8fcc243"
  },
@@ -87,268 +93,268 @@
  "start_jobs": {
   "35-3023": {
    "status": "ok",
-   "opportunity_id": "job.41860.35-3023.median",
+   "opportunity_id": "sf.job.35-3023.p50",
    "requires_confirmed_abilities": []
   },
   "41-2011": {
    "status": "ok",
-   "opportunity_id": "job.41860.41-2011.median",
+   "opportunity_id": "sf.job.41-2011.p50",
    "requires_confirmed_abilities": []
   },
   "41-2031": {
    "status": "ok",
-   "opportunity_id": "job.41860.41-2031.median",
+   "opportunity_id": "sf.job.41-2031.p50",
    "requires_confirmed_abilities": []
   },
   "35-3031": {
    "status": "ok",
-   "opportunity_id": "job.41860.35-3031.median",
+   "opportunity_id": "sf.job.35-3031.p50",
    "requires_confirmed_abilities": []
   },
   "35-9021": {
    "status": "ok",
-   "opportunity_id": "job.41860.35-9021.median",
+   "opportunity_id": "sf.job.35-9021.p50",
    "requires_confirmed_abilities": []
   },
   "35-2014": {
    "status": "ok",
-   "opportunity_id": "job.41860.35-2014.median",
+   "opportunity_id": "sf.job.35-2014.p50",
    "requires_confirmed_abilities": [
-    "exp_related_35_2014"
+    "soc_35_2014_experience"
    ]
   },
   "37-2011": {
    "status": "ok",
-   "opportunity_id": "job.41860.37-2011.median",
+   "opportunity_id": "sf.job.37-2011.p50",
    "requires_confirmed_abilities": []
   },
   "37-2012": {
    "status": "ok",
-   "opportunity_id": "job.41860.37-2012.median",
+   "opportunity_id": "sf.job.37-2012.p50",
    "requires_confirmed_abilities": []
   },
   "37-3011": {
    "status": "ok",
-   "opportunity_id": "job.41860.37-3011.median",
+   "opportunity_id": "sf.job.37-3011.p50",
    "requires_confirmed_abilities": []
   },
   "53-7062": {
    "status": "ok",
-   "opportunity_id": "job.41860.53-7062.median",
+   "opportunity_id": "sf.job.53-7062.p50",
    "requires_confirmed_abilities": []
   },
   "53-7065": {
    "status": "ok",
-   "opportunity_id": "job.41860.53-7065.median",
+   "opportunity_id": "sf.job.53-7065.p50",
    "requires_confirmed_abilities": []
   },
   "51-6011": {
    "status": "ok",
-   "opportunity_id": "job.41860.51-6011.median",
+   "opportunity_id": "sf.job.51-6011.p50",
    "requires_confirmed_abilities": []
   },
   "43-9061": {
    "status": "ok",
-   "opportunity_id": "job.41860.43-9061.median",
+   "opportunity_id": "sf.job.43-9061.p50",
    "requires_confirmed_abilities": [
     "edu_at_least_hs"
    ]
   },
   "43-4051": {
    "status": "ok",
-   "opportunity_id": "job.41860.43-4051.median",
+   "opportunity_id": "sf.job.43-4051.p50",
    "requires_confirmed_abilities": [
     "edu_at_least_hs"
    ]
   },
   "43-6014": {
    "status": "ok",
-   "opportunity_id": "job.41860.43-6014.median",
+   "opportunity_id": "sf.job.43-6014.p50",
    "requires_confirmed_abilities": [
     "edu_at_least_hs"
    ]
   },
   "43-4171": {
    "status": "ok",
-   "opportunity_id": "job.41860.43-4171.median",
+   "opportunity_id": "sf.job.43-4171.p50",
    "requires_confirmed_abilities": [
     "edu_at_least_hs"
    ]
   },
   "43-5071": {
    "status": "ok",
-   "opportunity_id": "job.41860.43-5071.median",
+   "opportunity_id": "sf.job.43-5071.p50",
    "requires_confirmed_abilities": [
     "edu_at_least_hs"
    ]
   },
   "43-3071": {
    "status": "ok",
-   "opportunity_id": "job.41860.43-3071.median",
+   "opportunity_id": "sf.job.43-3071.p50",
    "requires_confirmed_abilities": [
     "edu_at_least_hs"
    ]
   },
   "49-9071": {
    "status": "ok",
-   "opportunity_id": "job.41860.49-9071.median",
+   "opportunity_id": "sf.job.49-9071.p50",
    "requires_confirmed_abilities": [
     "edu_at_least_hs"
    ]
   },
   "51-4121": {
    "status": "ok",
-   "opportunity_id": "job.41860.51-4121.median",
+   "opportunity_id": "sf.job.51-4121.p50",
    "requires_confirmed_abilities": [
     "edu_at_least_hs"
    ]
   },
   "39-9031": {
    "status": "ok",
-   "opportunity_id": "job.41860.39-9031.median",
+   "opportunity_id": "sf.job.39-9031.p50",
    "requires_confirmed_abilities": [
     "edu_at_least_hs"
    ]
   },
   "41-3091": {
    "status": "ok",
-   "opportunity_id": "job.41860.41-3091.median",
+   "opportunity_id": "sf.job.41-3091.p50",
    "requires_confirmed_abilities": [
     "edu_at_least_hs"
    ]
   },
   "43-3031": {
    "status": "ok",
-   "opportunity_id": "job.41860.43-3031.median",
+   "opportunity_id": "sf.job.43-3031.p50",
    "requires_confirmed_abilities": [
     "edu_at_least_some_college"
    ]
   },
   "15-1232": {
    "status": "ok",
-   "opportunity_id": "job.41860.15-1232.median",
+   "opportunity_id": "sf.job.15-1232.p50",
    "requires_confirmed_abilities": [
     "edu_at_least_some_college"
    ]
   },
   "49-3023": {
    "status": "ok",
-   "opportunity_id": "job.41860.49-3023.median",
+   "opportunity_id": "sf.job.49-3023.p50",
    "requires_confirmed_abilities": [
-    "award_49_3023"
+    "soc_49_3023_award"
    ]
   },
   "49-2022": {
    "status": "ok",
-   "opportunity_id": "job.41860.49-2022.median",
+   "opportunity_id": "sf.job.49-2022.p50",
    "requires_confirmed_abilities": [
-    "award_49_2022"
+    "soc_49_2022_award"
    ]
   },
   "27-4011": {
    "status": "ok",
-   "opportunity_id": "job.41860.27-4011.median",
+   "opportunity_id": "sf.job.27-4011.p50",
    "requires_confirmed_abilities": [
-    "award_27_4011"
+    "soc_27_4011_award"
    ]
   },
   "23-2011": {
    "status": "ok",
-   "opportunity_id": "job.41860.23-2011.median",
+   "opportunity_id": "sf.job.23-2011.p50",
    "requires_confirmed_abilities": [
     "edu_at_least_associate"
    ]
   },
   "15-1231": {
    "status": "ok",
-   "opportunity_id": "job.41860.15-1231.median",
+   "opportunity_id": "sf.job.15-1231.p50",
    "requires_confirmed_abilities": [
     "edu_at_least_associate"
    ]
   },
   "13-2011": {
    "status": "ok",
-   "opportunity_id": "job.41860.13-2011.median",
+   "opportunity_id": "sf.job.13-2011.p50",
    "requires_confirmed_abilities": [
     "edu_at_least_bachelor"
    ]
   },
   "15-1252": {
    "status": "ok",
-   "opportunity_id": "job.41860.15-1252.median",
+   "opportunity_id": "sf.job.15-1252.p50",
    "requires_confirmed_abilities": [
     "edu_at_least_bachelor"
    ]
   },
   "13-1161": {
    "status": "ok",
-   "opportunity_id": "job.41860.13-1161.median",
+   "opportunity_id": "sf.job.13-1161.p50",
    "requires_confirmed_abilities": [
     "edu_at_least_bachelor"
    ]
   },
   "13-1071": {
    "status": "ok",
-   "opportunity_id": "job.41860.13-1071.median",
+   "opportunity_id": "sf.job.13-1071.p50",
    "requires_confirmed_abilities": [
     "edu_at_least_bachelor"
    ]
   },
   "15-1211": {
    "status": "ok",
-   "opportunity_id": "job.41860.15-1211.median",
+   "opportunity_id": "sf.job.15-1211.p50",
    "requires_confirmed_abilities": [
     "edu_at_least_bachelor"
    ]
   },
   "13-2051": {
    "status": "ok",
-   "opportunity_id": "job.41860.13-2051.median",
+   "opportunity_id": "sf.job.13-2051.p50",
    "requires_confirmed_abilities": [
     "edu_at_least_bachelor"
    ]
   },
   "27-1024": {
    "status": "ok",
-   "opportunity_id": "job.41860.27-1024.median",
+   "opportunity_id": "sf.job.27-1024.p50",
    "requires_confirmed_abilities": [
     "edu_at_least_bachelor"
    ]
   },
   "13-1082": {
    "status": "ok",
-   "opportunity_id": "job.41860.13-1082.median",
+   "opportunity_id": "sf.job.13-1082.p50",
    "requires_confirmed_abilities": [
     "edu_at_least_bachelor"
    ]
   },
   "41-1011": {
    "status": "ok",
-   "opportunity_id": "job.41860.41-1011.median",
+   "opportunity_id": "sf.job.41-1011.p50",
    "requires_confirmed_abilities": [
     "edu_at_least_hs",
-    "exp_related_41_1011"
+    "soc_41_1011_experience"
    ]
   },
   "43-1011": {
    "status": "ok",
-   "opportunity_id": "job.41860.43-1011.median",
+   "opportunity_id": "sf.job.43-1011.p50",
    "requires_confirmed_abilities": [
     "edu_at_least_hs",
-    "exp_related_43_1011"
+    "soc_43_1011_experience"
    ]
   },
   "35-1012": {
    "status": "ok",
-   "opportunity_id": "job.41860.35-1012.median",
+   "opportunity_id": "sf.job.35-1012.p50",
    "requires_confirmed_abilities": [
     "edu_at_least_hs",
-    "exp_related_35_1012"
+    "soc_35_1012_experience"
    ]
   }
  },
  "minimum_food_candidate": {
-  "opportunity_id": "food.41860.home_staples",
+  "opportunity_id": "sf.food.home_staples",
   "monthly": 118.28
  },
  "not_generated": [
@@ -409,7 +415,7 @@
     "food.item.41860.714233"
    ],
    "opportunity": {
-    "opportunity_id": "food.41860.home_staples",
+    "opportunity_id": "sf.food.home_staples",
     "category": "food",
     "label": "自己做·主食为主",
     "spec": {},
@@ -541,7 +547,7 @@
     "food.item.41860.714233"
    ],
    "opportunity": {
-    "opportunity_id": "food.41860.home_varied",
+    "opportunity_id": "sf.food.home_varied",
     "category": "food",
     "label": "自己做·荤素搭配",
     "spec": {},
@@ -676,7 +682,7 @@
     "food.item.41860.714233"
    ],
    "opportunity": {
-    "opportunity_id": "food.41860.home_fresh",
+    "opportunity_id": "sf.food.home_fresh",
     "category": "food",
     "label": "自己做·鲜肉蔬果较多",
     "spec": {},
@@ -816,7 +822,7 @@
     "background.food_spending.41860"
    ],
    "opportunity": {
-    "opportunity_id": "food.41860.cook_delivery.japanese",
+    "opportunity_id": "sf.food.cook_delivery.japanese",
     "category": "food",
     "label": "家里做 + 每周 4 顿外送（日料）",
     "spec": {},
@@ -972,7 +978,7 @@
     "background.food_spending.41860"
    ],
    "opportunity": {
-    "opportunity_id": "food.41860.cook_delivery.chinese",
+    "opportunity_id": "sf.food.cook_delivery.chinese",
     "category": "food",
     "label": "家里做 + 每周 4 顿外送（中餐）",
     "spec": {},
@@ -1128,7 +1134,7 @@
     "background.food_spending.41860"
    ],
    "opportunity": {
-    "opportunity_id": "food.41860.cook_delivery.mexican",
+    "opportunity_id": "sf.food.cook_delivery.mexican",
     "category": "food",
     "label": "家里做 + 每周 4 顿外送（墨西哥菜）",
     "spec": {},
@@ -1284,7 +1290,7 @@
     "background.food_spending.41860"
    ],
    "opportunity": {
-    "opportunity_id": "food.41860.cook_delivery.italian",
+    "opportunity_id": "sf.food.cook_delivery.italian",
     "category": "food",
     "label": "家里做 + 每周 4 顿外送（意式）",
     "spec": {},
@@ -1440,7 +1446,7 @@
     "background.food_spending.41860"
    ],
    "opportunity": {
-    "opportunity_id": "food.41860.cook_delivery.indian",
+    "opportunity_id": "sf.food.cook_delivery.indian",
     "category": "food",
     "label": "家里做 + 每周 4 顿外送（印度菜）",
     "spec": {},
@@ -1596,7 +1602,7 @@
     "background.food_spending.41860"
    ],
    "opportunity": {
-    "opportunity_id": "food.41860.cook_delivery.vietnamese",
+    "opportunity_id": "sf.food.cook_delivery.vietnamese",
     "category": "food",
     "label": "家里做 + 每周 4 顿外送（越南菜）",
     "spec": {},
@@ -1751,7 +1757,7 @@
     "background.food_spending.41860"
    ],
    "opportunity": {
-    "opportunity_id": "food.41860.cook_dine.japanese",
+    "opportunity_id": "sf.food.cook_dine.japanese",
     "category": "food",
     "label": "家里做 + 每周 7 顿外食（日料）",
     "spec": {},
@@ -1904,7 +1910,7 @@
     "background.food_spending.41860"
    ],
    "opportunity": {
-    "opportunity_id": "food.41860.cook_dine.chinese",
+    "opportunity_id": "sf.food.cook_dine.chinese",
     "category": "food",
     "label": "家里做 + 每周 7 顿外食（中餐）",
     "spec": {},
@@ -2057,7 +2063,7 @@
     "background.food_spending.41860"
    ],
    "opportunity": {
-    "opportunity_id": "food.41860.cook_dine.mexican",
+    "opportunity_id": "sf.food.cook_dine.mexican",
     "category": "food",
     "label": "家里做 + 每周 7 顿外食（墨西哥菜）",
     "spec": {},
@@ -2210,7 +2216,7 @@
     "background.food_spending.41860"
    ],
    "opportunity": {
-    "opportunity_id": "food.41860.cook_dine.italian",
+    "opportunity_id": "sf.food.cook_dine.italian",
     "category": "food",
     "label": "家里做 + 每周 7 顿外食（意式）",
     "spec": {},
@@ -2363,7 +2369,7 @@
     "background.food_spending.41860"
    ],
    "opportunity": {
-    "opportunity_id": "food.41860.cook_dine.indian",
+    "opportunity_id": "sf.food.cook_dine.indian",
     "category": "food",
     "label": "家里做 + 每周 7 顿外食（印度菜）",
     "spec": {},
@@ -2516,7 +2522,7 @@
     "background.food_spending.41860"
    ],
    "opportunity": {
-    "opportunity_id": "food.41860.cook_dine.vietnamese",
+    "opportunity_id": "sf.food.cook_dine.vietnamese",
     "category": "food",
     "label": "家里做 + 每周 7 顿外食（越南菜）",
     "spec": {},
@@ -2641,7 +2647,7 @@
     "jobs.oews2024.41860.51-6011"
    ],
    "opportunity": {
-    "opportunity_id": "service.41860.laundry_pickup",
+    "opportunity_id": "sf.service.laundry_pickup",
     "category": "service",
     "label": "洗衣取送（每周一次）",
     "spec": {
@@ -2717,7 +2723,7 @@
     "jobs.oews2024.41860.37-2012"
    ],
    "opportunity": {
-    "opportunity_id": "service.41860.cleaning_biweekly",
+    "opportunity_id": "sf.service.cleaning_biweekly",
     "category": "service",
     "label": "上门保洁（每两周一次）",
     "spec": {
@@ -2793,7 +2799,7 @@
     "jobs.oews2024.41860.37-2012"
    ],
    "opportunity": {
-    "opportunity_id": "service.41860.cleaning_weekly",
+    "opportunity_id": "sf.service.cleaning_weekly",
     "category": "service",
     "label": "上门保洁（每周一次）",
     "spec": {
@@ -2869,7 +2875,7 @@
     "jobs.oews2024.41860.31-9011"
    ],
    "opportunity": {
-    "opportunity_id": "service.41860.massage_studio_1",
+    "opportunity_id": "sf.service.massage_studio_1",
     "category": "service",
     "label": "按摩（店里，每月一次）",
     "spec": {
@@ -2950,7 +2956,7 @@
     "jobs.oews2024.41860.31-9011"
    ],
    "opportunity": {
-    "opportunity_id": "service.41860.massage_studio_2",
+    "opportunity_id": "sf.service.massage_studio_2",
     "category": "service",
     "label": "按摩（店里，每月两次）",
     "spec": {
@@ -3031,7 +3037,7 @@
     "jobs.oews2024.41860.31-9011"
    ],
    "opportunity": {
-    "opportunity_id": "service.41860.massage_home_1",
+    "opportunity_id": "sf.service.massage_home_1",
     "category": "service",
     "label": "上门按摩（每月一次）",
     "spec": {
@@ -3114,7 +3120,7 @@
     "goods.energystar.clothes_washer.2390459"
    ],
    "opportunity": {
-    "opportunity_id": "device.41860.washer_top",
+    "opportunity_id": "sf.durable.washer_top",
     "category": "durable",
     "label": "顶开洗衣机",
     "spec": {
@@ -3177,6 +3183,21 @@
       "goods_factor 1.089367（intake rpp_goods_spatial_adjustment@1）"
      ],
      "rule": "全国类别设定 700 × 商品类空间换算系数，四舍五入到分"
+    },
+    "failure": {
+     "kind": "none_within_horizon",
+     "annual_probability": null,
+     "note": "没有公开的型号或类别故障率资料（ENERGY STAR 只有认证事实，保修条款不是故障分布）；设定寿命 10 年，3 年模拟期内不建模随机故障",
+     "source": {
+      "kind": "synthetic",
+      "observed_on": "2026-10-23",
+      "geography_scope": "CBSA2023 41860 San Francisco-Oakland-Fremont 都会区",
+      "mapping_version": "e3b-life-items-v1",
+      "provenance": null,
+      "synthetic_note": "故障规则是登记的设定（device_failure_v1）：没有公开的型号或类别故障率资料，保修条款不是故障分布",
+      "inputs": [],
+      "rule": "成套设备部件独立、任一部件坏就整套不能用：1 − Π(1 − p)；全部部件 3 年内不建模随机故障时写 none_within_horizon"
+     }
     }
    }
   },
@@ -3195,7 +3216,7 @@
     "goods.energystar.clothes_washer.2788507"
    ],
    "opportunity": {
-    "opportunity_id": "device.41860.washer_front",
+    "opportunity_id": "sf.durable.washer_front",
     "category": "durable",
     "label": "前开洗衣机",
     "spec": {
@@ -3258,6 +3279,21 @@
       "goods_factor 1.089367（intake rpp_goods_spatial_adjustment@1）"
      ],
      "rule": "全国类别设定 1000 × 商品类空间换算系数，四舍五入到分"
+    },
+    "failure": {
+     "kind": "none_within_horizon",
+     "annual_probability": null,
+     "note": "没有公开的型号或类别故障率资料（ENERGY STAR 只有认证事实，保修条款不是故障分布）；设定寿命 10 年，3 年模拟期内不建模随机故障",
+     "source": {
+      "kind": "synthetic",
+      "observed_on": "2026-10-23",
+      "geography_scope": "CBSA2023 41860 San Francisco-Oakland-Fremont 都会区",
+      "mapping_version": "e3b-life-items-v1",
+      "provenance": null,
+      "synthetic_note": "故障规则是登记的设定（device_failure_v1）：没有公开的型号或类别故障率资料，保修条款不是故障分布",
+      "inputs": [],
+      "rule": "成套设备部件独立、任一部件坏就整套不能用：1 − Π(1 − p)；全部部件 3 年内不建模随机故障时写 none_within_horizon"
+     }
     }
    }
   },
@@ -3277,7 +3313,7 @@
     "goods.energystar.clothes_dryer.2683792"
    ],
    "opportunity": {
-    "opportunity_id": "device.41860.pair_top_dryer",
+    "opportunity_id": "sf.durable.pair_top_dryer",
     "category": "durable",
     "label": "顶开洗衣机 + 电烘干机一套",
     "spec": {
@@ -3344,6 +3380,21 @@
       "goods_factor 1.089367（intake rpp_goods_spatial_adjustment@1）"
      ],
      "rule": "全国类别设定 1400 × 商品类空间换算系数，四舍五入到分"
+    },
+    "failure": {
+     "kind": "none_within_horizon",
+     "annual_probability": null,
+     "note": "没有公开的型号或类别故障率资料（ENERGY STAR 只有认证事实，保修条款不是故障分布）；设定寿命 10 年，3 年模拟期内不建模随机故障；同洗衣机：没有公开故障率资料，设定寿命 10 年，3 年模拟期内不建模随机故障",
+     "source": {
+      "kind": "synthetic",
+      "observed_on": "2026-10-23",
+      "geography_scope": "CBSA2023 41860 San Francisco-Oakland-Fremont 都会区",
+      "mapping_version": "e3b-life-items-v1",
+      "provenance": null,
+      "synthetic_note": "故障规则是登记的设定（device_failure_v1）：没有公开的型号或类别故障率资料，保修条款不是故障分布",
+      "inputs": [],
+      "rule": "成套设备部件独立、任一部件坏就整套不能用：1 − Π(1 − p)；全部部件 3 年内不建模随机故障时写 none_within_horizon"
+     }
     }
    }
   },
@@ -3363,7 +3414,7 @@
     "goods.energystar.clothes_dryer.2683792"
    ],
    "opportunity": {
-    "opportunity_id": "device.41860.pair_front_dryer",
+    "opportunity_id": "sf.durable.pair_front_dryer",
     "category": "durable",
     "label": "前开洗衣机 + 电烘干机一套",
     "spec": {
@@ -3430,6 +3481,21 @@
       "goods_factor 1.089367（intake rpp_goods_spatial_adjustment@1）"
      ],
      "rule": "全国类别设定 1700 × 商品类空间换算系数，四舍五入到分"
+    },
+    "failure": {
+     "kind": "none_within_horizon",
+     "annual_probability": null,
+     "note": "没有公开的型号或类别故障率资料（ENERGY STAR 只有认证事实，保修条款不是故障分布）；设定寿命 10 年，3 年模拟期内不建模随机故障；同洗衣机：没有公开故障率资料，设定寿命 10 年，3 年模拟期内不建模随机故障",
+     "source": {
+      "kind": "synthetic",
+      "observed_on": "2026-10-23",
+      "geography_scope": "CBSA2023 41860 San Francisco-Oakland-Fremont 都会区",
+      "mapping_version": "e3b-life-items-v1",
+      "provenance": null,
+      "synthetic_note": "故障规则是登记的设定（device_failure_v1）：没有公开的型号或类别故障率资料，保修条款不是故障分布",
+      "inputs": [],
+      "rule": "成套设备部件独立、任一部件坏就整套不能用：1 − Π(1 − p)；全部部件 3 年内不建模随机故障时写 none_within_horizon"
+     }
     }
    }
   },
@@ -3448,7 +3514,7 @@
     "goods.energystar.combo_washer_dryer.4520752"
    ],
    "opportunity": {
-    "opportunity_id": "device.41860.combo",
+    "opportunity_id": "sf.durable.combo",
     "category": "durable",
     "label": "洗烘一体机",
     "spec": {
@@ -3511,6 +3577,21 @@
       "goods_factor 1.089367（intake rpp_goods_spatial_adjustment@1）"
      ],
      "rule": "全国类别设定 1600 × 商品类空间换算系数，四舍五入到分"
+    },
+    "failure": {
+     "kind": "none_within_horizon",
+     "annual_probability": null,
+     "note": "同洗衣机：没有公开故障率资料，设定寿命 10 年，3 年模拟期内不建模随机故障",
+     "source": {
+      "kind": "synthetic",
+      "observed_on": "2026-10-23",
+      "geography_scope": "CBSA2023 41860 San Francisco-Oakland-Fremont 都会区",
+      "mapping_version": "e3b-life-items-v1",
+      "provenance": null,
+      "synthetic_note": "故障规则是登记的设定（device_failure_v1）：没有公开的型号或类别故障率资料，保修条款不是故障分布",
+      "inputs": [],
+      "rule": "成套设备部件独立、任一部件坏就整套不能用：1 − Π(1 − p)；全部部件 3 年内不建模随机故障时写 none_within_horizon"
+     }
     }
    }
   },
@@ -3519,11 +3600,12 @@
    "status": "executable",
    "gaps": [],
    "assumptions": [
-    "equipment_category_v1"
+    "equipment_category_v1",
+    "device_failure_v1"
    ],
    "records": [],
    "opportunity": {
-    "opportunity_id": "equipment.41860.tennis_racket",
+    "opportunity_id": "sf.durable.tennis_racket",
     "category": "durable",
     "label": "网球拍",
     "spec": {},
@@ -3576,6 +3658,21 @@
      ],
      "rule": "全国类别设定 100 × 商品类空间换算系数，四舍五入到分"
     },
+    "failure": {
+     "kind": "none_within_horizon",
+     "annual_probability": null,
+     "note": "没有公开的故障率资料；设定寿命 5 年长于 3 年模拟期，期内不建模随机损坏",
+     "source": {
+      "kind": "synthetic",
+      "observed_on": "2026-10-23",
+      "geography_scope": "CBSA2023 41860 San Francisco-Oakland-Fremont 都会区",
+      "mapping_version": "e3b-life-items-v1",
+      "provenance": null,
+      "synthetic_note": "故障规则是登记的设定（device_failure_v1）：没有公开的型号或类别故障率资料，保修条款不是故障分布",
+      "inputs": [],
+      "rule": "成套设备部件独立、任一部件坏就整套不能用：1 − Π(1 − p)；全部部件 3 年内不建模随机故障时写 none_within_horizon"
+     }
+    },
     "equipment": {
      "provides": [
       "racket_playable"
@@ -3589,11 +3686,12 @@
    "status": "executable",
    "gaps": [],
    "assumptions": [
-    "equipment_category_v1"
+    "equipment_category_v1",
+    "device_failure_v1"
    ],
    "records": [],
    "opportunity": {
-    "opportunity_id": "equipment.41860.acoustic_guitar",
+    "opportunity_id": "sf.durable.acoustic_guitar",
     "category": "durable",
     "label": "民谣吉他",
     "spec": {},
@@ -3646,6 +3744,21 @@
      ],
      "rule": "全国类别设定 200 × 商品类空间换算系数，四舍五入到分"
     },
+    "failure": {
+     "kind": "none_within_horizon",
+     "annual_probability": null,
+     "note": "没有公开的故障率资料；设定寿命 8 年长于 3 年模拟期，期内不建模随机损坏",
+     "source": {
+      "kind": "synthetic",
+      "observed_on": "2026-10-23",
+      "geography_scope": "CBSA2023 41860 San Francisco-Oakland-Fremont 都会区",
+      "mapping_version": "e3b-life-items-v1",
+      "provenance": null,
+      "synthetic_note": "故障规则是登记的设定（device_failure_v1）：没有公开的型号或类别故障率资料，保修条款不是故障分布",
+      "inputs": [],
+      "rule": "成套设备部件独立、任一部件坏就整套不能用：1 − Π(1 − p)；全部部件 3 年内不建模随机故障时写 none_within_horizon"
+     }
+    },
     "equipment": {
      "provides": [
       "guitar_playable"
@@ -3668,7 +3781,7 @@
     "jobs.oews2024.41860.39-9031"
    ],
    "opportunity": {
-    "opportunity_id": "activity.41860.group_fitness",
+    "opportunity_id": "sf.experience.group_fitness",
     "category": "experience",
     "label": "团体健身课（一次）",
     "spec": {
@@ -3753,7 +3866,7 @@
     "jobs.oews2024.41860.39-9031"
    ],
    "opportunity": {
-    "opportunity_id": "activity.41860.yoga_class",
+    "opportunity_id": "sf.experience.yoga_class",
     "category": "experience",
     "label": "瑜伽课（一次）",
     "spec": {
@@ -3834,7 +3947,7 @@
    ],
    "records": [],
    "opportunity": {
-    "opportunity_id": "activity.41860.tennis_rental",
+    "opportunity_id": "sf.experience.tennis_rental",
     "category": "experience",
     "label": "网球场地连球拍租借（一次）",
     "spec": {
@@ -3918,7 +4031,7 @@
    ],
    "records": [],
    "opportunity": {
-    "opportunity_id": "activity.41860.tennis_own",
+    "opportunity_id": "sf.experience.tennis_own",
     "category": "experience",
     "label": "网球场地（自带球拍，一次）",
     "spec": {
@@ -4003,7 +4116,7 @@
     "jobs.oews2024.41860.25-3021"
    ],
    "opportunity": {
-    "opportunity_id": "activity.41860.guitar_lesson",
+    "opportunity_id": "sf.experience.guitar_lesson",
     "category": "experience",
     "label": "吉他小班课（一次）",
     "spec": {
@@ -4086,7 +4199,7 @@
    ],
    "records": [],
    "opportunity": {
-    "opportunity_id": "activity.41860.guitar_practice",
+    "opportunity_id": "sf.experience.guitar_practice",
     "category": "experience",
     "label": "在家练吉他（一次 1 小时）",
     "spec": {},
@@ -4168,7 +4281,7 @@
     "jobs.oews2024.41860.25-3021"
    ],
    "opportunity": {
-    "opportunity_id": "activity.41860.art_class",
+    "opportunity_id": "sf.experience.art_class",
     "category": "experience",
     "label": "绘画课（一次）",
     "spec": {
@@ -4254,7 +4367,7 @@
     "jobs.oews2024.41860.25-3021"
    ],
    "opportunity": {
-    "opportunity_id": "activity.41860.cooking_class",
+    "opportunity_id": "sf.experience.cooking_class",
     "category": "experience",
     "label": "烹饪课（一次，不代替正餐）",
     "spec": {
@@ -4338,7 +4451,7 @@
    ],
    "records": [],
    "opportunity": {
-    "opportunity_id": "activity.41860.museum_visit",
+    "opportunity_id": "sf.experience.museum_visit",
     "category": "experience",
     "label": "参观博物馆（一次）",
     "spec": {},
@@ -4415,7 +4528,7 @@
     "b.jobs.41860.35"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.35-3023.p25",
+    "opportunity_id": "sf.job.35-3023.p25",
     "category": "job",
     "label": "快餐与柜台服务员·工资在本职业 25 分位",
     "spec": {
@@ -4510,13 +4623,13 @@
     "b.jobs.41860.35"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.35-3023.median",
+    "opportunity_id": "sf.job.35-3023.p50",
     "category": "job",
     "label": "快餐与柜台服务员·工资在本职业中位数",
     "spec": {
      "work_mode": "onsite",
      "weekly_hours": 35.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
     "quality": "Fast Food and Counter Workers；每周约 35 小时、每月 22 个工作日、到岗 22 天；没有资格要求",
@@ -4583,7 +4696,7 @@
       "b.jobs.41860.35",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 40421.03（cpi_u_period_conversion@1（×0.998790））× 每周 35 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 40421.03（cpi_u_period_conversion@1（×0.998790））× 每周 35 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -4605,7 +4718,7 @@
     "b.jobs.41860.35"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.35-3023.p75",
+    "opportunity_id": "sf.job.35-3023.p75",
     "category": "job",
     "label": "快餐与柜台服务员·工资在本职业 75 分位",
     "spec": {
@@ -4700,7 +4813,7 @@
     "b.jobs.41860.41"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.41-2011.p25",
+    "opportunity_id": "sf.job.41-2011.p25",
     "category": "job",
     "label": "收银员·工资在本职业 25 分位",
     "spec": {
@@ -4795,13 +4908,13 @@
     "b.jobs.41860.41"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.41-2011.median",
+    "opportunity_id": "sf.job.41-2011.p50",
     "category": "job",
     "label": "收银员·工资在本职业中位数",
     "spec": {
      "work_mode": "onsite",
      "weekly_hours": 40.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
     "quality": "Cashiers；每周约 40 小时、每月 22 个工作日、到岗 22 天；没有资格要求",
@@ -4868,7 +4981,7 @@
       "b.jobs.41860.41",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 39472.18（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 39472.18（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -4890,7 +5003,7 @@
     "b.jobs.41860.41"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.41-2011.p75",
+    "opportunity_id": "sf.job.41-2011.p75",
     "category": "job",
     "label": "收银员·工资在本职业 75 分位",
     "spec": {
@@ -4985,7 +5098,7 @@
     "b.jobs.41860.41"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.41-2031.p25",
+    "opportunity_id": "sf.job.41-2031.p25",
     "category": "job",
     "label": "零售销售员·工资在本职业 25 分位",
     "spec": {
@@ -5080,13 +5193,13 @@
     "b.jobs.41860.41"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.41-2031.median",
+    "opportunity_id": "sf.job.41-2031.p50",
     "category": "job",
     "label": "零售销售员·工资在本职业中位数",
     "spec": {
      "work_mode": "onsite",
      "weekly_hours": 40.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
     "quality": "Retail Salespersons；每周约 40 小时、每月 22 个工作日、到岗 22 天；没有资格要求",
@@ -5153,7 +5266,7 @@
       "b.jobs.41860.41",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 42438.59（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 42438.59（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -5175,7 +5288,7 @@
     "b.jobs.41860.41"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.41-2031.p75",
+    "opportunity_id": "sf.job.41-2031.p75",
     "category": "job",
     "label": "零售销售员·工资在本职业 75 分位",
     "spec": {
@@ -5270,7 +5383,7 @@
     "b.jobs.41860.35"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.35-3031.p25",
+    "opportunity_id": "sf.job.35-3031.p25",
     "category": "job",
     "label": "餐厅服务员·工资在本职业 25 分位",
     "spec": {
@@ -5365,13 +5478,13 @@
     "b.jobs.41860.35"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.35-3031.median",
+    "opportunity_id": "sf.job.35-3031.p50",
     "category": "job",
     "label": "餐厅服务员·工资在本职业中位数",
     "spec": {
      "work_mode": "onsite",
      "weekly_hours": 35.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
     "quality": "Waiters and Waitresses；每周约 35 小时、每月 22 个工作日、到岗 22 天；没有资格要求",
@@ -5438,7 +5551,7 @@
       "b.jobs.41860.35",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 37314.8（cpi_u_period_conversion@1（×0.998790））× 每周 35 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 37314.8（cpi_u_period_conversion@1（×0.998790））× 每周 35 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -5460,7 +5573,7 @@
     "b.jobs.41860.35"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.35-3031.p75",
+    "opportunity_id": "sf.job.35-3031.p75",
     "category": "job",
     "label": "餐厅服务员·工资在本职业 75 分位",
     "spec": {
@@ -5555,7 +5668,7 @@
     "b.jobs.41860.35"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.35-9021.p25",
+    "opportunity_id": "sf.job.35-9021.p25",
     "category": "job",
     "label": "洗碗工·工资在本职业 25 分位",
     "spec": {
@@ -5650,13 +5763,13 @@
     "b.jobs.41860.35"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.35-9021.median",
+    "opportunity_id": "sf.job.35-9021.p50",
     "category": "job",
     "label": "洗碗工·工资在本职业中位数",
     "spec": {
      "work_mode": "onsite",
      "weekly_hours": 35.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
     "quality": "Dishwashers；每周约 35 小时、每月 22 个工作日、到岗 22 天；没有资格要求",
@@ -5723,7 +5836,7 @@
       "b.jobs.41860.35",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 40131.39（cpi_u_period_conversion@1（×0.998790））× 每周 35 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 40131.39（cpi_u_period_conversion@1（×0.998790））× 每周 35 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -5745,7 +5858,7 @@
     "b.jobs.41860.35"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.35-9021.p75",
+    "opportunity_id": "sf.job.35-9021.p75",
     "category": "job",
     "label": "洗碗工·工资在本职业 75 分位",
     "spec": {
@@ -5841,7 +5954,7 @@
     "b.jobs.41860.35"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.35-2014.p25",
+    "opportunity_id": "sf.job.35-2014.p25",
     "category": "job",
     "label": "餐厅厨师·工资在本职业 25 分位",
     "spec": {
@@ -5850,7 +5963,7 @@
      "wage_position": "p25"
     },
     "unit": "position",
-    "quality": "Cooks, Restaurant；每周约 35 小时、每月 22 个工作日、到岗 22 天；要求 exp_related_35_2014",
+    "quality": "Cooks, Restaurant；每周约 35 小时、每月 22 个工作日、到岗 22 天；要求 soc_35_2014_experience",
     "availability": "available",
     "price": null,
     "compensation": {
@@ -5867,7 +5980,7 @@
      "code": "35-2014"
     },
     "eligibility": [
-     "ability:exp_related_35_2014"
+     "ability:soc_35_2014_experience"
     ],
     "targets": [],
     "functions": [],
@@ -5939,16 +6052,16 @@
     "b.jobs.41860.35"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.35-2014.median",
+    "opportunity_id": "sf.job.35-2014.p50",
     "category": "job",
     "label": "餐厅厨师·工资在本职业中位数",
     "spec": {
      "work_mode": "onsite",
      "weekly_hours": 35.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
-    "quality": "Cooks, Restaurant；每周约 35 小时、每月 22 个工作日、到岗 22 天；要求 exp_related_35_2014",
+    "quality": "Cooks, Restaurant；每周约 35 小时、每月 22 个工作日、到岗 22 天；要求 soc_35_2014_experience",
     "availability": "available",
     "price": null,
     "compensation": {
@@ -5965,7 +6078,7 @@
      "code": "35-2014"
     },
     "eligibility": [
-     "ability:exp_related_35_2014"
+     "ability:soc_35_2014_experience"
     ],
     "targets": [],
     "functions": [],
@@ -6014,7 +6127,7 @@
       "b.jobs.41860.35",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 45175.28（cpi_u_period_conversion@1（×0.998790））× 每周 35 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 45175.28（cpi_u_period_conversion@1（×0.998790））× 每周 35 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -6037,7 +6150,7 @@
     "b.jobs.41860.35"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.35-2014.p75",
+    "opportunity_id": "sf.job.35-2014.p75",
     "category": "job",
     "label": "餐厅厨师·工资在本职业 75 分位",
     "spec": {
@@ -6046,7 +6159,7 @@
      "wage_position": "p75"
     },
     "unit": "position",
-    "quality": "Cooks, Restaurant；每周约 35 小时、每月 22 个工作日、到岗 22 天；要求 exp_related_35_2014",
+    "quality": "Cooks, Restaurant；每周约 35 小时、每月 22 个工作日、到岗 22 天；要求 soc_35_2014_experience",
     "availability": "available",
     "price": null,
     "compensation": {
@@ -6063,7 +6176,7 @@
      "code": "35-2014"
     },
     "eligibility": [
-     "ability:exp_related_35_2014"
+     "ability:soc_35_2014_experience"
     ],
     "targets": [],
     "functions": [],
@@ -6134,7 +6247,7 @@
     "b.jobs.41860.37"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.37-2011.p25",
+    "opportunity_id": "sf.job.37-2011.p25",
     "category": "job",
     "label": "清洁工（楼宇）·工资在本职业 25 分位",
     "spec": {
@@ -6229,13 +6342,13 @@
     "b.jobs.41860.37"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.37-2011.median",
+    "opportunity_id": "sf.job.37-2011.p50",
     "category": "job",
     "label": "清洁工（楼宇）·工资在本职业中位数",
     "spec": {
      "work_mode": "onsite",
      "weekly_hours": 40.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
     "quality": "Janitors and Cleaners, Except Maids and Housekeeping Cleaners；每周约 40 小时、每月 22 个工作日、到岗 22 天；没有资格要求",
@@ -6302,7 +6415,7 @@
       "b.jobs.41860.37",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 43477.33（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 43477.33（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -6324,7 +6437,7 @@
     "b.jobs.41860.37"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.37-2011.p75",
+    "opportunity_id": "sf.job.37-2011.p75",
     "category": "job",
     "label": "清洁工（楼宇）·工资在本职业 75 分位",
     "spec": {
@@ -6419,7 +6532,7 @@
     "b.jobs.41860.37"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.37-2012.p25",
+    "opportunity_id": "sf.job.37-2012.p25",
     "category": "job",
     "label": "家政与客房清洁员·工资在本职业 25 分位",
     "spec": {
@@ -6514,13 +6627,13 @@
     "b.jobs.41860.37"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.37-2012.median",
+    "opportunity_id": "sf.job.37-2012.p50",
     "category": "job",
     "label": "家政与客房清洁员·工资在本职业中位数",
     "spec": {
      "work_mode": "onsite",
      "weekly_hours": 40.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
     "quality": "Maids and Housekeeping Cleaners；每周约 40 小时、每月 22 个工作日、到岗 22 天；没有资格要求",
@@ -6587,7 +6700,7 @@
       "b.jobs.41860.37",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 45614.74（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 45614.74（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -6609,7 +6722,7 @@
     "b.jobs.41860.37"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.37-2012.p75",
+    "opportunity_id": "sf.job.37-2012.p75",
     "category": "job",
     "label": "家政与客房清洁员·工资在本职业 75 分位",
     "spec": {
@@ -6704,7 +6817,7 @@
     "b.jobs.41860.37"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.37-3011.p25",
+    "opportunity_id": "sf.job.37-3011.p25",
     "category": "job",
     "label": "园林绿化工·工资在本职业 25 分位",
     "spec": {
@@ -6799,13 +6912,13 @@
     "b.jobs.41860.37"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.37-3011.median",
+    "opportunity_id": "sf.job.37-3011.p50",
     "category": "job",
     "label": "园林绿化工·工资在本职业中位数",
     "spec": {
      "work_mode": "onsite",
      "weekly_hours": 40.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
     "quality": "Landscaping and Groundskeeping Workers；每周约 40 小时、每月 22 个工作日、到岗 22 天；没有资格要求",
@@ -6872,7 +6985,7 @@
       "b.jobs.41860.37",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 48151.67（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 48151.67（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -6894,7 +7007,7 @@
     "b.jobs.41860.37"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.37-3011.p75",
+    "opportunity_id": "sf.job.37-3011.p75",
     "category": "job",
     "label": "园林绿化工·工资在本职业 75 分位",
     "spec": {
@@ -6989,7 +7102,7 @@
     "b.jobs.41860.53"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.53-7062.p25",
+    "opportunity_id": "sf.job.53-7062.p25",
     "category": "job",
     "label": "搬运与装卸工·工资在本职业 25 分位",
     "spec": {
@@ -7084,13 +7197,13 @@
     "b.jobs.41860.53"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.53-7062.median",
+    "opportunity_id": "sf.job.53-7062.p50",
     "category": "job",
     "label": "搬运与装卸工·工资在本职业中位数",
     "spec": {
      "work_mode": "onsite",
      "weekly_hours": 40.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
     "quality": "Laborers and Freight, Stock, and Material Movers, Hand；每周约 40 小时、每月 22 个工作日、到岗 22 天；没有资格要求",
@@ -7157,7 +7270,7 @@
       "b.jobs.41860.53",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 48161.66（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 48161.66（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -7179,7 +7292,7 @@
     "b.jobs.41860.53"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.53-7062.p75",
+    "opportunity_id": "sf.job.53-7062.p75",
     "category": "job",
     "label": "搬运与装卸工·工资在本职业 75 分位",
     "spec": {
@@ -7274,7 +7387,7 @@
     "b.jobs.41860.53"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.53-7065.p25",
+    "opportunity_id": "sf.job.53-7065.p25",
     "category": "job",
     "label": "理货与拣货员·工资在本职业 25 分位",
     "spec": {
@@ -7369,13 +7482,13 @@
     "b.jobs.41860.53"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.53-7065.median",
+    "opportunity_id": "sf.job.53-7065.p50",
     "category": "job",
     "label": "理货与拣货员·工资在本职业中位数",
     "spec": {
      "work_mode": "onsite",
      "weekly_hours": 40.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
     "quality": "Stockers and Order Fillers；每周约 40 小时、每月 22 个工作日、到岗 22 天；没有资格要求",
@@ -7442,7 +7555,7 @@
       "b.jobs.41860.53",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 44576（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 44576（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -7464,7 +7577,7 @@
     "b.jobs.41860.53"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.53-7065.p75",
+    "opportunity_id": "sf.job.53-7065.p75",
     "category": "job",
     "label": "理货与拣货员·工资在本职业 75 分位",
     "spec": {
@@ -7559,7 +7672,7 @@
     "b.jobs.41860.51"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.51-6011.p25",
+    "opportunity_id": "sf.job.51-6011.p25",
     "category": "job",
     "label": "洗衣与干洗工·工资在本职业 25 分位",
     "spec": {
@@ -7654,13 +7767,13 @@
     "b.jobs.41860.51"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.51-6011.median",
+    "opportunity_id": "sf.job.51-6011.p50",
     "category": "job",
     "label": "洗衣与干洗工·工资在本职业中位数",
     "spec": {
      "work_mode": "onsite",
      "weekly_hours": 40.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
     "quality": "Laundry and Dry-Cleaning Workers；每周约 40 小时、每月 22 个工作日、到岗 22 天；没有资格要求",
@@ -7727,7 +7840,7 @@
       "b.jobs.41860.51",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 41599.61（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 41599.61（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -7749,7 +7862,7 @@
     "b.jobs.41860.51"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.51-6011.p75",
+    "opportunity_id": "sf.job.51-6011.p75",
     "category": "job",
     "label": "洗衣与干洗工·工资在本职业 75 分位",
     "spec": {
@@ -7844,7 +7957,7 @@
     "b.jobs.41860.43"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.43-9061.p25",
+    "opportunity_id": "sf.job.43-9061.p25",
     "category": "job",
     "label": "办公室文员·工资在本职业 25 分位",
     "spec": {
@@ -7941,13 +8054,13 @@
     "b.jobs.41860.43"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.43-9061.median",
+    "opportunity_id": "sf.job.43-9061.p50",
     "category": "job",
     "label": "办公室文员·工资在本职业中位数",
     "spec": {
      "work_mode": "onsite",
      "weekly_hours": 40.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
     "quality": "Office Clerks, General；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 edu_at_least_hs",
@@ -8016,7 +8129,7 @@
       "b.jobs.41860.43",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 55722.5（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 55722.5（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -8038,7 +8151,7 @@
     "b.jobs.41860.43"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.43-9061.p75",
+    "opportunity_id": "sf.job.43-9061.p75",
     "category": "job",
     "label": "办公室文员·工资在本职业 75 分位",
     "spec": {
@@ -8135,7 +8248,7 @@
     "b.jobs.41860.43"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.43-4051.p25",
+    "opportunity_id": "sf.job.43-4051.p25",
     "category": "job",
     "label": "客服代表·工资在本职业 25 分位",
     "spec": {
@@ -8232,13 +8345,13 @@
     "b.jobs.41860.43"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.43-4051.median",
+    "opportunity_id": "sf.job.43-4051.p50",
     "category": "job",
     "label": "客服代表·工资在本职业中位数",
     "spec": {
      "work_mode": "hybrid",
      "weekly_hours": 40.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
     "quality": "Customer Service Representatives；每周约 40 小时、每月 22 个工作日、到岗 13 天；要求 edu_at_least_hs",
@@ -8307,7 +8420,7 @@
       "b.jobs.41860.43",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 56331.76（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 56331.76（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -8329,7 +8442,7 @@
     "b.jobs.41860.43"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.43-4051.p75",
+    "opportunity_id": "sf.job.43-4051.p75",
     "category": "job",
     "label": "客服代表·工资在本职业 75 分位",
     "spec": {
@@ -8426,7 +8539,7 @@
     "b.jobs.41860.43"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.43-6014.p25",
+    "opportunity_id": "sf.job.43-6014.p25",
     "category": "job",
     "label": "秘书与行政助理·工资在本职业 25 分位",
     "spec": {
@@ -8523,13 +8636,13 @@
     "b.jobs.41860.43"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.43-6014.median",
+    "opportunity_id": "sf.job.43-6014.p50",
     "category": "job",
     "label": "秘书与行政助理·工资在本职业中位数",
     "spec": {
      "work_mode": "onsite",
      "weekly_hours": 40.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
     "quality": "Secretaries and Administrative Assistants, Except Legal, Medical, and Executive；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 edu_at_least_hs",
@@ -8598,7 +8711,7 @@
       "b.jobs.41860.43",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 60247.02（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 60247.02（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -8620,7 +8733,7 @@
     "b.jobs.41860.43"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.43-6014.p75",
+    "opportunity_id": "sf.job.43-6014.p75",
     "category": "job",
     "label": "秘书与行政助理·工资在本职业 75 分位",
     "spec": {
@@ -8717,7 +8830,7 @@
     "b.jobs.41860.43"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.43-4171.p25",
+    "opportunity_id": "sf.job.43-4171.p25",
     "category": "job",
     "label": "前台与咨询员·工资在本职业 25 分位",
     "spec": {
@@ -8814,13 +8927,13 @@
     "b.jobs.41860.43"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.43-4171.median",
+    "opportunity_id": "sf.job.43-4171.p50",
     "category": "job",
     "label": "前台与咨询员·工资在本职业中位数",
     "spec": {
      "work_mode": "onsite",
      "weekly_hours": 40.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
     "quality": "Receptionists and Information Clerks；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 edu_at_least_hs",
@@ -8889,7 +9002,7 @@
       "b.jobs.41860.43",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 48001.85（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 48001.85（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -8911,7 +9024,7 @@
     "b.jobs.41860.43"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.43-4171.p75",
+    "opportunity_id": "sf.job.43-4171.p75",
     "category": "job",
     "label": "前台与咨询员·工资在本职业 75 分位",
     "spec": {
@@ -9008,7 +9121,7 @@
     "b.jobs.41860.43"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.43-5071.p25",
+    "opportunity_id": "sf.job.43-5071.p25",
     "category": "job",
     "label": "收发与库存文员·工资在本职业 25 分位",
     "spec": {
@@ -9105,13 +9218,13 @@
     "b.jobs.41860.43"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.43-5071.median",
+    "opportunity_id": "sf.job.43-5071.p50",
     "category": "job",
     "label": "收发与库存文员·工资在本职业中位数",
     "spec": {
      "work_mode": "onsite",
      "weekly_hours": 40.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
     "quality": "Shipping, Receiving, and Inventory Clerks；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 edu_at_least_hs",
@@ -9180,7 +9293,7 @@
       "b.jobs.41860.43",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 48940.71（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 48940.71（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -9202,7 +9315,7 @@
     "b.jobs.41860.43"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.43-5071.p75",
+    "opportunity_id": "sf.job.43-5071.p75",
     "category": "job",
     "label": "收发与库存文员·工资在本职业 75 分位",
     "spec": {
@@ -9299,7 +9412,7 @@
     "b.jobs.41860.43"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.43-3071.p25",
+    "opportunity_id": "sf.job.43-3071.p25",
     "category": "job",
     "label": "银行柜员·工资在本职业 25 分位",
     "spec": {
@@ -9396,13 +9509,13 @@
     "b.jobs.41860.43"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.43-3071.median",
+    "opportunity_id": "sf.job.43-3071.p50",
     "category": "job",
     "label": "银行柜员·工资在本职业中位数",
     "spec": {
      "work_mode": "onsite",
      "weekly_hours": 40.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
     "quality": "Tellers；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 edu_at_least_hs",
@@ -9471,7 +9584,7 @@
       "b.jobs.41860.43",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 47792.11（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 47792.11（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -9493,7 +9606,7 @@
     "b.jobs.41860.43"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.43-3071.p75",
+    "opportunity_id": "sf.job.43-3071.p75",
     "category": "job",
     "label": "银行柜员·工资在本职业 75 分位",
     "spec": {
@@ -9590,7 +9703,7 @@
     "b.jobs.41860.49"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.49-9071.p25",
+    "opportunity_id": "sf.job.49-9071.p25",
     "category": "job",
     "label": "综合维修工·工资在本职业 25 分位",
     "spec": {
@@ -9687,13 +9800,13 @@
     "b.jobs.41860.49"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.49-9071.median",
+    "opportunity_id": "sf.job.49-9071.p50",
     "category": "job",
     "label": "综合维修工·工资在本职业中位数",
     "spec": {
      "work_mode": "onsite",
      "weekly_hours": 40.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
     "quality": "Maintenance and Repair Workers, General；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 edu_at_least_hs",
@@ -9762,7 +9875,7 @@
       "b.jobs.41860.49",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 63393.21（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 63393.21（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -9784,7 +9897,7 @@
     "b.jobs.41860.49"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.49-9071.p75",
+    "opportunity_id": "sf.job.49-9071.p75",
     "category": "job",
     "label": "综合维修工·工资在本职业 75 分位",
     "spec": {
@@ -9881,7 +9994,7 @@
     "b.jobs.41860.51"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.51-4121.p25",
+    "opportunity_id": "sf.job.51-4121.p25",
     "category": "job",
     "label": "焊工·工资在本职业 25 分位",
     "spec": {
@@ -9978,13 +10091,13 @@
     "b.jobs.41860.51"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.51-4121.median",
+    "opportunity_id": "sf.job.51-4121.p50",
     "category": "job",
     "label": "焊工·工资在本职业中位数",
     "spec": {
      "work_mode": "onsite",
      "weekly_hours": 40.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
     "quality": "Welders, Cutters, Solderers, and Brazers；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 edu_at_least_hs",
@@ -10053,7 +10166,7 @@
       "b.jobs.41860.51",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 63812.7（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 63812.7（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -10075,7 +10188,7 @@
     "b.jobs.41860.51"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.51-4121.p75",
+    "opportunity_id": "sf.job.51-4121.p75",
     "category": "job",
     "label": "焊工·工资在本职业 75 分位",
     "spec": {
@@ -10172,7 +10285,7 @@
     "b.jobs.41860.39"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.39-9031.p25",
+    "opportunity_id": "sf.job.39-9031.p25",
     "category": "job",
     "label": "健身教练与团体课老师·工资在本职业 25 分位",
     "spec": {
@@ -10269,13 +10382,13 @@
     "b.jobs.41860.39"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.39-9031.median",
+    "opportunity_id": "sf.job.39-9031.p50",
     "category": "job",
     "label": "健身教练与团体课老师·工资在本职业中位数",
     "spec": {
      "work_mode": "onsite",
      "weekly_hours": 35.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
     "quality": "Exercise Trainers and Group Fitness Instructors；每周约 35 小时、每月 22 个工作日、到岗 22 天；要求 edu_at_least_hs",
@@ -10344,7 +10457,7 @@
       "b.jobs.41860.39",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 60806.34（cpi_u_period_conversion@1（×0.998790））× 每周 35 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 60806.34（cpi_u_period_conversion@1（×0.998790））× 每周 35 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -10366,7 +10479,7 @@
     "b.jobs.41860.39"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.39-9031.p75",
+    "opportunity_id": "sf.job.39-9031.p75",
     "category": "job",
     "label": "健身教练与团体课老师·工资在本职业 75 分位",
     "spec": {
@@ -10463,7 +10576,7 @@
     "b.jobs.41860.41"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.41-3091.p25",
+    "opportunity_id": "sf.job.41-3091.p25",
     "category": "job",
     "label": "服务类销售代表·工资在本职业 25 分位",
     "spec": {
@@ -10560,13 +10673,13 @@
     "b.jobs.41860.41"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.41-3091.median",
+    "opportunity_id": "sf.job.41-3091.p50",
     "category": "job",
     "label": "服务类销售代表·工资在本职业中位数",
     "spec": {
      "work_mode": "hybrid",
      "weekly_hours": 40.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
     "quality": "Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel；每周约 40 小时、每月 22 个工作日、到岗 13 天；要求 edu_at_least_hs",
@@ -10635,7 +10748,7 @@
       "b.jobs.41860.41",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 99179.85（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 99179.85（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -10657,7 +10770,7 @@
     "b.jobs.41860.41"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.41-3091.p75",
+    "opportunity_id": "sf.job.41-3091.p75",
     "category": "job",
     "label": "服务类销售代表·工资在本职业 75 分位",
     "spec": {
@@ -10754,7 +10867,7 @@
     "b.jobs.41860.43"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.43-3031.p25",
+    "opportunity_id": "sf.job.43-3031.p25",
     "category": "job",
     "label": "记账员·工资在本职业 25 分位",
     "spec": {
@@ -10851,13 +10964,13 @@
     "b.jobs.41860.43"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.43-3031.median",
+    "opportunity_id": "sf.job.43-3031.p50",
     "category": "job",
     "label": "记账员·工资在本职业中位数",
     "spec": {
      "work_mode": "hybrid",
      "weekly_hours": 40.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
     "quality": "Bookkeeping, Accounting, and Auditing Clerks；每周约 40 小时、每月 22 个工作日、到岗 13 天；要求 edu_at_least_some_college",
@@ -10926,7 +11039,7 @@
       "b.jobs.41860.43",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 64401.98（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 64401.98（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -10948,7 +11061,7 @@
     "b.jobs.41860.43"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.43-3031.p75",
+    "opportunity_id": "sf.job.43-3031.p75",
     "category": "job",
     "label": "记账员·工资在本职业 75 分位",
     "spec": {
@@ -11045,7 +11158,7 @@
     "b.jobs.41860.15"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.15-1232.p25",
+    "opportunity_id": "sf.job.15-1232.p25",
     "category": "job",
     "label": "电脑用户支持专员·工资在本职业 25 分位",
     "spec": {
@@ -11142,13 +11255,13 @@
     "b.jobs.41860.15"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.15-1232.median",
+    "opportunity_id": "sf.job.15-1232.p50",
     "category": "job",
     "label": "电脑用户支持专员·工资在本职业中位数",
     "spec": {
      "work_mode": "hybrid",
      "weekly_hours": 40.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
     "quality": "Computer User Support Specialists；每周约 40 小时、每月 22 个工作日、到岗 13 天；要求 edu_at_least_some_college",
@@ -11217,7 +11330,7 @@
       "b.jobs.41860.15",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 84907.14（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 84907.14（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -11239,7 +11352,7 @@
     "b.jobs.41860.15"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.15-1232.p75",
+    "opportunity_id": "sf.job.15-1232.p75",
     "category": "job",
     "label": "电脑用户支持专员·工资在本职业 75 分位",
     "spec": {
@@ -11336,7 +11449,7 @@
     "b.jobs.41860.49"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.49-3023.p25",
+    "opportunity_id": "sf.job.49-3023.p25",
     "category": "job",
     "label": "汽车维修技师·工资在本职业 25 分位",
     "spec": {
@@ -11345,7 +11458,7 @@
      "wage_position": "p25"
     },
     "unit": "position",
-    "quality": "Automotive Service Technicians and Mechanics；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 award_49_3023",
+    "quality": "Automotive Service Technicians and Mechanics；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 soc_49_3023_award",
     "availability": "available",
     "price": null,
     "compensation": {
@@ -11362,7 +11475,7 @@
      "code": "49-3023"
     },
     "eligibility": [
-     "ability:award_49_3023"
+     "ability:soc_49_3023_award"
     ],
     "targets": [],
     "functions": [],
@@ -11433,16 +11546,16 @@
     "b.jobs.41860.49"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.49-3023.median",
+    "opportunity_id": "sf.job.49-3023.p50",
     "category": "job",
     "label": "汽车维修技师·工资在本职业中位数",
     "spec": {
      "work_mode": "onsite",
      "weekly_hours": 40.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
-    "quality": "Automotive Service Technicians and Mechanics；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 award_49_3023",
+    "quality": "Automotive Service Technicians and Mechanics；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 soc_49_3023_award",
     "availability": "available",
     "price": null,
     "compensation": {
@@ -11459,7 +11572,7 @@
      "code": "49-3023"
     },
     "eligibility": [
-     "ability:award_49_3023"
+     "ability:soc_49_3023_award"
     ],
     "targets": [],
     "functions": [],
@@ -11508,7 +11621,7 @@
       "b.jobs.41860.49",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 74499.75（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 74499.75（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -11530,7 +11643,7 @@
     "b.jobs.41860.49"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.49-3023.p75",
+    "opportunity_id": "sf.job.49-3023.p75",
     "category": "job",
     "label": "汽车维修技师·工资在本职业 75 分位",
     "spec": {
@@ -11539,7 +11652,7 @@
      "wage_position": "p75"
     },
     "unit": "position",
-    "quality": "Automotive Service Technicians and Mechanics；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 award_49_3023",
+    "quality": "Automotive Service Technicians and Mechanics；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 soc_49_3023_award",
     "availability": "available",
     "price": null,
     "compensation": {
@@ -11556,7 +11669,7 @@
      "code": "49-3023"
     },
     "eligibility": [
-     "ability:award_49_3023"
+     "ability:soc_49_3023_award"
     ],
     "targets": [],
     "functions": [],
@@ -11627,7 +11740,7 @@
     "b.jobs.41860.49"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.49-2022.p25",
+    "opportunity_id": "sf.job.49-2022.p25",
     "category": "job",
     "label": "通信设备安装维修工·工资在本职业 25 分位",
     "spec": {
@@ -11636,7 +11749,7 @@
      "wage_position": "p25"
     },
     "unit": "position",
-    "quality": "Telecommunications Equipment Installers and Repairers, Except Line Installers；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 award_49_2022",
+    "quality": "Telecommunications Equipment Installers and Repairers, Except Line Installers；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 soc_49_2022_award",
     "availability": "available",
     "price": null,
     "compensation": {
@@ -11653,7 +11766,7 @@
      "code": "49-2022"
     },
     "eligibility": [
-     "ability:award_49_2022"
+     "ability:soc_49_2022_award"
     ],
     "targets": [],
     "functions": [],
@@ -11724,16 +11837,16 @@
     "b.jobs.41860.49"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.49-2022.median",
+    "opportunity_id": "sf.job.49-2022.p50",
     "category": "job",
     "label": "通信设备安装维修工·工资在本职业中位数",
     "spec": {
      "work_mode": "onsite",
      "weekly_hours": 40.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
-    "quality": "Telecommunications Equipment Installers and Repairers, Except Line Installers；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 award_49_2022",
+    "quality": "Telecommunications Equipment Installers and Repairers, Except Line Installers；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 soc_49_2022_award",
     "availability": "available",
     "price": null,
     "compensation": {
@@ -11750,7 +11863,7 @@
      "code": "49-2022"
     },
     "eligibility": [
-     "ability:award_49_2022"
+     "ability:soc_49_2022_award"
     ],
     "targets": [],
     "functions": [],
@@ -11799,7 +11912,7 @@
       "b.jobs.41860.49",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 85566.35（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 85566.35（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -11821,7 +11934,7 @@
     "b.jobs.41860.49"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.49-2022.p75",
+    "opportunity_id": "sf.job.49-2022.p75",
     "category": "job",
     "label": "通信设备安装维修工·工资在本职业 75 分位",
     "spec": {
@@ -11830,7 +11943,7 @@
      "wage_position": "p75"
     },
     "unit": "position",
-    "quality": "Telecommunications Equipment Installers and Repairers, Except Line Installers；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 award_49_2022",
+    "quality": "Telecommunications Equipment Installers and Repairers, Except Line Installers；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 soc_49_2022_award",
     "availability": "available",
     "price": null,
     "compensation": {
@@ -11847,7 +11960,7 @@
      "code": "49-2022"
     },
     "eligibility": [
-     "ability:award_49_2022"
+     "ability:soc_49_2022_award"
     ],
     "targets": [],
     "functions": [],
@@ -11918,7 +12031,7 @@
     "b.jobs.41860.27"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.27-4011.p25",
+    "opportunity_id": "sf.job.27-4011.p25",
     "category": "job",
     "label": "音视频技术员·工资在本职业 25 分位",
     "spec": {
@@ -11927,7 +12040,7 @@
      "wage_position": "p25"
     },
     "unit": "position",
-    "quality": "Audio and Video Technicians；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 award_27_4011",
+    "quality": "Audio and Video Technicians；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 soc_27_4011_award",
     "availability": "available",
     "price": null,
     "compensation": {
@@ -11944,7 +12057,7 @@
      "code": "27-4011"
     },
     "eligibility": [
-     "ability:award_27_4011"
+     "ability:soc_27_4011_award"
     ],
     "targets": [],
     "functions": [],
@@ -12015,16 +12128,16 @@
     "b.jobs.41860.27"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.27-4011.median",
+    "opportunity_id": "sf.job.27-4011.p50",
     "category": "job",
     "label": "音视频技术员·工资在本职业中位数",
     "spec": {
      "work_mode": "onsite",
      "weekly_hours": 40.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
-    "quality": "Audio and Video Technicians；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 award_27_4011",
+    "quality": "Audio and Video Technicians；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 soc_27_4011_award",
     "availability": "available",
     "price": null,
     "compensation": {
@@ -12041,7 +12154,7 @@
      "code": "27-4011"
     },
     "eligibility": [
-     "ability:award_27_4011"
+     "ability:soc_27_4011_award"
     ],
     "targets": [],
     "functions": [],
@@ -12090,7 +12203,7 @@
       "b.jobs.41860.27",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 78385.05（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 78385.05（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -12112,7 +12225,7 @@
     "b.jobs.41860.27"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.27-4011.p75",
+    "opportunity_id": "sf.job.27-4011.p75",
     "category": "job",
     "label": "音视频技术员·工资在本职业 75 分位",
     "spec": {
@@ -12121,7 +12234,7 @@
      "wage_position": "p75"
     },
     "unit": "position",
-    "quality": "Audio and Video Technicians；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 award_27_4011",
+    "quality": "Audio and Video Technicians；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 soc_27_4011_award",
     "availability": "available",
     "price": null,
     "compensation": {
@@ -12138,7 +12251,7 @@
      "code": "27-4011"
     },
     "eligibility": [
-     "ability:award_27_4011"
+     "ability:soc_27_4011_award"
     ],
     "targets": [],
     "functions": [],
@@ -12209,7 +12322,7 @@
     "b.jobs.41860.23"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.23-2011.p25",
+    "opportunity_id": "sf.job.23-2011.p25",
     "category": "job",
     "label": "律师助理·工资在本职业 25 分位",
     "spec": {
@@ -12306,13 +12419,13 @@
     "b.jobs.41860.23"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.23-2011.median",
+    "opportunity_id": "sf.job.23-2011.p50",
     "category": "job",
     "label": "律师助理·工资在本职业中位数",
     "spec": {
      "work_mode": "hybrid",
      "weekly_hours": 40.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
     "quality": "Paralegals and Legal Assistants；每周约 40 小时、每月 22 个工作日、到岗 13 天；要求 edu_at_least_associate",
@@ -12381,7 +12494,7 @@
       "b.jobs.41860.23",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 85126.88（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 85126.88（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -12403,7 +12516,7 @@
     "b.jobs.41860.23"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.23-2011.p75",
+    "opportunity_id": "sf.job.23-2011.p75",
     "category": "job",
     "label": "律师助理·工资在本职业 75 分位",
     "spec": {
@@ -12500,7 +12613,7 @@
     "b.jobs.41860.15"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.15-1231.p25",
+    "opportunity_id": "sf.job.15-1231.p25",
     "category": "job",
     "label": "网络支持专员·工资在本职业 25 分位",
     "spec": {
@@ -12597,13 +12710,13 @@
     "b.jobs.41860.15"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.15-1231.median",
+    "opportunity_id": "sf.job.15-1231.p50",
     "category": "job",
     "label": "网络支持专员·工资在本职业中位数",
     "spec": {
      "work_mode": "hybrid",
      "weekly_hours": 40.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
     "quality": "Computer Network Support Specialists；每周约 40 小时、每月 22 个工作日、到岗 13 天；要求 edu_at_least_associate",
@@ -12672,7 +12785,7 @@
       "b.jobs.41860.15",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 98550.62（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 98550.62（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -12694,7 +12807,7 @@
     "b.jobs.41860.15"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.15-1231.p75",
+    "opportunity_id": "sf.job.15-1231.p75",
     "category": "job",
     "label": "网络支持专员·工资在本职业 75 分位",
     "spec": {
@@ -12791,7 +12904,7 @@
     "b.jobs.41860.13"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.13-2011.p25",
+    "opportunity_id": "sf.job.13-2011.p25",
     "category": "job",
     "label": "会计与审计师·工资在本职业 25 分位",
     "spec": {
@@ -12888,13 +13001,13 @@
     "b.jobs.41860.13"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.13-2011.median",
+    "opportunity_id": "sf.job.13-2011.p50",
     "category": "job",
     "label": "会计与审计师·工资在本职业中位数",
     "spec": {
      "work_mode": "hybrid",
      "weekly_hours": 40.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
     "quality": "Accountants and Auditors；每周约 40 小时、每月 22 个工作日、到岗 13 天；要求 edu_at_least_bachelor",
@@ -12963,7 +13076,7 @@
       "b.jobs.41860.13",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 105622.05（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 105622.05（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -12985,7 +13098,7 @@
     "b.jobs.41860.13"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.13-2011.p75",
+    "opportunity_id": "sf.job.13-2011.p75",
     "category": "job",
     "label": "会计与审计师·工资在本职业 75 分位",
     "spec": {
@@ -13082,7 +13195,7 @@
     "b.jobs.41860.15"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.15-1252.p25",
+    "opportunity_id": "sf.job.15-1252.p25",
     "category": "job",
     "label": "软件开发工程师·工资在本职业 25 分位",
     "spec": {
@@ -13179,13 +13292,13 @@
     "b.jobs.41860.15"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.15-1252.median",
+    "opportunity_id": "sf.job.15-1252.p50",
     "category": "job",
     "label": "软件开发工程师·工资在本职业中位数",
     "spec": {
      "work_mode": "hybrid",
      "weekly_hours": 40.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
     "quality": "Software Developers；每周约 40 小时、每月 22 个工作日、到岗 13 天；要求 edu_at_least_bachelor",
@@ -13254,7 +13367,7 @@
       "b.jobs.41860.15",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 174698.37（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 174698.37（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -13276,7 +13389,7 @@
     "b.jobs.41860.15"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.15-1252.p75",
+    "opportunity_id": "sf.job.15-1252.p75",
     "category": "job",
     "label": "软件开发工程师·工资在本职业 75 分位",
     "spec": {
@@ -13373,7 +13486,7 @@
     "b.jobs.41860.13"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.13-1161.p25",
+    "opportunity_id": "sf.job.13-1161.p25",
     "category": "job",
     "label": "市场研究与营销专员·工资在本职业 25 分位",
     "spec": {
@@ -13470,13 +13583,13 @@
     "b.jobs.41860.13"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.13-1161.median",
+    "opportunity_id": "sf.job.13-1161.p50",
     "category": "job",
     "label": "市场研究与营销专员·工资在本职业中位数",
     "spec": {
      "work_mode": "hybrid",
      "weekly_hours": 40.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
     "quality": "Market Research Analysts and Marketing Specialists；每周约 40 小时、每月 22 个工作日、到岗 13 天；要求 edu_at_least_bachelor",
@@ -13545,7 +13658,7 @@
       "b.jobs.41860.13",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 124688.95（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 124688.95（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -13567,7 +13680,7 @@
     "b.jobs.41860.13"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.13-1161.p75",
+    "opportunity_id": "sf.job.13-1161.p75",
     "category": "job",
     "label": "市场研究与营销专员·工资在本职业 75 分位",
     "spec": {
@@ -13664,7 +13777,7 @@
     "b.jobs.41860.13"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.13-1071.p25",
+    "opportunity_id": "sf.job.13-1071.p25",
     "category": "job",
     "label": "人力资源专员·工资在本职业 25 分位",
     "spec": {
@@ -13761,13 +13874,13 @@
     "b.jobs.41860.13"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.13-1071.median",
+    "opportunity_id": "sf.job.13-1071.p50",
     "category": "job",
     "label": "人力资源专员·工资在本职业中位数",
     "spec": {
      "work_mode": "hybrid",
      "weekly_hours": 40.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
     "quality": "Human Resources Specialists；每周约 40 小时、每月 22 个工作日、到岗 13 天；要求 edu_at_least_bachelor",
@@ -13836,7 +13949,7 @@
       "b.jobs.41860.13",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 100478.28（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 100478.28（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -13858,7 +13971,7 @@
     "b.jobs.41860.13"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.13-1071.p75",
+    "opportunity_id": "sf.job.13-1071.p75",
     "category": "job",
     "label": "人力资源专员·工资在本职业 75 分位",
     "spec": {
@@ -13955,7 +14068,7 @@
     "b.jobs.41860.15"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.15-1211.p25",
+    "opportunity_id": "sf.job.15-1211.p25",
     "category": "job",
     "label": "计算机系统分析师·工资在本职业 25 分位",
     "spec": {
@@ -14052,13 +14165,13 @@
     "b.jobs.41860.15"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.15-1211.median",
+    "opportunity_id": "sf.job.15-1211.p50",
     "category": "job",
     "label": "计算机系统分析师·工资在本职业中位数",
     "spec": {
      "work_mode": "hybrid",
      "weekly_hours": 40.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
     "quality": "Computer Systems Analysts；每周约 40 小时、每月 22 个工作日、到岗 13 天；要求 edu_at_least_bachelor",
@@ -14127,7 +14240,7 @@
       "b.jobs.41860.15",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 145264.03（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 145264.03（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -14149,7 +14262,7 @@
     "b.jobs.41860.15"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.15-1211.p75",
+    "opportunity_id": "sf.job.15-1211.p75",
     "category": "job",
     "label": "计算机系统分析师·工资在本职业 75 分位",
     "spec": {
@@ -14246,7 +14359,7 @@
     "b.jobs.41860.13"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.13-2051.p25",
+    "opportunity_id": "sf.job.13-2051.p25",
     "category": "job",
     "label": "金融与投资分析师·工资在本职业 25 分位",
     "spec": {
@@ -14343,13 +14456,13 @@
     "b.jobs.41860.13"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.13-2051.median",
+    "opportunity_id": "sf.job.13-2051.p50",
     "category": "job",
     "label": "金融与投资分析师·工资在本职业中位数",
     "spec": {
      "work_mode": "hybrid",
      "weekly_hours": 40.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
     "quality": "Financial and Investment Analysts；每周约 40 小时、每月 22 个工作日、到岗 13 天；要求 edu_at_least_bachelor",
@@ -14418,7 +14531,7 @@
       "b.jobs.41860.13",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 128314.56（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 128314.56（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -14440,7 +14553,7 @@
     "b.jobs.41860.13"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.13-2051.p75",
+    "opportunity_id": "sf.job.13-2051.p75",
     "category": "job",
     "label": "金融与投资分析师·工资在本职业 75 分位",
     "spec": {
@@ -14537,7 +14650,7 @@
     "b.jobs.41860.27"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.27-1024.p25",
+    "opportunity_id": "sf.job.27-1024.p25",
     "category": "job",
     "label": "平面设计师·工资在本职业 25 分位",
     "spec": {
@@ -14634,13 +14747,13 @@
     "b.jobs.41860.27"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.27-1024.median",
+    "opportunity_id": "sf.job.27-1024.p50",
     "category": "job",
     "label": "平面设计师·工资在本职业中位数",
     "spec": {
      "work_mode": "hybrid",
      "weekly_hours": 40.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
     "quality": "Graphic Designers；每周约 40 小时、每月 22 个工作日、到岗 13 天；要求 edu_at_least_bachelor",
@@ -14709,7 +14822,7 @@
       "b.jobs.41860.27",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 89381.72（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 89381.72（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -14731,7 +14844,7 @@
     "b.jobs.41860.27"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.27-1024.p75",
+    "opportunity_id": "sf.job.27-1024.p75",
     "category": "job",
     "label": "平面设计师·工资在本职业 75 分位",
     "spec": {
@@ -14828,7 +14941,7 @@
     "b.jobs.41860.13"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.13-1082.p25",
+    "opportunity_id": "sf.job.13-1082.p25",
     "category": "job",
     "label": "项目管理专员·工资在本职业 25 分位",
     "spec": {
@@ -14925,13 +15038,13 @@
     "b.jobs.41860.13"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.13-1082.median",
+    "opportunity_id": "sf.job.13-1082.p50",
     "category": "job",
     "label": "项目管理专员·工资在本职业中位数",
     "spec": {
      "work_mode": "hybrid",
      "weekly_hours": 40.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
     "quality": "Project Management Specialists；每周约 40 小时、每月 22 个工作日、到岗 13 天；要求 edu_at_least_bachelor",
@@ -15000,7 +15113,7 @@
       "b.jobs.41860.13",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 132369.65（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 132369.65（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -15022,7 +15135,7 @@
     "b.jobs.41860.13"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.13-1082.p75",
+    "opportunity_id": "sf.job.13-1082.p75",
     "category": "job",
     "label": "项目管理专员·工资在本职业 75 分位",
     "spec": {
@@ -15120,7 +15233,7 @@
     "b.jobs.41860.41"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.41-1011.p25",
+    "opportunity_id": "sf.job.41-1011.p25",
     "category": "job",
     "label": "零售主管·工资在本职业 25 分位",
     "spec": {
@@ -15129,7 +15242,7 @@
      "wage_position": "p25"
     },
     "unit": "position",
-    "quality": "First-Line Supervisors of Retail Sales Workers；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 edu_at_least_hs, exp_related_41_1011",
+    "quality": "First-Line Supervisors of Retail Sales Workers；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 edu_at_least_hs, soc_41_1011_experience",
     "availability": "available",
     "price": null,
     "compensation": {
@@ -15147,7 +15260,7 @@
     },
     "eligibility": [
      "ability:edu_at_least_hs",
-     "ability:exp_related_41_1011"
+     "ability:soc_41_1011_experience"
     ],
     "targets": [],
     "functions": [],
@@ -15219,16 +15332,16 @@
     "b.jobs.41860.41"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.41-1011.median",
+    "opportunity_id": "sf.job.41-1011.p50",
     "category": "job",
     "label": "零售主管·工资在本职业中位数",
     "spec": {
      "work_mode": "onsite",
      "weekly_hours": 40.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
-    "quality": "First-Line Supervisors of Retail Sales Workers；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 edu_at_least_hs, exp_related_41_1011",
+    "quality": "First-Line Supervisors of Retail Sales Workers；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 edu_at_least_hs, soc_41_1011_experience",
     "availability": "available",
     "price": null,
     "compensation": {
@@ -15246,7 +15359,7 @@
     },
     "eligibility": [
      "ability:edu_at_least_hs",
-     "ability:exp_related_41_1011"
+     "ability:soc_41_1011_experience"
     ],
     "targets": [],
     "functions": [],
@@ -15295,7 +15408,7 @@
       "b.jobs.41860.41",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 57090.84（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 57090.84（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -15318,7 +15431,7 @@
     "b.jobs.41860.41"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.41-1011.p75",
+    "opportunity_id": "sf.job.41-1011.p75",
     "category": "job",
     "label": "零售主管·工资在本职业 75 分位",
     "spec": {
@@ -15327,7 +15440,7 @@
      "wage_position": "p75"
     },
     "unit": "position",
-    "quality": "First-Line Supervisors of Retail Sales Workers；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 edu_at_least_hs, exp_related_41_1011",
+    "quality": "First-Line Supervisors of Retail Sales Workers；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 edu_at_least_hs, soc_41_1011_experience",
     "availability": "available",
     "price": null,
     "compensation": {
@@ -15345,7 +15458,7 @@
     },
     "eligibility": [
      "ability:edu_at_least_hs",
-     "ability:exp_related_41_1011"
+     "ability:soc_41_1011_experience"
     ],
     "targets": [],
     "functions": [],
@@ -15417,7 +15530,7 @@
     "b.jobs.41860.43"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.43-1011.p25",
+    "opportunity_id": "sf.job.43-1011.p25",
     "category": "job",
     "label": "办公室行政主管·工资在本职业 25 分位",
     "spec": {
@@ -15426,7 +15539,7 @@
      "wage_position": "p25"
     },
     "unit": "position",
-    "quality": "First-Line Supervisors of Office and Administrative Support Workers；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 edu_at_least_hs, exp_related_43_1011",
+    "quality": "First-Line Supervisors of Office and Administrative Support Workers；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 edu_at_least_hs, soc_43_1011_experience",
     "availability": "available",
     "price": null,
     "compensation": {
@@ -15444,7 +15557,7 @@
     },
     "eligibility": [
      "ability:edu_at_least_hs",
-     "ability:exp_related_43_1011"
+     "ability:soc_43_1011_experience"
     ],
     "targets": [],
     "functions": [],
@@ -15516,16 +15629,16 @@
     "b.jobs.41860.43"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.43-1011.median",
+    "opportunity_id": "sf.job.43-1011.p50",
     "category": "job",
     "label": "办公室行政主管·工资在本职业中位数",
     "spec": {
      "work_mode": "onsite",
      "weekly_hours": 40.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
-    "quality": "First-Line Supervisors of Office and Administrative Support Workers；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 edu_at_least_hs, exp_related_43_1011",
+    "quality": "First-Line Supervisors of Office and Administrative Support Workers；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 edu_at_least_hs, soc_43_1011_experience",
     "availability": "available",
     "price": null,
     "compensation": {
@@ -15543,7 +15656,7 @@
     },
     "eligibility": [
      "ability:edu_at_least_hs",
-     "ability:exp_related_43_1011"
+     "ability:soc_43_1011_experience"
     ],
     "targets": [],
     "functions": [],
@@ -15592,7 +15705,7 @@
       "b.jobs.41860.43",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 82919.55（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 82919.55（cpi_u_period_conversion@1（×0.998790））× 每周 40 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -15615,7 +15728,7 @@
     "b.jobs.41860.43"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.43-1011.p75",
+    "opportunity_id": "sf.job.43-1011.p75",
     "category": "job",
     "label": "办公室行政主管·工资在本职业 75 分位",
     "spec": {
@@ -15624,7 +15737,7 @@
      "wage_position": "p75"
     },
     "unit": "position",
-    "quality": "First-Line Supervisors of Office and Administrative Support Workers；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 edu_at_least_hs, exp_related_43_1011",
+    "quality": "First-Line Supervisors of Office and Administrative Support Workers；每周约 40 小时、每月 22 个工作日、到岗 22 天；要求 edu_at_least_hs, soc_43_1011_experience",
     "availability": "available",
     "price": null,
     "compensation": {
@@ -15642,7 +15755,7 @@
     },
     "eligibility": [
      "ability:edu_at_least_hs",
-     "ability:exp_related_43_1011"
+     "ability:soc_43_1011_experience"
     ],
     "targets": [],
     "functions": [],
@@ -15714,7 +15827,7 @@
     "b.jobs.41860.35"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.35-1012.p25",
+    "opportunity_id": "sf.job.35-1012.p25",
     "category": "job",
     "label": "餐饮主管·工资在本职业 25 分位",
     "spec": {
@@ -15723,7 +15836,7 @@
      "wage_position": "p25"
     },
     "unit": "position",
-    "quality": "First-Line Supervisors of Food Preparation and Serving Workers；每周约 35 小时、每月 22 个工作日、到岗 22 天；要求 edu_at_least_hs, exp_related_35_1012",
+    "quality": "First-Line Supervisors of Food Preparation and Serving Workers；每周约 35 小时、每月 22 个工作日、到岗 22 天；要求 edu_at_least_hs, soc_35_1012_experience",
     "availability": "available",
     "price": null,
     "compensation": {
@@ -15741,7 +15854,7 @@
     },
     "eligibility": [
      "ability:edu_at_least_hs",
-     "ability:exp_related_35_1012"
+     "ability:soc_35_1012_experience"
     ],
     "targets": [],
     "functions": [],
@@ -15813,16 +15926,16 @@
     "b.jobs.41860.35"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.35-1012.median",
+    "opportunity_id": "sf.job.35-1012.p50",
     "category": "job",
     "label": "餐饮主管·工资在本职业中位数",
     "spec": {
      "work_mode": "onsite",
      "weekly_hours": 35.0,
-     "wage_position": "median"
+     "wage_position": "p50"
     },
     "unit": "position",
-    "quality": "First-Line Supervisors of Food Preparation and Serving Workers；每周约 35 小时、每月 22 个工作日、到岗 22 天；要求 edu_at_least_hs, exp_related_35_1012",
+    "quality": "First-Line Supervisors of Food Preparation and Serving Workers；每周约 35 小时、每月 22 个工作日、到岗 22 天；要求 edu_at_least_hs, soc_35_1012_experience",
     "availability": "available",
     "price": null,
     "compensation": {
@@ -15840,7 +15953,7 @@
     },
     "eligibility": [
      "ability:edu_at_least_hs",
-     "ability:exp_related_35_1012"
+     "ability:soc_35_1012_experience"
     ],
     "targets": [],
     "functions": [],
@@ -15889,7 +16002,7 @@
       "b.jobs.41860.35",
       "bls_ep_education"
      ],
-     "rule": "OEWS median 年薪 49639.87（cpi_u_period_conversion@1（×0.998790））× 每周 35 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
+     "rule": "OEWS p50 年薪 49639.87（cpi_u_period_conversion@1（×0.998790））× 每周 35 小时 ÷ 40，四舍五入到分；每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定"
     }
    }
   },
@@ -15912,7 +16025,7 @@
     "b.jobs.41860.35"
    ],
    "opportunity": {
-    "opportunity_id": "job.41860.35-1012.p75",
+    "opportunity_id": "sf.job.35-1012.p75",
     "category": "job",
     "label": "餐饮主管·工资在本职业 75 分位",
     "spec": {
@@ -15921,7 +16034,7 @@
      "wage_position": "p75"
     },
     "unit": "position",
-    "quality": "First-Line Supervisors of Food Preparation and Serving Workers；每周约 35 小时、每月 22 个工作日、到岗 22 天；要求 edu_at_least_hs, exp_related_35_1012",
+    "quality": "First-Line Supervisors of Food Preparation and Serving Workers；每周约 35 小时、每月 22 个工作日、到岗 22 天；要求 edu_at_least_hs, soc_35_1012_experience",
     "availability": "available",
     "price": null,
     "compensation": {
@@ -15939,7 +16052,7 @@
     },
     "eligibility": [
      "ability:edu_at_least_hs",
-     "ability:exp_related_35_1012"
+     "ability:soc_35_1012_experience"
     ],
     "targets": [],
     "functions": [],

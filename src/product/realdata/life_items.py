@@ -24,6 +24,7 @@ from common.life_contracts import (
     DurationSpec,
     EnjoymentProvision,
     EquipmentFacts,
+    FailureSpec,
     FoodPlanFacts,
     FoodPlanPart,
     LifeOpportunity,
@@ -123,6 +124,7 @@ class Ctx:
     """一座城的编译上下文。"""
 
     cbsa: str
+    key: str
     label: str
     city: str
     cfg: dict[str, Any]
@@ -183,7 +185,7 @@ class Ctx:
 
 def contexts(cfg: dict[str, Any], sl: dict[str, Any]) -> list[Ctx]:
     return [
-        Ctx(m["cbsa"], m["label"], m["city"], cfg, sl["metros"][m["cbsa"]], sl)
+        Ctx(m["cbsa"], m["key"], m["label"], m["city"], cfg, sl["metros"][m["cbsa"]], sl)
         for m in cfg["metros"]
         if m["cbsa"] in sl["metros"]
     ]
@@ -346,7 +348,7 @@ def food_plans(ctx: Ctx, baskets: dict[str, Any], report: Report) -> list[Item]:
         share = min(Fraction(1), b.kcal / target)
         out.append(
             build(
-                f"food.{ctx.cbsa}.{p['plan']}",
+                f"{ctx.key}.food.{p['plan']}",
                 p["label"],
                 p["quality"],
                 [
@@ -414,7 +416,7 @@ def food_plans(ctx: Ctx, baskets: dict[str, Any], report: Report) -> list[Item]:
             )
             out.append(
                 build(
-                    f"food.{ctx.cbsa}.{p['plan']}.{key}",
+                    f"{ctx.key}.food.{p['plan']}.{key}",
                     f"{p['label']}（{name}）",
                     f"每周 {p['home_meals']} 顿自己做（荤素搭配，其中 {p['home_fresh']} 顿新鲜），另外 {p['out_meals']} 顿{name}"
                     f"{mode_zh}；{mode_zh}的钱已含在月费里，不另收"
@@ -512,7 +514,7 @@ def services(ctx: Ctx, report: Report) -> list[Item]:
         assert w is not None
         price = hourly * dec(s["worker_hours_per_month"]) * overhead
         o = LifeOpportunity(
-            opportunity_id=f"service.{ctx.cbsa}.{s['service']}",
+            opportunity_id=f"{ctx.key}.service.{s['service']}",
             category="service",
             label=s["label"],
             unit="service-month",
@@ -564,7 +566,7 @@ def services(ctx: Ctx, report: Report) -> list[Item]:
         n = s["sessions_per_month"]
         price = hourly * dec(s["worker_hours_per_session"]) * n * overhead
         o = LifeOpportunity(
-            opportunity_id=f"service.{ctx.cbsa}.{s['service']}",
+            opportunity_id=f"{ctx.key}.service.{s['service']}",
             category="service",
             label=s["label"],
             unit="service-month",
@@ -632,6 +634,26 @@ def representative_model(
     return pool[(len(pool) - 1) // 2] if pool else None
 
 
+def failure_spec(ctx: Ctx, rules: list[dict[str, Any]]) -> FailureSpec:
+    """一件持续物品的故障规则（引擎的 ``LifeOpportunity.failure``）。成套设备：部件互相独立、任一部件坏就整套不能用，
+    年故障概率 = 1 − Π(1 − p)（四舍五入到 0.0001）；所有部件都是 ``none_within_horizon`` 时整套也是。"""
+    hazards = [dec(r["annual_hazard"]) for r in rules if r["rule"] == "annual_hazard"]
+    note = "；".join(dict.fromkeys(r["basis"] for r in rules))[:280]
+    source = ctx.synthetic(
+        "故障规则是登记的设定（device_failure_v1）：没有公开的型号或类别故障率资料，保修条款不是故障分布",
+        [],
+        "成套设备部件独立、任一部件坏就整套不能用：1 − Π(1 − p)；全部部件 3 年内不建模随机故障时写 none_within_horizon",
+    )
+    if not hazards:
+        return FailureSpec(kind="none_within_horizon", note=note, source=source)
+    survive = Fraction(1)
+    for p in hazards:
+        survive *= 1 - p
+    return FailureSpec(
+        kind="annual_hazard", annual_probability=round_to(1 - survive, 4), note=note, source=source
+    )
+
+
 def devices(ctx: Ctx, report: Report) -> list[Item]:
     dc = ctx.cfg["devices"]
     factor = ctx.goods_factor()
@@ -653,7 +675,7 @@ def devices(ctx: Ctx, report: Report) -> list[Item]:
             spec[f"{m['category']}_annual_kwh"] = float(dec(m["annual_energy_kwh"]))
         records = tuple(m["record_id"] for m in models if m is not None)
         o = LifeOpportunity(
-            opportunity_id=f"device.{ctx.cbsa}.{offer['offer']}",
+            opportunity_id=f"{ctx.key}.durable.{offer['offer']}",
             category="durable",
             label=offer["label"],
             unit="appliance-set" if len(models) > 1 else "appliance",
@@ -671,6 +693,7 @@ def devices(ctx: Ctx, report: Report) -> list[Item]:
                 "appliance-set" if len(models) > 1 else "appliance",
             ),
             duration=DurationSpec(kind="durable_good", lasts_years=offer["lifetime_years"]),
+            failure=failure_spec(ctx, [dc["failure"][p["category"]] for p in offer["parts"]]),
             resource=ResourceProfile(
                 basis="passive",
                 substitutes=tuple(
@@ -704,7 +727,7 @@ def devices(ctx: Ctx, report: Report) -> list[Item]:
 
 
 def device_failure(cfg: dict[str, Any]) -> dict[str, Any]:
-    """每个设备类别的故障设定（纯数据，给主会话的引擎字段用）与用到它的设备方案。"""
+    """每个设备类别的故障设定与用到它的设备方案（机会本身的 ``failure`` 由它生成；这里汇总一份便于审阅）。"""
     dc = cfg["devices"]
     out = {}
     for cat, f in dc["failure"].items():
@@ -715,6 +738,8 @@ def device_failure(cfg: dict[str, Any]) -> dict[str, Any]:
                 o["offer"] for o in dc["offers"] if any(p["category"] == cat for p in o["parts"])
             ],
         }
+    for e in cfg["equipment"]:
+        out[e["item"]] = {**e["failure"], "assumption": "device_failure_v1", "offers": [e["item"]]}
     return out
 
 
@@ -724,7 +749,7 @@ def equipment(ctx: Ctx) -> list[Item]:
     for e in ctx.cfg["equipment"]:
         price = dec(e["price_usd_2024_national"]) * factor
         o = LifeOpportunity(
-            opportunity_id=f"equipment.{ctx.cbsa}.{e['item']}",
+            opportunity_id=f"{ctx.key}.durable.{e['item']}",
             category="durable",
             label=e["label"],
             unit="item",
@@ -732,6 +757,7 @@ def equipment(ctx: Ctx) -> list[Item]:
             availability="available",
             price=quote(price, ctx.numeraire, "one_time", "item"),
             duration=DurationSpec(kind="durable_good", lasts_years=e["lifetime_years"]),
+            failure=failure_spec(ctx, [e["failure"]]),
             equipment=EquipmentFacts(provides=tuple(e["provides"]), note="买到的当月就能用"),
             resource=ResourceProfile(basis="passive", note="持有本身不占时间"),
             attributes={"price_basis": "category_assumption"},
@@ -743,7 +769,9 @@ def equipment(ctx: Ctx) -> list[Item]:
                 f"全国类别设定 {e['price_usd_2024_national']} × 商品类空间换算系数，四舍五入到分",
             ),
         )
-        out.append(Item("equipment", o, "executable", ("equipment_category_v1",), ()))
+        out.append(
+            Item("equipment", o, "executable", ("equipment_category_v1", "device_failure_v1"), ())
+        )
     return out
 
 
@@ -832,7 +860,7 @@ def template_activities(ctx: Ctx, report: Report) -> list[Item]:
             else ctx.synthetic(note, inputs, rule)
         )
         o = LifeOpportunity(
-            opportunity_id=f"activity.{ctx.cbsa}.{t['template']}",
+            opportunity_id=f"{ctx.key}.experience.{t['template']}",
             category="experience",
             label=t["label"],
             unit="session",
@@ -1021,7 +1049,7 @@ def chicago_programs(ctx: Ctx, report: Report) -> list[Item]:
         }
         rid = prog["record_id"]
         o = LifeOpportunity(
-            opportunity_id=f"activity.{ctx.cbsa}.cpd.{rid.rsplit('.', 1)[1]}",
+            opportunity_id=f"{ctx.key}.experience.cpd.{rid.rsplit('.', 1)[1]}",
             category="experience",
             label=prog["label"][:120],
             unit="session",

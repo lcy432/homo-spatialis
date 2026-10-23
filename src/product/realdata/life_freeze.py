@@ -207,16 +207,18 @@ def freeze(
         main = [
             i.as_dict()
             for i in items
-            if not i.opportunity.opportunity_id.startswith(f"activity.{ctx.cbsa}.cpd.")
+            if not i.opportunity.opportunity_id.startswith(f"{ctx.key}.experience.cpd.")
         ]
         programs = [
             i.as_dict()
             for i in items
-            if i.opportunity.opportunity_id.startswith(f"activity.{ctx.cbsa}.cpd.")
+            if i.opportunity.opportunity_id.startswith(f"{ctx.key}.experience.cpd.")
         ]
         body = {
             "schema": FROZEN_SCHEMA,
             "cbsa": ctx.cbsa,
+            "key": ctx.key,
+            "city": {"country": "US", "scheme": "CBSA2023", "code": ctx.cbsa},
             "label": ctx.label,
             "intake_build_id": sl["intake_build_id"],
             "identities": identities,
@@ -240,7 +242,11 @@ def freeze(
                 "note_zh": "芝加哥公园管理局的真实活动：日期、年龄、季节与报名费原样保留；E1 有日期窗口、整期报名与年龄资格之前不可执行",
                 "items": programs,
             }
-        manifest["cities"][ctx.cbsa] = {"content_identity": content, "counts": body["counts"]}
+        manifest["cities"][ctx.cbsa] = {
+            "key": ctx.key,
+            "content_identity": content,
+            "counts": body["counts"],
+        }
         attribute_keys |= {k for i in items for k in i.opportunity.attributes}
     # 目录要求属性键在生活输入里声明（``LifeBundle.attribute_keys``）：这里列出用到的全部键，整合时一起声明
     manifest["vocabulary"] = {**manifest["vocabulary"], "attribute_keys": sorted(attribute_keys)}

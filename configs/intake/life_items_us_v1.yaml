@@ -156,7 +156,7 @@ devices:
     - {offer: combo, parts: [{category: combo_washer_dryer, type: Front Load}], price_usd_2024_national: 1600,
        lifetime_years: 10, substitutes: {laundry: 4}, label: 洗烘一体机,
        quality: 一台机器洗完直接烘干；本人每月还要约 4 小时分拣、叠放与收纳}
-  # 每个类别的故障设定（引擎的故障字段由主会话加；这里只作纯数据输出）。保修不是故障分布。
+  # 每个类别的故障设定，生成机会的 failure（FailureSpec）；成套设备按部件合成。保修不是故障分布。
   failure:
     clothes_washer: {rule: none_within_horizon, annual_hazard: null,
                      basis: 没有公开的型号或类别故障率资料（ENERGY STAR 只有认证事实，保修条款不是故障分布）；设定寿命 10 年，3 年模拟期内不建模随机故障}
@@ -175,9 +175,13 @@ devices:
 # ============================================================================ 爱好装备
 equipment:
   - {item: tennis_racket, provides: [racket_playable], price_usd_2024_national: 100, lifetime_years: 5, label: 网球拍,
-     quality: 一次买下、能用 5 年；自带球拍去打网球，不用再租}
+     quality: 一次买下、能用 5 年；自带球拍去打网球，不用再租,
+     failure: {rule: none_within_horizon, annual_hazard: null,
+               basis: 没有公开的故障率资料；设定寿命 5 年长于 3 年模拟期，期内不建模随机损坏}}
   - {item: acoustic_guitar, provides: [guitar_playable], price_usd_2024_national: 200, lifetime_years: 8, label: 民谣吉他,
-     quality: 一次买下、能用 8 年；放在家里本身不带来娱乐，要自己练或上课才有收获}
+     quality: 一次买下、能用 8 年；放在家里本身不带来娱乐，要自己练或上课才有收获,
+     failure: {rule: none_within_horizon, annual_hazard: null,
+               basis: 没有公开的故障率资料；设定寿命 8 年长于 3 年模拟期，期内不建模随机损坏}}
 
 # ============================================================================ 活动
 activities:
@@ -302,7 +306,7 @@ assumptions:
     basis_zh: ENERGY STAR 不记价格、寿命与效果；这些是类别设定，不是型号报价；同一类别的型号价格相同
   - id: device_failure_v1
     nature: assumption
-    statement_zh: 每个设备类别 3 年内不建模随机故障（none_within_horizon），见 devices.failure
+    statement_zh: 每个设备类别与爱好装备 3 年内不建模随机故障（none_within_horizon），见 devices.failure 与 equipment[].failure；写进机会的 failure（FailureSpec）
     basis_zh: 没有公开的故障率资料；保修条款不是故障分布
   - id: device_installable_v1
     nature: assumption

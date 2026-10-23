@@ -15,7 +15,7 @@ scheme: SOC2018
 ep_observed_on: 2026-10-22
 
 # 入职教育（EP 原文）→ 岗位要求的能力。学历按“至少达到”记：确认的最高学历授予它和它以下的各级（education_at_least_v1）。
-# “中学后非学位证书”是职业专属的（award_<职业>），只能由确认的证书或 CIP → SOC 对应的培训项目授予，不从职称或自由文字推。
+# “中学后非学位证书”是职业专属的（soc_<职业>_award），只能由确认的证书或 CIP → SOC 对应的培训项目授予，不从职称或自由文字推。
 education:
   - {ep: No formal educational credential, level: none}
   - {ep: High school diploma or equivalent, level: hs, ability: edu_at_least_hs, label: 高中毕业或同等学力}
@@ -26,7 +26,7 @@ education:
   - {ep: "Master's degree", level: master, ability: edu_at_least_master, label: 硕士学位}
   - {ep: Doctoral or professional degree, level: doctoral, ability: edu_at_least_doctoral, label: 博士或专业学位}
 
-# EP 的“相关职业经验”→ 能力 exp_related_<职业>；只能由确认的、在相关职业里的经历（年数够）授予（related_experience_v1）。
+# EP 的“相关职业经验”→ 能力 soc_<职业>_experience；只能由确认的、在相关职业里的经历（年数够）授予（related_experience_v1）。
 # E1 没有“在职积累经验”的机制：模拟期里干满几年不会自动得到它（契约缺口，见设计说明）。
 experience:
   "Less than 5 years": {min_years: 1}
@@ -41,7 +41,7 @@ arrangement:
   burden_per_work_hour: 1.0
   tiers:
     - {tier: p25, field: annual_wage_p25, label: 工资在本职业 25 分位}
-    - {tier: median, field: annual_wage_median, label: 工资在本职业中位数}
+    - {tier: p50, field: annual_wage_median, label: 工资在本职业中位数}
     - {tier: p75, field: annual_wage_p75, label: 工资在本职业 75 分位}
 
 # 培训（ipeds_training_v1）：IPEDS 按项目报告学费的院校项目；CIP → SOC 对照到范围内需要“中学后非学位证书”的职业，就授予那个职业的

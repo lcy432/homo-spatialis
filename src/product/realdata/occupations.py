@@ -2,8 +2,8 @@
 
 输入是 ``life_inputs`` 的切片与配置 ``configs/intake/occupations_us_v1.yaml``：
 
-* **能力**只有三类来源，都是结构化的：学历（“至少达到”某级，用户确认）、职业专属的中学后非学位证书（``award_<职业>``，用户确认或
-  CIP → SOC 对应的 IPEDS 项目授予）、相关职业经验（``exp_related_<职业>``，确认的经历按相关职业名单与年数）。不从职称或自由文字推
+* **能力**只有三类来源，都是结构化的：学历（“至少达到”某级，用户确认）、职业专属的中学后非学位证书（``soc_<职业>_award``，用户确认或
+  CIP → SOC 对应的 IPEDS 项目授予）、相关职业经验（``soc_<职业>_experience``，确认的经历按相关职业名单与年数）。不从职称或自由文字推
   学位、证书或执照。
 * **岗位**：每个支持的职业 × 都会区，按 OEWS 25 / 50 / 75 分位年薪各一个；工作安排按工时表与登记的到岗方式；``area`` 不写，带 SOC，
   整合时按通勤会话的就业片区补上。职业与行业分开：只按职业记，不写行业。
@@ -47,11 +47,11 @@ def _key(soc: str) -> str:
 
 
 def award_ability(soc: str) -> str:
-    return f"award_{_key(soc)}"
+    return f"soc_{_key(soc)}_award"
 
 
 def experience_ability(soc: str) -> str:
-    return f"exp_related_{_key(soc)}"
+    return f"soc_{_key(soc)}_experience"
 
 
 def _half_up(q: Fraction) -> int:
@@ -245,7 +245,7 @@ def jobs(ctx: Ctx, occ: dict[str, Any], scope: Scope, report: Report) -> list[It
                 continue
             pay = dec(annual) * weekly / 40
             o = LifeOpportunity(
-                opportunity_id=f"job.{ctx.cbsa}.{soc}.{tier['tier']}",
+                opportunity_id=f"{ctx.key}.job.{soc}.{tier['tier']}",
                 category="job",
                 label=f"{s['label']}·{tier['label']}"[:120],
                 unit="position",
@@ -335,7 +335,7 @@ def training(ctx: Ctx, occ: dict[str, Any], scope: Scope, report: Report) -> lis
             continue
         years = int(p["months"]) // 12
         o = LifeOpportunity(
-            opportunity_id=f"training.{ctx.cbsa}.{p['record_id'].removeprefix('training.ipeds2023.')}",
+            opportunity_id=f"{ctx.key}.training.ipeds.{p['record_id'].removeprefix('training.ipeds2023.')}",
             category="training",
             label=f"CIP {p['cip']} 证书项目·{p['institution']}"[:120],
             unit="program",
@@ -392,7 +392,7 @@ def start_jobs(
     have = {i.opportunity.opportunity_id: i for i in job_items}
     out: dict[str, Any] = {}
     for soc in scope.supported:
-        oid = f"job.{ctx.cbsa}.{soc}.median"
+        oid = f"{ctx.key}.job.{soc}.p50"
         if oid in have:
             out[soc] = {
                 "status": "ok",
