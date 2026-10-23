@@ -3,7 +3,7 @@
  "cities": {
   "nyc": {
    "cbsa": "35620",
-   "content_identity": "b1812564f9fb2aba872375cec1f6af45d1b595c02430bc55e6fe9b1985ebbcf6",
+   "content_identity": "a677d4c7987a6127f456a95a489c70120ade53d50c696099dbf47f5e46af11a3",
    "status": "complete",
    "modes": [
     "walk_bike",
@@ -17,7 +17,7 @@
   },
   "la": {
    "cbsa": "31080",
-   "content_identity": "5c5b778ef5ef6a330732922174f2ecfc3f1dd3b702074e60219ebd6130ff0ade",
+   "content_identity": "9a773d9c88778a74271374cc304cd59b9b56b88fb7e3fe2bb154c929b666f0b1",
    "status": "complete",
    "modes": [
     "walk_bike",
@@ -31,7 +31,7 @@
   },
   "sf": {
    "cbsa": "41860",
-   "content_identity": "7b2c3fdcd5ee14d40b1cccf042bea5306139e095ee04b8063fddd6d3f826558b",
+   "content_identity": "f577725c04ff2deddf6ea0d9e7599d2dd9efef764e4b20e1e4322828cce52bc6",
    "status": "partial",
    "modes": [
     "walk_bike",
@@ -46,7 +46,7 @@
   },
   "chi": {
    "cbsa": "16980",
-   "content_identity": "ea64992b7be26d05ee674d60c4107693b1ec9a3c1280cf57a0979952a23ff696",
+   "content_identity": "5be397b16fd3b69e3ea53df18f261452c3df0281075e237947c73eece7c7bf1f",
    "status": "complete",
    "modes": [
     "walk_bike",
@@ -60,7 +60,7 @@
   },
   "hou": {
    "cbsa": "26420",
-   "content_identity": "aee6861cf088ae63a7df35b5cbe03f26453fdcf41a604c64c45b267d502d9858",
+   "content_identity": "df90873ea2019cc6bc54d8730579023ee336efb17d9eeef60c0ba308b9eec4ae",
    "status": "complete",
    "modes": [
     "walk_bike",
@@ -74,7 +74,7 @@
   },
   "sea": {
    "cbsa": "42660",
-   "content_identity": "f387aa4515344a83c7ac485b10e42bc0a6ce18b7016488977f8e3dd96840ecb3",
+   "content_identity": "406d267f5510c2bb4742a319811e71f3dd5ce273108ad0ed136eb06638517a5d",
    "status": "complete",
    "modes": [
     "walk_bike",
@@ -87,5 +87,5 @@
    "legs": 147
   }
  },
- "content_identity": "0b5e8b46cbaf5646a49d95937d311b63bd5e21e964e734f13fe2f0eb746974e0"
+ "content_identity": "f2f059a8e908cc4c6e66e4c245bfc4b3905b3707d9d3a413e414dc0252688b25"
 }

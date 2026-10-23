@@ -60,8 +60,8 @@ from product.realdata.fetch import Request, _store
 CFG = load_commute_config(COMMUTE_CONFIG)
 NYC = next(c for c in CFG["cities"] if c["key"] == "nyc")
 A, D, B = "3604101", "3604102", "3604301"
-M, K, N = "nyc.area.work.3604100", "nyc.area.work.3604300", "nyc.area.work.3603200"
-OTHER = "nyc.area.work.other"
+M, K, N = "nyc.area.w.3604100", "nyc.area.w.3604300", "nyc.area.w.3603200"
+OTHER = "nyc.area.w.other"
 
 
 def fake_cost_cache(tmp: Path, cfg: dict, *, drop: str | None = None) -> Path:
@@ -147,7 +147,13 @@ POW = {
 
 
 def rows(
-    home: str, work: str, jwtrns: int, minutes: int, count: int, weight: int = 1
+    home: str,
+    work: str,
+    jwtrns: int,
+    minutes: int,
+    count: int,
+    weight: int = 1,
+    soc: str = "43",
 ) -> list[dict]:
     powsp, powpuma = POW[work]
     return [
@@ -159,14 +165,16 @@ def rows(
             "JWTRNS": jwtrns,
             "POWSP": powsp,
             "POWPUMA": powpuma,
+            "SOC2": soc,
         }
     ] * count
 
 
 def commuters() -> pd.DataFrame:
+    """A→曼哈顿坐公交的 30 人是 SOC 15（计算机与数学），其余都是 43（办公室与行政支持）。"""
     car, bus, walk, taxi = 1, 2, 10, 7
     r = (
-        rows(A, "M", bus, 20, 30)
+        rows(A, "M", bus, 20, 30, soc="15")
         + rows(A, "M", walk, 15, 30)
         + rows(A, "M", car, 30, 5)
         + rows(A, "M", taxi, 30, 4)
@@ -301,11 +309,11 @@ def test_work_areas_follow_the_inbound_share_rule():
 
 def test_area_declarations(city):
     areas = {a["area_id"]: AreaDecl.model_validate(a) for a in city["areas"]}
-    home = areas[f"nyc.area.home.{A}"]
+    home = areas[f"nyc.area.h.{A}"]
     assert home.kind == "home" and home.typical_roundtrip_minutes == 40
     assert home.typical_source.kind == "estimated"
-    assert areas[f"nyc.area.home.{B}"].typical_roundtrip_minutes == 90
-    assert areas[f"nyc.area.home.{D}"].typical_roundtrip_minutes == 50
+    assert areas[f"nyc.area.h.{B}"].typical_roundtrip_minutes == 90
+    assert areas[f"nyc.area.h.{D}"].typical_roundtrip_minutes == 50
     assert areas[M].kind == "work" and areas[M].typical_roundtrip_minutes is None
     assert city["diagnostics"]["typical"]["differs_from_intake_commute_table"] == []
 
@@ -369,6 +377,37 @@ def test_car_access_is_one_monthly_service(city):
     assert car.resource.basis == "per_service_month" and car.resource.hours == 0
 
 
+def test_ids_follow_the_shared_life_pack_convention(city):
+    ids = [a["area_id"] for a in city["areas"]]
+    assert ids == [f"nyc.area.h.{A}", f"nyc.area.h.{D}", f"nyc.area.h.{B}", M, K, N, OTHER]
+    assert city["car_access"]["opportunity_id"] == "nyc.service.car_access"
+    assert city["home_pumas"] == {
+        "included": [A, D, B],
+        "excluded_outside_tax_scope": ["3400601", "3603102"],
+        "excluded_partial_in_metro": ["3603101"],
+    }
+
+
+def test_work_area_job_shares_by_soc_major_group(city):
+    # 全部：600 / 300 / 60 / 40；SOC 15 只有 A→曼哈顿的 30 人；SOC 43 = 570 / 300 / 60 / 40（合计 970）
+    s = city["work_area_job_shares"]
+    assert s["all"]["weight"] == 1000
+    assert s["all"]["shares"] == {M: "0.6000", K: "0.3000", N: "0.0600", OTHER: "0.0400"}
+    assert s["by_soc_major"]["15"]["shares"] == {
+        M: "1.0000",
+        K: "0.0000",
+        N: "0.0000",
+        OTHER: "0.0000",
+    }
+    assert s["by_soc_major"]["43"]["weight"] == 970
+    assert s["by_soc_major"]["43"]["shares"] == {
+        M: "0.5876",
+        K: "0.3093",
+        N: "0.0619",
+        OTHER: "0.0412",
+    }
+
+
 def test_resident_diagnostics(city):
     d = city["diagnostics"]["resident_commuters"]
     assert d["outside_work_areas_weight_by_reason"] == {
@@ -429,15 +468,26 @@ def test_committed_frozen_files_are_consistent():
 
 def test_read_commuters_keeps_employed_non_wfh_commuters():
     header = ",".join(
-        ["SERIALNO", "STATE", "PUMA", "PWGTP", "ESR", "JWMNP", "JWTRNS", "POWSP", "POWPUMA"]
+        [
+            "SERIALNO",
+            "STATE",
+            "PUMA",
+            "PWGTP",
+            "ESR",
+            "JWMNP",
+            "JWTRNS",
+            "POWSP",
+            "POWPUMA",
+            "SOCP",
+        ]
     )
     lines = [
         header,
-        "1,36,4101,12,1,25,3,036,4100",  # 留下：在职、坐地铁
-        "2,36,4101,12,1,,11,036,4100",  # 在家工作
-        "3,36,4101,12,3,30,1,036,4100",  # 失业
-        "4,36,4101,12,2,,,,",  # 有工作但上周没上班
-        "5,36,4101,12,1,40,1,034,600",  # 留下：去新泽西开车
+        "1,36,4101,12,1,25,3,036,4100,151252",  # 留下：在职、坐地铁
+        "2,36,4101,12,1,,11,036,4100,151252",  # 在家工作
+        "3,36,4101,12,3,30,1,036,4100,",  # 失业
+        "4,36,4101,12,2,,,,,4110XX",  # 有工作但上周没上班
+        "5,36,4101,12,1,40,1,034,600,",  # 留下：去新泽西开车（没有职业代码）
     ]
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w") as z:
@@ -446,6 +496,7 @@ def test_read_commuters_keeps_employed_non_wfh_commuters():
     assert df["JWMNP"].tolist() == [25, 40]
     assert df["PUMA"].tolist() == ["04101", "04101"]
     assert df["POWSP"].tolist() == ["036", "034"] and df["POWPUMA"].tolist() == ["04100", "00600"]
+    assert df["SOC2"].tolist() == ["15", ""]
 
 
 def test_parse_powpuma_lookup():

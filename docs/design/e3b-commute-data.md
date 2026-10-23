@@ -16,16 +16,20 @@
 
 每份文件（`schema = e3b-commute-city-v1`）里能直接用的三样都已经按契约校验过：
 
-* `areas`：`AreaDecl` 列表——居住片区（`<城市>.area.home.<州两位+PUMA五位>`，带居民平时的往返分钟与来源）与就业片区（`<城市>.area.work.<州+工作地 PUMA>`，或 `<城市>.area.work.other`）。
+编号按资料包的共同约定：城市简称取自 `configs/intake/us_v1.yaml`（nyc、la、sf、chi、hou、sea）。
+
+* `areas`：`AreaDecl` 列表——居住片区 `<城市>.area.h.<州两位+PUMA五位>`（例如 `nyc.area.h.3604101`，每个都带居民平时的往返分钟与来源，冻结自检会查）与就业片区 `<城市>.area.w.<州两位+工作地 PUMA 五位>`（例如 `nyc.area.w.3604100` = 曼哈顿），或 `<城市>.area.w.other`。
 * `commute`：一个 `CommuteRelation`（方式规则 + 往返格）。
-* `car_access`：一项 `LifeOpportunity`（`ongoing_service`，`functions: [car_access]`，月费 740.50）。
+* `car_access`：一项 `LifeOpportunity`，编号 `<城市>.service.car_access`（`service`、`ongoing_service`、`functions: [car_access]`、按月 740.50、`per_service_month` 0 小时 0 负担、数量不计）。
+* `home_pumas`：有居住片区的 PUMA，以及因税的支持范围（`excluded_outside_tax_scope`）或只部分在都会区内（`excluded_partial_in_metro`）而没有的 PUMA——住房按 PUMA 生成时对照用。
+* `work_area_job_shares`：各就业片区占本城可支持工作地岗位的份额，全部（`all`）与按 SOC 2018 大类（`by_soc_major`，SOCP 前两位；每类带未加权条数 `n` 与权重）。岗位 = 到这些工作地上班、不在家工作的在职者（PWGTP），是存量分布、不是招聘；份额四舍五入到 4 位。例如计算机与数学类（15）在纽约 68% 在曼哈顿（全部岗位是 39%），在西雅图 91% 在金县（全部 66%）。
 
 另有 `transit_fare`（票价与摘句）、`assumptions`、`not_modeled`、`inputs`（intake 构建身份、每份原始文件的 SHA-256、汽油价记录、油耗与用车费用的摘句）、`diagnostics`（下面几节的数都从这里来）和 `content_identity`（去掉它本身之后整份内容的 SHA-256）。`index.json` 列每城的内容身份、状态与可用方式。同样的缓存与冻结库重跑一次，六份文件逐字节相同。
 
 接进资料包时要做的（主线的事，这里只列出来）：
 
-1. 住房候选写 `area = <城市>.area.home.<PUMA>`（intake 的 B 住房候选本来就按 PUMA 生成；A 网格按通勤层生成，没有 PUMA，需要另定）。
-2. 需要到岗的岗位写一个就业片区。OEWS 只到都会区，没有岗位在都会区内的位置；`diagnostics.work_areas.areas[].share` 是各就业片区的流入在职者份额，可以当分配岗位的接触权重（与 PI-20 同类的存量份额代理）。
+1. 住房候选写 `area = <城市>.area.h.<PUMA>`（intake 的 B 住房候选本来就按 PUMA 生成；A 网格按通勤层生成，没有 PUMA，需要另定）。
+2. 需要到岗的岗位写一个就业片区。OEWS 只到都会区，没有岗位在都会区内的位置；`work_area_job_shares` 可以当分配岗位的接触权重（与 PI-20 同类的存量份额代理）。
 3. 生活输入的 `functions` 要声明 `car_access`。
 
 ## 2. 片区

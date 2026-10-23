@@ -68,7 +68,7 @@ LEVEL_LABEL = {
 #: PUMS 2024 是全年调查；来源记录的日期取观测期的最后一天。
 OBSERVED_2024 = _dt.date(2024, 12, 31)
 CENT = Decimal("0.01")
-PERSON_COLUMNS = ("STATE", "PUMA", "PWGTP", "ESR", "JWMNP", "JWTRNS", "POWSP", "POWPUMA")
+PERSON_COLUMNS = ("STATE", "PUMA", "PWGTP", "ESR", "JWMNP", "JWTRNS", "POWSP", "POWPUMA", "SOCP")
 
 
 def load_commute_config(path: Path | str = COMMUTE_CONFIG) -> dict[str, Any]:
@@ -366,7 +366,7 @@ def parse_powpuma_lookup(content: bytes, sheet: str) -> PowLookup:
 
 
 def read_commuters(content: bytes, employed_esr: list[int]) -> pd.DataFrame:
-    """一个州的 PUMS 人员文件 → 在职、上周不在家工作、有通勤分钟的人（居住与工作地、方式、分钟、权重）。"""
+    """一个州的 PUMS 人员文件 → 在职、上周不在家工作、有通勤分钟的人（居住与工作地、方式、分钟、权重、职业大类）。"""
     z = zipfile.ZipFile(io.BytesIO(content))
     name = next(
         n for n in z.namelist() if n.lower().startswith("psam_p") and n.lower().endswith(".csv")
@@ -375,7 +375,7 @@ def read_commuters(content: bytes, employed_esr: list[int]) -> pd.DataFrame:
         df = pd.read_csv(
             f,
             usecols=list(PERSON_COLUMNS),
-            dtype={"STATE": str, "PUMA": str, "POWSP": str, "POWPUMA": str},
+            dtype={"STATE": str, "PUMA": str, "POWSP": str, "POWPUMA": str, "SOCP": str},
         )
     df = df[df["ESR"].isin(employed_esr) & (df["JWMNP"] > 0) & df["JWTRNS"].notna()]
     df = df[df["JWTRNS"] != 11].copy()
@@ -386,9 +386,11 @@ def read_commuters(content: bytes, employed_esr: list[int]) -> pd.DataFrame:
     df["JWTRNS"] = df["JWTRNS"].astype(int)
     df["JWMNP"] = df["JWMNP"].astype(int)
     df["PWGTP"] = df["PWGTP"].astype(int)
-    return df[["STATE", "PUMA", "PWGTP", "JWMNP", "JWTRNS", "POWSP", "POWPUMA"]].reset_index(
-        drop=True
-    )
+    #: SOC 2018 大类（SOCP 的前两位，例如 15 = 计算机与数学）；没有职业代码的是空串
+    df["SOC2"] = df["SOCP"].fillna("").str.strip().str[:2]
+    return df[
+        ["STATE", "PUMA", "PWGTP", "JWMNP", "JWTRNS", "POWSP", "POWPUMA", "SOC2"]
+    ].reset_index(drop=True)
 
 
 @dataclass
@@ -499,7 +501,7 @@ def define_work_areas(
     rest = [k for k in ranked if k not in own]
     areas = [
         WorkArea(
-            area_id=f"{key}.area.work.{k[0]}{k[1]}",
+            area_id=f"{key}.area.w.{k[0]}{k[1]}",
             label=_cut(f"就业片区·{lookup.label(k)}", 120),
             powpumas=(k,),
             counties=tuple(sorted(lookup.counties[k])),
@@ -511,7 +513,7 @@ def define_work_areas(
     if rest:
         areas.append(
             WorkArea(
-                area_id=f"{key}.area.work.other",
+                area_id=f"{key}.area.w.other",
                 label=_cut(
                     "就业片区·其余工作地（" + "、".join(lookup.label(k) for k in rest) + "）", 120
                 ),
@@ -551,6 +553,34 @@ def define_work_areas(
         "supported_without_inbound": [f"{k[0]}-{k[1]}" for k in supported if w[k] == 0],
     }
     return areas, diag
+
+
+def work_area_job_shares(
+    commuters: pd.DataFrame, area_of: dict[str, str], area_ids: list[str]
+) -> dict[str, Any]:
+    """每个就业片区占本城可支持工作地岗位的份额：全部，以及按 SOC 2018 大类（SOCP 前两位）。
+
+    岗位 = 到这些工作地上班、不在家工作的在职者（PWGTP 加权，缓存里各州的全部居民）。这是存量在职者的分布，不是招聘；
+    份额四舍五入到 4 位，加起来不一定正好是 1。只用来说明把岗位放进就业片区的规则，不进评分。"""
+    df = commuters.assign(area=_pow_key(commuters).map(area_of))
+    df = df[df["area"].notna()]
+
+    def shares(g: pd.DataFrame) -> dict[str, Any]:
+        w = g.groupby("area")["PWGTP"].sum()
+        total = int(w.sum())
+        return {
+            "n": len(g),
+            "weight": total,
+            "shares": {a: f"{Decimal(int(w.get(a, 0))) / Decimal(total):.4f}" for a in area_ids},
+        }
+
+    return {
+        "rule": "到可支持工作地上班、不在家工作的在职者（PWGTP）在各就业片区的分布；SOC 大类 = SOCP 前两位",
+        "all": shares(df),
+        "by_soc_major": {
+            str(soc): shares(g) for soc, g in df[df["SOC2"] != ""].groupby("SOC2", sort=True)
+        },
+    }
 
 
 # --------------------------------------------------------------------------- 通勤格
@@ -749,7 +779,7 @@ def _area_decls(
             }
         out.append(
             AreaDecl(
-                area_id=f"{key}.area.home.{p.code}",
+                area_id=f"{key}.area.h.{p.code}",
                 label=_home_label(p),
                 kind="home",
                 note=_cut(
@@ -876,7 +906,7 @@ def _leg(
     else:
         cost, cost_text = Decimal(0), "花费 0"
     return CommuteLeg(
-        home_area=f"{key}.area.home.{cell.home}",
+        home_area=f"{key}.area.h.{cell.home}",
         work_area=cell.work,
         mode=cell.mode,  # type: ignore[arg-type]
         roundtrip_minutes=minutes,
@@ -1064,6 +1094,15 @@ def build_city(
         "areas": [a.model_dump(mode="json", exclude_none=True) for a in areas],
         "commute": relation.model_dump(mode="json", exclude_none=True),
         "car_access": None if car is None else car.model_dump(mode="json", exclude_none=True),
+        # 住房按 PUMA 生成时对照用：哪些 PUMA 有居住片区，哪些因税的支持范围或只部分在都会区内而没有
+        "home_pumas": {
+            "included": home_codes,
+            "excluded_outside_tax_scope": [x["puma"] for x in home_excluded["outside_tax_scope"]],
+            "excluded_partial_in_metro": [x["puma"] for x in home_excluded["partial_in_metro"]],
+        },
+        "work_area_job_shares": work_area_job_shares(
+            raw.commuters, area_of, [a.area_id for a in work_areas]
+        ),
         "transit_fare": None
         if fare is None
         else {
@@ -1226,6 +1265,11 @@ def frozen_payload_problems(payload: dict[str, Any]) -> list[str]:
         problems.append("内容身份对不上")
     areas = [AreaDecl.model_validate(a) for a in payload["areas"]]
     kinds = {a.area_id: a.kind for a in areas}
+    problems += [
+        f"{a.area_id}：居住片区没有居民平时的往返分钟"
+        for a in areas
+        if a.kind == "home" and a.typical_roundtrip_minutes is None
+    ]
     rel = CommuteRelation.model_validate(payload["commute"])
     for g in rel.legs:
         if kinds.get(g.home_area) != "home" or kinds.get(g.work_area) != "work":
