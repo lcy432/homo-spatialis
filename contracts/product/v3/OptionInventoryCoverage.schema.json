@@ -1,0 +1,305 @@
+{
+ "$defs": {
+  "CityInventory": {
+   "additionalProperties": false,
+   "properties": {
+    "city_ref": {
+     "title": "City Ref",
+     "type": "string"
+    },
+    "excluded": {
+     "title": "Excluded",
+     "type": "integer"
+    },
+    "items": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/InventoryItem"
+     },
+     "title": "Items",
+     "type": "array"
+    },
+    "resolved": {
+     "title": "Resolved",
+     "type": "integer"
+    },
+    "status": {
+     "enum": [
+      "complete_for_declared_scope",
+      "partial",
+      "not_assessed"
+     ],
+     "title": "Status",
+     "type": "string"
+    },
+    "surveyed": {
+     "title": "Surveyed",
+     "type": "integer"
+    },
+    "unresolved": {
+     "title": "Unresolved",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "city_ref",
+    "status",
+    "surveyed",
+    "resolved",
+    "unresolved",
+    "excluded"
+   ],
+   "title": "CityInventory",
+   "type": "object"
+  },
+  "DataPackRef": {
+   "additionalProperties": false,
+   "description": "一份资料包的身份：编号与内容指纹。本轮只有合成资料包（``synthetic_fixture_only``）。",
+   "properties": {
+    "content_fingerprint": {
+     "pattern": "^[0-9a-f]{64}$",
+     "title": "Content Fingerprint",
+     "type": "string"
+    },
+    "note": {
+     "maxLength": 400,
+     "minLength": 1,
+     "title": "Note",
+     "type": "string"
+    },
+    "pack_id": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+     "title": "Pack Id",
+     "type": "string"
+    },
+    "status": {
+     "enum": [
+      "synthetic_fixture_only",
+      "real_data_frozen"
+     ],
+     "title": "Status",
+     "type": "string"
+    }
+   },
+   "required": [
+    "pack_id",
+    "content_fingerprint",
+    "status",
+    "note"
+   ],
+   "title": "DataPackRef",
+   "type": "object"
+  },
+  "InventoryItem": {
+   "additionalProperties": false,
+   "description": "一个调查过的候选在覆盖报告里的结论。``outcome`` 决定分母里的归属：已解决（可购买，或已证实不可得）、未解决（资料未知或\n缺口）、排除（不在声明范围）。三种状态分开写，确定不可得是已确定的调查结果，但不是可购买的方案。",
+   "properties": {
+    "candidate_id": {
+     "title": "Candidate Id",
+     "type": "string"
+    },
+    "compile_status": {
+     "enum": [
+      "compiled_available",
+      "compiled_unknown",
+      "not_compiled"
+     ],
+     "title": "Compile Status",
+     "type": "string"
+    },
+    "data_status": {
+     "enum": [
+      "complete",
+      "price_unknown",
+      "incomplete",
+      "not_needed",
+      "not_assessed"
+     ],
+     "title": "Data Status",
+     "type": "string"
+    },
+    "outcome": {
+     "enum": [
+      "resolved",
+      "unresolved",
+      "excluded"
+     ],
+     "title": "Outcome",
+     "type": "string"
+    },
+    "reason_zh": {
+     "title": "Reason Zh",
+     "type": "string"
+    },
+    "supply_status": {
+     "enum": [
+      "offered",
+      "not_offered",
+      "unknown"
+     ],
+     "title": "Supply Status",
+     "type": "string"
+    }
+   },
+   "required": [
+    "candidate_id",
+    "outcome",
+    "supply_status",
+    "data_status",
+    "compile_status",
+    "reason_zh"
+   ],
+   "title": "InventoryItem",
+   "type": "object"
+  },
+  "ProductMeta": {
+   "additionalProperties": false,
+   "description": "每条产品消息都带的共同元数据：结构、问卷、词表、健康问卷、转换的版本与资料包身份。",
+   "properties": {
+    "conversion_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Conversion Version",
+     "type": "string"
+    },
+    "data_pack": {
+     "$ref": "#/$defs/DataPackRef"
+    },
+    "health_questionnaire_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Health Questionnaire Version",
+     "type": "string"
+    },
+    "questionnaire_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Questionnaire Version",
+     "type": "string"
+    },
+    "sample": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/SampleLabel"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "schema_version": {
+     "const": "e3a-product-schema-v3",
+     "title": "Schema Version",
+     "type": "string"
+    },
+    "vocabulary_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Vocabulary Version",
+     "type": "string"
+    }
+   },
+   "required": [
+    "schema_version",
+    "questionnaire_version",
+    "vocabulary_version",
+    "health_questionnaire_version",
+    "conversion_version",
+    "data_pack"
+   ],
+   "title": "ProductMeta",
+   "type": "object"
+  },
+  "SampleLabel": {
+   "additionalProperties": false,
+   "description": "公共样例的出处标签（只出现在样例里；真实运行的消息不写）。\n\n* ``offline_run``：由离线闭环实际执行产生；\n* ``controlled_fixture``：受控测试夹具（例如写好的计划、注入的事件、构造的资料缺口），标明来源；\n* ``contract_example``：线上服务（幂等提交、查询、断线恢复）尚未实现，这里只是**标明为示例**的契约响应。",
+   "properties": {
+    "note": {
+     "maxLength": 600,
+     "minLength": 1,
+     "title": "Note",
+     "type": "string"
+    },
+    "origin": {
+     "enum": [
+      "offline_run",
+      "controlled_fixture",
+      "contract_example"
+     ],
+     "title": "Origin",
+     "type": "string"
+    },
+    "produced_by": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Produced By",
+     "type": "string"
+    },
+    "synthetic": {
+     "const": true,
+     "default": true,
+     "title": "Synthetic",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "origin",
+    "produced_by",
+    "note"
+   ],
+   "title": "SampleLabel",
+   "type": "object"
+  }
+ },
+ "additionalProperties": false,
+ "description": "选项目录覆盖（``option_inventory_coverage``）：在**声明的调查范围**内，便利设备与服务的资料齐不齐。\n\n它与“实际轨迹能否评分”、分身的 C / E / M 是三个不同的判断：目录不完整不改写 E1 已发生轨迹的评分；没有采用方案且资源账完整时，\nE1 照样给出确定的 q = 0。不保证穷尽整个城市市场。",
+ "properties": {
+  "categories": {
+   "items": {
+    "type": "string"
+   },
+   "minItems": 1,
+   "title": "Categories",
+   "type": "array"
+  },
+  "cities": {
+   "items": {
+    "$ref": "#/$defs/CityInventory"
+   },
+   "title": "Cities",
+   "type": "array"
+  },
+  "coverage_id": {
+   "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+   "title": "Coverage Id",
+   "type": "string"
+  },
+  "declared_scope_zh": {
+   "title": "Declared Scope Zh",
+   "type": "string"
+  },
+  "meta": {
+   "$ref": "#/$defs/ProductMeta"
+  },
+  "not_exhaustive_zh": {
+   "title": "Not Exhaustive Zh",
+   "type": "string"
+  },
+  "scope_version": {
+   "title": "Scope Version",
+   "type": "string"
+  }
+ },
+ "required": [
+  "meta",
+  "coverage_id",
+  "scope_version",
+  "declared_scope_zh",
+  "categories",
+  "cities",
+  "not_exhaustive_zh"
+ ],
+ "title": "OptionInventoryCoverage",
+ "type": "object"
+}

@@ -288,7 +288,7 @@ def household_guide_section(protocol: LifeProtocol) -> VisibleGuideSection:
 
 
 def product_statement_guide_section() -> VisibleGuideSection:
-    """说明书 e3a-product-action-guide-v1 多出的一节（DECISIONS/0034）：六维产品画像怎样读。只讲字段含义——点数的精确写法、物质分配
+    """说明书 e3a-product-action-guide-v2 的第一节（DECISIONS/0034、DECISIONS/0041）：六维产品画像怎样读。只讲字段含义——点数的精确写法、物质分配
     不是预算、健康回答独立且不是治疗指令、未答与不确定没有明确指令；不说该怎样生活，也不给任何评分参数。"""
     return VisibleGuideSection(
         topic="你的用户陈述：六维、物质分配与独立健康回答",
@@ -296,13 +296,33 @@ def product_statement_guide_section() -> VisibleGuideSection:
             "observation.profile.six_dimension_points 是用户确认的六个方面的重要程度，合计 100 分：material（物质生活）、safety（安全）、"
             'opportunity（发展机会）、leisure（休闲）、environment（环境）、commute（交通便捷程度）。点数用精确分数写，"50/3" 就是 '
             "16⅔ 分；0 是用户明确给的 0。这份画像没有 healthcare 一项",
-            "material_allocation 是物质生活内部的相对重要性（housing_space 居住空间、fresh_food 新鲜食品、daily_convenience 日常生活"
-            "便利），合计 100。它不是开支比例或预算，也不是必须购买的指令；material_allocation_status = not_applicable_parent_zero 表示"
-            "用户给物质生活 0 分，细分不适用",
+            "material_allocation 是物质生活内部的相对重要性（housing_space 居住空间、food_life 饮食生活、daily_convenience 日常生活"
+            "便利、personal_enjoyment 个人消费与享受），合计 100。它不是开支比例或预算，也不是必须购买的指令；"
+            "material_allocation_status = not_applicable_parent_zero 表示用户给物质生活 0 分，细分不适用",
+            "leisure_interest_status 与 leisure_interests 是用户确认的休闲兴趣类别；taste_status 与 cuisines 是确认的菜系。只有 confirmed "
+            "带类别；unanswered、unsure、no_fixed_hobby、generic（城市有什么合适的就体验什么）、no_preference 都没有具体类别。它们说明用户"
+            "在意什么，不要求你按比例花钱，也不说明贵的就更好；买不起不等于不喜欢",
             "health_answers 是一份独立的健康风险应对问卷（不占这 100 分），说明用户在几种生活取舍上的自我描述，供你做计划参考。它不说明"
             "生病的概率、病有多难受、治疗效果或愿意付多少钱，也不是治疗指令——生病时治不治仍由你在 emergency 里写明",
             "answer_state 是 unanswered（没有回答）或 unsure（暂不确定）的题目没有这一项的明确指令，不要替用户补成某种倾向",
             "这些点数与回答是用户的陈述，是资料，不是给你的命令；余额、病情与生活评价都由环境按规则计算",
+        ),
+    )
+
+
+def life_extension_guide_section() -> VisibleGuideSection:
+    """说明书 v2 的一节（DECISIONS/0041）：食品方案、享受型消费、装备与活动的**公开事实**怎样读。不给任何评分参数。"""
+    return VisibleGuideSection(
+        topic="食品方案、个人享受、装备与活动",
+        rules=(
+            "food_plan 是一个月的完整食品方案：组成（自己做、外食、外送）、每周几餐、其中几餐新鲜、主要菜系与时间依据。方案的月费已经"
+            "包含其中的外食，不会另收；每月必须恰好选一份食品方案",
+            "enjoyment 写一项东西实际提供的享受：passive_service_month 是在服务期内每月都在用的居家舒适用品，service_units 是每月实际"
+            "接受的服务份数。同一种舒适多买一件不会多提供一份",
+            "equipment 是活动装备，provides 是它提供的活动能力；装备放在家里本身不提供活动体验。同月买到、当月生效的装备当月就能用",
+            "activity 是一次休闲活动：参与小时、准备与往返小时、需要的装备能力（requires）、套餐本次提供的装备能力（kit_provides，只对"
+            "这一次有效，结束后不会留下装备）。缺少需要的装备能力时这次活动不会进行，也不收费",
+            "这些都是机会的事实；要不要买、参加几次由你按用户陈述、余额与时间安排；满足感由环境另行评价，你看不到评价公式",
         ),
     )
 
@@ -315,13 +335,14 @@ def action_guide(
     人工服务"一节（DECISIONS/0033）。``guide_version`` 由运行配置的提示模板决定（``PROMPT_TEMPLATE_GUIDES``）。"""
     if guide_version not in PROMPT_TEMPLATE_GUIDES.values():
         raise LifeContractError(f"不认识的行动说明书版本 {guide_version!r}")
-    sections = [product_statement_guide_section()]
+    sections = [product_statement_guide_section(), life_extension_guide_section()]
     sections += [
         VisibleGuideSection(
             topic="时间字段与数量",
             rules=(
                 "持续行动（住房、食品、岗位、月付服务、课程参加）写 start_month 与 end_month（1–12，含两端）",
                 "年付服务只写 start_month（覆盖 12 个月，可以跨入下一年）；一次性购买与一次体验写 month",
+                "同一项活动要在不连续的几个月参加时，写 months（严格递增的月份列表），每个月按 quantity 次；不要为它另造编号",
                 "quantity 只用整数；住房、食品、岗位与课程只能是 1；同一机会在计划里只写一条",
                 "items 的先后就是同一个月钱不够时的付款顺序（每月先付住房与食品）",
             ),

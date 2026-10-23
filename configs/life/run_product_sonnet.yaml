@@ -1,6 +1,6 @@
 # 非全量的真实 LLM 测试配置（所有者 2026-10-19）：Claude Sonnet 5.5（configs/models.yaml 的 test_planner_sonnet 角色），effort max，经
 # Claude Agent SDK 单轮调用。scripts/run_life_e1_7b.py 不写 --config 时就用它。名单 roster_product.yaml（一位用户 × 两座城 × 每城一个分身
-# × 3 年）、提示模板 e3a-product-prompt-v1。全规模的产品流程测试不用它，用 scripts/run_product_full.py（Qwen Flash）。
+# × 3 年）、提示模板 e3a-product-prompt-v2。全规模的产品流程测试不用它，用 scripts/run_product_full.py（Qwen Flash）。
 # 不记账（unmetered_reason，走本机已登录的 Claude 订阅），只受全局规划调用上限约束。
 
 run_notice: >-
@@ -61,6 +61,6 @@ run:
   unmetered_reason: >-
     使用 Claude 订阅额度（auth: claude_subscription，所有者 2026-10-18：先不计算费用）；只受全局规划调用上限约束，
     token 用量照记在请求明细里
-  prompt_template: e3a-product-prompt-v1
+  prompt_template: e3a-product-prompt-v2
   memory_policy: e1-7a-memory-v1
   note: 非全量真实 LLM 测试的默认配置（Claude Sonnet 5.5，effort max）；mock 对照见 run_product_mock.yaml，全规模见 scripts/run_product_full.py。

@@ -104,6 +104,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from common.ids import Jurisdiction
 from common.life_billing import annual_minor, monthly_installment, unit_minor
 from common.life_contracts import (
+    MAX_SUMMARY_CHARS,
     MAX_SUMMARY_ENTRIES,
     MINIMUM_NEEDS,
     MONTHS_PER_YEAR,
@@ -127,6 +128,7 @@ from common.life_contracts import (
     MonthPause,
     MonthRecord,
     MonthRejection,
+    ParticipationRecord,
     PausedActivity,
     PersonYearState,
     PlanCheck,
@@ -298,6 +300,11 @@ _PAUSE_WHY: dict[str, str] = {
     # 收尾修订（F2）：代理自己的声明，不是资源不够，也不是付不起
     "agent_cancel_when_ill": "按年度应急声明，因本月患病取消购买（不扣款、不生成持有物、不顺延、不补购）",
 }
+
+
+def _needs_held_capability(o: LifeOpportunity) -> bool:
+    """这项活动是否需要套餐之外、已持有的装备能力（这样的活动在本月购买之后结算）。"""
+    return o.activity is not None and bool(o.activity.missing_capabilities(frozenset()))
 
 
 def _resource_shortfall(result: SettlementResult) -> bool:
@@ -672,6 +679,7 @@ class _Year:
                     month=item.month,
                 )
             )
+        self.participation: list[ParticipationRecord] = []
         self.held: list[_Held] = []
         for h in state.holdings:
             o = catalog.opportunity(h.opportunity_id)
@@ -826,6 +834,7 @@ class _Year:
         "resource_months",
         "savings",
         "goal_line",
+        "participation",
     )
 
     def _snapshot(self) -> dict[str, object]:
@@ -1190,12 +1199,22 @@ class _Year:
             elif ln.role == "prepaid_service" and ln.start_month == m:
                 self._pay_prepaid(ln, m)
 
-        # 第 6 步：一次性购买、体验、培训报名
+        # 第 6 步：一次性购买、体验、培训报名（按计划里的位置）。需要已持有装备能力的活动放到本月这些购买之后
+        # （DECISIONS/0041）：同月买到、当月生效的装备当月就能用，活动能不能参加不取决于它与装备在计划里谁写在前面；
+        # 其他购买之间的先后不变，这几项活动之间仍按位置。
+        deferred: list[_Line] = []
         for ln in self.lines:
-            if ln.role in ("durable_good", "experience") and ln.month == m:
+            if ln.role == "durable_good" and ln.month == m:
                 self._buy_once(ln, m)
+            elif ln.role == "experience" and m in ln.months:
+                if _needs_held_capability(ln.opp):
+                    deferred.append(ln)
+                else:
+                    self._buy_once(ln, m)
             elif ln.role == "training" and ln.start_month == m:
                 self._enroll(ln, m)
+        for ln in deferred:
+            self._buy_once(ln, m)
 
         # 第 7 步：持有物服务、培训参与、月末余额
         self._serve_holdings(m)
@@ -1601,8 +1620,23 @@ class _Year:
         paused = self._paused_kind(ln.opp, ln.role) if ln.role == "experience" else None
         if paused is not None:  # E1-5C：生病时不去参加这次体验，也不付款（不顺延）
             self._pause(ln, ln.opp, ln.role, m, paused)
+            self._participate(ln, m, "paused", _PAUSE_WHY[paused])
             return
         why = self._why_not(ln.opp)
+        used: tuple[str, ...] = ()
+        act = ln.opp.activity if ln.role == "experience" else None
+        if why is None and act is not None:
+            held = self._capabilities_now()
+            missing = act.missing_capabilities(frozenset(held))
+            if missing:
+                why = (
+                    f"缺少装备能力 {list(missing)}：本月没有在服务期内、提供这种能力的装备（买了但没成功、取消、未生效或已到期都"
+                    "不算）；不付款，也没有参加"
+                )
+            else:
+                used = tuple(
+                    dict.fromkeys(held[c] for c in act.requires if c not in act.kit_provides)
+                )
         cost = 0
         if why is None:
             assert ln.opp.price is not None
@@ -1614,9 +1648,13 @@ class _Year:
                 )
         if why is not None:
             ln.rejections.append((m, why))
+            if act is not None:
+                self._participate(ln, m, "failed", why)
             return
         durable = ln.role == "durable_good"
         self._pay(ln, m, cost, f"{'购入' if durable else '体验'}：{ln.opp.label}")
+        if act is not None:
+            self._participate(ln, m, "completed", None, used)
         if durable:
             same_year = ln.opp.duration.effective_from == "same_year"
             ln.effective = (self.year, m) if same_year else (self.year + 1, 1)
@@ -1634,6 +1672,43 @@ class _Year:
             self._event(m, f"购入{ln.opp.label}" + ("" if same_year else "（下一年起用）"))
         else:
             self._event(m, ln.opp.label + (f" ×{ln.qty}" if ln.qty != 1 else ""))
+
+    def _capabilities_now(self) -> dict[str, str]:
+        """这个月**有效持有**的装备能力 → 提供它的第一件持有物（按取得顺序）。买到并当月生效的已在 ``held`` 里；
+        已到期、下一年才起用的不算。只查不扣寿命：寿命只由持有服务按月扣（不会在“持有”与“使用”里各扣一次）。"""
+        out: dict[str, str] = {}
+        for h in self.held:
+            if h.expired or h.remaining <= 0 or h.opp.equipment is None:
+                continue
+            if h.in_service_from_year is not None and h.in_service_from_year > self.year:
+                continue
+            for c in h.opp.equipment.provides:
+                out.setdefault(c, h.opp.opportunity_id)
+        return out
+
+    def _participate(
+        self, ln: _Line, m: int, status: str, reason: str | None, used: tuple[str, ...] = ()
+    ) -> None:
+        """记下这一项活动这个月的实际参与（唯一的一份；时间账、评分与记忆都读它）。"""
+        a = ln.opp.activity
+        assert a is not None
+        done = status == "completed"
+        n = float(ln.qty) if done else 0.0
+        self.participation.append(
+            ParticipationRecord(
+                plan_order=ln.order,
+                opportunity_id=ln.opp.opportunity_id,
+                month=m,
+                status=status,  # type: ignore[arg-type]
+                primary_category=a.primary_category,
+                sessions=n,
+                participation_hours=n * a.participation_hours,
+                overhead_hours=n * a.overhead_hours,
+                equipment_used=used,
+                kit_capabilities=tuple(a.kit_provides) if done else (),
+                reason=None if reason is None else reason[:MAX_SUMMARY_CHARS],
+            )
+        )
 
     def _enroll(self, ln: _Line, m: int) -> None:
         t = self.training.get(ln.opp.opportunity_id)
@@ -1891,6 +1966,7 @@ class _Year:
                 )
                 for h in self.held
             ),
+            participation=tuple(self.participation),
             exit=self.exit,
             tax_policy_id=self.tax.policy_id,
             tax_status=self.tax.status,

@@ -93,6 +93,11 @@ class LifeBundle(ContractModel):
     #: E1-3 增补订正：需求功能的数量语义（存在型 / 容量型），在词表里声明一次。评分来源按功能
     #: 过滤时必须与这里一致——不能把"通信"换个说法当容量来按件计分。
     function_kinds: dict[str, FunctionKind] = Field(default_factory=dict)
+    #: 生活扩展（DECISIONS/0041）的公开词表：菜系、休闲活动类别、装备能力、享受功能。机会与画像只能用这里声明过的键。
+    cuisines: tuple[str, ...] = ()
+    leisure_categories: tuple[str, ...] = ()
+    capabilities: tuple[str, ...] = ()
+    enjoyment_functions: tuple[str, ...] = ()
     catalogs: tuple[CityLifeCatalog, ...]
     product_profiles: tuple[ProductLifeProfile, ...]
     initial_states: tuple[PersonYearState, ...]
@@ -103,7 +108,16 @@ class LifeBundle(ContractModel):
 
     @model_validator(mode="after")
     def _declarations_unique(self) -> LifeBundle:
-        for name in ("consumption_needs", "categories", "functions", "attribute_keys"):
+        for name in (
+            "consumption_needs",
+            "categories",
+            "functions",
+            "attribute_keys",
+            "cuisines",
+            "leisure_categories",
+            "capabilities",
+            "enjoyment_functions",
+        ):
             seq = getattr(self, name)
             dup = sorted(k for k, n in Counter(seq).items() if n > 1)
             if dup:
@@ -1151,6 +1165,8 @@ def _requested_months(role: str, item: ActionItem) -> tuple[int, ...]:
         return tuple(range(item.start_month, MONTHS_PER_YEAR + 1))
     if role in ONE_TIME_ROLES and item.month:
         return (item.month,)
+    if role == "experience" and item.months:
+        return tuple(item.months)
     return ()
 
 
@@ -1246,11 +1262,28 @@ def plan_problems(
                         item_order=i,
                     )
                 )
+        elif item.months is not None:
+            if role != "experience":
+                out.append(
+                    _p(
+                        "timing",
+                        f"{who}/{o.opportunity_id}: 只有一次性体验（活动）可以用 months 列出不连续的月份",
+                        item_order=i,
+                    )
+                )
         elif item.month is None or item.start_month is not None:
             out.append(
                 _p(
                     "timing",
                     f"{who}/{o.opportunity_id}: 一次性购买或体验必须给 month，且不给起止月",
+                    item_order=i,
+                )
+            )
+        if item.months is not None and role in PERIODIC_ROLES | {"prepaid_service"}:
+            out.append(
+                _p(
+                    "timing",
+                    f"{who}/{o.opportunity_id}: 按月执行的行动用起止月，不用 months",
                     item_order=i,
                 )
             )
@@ -1442,6 +1475,36 @@ def internal_leak_problems(where: str, o: LifeOpportunity) -> list[str]:
     return out
 
 
+def life_facet_vocabulary_problems(bundle: LifeBundle, where: str, o: LifeOpportunity) -> list[str]:
+    """生活扩展的公开事实只能用词表里声明过的键（菜系、活动类别、装备能力、享受功能）；说明文字里不能藏内部评分对象。"""
+    out: list[str] = []
+
+    def need(keys: tuple[str, ...] | list[str], vocab: tuple[str, ...], name: str) -> None:
+        for k in keys:
+            if k not in vocab:
+                out.append(f"{where}: {name} {k!r} 没有在词表里声明")
+
+    texts: dict[str, object] = {}
+    if o.food_plan is not None:
+        need([p.cuisine for p in o.food_plan.parts if p.cuisine], bundle.cuisines, "菜系")
+        texts["food_plan"] = o.food_plan.coverage_basis + " " + o.food_plan.time_basis
+    if o.activity is not None:
+        a = o.activity
+        need([a.primary_category, *a.tags], bundle.leisure_categories, "活动类别")
+        need([*a.requires, *a.kit_provides], bundle.capabilities, "装备能力")
+        texts["activity"] = a.time_basis
+    if o.equipment is not None:
+        need(list(o.equipment.provides), bundle.capabilities, "装备能力")
+        texts["equipment"] = o.equipment.note
+    need([e.function for e in o.enjoyment], bundle.enjoyment_functions, "享受功能")
+    for e in o.enjoyment:
+        texts[f"enjoyment.{e.function}"] = e.basis
+    hidden = serialized_internal(texts)
+    if hidden is not None:
+        out.append(f"{where}: 生活事实的说明里藏着原样序列化的内部评分对象 {hidden}")
+    return out
+
+
 def function_supply_problems(catalog: CityLifeCatalog, functions: set[str]) -> list[str]:
     """功能供给声明与目录是否对得上（`DECISIONS/0019` 第十二节）。
 
@@ -1508,6 +1571,9 @@ def cross_validate(bundle: LifeBundle) -> ContractReport:
                         f"{cat.city}/{o.opportunity_id}: 属性 {k!r} 没有在 attribute_keys 里声明"
                     )
             errors.extend(internal_leak_problems(f"{cat.city}/{o.opportunity_id}", o))
+            errors.extend(
+                life_facet_vocabulary_problems(bundle, f"{cat.city}/{o.opportunity_id}", o)
+            )
             if o.duration.kind == "training_course" and (o.duration.completion_years or 0) > n:
                 errors.append(
                     f"{cat.city}/{o.opportunity_id}: 培训需要 {o.duration.completion_years} 年，"
@@ -1542,6 +1608,16 @@ def cross_validate(bundle: LifeBundle) -> ContractReport:
         for need in product_needs:
             if need not in needs:
                 errors.append(f"product_profiles/{p.person_id}: 需求 {need!r} 没有声明")
+        for key in p.leisure_interests:
+            if key not in bundle.leisure_categories:
+                errors.append(
+                    f"product_profiles/{p.person_id}: 兴趣类别 {key!r} 没有在 leisure_categories 里声明"
+                )
+        for key in p.cuisines:
+            if key not in bundle.cuisines:
+                errors.append(
+                    f"product_profiles/{p.person_id}: 菜系 {key!r} 没有在 cuisines 里声明"
+                )
         if protocol.health_input.questionnaire_version != p.health_questionnaire_version:
             errors.append(
                 f"product_profiles/{p.person_id}: 健康问卷版本 {p.health_questionnaire_version} 与协议声明的 "

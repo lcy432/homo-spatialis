@@ -92,9 +92,12 @@ LANDSCAPE_BETA_MAX = 0.5
 #:
 #: 六维（物质、安全、发展、休闲、环境、交通）各有分项，医疗维没有分项；发展维带成长项、交通维是广义交通；物质三项里
 #: daily_convenience 读这个月实际减少的家务小时。H 读月初健康状态、全组共用，不乘任何个人权重。
-SCORING_VERSION = "e1-convenience-v1"
+SCORING_VERSION = "e1-life-v1"
 #: 便利分项的物质细需求键（产品输入里的"日常生活便利"：愿意在多大程度上花钱减少日常杂务）。
 DAILY_CONVENIENCE = "daily_convenience"
+#: 生活扩展（DECISIONS/0041）的物质细需求键：饮食生活、个人消费与享受。
+FOOD_LIFE = "food_life"
+PERSONAL_ENJOYMENT = "personal_enjoyment"
 #: 评分内容身份的规范化格式（哪些字段参与见 ``LifeScoringSpec.content``，DECISIONS/0025）。
 SCORING_CONTENT_SCHEMA = "life-scoring-content-v1"
 #: 不参与评分内容身份的字段：名字与引用（另行核对）、说明文字。其余字段——包括以后新增的——默认参与。
@@ -334,6 +337,73 @@ class ConvenienceSpec(ContractModel):
         return self
 
 
+class FoodLifeSpec(ContractModel):
+    """物质维“饮食生活”（DECISIONS/0041）：在这个月**实际执行**的完整食品方案上评价已支持的饮食属性。
+
+        z_m = η_fresh · F_m + η_taste · T_m        s = min(c, z/(z + τ))
+
+    * F_m：方案每周新鲜餐数（组成之和）；T_m：主要菜系在用户确认的口味里的组成每周几餐（每个组成只算一次，多标签不叠加）；
+    * 基本饮食是否覆盖是可行性（最低生活检查与方案声明），不在这里给“没饿着”加分；价格、餐馆档次、外食次数都不是输入；
+    * 降级时读实际吃的最低方案；η、τ、c 全组共用，只在评分规格里，不进机会，也不进观察。"""
+
+    rule: Literal["food_plan_fresh_and_taste_v1"]
+    eta_fresh: Annotated[float, Field(ge=0, allow_inf_nan=False)]
+    eta_taste: Annotated[float, Field(ge=0, allow_inf_nan=False)]
+    cap: Annotated[float, Field(ge=0, le=1, allow_inf_nan=False)]
+    unit: str = Field(min_length=1, max_length=80)
+    definition: str = Field(min_length=1, max_length=400)
+
+
+class EnjoymentRule(ContractModel):
+    """一项享受功能的计量：``presence``（在用的舒适用品，同功能多件只算一份）或 ``units``（享受型服务，同功能按份数相加）。"""
+
+    function: KeyStr
+    label: str = Field(min_length=1, max_length=80)
+    measure: Literal["presence", "units"]
+    eta: Annotated[float, Field(gt=0, allow_inf_nan=False)]
+    unit: str = Field(min_length=1, max_length=40)
+
+
+class EnjoymentSpec(ContractModel):
+    """物质维“个人消费与享受”（DECISIONS/0041）：按这个月实际提供的功能或服务量计分，不按成交金额或购买次数。
+
+        v_f = 1（presence：这个月有在用的、提供功能 f 的用品；第二件同功能不再加）    或    Σ 份数（units：实际提供的服务份数）
+        z_m = Σ_f η_f · v_f        s = min(c, z/(z + τ))
+
+    纯爱好装备没有享受功能（它只提供活动条件）；词表外的功能是“模型未支持”，单独列出，不当 0 也不当未知。"""
+
+    rule: Literal["enjoyment_by_function_v1"]
+    functions: tuple[EnjoymentRule, ...] = Field(min_length=1)
+    cap: Annotated[float, Field(ge=0, le=1, allow_inf_nan=False)]
+    unit: str = Field(min_length=1, max_length=80)
+    definition: str = Field(min_length=1, max_length=400)
+
+    @model_validator(mode="after")
+    def _unique(self) -> EnjoymentSpec:
+        ids = [f.function for f in self.functions]
+        if len(ids) != len(set(ids)):
+            raise ValueError("享受功能的计量规则重复")
+        return self
+
+    def rule_for(self, function: str) -> EnjoymentRule | None:
+        return next((f for f in self.functions if f.function == function), None)
+
+
+class ParticipationSpec(ContractModel):
+    """休闲维的实际活动参与（DECISIONS/0041）：读结算写出的参与记录。
+
+        x_m = Σ_活动 参与小时 × (1 + κ · 1[主要类别 ∈ 确认的兴趣])        贡献 = η_hour · x_m（加进休闲分项的 z）
+
+    只计参与小时（准备、往返、排队不算享受）；每次活动只匹配一次，多标签不叠乘；同样的总参与小时拆成几条记录不多得分；
+    匹配不放大城市背景 b。κ 有界（0–1），是公开登记的探索假设，不是对个人效用的测量。"""
+
+    rule: Literal["participation_hours_interest_match_v1"]
+    eta_hour: Annotated[float, Field(gt=0, allow_inf_nan=False)]
+    match_bonus: Annotated[float, Field(ge=0, le=1, allow_inf_nan=False)]
+    unit: str = Field(min_length=1, max_length=80)
+    definition: str = Field(min_length=1, max_length=400)
+
+
 class ScoringComponent(ContractModel):
     """一个评分分项：定义、单位与锚点 τ **在所有城市之间共用**。
 
@@ -356,6 +426,10 @@ class ScoringComponent(ContractModel):
     growth: GrowthSpec | None = Field(default=None, exclude_if=lambda v: v is None)
     transport: TransportSpec | None = Field(default=None, exclude_if=lambda v: v is None)
     convenience: ConvenienceSpec | None = Field(default=None, exclude_if=lambda v: v is None)
+    #: 生活扩展（DECISIONS/0041）：饮食生活、个人消费与享受、休闲里的实际活动参与。没有用到的不序列化。
+    food_life: FoodLifeSpec | None = Field(default=None, exclude_if=lambda v: v is None)
+    enjoyment: EnjoymentSpec | None = Field(default=None, exclude_if=lambda v: v is None)
+    participation: ParticipationSpec | None = Field(default=None, exclude_if=lambda v: v is None)
 
     @field_validator("dimension")
     @classmethod
@@ -415,6 +489,16 @@ class ScoringComponent(ContractModel):
                     f"{self.component_id}: 日常生活便利读资源账里实际减少的家务小时，不再挂物品来源"
                     "（挂来源就是按购买或件数另给一份分）"
                 )
+        for name, need in (("food_life", FOOD_LIFE), ("enjoyment", PERSONAL_ENJOYMENT)):
+            if getattr(self, name) is not None:
+                if self.material_need != need:
+                    raise ValueError(f"{self.component_id}: {name} 只属于物质细需求 {need}")
+                if self.sources:
+                    raise ValueError(
+                        f"{self.component_id}: {name} 读实际方案的事实，不再挂物品来源"
+                    )
+        if self.participation is not None and self.dimension != "leisure":
+            raise ValueError(f"{self.component_id}: 活动参与只属于休闲维")
         if not math.isfinite(self.tau):
             raise ValueError(f"{self.component_id}: τ 必须是有限正数")
         return self
@@ -426,12 +510,20 @@ class ScoringComponent(ContractModel):
             and self.transport is None
             and self.growth is None
             and self.convenience is None
+            and self.food_life is None
+            and self.enjoyment is None
+            and self.participation is None
         )
 
     @property
     def plan_level(self) -> bool:
-        """这一项的值来自实际执行方案的事实（城市条件写 plan_level）：广义交通或日常生活便利。"""
-        return self.transport is not None or self.convenience is not None
+        """这一项的值来自实际执行方案的事实（城市条件写 plan_level）：广义交通、日常生活便利、饮食生活、个人消费与享受。"""
+        return (
+            self.transport is not None
+            or self.convenience is not None
+            or self.food_life is not None
+            or self.enjoyment is not None
+        )
 
 
 class Omission(ContractModel):
@@ -446,7 +538,7 @@ class LifeScoringSpec(ContractModel):
     """一套探索评分规格。同一规格内，所有城市用同一套分项含义、方向、单位与锚点。"""
 
     spec_id: IdStr
-    scoring_version: Literal["e1-convenience-v1"]
+    scoring_version: Literal["e1-life-v1"]
     status: Literal["exploratory_synthetic"]
     function: Literal["saturating_capped_v1"] = SCORING_FUNCTION
     protocol_id: IdStr
@@ -824,6 +916,10 @@ class ScoringPreference(ContractModel):
     dimension_weights: dict[str, Annotated[float, Field(ge=0, allow_inf_nan=False)]]
     material_weights: dict[KeyStr, Annotated[float, Field(ge=0, allow_inf_nan=False)]]
     derivation: str = Field(min_length=1, max_length=400)
+    #: 生活扩展（DECISIONS/0041）：用户确认后进入有限匹配规则的兴趣类别与菜系（来自确认画像，不从文字临场猜）。
+    #: 空表示没有确认的类别（未答、暂不确定、明确没有固定爱好、选择通用评价）——这些状态在画像里分开保存，评分都按中性规则。
+    leisure_interests: tuple[KeyStr, ...] = ()
+    cuisines: tuple[KeyStr, ...] = ()
 
     @model_validator(mode="after")
     def _weights_ok(self) -> ScoringPreference:
@@ -944,6 +1040,52 @@ class ConvenienceTerm(ContractModel):
     cap: Annotated[float, Field(ge=0, le=1)]
 
 
+class FoodLifeTerm(ContractModel):
+    """饮食生活这个月的明细：读的是哪一份实际方案、新鲜餐与合口味餐各几餐。"""
+
+    opportunity_id: IdStr
+    fresh_meals_per_week: Annotated[float, Field(ge=0)]
+    taste_matched_meals_per_week: Annotated[float, Field(ge=0)]
+    matched_cuisines: tuple[KeyStr, ...] = ()
+    eta_fresh: float
+    eta_taste: float
+
+
+class EnjoymentFunctionTerm(ContractModel):
+    """个人消费与享受里一项功能这个月的取值：v_f 与它来自哪些在用的东西。"""
+
+    function: KeyStr
+    measure: Literal["presence", "units"]
+    value: Annotated[float, Field(ge=0)]
+    eta: float
+    contribution: Annotated[float, Field(ge=0)]
+    via: tuple[IdStr, ...]
+
+
+class EnjoymentTerm(ContractModel):
+    functions: tuple[EnjoymentFunctionTerm, ...] = ()
+    #: 在用、但功能不在计量规则里的（模型未支持；不当 0，也不当未知）。
+    unsupported: tuple[str, ...] = ()
+
+
+class ParticipationEntry(ContractModel):
+    opportunity_id: IdStr
+    primary_category: KeyStr
+    participation_hours: Annotated[float, Field(ge=0)]
+    matched: bool
+    weighted_hours: Annotated[float, Field(ge=0)]
+
+
+class ParticipationTerm(ContractModel):
+    """休闲里实际活动参与这个月的明细：每项活动的参与小时、是否匹配确认的兴趣、加权后的小时与总贡献。"""
+
+    entries: tuple[ParticipationEntry, ...] = ()
+    weighted_hours: Annotated[float, Field(ge=0)]
+    eta_hour: float
+    match_bonus: float
+    contribution: Annotated[float, Field(ge=0)]
+
+
 class ComponentMonth(ContractModel):
     component_id: KeyStr
     dimension: str
@@ -965,6 +1107,9 @@ class ComponentMonth(ContractModel):
     growth: GrowthTerm | None = Field(default=None, exclude_if=lambda v: v is None)
     transport: TransportTerm | None = Field(default=None, exclude_if=lambda v: v is None)
     convenience: ConvenienceTerm | None = Field(default=None, exclude_if=lambda v: v is None)
+    food_life: FoodLifeTerm | None = Field(default=None, exclude_if=lambda v: v is None)
+    enjoyment: EnjoymentTerm | None = Field(default=None, exclude_if=lambda v: v is None)
+    participation: ParticipationTerm | None = Field(default=None, exclude_if=lambda v: v is None)
 
 
 class MaterialTerm(ContractModel):
@@ -1207,6 +1352,10 @@ RESERVED_SCORING_KEYS: frozenset[str] = frozenset(
         "tau_minutes",
         "eta",
         "eta_any",
+        "eta_fresh",
+        "eta_taste",
+        "eta_hour",
+        "match_bonus",
         "efficiencies",
         "a_nature",
         "base_includes_landscape",

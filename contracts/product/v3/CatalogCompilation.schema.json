@@ -1,0 +1,549 @@
+{
+ "$defs": {
+  "CompiledOpportunity": {
+   "additionalProperties": false,
+   "description": "编入 E1 的一项合法机会：E1 的 ``availability``、逐字段来源映射与最弱来源性质（整条机会的来源标签取它）。",
+   "properties": {
+    "availability": {
+     "enum": [
+      "available",
+      "unknown"
+     ],
+     "title": "Availability",
+     "type": "string"
+    },
+    "candidate_id": {
+     "title": "Candidate Id",
+     "type": "string"
+    },
+    "city_ref": {
+     "title": "City Ref",
+     "type": "string"
+    },
+    "field_sources": {
+     "additionalProperties": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "title": "Field Sources",
+     "type": "object"
+    },
+    "note_zh": {
+     "title": "Note Zh",
+     "type": "string"
+    },
+    "opportunity_id": {
+     "title": "Opportunity Id",
+     "type": "string"
+    },
+    "unknown_reason": {
+     "anyOf": [
+      {
+       "enum": [
+        "price_unknown",
+        "supply_unknown",
+        "supply_and_price_unknown"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Unknown Reason"
+    },
+    "weakest_source_kind": {
+     "enum": [
+      "observed",
+      "derived",
+      "estimated",
+      "synthetic"
+     ],
+     "title": "Weakest Source Kind",
+     "type": "string"
+    }
+   },
+   "required": [
+    "candidate_id",
+    "opportunity_id",
+    "city_ref",
+    "availability",
+    "field_sources",
+    "weakest_source_kind",
+    "note_zh"
+   ],
+   "title": "CompiledOpportunity",
+   "type": "object"
+  },
+  "DataPackRef": {
+   "additionalProperties": false,
+   "description": "一份资料包的身份：编号与内容指纹。本轮只有合成资料包（``synthetic_fixture_only``）。",
+   "properties": {
+    "content_fingerprint": {
+     "pattern": "^[0-9a-f]{64}$",
+     "title": "Content Fingerprint",
+     "type": "string"
+    },
+    "note": {
+     "maxLength": 400,
+     "minLength": 1,
+     "title": "Note",
+     "type": "string"
+    },
+    "pack_id": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+     "title": "Pack Id",
+     "type": "string"
+    },
+    "status": {
+     "enum": [
+      "synthetic_fixture_only",
+      "real_data_frozen"
+     ],
+     "title": "Status",
+     "type": "string"
+    }
+   },
+   "required": [
+    "pack_id",
+    "content_fingerprint",
+    "status",
+    "note"
+   ],
+   "title": "DataPackRef",
+   "type": "object"
+  },
+  "ProductIssue": {
+   "additionalProperties": false,
+   "description": "一条可展示的问题：机器代码、字段位置、中文原因、影响与下一步动作。E5 原样展示中文，不另写解释。",
+   "properties": {
+    "audit_ref": {
+     "anyOf": [
+      {
+       "maxLength": 200,
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Audit Ref"
+    },
+    "code": {
+     "pattern": "^[a-z][a-z0-9_]{1,63}$",
+     "title": "Code",
+     "type": "string"
+    },
+    "field": {
+     "maxLength": 160,
+     "minLength": 1,
+     "title": "Field",
+     "type": "string"
+    },
+    "impact_zh": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Impact Zh",
+     "type": "string"
+    },
+    "message_zh": {
+     "maxLength": 400,
+     "minLength": 1,
+     "title": "Message Zh",
+     "type": "string"
+    },
+    "next_action_zh": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Next Action Zh",
+     "type": "string"
+    },
+    "severity": {
+     "enum": [
+      "error",
+      "warning",
+      "info"
+     ],
+     "title": "Severity",
+     "type": "string"
+    }
+   },
+   "required": [
+    "code",
+    "severity",
+    "field",
+    "message_zh",
+    "impact_zh",
+    "next_action_zh"
+   ],
+   "title": "ProductIssue",
+   "type": "object"
+  },
+  "ProductMeta": {
+   "additionalProperties": false,
+   "description": "每条产品消息都带的共同元数据：结构、问卷、词表、健康问卷、转换的版本与资料包身份。",
+   "properties": {
+    "conversion_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Conversion Version",
+     "type": "string"
+    },
+    "data_pack": {
+     "$ref": "#/$defs/DataPackRef"
+    },
+    "health_questionnaire_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Health Questionnaire Version",
+     "type": "string"
+    },
+    "questionnaire_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Questionnaire Version",
+     "type": "string"
+    },
+    "sample": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/SampleLabel"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "schema_version": {
+     "const": "e3a-product-schema-v3",
+     "title": "Schema Version",
+     "type": "string"
+    },
+    "vocabulary_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Vocabulary Version",
+     "type": "string"
+    }
+   },
+   "required": [
+    "schema_version",
+    "questionnaire_version",
+    "vocabulary_version",
+    "health_questionnaire_version",
+    "conversion_version",
+    "data_pack"
+   ],
+   "title": "ProductMeta",
+   "type": "object"
+  },
+  "SampleLabel": {
+   "additionalProperties": false,
+   "description": "公共样例的出处标签（只出现在样例里；真实运行的消息不写）。\n\n* ``offline_run``：由离线闭环实际执行产生；\n* ``controlled_fixture``：受控测试夹具（例如写好的计划、注入的事件、构造的资料缺口），标明来源；\n* ``contract_example``：线上服务（幂等提交、查询、断线恢复）尚未实现，这里只是**标明为示例**的契约响应。",
+   "properties": {
+    "note": {
+     "maxLength": 600,
+     "minLength": 1,
+     "title": "Note",
+     "type": "string"
+    },
+    "origin": {
+     "enum": [
+      "offline_run",
+      "controlled_fixture",
+      "contract_example"
+     ],
+     "title": "Origin",
+     "type": "string"
+    },
+    "produced_by": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Produced By",
+     "type": "string"
+    },
+    "synthetic": {
+     "const": true,
+     "default": true,
+     "title": "Synthetic",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "origin",
+    "produced_by",
+    "note"
+   ],
+   "title": "SampleLabel",
+   "type": "object"
+  },
+  "SourceFact": {
+   "additionalProperties": false,
+   "description": "一条来源事实：原始值、单位、时期、地理、来源性质，以及换算或假设的引用。报价、寿命与减负效果分别保留来源。",
+   "properties": {
+    "assumption": {
+     "anyOf": [
+      {
+       "maxLength": 300,
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Assumption"
+    },
+    "conversion": {
+     "anyOf": [
+      {
+       "maxLength": 300,
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Conversion"
+    },
+    "fact_id": {
+     "pattern": "^[a-z0-9][a-z0-9_.\\-]{0,79}$",
+     "title": "Fact Id",
+     "type": "string"
+    },
+    "field": {
+     "enum": [
+      "price",
+      "lifetime",
+      "effect",
+      "participation",
+      "availability"
+     ],
+     "title": "Field",
+     "type": "string"
+    },
+    "geography": {
+     "maxLength": 120,
+     "minLength": 1,
+     "title": "Geography",
+     "type": "string"
+    },
+    "kind": {
+     "enum": [
+      "observed",
+      "derived",
+      "estimated",
+      "synthetic"
+     ],
+     "title": "Kind",
+     "type": "string"
+    },
+    "locator": {
+     "anyOf": [
+      {
+       "maxLength": 300,
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Locator"
+    },
+    "note": {
+     "maxLength": 400,
+     "minLength": 1,
+     "title": "Note",
+     "type": "string"
+    },
+    "period": {
+     "maxLength": 40,
+     "minLength": 1,
+     "title": "Period",
+     "type": "string"
+    },
+    "raw_value": {
+     "anyOf": [
+      {
+       "maxLength": 80,
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Raw Value"
+    },
+    "unit": {
+     "maxLength": 60,
+     "minLength": 1,
+     "title": "Unit",
+     "type": "string"
+    }
+   },
+   "required": [
+    "fact_id",
+    "field",
+    "unit",
+    "period",
+    "geography",
+    "kind",
+    "note"
+   ],
+   "title": "SourceFact",
+   "type": "object"
+  },
+  "TaskDefinition": {
+   "additionalProperties": false,
+   "description": "全组共用的家务任务定义：基准小时、单位与说明（与 E1 协议的家务基准同一单位）。",
+   "properties": {
+    "baseline_hours_per_month": {
+     "title": "Baseline Hours Per Month",
+     "type": "string"
+    },
+    "description": {
+     "title": "Description",
+     "type": "string"
+    },
+    "task": {
+     "title": "Task",
+     "type": "string"
+    },
+    "unit": {
+     "const": "小时/月",
+     "title": "Unit",
+     "type": "string"
+    }
+   },
+   "required": [
+    "task",
+    "baseline_hours_per_month",
+    "unit",
+    "description"
+   ],
+   "title": "TaskDefinition",
+   "type": "object"
+  },
+  "UncompiledCandidate": {
+   "additionalProperties": false,
+   "description": "没有编入 E1 的候选：原因（机器代码 + 中文），真实供给状态原样保留（有卖但寿命未知，不改写成确定买不到）。",
+   "properties": {
+    "candidate_id": {
+     "title": "Candidate Id",
+     "type": "string"
+    },
+    "city_ref": {
+     "title": "City Ref",
+     "type": "string"
+    },
+    "market_status": {
+     "enum": [
+      "offered",
+      "not_offered",
+      "unknown"
+     ],
+     "title": "Market Status",
+     "type": "string"
+    },
+    "reasons": {
+     "items": {
+      "$ref": "#/$defs/ProductIssue"
+     },
+     "minItems": 1,
+     "title": "Reasons",
+     "type": "array"
+    }
+   },
+   "required": [
+    "candidate_id",
+    "city_ref",
+    "market_status",
+    "reasons"
+   ],
+   "title": "UncompiledCandidate",
+   "type": "object"
+  }
+ },
+ "additionalProperties": false,
+ "description": "一次目录编译：合法机会、未编入候选与原因、版本、范围与来源映射。过滤之后的分母仍保留在覆盖报告里。",
+ "properties": {
+  "cities": {
+   "items": {
+    "type": "string"
+   },
+   "title": "Cities",
+   "type": "array"
+  },
+  "compilation_fingerprint": {
+   "pattern": "^[0-9a-f]{64}$",
+   "title": "Compilation Fingerprint",
+   "type": "string"
+  },
+  "compilation_id": {
+   "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+   "title": "Compilation Id",
+   "type": "string"
+  },
+  "compiled": {
+   "default": [],
+   "items": {
+    "$ref": "#/$defs/CompiledOpportunity"
+   },
+   "title": "Compiled",
+   "type": "array"
+  },
+  "compiler_version": {
+   "title": "Compiler Version",
+   "type": "string"
+  },
+  "facts": {
+   "default": [],
+   "items": {
+    "$ref": "#/$defs/SourceFact"
+   },
+   "title": "Facts",
+   "type": "array"
+  },
+  "meta": {
+   "$ref": "#/$defs/ProductMeta"
+  },
+  "scope_zh": {
+   "title": "Scope Zh",
+   "type": "string"
+  },
+  "tasks": {
+   "items": {
+    "$ref": "#/$defs/TaskDefinition"
+   },
+   "title": "Tasks",
+   "type": "array"
+  },
+  "uncompiled": {
+   "default": [],
+   "items": {
+    "$ref": "#/$defs/UncompiledCandidate"
+   },
+   "title": "Uncompiled",
+   "type": "array"
+  }
+ },
+ "required": [
+  "meta",
+  "compilation_id",
+  "compiler_version",
+  "scope_zh",
+  "cities",
+  "tasks",
+  "compilation_fingerprint"
+ ],
+ "title": "CatalogCompilation",
+ "type": "object"
+}

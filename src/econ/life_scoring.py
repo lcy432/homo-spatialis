@@ -64,6 +64,7 @@ from common.life_contracts import (
     LifeProtocol,
     MonthlyResourceRules,
     MonthResources,
+    ParticipationRecord,
     PersonYearState,
     ResourceContribution,
     to_fraction,
@@ -78,7 +79,10 @@ from common.life_scoring_contracts import (
     ComponentSource,
     ConvenienceTerm,
     DimensionMonth,
+    EnjoymentFunctionTerm,
+    EnjoymentTerm,
     ExploratoryYearScore,
+    FoodLifeTerm,
     GrowthTerm,
     HardRequirementResult,
     HealthTerm,
@@ -88,6 +92,8 @@ from common.life_scoring_contracts import (
     LifeScoringSpec,
     MaterialTerm,
     MonthScore,
+    ParticipationEntry,
+    ParticipationTerm,
     PreferenceInsufficient,
     RequirementEvidence,
     ScoringComponent,
@@ -162,8 +168,11 @@ def preference_from_confirmed_profile(
         dimension_weights={k: float(q / POINTS_TOTAL) for k, q in dims.items()},
         material_weights={k: float(q / POINTS_TOTAL) for k, q in materials.items()},
         derivation=(
-            "用户确认的六维精确点数 / 100、物质细项精确点数 / 100（精确相除后只转一次浮点）；健康回答独立，不进权重"
+            "用户确认的六维精确点数 / 100、物质细项精确点数 / 100（精确相除后只转一次浮点）；健康回答独立，不进权重；"
+            "确认的休闲兴趣与菜系只进入有限匹配规则"
         ),
+        leisure_interests=tuple(profile.leisure_interests),
+        cuisines=tuple(profile.cuisines),
     )
 
 
@@ -626,6 +635,220 @@ def _score_convenience(
     )
 
 
+_FOOD_UNKNOWN = "饮食生活信息不足："
+_ENJOYMENT_UNKNOWN = "个人消费与享受信息不足："
+
+
+def _plan_level_gate(
+    comp: ScoringComponent, cond: CityComponentCondition, cap: float, prefix: str
+) -> ComponentMonth | None:
+    head = _head(comp)
+    if cond.status == "unknown":
+        return ComponentMonth(
+            **head, status="unknown", reasons=(f"城市条件未知：{cond.unknown_reason}",)
+        )
+    if cond.status != "plan_level":
+        return ComponentMonth(
+            **head,
+            status="unknown",
+            cap=cap,
+            reasons=(f"{prefix}城市条件是 {cond.status}，不是方案级",),
+        )
+    return None
+
+
+def _score_food_life(
+    comp: ScoringComponent,
+    cond: CityComponentCondition,
+    in_use: list[_InUse],
+    pref: ScoringPreference,
+) -> ComponentMonth:
+    """饮食生活（DECISIONS/0041）：z = η_fresh·F + η_taste·T，s = min(c, z/(z + τ))。读这个月实际吃的那一份完整方案
+    （降级时是最低方案）；价格、餐馆档次与外食次数都不是输入，基本饮食覆盖是可行性、不另加分。"""
+    fl = comp.food_life
+    assert fl is not None
+    gate = _plan_level_gate(comp, cond, fl.cap, _FOOD_UNKNOWN)
+    if gate is not None:
+        return gate
+    head = _head(comp)
+    foods = [r for r in in_use if r.record == "food"]
+    if not foods:
+        return ComponentMonth(
+            **head,
+            status="unknown",
+            cap=fl.cap,
+            reasons=(_FOOD_UNKNOWN + "这个月没有实际执行的食品方案记录",),
+        )
+    if len(foods) > 1:
+        raise LifeContractError(
+            f"{comp.component_id}: 同一个月有 {len(foods)} 份食品方案在执行——记录错误"
+        )
+    opp = foods[0].opp
+    plan = opp.food_plan
+    if plan is None:
+        return ComponentMonth(
+            **head,
+            status="unknown",
+            cap=fl.cap,
+            reasons=(
+                _FOOD_UNKNOWN
+                + f"{opp.opportunity_id} 没有完整方案事实（组成、新鲜餐、菜系），不当 0",
+            ),
+        )
+    cuisines = frozenset(pref.cuisines)
+    fresh = plan.fresh_meals_per_week
+    taste = plan.matched_meals_per_week(cuisines)
+    matched = tuple(
+        sorted({p.cuisine for p in plan.parts if p.cuisine is not None and p.cuisine in cuisines})
+    )
+    z = fl.eta_fresh * fresh + fl.eta_taste * taste
+    raw, s, capped = saturating(z, comp.tau, fl.cap)
+    why = (
+        f"实际方案 {opp.opportunity_id}：每周新鲜 {fresh:g} 餐、合口味 {taste:g} 餐（确认的菜系 {list(matched) or '无'}）；"
+        "价格、档次与外食次数不进入这一项"
+    )
+    return ComponentMonth(
+        **head,
+        status="known",
+        cap=fl.cap,
+        z=z,
+        raw=raw,
+        s=s,
+        capped=capped,
+        reasons=(why,),
+        food_life=FoodLifeTerm(
+            opportunity_id=opp.opportunity_id,
+            fresh_meals_per_week=fresh,
+            taste_matched_meals_per_week=taste,
+            matched_cuisines=matched,
+            eta_fresh=fl.eta_fresh,
+            eta_taste=fl.eta_taste,
+        ),
+    )
+
+
+def _score_enjoyment(
+    comp: ScoringComponent, cond: CityComponentCondition, in_use: list[_InUse]
+) -> ComponentMonth:
+    """个人消费与享受（DECISIONS/0041）：同功能先去重（presence）或按份数相加（units），再按功能汇总；不读价格与成交次数。
+    纯爱好装备没有享受功能，不进这一项；词表外的功能列为“模型未支持”。"""
+    es = comp.enjoyment
+    assert es is not None
+    gate = _plan_level_gate(comp, cond, es.cap, _ENJOYMENT_UNKNOWN)
+    if gate is not None:
+        return gate
+    head = _head(comp)
+    values: dict[str, float] = {}
+    via: dict[str, list[str]] = {}
+    unsupported: list[str] = []
+    for r in in_use:
+        for e in r.opp.enjoyment:
+            rule = es.rule_for(e.function)
+            if rule is None:
+                unsupported.append(f"{r.opp.opportunity_id}:{e.function}")
+                continue
+            expected = "presence" if e.mode == "passive_service_month" else "units"
+            if rule.measure != expected:
+                raise LifeContractError(
+                    f"{r.opp.opportunity_id}: 功能 {e.function} 的提供方式 {e.mode} 与计量规则 {rule.measure} 对不上"
+                )
+            if rule.measure == "presence":
+                values[e.function] = 1.0
+            else:
+                assert e.units_per_month is not None
+                values[e.function] = values.get(e.function, 0.0) + e.units_per_month * r.quantity
+            via.setdefault(e.function, []).append(r.opp.opportunity_id)
+    terms = []
+    for f in sorted(values):
+        rule = es.rule_for(f)
+        assert rule is not None
+        terms.append(
+            EnjoymentFunctionTerm(
+                function=f,
+                measure=rule.measure,
+                value=values[f],
+                eta=rule.eta,
+                contribution=rule.eta * values[f],
+                via=tuple(dict.fromkeys(via[f])),
+            )
+        )
+    z = math.fsum(t.contribution for t in terms)
+    raw, s, capped = saturating(z, comp.tau, es.cap)
+    reasons = [
+        "这个月实际提供的享受功能："
+        + ("；".join(f"{t.function} = {t.value:g}" for t in terms) or "没有（确定的 0）")
+        + "；同功能的第二件舒适用品不再加，成交与花钱不另计分"
+    ]
+    if unsupported:
+        reasons.append(f"模型未支持的享受功能（不当 0，也不当未知）：{sorted(set(unsupported))}")
+    return ComponentMonth(
+        **head,
+        status="known",
+        cap=es.cap,
+        z=z,
+        raw=raw,
+        s=s,
+        capped=capped,
+        reasons=tuple(reasons),
+        enjoyment=EnjoymentTerm(
+            functions=tuple(terms), unsupported=tuple(sorted(set(unsupported)))
+        ),
+    )
+
+
+def _participation_term(
+    comp: ScoringComponent,
+    in_use: list[_InUse],
+    records: list[ParticipationRecord],
+    pref: ScoringPreference,
+) -> tuple[ParticipationTerm | None, str | None]:
+    """休闲里的实际活动参与：Σ 参与小时 × (1 + κ·匹配)，贡献 η_hour × 加权小时。返回（明细，未知原因）。"""
+    ps = comp.participation
+    assert ps is not None
+    for r in in_use:
+        if r.record == "experience" and r.opp.activity is None and not r.opp.enjoyment:
+            return None, (
+                f"体验 {r.opp.opportunity_id} 没有活动事实（参与小时、类别），也没有享受事实：模型无法评价，不当 0"
+            )
+    interests = frozenset(pref.leisure_interests)
+    done = [p for p in records if p.status == "completed"]
+    executed = {
+        r.opp.opportunity_id: r.quantity
+        for r in in_use
+        if r.record == "experience" and r.opp.activity
+    }
+    for oid, qty in executed.items():
+        sessions = sum(p.sessions for p in done if p.opportunity_id == oid)
+        if sessions != qty:
+            raise LifeContractError(
+                f"{oid}: 参与记录 {sessions:g} 次与执行记录 {qty:g} 次对不上——时间账与评分必须读同一份事实"
+            )
+    entries = []
+    for p in done:
+        matched = p.primary_category in interests
+        weighted = p.participation_hours * (1 + ps.match_bonus * (1 if matched else 0))
+        entries.append(
+            ParticipationEntry(
+                opportunity_id=p.opportunity_id,
+                primary_category=p.primary_category,
+                participation_hours=p.participation_hours,
+                matched=matched,
+                weighted_hours=weighted,
+            )
+        )
+    weighted_total = math.fsum(e.weighted_hours for e in entries)
+    return (
+        ParticipationTerm(
+            entries=tuple(entries),
+            weighted_hours=weighted_total,
+            eta_hour=ps.eta_hour,
+            match_bonus=ps.match_bonus,
+            contribution=ps.eta_hour * weighted_total,
+        ),
+        None,
+    )
+
+
 def _score_component(
     comp: ScoringComponent,
     cond: CityComponentCondition,
@@ -634,6 +857,8 @@ def _score_component(
     growth: MonthGrowth | None = None,
     resources: MonthResources | None = None,
     rules: MonthlyResourceRules | None = None,
+    participation: list[ParticipationRecord] | None = None,
+    pref: ScoringPreference | None = None,
 ) -> ComponentMonth:
     """一个分项一个月的评分。``supply`` 是这座城各项功能的供给声明（功能 → 状态）；``growth`` 是这个月的
     成长（只有成长项分项用）；``resources`` 是这个月的资源账（广义交通读其中的到岗次数，日常生活便利读其中的家务行）；
@@ -642,6 +867,11 @@ def _score_component(
         return _score_transport(comp, cond, in_use, resources)
     if comp.convenience is not None:
         return _score_convenience(comp, cond, resources, rules)
+    if comp.food_life is not None:
+        assert pref is not None
+        return _score_food_life(comp, cond, in_use, pref)
+    if comp.enjoyment is not None:
+        return _score_enjoyment(comp, cond, in_use)
     if comp.growth is not None:
         if growth is None:
             raise LifeContractError(f"{comp.component_id}: 成长项没有拿到这个月的学习进度")
@@ -719,6 +949,20 @@ def _score_component(
             )
     terms = [t.model_copy(update={"counted": i in counted}) for i, t in enumerate(terms)]
     z = cond.base + math.fsum(t.contribution for t in terms if t.counted)
+    part: ParticipationTerm | None = None
+    if comp.participation is not None:
+        assert pref is not None
+        part, why = _participation_term(comp, in_use, participation or [], pref)
+        if why is not None:
+            return ComponentMonth(
+                **head, status="unknown", base=cond.base, cap=cond.cap, reasons=(why,)
+            )
+        assert part is not None
+        z += part.contribution
+        if part.entries:
+            reasons.append(
+                "实际活动参与：Σ 参与小时 × (1 + κ·匹配确认的兴趣)；准备与往返不算享受时间，匹配不放大城市背景"
+            )
     raw, s, capped = saturating(z, comp.tau, cond.cap)
     landscape: LandscapeTerm | None = None
     if comp.landscape is not None:
@@ -763,6 +1007,7 @@ def _score_component(
         capped=capped,
         reasons=tuple(reasons),
         landscape=landscape,
+        participation=part,
     )
 
 
@@ -1096,11 +1341,23 @@ def score_year(
                 growth=growth.get(m),
                 resources=resources.get(m),
                 rules=protocol.resource_rules,
+                participation=[p for p in outcome.participation if p.month == m],
+                pref=preference,
             )
             comps[comp.component_id] = cm
             contributed.update(
                 t.opportunity_id for t in cm.terms if t.counted and t.contribution > 0
             )
+            if cm.food_life is not None and (cm.z or 0) > 0:
+                contributed.add(cm.food_life.opportunity_id)
+            if cm.enjoyment is not None:
+                contributed.update(
+                    i for t in cm.enjoyment.functions if t.contribution > 0 for i in t.via
+                )
+            if cm.participation is not None:
+                contributed.update(
+                    e.opportunity_id for e in cm.participation.entries if e.weighted_hours > 0
+                )
             if cm.convenience is not None:  # 承担了家务替代的设备或服务，这个月算作带来了计入的改善
                 contributed.update(
                     r.opportunity_id

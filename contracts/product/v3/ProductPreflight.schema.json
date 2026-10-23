@@ -1,0 +1,708 @@
+{
+ "$defs": {
+  "CapabilityStatus": {
+   "additionalProperties": false,
+   "description": "一种能力在当前输入与声明范围内的状态。**不保证**未来每份计划都合法、每个月都能完整评分。",
+   "properties": {
+    "reasons": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Reasons",
+     "type": "array"
+    },
+    "status": {
+     "enum": [
+      "yes",
+      "no",
+      "partial",
+      "unknown"
+     ],
+     "title": "Status",
+     "type": "string"
+    }
+   },
+   "required": [
+    "status"
+   ],
+   "title": "CapabilityStatus",
+   "type": "object"
+  },
+  "CityCoverageSummary": {
+   "additionalProperties": false,
+   "description": "一座城的偏好覆盖摘要（E1 覆盖报告的投影）。不是阈值，也不解锁不完整的总分。\n\n* ``common_weight``：整个比较组**共同**覆盖的权重（每座城资料都齐、规则都有的叶子之和；各城相同，城市比较只在这部分上是同口径的）；\n* ``unknown_weight``：**这座城**资料未知的正权重之和（这些月份的总分会不完整，不补 0、不删掉再重新归一化）；\n* ``no_component_weight``：本版评分没有分项的正权重之和（各城相同）；\n* ``unsupported_positive_leaves``：**这座城**资料未知或没有评分分项的正权重叶子。",
+   "properties": {
+    "common_weight": {
+     "$ref": "#/$defs/ExactNumber"
+    },
+    "label": {
+     "title": "Label",
+     "type": "string"
+    },
+    "no_component_weight": {
+     "$ref": "#/$defs/ExactNumber"
+    },
+    "unknown_weight": {
+     "$ref": "#/$defs/ExactNumber"
+    },
+    "unsupported_positive_leaves": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Unsupported Positive Leaves",
+     "type": "array"
+    }
+   },
+   "required": [
+    "common_weight",
+    "unknown_weight",
+    "no_component_weight",
+    "label"
+   ],
+   "title": "CityCoverageSummary",
+   "type": "object"
+  },
+  "CityPreflight": {
+   "additionalProperties": false,
+   "properties": {
+    "city_ref": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+     "title": "City Ref",
+     "type": "string"
+    },
+    "coverage": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/CityCoverageSummary"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "data_gaps": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/ProductIssue"
+     },
+     "title": "Data Gaps",
+     "type": "array"
+    },
+    "executable": {
+     "$ref": "#/$defs/CapabilityStatus"
+    },
+    "feedback": {
+     "$ref": "#/$defs/CapabilityStatus"
+    },
+    "label": {
+     "title": "Label",
+     "type": "string"
+    },
+    "option_inventory_status": {
+     "enum": [
+      "complete_for_declared_scope",
+      "partial",
+      "not_assessed"
+     ],
+     "title": "Option Inventory Status",
+     "type": "string"
+    },
+    "scorable": {
+     "$ref": "#/$defs/CapabilityStatus"
+    },
+    "start_job_label": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Start Job Label"
+    }
+   },
+   "required": [
+    "city_ref",
+    "label",
+    "executable",
+    "scorable",
+    "feedback",
+    "option_inventory_status"
+   ],
+   "title": "CityPreflight",
+   "type": "object"
+  },
+  "ConfirmedRef": {
+   "additionalProperties": false,
+   "properties": {
+    "confirmed_id": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+     "title": "Confirmed Id",
+     "type": "string"
+    },
+    "content_fingerprint": {
+     "pattern": "^[0-9a-f]{64}$",
+     "title": "Content Fingerprint",
+     "type": "string"
+    }
+   },
+   "required": [
+    "confirmed_id",
+    "content_fingerprint"
+   ],
+   "title": "ConfirmedRef",
+   "type": "object"
+  },
+  "DataPackRef": {
+   "additionalProperties": false,
+   "description": "一份资料包的身份：编号与内容指纹。本轮只有合成资料包（``synthetic_fixture_only``）。",
+   "properties": {
+    "content_fingerprint": {
+     "pattern": "^[0-9a-f]{64}$",
+     "title": "Content Fingerprint",
+     "type": "string"
+    },
+    "note": {
+     "maxLength": 400,
+     "minLength": 1,
+     "title": "Note",
+     "type": "string"
+    },
+    "pack_id": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+     "title": "Pack Id",
+     "type": "string"
+    },
+    "status": {
+     "enum": [
+      "synthetic_fixture_only",
+      "real_data_frozen"
+     ],
+     "title": "Status",
+     "type": "string"
+    }
+   },
+   "required": [
+    "pack_id",
+    "content_fingerprint",
+    "status",
+    "note"
+   ],
+   "title": "DataPackRef",
+   "type": "object"
+  },
+  "ExactNumber": {
+   "additionalProperties": false,
+   "description": "一个精确数：``exact`` 是规范分数写法（参与计算与比较），``display`` 只供显示（四舍五入，不回流计算）。",
+   "properties": {
+    "display": {
+     "maxLength": 40,
+     "minLength": 1,
+     "title": "Display",
+     "type": "string"
+    },
+    "exact": {
+     "pattern": "^(0|-?[1-9][0-9]*)(/[1-9][0-9]*)?$",
+     "title": "Exact",
+     "type": "string"
+    }
+   },
+   "required": [
+    "exact",
+    "display"
+   ],
+   "title": "ExactNumber",
+   "type": "object"
+  },
+  "PlannerAndCost": {
+   "additionalProperties": false,
+   "properties": {
+    "call_limit": {
+     "title": "Call Limit",
+     "type": "integer"
+    },
+    "description_zh": {
+     "title": "Description Zh",
+     "type": "string"
+    },
+    "max_cost": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Max Cost"
+    },
+    "paid": {
+     "title": "Paid",
+     "type": "boolean"
+    },
+    "planner_id": {
+     "title": "Planner Id",
+     "type": "string"
+    },
+    "planner_kind": {
+     "enum": [
+      "mock",
+      "llm"
+     ],
+     "title": "Planner Kind",
+     "type": "string"
+    }
+   },
+   "required": [
+    "planner_kind",
+    "planner_id",
+    "description_zh",
+    "call_limit",
+    "paid"
+   ],
+   "title": "PlannerAndCost",
+   "type": "object"
+  },
+  "ProductIssue": {
+   "additionalProperties": false,
+   "description": "一条可展示的问题：机器代码、字段位置、中文原因、影响与下一步动作。E5 原样展示中文，不另写解释。",
+   "properties": {
+    "audit_ref": {
+     "anyOf": [
+      {
+       "maxLength": 200,
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Audit Ref"
+    },
+    "code": {
+     "pattern": "^[a-z][a-z0-9_]{1,63}$",
+     "title": "Code",
+     "type": "string"
+    },
+    "field": {
+     "maxLength": 160,
+     "minLength": 1,
+     "title": "Field",
+     "type": "string"
+    },
+    "impact_zh": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Impact Zh",
+     "type": "string"
+    },
+    "message_zh": {
+     "maxLength": 400,
+     "minLength": 1,
+     "title": "Message Zh",
+     "type": "string"
+    },
+    "next_action_zh": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Next Action Zh",
+     "type": "string"
+    },
+    "severity": {
+     "enum": [
+      "error",
+      "warning",
+      "info"
+     ],
+     "title": "Severity",
+     "type": "string"
+    }
+   },
+   "required": [
+    "code",
+    "severity",
+    "field",
+    "message_zh",
+    "impact_zh",
+    "next_action_zh"
+   ],
+   "title": "ProductIssue",
+   "type": "object"
+  },
+  "ProductMeta": {
+   "additionalProperties": false,
+   "description": "每条产品消息都带的共同元数据：结构、问卷、词表、健康问卷、转换的版本与资料包身份。",
+   "properties": {
+    "conversion_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Conversion Version",
+     "type": "string"
+    },
+    "data_pack": {
+     "$ref": "#/$defs/DataPackRef"
+    },
+    "health_questionnaire_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Health Questionnaire Version",
+     "type": "string"
+    },
+    "questionnaire_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Questionnaire Version",
+     "type": "string"
+    },
+    "sample": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/SampleLabel"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "schema_version": {
+     "const": "e3a-product-schema-v3",
+     "title": "Schema Version",
+     "type": "string"
+    },
+    "vocabulary_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Vocabulary Version",
+     "type": "string"
+    }
+   },
+   "required": [
+    "schema_version",
+    "questionnaire_version",
+    "vocabulary_version",
+    "health_questionnaire_version",
+    "conversion_version",
+    "data_pack"
+   ],
+   "title": "ProductMeta",
+   "type": "object"
+  },
+  "ProductMoney": {
+   "additionalProperties": false,
+   "description": "一笔钱：整数最小单位（美元是分）、币种与计价口径；``display`` 只供显示。",
+   "properties": {
+    "amount_minor": {
+     "title": "Amount Minor",
+     "type": "integer"
+    },
+    "currency": {
+     "pattern": "^[A-Z]{3}$",
+     "title": "Currency",
+     "type": "string"
+    },
+    "display": {
+     "maxLength": 40,
+     "minLength": 1,
+     "title": "Display",
+     "type": "string"
+    },
+    "numeraire_id": {
+     "maxLength": 40,
+     "minLength": 1,
+     "title": "Numeraire Id",
+     "type": "string"
+    }
+   },
+   "required": [
+    "amount_minor",
+    "currency",
+    "numeraire_id",
+    "display"
+   ],
+   "title": "ProductMoney",
+   "type": "object"
+  },
+  "RunBinding": {
+   "additionalProperties": false,
+   "description": "预检查绑定的运行身份：编译出的 E1 输入、协议、评分、评价、提示模板、规划器与运行清单的内容身份。变了就要重新预检查。",
+   "properties": {
+    "compiled_inputs": {
+     "additionalProperties": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+     },
+     "title": "Compiled Inputs",
+     "type": "object"
+    },
+    "evaluation_spec_id": {
+     "title": "Evaluation Spec Id",
+     "type": "string"
+    },
+    "identities_fingerprint": {
+     "pattern": "^[0-9a-f]{64}$",
+     "title": "Identities Fingerprint",
+     "type": "string"
+    },
+    "planner_id": {
+     "title": "Planner Id",
+     "type": "string"
+    },
+    "planner_kind": {
+     "enum": [
+      "mock",
+      "llm"
+     ],
+     "title": "Planner Kind",
+     "type": "string"
+    },
+    "prompt_template": {
+     "title": "Prompt Template",
+     "type": "string"
+    },
+    "protocol_id": {
+     "title": "Protocol Id",
+     "type": "string"
+    },
+    "scoring_content_fingerprint": {
+     "pattern": "^[0-9a-f]{64}$",
+     "title": "Scoring Content Fingerprint",
+     "type": "string"
+    },
+    "scoring_version": {
+     "title": "Scoring Version",
+     "type": "string"
+    }
+   },
+   "required": [
+    "protocol_id",
+    "scoring_version",
+    "scoring_content_fingerprint",
+    "evaluation_spec_id",
+    "prompt_template",
+    "planner_kind",
+    "planner_id",
+    "compiled_inputs",
+    "identities_fingerprint"
+   ],
+   "title": "RunBinding",
+   "type": "object"
+  },
+  "SampleLabel": {
+   "additionalProperties": false,
+   "description": "公共样例的出处标签（只出现在样例里；真实运行的消息不写）。\n\n* ``offline_run``：由离线闭环实际执行产生；\n* ``controlled_fixture``：受控测试夹具（例如写好的计划、注入的事件、构造的资料缺口），标明来源；\n* ``contract_example``：线上服务（幂等提交、查询、断线恢复）尚未实现，这里只是**标明为示例**的契约响应。",
+   "properties": {
+    "note": {
+     "maxLength": 600,
+     "minLength": 1,
+     "title": "Note",
+     "type": "string"
+    },
+    "origin": {
+     "enum": [
+      "offline_run",
+      "controlled_fixture",
+      "contract_example"
+     ],
+     "title": "Origin",
+     "type": "string"
+    },
+    "produced_by": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Produced By",
+     "type": "string"
+    },
+    "synthetic": {
+     "const": true,
+     "default": true,
+     "title": "Synthetic",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "origin",
+    "produced_by",
+    "note"
+   ],
+   "title": "SampleLabel",
+   "type": "object"
+  },
+  "StartSummary": {
+   "additionalProperties": false,
+   "description": "标准开局摘要：同一用户跨城、跨重复序号相同的个人条件。",
+   "properties": {
+    "abilities": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Abilities",
+     "type": "array"
+    },
+    "age_years": {
+     "title": "Age Years",
+     "type": "integer"
+    },
+    "cash": {
+     "$ref": "#/$defs/ProductMoney"
+    },
+    "monthly_energy_note": {
+     "title": "Monthly Energy Note",
+     "type": "string"
+    },
+    "monthly_time_note": {
+     "title": "Monthly Time Note",
+     "type": "string"
+    },
+    "occupation_label": {
+     "title": "Occupation Label",
+     "type": "string"
+    },
+    "rule": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Rule",
+     "type": "string"
+    },
+    "scenario_zh": {
+     "items": {
+      "type": "string"
+     },
+     "minItems": 1,
+     "title": "Scenario Zh",
+     "type": "array"
+    }
+   },
+   "required": [
+    "rule",
+    "age_years",
+    "cash",
+    "occupation_label",
+    "monthly_time_note",
+    "monthly_energy_note",
+    "scenario_zh"
+   ],
+   "title": "StartSummary",
+   "type": "object"
+  }
+ },
+ "additionalProperties": false,
+ "description": "一次运行前检查。``preflight_fingerprint`` 覆盖除它本身以外的全部内容；确认画像或运行身份变了，旧预检查失效。",
+ "properties": {
+  "binding": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/RunBinding"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null
+  },
+  "cities": {
+   "default": [],
+   "items": {
+    "$ref": "#/$defs/CityPreflight"
+   },
+   "title": "Cities",
+   "type": "array"
+  },
+  "clones_per_city": {
+   "minimum": 0,
+   "title": "Clones Per City",
+   "type": "integer"
+  },
+  "confirmed": {
+   "$ref": "#/$defs/ConfirmedRef"
+  },
+  "executable": {
+   "$ref": "#/$defs/CapabilityStatus"
+  },
+  "feedback": {
+   "$ref": "#/$defs/CapabilityStatus"
+  },
+  "issues": {
+   "default": [],
+   "items": {
+    "$ref": "#/$defs/ProductIssue"
+   },
+   "title": "Issues",
+   "type": "array"
+  },
+  "meta": {
+   "$ref": "#/$defs/ProductMeta"
+  },
+  "planner": {
+   "$ref": "#/$defs/PlannerAndCost"
+  },
+  "preflight_fingerprint": {
+   "pattern": "^[0-9a-f]{64}$",
+   "title": "Preflight Fingerprint",
+   "type": "string"
+  },
+  "preflight_id": {
+   "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+   "title": "Preflight Id",
+   "type": "string"
+  },
+  "scope_zh": {
+   "default": [],
+   "items": {
+    "type": "string"
+   },
+   "title": "Scope Zh",
+   "type": "array"
+  },
+  "scorable": {
+   "$ref": "#/$defs/CapabilityStatus"
+  },
+  "start": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/StartSummary"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null
+  },
+  "status": {
+   "enum": [
+    "ready",
+    "blocked"
+   ],
+   "title": "Status",
+   "type": "string"
+  },
+  "years": {
+   "minimum": 1,
+   "title": "Years",
+   "type": "integer"
+  }
+ },
+ "required": [
+  "meta",
+  "preflight_id",
+  "confirmed",
+  "status",
+  "executable",
+  "scorable",
+  "feedback",
+  "clones_per_city",
+  "years",
+  "planner",
+  "preflight_fingerprint"
+ ],
+ "title": "ProductPreflight",
+ "type": "object"
+}

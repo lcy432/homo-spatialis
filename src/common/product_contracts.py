@@ -34,11 +34,11 @@ from typing import Annotated, Any, Literal
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 #: 结构版本（字段形状）。字段含义或形状一变就换名字，并在 ADR 记录。
-PRODUCT_SCHEMA_VERSION = "e3a-product-schema-v2"
+PRODUCT_SCHEMA_VERSION = "e3a-product-schema-v3"
 #: 问卷 / 题干语义版本：六维与物质的题干、定义、参考改善范围与控件规则。题干一变，旧确认失效、需要重新确认。
-QUESTIONNAIRE_VERSION = "e3a-questionnaire-v0.1-draft"
+QUESTIONNAIRE_VERSION = "e3a-questionnaire-v0.2-draft"
 #: 词表版本：六维键、物质键、职业受控词表、硬要求选项与属性偏好种类。
-VOCABULARY_VERSION = "e3a-vocabulary-v1"
+VOCABULARY_VERSION = "e3a-vocabulary-v2"
 #: 独立健康问卷版本（暂定文案，未经量表验证）。
 HEALTH_QUESTIONNAIRE_VERSION = "e3a-health-coping-q-v0.1-draft"
 #: 转换版本：原始答案 → 确认画像 → E1 输入的规则（精确分数、规范写法、金额换算、标准开局编译）。
@@ -111,7 +111,7 @@ class SampleLabel(ProductModel):
 class ProductMeta(ProductModel):
     """每条产品消息都带的共同元数据：结构、问卷、词表、健康问卷、转换的版本与资料包身份。"""
 
-    schema_version: Literal["e3a-product-schema-v2"]
+    schema_version: Literal["e3a-product-schema-v3"]
     questionnaire_version: str = Field(min_length=1, max_length=80)
     vocabulary_version: str = Field(min_length=1, max_length=80)
     health_questionnaire_version: str = Field(min_length=1, max_length=80)
@@ -306,6 +306,24 @@ class AbilityOption(ProductModel):
     ask_when: str = Field(min_length=1, max_length=300)
 
 
+class VocabularyTerm(ProductModel):
+    """有限词表里的一项（休闲活动类别或菜系）：键、显示名与用来解释文字的别名（明确映射，不调用模型猜）。"""
+
+    key: Annotated[str, Field(pattern=r"^[a-z][a-z0-9_]{0,47}$")]
+    label: str = Field(min_length=1, max_length=40)
+    aliases: tuple[Annotated[str, Field(min_length=1, max_length=40)], ...] = Field(min_length=1)
+
+
+class InterestCapability(ProductModel):
+    """兴趣与口味（DECISIONS/0041）：可选的文字描述先形成待确认的解释；用户确认后的类别才进入共同、有限的匹配规则。"""
+
+    leisure_categories: tuple[VocabularyTerm, ...] = Field(min_length=1)
+    cuisines: tuple[VocabularyTerm, ...] = Field(min_length=1)
+    leisure_states_zh: tuple[str, ...] = Field(min_length=1)
+    taste_states_zh: tuple[str, ...] = Field(min_length=1)
+    matching_note_zh: str = Field(min_length=1, max_length=400)
+
+
 class ProductCapabilities(ProductModel):
     """E3 发布的能力清单（E5 只能呈现这里有的选择）。"""
 
@@ -330,6 +348,7 @@ class ProductCapabilities(ProductModel):
     unsupported: tuple[str, ...] = ()
     limits: tuple[str, ...] = ()
     interview: Literal["reserved_not_implemented"] = "reserved_not_implemented"
+    interests: InterestCapability
 
 
 # ==========================================================================
@@ -405,6 +424,29 @@ class FreeTextAnswer(ProductModel):
     text: str | None = None
 
 
+LeisureAnswerState = Literal["unanswered", "unsure", "no_fixed_hobby", "generic", "described"]
+TasteAnswerState = Literal["unanswered", "unsure", "no_preference", "described"]
+
+
+class LeisureInterestAnswer(ProductModel):
+    """休闲兴趣：未答、暂不确定、明确没有固定爱好、选择通用休闲评价（“城市有什么合适的就体验什么”），或用文字描述。
+
+    文字描述先由 E3 按词表形成待确认的解释；``selected`` 是用户从解释或词表里**明确选中**的类别——只有选了才进入有评分作用的类别。
+    空白不会被当成“通用评价”的选择。"""
+
+    state: LeisureAnswerState = "unanswered"
+    text: str | None = Field(default=None, max_length=300)
+    selected: tuple[str, ...] = ()
+
+
+class TasteAnswer(ProductModel):
+    """口味与菜系：未答、暂不确定、明确没有偏好，或用文字描述（同样先解释、再由用户选中确认）。"""
+
+    state: TasteAnswerState = "unanswered"
+    text: str | None = Field(default=None, max_length=300)
+    selected: tuple[str, ...] = ()
+
+
 class AttributePreferenceAnswer(ProductModel):
     """一条属性偏好（品牌、菜系、上门顾虑……）：原文与它挂在哪项需求下；``as_hard_requirement`` 表示用户想把它当不可妥协的要求。"""
 
@@ -464,6 +506,8 @@ class UserInputDraft(ProductModel):
     abilities: tuple[AbilityClaim, ...] = ()
     hard_requirements: tuple[HardRequirementAnswer, ...] = ()
     evidence: tuple[EvidenceRef, ...] = ()
+    leisure_interest: LeisureInterestAnswer = Field(default_factory=LeisureInterestAnswer)
+    taste: TasteAnswer = Field(default_factory=TasteAnswer)
 
 
 # ==========================================================================
@@ -560,6 +604,22 @@ class StatementReview(ProductModel):
     message_zh: str
 
 
+class InterestReview(ProductModel):
+    """一段兴趣或口味的审阅：作答状态、原文、按词表得到的候选、有歧义与没认出的片段、用户已选中的类别与可读说明。
+
+    ``status``：``confirmable``（有选中的类别，或选择了不需要类别的状态）、``pending_selection``（只有文字、还没选中类别——不能
+    确认，免得空白或没核对的解释悄悄进入评分）、``invalid``（选中了词表外的类别）。"""
+
+    state: str
+    text: str | None = None
+    candidates: tuple[str, ...] = ()
+    ambiguous: tuple[str, ...] = ()
+    unrecognized: tuple[str, ...] = ()
+    selected: tuple[str, ...] = ()
+    status: Literal["confirmable", "pending_selection", "invalid"]
+    message_zh: str = Field(min_length=1, max_length=400)
+
+
 class ProfileReview(ProductModel):
     """一份草稿的审阅：E3 给出的可读解释与全部问题。``confirmable`` 为假时，``issues`` 里有阻断项。"""
 
@@ -581,6 +641,8 @@ class ProfileReview(ProductModel):
     pending_confirmations: tuple[str, ...] = ()
     issues: tuple[ProductIssue, ...] = ()
     summary_zh: tuple[str, ...] = ()
+    leisure_interest: InterestReview
+    taste: InterestReview
 
 
 # ==========================================================================
@@ -676,6 +738,28 @@ class RetainedStatement(ProductModel):
     message_zh: str = Field(min_length=1, max_length=400)
 
 
+class ConfirmedInterests(ProductModel):
+    """确认后的兴趣与口味（DECISIONS/0041）。只有 ``confirmed`` 带类别；其余状态分开保存、都按中性规则评分。
+
+    类别只进入共同、有限的匹配规则（系数是公开登记的模型假设，不是对个人效用的测量）；不改变六维点数、现金、资格或硬要求。
+    没认出的文字原样保留在 ``unrecognized_text``（本版未支持），不交给评分。"""
+
+    leisure_status: Literal["unanswered", "unsure", "no_fixed_hobby", "generic", "confirmed"]
+    leisure_categories: tuple[str, ...] = ()
+    taste_status: Literal["unanswered", "unsure", "no_preference", "confirmed"]
+    cuisines: tuple[str, ...] = ()
+    unrecognized_text: tuple[str, ...] = ()
+    matching_note_zh: str = Field(min_length=1, max_length=400)
+
+    @model_validator(mode="after")
+    def _shape(self) -> ConfirmedInterests:
+        if (self.leisure_status == "confirmed") != bool(self.leisure_categories):
+            raise ValueError("只有确认的休闲兴趣才带类别")
+        if (self.taste_status == "confirmed") != bool(self.cuisines):
+            raise ValueError("只有确认的口味才带菜系")
+        return self
+
+
 class FieldSource(ProductModel):
     """一项确认值的来源（表单字段，或未来的访谈证据引用）。"""
 
@@ -705,6 +789,7 @@ class ConfirmedProfile(ProductModel):
     hard_requirements: tuple[ConfirmedHardRequirement, ...] = ()
     retained: tuple[RetainedStatement, ...] = ()
     sources: tuple[FieldSource, ...] = ()
+    interests: ConfirmedInterests
     content_fingerprint: Sha256
 
     def content(self) -> dict[str, Any]:

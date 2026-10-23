@@ -42,7 +42,12 @@ NORMAL_SIX = {
     "environment": "10",
     "commute": "10",
 }
-NORMAL_MATERIAL = {"housing_space": "30", "fresh_food": "30", "daily_convenience": "40"}
+NORMAL_MATERIAL = {
+    "housing_space": "25",
+    "food_life": "25",
+    "daily_convenience": "30",
+    "personal_enjoyment": "20",
+}
 NORMAL_TEXT = "我在写字楼做全职文员。下班以后不想再把很多时间花在洗衣服、打扫屋子上，愿意为省事花一些钱；但也不想因为花钱让自己手头太紧。"
 
 

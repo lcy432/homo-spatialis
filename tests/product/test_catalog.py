@@ -125,7 +125,12 @@ def test_trajectory_scorability_is_independent_of_the_catalog_gaps(tmp_path):
         "no_purchase",
         person="u602",
         draft_kwargs={
-            "material": {"housing_space": "50", "fresh_food": "50", "daily_convenience": "0"},
+            "material": {
+                "housing_space": "50",
+                "food_life": "50",
+                "daily_convenience": "0",
+                "personal_enjoyment": "0",
+            },
             "hard_requirements": (),
         },
     )

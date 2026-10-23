@@ -135,6 +135,21 @@ def product_profile(
             "hard_requirements": hard,
             "free_text": confirmed.free_text,
             "occupation": {"scheme": mapping.scheme, "code": mapping.code},
+            "leisure_interest_status": confirmed.interests.leisure_status,
+            "leisure_interests": list(confirmed.interests.leisure_categories),
+            "taste_status": confirmed.interests.taste_status,
+            "cuisines": list(confirmed.interests.cuisines),
+            "unsupported_requests": [
+                *(
+                    f"{r.kind}：{r.raw_text}"[:200]
+                    for r in confirmed.retained
+                    if r.kind in ("brand",)
+                ),
+                *(
+                    f"未认出的兴趣或口味描述：{t}"[:200]
+                    for t in confirmed.interests.unrecognized_text
+                ),
+            ],
         }
     )
 
@@ -410,6 +425,11 @@ def compile_inputs(
         "categories": life["categories"],
         "functions": life.get("functions", []),
         "function_kinds": life.get("function_kinds", {}),
+        # 生活扩展（DECISIONS/0041）的公开词表原样沿用基础样例；确认的兴趣与菜系必须在这里面（加载器核对）
+        "cuisines": life.get("cuisines", []),
+        "leisure_categories": life.get("leisure_categories", []),
+        "capabilities": life.get("capabilities", []),
+        "enjoyment_functions": life.get("enjoyment_functions", []),
         "tax_policies": life["tax_policies"],
         "catalogs": catalogs,
         "product_profiles": [profile.model_dump(mode="json")],

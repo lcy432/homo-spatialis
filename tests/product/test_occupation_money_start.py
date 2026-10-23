@@ -167,12 +167,12 @@ def test_compiled_bundle_uses_the_product_protocol_and_the_unchanged_scoring_con
         )
         scoring, _ = load_scoring_config(s.pre.compiled.paths["scoring_config"], bundle)
     p = bundle.protocol
-    assert p.protocol_id == "life-v1-e3a-product" and p.scoring_scale_version == "e1-convenience-v1"
+    assert p.protocol_id == "life-v1-e3a-product" and p.scoring_scale_version == "e1-life-v1"
     assert isinstance(p.health_input, IndependentHealthInputDeclaration)
     assert p.energy_feedback.preference_source == "product_confirmed_six_dim"
     assert (
         scoring.spec.content_fingerprint
-        == "fdf920f447af884c8fa05ee90a6e971193fb7cc6cffee772d77b8c5d0588f23a"
+        == "8444d8d20d88e0bacf492990dc66d4183983e973a840e6473718287b73f2baa8"
     )
     assert [x.person_id for x in bundle.product_profiles] == ["u601"]
     assert report.contract_valid and report.settlement_ready

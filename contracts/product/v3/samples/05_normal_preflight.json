@@ -1,0 +1,188 @@
+{
+ "description_zh": "运行前检查通过：两座合成城、每城一个分身、三年；逐城的可执行 / 可评分 / 可反馈与运行绑定",
+ "message": "ProductPreflight",
+ "payload": {
+  "binding": {
+   "compiled_inputs": {
+    "life_input": "e9a7121e5b188c860fd2ae7995ee99928c97a5253d767103c5abc4a421a7a614",
+    "roster": "837ef513e4116b24f75b2f29c0edd9b0ea40b12dfa12c8c3979c7074e8b59b4c",
+    "run_config": "f1ca1f9f33764f7b8de0629e79276ad68871e96745b9aef63733b03cc52dce3a",
+    "scoring_config": "44dcc1f38fa8779bbe903c7890282207a6d8bc7bea29dde89b012e6b815d06fe"
+   },
+   "evaluation_spec_id": "eval.e1-convenience.main",
+   "identities_fingerprint": "c9d80a3984dfe983daa1674c2210c11e16c67c09d7d45f8c895080f04bc4fe75",
+   "planner_id": "mock.rules.e3a-product",
+   "planner_kind": "mock",
+   "prompt_template": "e3a-product-prompt-v2",
+   "protocol_id": "life-v1-e3a-product",
+   "scoring_content_fingerprint": "8444d8d20d88e0bacf492990dc66d4183983e973a840e6473718287b73f2baa8",
+   "scoring_version": "e1-life-v1"
+  },
+  "cities": [
+   {
+    "city_ref": "US:SYNTH2026:K51",
+    "coverage": {
+     "common_weight": {
+      "display": "1.000",
+      "exact": "1"
+     },
+     "label": "synthetic_contract_coverage",
+     "no_component_weight": {
+      "display": "0.000",
+      "exact": "0"
+     },
+     "unknown_weight": {
+      "display": "0.000",
+      "exact": "0"
+     },
+     "unsupported_positive_leaves": []
+    },
+    "data_gaps": [],
+    "executable": {
+     "reasons": [
+      "标准开局通过、名单已冻结；年度计划仍由环境逐次检查，不保证每份计划都合法"
+     ],
+     "status": "yes"
+    },
+    "feedback": {
+     "reasons": [
+      "上一年 12 个月都完整评分时才更新下一年的精力额度"
+     ],
+     "status": "yes"
+    },
+    "label": "合成城 K51",
+    "option_inventory_status": "partial",
+    "scorable": {
+     "reasons": [
+      "按当前输入，正权重的评分资料在声明范围内齐全；不保证未来每个月都能完整评分"
+     ],
+     "status": "yes"
+    },
+    "start_job_label": "全职文员（合成写字楼）"
+   },
+   {
+    "city_ref": "US:SYNTH2026:M52",
+    "coverage": {
+     "common_weight": {
+      "display": "1.000",
+      "exact": "1"
+     },
+     "label": "synthetic_contract_coverage",
+     "no_component_weight": {
+      "display": "0.000",
+      "exact": "0"
+     },
+     "unknown_weight": {
+      "display": "0.000",
+      "exact": "0"
+     },
+     "unsupported_positive_leaves": []
+    },
+    "data_gaps": [],
+    "executable": {
+     "reasons": [
+      "标准开局通过、名单已冻结；年度计划仍由环境逐次检查，不保证每份计划都合法"
+     ],
+     "status": "yes"
+    },
+    "feedback": {
+     "reasons": [
+      "上一年 12 个月都完整评分时才更新下一年的精力额度"
+     ],
+     "status": "yes"
+    },
+    "label": "合成城 M52",
+    "option_inventory_status": "partial",
+    "scorable": {
+     "reasons": [
+      "按当前输入，正权重的评分资料在声明范围内齐全；不保证未来每个月都能完整评分"
+     ],
+     "status": "yes"
+    },
+    "start_job_label": "全职文员（合成写字楼）"
+   }
+  ],
+  "clones_per_city": 1,
+  "confirmed": {
+   "confirmed_id": "confirmed.draft.u501.r1",
+   "content_fingerprint": "9d5188bb6d08a214ad924672da99e79ea66dbf11e8aa39a3116e395472a35f8d"
+  },
+  "executable": {
+   "reasons": [
+    "全部候选城市的标准开局与名单检查通过"
+   ],
+   "status": "yes"
+  },
+  "feedback": {
+   "reasons": [
+    "上一年完整评分才更新下一年额度；不完整时这个分身的下一年会受阻"
+   ],
+   "status": "yes"
+  },
+  "issues": [],
+  "meta": {
+   "conversion_version": "e3a-conversion-v2",
+   "data_pack": {
+    "content_fingerprint": "ff26a0e51fecbeb0e534b06db93ef69cf8dd4c94542cbf4060030f9ed83242c4",
+    "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
+    "pack_id": "pack.e3a.synthetic-v2",
+    "status": "synthetic_fixture_only"
+   },
+   "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.2-draft",
+   "sample": {
+    "note": "离线闭环实际执行的结果（mock 规划器，零网络）",
+    "origin": "offline_run",
+    "produced_by": "product.scenarios.closed_loop(normal)",
+    "synthetic": true
+   },
+   "schema_version": "e3a-product-schema-v3",
+   "vocabulary_version": "e3a-vocabulary-v2"
+  },
+  "planner": {
+   "call_limit": 18,
+   "description_zh": "可控的确定性离线规划器（mock）：只检验接线、状态传递与信息隔离，不代表真实大语言模型的能力；没有网络调用",
+   "max_cost": null,
+   "paid": false,
+   "planner_id": "mock.rules.e3a-product",
+   "planner_kind": "mock"
+  },
+  "preflight_fingerprint": "3e8255914d5356388c8010553abf005ac16206c287b81a75864324797059da95",
+  "preflight_id": "preflight.confirmed.draft.u501.r1",
+  "scope_zh": [
+   "生活协议 life-v1-e3a-product（状态 synthetic_fixture_only）、评分 score.e1-life.explore（探索版）：城市、报价、工资、疾病、治疗与评分参数全部是合成设定，不是现实城市，不排序真实城市",
+   "城市背景事实 e1-7a-city-facts-v1：每座城 4 条合成指数，换算到评分条件的规则是内部合成设定",
+   "评价沿用 E1-6：完整者均值只用完整评价的分身；生活出局另报比例与事件链；模拟问题进入缺失范围（不是置信区间）",
+   "城市、报价、工资、税、疾病与治疗全部是合成设定；结果不排序真实城市，也不是现实推荐",
+   "离线规划器是可控的 mock，不代表真实大语言模型的能力或偏好理解",
+   "问卷文案与参考改善范围是暂定稿，没有做认知访谈与量表验证"
+  ],
+  "scorable": {
+   "reasons": [
+    "逐城说明见 cities；不保证未来每个月都能完整评分"
+   ],
+   "status": "yes"
+  },
+  "start": {
+   "abilities": [],
+   "age_years": 35,
+   "cash": {
+    "amount_minor": 300000,
+    "currency": "USD",
+    "display": "3,000.00",
+    "numeraire_id": "USD_2024_LOCAL"
+   },
+   "monthly_energy_note": "每月可承受 250 个负担点的活动（本版统一的模型设定）；上一年过得越满意，下一年最多多 10%",
+   "monthly_time_note": "每月可安排约 365 小时（每天 12 小时的睡眠与基本休息已经预留在外）——本版统一的模型设定，不是对你的测量",
+   "occupation_label": "办公室文员",
+   "rule": "v1_standard_start_2026_10_12",
+   "scenario_zh": [
+    "这是一次搬到候选城市重新开始的简化情景：从第 1 年、健康、没有已有物品、没有在学课程、没有资金目标开始",
+    "现实中的旧家具、病史与在学课程暂未纳入；这是模拟的假设，不是对你现实情况的判断",
+    "同一个你在各城市、各个分身里的年龄、现金、能力与基础时间精力都相同；城市里的具体岗位按当地目录匹配"
+   ]
+  },
+  "status": "ready",
+  "years": 3
+ }
+}

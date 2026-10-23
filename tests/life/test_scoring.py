@@ -22,8 +22,9 @@ from econ.life_scoring import effective_weights, preference_from_confirmed_profi
 from .conftest import CLONE_K, K51, base_items, live_year, whole
 from .settle_support import revise
 
+# 物质 = 25%·居住 1/2 + 25%·饮食 3/10（基本方案每周 3 顿新鲜、菜系不合口味）+ 30%·便利 0 + 20%·享受 0（没有在用的享受）= 1/5
 B_BASE = (
-    Fraction(45, 100) * Fraction(6, 25)
+    Fraction(45, 100) * Fraction(1, 5)
     + Fraction(5, 100) * Fraction(1, 2)
     + Fraction(10, 100) * Fraction(1, 2)
     + Fraction(15, 100) * Fraction(1, 4)
@@ -45,8 +46,9 @@ def test_a_healthy_base_month_by_hand(first_year):
     m = first_year.score.months[0]
     assert m.status == "scored"
     assert _component(m, "housing_space").s == pytest.approx(0.5, abs=1e-12)
-    assert _component(m, "fresh_food").s == pytest.approx(0.3, abs=1e-12)
+    assert _component(m, "food_life").s == pytest.approx(0.3, abs=1e-12)
     assert _component(m, "daily_convenience").s == 0
+    assert _component(m, "personal_enjoyment").s == 0  # 没有在用的享受：确定的 0，不是未知
     assert _component(m, "commute").s == pytest.approx(6 / 13, abs=1e-12)
     assert m.u == pytest.approx(float(U_BASE), abs=1e-12)
     assert first_year.score.annual_mean == pytest.approx(float(U_BASE), abs=1e-12)
@@ -68,7 +70,13 @@ def test_the_dimension_weights_are_exactly_the_stated_points(bundle, scoring):
         abs=1e-12,
     )
     assert pref.material_weights == pytest.approx(
-        {"housing_space": 0.3, "fresh_food": 0.3, "daily_convenience": 0.4}, abs=1e-12
+        {
+            "housing_space": 0.25,
+            "food_life": 0.25,
+            "daily_convenience": 0.3,
+            "personal_enjoyment": 0.2,
+        },
+        abs=1e-12,
     )
 
 
@@ -164,5 +172,5 @@ def test_a_mismatched_scoring_content_is_refused(bundle, scoring):
         }
     )
     other = type(scoring)(**{**scoring.__dict__, "spec": changed})
-    with pytest.raises(LifeContractError, match="fdf920f447af"):  # 协议记着的旧身份
+    with pytest.raises(LifeContractError, match="8444d8d20d88"):  # 协议记着的旧身份
         live_year(bundle, other, bundle.initial_state(CLONE_K), base_items())

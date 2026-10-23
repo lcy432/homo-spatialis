@@ -140,6 +140,22 @@ class MaterialLeafDecl(_Strict):
     note: str
 
 
+class VocabularyTermDecl(_Strict):
+    key: str
+    label: str
+    aliases: tuple[str, ...]
+
+
+class InterestsDecl(_Strict):
+    """兴趣与口味的有限词表与别名（DECISIONS/0041）。键必须与生活输入里声明的词表相同（编译时核对）。"""
+
+    leisure_categories: tuple[VocabularyTermDecl, ...]
+    cuisines: tuple[VocabularyTermDecl, ...]
+    leisure_states_zh: tuple[str, ...]
+    taste_states_zh: tuple[str, ...]
+    matching_note_zh: str
+
+
 class PointsDecl(_Strict):
     manual_entry: str
     manual_max_decimals: int
@@ -227,6 +243,7 @@ class PackBody(_Strict):
     unsupported: tuple[str, ...] = ()
     limits: tuple[str, ...] = ()
     catalog_scope: CatalogScope
+    interests: InterestsDecl
     facts: tuple[SourceFact, ...] = ()
     candidates: tuple[OpportunityCandidate, ...] = ()
 
@@ -252,6 +269,15 @@ class DataPack:
             out.append(
                 f"健康问卷版本 {b.health_questionnaire.version} 与契约声明的 {HEALTH_QUESTIONNAIRE_VERSION} 不同"
             )
+        for name, terms in (
+            ("休闲活动类别", b.interests.leisure_categories),
+            ("菜系", b.interests.cuisines),
+        ):
+            tk = [t.key for t in terms]
+            if len(tk) != len(set(tk)):
+                out.append(f"{name}的键重复：{tk}")
+            if any(not t.aliases for t in terms):
+                out.append(f"{name}每一项都要有别名（明确映射，不靠模型猜）")
         keys = [d.key for d in b.dimensions]
         want = ["material", "safety", "opportunity", "leisure", "environment", "commute"]
         if keys != want:

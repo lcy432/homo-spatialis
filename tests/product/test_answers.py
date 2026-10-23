@@ -1,7 +1,7 @@
 """E3-A 模块 B：原始答案、审阅与确认画像——状态不混、精确分配、确认身份与失效、只留存的陈述。
 
 可手算的例子：六维 30/20/20/10/10/10 精确合计 100；均分每项 50/3（显示 16.7，六个显示值加起来是 100.2，但精确值合计正好 100，
-显示值不回流计算）；物质均分每项 100/3。
+显示值不回流计算）；物质均分每项 25（四项）。
 """
 
 from __future__ import annotations
@@ -150,7 +150,7 @@ def test_equal_split_is_exact_and_has_no_order_bias(pack):
         "100.2"
     )  # 显示值之和不是 100：显示不回流计算
     mat = lines(review, "material")
-    assert {ln.exact for ln in mat.values()} == {"100/3"}
+    assert {ln.exact for ln in mat.values()} == {"25"}
     confirmed = confirm_profile(
         pack, draft, person_ref="u1", acknowledged=review.pending_confirmations
     )
@@ -234,7 +234,7 @@ def test_healthcare_is_not_a_seventh_dimension_and_laundry_is_not_convenience(pa
     )
     review = review_draft(
         pack,
-        make_draft(pack, material={"housing_space": "30", "fresh_food": "30", "laundry": "40"}),
+        make_draft(pack, material={"housing_space": "30", "food_life": "30", "laundry": "40"}),
     )
     assert "legacy_laundry_key" in codes(review) and not review.confirmable
 

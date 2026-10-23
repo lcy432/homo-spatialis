@@ -12,7 +12,7 @@ pack_notice: >-
   问卷文案是暂定稿，未经认知访谈与量表验证。
 
 pack:
-  pack_id: pack.e3a.synthetic-v1
+  pack_id: pack.e3a.synthetic-v2
   status: synthetic_fixture_only
   observed_on: 2026-10-18
   note: >-
@@ -27,12 +27,12 @@ pack:
     evaluation_config: configs/life/evaluation_product.yaml
     city_facts: configs/life/city_facts_product.yaml
     protocol_id: life-v1-e3a-product
-    scoring_version: e1-convenience-v1
-    scoring_content_fingerprint: fdf920f447af884c8fa05ee90a6e971193fb7cc6cffee772d77b8c5d0588f23a
-    prompt_template: e3a-product-prompt-v1
+    scoring_version: e1-life-v1
+    scoring_content_fingerprint: 8444d8d20d88e0bacf492990dc66d4183983e973a840e6473718287b73f2baa8
+    prompt_template: e3a-product-prompt-v2
 
   run:
-    prompt_template: e3a-product-prompt-v1
+    prompt_template: e3a-product-prompt-v2
     repeat_indexes: [0]
     max_revisions_per_year: 2
     permission_version: e3a-product-v1
@@ -159,16 +159,21 @@ pack:
       definition: 实际住的那一处有多大
       support: supported
       note: 只看面积；房租与通勤不在这一项
-    - key: fresh_food
-      label: 新鲜食品
-      definition: 实际吃的食品方案每周有几顿以新鲜食材为主
-      support: supported
-      note: 准备时间算在时间账里，不另给“省时”分
+    - key: food_life
+      label: 饮食生活
+      definition: 实际吃的完整食品方案（自己做、外食都可以）新鲜不新鲜、合不合你确认的口味
+      support: partially_supported
+      note: 只评价新鲜餐与你确认的菜系；吃饱是基本保障，不另加分；价格、餐馆档次与外食次数不等于更好；准备时间算在时间账里
     - key: daily_convenience
       label: 日常生活便利
       definition: 你愿意在多大程度上花钱减少日常杂务（洗衣与打扫）
       support: supported
       note: 只看本人实际少做了多少小时；设备与人工服务是两种实现方式，不分别打分；它是相对重要程度，不是预算或必须购买的指令；不是旧问卷的“洗衣”题
+    - key: personal_enjoyment
+      label: 个人消费与享受
+      definition: 实际在用的居家舒适用品与实际接受的享受型服务（例如舒适的椅子、按摩）
+      support: partially_supported
+      note: 按实际提供的功能或服务量评价，不按花了多少钱或买了几件；同一种舒适多买一件不再加分；纯爱好装备（吉他、球拍）只让活动可以开展，放在家里不算享受
 
   points:
     manual_entry: 手工输入按精确十进制解析，最多 2 位小数（步长不是测量精度）；也接受规范分数写法（例如 50/3）
@@ -176,12 +181,13 @@ pack:
     display_decimals: 1
     canonical_form: 约分后的整数（30）或 分子/分母（50/3）；计算与比较都用它，显示四舍五入到 1 位小数，显示值不回流计算
     equal_split_six: 50/3
-    equal_split_material: 100/3
+    equal_split_material: "25"
     rules:
       - 六维合计必须精确等于 100；不预填数值、不提供人格套餐，不自动按比例扣减其他项
-      - 只有用户主动选择“平均分配”才生成均分（六维每项 50/3、物质每项 100/3），不让排在前面的项目多拿分
+      - 只有用户主动选择“平均分配”才生成均分（六维每项 50/3、物质每项 25），不让排在前面的项目多拿分
       - 明确 0 是已提供的数值；“未答”“明确无所谓”“暂不确定”都不会被自动换成 0 或均分
-      - 物质父项为正时，物质三项也必须精确合计 100；物质父项明确为 0 时细分不适用，不伪造三个回答
+      - 物质父项为正时，物质四项也必须精确合计 100；物质父项明确为 0 时细分不适用，不伪造四个回答
+      - 物质从三项改成四项、饮食的含义扩大之后，旧的确认不能补 0 或重新分配点数沿用：请重新审阅并确认
 
   health_questionnaire:
     version: e3a-health-coping-q-v0.1-draft
@@ -225,13 +231,38 @@ pack:
 
   attribute_kinds:
     - {kind: brand, label: 品牌, support: unsupported, usage: [retained_only], note: 已记录原文，本版不评分、不交给分身；需要同规格报价与匹配规则（V2）}
-    - {kind: cuisine, label: 菜系, support: unsupported, usage: [retained_only], note: 已记录原文，本版不评分、不交给分身}
+    - {kind: cuisine, label: 菜系, support: unsupported, usage: [retained_only], note: 这里的原文只留存；想让口味进入饮食评价，请在“口味与菜系”一项里描述并选中类别}
     - {kind: preparation, label: 制作方式（做饭 / 外卖）, support: unsupported, usage: [retained_only], note: 已记录原文，本版不评分}
     - {kind: tier, label: 档次, support: unsupported, usage: [retained_only], note: 已记录原文，本版不评分；不从价格推断档次偏好}
     - {kind: service_quality, label: 服务质量, support: unsupported, usage: [retained_only], note: 已记录原文，本版不评分}
     - {kind: home_entry_concern, label: 上门顾虑（例如不想让陌生人进家）, support: unsupported, usage: [retained_only],
        note: 已记录原文；本版没有能核验或拦截上门服务的机制，分身可能选择上门服务——即使你把它确认为不可妥协，也只能原样留存}
 
+  interests:
+    leisure_categories:
+      - {key: music, label: 音乐, aliases: [音乐, 吉他, 唱歌, 合唱, 乐器, music, guitar, choir]}
+      - {key: racket_sports, label: 球拍运动, aliases: [网球, 羽毛球, 乒乓球, 球拍, tennis, badminton]}
+      - {key: arts_culture, label: 艺术与文化, aliases: [美术馆, 博物馆, 展览, 音乐会, 看演出, museum, gallery]}
+      - {key: culinary, label: 美食活动, aliases: [烹饪, 做菜, 品鉴, cooking]}
+      - {key: fitness, label: 健身, aliases: [健身, 跑步, 撸铁, gym, running]}
+    cuisines:
+      - {key: home_style, label: 家常菜, aliases: [家常]}
+      - {key: sichuan, label: 川菜, aliases: [川菜, 川味, 麻辣, sichuan]}
+      - {key: italian, label: 意大利菜, aliases: [意大利, 意式, 披萨, 意面, italian, pasta]}
+    leisure_states_zh:
+      - 未答：没有这一项的明确信息，按中性规则评价；不会被当成“通用评价”的选择
+      - 暂不确定：按中性规则评价
+      - 明确没有固定爱好：按中性规则评价
+      - 采用通用休闲评价：城市有什么合适的就体验什么（按中性规则评价）
+      - 用文字描述：先按词表形成候选，你选中的类别才进入评价；没认出的描述原样保留，本版不评价
+    taste_states_zh:
+      - 未答：按中性规则评价
+      - 暂不确定：按中性规则评价
+      - 明确没有口味偏好：按中性规则评价
+      - 用文字描述：先按词表形成候选，你选中的菜系才进入饮食评价；品牌与其他要求只留存
+    matching_note_zh: >-
+      确认的兴趣只在同样的实际参与时间下带来适度更高的满足（模型假设：多 50%，有上限）；确认的菜系只让实际吃到的合口味餐多计一点。
+      这些系数是公开登记的模型假设，不是对你个人的测量；不改变你的点数、现金或资格，也不让贵的东西自动更好
   start_scenario:
     - 这是一次搬到候选城市重新开始的简化情景：从第 1 年、健康、没有已有物品、没有在学课程、没有资金目标开始
     - 现实中的旧家具、病史与在学课程暂未纳入；这是模拟的假设，不是对你现实情况的判断

@@ -1961,6 +1961,153 @@ class DurationSpec(ContractModel):
         return None
 
 
+# ==========================================================================
+# 生活扩展（DECISIONS/0041）：完整食品方案、享受型消费、活动装备与休闲活动的**公开事实**。
+#
+# 这里只有事实的形状：组成、数量、时间、功能、活动条件与依据。幸福度怎样从这些事实换算出来（效率、锚点、兴趣匹配倍率）
+# 只写在评分规格里（``common.life_scoring_contracts``），不进机会，也就不进代理的观察。
+# ==========================================================================
+
+#: 一周最多 21 餐（每天三餐）。只用于检查“每周餐数”没有写错单位，不是营养规定。
+MEALS_PER_WEEK_MAX: int = 21
+#: 两个小时数相等的容差：输入只有两位小数，1e-9 足以区分写错与浮点舍入。
+HOURS_TOL: float = 1e-9
+FoodMode = Literal["home_cooked", "dine_out", "delivery"]
+EnjoymentMode = Literal["passive_service_month", "service_units"]
+
+
+class FoodPlanPart(ContractModel):
+    """完整食品方案的一个组成：怎么做（自己做 / 外食 / 外送）、每周几餐、其中几餐新鲜、主要菜系。
+
+    ``cuisine`` 是词表里的菜系键（没有标注就为空）；每个组成只有一个主要菜系，口味匹配按组成算一次，不按标签叠加。"""
+
+    part_id: KeyStr
+    mode: FoodMode
+    meals_per_week: Annotated[float, Field(gt=0, le=MEALS_PER_WEEK_MAX)]
+    fresh_meals_per_week: Annotated[float, Field(ge=0)] = 0
+    cuisine: KeyStr | None = None
+    note: str = Field(min_length=1, max_length=200)
+
+    @model_validator(mode="after")
+    def _fresh_within_meals(self) -> FoodPlanPart:
+        if self.fresh_meals_per_week > self.meals_per_week:
+            raise ValueError(f"{self.part_id}: 新鲜餐数不能多于这一组成的餐数")
+        return self
+
+
+class FoodPlanFacts(ContractModel):
+    """一个月的**完整**食品方案：覆盖整月基本饮食的声明与依据、组成、时间依据。
+
+    “每周新鲜餐数”不是总餐数；几项食材报价或一家餐馆的位置也不是完整方案——``covers_basic_month`` 为假的方案不能执行。
+    方案的价格就是机会的报价（整个方案的月费，含其中的外食）：同一部分餐食不另收一次钱。时间 = 准备 + 外出就餐
+    （``prep_hours_per_month + dining_hours_per_month`` 必须等于资源事实里的每月小时）。"""
+
+    covers_basic_month: bool
+    coverage_basis: str = Field(min_length=1, max_length=280)
+    meals_per_week: Annotated[float, Field(gt=0, le=MEALS_PER_WEEK_MAX)]
+    parts: tuple[FoodPlanPart, ...] = Field(min_length=1)
+    prep_hours_per_month: Annotated[float, Field(ge=0, le=744)]
+    dining_hours_per_month: Annotated[float, Field(ge=0, le=744)]
+    time_basis: str = Field(min_length=1, max_length=280)
+
+    @model_validator(mode="after")
+    def _parts_add_up(self) -> FoodPlanFacts:
+        ids = [p.part_id for p in self.parts]
+        if len(ids) != len(set(ids)):
+            raise ValueError("食品方案的组成编号重复")
+        total = sum(p.meals_per_week for p in self.parts)
+        if abs(total - self.meals_per_week) > HOURS_TOL:
+            raise ValueError(
+                f"组成的每周餐数之和 {total:g} ≠ 方案的每周餐数 {self.meals_per_week:g}"
+            )
+        return self
+
+    @property
+    def fresh_meals_per_week(self) -> float:
+        return sum(p.fresh_meals_per_week for p in self.parts)
+
+    def matched_meals_per_week(self, cuisines: frozenset[str]) -> float:
+        """主要菜系在 ``cuisines`` 里的组成每周几餐（每个组成只算一次）。"""
+        return sum(
+            p.meals_per_week for p in self.parts if p.cuisine is not None and p.cuisine in cuisines
+        )
+
+
+class EnjoymentProvision(ContractModel):
+    """一项享受型改善：词表里的功能、提供方式与依据。
+
+    * ``passive_service_month``：实际在用的居家舒适用品，按服务月提供（放着也在用，例如一把好椅子）；
+    * ``service_units``：享受型服务，每月提供 ``units_per_month`` 份（例如每月两次按摩）。
+
+    这里只有“提供了什么”；提供一份能带来多少满足在评分规格里。同一商品提供两种改善要分成两条、各写依据。"""
+
+    function: KeyStr
+    mode: EnjoymentMode
+    units_per_month: Annotated[float, Field(gt=0)] | None = None
+    unit_label: str | None = Field(default=None, max_length=40)
+    basis: str = Field(min_length=1, max_length=280)
+
+    @model_validator(mode="after")
+    def _units_match_mode(self) -> EnjoymentProvision:
+        if (self.mode == "service_units") != (self.units_per_month is not None):
+            raise ValueError(f"{self.function}: 只有按服务量提供的写 units_per_month，且必须写")
+        if (self.units_per_month is None) != (self.unit_label is None):
+            raise ValueError(f"{self.function}: 服务量与它的单位要一起写")
+        return self
+
+
+class EquipmentFacts(ContractModel):
+    """活动装备：持有并在服务期内时提供哪些活动能力（例如 ``guitar_playable``）。
+
+    装备本身不带来娱乐满足：它只让需要这种能力的活动可以开展；当前价值来自实际参加的活动，未来价值来自期末参考生活里的
+    可用性。活动条件引用能力，不绑死某一个商品编号。"""
+
+    provides: tuple[KeyStr, ...] = Field(min_length=1)
+    note: str = Field(min_length=1, max_length=200)
+
+    @model_validator(mode="after")
+    def _unique(self) -> EquipmentFacts:
+        if len(set(self.provides)) != len(self.provides):
+            raise ValueError("装备能力重复")
+        return self
+
+
+class ActivityFacts(ContractModel):
+    """一项休闲活动的一次参与：主要类别（兴趣匹配只用它）、辅助标签（只检索与说明）、参与与其他占用的小时、需要的装备能力、
+    套餐本次提供的装备能力。
+
+    每次占用 = 参与小时 + 准备、往返、排队的小时（必须等于资源事实里的每次小时）；只有参与小时进入休闲评价。套餐提供的
+    装备只对这一次活动有效，不会变成持有物。``replaces_meals_per_session`` 大于 0（同时替代正餐的套餐）本轮不支持，明确拒绝。"""
+
+    primary_category: KeyStr
+    tags: tuple[KeyStr, ...] = ()
+    participation_hours: Annotated[float, Field(gt=0, le=24)]
+    overhead_hours: Annotated[float, Field(ge=0, le=24)]
+    requires: tuple[KeyStr, ...] = ()
+    kit_provides: tuple[KeyStr, ...] = ()
+    replaces_meals_per_session: Annotated[float, Field(ge=0)] = 0
+    time_basis: str = Field(min_length=1, max_length=280)
+
+    @model_validator(mode="after")
+    def _consistent(self) -> ActivityFacts:
+        for name in ("tags", "requires", "kit_provides"):
+            seq = getattr(self, name)
+            if len(set(seq)) != len(seq):
+                raise ValueError(f"活动的 {name} 重复")
+        if self.primary_category in self.tags:
+            raise ValueError("主要类别不要再写进辅助标签（匹配只算一次）")
+        if self.replaces_meals_per_session > 0:
+            raise ValueError(
+                "同时替代正餐的活动套餐本轮不支持：餐食覆盖、费用与时间的归属没有组合规则，不临场猜抵扣"
+            )
+        return self
+
+    def missing_capabilities(self, held: frozenset[str]) -> tuple[str, ...]:
+        """这一次参与还缺哪些装备能力（套餐本次提供的与已持有的都算有）。"""
+        have = held | frozenset(self.kit_provides)
+        return tuple(c for c in self.requires if c not in have)
+
+
 class LifeOpportunity(ContractModel):
     """一座城市里的一项生活机会：一种商品、方案、服务、培训或工作。
 
@@ -1999,6 +2146,57 @@ class LifeOpportunity(ContractModel):
     employer_id: IdStr | None = Field(default=None, exclude_if=lambda v: v is None)
     #: E1-5A：培训完成后授予哪些能力（能力在 ``CareerRules.abilities`` 里声明）。只有培训可以写。
     grants: tuple[KeyStr, ...] = Field(default=(), exclude_if=lambda v: v == ())
+    #: 生活扩展（DECISIONS/0041）的公开事实；没有用到时不序列化（原有机会的内容身份不变）。
+    food_plan: FoodPlanFacts | None = Field(default=None, exclude_if=lambda v: v is None)
+    enjoyment: tuple[EnjoymentProvision, ...] = Field(default=(), exclude_if=lambda v: v == ())
+    equipment: EquipmentFacts | None = Field(default=None, exclude_if=lambda v: v is None)
+    activity: ActivityFacts | None = Field(default=None, exclude_if=lambda v: v is None)
+
+    @model_validator(mode="after")
+    def _life_facets(self) -> LifeOpportunity:
+        oid, kind, r = self.opportunity_id, self.duration.kind, self.resource
+        if self.food_plan is not None:
+            fp = self.food_plan
+            if r.basis != "per_service_month" or r.hours is None:
+                raise ValueError(f"{oid}: 食品方案的时间按服务月计（per_service_month）")
+            if abs(r.hours - (fp.prep_hours_per_month + fp.dining_hours_per_month)) > HOURS_TOL:
+                raise ValueError(
+                    f"{oid}: 每月 {r.hours:g} 小时 ≠ 准备 {fp.prep_hours_per_month:g} + 外出就餐 {fp.dining_hours_per_month:g}"
+                )
+            if self.availability == "available" and not fp.covers_basic_month:
+                raise ValueError(
+                    f"{oid}: 没有覆盖整月基本饮食的方案不能当作可执行的食品方案（几项食材报价或一家餐馆不是完整方案）"
+                )
+        if self.activity is not None:
+            a = self.activity
+            if kind != "one_time_experience" or r.basis != "per_occurrence" or r.hours is None:
+                raise ValueError(
+                    f"{oid}: 休闲活动是按次发生的体验（one_time_experience、per_occurrence）"
+                )
+            if abs(r.hours - (a.participation_hours + a.overhead_hours)) > HOURS_TOL:
+                raise ValueError(
+                    f"{oid}: 每次 {r.hours:g} 小时 ≠ 参与 {a.participation_hours:g} + 其他占用 {a.overhead_hours:g}"
+                )
+            if r.quantity_scales is not True:
+                raise ValueError(f"{oid}: 活动的次数必须按数量算（quantity_scales = true）")
+            if self.enjoyment:
+                raise ValueError(
+                    f"{oid}: 同一项体验不同时算休闲活动与享受型服务；确有两种独立改善时拆成两项并各写依据"
+                )
+        if self.equipment is not None:
+            if kind != "durable_good":
+                raise ValueError(f"{oid}: 活动装备是持续物品（durable_good）")
+            if self.activity is not None:
+                raise ValueError(f"{oid}: 装备与活动是两项机会")
+        functions = [e.function for e in self.enjoyment]
+        if len(functions) != len(set(functions)):
+            raise ValueError(f"{oid}: 享受功能重复；同一功能只写一条")
+        for e in self.enjoyment:
+            if e.mode == "passive_service_month" and kind != "durable_good":
+                raise ValueError(f"{oid}: 按服务月提供的舒适用品是持续物品")
+            if e.mode == "service_units" and kind not in ("ongoing_service", "one_time_experience"):
+                raise ValueError(f"{oid}: 按服务量提供的享受是服务或一次体验")
+        return self
 
     @model_validator(mode="after")
     def _availability_consistent(self) -> LifeOpportunity:
@@ -2889,11 +3087,21 @@ class ActionItem(ContractModel):
     start_month: Month | None = None
     end_month: Month | None = None
     month: Month | None = None
+    #: 生活扩展（DECISIONS/0041）：同一项活动在不连续的几个月参加时，明确列出月份（严格递增）；每个月按 ``quantity`` 次。
+    #: 只用于一次性的体验；不另造编号，全年仍只有这一条。没有用到时不序列化。
+    months: tuple[Month, ...] | None = Field(default=None, exclude_if=lambda v: v is None)
     #: E1-5B：这条购买或报名用来兑现哪个资金目标（必须明确写；同一机会没写就不算兑现）。没有用到时不序列化。
     goal_id: IdStr | None = Field(default=None, exclude_if=lambda v: v is None)
 
     @model_validator(mode="after")
     def _timing_fields_consistent(self) -> ActionItem:
+        if self.months is not None:
+            if not self.months:
+                raise ValueError(f"{self.opportunity_id}: months 不能为空")
+            if any(b <= a for a, b in zip(self.months, self.months[1:], strict=False)):
+                raise ValueError(f"{self.opportunity_id}: months 必须严格递增（不重复）")
+            if self.month is not None or self.start_month is not None or self.end_month is not None:
+                raise ValueError(f"{self.opportunity_id}: 给了 months 就不再给 month 或起止月")
         if self.month is not None and (self.start_month is not None or self.end_month is not None):
             raise ValueError(
                 f"{self.opportunity_id}: 一次性行动用 month，周期行动用 start_month/end_month，"
@@ -3119,6 +3327,42 @@ class HoldingService(ContractModel):
     #: E1-5C：服务期照样流逝、但因为生病没有使用的月份（"付款 ≠ 参与"）。它们不在 ``covered_months`` 里：评分与时间
     #: 账只读实际使用的月份。没有用到时不序列化。
     paused_months: tuple[Month, ...] = Field(default=(), exclude_if=lambda v: v == ())
+
+
+ParticipationStatus = Literal["completed", "paused", "failed"]
+
+
+class ParticipationRecord(ContractModel):
+    """一项休闲活动在一个月里的**实际**参与（权威事实，DECISIONS/0041）：时间账、精力账、休闲评价与事实记忆都从这里取数。
+
+    ``completed``：参加了 ``sessions`` 次，参与 ``participation_hours`` 小时、准备与往返等 ``overhead_hours`` 小时；用到的装备是
+    ``equipment_used``（持有物的机会编号），套餐本次提供的能力在 ``kit_capabilities``（不会变成持有物）。``paused``（生病）与
+    ``failed``（缺装备、付不起、资料不可得）次数与小时都是 0，原因写在 ``reason``；已经合法发生的费用不倒删，没参加就没有收益。"""
+
+    plan_order: Annotated[int, Field(ge=0)]
+    opportunity_id: IdStr
+    month: Month
+    status: ParticipationStatus
+    primary_category: KeyStr
+    sessions: Annotated[float, Field(ge=0)]
+    participation_hours: Annotated[float, Field(ge=0)]
+    overhead_hours: Annotated[float, Field(ge=0)]
+    equipment_used: tuple[IdStr, ...] = ()
+    kit_capabilities: tuple[KeyStr, ...] = ()
+    reason: str | None = Field(default=None, max_length=MAX_SUMMARY_CHARS)
+
+    @model_validator(mode="after")
+    def _status_consistent(self) -> ParticipationRecord:
+        done = self.status == "completed"
+        if done != (self.sessions > 0):
+            raise ValueError(f"{self.opportunity_id} 第 {self.month} 月：只有实际参加才有次数")
+        if not done and (self.participation_hours or self.overhead_hours or self.equipment_used):
+            raise ValueError(
+                f"{self.opportunity_id} 第 {self.month} 月：没有参加就没有参与小时与装备使用"
+            )
+        if not done and not self.reason:
+            raise ValueError(f"{self.opportunity_id} 第 {self.month} 月：暂停或失败要写原因")
+        return self
 
 
 class MonthRecord(ContractModel):
@@ -3536,6 +3780,8 @@ class EnvironmentOutcome(ContractModel):
     months: tuple[MonthRecord, ...] = ()
     items: tuple[ItemExecution, ...] = ()
     holdings_service: tuple[HoldingService, ...] = ()
+    #: 生活扩展（DECISIONS/0041）：休闲活动的实际参与（每项活动每个请求月一条）。没有用到时不序列化。
+    participation: tuple[ParticipationRecord, ...] = Field(default=(), exclude_if=lambda v: v == ())
     exit: ExitRecord | None = None
     tax_policy_id: str | None = None
     tax_status: str | None = None

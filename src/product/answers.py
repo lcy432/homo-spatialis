@@ -4,9 +4,9 @@
 ``ConfirmedProfile``（用户确认的语义与精确数值，带内容身份）。规则：
 
 * 未答、已提供（明确 0 也是已提供）、明确无所谓、暂不确定四种状态互不代替；“无所谓”“不确定”不会被自动换成 0 或均分。
-* 六维合计必须**精确**等于 100；手工输入按精确十进制解析；只有用户主动选择平均分配才生成均分（六维每项 50/3、物质每项 100/3）。
+* 六维合计必须**精确**等于 100；手工输入按精确十进制解析；只有用户主动选择平均分配才生成均分（六维每项 50/3、物质每项 25）。
   不预填、不按比例自动扣减；合计不对就报“还差 / 多出几分”，由用户自己改。
-* 物质父项为正时三项细分必须精确合计 100；父项明确为 0 时细分不适用，不伪造回答。旧问卷的 ``laundry`` 不能自动当作
+* 物质父项为正时四项细分必须精确合计 100；父项明确为 0 时细分不适用，不伪造回答。旧问卷的 ``laundry`` 不能自动当作
   ``daily_convenience``；``healthcare`` 不在六维里（健康回答另有独立问卷）。
 * 职业由用户在少量可读候选里确认，不填职业代码，不从职称授予资格；金额保留原始金额、币种、时期与口径，没有合法换算就阻断。
 * 自由文字超过 2,000 字符报错，不截断；属性偏好与未获执行保障的“不可妥协”要求只留存原文与支持状态，确认时要显式知悉。
@@ -187,7 +187,7 @@ def _allocation(
                     f"{where}.entries.laundry",
                     "旧问卷的“洗衣”问的是有没有洗衣条件，不能自动当作“日常生活便利”（愿意花钱减少日常杂务）",
                     "这一项不会被使用，也不会被改读成新题目",
-                    "按新题目重新分配物质三项（居住空间、新鲜食品、日常生活便利）",
+                    "按新题目重新分配物质四项（居住空间、饮食生活、日常生活便利、个人消费与享受）",
                 )
             )
         else:
@@ -555,7 +555,7 @@ def review_draft(
             supports=leaf_support,
             equal_value=b.points.equal_split_material,
             where="material",
-            what="物质三项",
+            what="物质四项",
         )
         if material_parent is not None:
             issues += material_issues
@@ -565,7 +565,7 @@ def review_draft(
                 for i in material_issues
                 if i.code in ("legacy_laundry_key", "unknown_allocation_key")
             ]
-    for i, (label, review) in enumerate((("六维", six_review), ("物质三项", material_review))):
+    for i, (label, review) in enumerate((("六维", six_review), ("物质四项", material_review))):
         items.append(
             ItemStatus(
                 item="six_dimensions" if i == 0 else "material",
@@ -873,6 +873,45 @@ def review_draft(
             note="只来自你明确确认的事实，不从职业称呼自动授予",
         )
     )
+    from product.interests import Term, review_one
+
+    leisure_terms = tuple(Term(t.key, t.label, t.aliases) for t in b.interests.leisure_categories)
+    cuisine_terms = tuple(Term(t.key, t.label, t.aliases) for t in b.interests.cuisines)
+    leisure_review, more, _ = review_one(
+        "leisure",
+        draft.leisure_interest.state,
+        draft.leisure_interest.text,
+        tuple(draft.leisure_interest.selected),
+        leisure_terms,
+    )
+    issues += more
+    taste_review, more, _ = review_one(
+        "taste", draft.taste.state, draft.taste.text, tuple(draft.taste.selected), cuisine_terms
+    )
+    issues += more
+    for key, label, r in (
+        ("leisure_interest", "休闲兴趣", leisure_review),
+        ("taste", "口味与菜系", taste_review),
+    ):
+        items.append(
+            ItemStatus(
+                item=key,
+                label=label,
+                answer_state="provided"
+                if r.state == "described"
+                else (
+                    "unsure"
+                    if r.state == "unsure"
+                    else "unanswered"
+                    if r.state == "unanswered"
+                    else "provided"
+                ),
+                support="partially_supported",
+                confirmation="pending",
+                usage=("planning", "scoring") if r.selected else ("planning",),
+                note=r.message_zh[:300],
+            )
+        )
     pending.append("ack:standard_start")
     confirmable = not any(i.severity == "error" for i in issues)
     if confirmable:
@@ -896,6 +935,8 @@ def review_draft(
         pending_confirmations=tuple(dict.fromkeys(pending)),
         issues=tuple(issues),
         summary_zh=tuple(summary),
+        leisure_interest=leisure_review,
+        taste=taste_review,
     )
     return review
 
@@ -1098,8 +1139,12 @@ def confirm_profile(
             "abilities",
             "hard_requirements",
             "attribute_preferences",
+            "leisure_interest",
+            "taste",
         )
     )
+    from product.interests import confirmed as confirmed_interests
+
     fields = dict(
         meta=pack.meta(sample),
         confirmed_id=f"confirmed.{draft.draft_id}.r{draft.revision}",
@@ -1147,6 +1192,9 @@ def confirm_profile(
         hard_requirements=tuple(hard),
         retained=tuple(retained),
         sources=sources,
+        interests=confirmed_interests(
+            review.leisure_interest, review.taste, pack.body.interests.matching_note_zh
+        ),
     )
     unsealed = ConfirmedProfile.model_construct(**fields, content_fingerprint="0" * 64)
     return ConfirmedProfile(**fields, content_fingerprint=unsealed.expected_fingerprint())

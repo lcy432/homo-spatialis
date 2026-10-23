@@ -96,7 +96,7 @@ def test_the_stated_profile_is_shown_but_no_scoring_weight_is(bundle):
     payload = observation_payload(_obs(bundle))
     shown = payload["profile"]
     assert shown["six_dimension_points"]["material"] == "45"
-    assert shown["material_allocation"]["daily_convenience"] == "40"
+    assert shown["material_allocation"]["daily_convenience"] == "30"
     assert len(shown["health_answers"]) == len(profile.health_answers)
     blob = json.dumps(payload, ensure_ascii=False)
     for key in (

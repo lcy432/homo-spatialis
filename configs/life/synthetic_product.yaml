@@ -21,7 +21,7 @@ protocol:
   protocol_id: life-v1-e3a-product
   schema_version: e3a-product-draft
   life_rules_version: e1-5c-monthly-health-v1
-  scoring_scale_version: e1-convenience-v1
+  scoring_scale_version: e1-life-v1
   info_permission_version: e3a-product-v1
   status: synthetic_fixture_only
   simulation_years: 3
@@ -103,11 +103,11 @@ protocol:
     formula: base_times_one_plus_alpha_s
     lag_years: 1
     score_statistic: complete_year_mean_u
-    scoring_spec_id: score.e1-convenience.explore
-    scoring_version: e1-convenience-v1
+    scoring_spec_id: score.e1-life.explore
+    scoring_version: e1-life-v1
     # 评分内容身份（DECISIONS/0025）：scoring_product.yaml 的规格的内容身份。规格一改（τ、c、任务组合……）这里就要换，
     # 并从共同初始状态重跑。
-    scoring_content_fingerprint: fdf920f447af884c8fa05ee90a6e971193fb7cc6cffee772d77b8c5d0588f23a
+    scoring_content_fingerprint: 8444d8d20d88e0bacf492990dc66d4183983e973a840e6473718287b73f2baa8
     preference_source: product_confirmed_six_dim
     quantization: floor_to_0.01
     source: *rules
@@ -217,9 +217,14 @@ protocol:
       健康回答是独立的健康风险应对问卷（e3a-health-coping-q-v0.1-draft），不占六维 100 分、不是第七个评分权重；只供分身做计划，
       结算、风险抽签与评分都不读它
 
-consumption_needs: [housing_space, fresh_food, daily_convenience]
+consumption_needs: [housing_space, food_life, daily_convenience, personal_enjoyment]
 categories: [housing, food, durable, job, training, experience, service]
 functions: [housing, food]
+# 生活扩展（DECISIONS/0041）的公开词表：菜系、休闲活动类别、装备能力、享受功能。机会只能用这里声明过的键；怎样换算成满足感只在评分规格里。
+cuisines: [home_style, sichuan, italian]
+leisure_categories: [music, racket_sports, arts_culture, culinary, fitness]
+capabilities: [guitar_playable, racket_playable]
+enjoyment_functions: [home_comfort, personal_care]
 
 tax_policies:
   - policy_id: tax.synth.e1conv
@@ -247,7 +252,7 @@ catalogs:
       - need: food
         baseline_opportunity_id: k51.food.basic
         baseline_quantity: 1
-        qualifying_opportunity_ids: [k51.food.basic, k51.food.fresh]
+        qualifying_opportunity_ids: [k51.food.basic, k51.food.fresh, k51.food.sichuan_home, k51.food.home_and_dining]
         meets: 一个成年人一个月的基本口粮（合成声明）
     treatments:
       - treatment_id: k51.care.clinic
@@ -308,10 +313,17 @@ catalogs:
       - opportunity_id: k51.food.basic
         category: food
         label: 基本食品方案（自己做）
-        spec: {fresh_meals_per_week: 3}
         functions: [food]
         unit: household-plan
         quality: 米面与罐头为主；自己做，每月准备约 30 小时
+        food_plan:
+          covers_basic_month: true
+          coverage_basis: 一个成年人每天三餐的基本口粮（合成声明，与本城最低食品方案的声明相同）
+          meals_per_week: 21
+          parts: [{part_id: home, mode: home_cooked, meals_per_week: 21, fresh_meals_per_week: 3, cuisine: home_style, note: 自己做的家常饭}]
+          prep_hours_per_month: 30
+          dining_hours_per_month: 0
+          time_basis: 买菜、做饭与收拾合计每月约 30 小时（合成设定）
         availability: available
         price: {amount: {amount: 380, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: plan-month}
         duration: {kind: ongoing_service}
@@ -321,10 +333,17 @@ catalogs:
       - opportunity_id: k51.food.fresh
         category: food
         label: 新鲜食材方案（自己做）
-        spec: {fresh_meals_per_week: 21}
         functions: [food]
         unit: household-plan
         quality: 每天三顿以新鲜食材为主；自己做，每月准备约 40 小时
+        food_plan:
+          covers_basic_month: true
+          coverage_basis: 一个成年人每天三餐（合成声明）
+          meals_per_week: 21
+          parts: [{part_id: home, mode: home_cooked, meals_per_week: 21, fresh_meals_per_week: 21, cuisine: home_style, note: 以新鲜食材为主的家常饭}]
+          prep_hours_per_month: 40
+          dining_hours_per_month: 0
+          time_basis: 买菜、洗切、做饭与收拾合计每月约 40 小时（合成设定）
         availability: available
         price: {amount: {amount: 450, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: plan-month}
         duration: {kind: ongoing_service}
@@ -374,8 +393,157 @@ catalogs:
         availability: available
         price: {amount: {amount: 150, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: ticket}
         duration: {kind: one_time_experience, lasts_years: 0}
+        activity: {primary_category: arts_culture, participation_hours: 4, overhead_hours: 0,
+                   time_basis: 一晚演出连同往返约 4 小时；合成设定把整晚都算作参与（与原来按一次 4 小时计的资源事实相同）}
         resource: {basis: per_occurrence, hours: 4, burden_per_hour: 0.5, quantity_scales: true,
                    note: 一次 4 小时}
+        source: *synth
+      - opportunity_id: k51.food.sichuan_home
+        category: food
+        label: 川味家常方案（自己做）
+        functions: [food]
+        unit: household-plan
+        quality: 自己做的川味家常菜，每周约 10 顿用新鲜食材；每月准备约 36 小时
+        food_plan:
+          covers_basic_month: true
+          coverage_basis: 一个成年人每天三餐（合成声明）
+          meals_per_week: 21
+          parts: [{part_id: home, mode: home_cooked, meals_per_week: 21, fresh_meals_per_week: 10, cuisine: sichuan, note: 自己做的川味家常菜}]
+          prep_hours_per_month: 36
+          dining_hours_per_month: 0
+          time_basis: 买菜、做饭与收拾合计每月约 36 小时（合成设定）
+        availability: available
+        price: {amount: {amount: 400, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: plan-month}
+        duration: {kind: ongoing_service}
+        resource: {basis: per_service_month, hours: 36, burden_per_hour: 0.5, quantity_scales: false,
+                   note: 准备时间就是这份方案的全部做饭时间}
+        source: *synth
+      - opportunity_id: k51.food.home_and_dining
+        category: food
+        label: 家常加每周四顿意式外食（一个月的完整方案）
+        functions: [food]
+        unit: household-plan
+        quality: 每周 17 顿自己做（其中 10 顿新鲜），另外 4 顿去意式餐馆；外食的钱已含在月费里，不另收
+        food_plan:
+          covers_basic_month: true
+          coverage_basis: 一个成年人每天三餐：自己做 17 顿 + 外食 4 顿（合成声明）
+          meals_per_week: 21
+          parts:
+            - {part_id: home, mode: home_cooked, meals_per_week: 17, fresh_meals_per_week: 10, cuisine: home_style, note: 自己做的家常饭}
+            - {part_id: dining, mode: dine_out, meals_per_week: 4, fresh_meals_per_week: 4, cuisine: italian, note: 每周 4 顿意式餐馆}
+          prep_hours_per_month: 28
+          dining_hours_per_month: 8
+          time_basis: 自己做每月约 28 小时；外食每月约 17 顿、往返与就餐合计约 8 小时（合成设定）
+        availability: available
+        price: {amount: {amount: 620, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: plan-month}
+        duration: {kind: ongoing_service}
+        resource: {basis: per_service_month, hours: 36, burden_per_hour: 0.5, quantity_scales: false,
+                   note: 做饭 28 小时 + 外食 8 小时}
+        source: *synth
+      - opportunity_id: k51.durable.comfort_chair
+        category: durable
+        label: 舒适的阅读椅
+        unit: chair
+        quality: 一次买下、能用 5 年；放在家里每天都在用
+        availability: available
+        price: {amount: {amount: 300, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: chair}
+        duration: {kind: durable_good, lasts_years: 5}
+        enjoyment: [{function: home_comfort, mode: passive_service_month, basis: 每天在家坐着读书、休息时更舒服（居家舒适，在服务期内每月都在用）}]
+        resource: {basis: passive, note: 持有本身不占时间}
+        source: *synth
+      - opportunity_id: k51.durable.cushion_set
+        category: durable
+        label: 靠垫与软毯一套
+        unit: set
+        quality: 一次买下、能用 2 年；和阅读椅提供的是同一种居家舒适
+        availability: available
+        price: {amount: {amount: 80, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: set}
+        duration: {kind: durable_good, lasts_years: 2}
+        enjoyment: [{function: home_comfort, mode: passive_service_month, basis: 让沙发更舒服（居家舒适；与阅读椅同一功能）}]
+        resource: {basis: passive, note: 持有本身不占时间}
+        source: *synth
+      - opportunity_id: k51.service.massage
+        category: service
+        label: 按摩（每月两次）
+        unit: service-month
+        quality: 每月两次、每次约 1 小时的放松按摩
+        availability: available
+        price: {amount: {amount: 140, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: service-month}
+        duration: {kind: ongoing_service}
+        enjoyment: [{function: personal_care, mode: service_units, units_per_month: 2, unit_label: 次, basis: 每月实际接受两次按摩（享受型服务）}]
+        resource: {basis: per_service_month, hours: 2, burden_per_hour: 0.2, quantity_scales: false,
+                   note: 每月两次、每次约 1 小时；生大病的月份照样付费但暂停}
+        source: *synth
+      - opportunity_id: k51.durable.guitar
+        category: durable
+        label: 民谣吉他
+        unit: instrument
+        quality: 一次买下、能用 3 年；放在家里本身不带来娱乐，要自己练才有收获
+        availability: available
+        price: {amount: {amount: 240, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: instrument}
+        duration: {kind: durable_good, lasts_years: 3}
+        equipment: {provides: [guitar_playable], note: 能弹的吉他；买到的当月就能用}
+        resource: {basis: passive, note: 持有本身不占时间}
+        source: *synth
+      - opportunity_id: k51.experience.guitar_practice
+        category: experience
+        label: 在家练吉他（一次 2 小时）
+        unit: session
+        quality: 在家自己练，不收费；需要一把能弹的吉他
+        availability: available
+        price: {amount: {amount: 0, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: session}
+        duration: {kind: one_time_experience, lasts_years: 0}
+        activity: {primary_category: music, participation_hours: 2, overhead_hours: 0, requires: [guitar_playable],
+                   time_basis: 在家练，一次 2 小时，没有往返}
+        resource: {basis: per_occurrence, hours: 2, burden_per_hour: 0.6, quantity_scales: true, note: 一次 2 小时}
+        source: *synth
+      - opportunity_id: k51.experience.tennis_with_rental
+        category: experience
+        label: 网球场地连球拍租借（一次）
+        unit: session
+        quality: 场地 1.5 小时，含本次的球拍与球；往返约 1 小时；结束后球拍要还
+        availability: available
+        price: {amount: {amount: 30, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: session}
+        duration: {kind: one_time_experience, lasts_years: 0}
+        activity: {primary_category: racket_sports, participation_hours: 1.5, overhead_hours: 1, requires: [racket_playable],
+                   kit_provides: [racket_playable], time_basis: 打球 1.5 小时 + 往返与换衣 1 小时}
+        resource: {basis: per_occurrence, hours: 2.5, burden_per_hour: 1.0, quantity_scales: true, note: 一次 2.5 小时}
+        source: *synth
+      - opportunity_id: k51.experience.community_choir
+        category: experience
+        label: 社区合唱排练（免费，一次）
+        unit: session
+        quality: 社区中心的免费合唱排练，一次 2 小时，往返约半小时
+        availability: available
+        price: {amount: {amount: 0, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: session}
+        duration: {kind: one_time_experience, lasts_years: 0}
+        activity: {primary_category: music, tags: [arts_culture], participation_hours: 2, overhead_hours: 0.5,
+                   time_basis: 排练 2 小时 + 往返半小时}
+        resource: {basis: per_occurrence, hours: 2.5, burden_per_hour: 0.6, quantity_scales: true, note: 一次 2.5 小时}
+        source: *synth
+      - opportunity_id: k51.experience.gallery_tour
+        category: experience
+        label: 美术馆导览（一次）
+        unit: ticket
+        quality: 讲解导览 2 小时，往返约半小时
+        availability: available
+        price: {amount: {amount: 60, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: ticket}
+        duration: {kind: one_time_experience, lasts_years: 0}
+        activity: {primary_category: arts_culture, participation_hours: 2, overhead_hours: 0.5,
+                   time_basis: 导览 2 小时 + 往返半小时}
+        resource: {basis: per_occurrence, hours: 2.5, burden_per_hour: 0.5, quantity_scales: true, note: 一次 2.5 小时}
+        source: *synth
+      - opportunity_id: k51.experience.cooking_class
+        category: experience
+        label: 烹饪课（一次，不代替正餐）
+        unit: class
+        quality: 2.5 小时的烹饪课，往返约半小时；做的是试吃小份，不算一顿正餐
+        availability: available
+        price: {amount: {amount: 45, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: class}
+        duration: {kind: one_time_experience, lasts_years: 0}
+        activity: {primary_category: culinary, participation_hours: 2.5, overhead_hours: 0.5,
+                   time_basis: 上课 2.5 小时 + 往返半小时；不替代正餐}
+        resource: {basis: per_occurrence, hours: 3, burden_per_hour: 0.8, quantity_scales: true, note: 一次 3 小时}
         source: *synth
       - opportunity_id: k51.job.clerk
         category: job
@@ -453,7 +621,7 @@ catalogs:
       - need: food
         baseline_opportunity_id: m52.food.basic
         baseline_quantity: 1
-        qualifying_opportunity_ids: [m52.food.basic, m52.food.fresh]
+        qualifying_opportunity_ids: [m52.food.basic, m52.food.fresh, m52.food.sichuan_home, m52.food.home_and_dining]
         meets: 一个成年人一个月的基本口粮（合成声明）
     treatments:
       - {treatment_id: m52.care.clinic, severity: minor, need_id: minor_illness_care, label: 社区门诊与药物,
@@ -492,10 +660,17 @@ catalogs:
       - opportunity_id: m52.food.basic
         category: food
         label: 基本食品方案（自己做）
-        spec: {fresh_meals_per_week: 3}
         functions: [food]
         unit: household-plan
         quality: 米面与罐头为主；自己做，每月准备约 30 小时
+        food_plan:
+          covers_basic_month: true
+          coverage_basis: 一个成年人每天三餐的基本口粮（合成声明，与本城最低食品方案的声明相同）
+          meals_per_week: 21
+          parts: [{part_id: home, mode: home_cooked, meals_per_week: 21, fresh_meals_per_week: 3, cuisine: home_style, note: 自己做的家常饭}]
+          prep_hours_per_month: 30
+          dining_hours_per_month: 0
+          time_basis: 买菜、做饭与收拾合计每月约 30 小时（合成设定）
         availability: available
         price: {amount: {amount: 380, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: plan-month}
         duration: {kind: ongoing_service}
@@ -505,10 +680,17 @@ catalogs:
       - opportunity_id: m52.food.fresh
         category: food
         label: 新鲜食材方案（自己做）
-        spec: {fresh_meals_per_week: 21}
         functions: [food]
         unit: household-plan
         quality: 每天三顿以新鲜食材为主；自己做，每月准备约 40 小时
+        food_plan:
+          covers_basic_month: true
+          coverage_basis: 一个成年人每天三餐（合成声明）
+          meals_per_week: 21
+          parts: [{part_id: home, mode: home_cooked, meals_per_week: 21, fresh_meals_per_week: 21, cuisine: home_style, note: 以新鲜食材为主的家常饭}]
+          prep_hours_per_month: 40
+          dining_hours_per_month: 0
+          time_basis: 买菜、洗切、做饭与收拾合计每月约 40 小时（合成设定）
         availability: available
         price: {amount: {amount: 450, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: plan-month}
         duration: {kind: ongoing_service}
@@ -558,8 +740,157 @@ catalogs:
         availability: available
         price: {amount: {amount: 150, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: ticket}
         duration: {kind: one_time_experience, lasts_years: 0}
+        activity: {primary_category: arts_culture, participation_hours: 4, overhead_hours: 0,
+                   time_basis: 一晚演出连同往返约 4 小时；合成设定把整晚都算作参与（与原来按一次 4 小时计的资源事实相同）}
         resource: {basis: per_occurrence, hours: 4, burden_per_hour: 0.5, quantity_scales: true,
                    note: 一次 4 小时}
+        source: *synth
+      - opportunity_id: m52.food.sichuan_home
+        category: food
+        label: 川味家常方案（自己做）
+        functions: [food]
+        unit: household-plan
+        quality: 自己做的川味家常菜，每周约 10 顿用新鲜食材；每月准备约 36 小时
+        food_plan:
+          covers_basic_month: true
+          coverage_basis: 一个成年人每天三餐（合成声明）
+          meals_per_week: 21
+          parts: [{part_id: home, mode: home_cooked, meals_per_week: 21, fresh_meals_per_week: 10, cuisine: sichuan, note: 自己做的川味家常菜}]
+          prep_hours_per_month: 36
+          dining_hours_per_month: 0
+          time_basis: 买菜、做饭与收拾合计每月约 36 小时（合成设定）
+        availability: available
+        price: {amount: {amount: 410, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: plan-month}
+        duration: {kind: ongoing_service}
+        resource: {basis: per_service_month, hours: 36, burden_per_hour: 0.5, quantity_scales: false,
+                   note: 准备时间就是这份方案的全部做饭时间}
+        source: *synth
+      - opportunity_id: m52.food.home_and_dining
+        category: food
+        label: 家常加每周四顿意式外食（一个月的完整方案）
+        functions: [food]
+        unit: household-plan
+        quality: 每周 17 顿自己做（其中 10 顿新鲜），另外 4 顿去意式餐馆；外食的钱已含在月费里，不另收
+        food_plan:
+          covers_basic_month: true
+          coverage_basis: 一个成年人每天三餐：自己做 17 顿 + 外食 4 顿（合成声明）
+          meals_per_week: 21
+          parts:
+            - {part_id: home, mode: home_cooked, meals_per_week: 17, fresh_meals_per_week: 10, cuisine: home_style, note: 自己做的家常饭}
+            - {part_id: dining, mode: dine_out, meals_per_week: 4, fresh_meals_per_week: 4, cuisine: italian, note: 每周 4 顿意式餐馆}
+          prep_hours_per_month: 28
+          dining_hours_per_month: 8
+          time_basis: 自己做每月约 28 小时；外食每月约 17 顿、往返与就餐合计约 8 小时（合成设定）
+        availability: available
+        price: {amount: {amount: 600, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: plan-month}
+        duration: {kind: ongoing_service}
+        resource: {basis: per_service_month, hours: 36, burden_per_hour: 0.5, quantity_scales: false,
+                   note: 做饭 28 小时 + 外食 8 小时}
+        source: *synth
+      - opportunity_id: m52.durable.comfort_chair
+        category: durable
+        label: 舒适的阅读椅
+        unit: chair
+        quality: 一次买下、能用 5 年；放在家里每天都在用
+        availability: available
+        price: {amount: {amount: 360, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: chair}
+        duration: {kind: durable_good, lasts_years: 5}
+        enjoyment: [{function: home_comfort, mode: passive_service_month, basis: 每天在家坐着读书、休息时更舒服（居家舒适，在服务期内每月都在用）}]
+        resource: {basis: passive, note: 持有本身不占时间}
+        source: *synth
+      - opportunity_id: m52.durable.cushion_set
+        category: durable
+        label: 靠垫与软毯一套
+        unit: set
+        quality: 一次买下、能用 2 年；和阅读椅提供的是同一种居家舒适
+        availability: available
+        price: {amount: {amount: 90, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: set}
+        duration: {kind: durable_good, lasts_years: 2}
+        enjoyment: [{function: home_comfort, mode: passive_service_month, basis: 让沙发更舒服（居家舒适；与阅读椅同一功能）}]
+        resource: {basis: passive, note: 持有本身不占时间}
+        source: *synth
+      - opportunity_id: m52.service.massage
+        category: service
+        label: 按摩（每月两次）
+        unit: service-month
+        quality: 每月两次、每次约 1 小时的放松按摩
+        availability: available
+        price: {amount: {amount: 110, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: service-month}
+        duration: {kind: ongoing_service}
+        enjoyment: [{function: personal_care, mode: service_units, units_per_month: 2, unit_label: 次, basis: 每月实际接受两次按摩（享受型服务）}]
+        resource: {basis: per_service_month, hours: 2, burden_per_hour: 0.2, quantity_scales: false,
+                   note: 每月两次、每次约 1 小时；生大病的月份照样付费但暂停}
+        source: *synth
+      - opportunity_id: m52.durable.guitar
+        category: durable
+        label: 民谣吉他
+        unit: instrument
+        quality: 一次买下、能用 3 年；放在家里本身不带来娱乐，要自己练才有收获
+        availability: available
+        price: {amount: {amount: 280, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: instrument}
+        duration: {kind: durable_good, lasts_years: 3}
+        equipment: {provides: [guitar_playable], note: 能弹的吉他；买到的当月就能用}
+        resource: {basis: passive, note: 持有本身不占时间}
+        source: *synth
+      - opportunity_id: m52.experience.guitar_practice
+        category: experience
+        label: 在家练吉他（一次 2 小时）
+        unit: session
+        quality: 在家自己练，不收费；需要一把能弹的吉他
+        availability: available
+        price: {amount: {amount: 0, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: session}
+        duration: {kind: one_time_experience, lasts_years: 0}
+        activity: {primary_category: music, participation_hours: 2, overhead_hours: 0, requires: [guitar_playable],
+                   time_basis: 在家练，一次 2 小时，没有往返}
+        resource: {basis: per_occurrence, hours: 2, burden_per_hour: 0.6, quantity_scales: true, note: 一次 2 小时}
+        source: *synth
+      - opportunity_id: m52.experience.tennis_with_rental
+        category: experience
+        label: 网球场地连球拍租借（一次）
+        unit: session
+        quality: 场地 1.5 小时，含本次的球拍与球；往返约 1 小时；结束后球拍要还
+        availability: available
+        price: {amount: {amount: 26, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: session}
+        duration: {kind: one_time_experience, lasts_years: 0}
+        activity: {primary_category: racket_sports, participation_hours: 1.5, overhead_hours: 1, requires: [racket_playable],
+                   kit_provides: [racket_playable], time_basis: 打球 1.5 小时 + 往返与换衣 1 小时}
+        resource: {basis: per_occurrence, hours: 2.5, burden_per_hour: 1.0, quantity_scales: true, note: 一次 2.5 小时}
+        source: *synth
+      - opportunity_id: m52.experience.community_choir
+        category: experience
+        label: 社区合唱排练（免费，一次）
+        unit: session
+        quality: 社区中心的免费合唱排练，一次 2 小时，往返约半小时
+        availability: available
+        price: {amount: {amount: 0, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: session}
+        duration: {kind: one_time_experience, lasts_years: 0}
+        activity: {primary_category: music, tags: [arts_culture], participation_hours: 2, overhead_hours: 0.5,
+                   time_basis: 排练 2 小时 + 往返半小时}
+        resource: {basis: per_occurrence, hours: 2.5, burden_per_hour: 0.6, quantity_scales: true, note: 一次 2.5 小时}
+        source: *synth
+      - opportunity_id: m52.experience.gallery_tour
+        category: experience
+        label: 美术馆导览（一次）
+        unit: ticket
+        quality: 讲解导览 2 小时，往返约半小时
+        availability: available
+        price: {amount: {amount: 55, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: ticket}
+        duration: {kind: one_time_experience, lasts_years: 0}
+        activity: {primary_category: arts_culture, participation_hours: 2, overhead_hours: 0.5,
+                   time_basis: 导览 2 小时 + 往返半小时}
+        resource: {basis: per_occurrence, hours: 2.5, burden_per_hour: 0.5, quantity_scales: true, note: 一次 2.5 小时}
+        source: *synth
+      - opportunity_id: m52.experience.cooking_class
+        category: experience
+        label: 烹饪课（一次，不代替正餐）
+        unit: class
+        quality: 2.5 小时的烹饪课，往返约半小时；做的是试吃小份，不算一顿正餐
+        availability: available
+        price: {amount: {amount: 40, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: class}
+        duration: {kind: one_time_experience, lasts_years: 0}
+        activity: {primary_category: culinary, participation_hours: 2.5, overhead_hours: 0.5,
+                   time_basis: 上课 2.5 小时 + 往返半小时；不替代正餐}
+        resource: {basis: per_occurrence, hours: 3, burden_per_hour: 0.8, quantity_scales: true, note: 一次 3 小时}
         source: *synth
       - opportunity_id: m52.job.clerk
         category: job
@@ -626,12 +957,12 @@ catalogs:
 # ---------------------------------------------------------------------- 一位用户（合成人设，不是任何真实的人）
 # 六维产品画像：用户确认的陈述（精确分数），健康回答独立。confirmed_profile_fingerprint 是样例用的占位身份（不对应真实确认记录）。
 product_profiles:
-  - profile_version: product-life-profile-v1
+  - profile_version: product-life-profile-v2
     person_id: u301
     confirmed_profile_fingerprint: "0000000000000000000000000000000000000000000000000000000000000301"
     dimension_points: {material: "45", safety: "5", opportunity: "10", leisure: "15", environment: "5", commute: "20"}
     material_status: allocated
-    material_points: {housing_space: "30", fresh_food: "30", daily_convenience: "40"}
+    material_points: {housing_space: "25", food_life: "25", daily_convenience: "30", personal_enjoyment: "20"}
     health_questionnaire_version: e3a-health-coping-q-v0.1-draft
     health_answers:
       - question_id: hc_more_pay_more_sick_risk
@@ -653,6 +984,11 @@ product_profiles:
     hard_requirements: []
     free_text: 我在写字楼做全职文员。下班以后不想再把很多时间花在洗衣服、打扫屋子上，愿意为省事花一些钱；但也不想因为花钱让自己手头太紧。
     occupation: *clerk
+    leisure_interest_status: confirmed
+    leisure_interests: [music]
+    taste_status: confirmed
+    cuisines: [sichuan]
+    unsupported_requests: [喜欢某个牌子的吉他（本版只保留原文，不评分）]
 
 # ---------------------------------------------------------------------- 第一年开局（标准开局 v1：健康、没有病史、没有持有物、不绑定）
 # 没有 plans：每一年的计划由规划器根据当年的安全观察给出。

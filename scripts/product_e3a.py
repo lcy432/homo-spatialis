@@ -1,10 +1,10 @@
 """E3-A 产品共享结构与离线闭环的入口（DECISIONS/0034）。零网络、零费用，不调用任何真实模型。
 
-    uv run python scripts/product_e3a.py export-schema [--out contracts/product/v2]
+    uv run python scripts/product_e3a.py export-schema [--out contracts/product/v3]
         从权威结构（src/common/product_contracts.py）导出 JSON Schema 与 index.json
-    uv run python scripts/product_e3a.py check-schema [--dir contracts/product/v2]
+    uv run python scripts/product_e3a.py check-schema [--dir contracts/product/v3]
         一致性检查：现在的结构导出的 schema 与目录里的文件逐字节相同；全部公共样例按结构校验、带合成出处标签、不含内部路径或凭证
-    uv run python scripts/product_e3a.py samples [--out contracts/product/v2/samples] [--work <新目录>]
+    uv run python scripts/product_e3a.py samples [--out contracts/product/v3/samples] [--work <新目录>]
         用真实代码路径重新生成全部公共样例（合成人物；离线闭环、受控夹具与标明为示例的契约响应）
     uv run python scripts/product_e3a.py run-offline --out <新目录>
         一条正常闭环：原始答案 → 审阅 → 确认 → 编译 → E1 预检查与冻结 → 提交 → mock 三年 → E1 评价与汇总 → 产品结果
@@ -44,7 +44,7 @@ from common.product_contracts import (
 from common.run_store import RunStore
 
 REPO = Path(__file__).resolve().parent.parent
-SCHEMA_DIR = REPO / "contracts/product/v2"
+SCHEMA_DIR = REPO / "contracts/product/v3"
 #: 样例文件可以装的结构：共享消息，加上结果里的一年生活事实（受控夹具展示部分月份没有买到服务）。
 SAMPLE_TYPES: dict[str, type[ProductModel]] = {**PRODUCT_MESSAGES, "YearFacts": YearFacts}
 #: 公共样例不能出现的东西：绝对路径、用户目录、凭证。
@@ -187,7 +187,7 @@ def generate_samples(out: Path, work: Path) -> None:
         out,
         "02_normal_draft",
         "UserInputDraft",
-        "正常填写：全职文员、六维 30/20/20/10/10/10、物质三项 30/30/40、健康问卷一题暂不确定、通勤上限 60 分钟",
+        "正常填写：全职文员、六维 30/20/20/10/10/10、物质四项 25/25/30/20、健康问卷一题暂不确定、通勤上限 60 分钟",
         dump(n.draft),
     )
     _sample_file(
@@ -271,7 +271,12 @@ def generate_samples(out: Path, work: Path) -> None:
             "environment": "indifferent",
             "commute": "30",
         },
-        material={"housing_space": "50", "fresh_food": "50", "daily_convenience": "0"},
+        material={
+            "housing_space": "50",
+            "food_life": "50",
+            "daily_convenience": "0",
+            "personal_enjoyment": "0",
+        },
     )
     _sample_file(
         out,
@@ -287,7 +292,7 @@ def generate_samples(out: Path, work: Path) -> None:
         out,
         "13_equal_split_review",
         "ProfileReview",
-        "主动均分：六维每项 50/3（显示 16.7）、物质每项 100/3（显示 33.3）；精确合计 100，显示值不回流计算",
+        "主动均分：六维每项 50/3（显示 16.7）、物质每项 25（显示 25.0）；精确合计 100，显示值不回流计算",
         dump(eq.review),
     )
     _sample_file(
@@ -316,7 +321,7 @@ def generate_samples(out: Path, work: Path) -> None:
     laundry = sc.review_only(
         work / "laundry",
         "legacy_laundry",
-        material={"housing_space": "30", "fresh_food": "30", "laundry": "40"},
+        material={"housing_space": "30", "food_life": "30", "laundry": "40"},
     )
     _sample_file(
         out,
@@ -337,7 +342,7 @@ def generate_samples(out: Path, work: Path) -> None:
             },
             {
                 "preference_id": "pref.cuisine",
-                "need": "fresh_food",
+                "need": "food_life",
                 "kind": "cuisine",
                 "raw_text": "喜欢清淡的江浙菜",
             },
@@ -395,7 +400,12 @@ def generate_samples(out: Path, work: Path) -> None:
         "no_purchase",
         person="u502",
         draft_kwargs={
-            "material": {"housing_space": "50", "fresh_food": "50", "daily_convenience": "0"},
+            "material": {
+                "housing_space": "50",
+                "food_life": "50",
+                "daily_convenience": "0",
+                "personal_enjoyment": "0",
+            },
             "hard_requirements": (),
         },
     )

@@ -11,12 +11,14 @@ from common.product_contracts import (
     HealthOptionDef,
     HealthQuestion,
     HealthQuestionnaire,
+    InterestCapability,
     MaterialLeafDefinition,
     MoneyBasisOption,
     OccupationCapability,
     PointsRules,
     ProductCapabilities,
     SampleLabel,
+    VocabularyTerm,
 )
 from product.pack import DataPack
 
@@ -156,4 +158,17 @@ def build_capabilities(pack: DataPack, *, sample: SampleLabel | None = None) -> 
         start_scenario=b.start_scenario,
         unsupported=b.unsupported,
         limits=b.limits,
+        interests=InterestCapability(
+            leisure_categories=tuple(
+                VocabularyTerm(key=t.key, label=t.label, aliases=t.aliases)
+                for t in b.interests.leisure_categories
+            ),
+            cuisines=tuple(
+                VocabularyTerm(key=t.key, label=t.label, aliases=t.aliases)
+                for t in b.interests.cuisines
+            ),
+            leisure_states_zh=b.interests.leisure_states_zh,
+            taste_states_zh=b.interests.taste_states_zh,
+            matching_note_zh=b.interests.matching_note_zh,
+        ),
     )

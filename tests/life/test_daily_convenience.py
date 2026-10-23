@@ -573,7 +573,7 @@ def test_coverage_reports_an_action_mechanism_for_every_arrangement(w):
         "all_arrangements",
         "synthetic_only",
     )
-    assert abs(leaf.weight - 0.8 * 0.45 * 0.4) < 1e-12  # (1 − γ) × 物质 45/100 × 便利 40/100
+    assert abs(leaf.weight - 0.8 * 0.45 * 0.3) < 1e-12  # (1 − γ) × 物质 45/100 × 便利 30/100
 
 
 # ---------------------------------------------------------------------- 5. 学习与资源：省下的时间进入已有执行链
@@ -594,7 +594,7 @@ def test_convenience_makes_the_course_plan_feasible_without_changing_learning(w)
 
 def test_zero_weight_keeps_the_time_saving_but_adds_no_score(w):
     zero = w.profile.model_copy(
-        update={"material_points": {"housing_space": "50", "fresh_food": "50"}}
+        update={"material_points": {"housing_space": "50", "food_life": "50"}}
     )
     s0 = w.start(K51)
     none = w.year(s0, base(), profile=zero)
@@ -705,7 +705,7 @@ def test_mock_picks_the_cheaper_way_per_hour_from_public_facts(w):
     assert items == [
         whole("m52.service.chores")
     ]  # 108 / 18 = 6.0 每小时，设备 6,000 / 60 / 12 ≈ 8.3
-    items, _ = _m5(w, K51, material={"housing_space": "50", "fresh_food": "50"})
+    items, _ = _m5(w, K51, material={"housing_space": "50", "food_life": "50"})
     assert items == []  # 用户没有给便利点数：不买
     held = (
         Holding(
@@ -779,7 +779,7 @@ def test_mock_run_and_requests_use_the_new_inputs(conv_repo):
     payloads = planner_payloads(out)
     assert len(payloads) == 6
     for p in payloads:
-        assert p["observation"]["profile"]["material_allocation"]["daily_convenience"] == "40"
+        assert p["observation"]["profile"]["material_allocation"]["daily_convenience"] == "30"
         assert p["guide"]["version"] == ACTION_GUIDE_VERSION
         assert any(s["topic"].startswith("日常杂务") for s in p["guide"]["sections"])
         text = json.dumps(p, ensure_ascii=False)

@@ -1,0 +1,460 @@
+{
+ "description_zh": "受控夹具：同一健康题两个答案、同一资格两条、两条通勤上限——确认前全部拒绝，不按最后一个算，也不自动取更严格的上限",
+ "message": "ProfileReview",
+ "payload": {
+  "abilities": [],
+  "age": 35,
+  "cities": [
+   "US:SYNTH2026:K51",
+   "US:SYNTH2026:M52"
+  ],
+  "confirmable": false,
+  "draft": {
+   "draft_fingerprint": "2c7b889673164136d5b385374200e8adbc40179e93dc6a047e0ebbf58950ccd7",
+   "draft_id": "draft.u511.duplicates",
+   "revision": 1
+  },
+  "free_text_chars": 61,
+  "health": [
+   {
+    "answer_state": "unanswered",
+    "meaning": "这一题收到了多个答案：确认前请只保留一个（系统不替你选）",
+    "option": null,
+    "option_label": null,
+    "question_id": "hc_more_pay_more_sick_risk",
+    "text": "一种安排能多赚一点钱，但生病、需要休息几天的可能也更高。我愿意选择它。"
+   },
+   {
+    "answer_state": "provided",
+    "meaning": "愿意推迟不急需的消费，先为可能的健康开支留钱",
+    "option": "agree",
+    "option_label": "符合我",
+    "question_id": "hc_reserve_for_health_costs",
+    "text": "为了应对可能发生的健康开支，我愿意推迟一次想要、但并不急需的消费，先留一笔钱。"
+   },
+   {
+    "answer_state": "unsure",
+    "meaning": "用户暂不确定",
+    "option": null,
+    "option_label": null,
+    "question_id": "hc_wait_for_clear_risk_info",
+    "text": "健康风险的信息还不清楚时，我愿意先放弃眼前的一点收益，等了解清楚再决定。"
+   }
+  ],
+  "issues": [
+   {
+    "audit_ref": null,
+    "code": "health_answer_duplicated",
+    "field": "health.items.hc_more_pay_more_sick_risk",
+    "impact_zh": "这一题的倾向不能确定，画像不能确认",
+    "message_zh": "健康题 hc_more_pay_more_sick_risk 收到了 2 个答案（不符合我、符合我）：同一题只能有一个答案，系统不替你选，也不按最后一个算",
+    "next_action_zh": "只保留一个答案（拿不准可以选“暂不确定”）",
+    "severity": "error"
+   },
+   {
+    "audit_ref": null,
+    "code": "hard_requirement_conflict",
+    "field": "hard_requirements.need.commute_limit",
+    "impact_zh": "这项硬要求还不能使用，画像不能确认",
+    "message_zh": "“住处到就业中心的往返时间不超过（分钟）”收到了 2 条（45 分钟、60 分钟）：同一项要求只能有一条，系统不自动取更严格的上限，也不按最后一条算",
+    "next_action_zh": "只保留一条，写你真正要的那个数",
+    "severity": "error"
+   },
+   {
+    "audit_ref": null,
+    "code": "ability_duplicated",
+    "field": "abilities.accounting_cert",
+    "impact_zh": "这项资格不能进入开局，画像不能确认",
+    "message_zh": "资格 accounting_cert 出现了 2 次（已提供、暂不确定）：系统不替你判断持不持有",
+    "next_action_zh": "只保留一条：持有就选“已提供”，不确定就选“暂不确定”",
+    "severity": "error"
+   }
+  ],
+  "items": [
+   {
+    "answer_state": "provided",
+    "confirmation": "pending",
+    "execution_guaranteed": null,
+    "item": "cities",
+    "label": "候选城市",
+    "note": "每座城一个分身固定生活三年；城市身份用完整的国家 / 体系 / 代码",
+    "support": "supported",
+    "usage": [
+     "start_state"
+    ]
+   },
+   {
+    "answer_state": "provided",
+    "confirmation": "pending",
+    "execution_guaranteed": null,
+    "item": "occupation",
+    "label": "职业",
+    "note": "用于匹配开局时的当地目录岗位；不授予任何资格，分类代码只在内部保留",
+    "support": "supported",
+    "usage": [
+     "start_state",
+     "planning"
+    ]
+   },
+   {
+    "answer_state": "provided",
+    "confirmation": "pending",
+    "execution_guaranteed": null,
+    "item": "age",
+    "label": "年龄",
+    "note": "进入已有的年龄规则（合成设定，未经医学标定）；不从职业猜年龄",
+    "support": "supported",
+    "usage": [
+     "start_state"
+    ]
+   },
+   {
+    "answer_state": "provided",
+    "confirmation": "pending",
+    "execution_guaranteed": null,
+    "item": "cash",
+    "label": "开始时可用于生活的钱",
+    "note": "可动用的流动资金，不是房产总值、信用额度或月薪；没填不是 0，不静默借贷",
+    "support": "supported",
+    "usage": [
+     "start_state",
+     "planning"
+    ]
+   },
+   {
+    "answer_state": "provided",
+    "confirmation": "pending",
+    "execution_guaranteed": null,
+    "item": "six_dimensions",
+    "label": "六维",
+    "note": "陈述的相对重要程度，不是开支比例或预算；精确分数参与计算，显示值只供阅读",
+    "support": "supported",
+    "usage": [
+     "scoring",
+     "planning"
+    ]
+   },
+   {
+    "answer_state": "provided",
+    "confirmation": "pending",
+    "execution_guaranteed": null,
+    "item": "material",
+    "label": "物质四项",
+    "note": "陈述的相对重要程度，不是开支比例或预算；精确分数参与计算，显示值只供阅读",
+    "support": "supported",
+    "usage": [
+     "scoring",
+     "planning"
+    ]
+   },
+   {
+    "answer_state": "provided",
+    "confirmation": "pending",
+    "execution_guaranteed": null,
+    "item": "health",
+    "label": "健康风险应对（独立问卷）",
+    "note": "不占六维 100 分，不是第七个评分权重；只供分身做计划，不改变疾病规则、账目或满足感；题目是暂定文案",
+    "support": "partially_supported",
+    "usage": [
+     "planning"
+    ]
+   },
+   {
+    "answer_state": "provided",
+    "confirmation": "pending",
+    "execution_guaranteed": null,
+    "item": "free_text",
+    "label": "可选补充文字",
+    "note": "只供分身做计划参考；不会自动改分数、现金、资格或硬要求，本轮不用 LLM 提取",
+    "support": "partially_supported",
+    "usage": [
+     "planning"
+    ]
+   },
+   {
+    "answer_state": "unanswered",
+    "confirmation": "pending",
+    "execution_guaranteed": null,
+    "item": "abilities",
+    "label": "已确认的资格",
+    "note": "只来自你明确确认的事实，不从职业称呼自动授予",
+    "support": "supported",
+    "usage": [
+     "qualification",
+     "start_state"
+    ]
+   },
+   {
+    "answer_state": "unanswered",
+    "confirmation": "pending",
+    "execution_guaranteed": null,
+    "item": "leisure_interest",
+    "label": "休闲兴趣",
+    "note": "休闲兴趣：未答（没有这一项的明确信息，按中性规则评价；不是“通用评价”的选择）",
+    "support": "partially_supported",
+    "usage": [
+     "planning"
+    ]
+   },
+   {
+    "answer_state": "unanswered",
+    "confirmation": "pending",
+    "execution_guaranteed": null,
+    "item": "taste",
+    "label": "口味与菜系",
+    "note": "口味与菜系：未答（没有这一项的明确信息，按中性规则评价；不是“通用评价”的选择）",
+    "support": "partially_supported",
+    "usage": [
+     "planning"
+    ]
+   }
+  ],
+  "leisure_interest": {
+   "ambiguous": [],
+   "candidates": [],
+   "message_zh": "休闲兴趣：未答（没有这一项的明确信息，按中性规则评价；不是“通用评价”的选择）",
+   "selected": [],
+   "state": "unanswered",
+   "status": "confirmable",
+   "text": null,
+   "unrecognized": []
+  },
+  "material": {
+   "lines": [
+    {
+     "display": "25.0",
+     "exact": "25",
+     "key": "housing_space",
+     "label": "居住空间",
+     "state": "provided",
+     "support": "supported",
+     "usage": [
+      "scoring",
+      "planning"
+     ]
+    },
+    {
+     "display": "25.0",
+     "exact": "25",
+     "key": "food_life",
+     "label": "饮食生活",
+     "state": "provided",
+     "support": "partially_supported",
+     "usage": [
+      "scoring",
+      "planning"
+     ]
+    },
+    {
+     "display": "30.0",
+     "exact": "30",
+     "key": "daily_convenience",
+     "label": "日常生活便利",
+     "state": "provided",
+     "support": "supported",
+     "usage": [
+      "scoring",
+      "planning"
+     ]
+    },
+    {
+     "display": "20.0",
+     "exact": "20",
+     "key": "personal_enjoyment",
+     "label": "个人消费与享受",
+     "state": "provided",
+     "support": "partially_supported",
+     "usage": [
+      "scoring",
+      "planning"
+     ]
+    }
+   ],
+   "mode": "manual",
+   "status": "complete",
+   "total": {
+    "display": "100.0",
+    "exact": "100"
+   }
+  },
+  "meta": {
+   "conversion_version": "e3a-conversion-v2",
+   "data_pack": {
+    "content_fingerprint": "ff26a0e51fecbeb0e534b06db93ef69cf8dd4c94542cbf4060030f9ed83242c4",
+    "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
+    "pack_id": "pack.e3a.synthetic-v2",
+    "status": "synthetic_fixture_only"
+   },
+   "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.2-draft",
+   "sample": {
+    "note": "草稿里故意写了重复与冲突的答案（受控夹具）；审阅的实际输出",
+    "origin": "controlled_fixture",
+    "produced_by": "product.scenarios.duplicate_answers",
+    "synthetic": true
+   },
+   "schema_version": "e3a-product-schema-v3",
+   "vocabulary_version": "e3a-vocabulary-v2"
+  },
+  "money": {
+   "amount_text": "3000",
+   "conversion_rule": "identity_same_basis_v1",
+   "converted": {
+    "amount_minor": 300000,
+    "currency": "USD",
+    "display": "3,000.00",
+    "numeraire_id": "USD_2024_LOCAL"
+   },
+   "currency": "USD",
+   "meaning": "可动用的流动资金（不是总资产、信用额度或月薪）",
+   "price_period": "2024",
+   "status": "convertible"
+  },
+  "occupation": {
+   "candidates": [
+    {
+     "candidate_id": "occ.accountant",
+     "duties": [
+      "编制财务报表",
+      "核对账目与税务资料"
+     ],
+     "label": "会计",
+     "matched_terms": [
+      "会计"
+     ]
+    }
+   ],
+   "message_zh": "看起来你的工作是“会计”；请确认这个理解是否正确",
+   "raw_text": "我在事务所做会计",
+   "selected": "occ.accountant",
+   "status": "explicit"
+  },
+  "pending_confirmations": [
+   "ack:standard_start"
+  ],
+  "review_id": "review.draft.u511.duplicates.r1",
+  "six_dimensions": {
+   "lines": [
+    {
+     "display": "30.0",
+     "exact": "30",
+     "key": "material",
+     "label": "物质生活",
+     "state": "provided",
+     "support": "supported",
+     "usage": [
+      "scoring",
+      "planning"
+     ]
+    },
+    {
+     "display": "20.0",
+     "exact": "20",
+     "key": "safety",
+     "label": "安全",
+     "state": "provided",
+     "support": "partially_supported",
+     "usage": [
+      "scoring",
+      "planning"
+     ]
+    },
+    {
+     "display": "20.0",
+     "exact": "20",
+     "key": "opportunity",
+     "label": "发展机会",
+     "state": "provided",
+     "support": "supported",
+     "usage": [
+      "scoring",
+      "planning"
+     ]
+    },
+    {
+     "display": "10.0",
+     "exact": "10",
+     "key": "leisure",
+     "label": "休闲",
+     "state": "provided",
+     "support": "supported",
+     "usage": [
+      "scoring",
+      "planning"
+     ]
+    },
+    {
+     "display": "10.0",
+     "exact": "10",
+     "key": "environment",
+     "label": "环境",
+     "state": "provided",
+     "support": "partially_supported",
+     "usage": [
+      "scoring",
+      "planning"
+     ]
+    },
+    {
+     "display": "10.0",
+     "exact": "10",
+     "key": "commute",
+     "label": "交通便捷程度",
+     "state": "provided",
+     "support": "supported",
+     "usage": [
+      "scoring",
+      "planning"
+     ]
+    }
+   ],
+   "mode": "manual",
+   "status": "complete",
+   "total": {
+    "display": "100.0",
+    "exact": "100"
+   }
+  },
+  "statements": [
+   {
+    "as_hard_requirement": true,
+    "execution_guaranteed": false,
+    "kind": "hard_requirement",
+    "message_zh": "每月检查实际所住住房的往返分钟：满足、不满足、无法判断单独报告；不进分数，也不拦截计划",
+    "raw_text": "住处到就业中心的往返时间不超过（分钟） 60 分钟",
+    "ref": "hr.commute",
+    "support": "supported",
+    "usage": [
+     "planning",
+     "scoring"
+    ]
+   },
+   {
+    "as_hard_requirement": true,
+    "execution_guaranteed": false,
+    "kind": "hard_requirement",
+    "message_zh": "每月检查实际所住住房的往返分钟：满足、不满足、无法判断单独报告；不进分数，也不拦截计划",
+    "raw_text": "住处到就业中心的往返时间不超过（分钟） 45 分钟",
+    "ref": "hr.commute2",
+    "support": "supported",
+    "usage": [
+     "planning",
+     "scoring"
+    ]
+   }
+  ],
+  "summary_zh": [
+   "健康问卷有 2 题没有明确倾向（未答或暂不确定）：照实保留，分身会被告知没有这几项的明确指令"
+  ],
+  "taste": {
+   "ambiguous": [],
+   "candidates": [],
+   "message_zh": "口味与菜系：未答（没有这一项的明确信息，按中性规则评价；不是“通用评价”的选择）",
+   "selected": [],
+   "state": "unanswered",
+   "status": "confirmable",
+   "text": null,
+   "unrecognized": []
+  }
+ }
+}

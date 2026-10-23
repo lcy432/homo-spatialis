@@ -1,0 +1,378 @@
+{
+ "$defs": {
+  "EffectField": {
+   "additionalProperties": false,
+   "description": "减负效果：每项代表性家务的“本人处理整项家务后仍需的月小时”（不是机器运行或服务人员工作时间）。未知不等于没有效果。",
+   "properties": {
+    "facts": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Facts",
+     "type": "array"
+    },
+    "residuals": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/TaskRelief"
+     },
+     "title": "Residuals",
+     "type": "array"
+    },
+    "status": {
+     "enum": [
+      "known",
+      "unknown"
+     ],
+     "title": "Status",
+     "type": "string"
+    }
+   },
+   "required": [
+    "status"
+   ],
+   "title": "EffectField",
+   "type": "object"
+  },
+  "LifetimeField": {
+   "additionalProperties": false,
+   "description": "设备寿命与生效时点。当前 E1 只接受 1–30 的整数年；未知或非整数年**不补值、不取整**。",
+   "properties": {
+    "effective_from": {
+     "anyOf": [
+      {
+       "enum": [
+        "same_year",
+        "next_year"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Effective From"
+    },
+    "facts": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Facts",
+     "type": "array"
+    },
+    "status": {
+     "enum": [
+      "known",
+      "unknown",
+      "not_applicable"
+     ],
+     "title": "Status",
+     "type": "string"
+    },
+    "years_text": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Years Text"
+    }
+   },
+   "required": [
+    "status"
+   ],
+   "title": "LifetimeField",
+   "type": "object"
+  },
+  "ParticipationField": {
+   "additionalProperties": false,
+   "description": "服务需要本人每月花多少小时参与（不是服务人员的工作时间）。设备不适用；服务未知时不能编入（不当成 0）。",
+   "properties": {
+    "burden_per_hour_text": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Burden Per Hour Text"
+    },
+    "facts": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Facts",
+     "type": "array"
+    },
+    "hours_text": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Hours Text"
+    },
+    "status": {
+     "enum": [
+      "known",
+      "unknown",
+      "not_applicable"
+     ],
+     "title": "Status",
+     "type": "string"
+    }
+   },
+   "required": [
+    "status"
+   ],
+   "title": "ParticipationField",
+   "type": "object"
+  },
+  "PriceField": {
+   "additionalProperties": false,
+   "description": "报价字段：金额、币种、基年、当地价口径、计费周期与计价单位；未知时 ``status = unknown``，不填 0。",
+   "properties": {
+    "amount_text": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Amount Text"
+    },
+    "base_year": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Base Year"
+    },
+    "billing": {
+     "anyOf": [
+      {
+       "enum": [
+        "one_time",
+        "per_month",
+        "per_visit",
+        "per_year"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Billing"
+    },
+    "currency": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Currency"
+    },
+    "facts": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Facts",
+     "type": "array"
+    },
+    "per_unit": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Per Unit"
+    },
+    "price_meaning": {
+     "anyOf": [
+      {
+       "const": "local_price_base_year",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Price Meaning"
+    },
+    "status": {
+     "enum": [
+      "known",
+      "unknown"
+     ],
+     "title": "Status",
+     "type": "string"
+    }
+   },
+   "required": [
+    "status"
+   ],
+   "title": "PriceField",
+   "type": "object"
+  },
+  "TaskRelief": {
+   "additionalProperties": false,
+   "properties": {
+    "residual_hours_per_month": {
+     "maxLength": 20,
+     "minLength": 1,
+     "title": "Residual Hours Per Month",
+     "type": "string"
+    },
+    "task": {
+     "maxLength": 48,
+     "minLength": 1,
+     "title": "Task",
+     "type": "string"
+    }
+   },
+   "required": [
+    "task",
+    "residual_hours_per_month"
+   ],
+   "title": "TaskRelief",
+   "type": "object"
+  }
+ },
+ "additionalProperties": false,
+ "description": "一个可能不完整的设备 / 服务候选，逐字段带状态。``market_status`` 是真实供给状态，与能否编译分开记。",
+ "properties": {
+  "candidate_id": {
+   "pattern": "^[a-z0-9][a-z0-9_.\\-]{0,79}$",
+   "title": "Candidate Id",
+   "type": "string"
+  },
+  "city_ref": {
+   "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+   "title": "City Ref",
+   "type": "string"
+  },
+  "effect": {
+   "$ref": "#/$defs/EffectField"
+  },
+  "kind": {
+   "enum": [
+    "device",
+    "service"
+   ],
+   "title": "Kind",
+   "type": "string"
+  },
+  "label": {
+   "maxLength": 120,
+   "minLength": 1,
+   "title": "Label",
+   "type": "string"
+  },
+  "lifetime": {
+   "$ref": "#/$defs/LifetimeField"
+  },
+  "market_status": {
+   "enum": [
+    "offered",
+    "not_offered",
+    "unknown"
+   ],
+   "title": "Market Status",
+   "type": "string"
+  },
+  "participation": {
+   "$ref": "#/$defs/ParticipationField",
+   "default": {
+    "burden_per_hour_text": null,
+    "facts": [],
+    "hours_text": null,
+    "status": "not_applicable"
+   }
+  },
+  "price": {
+   "$ref": "#/$defs/PriceField"
+  },
+  "quality": {
+   "maxLength": 280,
+   "minLength": 1,
+   "title": "Quality",
+   "type": "string"
+  },
+  "service_period": {
+   "anyOf": [
+    {
+     "maxLength": 80,
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Service Period"
+  },
+  "target_opportunity_id": {
+   "pattern": "^[a-z0-9][a-z0-9_.\\-]{0,63}$",
+   "title": "Target Opportunity Id",
+   "type": "string"
+  },
+  "tasks": {
+   "items": {
+    "type": "string"
+   },
+   "minItems": 1,
+   "title": "Tasks",
+   "type": "array"
+  }
+ },
+ "required": [
+  "candidate_id",
+  "city_ref",
+  "kind",
+  "label",
+  "quality",
+  "tasks",
+  "market_status",
+  "price",
+  "lifetime",
+  "effect",
+  "target_opportunity_id"
+ ],
+ "title": "OpportunityCandidate",
+ "type": "object"
+}

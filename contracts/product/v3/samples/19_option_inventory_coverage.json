@@ -1,0 +1,119 @@
+{
+ "description_zh": "选项目录覆盖：声明范围内两城都是 partial（有未解决的候选）；做饭设备在范围之外记为排除；分母不因过滤变小",
+ "message": "OptionInventoryCoverage",
+ "payload": {
+  "categories": [
+   "household_device",
+   "household_service"
+  ],
+  "cities": [
+   {
+    "city_ref": "US:SYNTH2026:K51",
+    "excluded": 1,
+    "items": [
+     {
+      "candidate_id": "cand.k51.device.convenience-pack",
+      "compile_status": "compiled_available",
+      "data_status": "complete",
+      "outcome": "resolved",
+      "reason_zh": "资料齐全，已编入、可购买",
+      "supply_status": "offered"
+     },
+     {
+      "candidate_id": "cand.k51.service.chores",
+      "compile_status": "compiled_available",
+      "data_status": "complete",
+      "outcome": "resolved",
+      "reason_zh": "资料齐全，已编入、可购买",
+      "supply_status": "offered"
+     },
+     {
+      "candidate_id": "cand.k51.device.robot-lifetime-unknown",
+      "compile_status": "not_compiled",
+      "data_status": "incomplete",
+      "outcome": "unresolved",
+      "reason_zh": "资料有缺口，没有编入：lifetime_unknown（设备能用几年的资料缺失：E1 可执行的耐用品要求明确的 1–30 整数年，不按“常见寿命”补值）",
+      "supply_status": "offered"
+     },
+     {
+      "candidate_id": "cand.k51.device.dryer-quote-unknown",
+      "compile_status": "compiled_unknown",
+      "data_status": "price_unknown",
+      "outcome": "unresolved",
+      "reason_zh": "有卖但报价未知：编成“资料未知”，分身看得到但不能购买；不当免费",
+      "supply_status": "offered"
+     },
+     {
+      "candidate_id": "cand.k51.device.cooker-out-of-scope",
+      "compile_status": "not_compiled",
+      "data_status": "not_assessed",
+      "outcome": "excluded",
+      "reason_zh": "不在声明的调查范围（任务 ['cooking'] 不属于代表性杂务组合 ['laundry', 'cleaning']）",
+      "supply_status": "offered"
+     }
+    ],
+    "resolved": 2,
+    "status": "partial",
+    "surveyed": 5,
+    "unresolved": 2
+   },
+   {
+    "city_ref": "US:SYNTH2026:M52",
+    "excluded": 0,
+    "items": [
+     {
+      "candidate_id": "cand.m52.device.convenience-pack",
+      "compile_status": "compiled_available",
+      "data_status": "complete",
+      "outcome": "resolved",
+      "reason_zh": "资料齐全，已编入、可购买",
+      "supply_status": "offered"
+     },
+     {
+      "candidate_id": "cand.m52.service.chores",
+      "compile_status": "compiled_available",
+      "data_status": "complete",
+      "outcome": "resolved",
+      "reason_zh": "资料齐全，已编入、可购买",
+      "supply_status": "offered"
+     },
+     {
+      "candidate_id": "cand.m52.service.cleaning-effect-unknown",
+      "compile_status": "not_compiled",
+      "data_status": "incomplete",
+      "outcome": "unresolved",
+      "reason_zh": "资料有缺口，没有编入：effect_unknown（减负效果（本人每月还要做多少小时）资料缺失：不能删掉替代字段把它伪装成“确定没有效果”）",
+      "supply_status": "offered"
+     }
+    ],
+    "resolved": 2,
+    "status": "partial",
+    "surveyed": 3,
+    "unresolved": 1
+   }
+  ],
+  "coverage_id": "inventory.pack.e3a.synthetic-v2",
+  "declared_scope_zh": "合成资料包里两座城的“日常杂务”设备与人工服务：只调查能替代洗衣或打扫（协议的代表性杂务组合）的方案；做饭、照护、维修等不在 本次调查范围。调查范围之外的东西不计入分母，也不代表城市没有。",
+  "meta": {
+   "conversion_version": "e3a-conversion-v2",
+   "data_pack": {
+    "content_fingerprint": "ff26a0e51fecbeb0e534b06db93ef69cf8dd4c94542cbf4060030f9ed83242c4",
+    "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
+    "pack_id": "pack.e3a.synthetic-v2",
+    "status": "synthetic_fixture_only"
+   },
+   "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.2-draft",
+   "sample": {
+    "note": "离线闭环实际执行的结果（mock 规划器，零网络）",
+    "origin": "offline_run",
+    "produced_by": "product.scenarios.closed_loop(normal)",
+    "synthetic": true
+   },
+   "schema_version": "e3a-product-schema-v3",
+   "vocabulary_version": "e3a-vocabulary-v2"
+  },
+  "not_exhaustive_zh": "这只说明声明范围内调查过的候选资料齐不齐，不保证穷尽整个城市市场；没有记录不等于城市没有。供给状态（有卖 / 确定没有 / 不知道）、资料状态与编译状态分开记：确定没有是已确定的调查结果，但不是可购买的方案。它与实际轨迹能否评分、分身的 C / E / M 是不同的判断：目录缺口不改写已发生轨迹的评分",
+  "scope_version": "e3a-convenience-inventory-scope-v1"
+ }
+}

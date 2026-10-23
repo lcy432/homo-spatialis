@@ -1,23 +1,24 @@
-# E1 补充"日常生活便利"的探索评分配置（生活输入在 synthetic_product.yaml；DECISIONS/0033）。由 scoring_e1_7b_pilot.yaml 复制而来：
-# 物质维第三项从"有没有洗衣设备"（laundry，any）换成"这个月实际少做了多少小时家务"（daily_convenience）；其余分项、健康项、
-# 比较组口径与城市评分条件逐项相同（两座新合成城 K51、M52 的背景事实与 E1-7B 的 C97 相同）。
+# 生活扩展的探索评分配置（生活输入在 synthetic_product.yaml；DECISIONS/0033、DECISIONS/0041）。在“日常生活便利”版本上：
+# 物质维四项：居住面积、饮食生活（实际完整食品方案的新鲜餐与合口味餐）、日常生活便利（实际减少的家务小时）、个人消费与享受（实际
+# 提供的享受功能或服务量）；休闲维把“一次体验算一次”换成“实际参与小时”，确认的兴趣在同样参与小时下有适度更高的效率。
 #
-# **全部是合成探索参数，不是经验估计，不能声称已经现实标定，不能用来排序城市。** τ = 8 小时/月、c = 0.9 是开跑前冻结的合成设定，
-# 不按 LLM 的结果调。
+# **全部是合成探索参数，不是经验估计，不能声称已经现实标定，不能用来排序城市。** 新增参数在看任何 mock 结果与城市排序之前定下：
+# η_taste = 0.5、κ = 0.5、η_hour = 1、个人消费与享受的 τ = 3 与各功能 η（见参数目录 PI-26–PI-29）。
 
 scoring_notice: >-
-  exploratory_synthetic：E1 补充"日常生活便利"的探索评分配置。物质维三项：居住面积、新鲜食品、日常生活便利（实际减少的家务小时）。
+  exploratory_synthetic：生活扩展的探索评分配置。物质维四项：居住面积、饮食生活、日常生活便利（实际减少的家务小时）、个人消费与享受；
+  休闲按实际参与小时计、确认的兴趣有适度更高的效率。
   不代表任何真实城市的生活质量、医疗水平或人的心理规律。
 
 spec:
-  spec_id: score.e1-convenience.explore
-  scoring_version: e1-convenience-v1
+  spec_id: score.e1-life.explore
+  scoring_version: e1-life-v1
   status: exploratory_synthetic
   function: saturating_capped_v1
   protocol_id: life-v1-e3a-product
   note: >-
-    物质维三个叶子：居住面积、新鲜食品、日常生活便利（这个月本人实际少做的洗衣与打扫小时）。安全、环境只有城市基础条件；休闲由城市
-    基础条件与实际发生的锻炼、体验改善；发展维 = 城市发展条件 + 当月实际新增的能力进度；通勤维为广义交通。医疗维没有分项；健康由
+    物质维四个叶子：居住面积、饮食生活（实际完整食品方案）、日常生活便利（这个月本人实际少做的洗衣与打扫小时）、个人消费与享受（实际
+    提供的享受功能与服务量）。安全、环境只有城市基础条件；休闲由城市基础条件、声明了使用安排的锻炼与实际活动参与小时改善；发展维 = 城市发展条件 + 当月实际新增的能力进度；通勤维为广义交通。医疗维没有分项；健康由
     全组共用的健康项 γ·H(月初状态) 评价。工资、现金、付款、成交与剩余时间不进入满足感。
   health:
     gamma: 0.2
@@ -42,21 +43,23 @@ spec:
           spec_key: floor_area_sqft
           unit: 平方英尺
           note: 实际住的那一处；降级后读最低方案那一处的规格
-    - component_id: fresh_food
+    - component_id: food_life
       dimension: material
-      material_need: fresh_food
-      unit: 新鲜餐/周（折算）
+      material_need: food_life
+      unit: 餐/周（折算）
       tau: 7
-      combine: max
-      description: 这个月实际执行的食品方案每周有几顿新鲜餐。准备时间是时间事实，不另给一份"省时幸福"。
-      sources:
-        - source_id: food_plan
-          records: [food]
-          value: spec_number
-          measure: level
-          spec_key: fresh_meals_per_week
-          unit: 餐/周
-          note: 实际吃的那一份方案；降级后读最低方案那一份
+      description: >-
+        饮食生活：这个月实际执行的完整食品方案每周有几顿新鲜餐、几顿合确认口味的餐。基本饮食覆盖是可行性（最低生活检查），不在这里
+        加分；价格、餐馆档次与外食次数都不是输入；降级时读最低方案。
+      food_life:
+        rule: food_plan_fresh_and_taste_v1
+        eta_fresh: 1.0
+        eta_taste: 0.5
+        cap: 0.9
+        unit: 餐/周
+        definition: >-
+          z = η_fresh·F + η_taste·T，s = min(c, z/(z + τ))；F = 每周新鲜餐数，T = 主要菜系在确认口味里的组成每周几餐（每个组成只算
+          一次）。η_fresh 与原“新鲜食品”项的 1 相同（中性用户的饮食分不变）；η_taste = 0.5 是探索设定
     - component_id: daily_convenience
       dimension: material
       material_need: daily_convenience
@@ -73,6 +76,24 @@ spec:
         definition: >-
           q = Σ（协议家务基准小时 − 当月资源账里本人的残余小时），s = min(c, q/(q + τ))；同一项家务只取当月在用方案里残余最小的那一个
           （结算写出），不读价格、付款或成交。代表性杂务组合，不含做饭、通勤、工作、学习与疾病恢复
+    - component_id: personal_enjoyment
+      dimension: material
+      material_need: personal_enjoyment
+      unit: 享受功能（折算）
+      tau: 3
+      description: >-
+        个人消费与享受：这个月实际在用的居家舒适用品与实际接受的享受型服务。按功能计：同功能的第二件用品不再加，服务按实际份数相加；
+        纯爱好装备没有享受功能（它只让活动可以开展）；成交、花钱与购买次数不计分。
+      enjoyment:
+        rule: enjoyment_by_function_v1
+        cap: 0.9
+        unit: 功能（折算）
+        definition: >-
+          v_f = 1（presence：这个月有在用的、提供功能 f 的用品）或 Σ 份数（units：实际接受的服务次数）；z = Σ η_f·v_f，
+          s = min(c, z/(z + τ))。η 与 τ 是探索设定
+        functions:
+          - {function: home_comfort, label: 居家舒适, measure: presence, eta: 1.5, unit: 在用}
+          - {function: personal_care, label: 放松护理, measure: units, eta: 1.0, unit: 次}
     - component_id: safety
       dimension: safety
       unit: 指数（合成）
@@ -97,7 +118,9 @@ spec:
       unit: 每月参与次数（折算）
       tau: 12
       combine: sum
-      description: 城市基础休闲条件，加上声明了使用安排的锻炼次数与实际发生的体验。生病暂停的月份没有使用，也就没有改善。
+      description: >-
+        城市基础休闲条件，加上声明了使用安排的锻炼次数与实际活动参与小时（只计参与，不计准备与往返）。确认的兴趣在同样参与小时下效率
+        高 κ；生病暂停的月份没有参与，也就没有改善。
       sources:
         - source_id: usage_plan
           records: [prepaid_service, periodic_service]
@@ -108,12 +131,14 @@ spec:
           per_unit: true
           unit: 次/月
           note: 使用假设：只有声明了每月锻炼次数的会员才算锻炼
-        - source_id: events
-          records: [experience]
-          value: quantity
-          measure: count
-          unit: 次
-          note: 这个月实际发生的一次体验
+      participation:
+        rule: participation_hours_interest_match_v1
+        eta_hour: 1.0
+        match_bonus: 0.5
+        unit: 参与小时
+        definition: >-
+          x = Σ 参与小时 × (1 + κ·1[主要类别 ∈ 确认的兴趣])，贡献 η_hour·x 加进休闲的 z。η_hour = 1/小时：原来一次 4 小时的体验
+          按“次”计 4，换成小时后锚点同步换成每小时 1；κ = 0.5 是探索设定，有界（0–1），只放大活动参与、不放大城市背景
     - component_id: environment
       dimension: environment
       unit: 指数（合成）
@@ -142,9 +167,12 @@ spec:
     - what: 日常生活便利把"花钱换省事"合成一项：设备与人工、品牌与服务质量的偏好差异、对陌生人进家的顾虑、维修与转卖都没有区分
       affects: 喜欢某类设备却不愿意请人上门（或相反）的人；看重品牌或服务质量的人
       owner: V2（商品异质性，需要同规格报价）
-    - what: 物质生活里住房、食品、杂务之外的需求（通信、储物、工作设备、衣着）
-      affects: 物质偏好集中在这些方面的人（物质维的评价会偏窄）
+    - what: 物质生活里住房、食品、杂务、居家舒适与放松护理之外的需求（通信、储物、工作设备、衣着）；品牌偏好只保留原文
+      affects: 物质偏好集中在这些方面的人、很看重品牌的人（物质维的评价会偏窄）
       owner: E3 首发词表 / V2
+    - what: 同时替代正餐的活动套餐（餐食覆盖、费用与时间的组合规则）；装备租赁库存
+      affects: 想用美食活动或套餐代替一顿正餐的人；只想租不想买装备的人
+      owner: V2（需要组合规则与所有者裁决）
     - what: 非工作出行（购物、社交、就医）的时间与满足感；公共交通可及性
       affects: 不上班但出行多的人、依赖公共交通或住得离日常设施远的人
       owner: V2（需要共同粒度的出行资料）
@@ -163,7 +191,7 @@ comparison_group:
   cities:
     - {country: US, scheme: SYNTH2026, code: K51}
     - {country: US, scheme: SYNTH2026, code: M52}
-  scoring_version: e1-convenience-v1
+  scoring_version: e1-life-v1
   geography_scope: synthetic city (no real geography)
   currency: USD
   base_year: 2024
@@ -173,7 +201,6 @@ comparison_group:
   commute_granularity: plan_level
   units:
     floor_area_sqft: 平方英尺
-    fresh_meals_per_week: 新鲜餐/周
     visits_per_month: 次/月
     commute_roundtrip_minutes: 分钟/工作日往返
   note: >-
@@ -182,30 +209,32 @@ comparison_group:
 
 city_conditions:
   - city: {country: US, scheme: SYNTH2026, code: K51}
-    spec_id: score.e1-convenience.explore
+    spec_id: score.e1-life.explore
     label: 合成城 K51
     components:
       - {component_id: housing_space, status: known, base: 0, cap: 0.9, efficiencies: [{source_id: dwelling, eta: 0.01}], source: &cond
           {kind: synthetic, observed_on: 2026-10-18, geography_scope: synthetic city (no real geography),
            mapping_version: scoring-e1-convenience, synthetic_note: 手工设定的探索参数，不是经验估计}}
-      - {component_id: fresh_food, status: known, base: 0, cap: 0.9, efficiencies: [{source_id: food_plan, eta: 1.0}], source: *cond}
+      - {component_id: food_life, status: plan_level, source: *cond}
+      - {component_id: personal_enjoyment, status: plan_level, source: *cond}
       - {component_id: daily_convenience, status: plan_level, source: *cond}
       - {component_id: safety, status: known, base: 3, cap: 0.9, source: *cond}
       - {component_id: opportunity, status: known, base: 2, cap: 0.9, source: *cond}
       - {component_id: leisure, status: known, base: 4, cap: 0.9,
-         efficiencies: [{source_id: usage_plan, eta: 1.0}, {source_id: events, eta: 4.0}], source: *cond}
+         efficiencies: [{source_id: usage_plan, eta: 1.0}], source: *cond}
       - {component_id: environment, status: known, base: 3, cap: 0.9, source: *cond}
       - {component_id: commute, status: plan_level, source: *cond}
   - city: {country: US, scheme: SYNTH2026, code: M52}
-    spec_id: score.e1-convenience.explore
+    spec_id: score.e1-life.explore
     label: 合成城 M52
     components:
       - {component_id: housing_space, status: known, base: 0, cap: 0.9, efficiencies: [{source_id: dwelling, eta: 0.01}], source: *cond}
-      - {component_id: fresh_food, status: known, base: 0, cap: 0.9, efficiencies: [{source_id: food_plan, eta: 1.0}], source: *cond}
+      - {component_id: food_life, status: plan_level, source: *cond}
+      - {component_id: personal_enjoyment, status: plan_level, source: *cond}
       - {component_id: daily_convenience, status: plan_level, source: *cond}
       - {component_id: safety, status: known, base: 3, cap: 0.9, source: *cond}
       - {component_id: opportunity, status: known, base: 2, cap: 0.9, source: *cond}
       - {component_id: leisure, status: known, base: 4, cap: 0.9,
-         efficiencies: [{source_id: usage_plan, eta: 1.0}, {source_id: events, eta: 4.0}], source: *cond}
+         efficiencies: [{source_id: usage_plan, eta: 1.0}], source: *cond}
       - {component_id: environment, status: known, base: 3, cap: 0.9, source: *cond}
       - {component_id: commute, status: plan_level, source: *cond}

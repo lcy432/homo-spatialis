@@ -46,10 +46,10 @@ _DEFS: tuple[tuple[UnitDef, tuple[str, ...]], ...] = (
         UnitDef("minute", "duration", 1.0, "分钟"),
         ("分钟", "分钟/工作日往返", "minute", "minutes", "min"),
     ),
-    (UnitDef("hour", "duration", 60.0, "小时"), ("小时", "hour", "hours", "h")),
+    (UnitDef("hour", "duration", 60.0, "小时"), ("小时", "参与小时", "hour", "hours", "h")),
     (
         UnitDef("meal_per_week", "meal_rate", 1.0, "餐/周"),
-        ("餐/周", "新鲜餐/周", "新鲜餐/周（折算）", "meals per week"),
+        ("餐/周", "餐/周（折算）", "新鲜餐/周", "新鲜餐/周（折算）", "meals per week"),
     ),
     (
         UnitDef("per_month", "monthly_count", 1.0, "次/月"),
@@ -70,6 +70,12 @@ _DEFS: tuple[tuple[UnitDef, tuple[str, ...]], ...] = (
     (
         UnitDef("hour_per_month", "monthly_duration", 1.0, "小时/月"),
         ("小时/月", "hours per month"),
+    ),
+    # 生活扩展（DECISIONS/0041）：个人消费与享受按功能计（在用的舒适功能、实际接受的服务份数经各功能的 η 折算）。
+    # 它是效果折算后的合成量纲，不与次数或小时直接换算
+    (
+        UnitDef("enjoyment_index", "enjoyment", 1.0, "享受功能（折算）"),
+        ("享受功能（折算）", "功能（折算）", "enjoyment index"),
     ),
 )
 

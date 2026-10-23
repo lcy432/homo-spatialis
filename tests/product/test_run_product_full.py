@@ -86,7 +86,7 @@ def test_the_flash_config_reuses_the_flash_settings_and_passes_the_planner_check
         want["temperature"],
         want["max_output_tokens"],
     )
-    assert run.prompt_template == "e3a-product-prompt-v1"
+    assert run.prompt_template == "e3a-product-prompt-v2"
     assert run.planning.global_call_limit == 72
     assert (run.paid_budget.max_requests, float(run.paid_budget.max_cost_cny)) == (144, 10.0)
     assert run.paid_budget.price.price_version == flash["paid_budget"]["price"]["price_version"]

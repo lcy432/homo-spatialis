@@ -4,7 +4,7 @@
 
 * **六维定和 100**：``material / safety / opportunity / leisure / environment / commute``。点数用**精确分数**写，规范写法是
   约分后的 ``"30"``、``"50/3"``——六维均分每项 ``50/3``，不能让排在前面的维度多拿 1 分；显示时四舍五入只是显示，不回流计算。
-* **物质细分**：物质父项为正时，细项（当前词表 ``housing_space / fresh_food / daily_convenience``）另分 100；父项明确为 0 时细分
+* **物质细分**：物质父项为正时，细项（当前词表 ``housing_space / food_life / daily_convenience / personal_enjoyment``）另分 100；父项明确为 0 时细分
   不适用（``not_applicable_parent_zero``），不伪造三个回答。
 * **独立健康回答**：一份有版本的健康风险应对问卷，**不占**六维 100 分，也**不是**第七个评分权重；只作为分身做计划的信息，
   不改变疾病规则、γ、H、账目或满足感。未答与“暂不确定”照实保存，观察里说明没有相应的明确指令。
@@ -28,7 +28,7 @@ from worlds.dimensions import ALL_DIMENSIONS, MATERIAL
 #: 新产品的六维：七维去掉 healthcare，顺序沿用 ``worlds.dimensions`` 的唯一定义。
 SIX_DIMENSIONS: tuple[str, ...] = tuple(d for d in ALL_DIMENSIONS if d != "healthcare")
 assert MATERIAL in SIX_DIMENSIONS and len(SIX_DIMENSIONS) == 6
-PRODUCT_PROFILE_VERSION = "product-life-profile-v1"
+PRODUCT_PROFILE_VERSION = "product-life-profile-v2"
 #: 定和总数。
 POINTS_TOTAL = Fraction(100)
 _POINTS_PATTERN = r"^(0|[1-9][0-9]*)(/[1-9][0-9]*)?$"
@@ -56,6 +56,10 @@ def _canonical_text(text: str) -> str:
 ExactPoints = Annotated[str, Field(pattern=_POINTS_PATTERN), AfterValidator(_canonical_text)]
 
 HealthAnswerState = Literal["provided", "unsure", "unanswered"]
+#: 生活扩展（DECISIONS/0041）：休闲兴趣与口味的确认状态。未答、暂不确定、明确没有固定爱好 / 没有口味偏好、选择通用休闲评价与已确认
+#: 类别分开保存；只有 ``confirmed`` 带类别，其余都按中性规则评分（空白不会被悄悄当成“通用评价”的选择）。
+LeisureInterestStatus = Literal["unanswered", "unsure", "no_fixed_hobby", "generic", "confirmed"]
+TasteStatus = Literal["unanswered", "unsure", "no_preference", "confirmed"]
 HealthOption = Literal["agree", "disagree", "no_clear_tendency"]
 
 
@@ -93,7 +97,7 @@ class ProductLifeProfile(ContractModel):
     ``agentlayer.life_views.ObservationPermission`` 显式决定（健康回答另有显式开关 ``show_health_answers``）。
     """
 
-    profile_version: Literal["product-life-profile-v1"]
+    profile_version: Literal["product-life-profile-v2"]
     person_id: IdStr
     confirmed_profile_fingerprint: Annotated[str, Field(pattern=_SHA256)]
     dimension_points: dict[str, ExactPoints]
@@ -104,6 +108,25 @@ class ProductLifeProfile(ContractModel):
     hard_requirements: tuple[HardRequirement, ...] = ()
     free_text: str | None = Field(default=None, max_length=2000)
     occupation: OccupationId | None = None
+    #: 用户确认后进入有限匹配规则的休闲兴趣类别与菜系（词表键）；状态见上。不改变点数、现金、资格或硬要求。
+    leisure_interest_status: LeisureInterestStatus
+    leisure_interests: tuple[KeyStr, ...] = ()
+    taste_status: TasteStatus
+    cuisines: tuple[KeyStr, ...] = ()
+    #: 保留但本轮不支持的描述（品牌、其他要求），原样保存给用户看；不进任何评分，不产生品牌溢价或加成。
+    unsupported_requests: tuple[Annotated[str, Field(min_length=1, max_length=200)], ...] = ()
+
+    @model_validator(mode="after")
+    def _interests_match_status(self) -> ProductLifeProfile:
+        for status, items, name in (
+            (self.leisure_interest_status, self.leisure_interests, "休闲兴趣"),
+            (self.taste_status, self.cuisines, "口味"),
+        ):
+            if (status == "confirmed") != bool(items):
+                raise ValueError(f"{self.person_id}: 只有确认的{name}才带类别，确认了就必须有类别")
+            if len(set(items)) != len(items):
+                raise ValueError(f"{self.person_id}: {name}类别重复")
+        return self
 
     @model_validator(mode="after")
     def _constant_sums(self) -> ProductLifeProfile:
