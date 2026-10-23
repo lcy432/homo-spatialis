@@ -111,6 +111,7 @@ from common.life_contracts import (
     CareerYear,
     CashFlowEntry,
     CityLifeCatalog,
+    DeviceFailure,
     EmploymentRecord,
     EnergyQuotaBasis,
     EnvironmentOutcome,
@@ -134,6 +135,7 @@ from common.life_contracts import (
     PersonYearState,
     PlanCheck,
     RealTaxPolicy,
+    ReplacementRule,
     ResourceShortfall,
     SettlementProblem,
     SettlementResult,
@@ -154,6 +156,7 @@ from common.money import Money, NumeraireMismatchError
 from common.providers import TaxFunction
 from econ.life_career import Completion, employment_after_year, grant_abilities
 from econ.life_commute import CommuteUnavailableError, OnsiteJob, executed_commute
+from econ.life_failures import draw_failure
 from econ.life_health import (
     ExtraLoad,
     HealthYearTracker,
@@ -786,6 +789,15 @@ class _Year:
         self.goal_line = next(
             (ln for ln in self.lines if action.items[ln.order].goal_id is not None), None
         )
+        # 持续物品的随机故障（DECISIONS/0042）：只在真实执行里抽签；年初的无事件试算与疾病一样不发生新事件
+        source = protocol.device_failures
+        self.failure_source = (
+            source if new_events and source is not None and source.mode == "random" else None
+        )
+        self.device_failures: list[DeviceFailure] = []
+        #: 坏了之后下个月要按声明买的替换：月份 → [(故障记录的位置, 替换规则)]
+        self.pending_replacements: dict[int, list[tuple[int, ReplacementRule]]] = {}
+        self.replacement_rules = {r.held: r for r in action.replacements}
         # 疾病、应急与恢复
         self.new_events = new_events
         self.health = HealthYearTracker(
@@ -865,8 +877,8 @@ class _Year:
             if failure is not None:
                 if not self.new_events:
                     return failure
-                if not self.health.new_event_months:
-                    # 没有任何新事件时，真实执行与无事件试算逐月相同——试算通过了，这里就不可能失败
+                if not self.health.new_event_months and not self.device_failures:
+                    # 没有任何新事件（疾病或故障）时，真实执行与无事件试算逐月相同——试算通过了，这里就不可能失败
                     raise AssertionError(
                         f"第 {month} 月在没有新事件的情况下失败，与年初的无事件试算矛盾：{failure.problems}"
                     )
@@ -898,6 +910,8 @@ class _Year:
         "training",
         "resource_months",
         "commutes",
+        "device_failures",
+        "pending_replacements",
         "savings",
         "goal_line",
         "participation",
@@ -1271,6 +1285,10 @@ class _Year:
         # 第 6 步：一次性购买、体验、培训报名（按计划里的位置）。需要已持有装备能力的活动放到本月这些购买之后
         # （DECISIONS/0041）：同月买到、当月生效的装备当月就能用，活动能不能参加不取决于它与装备在计划里谁写在前面；
         # 其他购买之间的先后不变，这几项活动之间仍按位置。
+        for idx, rule in self.pending_replacements.pop(m, []):
+            self._replace(
+                idx, rule, m
+            )  # DECISIONS/0042：先买上个月坏掉的东西的替换（年度计划预先声明的）
         deferred: list[_Line] = []
         for ln in self.lines:
             if ln.role == "durable_good" and ln.month == m:
@@ -1321,6 +1339,14 @@ class _Year:
         if len(homes) > 1:
             raise LifeContractError(f"第 {m} 月实际住房有 {len(homes)} 处，不是恰好一处")
         return homes[0] if homes else None
+
+    def _residence_after(self) -> str | None:
+        """这一年最后一个完整生活月实际住的那一处（续租用）；没有就是 None。"""
+        lived = [r.month for r in self.resource_months if r.resource_check == "complete"]
+        if not lived:
+            return None
+        home = self._home_in(max(lived))
+        return home.opportunity_id if home is not None else None
 
     def _onsite_jobs(self, m: int) -> list[OnsiteJob]:
         """这个月实际上了班（拿到工资）、需要到岗的岗位。病假与没有执行的岗位不在里面。"""
@@ -1929,6 +1955,104 @@ class _Year:
             h.remaining -= 1
             if h.remaining == 0:
                 h.expired = True
+            elif h.kind == "durable_good" and h.opp.failure is not None:
+                self._failure_draw(h, m)
+
+    def _failure_draw(self, h: _Held, m: int) -> None:
+        """月末抽签（DECISIONS/0042）：每件抽一次；坏的件数从下个月起不能用，全坏了就作废这条持有物（剩余寿命不另扣）。"""
+        src = self.failure_source
+        spec = h.opp.failure
+        if src is None or spec is None or spec.kind != "annual_hazard":
+            return
+        units = max(1, round(h.quantity))
+        failed = 0
+        last = None
+        for unit in range(units):
+            hit, u, hz, digest = draw_failure(
+                spec,
+                src,
+                person_id=self.state.person_id,
+                repeat_index=self.health.repeat_index,
+                opportunity_id=h.opp.opportunity_id,
+                acquired=(h.acquired_year, h.acquired_month or 0),
+                unit=unit,
+                year=self.year,
+                month=m,
+            )
+            last = (u, hz, digest)
+            failed += hit
+        if not failed:
+            return
+        assert last is not None
+        u, hz, digest = last
+        if failed >= units:
+            h.expired = True
+        else:
+            h.quantity -= failed
+        rule = self.replacement_rules.get(h.opp.opportunity_id)
+        status = "not_declared" if rule is None else ("next_year" if m == 12 else "not_reached")
+        self.device_failures.append(
+            DeviceFailure(
+                opportunity_id=h.opp.opportunity_id,
+                acquired_year=h.acquired_year,
+                acquired_month=h.acquired_month,
+                month=m,
+                units_failed=failed,
+                monthly_hazard=ExactAmount.of(hz),
+                uniform=ExactAmount.of(u),
+                key_fingerprint=digest,
+                replacement_id=rule.replacement if rule is not None else None,
+                replacement_status=status,  # type: ignore[arg-type]
+                note=f"第 {m} 月月末坏了 {failed} 件，下个月起不能用",
+            )
+        )
+        self._event(m, f"{h.opp.label}坏了（{failed} 件）")
+        if rule is not None and m < 12:
+            self.pending_replacements.setdefault(m + 1, []).append(
+                (len(self.device_failures) - 1, rule)
+            )
+
+    def _replace(self, idx: int, rule: ReplacementRule, m: int) -> None:
+        """按年度计划的声明买替换：普通购买检查（可得、报价、现金），买不起就记没有买成，不顺延、不另问规划器。"""
+        opp = self.catalog.opportunity(rule.replacement)
+        why = None if opp is not None else f"目录里没有 {rule.replacement}"
+        if opp is not None:
+            why = self._why_not(opp)
+        cost = 0
+        if why is None:
+            assert opp is not None and opp.price is not None
+            cost = rule.quantity * unit_minor(opp.price, self.digits)
+            if cost > self.cash:
+                why = f"资金不足：替换需要 {self._fmt(cost)}，现金 {self._fmt(self.cash)}"
+        rec = self.device_failures[idx]
+        if why is not None:
+            self.device_failures[idx] = rec.model_copy(
+                update={
+                    "replacement_status": "rejected",
+                    "replacement_month": m,
+                    "note": (rec.note + f"；第 {m} 月替换没有买成：{why}")[:280],
+                }
+            )
+            return
+        assert opp is not None
+        self.cash -= cost
+        self._flow(m, "expense", opp.opportunity_id, f"替换购入：{opp.label}", -cost)
+        same_year = opp.duration.effective_from == "same_year"
+        self.held.append(
+            _Held(
+                opp=opp,
+                kind="durable_good",
+                quantity=float(rule.quantity),
+                acquired_year=self.year,
+                acquired_month=m,
+                remaining=opp.duration.lifetime_months or 0,
+                in_service_from_year=None if same_year else self.year + 1,
+            )
+        )
+        self.device_failures[idx] = rec.model_copy(
+            update={"replacement_status": "bought", "replacement_month": m}
+        )
+        self._event(m, f"替换购入{opp.label}")
 
     def _attend_training(self, m: int) -> None:
         for ln in self.lines:
@@ -2058,7 +2182,9 @@ class _Year:
         pairs = [self._records(r) for r in records]
         notes = [
             f"合成记账验证：税是合成测试替身 {self.tax.policy_id}（{self.tax.status}），"
-            "这份账不是真实税后生活成本",
+            "这份账不是真实税后生活成本"
+            if self.tax.status == "synthetic_test_double"
+            else f"税按官方 2024 年规则 {self.tax.policy_id}（单身、只有工资收入；没有建模的抵免与附加税见税制说明）",
         ]
         resources = resource_year(self.rules, self.state, self.resource_months)
         complete = [m.month for m in resources.months if m.resource_check == "complete"]
@@ -2144,10 +2270,13 @@ class _Year:
                 for h in self.held
             ),
             participation=tuple(self.participation),
+            device_failures=tuple(self.device_failures),
             exit=self.exit,
             tax_policy_id=self.tax.policy_id,
             tax_status=self.tax.status,
-            bookkeeping_label="synthetic_bookkeeping_only",
+            bookkeeping_label="synthetic_bookkeeping_only"
+            if self.tax.status == "synthetic_test_double"
+            else None,
             energy_feasibility=feasibility,  # type: ignore[arg-type]
             resources=resources,
             notes=tuple(notes),
@@ -2202,6 +2331,8 @@ class _Year:
             ),
             savings_goals=goals,
             health=next_health,
+            env_repeat=s.env_repeat,
+            residence=self._residence_after(),
             goals=tuple(s.goals),
             experience_summary=(tuple(s.experience_summary) + tuple(self.events))[
                 -MAX_SUMMARY_ENTRIES:

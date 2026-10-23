@@ -13,7 +13,7 @@ import pytest
 
 from common.life_contracts import CityLifeCatalog
 
-from .conftest import CLONE_K, K51, live_year, whole
+from .conftest import CLONE_K, K51, live_year, once, whole
 
 TOL = 1e-12
 
@@ -381,3 +381,232 @@ def test_an_undeclared_commute_area_is_refused(bundle):
 
     with pytest.raises(ValueError, match="没有在 areas 里声明"):
         catalog_with(bundle, stray)
+
+
+# --------------------------------------------------------------------------- 设备故障与替换（DECISIONS/0042）
+#
+# 便利设备包（1,440，寿命 5 年，洗衣残余 4、打扫残余 6 小时/月）加一条年故障概率 0.999999 的规则：月度风险
+# h = 1 − (10⁻⁶)^(1/12) ≈ 0.684，固定种子下第一年里必然坏（具体月份由键决定，测试只要求它早于第 12 月）。
+
+PACK = "k51.durable.convenience_pack"
+
+
+def with_failure(d: dict, p: float = 0.999999) -> None:
+    o = opp(d, PACK)
+    o["failure"] = {
+        "kind": "annual_hazard",
+        "annual_probability": p,
+        "note": "测试用的高故障概率",
+        "source": o["source"],
+    }
+
+
+def failing_protocol(bundle, seed: int = 7):
+    from common.life_contracts import DeviceFailureSource
+
+    src = DeviceFailureSource(mode="random", pairing_id="test.pairing", seed=seed, note="测试")
+    return bundle.protocol.model_copy(update={"device_failures": src})
+
+
+def household_hours(year, month: int) -> Fraction:
+    m = month_res(year, month)
+    return sum(
+        (r.hours.fraction() for r in m.contributions if r.category == "household_task"),
+        Fraction(0),
+    )
+
+
+def buy_pack(replace: bool = False):
+    items = plan(extra=[once(PACK, 1)])
+    return items, ([{"held": PACK, "replacement": PACK}] if replace else [])
+
+
+def run_with(bundle, scoring, start, items, replacements, catalog, protocol):
+    from common.life_contracts import ReplacementRule
+    from econ.life_year import run_life_year
+
+    from .conftest import scoring_inputs, tax_for, year_action
+
+    action = year_action(start, items).model_copy(
+        update={"replacements": tuple(ReplacementRule(**r) for r in replacements)}
+    )
+    return run_life_year(
+        protocol=protocol,
+        state=start,
+        action=action,
+        catalog=catalog,
+        tax=tax_for(bundle, K51),
+        scoring=scoring_inputs(bundle, scoring, K51),
+    )
+
+
+def test_a_failed_device_stops_next_month_and_its_lifetime_is_not_kept(bundle, scoring, start):
+    cat = catalog_with(bundle, with_failure)
+    items, _ = buy_pack()
+    y = run_with(bundle, scoring, start, items, [], cat, failing_protocol(bundle))
+    (f,) = y.settlement.outcome.device_failures
+    assert f.month < 12 and f.replacement_status == "not_declared"
+    assert household_hours(y, f.month) == 4 + 6  # 坏的那个月还在用
+    assert household_hours(y, f.month + 1) == 12 + 10  # 下个月起家务回到基准
+    assert PACK not in {
+        h.opportunity_id for h in y.next_state.holdings
+    }  # 剩余寿命作废，不带进下一年
+
+
+def test_a_declared_replacement_is_bought_the_next_month(bundle, scoring, start):
+    cat = catalog_with(bundle, with_failure)
+    items, rep = buy_pack(replace=True)
+    y = run_with(bundle, scoring, start, items, rep, cat, failing_protocol(bundle))
+    first = y.settlement.outcome.device_failures[0]
+    assert first.replacement_status == "bought" and first.replacement_month == first.month + 1
+    buys = [f for f in y.settlement.outcome.cash_flows if f.label.startswith("替换购入")]
+    assert buys[0].month == first.month + 1 and buys[0].amount.amount == pytest.approx(-1440.0)
+    assert household_hours(y, first.month + 1) == 4 + 6  # 替换当月生效
+
+
+def test_failures_are_hidden_from_the_plan_check(bundle, start):
+    from econ.life_settlement import check_year_plan
+
+    from .conftest import tax_for, year_action
+
+    cat = catalog_with(bundle, with_failure)
+    items, _ = buy_pack()
+    r = check_year_plan(
+        protocol=failing_protocol(bundle),
+        state=start,
+        action=year_action(start, items),
+        catalog=cat,
+        tax=tax_for(bundle, K51),
+    )
+    assert r.passed and not r.problems  # 年初试算不抽签：计划检查看不到将来会不会坏
+
+
+def test_draws_do_not_depend_on_plan_order(bundle, scoring, start):
+    cat = catalog_with(bundle, with_failure)
+    items, _ = buy_pack()
+    a = run_with(bundle, scoring, start, items, [], cat, failing_protocol(bundle))
+    b = run_with(bundle, scoring, start, list(reversed(items)), [], cat, failing_protocol(bundle))
+    fa, fb = a.settlement.outcome.device_failures[0], b.settlement.outcome.device_failures[0]
+    assert (fa.month, fa.key_fingerprint) == (fb.month, fb.key_fingerprint)
+
+
+def test_no_random_failure_rule_never_fails(bundle, scoring, start):
+    def none_rule(d: dict) -> None:
+        o = opp(d, PACK)
+        o["failure"] = {
+            "kind": "none_within_horizon",
+            "note": "三年内不随机坏",
+            "source": o["source"],
+        }
+
+    items, _ = buy_pack()
+    y = run_with(
+        bundle, scoring, start, items, [], catalog_with(bundle, none_rule), failing_protocol(bundle)
+    )
+    assert not y.settlement.outcome.device_failures
+
+
+def test_monthly_hazard_by_hand():
+    from econ.life_failures import monthly_hazard
+
+    assert float(monthly_hazard(0.1)) == pytest.approx(1 - 0.9 ** (1 / 12), abs=1e-15)
+    assert monthly_hazard(0.1) == monthly_hazard(0.1)  # 十进制计算，逐位可重放
+
+
+def test_a_replacement_that_is_not_a_durable_good_is_refused(bundle, start):
+    from common.life_contracts import ReplacementRule
+    from ledger.life_catalog import plan_problems
+
+    from .conftest import year_action
+
+    action = year_action(start, plan()).model_copy(
+        update={"replacements": (ReplacementRule(held=PACK, replacement="k51.service.chores"),)}
+    )
+    probs = plan_problems(bundle.protocol, bundle.catalog_for(K51), action)
+    assert [p.code for p in probs] == ["bad_replacement"]
+
+
+# --------------------------------------------------------------------------- 年度菜单与延续（DECISIONS/0042）
+#
+# 岗位菜单：第 1 年环境重复 1 只有兼职，环境重复 2 只有会计；文员是开局岗位（可以延续）。住房菜单：第 1 年只有近处，第 2 年
+# 只有远处；远处也是最低住房的保底方案，所以总在可选里。
+
+
+def with_menus(d: dict) -> None:
+    def menu(cat: str, year: int, env: int, ids: list[str]) -> dict:
+        return {
+            "menu_id": f"menu.k51.{cat}.y{year}.r{env}",
+            "category": cat,
+            "year": year,
+            "env_repeat": env,
+            "opportunity_ids": ids,
+            "basis": "测试菜单（种子里没有分身编号）",
+        }
+
+    d["menus"] = [
+        menu("job", 1, 1, ["k51.job.shop_parttime"]),
+        menu("job", 1, 2, ["k51.job.accountant"]),
+        menu("job", 2, 1, ["k51.job.shop_parttime"]),
+        menu("housing", 1, 1, ["k51.housing.near"]),
+        menu("housing", 1, 2, ["k51.housing.near"]),
+        menu("housing", 2, 1, ["k51.housing.far"]),
+    ]
+
+
+def test_the_menu_and_continuations_are_what_can_be_seen_and_chosen(bundle, start):
+    cat = catalog_with(bundle, with_menus)
+    s1 = start.model_copy(update={"env_repeat": 1})
+    offered = cat.offered_ids(s1)
+    assert {"k51.job.shop_parttime", "k51.job.clerk"} <= offered  # 菜单 + 现在的岗位
+    assert "k51.job.accountant" not in offered
+    assert {"k51.housing.near", "k51.housing.far"} <= offered  # 菜单 + 最低住房保底
+    assert "k51.food.basic" in offered  # 没有菜单的类别全部可选
+    other = start.model_copy(update={"env_repeat": 2, "clone_id": "u301.k51.r9"})
+    assert "k51.job.accountant" in cat.offered_ids(other)  # 环境重复不同，菜单不同
+
+
+def test_choosing_off_the_menu_is_refused_by_the_authoritative_check(bundle, start):
+    from ledger.life_catalog import plan_state_problems
+
+    from .conftest import year_action
+
+    cat = catalog_with(bundle, with_menus)
+    s1 = start.model_copy(update={"env_repeat": 1})
+    action = year_action(s1, plan(extra=[whole("k51.job.accountant")]))
+    codes = [p.code for p in plan_state_problems(bundle.protocol, s1, action, cat)]
+    assert "not_on_menu" in codes
+    no_env = plan_state_problems(bundle.protocol, start, year_action(start, plan()), cat)
+    assert [p.code for p in no_env if p.code == "menu_data"] == ["menu_data"]
+
+
+def test_the_observation_shows_only_the_menu_and_the_lines_that_matter(bundle, start):
+    from .test_views import _obs
+
+    cat = catalog_with(bundle, with_menus)
+    obs = _obs(bundle, state=start.model_copy(update={"env_repeat": 1}), catalog=cat)
+    ids = {o.opportunity_id for o in obs.opportunities}
+    assert "k51.job.accountant" not in ids and "k51.job.shop_parttime" in ids
+    assert {a.area_id for a in obs.areas} == {"k51.area.near", "k51.area.far", "k51.area.center"}
+
+
+def test_the_current_home_can_be_renewed_off_the_menu(bundle, scoring, start):
+    cat = catalog_with(bundle, with_menus)
+    s1 = start.model_copy(update={"env_repeat": 1})
+    y1 = live_year(bundle, scoring, s1, plan("k51.housing.near"), catalog=cat)
+    s2 = y1.next_state
+    assert s2.residence == "k51.housing.near" and s2.env_repeat == 1
+    assert "k51.housing.near" in cat.offered_ids(s2)  # 第 2 年菜单只有远处，续租近处照样可以
+    y2 = live_year(bundle, scoring, s2, plan("k51.housing.near"), catalog=cat)
+    assert y2.settlement.status == "completed"
+
+
+def test_the_valuation_period_keeps_year_n_menus_and_draws_no_failures(bundle):
+    from econ.life_terminal_value import _derived_protocol, valuation_catalog
+
+    cat = catalog_with(bundle, with_menus)
+    v = valuation_catalog(cat, 2)
+    year3 = [m for m in v.menus if m.year == 3]
+    assert {m.category for m in year3} == {"job", "housing"}
+    assert all(m.menu_id.endswith(".valuation") for m in year3)
+    vprotocol, _ = _derived_protocol(failing_protocol(bundle))
+    assert vprotocol.device_failures is None

@@ -112,6 +112,7 @@ from common.life_contracts import (
     TreatmentRecord,
     VisibleCareerYear,
     VisibleCommuteUse,
+    VisibleDeviceFailure,
     VisibleFeedback,
     VisibleGoalEvent,
     VisibleGoalProgress,
@@ -263,6 +264,7 @@ class VisibleOpportunity(ContractModel):
     grants: tuple[str, ...] = Field(exclude_if=lambda v: not v)
     #: 片区（DECISIONS/0042）：住房是住处所在的居住片区，岗位是工作所在的就业片区。没有的不序列化。
     area: str | None = Field(default=None, exclude_if=lambda v: v is None)
+    failure: VisibleFailureRule | None = Field(default=None, exclude_if=lambda v: v is None)
     #: 没有资格要求的机会不序列化。
     qualification: VisibleQualification | None = Field(default=None, exclude_if=lambda v: v is None)
     #: 生活扩展（DECISIONS/0041）：食品方案、享受、装备、活动的公开事实。没有的不序列化。
@@ -276,6 +278,14 @@ class VisibleOpportunity(ContractModel):
         """期限与时间精力事实里空的项（null、空列表）不写进请求：键不出现就是“没有”（收尾 R1：只省重复，不删事实）。"""
         data = value.model_dump(mode="json")
         return {k: v for k, v in data.items() if v is not None and v != [] and v != {}}
+
+
+class VisibleFailureRule(ContractModel):
+    """一件持续物品的故障规则（公开事实，DECISIONS/0042）；将来哪个月坏不公开。"""
+
+    kind: str
+    annual_probability: float | None = Field(default=None, exclude_if=lambda v: v is None)
+    note: str
 
 
 class VisibleArea(ContractModel):
@@ -605,6 +615,8 @@ class AgentObservation(ContractModel):
     #: 城市内部的片区与通勤关系（DECISIONS/0042）；没有时不序列化。
     areas: tuple[VisibleArea, ...] = Field(default=(), exclude_if=lambda v: v == ())
     commute: VisibleCommute | None = Field(default=None, exclude_if=lambda v: v is None)
+    #: 现在住的那一处（续租不必在菜单上，DECISIONS/0042）；开局没有住处时不序列化。
+    residence: str | None = Field(default=None, exclude_if=lambda v: v is None)
     last_feedback: VisibleFeedback | None
     #: 月度资源规则与预算（DECISIONS/0020）。
     resources: VisibleResourceBudget
@@ -1011,6 +1023,13 @@ def _visible_opportunity(
         employer_id=o.employer_id,
         grants=tuple(o.grants),
         area=o.area,
+        failure=None
+        if o.failure is None
+        else VisibleFailureRule(
+            kind=o.failure.kind,
+            annual_probability=o.failure.annual_probability,
+            note=o.failure.note,
+        ),
         qualification=_qualification(o, state, catalog, rules),
         food_plan=None if o.food_plan is None else _visible_food_plan(o.food_plan),
         enjoyment=tuple(
@@ -1097,9 +1116,8 @@ def _visible_resources(
         else None,
         energy_rule=_energy_rule(rules, feedback),
         commute_rule=(
-            "当月通勤小时 = 通勤关系表里实际住处片区到各岗位就业片区、实际所用方式的往返分钟 × 这个岗位的到岗次数 / 60，"
-            "几个岗位相加；每个岗位每次到岗算一趟完整往返，不合并行程；远程岗位不通勤，混合岗位只算到岗的次数。住房降级后"
-            "按实际住的房所在片区计算"
+            "当月通勤小时 = 实际所用方式的往返分钟（通勤表）× 每个到岗岗位的到岗次数 / 60，几个岗位相加，不合并行程；远程岗位"
+            "不通勤，混合岗位只算到岗的次数"
         ),
         commute_burden_per_hour=rules.commute_burden_per_hour,
         household_rule=(
@@ -1221,6 +1239,18 @@ def build_observation(
             + "——不为这个状态构造观察"
         )
 
+    # DECISIONS/0042：有年度菜单时只给看菜单上的与可以延续的；通勤关系只给看这些住处与岗位所在的片区
+    offered = catalog.offered_ids(state)
+    used_areas = (
+        frozenset(
+            o.area
+            for o in catalog.opportunities
+            if o.opportunity_id in offered and o.area is not None
+        )
+        if catalog.menus
+        else frozenset(a.area_id for a in catalog.areas)
+    )
+
     p = permission
     if last_feedback is not None and not p.show_energy_level:
         last_feedback = _without_energy(last_feedback)
@@ -1261,7 +1291,9 @@ def build_observation(
         experience_summary=tuple(state.experience_summary),
         profile=_visible_product_profile(profile, p),
         opportunities=tuple(
-            _visible_opportunity(o, state, catalog, career_rules) for o in catalog.opportunities
+            _visible_opportunity(o, state, catalog, career_rules)
+            for o in catalog.opportunities
+            if o.opportunity_id in offered
         ),
         minimum_living=tuple(
             VisibleMinimumNeed(
@@ -1283,8 +1315,10 @@ def build_observation(
                 nature=None if a.typical_source is None else a.typical_source.kind,
             )
             for a in catalog.areas
+            if a.area_id in used_areas
         ),
-        commute=_visible_commute(catalog),
+        commute=_visible_commute(catalog, used_areas),
+        residence=state.residence,
         last_feedback=last_feedback,
         resources=_visible_resources(resource_rules, state, p.show_energy_level, energy_feedback),
         channels=_channels(p, energy_feedback),
@@ -1298,7 +1332,8 @@ def build_observation(
     return obs
 
 
-def _visible_commute(catalog: CityLifeCatalog) -> VisibleCommute | None:
+def _visible_commute(catalog: CityLifeCatalog, used_areas: frozenset[str]) -> VisibleCommute | None:
+    """通勤关系只给看用得上的片区（菜单上的住处与岗位所在的片区，DECISIONS/0042）。"""
     rel = catalog.commute
     if rel is None:
         return None
@@ -1322,6 +1357,7 @@ def _visible_commute(catalog: CityLifeCatalog) -> VisibleCommute | None:
                 nature=g.source.kind,
             )
             for g in rel.legs
+            if g.home_area in used_areas and g.work_area in used_areas
         ),
     )
 
@@ -1458,6 +1494,17 @@ def visible_feedback(result: SettlementResult) -> VisibleFeedback:
         savings=_visible_savings_year(out.savings),
         health=_visible_health_year(out),
         participation=_visible_participation(out.participation),
+        device_failures=tuple(
+            VisibleDeviceFailure(
+                opportunity_id=f.opportunity_id,
+                month=f.month,
+                units_failed=f.units_failed,
+                replacement_id=f.replacement_id,
+                replacement_status=f.replacement_status,
+                replacement_month=f.replacement_month,
+            )
+            for f in out.device_failures
+        ),
     )
     assert_payload_clean(feedback)
     return feedback

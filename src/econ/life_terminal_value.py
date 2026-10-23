@@ -151,7 +151,21 @@ def _derived_protocol(protocol: LifeProtocol) -> tuple[LifeProtocol, IllnessEven
         note=VALUATION_SOURCE_NOTE,
     )
     data["illness_events"] = source.model_dump(mode="python")
+    # DECISIONS/0042：估值期不抽设备故障（登记的边界）——期末持有、在服务期内的装备按剩余寿命使用
+    data["device_failures"] = None
     return LifeProtocol.model_validate(data), source
+
+
+def valuation_catalog(catalog: CityLifeCatalog, n: int) -> CityLifeCatalog:
+    """估值期（第 N+1 年）沿用第 N 年的年度菜单（DECISIONS/0042）：菜单只冻结到第 N 年，估值期不抽新菜单。"""
+    if not catalog.menus:
+        return catalog
+    extra = tuple(
+        m.model_copy(update={"menu_id": f"{m.menu_id}.valuation", "year": n + 1})
+        for m in catalog.menus
+        if m.year == n
+    )
+    return catalog.model_copy(update={"menus": catalog.menus + extra})
 
 
 def _valuation_quota(
@@ -853,6 +867,7 @@ def value_terminal(
             + "；".join(m for _, m in problems)
         )
 
+    catalog = valuation_catalog(catalog, protocol.simulation_years)
     quota = _valuation_quota(protocol, terminal, last_year)
     not_valued = _not_valued(terminal, spec.valuation_horizon_months, spec, catalog)
     if isinstance(quota, str):

@@ -358,12 +358,22 @@ class ProductMockPlanner:
             items.append(_period(oid, 1, months))
             spend += fee
         items += self._extras(v, monthly_net, spend, notes)
-        return {
+        # DECISIONS/0042：会随机坏的持续物品（持有的与今年要买的）预先声明坏了买同一款
+        durable_ids = v.held_ids() | {it["opportunity_id"] for it in items}
+        replacements = [
+            {"held": oid, "replacement": oid}
+            for oid in sorted(durable_ids)
+            if ((v.opps.get(oid) or {}).get("failure") or {}).get("kind") == "annual_hazard"
+        ]
+        out = {
             "items": items,
             "minimum_fallback": ["housing", "food"],
             "savings_goal": None,
             "emergency": self._emergency(v, items),
         }
+        if replacements:
+            out["replacements"] = replacements
+        return out
 
     @staticmethod
     def opps_job(v: _View, oid: str) -> dict[str, Any]:

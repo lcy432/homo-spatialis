@@ -1197,6 +1197,15 @@ def plan_problems(
     """
     out: list[SettlementProblem] = []
     who = f"{action.clone_id} 第 {action.year_index} 年"
+    for r in action.replacements:  # DECISIONS/0042：替换只能是本城的持续物品
+        o = catalog.opportunity(r.replacement)
+        if o is None or o.duration.kind != "durable_good":
+            out.append(
+                _p(
+                    "bad_replacement",
+                    f"{who}: 替换 {r.held} 的 {r.replacement} 不是 {catalog.city} 目录里的持续物品",
+                )
+            )
     if action.year_index > protocol.simulation_years:
         out.append(
             _p(
@@ -1382,6 +1391,26 @@ def plan_state_problems(
     """
     out: list[SettlementProblem] = []
     who = f"{action.clone_id} 第 {action.year_index} 年"
+    if catalog.menus:  # DECISIONS/0042：菜单同时约束观察与这里的权威检查
+        try:
+            offered = catalog.offered_ids(state)
+        except LifeContractError as exc:
+            out.append(_p("menu_data", f"{who}: {exc}"))
+        else:
+            for i, item in enumerate(action.items):
+                o = catalog.opportunity(item.opportunity_id)
+                if (
+                    o is not None
+                    and o.category in catalog.menu_categories
+                    and item.opportunity_id not in offered
+                ):
+                    out.append(
+                        _p(
+                            "not_on_menu",
+                            f"{who}: {item.opportunity_id} 不在今年的菜单上，也不是可以延续的住处或岗位",
+                            item_order=i,
+                        )
+                    )
     if action.clone_id != state.clone_id or action.person_id != state.person_id:
         out.append(
             _p(
@@ -1604,6 +1633,18 @@ def cross_validate(bundle: LifeBundle) -> ContractReport:
                 errors.append(
                     f"{cat.city}: 通勤方式 {rule.mode} 要求的功能 {rule.requires_function!r} 没有在 functions 里声明"
                 )
+        if cat.menus:  # DECISIONS/0042：每一类、每一年、每个环境重复都要有菜单，缺了就是资料不完整
+            envs = range(1, max(m.env_repeat for m in cat.menus) + 1)
+            have = {(m.category, m.year, m.env_repeat) for m in cat.menus}
+            lacking = sorted(
+                (c, y, e)
+                for c in cat.menu_categories
+                for y in range(1, n + 1)
+                for e in envs
+                if (c, y, e) not in have
+            )
+            if lacking:
+                errors.append(f"{cat.city}: 缺年度菜单（类别、年、环境重复）{lacking[:6]}")
         errors.extend(resource_catalog_problems(protocol, cat))
         errors.extend(career_catalog_problems(protocol, cat))
         errors.extend(health_catalog_problems(protocol, cat))
