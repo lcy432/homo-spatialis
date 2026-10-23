@@ -4,13 +4,13 @@
  "payload": {
   "binding": {
    "compiled_inputs": {
-    "life_input": "a1e4d19a582fbcfe9fefcf415d7403634b61d33cadc2c4f90bb746e21ba00422",
+    "life_input": "37e9efce87b1984dfeb2989dded3d976bc8c7024fc4fe2b841a53b1f76a579eb",
     "roster": "780f9aa813b4a76aa1da6cbbb87d46a5b1d29b8b8cf5367b48529591e8a20a85",
     "run_config": "0e14ba87c7bd5365904cc1ed1cff208e293b208bf9050c138d54a584a62c9920",
     "scoring_config": "0425c099ef4b9a2461249316c60074b37d08191d65eb90be39c8a1519f4c288c"
    },
    "evaluation_spec_id": "eval.e1-life.main",
-   "identities_fingerprint": "2e2d3a34e22a24c37dd3db7e4a0941a06a9650bf95000ede0a11f1c11859b845",
+   "identities_fingerprint": "b366382367884a05a9b57c3a9db778b1988d34dac85fa5672ae04ebf690b522c",
    "planner_id": "mock.rules.e3a-product",
    "planner_kind": "mock",
    "prompt_template": "e3b-product-prompt-v1",
@@ -169,7 +169,7 @@
    "planner_id": "mock.rules.e3a-product",
    "planner_kind": "mock"
   },
-  "preflight_fingerprint": "1b4d0b79c01a85010f7360b7431b1c9812f1545c4d0dd42d27c59faf1c5bb192",
+  "preflight_fingerprint": "765e62e29813389426470298309ae98593dc0afe55e9a46f46f3087fb0982008",
   "preflight_id": "preflight.confirmed.draft.u510.unknown_safety.r1",
   "scope_zh": [
    "生活协议 life-v1-e3a-product（状态 synthetic_fixture_only）、评分 score.e1-life.explore（探索版）：城市、报价、工资、疾病、治疗与评分参数全部是合成设定，不是现实城市，不排序真实城市",

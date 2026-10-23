@@ -239,11 +239,17 @@ def compile_inputs(
 
     # ---- 城市目录：便利设备与服务换成资料候选编入的那几项，其余原样
     compilation, compiled_by_city = compile_catalog(pack, protocol)
+    # 资料包为这座城声明了便利候选，才把基础目录里的便利方案换成编入的候选；真实资料包（DECISIONS/0042）不声明候选，
+    # 设备与服务原样来自它的目录
+    declared = {c.city_ref for c in b.candidates}
     catalogs = []
     for cat in copy.deepcopy(life["catalogs"]):
         ref = f"{cat['city']['country']}:{cat['city']['scheme']}:{cat['city']['code']}"
-        kept = [o for o in cat["opportunities"] if not (o.get("resource") or {}).get("substitutes")]
-        cat["opportunities"] = kept + compiled_by_city.get(ref, [])
+        if ref in declared:
+            kept = [
+                o for o in cat["opportunities"] if not (o.get("resource") or {}).get("substitutes")
+            ]
+            cat["opportunities"] = kept + compiled_by_city.get(ref, [])
         catalogs.append(cat)
     catalog_by_ref = {
         f"{c['city']['country']}:{c['city']['scheme']}:{c['city']['code']}": c for c in catalogs
@@ -276,10 +282,11 @@ def compile_inputs(
     rules_version = protocol["resource_rules"]["version"]
     digits = b.money_basis.minor_unit_digits
     numeraire = confirmed.money.converted.numeraire_id
+    real = b.status == "real_data_frozen"
     start_source = {
         "kind": "synthetic",
         "observed_on": b.observed_on.isoformat(),
-        "geography_scope": "synthetic city (no real geography)",
+        "geography_scope": b.catalog_scope.geography_scope,
         "mapping_version": COMPILER,
         "synthetic_note": "E3-A 标准开局的模型设定（每月时间与负担额度）：本版统一的合成设定，不是对用户的测量",
     }
@@ -342,7 +349,16 @@ def compile_inputs(
                 )
             )
             continue
-        job = sorted(usable, key=lambda o: o["opportunity_id"])[0]
+        # 开局岗位：同一分类、资格已确认的岗位里取中位工资档（DECISIONS/0042；真实资料包的岗位写着 wage_position）；
+        # 没有工资档的（合成样例）按编号取第一个
+        job = sorted(
+            usable,
+            key=lambda o: (
+                (o.get("spec") or {}).get("wage_position") != "p50",
+                o["opportunity_id"],
+            ),
+        )[0]
+        envs = max((m["env_repeat"] for m in cat.get("menus", [])), default=0)
         start_jobs[ref] = job["label"]
         for k in b.run.repeat_indexes:
             clone = f"{confirmed.person_ref}.{cat['city']['code'].lower()}.r{k}"
@@ -392,6 +408,8 @@ def compile_inputs(
                     },
                     "savings_goals": [],
                     "health": {"age_years": confirmed.age_years, "repeat_index": k},
+                    # 年度菜单的环境重复（DECISIONS/0042）：重复序号轮流分到各个环境重复，同编号的分身看同一份菜单
+                    **({"env_repeat": k % envs + 1} if envs else {}),
                     "goals": [],
                     "experience_summary": [],
                 }
@@ -415,15 +433,19 @@ def compile_inputs(
     }
     rel = {k: _relative(p, repo_root) for k, p in paths.items()}
     notice = (
-        "exploratory_synthetic：E3-A 编译产物。合成城市、合成参数、六维产品画像（用户确认的陈述，不是心理真值）；"
+        "exploratory_synthetic：E3B 编译产物。城市资料来自公开来源与登记的模型设定，生活规则与评分是合成探索参数；"
+        "六维产品画像是用户确认的陈述，不是心理真值；不排序真实城市。"
+        if real
+        else "exploratory_synthetic：E3-A 编译产物。合成城市、合成参数、六维产品画像（用户确认的陈述，不是心理真值）；"
         "不是现实城市评价，不排序真实城市。"
     )
     bundle = {
-        "fixture_notice": "synthetic_fixture_only：" + notice,
+        "fixture_notice": ("real_data_frozen：" if real else "synthetic_fixture_only：") + notice,
         "protocol": protocol,
         "consumption_needs": needs,
         "categories": life["categories"],
         "functions": life.get("functions", []),
+        "attribute_keys": life.get("attribute_keys", []),
         "function_kinds": life.get("function_kinds", {}),
         # 生活扩展（DECISIONS/0041）的公开词表原样沿用基础样例；确认的兴趣与菜系必须在这里面（加载器核对）
         "cuisines": life.get("cuisines", []),

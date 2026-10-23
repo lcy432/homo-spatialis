@@ -992,4 +992,15 @@ def build_all(
         },
     }
     dump_json(report, out_dir / "report.json")
+    from product.realdata.product_pack import build_product_pack, write_product_pack
+
+    write_product_pack(
+        build_product_pack(
+            scoring_fingerprint=pack.life_input["protocol"]["energy_feedback"][
+                "scoring_content_fingerprint"
+            ],
+            manifest=_json(FROZEN / "items" / "manifest.json"),
+            cities=cfg["cities"],
+        )
+    )
     return report

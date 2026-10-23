@@ -88,6 +88,8 @@ from workflows.state import ContentRef, fingerprint, public_text
 REPO = Path(__file__).resolve().parents[2]
 RUN_REQUEST_VERSION = "wf-e3-run-request-v1"
 DEFAULT_PACK_PATH = "configs/product/e3a_synthetic_pack.yaml"
+#: E3B 六城真实资料包（DECISIONS/0042）。工作目录里同样按仓库相对路径复制。
+E3B_PACK_PATH = "configs/product/e3b_us_v1_pack.yaml"
 EXIT_CODES = {"submit:after_register": 51, "life:crash_at_call": 52, "life:after_complete": 53}
 
 #: E1 停下（halted）的原因 → 流程的公开代码。服务失败是 E1 支持恢复的边界（等人发起后经 E1 的恢复入口接上）；其余都要维护者
@@ -722,6 +724,60 @@ EXAMPLES: dict[str, dict[str, Any]] = {
         "person": "u606",
         "scripts": [{"clone_id": "u606.k51.r0", "behavior": "raise_error", "years": [1]}],
     },
+    # E3B 六城真实资料包（DECISIONS/0042）：人物是合成的，城市资料是真实资料包
+    "e3b_normal": {
+        "person": "u701",
+        "pack": E3B_PACK_PATH,
+        "repeat_indexes": (0, 1, 2, 3),
+        "draft": {"abilities": ("edu_at_least_hs",)},
+    },
+    "e3b_mixed": {
+        "person": "u702",
+        "pack": E3B_PACK_PATH,
+        "repeat_indexes": (0, 1),
+        "draft": {
+            "occupation_text": "我在门店做售货员，接待顾客、整理货架",
+            "selected": "occ.retail_sales",
+            "hard_requirements": (),
+        },
+        "illness": [
+            {
+                "person_id": "u702",
+                "repeat_index": 1,
+                "year_index": 1,
+                "month": 1,
+                "severity": "major",
+                "note": "受控夹具：大病",
+            }
+        ],
+        "scripts": [{"clone_id": "u702.41860.r0", "behavior": "malformed_output", "years": [1]}],
+    },
+    "e3b_exit": {
+        "person": "u703",
+        "pack": E3B_PACK_PATH,
+        "draft": {
+            "occupation_text": "我在快餐店柜台点单、做饮品",
+            "selected": "occ.counter_drinks",
+            "hard_requirements": (),
+            "cash": ("300", "USD", "2024"),
+        },
+        "illness": [
+            {
+                "person_id": "u703",
+                "repeat_index": 0,
+                "year_index": 1,
+                "month": 1,
+                "severity": "major",
+                "note": "受控夹具：大病",
+            }
+        ],
+    },
+    "e3b_paused": {
+        "person": "u704",
+        "pack": E3B_PACK_PATH,
+        "draft": {"abilities": ("edu_at_least_hs",)},
+        "scripts": [{"clone_id": "u704.16980.r0", "behavior": "raise_error", "years": [1]}],
+    },
 }
 
 
@@ -737,8 +793,9 @@ def seed_example(
     if not re.fullmatch(r"[a-z0-9][a-z0-9_-]{0,40}", name):
         raise ValueError(f"名字只能用小写字母、数字、下划线与连字符：{name!r}")
     person = spec["person"]
+    pack_path = spec.get("pack", DEFAULT_PACK_PATH)
     with ws.cwd():
-        pack = load_pack(Path(DEFAULT_PACK_PATH))
+        pack = load_pack(Path(pack_path))
         file_fp = pack.fingerprint
         if spec.get("repeat_indexes") is not None:
             raw = copy.deepcopy(pack.raw)
@@ -753,10 +810,11 @@ def seed_example(
     request = RunRequest(
         version=RUN_REQUEST_VERSION,
         label=name,
+        pack_path=pack_path,
         pack_fingerprint=file_fp,
         repeat_indexes=spec.get("repeat_indexes"),
         scripts=tuple(MockScript(**s) for s in spec.get("scripts", ())),
         illness_events=None if "illness" not in spec else {**_ILLNESS, "injected": spec["illness"]},
-        note=f"合成样例 {example}",
+        note=f"合成人物样例 {example}（资料包 {pack_path}）",
     )
     return profile, ws.save_request(name, request)

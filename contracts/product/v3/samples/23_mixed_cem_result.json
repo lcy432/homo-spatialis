@@ -611,7 +611,7 @@
     "clone_ref": "u503.m52.r0",
     "event_chain": [],
     "explanation": {
-     "audit_ref": "run:run-e3a-ddfe1a59629f8fd2 clone:u503.m52.r0 record:progress.json",
+     "audit_ref": "run:run-e3a-6dd51a5b096ccf87 clone:u503.m52.r0 record:progress.json",
      "category": "plan_or_execution_incomplete",
      "impact_zh": "不进完成者平均；城市的模拟缺失范围把它当作未知（0 到 1 之间都保留），不写成生活出局",
      "next_action_zh": "这是规划或模拟的问题，不是生活出局；改进规划器或说明之后重跑",
@@ -865,7 +865,7 @@
    "planner_kind": "mock"
   },
   "preflight": {
-   "preflight_fingerprint": "41da1e4a843e4828eb273ed798289b15e41d3de828b4a9deb78756aae22fc544",
+   "preflight_fingerprint": "c0dc10edc5de52e8be8bfe4ce66874731a13c3316c213dcbf7649bf9ab3830f7",
    "preflight_id": "preflight.confirmed.draft.u503.r1"
   },
   "reading_guide_zh": [
@@ -879,9 +879,9 @@
    "分数是当前合成模型下、按你确认的陈述偏好计算的结果；小数末位的差异不构成可靠的排序"
   ],
   "real_model_calls": 0,
-  "result_fingerprint": "cf485f12b614293e935dbdcb810dd28d66e4010477eb084bf4e1266306dbcf3d",
-  "result_id": "result.run-e3a-ddfe1a59629f8fd2",
-  "run_id": "run-e3a-ddfe1a59629f8fd2",
+  "result_fingerprint": "ac0cf9d36e8846f3d99d4eb10d8d18ac4f369a787b51fc7ded38d40b8d461c9f",
+  "result_id": "result.run-e3a-6dd51a5b096ccf87",
+  "run_id": "run-e3a-6dd51a5b096ccf87",
   "run_stage": "completed",
   "sources_zh": [
    "生活事实：E1 结算记录（钱、岗位、住房、食品、服务月份）与月度资源账（本人家务小时）",

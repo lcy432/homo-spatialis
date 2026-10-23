@@ -1,0 +1,953 @@
+# E3B 六城真实资料包的产品配置（DECISIONS/0042）。由 scripts/life_pack_us.py build 生成，不要手改：
+# 问卷与产品词表沿用 E3-A；城市、职业、能力、菜系与 E1 基础样例指向冻结的六城资料包。
+pack_notice: real_data_frozen：E3B 六城真实资料包。城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定；不排序真实城市
+pack:
+  pack_id: pack.e3b.us-v1
+  status: real_data_frozen
+  observed_on: '2026-10-23'
+  note: E3B 六城真实资料包：城市（CBSA 2023 都会区，按税务支持范围裁剪）、住房、通勤、食品、服务、设备、活动、岗位、培训与官方 2024 年税来自公开资料与登记的模型设定；生活规则与评分参数仍是合成探索设定。问卷与产品词表沿用 E3-A
+  e1_base:
+    life_input: data/frozen/life/us-v1/pack/life_input.json
+    scoring_config: data/frozen/life/us-v1/pack/scoring.json
+    evaluation_config: data/frozen/life/us-v1/pack/evaluation.json
+    city_facts: data/frozen/life/us-v1/pack/city_facts.json
+    protocol_id: life-v1-e3b-us
+    scoring_version: e1-life-v1
+    scoring_content_fingerprint: 180fd9389343bac1da0fac4528e4eb6e9c6d7e069bddd56ea47acdcc4380bce0
+    prompt_template: e3b-product-prompt-v1
+  run:
+    prompt_template: e3b-product-prompt-v1
+    repeat_indexes:
+    - 0
+    - 1
+    - 2
+    - 3
+    max_revisions_per_year: 2
+    permission_version: e3a-product-v1
+    show_health_answers: true
+    planner:
+      kind: mock
+      planner_id: mock.rules.e3a-product
+      version: e3a-product-mock-v1
+      rules_version: e3a-product-mock-rules-v1
+  money_basis:
+    currency: USD
+    base_year: 2024
+    minor_unit_digits: 2
+  money_bases:
+  - currency: USD
+    price_period: '2024'
+    meaning: liquid_funds_v1
+    conversion_rule: identity_same_basis_v1
+    numeraire_id: USD_2024_LOCAL
+    note: 按 2024 年美元、当地价格水平填写的可动用流动资金；与目录同一口径，换算是恒等，不做通胀或汇率换算
+  start_model_settings:
+    time_budget_hours_per_year: 4380
+    energy_quota: 250
+    energy_scale_version: e1-4a-monthly-quota-v1
+    reserved_text: 只预留协议声明的睡眠与基本休息（每天 12 小时），其余 12 小时/天可分配
+    readable_time_note: 每月可安排约 365 小时（每天 12 小时的睡眠与基本休息已经预留在外）——本版统一的模型设定，不是对你的测量
+    readable_energy_note: 每月可承受 250 个负担点的活动（本版统一的模型设定）；上一年过得越满意，下一年最多多 10%
+  age_min: 18
+  age_max: 100
+  cities:
+  - city_ref: US:CBSA2023:35620
+    country: US
+    scheme: CBSA2023
+    code: '35620'
+    label: 纽约（纽约市五区居民）
+    geography_version: CBSA2023 / PUMA2020
+    note: 支持的居住与工作地按税务范围裁剪（tax.us2024.nyc）
+  - city_ref: US:CBSA2023:31080
+    country: US
+    scheme: CBSA2023
+    code: '31080'
+    label: 洛杉矶
+    geography_version: CBSA2023 / PUMA2020
+    note: 支持的居住与工作地按税务范围裁剪（tax.us2024.ca）
+  - city_ref: US:CBSA2023:41860
+    country: US
+    scheme: CBSA2023
+    code: '41860'
+    label: 旧金山
+    geography_version: CBSA2023 / PUMA2020
+    note: 支持的居住与工作地按税务范围裁剪（tax.us2024.ca）
+  - city_ref: US:CBSA2023:16980
+    country: US
+    scheme: CBSA2023
+    code: '16980'
+    label: 芝加哥（伊利诺伊州部分）
+    geography_version: CBSA2023 / PUMA2020
+    note: 支持的居住与工作地按税务范围裁剪（tax.us2024.il）
+  - city_ref: US:CBSA2023:26420
+    country: US
+    scheme: CBSA2023
+    code: '26420'
+    label: 休斯敦
+    geography_version: CBSA2023 / PUMA2020
+    note: 支持的居住与工作地按税务范围裁剪（tax.us2024.tx）
+  - city_ref: US:CBSA2023:42660
+    country: US
+    scheme: CBSA2023
+    code: '42660'
+    label: 西雅图
+    geography_version: CBSA2023 / PUMA2020
+    note: 支持的居住与工作地按税务范围裁剪（tax.us2024.wa）
+  occupations:
+  - concept_id: occ.counter_drinks
+    label: 柜台点单与饮品制作
+    duties:
+    - 在柜台点单与收款
+    - 制作咖啡、奶茶等饮品
+    aliases:
+    - 做饮品
+    - 饮品制作
+    - 咖啡师
+    - 奶茶
+    - barista
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 35-3023
+      basis: SOC 2018 职业 35-3023（E3B 支持的职业范围）
+  - concept_id: occ.cashier
+    label: 收银员
+    duties:
+    - 为顾客结账收款
+    - 核对现金与票据
+    aliases:
+    - 收银
+    - cashier
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 41-2011
+      basis: SOC 2018 职业 41-2011（E3B 支持的职业范围）
+  - concept_id: occ.retail_sales
+    label: 门店销售员
+    duties:
+    - 在门店接待顾客、介绍商品
+    - 整理货架与陈列
+    aliases:
+    - 店员
+    - 售货员
+    - 门店销售
+    - 导购
+    - retail sales
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 41-2031
+      basis: SOC 2018 职业 41-2031（E3B 支持的职业范围）
+  - concept_id: occ.soc_35_3031
+    label: 餐厅服务员
+    duties:
+    - 餐厅服务员
+    aliases:
+    - 餐厅服务员
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 35-3031
+      basis: SOC 2018 职业 35-3031（E3B 支持的职业范围）
+  - concept_id: occ.soc_35_9021
+    label: 洗碗工
+    duties:
+    - 洗碗工
+    aliases:
+    - 洗碗工
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 35-9021
+      basis: SOC 2018 职业 35-9021（E3B 支持的职业范围）
+  - concept_id: occ.soc_35_2014
+    label: 餐厅厨师
+    duties:
+    - 餐厅厨师
+    aliases:
+    - 餐厅厨师
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 35-2014
+      basis: SOC 2018 职业 35-2014（E3B 支持的职业范围）
+  - concept_id: occ.soc_37_2011
+    label: 清洁工（楼宇）
+    duties:
+    - 清洁工（楼宇）
+    aliases:
+    - 清洁工（楼宇）
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 37-2011
+      basis: SOC 2018 职业 37-2011（E3B 支持的职业范围）
+  - concept_id: occ.soc_37_2012
+    label: 家政与客房清洁员
+    duties:
+    - 家政与客房清洁员
+    aliases:
+    - 家政与客房清洁员
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 37-2012
+      basis: SOC 2018 职业 37-2012（E3B 支持的职业范围）
+  - concept_id: occ.soc_37_3011
+    label: 园林绿化工
+    duties:
+    - 园林绿化工
+    aliases:
+    - 园林绿化工
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 37-3011
+      basis: SOC 2018 职业 37-3011（E3B 支持的职业范围）
+  - concept_id: occ.soc_53_7062
+    label: 搬运与装卸工
+    duties:
+    - 搬运与装卸工
+    aliases:
+    - 搬运与装卸工
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 53-7062
+      basis: SOC 2018 职业 53-7062（E3B 支持的职业范围）
+  - concept_id: occ.soc_53_7065
+    label: 理货与拣货员
+    duties:
+    - 理货与拣货员
+    aliases:
+    - 理货与拣货员
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 53-7065
+      basis: SOC 2018 职业 53-7065（E3B 支持的职业范围）
+  - concept_id: occ.soc_51_6011
+    label: 洗衣与干洗工
+    duties:
+    - 洗衣与干洗工
+    aliases:
+    - 洗衣与干洗工
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 51-6011
+      basis: SOC 2018 职业 51-6011（E3B 支持的职业范围）
+  - concept_id: occ.office_clerk
+    label: 办公室文员
+    duties:
+    - 处理文件与表格
+    - 录入与整理资料
+    - 接听电话、安排日程
+    aliases:
+    - 文员
+    - 行政助理
+    - 办公室职员
+    - office clerk
+    - admin assistant
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 43-9061
+      basis: SOC 2018 职业 43-9061（E3B 支持的职业范围）
+  - concept_id: occ.soc_43_4051
+    label: 客服代表
+    duties:
+    - 客服代表
+    aliases:
+    - 客服代表
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 43-4051
+      basis: SOC 2018 职业 43-4051（E3B 支持的职业范围）
+  - concept_id: occ.soc_43_6014
+    label: 秘书与行政助理
+    duties:
+    - 秘书与行政助理
+    aliases:
+    - 秘书与行政助理
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 43-6014
+      basis: SOC 2018 职业 43-6014（E3B 支持的职业范围）
+  - concept_id: occ.soc_43_4171
+    label: 前台与咨询员
+    duties:
+    - 前台与咨询员
+    aliases:
+    - 前台与咨询员
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 43-4171
+      basis: SOC 2018 职业 43-4171（E3B 支持的职业范围）
+  - concept_id: occ.soc_43_5071
+    label: 收发与库存文员
+    duties:
+    - 收发与库存文员
+    aliases:
+    - 收发与库存文员
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 43-5071
+      basis: SOC 2018 职业 43-5071（E3B 支持的职业范围）
+  - concept_id: occ.soc_43_3071
+    label: 银行柜员
+    duties:
+    - 银行柜员
+    aliases:
+    - 银行柜员
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 43-3071
+      basis: SOC 2018 职业 43-3071（E3B 支持的职业范围）
+  - concept_id: occ.soc_49_9071
+    label: 综合维修工
+    duties:
+    - 综合维修工
+    aliases:
+    - 综合维修工
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 49-9071
+      basis: SOC 2018 职业 49-9071（E3B 支持的职业范围）
+  - concept_id: occ.soc_51_4121
+    label: 焊工
+    duties:
+    - 焊工
+    aliases:
+    - 焊工
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 51-4121
+      basis: SOC 2018 职业 51-4121（E3B 支持的职业范围）
+  - concept_id: occ.soc_39_9031
+    label: 健身教练与团体课老师
+    duties:
+    - 健身教练与团体课老师
+    aliases:
+    - 健身教练与团体课老师
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 39-9031
+      basis: SOC 2018 职业 39-9031（E3B 支持的职业范围）
+  - concept_id: occ.soc_41_3091
+    label: 服务类销售代表
+    duties:
+    - 服务类销售代表
+    aliases:
+    - 服务类销售代表
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 41-3091
+      basis: SOC 2018 职业 41-3091（E3B 支持的职业范围）
+  - concept_id: occ.bookkeeper
+    label: 记账员或出纳
+    duties:
+    - 登记日常收支
+    - 管理现金与票据
+    aliases:
+    - 记账
+    - 出纳
+    - 做账
+    - bookkeeper
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 43-3031
+      basis: SOC 2018 职业 43-3031（E3B 支持的职业范围）
+  - concept_id: occ.soc_15_1232
+    label: 电脑用户支持专员
+    duties:
+    - 电脑用户支持专员
+    aliases:
+    - 电脑用户支持专员
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 15-1232
+      basis: SOC 2018 职业 15-1232（E3B 支持的职业范围）
+  - concept_id: occ.soc_49_3023
+    label: 汽车维修技师
+    duties:
+    - 汽车维修技师
+    aliases:
+    - 汽车维修技师
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 49-3023
+      basis: SOC 2018 职业 49-3023（E3B 支持的职业范围）
+  - concept_id: occ.soc_49_2022
+    label: 通信设备安装维修工
+    duties:
+    - 通信设备安装维修工
+    aliases:
+    - 通信设备安装维修工
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 49-2022
+      basis: SOC 2018 职业 49-2022（E3B 支持的职业范围）
+  - concept_id: occ.soc_27_4011
+    label: 音视频技术员
+    duties:
+    - 音视频技术员
+    aliases:
+    - 音视频技术员
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 27-4011
+      basis: SOC 2018 职业 27-4011（E3B 支持的职业范围）
+  - concept_id: occ.soc_23_2011
+    label: 律师助理
+    duties:
+    - 律师助理
+    aliases:
+    - 律师助理
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 23-2011
+      basis: SOC 2018 职业 23-2011（E3B 支持的职业范围）
+  - concept_id: occ.soc_15_1231
+    label: 网络支持专员
+    duties:
+    - 网络支持专员
+    aliases:
+    - 网络支持专员
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 15-1231
+      basis: SOC 2018 职业 15-1231（E3B 支持的职业范围）
+  - concept_id: occ.accountant
+    label: 会计
+    duties:
+    - 编制财务报表
+    - 核对账目与税务资料
+    aliases:
+    - 会计
+    - 审计
+    - accountant
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 13-2011
+      basis: SOC 2018 职业 13-2011（E3B 支持的职业范围）
+  - concept_id: occ.soc_15_1252
+    label: 软件开发工程师
+    duties:
+    - 软件开发工程师
+    aliases:
+    - 软件开发工程师
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 15-1252
+      basis: SOC 2018 职业 15-1252（E3B 支持的职业范围）
+  - concept_id: occ.soc_13_1161
+    label: 市场研究与营销专员
+    duties:
+    - 市场研究与营销专员
+    aliases:
+    - 市场研究与营销专员
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 13-1161
+      basis: SOC 2018 职业 13-1161（E3B 支持的职业范围）
+  - concept_id: occ.soc_13_1071
+    label: 人力资源专员
+    duties:
+    - 人力资源专员
+    aliases:
+    - 人力资源专员
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 13-1071
+      basis: SOC 2018 职业 13-1071（E3B 支持的职业范围）
+  - concept_id: occ.soc_15_1211
+    label: 计算机系统分析师
+    duties:
+    - 计算机系统分析师
+    aliases:
+    - 计算机系统分析师
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 15-1211
+      basis: SOC 2018 职业 15-1211（E3B 支持的职业范围）
+  - concept_id: occ.soc_13_2051
+    label: 金融与投资分析师
+    duties:
+    - 金融与投资分析师
+    aliases:
+    - 金融与投资分析师
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 13-2051
+      basis: SOC 2018 职业 13-2051（E3B 支持的职业范围）
+  - concept_id: occ.soc_27_1024
+    label: 平面设计师
+    duties:
+    - 平面设计师
+    aliases:
+    - 平面设计师
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 27-1024
+      basis: SOC 2018 职业 27-1024（E3B 支持的职业范围）
+  - concept_id: occ.soc_13_1082
+    label: 项目管理专员
+    duties:
+    - 项目管理专员
+    aliases:
+    - 项目管理专员
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 13-1082
+      basis: SOC 2018 职业 13-1082（E3B 支持的职业范围）
+  - concept_id: occ.soc_41_1011
+    label: 零售主管
+    duties:
+    - 零售主管
+    aliases:
+    - 零售主管
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 41-1011
+      basis: SOC 2018 职业 41-1011（E3B 支持的职业范围）
+  - concept_id: occ.soc_43_1011
+    label: 办公室行政主管
+    duties:
+    - 办公室行政主管
+    aliases:
+    - 办公室行政主管
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 43-1011
+      basis: SOC 2018 职业 43-1011（E3B 支持的职业范围）
+  - concept_id: occ.soc_35_1012
+    label: 餐饮主管
+    duties:
+    - 餐饮主管
+    aliases:
+    - 餐饮主管
+    mappings:
+    - country: US
+      scheme: SOC2018
+      version: '2018'
+      code: 35-1012
+      basis: SOC 2018 职业 35-1012（E3B 支持的职业范围）
+  abilities:
+  - ability_id: edu_at_least_hs
+    label: 高中毕业或同等学力
+    ask_when: 只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验
+  - ability_id: edu_at_least_some_college
+    label: 读过大学（未取得学位）
+    ask_when: 只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验
+  - ability_id: edu_at_least_associate
+    label: 副学士学位
+    ask_when: 只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验
+  - ability_id: edu_at_least_bachelor
+    label: 学士学位
+    ask_when: 只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验
+  - ability_id: edu_at_least_master
+    label: 硕士学位
+    ask_when: 只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验
+  - ability_id: edu_at_least_doctoral
+    label: 博士或专业学位
+    ask_when: 只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验
+  - ability_id: soc_27_4011_award
+    label: 音视频技术员的中学后证书
+    ask_when: 只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验
+  - ability_id: soc_35_1012_experience
+    label: 餐饮主管的相关工作经验
+    ask_when: 只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验
+  - ability_id: soc_35_2014_experience
+    label: 餐厅厨师的相关工作经验
+    ask_when: 只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验
+  - ability_id: soc_41_1011_experience
+    label: 零售主管的相关工作经验
+    ask_when: 只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验
+  - ability_id: soc_43_1011_experience
+    label: 办公室行政主管的相关工作经验
+    ask_when: 只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验
+  - ability_id: soc_49_2022_award
+    label: 通信设备安装维修工的中学后证书
+    ask_when: 只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验
+  - ability_id: soc_49_3023_award
+    label: 汽车维修技师的中学后证书
+    ask_when: 只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验
+  dimensions:
+  - key: material
+    label: 物质生活
+    definition: 住得多宽敞、吃得是否新鲜、日常杂务能不能花钱省掉等实际消费得到的条件（内部还要再分三项）
+    reference_improvement: 参考情境：从远处一居室、以米面罐头为主、洗衣打扫全部自己做，改善到每天三顿新鲜食材、每月少做约 18 小时家务（本版合成模型里的一档改善）
+    support: supported
+    support_note: 居住空间、新鲜食品、日常生活便利三项都能按实际生活评分；物质生活里的其他需求（通信、储物、衣着）本版没有
+  - key: safety
+    label: 安全
+    definition: 城市的公共安全条件
+    reference_improvement: 参考情境：合成安全指数从 4 提高到 8（0–10，只在本组合成城市之间可比）
+    support: partially_supported
+    support_note: 本版只有城市背景条件，分身不能花钱或行动改善它
+  - key: opportunity
+    label: 发展机会
+    definition: 城市提供的职业与成长条件，加上你在生活中实际学到的新能力
+    reference_improvement: 参考情境：在一年里学完一门 12 个月的资格课程，或城市发展条件从合成指数 4 提高到 8
+    support: supported
+    support_note: 城市背景 + 实际参加的学习；证书本身、换岗与涨薪不另加分
+  - key: leisure
+    label: 休闲
+    definition: 城市基础休闲条件，加上实际参加的锻炼、演出等活动
+    reference_improvement: 参考情境：从每月不参加任何活动，到每月去 8 次健身房
+    support: supported
+    support_note: 只算实际发生的活动；具体爱好与地理的匹配本版没有
+  - key: environment
+    label: 环境
+    definition: 空气、气候与城市环境的背景条件
+    reference_improvement: 参考情境：合成环境指数从 4 提高到 8（0–10，只在本组合成城市之间可比）
+    support: partially_supported
+    support_note: 本版只有城市背景条件，分身不能行动改善它
+  - key: commute
+    label: 交通便捷程度
+    definition: 住处到工作地点的往返时间与实际出门上班的次数对生活的影响
+    reference_improvement: 参考情境：每月到岗 20 次时，每天往返从 70 分钟缩短到 30 分钟
+    support: supported
+    support_note: 按实际所住住房的往返分钟与实际到岗次数评分；非工作出行本版没有细化
+  material_leaves:
+  - key: housing_condition
+    label: 居住条件
+    definition: 实际住的那一处房子本身的条件：空间够不够用、同类房子里条件好不好
+    support: supported
+    note: 只看房子本身；房租、通勤、地区的安全与环境不在这一项（安全、环境按住处所在片区另算）；旧版的“居住空间（只看面积）”含义不同，旧的确认要重新审阅
+  - key: food_life
+    label: 饮食生活
+    definition: 实际吃的完整食品方案（自己做、外食都可以）新鲜不新鲜、合不合你确认的口味
+    support: partially_supported
+    note: 只评价新鲜餐与你确认的菜系；吃饱是基本保障，不另加分；价格、餐馆档次与外食次数不等于更好；准备时间算在时间账里
+  - key: daily_convenience
+    label: 日常生活便利
+    definition: 你愿意在多大程度上花钱减少日常杂务（洗衣与打扫）
+    support: supported
+    note: 只看本人实际少做了多少小时；设备与人工服务是两种实现方式，不分别打分；它是相对重要程度，不是预算或必须购买的指令；不是旧问卷的“洗衣”题
+  - key: personal_enjoyment
+    label: 个人消费与享受
+    definition: 实际在用的居家舒适用品与实际接受的享受型服务（例如舒适的椅子、按摩）
+    support: partially_supported
+    note: 按实际提供的功能或服务量评价，不按花了多少钱或买了几件；同一种舒适多买一件不再加分；纯爱好装备（吉他、球拍）只让活动可以开展，放在家里不算享受
+  points:
+    manual_entry: 手工输入按精确十进制解析，最多 2 位小数（步长不是测量精度）；也接受规范分数写法（例如 50/3）
+    manual_max_decimals: 2
+    display_decimals: 1
+    canonical_form: 约分后的整数（30）或 分子/分母（50/3）；计算与比较都用它，显示四舍五入到 1 位小数，显示值不回流计算
+    equal_split_six: 50/3
+    equal_split_material: '25'
+    rules:
+    - 六维合计必须精确等于 100；不预填数值、不提供人格套餐，不自动按比例扣减其他项
+    - 只有用户主动选择“平均分配”才生成均分（六维每项 50/3、物质每项 25），不让排在前面的项目多拿分
+    - 明确 0 是已提供的数值；“未答”“明确无所谓”“暂不确定”都不会被自动换成 0 或均分
+    - 物质父项为正时，物质四项也必须精确合计 100；物质父项明确为 0 时细分不适用，不伪造四个回答
+    - 物质从三项改成四项、饮食的含义扩大之后，旧的确认不能补 0 或重新分配点数沿用：请重新审阅并确认
+  health_questionnaire:
+    version: e3a-health-coping-q-v0.1-draft
+    status: draft_wording_not_validated
+    common_prompt: 假设基本生活已有保障，判断下面的选择是否符合你。没有正确答案。
+    questions:
+    - question_id: hc_more_pay_more_sick_risk
+      text: 一种安排能多赚一点钱，但生病、需要休息几天的可能也更高。我愿意选择它。
+      agree_meaning: 愿意为多一点收入接受更高的生病与休息可能
+      disagree_meaning: 不愿意为多一点收入接受更高的生病与休息可能
+    - question_id: hc_reserve_for_health_costs
+      text: 为了应对可能发生的健康开支，我愿意推迟一次想要、但并不急需的消费，先留一笔钱。
+      agree_meaning: 愿意推迟不急需的消费，先为可能的健康开支留钱
+      disagree_meaning: 不倾向为可能的健康开支推迟不急需的消费
+    - question_id: hc_wait_for_clear_risk_info
+      text: 健康风险的信息还不清楚时，我愿意先放弃眼前的一点收益，等了解清楚再决定。
+      agree_meaning: 健康风险信息不清楚时，愿意先放弃一点眼前收益、等了解清楚
+      disagree_meaning: 健康风险信息不清楚时，不倾向为了等待而放弃眼前收益
+    options:
+    - option_id: agree
+      label: 符合我
+      meaning: 这句话符合用户自己
+    - option_id: disagree
+      label: 不符合我
+      meaning: 这句话不符合用户自己
+    - option_id: no_clear_tendency
+      label: 无明显倾向
+      meaning: 用户在这一题上没有明显倾向
+    - option_id: unsure
+      label: 暂不确定
+      meaning: 用户暂不确定——没有这一项的明确指令
+    unanswered_rule: 没有作答另存为“未答”，与“暂不确定”分开；两者都表示没有这一项的明确指令，不补中间值
+    rules:
+    - 不计算总健康分，不推断患病概率、疼痛权重、疗效、愿付金额或拒绝治疗
+    - 健康回答不占六维 100 分，也不是第七个评分权重；只供分身做计划，不改变疾病规则、γ、H、账目或满足感
+    - 题目是暂定文案，没有经过认知访谈或量表验证
+  hard_requirement_options:
+  - option_id: housing.max_commute_roundtrip
+    label: 住处到就业中心的往返时间不超过（分钟）
+    parameter: max_commute_roundtrip_minutes
+    unit: 分钟
+    minimum: 20
+    maximum: 180
+    step: 5
+    need: commute_limit
+    compiles_to: E1 硬要求：住房类别、通勤执行记录里最长的往返分钟 ≤ 给定分钟（每个月检查；没有到岗的月份是 0）
+    verification: 每月检查实际所住住房的往返分钟：满足、不满足、无法判断单独报告；不进分数，也不拦截计划
+  attribute_kinds:
+  - kind: brand
+    label: 品牌
+    support: unsupported
+    usage:
+    - retained_only
+    note: 已记录原文，本版不评分、不交给分身；需要同规格报价与匹配规则（V2）
+  - kind: cuisine
+    label: 菜系
+    support: unsupported
+    usage:
+    - retained_only
+    note: 这里的原文只留存；想让口味进入饮食评价，请在“口味与菜系”一项里描述并选中类别
+  - kind: preparation
+    label: 制作方式（做饭 / 外卖）
+    support: unsupported
+    usage:
+    - retained_only
+    note: 已记录原文，本版不评分
+  - kind: tier
+    label: 档次
+    support: unsupported
+    usage:
+    - retained_only
+    note: 已记录原文，本版不评分；不从价格推断档次偏好
+  - kind: service_quality
+    label: 服务质量
+    support: unsupported
+    usage:
+    - retained_only
+    note: 已记录原文，本版不评分
+  - kind: home_entry_concern
+    label: 上门顾虑（例如不想让陌生人进家）
+    support: unsupported
+    usage:
+    - retained_only
+    note: 已记录原文；本版没有能核验或拦截上门服务的机制，分身可能选择上门服务——即使你把它确认为不可妥协，也只能原样留存
+  interests:
+    leisure_categories:
+    - key: music
+      label: 音乐
+      aliases:
+      - 音乐
+      - 吉他
+      - 唱歌
+      - 合唱
+      - 乐器
+      - music
+      - guitar
+      - choir
+    - key: racket_sports
+      label: 球拍运动
+      aliases:
+      - 网球
+      - 羽毛球
+      - 乒乓球
+      - 球拍
+      - tennis
+      - badminton
+    - key: arts_culture
+      label: 艺术与文化
+      aliases:
+      - 美术馆
+      - 博物馆
+      - 展览
+      - 音乐会
+      - 看演出
+      - museum
+      - gallery
+    - key: culinary
+      label: 美食活动
+      aliases:
+      - 烹饪
+      - 做菜
+      - 品鉴
+      - cooking
+    - key: fitness
+      label: 健身
+      aliases:
+      - 健身
+      - 跑步
+      - 撸铁
+      - gym
+      - running
+    cuisines:
+    - key: home_style
+      label: 家常菜
+      aliases:
+      - 家常
+    - key: chinese
+      label: 中餐
+      aliases:
+      - 中餐
+      - 中国菜
+      - 川菜
+      - 粤菜
+      - chinese
+    - key: italian
+      label: 意大利菜
+      aliases:
+      - 意大利
+      - 意式
+      - 披萨
+      - 意面
+      - italian
+      - pasta
+    - key: mexican
+      label: 墨西哥菜
+      aliases:
+      - 墨西哥
+      - 塔可
+      - mexican
+      - taco
+    - key: japanese
+      label: 日本料理
+      aliases:
+      - 日料
+      - 日本菜
+      - 寿司
+      - 拉面
+      - japanese
+      - sushi
+    - key: indian
+      label: 印度菜
+      aliases:
+      - 印度
+      - 咖喱
+      - indian
+      - curry
+    - key: thai
+      label: 泰国菜
+      aliases:
+      - 泰国
+      - 泰餐
+      - thai
+    - key: korean
+      label: 韩国料理
+      aliases:
+      - 韩国
+      - 韩餐
+      - korean
+    - key: vietnamese
+      label: 越南菜
+      aliases:
+      - 越南
+      - 河粉
+      - vietnamese
+      - pho
+    - key: mediterranean
+      label: 地中海菜
+      aliases:
+      - 地中海
+      - 希腊菜
+      - mediterranean
+      - greek
+    leisure_states_zh:
+    - 未答：没有这一项的明确信息，按中性规则评价；不会被当成“通用评价”的选择
+    - 暂不确定：按中性规则评价
+    - 明确没有固定爱好：按中性规则评价
+    - 采用通用休闲评价：城市有什么合适的就体验什么（按中性规则评价）
+    - 用文字描述：先按词表形成候选，你选中的类别才进入评价；没认出的描述原样保留，本版不评价
+    taste_states_zh:
+    - 未答：按中性规则评价
+    - 暂不确定：按中性规则评价
+    - 明确没有口味偏好：按中性规则评价
+    - 用文字描述：先按词表形成候选，你选中的菜系才进入饮食评价；品牌与其他要求只留存
+    matching_note_zh: 确认的兴趣只在同样的实际参与时间下带来适度更高的满足（模型假设：多 50%，有上限）；确认的菜系只让实际吃到的合口味餐多计一点。 这些系数是公开登记的模型假设，不是对你个人的测量；不改变你的点数、现金或资格，也不让贵的东西自动更好
+  start_scenario:
+  - 这是一次搬到候选城市重新开始的简化情景：从第 1 年、健康、没有已有物品、没有在学课程、没有资金目标开始
+  - 现实中的旧家具、病史与在学课程暂未纳入；这是模拟的假设，不是对你现实情况的判断
+  - 同一个你在各城市、各个分身里的年龄、现金、能力与基础时间精力都相同；城市里的具体岗位按当地目录匹配
+  unsupported:
+  - 多人家庭、非工资收入（利息、股息、副业）、家庭共同资产、买房与贷款
+  - 税收抵免、税前扣除与逐项扣除；纽约市以外的纽约都会区居民、芝加哥都会区的印第安纳部分、跨州组合
+  - 停车费与按距离计的公交票价；旧金山的公交票价（官方网站拒绝访问）
+  - 芝加哥公园管理局的真实活动（需要日期窗口、整期报名与年龄资格，引擎暂不支持）
+  - 品牌、制作方式、档次、服务质量与上门顾虑的评分（只记录原文）
+  - 访谈式输入（只保留来源与证据引用接口）
+  limits:
+  - 城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定：结果不排序真实城市，也不是现实推荐
+  - 安全与休闲背景是六城共同先验（没有可比资料）；治疗价格是共同假设；外食、服务、设备寿命与活动价格含登记的模型设定
+  - 离线规划器是可控的 mock，不代表真实大语言模型的能力或偏好理解
+  - 问卷文案与参考改善范围是暂定稿，没有做认知访谈与量表验证
+  catalog_scope:
+    scope_version: e3a-convenience-inventory-scope-v1
+    declared_scope: 便利设备与人工服务来自真实资料包（ENERGY STAR 型号与本都会区服务职业工资），不在这里另编合成候选
+    categories:
+    - household_device
+    - household_service
+    tasks:
+    - laundry
+    - cleaning
+    geography_scope: CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）
+  facts: []
+  candidates: []

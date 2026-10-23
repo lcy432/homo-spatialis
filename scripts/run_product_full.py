@@ -60,8 +60,8 @@ def _with_repeats(n: int) -> None:
     """每座城 n 个重复分身：改资料包的 run.repeat_indexes，与 ``product.scenarios.closed_loop`` 的做法相同。"""
     original = sc.load_pack
 
-    def load() -> DataPack:
-        pack = original()
+    def load(*args: Any) -> DataPack:
+        pack = original(*args)
         raw = json.loads(json.dumps(pack.raw, default=str))
         raw["pack"]["run"]["repeat_indexes"] = list(range(n))
         return DataPack(raw, pack.path)
@@ -75,25 +75,29 @@ def _with_years(years: int) -> None:
 
     def workspace(work: Path) -> Path:
         w = original(work)
-        path = w / "configs/life/synthetic_product.yaml"
+        pack = yaml.safe_load((w / sc.PACK_PATH).read_text(encoding="utf-8"))
+        path = w / pack["pack"]["e1_base"]["life_input"]
         data = yaml.safe_load(path.read_text(encoding="utf-8"))
         data["protocol"]["simulation_years"] = years
-        path.write_text(
-            yaml.safe_dump(data, allow_unicode=True, sort_keys=False, width=1000),
-            encoding="utf-8",
-            newline="\n",
+        text = (
+            json.dumps(data, ensure_ascii=False, default=str)
+            if path.suffix == ".json"
+            else yaml.safe_dump(data, allow_unicode=True, sort_keys=False, width=1000)
         )
+        path.write_text(text, encoding="utf-8", newline="\n")
         return w
 
     sc.workspace = workspace
 
 
-def compile_full(work: Path, *, repeats: int, years: int | None) -> sc.Scenario:
+def compile_full(
+    work: Path, *, repeats: int, years: int | None, abilities: tuple[str, ...] = ()
+) -> sc.Scenario:
     """产品链编译到 E1 预检查（mock 规划器的运行配置）。"""
     _with_repeats(repeats)
     if years is not None:
         _with_years(years)
-    s = sc.preflight_only(work, "full")
+    s = sc.preflight_only(work, "full", **({"abilities": abilities} if abilities else {}))
     if s.pre.preflight.status != "ready":
         raise SystemExit(f"E1 预检查没有通过：{s.pre.preflight.status}")
     return s
@@ -191,6 +195,17 @@ def main() -> None:
     )
     ap.add_argument("--run-id", default=None)
     ap.add_argument(
+        "--abilities",
+        nargs="*",
+        default=[],
+        help="草稿里明确确认的能力（例如 edu_at_least_hs）；系统不从职业称呼自动授予",
+    )
+    ap.add_argument(
+        "--pack",
+        default=None,
+        help="资料包（默认 E3-A 合成资料包；E3B 六城真实资料包是 configs/product/e3b_us_v1_pack.yaml）",
+    )
+    ap.add_argument(
         "--workers",
         type=int,
         default=None,
@@ -204,10 +219,14 @@ def main() -> None:
     if args.out.exists():
         raise SystemExit(f"{args.out} 已存在：换一个新目录")
     work = args.out.resolve()
+    if args.pack:
+        sc.PACK_PATH = Path(args.pack)
     if not args.mock:
         # 运行目录可以在仓库之外：密钥的后备从仓库根目录的 .env 读（进程环境优先，不覆盖），不打印
         load_dotenv(REPO / ".env", override=False)
-    s = compile_full(work / "ws", repeats=args.repeats, years=args.years)
+    s = compile_full(
+        work / "ws", repeats=args.repeats, years=args.years, abilities=tuple(args.abilities)
+    )
     ws = s.work
     world = s.pre.world
     assert world is not None

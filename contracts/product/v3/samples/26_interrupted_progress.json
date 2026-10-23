@@ -30,7 +30,7 @@
    "vocabulary_version": "e3a-vocabulary-v3"
   },
   "pause": {
-   "audit_ref": "run:run-e3a-79139a294f3b2cd5 record:progress.json",
+   "audit_ref": "run:run-e3a-904c9b35c67ecf0a record:progress.json",
    "category": "interrupted",
    "impact_zh": "已经提交的年份保留在归档里；还没有生成评价与汇总，不擅自给出分类或分数",
    "next_action_zh": "可以恢复同一次运行（恢复前逐条核对归档，已用的调用次数与预算不清零）；系统不会替分身生成计划",
@@ -39,7 +39,7 @@
   "report_available": false,
   "resumable": true,
   "resume_note": "可以从年度边界或两份候选之间恢复（E1 的恢复入口逐条核对归档，尝试次数与调用次数不清零）",
-  "run_id": "run-e3a-79139a294f3b2cd5",
+  "run_id": "run-e3a-904c9b35c67ecf0a",
   "stage": "interrupted",
   "stage_zh": "在两次规划调用之间中断"
  }

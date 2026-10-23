@@ -156,12 +156,29 @@ def _derived_protocol(protocol: LifeProtocol) -> tuple[LifeProtocol, IllnessEven
     return LifeProtocol.model_validate(data), source
 
 
-def valuation_catalog(catalog: CityLifeCatalog, n: int) -> CityLifeCatalog:
-    """估值期（第 N+1 年）沿用第 N 年的年度菜单（DECISIONS/0042）：菜单只冻结到第 N 年，估值期不抽新菜单。"""
+def valuation_catalog(
+    catalog: CityLifeCatalog, n: int, slot_ids: frozenset[str] = frozenset()
+) -> CityLifeCatalog:
+    """估值期（第 N+1 年）的菜单（DECISIONS/0042）：沿用第 N 年的菜单，再加上评价规格绑定的槽位机会。菜单只冻结到第 N 年，
+    估值期不抽新菜单；参考集合由评价规格定义（各分身相同），不受随机菜单影响。"""
     if not catalog.menus:
         return catalog
+    category = {o.opportunity_id: o.category for o in catalog.opportunities}
     extra = tuple(
-        m.model_copy(update={"menu_id": f"{m.menu_id}.valuation", "year": n + 1})
+        m.model_copy(
+            update={
+                "menu_id": f"{m.menu_id}.valuation",
+                "year": n + 1,
+                "opportunity_ids": tuple(
+                    dict.fromkeys(
+                        (
+                            *m.opportunity_ids,
+                            *sorted(s for s in slot_ids if category.get(s) == m.category),
+                        )
+                    )
+                ),
+            }
+        )
         for m in catalog.menus
         if m.year == n
     )
@@ -867,7 +884,11 @@ def value_terminal(
             + "；".join(m for _, m in problems)
         )
 
-    catalog = valuation_catalog(catalog, protocol.simulation_years)
+    catalog = valuation_catalog(
+        catalog,
+        protocol.simulation_years,
+        frozenset(t.opportunity_id for t in binding.targets if t.opportunity_id is not None),
+    )
     quota = _valuation_quota(protocol, terminal, last_year)
     not_valued = _not_valued(terminal, spec.valuation_horizon_months, spec, catalog)
     if isinstance(quota, str):

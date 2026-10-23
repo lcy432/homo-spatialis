@@ -220,7 +220,7 @@ class CatalogScope(_Strict):
 
 class PackBody(_Strict):
     pack_id: str
-    status: Literal["synthetic_fixture_only"]
+    status: Literal["synthetic_fixture_only", "real_data_frozen"]
     observed_on: _dt.date
     note: str
     e1_base: E1Base
@@ -311,7 +311,9 @@ class DataPack:
             pack_id=self.body.pack_id,
             content_fingerprint=self.fingerprint,
             status=self.body.status,
-            note="合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
+            note="合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料"
+            if self.body.status == "synthetic_fixture_only"
+            else "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定",
         )
 
     def meta(self, sample: SampleLabel | None = None) -> ProductMeta:

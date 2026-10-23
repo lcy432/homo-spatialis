@@ -86,7 +86,7 @@ def make_draft(
     *,
     draft_id: str = "draft.u501",
     revision: int = 1,
-    cities: tuple[str, ...] = (K51, M52),
+    cities: tuple[str, ...] | None = None,
     occupation_text: str | None = "我在写字楼做全职文员，平时处理文件和表格",
     selected: str | None = "occ.office_clerk",
     age: int | None = 35,
@@ -112,6 +112,8 @@ def make_draft(
 ) -> UserInputDraft:
     """一份合成草稿；默认就是主故事里的 u501（全职文员、看重省事、健康问卷一题暂不确定、通勤上限 60 分钟）。"""
     amount, currency, period = cash
+    if cities is None:  # 默认：资料包里的全部城市（合成资料包就是 K51、M52）
+        cities = tuple(c.city_ref for c in pack.body.cities)
     return UserInputDraft(
         meta=pack.meta(sample),
         draft_id=draft_id,
@@ -157,6 +159,12 @@ WORKSPACE_FILES = (
     "configs/life/scoring_product.yaml",
     "configs/life/evaluation_product.yaml",
     "configs/life/city_facts_product.yaml",
+    # E3B 六城真实资料包（DECISIONS/0042）
+    "configs/product/e3b_us_v1_pack.yaml",
+    "data/frozen/life/us-v1/pack/life_input.json",
+    "data/frozen/life/us-v1/pack/scoring.json",
+    "data/frozen/life/us-v1/pack/evaluation.json",
+    "data/frozen/life/us-v1/pack/city_facts.json",
 )
 
 

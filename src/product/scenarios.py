@@ -79,13 +79,17 @@ class Scenario:
     extra: dict[str, Any] = field(default_factory=dict)
 
 
+#: 离线闭环用哪一份资料包（工作区里的相对路径）。默认是 E3-A 合成资料包；E3B 的全规模 mock 运行改成真实资料包。
+PACK_PATH = Path("configs/product/e3a_synthetic_pack.yaml")
+
+
 def workspace(work: Path) -> Path:
     return prepare_workspace(Path(work), REPO)
 
 
 def capabilities(work: Path) -> ProductCapabilities:
     with contextlib.chdir(workspace(work)):
-        pack = load_pack()
+        pack = load_pack(PACK_PATH)
         return build_capabilities(
             pack,
             sample=label(
@@ -132,7 +136,7 @@ def closed_loop(
     work = workspace(work)
     sample = label(origin, f"product.scenarios.closed_loop({name})", note)
     with contextlib.chdir(work):
-        pack = load_pack()
+        pack = load_pack(PACK_PATH)
         if repeat_indexes is not None:
             raw = copy.deepcopy(pack.raw)
             raw["pack"]["run"]["repeat_indexes"] = list(repeat_indexes)
@@ -194,7 +198,7 @@ def review_only(work: Path, name: str, *, person: str = "u501", **draft_kwargs: 
         "审阅与确认的实际输出（没有运行生活）",
     )
     with contextlib.chdir(work):
-        pack = load_pack()
+        pack = load_pack(PACK_PATH)
         draft = make_draft(pack, draft_id=f"draft.{person}.{name}", sample=sample, **draft_kwargs)
         review = review_draft(pack, draft, sample=sample)
         s = Scenario(name=name, work=work, pack=pack, draft=draft, review=review)
@@ -226,7 +230,7 @@ def preflight_only(
         origin, f"product.scenarios.preflight_only({name})", "预检查的实际输出（没有运行生活）"
     )
     with contextlib.chdir(work):
-        pack = load_pack()
+        pack = load_pack(PACK_PATH)
         if mutate_pack is not None:
             raw = copy.deepcopy(pack.raw)
             mutate_pack(raw["pack"])
@@ -318,7 +322,7 @@ def positive_weight_data_unknown(work: Path) -> Scenario:
         "工作区副本里 M52 的安全资料改成资料未知（评分条件与可见事实一起改）；预检查的实际输出",
     )
     with contextlib.chdir(work):
-        pack = load_pack()
+        pack = load_pack(PACK_PATH)
         draft = make_draft(pack, draft_id="draft.u510.unknown_safety")
         review = review_draft(pack, draft)
         confirmed = confirm_profile(
@@ -347,7 +351,7 @@ def catalog_boundary(work: Path) -> tuple[CatalogCompilation, OptionInventoryCov
     """目录编译的边界样例（受控夹具）：在资料包副本里加几个不完整或混合来源的候选，看编译怎样处理。"""
     work = workspace(work)
     with contextlib.chdir(work):
-        pack = load_pack()
+        pack = load_pack(PACK_PATH)
         raw = copy.deepcopy(pack.raw)
         body = raw["pack"]
         body["facts"] += [
@@ -534,7 +538,7 @@ def catalog_statuses(work: Path) -> tuple[CatalogCompilation, OptionInventoryCov
     效果没有来源；报价引用了记录效果的事实。原有候选照常编译，分母包括全部候选。"""
     work = workspace(work)
     with contextlib.chdir(work):
-        pack = load_pack()
+        pack = load_pack(PACK_PATH)
         raw = copy.deepcopy(pack.raw)
         body = raw["pack"]
         body["facts"] += [
@@ -740,7 +744,7 @@ def duplicate_answers(work: Path) -> Scenario:
         "草稿里故意写了重复与冲突的答案（受控夹具）；审阅的实际输出",
     )
     with contextlib.chdir(work):
-        pack = load_pack()
+        pack = load_pack(PACK_PATH)
         raw = make_draft(
             pack,
             draft_id="draft.u511.duplicates",
