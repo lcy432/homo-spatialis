@@ -1340,6 +1340,14 @@ class _Year:
             raise LifeContractError(f"第 {m} 月实际住房有 {len(homes)} 处，不是恰好一处")
         return homes[0] if homes else None
 
+    def _residence_after(self) -> str | None:
+        """这一年最后一个完整生活月实际住的那一处（续租用）；没有就是 None。"""
+        lived = [r.month for r in self.resource_months if r.resource_check == "complete"]
+        if not lived:
+            return None
+        home = self._home_in(max(lived))
+        return home.opportunity_id if home is not None else None
+
     def _onsite_jobs(self, m: int) -> list[OnsiteJob]:
         """这个月实际上了班（拿到工资）、需要到岗的岗位。病假与没有执行的岗位不在里面。"""
         out = []
@@ -2323,6 +2331,8 @@ class _Year:
             ),
             savings_goals=goals,
             health=next_health,
+            env_repeat=s.env_repeat,
+            residence=self._residence_after(),
             goals=tuple(s.goals),
             experience_summary=(tuple(s.experience_summary) + tuple(self.events))[
                 -MAX_SUMMARY_ENTRIES:

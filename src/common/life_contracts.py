@@ -2526,6 +2526,20 @@ class SyntheticTaxPolicy(ContractModel):
         return self
 
 
+class MenuDecl(ContractModel):
+    """一份年度菜单（DECISIONS/0042）：某一类机会（住房、岗位）在第 ``year`` 年、第 ``env_repeat`` 个环境重复里给分身看的那几项。
+
+    菜单是冻结在目录里的资料（抽法与种子写在 ``basis``，种子里没有分身编号），同一城、同一年、同一个环境重复的分身看到同一份；
+    续租、延续、修订与查询都不重抽。没有菜单的类别整类都给看（例如食品、服务、物品），培训与活动按自己的日期。"""
+
+    menu_id: IdStr
+    category: KeyStr
+    year: YearIndex
+    env_repeat: Annotated[int, Field(ge=1, le=99)]
+    opportunity_ids: tuple[IdStr, ...] = Field(min_length=1)
+    basis: str = Field(min_length=1, max_length=400)
+
+
 class TaxCitation(ContractModel):
     """一条税规则的官方出处（DECISIONS/0042）：网址、取得日期、原始文件的 SHA-256 与原文摘句。构建时核对摘句确实在那份原始
     文件里、规则里的每个数都出现在摘句里（数是读出来的，不是生成的）。"""
@@ -2637,6 +2651,8 @@ class CityLifeCatalog(ContractModel):
     areas: tuple[AreaDecl, ...] = Field(default=(), exclude_if=lambda v: v == ())
     #: 通勤关系（DECISIONS/0042）：住处片区 × 就业片区 × 方式。有需要到岗的岗位就必须有（加载器检查）。
     commute: CommuteRelation | None = Field(default=None, exclude_if=lambda v: v is None)
+    #: 年度菜单（DECISIONS/0042）。有菜单的类别只给看菜单上的与可以延续的；没有用到时不序列化。
+    menus: tuple[MenuDecl, ...] = Field(default=(), exclude_if=lambda v: v == ())
     #: 这座城适用的合成税策略。缺了**不能结算**——没有配置不等于零税。
     tax_policy_id: IdStr | None = None
     #: E1-3 增补订正：各项需求功能的供给资料是否完整。目录里没有记录不等于确定没有。
@@ -2755,6 +2771,55 @@ class CityLifeCatalog(ContractModel):
 
     def area(self, area_id: str) -> AreaDecl | None:
         return next((a for a in self.areas if a.area_id == area_id), None)
+
+    @model_validator(mode="after")
+    def _menus_consistent(self) -> CityLifeCatalog:
+        keys = [(m.category, m.year, m.env_repeat) for m in self.menus]
+        if len(keys) != len(set(keys)):
+            raise ValueError(f"{self.city}: 同一类别、年份与环境重复的菜单不止一份")
+        by_id = {o.opportunity_id: o for o in self.opportunities}
+        for m in self.menus:
+            for oid in m.opportunity_ids:
+                o = by_id.get(oid)
+                if o is None or o.category != m.category:
+                    raise ValueError(
+                        f"{self.city}/{m.menu_id}: {oid} 不是目录里的 {m.category} 类机会"
+                    )
+        return self
+
+    @property
+    def menu_categories(self) -> frozenset[str]:
+        return frozenset(m.category for m in self.menus)
+
+    def offered_ids(self, state: PersonYearState) -> frozenset[str]:
+        """这个人这一年能看到、能写进计划的机会（DECISIONS/0042）：没有菜单的类别全部；有菜单的类别是这一年这个环境重复的菜单，
+        加上可以延续的（续租现在住的那一处、现在的岗位），加上最低生活的保底方案（兜底要用）。分身之间看同一份菜单。"""
+        cats = self.menu_categories
+        if not cats:
+            return frozenset(o.opportunity_id for o in self.opportunities)
+        if state.env_repeat is None:
+            raise LifeContractError(f"{state.clone_id}: 这座城有年度菜单，状态却没有环境重复编号")
+        out = {o.opportunity_id for o in self.opportunities if o.category not in cats}
+        for cat in sorted(cats):
+            menu = next(
+                (
+                    m
+                    for m in self.menus
+                    if (m.category, m.year, m.env_repeat)
+                    == (cat, state.year_index, state.env_repeat)
+                ),
+                None,
+            )
+            if menu is None:
+                raise LifeContractError(
+                    f"{self.city}: 没有第 {state.year_index} 年、环境重复 {state.env_repeat} 的 {cat} 菜单"
+                )
+            out.update(menu.opportunity_ids)
+        if state.residence is not None:
+            out.add(state.residence)
+        out.update(state.employment.current_position_ids)
+        out.update(m.baseline_opportunity_id for m in self.minimum_living)
+        return frozenset(out)
 
     def supply_for(self, function: str) -> FunctionSupply | None:
         return next((f for f in self.function_supply if f.function == function), None)
@@ -3043,6 +3108,12 @@ class PersonYearState(ContractModel):
     savings_goals: tuple[SavingsGoal, ...] = ()
     #: 健康状态（年龄、重复序号、正在延续的疾病、病史、上月工作相对负担、绑定；DECISIONS/0027）。
     health: HealthState
+    #: 年度菜单的环境重复编号（DECISIONS/0042）：开局分配、之后不变；同一城同一编号的分身看同一份菜单。没有菜单时不写。
+    env_repeat: Annotated[int, Field(ge=1, le=99)] | None = Field(
+        default=None, exclude_if=lambda v: v is None
+    )
+    #: 上一年最后一个生活月实际住的那一处（续租用，DECISIONS/0042）；开局与没有住处时不写。
+    residence: IdStr | None = Field(default=None, exclude_if=lambda v: v is None)
     goals: tuple[Annotated[str, Field(min_length=1, max_length=200)], ...] = ()
     experience_summary: tuple[
         Annotated[str, Field(min_length=1, max_length=MAX_SUMMARY_CHARS)], ...

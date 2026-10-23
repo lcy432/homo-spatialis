@@ -524,3 +524,89 @@ def test_a_replacement_that_is_not_a_durable_good_is_refused(bundle, start):
     )
     probs = plan_problems(bundle.protocol, bundle.catalog_for(K51), action)
     assert [p.code for p in probs] == ["bad_replacement"]
+
+
+# --------------------------------------------------------------------------- 年度菜单与延续（DECISIONS/0042）
+#
+# 岗位菜单：第 1 年环境重复 1 只有兼职，环境重复 2 只有会计；文员是开局岗位（可以延续）。住房菜单：第 1 年只有近处，第 2 年
+# 只有远处；远处也是最低住房的保底方案，所以总在可选里。
+
+
+def with_menus(d: dict) -> None:
+    def menu(cat: str, year: int, env: int, ids: list[str]) -> dict:
+        return {
+            "menu_id": f"menu.k51.{cat}.y{year}.r{env}",
+            "category": cat,
+            "year": year,
+            "env_repeat": env,
+            "opportunity_ids": ids,
+            "basis": "测试菜单（种子里没有分身编号）",
+        }
+
+    d["menus"] = [
+        menu("job", 1, 1, ["k51.job.shop_parttime"]),
+        menu("job", 1, 2, ["k51.job.accountant"]),
+        menu("job", 2, 1, ["k51.job.shop_parttime"]),
+        menu("housing", 1, 1, ["k51.housing.near"]),
+        menu("housing", 1, 2, ["k51.housing.near"]),
+        menu("housing", 2, 1, ["k51.housing.far"]),
+    ]
+
+
+def test_the_menu_and_continuations_are_what_can_be_seen_and_chosen(bundle, start):
+    cat = catalog_with(bundle, with_menus)
+    s1 = start.model_copy(update={"env_repeat": 1})
+    offered = cat.offered_ids(s1)
+    assert {"k51.job.shop_parttime", "k51.job.clerk"} <= offered  # 菜单 + 现在的岗位
+    assert "k51.job.accountant" not in offered
+    assert {"k51.housing.near", "k51.housing.far"} <= offered  # 菜单 + 最低住房保底
+    assert "k51.food.basic" in offered  # 没有菜单的类别全部可选
+    other = start.model_copy(update={"env_repeat": 2, "clone_id": "u301.k51.r9"})
+    assert "k51.job.accountant" in cat.offered_ids(other)  # 环境重复不同，菜单不同
+
+
+def test_choosing_off_the_menu_is_refused_by_the_authoritative_check(bundle, start):
+    from ledger.life_catalog import plan_state_problems
+
+    from .conftest import year_action
+
+    cat = catalog_with(bundle, with_menus)
+    s1 = start.model_copy(update={"env_repeat": 1})
+    action = year_action(s1, plan(extra=[whole("k51.job.accountant")]))
+    codes = [p.code for p in plan_state_problems(bundle.protocol, s1, action, cat)]
+    assert "not_on_menu" in codes
+    no_env = plan_state_problems(bundle.protocol, start, year_action(start, plan()), cat)
+    assert [p.code for p in no_env if p.code == "menu_data"] == ["menu_data"]
+
+
+def test_the_observation_shows_only_the_menu_and_the_lines_that_matter(bundle, start):
+    from .test_views import _obs
+
+    cat = catalog_with(bundle, with_menus)
+    obs = _obs(bundle, state=start.model_copy(update={"env_repeat": 1}), catalog=cat)
+    ids = {o.opportunity_id for o in obs.opportunities}
+    assert "k51.job.accountant" not in ids and "k51.job.shop_parttime" in ids
+    assert {a.area_id for a in obs.areas} == {"k51.area.near", "k51.area.far", "k51.area.center"}
+
+
+def test_the_current_home_can_be_renewed_off_the_menu(bundle, scoring, start):
+    cat = catalog_with(bundle, with_menus)
+    s1 = start.model_copy(update={"env_repeat": 1})
+    y1 = live_year(bundle, scoring, s1, plan("k51.housing.near"), catalog=cat)
+    s2 = y1.next_state
+    assert s2.residence == "k51.housing.near" and s2.env_repeat == 1
+    assert "k51.housing.near" in cat.offered_ids(s2)  # 第 2 年菜单只有远处，续租近处照样可以
+    y2 = live_year(bundle, scoring, s2, plan("k51.housing.near"), catalog=cat)
+    assert y2.settlement.status == "completed"
+
+
+def test_the_valuation_period_keeps_year_n_menus_and_draws_no_failures(bundle):
+    from econ.life_terminal_value import _derived_protocol, valuation_catalog
+
+    cat = catalog_with(bundle, with_menus)
+    v = valuation_catalog(cat, 2)
+    year3 = [m for m in v.menus if m.year == 3]
+    assert {m.category for m in year3} == {"job", "housing"}
+    assert all(m.menu_id.endswith(".valuation") for m in year3)
+    vprotocol, _ = _derived_protocol(failing_protocol(bundle))
+    assert vprotocol.device_failures is None
