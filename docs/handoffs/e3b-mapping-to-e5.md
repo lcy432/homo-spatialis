@@ -56,6 +56,6 @@
 
 ### 7.1 最后收尾（2026-10-24）要界面层做的事
 
-* **4 份旧草稿夹具**：`web/tests/fixtures/drafts/` 的 4 份草稿还是按公共结构 v2 生成的，所以 `tests/product/test_web_drafts.py` 的 4 条测试跳过（不是需要真实模型的测试）。请按现有 v3.3 公共结构与最终样例重新生成（在 `web/` 里运行 `UPDATE_DRAFT_FIXTURES=1 npx vitest run tests/draft-fixtures.test.ts`）并恢复这 4 条测试；本轮不改页面，也不另升公共结构版本。
-* **停机预算 20 元**：正式服务每次运行的停机预算改成 20 元（`configs/product/service.yaml`）。预检查与进度里的 `max_cost` 照原样显示服务给的值，不要写成“保证花多少”——20 元是到了就停下的上限，预计花费另算。
+* **4 份旧草稿夹具**：`web/tests/fixtures/drafts/` 的 4 份草稿还是按公共结构 v2 生成的，所以 `tests/product/test_web_drafts.py` 的 4 条测试跳过（不是需要真实模型的测试）。请按现有 v3.3 公共结构与最终样例重新生成（在 `web/` 里运行 `UPDATE_DRAFT_FIXTURES=1 npx vitest run tests/draft-fixtures.test.ts`）并恢复这 4 条测试；本轮不改页面，也不另升公共结构版本。**已完成**（`85f7c90`）：生成器改为按 v3 样例 `01_capabilities.json` 生成并按 v3 的 `UserInputDraft` schema 校验，4 份夹具只改了版本信息、答案不变，4 条测试恢复通过。
+* **停机预算 20 元**：正式服务每次运行的停机预算改成 20 元（`configs/product/service.yaml`）。预检查与进度里的 `max_cost` 照原样显示服务给的值，不要写成“保证花多少”——20 元是到了就停下的上限，预计花费另算。现在的离线界面把它放在“费用”一栏（`web/src/components/Preflight.tsx`、`Progress.tsx`），付费运行会读成“费用：20 元”：界面迁到 v3 与托管服务时改称停机上限（本轮不改页面）。
 * 请求里中文不再拆成模板碎片、Flash 输入护栏改成 192,000，都只影响发给模型的文字，没有公共字段变化。
