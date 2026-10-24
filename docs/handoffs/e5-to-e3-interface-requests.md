@@ -1,6 +1,6 @@
 # E5 → E3 接口需求
 
-更新：2026-10-18（本地时区 UTC−7）。E5 首轮讨论（所有者确认“合并版”方案）之后提出，**待 E3 排期与答复**。
+更新：2026-10-18（本地时区 UTC−7）。E5 首轮讨论（所有者确认“合并版”方案）之后提出；2026-10-23 E3C 答复了 B1–B8 与 C1–C4（各条目下的“E3 答复”）。
 
 本文只提需求，不改变现有契约：权威结构仍是 `src/common/product_contracts.py` → [contracts/product/v2/](../../contracts/product/v2/README.md)，字段名与含义
 由 E3 决定。每条写明：用户在界面上遇到什么、现在的契约是什么样、建议的请求或回复（字段名只是举例）、E5 在 E3 答复之前怎么做。E3 答复时请直接
@@ -35,6 +35,10 @@
   `attention` / `notice` / `error`）由 `src/workflows/runtime.py` 输出，不在 `contracts/product/` 里，没有 schema，也不在 `index.json` 的哈希核对里。
 - **建议**：E3 把它（至少公开部分）收进共享结构、导出 schema 与样例（等待确认、运行中、需要处理、已交付、被拒），或者在 RunProgress 里加提交前的阶段
   （流程说明第 10 节第 2 条）。界面在这之前不接一份没有 schema 的 JSON。
+
+- **E3 答复（2026-10-23，E3C）**：已收进共享结构 `e3a-product-schema-v3.2`：`RunIntentView`（阶段与中文、`waiting_for`、运行前说明与 `confirm_with`、进度、
+  `result_available`、`allowed_actions`、时间、删除状态、安全说明与支持编号、次数），有 schema 与样例（等确认 71、阻断 81、排队 70 / 73、运行中 76、暂停 82、结束 78、
+  删除 87、过期 90）。LangGraph 原型自己的 `status()` 视图仍是内部的，界面不读它（[E3C 交接](e3c-to-e5-service.md)、[ADR0043](../../DECISIONS/0043-e3c-hosted-service.md)）。
 
 ## A. 影响 E5-A 呈现
 
@@ -149,6 +153,10 @@ E5 在此之前：没有草稿的场景从确认页开始演示并在页面上�
   成功返回 `ConfirmedProfile`；失败返回 `{"status": "refused", "issues": [ProductIssue, …]}`，草稿版本过时也用这个格式给出明确代码。`person_ref` 由服务端
   按登录会话决定（C1），不由浏览器填。
 
+- **E3 答复（2026-10-23，E3C）**：`POST /api/v1/profiles/confirm` 收 `ProfileConfirmRequest`（审阅编号、草稿编号、修订号、知悉项），**不收完整草稿**——草稿由服务端按
+  版本保存（`PUT /api/v1/drafts/{id}`，`expected_revision` 对不上 409 `revision_conflict`）。回复 `ProfileConfirmReply`：`confirmed` 带服务端生成的确认画像，`refused`
+  带 `ProductIssue`（审阅之后草稿改过 `review_stale`、知悉项缺失 `acknowledgement_missing` 等）。`person_ref` 由服务身份派生，浏览器不提交。样例 63–68（[E3C 交接](e3c-to-e5-service.md)、[ADR0043](../../DECISIONS/0043-e3c-hosted-service.md)）。
+
 ### B2 进度：当前位置、更新时间、由谁处理
 
 - **界面场景**：小林在进度页等着，想知道“现在跑到哪了”；批次停下时想知道“要我做什么，还是等别人”。
@@ -163,6 +171,10 @@ E5 在此之前：没有草稿的场景从确认页开始演示并在页面上�
 
   停下时 `handled_by` 写 `"maintainer"`、`"user"` 或 `"none"`（不能恢复），界面据此写“等维护者处理，你不需要重新填写”或给出按钮。
 
+- **E3 答复（2026-10-23，E3C）**：`RunProgress.updated_at` 是 worker 写下这份快照的时间；“由谁处理”在 `RunIntentView.waiting_for`（`user` / `maintainer` /
+  `service` / `none`）与 `allowed_actions`（只有服务端判定安全时才有 `resume`）。没有另加 `current` 与排队位置：逐分身的 `years_committed` 就是“过到第几年”；
+  排队只写阶段（`checking` / `queued`），单个 worker 串行，不承诺位置。样例 76、77、82、83（[E3C 交接](e3c-to-e5-service.md)、[ADR0043](../../DECISIONS/0043-e3c-hosted-service.md)）。
+
 ### B3 恢复入口
 
 - **现在**：E1 有 `resume_run`（`orchestration/life_runner.py` 第 1974 行），只在 `running` / `interrupted` / `halted` 时可以恢复，尝试次数与预算不清零；
@@ -170,6 +182,10 @@ E5 在此之前：没有草稿的场景从确认页开始演示并在页面上�
 - **建议**：恢复请求带 `run_id` 与它自己的幂等键，回复是“已恢复”或结构化拒绝；重复点击只产生一次恢复执行。E5 建议 V1 只由维护者恢复——发送状态不确定、
   预算不足、模型不符这些情况，用户点一下就可能重复付费。
 - **E5 在此之前**：不做恢复按钮。
+
+- **E3 答复（2026-10-23，E3C）**：`POST /api/v1/runs/{run_id}/resume`，只在 `allowed_actions` 含 `resume` 时可用——目前只有“模型服务暂时不可用、E1 停在可以恢复的
+  边界”这一种；发送状态不确定、预算停下、模型不符、归档冲突都等维护者（`waiting_for = maintainer`，维护者用本机命令行 `jobs` 查看）。已经排队的再点返回 409
+  `not_resumable`，只执行一次；恢复不另扣次数，已保存的回复不重新请求。样例 82、83（[E3C 交接](e3c-to-e5-service.md)、[ADR0043](../../DECISIONS/0043-e3c-hosted-service.md)）。
 
 ### B4 提交：持久幂等、回执丢失、同一份预检查去重
 
@@ -183,17 +199,30 @@ E5 在此之前：没有草稿的场景从确认页开始演示并在页面上�
   3. 服务端另加一条保护：同一个用户、同一份预检查已经有运行时，直接返回那次运行，不依赖浏览器还记得键；
   4. `service` 增加托管取值。
 
+- **E3 答复（2026-10-23，E3C）**：四条都做了。服务端 SQLite 是唯一权威的登记，“接受、预留 1 次、写稳定运行编号、排队”在一个 `BEGIN IMMEDIATE` 短事务里；回执丢失后
+  同一个键、同一份内容重发返回原运行（`duplicate_same_run`）；同一个意图（同一份确认与运行前说明）换了键也只对应一个运行——这条保护在服务端，不依赖浏览器记住键；
+  同一个键配了不同内容 409 `idempotency_conflict`；`RunReceipt.service = hosted_service`。样例 72–75（[E3C 交接](e3c-to-e5-service.md)、[ADR0043](../../DECISIONS/0043-e3c-hosted-service.md)）。
+
 ### B5 真实模型的费用投影
 
 - **现在**：`product.bridge.progress` 把费用写死成 `offline_mock_zero_cost`（第 175–180 行）。
 - **建议**：真实模型运行写 `estimated_from_quote`，给出已用调用次数、上限、按报价估算的金额与币种，并保留“以供应商账单为准”的说明；预检查的
   `max_cost` 与之同源。
 
+- **E3 答复（2026-10-23，E3C）**：做了。mock 才写 `offline_mock_zero_cost`；真实模型写 `estimated_from_quote`，从这次运行自己的账本只读汇总：已核算 `settled_cost`、
+  用量不确定 `uncertain_cost`（保留预留，不记 0）、在途预留 `in_flight_cost`，`estimated_cost` 是三者之和；规划候选（`calls_used` / `call_limit`）与服务尝试
+  （`service_attempts` / `service_attempt_limit`）分开计；带币种、报价版本与 10 元上限，`note` 写明不是供应商账单。预检查的 `max_cost` 与它同源（正式运行设置）。
+  样例 77；真实模型在服务链上还没有试跑（[E3C 交接](e3c-to-e5-service.md)、[ADR0043](../../DECISIONS/0043-e3c-hosted-service.md)）。
+
 ### B6 预检查请求与可调参数
 
 - **现在**：`run_preflight` 接收完整的确认画像与编译目录（`product/preflight.py` 第 102 行）；每城分身数与年数来自资料包的运行设置。
 - **建议**：网络请求只带确认引用，画像由服务端保存。V1 是否允许用户调整城市数之外的参数（每城分身数、年数）请 E3 与所有者确认；如果允许，要有正式的
   请求字段与上限。E5 目前只显示，不提供调整。
+
+- **E3 答复（2026-10-23，E3C）**：网络请求只带确认引用（`POST /api/v1/run-intents` 的 `confirmed_id`），画像由服务端保存，运行前检查由 worker 排队做。V1 不开放
+  调参数：所有者确认固定六城 × 每城 4 个分身 × 3 年（`SessionView.rules` 写明）；浏览器带规模、模型、预算或路径字段返回 422，确认的城市不是全部六城返回 409
+  `run_scale_fixed`（[E3C 交接](e3c-to-e5-service.md)、[ADR0043](../../DECISIONS/0043-e3c-hosted-service.md)）。
 
 ### B7 分身自己的说法（模型理由）
 
@@ -209,12 +238,19 @@ E5 在此之前：没有草稿的场景从确认页开始演示并在页面上�
   界面放在“分身自己的说法（可能算错）”一栏，旁边是“环境记录（以此为准）”。是否需要额外的信息隔离检查、长度上限，由 E3 定。
 - **E5 在此之前**：留出位置，写“本版结果还没有提供分身自己的理由”，不放任何模拟内容。
 
+- **E3 答复（2026-10-23，E3C）**：本轮没有做（E3C 的范围是托管服务）；`ProductResult` 仍不含规划理由与需求摘要。E5 继续显示占位文字，等后续单独排期。
+
 ## C. E5-C 上线之前要定（E5 的建议，供所有者与 E3 决定）
 
 - **C1 访问控制与用户归属**：`person_ref` 由服务端会话决定；每次运行只能由创建它的会话打开；不拿 run_id 当钥匙。
 - **C2 留存与删除**：建议草稿与结果默认保留 30 天，用户可以随时一键删除；真实用户的文字与模型回复不进仓库，不做公开分享链接。
 - **C3 单执行者队列与费用保护**：现在的预算账本只支持串行；E3 与 E5 共用一套队列，不各建一套。
 - **C4 “我的运行”**：用户回来时能看到自己已有的运行与状态（配合 B4 的同一份预检查去重）。
+
+- **E3 答复（2026-10-23，E3C）**：C1 访问控制——服务身份 `principal_id` 由专属链接决定，每个对象按它过滤，别人的编号一律“没有找到”，`run_id` 不是钥匙。
+  C2 留存与删除——结果从首次结束起 30 天、草稿最后编辑起 30 天、等待中的意图最后一次业务操作起 30 天，查看不续期；可以删一次运行或删除全部内容（保留次数记录
+  与最小墓碑）；不做长期备份、不做分享链接。C3 队列与费用保护——单个 worker 串行，服务端 SQLite 是唯一队列；每次运行一本新账本、10 元上限。C4 我的运行——
+  `GET /api/v1/runs`，会话视图另有 `drafts` 与 `open_intent_id`（[E3C 交接](e3c-to-e5-service.md)、[ADR0043](../../DECISIONS/0043-e3c-hosted-service.md)）。
 
 ## 追加（E5 后续轮次）
 

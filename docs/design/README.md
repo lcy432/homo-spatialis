@@ -8,7 +8,7 @@
 |---|---|
 | 生活引擎 | [生活条件与满足感（E1-3，含日常生活便利第 21 节）](e1-3-life-model.md)、[时间与精力（E1-4）](e1-4-time-energy.md)、[职业、储蓄、风险（E1-5）](e1-5-career-savings-risk.md)、[跨期评价与城市汇总（E1-6）](e1-6-evaluation.md)、[生活扩展：食品方案、享受、装备与爱好](e1-8-life-extension.md) |
 | 代理层 | [代理规划闭环与真实模型（E1-7；第 18 节是 Haiku 测试）](e1-7-agent-loop.md) |
-| 接入层 | [E3/E5 共享接口与设计约定](e3-e5-product-contract.md)、[E3-A 用户输入与 E1 适配](e3a-product-input.md)、[intake-02 真实资料与机会数据库](intake-02-real-data.md)、[LangGraph 外层运行流程](langgraph-product-workflow.md) |
+| 接入层 | [E3/E5 共享接口与设计约定](e3-e5-product-contract.md)、[E3-A 用户输入与 E1 适配](e3a-product-input.md)、[intake-02 真实资料与机会数据库](intake-02-real-data.md)、[LangGraph 外层运行流程](langgraph-product-workflow.md)、[E3C 托管服务](e3c-service.md) |
 | 界面层 | [E5-A 离线界面原型](e5-a-offline-ui.md) |
 | 跨层 | [参数与假设目录](parameter-assumption-register.md) |
 
@@ -16,7 +16,7 @@
 
 ## 交接说明
 
-[E3 交接](../handoffs/e3-data-input-handoff.md)、[E5 交接](../handoffs/e5-product-handoff.md)、[E5 对 E3 的接口需求](../handoffs/e5-to-e3-interface-requests.md)、[日常生活便利交给接入层](../handoffs/e1-daily-convenience-to-e3.md)、[生活扩展交给界面层](../handoffs/e3-to-e5-life-extension.md)。
+[E3 交接](../handoffs/e3-data-input-handoff.md)、[E5 交接](../handoffs/e5-product-handoff.md)、[E5 对 E3 的接口需求](../handoffs/e5-to-e3-interface-requests.md)、[日常生活便利交给接入层](../handoffs/e1-daily-convenience-to-e3.md)、[生活扩展交给界面层](../handoffs/e3-to-e5-life-extension.md)、[E3C 托管服务交给界面层](../handoffs/e3c-to-e5-service.md)。
 
 ## 历史
 

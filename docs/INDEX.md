@@ -2,7 +2,7 @@
 
 **层与命名、轮次与状态、默认入口都只在这里写一次。** 其他文档不再各写一遍状态，只链接过来。改了状态、默认配置或命名，只改这一份。
 
-更新：2026-10-22。
+更新：2026-10-23。
 
 ## 0. 现在怎么工作（开发期）
 
@@ -75,15 +75,16 @@
 | intake-01 | E3-A | 六维＋独立健康的输入适配、共享消息结构（v2） | 已实现 | | [0034](../DECISIONS/0034-e3a-product-input-contract.md) |
 | intake-02 | E3-B | 真实资料与机会数据库：六个验证都会区的官方与公开来源批量获取、标准化与溯源，住房 B 映射（ACS 加权条件分布，中位数与标准误成对，官方州别顶码）与 A 覆盖网格，按板块的机会注册表（资料缺口与 E1 缺口分开）、分页查询与菜单（共享、不重抽），LangGraph 资料构建流程（可恢复、按内容身份复用、原始文件指纹约束读取、冻结） | 已实现；收尾修复（独立审核 F1–F6 与两处口径）离线自测通过，待独立复核 | 构建 `562c3233…`：真实记录 144,743、机会 85,316（真实记录本身 66,350、派生 324、映射生成 18,642）、菜单 252；现在能编进 E1 的 0 项（活动的日期与年龄限制 E1 表达不了），只缺资料 21,474 / 只缺 E1 8,621 / 两样都缺 55,149 / 参考事实 72；美国目录的家电 1,634 个（241 个只在加拿大销售的不计）；HUD 被拒、FBI 要密钥、旧金山快餐与咖啡 504；冻结库只在本机，清单与报告在 `data/frozen/intake/us-v1/`；说明见 [intake-02 技术说明](design/intake-02-real-data.md) | [0040](../DECISIONS/0040-intake-02-real-data-database.md) |
 | intake-03 | E3-B 收尾 | 六城可执行生活资料包与最小引擎适配：片区与居住条件、按住处片区的地区条件、通勤关系表与每月执行记录、官方 2024 年税（摘句核对）、设备故障与预先声明的替换、年度菜单与续租；都会区安全背景（FBI 2024、纽约州 DCJS）与休闲共同背景 1；独立审核 F1–F6 的修复（用车费不含油费、构建身份核对实际内容、参考住房按参考岗位绑定、mock 用车、可见事实不写内部锚点、E5 逐城治安说明）；六城组装、冻结与产品链（mock、LangGraph、恢复、零调用重放） | 已实现；修复及离线自测完成，待独立复核 | 资料包 `data/frozen/life/us-v1/pack/`（构建 `7cc38665…`），产品配置 `configs/product/e3b_us_v1_pack.yaml`（`real_data_frozen`）；提示模板 `e3b-product-prompt-v1`；缺口：旧金山公交、芝加哥公园真实活动、四城培训、博物馆价格、纽约都会区新泽西与宾州部分的犯罪资料；说明见 [E3B 资料包](design/e3b-life-pack.md)、[通勤资料](design/e3b-commute-data.md)、[生活机会与职业](design/e3b-items-data.md) | [0042](../DECISIONS/0042-e3b-real-life-pack.md) |
-| intake-05 | E3-C | 资料缺口补齐与 E1 扩展（活动日历、整期报名、年龄资格；在职积累经验）；向界面层提供真实资料包的运行与结果 | 计划中 | | |
-| intake-04 | — | LangGraph 外层运行流程：预检查 → 等用户确认 → 幂等登记 → 启动或恢复生活引擎 → 交付结果；SQLite 持久化，接上接入层（E3-A）的预检查、登记与投影和代理层的启动、恢复 | 已实现 | 原型：只接离线 mock 规划器，没有并发锁与托管；说明见 [LangGraph 外层流程](design/langgraph-product-workflow.md)；接线由 `tests/workflows` 覆盖 | |
+| intake-05 | E3-C | 托管服务：一人一条专属链接与 7 天会话（Cookie + CSRF、限流）、3 次启动机会（服务端事件记账，预留 → 已使用 / 退回）、服务端确认画像、运行意图与正式运行设置（固定六城 × 每城 4 个分身 × 3 年、`product_planner`、每次运行一本新账本、10 元上限）、单个 worker 驱动现有 LangGraph 与 E1（进程锁、重启恢复、发送许可）、删除与 30 天过期；公共结构 v3.2 与 OpenAPI | 已实现；离线验收通过 | 没有部署（主机、域名、TLS 都没有），付费调用开关关闭（`live_calls_enabled: false`），真实模型没有在服务链上试跑，网页还没接线；说明见 [E3C 托管服务](design/e3c-service.md)，交接见 [E3C → E5](handoffs/e3c-to-e5-service.md) | [0043](../DECISIONS/0043-e3c-hosted-service.md) |
+| intake-06 | — | 资料缺口补齐与 E1 扩展（活动日历、整期报名、年龄资格；在职积累经验） | 计划中 | 原先排在 E3-C 名下，E3C 改做托管服务后另排 | |
+| intake-04 | — | LangGraph 外层运行流程：预检查 → 等用户确认 → 幂等登记 → 启动或恢复生活引擎 → 交付结果；SQLite 持久化，接上接入层（E3-A）的预检查、登记与投影和代理层的启动、恢复 | 已实现 | 原型本身只接离线 mock；托管服务（intake-05）的 worker 驱动同一套流程，注入真实规划器、停止控制、启动核对与服务端登记表；说明见 [LangGraph 外层流程](design/langgraph-product-workflow.md)；接线由 `tests/workflows` 与 `tests/product_service` 覆盖 | |
 
 ### 界面层
 
 | 编号 | 旧编号 | 内容 | 状态 | 备注 | ADR |
 |---|---|---|---|---|---|
 | ui-01 | E5-A | 离线界面原型（React + TypeScript + Vite，`web/`；读共享结构 v2 的公共样例） | 已实现 | 说明见 [e5-a](design/e5-a-offline-ui.md) | [0036](../DECISIONS/0036-e5a-offline-ui.md) |
-| ui-02 | E5-B / E5-C | 接接入层服务与运行器；串行排队、服务端密钥、预算与轻量部署 | 计划中 | | |
+| ui-02 | E5-B / E5-C | 网页接 E3C 托管服务：专属链接换会话、草稿与确认、运行意图、轮询进度与结果、删除（[E3C 交接](handoffs/e3c-to-e5-service.md)）。次数、排队、预算、后台调度与删除过期由 E3C 负责，界面不另做 | 计划中 | | |
 
 ### 研究线
 
@@ -98,6 +99,7 @@ P8 / P9 / P10 已实现，门一已过，门二与门三待真实输入；开发
 | 全规模产品流程测试（所有城市、每城 ≥ 4 个分身、完整年限） | `scripts/run_product_full.py`（Qwen 最新 Flash，`product_planner`；每次运行一本新账本；`--mock` 零费用） |
 | 产品样例的 Flash 配置 / Haiku 测试配置（显式 `--config`） | `configs/life/run_product_flash.yaml`（账本 `ledgers/qwen-flash-convenience/`）/ `configs/life/run_product_haiku.yaml` |
 | 离线 mock 对照 | `configs/life/run_product_mock.yaml` |
+| 托管服务（E3C） | `scripts/product_service.py`（api / worker / invite / jobs / quota-adjust / openapi）；生产 `configs/product/service.yaml`（真实规划器、付费开关关闭），本地联调 `configs/product/service_local_mock.yaml`（离线 mock，只绑定 127.0.0.1） |
 | 接入层产品链 | `scripts/product_e3a.py` 显式编译产品样例 |
 | 六城真实生活资料包（E3B） | `scripts/life_pack_us.py`：`fetch-tax`、`fetch-safety`（联网）→ `check-tax`、`check-safety` → `build`（离线，读 intake 冻结库与两份冻结资料，写 `data/frozen/life/us-v1/pack/` 与产品配置）；产品链 `scripts/run_product_full.py --mock --pack configs/product/e3b_us_v1_pack.yaml --abilities edu_at_least_hs`；敏感性 `scripts/life_pack_sensitivity.py` |
 | 真实资料构建（intake-02） | 配置 `configs/intake/us_v1.yaml`；`scripts/intake_data.py`：`fetch`（唯一联网的命令）→ `build`（LangGraph，离线，可恢复）→ `export`；`query` / `menu` / `lineage` 查冻结库；测试样本由 `scripts/intake_fixtures.py` 生成 |
