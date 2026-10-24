@@ -77,6 +77,8 @@ class Pool:
     candidates: list[Candidate] = field(default_factory=list)
     masses: Counter[str] = field(default_factory=Counter)
     excluded: Counter[str] = field(default_factory=Counter)
+    #: 住房的普通租赁代理（``ordinary_rental_access_p10_v1``）：每个卧室组的门槛、样本数、回退层次与排除的权重
+    access: dict[str, Any] = field(default_factory=dict)
 
     def weights(self) -> list[tuple[str, float]]:
         return [(c.opportunity_id, c.weight) for c in self.candidates]
@@ -92,6 +94,7 @@ class Pool:
                 if k != "raw"
             },
             "excluded": dict(sorted(self.excluded.items())),
+            **({"ordinary_access": self.access} if self.access else {}),
         }
 
 
@@ -159,16 +162,107 @@ def housing_pool(
                 pool.masses[why] += share
             if problems:
                 continue
-            pool.masses["executable"] += share
+            pool.masses["prequalified"] += share
             pool.candidates.append(
                 Candidate(
                     f"{key}.housing.{puma}.{bed}.{pt['id']}",
                     float(share),
                     area,
-                    {"cell": cell, "table": table, "point": pt},
+                    {"cell": cell, "table": table, "point": pt, "share": share},
                 )
             )
+    apply_ordinary_access(pool, key)
     return pool
+
+
+ACCESS_RULE = "ordinary_rental_access_p10_v1"
+ACCESS_QUANTILE = Fraction(1, 10)
+ACCESS_MIN_RECORDS = 30
+
+
+def weighted_step_quantile(pairs: list[tuple[Decimal, Fraction]], q: Fraction) -> Decimal:
+    """加权阶梯分位：按值升序累计精确权重，第一次达到总权重 q 的那个观测值（不插值）。"""
+    ordered = sorted(pairs, key=lambda x: x[0])
+    total = sum((w for _, w in ordered), Fraction(0))
+    acc = Fraction(0)
+    for v, w in ordered:
+        acc += w
+        if acc >= q * total:
+            return v
+    return ordered[-1][0]
+
+
+def _rent(c: Candidate) -> Decimal:
+    return Decimal(c.data["point"]["gross_rent"])
+
+
+def _records(cands: list[Candidate]) -> set[str]:
+    """独立来源记录：按记录编号去重（回退借来的同一条记录在别的目标格出现，不重复计数）。"""
+    return {r for c in cands for r in c.data["point"]["records"]}
+
+
+def apply_ordinary_access(pool: Pool, key: str) -> None:
+    """普通租赁市场的保守模型代理（``ordinary_rental_access_p10_v1``，六城相同）：在前置合格池里按“都会区 × 卧室组”算毛租金的
+    加权阶梯 P10（权重 = 目标格权重 × 支持点权重 ÷ 支持表总权重，精确分数）；一组独立来源记录不到 30 条就回退到同城全部卧室，
+    仍不足就阻断冻结。租金严格低于门槛的退出普通可执行池（原因 ``access_unverified_low_tail``），等于门槛的保留；门槛在过滤前一次算定，
+    原始租金、来源与权重留在资料层，不抬价、不标成假房或补贴房。"""
+    groups: dict[str, list[Candidate]] = {}
+    for c in pool.candidates:
+        groups.setdefault(c.data["cell"]["stratum"], []).append(c)
+    pairs = lambda cs: [(_rent(c), c.data["share"]) for c in cs]  # noqa: E731
+    city_n = len(_records(pool.candidates))
+    city_threshold = (
+        weighted_step_quantile(pairs(pool.candidates), ACCESS_QUANTILE)
+        if city_n >= ACCESS_MIN_RECORDS
+        else None
+    )
+    thresholds: dict[str, Decimal] = {}
+    report: dict[str, Any] = {}
+    for bed, cs in sorted(groups.items()):
+        n = len(_records(cs))
+        if n >= ACCESS_MIN_RECORDS:
+            thr, level = weighted_step_quantile(pairs(cs), ACCESS_QUANTILE), "bedroom_group"
+        elif city_threshold is not None:
+            thr, level = city_threshold, "all_bedrooms"
+        else:
+            raise ValueError(
+                f"{key}: 卧室组 {bed} 只有 {n} 条、全城只有 {city_n} 条独立来源记录（要求 {ACCESS_MIN_RECORDS}）："
+                "无法形成普通租赁代理，阻断这座城的资料包冻结"
+            )
+        thresholds[bed] = thr
+        pre = sum((c.data["share"] for c in cs), Fraction(0))
+        out = [c for c in cs if _rent(c) < thr]
+        gone = sum((c.data["share"] for c in out), Fraction(0))
+        kept = [c for c in cs if _rent(c) >= thr]
+        report[bed] = {
+            "threshold": str(thr),
+            "independent_records": n,
+            "level": level,
+            "excluded_weight": f"{float(gone):.2f}",
+            "excluded_share_of_prequalified": f"{float(gone / pre):.4f}" if pre else None,
+            "min_rent_before": str(min(_rent(c) for c in cs)),
+            "min_rent_after": str(min(_rent(c) for c in kept)) if kept else None,
+        }
+    kept_all = []
+    for c in pool.candidates:
+        if _rent(c) < thresholds[c.data["cell"]["stratum"]]:
+            pool.masses["access_unverified_low_tail"] += c.data["share"]
+        else:
+            pool.masses["executable"] += c.data["share"]
+            kept_all.append(c)
+    pool.candidates = kept_all
+    pool.access = {
+        "rule": ACCESS_RULE,
+        "quantile": "1/10",
+        "min_independent_records": ACCESS_MIN_RECORDS,
+        "city_independent_records": city_n,
+        "city_threshold": None if city_threshold is None else str(city_threshold),
+        "groups": report,
+        "note_zh": (
+            "普通租赁市场的保守模型代理：低于本组 P10 的实付租金记录照实保留在资料层，但不当成普通新租客能租到的价格；"
+            "ACS 不能证明保留的住房正在挂牌或对所有人开放"
+        ),
+    }
 
 
 def housing_opportunity(c: Candidate, city: dict[str, Any], cfg: dict[str, Any]) -> LifeOpportunity:

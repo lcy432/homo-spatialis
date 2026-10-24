@@ -55,7 +55,7 @@ from product.realdata.pack_inputs import (
 from product.realdata.reference_housing import (
     REFERENCE_HOUSING_RULE,
     ReferenceHousing,
-    choose_reference_housing,
+    build_reference_housing,
 )
 from product.realdata.safety import (
     CrimeCount,
@@ -71,7 +71,7 @@ BASE_LIFE_INPUT = Path("configs/life/synthetic_product.yaml")
 BASE_SCORING = Path("configs/life/scoring_product.yaml")
 BASE_EVALUATION = Path("configs/life/evaluation_product.yaml")
 BASE_FACTS = Path("configs/life/city_facts_product.yaml")
-INTAKE_DB = Path("runs/intake/us-v1/work/freeze/35667f4101a71c0e/intake.sqlite")
+INTAKE_DB = Path("runs/intake/us-v1/work/freeze/60cf49b404831f49/intake.sqlite")
 TREATMENT_PRICES = {
     "minor": 300,
     "major": 2000,
@@ -207,13 +207,14 @@ def _treatments(key: str, numeraire: str) -> list[dict[str, Any]]:
 
 
 def _reference_view(c: Candidate) -> dict[str, Any]:
-    """参考住房选择只看片区、月租与居住条件：完整池的逻辑候选不必展开成 E1 机会。"""
+    """参考住房候选只看片区、月租与居住条件：完整池的逻辑候选不必展开成 E1 机会。"""
     pt = c.data["point"]
     return {
         "opportunity_id": c.opportunity_id,
         "area": c.area,
-        "price": {"amount": {"amount": float(Decimal(pt["gross_rent"]))}},
-        "spec": {"bedrooms": int(pt["bedrooms"]), "quality_level": int(pt["quality_tier"])},
+        "gross_rent": pt["gross_rent"],
+        "bedrooms": int(pt["bedrooms"]),
+        "quality_level": int(pt["quality_tier"]),
     }
 
 
@@ -336,16 +337,14 @@ def assemble_city(
         hp.candidates,
         key=lambda c: (Decimal(c.data["point"]["gross_rent"]), c.opportunity_id),
     )
-    # 期末参考住房（独立审核 F3、F4）：从完整候选池按参考岗位与通勤关系选——参考岗位片区取完整岗位池与开局岗位的全部就业片区，
-    # 都与菜单无关，所以只换菜单种子不改变参考集合
+    # 期末参考住房候选（E3B 收尾）：从按普通住房代理过滤后的完整池，按全城就业覆盖 3/5 编译成选择器——就业片区全集取完整
+    # 岗位池与开局岗位的全部就业片区，都与菜单无关，所以只换菜单种子不改变参考候选
     job_areas = sorted({c.area for c in jp.candidates} | {o["area"] for o in starts})
-    reference = choose_reference_housing(
-        [_reference_view(c) for c in hp.candidates],
-        [{"area": a, "availability": "available"} for a in job_areas],
-        commute["commute"],
+    reference = build_reference_housing(
+        [_reference_view(c) for c in hp.candidates], job_areas, commute
     )
-    # 目录只展开这次运行能接触到的住房与岗位：任一年、任一环境重复的菜单上出现过的，加上最低住房（兜底要用）、参考住房（估值要用）
-    # 与开局岗位。参考住房与开局岗位不加进任何菜单：分身在模拟年里看不到、也选不了参考住房；开局岗位只是统一开局时手上的岗位
+    # 目录只展开这次运行能接触到的住房与岗位：任一年、任一环境重复的菜单上出现过的，加上最低住房（兜底要用）、参考住房候选
+    # （估值要用）与开局岗位。参考候选与开局岗位不加进任何菜单：分身在模拟年里看不到、也选不了参考专用的候选
     reachable = {oid for m in menus if m.category == "housing" for oid in m.opportunity_ids}
     reachable.add(cheapest.opportunity_id)
     reachable.update(reference.bound())
@@ -413,6 +412,7 @@ def assemble_city(
         "housing": hp.mass_report(),
         "job": jp.mass_report(),
         "menu_sizes": {"housing": mc["housing"]["size"], "job": mc["job"]["size"]},
+        "reference_housing": reference.summary(),
     }
     return CityBuild(
         catalog=catalog,
@@ -826,22 +826,22 @@ EVAL_SLOTS = [
     {
         "slot_id": "housing_basic",
         "role": "housing",
-        "description": "基本住房：完整候选池里不用车就能到达全部参考岗位片区的住房中最便宜的一处",
+        "description": "基本住房：就业覆盖达标、到这份生活实际岗位的通勤合规（不用车）的候选里月租最低的一处",
     },
     {
         "slot_id": "housing_comfort",
         "role": "housing",
-        "description": "较舒适的住房：不用车就能到达全部参考岗位片区的一卧中档里，最长往返最短的一处",
+        "description": "较舒适的住房：就业覆盖达标、实际通勤合规（不用车）的一卧中档里，到实际岗位最长往返最短的一处",
     },
     {
         "slot_id": "housing_basic_car",
         "role": "housing",
-        "description": "基本住房（用车）：开车能到达全部参考岗位片区的住房中最便宜的一处（可不可行由估值期的通勤、现金与硬要求检查判定）",
+        "description": "基本住房（用车）：就业覆盖达标、实际通勤合规（可开车）的候选里月租最低的一处",
     },
     {
         "slot_id": "housing_comfort_car",
         "role": "housing",
-        "description": "较舒适的住房（用车）：开车时到全部参考岗位片区最长往返最短的一卧中档",
+        "description": "较舒适的住房（用车）：就业覆盖达标、实际通勤合规（可开车）的一卧中档里，最长往返最短的一处",
     },
     {
         "slot_id": "car_access",
@@ -973,8 +973,8 @@ def _templates() -> list[dict[str, Any]]:
                 ),
             },
         ]
-        # 用车的参考生活（E3B 映射修正，reference_housing_by_job_reach_v2）：同样的基本 / 较舒适含义，住房换成用车槽位、另加用车权。
-        # 开车能到达全部参考岗位片区时就绑定，可不可行由估值期的检查判定（一条过慢的无车路线不会把它提前禁用）；模板数不变
+        # 用车的参考生活：同样的基本 / 较舒适含义，住房换成用车槽位、另加用车权（选择器按这份模板实际有用车权核对通勤，
+        # 照付用车权月费与油费）；模板数不变
         cars = []
         for t in base:
             car = copy.deepcopy(t)
@@ -982,9 +982,7 @@ def _templates() -> list[dict[str, Any]]:
             car["label"] = f"{t['label']}（用车）"
             car["housing_slot"] = f"{t['housing_slot']}_car"
             car["service_slots"] = [*t.get("service_slots", []), "car_access"]
-            car["description"] = (
-                f"{t['description']}；住处只有开车能到岗，另付用车权月费与开车油费"[:400]
-            )
+            car["description"] = f"{t['description']}；另付用车权月费与开车油费"[:400]
             cars.append(car)
         out += base + cars
     return out
@@ -996,6 +994,13 @@ def _target(slot: str, oid: str | None, ids: set[str], why: str) -> dict[str, An
     return {"slot_id": slot, "status": "unavailable", "reason": why[:280]}
 
 
+def _selector_target(slot: str, ref: ReferenceHousing, kind: str) -> dict[str, Any]:
+    """参考住房槽位（E3B 收尾）：用车与不用车的槽位共用同一份候选，差别只在模板实际有没有用车权（E1 解析时读）。"""
+    if ref.reason is not None:
+        return {"slot_id": slot, "status": "unknown", "reason": ref.reason[:280]}
+    return {"slot_id": slot, "status": "selector", "housing_selector": ref.selectors[kind]}
+
+
 def build_evaluation(cfg: dict[str, Any], pack: PackBuild) -> dict[str, Any]:
     base = _yaml(BASE_EVALUATION)
     spec = copy.deepcopy(base["spec"])
@@ -1003,9 +1008,9 @@ def build_evaluation(cfg: dict[str, Any], pack: PackBuild) -> dict[str, Any]:
     spec["slots"] = EVAL_SLOTS
     spec["life_templates"] = _templates()
     spec["note"] = (
-        "E3B 六城的期末参考生活：模板与选择规则同产品基础样例的思路，槽位按真实目录绑定；参考住房按参考岗位与通勤关系从完整候选池"
-        f"选（{REFERENCE_HOUSING_RULE}），开车能到达全部参考岗位片区时也绑定用车的参考生活；估值期沿用第 3 年菜单加绑定的槽位机会、"
-        "不抽设备故障；没有可绑定的槽位写确定没有并说明原因"
+        "E3B 六城的期末参考生活：模板与选择规则同产品基础样例的思路，槽位按真实目录绑定；参考住房是内部选择器"
+        f"（{REFERENCE_HOUSING_RULE}）：全城就业覆盖 3/5 的候选，估值期初按每份模板实际岗位、实际交通能力与通勤硬要求核对后选；"
+        "估值期沿用第 3 年菜单加绑定的槽位机会与参考候选、不抽设备故障；没有可绑定的槽位写确定没有并说明原因"
     )
     bindings = []
     for c in cfg["cities"]:
@@ -1024,9 +1029,9 @@ def build_evaluation(cfg: dict[str, Any], pack: PackBuild) -> dict[str, Any]:
         ]
         qualified = next((j for j in sorted(award_jobs) if j in ids), None)
         if qualified is not None and opps[qualified].get("area") not in ref.job_areas:
-            # 换岗模板按目标岗位检查：目标岗位必须在参考岗位集合里，参考住房才对它合法
+            # 换岗模板的目标岗位必须在全城就业选择面里（它的片区在覆盖率的分母里）
             raise RuntimeError(
-                f"{k}: 换岗参考岗位 {qualified} 的片区不在参考岗位集合 {ref.job_areas} 里"
+                f"{k}: 换岗参考岗位 {qualified} 的片区不在全城就业片区 {ref.job_areas} 里"
             )
         no_training = "本城没有能授予岗位资格的培训项目（IPEDS 里没有支持职业的整年项目），没有可作参考的“改做已具资格的岗位”"
         bindings.append(
@@ -1034,12 +1039,12 @@ def build_evaluation(cfg: dict[str, Any], pack: PackBuild) -> dict[str, Any]:
                 "city": city_ref(c["cbsa"]),
                 "targets": [
                     *(
-                        _target(slot, ref.slots[slot], ids, ref.reasons.get(slot, "没有"))
-                        for slot in (
-                            "housing_basic",
-                            "housing_comfort",
-                            "housing_basic_car",
-                            "housing_comfort_car",
+                        _selector_target(slot, ref, kind)
+                        for slot, kind in (
+                            ("housing_basic", "basic"),
+                            ("housing_comfort", "comfort"),
+                            ("housing_basic_car", "basic"),
+                            ("housing_comfort_car", "comfort"),
                         )
                     ),
                     _target("car_access", f"{k}.service.car_access", ids, "本城没有用车权"),

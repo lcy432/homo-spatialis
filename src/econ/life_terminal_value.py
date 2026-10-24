@@ -30,6 +30,7 @@
 
 from __future__ import annotations
 
+from collections import Counter
 from collections.abc import Sequence
 from dataclasses import dataclass
 from decimal import Decimal
@@ -40,6 +41,7 @@ from common.life_contracts import (
     MONTHS_PER_YEAR,
     CityLifeCatalog,
     ExactAmount,
+    HardRequirement,
     IllnessEventSource,
     LifeContractError,
     LifeOpportunity,
@@ -47,6 +49,7 @@ from common.life_contracts import (
     PersonYearState,
     YearAction,
     canonical_fingerprint,
+    exact_minor_units,
     health_rules_state_problems,
     model_fingerprint,
     qualification_gaps,
@@ -55,6 +58,8 @@ from common.life_contracts import (
 from common.life_evaluation_contracts import (
     CitySlotBinding,
     EvaluationSpec,
+    HousingBindingRecord,
+    HousingSelector,
     LifeTemplate,
     PlanEvaluation,
     PlanItem,
@@ -67,7 +72,9 @@ from common.life_evaluation_contracts import (
 )
 from common.life_feedback_contracts import ScoredYear
 from common.life_scoring_contracts import HardRequirementResult
+from econ.life_commute import available_legs, choose_leg
 from econ.life_feedback import quota_from_score, score_fraction
+from econ.life_scoring import housing_commute_verdict
 from econ.life_settlement import LifeTaxBinding, settle_year
 from econ.life_year import ScoringInputs, _check_scoring_inputs, _score
 from ledger.life_evaluation_config import city_binding_problems
@@ -438,6 +445,157 @@ def _availability(o: LifeOpportunity) -> tuple[LifeOpportunity | None, str | Non
 
 
 _INFEASIBLE = {"slot_unavailable", "no_qualification"}
+
+
+def _rent_minor(o: LifeOpportunity, digits: int) -> int:
+    if o.price is None:
+        raise LifeContractError(f"参考住房候选 {o.opportunity_id} 没有报价")
+    m = exact_minor_units(o.price.amount.amount, digits)
+    if m is None:
+        raise LifeContractError(f"参考住房候选 {o.opportunity_id} 的月租精度细于最小记账单位")
+    return m
+
+
+def _select_housing(
+    slot_id: str,
+    sel: HousingSelector,
+    catalog: CityLifeCatalog,
+    jobs: Sequence[LifeOpportunity],
+    functions: frozenset[str],
+    requirements: Sequence[HardRequirement],
+) -> tuple[LifeOpportunity | None, str | None, str | None, HousingBindingRecord]:
+    """参考模板的岗位确定之后，按住房选择器选一处（E3B 收尾，``reference_housing_coverage_commute_v3``）。
+
+    每个候选核对三件事：全城就业覆盖（编译时算好，``eligible`` / ``unknown``）；这份模板实际需要到岗的每个岗位，从候选
+    片区用模板实际获得的功能（不用车的模板没有用车权）按 E1 同一份 ``available_legs`` + ``fastest_available_v1`` 选线，
+    取最长往返；用户的通勤硬要求（与逐月检验同一份条件比较）。关系表里这条线一种方式都没有、也没有明确不可达证据时算
+    未知，不当确定走不通。通过的候选里，基本档按（月租、编号）、较舒适档按（最长往返、月租、编号）取最小。没有已知合格
+    的候选时：有资料未知的候选是"资料未知"（方案无法评价），全部已知不合格才是"确定没有"（方案已知不可行）。"""
+    digits = catalog.money_basis.minor_unit_digits
+    onsite = [
+        o
+        for o in jobs
+        if o.resource is not None
+        and o.resource.job is not None
+        and o.resource.job.onsite_days_per_month > 0
+    ]
+    limits = sorted(
+        {
+            int(v)
+            for r in requirements
+            for a in [
+                dict(r.requirement),
+                *(dict(s.satisfies_with) for s in r.acceptable_substitutes),
+            ]
+            for k, v in a.items()
+            if k == "max_commute_roundtrip_minutes" and isinstance(v, int | float)
+        }
+    )
+    head = dict(
+        slot_id=slot_id,
+        rule_id=sel.rule_id,
+        kind=sel.kind,
+        onsite_job_areas=tuple(sorted({o.area for o in onsite if o.area is not None})),
+        remote_jobs=len(jobs) - len(onsite),
+        functions=tuple(sorted(functions)),
+        commute_limits=tuple(limits),
+        total_weight=sel.total_weight,
+    )
+    missing_area = [o.opportunity_id for o in onsite if o.area is None]
+    if missing_area:
+        why = f"岗位 {missing_area} 没写就业片区：参考住房的实际通勤读不到（不当 0 分钟）"
+        rec = HousingBindingRecord(
+            **head,  # type: ignore[arg-type]
+            status="unknown",
+            candidates=len(sel.candidates),
+            passed=0,
+            unknown=len(sel.candidates),
+            failed=0,
+            reason=why,
+        )
+        return None, "slot_unknown", f"槽位 {slot_id}：{why}", rec
+    pairs = (
+        set()
+        if catalog.commute is None
+        else {(g.home_area, g.work_area) for g in catalog.commute.legs}
+    )
+    passed: list[tuple[tuple[int, int, str], LifeOpportunity, int, int]] = []
+    unknown_keys: list[tuple[int, int, str]] = []
+    causes: Counter[str] = Counter()
+    for c in sel.candidates:
+        o = catalog.opportunity(c.opportunity_id)
+        if o is None:  # 配置加载已核对
+            raise LifeContractError(f"选择器候选 {c.opportunity_id} 不在目录里")
+        rent = _rent_minor(o, digits) if o.price is not None else 0
+        if o.availability == "unavailable":
+            causes["目录写明缺货"] += 1
+            continue
+        failed, unsure = False, o.availability == "unknown" or c.coverage == "unknown"
+        longest, commute_known = 0, True
+        for j in onsite:
+            assert j.area is not None
+            if (c.area, j.area) not in pairs:
+                commute_known = False
+                continue
+            legs = available_legs(catalog, c.area, j.area, functions)
+            if not legs:
+                failed = True
+                causes["到实际岗位只有这份模板没有的交通方式（例如要用车权）"] += 1
+                break
+            longest = max(longest, choose_leg(legs, digits).roundtrip_minutes)
+        if failed:
+            continue
+        if commute_known:
+            verdicts = [housing_commute_verdict(r, o, longest) for r in requirements]
+            if "no" in verdicts:
+                causes["实际往返超过通勤硬要求"] += 1
+                continue
+            unsure = unsure or "unknown" in verdicts
+        else:
+            unsure = True
+        # 基本档不比通勤（比较值固定为 0），较舒适档先比最长往返
+        key = (0 if sel.kind == "basic" else longest, rent, c.opportunity_id)
+        if unsure:
+            unknown_keys.append(key)
+        else:
+            passed.append((key, o, c.covered_weight, longest))
+    n_unknown, n_passed = len(unknown_keys), len(passed)
+    counts = dict(
+        candidates=len(sel.candidates),
+        passed=n_passed,
+        unknown=n_unknown,
+        failed=len(sel.candidates) - n_passed - n_unknown,
+    )
+    if passed:
+        key, o, covered, longest = min(passed, key=lambda x: x[0])
+        rec = HousingBindingRecord(
+            **head,  # type: ignore[arg-type]
+            status="selected",
+            **counts,
+            opportunity_id=o.opportunity_id,
+            home_area=o.area,
+            covered_weight=covered,
+            longest_roundtrip_minutes=longest,
+            unknown_ranked_ahead=sum(k < key for k in unknown_keys),
+        )
+        return o, None, None, rec
+    detail = "、".join(f"{k} {v} 个" for k, v in sorted(causes.items()))
+    if n_unknown:
+        why = (
+            f"没有已知合格的候选：{n_unknown} 个候选的覆盖或通勤资料未知（线路缺失且没有明确不可达证据，不当确定没有）"
+            + (f"；其余已知不合格：{detail}" if detail else "")
+        )
+        rec = HousingBindingRecord(**head, status="unknown", **counts, reason=why[:400])  # type: ignore[arg-type]
+        return None, "slot_unknown", f"槽位 {slot_id}：{why}"[:400], rec
+    why = (
+        f"每个候选都已知不合格（{len(sel.candidates)} 个候选，覆盖不足的居住片区 {sel.excluded_home_areas} 个"
+        + (f"；{detail}" if detail else "")
+        + "）"
+    )
+    rec = HousingBindingRecord(**head, status="unavailable", **counts, reason=why[:400])  # type: ignore[arg-type]
+    return None, "slot_unavailable", f"槽位 {slot_id}：{why}"[:400], rec
+
+
 _TREATMENT_TEXT = {
     "untriggered": "未触发（估值期初健康）",
     "treat_if_possible": "条件允许就治",
@@ -451,8 +609,11 @@ def _plan_action(
     binding: CitySlotBinding,
     catalog: CityLifeCatalog,
     state: PersonYearState,
+    requirements: Sequence[HardRequirement] = (),
+    housing_record: list[HousingBindingRecord] | None = None,
 ) -> tuple[list[dict[str, object]], list[PlanItem], list[str], str | None, str | None]:
-    """基础生活模板 → 年度计划的行动列表。返回（行动、方案条目、不重复购买的说明、失败分类、原因）。"""
+    """基础生活模板 → 年度计划的行动列表。返回（行动、方案条目、不重复购买的说明、失败分类、原因）。住房槽位是选择器
+    时，在岗位确定之后按选择器选（E3B 收尾），绑定记录追加到 ``housing_record``。"""
     whole_year = {"quantity": 1, "start_month": 1, "end_month": MONTHS_PER_YEAR}
     actions: list[dict[str, object]] = []
     items: list[PlanItem] = []
@@ -503,7 +664,27 @@ def _plan_action(
             )
         add(slot, "job", o, **whole_year)
     for slot in (plan.housing_slot, plan.food_slot, *plan.service_slots):
-        o, kind, why = _slot_opportunity(binding, catalog, slot)
+        target = binding.target(slot)
+        if target is not None and target.housing_selector is not None:
+            # 只用这份模板实际获得的功能（它的按月服务提供的，例如用车权）；不借用别的模板的车
+            functions: set[str] = set()
+            for s in plan.service_slots:
+                so, kind, why = _slot_opportunity(binding, catalog, s)
+                if so is None:
+                    return actions, items, skipped, kind, why
+                functions.update(so.functions)
+            o, kind, why, record = _select_housing(
+                slot,
+                target.housing_selector,
+                catalog,
+                [j for _, j in jobs],
+                frozenset(functions),
+                requirements,
+            )
+            if housing_record is not None:
+                housing_record.append(record)
+        else:
+            o, kind, why = _slot_opportunity(binding, catalog, slot)
         if o is None:
             return actions, items, skipped, kind, why
         add(slot, spec.slot_role(slot) or "service", o, **whole_year)
@@ -603,11 +784,15 @@ def _evaluate_plan(
     state: PersonYearState,
     delta: Fraction,
 ) -> PlanEvaluation:
-    raw, items, skipped, kind, why = _plan_action(branch.template, spec, binding, catalog, state)
+    record: list[HousingBindingRecord] = []
+    raw, items, skipped, kind, why = _plan_action(
+        branch.template, spec, binding, catalog, state, scoring.hard_requirements, record
+    )
+    bound = {"housing_binding": record[0]} if record else {}
     if kind is not None:
         assert why is not None
         status = "infeasible" if kind in _INFEASIBLE else "unevaluable"
-        return _plan_failure(branch, status, kind, [why], items, skipped)
+        return _plan_failure(branch, status, kind, [why], items, skipped, **bound)
     data: dict[str, object] = {
         "person_id": state.person_id,
         "clone_id": state.clone_id,
@@ -622,6 +807,7 @@ def _evaluate_plan(
         skipped=skipped,
         action_fingerprint=model_fingerprint(action),
         cash_start=state.cash,
+        **bound,
     )
     result = settle_year(protocol=protocol, state=state, action=action, catalog=catalog, tax=tax)
     codes = tuple(p.code for p in result.problems)
@@ -884,10 +1070,17 @@ def value_terminal(
             + "；".join(m for _, m in problems)
         )
 
+    # 估值期菜单加上绑定的机会与住房选择器的全部候选（选哪一处要等每份模板的岗位确定；候选不进模拟年的菜单）
     catalog = valuation_catalog(
         catalog,
         protocol.simulation_years,
-        frozenset(t.opportunity_id for t in binding.targets if t.opportunity_id is not None),
+        frozenset(t.opportunity_id for t in binding.targets if t.opportunity_id is not None)
+        | {
+            c.opportunity_id
+            for t in binding.targets
+            if t.housing_selector is not None
+            for c in t.housing_selector.candidates
+        },
     )
     quota = _valuation_quota(protocol, terminal, last_year)
     not_valued = _not_valued(terminal, spec.valuation_horizon_months, spec, catalog)

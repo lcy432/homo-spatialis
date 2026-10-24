@@ -23,7 +23,7 @@ import yaml
 from pydantic import Field, ValidationError
 
 from common.life_contracts import CityLifeCatalog, ContractModel, LifeContractError
-from common.life_evaluation_contracts import CitySlotBinding, EvaluationSpec
+from common.life_evaluation_contracts import CitySlotBinding, EvaluationSpec, HousingSelector
 from ledger.life_catalog import LifeBundle, item_role
 from ledger.life_scoring_config import ScoringConfig
 
@@ -66,6 +66,8 @@ def city_binding_problems(spec: EvaluationSpec, catalog: CityLifeCatalog) -> lis
         return [f"评价规格 {spec.spec_id} 没有 {catalog.city} 的槽位绑定"]
     out: list[str] = []
     for target in binding.targets:
+        if target.housing_selector is not None:
+            out.extend(_selector_problems(target.slot_id, target.housing_selector, catalog))
         if target.status != "opportunity":
             continue
         assert target.opportunity_id is not None
@@ -86,6 +88,40 @@ def city_binding_problems(spec: EvaluationSpec, catalog: CityLifeCatalog) -> lis
                 f"{where}: {o.opportunity_id} 没有活动事实（activity），不能当参考生活里的爱好活动"
             )
     out.extend(_activity_use_problems(spec, binding, catalog))
+    return out
+
+
+def _selector_problems(slot_id: str, sel: HousingSelector, catalog: CityLifeCatalog) -> list[str]:
+    """住房选择器（E3B 收尾）与本城目录对得上吗：候选都是目录里的合格住房、片区一致；就业片区都在目录里；每个候选的
+    覆盖分子与未知权重按目录自己的通勤关系表重算一遍（有任一方式的线 = 已知通达；一条线都没有 = 未知，留在分母里）。"""
+    where = f"{catalog.city} 槽位 {slot_id} 的选择器"
+    out: list[str] = []
+    work = {a.area_id for a in catalog.areas if a.kind in ("work", "home_work")}
+    stray = sorted(w.area_id for w in sel.work_areas if w.area_id not in work)
+    if stray:
+        out.append(f"{where}: 就业片区 {stray} 不在本城目录的就业片区里")
+    pairs = (
+        set()
+        if catalog.commute is None
+        else {(g.home_area, g.work_area) for g in catalog.commute.legs}
+    )
+    for c in sel.candidates:
+        o = catalog.opportunity(c.opportunity_id)
+        if o is None:
+            out.append(f"{where}: 候选 {c.opportunity_id} 不在这座城的目录里")
+            continue
+        if item_role(catalog, o) != "housing":
+            out.append(f"{where}: 候选 {c.opportunity_id} 在结算里不是住房")
+        if o.area != c.area:
+            out.append(f"{where}: 候选 {c.opportunity_id} 的片区 {c.area} 与目录写的 {o.area} 不同")
+            continue
+        covered = sum(w.inbound_weight for w in sel.work_areas if (c.area, w.area_id) in pairs)
+        unknown = sel.total_weight - covered
+        if (covered, unknown) != (c.covered_weight, c.unknown_weight):
+            out.append(
+                f"{where}: 候选 {c.opportunity_id} 的覆盖 {c.covered_weight} / 未知 {c.unknown_weight} 与按目录通勤关系"
+                f"重算的 {covered} / {unknown} 不同"
+            )
     return out
 
 

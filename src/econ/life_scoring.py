@@ -1247,6 +1247,32 @@ def _item_meets(
     return "unknown" if missing else "yes"
 
 
+def housing_commute_verdict(
+    req: HardRequirement, opp: LifeOpportunity, roundtrip_minutes: int
+) -> str | None:
+    """参考住房选择器（E3B 收尾）用：一处住房在给定的最长往返分钟（没有到岗是 0）下满不满足一条通勤硬要求。只看所有
+    备选条件都是住房类、且至少一个条件读通勤执行事实的硬要求，其余返回 None（交给估值期逐月的正常检查）。yes / no /
+    unknown 与逐月检验用同一份条件比较（``_item_meets``）。"""
+    alternatives = [dict(req.requirement)] + [
+        dict(s.satisfies_with) for s in req.acceptable_substitutes
+    ]
+    if any(a.get("category") != "housing" for a in alternatives):
+        return None
+    reads_commute = any(
+        k[4:] in EXECUTED_FACT_KEYS
+        for a in alternatives
+        for k in a
+        if k.startswith(("min_", "max_"))
+    )
+    if not reads_commute:
+        return None
+    facts: dict[str, object] = {"commute_roundtrip_minutes": roundtrip_minutes}
+    verdicts = [_item_meets(a, opp, facts) for a in alternatives]
+    if "yes" in verdicts:
+        return "yes"
+    return "unknown" if "unknown" in verdicts else "no"
+
+
 def _condition_status(
     cond: dict[str, object], in_use: list[_InUse], resources: MonthResources | None = None
 ) -> tuple[str, tuple[str, ...], str | None]:

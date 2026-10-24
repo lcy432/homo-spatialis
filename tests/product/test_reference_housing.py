@@ -1,8 +1,8 @@
-"""期末参考生活的住房（独立审核 F3、F4，DECISIONS/0042）：按参考岗位与通勤关系从完整候选池绑定，与年度菜单无关。
+"""期末参考住房候选（E3B 收尾，``reference_housing_coverage_commute_v3``）：全城就业覆盖 3/5 编译成选择器，与年度菜单无关。
 
-审核时的问题：参考住房从菜单裁剪后的目录里挑、不看参考岗位在哪——西雅图的固定住房从岗位片区出发超过通勤上限，三年都正常
-生活的分身全部无法估值；菜单一换，参考集合也跟着换。规则 ``reference_housing_by_job_reach_v2`` 见
-``product.realdata.reference_housing``。
+编译这一半在 ``product.realdata.reference_housing``；估值期初按实际岗位、交通能力与通勤硬要求选的那一半在 E1，测试见
+``tests/life/test_reference_selector.py``。手算口径：覆盖率 = 有已知线路（任一方式）通达的就业片区流入权重 ÷ 全部就业片区
+流入权重；一条线都没有的片区算未知、留在分母里；每个居住片区只留最便宜的一处与最便宜的一卧中档。
 """
 
 from __future__ import annotations
@@ -14,134 +14,88 @@ from pathlib import Path
 import pytest
 
 from product.realdata.life_pack import load_pack_config
-from product.realdata.reference_housing import choose_reference_housing
+from product.realdata.reference_housing import build_reference_housing
 
 PACK = Path("data/frozen/life/us-v1/pack")
 FROZEN = Path("data/frozen/life/us-v1")
+HOUSING_SLOTS = ("housing_basic", "housing_comfort", "housing_basic_car", "housing_comfort_car")
 
 
-def home(oid: str, area: str, price: float, bedrooms: int = 1, quality: int = 2) -> dict:
+def home(oid: str, area: str, rent: str, bedrooms: int = 1, quality: int = 2) -> dict:
     return {
         "opportunity_id": oid,
         "area": area,
-        "spec": {"bedrooms": bedrooms, "quality_level": quality},
-        "price": {"amount": {"amount": price, "numeraire": "USD_2024_LOCAL"}},
+        "gross_rent": rent,
+        "bedrooms": bedrooms,
+        "quality_level": quality,
     }
 
 
-def leg(h: str, w: str, mode: str, minutes: int) -> dict:
-    return {"home_area": h, "work_area": w, "mode": mode, "roundtrip_minutes": minutes}
+def commute(legs: list[tuple[str, str]], weights: dict[str, int]) -> dict:
+    return {
+        "content_identity": "a" * 64,
+        "commute": {"legs": [{"home_area": h, "work_area": w} for h, w in legs]},
+        "diagnostics": {
+            "work_areas": {
+                "areas": [{"area_id": a, "inbound_weight": n} for a, n in weights.items()]
+            }
+        },
+    }
 
 
-MODES = [
-    {"mode": "walk_bike"},
-    {"mode": "transit"},
-    {"mode": "drive", "requires_function": "car_access"},
-]
-JOB_W = [{"opportunity_id": "x.job.a", "area": "w1", "availability": "available"}]
+W = {"w1": 60, "w2": 30, "w3": 10}
 
 
-def test_basic_is_the_cheapest_home_that_reaches_every_reference_job():
+def test_coverage_counts_any_known_line_and_keeps_unknown_areas_in_the_denominator():
     housing = [
-        home("x.housing.far", "h_far", 500, bedrooms=0, quality=1),  # 最便宜，但没有一条线到岗位
-        home("x.housing.ok", "h_ok", 900, bedrooms=0, quality=1),
-        home("x.housing.mid", "h_near", 1500),
+        home("x.h.a1", "ha", "900.00", bedrooms=0, quality=1),
+        home("x.h.b1", "hb", "800.00"),
+        home("x.h.c1", "hc", "500.00"),
     ]
-    rel = {
-        "modes": MODES,
-        "legs": [leg("h_ok", "w1", "transit", 80), leg("h_near", "w1", "walk_bike", 20)],
-    }
-    ref = choose_reference_housing(housing, JOB_W, rel)
-    assert ref.job_areas == ("w1",)
-    assert ref.slots["housing_basic"] == "x.housing.ok"  # 不是到不了岗位的 500
-    assert ref.worst_minutes["housing_basic"] == 80
-    assert ref.slots["housing_comfort"] == "x.housing.mid"
-    # 开车也能到的住房里最便宜的同样是它：用车的参考生活照样绑定，可不可行交给估值期的检查
-    assert ref.slots["housing_basic_car"] == "x.housing.ok"
+    rel = commute([("ha", "w1"), ("hb", "w2"), ("hb", "w3"), ("hc", "w2")], W)
+    ref = build_reference_housing(housing, ["w1", "w2", "w3"], rel)
+    assert ref.reason is None
+    # ha：60/100 = 3/5 恰好达标；hb：已知 40/100 不足，加上未知 60 可能达到 → 资格未知；hc 同理
+    assert ref.areas["ha"] == {"covered": 60, "unknown": 40, "coverage": "eligible"}
+    assert ref.areas["hb"] == {"covered": 40, "unknown": 60, "coverage": "unknown"}
+    assert ref.areas["hc"]["coverage"] == "unknown"
+    basic = {c["opportunity_id"]: c for c in ref.selectors["basic"]["candidates"]}
+    assert basic["x.h.a1"]["covered_weight"] == 60 and basic["x.h.a1"]["coverage"] == "eligible"
+    assert ref.selectors["basic"]["work_areas"] == [
+        {"area_id": a, "inbound_weight": n} for a, n in sorted(W.items())
+    ]
+    assert ref.selectors["basic"]["commute_identity"] == "a" * 64
 
 
-def test_comfort_is_the_one_bedroom_mid_tier_with_the_shortest_worst_commute():
+def test_without_unreachability_evidence_an_area_is_never_excluded_only_unknown():
+    """冻结资料里没有“明确不可达”的记录：缺线一律算未知，所以已知覆盖再低也只是资格未知，不会被当成确定不合格。"""
+    housing = [home("x.h.a", "ha", "500.00")]
+    ref = build_reference_housing(housing, ["w1", "w2", "w3"], commute([("ha", "w3")], W))
+    assert ref.areas["ha"] == {"covered": 10, "unknown": 90, "coverage": "unknown"}
+    assert ref.selectors["basic"]["excluded_home_areas"] == 0
+
+
+def test_each_home_area_keeps_its_cheapest_home_and_its_cheapest_one_bed_mid():
     housing = [
-        home("x.housing.a", "h_a", 1400),
-        home("x.housing.b", "h_b", 1600),
-        home("x.housing.c", "h_c", 1300, bedrooms=2),  # 两卧：不是“一卧中档”
+        home("x.h.2", "ha", "700.00", bedrooms=0, quality=1),
+        home("x.h.1", "ha", "700.00", bedrooms=2, quality=3),  # 同价按编号：x.h.1 在前
+        home("x.h.3", "ha", "1200.00"),
+        home("x.h.4", "ha", "1100.00"),
+        home("x.h.5", "ha", "1000.00", bedrooms=1, quality=3),  # 一卧但不是中档
     ]
-    rel = {
-        "modes": MODES,
-        "legs": [
-            leg("h_a", "w1", "transit", 70),
-            leg("h_b", "w1", "transit", 30),
-            leg("h_c", "w1", "walk_bike", 10),
-        ],
-    }
-    ref = choose_reference_housing(housing, JOB_W, rel)
-    assert (
-        ref.slots["housing_comfort"] == "x.housing.b" and ref.worst_minutes["housing_comfort"] == 30
-    )
-    assert ref.slots["housing_basic"] == "x.housing.c"  # 基本住房只看合法与价格
+    ref = build_reference_housing(housing, ["w1"], commute([("ha", "w1")], {"w1": 5}))
+    assert [c["opportunity_id"] for c in ref.selectors["basic"]["candidates"]] == ["x.h.1"]
+    assert [c["opportunity_id"] for c in ref.selectors["comfort"]["candidates"]] == ["x.h.4"]
+    assert ref.bound() == ["x.h.1", "x.h.4"]
 
 
-def test_every_reference_job_area_must_be_reachable():
-    jobs = [*JOB_W, {"opportunity_id": "x.job.b", "area": "w2", "availability": "available"}]
-    housing = [home("x.housing.a", "h_a", 1000), home("x.housing.b", "h_b", 1100)]
-    rel = {
-        "modes": MODES,
-        "legs": [
-            leg("h_a", "w1", "walk_bike", 20),  # 到不了 w2
-            leg("h_b", "w1", "transit", 40),
-            leg("h_b", "w2", "transit", 50),
-        ],
-    }
-    ref = choose_reference_housing(housing, jobs, rel)
-    assert ref.slots["housing_basic"] == "x.housing.b" and ref.worst_minutes["housing_basic"] == 50
+def test_a_job_area_without_a_positive_weight_is_insufficient_data_not_equal_weights():
+    housing = [home("x.h.a", "ha", "500.00")]
+    ref = build_reference_housing(housing, ["w1", "w9"], commute([("ha", "w1")], {"w1": 5}))
+    assert ref.selectors == {} and "不默认等权" in ref.reason
 
 
-def test_a_slow_route_without_a_car_does_not_disable_the_car_reference_life():
-    """v1 的问题：有一条（过慢的）无车路线，就不设用车参考生活；估值期无车方案违反通勤硬要求时，整个参考集合都不可行。"""
-    housing = [home("x.housing.a", "h_a", 1000), home("x.housing.b", "h_b", 1200)]
-    rel = {
-        "modes": MODES,
-        "legs": [
-            leg("h_a", "w1", "transit", 240),  # 存在但很慢
-            leg("h_a", "w1", "drive", 60),
-            leg("h_b", "w1", "drive", 30),
-        ],
-    }
-    ref = choose_reference_housing(housing, JOB_W, rel)
-    assert ref.slots["housing_basic"] == "x.housing.a" and ref.worst_minutes["housing_basic"] == 240
-    assert ref.slots["housing_basic_car"] == "x.housing.a"
-    assert ref.slots["housing_comfort_car"] == "x.housing.b"  # 开车最长往返 30 < 60
-
-
-def test_a_car_reference_life_when_no_home_reaches_without_a_car():
-    jobs = [*JOB_W, {"opportunity_id": "x.job.b", "area": "w2", "availability": "available"}]
-    housing = [home("x.housing.a", "h_a", 1000), home("x.housing.b", "h_b", 1200)]
-    rel = {
-        "modes": MODES,
-        "legs": [
-            leg("h_a", "w1", "walk_bike", 20),
-            leg("h_a", "w2", "drive", 40),
-            leg("h_b", "w1", "drive", 30),
-            leg("h_b", "w2", "drive", 30),
-        ],
-    }
-    ref = choose_reference_housing(housing, jobs, rel)
-    assert ref.slots["housing_basic"] is None and ref.slots["housing_comfort"] is None
-    assert "没有不用车" in ref.reasons["housing_basic"]
-    assert ref.slots["housing_basic_car"] == "x.housing.a"  # 开车能到两个片区里最便宜的
-    assert ref.slots["housing_comfort_car"] == "x.housing.b"  # 最长往返 30 < 40
-    assert ref.worst_minutes["housing_comfort_car"] == 30
-
-
-def test_no_home_reaches_even_by_car_is_reported_not_relaxed():
-    housing = [home("x.housing.a", "h_a", 1000)]
-    rel = {"modes": MODES, "legs": []}
-    ref = choose_reference_housing(housing, JOB_W, rel)
-    assert ref.bound() == []
-    assert "开车也没有" in ref.reasons["housing_basic_car"]
-
-
-# --------------------------------------------------------------------------- 组装：参考集合与菜单无关
+# --------------------------------------------------------------------------- 组装：参考候选与菜单无关
 
 
 def _point(pid: str, rent: str, bedrooms: int, tier: int) -> dict:
@@ -202,7 +156,7 @@ def _hou_inputs():
                 "level": "puma_bed",
                 "weight_sum": 30,
                 "donors": {"n": 3, "utilities_median_month": "100.00", "assumption": "x"},
-                "points": [_point(f"s{k}", rent, nbed, k) for k in (1, 2, 3)],
+                "points": [_point(f"{tid}.s{k}", rent, nbed, k) for k in (1, 2, 3)],
             }
             cells.append(
                 {
@@ -241,7 +195,7 @@ def _build(seed: str):
     )
 
 
-def test_changing_only_the_menu_seed_keeps_the_reference_housing():
+def test_changing_only_the_menu_seed_keeps_the_reference_candidates():
     a, b = _build("seed-one"), _build("seed-two")
     menus = lambda cb: {  # noqa: E731
         m["menu_id"]: m["opportunity_ids"]
@@ -249,15 +203,10 @@ def test_changing_only_the_menu_seed_keeps_the_reference_housing():
         if m["category"] == "housing"
     }
     assert menus(a) != menus(b)  # 菜单确实换了
-    assert a.reference.slots == b.reference.slots  # 参考住房没变
+    assert a.reference.selectors == b.reference.selectors  # 参考候选没变
     for cb in (a, b):
         ids = {o["opportunity_id"] for o in cb.catalog["opportunities"]}
-        assert set(cb.reference.bound()) <= ids  # 参考住房一定在目录里（菜单没抽到也在）
-        on_menu = {i for v in menus(cb).values() for i in v}
-        assert cb.reference.bound()
-        # 参考专用项不因此进菜单：没被抽中就不在任何一份菜单上
-        extra = set(cb.reference.bound()) - on_menu
-        assert all(i not in on_menu for i in extra)
+        assert cb.reference.bound() and set(cb.reference.bound()) <= ids  # 候选一定在目录里
 
 
 # --------------------------------------------------------------------------- 冻结的资料包
@@ -271,99 +220,51 @@ def pack():
 
     bundle, _ = load_life_bundle(PACK / "life_input.json", require_settlement_ready=True)
     scoring, _ = load_scoring_config(PACK / "scoring.json", bundle)
-    ev = load_evaluation_config(PACK / "evaluation.json", bundle, scoring)
+    ev = load_evaluation_config(PACK / "evaluation.json", bundle, scoring)  # 加载器按目录重算覆盖
     return bundle, ev
 
 
-def _job_areas(cat) -> set[str]:
-    return {
-        o.area for o in cat.opportunities if o.category == "job" and o.availability == "available"
-    }
-
-
-def _reach(cat, home_area: str, work_area: str, car: bool) -> int | None:
-    req = {m.mode: m.requires_function for m in cat.commute.modes}
-    mins = [
-        g.roundtrip_minutes
-        for g in cat.commute.legs
-        if g.home_area == home_area and g.work_area == work_area and (car or req[g.mode] is None)
-    ]
-    return min(mins) if mins else None
-
-
-def test_every_bound_reference_home_reaches_every_reference_job(pack):
-    bundle, ev = pack
-    for b in ev.spec.city_bindings:
-        cat = bundle.catalog_for(str(b.city))
-        areas = _job_areas(cat)
-        for slot, car in (
-            ("housing_basic", False),
-            ("housing_comfort", False),
-            ("housing_basic_car", True),
-            ("housing_comfort_car", True),
-        ):
-            t = b.target(slot)
-            if t.status != "opportunity":
-                assert t.status == "unavailable" and t.reason
-                continue
-            h = cat.opportunity(t.opportunity_id)
-            for w in areas:
-                assert _reach(cat, h.area, w, car) is not None, (b.city, slot, w)
-        car_slot = b.target("car_access")
-        assert car_slot.status == "opportunity" and car_slot.opportunity_id.endswith(
-            ".service.car_access"
-        )
-
-
-def test_the_switch_job_templates_check_their_target_job(pack):
-    bundle, ev = pack
-    checked = 0
-    for b in ev.spec.city_bindings:
-        q = b.target("qualified_job")
-        if q.status != "opportunity":
-            continue
-        cat = bundle.catalog_for(str(b.city))
-        area = cat.opportunity(q.opportunity_id).area
-        for slot, car in (
-            ("housing_basic", False),
-            ("housing_comfort", False),
-            ("housing_basic_car", True),
-            ("housing_comfort_car", True),
-        ):
-            t = b.target(slot)
-            if t.status == "opportunity":
-                h = cat.opportunity(t.opportunity_id).area
-                assert _reach(cat, h, area, car) is not None
-                checked += 1
-    assert checked
-
-
-def test_car_reference_lives_are_bound_wherever_a_car_reaches(pack):
-    """参考岗位片区是完整岗位池的全部就业片区；开车能到达全部片区就绑定用车参考生活（不再因为有一条无车路线就不设）。"""
+def test_every_housing_slot_is_a_selector_shared_by_car_and_no_car_templates(pack):
     _, ev = pack
     for b in ev.spec.city_bindings:
-        for slot in ("housing_basic", "housing_comfort"):
-            plain, car = b.target(slot), b.target(f"{slot}_car")
-            if plain.status != "opportunity":
-                assert "没有不用车" in plain.reason
-            assert car.status == "opportunity" or "开车也没有" in car.reason
+        sel = {s: b.target(s).housing_selector for s in HOUSING_SLOTS}
+        assert all(v is not None for v in sel.values()), b.city
+        assert sel["housing_basic"] == sel["housing_basic_car"]
+        assert sel["housing_comfort"] == sel["housing_comfort_car"]
+        assert sel["housing_basic"].kind == "basic" and sel["housing_comfort"].kind == "comfort"
+        assert sel["housing_basic"].rule_id == "reference_housing_coverage_commute_v3"
     templates = {p.template_id: p for p in ev.spec.life_templates}
+    assert len(templates) == 12
     assert "car_access" in templates["p1_basic_car"].service_slots
     assert "car_access" not in templates["p1_basic"].service_slots
 
 
-def test_reference_only_homes_stay_out_of_the_agents_menu(pack):
+def test_seattle_potential_coverage_is_not_a_sixty_minute_rule(pack):
+    """已知反例的口径：一处住房到每个就业片区都有线（哪怕有的往返超过 60 分钟），潜在覆盖就是 100%。"""
+    bundle, ev = pack
+    sea = "US:CBSA2023:42660"
+    cat = bundle.catalog_for(sea)
+    sel = ev.spec.binding_for(sea).target("housing_comfort").housing_selector
+    slow = [
+        c
+        for c in sel.candidates
+        if c.covered_weight == sel.total_weight
+        and any(g.roundtrip_minutes > 60 for g in cat.commute.legs if g.home_area == c.area)
+    ]
+    assert slow and all(c.coverage == "eligible" for c in slow)
+
+
+def test_reference_only_candidates_stay_out_of_the_agents_menu(pack):
     bundle, ev = pack
     for b in ev.spec.city_bindings:
         cat = bundle.catalog_for(str(b.city))
         on_menu = {i for m in cat.menus if m.category == "housing" for i in m.opportunity_ids}
-        bound = {
-            t.opportunity_id
-            for t in b.targets
-            if t.status == "opportunity" and cat.opportunity(t.opportunity_id).category == "housing"
+        cands = {
+            c.opportunity_id for s in HOUSING_SLOTS for c in b.target(s).housing_selector.candidates
         }
         baseline = {m.baseline_opportunity_id for m in cat.minimum_living}
-        for oid in bound - on_menu - baseline:
+        assert cands - on_menu - baseline  # 确实有参考专用的候选
+        for oid in cands - on_menu - baseline:
             for env in (1, 2):
                 for year in (1, 2, 3):
                     assert oid not in _offered(cat, year, env)
@@ -412,7 +313,13 @@ def test_with_data_and_terminal_state_fixed_new_menus_do_not_rewrite_v(tmp_path,
     traj = verify_trajectory(
         protocol=bundle.protocol, catalog=cat, tax=tax, scoring=inputs, results=results
     )
-    bound = {t.opportunity_id for t in spec.binding_for(hou).targets if t.opportunity_id}
+    targets = spec.binding_for(hou).targets
+    bound = {t.opportunity_id for t in targets if t.opportunity_id} | {
+        c.opportunity_id
+        for t in targets
+        if t.housing_selector is not None
+        for c in t.housing_selector.candidates
+    }
     swapped = []
     for m in cat.menus:
         pool = sorted(
@@ -448,11 +355,29 @@ def test_with_data_and_terminal_state_fixed_new_menus_do_not_rewrite_v(tmp_path,
 
     first = value(cat)
     assert first[0] == "complete" and first[2] is not None
+    # 每个模板的住房都是岗位确定之后按选择器选的，绑定记录进评价证据
+    v = value_terminal(
+        spec=spec,
+        protocol=bundle.protocol,
+        catalog=cat,
+        tax=tax,
+        scoring=inputs,
+        terminal=traj.terminal,
+        last_year=traj.last_year,
+        trajectory_status="complete",
+    )
+    # 走到住房这一步的分支都有绑定记录（在岗位资格这一步就失败的分支没有）
+    for p in v.plans:
+        if any(i.slot_role == "housing" for i in p.items):
+            assert p.housing_binding is not None and p.housing_binding.status == "selected"
+    best = next(p for p in v.plans if p.plan_id == v.selected_plan_id)
+    assert best.housing_binding.status == "selected"
+    assert best.housing_binding.opportunity_id in {i.opportunity_id for i in best.items}
     assert value(other) == first
 
 
 def test_reference_only_homes_are_not_in_the_agents_observation(tmp_path, monkeypatch):
-    """估值专用的参考住房在目录里、不在菜单上：观察的机会与最低生活合格名单里都没有它们（合格名单只列这一年能写进计划的）。"""
+    """估值专用的参考候选在目录里、不在菜单上：观察的机会与最低生活合格名单里都没有它们（合格名单只列这一年能写进计划的）。"""
     import contextlib
 
     from agentlayer.life_views import build_observation
@@ -481,13 +406,22 @@ def test_reference_only_homes_are_not_in_the_agents_observation(tmp_path, monkey
     text = obs.model_dump_json()
     offered = cat.offered_ids(state)
     ref = {
-        t.opportunity_id
+        c.opportunity_id
         for t in w.specs[next(iter(w.specs))].binding_for(sf).targets
-        if t.opportunity_id and cat.opportunity(t.opportunity_id).category == "housing"
+        if t.housing_selector is not None
+        for c in t.housing_selector.candidates
     }
     hidden = ref - offered
-    assert hidden  # 旧金山的用车参考住房这一年不在菜单上
+    assert hidden  # 旧金山的大部分参考候选这一年不在菜单上
     for oid in hidden:
         assert oid not in text
     for need in obs.minimum_living:
         assert set(need.qualifying_opportunity_ids) <= offered
+
+
+def test_duplicated_job_candidates_do_not_change_the_job_weights():
+    housing = [home("x.h.a", "ha", "500.00"), home("x.h.b", "hb", "700.00")]
+    rel = commute([("ha", "w1"), ("hb", "w2")], W)
+    once = build_reference_housing(housing, ["w1", "w2", "w3"], rel)
+    many = build_reference_housing(housing, ["w1", "w1", "w1", "w2", "w3", "w3"], rel)
+    assert once.selectors == many.selectors and once.areas == many.areas

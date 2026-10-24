@@ -1,141 +1,133 @@
-"""期末参考生活的住房绑定（独立审核 F3、F4，DECISIONS/0042）：按参考岗位与通勤关系，从完整候选池选。
+"""期末参考生活的住房候选（E3B 收尾，DECISIONS/0044）：全城就业覆盖 3/5，加上估值期初的实际通勤检查。
 
-参考生活的住房以前从按菜单裁剪后的目录里挑，而且不看参考岗位在哪：固定住房可能到不了岗位（通勤不合法），菜单一换参考集合就
-跟着变。现在的规则（``reference_housing_by_job_reach_v2``，六城统一、在看结果之前写定）：
+参考住房不再在编译时固定成四处，而是编译成一个**内部选择器**（``common.life_evaluation_contracts.HousingSelector``），
+在估值期初每份参考模板的岗位确定之后由 E1 解析（``econ.life_terminal_value._select_housing``）。这里只做编译这一半：
 
-* **参考岗位集合**：现职模板的岗位是估值期初分身手上的岗位，事先不知道是哪一个，所以取本城完整岗位池与开局岗位的全部就业
-  片区（与菜单无关）；换岗模板的目标岗位也在这个集合里（组装时另外核对）。
-* **合法**：从住处片区到每个参考岗位片区都有一条可执行的通勤线——不用车的模板只认不需要用车权的方式（公交、步行骑车）；用车
-  模板也认开车（用车权的月费与油费在估值结算里照付）。
-* **基本住房**：完整候选池（不是菜单）里合法的住房中最便宜的一处；**较舒适的住房**：合法的一卧中档里，到参考岗位最长的往返
-  分钟最短的一处（同分钟取便宜的）。
-* **用车的参考生活**（E3B 映射修正：v1 的“只在没有不用车就合法的住房时才设”会让一条存在但过慢的无车路线把合法的用车参考
-  生活提前禁用）：开车能到达全部参考岗位片区时就绑定（同样的基本 / 较舒适含义，另加用车权），可不可行交给估值期现有的通勤、
-  现金与硬要求检查判定；模板数不变。
-* 用车也到不了的：这一档确定没有，用到它的参考方案已知不可行——资料确实不足时估值如实报不完整，不放宽条件。
+* **全城就业选择面**：就业片区全集是完整岗位池与开局岗位用到的片区（与年度菜单无关）；权重读冻结通勤资料
+  ``diagnostics.work_areas.areas[].inbound_weight``（ACS 流入就业人数），不用岗位个数、模板个数或取整的 share。
+* **覆盖率(h)** = 有已知线路通达的就业片区权重 ÷ 全部就业片区权重。分子允许关系表里任一方式（只量住处的潜在地理
+  适用面，不给用户免费的车，也不另加全城统一的 60 分钟条件）；一条线都没有、也没有明确不可达证据的片区算未知，
+  留在分母里。已知覆盖 ≥ 3/5 → 合格；加上未知才可能 ≥ 3/5 → 资格未知；否则不进候选。阈值由所有者定，不按六城结果调。
+  覆盖率不表示 60% 的工作一小时内可达，也不表示实际招聘概率或不用车就能到。
+* **无损压缩**：每个居住片区最多两项——当地最便宜的一处（基本档候选）与当地最便宜的一卧中档（较舒适档候选），
+  同价按编号。同片区的通勤关系相同，这对当前排序与通勤硬要求是精确简化；以后加面积、楼型之类的住房硬要求要重新核对。
+* 候选从按普通住房代理（``ordinary_rental_access_p10_v1``）过滤后的完整池生成，作为内部评价资料展开进目录，不进任何
+  菜单：分身在模拟年里看不到、也选不了参考专用的候选（同一编号本来就在当年菜单上时照常可见）。
 
-参考集合只由完整候选池、参考岗位与通勤关系决定，与年度菜单无关：只换菜单抽样种子不会改变参考住房。
+正权重缺失或分母为零时报资料不足（参考住房槽位资料未知），不默认等权。
 """
 
 from __future__ import annotations
 
 from collections.abc import Iterable
 from dataclasses import dataclass, field
+from decimal import Decimal
 from typing import Any
 
-REFERENCE_HOUSING_RULE = "reference_housing_by_job_reach_v2"
+from common.life_evaluation_contracts import HOUSING_SELECTOR_RULE, coverage_status
+
+REFERENCE_HOUSING_RULE = HOUSING_SELECTOR_RULE
 COMFORT_SPEC = {"bedrooms": 1, "quality_level": 2}
 
 
 @dataclass(frozen=True)
 class ReferenceHousing:
-    """一城的参考住房：四个槽位各绑定到哪一处（或确定没有及原因），以及参考岗位片区与每处的最长往返分钟。"""
+    """一城的参考住房候选：两个档次的选择器（``basic`` / ``comfort``，可以直接写进槽位绑定），或者资料不足的原因；
+    ``areas`` 是每个居住片区的覆盖（报告与证据用）。"""
 
     job_areas: tuple[str, ...]
-    slots: dict[str, str | None]
-    reasons: dict[str, str] = field(default_factory=dict)
-    worst_minutes: dict[str, int] = field(default_factory=dict)
+    selectors: dict[str, dict[str, Any]] = field(default_factory=dict)
+    reason: str | None = None
+    areas: dict[str, dict[str, Any]] = field(default_factory=dict)
 
     def bound(self) -> list[str]:
-        return [oid for oid in self.slots.values() if oid is not None]
+        """要展开进目录的候选编号。"""
+        return sorted(
+            {c["opportunity_id"] for s in self.selectors.values() for c in s["candidates"]}
+        )
+
+    def summary(self) -> dict[str, Any]:
+        """报告用的覆盖摘要：各资格的居住片区数、两档的候选数。"""
+        by_status: dict[str, int] = {"eligible": 0, "unknown": 0, "excluded": 0}
+        for a in self.areas.values():
+            by_status[a["coverage"]] += 1
+        return {
+            "rule": REFERENCE_HOUSING_RULE,
+            "coverage_threshold": "3/5",
+            "job_areas": len(self.job_areas),
+            "home_areas_by_coverage": by_status,
+            "candidates": {k: len(s["candidates"]) for k, s in sorted(self.selectors.items())},
+            **({"reason": self.reason} if self.reason else {}),
+        }
 
 
-def _legs(relation: dict[str, Any]) -> dict[tuple[str, str], list[dict[str, Any]]]:
-    out: dict[tuple[str, str], list[dict[str, Any]]] = {}
-    for g in relation["legs"]:
-        out.setdefault((g["home_area"], g["work_area"]), []).append(g)
-    return out
+def _rent(h: dict[str, Any]) -> Decimal:
+    return Decimal(h["gross_rent"])
 
 
-def worst_roundtrip(
-    home_area: str | None,
-    job_areas: Iterable[str],
-    legs: dict[tuple[str, str], list[dict[str, Any]]],
-    modes: set[str],
-) -> int | None:
-    """从住处片区到每个参考岗位片区、只用 ``modes`` 里的方式时最快一条线的往返分钟，再取最长的；任何一个岗位片区走不通是 None。"""
-    if home_area is None:
-        return None
-    worst = 0
-    for w in job_areas:
-        cands = [g["roundtrip_minutes"] for g in legs.get((home_area, w), ()) if g["mode"] in modes]
-        if not cands:
-            return None
-        worst = max(worst, min(cands))
-    return worst
-
-
-def _price(h: dict[str, Any]) -> float:
-    return float(h["price"]["amount"]["amount"])
-
-
-def _pick(
+def build_reference_housing(
     housing: list[dict[str, Any]],
-    job_areas: tuple[str, ...],
-    legs: dict[tuple[str, str], list[dict[str, Any]]],
-    modes: set[str],
-) -> tuple[tuple[dict[str, Any], int] | None, tuple[dict[str, Any], int] | None]:
-    reach = []
-    for h in housing:
-        w = worst_roundtrip(h.get("area"), job_areas, legs, modes)
-        if w is not None:
-            reach.append((h, w))
-    basic = min(reach, key=lambda x: (_price(x[0]), x[0]["opportunity_id"]), default=None)
-    mid1 = [
-        (h, w)
-        for h, w in reach
-        if all((h.get("spec") or {}).get(k) == v for k, v in COMFORT_SPEC.items())
-    ]
-    comfort = min(mid1, key=lambda x: (x[1], _price(x[0]), x[0]["opportunity_id"]), default=None)
-    return basic, comfort
-
-
-def choose_reference_housing(
-    housing: list[dict[str, Any]], jobs: list[dict[str, Any]], relation: dict[str, Any]
+    job_areas: Iterable[str],
+    commute: dict[str, Any],
 ) -> ReferenceHousing:
-    """``housing`` 是完整候选池（可执行的住房，未按菜单裁剪），``jobs`` 是本城目录里的岗位，``relation`` 是通勤关系表。"""
-    job_areas = tuple(
-        sorted({j["area"] for j in jobs if j.get("availability") == "available" and j.get("area")})
-    )
-    legs = _legs(relation)
-    modes = {m["mode"]: m for m in relation["modes"]}
-    free = {m for m, d in modes.items() if not d.get("requires_function")}
-    slots: dict[str, str | None] = {}
-    reasons: dict[str, str] = {}
-    worst: dict[str, int] = {}
-    if not job_areas:
-        for s in ("housing_basic", "housing_comfort", "housing_basic_car", "housing_comfort_car"):
-            slots[s] = None
-            reasons[s] = "本城目录里没有可得岗位：参考岗位集合为空，没有可以核对通勤的参考住房"
-        return ReferenceHousing(job_areas, slots, reasons, worst)
-    no_car = dict(
-        zip(
-            ("housing_basic", "housing_comfort"), _pick(housing, job_areas, legs, free), strict=True
+    """``housing`` 是合格住房池的轻量视图（编号、片区、月租 ``gross_rent``、卧室数、质量档），``job_areas`` 是全城就业
+    片区全集，``commute`` 是冻结的通勤资料（取关系表、流入就业权重与内容身份）。"""
+    areas = tuple(sorted(set(job_areas)))
+    weights = {
+        a["area_id"]: int(a["inbound_weight"])
+        for a in commute["diagnostics"]["work_areas"]["areas"]
+    }
+    if not areas:
+        return ReferenceHousing(areas, reason="本城没有可得岗位：全城就业选择面是空的")
+    missing = [a for a in areas if weights.get(a, 0) <= 0]
+    if missing:
+        return ReferenceHousing(
+            areas,
+            reason=f"就业片区 {missing} 没有正的流入就业权重：覆盖率资料不足（不默认等权）",
         )
-    )
-    with_car = dict(
-        zip(
-            ("housing_basic_car", "housing_comfort_car"),
-            _pick(housing, job_areas, legs, set(modes)),
-            strict=True,
-        )
-    )
-    labels = {"housing_basic": "合法住房", "housing_comfort": "合法的一卧中档"}
-    for slot, got in no_car.items():
-        if got is not None:
-            slots[slot], worst[slot] = got[0]["opportunity_id"], got[1]
-        else:
-            slots[slot] = None
-            reasons[slot] = (
-                f"完整候选池里没有不用车就能到达全部参考岗位片区（{len(job_areas)} 个）的{labels[slot]}"
-            )
-        car_slot = f"{slot}_car"
-        car = with_car[car_slot]
-        if car is not None:
-            slots[car_slot], worst[car_slot] = car[0]["opportunity_id"], car[1]
-        else:
-            slots[car_slot] = None
-            reasons[car_slot] = (
-                f"开车也没有能到达全部参考岗位片区的{labels[slot]}：这一档参考生活确定没有（资料不足，不放宽条件）"
-            )
-    return ReferenceHousing(job_areas, slots, reasons, worst)
+    total = sum(weights[a] for a in areas)
+    pairs = {(g["home_area"], g["work_area"]) for g in commute["commute"]["legs"]}
+    by_area: dict[str, list[dict[str, Any]]] = {}
+    for h in housing:
+        by_area.setdefault(h["area"], []).append(h)
+    coverage: dict[str, dict[str, Any]] = {}
+    basic: list[dict[str, Any]] = []
+    comfort: list[dict[str, Any]] = []
+    for home in sorted(by_area):
+        covered = sum(weights[w] for w in areas if (home, w) in pairs)
+        unknown = total - covered
+        status = coverage_status(covered, unknown, total)
+        coverage[home] = {"covered": covered, "unknown": unknown, "coverage": status}
+        if status == "excluded":
+            continue
+        cand = {
+            "area": home,
+            "coverage": status,
+            "covered_weight": covered,
+            "unknown_weight": unknown,
+        }
+        homes = by_area[home]
+        cheapest = min(homes, key=lambda h: (_rent(h), h["opportunity_id"]))
+        basic.append({"opportunity_id": cheapest["opportunity_id"], **cand})
+        mid1 = [
+            h
+            for h in homes
+            if (h["bedrooms"], h["quality_level"])
+            == (COMFORT_SPEC["bedrooms"], COMFORT_SPEC["quality_level"])
+        ]
+        if mid1:
+            best = min(mid1, key=lambda h: (_rent(h), h["opportunity_id"]))
+            comfort.append({"opportunity_id": best["opportunity_id"], **cand})
+    excluded = sum(a["coverage"] == "excluded" for a in coverage.values())
+    head = {
+        "rule_id": REFERENCE_HOUSING_RULE,
+        "coverage_threshold": "3/5",
+        "commute_identity": commute["content_identity"],
+        "work_areas": [{"area_id": a, "inbound_weight": weights[a]} for a in areas],
+        "excluded_home_areas": excluded,
+    }
+    selectors = {
+        "basic": {**head, "kind": "basic", "candidates": basic},
+        "comfort": {**head, "kind": "comfort", "candidates": comfort},
+    }
+    return ReferenceHousing(areas, selectors, None, coverage)

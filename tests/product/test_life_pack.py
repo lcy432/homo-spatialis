@@ -55,7 +55,8 @@ def point(pid: str, weight: int, gross: str | None = "1500.00", **kw) -> dict:
         "quality_tier": kw.get("tier", 2),
         "censor_bound": None,
         "censored_by": None,
-        "records": [f"housing.acs2024.{pid}"],
+        # 一个支持点合并了可执行特征相同的 15 条记录：两个可执行点共 30 条，够普通住房代理的样本门槛
+        "records": [f"housing.acs2024.{pid}.{i}" for i in range(15)],
     }
 
 

@@ -152,20 +152,103 @@ class LifeTemplate(ContractModel):
         return tuple(out)
 
 
+#: 参考住房选择器的规则（E3B 收尾，DECISIONS/0044）：候选先过全城就业覆盖（已知线路通达的就业片区权重 ≥ 3/5），
+#: 再在估值期初按这份参考生活实际的岗位、实际的交通能力与用户的通勤硬要求核对，最后按档次的排序选一处。
+HOUSING_SELECTOR_RULE = "reference_housing_coverage_commute_v3"
+HOUSING_COVERAGE_THRESHOLD = Fraction(3, 5)
+
+
+class WorkAreaWeight(ContractModel):
+    """全城就业选择面里的一个就业片区与它的流入就业权重（ACS 流入通勤者人数，正整数）。"""
+
+    area_id: IdStr
+    inbound_weight: Annotated[int, Field(ge=1)]
+
+
+class HousingCandidate(ContractModel):
+    """参考住房选择器的一个候选：一处住房、它的居住片区，以及这个片区的就业覆盖。``covered_weight`` 是有已知线路通达的
+    就业片区权重之和，``unknown_weight`` 是没有任何线路记录（也没有明确不可达证据）的就业片区权重之和；两者都留在
+    分母里。``coverage`` = ``eligible``（已知覆盖 ≥ 阈值）或 ``unknown``（已知覆盖不足、加上未知片区可能达到）。"""
+
+    opportunity_id: IdStr
+    area: IdStr
+    coverage: Literal["eligible", "unknown"]
+    covered_weight: Annotated[int, Field(ge=0)]
+    unknown_weight: Annotated[int, Field(ge=0)]
+
+
+class HousingSelector(ContractModel):
+    """一个住房槽位的内部选择器（E3B 收尾）：每份参考模板的岗位确定之后，才从 ``candidates`` 里按规则选一处。
+
+    * ``basic``：通过实际通勤检查的候选里，按（月租、编号）最小；
+    * ``comfort``：候选已限定为一卧中档；按（到实际需要到岗的岗位的最长往返分钟、月租、编号）最小，没有到岗岗位时
+      通勤比较值是 0。
+
+    候选由资料编译从合格住房池生成，每个居住片区最多一项（当地最便宜的那一处；同片区通勤关系相同，这对当前排序与通勤
+    硬要求是精确简化）。覆盖已知不足阈值的片区不进候选，个数记在 ``excluded_home_areas``。候选只是内部评价资料：
+    不在任何年度菜单上就不会出现在代理的观察里。"""
+
+    rule_id: Literal["reference_housing_coverage_commute_v3"]
+    kind: Literal["basic", "comfort"]
+    coverage_threshold: Literal["3/5"]
+    commute_identity: Sha256
+    work_areas: tuple[WorkAreaWeight, ...] = Field(min_length=1)
+    candidates: tuple[HousingCandidate, ...]
+    excluded_home_areas: Annotated[int, Field(ge=0)] = 0
+
+    @model_validator(mode="after")
+    def _shape(self) -> HousingSelector:
+        areas = [w.area_id for w in self.work_areas]
+        if len(set(areas)) != len(areas):
+            raise ValueError("选择器的就业片区重复")
+        ids = [c.opportunity_id for c in self.candidates]
+        if len(set(ids)) != len(ids):
+            raise ValueError("选择器的候选重复")
+        total = self.total_weight
+        for c in self.candidates:
+            if c.covered_weight + c.unknown_weight > total:
+                raise ValueError(f"{c.opportunity_id}: 覆盖权重之和超过全部就业权重 {total}")
+            if c.coverage != coverage_status(c.covered_weight, c.unknown_weight, total):
+                raise ValueError(
+                    f"{c.opportunity_id}: 覆盖状态 {c.coverage} 与权重 {c.covered_weight} / {c.unknown_weight} / "
+                    f"{total} 按阈值 3/5 算出的不一致"
+                )
+        return self
+
+    @property
+    def total_weight(self) -> int:
+        return sum(w.inbound_weight for w in self.work_areas)
+
+
+def coverage_status(covered: int, unknown: int, total: int) -> str:
+    """覆盖资格：已知覆盖 ≥ 3/5 是 ``eligible``；加上未知片区才可能 ≥ 3/5 是 ``unknown``；否则 ``excluded``。精确分数比较。"""
+    if total <= 0:
+        raise ValueError("全部就业权重必须为正：不能默认等权")
+    if Fraction(covered, total) >= HOUSING_COVERAGE_THRESHOLD:
+        return "eligible"
+    if Fraction(covered + unknown, total) >= HOUSING_COVERAGE_THRESHOLD:
+        return "unknown"
+    return "excluded"
+
+
 class SlotTarget(ContractModel):
-    """一座城的一个槽位绑定到什么：目录里的一项机会，或确定没有（``unavailable``），或资料未知（``unknown``）。
-    确定没有与资料未知分开——前者让用到它的方案"已知不可行"，后者让方案"无法评价"。"""
+    """一座城的一个槽位绑定到什么：目录里的一项机会，或确定没有（``unavailable``），或资料未知（``unknown``），或（只限
+    住房槽位）一个内部选择器（``selector``，岗位确定之后再选）。确定没有与资料未知分开——前者让用到它的方案"已知不可行"，
+    后者让方案"无法评价"。"""
 
     slot_id: KeyStr
-    status: Literal["opportunity", "unavailable", "unknown"]
+    status: Literal["opportunity", "unavailable", "unknown", "selector"]
     opportunity_id: IdStr | None = None
     reason: str | None = Field(default=None, max_length=280)
+    housing_selector: HousingSelector | None = Field(default=None, exclude_if=lambda v: v is None)
 
     @model_validator(mode="after")
     def _shape(self) -> SlotTarget:
         if (self.status == "opportunity") != (self.opportunity_id is not None):
             raise ValueError(f"{self.slot_id}: 只有绑定到机会时写 opportunity_id，而且必须写")
-        if self.status != "opportunity" and not self.reason:
+        if (self.status == "selector") != (self.housing_selector is not None):
+            raise ValueError(f"{self.slot_id}: 只有选择器写 housing_selector，而且必须写")
+        if self.status in ("unavailable", "unknown") and not self.reason:
             raise ValueError(f"{self.slot_id}: 确定没有或资料未知必须写原因")
         return self
 
@@ -274,6 +357,9 @@ class EvaluationSpec(ContractModel):
                     f"{b.city}: 必须为比较组的每个槽位写绑定（同一套方案类别），缺 {sorted(set(roles) - got)}、"
                     f"多 {sorted(got - set(roles))}"
                 )
+            for t in b.targets:
+                if t.status == "selector" and roles.get(t.slot_id) != "housing":
+                    raise ValueError(f"{b.city}: 选择器只用于住房槽位，{t.slot_id} 不是住房槽位")
         return self
 
     @property
@@ -608,6 +694,43 @@ class PlanItem(ContractModel):
     )
 
 
+class HousingBindingRecord(ContractModel):
+    """一份参考模板实例化时住房选择器的绑定记录（E3B 收尾）：实际岗位片区、允许的交通能力、选中的住房与它的覆盖分子
+    分母，以及候选核对的计数与失败原因。``status`` = ``selected``（选中）/ ``unknown``（没有已知合格的候选，但有候选
+    资料未知）/ ``unavailable``（每个候选都已知不合格）。``unknown_ranked_ahead`` 是排序上排在选中项前面、但资格或
+    通勤资料未知的候选个数（只在选中时记）。"""
+
+    slot_id: KeyStr
+    rule_id: str = Field(min_length=1, max_length=80)
+    kind: Literal["basic", "comfort"]
+    status: Literal["selected", "unknown", "unavailable"]
+    onsite_job_areas: tuple[IdStr, ...] = ()
+    remote_jobs: Annotated[int, Field(ge=0)] = 0
+    functions: tuple[KeyStr, ...] = ()
+    commute_limits: tuple[Annotated[int, Field(ge=0)], ...] = ()
+    candidates: Annotated[int, Field(ge=0)]
+    passed: Annotated[int, Field(ge=0)]
+    unknown: Annotated[int, Field(ge=0)]
+    failed: Annotated[int, Field(ge=0)]
+    opportunity_id: IdStr | None = None
+    home_area: IdStr | None = None
+    covered_weight: Annotated[int, Field(ge=0)] | None = None
+    total_weight: Annotated[int, Field(ge=1)]
+    longest_roundtrip_minutes: Annotated[int, Field(ge=0)] | None = None
+    unknown_ranked_ahead: Annotated[int, Field(ge=0)] = 0
+    reason: str | None = Field(default=None, max_length=400)
+
+    @model_validator(mode="after")
+    def _shape(self) -> HousingBindingRecord:
+        if (self.status == "selected") != (self.opportunity_id is not None):
+            raise ValueError(f"{self.slot_id}: 只有选中时写住房编号，而且必须写")
+        if self.passed + self.unknown + self.failed != self.candidates:
+            raise ValueError(f"{self.slot_id}: 候选计数对不上")
+        if self.status != "selected" and not self.reason:
+            raise ValueError(f"{self.slot_id}: 没有选中必须写原因")
+        return self
+
+
 class PlanEvaluation(ContractModel):
     """一个估值分支（基础生活模板 + 治疗选择）在这个终态上的结果：适用性、实际结算、逐月分数、V_p、硬要求与未被选中
     的原因。``plan_id`` 是分支编号：估值期初健康时就是模板编号（治疗选择未触发）；带病时是"模板编号.treat"或
@@ -639,6 +762,9 @@ class PlanEvaluation(ContractModel):
     action_fingerprint: Sha256 | None = None
     outcome_fingerprint: Sha256 | None = None
     score_fingerprint: Sha256 | None = None
+    housing_binding: HousingBindingRecord | None = Field(
+        default=None, exclude_if=lambda v: v is None
+    )
 
     @model_validator(mode="after")
     def _shape(self) -> PlanEvaluation:
@@ -806,6 +932,9 @@ def internal_evaluation_models() -> tuple[type[ContractModel], ...]:
         DurablePurchaseRule,
         ActivityUseRule,
         LifeTemplate,
+        WorkAreaWeight,
+        HousingCandidate,
+        HousingSelector,
         SlotTarget,
         CitySlotBinding,
         ActualMonth,
@@ -821,6 +950,7 @@ def internal_evaluation_models() -> tuple[type[ContractModel], ...]:
         ValuationStateSummary,
         ValuationContext,
         PlanItem,
+        HousingBindingRecord,
         PlanEvaluation,
         TerminalValuation,
         CombinedScore,
