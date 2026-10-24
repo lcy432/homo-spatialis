@@ -71,6 +71,9 @@ def test_a_family_reports_each_spec_and_says_when_nothing_was_updated():
     f = family_update([("food.a", Decimal("10")), ("food.b", Decimal("0"))], {})
     assert f["specs"] == 2 and f["comparable_quotes"] == 0
     assert f["by_status"] == {"no_local_quotes": 1, "zero_base_price": 1}
-    assert f["note_zh"] == NO_UPDATE_ZH
-    g = family_update([("food.a", Decimal("10"))], {"food.a": [q("x", "12", spec="food.a")]})
+    assert f["note_zh"] == NO_UPDATE_ZH and "spec_updates" not in f
+    # 有报价的规格：汇总直接采用接线时的修正记录（机会里的价已经是最终价，不再按它重算一次）
+    record = retail_update(Decimal("10"), [q("x", "12", spec="food.a")], "food.a")
+    g = family_update([("food.a", Decimal(record["execution_price"]))], {"food.a": record})
     assert g["by_status"] == {"updated": 1} and g["note_zh"] != NO_UPDATE_ZH
+    assert g["comparable_quotes"] == 1 and g["spec_updates"] == {"food.a": record}

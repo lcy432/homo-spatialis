@@ -439,10 +439,6 @@ menus:
   policies:
     housing:
       kind: full_catalog
-    jobs:
-      kind: annual_exposure_sample
-      strata_key: soc_major
-      size: 30
     training:
       kind: calendar_open
     food:

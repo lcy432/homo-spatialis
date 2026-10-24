@@ -9,11 +9,13 @@
 # 语言模型不生成任何数：设定值是本配置作者写下、登记、可审阅的；代码只做确定的换算。
 
 version: life-items-us-v1
-intake_build_id: 35667f4101a71c0e5ea6c1aaa8e5f45cd83c825d6b1393bde1104d3d571a96b7
+intake_build_id: 60cf49b404831f495388e9c91e6e7ee6d9fa93d819bebf1158aaac70c3a918fb
 numeraire: USD_2024_LOCAL
 mapping_version: e3b-life-items-v1
 #: 纯设定类机会的来源日期（配置写定的日子）
 assumptions_written_on: 2026-10-23
+#: A 板块的本地同规格直接报价清单（E3B 收尾 §4.1）：冻结时读入、按 retail_correction_lognormal_v1 接进机会价格，内容身份进构建身份
+local_quotes: configs/intake/local_quotes_us_v1.yaml
 metros:
   - {cbsa: "35620", key: nyc, label: New York-Newark-Jersey City 都会区, city: 纽约}
   - {cbsa: "31080", key: la, label: Los Angeles-Long Beach-Anaheim 都会区, city: 洛杉矶}
@@ -277,6 +279,9 @@ daily_support:
     service: home_internet_basic
     label: 家庭宽带（基本档）
     quality: 居家互联网接入：下行 100–199 Mbps、上行至少 20 Mbps、不限流量；月费是 FCC 2024 城市费率调查同规格报价的大区加权中位数，换到 2024 年（不含税）
+    # FCC 资料不可得时（ce_internet_budget_proxy_v1）的可见名称与说明：不声称任何速度、上行或流量档
+    label_ce_fallback: 家庭宽带（按平均支出估计）
+    quality_ce_fallback: 居家互联网接入；月费是 CE 2024 一人消费单位互联网服务的月均支出（全国分配估计、共同预算代理，各城相同），不是某家运营商的报价，不对应特定的速度或流量档
     # 同规格（fcc_broadband_basic_tier_v1）：FCC 2024 宽带定义 100/20 Mbps 那一档的报价（下行 100–199），不是所有达到 100/20 的套餐
     fcc_spec: {download_min_mbps: 100, download_below_mbps: 200, upload_min_mbps: 20, usage: unlimited}
     min_offers: 30
@@ -508,6 +513,10 @@ assumptions:
     nature: assumption
     statement_zh: 同规格零售价相对基础成本预测的修正 δ = log(实际价 ÷ 基础预测价)，共同先验 N(0, log(1.5)²)；同规格直接报价按供应商去重、每家一个对数比值；本地均值观测方差 max(s²/n, log(1.1)²)，只有一家时 log(1.5)²；正态共轭更新，执行价 = 基础预测 × exp(后验均值)
     basis_zh: 方差是登记的探索设定，不是从报价估计的；现在六城没有合格的同规格直接报价，所以全部“未发生本地报价更新”，执行价就是基础预测（标为估计）
+  - id: local_quote_comparability_v1
+    nature: rule
+    statement_zh: 本地报价（configs/intake/local_quotes_us_v1.yaml）只有在规格键（机会编号去掉城市前缀）、计价口径（币种_基年_LOCAL）、计费周期、计价单位都与机会报价相同，且税费口径为未含销售税、单独购买（不捆绑）时，才参与这个规格的零售修正；其余只记录不更新，不做税费、捆绑或时期换算。修正后的执行价只写进机会价格一次
+    basis_zh: 基础预测统一按“未含销售税、单独购买”的口径比较是登记的设定，没有逐个规格核对基础价的税费口径（例如 CE 支出含销售税）；有报价时要先核对这一点
   - id: daily_support_cost_order_v1
     nature: rule
     statement_zh: 日常支持的费用顺序：同规格直接报价 → FCC 同规格大区参照（家庭宽带，大区至少 30 条同规格报价）→ FCC 全国参照 → CE 一人消费单位预算代理；现在六城都没有直接报价
@@ -515,6 +524,10 @@ assumptions:
     nature: assumption
     statement_zh: 手机通信月费 = CE 2024 一人消费单位手机服务年均支出 ÷ 12（共同预算代理，各城相同）；不是单人套餐报价，不能把全部家庭的通信支出叫单人套餐价
     basis_zh: 没有可用的单人套餐直接报价；CE 是全国一人消费单位的平均支出，含不同套餐与使用量
+  - id: ce_internet_budget_proxy_v1
+    nature: assumption
+    statement_zh: FCC 原始资料未获取或明确不可得（或缺少把 2023 年调查价换到 2024 年的 CPI）时，家庭宽带月费 = CE 2024 一人消费单位“其他家庭开支”× 全国详细表互联网服务占比 ÷ 12（分配估计、共同预算代理，各城相同）；CE 已是 2024 年口径，不再乘 CPI；不对应任何速度、上行或流量档
+    basis_zh: 只是平均支出，含不同套餐与用量，不是某家运营商的报价；FCC 文件在缓存里但指纹不符、损坏或格式不对时拒绝构建，不走这条回退
   - id: fcc_broadband_basic_tier_v1
     nature: assumption
     statement_zh: 家庭宽带基本档 = FCC 2024 城市费率调查里下行 100–199 Mbps、上行至少 20 Mbps、不限流量的报价；参照价 = 本城所在人口普查大区这些报价按调查权重的中位数总月费（月费 + 强制收费 + 附加费，不含税），按 CPI 互联网服务（CUUR0000SEEE03）2024 ÷ 2023 年平均换到 2024 年

@@ -18,12 +18,16 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pytest
+import yaml
 
 from common.intake_contracts import CompileInfo, Menu, Opportunity, StdRecord, applies_to
 from ledger import intake_data
-from product.realdata import build, e1_export, goods, query, store
+from product.realdata import build, e1_export, goods, jobs, life_inputs, query, store
 from product.realdata.activities import PRIVATE_ACCESS, _session_hours, _text
+from product.realdata.config import load_config
 from product.realdata.prices import Cpi, to_cents_text
+
+from .support import CACHE, CONFIG
 
 REPO = Path(__file__).resolve().parents[3]
 
@@ -480,8 +484,6 @@ def test_cli_query_and_menu_print_amounts_with_unit_numeraire_and_reasons(built,
     assert free and all(
         i["amount"]["unit"] == "USD/registration" for i in free
     )  # 免费活动是有值的 0，不是缺失
-    jobs = _run_cli(capsys, db, "query", "--sector", "jobs", "--per-page", "5")["items"]
-    assert all(i["amount"]["fact"] == "annual_wage" for i in jobs)
     plan = _run_cli(capsys, db, "query", "--sector", "food", "--kind", "food_plan")["items"]
     assert all(
         i["amount"]["fact"] == "monthly_food_cost" and i["amount"]["kind"] == "assumption"
@@ -523,9 +525,11 @@ def test_menus_are_unique_per_environment_and_independent_of_clones(built):
     _, _, _, _, menus, _ = built
     keys = [(m.cbsa, m.year, m.sector, m.env_repeat) for m in menus]
     assert len(keys) == len(set(keys))
-    j = {(m.year, m.env_repeat): m for m in menus if m.sector == "jobs"}
-    assert j[(1, 0)].seed != j[(1, 1)].seed and j[(1, 0)].seed != j[(2, 0)].seed
-    assert all(m.selection == "listed" and m.selected for m in j.values())
+    a = {(m.year, m.env_repeat): m for m in menus if m.sector == "activities"}
+    assert a[(1, 0)].seed != a[(1, 1)].seed and a[(1, 0)].seed != a[(2, 0)].seed
+    assert all(m.selection == "listed" and m.selected for m in a.values())
+    # 岗位在 intake 里没有菜单：岗位候选池与年度岗位菜单只在 E3B 资料包里
+    assert not any(m.sector == "jobs" for m in menus)
     # 住房的候选池是完整支持表的目标格：全部列出，不在 intake 里抽年度菜单（年度菜单在 E3B 资料包里从展开的完整池抽）
     h = [m for m in menus if m.sector == "housing"]
     assert h and all(m.policy == "full_catalog" and m.selection == "all_eligible" for m in h)
@@ -542,18 +546,19 @@ def test_query_filters_page_and_lineage(built):
     *_, db = built
     conn = store.open_readonly(db)
     try:
-        p1 = query.opportunities(conn, sector="jobs", cbsa="16980", per_page=5)
-        p2 = query.opportunities(conn, sector="jobs", cbsa="16980", per_page=5, page=2)
+        venues = {"sector": "food", "cbsa": "16980", "kind": "restaurant_venue", "per_page": 5}
+        p1 = query.opportunities(conn, **venues)
+        p2 = query.opportunities(conn, **venues, page=2)
         assert p1.total > 10 and len(p1.items) == 5
         assert {o["opportunity_id"] for o in p1.items}.isdisjoint(
             o["opportunity_id"] for o in p2.items
         )
-        major = p1.items[0]["attributes"]["soc_major"]
+        takeaway = p1.items[0]["attributes"]["takeaway"]
         filtered = query.opportunities(
-            conn, sector="jobs", attributes={"soc_major": major}, per_page=500
+            conn, sector="food", attributes={"takeaway": takeaway}, per_page=500
         )
         assert filtered.total > 0 and all(
-            o["attributes"]["soc_major"] == major for o in filtered.items
+            o["attributes"]["takeaway"] == takeaway for o in filtered.items
         )
         lin = query.lineage(conn, "food.plan.16980.staples_home")
         assert lin["records"] and all(r["source"]["source_id"] == "bls_ap" for r in lin["records"])
@@ -576,6 +581,126 @@ def test_activity_text_is_unescaped_and_private_venues_are_not_listed(built):
         for r in acts
         if r.record_type == "activity_venue"
     )
+
+
+# --------------------------------------------------------------------------- 岗位：intake 只留来源事实（旧的三档岗位候选已删除）
+
+#: 迁移前的代码（从三档岗位候选的中位数档读入职要求）在同一份小样本上给出的值，逐字记下：迁移后从 EP 记录读必须完全相同。
+#: 唯一的有意改动：EP 表里写 "None"（不需要）的格子以前被 pandas 读成缺失、写成 "nan"，现在照原文是 "None"（E3B 收尾）。
+EP_BEFORE_MIGRATION = {
+    "11-1011": ("Bachelor's degree", "5 years or more", "None"),
+    "11-9051": (
+        "High school diploma or equivalent",
+        "Less than 5 years",
+        "Short-term on-the-job training",
+    ),
+    "13-1031": ("High school diploma or equivalent", "None", "Long-term on-the-job training"),
+    "13-1032": ("Postsecondary nondegree award", "None", "Moderate-term on-the-job training"),
+    "13-1071": ("Bachelor's degree", "None", "None"),
+}
+
+
+def _ep_table() -> dict[str, dict[str, str]]:
+    raw = next((CACHE / "bls_ep_education").glob("*.bin")).read_bytes()
+    return jobs.parse_ep_education(raw)["occupations"]
+
+
+def test_jobs_are_source_facts_without_candidates_or_menus(built):
+    _, _, opps, recs, menus, _ = built
+    assert not any(o.sector == "jobs" or o.kind == query.RETIRED_JOB_KIND for o in opps)
+    assert not any(m.sector == "jobs" for m in menus)
+    table = _ep_table()
+    ep = {
+        r.attributes["occupation_code"]: r
+        for r in recs
+        if r.record_type == "occupation_entry_requirements"
+    }
+    assert set(ep) == set(table)
+    for soc, r in ep.items():
+        assert r.record_id == f"jobs.ep.{soc}" and r.geo.level == "national" and r.geo.cbsa is None
+        assert r.source.source_id == "bls_ep_education" and r.source.raw_sha256
+        assert {f.name: f.value for f in r.fields} == {
+            name: table[soc][key] for key, name in jobs.EP_FIELDS.items()
+        }
+        assert all(f.kind == "observed" and f.raw == f.value for f in r.fields)
+    oews = [r for r in recs if r.record_type == "occupation_wage_distribution"]
+    assert oews and all(r.geo.cbsa == "16980" for r in oews)
+
+
+def test_life_inputs_read_entry_requirements_from_ep_records_unchanged(built):
+    *_, db = built
+    names = list(jobs.EP_FIELDS.values())
+    conn = store.open_readonly(db)
+    try:
+        before = {soc: dict(zip(names, v, strict=True)) for soc, v in EP_BEFORE_MIGRATION.items()}
+        assert life_inputs._ep(conn, sorted(before), ["16980"]) == before
+        socs = sorted(
+            rid.rsplit(".", 1)[1]
+            for (rid,) in conn.execute(
+                "SELECT record_id FROM records WHERE record_type = 'occupation_wage_distribution'"
+            )
+        )
+        table = _ep_table()
+        with_ep = [s for s in socs if s in table]
+        assert life_inputs._ep(conn, with_ep, ["16980"]) == {
+            s: {name: table[s][key] for key, name in jobs.EP_FIELDS.items()} for s in with_ep
+        }
+        # 没有任何都会区 OEWS 记录的职业不进切片（与迁移前相同）
+        assert life_inputs._ep(conn, ["99-9999"], ["16980"]) == {}
+        # 有 OEWS 记录但 EP 没有分配的职业（小样本里是 11-1031 立法者）：明确报错，不补
+        no_ep = [s for s in socs if s not in table]
+        assert no_ep
+        with pytest.raises(life_inputs.SliceError, match="EP 入职要求"):
+            life_inputs._ep(conn, no_ep[:1], ["16980"])
+    finally:
+        conn.close()
+
+
+def test_old_job_queries_are_refused_with_a_pointer_to_the_life_pack(built, capsys):
+    *_, db = built
+    conn = store.open_readonly(db)
+    try:
+        for call in (
+            lambda: query.opportunities(conn, sector="jobs", cbsa="16980"),
+            lambda: query.opportunities(conn, kind="job_opening_candidate"),
+            lambda: query.menu(conn, "16980", 1, "jobs"),
+            lambda: query.lineage(conn, "jobs.16980.11-1011.median"),
+        ):
+            with pytest.raises(query.RetiredJobQueryError, match="data/frozen/life/us-v1/pack/"):
+                call()
+        with pytest.raises(KeyError):
+            query.lineage(conn, "food.no.such.item")
+        wages = query.records(
+            conn, sector="jobs", cbsa="16980", record_type="occupation_wage_distribution"
+        )
+        assert wages.total > 10 and all(r["geo"]["cbsa"] == "16980" for r in wages.items)
+        req = {"sector": "jobs", "cbsa": "16980", "record_type": "occupation_entry_requirements"}
+        assert query.records(conn, **req).total == len(_ep_table())  # 全国记录随都会区一起给
+        assert query.records(conn, **req, include_national=False).total == 0
+    finally:
+        conn.close()
+    cli = _cli()
+    assert cli.main(["--db-file", str(db), "query", "--sector", "jobs"]) == 2
+    err = capsys.readouterr().err
+    assert "已废弃" in err and "scripts/life_pack_us.py build" in err
+    menu_args = ["menu", "--cbsa", "16980", "--year", "1", "--sector", "jobs"]
+    assert cli.main(["--db-file", str(db), *menu_args]) == 2
+    assert "生活资料包" in capsys.readouterr().err
+    out = _run_cli(capsys, db, "records", "--sector", "jobs", "--cbsa", "16980", "--per-page", "3")
+    assert out["returned"] == 3 and out["total"] > 3
+
+
+def test_config_with_a_job_menu_policy_is_rejected(tmp_path):
+    raw = yaml.safe_load(CONFIG.read_text(encoding="utf-8"))
+    raw["menus"]["policies"]["jobs"] = {
+        "kind": "annual_exposure_sample",
+        "strata_key": "soc_major",
+        "size": 30,
+    }
+    old = tmp_path / "old.yaml"
+    old.write_text(yaml.safe_dump(raw, allow_unicode=True), encoding="utf-8")
+    with pytest.raises(ValueError, match="E3B 生活资料包"):
+        load_config(old)
 
 
 # --------------------------------------------------------------------------- 检查器
@@ -610,7 +735,7 @@ def test_ledger_catches_menu_items_outside_the_eligible_set(built, tmp_path):
     outside = next(o.opportunity_id for o in opps if o.sector == "food")
 
     def add_unpriced(docs):
-        target = next(d for d in docs if d["sector"] == "jobs" and d["selected"])
+        target = next(d for d in docs if d["sector"] == "activities" and d["selected"])
         target["selected"] = [*target["selected"][:-1], outside]
 
     problems = _tamper(ctx, refs, tmp_path, add_unpriced)

@@ -13,8 +13,8 @@ pums_year: 2024
 
 # intake-02 的冻结库：PUMS、划定与 PUMA 对应文件的指纹按它核对；通勤层与汽油价也从它读。
 intake:
-  build_id: 35667f4101a71c0e5ea6c1aaa8e5f45cd83c825d6b1393bde1104d3d571a96b7
-  default_db: runs/intake/us-v1/work/freeze/35667f4101a71c0e/intake.sqlite
+  build_id: 60cf49b404831f495388e9c91e6e7ee6d9fa93d819bebf1158aaac70c3a918fb
+  default_db: runs/intake/us-v1/work/freeze/60cf49b404831f49/intake.sqlite
 
 # 官方 PUMS 代码表（2020–2024 5 年期，与 2024 1 年期用同一套 2020 年工作地 PUMA）：县 → PUMA → 工作地 PUMA。
 # 1 年期的代码表是旧式 .xls（没有读取它的依赖），5 年期是 .xlsx；构建时核对 2024 年资料里出现的工作地代码都在这张表里。

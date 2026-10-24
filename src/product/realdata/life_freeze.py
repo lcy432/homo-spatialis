@@ -8,8 +8,11 @@ from __future__ import annotations
 
 import json
 from collections import Counter
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
+
+import yaml
 
 from common.life_contracts import (
     RESOURCE_INPUT_DECIMALS,
@@ -19,7 +22,13 @@ from common.life_contracts import (
     has_decimals,
 )
 from ledger.life_catalog import internal_leak_problems
-from product.realdata.a_blocks import city_blocks
+from product.realdata.a_blocks import (
+    LocalQuote,
+    QuoteError,
+    apply_local_quotes,
+    city_blocks,
+    load_local_quotes,
+)
 from product.realdata.life_items import (
     ITEMS_VERSION,
     STATUSES,
@@ -50,6 +59,7 @@ from product.realdata.occupations import (
 )
 
 FROZEN_SCHEMA = "e3b-life-items-frozen-v1"
+REPO = Path(__file__).resolve().parents[3]
 
 
 class FreezeError(ValueError):
@@ -93,9 +103,15 @@ def item_problems(o: LifeOpportunity, vocab: dict[str, list[str]]) -> list[str]:
 
 
 def compile_city(
-    ctx: Ctx, occ: dict[str, Any], baskets: dict[str, Any], scope: Scope
-) -> tuple[list[Item], Report, dict[str, Any], list[dict[str, Any]]]:
-    """一城的生活机会与岗位模板。岗位是模板（职业 × 年薪支持点），工时与就业片区在整合时拼上（``job_wage_support_v1``）。"""
+    ctx: Ctx,
+    occ: dict[str, Any],
+    baskets: dict[str, Any],
+    scope: Scope,
+    quotes: Sequence[LocalQuote] = (),
+    quote_basis: dict[str, str] | None = None,
+) -> tuple[list[Item], Report, dict[str, Any], list[dict[str, Any]], dict[str, dict[str, Any]]]:
+    """一城的生活机会与岗位模板。岗位是模板（职业 × 年薪支持点），工时与就业片区在整合时拼上（``job_wage_support_v1``）。
+    本城的本地报价在检查之前接进机会价格（``apply_local_quotes``），返回值最后一项是按规格的修正记录。"""
     report = Report()
     templates = job_templates(ctx, occ, scope, report)
     items = [
@@ -109,6 +125,12 @@ def compile_city(
         *chicago_programs(ctx, report),
         *training(ctx, occ, scope, report),
     ]
+    try:
+        items, corrections = apply_local_quotes(
+            items, quotes, ctx.cfg["a_blocks"], quote_basis or {}
+        )
+    except QuoteError as e:
+        raise FreezeError(f"{ctx.cbsa}: {e}") from e
     ids = Counter(i.opportunity.opportunity_id for i in items)
     dup = sorted(k for k, n in ids.items() if n > 1)
     if dup:
@@ -117,7 +139,7 @@ def compile_city(
     bad = [i.status for i in items if i.status not in STATUSES]
     if problems or bad:
         raise FreezeError(f"{ctx.cbsa}: {(problems + bad)[:8]}")
-    return items, report, start_jobs(ctx, occ, scope, templates), templates
+    return items, report, start_jobs(ctx, occ, scope, templates), templates, corrections
 
 
 def _cheapest_food(items: list[Item]) -> dict[str, Any] | None:
@@ -174,12 +196,21 @@ def freeze(
     occ_cfg: dict[str, Any],
     baskets: dict[str, Any],
     out_dir: Path | None = None,
+    *,
+    quotes: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """编译六城并（给了 ``out_dir`` 时）写出冻结文件。返回清单。"""
+    """编译六城并（给了 ``out_dir`` 时）写出冻结文件。返回清单。``quotes`` 是本地报价清单（不给时读物品配置
+    ``local_quotes`` 指向的文件）；它的内容身份进清单的 ``identities``，从而进资料包的构建身份。"""
+    if quotes is None:
+        quotes = yaml.safe_load((REPO / items_cfg["local_quotes"]).read_text(encoding="utf-8"))
     # YAML 把日期读成 date 对象：先规范成 JSON 能写的形状，内容身份与输出都按它算
-    items_cfg, occ_cfg, baskets = (
-        json.loads(json.dumps(x, default=str)) for x in (items_cfg, occ_cfg, baskets)
+    items_cfg, occ_cfg, baskets, quotes = (
+        json.loads(json.dumps(x, default=str)) for x in (items_cfg, occ_cfg, baskets, quotes)
     )
+    try:
+        city_quotes = load_local_quotes(quotes)
+    except QuoteError as e:
+        raise FreezeError(f"本地报价清单：{e}") from e
     if sl["intake_build_id"] != items_cfg["intake_build_id"]:
         raise FreezeError("切片的 intake 构建身份与配置不同")
     scope = Scope(occ_cfg, sl)
@@ -196,6 +227,7 @@ def freeze(
         "occupations_config": canonical_fingerprint(occ_cfg),
         "baskets": canonical_fingerprint(baskets),
         "slice": canonical_fingerprint(sl),
+        "local_quotes": canonical_fingerprint(quotes),
     }
     manifest: dict[str, Any] = {
         "schema": FROZEN_SCHEMA,
@@ -219,8 +251,19 @@ def freeze(
     }
     files: dict[str, dict[str, Any]] = {}
     attribute_keys: set[str] = set()
-    for ctx in contexts(items_cfg, sl):
-        items, report, starts, templates = compile_city(ctx, occ_cfg, baskets, scope)
+    ctxs = contexts(items_cfg, sl)
+    stray = sorted(set(city_quotes) - {c.cbsa for c in ctxs})
+    if stray:
+        raise FreezeError(f"本地报价清单里有不在这次构建里的城市 {stray}")
+    for ctx in ctxs:
+        items, report, starts, templates, corrections = compile_city(
+            ctx,
+            occ_cfg,
+            baskets,
+            scope,
+            city_quotes.get(ctx.cbsa, ()),
+            quotes["comparable_basis"],
+        )
         referenced = {a for i in items for a in i.assumptions} | {
             a for tp in templates for a in tp["assumptions"]
         }
@@ -252,6 +295,7 @@ def freeze(
                 items=items,
                 report_entries=report.entries,
                 evidence=block_evidence(ctx),
+                corrections=corrections,
             ),
             "activity_dominance": activity_dominance(items),
             "start_jobs": starts,

@@ -1,0 +1,29 @@
+# E3B 收尾 §4.1：A 板块的本地同规格直接报价清单（构建输入，进构建身份）。
+#
+# 单向链：基础成本预测（life_items 的既有公式）→ 这里的合格报价（校验、去重）→ retail_correction_lognormal_v1（a_blocks.retail_update，
+# 公式与舍入不变）→ 最终价写进机会的 price → E1 结算。现在六城一条报价也没有：执行价都是基础预测，冻结结果与没有这份清单时逐字节相同。
+#
+# 每条报价的字段（全部必填，不认识的字段拒绝）：
+#   city       CBSA 代码（"35620" 纽约、"31080" 洛杉矶、"41860" 旧金山、"16980" 芝加哥、"26420" 休斯敦、"42660" 西雅图）
+#   quote_id   稳定编号，同城唯一。同城同编号同内容只算一次；同编号不同内容拒绝构建
+#   supplier   供应商。同一供应商的多条真实报价（不同门店、不同日期）按既有规则汇成一个供应商观测
+#   spec       规格键 = 机会编号去掉城市前缀（例如 service.mobile_basic）。本城没有这个机会、它不属于任何 A 方案族、
+#              它的价格本身就是直接报价（芝加哥公园整期报名费）或它没有基础预测价时拒绝构建
+#   amount     金额（十进制文字，精确到分）。负价拒绝；零价按既有规则单独处理，不取对数
+#   currency   币种（ISO 4217）
+#   base_year  价格所在年份。计价口径 = <currency>_<base_year>_LOCAL，要与机会的口径相同才参与更新（不做时期换算）
+#   period     观测时期（YYYY、YYYY-MM 或 YYYY-MM-DD），年份必须等于 base_year
+#   billing    计费周期（per_month、one_time……），要与机会报价相同
+#   per_unit   计价单位（service-month、plan-month……），要与机会报价相同
+#   tax_basis  税费口径（tax_basis_values 之一）
+#   bundle     捆绑口径（bundle_values 之一）
+#   source     来源（供应商网页、价目表等）
+#   locator    原始定位（网址 + 取得日期、页内位置或文件指纹），能据此复核
+#
+# 只有完全同规格、同口径的报价参与同一次更新：口径与 comparable_basis（基础预测按这个口径比较，local_quote_comparability_v1）
+# 或机会报价的计价口径、周期、单位有任何不同，就只记录、不参与更新，也不做换算。
+version: local-quotes-us-v1
+comparable_basis: {tax_basis: before_sales_tax, bundle: standalone}
+tax_basis_values: [before_sales_tax, including_sales_tax]
+bundle_values: [standalone, bundled]
+quotes: []

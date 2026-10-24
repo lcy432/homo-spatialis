@@ -664,8 +664,9 @@ def _support_item(
 
 
 def daily_support(ctx: Ctx, report: Report) -> list[Item]:
-    """三个支持功能各一个按月服务（见配置 daily_support）。费用顺序：同规格直接报价（现在没有）→ FCC 同规格大区参照（家庭宽带）
-    → FCC 全国参照 → CE 一人消费单位预算代理；预算代理标明，不叫观测单价。"""
+    """三个支持功能各一个按月服务（见配置 daily_support）。基础价的顺序：FCC 同规格大区参照（家庭宽带）→ FCC 全国参照 → CE 一人
+    消费单位预算代理（FCC 资料或 CPI 不可得时，可见文字也跟着回退）；预算代理标明，不叫观测单价。同规格本地报价在冻结时按零售修正
+    接进价格（``a_blocks.apply_local_quotes``）。"""
     ds, sl = ctx.cfg["daily_support"], ctx.slice["daily_support"]
     one, det = sl["ce"]["one_person"], sl["ce"]["detail_all_units"]
     ce_ref = [
@@ -698,34 +699,41 @@ def daily_support(ctx: Ctx, report: Report) -> list[Item]:
     )
 
     hc = ds["home_connectivity"]
-    fcc, cpi = sl["fcc"], sl["cpi_internet"]["annual"]
-    factor = dec(cpi[str(hc["cpi_to_year"])]) / dec(cpi[str(hc["cpi_from_year"])])
+    fcc, cpi_block = sl["fcc"], sl["cpi_internet"]
+    # FCC 原始资料或把 2023 年调查价换到 2024 年的 CPI 未获取 / 明确不可得：切片里标 unavailable（文件在缓存里但指纹不符、
+    # 损坏或格式不对的，切片阶段就拒绝了，到不了这里）
+    unusable = [x["reason_zh"] for x in (fcc, cpi_block) if x.get("status") == "unavailable"]
     region = hc["metro_region"][ctx.cbsa]
-    reg, nat = fcc["by_region"].get(region) or {}, fcc["national"]
-    if reg.get("weighted_median_total_charge") and reg["offers"] >= hc["min_offers"]:
-        base, basis, geo, n = (
-            dec(reg["weighted_median_total_charge"]),
-            "fcc_regional_reference",
-            f"census_region:{region}",
-            reg["offers"],
-        )
-    elif nat.get("weighted_median_total_charge") and nat["offers"] >= hc["min_offers"]:
-        base, basis, geo, n = (
-            dec(nat["weighted_median_total_charge"]),
-            "fcc_national_reference",
-            "national",
-            nat["offers"],
-        )
-        report.add(
-            "daily_support",
-            "gap",
-            "home_connectivity",
-            f"{region} 区同规格报价不到 {hc['min_offers']} 条：用全国参照",
-        )
-    else:
-        base = None
+    base = None
+    if not unusable:
+        reg, nat = fcc["by_region"].get(region) or {}, fcc["national"]
+        if reg.get("weighted_median_total_charge") and reg["offers"] >= hc["min_offers"]:
+            base, basis, geo, n = (
+                dec(reg["weighted_median_total_charge"]),
+                "fcc_regional_reference",
+                f"census_region:{region}",
+                reg["offers"],
+            )
+        elif nat.get("weighted_median_total_charge") and nat["offers"] >= hc["min_offers"]:
+            base, basis, geo, n = (
+                dec(nat["weighted_median_total_charge"]),
+                "fcc_national_reference",
+                "national",
+                nat["offers"],
+            )
+            report.add(
+                "daily_support",
+                "gap",
+                "home_connectivity",
+                f"{region} 区同规格报价不到 {hc['min_offers']} 条：用全国参照",
+            )
+        else:
+            unusable.append(f"{region} 区与全国的同规格报价都不到 {hc['min_offers']} 条")
     spec = hc["fcc_spec"]
+    shown = hc
     if base is not None:
+        cpi = cpi_block["annual"]
+        factor = dec(cpi[str(hc["cpi_to_year"])]) / dec(cpi[str(hc["cpi_from_year"])])
         monthly = base * factor
         attrs: dict[str, Any] = {
             "cost_basis": basis,
@@ -749,27 +757,39 @@ def daily_support(ctx: Ctx, report: Report) -> list[Item]:
         )
         assumptions = (*common, "fcc_broadband_basic_tier_v1")
     else:
+        # 回退（ce_internet_budget_proxy_v1）：名称、说明、属性、来源都从这一支生成，不声称 FCC 的速度、上行或流量档；
+        # CE 已是 2024 年口径，不乘 CPI
+        why = "；".join(unusable)
         annual, _ = allocated_annual(one, det, hc["ce_fallback_line"])
         monthly = annual / 12
         attrs = {
             "cost_basis": "ce_allocated_budget_proxy",
             "observed_unit_price": False,
             "price_geography": "national",
+            "ce_annual_one_person": cents(annual),
         }
         inputs, rule = (
             ce_ref,
-            "FCC 资料不能用：CE 一人“其他家庭开支”× 全国详细表互联网服务占比 ÷ 12（分配估计、共同预算代理）",
+            f"FCC 同规格参照不能用（{why}）：CE 2024 一人“其他家庭开支”× 全国详细表互联网服务占比 = 年 {cents(annual)}"
+            " ÷ 12，四舍五入到分；CE 已是 2024 年口径，不乘 CPI；分配估计、共同预算代理，不对应任何速度或流量档",
         )
-        assumptions = (*common, "ce_one_person_budget_proxy_v1")
+        assumptions = (*common, "ce_internet_budget_proxy_v1")
         report.add(
             "daily_support",
             "gap",
             "home_connectivity",
-            "FCC 同规格报价不足：用 CE 分配估计的预算代理",
+            f"FCC 同规格参照不能用（{why}）：用 CE 分配估计的预算代理",
         )
+        shown = {**hc, "label": hc["label_ce_fallback"], "quality": hc["quality_ce_fallback"]}
     out.append(
         _support_item(
-            ctx, hc, monthly, attributes=attrs, inputs=inputs, rule=rule, assumptions=assumptions
+            ctx,
+            shown,
+            monthly,
+            attributes=attrs,
+            inputs=inputs,
+            rule=rule,
+            assumptions=assumptions,
         )
     )
 

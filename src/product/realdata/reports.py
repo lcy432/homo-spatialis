@@ -21,7 +21,7 @@ import pandas as pd
 from common.intake_contracts import Menu, Opportunity, StdRecord, applies_to
 from product.realdata import mapping_b
 
-REPORT_VERSION = "intake-reports-v3"
+REPORT_VERSION = "intake-reports-v4"
 
 
 def _jsonl(path: Path):
@@ -47,7 +47,7 @@ def build_reports(config, std_dir: Path, map_dir: Path, catalog_dir: Path) -> di
         "coverage": coverage(config, std_dir, opps),
         "sources": source_stats(config, std_dir),
         "mapping_housing": housing_diagnostics(config, std_dir, opps, tables),
-        "mapping_jobs": jobs_diagnostics(config, opps, tables),
+        "mapping_jobs": jobs_diagnostics(config, std_dir, tables),
         "mapping_food": food_diagnostics(config, opps),
         "activities_training": activity_training_diagnostics(config, opps),
         "menus": menu_diagnostics(config, opps, menu_docs, tables),
@@ -311,26 +311,27 @@ def housing_diagnostics(
 # --------------------------------------------------------------------------- 岗位、食品、活动与培训
 
 
-def jobs_diagnostics(config, opps: list[Opportunity], tables: dict[str, dict]) -> dict[str, Any]:
-    out = {}
+def jobs_diagnostics(config, std_dir: Path, tables: dict[str, dict]) -> dict[str, Any]:
+    recs = [StdRecord.model_validate(d) for d in _jsonl(std_dir / "records_jobs.jsonl.gz")]
+    out: dict[str, Any] = {}
     for m in config.metros:
-        js = [o for o in opps if o.cbsa == m.cbsa and o.sector == "jobs"]
-        med = [o for o in js if o.attributes.get("wage_position") == "median"]
-        wage = med and [o.fact("annual_wage") for o in med]
+        occ = [
+            r
+            for r in recs
+            if r.record_type == "occupation_wage_distribution" and r.geo.cbsa == m.cbsa
+        ]
+        wage = [r.field("annual_wage_median") for r in occ]
+        emp = [r.field("employment") for r in occ]
         out[m.cbsa] = {
-            "occupations": len(med),
-            "wage_present": sum(1 for f in (wage or []) if f and f.status == "present"),
+            "occupations": len(occ),
+            "wage_present": sum(1 for f in wage if f and f.status == "present"),
             "wage_suppressed_topcoded": sum(
-                1
-                for f in (wage or [])
-                if f and f.status == "suppressed" and "顶码" in (f.reason or "")
+                1 for f in wage if f and f.status == "suppressed" and "顶码" in (f.reason or "")
             ),
             "wage_not_published": sum(
-                1
-                for f in (wage or [])
-                if f and f.status == "suppressed" and "顶码" not in (f.reason or "")
+                1 for f in wage if f and f.status == "suppressed" and "顶码" not in (f.reason or "")
             ),
-            "employment_suppressed": sum(1 for o in med if o.target_weight is None),
+            "employment_suppressed": sum(1 for f in emp if f is None or f.status != "present"),
             "hours_level": dict(
                 Counter(
                     t["level"]
@@ -340,7 +341,11 @@ def jobs_diagnostics(config, opps: list[Opportunity], tables: dict[str, dict]) -
             ),
         }
     return {
-        "note_zh": "工资是 OEWS 的观测分位数（换到 2024 年平均价格是估计）；工时与在家工作比例按 SOC 大类，样本不足回退到六城合并。",
+        "note_zh": (
+            "工资是 OEWS 的观测分位数（换到 2024 年平均价格是估计）；工时与在家工作比例按 SOC 大类，样本不足回退到六城合并。"
+            "intake 不生成岗位候选：岗位候选池与年度菜单在 E3B 生活资料包里。"
+        ),
+        "ep_occupations": sum(1 for r in recs if r.record_type == "occupation_entry_requirements"),
         "metros": out,
     }
 
@@ -480,7 +485,8 @@ def menu_diagnostics(
     return {
         "note_zh": (
             "住房的候选池是完整加权经验支持表（每个目标格一条，intake 里只列出、不抽样）；年度接触菜单在 E3B 资料包里从完整可执行池"
-            "按同一个名额抽，30、60、120 的菜单诊断也在那里（docs/design/e3b-life-pack.md）。这里只核对共享菜单与日历菜单。"
+            "按同一个名额抽，30、60、120 的菜单诊断也在那里（docs/design/e3b-life-pack.md）。岗位在 intake 里没有候选也没有菜单，"
+            "岗位候选池与年度菜单只在资料包里。这里只核对共享菜单与日历菜单。"
         ),
         "menus_per_policy": dict(Counter(mnu.policy for mnu in menu_docs)),
         "calendar_menus": {

@@ -154,14 +154,30 @@ def _ce_lines(items_cfg: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def _daily_support(items_cfg: dict[str, Any], cache: Path) -> tuple[dict[str, Any], dict[str, str]]:
-    """BLS CE 2024 全国表、FCC URS 2024 与 CPI 互联网服务：编译日常支持与消费篮子要用的数（只解析，不定价）。"""
+    """BLS CE 2024 全国表、FCC URS 2024 与 CPI 互联网服务：编译日常支持与消费篮子要用的数（只解析，不定价）。
+
+    CE 两张表必须有。FCC 与 CPI 可以缺：缓存里没有（未获取，或获取时被拒、明确不可得）就在切片里标 ``unavailable``，编译时
+    家庭宽带回退到 CE 预算代理（``ce_internet_budget_proxy_v1``）；文件在缓存里但指纹不符、损坏或格式不对就拒绝构建，不当作
+    资料缺失。三份都在时输出与原来逐字节相同。"""
+
+    def optional(req: Request) -> tuple[bytes, str] | None:
+        got = read_cached(req, cache)
+        if got.record.status == "not_cached":
+            return None
+        if not got.ok or got.content is None:
+            raise SliceError(
+                f"{req.source_id} 的原始文件在缓存里但不能用（{got.record.note or got.record.status}）：拒绝构建，不当作资料缺失回退"
+            )
+        assert got.record.raw_sha256 is not None
+        return got.content, got.record.raw_sha256
+
     ds = items_cfg["daily_support"]
     hc = ds["home_connectivity"]
     size_b, size_sha = _raw(CE_SIZE_REQUEST, cache)
     det_b, det_sha = _raw(CE_DETAIL_REQUEST, cache)
-    fcc_b, fcc_sha = _raw(FCC_URS_REQUEST, cache)
-    _, method_sha = _raw(FCC_METHOD_REQUEST, cache)
-    cpi_b, cpi_sha = _raw(CPI_COMMUNICATION_REQUEST, cache)
+    fcc_got, method_got, cpi_got = (
+        optional(r) for r in (FCC_URS_REQUEST, FCC_METHOD_REQUEST, CPI_COMMUNICATION_REQUEST)
+    )
     lines = _ce_lines(items_cfg)
     size_labels = sorted({x["size_label"] for x in lines})
     detail_labels = sorted(
@@ -178,18 +194,33 @@ def _daily_support(items_cfg: dict[str, Any], cache: Path) -> tuple[dict[str, An
             "detail_all_units": read_ce_means(det_b, detail_labels, ds["ce_detail_column_all"]),
             "unit": "USD per consumer unit per year (CE 2024 calendar year)",
         },
-        "fcc": read_fcc_urs(fcc_b, hc["fcc_spec"], hc["regions"]),
+        # 文件在、但内容解析不出（缺列、缺年份……）时解析函数报错，同样拒绝构建
+        "fcc": read_fcc_urs(fcc_got[0], hc["fcc_spec"], hc["regions"])
+        if fcc_got
+        else {"status": "unavailable", "reason_zh": "FCC URS 2024 原始文件未获取或明确不可得"},
         "cpi_internet": {
             "series": hc["cpi_series"],
-            "annual": read_cpi_annual(cpi_b, hc["cpi_series"], years),
+            "annual": read_cpi_annual(cpi_got[0], hc["cpi_series"], years),
+        }
+        if cpi_got
+        else {
+            "series": hc["cpi_series"],
+            "status": "unavailable",
+            "reason_zh": "CPI 互联网服务原始文件未获取，2023 年调查价换不到 2024 年",
         },
     }
     raw = {
         "bls_ce_national_2024_size": size_sha,
         "bls_ce_national_2024_detail": det_sha,
-        "fcc_urs_2024_broadband": fcc_sha,
-        "fcc_urs_2024_methodology": method_sha,
-        "bls_cpi_u_education_communication": cpi_sha,
+        **{
+            key: got[1]
+            for key, got in (
+                ("fcc_urs_2024_broadband", fcc_got),
+                ("fcc_urs_2024_methodology", method_got),
+                ("bls_cpi_u_education_communication", cpi_got),
+            )
+            if got is not None
+        },
     }
     return out, raw
 
@@ -364,26 +395,31 @@ def _hours(conn: sqlite3.Connection, cbsa: str, majors: list[str]) -> dict[str, 
 
 
 def _ep(conn: sqlite3.Connection, socs: list[str], cbsas: list[str]) -> dict[str, Any]:
+    """EP 全国入职要求（intake 记录 ``jobs.ep.<soc>``）。只收至少一个都会区有 OEWS 记录的职业；EP 没有这个职业时报错，不补。"""
     out: dict[str, Any] = {}
     for soc in socs:
-        for cbsa in cbsas:
-            d = _json(
-                conn,
-                "select json from opportunities where opportunity_id = ?",
-                f"jobs.{cbsa}.{soc}.median",
+        if not any(
+            conn.execute(
+                "select 1 from records where record_id = ?", (f"jobs.oews2024.{cbsa}.{soc}",)
+            ).fetchone()
+            for cbsa in cbsas
+        ):
+            continue
+        rec = _json(conn, "select json from records where record_id = ?", f"jobs.ep.{soc}")
+        if rec is None:
+            raise SliceError(
+                f"{soc}: 有 OEWS 工资记录，但冻结库里没有 EP 入职要求（jobs.ep.{soc}）；"
+                "EP 没有分配这个职业，或者这是删除三档岗位候选之前的旧 intake 构建（要用现行代码重建）"
             )
-            if d is None:
-                continue
-            f = _fields(d, "facts")
-            out[soc] = {
-                k: f[k]["value"]
-                for k in (
-                    "typical_entry_education",
-                    "related_work_experience",
-                    "typical_on_the_job_training",
-                )
-            }
-            break
+        f = _fields(rec)
+        out[soc] = {
+            k: f[k]["value"]
+            for k in (
+                "typical_entry_education",
+                "related_work_experience",
+                "typical_on_the_job_training",
+            )
+        }
     return out
 
 

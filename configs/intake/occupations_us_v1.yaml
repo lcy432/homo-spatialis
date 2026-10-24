@@ -8,7 +8,7 @@
 # 记，不写行业，也不从行业推职业。
 
 version: occupations-us-v1
-intake_build_id: 35667f4101a71c0e5ea6c1aaa8e5f45cd83c825d6b1393bde1104d3d571a96b7
+intake_build_id: 60cf49b404831f495388e9c91e6e7ee6d9fa93d819bebf1158aaac70c3a918fb
 numeraire: USD_2024_LOCAL
 scheme: SOC2018
 #: 能力定义的来源日期：intake 获取 EP 表 5.4（education.xlsx）的日子（表本身没有在冻结库里记版本年份）

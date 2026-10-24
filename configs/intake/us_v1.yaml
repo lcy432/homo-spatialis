@@ -338,7 +338,7 @@ menus:
   policies:
     # 住房的候选池是完整加权经验支持表（每个目标格一条），这里只列出；年度接触菜单在 E3B 资料包里从完整可执行池按 60 个抽
     housing: {kind: full_catalog}
-    jobs: {kind: annual_exposure_sample, strata_key: soc_major, size: 30}
+    # 岗位没有 intake 菜单：岗位候选池（模板 × 20 个年薪支持点 × 工时与就业片区）与年度岗位菜单在 E3B 生活资料包里
     training: {kind: calendar_open}
     food: {kind: full_catalog}
     goods: {kind: full_catalog}

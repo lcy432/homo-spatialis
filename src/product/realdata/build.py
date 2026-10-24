@@ -58,11 +58,14 @@ FETCH_VERSION = "2"
 #: 改了标准化的语义（字段、过滤、文字清理）就升这个版本：否则同一身份会复用旧产物。
 #: 4 = 官方顶码表、家电适用市场、活动年龄限制、标准化读取绑定获取阶段的原始指纹。
 #: 5 = 住房记录加厨卫条件（KIT、PLM）、毛租金是否受水电燃料顶码影响、上网与通信设备字段（E3B 映射修正）。
-STANDARDIZE_VERSION = "5"
+#: 6 = BLS 就业预测的入职要求成为全国记录（``jobs.ep.<soc>``），不再只是一份旁路 JSON。
+#: 7 = EP 表里写 "None"（不需要）的格子照原文保留，不再被 pandas 读成缺失、写成 "nan"。
+STANDARDIZE_VERSION = "7"
 #: 改了映射阶段的语义（机会怎样生成、编译缺口怎样分类、来源分类）就升这个版本。
 #: 3 = 中位数与标准误成对、官方顶码下的可识别规则与说明、派生的食材机会、资料缺口与 E1 缺口分开。
 #: 4 = B 住房候选换成完整加权经验支持表（housing_rent_support@1），不再压成三个价位；上网与通信设备分布（描述用）。
-MAP_VERSION = "4"
+#: 5 = 不再生成旧的三档岗位候选（``job_opening_candidate``）；岗位候选池与菜单在 E3B 生活资料包里。
+MAP_VERSION = "5"
 STAGES = ("configure", "fetch", "standardize", "map", "catalog", "check", "freeze")
 
 
@@ -114,7 +117,6 @@ def all_assumptions() -> list[AssumptionSpec]:
         mapping_b.MARKET_PROXY,
         mapping_b.UTILITIES_IMPUTATION,
         mapping_b.ROUNDTRIP,
-        jobs.EMPLOYMENT_PROXY,
         food.BASKET,
         e1_export.BURDEN,
     ]
@@ -465,18 +467,16 @@ def stage_standardize(ctx: BuildContext, fetched: StageRef) -> StageRef:
         # ---- 职业
         cbsas = {m.cbsa for m in cfg.metros}
         titles = {m.cbsa: m.label for m in cfg.metros}
+        job_records: list[StdRecord] = []
         if ok("oews"):
             factor = cpi.factor(["2024-05"])
             oews = jobs.parse_oews(content("oews", reqs["oews"]), cbsas)
-            summary["records"]["jobs"] = _write_jsonl(
-                d / "records_jobs.jsonl.gz", jobs.records(oews, factor, sha.get("oews"), titles)
-            )
-        ep = (
-            jobs.parse_ep_education(content("ep_education", reqs["ep_education"]))
-            if ok("ep_education")
-            else {}
-        )
-        _write_json(d / "ep_education.json", ep)
+            job_records += jobs.records(oews, factor, sha.get("oews"), titles)
+        if ok("ep_education"):
+            ep = jobs.parse_ep_education(content("ep_education", reqs["ep_education"]))
+            job_records += jobs.ep_records(ep, sha.get("ep_education"))
+        if job_records:
+            summary["records"]["jobs"] = _write_jsonl(d / "records_jobs.jsonl.gz", job_records)
 
         # ---- 食品
         ap_reqs = {n.split(":", 1)[1]: r for n, r in reqs.items() if n.startswith("ap:")}
@@ -709,10 +709,6 @@ def stage_map(ctx: BuildContext, std: StageRef) -> StageRef:
                         "wfh_share": h.wfh_share,
                     }
                 )
-            job_recs = [r for r in _records(sd / "records_jobs.jsonl.gz") if r.geo.code == m.cbsa]
-            ep = _read_json(sd / "ep_education.json")
-            for rec in job_recs:
-                opps += jobs.opportunities(rec, hours, ep)
             step += 1
             _maybe_fail(ctx, "map", step)
         # 食品

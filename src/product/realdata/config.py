@@ -59,6 +59,15 @@ class MenuSettings(IntakeModel):
     policies: dict[Sector, dict[str, Any]]
     size_diagnostic: dict[str, Any] = Field(default_factory=dict)
 
+    @model_validator(mode="after")
+    def _no_job_menus(self) -> MenuSettings:
+        if "jobs" in self.policies:
+            raise ValueError(
+                "intake 不再生成岗位菜单（旧的三档岗位候选已删除）：岗位候选池与年度岗位菜单在 E3B 生活资料包里"
+                "（data/frozen/life/us-v1/pack/，scripts/life_pack_us.py build）；请从 menus.policies 删掉 jobs"
+            )
+        return self
+
 
 class BuildConfig(IntakeModel):
     build: BuildSettings

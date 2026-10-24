@@ -7,6 +7,7 @@
     uv run python scripts/intake_data.py status [--thread 流程编号]
     uv run python scripts/intake_data.py query --sector food --cbsa 41860 [--kind ...] [--attr 键=值 ...] [--page 1 --per-page 20]
     uv run python scripts/intake_data.py menu --cbsa 41860 --year 1 --sector housing [--env-repeat 0] [--page 1]
+    uv run python scripts/intake_data.py records --sector jobs --cbsa 41860 [--type occupation_wage_distribution] [--page 1]
     uv run python scripts/intake_data.py lineage <机会编号>
     uv run python scripts/intake_data.py export [--out data/frozen/intake/us-v1]
 
@@ -131,6 +132,11 @@ def _db(args: argparse.Namespace) -> Path:
         return rt.frozen_db(args.thread)
 
 
+def _retired(exc: query.RetiredJobQueryError) -> int:
+    print(f"已废弃的查询：{exc}", file=sys.stderr)
+    return 2
+
+
 def cmd_query(args: argparse.Namespace) -> int:
     attrs = dict(a.split("=", 1) for a in args.attr or [])
     conn = store.open_readonly(_db(args))
@@ -145,6 +151,8 @@ def cmd_query(args: argparse.Namespace) -> int:
             page=args.page,
             per_page=args.per_page,
         )
+    except query.RetiredJobQueryError as exc:
+        return _retired(exc)
     finally:
         conn.close()
     _print(
@@ -188,6 +196,8 @@ def cmd_menu(args: argparse.Namespace) -> int:
             print("没有这份菜单", file=sys.stderr)
             return 1
         page = query.menu_items(conn, doc, args.page, args.per_page)
+    except query.RetiredJobQueryError as exc:
+        return _retired(exc)
     finally:
         conn.close()
     head = {
@@ -207,10 +217,30 @@ def cmd_menu(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_records(args: argparse.Namespace) -> int:
+    conn = store.open_readonly(_db(args))
+    try:
+        page = query.records(
+            conn,
+            sector=args.sector,
+            cbsa=args.cbsa,
+            record_type=args.type,
+            text=args.text,
+            page=args.page,
+            per_page=args.per_page,
+        )
+    finally:
+        conn.close()
+    _print(page.as_dict())
+    return 0
+
+
 def cmd_lineage(args: argparse.Namespace) -> int:
     conn = store.open_readonly(_db(args))
     try:
         _print(query.lineage(conn, args.opportunity_id))
+    except query.RetiredJobQueryError as exc:
+        return _retired(exc)
     finally:
         conn.close()
     return 0
@@ -254,6 +284,13 @@ def main(argv: list[str] | None = None) -> int:
     m.add_argument("--env-repeat", type=int, default=0)
     m.add_argument("--page", type=int, default=1)
     m.add_argument("--per-page", type=int, default=20)
+    r = sub.add_parser("records", help="分页查询标准化的来源记录（原始事实）")
+    r.add_argument("--sector")
+    r.add_argument("--cbsa")
+    r.add_argument("--type", help="记录类型，例如 occupation_wage_distribution")
+    r.add_argument("--text")
+    r.add_argument("--page", type=int, default=1)
+    r.add_argument("--per-page", type=int, default=20)
     lg = sub.add_parser("lineage", help="一项机会的来源链")
     lg.add_argument("opportunity_id")
     e = sub.add_parser("export", help="把冻结库的清单与报告写成可提交的小文件")
@@ -265,6 +302,7 @@ def main(argv: list[str] | None = None) -> int:
         "status": cmd_status,
         "query": cmd_query,
         "menu": cmd_menu,
+        "records": cmd_records,
         "lineage": cmd_lineage,
         "export": cmd_export,
     }
