@@ -10,7 +10,7 @@
     "scoring_config": "6e3ad207c3579c6a6920270528dd50dedc0549c8a1b886ec042fd392e2b35bac"
    },
    "evaluation_spec_id": "eval.e1-life.main",
-   "identities_fingerprint": "189076a8d54915bd5161cf6366b40644754a16da3bce1966770569ff026a85ad",
+   "identities_fingerprint": "c20ec744cb6ec27e169726a2e24aebcfceb23c460f9925699d2badcd6e448f3d",
    "planner_id": "mock.rules.e3a-product",
    "planner_kind": "mock",
    "prompt_template": "e3b-product-prompt-v3",
@@ -704,7 +704,7 @@
    "planner_id": "mock.rules.e3a-product",
    "planner_kind": "mock"
   },
-  "preflight_fingerprint": "a174791c6d1237f75d13b3d6caaeeb5860335f7c8e159e13772b27bff0b3b608",
+  "preflight_fingerprint": "3d813fb432f914b97ac9c5f9568e633a7ad0bd9e13b0cfea31a5d00e2a915463",
   "preflight_id": "preflight.confirmed.draft.u501.r1",
   "scope_zh": [
    "生活协议 life-v1-e3a-product（状态 synthetic_fixture_only）、评分 score.e1-life.explore（探索版）：城市、报价、工资、疾病、治疗与评分参数全部是合成设定，不是现实城市，不排序真实城市",

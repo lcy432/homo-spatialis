@@ -55,7 +55,7 @@
      "scoring_config": "0735d4bb47d38688b41e95ed1bd253b624130ed19ad150e846ad020fed7159f5"
     },
     "evaluation_spec_id": "eval.e1-life.main",
-    "identities_fingerprint": "6051a80c14160d137dd9176c91a7bbb0938d3a1034423d3bbd986e14ed68f6c0",
+    "identities_fingerprint": "3f4e18b99c9138020e2b4c79e902592bbec1ad5a36ac850c32fe88dc97145f4e",
     "planner_id": "mock.rules.e3a-product",
     "planner_kind": "mock",
     "prompt_template": "e3b-product-prompt-v3",
@@ -744,7 +744,7 @@
     "planner_id": "mock.rules.e3a-product",
     "planner_kind": "mock"
    },
-   "preflight_fingerprint": "9888c97b4ab9a9d13353bd8962f25b225f26794a6eaa222c32e76403f5a7862c",
+   "preflight_fingerprint": "77f10d4cafecbaaacd5b49adb3176e9f4d6638d3a007b546269dce309bc266fe",
    "preflight_id": "preflight.confirmed.draft-000000000000000f.r2",
    "scope_zh": [
     "生活协议 life-v1-e3a-product（状态 synthetic_fixture_only）、评分 score.e1-life.explore（探索版）：城市、报价、工资、疾病、治疗与评分参数全部是合成设定，不是现实城市，不排序真实城市",
@@ -808,7 +808,7 @@
     "vocabulary_version": "e3a-vocabulary-v4"
    },
    "pause": {
-    "audit_ref": "run:run-e3a-892b2f5c5bc9b73a record:progress.json",
+    "audit_ref": "run:run-e3a-a1efed5232c22ea9 record:progress.json",
     "category": "batch_halted_service_unavailable",
     "impact_zh": "不是生活结果；还没有生成评价与汇总，不擅自给出分类或分数",
     "next_action_zh": "维护者处理服务、凭证、预算或请求的问题；可以恢复同一次运行（恢复前逐条核对归档，已用的调用次数与预算不清零）；系统不会替分身生成计划",
@@ -817,7 +817,7 @@
    "report_available": false,
    "resumable": true,
    "resume_note": "可以从年度边界或两份候选之间恢复（E1 的恢复入口逐条核对归档，尝试次数与调用次数不清零）",
-   "run_id": "run-e3a-892b2f5c5bc9b73a",
+   "run_id": "run-e3a-a1efed5232c22ea9",
    "stage": "halted",
    "stage_zh": "批次停下（服务、预算或请求检查）",
    "updated_at": "2026-10-24T09:00:00Z"
@@ -829,7 +829,7 @@
    "used": 1
   },
   "result_available": false,
-  "run_id": "run-e3a-892b2f5c5bc9b73a",
+  "run_id": "run-e3a-a1efed5232c22ea9",
   "stage": "needs_attention",
   "stage_zh": "停下了，需要处理",
   "support_ref": "sup-0000000000000011",

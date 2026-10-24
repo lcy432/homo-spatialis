@@ -26,6 +26,7 @@ from product.realdata.a_blocks import (
     LocalQuote,
     QuoteError,
     apply_local_quotes,
+    base_basis_of,
     city_blocks,
     load_local_quotes,
 )
@@ -108,7 +109,7 @@ def compile_city(
     baskets: dict[str, Any],
     scope: Scope,
     quotes: Sequence[LocalQuote] = (),
-    quote_basis: dict[str, str] | None = None,
+    base_basis: dict[str, dict[str, str]] | None = None,
 ) -> tuple[list[Item], Report, dict[str, Any], list[dict[str, Any]], dict[str, dict[str, Any]]]:
     """一城的生活机会与岗位模板。岗位是模板（职业 × 年薪支持点），工时与就业片区在整合时拼上（``job_wage_support_v1``）。
     本城的本地报价在检查之前接进机会价格（``apply_local_quotes``），返回值最后一项是按规格的修正记录。"""
@@ -127,7 +128,7 @@ def compile_city(
     ]
     try:
         items, corrections = apply_local_quotes(
-            items, quotes, ctx.cfg["a_blocks"], quote_basis or {}
+            items, quotes, ctx.cfg["a_blocks"], base_basis or {}
         )
     except QuoteError as e:
         raise FreezeError(f"{ctx.cbsa}: {e}") from e
@@ -209,6 +210,7 @@ def freeze(
     )
     try:
         city_quotes = load_local_quotes(quotes)
+        base_basis = base_basis_of(quotes)
     except QuoteError as e:
         raise FreezeError(f"本地报价清单：{e}") from e
     if sl["intake_build_id"] != items_cfg["intake_build_id"]:
@@ -262,7 +264,7 @@ def freeze(
             baskets,
             scope,
             city_quotes.get(ctx.cbsa, ()),
-            quotes["comparable_basis"],
+            base_basis,
         )
         referenced = {a for i in items for a in i.assumptions} | {
             a for tp in templates for a in tp["assumptions"]

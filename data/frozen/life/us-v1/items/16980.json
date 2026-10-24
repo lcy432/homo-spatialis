@@ -11,11 +11,11 @@
  "label": "Chicago-Naperville-Elgin 都会区",
  "intake_build_id": "60cf49b404831f495388e9c91e6e7ee6d9fa93d819bebf1158aaac70c3a918fb",
  "identities": {
-  "items_config": "5bfd573dd8c7a87fe6acfa4385addd2abcb370c4180b4e4bda5e5002016df30a",
+  "items_config": "9f1616524f824bd7ca276d0623d588a525f048b7245bae294abc13f2eeb7847a",
   "occupations_config": "f7816be430235fe24187bf350b7b99cdfdcf3cbb9dca728b920e73f4050b104d",
   "baskets": "8714cbfd8ebb7dfbd39fb6f9bd9bcc2489d4841fe6caefbbdb88bbac1388d19f",
   "slice": "3ec870c16354eddd806c5eeb480c51c3095d9e1cce67154c2e982c1054a40ed7",
-  "local_quotes": "6a02611dbcc0c0e6b625ed0dcad2488bf472b27715b0f208247fe16ea1d5e10e"
+  "local_quotes": "11233a29ac6796b9c62565b7bc84feda084ea641f726b346489aa8ed9d9faa97"
  },
  "counts": {
   "raw_inputs": {

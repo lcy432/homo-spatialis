@@ -55,7 +55,9 @@ run:
       sdk_max_retries: 0
       service_retries: 1
       retry_wait_seconds: 5
-      max_input_tokens: 128000
+      # 单次输入护栏（项目估计 token）：所有者 2026-10-24 定为 192,000（中文整句不拆词之后，六城请求约 13–17 万）；
+      # 预检查、启动前复核与发送前检查读同一个值，超过就不发送、不扣次数
+      max_input_tokens: 192000
       token_estimate: ascii1_nonascii2_v1
       note: >-
         沿用 E1-7B 的调用设定（思考关闭、温度 0.2、JSON object、输出上限 4,096、超时 90 秒、SDK 自动重试关闭、每份候选最多 1 次服务重试），

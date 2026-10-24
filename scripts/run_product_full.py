@@ -188,7 +188,10 @@ def main() -> None:
     )
     ap.add_argument("--years", type=int, default=None, help="模拟年限（默认按协议）")
     ap.add_argument(
-        "--max-cost-cny", type=float, default=10.0, help="这次运行的费用上限（元，按报价估算）"
+        "--max-cost-cny",
+        type=float,
+        default=20.0,
+        help="这次运行的停机预算（元，按报价估算；所有者 2026-10-24 定为 20）",
     )
     ap.add_argument(
         "--mock", action="store_true", help="同一条产品链，mock 规划器（零网络、零费用）"

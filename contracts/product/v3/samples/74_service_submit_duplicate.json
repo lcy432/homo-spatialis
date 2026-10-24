@@ -44,7 +44,7 @@
       "scoring_config": "386a67d8e2cf960f49909a1887f19b7dbd7f22aba85863987aa3d2b869e41fb1"
      },
      "evaluation_spec_id": "eval.e1-life.main",
-     "identities_fingerprint": "1d9749154ff1a1090ba7243176d10d88fbd8addd490074796201559bfc7049b1",
+     "identities_fingerprint": "2f9c5cfbe05b3a40215fb45c0b6871d97cbc40f98a8961ef7a373543fc328b72",
      "planner_id": "mock.rules.e3a-product",
      "planner_kind": "mock",
      "prompt_template": "e3b-product-prompt-v3",
@@ -733,7 +733,7 @@
      "planner_id": "mock.rules.e3a-product",
      "planner_kind": "mock"
     },
-    "preflight_fingerprint": "26d0961c0e5ad486c6740186f4db3d5941e052b6a8199e73cf8bf722521ae8e7",
+    "preflight_fingerprint": "248848734d023ed85edc3ef3a288c6fa01b827e8b6086fe98a6668a101575957",
     "preflight_id": "preflight.confirmed.draft-0000000000000005.r2",
     "scope_zh": [
      "生活协议 life-v1-e3a-product（状态 synthetic_fixture_only）、评分 score.e1-life.explore（探索版）：城市、报价、工资、疾病、治疗与评分参数全部是合成设定，不是现实城市，不排序真实城市",
@@ -781,7 +781,7 @@
     "used": 0
    },
    "result_available": false,
-   "run_id": "run-e3a-c6ec42c9946f6910",
+   "run_id": "run-e3a-f3a01238e9f2bfbb",
    "stage": "queued",
    "stage_zh": "已确认，排队等待开始",
    "support_ref": null,
@@ -824,7 +824,7 @@
     "vocabulary_version": "e3a-vocabulary-v4"
    },
    "reasons": [],
-   "run_id": "run-e3a-c6ec42c9946f6910",
+   "run_id": "run-e3a-f3a01238e9f2bfbb",
    "service": "hosted_service",
    "status": "duplicate_same_run"
   }

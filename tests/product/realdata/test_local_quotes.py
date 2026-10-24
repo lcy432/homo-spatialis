@@ -1,7 +1,9 @@
 """E3B 收尾 §4：A 的本地报价接线与家庭宽带的回退。
 
 * 报价走完整构建：真实小样本切片 + 临时报价清单 → 冻结 → 机会价格 → E1 年度结算，扣的是零售修正后的最终价；
-* 报价清单的校验与去重（同编号同内容只算一次、同编号不同内容拒绝、负价拒绝、口径不同不混）；
+* 报价清单的校验与去重（同编号同内容只算一次、同编号不同内容拒绝、负价拒绝、口径不同不混、观测时期按真实日历）；
+* 基础价口径逐规格核实：仓库里没有核实过任何规格，任何报价都拒绝启用、价格不变；能更新的测试用口径写明的受控夹具
+  （``CONTROLLED``，不是对真实基础价的核实）；
 * FCC 原始资料缺失才回退到 CE 预算代理，可见文字跟着回退；文件在但坏了拒绝构建。
 
 只读 ``tests/fixtures/life_items/`` 与临时目录，不联网、不读本机原始缓存。
@@ -22,7 +24,7 @@ import pytest
 import yaml
 
 from common.life_contracts import CityLifeCatalog, YearAction, exact_minor_units
-from product.realdata.a_blocks import QuoteError, load_local_quotes
+from product.realdata.a_blocks import QuoteError, base_basis_of, load_local_quotes
 from product.realdata.daily_support_data import (
     CE_DETAIL_REQUEST,
     CE_SIZE_REQUEST,
@@ -40,6 +42,15 @@ FIXTURE = REPO / "tests/fixtures/life_items/slice_sample.json"
 CHI, NYC = "16980", "35620"
 MOBILE = "service.mobile_basic"
 NET = "service.home_internet_basic"
+#: 受控夹具：只在测试里把手机基础价的口径写明为“未含销售税、单独购买”，让同口径的报价能走完更新链。它不是对 CE 基础价的
+#: 真实核实（CE 支出含销售税），仓库里的报价清单不登记任何规格。
+CONTROLLED = {
+    MOBILE: {
+        "tax_basis": "before_sales_tax",
+        "bundle": "standalone",
+        "verified_by": "测试夹具：受控口径（tests/product/realdata/test_local_quotes.py），不是真实核实",
+    }
+}
 
 
 def _yaml(rel: str) -> dict:
@@ -79,9 +90,10 @@ def quote(quote_id: str, amount: str, supplier: str = "carrier-a", **change) -> 
     }
 
 
-def quotes_cfg(*quotes: dict) -> dict:
+def quotes_cfg(*quotes: dict, basis: dict | None = None) -> dict:
+    """仓库的报价清单换上测试报价；``basis`` 给出基础价口径登记（默认是受控夹具，``{}`` = 仓库现状：没有核实过任何规格）。"""
     cfg = _yaml("configs/intake/local_quotes_us_v1.yaml")
-    return {**cfg, "quotes": list(quotes)}
+    return {**cfg, "base_basis": CONTROLLED if basis is None else basis, "quotes": list(quotes)}
 
 
 def frozen_city(out: Path, cbsa: str) -> dict:
@@ -107,7 +119,7 @@ def plain(tmp_path_factory, sl, cfgs):
 
 @pytest.fixture(scope="module")
 def quoted(tmp_path_factory, sl, cfgs):
-    """芝加哥手机一家同规格报价 91.62 的冻结结果。"""
+    """芝加哥手机一家同规格报价 91.62 的冻结结果（基础价口径用受控夹具写明）。"""
     out = tmp_path_factory.mktemp("quoted")
     return out, freeze(sl, *cfgs, out, quotes=quotes_cfg(quote("chi-mobile-001", "91.62")))
 
@@ -116,7 +128,10 @@ def quoted(tmp_path_factory, sl, cfgs):
 
 
 def test_the_repository_list_is_empty_and_enters_the_build_identity(plain, quoted):
-    assert _yaml("configs/intake/local_quotes_us_v1.yaml")["quotes"] == []
+    repo = _yaml("configs/intake/local_quotes_us_v1.yaml")
+    assert (
+        repo["quotes"] == [] and repo["base_basis"] == {}
+    )  # 没有报价，也没有核实过任何规格的基础价口径
     assert plain[1]["identities"]["local_quotes"] != quoted[1]["identities"]["local_quotes"]
     assert plain[1]["content_identity"] != quoted[1]["content_identity"]
     # 只有芝加哥的内容变了；没有报价的城市逐字节不变（除了记录输入身份的 identities）
@@ -151,7 +166,7 @@ def test_one_quote_moves_the_frozen_price_by_the_registered_formula(plain, quote
         o["source"]["kind"] == "estimated" and "local_quote:chi-mobile-001" in o["source"]["inputs"]
     )
     assert o["source"]["rule"].startswith("retail_correction_lognormal_v1")
-    assert {"retail_correction_lognormal_v1", "local_quote_comparability_v1"} <= set(
+    assert {"retail_correction_lognormal_v1", "local_quote_base_basis_v1"} <= set(
         item(body, MOBILE)["assumptions"]
     )
     # 方案族汇总的记录就是写进机会的那一次修正：基础价、合格报价、先验与后验、最终价
@@ -161,6 +176,9 @@ def test_one_quote_moves_the_frozen_price_by_the_registered_formula(plain, quote
     assert (r["p_base"], r["execution_price"], r["final_price"]) == ("61.08", "74.81", "74.81")
     assert r["status"] == "updated" and r["suppliers"] == 1
     assert r["comparable_quote_ids"] == ["chi-mobile-001"] and r["not_comparable"] == []
+    assert (
+        r["basis"]["tax_basis"] == "before_sales_tax" and "测试夹具" in r["base_basis_verified_by"]
+    )
     assert r["posterior"]["mean"] == pytest.approx(math.log(1.5) / 2)
     assert r["prior"]["sd"] == pytest.approx(math.log(1.5))
     # 其余两项没有报价：价格不变
@@ -315,7 +333,8 @@ def test_a_park_program_keeps_its_direct_quote(plain, sl, cfgs):
 
 
 def test_other_bases_and_zero_prices_do_not_update(sl, cfgs, plain, tmp_path):
-    """含税、捆绑、按年计费或别的计价口径的报价只记录、不参与；零价单独处理、不取对数。都不改价格。"""
+    """基础价口径登记为“未含销售税、单独购买”时：含税、捆绑、按年计费或别的计价口径的报价只记录哪一项不同、不参与；
+    零价单独处理、不取对数。都不改价格。"""
     o, fam = _mobile_record(
         sl,
         cfgs,
@@ -336,6 +355,76 @@ def test_other_bases_and_zero_prices_do_not_update(sl, cfgs, plain, tmp_path):
         "y25": ["numeraire"],
         "year": ["billing"],
     }
+
+
+def test_an_unverified_base_basis_refuses_the_quote_and_keeps_the_price(sl, cfgs, plain, tmp_path):
+    """仓库现状：没有核实过任何规格的基础价口径。一条口径看起来“合适”的报价也拒绝启用，价格逐字节不变，记录写明原因。"""
+    freeze(sl, *cfgs, tmp_path, quotes=quotes_cfg(quote("chi-mobile-001", "91.62"), basis={}))
+    body = frozen_city(tmp_path, CHI)
+    assert item(body, MOBILE) == item(
+        frozen_city(plain[0], CHI), MOBILE
+    )  # 价格、来源、设定登记都不变
+    r = support_family(body)["spec_updates"][MOBILE]
+    assert r["status"] == "base_basis_unverified" and r["refused_quote_ids"] == ["chi-mobile-001"]
+    assert r["final_price"] == r["p_base"] == "61.08" and r["comparable_quote_ids"] == []
+    assert "没有逐规格核实" in r["note_zh"] and "不猜税费" in r["note_zh"]
+    assert r["basis_known"] == {
+        "numeraire": "USD_2024_LOCAL",
+        "billing": "per_month",
+        "per_unit": "service-month",
+    }
+
+
+def test_a_registered_basis_that_differs_from_the_quote_is_not_used(sl, cfgs, plain, tmp_path):
+    """登记的基础价是含税的，报价是未含税的：不做换算，只记录不同的那一项，价格不变。"""
+    taxed = {MOBILE: {**CONTROLLED[MOBILE], "tax_basis": "including_sales_tax"}}
+    freeze(sl, *cfgs, tmp_path, quotes=quotes_cfg(quote("chi-mobile-001", "91.62"), basis=taxed))
+    body = frozen_city(tmp_path, CHI)
+    assert (
+        item(body, MOBILE)["opportunity"] == item(frozen_city(plain[0], CHI), MOBILE)["opportunity"]
+    )
+    r = support_family(body)["spec_updates"][MOBILE]
+    assert r["status"] == "no_local_quotes" and r["final_price"] == "61.08"
+    assert r["not_comparable"] == [{"quote_id": "chi-mobile-001", "differs_in": ["tax_basis"]}]
+
+
+def test_the_base_basis_register_needs_registered_values_and_a_verification():
+    ok = base_basis_of(quotes_cfg())
+    assert ok == CONTROLLED
+    with pytest.raises(QuoteError, match="恰好写"):
+        base_basis_of(
+            quotes_cfg(basis={MOBILE: {"tax_basis": "before_sales_tax", "bundle": "standalone"}})
+        )
+    with pytest.raises(QuoteError, match="不在登记的取值里"):
+        base_basis_of(quotes_cfg(basis={MOBILE: {**CONTROLLED[MOBILE], "tax_basis": "probably"}}))
+    with pytest.raises(QuoteError, match="核实依据"):
+        base_basis_of(quotes_cfg(basis={MOBILE: {**CONTROLLED[MOBILE], "verified_by": " "}}))
+    with pytest.raises(QuoteError, match="要是映射"):
+        base_basis_of({**quotes_cfg(), "base_basis": None})
+
+
+@pytest.mark.parametrize("period", ["2024", "2024-06", "2024-12-31", "2024-02-29"])
+def test_real_calendar_periods_are_accepted(period):
+    (q,) = load_local_quotes(quotes_cfg(quote("q1", "91.62", period=period)))[CHI]
+    assert q.period == period
+
+
+@pytest.mark.parametrize(
+    ("period", "base_year", "message"),
+    [
+        ("2024-99-99", 2024, "不是真实的日历日期"),
+        ("2024-02-30", 2024, "不是真实的日历日期"),
+        ("2024-13", 2024, "不是真实的日历日期"),
+        ("2024-00", 2024, "不是真实的日历日期"),
+        ("2023-02-29", 2023, "不是真实的日历日期"),  # 2023 不是闰年
+        ("2024-6", 2024, "YYYY、YYYY-MM 或 YYYY-MM-DD"),
+        ("2024/06", 2024, "YYYY、YYYY-MM 或 YYYY-MM-DD"),
+        ("2025-01-15", 2024, "年份要等于 base_year"),
+    ],
+)
+def test_impossible_or_mismatched_periods_are_refused(period, base_year, message):
+    with pytest.raises(QuoteError, match=message):
+        load_local_quotes(quotes_cfg(quote("q1", "91.62", period=period, base_year=base_year)))
 
 
 # --------------------------------------------------------------------------- 家庭宽带的回退

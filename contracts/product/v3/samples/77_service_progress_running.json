@@ -15,7 +15,7 @@
    "call_limit": 18,
    "calls_used": 3,
    "currency": "CNY",
-   "estimated_cost": "0.084645",
+   "estimated_cost": "0.084626",
    "in_flight_cost": "0.043107",
    "kind": "estimated_from_quote",
    "max_cost": "10",
@@ -23,7 +23,7 @@
    "price_version": "qwen3.8-flash@beijing@2026-10-09",
    "service_attempt_limit": 36,
    "service_attempts": 4,
-   "settled_cost": "0.041538",
+   "settled_cost": "0.041519",
    "uncertain_attempts": 0,
    "uncertain_cost": "0.000000"
   },
@@ -50,7 +50,7 @@
   "report_available": false,
   "resumable": true,
   "resume_note": "可以从年度边界或两份候选之间恢复（E1 的恢复入口逐条核对归档，尝试次数与调用次数不清零）",
-  "run_id": "run-e3a-e2e5e47eeb2ec30b",
+  "run_id": "run-e3a-e63009b5df3e5850",
   "stage": "running",
   "stage_zh": "运行中",
   "updated_at": "2026-10-24T09:00:00Z"

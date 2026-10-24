@@ -17,10 +17,15 @@ A 的覆盖网格不是市场份额：没有供给抽样资料，不声称知道
 （``configs/intake/local_quotes_us_v1.yaml``，``load_local_quotes`` 校验、按城市与编号去重）→ 同规格同口径的报价做一次零售修正
 （``apply_local_quotes``）→ 执行价写进机会的 ``price`` → 冻结、目录与 E1 结算都读这一个价。修正记录按规格交给 ``city_blocks``
 汇总，不再重算，所以报告的价与执行的价是同一个。
+
+**基础价口径逐规格核实**（``local_quote_base_basis_v1``）：报价清单的 ``base_basis`` 逐规格写明基础预测价的税费与捆绑口径和核实
+依据；计价口径、计费周期与计价单位读机会本身的报价。没登记的规格有报价时拒绝启用（保留基础价，修正记录写明原因）；登记了的
+规格只用口径完全相同的报价。不用全局标签代替逐规格核实，不猜税费，不做换算。
 """
 
 from __future__ import annotations
 
+import datetime as dt
 import math
 import re
 from collections import Counter
@@ -127,8 +132,11 @@ QUOTE_FIELDS = (
     "source",
     "locator",
 )
-QUOTE_ASSUMPTION = "local_quote_comparability_v1"
-_PERIOD = re.compile(r"^(\d{4})(-\d{2}(-\d{2})?)?$")
+QUOTE_ASSUMPTION = "local_quote_base_basis_v1"
+_PERIOD = re.compile(r"^(\d{4})(?:-(\d{2})(?:-(\d{2}))?)?$")
+#: 基础价口径登记里每个规格必须写的字段
+BASE_BASIS_FIELDS = ("tax_basis", "bundle", "verified_by")
+UNVERIFIED_ZH = "基础价的税费与捆绑口径没有逐规格核实：拒绝启用这个规格的本地报价，保留基础价（不猜税费、不做换算）"
 
 
 class QuoteError(ValueError):
@@ -193,7 +201,14 @@ def _quote(raw: Any, n: int, taxes: set[str], bundles: set[str]) -> LocalQuote:
     if not re.fullmatch(r"[A-Z]{3}", t["currency"]) or not re.fullmatch(r"\d{4}", t["base_year"]):
         raise QuoteError(f"{where}：币种要是三个大写字母、base_year 要是四位年份")
     m = _PERIOD.match(t["period"])
-    if m is None or m.group(1) != t["base_year"]:
+    if m is None:
+        raise QuoteError(f"{where}：观测时期 {t['period']!r} 要写成 YYYY、YYYY-MM 或 YYYY-MM-DD")
+    year, month, day = m.groups()
+    try:  # 真实日历：月份 1–12，日期要在这个月里存在（闰年按公历）
+        dt.date(int(year), int(month or 1), int(day or 1))
+    except ValueError as e:
+        raise QuoteError(f"{where}：观测时期 {t['period']!r} 不是真实的日历日期") from e
+    if year != t["base_year"]:
         raise QuoteError(
             f"{where}：观测时期 {t['period']!r} 的年份要等于 base_year {t['base_year']}（跨年要登记的时期换算，现在没有）"
         )
@@ -208,14 +223,32 @@ def _quote(raw: Any, n: int, taxes: set[str], bundles: set[str]) -> LocalQuote:
     )
 
 
-def load_local_quotes(cfg: dict[str, Any]) -> dict[str, tuple[LocalQuote, ...]]:
-    """校验本地报价清单并按城市与编号去重：同城同编号同内容只算一次，同编号不同内容拒绝。返回 {城市: 按编号排序的报价}。"""
+def base_basis_of(cfg: dict[str, Any]) -> dict[str, dict[str, str]]:
+    """报价清单的基础价口径登记（``base_basis``）：{规格键: {税费口径, 捆绑口径, 核实依据}}。取值要在登记的取值里，核实依据不能空；
+    不认识或缺少的字段拒绝。没登记的规格就是没核实过。"""
     taxes, bundles = set(cfg["tax_basis_values"]), set(cfg["bundle_values"])
-    basis = cfg["comparable_basis"]
-    if set(basis) != {"tax_basis", "bundle"} or (
-        basis["tax_basis"] not in taxes or basis["bundle"] not in bundles
-    ):
-        raise QuoteError(f"comparable_basis 要写登记取值里的 tax_basis 与 bundle，得到 {basis}")
+    raw = cfg.get("base_basis")
+    if not isinstance(raw, dict):
+        raise QuoteError("base_basis 要是映射 {规格键: 口径}（没有核实过的规格时写 {}）")
+    out: dict[str, dict[str, str]] = {}
+    for spec, b in sorted(raw.items()):
+        if not isinstance(b, dict) or set(b) != set(BASE_BASIS_FIELDS):
+            raise QuoteError(f"base_basis 的 {spec} 要恰好写 {list(BASE_BASIS_FIELDS)}")
+        v = {k: str(b[k]).strip() for k in BASE_BASIS_FIELDS}
+        if v["tax_basis"] not in taxes or v["bundle"] not in bundles or not v["verified_by"]:
+            raise QuoteError(
+                f"base_basis 的 {spec}：税费口径 {v['tax_basis']!r} 或捆绑口径 {v['bundle']!r} 不在登记的取值里，"
+                "或没有写核实依据"
+            )
+        out[str(spec)] = v
+    return out
+
+
+def load_local_quotes(cfg: dict[str, Any]) -> dict[str, tuple[LocalQuote, ...]]:
+    """校验本地报价清单并按城市与编号去重：同城同编号同内容只算一次，同编号不同内容拒绝。返回 {城市: 按编号排序的报价}。
+    基础价口径登记一起校验（``base_basis_of``）。"""
+    taxes, bundles = set(cfg["tax_basis_values"]), set(cfg["bundle_values"])
+    base_basis_of(cfg)
     seen: dict[tuple[str, str], LocalQuote] = {}
     for n, raw in enumerate(cfg.get("quotes") or []):
         q = _quote(raw, n, taxes, bundles)
@@ -284,11 +317,12 @@ def apply_local_quotes(
     items: Sequence[Any],
     quotes: Sequence[LocalQuote],
     declarations: Iterable[dict[str, Any]],
-    basis: dict[str, str],
+    base_basis: dict[str, dict[str, str]],
 ) -> tuple[list[Any], dict[str, dict[str, Any]]]:
-    """把一城的本地报价接进机会价格。每个有报价的规格做一次零售修正：只有规格相同、口径（计价口径、计费周期、计价单位，以及
-    ``basis`` 给出的税费与捆绑口径）完全相同的报价参与；``updated`` 时把执行价写进机会的 ``price``，只应用这一次。返回（机会，
-    按规格的修正记录：基础价、合格报价、先验与后验、最终价、未更新原因）。没有报价时机会原样返回。"""
+    """把一城的本地报价接进机会价格。``base_basis`` 是逐规格核实的基础价口径（``base_basis_of``）：没登记的规格拒绝启用报价
+    （状态 ``base_basis_unverified``，保留基础价并写明原因）；登记了的规格做一次零售修正，只有口径（机会报价的计价口径、计费周期、
+    计价单位，以及登记的税费与捆绑口径）完全相同的报价参与，其余写明哪一项不同；``updated`` 时把执行价写进机会的 ``price``，
+    只应用这一次。返回（机会，按规格的修正记录：基础价、合格报价、先验与后验、最终价、未更新原因）。没有报价时机会原样返回。"""
     out = list(items)
     if not quotes:
         return out, {}
@@ -313,12 +347,30 @@ def apply_local_quotes(
             raise QuoteError(
                 f"{where}：这个机会没有基础预测价，零售修正无从更新（未知不当零，也不拿报价直接填）"
             )
-        target = {
+        known = {
             "numeraire": o.price.amount.numeraire,
             "billing": o.price.billing,
             "per_unit": o.price.per_unit,
-            **basis,
         }
+        reg = base_basis.get(spec)
+        if reg is None:
+            base = str(Decimal(str(o.price.amount.amount)))
+            records[spec] = {
+                "rule": RETAIL_RULE,
+                "status": "base_basis_unverified",
+                "spec": spec,
+                "p_base": base,
+                "basis_known": known,
+                "direct_quotes": [],
+                "comparable_quote_ids": [],
+                "refused_quote_ids": [q.quote_id for q in qs],
+                "quotes": [q.as_dict() for q in qs],
+                "execution_price": base,
+                "final_price": base,
+                "note_zh": UNVERIFIED_ZH,
+            }
+            continue
+        target = {**known, "tax_basis": reg["tax_basis"], "bundle": reg["bundle"]}
         r = retail_update(
             Decimal(str(o.price.amount.amount)),
             [DirectQuote(q.supplier, _basis_key(q.spec, q.basis()), q.amount) for q in qs],
@@ -328,6 +380,7 @@ def apply_local_quotes(
             **r,
             "spec": spec,
             "basis": target,
+            "base_basis_verified_by": reg["verified_by"],
             "comparable_quote_ids": [q.quote_id for q in qs if q.basis() == target],
             "not_comparable": [
                 {

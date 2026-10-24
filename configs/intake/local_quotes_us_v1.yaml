@@ -12,7 +12,7 @@
 #   amount     金额（十进制文字，精确到分）。负价拒绝；零价按既有规则单独处理，不取对数
 #   currency   币种（ISO 4217）
 #   base_year  价格所在年份。计价口径 = <currency>_<base_year>_LOCAL，要与机会的口径相同才参与更新（不做时期换算）
-#   period     观测时期（YYYY、YYYY-MM 或 YYYY-MM-DD），年份必须等于 base_year
+#   period     观测时期（YYYY、YYYY-MM 或 YYYY-MM-DD，按真实日历校验：2024-02-30、2024-13 拒绝），年份必须等于 base_year
 #   billing    计费周期（per_month、one_time……），要与机会报价相同
 #   per_unit   计价单位（service-month、plan-month……），要与机会报价相同
 #   tax_basis  税费口径（tax_basis_values 之一）
@@ -20,10 +20,16 @@
 #   source     来源（供应商网页、价目表等）
 #   locator    原始定位（网址 + 取得日期、页内位置或文件指纹），能据此复核
 #
-# 只有完全同规格、同口径的报价参与同一次更新：口径与 comparable_basis（基础预测按这个口径比较，local_quote_comparability_v1）
-# 或机会报价的计价口径、周期、单位有任何不同，就只记录、不参与更新，也不做换算。
+# 基础价口径逐规格核实（local_quote_base_basis_v1）：base_basis 按规格键写明基础预测价的税费口径、捆绑口径（tax_basis_values /
+# bundle_values 之一）与核实依据 verified_by（表名、条目、说明，能据此复核）；计价口径、计费周期与计价单位读机会本身的报价，
+# 不在这里写。例如：
+#   base_basis:
+#     service.mobile_basic: {tax_basis: including_sales_tax, bundle: standalone, verified_by: "……核实依据……"}
+# 没登记的规格有报价时拒绝启用：保留基础价，修正记录写明原因（不猜税费、不做换算）。登记了的规格只用口径完全相同的报价
+# （税费、捆绑与登记的相同，计价口径、周期、单位与机会报价相同），其余只记录哪一项不同、不参与更新。
+# 现在没有核实过任何规格的基础价口径（CE 支出含销售税，成本模型的口径各不相同），所以 base_basis 是空的。
 version: local-quotes-us-v1
-comparable_basis: {tax_basis: before_sales_tax, bundle: standalone}
+base_basis: {}
 tax_basis_values: [before_sales_tax, including_sales_tax]
 bundle_values: [standalone, bundled]
 quotes: []

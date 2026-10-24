@@ -1218,7 +1218,7 @@
    "planner_kind": "mock"
   },
   "preflight": {
-   "preflight_fingerprint": "ab4315a719e592a7d136918ace12c099079d69d9e20a46ad1c63f8f8975acc04",
+   "preflight_fingerprint": "3bab69778b330e6573f707b3af7cd120f0c0a37723fb12e8af1113182a45e5bb",
    "preflight_id": "preflight.confirmed.draft.u504.r1"
   },
   "reading_guide_zh": [
@@ -1232,9 +1232,9 @@
    "分数是当前合成模型下、按你确认的陈述偏好计算的结果；小数末位的差异不构成可靠的排序"
   ],
   "real_model_calls": 0,
-  "result_fingerprint": "b008f8af159749a939b9987c35bde5a1fce0f6fb0540debcc02f756f90b00cf9",
-  "result_id": "result.run-e3a-62c41e75358c2ab3",
-  "run_id": "run-e3a-62c41e75358c2ab3",
+  "result_fingerprint": "d33046b451ad8b955c0c7ea93fd7e9b06a5036f58883f49ac3b7b0322f5715ef",
+  "result_id": "result.run-e3a-54167a02f1908c9c",
+  "run_id": "run-e3a-54167a02f1908c9c",
   "run_stage": "completed",
   "sources_zh": [
    "生活事实：E1 结算记录（钱、岗位、住房、食品、服务月份）与月度资源账（本人家务小时）",

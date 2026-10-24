@@ -258,14 +258,18 @@ def table_of(enc):
     return enc[TABLE]
 
 
-def test_text_templates_lookups_and_equal_columns_round_trip():
+def test_chinese_text_stays_whole_while_lookups_and_equal_columns_compress():
     rows = job_rows()
     enc = encode(rows)
     t = table_of(enc)
     assert canon(decode(enc)) == canon(rows)
-    # 共同的文案写一次（模板里的 {0}、{1}… 由同一行的“列#0”“列#1”…填回）
-    assert "label" in t["format"] and "工资约在本职业" in t["format"]["label"]
-    assert "label" not in t["columns"] or any("label#" in c for c in t["columns"])
+    # 含中文的文字不抽逐字模板（E3B 最后收尾）：每个标签与说明在发送的文字里原样出现，不被拆成空位
+    fmt = t.get("format", {})
+    assert "label" not in fmt and "quality" not in fmt
+    text = json.dumps(enc, ensure_ascii=False)
+    for r in rows:
+        assert json.dumps(r["label"], ensure_ascii=False) in text
+        assert json.dumps(r["quality"], ensure_ascii=False) in text
     # 职业名称由职业代码决定：查表，每个代码只写一次
     lookups = t["lookup"]
     assert any(lk["key"] == "occupation.code" for lk in lookups)
@@ -276,6 +280,25 @@ def test_text_templates_lookups_and_equal_columns_round_trip():
     assert "eligibility" not in back[1] and back[0]["eligibility"] == [
         "ability:edu_at_least_bachelor"
     ]
+
+
+def test_only_text_without_chinese_gets_a_template():
+    """一列够长的文字：编号这样的英文代码照样抽出共同模板（nyc.area.h.{0}），中文整句一个字也不拆，相同的整句仍只写一次。"""
+    rows = [
+        {
+            "home": f"nyc.area.h.36041{n:02d}",
+            "note": f"第 {n} 号居住片区，完整位于 CBSA 35620 内（按普查区）；资料的地理单位，不是街区；通勤层 {n % 3}",
+            "same": "资料的地理单位，不是街区",
+        }
+        for n in range(40)
+    ]
+    enc = encode(rows)
+    t = enc[TABLE]
+    assert canon(decode(enc)) == canon(rows)
+    assert t["format"] == {"home": "nyc.area.h.{0}"}
+    assert t["common"] == {"same": "资料的地理单位，不是街区"}
+    text = json.dumps(enc, ensure_ascii=False)
+    assert all(json.dumps(r["note"], ensure_ascii=False) in text for r in rows)
 
 
 def test_values_that_only_look_equal_are_not_merged():

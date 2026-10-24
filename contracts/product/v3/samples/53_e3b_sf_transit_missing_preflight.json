@@ -10,7 +10,7 @@
     "scoring_config": "0a476a4b1fb8676a8330c3100f0e57e7fb577b4122516f73c4b8b087764d8985"
    },
    "evaluation_spec_id": "eval.e3b-us.main",
-   "identities_fingerprint": "d941df0b1aa51cb0e208e592c159d7f11dabc5d9b9f2e93d3475d42bab6b73b5",
+   "identities_fingerprint": "033a1cd8976d236ff207c52328a54b587e8d219efd1f8e815564641f648f2665",
    "planner_id": "mock.rules.e3a-product",
    "planner_kind": "mock",
    "prompt_template": "e3b-product-prompt-v3",
@@ -905,7 +905,7 @@
    "planner_id": "mock.rules.e3a-product",
    "planner_kind": "mock"
   },
-  "preflight_fingerprint": "3ccda0cacef359f638185f9742887611358d615d2103134d136adda43120a3ad",
+  "preflight_fingerprint": "b72ba9f714d970cdb79366110e9a7ac6ce087462c0cad4841d01cef22c169801",
   "preflight_id": "preflight.confirmed.draft.u501.e3b_sf.r1",
   "scope_notes": [
    {

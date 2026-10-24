@@ -12,7 +12,8 @@
       （例如职业代码决定职业名称），每种取值只写一次；按列出的先后查，一张查表也可以带自己的 common、same、lookup。
     - ``same``：``{列: 另一列}``，两列每行都相同，只写后者。
     - ``format``：``{列: 模板}``，这一列的文字 = 模板里的 ``{0}``、``{1}``… 依次换成这一行 ``列#0``、``列#1``… 的值；对不上
-      模板的行直接写原文。共同的文案只写一次。
+      模板的行直接写原文。只用于不含中文的文字（编号、代码之类）：含中文的自然语言整句照写，只做整句同值去重（common、
+      lookup、same、分组），不把词语拆成空位拼接（E3B 最后收尾）。
     - ``nested``：``{列: 子表头}``，这一列的值是对象列表，所有对象合成一张子表（共用列名、common、lookup、same），每个对象写一行。
 * **分板块** ``{"$sections": {"key": "category", "order": [[板块, 个数], …], "parts": {板块: 这一板块的对象}}}``：
   一列异质对象（住房、岗位、食品……）按板块各用自己的表；原来的顺序是按 order 依次从各板块取对应个数。
@@ -39,7 +40,7 @@ import re
 from collections import Counter
 from typing import Any
 
-FORMAT = "compact-tables-v2"
+FORMAT = "compact-tables-v3"
 TABLE = "$table"
 SECTIONS = "$sections"
 GRID = "$grid"
@@ -56,6 +57,8 @@ _MIN_FIXED = 2
 #: 单独成段（编号 chi.area.h.1703101 的共同开头可以提出来）；其余（汉字、中文标点、单独的空白）一字一段
 _TOKEN = re.compile(r"[A-Za-z0-9](?:[A-Za-z0-9 ,&()'/+-]*[A-Za-z0-9)])?|.", re.S)
 _SLOT = re.compile(r"\{(\d+)\}")
+#: 中文（汉字、中文标点与全角字符）。含中文的一列文字不抽逐字模板：模板按单个汉字对齐会把词语拆开，模型读到的是碎片
+_CHINESE = re.compile("[\u3000-\u303f\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff00-\uffef]")
 #: 查表最多几张（每张由一列决定另外几列）
 _MAX_LOOKUPS = 3
 _ABSENT_COST = len('{"$absent":1}')
@@ -225,6 +228,8 @@ def _text_format(values: list[str]) -> tuple[str, list[list[str] | None]] | None
     """一列文字的共同模板：固定文字只写一次，空位写成 {0}、{1}…；返回模板与每行各空位的值（对不上模板的行是 None）。"""
     if any(_SLOT.search(v) for v in values):
         return None  # 原文里本来就有 {数字} 的写法时不用模板
+    if any(_CHINESE.search(v) for v in values):
+        return None  # 中文自然语言整句照写，不拆成空位（整句相同的仍由 common、lookup、same 与分组去重）
     toks = [_tokens(v) for v in values]
     order = sorted(range(len(values)), key=lambda i: (len(toks[i]), i))
     best: tuple[int, str, list[list[str] | None]] | None = None
