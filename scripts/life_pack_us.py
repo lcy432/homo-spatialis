@@ -117,7 +117,7 @@ def main(argv: list[str] | None = None) -> int:
     b = sub.add_parser("build", help="离线组装六城资料包")
     b.add_argument("--out", default="data/frozen/life/us-v1/pack")
     b.add_argument(
-        "--intake-db", default="runs/intake/us-v1/work/freeze/562c32339bbae67f/intake.sqlite"
+        "--intake-db", default="runs/intake/us-v1/work/freeze/35667f4101a71c0e/intake.sqlite"
     )
     args = ap.parse_args(argv)
     handlers = {

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+from decimal import Decimal
 from fractions import Fraction
 from pathlib import Path
 
@@ -12,7 +13,7 @@ import yaml
 
 from common.life_contracts import AbilitySpec, parse_eligibility_tag
 from product.realdata.life_freeze import freeze
-from product.realdata.occupations import Scope, start_job
+from product.realdata.occupations import Scope, job_opportunity, start_job, wage_support
 
 REPO = Path(__file__).resolve().parents[2]
 FIXTURE = REPO / "tests/fixtures/life_items/slice_sample.json"
@@ -110,51 +111,87 @@ def test_confirmed_facts_map_to_abilities_without_inferring_degrees(scope):
         scope.from_confirmed(education_level="phd")
 
 
+def templates(frozen, cbsa: str) -> dict[str, dict]:
+    return {x["soc"]: x for x in city(frozen, cbsa)["job_templates"]}
+
+
 def test_job_pay_and_arrangement_hand_check(frozen):
-    jobs = by_id(frozen, "35620")
-    fast = jobs["nyc.job.35-3023.p50"]["opportunity"]
+    """岗位 = 模板 × 年薪 × （每周工时，就业片区）：薪酬 = 年薪 × 每周工时 ÷ 40；每月工时 = 每周 × 52 ÷ 12；每周 5 天、每月 22 天。"""
+    rules = frozen[1]["job_rules"]
+
+    def job(soc: str, hours: int):
+        tpl = templates(frozen, "35620")[soc]
+        return job_opportunity(
+            tpl,
+            rules,
+            annual=Decimal(tpl["median_annual"]),
+            weekly_hours=hours,
+            area="nyc.area.w.x",
+            opportunity_id=f"nyc.job.{soc}.test",
+            wage_label="p50",
+            numeraire="USD_2024_LOCAL",
+            mapping_version="test",
+            hours_level="test",
+        )
+
+    fast = job("35-3023", 36)
     # 中位年薪 35,377.14 × 每周 36 小时 ÷ 40 = 31,839.426 → 31,839.43；每月 36 × 52 ÷ 12 = 156 小时；每周 5 天 → 每月 22 天
-    assert fast["compensation"]["amount"]["amount"] == 31839.43
-    job = fast["resource"]["job"]
+    assert fast.compensation.amount.amount == 31839.43
+    arr = fast.resource.job
     assert (
-        job["work_mode"],
-        job["work_hours_per_month"],
-        job["workdays_per_month"],
-        job["onsite_days_per_month"],
-    ) == (
-        "onsite",
-        156.0,
-        22,
-        22,
-    )
-    acct = jobs["nyc.job.13-2011.p50"]["opportunity"]
-    assert acct["compensation"]["amount"]["amount"] == 104972.84  # 每周 40 小时：年薪原样
+        arr.work_mode,
+        arr.work_hours_per_month,
+        arr.workdays_per_month,
+        arr.onsite_days_per_month,
+    ) == ("onsite", 156.0, 22, 22)
+    acct = job("13-2011", 40)
+    assert acct.compensation.amount.amount == 104972.84  # 每周 40 小时：年薪原样
     # 40 × 52 ÷ 12 = 173.33…；hybrid 每 5 天到岗 3 天：22 × 3 ÷ 5 = 13.2 → 13
-    assert acct["resource"]["job"]["work_hours_per_month"] == 173.33
-    assert acct["resource"]["job"]["onsite_days_per_month"] == 13
-    assert acct["eligibility"] == ["ability:edu_at_least_bachelor"]
+    assert acct.resource.job.work_hours_per_month == 173.33
+    assert acct.resource.job.onsite_days_per_month == 13
+    assert acct.eligibility == ("ability:edu_at_least_bachelor",)
+    # 低工时 = 每天工作短，不减少到岗天数：每周 10 小时 → 每月 43.33 小时，仍是 22 天
+    short = job("35-3023", 10)
+    assert short.resource.job.work_hours_per_month == 43.33
+    assert short.resource.job.workdays_per_month == 22
 
 
-def test_jobs_carry_the_soc_leave_the_area_for_integration_and_come_in_three_tiers(frozen, scope):
-    jobs = {k: v for k, v in by_id(frozen, "16980").items() if k.startswith("chi.job.")}
-    assert len(jobs) == 3 * len(scope.supported)
-    for v in jobs.values():
-        o = v["opportunity"]
-        assert o.get("area") is None and o["occupation"]["scheme"] == "SOC2018"
-        assert v["status"] == "needs_area" and "work_area_assigned_at_integration" in v["gaps"]
-    p25, med, p75 = (
-        jobs[f"chi.job.43-9061.{t}"]["opportunity"]["compensation"]["amount"]["amount"]
-        for t in ("p25", "p50", "p75")
-    )
-    assert p25 < med < p75
+def test_templates_carry_twenty_wage_points_and_leave_the_tails_unidentified(frozen, scope):
+    tps = templates(frozen, "16980")
+    assert set(tps) <= set(scope.supported) and len(tps) >= 30
+    assert not any(
+        i.startswith("chi.job.") for i in by_id(frozen, "16980")
+    )  # 岗位在资料包组装时展开
+    w = tps["43-9061"]["wage"]
+    assert len(w["points"]) == 20 and w["unidentified_tails"] == "1/5"
+    assert all(p["mass"] == "1/25" for p in w["points"])
+    assert [p["quantile"] for p in w["points"][:3]] == ["0.12", "0.16", "0.20"]
+    annual = [Decimal(p["annual"]) for p in w["points"]]
+    assert annual == sorted(annual)
 
 
-def test_start_job_uses_the_median_tier_and_never_substitutes(frozen, cfgs):
+def test_wage_support_is_piecewise_linear_between_published_quantiles():
+    w = {
+        "annual_wage_p10": "20000",
+        "annual_wage_p25": "35000",
+        "annual_wage_median": "50000",
+        "annual_wage_p75": "70000",
+        "annual_wage_p90": "100000",
+    }
+    pts = wage_support(w)["points"]
+    # 分位 0.12：20,000 + 15,000 × (0.12 − 0.10) ÷ 0.15 = 22,000；分位 0.52：50,000 + 20,000 × 0.02 ÷ 0.25 = 51,600
+    assert pts[0]["annual"] == "22000.00" and pts[10]["annual"] == "51600.00"
+    # p90 没有发布（OEWS 的 # 顶码）：落在 p75–p90 那一段的区间都是未识别，不补
+    cut = wage_support({**w, "annual_wage_p90": None})
+    assert len(cut["points"]) == 16 and cut["unidentified_inside"] == str(Fraction(4, 25))
+
+
+def test_start_job_uses_the_median_and_never_substitutes(frozen, cfgs):
     index = city(frozen, "16980")["start_jobs"]
     ok = start_job(index, cfgs[1], "43-9061")
     assert ok == {
         "status": "ok",
-        "opportunity_id": "chi.job.43-9061.p50",
+        "opportunity_id": "chi.job.43-9061.start",
         "requires_confirmed_abilities": ["edu_at_least_hs"],
     }
     massage = start_job(index, cfgs[1], "31-9011")

@@ -44,10 +44,11 @@ CATEGORY_ZH = {"housing": "住房", "job": "岗位"}
 BUILD_LABEL_ZH = {
     "areas": "片区（居住与就业）",
     "commute_legs": "通勤关系表的线（住处片区 × 就业片区 × 方式）",
-    "housing_candidates": "住房候选",
-    "housing_executable": "可执行的住房候选",
-    "housing_in_catalog": "放进目录的住房",
-    "jobs_placed": "放进目录的岗位（已补上就业片区）",
+    "housing_candidates": "完整可执行住房池的候选（目标格 × 经验支持点）",
+    "housing_in_catalog": "放进目录的住房（菜单上出现过的，加最低住房与参考住房）",
+    "job_candidates": "完整可执行岗位池的候选（职业 × 年薪支持点 × 工时与就业片区）",
+    "jobs_in_catalog": "放进目录的岗位（菜单上出现过的）",
+    "start_jobs": "各职业的开局岗位",
     "menus": "年度菜单",
     "items_by_domain.activity": "生活物品候选：活动",
     "items_by_domain.device": "生活物品候选：省家务设备",
@@ -57,8 +58,10 @@ BUILD_LABEL_ZH = {
     "items_by_domain.job": "生活物品候选：岗位",
     "items_by_domain.service": "生活物品候选：服务",
     "items_by_domain.training": "生活物品候选：培训",
-    "excluded.housing.outside_tax_scope": "没有放进目录的住房：在税务支持范围之外",
-    "excluded.housing.rent_unknown": "没有放进目录的住房：租金未知",
+    "excluded.housing.outside_tax_scope": "没有进住房池的目标格：在税务支持范围之外",
+    "excluded.housing.no_commute_area": "没有进住房池的目标格：通勤资料里没有居住片区",
+    "excluded.job.employment_unknown": "没有进岗位池的职业：就业人数未知",
+    "excluded.job.no_start_job": "没有开局岗位的职业",
 }
 
 

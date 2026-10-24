@@ -18,10 +18,10 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from common.intake_contracts import Menu, MenuPolicy, Opportunity, StdRecord, applies_to
-from product.realdata import mapping_b, menus
+from common.intake_contracts import Menu, Opportunity, StdRecord, applies_to
+from product.realdata import mapping_b
 
-REPORT_VERSION = "intake-reports-v2"
+REPORT_VERSION = "intake-reports-v3"
 
 
 def _jsonl(path: Path):
@@ -246,20 +246,22 @@ def housing_diagnostics(
                 }
             )
         market = hdf[hdf["full_puma"] & hdf["segment"].isin(mapping_b.MARKET)]
-        b = [o for o in opps if o.cbsa == m.cbsa and o.kind == "rental_listing_candidate"]
+        b = [o for o in opps if o.cbsa == m.cbsa and o.kind == "rental_support_cell"]
         comparison = []
         for bed in ("0", "1", "2", "3plus"):
             src = market[market["bed_class"] == bed]
-            cand = [
-                o
-                for o in b
-                if o.stratum == bed
-                and o.fact("monthly_rent")
-                and o.fact("monthly_rent").status == "present"
-            ]
-            cv = [float(o.fact("monthly_rent").value) for o in cand]  # type: ignore[union-attr]
-            cw = [float(o.target_weight or 0) for o in cand]
-            row = {"bedrooms": bed, "source_n": len(src), "candidates": len(cand)}
+            cells = [o for o in b if o.stratum == bed and o.attributes.get("support_table")]
+            # 展开后的逻辑候选：目标格总权重 × 支持点权重 ÷ 支持表总权重；只用合同租金已知的支持点（顶码不进分位数）
+            cv: list[float] = []
+            cw: list[float] = []
+            for o in cells:
+                tab = tables[str(o.attributes["support_table"])]
+                scale = float(o.target_weight or 0) / max(tab["weight_sum"], 1)
+                for pt in tab["points"]:
+                    if pt["contract_rent"] is not None and pt["price_status"] != "censored":
+                        cv.append(float(pt["contract_rent"]))
+                        cw.append(pt["weight"] * scale)
+            row = {"bedrooms": bed, "source_n": len(src), "target_cells": len(cells)}
             cens = src["censored"].to_numpy(bool)
             limit = (
                 float(np.nanmin(src["censor_bound"].to_numpy(float)[cens]))
@@ -277,14 +279,14 @@ def housing_diagnostics(
                     if len(src)
                     else None
                 )
-                row[f"candidates_q{q}"] = _wq(cv, cw, q)
+                row[f"support_q{q}"] = _wq(cv, cw, q)
             comparison.append(row)
         levels = Counter(str(o.attributes.get("price_level_used")) for o in b)
         a = [o for o in opps if o.cbsa == m.cbsa and o.kind == "coverage_grid_candidate"]
         out[m.cbsa] = {
             "validation_vs_published": validation,
             "market_vs_stock": market_vs_stock,
-            "candidates_vs_source_distribution": comparison,
+            "support_vs_source_distribution": comparison,
             "b_price_level_used": dict(levels),
             "a_grid": {
                 "generated": len(a),
@@ -299,7 +301,8 @@ def housing_diagnostics(
         "note_zh": (
             "validation_vs_published：用同一套筛选与权重从 PUMS 算出的存量毛租金中位数，对照 ACS 独立发布的 B25031（发布表在分箱内插值，"
             "差几美元正常）；它检验的是权重与筛选，不检验新租市场代理。market_vs_stock：新租市场代理比存量高多少——这就是不能拿存量当报价的原因。"
-            "candidates_vs_source_distribution：按目标权重加权的候选租金分布对照来源样本分布；回退层级越粗，差异越大。"
+            "support_vs_source_distribution：展开后的完整支持分布（目标格总权重 × 支持点份额，合同租金已知的部分）对照来源样本；"
+            "目标格自己的样本够时两者一致，回退格借上层的形状，回退越粗差异越大。"
         ),
         "metros": out,
     }
@@ -473,81 +476,12 @@ def capability_summary(opps: list[Opportunity]) -> dict[str, Any]:
 def menu_diagnostics(
     config, opps: list[Opportunity], menu_docs: list[Menu], tables: dict[str, dict]
 ) -> dict[str, Any]:
-    diag = config.menus.size_diagnostic
-    ks = [int(k) for k in diag.get("housing_per_stratum", [1, 2, 3, 5, 8])]
-    reps = int(diag.get("repeats", 20))
-    build_id = menu_docs[0].build_id if menu_docs else "0" * 64
-    size_rows: dict[str, list[dict[str, Any]]] = {}
-    inclusion: dict[str, Any] = {}
-    for m in config.metros:
-        pool = [o for o in opps if o.cbsa == m.cbsa and o.sector == "housing"]
-        medians = {
-            bed: float(t["quantiles"]["0.50"])
-            for bed in ("0", "1", "2", "3plus")
-            if (t := tables.get(f"b.housing.{m.cbsa}.metro_bed.{bed}"))
-            and t["quantiles"].get("0.50")
-        }
-        rows = []
-        for k in ks:
-            policy = MenuPolicy(
-                sector="housing",
-                kind="annual_exposure_sample",
-                strata_key="bedrooms",
-                per_stratum=k,
-            )
-            best_ratio, short_commute = [], []
-            for r in range(reps):
-                mnu = menus.build_menu(
-                    build_id=build_id,
-                    cbsa=m.cbsa,
-                    year=1,
-                    sector="housing",
-                    env_repeat=100 + r,
-                    policy=policy,
-                    opportunities=pool,
-                    global_seed=config.build.seed,
-                )
-                chosen = [o for o in pool if o.opportunity_id in set(mnu.selected)]
-                for bed, med in medians.items():
-                    rents = [
-                        float(o.fact("monthly_rent").value)
-                        for o in chosen
-                        if o.stratum == bed
-                        and o.fact("monthly_rent")
-                        and o.fact("monthly_rent").status == "present"
-                    ]  # type: ignore[union-attr,arg-type]
-                    if rents:
-                        best_ratio.append(min(rents) / med)
-                rt = [
-                    int(o.fact("commute_roundtrip_minutes").value)
-                    for o in chosen
-                    if o.fact("commute_roundtrip_minutes")
-                    and o.fact("commute_roundtrip_minutes").status == "present"
-                ]  # type: ignore[union-attr,arg-type]
-                if rt:
-                    short_commute.append(sum(1 for x in rt if x <= 60) / len(rt))
-            rows.append(
-                {
-                    "per_stratum": k,
-                    "mean_cheapest_over_market_median": round(statistics.mean(best_ratio), 4)
-                    if best_ratio
-                    else None,
-                    "mean_share_roundtrip_le_60min": round(statistics.mean(short_commute), 4)
-                    if short_commute
-                    else None,
-                }
-            )
-        size_rows[m.cbsa] = rows
-        inclusion[m.cbsa] = _inclusion_check(pool, "1", 3, reps=400)
     shared = _shared_menu_check(menu_docs)
     return {
         "note_zh": (
-            "菜单大小诊断：同一城市用不同的每层名额 k 各抽 20 次（环境重复 100–119），看最便宜的一套相对新租市场中位数、往返 ≤ 60 分钟的比例怎样变。"
-            "k 越大，最便宜的那套越便宜——所以各城必须用同一个 k，不能靠给某座城多抽来制造优势。inclusion：无放回加权抽样里，权重最大的候选的"
-            "实际入选频率（400 次模拟）与“k × 权重份额”的对照；权重不是入选概率。"
+            "住房的候选池是完整加权经验支持表（每个目标格一条，intake 里只列出、不抽样）；年度接触菜单在 E3B 资料包里从完整可执行池"
+            "按同一个名额抽，30、60、120 的菜单诊断也在那里（docs/design/e3b-life-pack.md）。这里只核对共享菜单与日历菜单。"
         ),
-        "size_diagnostic": size_rows,
-        "inclusion": inclusion,
         "menus_per_policy": dict(Counter(mnu.policy for mnu in menu_docs)),
         "calendar_menus": {
             "filter": dict(
@@ -565,40 +499,6 @@ def menu_diagnostics(
             "note_zh": "按日历开放的菜单现在没有按日历筛选（pending_mapping：模拟年份与真实日期的对应还没定义），只列出观测到的项目及原始日历；日历已知与未知分开数。",
         },
         "shared_menus": shared,
-    }
-
-
-def _inclusion_check(pool: list[Opportunity], stratum: str, k: int, *, reps: int) -> dict[str, Any]:
-    cand = [
-        o
-        for o in pool
-        if o.origin == "mapping_b"
-        and o.stratum == stratum
-        and o.target_weight
-        and float(o.target_weight) > 0
-    ]
-    if len(cand) <= k:
-        return {"candidates": len(cand), "note": "候选不多于名额，全部入选"}
-    w = np.array([float(o.target_weight) for o in cand])  # type: ignore[arg-type]
-    rng = np.random.default_rng(20261022)
-    hits = np.zeros(len(cand))
-    for _ in range(reps):
-        keys = np.log(rng.random(len(cand))) / w
-        hits[np.argsort(-keys)[:k]] += 1
-    top = np.argsort(-w)[:5]
-    share = w / w.sum()
-    return {
-        "candidates": len(cand),
-        "k": k,
-        "top5": [
-            {
-                "opportunity_id": cand[i].opportunity_id,
-                "weight_share": round(float(share[i]), 5),
-                "k_times_share": round(float(min(1.0, k * share[i])), 5),
-                "simulated_inclusion": round(float(hits[i] / reps), 5),
-            }
-            for i in top
-        ],
     }
 
 

@@ -18,7 +18,7 @@ from dataclasses import dataclass
 from fractions import Fraction
 
 from common.intake_contracts import MethodSpec
-from product.realdata.mapping_b import PRICE_POSITIONS, RentCell, RentModel
+from product.realdata.mapping_b import GRID_POSITIONS, RentCell, RentModel
 
 HOUSING_GRID = MethodSpec(
     method_id="housing_coverage_grid",
@@ -53,9 +53,9 @@ class GridPoint:
 
 
 def housing_grid(model: RentModel, cfg: dict) -> list[GridPoint]:
-    if tuple(cfg["price_positions"]) != PRICE_POSITIONS:
+    if tuple(cfg["price_positions"]) != GRID_POSITIONS:
         raise ValueError(
-            f"配置的价位 {cfg['price_positions']} 与方法 {HOUSING_GRID.ref} 定义的 {PRICE_POSITIONS} 不同：改价位要升方法版本"
+            f"配置的价位 {cfg['price_positions']} 与方法 {HOUSING_GRID.ref} 定义的 {GRID_POSITIONS} 不同：改价位要升方法版本"
         )
     points: list[GridPoint] = []
     for tier in cfg["location_tiers"]:

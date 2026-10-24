@@ -10,24 +10,24 @@
     },
     "targets": [
      {
-      "opportunity_id": "nyc.housing.3604107.1.1-6",
+      "reason": "完整候选池里没有不用车就能到达全部参考岗位片区（8 个）的合法住房",
       "slot_id": "housing_basic",
-      "status": "opportunity"
+      "status": "unavailable"
      },
      {
-      "opportunity_id": "nyc.housing.3604112.1.1-2",
+      "reason": "完整候选池里没有不用车就能到达全部参考岗位片区（8 个）的合法的一卧中档",
       "slot_id": "housing_comfort",
+      "status": "unavailable"
+     },
+     {
+      "opportunity_id": "nyc.housing.3604207.0.s0001",
+      "slot_id": "housing_basic_car",
       "status": "opportunity"
      },
      {
-      "reason": "不用车就有能到达全部参考岗位片区的合法住房：不设用车的参考生活（必要交通服务只在需要时加）",
-      "slot_id": "housing_basic_car",
-      "status": "unavailable"
-     },
-     {
-      "reason": "不用车就有能到达全部参考岗位片区的合法的一卧中档：不设用车的参考生活（必要交通服务只在需要时加）",
+      "opportunity_id": "nyc.housing.3604310.1.s0057",
       "slot_id": "housing_comfort_car",
-      "status": "unavailable"
+      "status": "opportunity"
      },
      {
       "opportunity_id": "nyc.service.car_access",
@@ -35,12 +35,12 @@
       "status": "opportunity"
      },
      {
-      "opportunity_id": "nyc.food.home_staples",
+      "opportunity_id": "nyc.food.staples.h21",
       "slot_id": "food_basic",
       "status": "opportunity"
      },
      {
-      "opportunity_id": "nyc.food.home_fresh",
+      "opportunity_id": "nyc.food.fresh.h21",
       "slot_id": "food_comfort",
       "status": "opportunity"
      },
@@ -80,7 +80,7 @@
       "status": "opportunity"
      },
      {
-      "opportunity_id": "nyc.job.49-2022.p50",
+      "opportunity_id": "nyc.job.49-2022.start",
       "slot_id": "qualified_job",
       "status": "opportunity"
      }
@@ -94,24 +94,24 @@
     },
     "targets": [
      {
-      "opportunity_id": "la.housing.0603744.0.1-6",
+      "opportunity_id": "la.housing.0603764.0.s0001",
       "slot_id": "housing_basic",
       "status": "opportunity"
      },
      {
-      "opportunity_id": "la.housing.0603748.1.1-2",
+      "opportunity_id": "la.housing.0603735.1.s0092",
       "slot_id": "housing_comfort",
       "status": "opportunity"
      },
      {
-      "reason": "不用车就有能到达全部参考岗位片区的合法住房：不设用车的参考生活（必要交通服务只在需要时加）",
+      "opportunity_id": "la.housing.0603706.0.s0001",
       "slot_id": "housing_basic_car",
-      "status": "unavailable"
+      "status": "opportunity"
      },
      {
-      "reason": "不用车就有能到达全部参考岗位片区的合法的一卧中档：不设用车的参考生活（必要交通服务只在需要时加）",
+      "opportunity_id": "la.housing.0603703.1.s0100",
       "slot_id": "housing_comfort_car",
-      "status": "unavailable"
+      "status": "opportunity"
      },
      {
       "opportunity_id": "la.service.car_access",
@@ -119,12 +119,12 @@
       "status": "opportunity"
      },
      {
-      "opportunity_id": "la.food.home_staples",
+      "opportunity_id": "la.food.staples.h21",
       "slot_id": "food_basic",
       "status": "opportunity"
      },
      {
-      "opportunity_id": "la.food.home_fresh",
+      "opportunity_id": "la.food.fresh.h21",
       "slot_id": "food_comfort",
       "status": "opportunity"
      },
@@ -178,22 +178,22 @@
     },
     "targets": [
      {
-      "reason": "完整候选池里没有不用车就能到达全部参考岗位片区（2 个）的合法住房",
+      "reason": "完整候选池里没有不用车就能到达全部参考岗位片区（5 个）的合法住房",
       "slot_id": "housing_basic",
       "status": "unavailable"
      },
      {
-      "reason": "完整候选池里没有不用车就能到达全部参考岗位片区（2 个）的合法的一卧中档",
+      "reason": "完整候选池里没有不用车就能到达全部参考岗位片区（5 个）的合法的一卧中档",
       "slot_id": "housing_comfort",
       "status": "unavailable"
      },
      {
-      "opportunity_id": "sf.housing.0607509.0.1-6",
+      "opportunity_id": "sf.housing.0600113.1.s0001",
       "slot_id": "housing_basic_car",
       "status": "opportunity"
      },
      {
-      "opportunity_id": "sf.housing.0607509.1.1-2",
+      "opportunity_id": "sf.housing.0608102.1.s0050",
       "slot_id": "housing_comfort_car",
       "status": "opportunity"
      },
@@ -203,12 +203,12 @@
       "status": "opportunity"
      },
      {
-      "opportunity_id": "sf.food.home_staples",
+      "opportunity_id": "sf.food.staples.h21",
       "slot_id": "food_basic",
       "status": "opportunity"
      },
      {
-      "opportunity_id": "sf.food.home_fresh",
+      "opportunity_id": "sf.food.fresh.h21",
       "slot_id": "food_comfort",
       "status": "opportunity"
      },
@@ -262,24 +262,24 @@
     },
     "targets": [
      {
-      "opportunity_id": "chi.housing.1703161.3plus.1-6",
+      "reason": "完整候选池里没有不用车就能到达全部参考岗位片区（6 个）的合法住房",
       "slot_id": "housing_basic",
-      "status": "opportunity"
+      "status": "unavailable"
      },
      {
-      "opportunity_id": "chi.housing.1703153.1.1-2",
+      "reason": "完整候选池里没有不用车就能到达全部参考岗位片区（6 个）的合法的一卧中档",
       "slot_id": "housing_comfort",
+      "status": "unavailable"
+     },
+     {
+      "opportunity_id": "chi.housing.1703101.3plus.s0001",
+      "slot_id": "housing_basic_car",
       "status": "opportunity"
      },
      {
-      "reason": "不用车就有能到达全部参考岗位片区的合法住房：不设用车的参考生活（必要交通服务只在需要时加）",
-      "slot_id": "housing_basic_car",
-      "status": "unavailable"
-     },
-     {
-      "reason": "不用车就有能到达全部参考岗位片区的合法的一卧中档：不设用车的参考生活（必要交通服务只在需要时加）",
+      "opportunity_id": "chi.housing.1708904.1.s0066",
       "slot_id": "housing_comfort_car",
-      "status": "unavailable"
+      "status": "opportunity"
      },
      {
       "opportunity_id": "chi.service.car_access",
@@ -287,12 +287,12 @@
       "status": "opportunity"
      },
      {
-      "opportunity_id": "chi.food.home_staples",
+      "opportunity_id": "chi.food.staples.h21",
       "slot_id": "food_basic",
       "status": "opportunity"
      },
      {
-      "opportunity_id": "chi.food.home_fresh",
+      "opportunity_id": "chi.food.fresh.h21",
       "slot_id": "food_comfort",
       "status": "opportunity"
      },
@@ -346,24 +346,24 @@
     },
     "targets": [
      {
-      "opportunity_id": "hou.housing.4804626.1.1-6",
+      "reason": "完整候选池里没有不用车就能到达全部参考岗位片区（4 个）的合法住房",
       "slot_id": "housing_basic",
-      "status": "opportunity"
+      "status": "unavailable"
      },
      {
-      "opportunity_id": "hou.housing.4804603.1.1-2",
+      "reason": "完整候选池里没有不用车就能到达全部参考岗位片区（4 个）的合法的一卧中档",
       "slot_id": "housing_comfort",
+      "status": "unavailable"
+     },
+     {
+      "opportunity_id": "hou.housing.4804601.3plus.s0001",
+      "slot_id": "housing_basic_car",
       "status": "opportunity"
      },
      {
-      "reason": "不用车就有能到达全部参考岗位片区的合法住房：不设用车的参考生活（必要交通服务只在需要时加）",
-      "slot_id": "housing_basic_car",
-      "status": "unavailable"
-     },
-     {
-      "reason": "不用车就有能到达全部参考岗位片区的合法的一卧中档：不设用车的参考生活（必要交通服务只在需要时加）",
+      "opportunity_id": "hou.housing.4804615.1.s0042",
       "slot_id": "housing_comfort_car",
-      "status": "unavailable"
+      "status": "opportunity"
      },
      {
       "opportunity_id": "hou.service.car_access",
@@ -371,12 +371,12 @@
       "status": "opportunity"
      },
      {
-      "opportunity_id": "hou.food.home_staples",
+      "opportunity_id": "hou.food.staples.h21",
       "slot_id": "food_basic",
       "status": "opportunity"
      },
      {
-      "opportunity_id": "hou.food.home_fresh",
+      "opportunity_id": "hou.food.fresh.h21",
       "slot_id": "food_comfort",
       "status": "opportunity"
      },
@@ -416,7 +416,7 @@
       "status": "opportunity"
      },
      {
-      "opportunity_id": "hou.job.27-4011.p50",
+      "opportunity_id": "hou.job.27-4011.start",
       "slot_id": "qualified_job",
       "status": "opportunity"
      }
@@ -430,24 +430,24 @@
     },
     "targets": [
      {
-      "opportunity_id": "sea.housing.5323306.0.1-6",
+      "reason": "完整候选池里没有不用车就能到达全部参考岗位片区（3 个）的合法住房",
       "slot_id": "housing_basic",
-      "status": "opportunity"
+      "status": "unavailable"
      },
      {
-      "opportunity_id": "sea.housing.5323315.1.1-2",
+      "reason": "完整候选池里没有不用车就能到达全部参考岗位片区（3 个）的合法的一卧中档",
       "slot_id": "housing_comfort",
+      "status": "unavailable"
+     },
+     {
+      "opportunity_id": "sea.housing.5323306.2.s0001",
+      "slot_id": "housing_basic_car",
       "status": "opportunity"
      },
      {
-      "reason": "不用车就有能到达全部参考岗位片区的合法住房：不设用车的参考生活（必要交通服务只在需要时加）",
-      "slot_id": "housing_basic_car",
-      "status": "unavailable"
-     },
-     {
-      "reason": "不用车就有能到达全部参考岗位片区的合法的一卧中档：不设用车的参考生活（必要交通服务只在需要时加）",
+      "opportunity_id": "sea.housing.5323312.1.s0029",
       "slot_id": "housing_comfort_car",
-      "status": "unavailable"
+      "status": "opportunity"
      },
      {
       "opportunity_id": "sea.service.car_access",
@@ -455,12 +455,12 @@
       "status": "opportunity"
      },
      {
-      "opportunity_id": "sea.food.home_staples",
+      "opportunity_id": "sea.food.staples.h21",
       "slot_id": "food_basic",
       "status": "opportunity"
      },
      {
-      "opportunity_id": "sea.food.home_fresh",
+      "opportunity_id": "sea.food.fresh.h21",
       "slot_id": "food_comfort",
       "status": "opportunity"
      },
@@ -840,7 +840,7 @@
    }
   ],
   "monthly_discount_factor": "1",
-  "note": "E3B 六城的期末参考生活：模板与选择规则同产品基础样例的思路，槽位按真实目录绑定；参考住房按参考岗位与通勤关系从完整候选池选（reference_housing_by_job_reach_v1），用车的参考生活只在不用车到不了参考岗位时绑定；估值期沿用第 3 年菜单加绑定的槽位机会、不抽设备故障；没有可绑定的槽位写确定没有并说明原因",
+  "note": "E3B 六城的期末参考生活：模板与选择规则同产品基础样例的思路，槽位按真实目录绑定；参考住房按参考岗位与通勤关系从完整候选池选（reference_housing_by_job_reach_v2），开车能到达全部参考岗位片区时也绑定用车的参考生活；估值期沿用第 3 年菜单加绑定的槽位机会、不抽设备故障；没有可绑定的槽位写确定没有并说明原因",
   "selection_rule": "best_complete_feasible_in_reference_set",
   "slots": [
    {
@@ -854,12 +854,12 @@
     "slot_id": "housing_comfort"
    },
    {
-    "description": "基本住房（用车）：只在没有不用车就合法的基本住房时设；开车能到达全部参考岗位片区的住房中最便宜的一处",
+    "description": "基本住房（用车）：开车能到达全部参考岗位片区的住房中最便宜的一处（可不可行由估值期的通勤、现金与硬要求检查判定）",
     "role": "housing",
     "slot_id": "housing_basic_car"
    },
    {
-    "description": "较舒适的住房（用车）：只在没有不用车就合法的一卧中档时设；开车时最长往返最短的一卧中档",
+    "description": "较舒适的住房（用车）：开车时到全部参考岗位片区最长往返最短的一卧中档",
     "role": "housing",
     "slot_id": "housing_comfort_car"
    },

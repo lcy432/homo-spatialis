@@ -178,7 +178,7 @@ def test_a_driving_year_pays_the_fixed_fee_once_and_fuel_per_trip(pack_bundle):
 
     city = "US:CBSA2023:41860"
     cat = pack_bundle.catalog_for(city)
-    job_id = "sf.job.43-9061.p50"
+    job_id = "sf.job.43-9061.start"
     state = _start(pack_bundle, city, job_id)
     home, leg = _drive_only_home(cat, state, cat.opportunity(job_id).area)
     # 手算一次的油费：往返分钟 / 60 × 25 ÷ 23.4 × 4.864，四舍五入到分

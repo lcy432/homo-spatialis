@@ -57,10 +57,12 @@ from product.realdata.fetch import DEFAULT_CACHE, Mode, fetch
 FETCH_VERSION = "2"
 #: 改了标准化的语义（字段、过滤、文字清理）就升这个版本：否则同一身份会复用旧产物。
 #: 4 = 官方顶码表、家电适用市场、活动年龄限制、标准化读取绑定获取阶段的原始指纹。
-STANDARDIZE_VERSION = "4"
+#: 5 = 住房记录加厨卫条件（KIT、PLM）、毛租金是否受水电燃料顶码影响、上网与通信设备字段（E3B 映射修正）。
+STANDARDIZE_VERSION = "5"
 #: 改了映射阶段的语义（机会怎样生成、编译缺口怎样分类、来源分类）就升这个版本。
 #: 3 = 中位数与标准误成对、官方顶码下的可识别规则与说明、派生的食材机会、资料缺口与 E1 缺口分开。
-MAP_VERSION = "3"
+#: 4 = B 住房候选换成完整加权经验支持表（housing_rent_support@1），不再压成三个价位；上网与通信设备分布（描述用）。
+MAP_VERSION = "4"
 STAGES = ("configure", "fetch", "standardize", "map", "catalog", "check", "freeze")
 
 
@@ -90,6 +92,8 @@ def all_methods() -> list[MethodSpec]:
         prices.ADJHSG_METHOD,
         housing.CLASSIFY,
         mapping_b.HOUSING_METHOD,
+        mapping_b.SUPPORT_METHOD,
+        mapping_b.INTERNET_METHOD,
         acs.TOPCODE_METHOD,
         mapping_b.COMMUTE_METHOD,
         mapping_b.JOBS_METHOD,
@@ -108,6 +112,7 @@ def all_methods() -> list[MethodSpec]:
 def all_assumptions() -> list[AssumptionSpec]:
     return [
         mapping_b.MARKET_PROXY,
+        mapping_b.UTILITIES_IMPUTATION,
         mapping_b.ROUNDTRIP,
         jobs.EMPLOYMENT_PROXY,
         food.BASKET,
@@ -403,6 +408,11 @@ def stage_standardize(ctx: BuildContext, fetched: StageRef) -> StageRef:
             if ok("pums_topcodes")
             else {}
         )
+        utility_rules = (
+            acs.parse_utility_topcodes(content("pums_topcodes", reqs["pums_topcodes"]))
+            if ok("pums_topcodes")
+            else {}
+        )
         rules: dict[str, acs.TopcodeRule] = {}
         housing_records: list[StdRecord] = []
         h_cache: dict[str, bytes] = {}
@@ -426,7 +436,7 @@ def stage_standardize(ctx: BuildContext, fetched: StageRef) -> StageRef:
                 parts_p.append(acs.read_pums_persons(p_cache[st], pumas, cfg.pums.person_vars))
             if not parts_h:
                 continue
-            hdf = housing.prepare(pd.concat(parts_h, ignore_index=True), g, rules)
+            hdf = housing.prepare(pd.concat(parts_h, ignore_index=True), g, rules, utility_rules)
             pdf = pd.concat(parts_p, ignore_index=True).assign(cbsa=m.cbsa)
             hdf.to_parquet(d / f"housing_{m.cbsa}.parquet", index=False)
             pdf.to_parquet(d / f"persons_{m.cbsa}.parquet", index=False)
@@ -669,7 +679,9 @@ def stage_map(ctx: BuildContext, std: StageRef) -> StageRef:
                 tables.append(_commute_table(m.cbsa, code, c, tiers.get(code), "puma"))
             for tier, c in tier_com.items():
                 tables.append(_commute_table(m.cbsa, tier, c, tier, "tier"))
-            b_opps = housing.b_opportunities(hdf, model, com, mg)
+            b_opps, support = housing.support_cells(hdf, model, com, mg)
+            tables += list(support.values())
+            tables.append(mapping_b.internet_access(hdf, m.cbsa))
             points = mapping_a.housing_grid(model, cfg.mapping["a_housing"])
             a_opps = housing.a_opportunities(points, tier_com, mg)
             unsupported = sorted({(p.tier, p.bed, p.struct) for p in points if not p.supported})
@@ -679,6 +691,7 @@ def stage_map(ctx: BuildContext, std: StageRef) -> StageRef:
                 lv = str(o.attributes.get("price_level_used"))
                 levels[lv] = levels.get(lv, 0) + 1
             summary["b_levels"][m.cbsa] = levels
+            summary.setdefault("b_support_tables", {})[m.cbsa] = len(support)
             opps += b_opps + a_opps
             hours = mapping_b.job_hours(
                 pdf, m.cbsa, pooled, int(cfg.mapping["b_jobs"]["min_unweighted_n"])

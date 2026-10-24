@@ -21,20 +21,22 @@ cities:
   - {cbsa: "42660", key: sea, label: 西雅图, jurisdiction: [US, WA], tax_policy: tax.us2024.wa, home_states: ["53"], work_states: ["53"]}
 
 housing:
-  # 居住条件（SC-26）：空间等级由卧室数推断；条件档次是同格（PUMA 或回退的通勤层 × 卧室）租金三档的位置——含误差的估计。
+  # 居住条件（SC-26）：空间等级由卧室格推断；条件档次是同一解析格里合同租金的加权三分位（housing_rent_support@1，含误差的估计）。
+  # 月租是完整经验支持点自己的毛租金：同一条 ACS 记录的 GRNTP，或合同租金 + 同格水电燃气月费的加权中位数（插补，标明）。
+  # 厨卫设施按 ACS KIT / PLM 核对：不完整或未知的支持点不进可执行池，也不能当最低住房。
   space_level_by_bedrooms: {"0": 1, "1": 2, "2": 3, "3plus": 4}
-  bedrooms_by_class: {"0": 0, "1": 1, "2": 2, "3plus": 3}
-  quality_level_by_position: {"1/6": 1, "1/2": 2, "5/6": 3}
-  # 月租 = 合同租金分位（估计）+ 水电燃气月费中位数（估计，毛租金 − 合同租金）。两个估计相加不等于毛租金的同一分位，照实说明。
-  gross_rent_rule: contract_quantile_plus_utilities_median_v1
-  # ACS 租住单元是独立住房单元；厨卫设施没有核对（没有取 KIT/PLM），登记为假设 acs_rental_units_have_basic_facilities_v1
-  basic_facilities_assumption: acs_rental_units_have_basic_facilities_v1
 
 menus:
+  # E3B 映射修正：每城 × 每年 × 每个环境重复的菜单从完整可执行池加权无放回抽 size 个（住房不再按卧室每层 3 个）。
   algorithm: weighted_keyed_sample@1
   seed: life-pack-us-v1-menus-2026-10-23
-  housing: {strata_key: bedrooms_class, per_stratum: 3}
-  job: {size: 30}
+  housing: {size: 60}
+  job: {size: 60}
+
+# 菜单大小诊断（只报告，不替代候选分布验收）：同一算法、诊断专用种子，各取前 max(sizes) 个看 30 / 60 / 120 的差别。
+menu_size_diagnostic:
+  sizes: [30, 60, 120]
+  repeats: 20
 
 # 地区与城市条件（SC-27）。固定参考尺度：第七座城不会改变前六座的值。
 conditions:

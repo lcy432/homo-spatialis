@@ -69,7 +69,18 @@ LEVEL_LABEL = {
 #: PUMS 2024 是全年调查；来源记录的日期取观测期的最后一天。
 OBSERVED_2024 = _dt.date(2024, 12, 31)
 CENT = Decimal("0.01")
-PERSON_COLUMNS = ("STATE", "PUMA", "PWGTP", "ESR", "JWMNP", "JWTRNS", "POWSP", "POWPUMA", "SOCP")
+PERSON_COLUMNS = (
+    "STATE",
+    "PUMA",
+    "PWGTP",
+    "ESR",
+    "JWMNP",
+    "JWTRNS",
+    "POWSP",
+    "POWPUMA",
+    "SOCP",
+    "WKHP",
+)
 
 
 def load_commute_config(path: Path | str = COMMUTE_CONFIG) -> dict[str, Any]:
@@ -379,7 +390,9 @@ def parse_powpuma_lookup(content: bytes, sheet: str) -> PowLookup:
 
 
 def read_commuters(content: bytes, employed_esr: list[int]) -> pd.DataFrame:
-    """一个州的 PUMS 人员文件 → 在职、上周不在家工作、有通勤分钟的人（居住与工作地、方式、分钟、权重、职业大类）。"""
+    """一个州的 PUMS 人员文件 → 在职、上周不在家工作、有通勤分钟的人（居住与工作地、方式、分钟、权重、职业大类、通常每周工时）。
+
+    WKHP = 99 是“99 小时或以上”（顶码），照实保留为删失，不当准确值；空值是没有回答。"""
     z = zipfile.ZipFile(io.BytesIO(content))
     name = next(
         n for n in z.namelist() if n.lower().startswith("psam_p") and n.lower().endswith(".csv")
@@ -401,8 +414,9 @@ def read_commuters(content: bytes, employed_esr: list[int]) -> pd.DataFrame:
     df["PWGTP"] = df["PWGTP"].astype(int)
     #: SOC 2018 大类（SOCP 的前两位，例如 15 = 计算机与数学）；没有职业代码的是空串
     df["SOC2"] = df["SOCP"].fillna("").str.strip().str[:2]
+    df["WKHP"] = pd.to_numeric(df["WKHP"], errors="coerce")
     return df[
-        ["STATE", "PUMA", "PWGTP", "JWMNP", "JWTRNS", "POWSP", "POWPUMA", "SOC2"]
+        ["STATE", "PUMA", "PWGTP", "JWMNP", "JWTRNS", "POWSP", "POWPUMA", "SOC2", "WKHP"]
     ].reset_index(drop=True)
 
 
@@ -568,32 +582,75 @@ def define_work_areas(
     return areas, diag
 
 
-def work_area_job_shares(
-    commuters: pd.DataFrame, area_of: dict[str, str], area_ids: list[str]
-) -> dict[str, Any]:
-    """每个就业片区占本城可支持工作地岗位的份额：全部，以及按 SOC 2018 大类（SOCP 前两位）。
+#: WKHP 的顶码值：“99 小时或以上”。
+WKHP_TOPCODE = 99
 
-    岗位 = 到这些工作地上班、不在家工作的在职者（PWGTP 加权，缓存里各州的全部居民）。这是存量在职者的分布，不是招聘；
-    份额四舍五入到 4 位，加起来不一定正好是 1。只用来说明把岗位放进就业片区的规则，不进评分。"""
+
+def _joint(g: pd.DataFrame) -> dict[str, Any]:
+    """一组在职者的（通常每周工时 × 就业片区）加权经验联合分布：每个出现过的组合一点（PWGTP 之和与未加权条数）。WKHP 顶码与空值
+    单独计数，不进可执行的组合。"""
+    w = g["PWGTP"].to_numpy(float)
+    hours = g["WKHP"]
+    valid = hours.notna() & (hours < WKHP_TOPCODE) & (hours > 0)
+    pts = (
+        g[valid]
+        .assign(hours=hours[valid].astype(int))
+        .groupby(["hours", "area"], sort=True)["PWGTP"]
+        .agg(["sum", "count"])
+    )
+    return {
+        "n": len(g),
+        "weight": int(w.sum()),
+        "n_eff": round(float(w.sum() ** 2 / (w**2).sum()), 2) if len(g) else 0.0,
+        "weight_hours_topcoded": int(g.loc[hours >= WKHP_TOPCODE, "PWGTP"].sum()),
+        "weight_hours_missing": int(g.loc[hours.isna(), "PWGTP"].sum()),
+        "points": [
+            {"hours": int(h), "area": str(a), "weight": int(r["sum"]), "n": int(r["count"])}
+            for (h, a), r in pts.iterrows()
+        ],
+    }
+
+
+def hours_area_joint(
+    commuters: pd.DataFrame, area_of: dict[str, str], min_n: int
+) -> dict[str, Any]:
+    """按 SOC 2018 大类（SOCP 前两位）的（通常每周工时 × 就业片区）加权经验联合分布（同一条人员记录的工时与工作地）。
+
+    人群 = 到可支持工作地上班、上周不在家工作的在职者（PWGTP，缓存里各州的全部居民）——与就业片区的划法同一批人。一个大类不足
+    ``min_n`` 条未加权记录就回退到全部在职者（``all``），用了哪一层写在里面。这是存量在职者的分布，不是招聘；上周在家工作不在里面，
+    也不据此推算远程或混合办公。"""
     df = commuters.assign(area=_pow_key(commuters).map(area_of))
     df = df[df["area"].notna()]
-
-    def shares(g: pd.DataFrame) -> dict[str, Any]:
-        w = g.groupby("area")["PWGTP"].sum()
-        total = int(w.sum())
-        return {
-            "n": len(g),
-            "weight": total,
-            "shares": {a: f"{Decimal(int(w.get(a, 0))) / Decimal(total):.4f}" for a in area_ids},
-        }
-
+    by_major = {}
+    short = {}
+    for soc, g in df[df["SOC2"] != ""].groupby("SOC2", sort=True):
+        if len(g) >= min_n:
+            by_major[str(soc)] = _joint(g)
+        else:
+            short[str(soc)] = len(g)
     return {
-        "rule": "到可支持工作地上班、不在家工作的在职者（PWGTP）在各就业片区的分布；SOC 大类 = SOCP 前两位",
-        "all": shares(df),
-        "by_soc_major": {
-            str(soc): shares(g) for soc, g in df[df["SOC2"] != ""].groupby("SOC2", sort=True)
-        },
+        "rule": (
+            "到可支持工作地上班、上周不在家工作的在职者：同一条记录的通常每周工时（WKHP）与就业片区，PWGTP 加权的经验联合分布；"
+            f"按 SOC 大类，不足 {min_n} 条回退到全部在职者；WKHP = 99（99 小时或以上）是顶码，单独计数"
+        ),
+        "min_unweighted_n": min_n,
+        "all": _joint(df),
+        "by_soc_major": by_major,
+        "soc_major_below_min_n": short,
     }
+
+
+def time_distributions(res: pd.DataFrame) -> dict[str, Any]:
+    """每条线（居住片区 × 就业片区 × 方式）自己的单程分钟加权经验分布（诊断用）：分钟 → PWGTP 之和与未加权条数。执行仍用关系表
+    里确定的往返分钟（阶梯中位数 × 2，按格回退）；不同受访者的差异不是同一个人每天的波动。"""
+    out: dict[str, Any] = {}
+    for (h, wk, m), g in res.groupby(["home", "work", "mode"], sort=True):
+        pts = g.groupby("JWMNP", sort=True)["PWGTP"].agg(["sum", "count"])
+        out[f"{h}|{wk}|{m}"] = {
+            "n": len(g),
+            "oneway_minutes": [[int(v), int(r["sum"]), int(r["count"])] for v, r in pts.iterrows()],
+        }
+    return out
 
 
 # --------------------------------------------------------------------------- 通勤格
@@ -723,6 +780,8 @@ def fuel_per_roundtrip(minutes: int, speed_mph: Decimal, mpg: Decimal, price: De
 class CityResult:
     key: str
     payload: dict[str, Any]
+    #: 诊断用：每条线（居住片区 × 就业片区 × 方式）自己的单程分钟加权经验分布（单独成文件，主文件记它的内容身份）
+    times: dict[str, Any] | None = None
 
 
 def _home_label(p: geo.PumaMembership) -> str:
@@ -1132,8 +1191,8 @@ def build_city(
             "excluded_outside_tax_scope": [x["puma"] for x in home_excluded["outside_tax_scope"]],
             "excluded_partial_in_metro": [x["puma"] for x in home_excluded["partial_in_metro"]],
         },
-        "work_area_job_shares": work_area_job_shares(
-            raw.commuters, area_of, [a.area_id for a in work_areas]
+        "hours_area_joint": hours_area_joint(
+            raw.commuters, area_of, int(method["min_unweighted_n"])
         ),
         "transit_fare": None
         if fare is None
@@ -1170,8 +1229,23 @@ def build_city(
         },
         "diagnostics": diag,
     }
+    times = {
+        "schema": "e3b-commute-time-distributions-v1",
+        "city": payload["city"],
+        "rule": (
+            "每条线（居住片区 × 就业片区 × 方式）自己的样本：单程分钟（JWMNP）→ PWGTP 之和与未加权条数；只供诊断，执行仍用关系表"
+            "里确定的往返分钟（阶梯中位数 × 2，按格回退）。不同受访者之间的差异不是同一个人每天的波动"
+        ),
+        "lines": time_distributions(res[res["work"].notna() & res["mode"].notna()]),
+    }
+    times["content_identity"] = content_identity(times)
+    payload["time_distributions"] = {
+        "file": f"{key}.time_distributions.json",
+        "content_identity": times["content_identity"],
+        "lines": len(times["lines"]),
+    }
     payload["content_identity"] = content_identity(payload)
-    return CityResult(key=key, payload=payload)
+    return CityResult(key=key, payload=payload, times=times)
 
 
 def _classify_outside(
@@ -1273,6 +1347,12 @@ def write_frozen(results: list[CityResult], out_dir: Path) -> dict[str, Any]:
         (out_dir / f"{r.key}.json").write_text(
             payload_text(r.payload), encoding="utf-8", newline="\n"
         )
+        if r.times is not None:
+            (out_dir / f"{r.key}.time_distributions.json").write_text(
+                json.dumps(r.times, ensure_ascii=False, separators=(",", ":")) + "\n",
+                encoding="utf-8",
+                newline="\n",
+            )
         p = r.payload
         index["cities"][r.key] = {
             "cbsa": p["city"]["cbsa"],

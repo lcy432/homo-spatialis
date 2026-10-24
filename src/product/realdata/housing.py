@@ -29,9 +29,14 @@ from common.intake_contracts import (
     StdRecord,
     missing,
 )
-from product.realdata.acs import TOPCODE_METHOD, TopcodeRule
+from product.realdata.acs import (
+    TOPCODE_METHOD,
+    UTILITY_TOPCODE_COLUMNS,
+    TopcodeRule,
+    utility_topcoded,
+)
 from product.realdata.geo import MetroGeo
-from product.realdata.mapping_b import PRICE_POSITIONS
+from product.realdata.mapping_b import GRID_POSITIONS
 from product.realdata.prices import ADJHSG_METHOD
 
 PERIOD_2024 = Period(
@@ -86,10 +91,45 @@ def segment(ten: float, vacs: float, mv: float) -> str:
     return "stock"
 
 
-def prepare(frame: pd.DataFrame, geo: MetroGeo, rules: dict[str, TopcodeRule]) -> pd.DataFrame:
-    """一个都会区的住房样本 → 分析表（分类、市场段、是否完整在内的 PUMA、顶码状态与真实值下界）。
+def facilities_status(kit: object, plm: object) -> str:
+    """厨卫条件（ACS KIT、PLM）：两项都是 1 才是完整；任何一项是 2 就是不完整；空值或别的代码是未知（不当完整）。"""
 
-    顶码按官方州别阈值与替代值识别（``rules``，每个州一条），**不**按筛选后样本的最大值猜。"""
+    def code(v: object) -> int | None:
+        try:
+            return None if pd.isna(v) else int(float(v))  # type: ignore[arg-type]
+        except (TypeError, ValueError):
+            return None
+
+    k, p = code(kit), code(plm)
+    if k == 2 or p == 2:
+        return "incomplete"
+    if k == 1 and p == 1:
+        return "complete"
+    return "unknown"
+
+
+def _gross_affected(row, utility_rules: dict[str, dict[str, tuple[float, float]]]) -> str | None:
+    """毛租金受不受顶码影响：合同租金顶码（或是否顶码未知），或任何一项有金额的水电燃料顶码。返回影响来源或 None。"""
+    if row.censored:
+        return "RNTP"
+    rules = utility_rules.get(row.STATE, {})
+    for var in UTILITY_TOPCODE_COLUMNS:
+        v = getattr(row, var, None)
+        if v is not None and not pd.isna(v) and utility_topcoded(float(v), rules.get(var)):
+            return var
+    return None
+
+
+def prepare(
+    frame: pd.DataFrame,
+    geo: MetroGeo,
+    rules: dict[str, TopcodeRule],
+    utility_rules: dict[str, dict[str, tuple[float, float]]] | None = None,
+) -> pd.DataFrame:
+    """一个都会区的住房样本 → 分析表（分类、市场段、是否完整在内的 PUMA、顶码状态与真实值下界、厨卫条件、毛租金是否受顶码
+    影响）。
+
+    顶码按官方州别阈值与替代值识别（``rules``，每个州一条；水电燃料 ``utility_rules``），**不**按筛选后样本的最大值猜。"""
     df = frame.copy()
     df["cbsa"] = geo.cbsa
     df["puma_code"] = df["STATE"] + df["PUMA"]
@@ -112,6 +152,12 @@ def prepare(frame: pd.DataFrame, geo: MetroGeo, rules: dict[str, TopcodeRule]) -
     df["censored"] = df["topcode_status"] != "not_topcoded"
     df["censor_bound"] = pd.array(bound, dtype="Float64").astype(float)
     df["record_id"] = "housing.acs2024." + df["SERIALNO"].str.lower()
+    for col in ("KIT", "PLM", *UTILITY_TOPCODE_COLUMNS):
+        if col not in df.columns:
+            df[col] = pd.NA
+    df["facilities"] = [facilities_status(k, p) for k, p in zip(df["KIT"], df["PLM"], strict=True)]
+    urules = utility_rules or {}
+    df["gross_affected_by"] = [_gross_affected(r, urules) for r in df.itertuples(index=False)]
     return df
 
 
@@ -150,6 +196,38 @@ def _censored_rent(name: str, row, rules: dict[str, TopcodeRule]) -> FieldValue:
     )
 
 
+def _affected(v: object) -> str | None:
+    """毛租金受顶码影响的来源（RNTP 或某项水电燃料）；空值（pandas 的 None / NaN）是没有影响。"""
+    return None if v is None or (isinstance(v, float) and pd.isna(v)) else str(v)
+
+
+def _utility_censored_gross(row) -> FieldValue:
+    return FieldValue(
+        name="gross_rent_month",
+        status="suppressed",
+        raw=None if pd.isna(row.GRNTP) else str(int(row.GRNTP)),
+        raw_unit="USD/month（ACS 2024 报告值）",
+        reason=(
+            f"毛租金含顶码（或是否顶码未知）的水电燃料费（{_affected(row.gross_affected_by)}，Census 2024 PUMS top and bottom coded "
+            "values）：替代值不是这套房的真实费用，真实毛租金只知道不低于报告值"
+        )[:300],
+        method=TOPCODE_METHOD.ref,
+    )
+
+
+def _facility(name: str, raw: object, what: str) -> FieldValue:
+    """ACS KIT / PLM：1 有（完整），2 没有（不完整）；空值是没有回答或不适用——未知，不当完整。"""
+    code = None
+    try:
+        code = None if pd.isna(raw) else str(int(float(raw)))  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        code = None
+    value = {"1": "complete", "2": "incomplete"}.get(code or "")
+    if value is None:
+        return missing(name, "missing", f"没有这一项（{what}）的有效回答：未知，不当完整")
+    return FieldValue(name=name, status="present", raw=code, value=value)
+
+
 def reason_state(rule: TopcodeRule) -> str:
     return "官方顶码表里没有这个州" if rule.status == "missing" else "官方阈值以上却不等于替代值"
 
@@ -176,6 +254,8 @@ def records(
             (
                 _censored_rent("gross_rent_month", row, rules)
                 if row.censored and row.segment != "vacant_for_rent"
+                else _utility_censored_gross(row)
+                if row.segment != "vacant_for_rent" and _affected(row.gross_affected_by)
                 else _money("gross_rent_month", float(row.GRNTP), str(row.ADJHSG), row.rent_gross)
                 if row.segment != "vacant_for_rent" and pd.notna(row.GRNTP) and float(row.GRNTP) > 0
                 else missing(
@@ -215,6 +295,8 @@ def records(
                 if pd.notna(row.YRBLT)
                 else missing("year_built", "missing", "没有建成年代")
             ),
+            _facility("kitchen_facilities", row.KIT, "炉灶、冰箱与带龙头的水槽"),
+            _facility("plumbing_facilities", row.PLM, "冷热自来水与浴缸或淋浴"),
             missing("floor_area", "missing", "ACS 不测面积；房间数与卧室数不是面积"),
             missing("lease_terms", "missing", "ACS 不收集租期、押金、宠物等租约条件"),
         ]
@@ -263,6 +345,8 @@ def records(
                 if pd.isna(row.censor_bound)
                 else float(row.censor_bound),
                 "full_puma": bool(row.full_puma),
+                "facilities": row.facilities,
+                "gross_affected_by": _affected(row.gross_affected_by),
             },
             terms=terms,
             weight=str(int(row.WGTP)),
@@ -271,7 +355,6 @@ def records(
 
 # --------------------------------------------------------------------------- 机会（B 为主、A 补共同覆盖）
 
-POSITIONS = PRICE_POSITIONS
 POSITION_ZH = {
     "1/6": "这一类里偏低的三分之一",
     "1/2": "这一类里居中的三分之一",
@@ -360,13 +443,25 @@ def _common_facts(bed: str) -> list[FieldValue]:
     ]
 
 
-def b_opportunities(df: pd.DataFrame, model, commute: dict, geo: MetroGeo) -> list:
-    """B：每个（完整在内的 PUMA × 卧室）格生成三个价位的候选；价格取本格或回退层的条件分布，通勤取这个 PUMA 的居民通勤。"""
-    from product.realdata.mapping_b import COMMUTE_METHOD, HOUSING_METHOD
+def support_cells(
+    df: pd.DataFrame, model, commute: dict, geo: MetroGeo
+) -> tuple[list, dict[str, dict]]:
+    """B（``housing_rent_support@1``）：每个（完整在内的 PUMA × 卧室）格一条目标格记录，引用它实际使用那一层的完整加权经验支持表。
+
+    目标格的总权重 = 本格新租市场代理（空置待租 ∪ 12 个月内迁入）的 WGTP 之和；回退到上层时只借上层分布的形状，不借上层的总权重。
+    返回（目标格机会，支持表——按表编号去重）。逻辑上的候选 = （目标 PUMA，支持点），权重 = 目标格总权重 × 支持点权重 ÷ 支持表总权重。"""
+    from product.realdata.mapping_b import (
+        COMMUTE_METHOD,
+        SUPPORT_METHOD,
+        support_table,
+        support_table_id,
+    )
     from product.realdata.registry import make_opportunity, weight_text
 
     market = df[df["full_puma"] & df["segment"].isin(("vacant_for_rent", "recent_mover"))]
     mass = market.groupby(["puma_code", "bed_class"])["WGTP"].sum()
+    by_id = df.set_index("record_id", drop=False)
+    tables: dict[str, dict] = {}
     out = []
     for (puma_code, bed), w in sorted(mass.items()):
         tier = model.tiers.get(puma_code)
@@ -378,65 +473,67 @@ def b_opportunities(df: pd.DataFrame, model, commute: dict, geo: MetroGeo) -> li
         member = geo.puma(puma_code[:2], puma_code[2:])
         name = member.name if member and member.name else f"PUMA {puma_code}"
         c = commute.get(puma_code)
-        for i, pos in enumerate(POSITIONS, start=1):
-            facts = (
-                _rent_fact(cell, pos, HOUSING_METHOD.ref),
-                *_common_facts(bed),
-                *_commute_facts(c, COMMUTE_METHOD.ref),
+        attrs: dict = {
+            "tier": tier,
+            "fallback_tried": ",".join(tried) or None,
+            "target_weight_source": "target_cell_market_wgtp",
+        }
+        lineage: list[str] = [f"b.commute.{geo.cbsa}.{puma_code}"]
+        if cell is None:
+            attrs.update(support_table=None, price_level_used=None, cell_n=0)
+        else:
+            tid = support_table_id(cell)
+            if tid not in tables:
+                tables[tid] = support_table(cell, by_id.loc[list(cell.record_ids)])
+            t = tables[tid]
+            ws = t["weight_sum"] or 1
+            attrs.update(
+                support_table=tid,
+                price_level_used=cell.level,
+                price_population=cell.population,
+                shape_borrowed=cell.level != "puma_bed",
+                cell_n=cell.n,
+                cell_n_eff=round(cell.n_eff, 2),
+                support_points=len(t["points"]),
+                **{f"share_{k}": f"{v / ws:.4f}" for k, v in t["masses"].items() if k != "raw"},
             )
-            lineage = tuple(
-                x
-                for x in ((cell.table_id if cell else None), f"b.commute.{geo.cbsa}.{puma_code}")
-                if x
-            )
-            out.append(
-                make_opportunity(
-                    opportunity_id=f"housing.b.{geo.cbsa}.{puma_code}.{bed}.q{i}",
-                    sector="housing",
-                    kind="rental_listing_candidate",
-                    label=f"{BEDROOM_ZH[bed]}·{name}·{POSITION_ZH[pos]}",
+            lineage = [tid, cell.table_id, *lineage]
+        out.append(
+            make_opportunity(
+                opportunity_id=f"housing.b.{geo.cbsa}.{puma_code}.{bed}",
+                sector="housing",
+                kind="rental_support_cell",
+                label=f"{BEDROOM_ZH[bed]}·{name}（完整租金分布）",
+                cbsa=geo.cbsa,
+                geo=GeoRef(
+                    country="US",
+                    scheme="PUMA2020",
+                    code=puma_code,
+                    level="puma",
+                    label=name,
                     cbsa=geo.cbsa,
-                    geo=GeoRef(
-                        country="US",
-                        scheme="PUMA2020",
-                        code=puma_code,
-                        level="puma",
-                        label=name,
-                        cbsa=geo.cbsa,
-                        relation="within",
-                    ),
-                    origin="mapping_b",
-                    method=HOUSING_METHOD.ref,
-                    lineage=lineage,
-                    facts=facts,
-                    required=REQUIRED,
-                    supply_status="offered",
-                    menu_policy="annual_exposure_sample",
-                    e1_category="housing",
-                    e1_needs=HOUSING_E1_NEEDS,
-                    data_gaps=HOUSING_DATA_GAPS,
-                    attributes={
-                        "tier": tier,
-                        "price_level_used": cell.level if cell else None,
-                        "price_population": cell.population if cell else None,
-                        "fallback_tried": ",".join(tried) or None,
-                        "cell_n": cell.n if cell else 0,
-                        "structure_mix": (
-                            ";".join(f"{k}={v}" for k, v in cell.structure_mix.items())
-                            if cell
-                            else None
-                        ),
-                        "utilities_median_month": cell.utilities_median if cell else None,
-                        "price_position": pos,
-                    },
-                    terms={"utilities_in_rent": "unknown"},
-                    target_weight=weight_text(w / len(POSITIONS)),
-                    weight_basis="cell_market_weight/3：本 PUMA × 卧室格里空置待租与 12 个月内迁入租住户的 WGTP 之和 ÷ 3",
-                    stratum=bed,
-                    price_fact="monthly_rent",
-                )
+                    relation="within",
+                ),
+                origin="mapping_b",
+                method=SUPPORT_METHOD.ref,
+                lineage=tuple(lineage),
+                facts=(*_common_facts(bed), *_commute_facts(c, COMMUTE_METHOD.ref)),
+                required=("bedrooms_class",),
+                supply_status="offered",
+                menu_policy="full_catalog",
+                e1_category="housing",
+                e1_needs=HOUSING_E1_NEEDS,
+                data_gaps=HOUSING_DATA_GAPS,
+                attributes=attrs,
+                terms={"utilities_in_rent": "unknown"},
+                target_weight=weight_text(w),
+                weight_basis=(
+                    "本 PUMA × 卧室格里空置待租与 12 个月内迁入租住户的 WGTP 之和；回退时只借上层分布的形状，总权重仍是这一格的"
+                ),
+                stratum=bed,
             )
-    return out
+        )
+    return out, tables
 
 
 def a_opportunities(points, tier_commute: dict, geo: MetroGeo) -> list:
@@ -449,7 +546,7 @@ def a_opportunities(points, tier_commute: dict, geo: MetroGeo) -> list:
     for p in points:
         if not p.supported:
             continue
-        i = POSITIONS.index(p.position) + 1
+        i = GRID_POSITIONS.index(p.position) + 1
         facts = (
             _rent_fact(p.cell, p.position, HOUSING_GRID.ref),
             *_common_facts(p.bed),

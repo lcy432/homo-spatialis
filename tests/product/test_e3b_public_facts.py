@@ -99,7 +99,7 @@ def test_data_nature_counts_come_from_the_catalog_and_the_pack_report(real):
         counts = report["cities"][key]["counts"]
         build = {b.key: b.count for b in dn.build}
         assert dn.build_status == "from_pack_report"
-        for k in ("areas", "commute_legs", "housing_in_catalog", "jobs_placed", "menus"):
+        for k in ("areas", "commute_legs", "housing_in_catalog", "jobs_in_catalog", "menus"):
             assert build[k] == counts[k]
         assert build["items_by_domain.food"] == counts["items_by_domain"]["food"]
         for k, n in report["cities"][key]["excluded"].items():

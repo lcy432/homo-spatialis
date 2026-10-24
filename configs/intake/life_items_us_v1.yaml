@@ -9,7 +9,7 @@
 # 语言模型不生成任何数：设定值是本配置作者写下、登记、可审阅的；代码只做确定的换算。
 
 version: life-items-us-v1
-intake_build_id: 562c32339bbae67fd1917b7ac67f4b5b28f55d07e88a8c78ee6fe371ed863691
+intake_build_id: 35667f4101a71c0e5ea6c1aaa8e5f45cd83c825d6b1393bde1104d3d571a96b7
 numeraire: USD_2024_LOCAL
 mapping_version: e3b-life-items-v1
 #: 纯设定类机会的来源日期（配置写定的日子）
@@ -29,6 +29,101 @@ vocabulary:
   capabilities: [guitar_playable, racket_playable]
   enjoyment_functions: [personal_care]
   household_tasks: [laundry, cleaning]
+
+# ============================================================================ A 板块的共同结构（E3B 映射修正 §4）
+# 每个板块：方案族与合法组合、参数（含义、单位、支持范围、共同先验与来源）、允许按城市证据更新的参数、真实差异与估计不确定性的
+# 区分、模型支持状态。每城的证据、零售修正结果与编译状态由 src/product/realdata/a_blocks.py 补上，冻结在每城的 a_blocks 里。
+# 零售价修正（retail_correction_lognormal_v1）：δ = log(实际价 ÷ 基础预测价) ~ N(0, log(1.5)²)，只用同规格直接报价按供应商去重后
+# 更新；现在六城都没有合格的同规格直接报价，执行价都是基础预测（标为估计，不叫本地观测价）。
+a_blocks:
+  - block: food
+    label_zh: 食品（完整每周 21 餐方案）
+    domains: [food]
+    legal_combinations_zh: 三个篮子 × 家里做的餐数 {0, 3, 7, 14, 21} × 其余餐的方式 {全部堂食, 全部外送, 各半} × 外面部分一个主菜系（9 选 1）；家里做 21 顿时没有外面部分，方式与菜系退化成一个方案
+    parameters:
+      - {id: basket_quantities, meaning_zh: 三个篮子每周的食材数量, unit: 计价单位/周, support: 正数, prior: {kind: point}, source: food_basket_quantities_v1, city_updatable: false}
+      - {id: basket_item_prices, meaning_zh: 篮子里每种食材的都会区估计价（基础成本预测）, unit: USD_2024_LOCAL/计价单位, support: 正数, prior: {kind: city_evidence}, source: rpp_goods_spatial_adjustment@1（BLS AP 区域均价 × RPP 商品类）, city_updatable: true}
+      - {id: energy_reference, meaning_zh: 每人每天的参照热量（补齐用）, unit: 千卡/天, support: "2000", prior: {kind: point, value: 2000}, source: food_energy_reference_v1, city_updatable: false}
+      - {id: fresh_meals_per_basket, meaning_zh: 每个篮子 21 餐里的新鲜餐数, unit: 餐/周, support: "0–21", prior: {kind: point, value: {staples: 4, varied: 10, fresh: 17}}, source: food_plan_composition_v1, city_updatable: false}
+      - {id: minutes_per_meal, meaning_zh: 自己做一顿的做饭与收拾时间, unit: 分钟, support: 正数, prior: {kind: point, value: {staples: 20, varied: 25, fresh: 30}}, source: food_plan_composition_v1, city_updatable: false}
+      - {id: home_meals_grid, meaning_zh: 家里做的餐数（共同覆盖网格，不是居民比例）, unit: 餐/周, support: "{0, 3, 7, 14, 21}", prior: {kind: grid}, source: food_home_share_by_meals_v1, city_updatable: false}
+      - {id: kitchen_hours_per_meal, meaning_zh: 外食每顿的厨房人工, unit: 小时, support: "0.25", prior: {kind: point, value: 0.25}, source: food_away_cost_proxy_v1, city_updatable: false}
+      - {id: venue_other_per_meal, meaning_zh: 外食每顿的场地及其他成本（全国基准，× 其他服务 RPP）, unit: USD_2024/顿, support: "2", prior: {kind: point, value: 2}, source: food_away_cost_proxy_v1, city_updatable: false}
+      - {id: delivery_hours_per_meal, meaning_zh: 外送每顿的配送人工, unit: 小时, support: "0.2", prior: {kind: point, value: 0.2}, source: food_away_cost_proxy_v1, city_updatable: false}
+      - {id: cook_and_driver_wages, meaning_zh: 厨师（35-2014）与配送司机（53-3033）的都会区中位时薪, unit: USD_2024_LOCAL/小时, support: 正数, prior: {kind: city_evidence}, source: OEWS 2024 年 5 月, city_updatable: true}
+      - {id: rpp_other_services, meaning_zh: 其他服务 RPP（场地及其他成本的空间换算）, unit: 指数（全国 = 100）, support: 正数, prior: {kind: city_evidence}, source: BEA RPP 2023, city_updatable: true}
+      - {id: dining_hours, meaning_zh: 堂食每顿（含往返）与外送每顿（下单与收取）的时间, unit: 小时, support: "1.25 / 0.25", prior: {kind: point}, source: dining_hours_v1, city_updatable: false}
+      - {id: retail_correction, meaning_zh: 同规格零售价相对基础预测的对数比值 δ, unit: 对数比值, support: 实数, prior: {kind: normal, mean: 0, sd: log(1.5)}, source: retail_correction_lognormal_v1, city_updatable: true}
+    families:
+      - {family: food_plan_week21, label_zh: 完整每周 21 餐方案, id_prefixes: [food.],
+         why_no_quotes_zh: 没有同规格（同样篮子、同样餐数与方式、同样税费口径）的本地直接报价；CE 的在外饮食支出只做量级对照}
+    variation_vs_uncertainty_zh: 方案之间的差异（篮子、家里餐数、外面的方式与菜系）是方案空间的真实差异；食材价、工资与 RPP 是城市证据；零售修正 δ 与各项设定的不确定性不生成额外方案
+    model_support_zh: 食品方案覆盖整月基本饮食（按热量补齐，不是营养方案）；饮食生活评分只读新鲜餐与菜系匹配
+
+  - block: services
+    label_zh: 人工杂务服务与享受型服务
+    domains: [service, enjoyment]
+    legal_combinations_zh: 每项服务按月购买，可以同时买几项；同一家务的减负取现有有效残余时间规则，不叠加
+    parameters:
+      - {id: worker_and_client_hours, meaning_zh: 每项服务的工人小时、本人小时与替代后的残余家务小时, unit: 小时/月, support: 非负, prior: {kind: point}, source: service_hours_v1, city_updatable: false}
+      - {id: service_wages, meaning_zh: 对应职业的都会区中位时薪（基础成本预测）, unit: USD_2024_LOCAL/小时, support: 正数, prior: {kind: city_evidence}, source: OEWS 2024 年 5 月（oews_hourly_from_annual_v1）, city_updatable: true}
+      - {id: labor_overhead, meaning_zh: 服务价格 = 工人工资 × 倍率, unit: 倍, support: "2.0", prior: {kind: point, value: 2.0}, source: labor_overhead_v1, city_updatable: false}
+      - {id: retail_correction, meaning_zh: 同规格零售价相对基础预测的对数比值 δ, unit: 对数比值, support: 实数, prior: {kind: normal, mean: 0, sd: log(1.5)}, source: retail_correction_lognormal_v1, city_updatable: true}
+    families:
+      - {family: chore_service_month, label_zh: 上门洗衣与保洁（按月）, id_prefixes: [service.laundry, service.cleaning],
+         why_no_quotes_zh: 没有同规格（同样频次与工时）的本地直接报价}
+      - {family: enjoyment_service_month, label_zh: 按摩（按月）, id_prefixes: [service.massage],
+         why_no_quotes_zh: 没有同规格的本地直接报价}
+    variation_vs_uncertainty_zh: 服务之间的差异是频次与工时；工资是城市证据；效果（替代后的残余小时）是共同设定，不随工资或报价改变
+    model_support_zh: 只在付了钱的月份起作用；家务减负读资源账里的残余小时
+
+  - block: devices
+    label_zh: 家务设备（洗衣机、烘干机）
+    domains: [device]
+    legal_combinations_zh: 每个设备方案一次买下、在寿命内按月提供减负；同一家务的减负不叠加
+    parameters:
+      - {id: national_category_price, meaning_zh: 设备类别的全国价格, unit: USD_2024, support: 正数, prior: {kind: point}, source: device_category_v1, city_updatable: false}
+      - {id: goods_spatial_factor, meaning_zh: 商品类空间换算系数（intake）, unit: 倍, support: 正数, prior: {kind: city_evidence}, source: rpp_goods_spatial_adjustment@1, city_updatable: true}
+      - {id: lifetime_and_residual, meaning_zh: 寿命（年）与替代后的残余家务小时, unit: 年 / 小时每月, support: 正数, prior: {kind: point}, source: device_category_v1, city_updatable: false}
+      - {id: failure, meaning_zh: 模拟期内的随机故障, unit: 年故障概率, support: none_within_horizon, prior: {kind: point}, source: device_failure_v1, city_updatable: false}
+      - {id: retail_correction, meaning_zh: 同规格零售价相对基础预测的对数比值 δ, unit: 对数比值, support: 实数, prior: {kind: normal, mean: 0, sd: log(1.5)}, source: retail_correction_lognormal_v1, city_updatable: true}
+    families:
+      - {family: laundry_device, label_zh: 洗衣与烘干设备, id_prefixes: [durable.washer, durable.pair, durable.combo],
+         why_no_quotes_zh: ENERGY STAR 只有认证事实不记价格；没有同型号的本地零售报价}
+    variation_vs_uncertainty_zh: 方案之间的差异是设备组合；价格是全国类别设定 × 城市商品系数；寿命与效果是共同设定
+    model_support_zh: 安装条件按假设可以安装（住房资料没有接口与排风条件，缺口）
+
+  - block: equipment
+    label_zh: 爱好装备
+    domains: [equipment]
+    legal_combinations_zh: 一次买下、在寿命内提供装备能力；装备本身不带来享受或休闲分
+    parameters:
+      - {id: national_category_price, meaning_zh: 装备类别的全国价格, unit: USD_2024, support: 正数, prior: {kind: point}, source: equipment_category_v1, city_updatable: false}
+      - {id: goods_spatial_factor, meaning_zh: 商品类空间换算系数（intake）, unit: 倍, support: 正数, prior: {kind: city_evidence}, source: rpp_goods_spatial_adjustment@1, city_updatable: true}
+      - {id: retail_correction, meaning_zh: 同规格零售价相对基础预测的对数比值 δ, unit: 对数比值, support: 实数, prior: {kind: normal, mean: 0, sd: log(1.5)}, source: retail_correction_lognormal_v1, city_updatable: true}
+    families:
+      - {family: hobby_equipment, label_zh: 球拍与吉他, id_prefixes: [durable.tennis, durable.acoustic],
+         why_no_quotes_zh: 没有同规格的本地直接报价}
+    variation_vs_uncertainty_zh: 价格是全国类别设定 × 城市商品系数；寿命是共同设定
+    model_support_zh: 装备能力只在持有期内有效；寿命内不建模随机损坏
+
+  - block: activities
+    label_zh: 爱好活动（五个支持类别）
+    domains: [activity]
+    legal_combinations_zh: 每个活动方案按次参加，时长用方案规定的时长；有要求的装备能力才能参加；芝加哥公园管理局的整期课程保留日期、年龄与报名限制，现在需要 E1 扩展
+    parameters:
+      - {id: template_settings, meaning_zh: 老师小时、人数、场地费率与器材材料设定, unit: 小时 / 人 / USD_2024, support: 正数, prior: {kind: point}, source: activity_template_v1, city_updatable: false}
+      - {id: instructor_wages, meaning_zh: 老师对应职业的都会区中位时薪, unit: USD_2024_LOCAL/小时, support: 正数, prior: {kind: city_evidence}, source: OEWS 2024 年 5 月, city_updatable: true}
+      - {id: rpp_all_and_goods, meaning_zh: RPP 总水平（场地）与商品类换算系数（器材）, unit: 指数 / 倍, support: 正数, prior: {kind: city_evidence}, source: BEA RPP 2023、rpp_goods_spatial_adjustment@1, city_updatable: true}
+      - {id: venue_presence, meaning_zh: 本城 OSM 里看得到相应场所才提供模型活动, unit: 处, support: 非负整数, prior: {kind: city_evidence}, source: OSM（主城市边界内）, city_updatable: true}
+      - {id: retail_correction, meaning_zh: 同规格零售价相对基础预测的对数比值 δ, unit: 对数比值, support: 实数, prior: {kind: normal, mean: 0, sd: log(1.5)}, source: retail_correction_lognormal_v1, city_updatable: true}
+    families:
+      - {family: model_activity_session, label_zh: 模型活动（按次）, id_prefixes: [experience.], exclude_prefixes: [experience.cpd.],
+         why_no_quotes_zh: 芝加哥公园管理局的真实价格是整期报名（规格不同），不与按次的模型方案合并；其他城市没有同规格的本地直接报价}
+      - {family: cpd_program_session, label_zh: 芝加哥公园管理局整期课程（真实报价）, id_prefixes: [experience.cpd.], direct_quotes: true,
+         why_no_quotes_zh: 价格本身就是直接报价；日期窗口、整期报名与年龄资格要 E1 扩展后才能执行}
+    variation_vs_uncertainty_zh: 方案之间的差异是类别、时长与是否付费；高价授课不自动得到更多休闲分（评分只读参与小时与兴趣匹配）
+    model_support_zh: 只有完成的参与按小时计休闲分；免费方案支配付费方案时如实报告（activity_dominance），不为付费方案新增奖励
 
 # ============================================================================ 食品
 food:
@@ -65,28 +160,35 @@ food:
     "711415": {fdc_id: "167762", note: 草莓}
   burden_per_hour: 0.5
   shopping_hours_per_week: 2
-  # 自己做的完整方案：一个篮子、21 餐；新鲜餐数与每餐做饭分钟是设定（food_plan_composition_v1）
-  home_plans:
-    - {plan: home_staples, basket: staples_home, fresh_meals_per_week: 4, minutes_per_meal: 20,
-       label: 自己做·主食为主, quality: 米面、整鸡、鸡蛋、土豆为主，按热量补齐到一个人一周的量}
-    - {plan: home_varied, basket: varied_home, fresh_meals_per_week: 10, minutes_per_meal: 25,
-       label: 自己做·荤素搭配, quality: 牛肉、鸡胸、奶酪、酸奶与蔬果搭配，不够的热量用主食补齐}
-    - {plan: home_fresh, basket: fresh_protein_home, fresh_meals_per_week: 17, minutes_per_meal: 30,
-       label: 自己做·鲜肉蔬果较多, quality: 鸡胸、牛排、草莓、生菜较多，不够的热量用主食补齐}
-  # 家里做 + 外送 / 外食的混合方案：家里部分用 varied 篮子补齐后的一周费用 × 家里餐数 ÷ 21（food_home_share_by_meals_v1）
-  mixed_plans:
-    - {plan: cook_delivery, home_basket: varied_home, home_meals: 17, home_fresh: 8, minutes_per_meal: 25,
-       out_mode: delivery, out_meals: 4, out_fresh: 4, label: 家里做 + 每周 4 顿外送}
-    - {plan: cook_dine, home_basket: varied_home, home_meals: 14, home_fresh: 7, minutes_per_meal: 25,
-       out_mode: dine_out, out_meals: 7, out_fresh: 7, label: 家里做 + 每周 7 顿外食}
+  # 完整每周 21 餐的方案族（E3B 映射修正）：三个篮子各自的新鲜餐数与每餐做饭分钟沿用共同设定（food_plan_composition_v1）。
+  # 家里做的餐数取共同网格 home_meals_grid；其余餐（21 − 家里做）按 away_modes 之一：全部堂食、全部外送、两者各半；外面部分
+  # 只用一个明确主菜系（cuisine_order 里的一个），家里部分是家常。家里做 21 顿时没有外面部分，三种方式与菜系退化成同一个方案，
+  # 只留一个。新鲜餐按组成比例（food_fresh_by_basket_share_v1）：每个组成的新鲜餐 = 餐数 × 篮子新鲜餐数 ÷ 21，外食不自动算新鲜。
+  plan_baskets:
+    - {key: staples, basket: staples_home, fresh_meals_per_week: 4, minutes_per_meal: 20,
+       label: 主食为主, quality: 米面、整鸡、鸡蛋、土豆为主，按热量补齐到一个人一周的量}
+    - {key: varied, basket: varied_home, fresh_meals_per_week: 10, minutes_per_meal: 25,
+       label: 荤素搭配, quality: 牛肉、鸡胸、奶酪、酸奶与蔬果搭配，不够的热量用主食补齐}
+    - {key: fresh, basket: fresh_protein_home, fresh_meals_per_week: 17, minutes_per_meal: 30,
+       label: 鲜肉蔬果较多, quality: 鸡胸、牛排、草莓、生菜较多，不够的热量用主食补齐}
+  home_meals_grid: [0, 3, 7, 14, 21]
+  away_modes: [dine_out, delivery, half]
+  # 外食统一成本代理（food_away_cost_proxy_v1，共同探索假设，不是已验证的零售价）：每顿 = 篮子补齐后每周花费 ÷ 21
+  # + 厨房 0.25 小时 × 厨师中位时薪 × 人工费用倍率 + 场地及其他 2 美元（全国基准）× 其他服务 RPP ÷ 100；外送每顿再加
+  # 0.2 小时 × 配送司机中位时薪 × 人工费用倍率。销售税、平台费与小费没有单列：不另加，记在机会属性 taxes_fees_tips 里。
+  away_cost:
+    cook_soc: 35-2014
+    delivery_soc: 53-3033
+    kitchen_hours_per_meal: 0.25
+    venue_other_per_meal_usd: 2
+    delivery_hours_per_meal: 0.2
   dining:
-    # 每顿外食的平均花费 = CE 都会区每户“在外饮食”年支出（2023–24 名义）× CPI 换到 2024 年平均 ÷ 每户人数 ÷ 52 ÷ 每人每周外食餐数
-    meals_away_per_person_week: 3
     dine_out_hours_per_meal: 1.25
     delivery_hours_per_meal: 0.25
-    # 菜系只在本城 OSM 的 amenity=restaurant 里至少有 min_restaurants 家写了这个菜系标签时提供（只数 restaurant：旧金山只有这一类）
+    # 完整菜系词表（产品资料包的外食菜系）每个都提供；本城 OSM amenity=restaurant 里写了这个菜系标签的不到 min_restaurants
+    # 家，只说明缺少供应证据：照样提供，按共同可得假设（food_cuisine_common_availability_v1）标明，不冒充某家餐馆的报价。
     min_restaurants: 20
-    max_cuisines_per_city: 6
+    cuisine_order: [chinese, italian, mexican, japanese, indian, thai, korean, vietnamese, mediterranean]
     osm_cuisine_tags:
       chinese: [chinese]
       italian: [italian]
@@ -220,6 +322,9 @@ activities:
        label: 吉他小班课（一次）, quality: 四人小班 1 小时，要自己带吉他；往返约 45 分钟}
     - {template: guitar_practice, category: music, venue: null, participation_hours: 1, overhead_hours: 0,
        requires: [guitar_playable], free: true, label: 在家练吉他（一次 1 小时）, quality: 在家自己练，不收费；需要一把能弹的吉他}
+    # 自主参与路径（E3B 映射修正 §4.2）：不用器械、不用场地、不收费；时长按这个方案规定的 1 小时，不另造半小时或两小时版本
+    - {template: bodyweight_workout, category: fitness, venue: null, participation_hours: 1, overhead_hours: 0.25, free: true,
+       label: 无器械锻炼（一次 1 小时）, quality: 在家或附近空地做徒手训练、跑步或快走 1 小时，不收费、不用器械；换衣与洗澡约 15 分钟}
     - {template: art_class, category: arts_culture, venue: arts_centre, soc: 25-3021, instructor_hours: 2, participants: 10,
        venue_per_participant_hour: 4, materials_usd_2024_national: 8, participation_hours: 2, overhead_hours: 0.75,
        label: 绘画课（一次）, quality: 十人班 2 小时，含本次材料；往返约 45 分钟}
@@ -259,7 +364,7 @@ assumptions:
     basis_zh: 资料里的能量（nutrient 1008，千卡/100 克）与份量克重；对应关系是本配置写定的；不扣骨头、果皮等不可食部分（FDC 的 CSV 没有可食比例），所以整鸡、香蕉、橙子、草莓、生菜、番茄的热量偏高、补齐的主食偏少
   - id: food_plan_composition_v1
     nature: assumption
-    statement_zh: 每个方案的每周新鲜餐数与每顿做饭分钟（food.home_plans / mixed_plans），外食与外送的餐都按新鲜餐计（与合成样例 SC-25 相同的口径）
+    statement_zh: 三个篮子各自的每周新鲜餐数（主食为主 4、荤素搭配 10、鲜肉蔬果较多 17，按 21 餐计）与每顿做饭分钟（20、25、30），见 food.plan_baskets；所有方案共用
     basis_zh: 篮子是“主食为主 / 荤素搭配 / 鲜肉蔬果较多”的设定，新鲜餐数按篮子里生鲜食材的多少写定；量级核对：BLS ATUS 2025 年平均，做饭的人每天花 1.09 小时在做饭与收拾上（见 food_time_check_v1）
   - id: food_shopping_hours_v1
     nature: assumption
@@ -267,21 +372,30 @@ assumptions:
     basis_zh: BLS ATUS 2025 年平均，购物的人每天 0.87 小时购买消费品（不只是食品）；只作量级
   - id: food_home_share_by_meals_v1
     nature: rule
-    statement_zh: 混合方案里家里部分的费用 = 同一篮子补齐后的一周费用 × 家里餐数 ÷ 21
-  - id: fafh_meals_per_person_week_v1
+    statement_zh: 方案里家里部分的费用 = 同一篮子补齐后的一周费用 × 家里餐数 ÷ 21；家里餐数取共同网格 0、3、7、14、21
+  - id: food_fresh_by_basket_share_v1
+    nature: rule
+    statement_zh: 每个组成的新鲜餐 = 这一组成的每周餐数 × 篮子新鲜餐数 ÷ 21（家里与外面同一比例），四舍五入到 0.01；外食与外送不自动算新鲜
+    basis_zh: 外食的食材口径就是所用篮子（food_away_cost_proxy_v1），新鲜程度跟着篮子走；没有餐馆新鲜度资料
+  - id: food_away_cost_proxy_v1
     nature: assumption
-    value: 每人每周 3 顿在外饮食
-    basis_zh: 没有公开的都会区“每人外食餐数”资料；CE 的在外饮食支出含零食与饮品，除以这个数得到的是“平均每顿外食花费”，不是菜单价；同一个数用于六城，城市差异只来自 CE
-  - id: fafh_delivery_same_average_v1
-    nature: assumption
-    statement_zh: 外送的一顿按同一“平均每顿外食花费”计；配送费与小费没有资料，不另加（terms 写 unknown）
+    statement_zh: 外食一顿 = 所用篮子补齐后每周花费 ÷ 21 + 厨房 0.25 小时 × 厨师（35-2014）都会区中位时薪 × 人工费用倍率 2.0 + 场地及其他 2 美元（全国基准）× 其他服务 RPP ÷ 100；外送每顿再加 0.2 小时 × 配送司机（53-3033）中位时薪 × 2.0
+    basis_zh: 共同探索假设，六城同一公式，城市差异只来自食材价、工资与 RPP；不是已验证的菜单价。销售税、平台费与小费没有单列，不另加（机会属性 taxes_fees_tips = not_itemized）。CE 都会区的在外饮食支出只做量级对照（food_check）
   - id: dining_hours_v1
     nature: assumption
     value: 外食每顿 1.25 小时（含往返），外送每顿 0.25 小时（下单与收取）
-  - id: cuisine_presence_threshold_v1
+  - id: cuisine_evidence_threshold_v2
     nature: assumption
-    value: 本城至少 20 家 OSM restaurant 写了这个菜系标签；每城最多 6 个菜系（按家数从多到少）
-    basis_zh: 只有确实看得到的菜系才提供对应外食方案；家数只说明存在，不说明质量或价格
+    value: 本城至少 20 家 OSM restaurant 写了这个菜系标签才算“有供应证据”；只用来标明证据，不再决定提供与否，也不截取前几名
+    basis_zh: 家数只说明存在，不说明质量或价格；OSM 的覆盖不完整
+  - id: food_cuisine_common_availability_v1
+    nature: assumption
+    statement_zh: 产品资料包外食菜系词表里的 9 个菜系在六个都会区都按共同可得提供；本城 OSM 不到证据门槛的方案在机会里标明（cuisine_supply_evidence = common_availability_assumed），不冒充某家餐馆的报价
+    basis_zh: OSM 未发现只表示缺少供应证据，不等于买不到；用同一个成本代理计价，不制造城市差异
+  - id: retail_correction_lognormal_v1
+    nature: assumption
+    statement_zh: 同规格零售价相对基础成本预测的修正 δ = log(实际价 ÷ 基础预测价)，共同先验 N(0, log(1.5)²)；同规格直接报价按供应商去重、每家一个对数比值；本地均值观测方差 max(s²/n, log(1.1)²)，只有一家时 log(1.5)²；正态共轭更新，执行价 = 基础预测 × exp(后验均值)
+    basis_zh: 方差是登记的探索设定，不是从报价估计的；现在六城没有合格的同规格直接报价，所以全部“未发生本地报价更新”，执行价就是基础预测（标为估计）
   - id: home_style_cuisine_v1
     nature: assumption
     statement_zh: 自己做的饭菜系按“家常”（home_style）计

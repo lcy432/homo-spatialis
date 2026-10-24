@@ -8,7 +8,7 @@
 # 记，不写行业，也不从行业推职业。
 
 version: occupations-us-v1
-intake_build_id: 562c32339bbae67fd1917b7ac67f4b5b28f55d07e88a8c78ee6fe371ed863691
+intake_build_id: 35667f4101a71c0e5ea6c1aaa8e5f45cd83c825d6b1393bde1104d3d571a96b7
 numeraire: USD_2024_LOCAL
 scheme: SOC2018
 #: 能力定义的来源日期：intake 获取 EP 表 5.4（education.xlsx）的日子（表本身没有在冻结库里记版本年份）
@@ -32,17 +32,14 @@ experience:
   "Less than 5 years": {min_years: 1}
   "5 years or more": {min_years: 5}
 
-# 工作安排（job_arrangement_v1）：每周工时取 intake 工时表（都会区 × SOC 大类的中位数）；每月工时 = 每周 × 52 ÷ 12，四舍五入到
-# 0.01；每周 5 个工作日，每月工作日 = 5 × 52 ÷ 12 四舍五入到整数（22）；hybrid 的到岗日 = 工作日 × 3 ÷ 5 四舍五入；薪酬 = OEWS
-# 年薪 × 每周工时 ÷ 40（年薪是时薪 × 2,080 = 时薪 × 40 × 52），四舍五入到分。
+# 工作安排（job_arrangement_v1）：每周工时来自通勤资料里同一批人员记录的（通常每周工时 × 就业片区）联合分布（E3B 映射修正，不再
+# 压成中位数）；每月工时 = 每周 × 52 ÷ 12，四舍五入到 0.01；每周 5 个工作日，每月工作日 = 5 × 52 ÷ 12 四舍五入到整数（22）——低工时
+# 表示每天工作短，不减少到岗天数；hybrid 的到岗日 = 工作日 × 3 ÷ 5 四舍五入；薪酬 = 年薪支持点 × 每周工时 ÷ 40（年薪是时薪 × 2,080），
+# 四舍五入到分。年薪支持点见 job_wage_support_v1。
 arrangement:
   days_per_week: 5
   hybrid_onsite_share: "3/5"
   burden_per_work_hour: 1.0
-  tiers:
-    - {tier: p25, field: annual_wage_p25, label: 工资在本职业 25 分位}
-    - {tier: p50, field: annual_wage_median, label: 工资在本职业中位数}
-    - {tier: p75, field: annual_wage_p75, label: 工资在本职业 75 分位}
 
 # 培训（ipeds_training_v1）：IPEDS 按项目报告学费的院校项目；CIP → SOC 对照到范围内需要“中学后非学位证书”的职业，就授予那个职业的
 # award 能力。只收全日制完成月数是整年的项目（E1 的培训按整年计）；每周 24 小时（联邦对按学时计的全日制定义的下限，
@@ -129,7 +126,14 @@ assumptions:
     statement_zh: 确认的现职 X 只说明“在 X 工作过”：授予 X 列为相关的职业的经验能力（年数够时），不授予学历、证书或执照；开局岗位仍要求用户确认 X 的入职能力
   - id: job_arrangement_v1
     nature: rule
-    statement_zh: 每周工时取工时表；每月 = 每周 × 52 ÷ 12（0.01）；每周 5 天、每月 22 个工作日；薪酬 = 年薪 × 每周工时 ÷ 40（分）
+    statement_zh: 每周工时取联合分布里这一点的工时；每月 = 每周 × 52 ÷ 12（0.01）；每周 5 天、每月 22 个工作日（低工时 = 每天工作短）；薪酬 = 年薪 × 每周工时 ÷ 40（分）
+  - id: job_wage_support_v1
+    nature: rule
+    statement_zh: OEWS p10、p25、p50、p75、p90 之间分段线性的分位函数，在 p10–p90 里切 20 个等概率区间、取每个区间中点的年薪（每点概率 0.04）；两端共 20% 是未识别，不生成尾部；有分位没有发布时，落在那一段的区间也是未识别
+  - id: job_wage_independent_of_hours_area_v1
+    nature: assumption
+    statement_zh: 给定职业后，工资与（每周工时 × 就业片区）条件独立：两者分别来自 OEWS 与 ACS PUMS，拼接是登记的假设，不是观测到的完整联合关系
+    basis_zh: OEWS 不给工时与工作地点，PUMS 的 WAGP 是过去一年的收入（不是岗位工资）；两套资料没有共同的个人记录
   - id: job_work_mode_v1
     nature: assumption
     statement_zh: 每个职业的到岗方式（supported.work_mode）；hybrid 每 5 个工作日到岗 3 天
@@ -138,9 +142,9 @@ assumptions:
     nature: assumption
     value: 每工时负担 1.0
     basis_zh: 与合成样例的文员相同；负担是 E1 的合成尺度
-  - id: start_job_median_v1
+  - id: start_job_median_v2
     nature: rule
-    statement_zh: 开局岗位 = 开局城市里用户确认职业的中位数档；职业不在范围或本城没有这个职业的工资资料就拒绝并说明原因，不替换
+    statement_zh: 开局岗位 = 开局城市里用户确认职业的 OEWS 中位年薪；每周工时与就业片区取这一职业大类联合分布里权重最大的一点（只用于统一开局，不压缩候选池）；职业不在范围或本城没有工资资料就拒绝并说明原因，不替换
   - id: ipeds_training_v1
     nature: assumption
     statement_zh: IPEDS 项目经 CIP → SOC 对照授予范围内职业的 award 能力；只收整年项目；每周 24 小时（34 CFR 668.2 全日制下限）；开课月份不限

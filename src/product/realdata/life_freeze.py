@@ -19,12 +19,15 @@ from common.life_contracts import (
     has_decimals,
 )
 from ledger.life_catalog import internal_leak_problems
+from product.realdata.a_blocks import city_blocks
 from product.realdata.life_items import (
     ITEMS_VERSION,
     STATUSES,
     Ctx,
     Item,
     Report,
+    activity_dominance,
+    block_evidence,
     chicago_programs,
     contexts,
     device_failure,
@@ -35,7 +38,14 @@ from product.realdata.life_items import (
     services,
     template_activities,
 )
-from product.realdata.occupations import OCCUPATIONS_VERSION, Scope, jobs, start_jobs, training
+from product.realdata.occupations import (
+    JOB_ATTRIBUTE_KEYS,
+    OCCUPATIONS_VERSION,
+    Scope,
+    job_templates,
+    start_jobs,
+    training,
+)
 
 FROZEN_SCHEMA = "e3b-life-items-frozen-v1"
 
@@ -82,9 +92,10 @@ def item_problems(o: LifeOpportunity, vocab: dict[str, list[str]]) -> list[str]:
 
 def compile_city(
     ctx: Ctx, occ: dict[str, Any], baskets: dict[str, Any], scope: Scope
-) -> tuple[list[Item], Report, dict[str, Any]]:
+) -> tuple[list[Item], Report, dict[str, Any], list[dict[str, Any]]]:
+    """一城的生活机会与岗位模板。岗位是模板（职业 × 年薪支持点），工时与就业片区在整合时拼上（``job_wage_support_v1``）。"""
     report = Report()
-    job_items = jobs(ctx, occ, scope, report)
+    templates = job_templates(ctx, occ, scope, report)
     items = [
         *food_plans(ctx, baskets, report),
         *services(ctx, report),
@@ -92,7 +103,6 @@ def compile_city(
         *equipment(ctx),
         *template_activities(ctx, report),
         *chicago_programs(ctx, report),
-        *job_items,
         *training(ctx, occ, scope, report),
     ]
     ids = Counter(i.opportunity.opportunity_id for i in items)
@@ -103,7 +113,7 @@ def compile_city(
     bad = [i.status for i in items if i.status not in STATUSES]
     if problems or bad:
         raise FreezeError(f"{ctx.cbsa}: {(problems + bad)[:8]}")
-    return items, report, start_jobs(ctx, occ, scope, job_items)
+    return items, report, start_jobs(ctx, occ, scope, templates), templates
 
 
 def _cheapest_food(items: list[Item]) -> dict[str, Any] | None:
@@ -194,14 +204,23 @@ def freeze(
         "abilities": abilities,
         "device_failure": device_failure(items_cfg),
         "atus_magnitude_check": sl["atus"],
+        # 岗位在资料包组装时由模板 × 联合分布展开：展开要用的工作安排与职业分类方案一起冻结在这里
+        "job_rules": {
+            "scheme": occ_cfg["scheme"],
+            "arrangement": occ_cfg["arrangement"],
+            "mapping_version": items_cfg["mapping_version"],
+        },
         "assumptions": _assumption_registry(items_cfg, occ_cfg),
         "cities": {},
     }
     files: dict[str, dict[str, Any]] = {}
     attribute_keys: set[str] = set()
     for ctx in contexts(items_cfg, sl):
-        items, report, starts = compile_city(ctx, occ_cfg, baskets, scope)
-        missing = sorted({a for i in items for a in i.assumptions} - used)
+        items, report, starts, templates = compile_city(ctx, occ_cfg, baskets, scope)
+        referenced = {a for i in items for a in i.assumptions} | {
+            a for tp in templates for a in tp["assumptions"]
+        }
+        missing = sorted(referenced - used)
         if missing:
             raise FreezeError(f"{ctx.cbsa}: 机会引用了没有登记的设定 {missing}")
         main = [
@@ -224,7 +243,15 @@ def freeze(
             "identities": identities,
             "counts": counts(ctx, items, report),
             "food_check": food_check(ctx, baskets),
+            "a_blocks": city_blocks(
+                items_cfg["a_blocks"],
+                items=items,
+                report_entries=report.entries,
+                evidence=block_evidence(ctx),
+            ),
+            "activity_dominance": activity_dominance(items),
             "start_jobs": starts,
+            "job_templates": templates,
             "minimum_food_candidate": _cheapest_food(items),
             "not_generated": report.entries,
             "items": main,
@@ -249,6 +276,7 @@ def freeze(
         }
         attribute_keys |= {k for i in items for k in i.opportunity.attributes}
     # 目录要求属性键在生活输入里声明（``LifeBundle.attribute_keys``）：这里列出用到的全部键，整合时一起声明
+    attribute_keys |= set(JOB_ATTRIBUTE_KEYS)
     manifest["vocabulary"] = {**manifest["vocabulary"], "attribute_keys": sorted(attribute_keys)}
     manifest["content_identity"] = canonical_fingerprint(
         {k: v for k, v in manifest.items() if k != "content_identity"}

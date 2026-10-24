@@ -5,9 +5,13 @@
 * **能力**只有三类来源，都是结构化的：学历（“至少达到”某级，用户确认）、职业专属的中学后非学位证书（``soc_<职业>_award``，用户确认或
   CIP → SOC 对应的 IPEDS 项目授予）、相关职业经验（``soc_<职业>_experience``，确认的经历按相关职业名单与年数）。不从职称或自由文字推
   学位、证书或执照。
-* **岗位**：每个支持的职业 × 都会区，按 OEWS 25 / 50 / 75 分位年薪各一个；工作安排按工时表与登记的到岗方式；``area`` 不写，带 SOC，
-  整合时按通勤会话的就业片区补上。职业与行业分开：只按职业记，不写行业。
-* **开局**：确认职业的中位数档；不在范围、本城没有资料就拒绝并说明原因，不替换成别的职业。
+* **岗位**（E3B 映射修正，``job_wage_support_v1``）：每个支持的职业 × 都会区写一份岗位模板——OEWS p10、p25、p50、p75、p90 之间的分段
+  线性分位函数在 p10–p90 里切 20 个等概率区间、取每个区间中点的年薪（每点概率 0.04）；两端共 20% 是未识别，不生成尾部。工时与
+  就业片区不在这里定：整合时与通勤资料里同一批人员记录的（通常每周工时 × 就业片区）联合分布拼起来（给定职业后条件独立，登记的假设
+  ``job_wage_independent_of_hours_area_v1``），薪酬沿用“年薪 × 每周工时 ÷ 40”，每周工作日与混合到岗比例不变（低工时 = 每天工作短）。
+  职业与行业分开：只按职业记，不写行业。
+* **开局**：确认职业的中位工资（OEWS p50）；工时与片区取这一职业大类联合分布里权重最大的一点（只用于统一开局，不压缩候选池）；不在范围、
+  本城没有资料就拒绝并说明原因，不替换成别的职业。
 """
 
 from __future__ import annotations
@@ -39,7 +43,7 @@ from product.realdata.life_items import (
     round_to,
 )
 
-OCCUPATIONS_VERSION = "e3b-occupations-v1"
+OCCUPATIONS_VERSION = "e3b-occupations-v2"
 
 
 def _key(soc: str) -> str:
@@ -217,92 +221,187 @@ def _arrangement(occ: dict[str, Any], mode: str, weekly: Fraction, burden: float
     )
 
 
-def jobs(ctx: Ctx, occ: dict[str, Any], scope: Scope, report: Report) -> list[Item]:
-    a = occ["arrangement"]
-    out: list[Item] = []
+#: 岗位机会的属性键（``job_opportunity`` 写的；岗位在资料包组装时展开，冻结清单要先声明这些键）
+JOB_ATTRIBUTE_KEYS = (
+    "soc_title",
+    "employment",
+    "entry_education",
+    "related_experience",
+    "on_the_job_training",
+    "hours_area_level",
+    "employer",
+)
+
+#: OEWS 年薪分位（职业 × 都会区）：分位点与切片里的字段名。
+WAGE_KNOTS = (
+    (Fraction(1, 10), "annual_wage_p10"),
+    (Fraction(1, 4), "annual_wage_p25"),
+    (Fraction(1, 2), "annual_wage_median"),
+    (Fraction(3, 4), "annual_wage_p75"),
+    (Fraction(9, 10), "annual_wage_p90"),
+)
+#: p10–p90 里等概率区间的个数：每个区间 0.04 的概率，取中点（0.12、0.16、……、0.88）。
+WAGE_INTERVALS = 20
+
+
+def wage_support(w: dict[str, Any]) -> dict[str, Any]:
+    """OEWS 分位 → 年薪支持点（``job_wage_support_v1``）：在 (0.10, p10)、(0.25, p25)、(0.50, p50)、(0.75, p75)、(0.90, p90) 之间分段线性，
+    p10–p90 切 20 个等概率区间，取每个区间中点的分位值。某一段的端点没有发布（* 或 #）时，落在这一段里的区间都是未识别；两端
+    （p10 以下、p90 以上）共 20% 也是未识别——不自行生成尾部。返回支持点与未识别的概率。"""
+    knots = [(q, w.get(f)) for q, f in WAGE_KNOTS]
+    step = Fraction(8, 10) / WAGE_INTERVALS
+    points, missing = [], Fraction(0)
+    for k in range(WAGE_INTERVALS):
+        mid = Fraction(1, 10) + step * k + step / 2
+        i = next(j for j in range(len(knots) - 1) if knots[j][0] <= mid <= knots[j + 1][0])
+        (q0, a0), (q1, a1) = knots[i], knots[i + 1]
+        if a0 is None or a1 is None:
+            missing += step
+            continue
+        annual = dec(a0) + (dec(a1) - dec(a0)) * (mid - q0) / (q1 - q0)
+        points.append(
+            {
+                "k": k,
+                "quantile": f"{float(mid):.2f}",
+                "mass": str(step),
+                "annual": f"{round_to(annual, 2):.2f}",
+            }
+        )
+    return {
+        "points": points,
+        "unidentified_tails": "1/5",
+        "unidentified_inside": str(missing),
+        "rule": "job_wage_support_v1",
+    }
+
+
+def job_templates(
+    ctx: Ctx, occ: dict[str, Any], scope: Scope, report: Report
+) -> list[dict[str, Any]]:
+    """每个支持的职业一份岗位模板：OEWS 年薪支持点、资格、到岗方式与来源。工时与就业片区在整合时拼上（见模块说明）。"""
+    out: list[dict[str, Any]] = []
     for soc, s in scope.supported.items():
         w = ctx.wage(soc)
-        hours = ctx.metro["hours"].get(soc.split("-")[0])
         if w is None:
             report.add("job", "gap", soc, "本城 OEWS 没有这个职业")
-            continue
-        if hours is None:
-            report.add("job", "gap", soc, "工时表没有这个职业大类在本城的值")
             continue
         if w["wage_basis"] != "annual_and_hourly":
             report.add("job", "gap", soc, f"OEWS 工资口径是 {w['wage_basis']}，不能按工时换算薪酬")
             continue
-        weekly = dec(hours["median_weekly_hours"])
-        arr = _arrangement(occ, s["work_mode"], weekly, a["burden_per_work_hour"])
-        need = scope.required(soc)
+        support = wage_support(w)
+        if not support["points"]:
+            report.add("job", "gap", soc, "OEWS 没有发布能构成工资支持点的分位")
+            continue
+        if support["unidentified_inside"] != "0":
+            report.add(
+                "job",
+                "gap",
+                f"{soc}.wage_inside",
+                f"OEWS 有分位没有发布：p10–p90 里 {support['unidentified_inside']} 的概率未识别，不补",
+            )
         ep = scope.ep[soc]
-        for tier in a["tiers"]:
-            annual = w.get(tier["field"])
-            if annual is None:
-                report.add(
-                    "job", "gap", f"{soc}.{tier['tier']}", "OEWS 没有发布这一档工资（* 或 #）"
-                )
-                continue
-            pay = dec(annual) * weekly / 40
-            o = LifeOpportunity(
-                opportunity_id=f"{ctx.key}.job.{soc}.{tier['tier']}",
-                category="job",
-                label=f"{s['label']}·{tier['label']}"[:120],
-                unit="position",
-                quality=(
-                    f"{w['title']}；每周约 {weekly:g} 小时、每月 {arr.workdays_per_month} 个工作日、到岗 {arr.onsite_days_per_month} 天"
-                    + (f"；要求 {', '.join(need)}" if need else "；没有资格要求")
-                )[:280],
-                spec={
-                    "work_mode": s["work_mode"],
-                    "weekly_hours": float(weekly),
-                    "wage_position": tier["tier"],
-                },
-                attributes={
-                    "soc_title": w["title"],
-                    "employment": int(w["employment"]) if w.get("employment") else "unknown",
+        out.append(
+            {
+                "soc": soc,
+                "soc_major": soc.split("-")[0],
+                "label": s["label"],
+                "title": w["title"],
+                "work_mode": s["work_mode"],
+                "eligibility": [f"ability:{x}" for x in scope.required(soc)],
+                "requires": list(scope.required(soc)),
+                "employment": int(w["employment"]) if w.get("employment") else None,
+                "median_annual": w.get("annual_wage_median"),
+                "wage": support,
+                "record_id": w["record_id"],
+                "conversion": w.get("conversion"),
+                "geography_scope": ctx.scope,
+                "ep": {
                     "entry_education": ep["typical_entry_education"],
                     "related_experience": ep["related_work_experience"],
                     "on_the_job_training": ep["typical_on_the_job_training"],
-                    "group_wfh_share": float(dec(hours["wfh_share"])),
-                    "hours_table_level": hours["level"],
-                    "employer": "not_identifiable",
                 },
-                availability="available",
-                compensation=quote(pay, ctx.numeraire, "per_year", "position-year"),
-                occupation=OccupationId(scheme=occ["scheme"], code=soc),
-                eligibility=tuple(f"ability:{x}" for x in need),
-                duration=DurationSpec(kind="ongoing_service"),
-                resource=ResourceProfile(
-                    basis="job",
-                    job=arr,
-                    note="工资、工时与到岗日是这个岗位固定的，不能自己改；生大病的月份请病假、没有工资",
-                ),
-                source=ctx.estimated(
-                    "2024-05-31",
-                    [w["record_id"], hours["table_id"], "bls_ep_education"],
-                    f"OEWS {tier['tier']} 年薪 {annual}（{w['conversion']}）× 每周 {weekly:g} 小时 ÷ 40，四舍五入到分；"
-                    f"每月工时 = 每周 × 52 ÷ 12；到岗方式是登记的设定",
-                ),
-            )
-            out.append(
-                Item(
-                    "job",
-                    o,
-                    "needs_area" if arr.onsite_days_per_month > 0 else "executable",
-                    (
-                        "job_scope_v1",
-                        "ep_typical_education_as_requirement_v1",
-                        "job_arrangement_v1",
-                        "job_work_mode_v1",
-                        "job_burden_v1",
-                        *(("related_experience_v1",) if scope.experience_of(soc) else ()),
-                    ),
-                    (w["record_id"], hours["table_id"]),
-                    ("work_area_assigned_at_integration",) if arr.onsite_days_per_month > 0 else (),
-                )
-            )
+                "assumptions": [
+                    "job_scope_v1",
+                    "ep_typical_education_as_requirement_v1",
+                    "job_arrangement_v1",
+                    "job_work_mode_v1",
+                    "job_burden_v1",
+                    "job_wage_support_v1",
+                    "job_wage_independent_of_hours_area_v1",
+                    *(("related_experience_v1",) if scope.experience_of(soc) else ()),
+                ],
+            }
+        )
     return out
+
+
+def job_opportunity(
+    tpl: dict[str, Any],
+    occ: dict[str, Any],
+    *,
+    annual: Decimal,
+    weekly_hours: int,
+    area: str | None,
+    opportunity_id: str,
+    wage_label: str,
+    numeraire: str,
+    mapping_version: str,
+    hours_level: str,
+) -> LifeOpportunity:
+    """一份可执行的岗位：模板 × 年薪支持点 × （每周工时，就业片区）。薪酬 = 年薪 × 每周工时 ÷ 40（四舍五入到分）；每月工时 =
+    每周 × 52 ÷ 12；每周工作日与混合到岗比例照配置（低工时 = 每天工作短，不减少到岗天数）。"""
+    a = occ["arrangement"]
+    weekly = Fraction(weekly_hours)
+    arr = _arrangement(occ, tpl["work_mode"], weekly, a["burden_per_work_hour"])
+    pay = Fraction(annual) * weekly / 40
+    need = tpl["requires"]
+    return LifeOpportunity(
+        opportunity_id=opportunity_id,
+        category="job",
+        label=f"{tpl['label']}·{wage_label}"[:120],
+        unit="position",
+        quality=(
+            f"{tpl['title']}；每周约 {weekly_hours} 小时、每月 {arr.workdays_per_month} 个工作日、到岗 "
+            f"{arr.onsite_days_per_month} 天"
+            + (f"；要求 {', '.join(need)}" if need else "；没有资格要求")
+        )[:280],
+        spec={
+            "work_mode": tpl["work_mode"],
+            "weekly_hours": float(weekly_hours),
+            "wage_position": wage_label,
+        },
+        attributes={
+            "soc_title": tpl["title"],
+            "employment": tpl["employment"] if tpl["employment"] is not None else "unknown",
+            "entry_education": tpl["ep"]["entry_education"],
+            "related_experience": tpl["ep"]["related_experience"],
+            "on_the_job_training": tpl["ep"]["on_the_job_training"],
+            "hours_area_level": hours_level,
+            "employer": "not_identifiable",
+        },
+        availability="available",
+        compensation=quote(pay, numeraire, "per_year", "position-year"),
+        occupation=OccupationId(scheme=occ["scheme"], code=tpl["soc"]),
+        eligibility=tuple(tpl["eligibility"]),
+        area=area,
+        duration=DurationSpec(kind="ongoing_service"),
+        resource=ResourceProfile(
+            basis="job",
+            job=arr,
+            note="工资、工时与到岗日是这个岗位固定的，不能自己改；生大病的月份请病假、没有工资",
+        ),
+        source=SourceRecord(
+            kind="estimated",
+            observed_on=_dt.date(2024, 5, 31),
+            geography_scope=tpl["geography_scope"],
+            mapping_version=mapping_version,
+            inputs=(tpl["record_id"], f"commute.hours_area_joint:{hours_level}"),
+            rule=(
+                f"OEWS 年薪 {annual}（{wage_label}）× 每周 {weekly_hours} 小时 ÷ 40 = {round_to(pay, 2)}；每月工时 = 每周 × 52 ÷ 12；"
+                "工时与就业片区来自同一批人员记录的联合分布，与工资在给定职业后条件独立（登记的假设）"
+            )[:280],
+        ),
+    )
 
 
 def training(ctx: Ctx, occ: dict[str, Any], scope: Scope, report: Report) -> list[Item]:
@@ -386,23 +485,24 @@ def training(ctx: Ctx, occ: dict[str, Any], scope: Scope, report: Report) -> lis
 
 
 def start_jobs(
-    ctx: Ctx, occ: dict[str, Any], scope: Scope, job_items: list[Item]
+    ctx: Ctx, occ: dict[str, Any], scope: Scope, templates: list[dict[str, Any]]
 ) -> dict[str, Any]:
-    """开局岗位索引（``start_job_median_v1``）：范围内每个职业 → 本城中位数档的岗位编号，或拒绝原因。"""
-    have = {i.opportunity.opportunity_id: i for i in job_items}
+    """开局岗位索引（``start_job_median_v2``）：范围内每个职业 → 本城的开局岗位编号（中位工资；工时与片区整合时取这一职业大类联合
+    分布里权重最大的一点），或拒绝原因。"""
+    have = {t["soc"]: t for t in templates}
     out: dict[str, Any] = {}
     for soc in scope.supported:
-        oid = f"{ctx.key}.job.{soc}.p50"
-        if oid in have:
+        tpl = have.get(soc)
+        if tpl is not None and tpl.get("median_annual") is not None:
             out[soc] = {
                 "status": "ok",
-                "opportunity_id": oid,
+                "opportunity_id": f"{ctx.key}.job.{soc}.start",
                 "requires_confirmed_abilities": list(scope.required(soc)),
             }
         else:
             out[soc] = {
                 "status": "rejected",
-                "reason_zh": "本城没有这个职业的中位数档岗位（资料缺失），不替换成别的职业",
+                "reason_zh": "本城没有这个职业的中位工资（资料缺失），不替换成别的职业",
             }
     return out
 

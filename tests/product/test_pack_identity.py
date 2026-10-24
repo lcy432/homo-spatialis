@@ -56,7 +56,7 @@ def _bump_nyc_staples(items: Path) -> None:
     body = _read(f)
     for it in body["items"]:
         o = it["opportunity"]
-        if o["opportunity_id"] == "nyc.food.home_staples":
+        if o["opportunity_id"] == "nyc.food.staples.h21":
             assert o["price"]["amount"]["amount"] == 120.24
             o["price"]["amount"]["amount"] = 121.24
     _write(f, body)

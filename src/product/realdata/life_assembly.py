@@ -3,10 +3,12 @@
 
 组装只做确定性的拼接与登记过的规则，不补数：
 
-* **岗位的就业片区**：按通勤资料里“各就业片区的到岗者占比（按 SOC 大类）”取占比最大的片区（登记规则
-  ``job_placement_modal_area_v1``；同一大类的岗位放在同一片区，没有反映同一职业分散在各片区的情况）。
+* **完整候选池与年度菜单分开**（E3B 映射修正，``life_pack``）：住房池 = 目标格 × 完整经验支持点；岗位池 = 职业模板 × 年薪支持点
+  × 职业大类的（每周工时 × 就业片区）联合分布。每份菜单从完整池加权无放回抽 60 个；目录只展开菜单上出现过的，加上最低住房、
+  期末参考住房与各职业的开局岗位。
 * **住房**只留通勤资料里有居住片区的 PUMA；没有片区的照实计数排除。
-* **最低生活**：最低住房 = 最便宜的住房（全部住房都合格：ACS 租住单元是独立住房单元）；最低食品 = 生活机会资料给出的最低食品方案。
+* **最低生活**：最低住房 = 完整池里最便宜的住房（池里都是租金可用、厨卫完整的整套租住单元）；最低食品 = 生活机会资料给出的
+  最低食品方案。
 * **治疗目录**没有真实医疗价格：用登记的共同假设（六城同一个名义价，``treatment_common_assumption_v1``），不制造城市差异。
 * 芝加哥公园管理局的真实活动需要 E1 扩展（日期窗口、整期报名、年龄资格），不放进目录，照实计数。
 """
@@ -29,9 +31,15 @@ from product.realdata import geo
 from product.realdata.fetch import DEFAULT_CACHE, fetch
 from product.realdata.life_pack import (
     PACK_CONFIG,
-    housing_items,
+    Candidate,
+    housing_opportunity,
+    housing_pool,
+    job_from_candidate,
+    job_pool,
     load_pack_config,
-    stratified_menus,
+    menu_size_diagnostics,
+    sampled_menus,
+    start_job_opportunity,
 )
 from product.realdata.pack_inputs import (
     build_identity,
@@ -63,7 +71,7 @@ BASE_LIFE_INPUT = Path("configs/life/synthetic_product.yaml")
 BASE_SCORING = Path("configs/life/scoring_product.yaml")
 BASE_EVALUATION = Path("configs/life/evaluation_product.yaml")
 BASE_FACTS = Path("configs/life/city_facts_product.yaml")
-INTAKE_DB = Path("runs/intake/us-v1/work/freeze/562c32339bbae67f/intake.sqlite")
+INTAKE_DB = Path("runs/intake/us-v1/work/freeze/35667f4101a71c0e/intake.sqlite")
 TREATMENT_PRICES = {
     "minor": 300,
     "major": 2000,
@@ -121,13 +129,6 @@ def city_ref(cbsa: str) -> dict[str, str]:
     return {"country": "US", "scheme": "CBSA2023", "code": cbsa}
 
 
-def modal_work_area(shares: dict[str, Any], soc: str) -> str:
-    """一个职业放在哪个就业片区：它的 SOC 大类到岗者占比最大的片区；没有这一大类就看全体（job_placement_modal_area_v1）。"""
-    table = shares.get("by_soc_major", {}).get(soc[:2]) or shares["all"]
-    rows = table["shares"]
-    return max(sorted(rows), key=lambda a: Decimal(str(rows[a])))
-
-
 @dataclass
 class CityBuild:
     catalog: dict[str, Any]
@@ -135,6 +136,8 @@ class CityBuild:
     excluded: Counter[str] = field(default_factory=Counter)
     #: 期末参考生活的住房（独立审核 F3、F4）：按参考岗位与通勤关系从完整候选池选，与菜单无关
     reference: ReferenceHousing | None = None
+    #: 完整池的质量（pools）与 30 / 60 / 120 菜单大小诊断（只报告）
+    diagnostics: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -203,49 +206,63 @@ def _treatments(key: str, numeraire: str) -> list[dict[str, Any]]:
     return out
 
 
+def _reference_view(c: Candidate) -> dict[str, Any]:
+    """参考住房选择只看片区、月租与居住条件：完整池的逻辑候选不必展开成 E1 机会。"""
+    pt = c.data["point"]
+    return {
+        "opportunity_id": c.opportunity_id,
+        "area": c.area,
+        "price": {"amount": {"amount": float(Decimal(pt["gross_rent"]))}},
+        "spec": {"bedrooms": int(pt["bedrooms"]), "quality_level": int(pt["quality_tier"])},
+    }
+
+
 def assemble_city(
     city: dict[str, Any],
     cfg: dict[str, Any],
     *,
-    candidates: list[dict[str, Any]],
+    cells: list[dict[str, Any]],
+    tables: dict[str, dict[str, Any]],
     puma_counties: dict[str, tuple[str, ...]],
     commute: dict[str, Any],
     items: dict[str, Any],
+    job_rules: dict[str, Any],
     settings_identity: str,
 ) -> CityBuild:
     key, cbsa, numeraire = city["key"], city["cbsa"], cfg["numeraire"]
     out_excluded: Counter[str] = Counter()
-    hb = housing_items(city, cfg, candidates, puma_counties)
-    out_excluded.update({f"housing.{k}": v for k, v in hb.excluded.items()})
     home_areas = {a["area_id"] for a in commute["areas"] if a["kind"] in ("home", "home_work")}
-    housing = []
-    for h in hb.items:
-        if h.area in home_areas:
-            housing.append(h)
-        else:
-            out_excluded["housing.no_commute_area"] += 1
-    weights = {h.opportunity_id: hb.weights[h.opportunity_id] for h in housing}
-    strata = {h.opportunity_id: hb.strata[h.opportunity_id] for h in housing}
+    work_areas = {a["area_id"] for a in commute["areas"] if a["kind"] in ("work", "home_work")}
+    hp = housing_pool(city, cfg, cells, tables, puma_counties, home_areas)
+    out_excluded.update({f"housing.{k}": v for k, v in hp.excluded.items()})
+    if not hp.candidates:
+        raise ValueError(f"{key}: 完整住房池是空的")
+    joint = commute["hours_area_joint"]
+    templates = items["job_templates"]
+    jp = job_pool(city, templates, joint, work_areas)
+    out_excluded.update({f"job.{k}": v for k, v in jp.excluded.items()})
 
-    opps: list[dict[str, Any]] = [h.model_dump(mode="json") for h in housing]
-    shares = commute["work_area_job_shares"]
-    job_weights: dict[str, float] = {}
+    opps: list[dict[str, Any]] = []
     by_domain: Counter[str] = Counter()
     for it in items["items"]:
-        o = copy.deepcopy(it["opportunity"])
         status = it["status"]
-        if status == "needs_area":
-            o["area"] = modal_work_area(shares, o["occupation"]["code"])
-            emp = (o.get("attributes") or {}).get("employment")
-            job_weights[o["opportunity_id"]] = float(emp or 0)
-        elif status == "needs_e1_extension":
+        if status == "needs_e1_extension":
             out_excluded[f"{it['domain']}.needs_e1_extension"] += 1
             continue
-        elif status not in ("executable", "data_unknown"):
+        if status not in ("executable", "data_unknown"):
             out_excluded[f"{it['domain']}.{status}"] += 1
             continue
         by_domain[it["domain"]] += 1
-        opps.append(o)
+        opps.append(copy.deepcopy(it["opportunity"]))
+    starts = []
+    for tpl in sorted(templates, key=lambda x: x["soc"]):
+        o = start_job_opportunity(
+            key, tpl, joint, work_areas, job_rules, numeraire, job_rules["mapping_version"]
+        )
+        if o is None:
+            out_excluded["job.no_start_job"] += 1
+            continue
+        starts.append(o.model_dump(mode="json"))
     opps.append(copy.deepcopy(commute["car_access"]))
     if not any(o["category"] == "training" for o in opps):
         # 加载器要求每种行动类型都有记录（可得、确定不可得或未知）：这城的声明可执行集合里没有培训项目
@@ -276,48 +293,75 @@ def assemble_city(
             }
         )
 
-    years, envs = cfg["simulation_years"], cfg["env_repeats"]
-    menus = stratified_menus(
-        key=key,
-        cbsa=cbsa,
-        category="housing",
-        weights=weights,
-        strata=strata,
-        per_stratum=cfg["menus"]["housing"]["per_stratum"],
-        size=None,
-        years=years,
-        env_repeats=envs,
-        seed=cfg["menus"]["seed"],
-        settings_identity=settings_identity,
-    ) + stratified_menus(
-        key=key,
-        cbsa=cbsa,
-        category="job",
-        weights=job_weights,
-        strata=None,
-        per_stratum=None,
-        size=cfg["menus"]["job"]["size"],
-        years=years,
-        env_repeats=envs,
-        seed=cfg["menus"]["seed"],
-        settings_identity=settings_identity,
-    )
+    years, envs, mc = cfg["simulation_years"], cfg["env_repeats"], cfg["menus"]
+    common = {
+        "key": key,
+        "cbsa": cbsa,
+        "years": years,
+        "env_repeats": envs,
+        "seed": mc["seed"],
+        "settings_identity": settings_identity,
+    }
+    menus = sampled_menus(
+        category="housing", pool=hp.weights(), size=mc["housing"]["size"], **common
+    ) + sampled_menus(category="job", pool=jp.weights(), size=mc["job"]["size"], **common)
+    diag = cfg["menu_size_diagnostic"]
+    sizes = tuple(diag["sizes"])
 
-    cheapest = min(housing, key=lambda h: (h.price.amount.amount, h.opportunity_id))
-    # 期末参考住房（独立审核 F3、F4）：从完整候选池按参考岗位与通勤关系选——在按菜单裁剪之前，所以只换菜单种子不改变参考集合
+    def describe_housing(c: Candidate) -> tuple[str, str, float]:
+        return c.data["cell"]["stratum"], c.area, float(Decimal(c.data["point"]["gross_rent"]))
+
+    def describe_job(c: Candidate) -> tuple[str, str, float]:
+        return c.data["template"]["soc"], c.area, float(Decimal(c.data["wage"]["annual"]))
+
+    diagnostics = {
+        cat: menu_size_diagnostics(
+            cbsa=cbsa,
+            category=cat,
+            pool=pool,
+            describe=describe,
+            sizes=sizes,
+            repeats=diag["repeats"],
+            seed=mc["seed"],
+            settings_identity=settings_identity,
+        )
+        for cat, pool, describe in (
+            ("housing", hp, describe_housing),
+            ("job", jp, describe_job),
+        )
+    }
+
+    by_id = {c.opportunity_id: c for c in hp.candidates}
+    cheapest = min(
+        hp.candidates,
+        key=lambda c: (Decimal(c.data["point"]["gross_rent"]), c.opportunity_id),
+    )
+    # 期末参考住房（独立审核 F3、F4）：从完整候选池按参考岗位与通勤关系选——参考岗位片区取完整岗位池与开局岗位的全部就业片区，
+    # 都与菜单无关，所以只换菜单种子不改变参考集合
+    job_areas = sorted({c.area for c in jp.candidates} | {o["area"] for o in starts})
     reference = choose_reference_housing(
-        [h.model_dump(mode="json") for h in housing],
-        [o for o in opps if o["category"] == "job"],
+        [_reference_view(c) for c in hp.candidates],
+        [{"area": a, "availability": "available"} for a in job_areas],
         commute["commute"],
     )
-    # 目录只放这次运行能接触到的住房：任一年、任一环境重复的菜单上出现过的，加上最低住房（兜底要用）与参考住房（估值要用）。
-    # 可执行的全集照样计数、进菜单抽样（菜单的抽样池是全集）。参考住房不加进任何菜单：分身在模拟年里看不到、也选不了它们，
-    # 只有估值期把评价规格绑定的槽位机会加进第 N 年的菜单
+    # 目录只展开这次运行能接触到的住房与岗位：任一年、任一环境重复的菜单上出现过的，加上最低住房（兜底要用）、参考住房（估值要用）
+    # 与开局岗位。参考住房与开局岗位不加进任何菜单：分身在模拟年里看不到、也选不了参考住房；开局岗位只是统一开局时手上的岗位
     reachable = {oid for m in menus if m.category == "housing" for oid in m.opportunity_ids}
     reachable.add(cheapest.opportunity_id)
     reachable.update(reference.bound())
-    opps = [o for o in opps if o["category"] != "housing" or o["opportunity_id"] in reachable]
-    housing = [h for h in housing if h.opportunity_id in reachable]
+    housing = [housing_opportunity(by_id[oid], city, cfg) for oid in sorted(reachable)]
+    jobs_by_id = {c.opportunity_id: c for c in jp.candidates}
+    menu_jobs = sorted({oid for m in menus if m.category == "job" for oid in m.opportunity_ids})
+    jobs = [
+        job_from_candidate(jobs_by_id[oid], job_rules, numeraire, job_rules["mapping_version"])
+        for oid in menu_jobs
+    ]
+    opps = (
+        [h.model_dump(mode="json") for h in housing]
+        + [j.model_dump(mode="json") for j in jobs]
+        + starts
+        + opps
+    )
     foods = [
         o
         for o in opps
@@ -336,7 +380,7 @@ def assemble_city(
                 "baseline_opportunity_id": cheapest.opportunity_id,
                 "baseline_quantity": 1,
                 "qualifying_opportunity_ids": sorted(h.opportunity_id for h in housing),
-                "meets": "一个人独占的整套租住单元（ACS 租住单元；厨卫设施按登记假设）",
+                "meets": "一个人独占的整套租住单元（ACS 租住单元，厨房与卫生设施完整）",
             },
             {
                 "need": "food",
@@ -353,17 +397,30 @@ def assemble_city(
         "opportunities": opps,
     }
     catalog = _rescope(catalog_raw)
+    # 计数（公开的构建计数只读这里：整数或一层整数字典）；池的质量与菜单大小诊断另放
     counts = {
-        "housing_candidates": len(candidates),
-        "housing_executable": len(weights),
+        "housing_candidates": len(hp.candidates),
         "housing_in_catalog": len(housing),
+        "job_candidates": len(jp.candidates),
+        "jobs_in_catalog": len(jobs),
+        "start_jobs": len(starts),
         "items_by_domain": dict(sorted(by_domain.items())),
-        "jobs_placed": len(job_weights),
         "menus": len(menus),
         "areas": len(commute["areas"]),
         "commute_legs": len(commute["commute"]["legs"]),
     }
-    return CityBuild(catalog=catalog, counts=counts, excluded=out_excluded, reference=reference)
+    pools = {
+        "housing": hp.mass_report(),
+        "job": jp.mass_report(),
+        "menu_sizes": {"housing": mc["housing"]["size"], "job": mc["job"]["size"]},
+    }
+    return CityBuild(
+        catalog=catalog,
+        counts=counts,
+        excluded=out_excluded,
+        reference=reference,
+        diagnostics={"pools": pools, "menu_size_diagnostics": diagnostics},
+    )
 
 
 def base_protocol(manifest: dict[str, Any]) -> dict[str, Any]:
@@ -411,14 +468,24 @@ def assemble(
             cache,
             intake_fetch_log(con),
         )
-        candidates = {
+        cells = {
             c["cbsa"]: [
                 json.loads(j)
                 for (j,) in con.execute(
-                    "select json from opportunities where kind='rental_listing_candidate' and cbsa=? order by opportunity_id",
+                    "select json from opportunities where kind='rental_support_cell' and cbsa=? order by opportunity_id",
                     (c["cbsa"],),
                 )
             ]
+            for c in cfg["cities"]
+        }
+        tables = {
+            c["cbsa"]: {
+                tid: json.loads(j)
+                for tid, j in con.execute(
+                    "select table_id, json from tables where method='housing_rent_support@1' and cbsa=? order by table_id",
+                    (c["cbsa"],),
+                )
+            }
             for c in cfg["cities"]
         }
         backgrounds = {c["cbsa"]: city_background(con, c["cbsa"]) for c in cfg["cities"]}
@@ -434,10 +501,11 @@ def assemble(
         "intake_build": intake_build,
         "intake_reads": {
             cbsa: {
-                "rental_candidates": rows_digest(candidates[cbsa]),
+                "rental_support_cells": rows_digest(cells[cbsa]),
+                "housing_support_tables": rows_digest(list(tables[cbsa].values())),
                 "city_facts": rows_digest(backgrounds[cbsa]),
             }
-            for cbsa in candidates
+            for cbsa in cells
         },
         "raw_geography": raw_digests,
         "tax": {
@@ -454,10 +522,12 @@ def assemble(
         cities[city["key"]] = assemble_city(
             city,
             cfg,
-            candidates=candidates[city["cbsa"]],
+            cells=cells[city["cbsa"]],
+            tables=tables[city["cbsa"]],
             puma_counties=counties,
             commute=commute[city["key"]][0],
             items=items.cities[city["cbsa"]],
+            job_rules=manifest["job_rules"],
             settings_identity=menu_identity,
         )
     vocab = manifest["vocabulary"]
@@ -564,9 +634,10 @@ def background_numbers(
     env_index = (
         None if share is None else (Decimal(10) * _decimal(share)).quantize(Decimal("0.001"))
     )
-    jobs = [i for i in items["items"] if i["domain"] == "job"]
-    socs = {i["opportunity"]["occupation"]["code"] for i in jobs}
-    supported = len({i["opportunity"]["occupation"]["code"] for i in jobs}) or 1
+    # 发展背景（supported_occupation_coverage_v1）：分子是本城有岗位模板（有已发布 OEWS 工资）的不同职业数，分母是固定的支持职业
+    # 总数（职业配置的范围，每城相同）——不是本城自己的职业数
+    socs = {t["soc"] for t in items["job_templates"]}
+    supported = len(items["start_jobs"]) or 1
     awards = {
         g
         for i in items["items"]
@@ -765,12 +836,12 @@ EVAL_SLOTS = [
     {
         "slot_id": "housing_basic_car",
         "role": "housing",
-        "description": "基本住房（用车）：只在没有不用车就合法的基本住房时设；开车能到达全部参考岗位片区的住房中最便宜的一处",
+        "description": "基本住房（用车）：开车能到达全部参考岗位片区的住房中最便宜的一处（可不可行由估值期的通勤、现金与硬要求检查判定）",
     },
     {
         "slot_id": "housing_comfort_car",
         "role": "housing",
-        "description": "较舒适的住房（用车）：只在没有不用车就合法的一卧中档时设；开车时最长往返最短的一卧中档",
+        "description": "较舒适的住房（用车）：开车时到全部参考岗位片区最长往返最短的一卧中档",
     },
     {
         "slot_id": "car_access",
@@ -870,8 +941,8 @@ def _templates() -> list[dict[str, Any]]:
                 ),
             },
         ]
-        # 用车的参考生活（必要交通服务，独立审核 F3）：同样的基本 / 较舒适含义，住房换成用车槽位、另加用车权。只在没有不用车就
-        # 合法的住房时绑定；其余城市的用车住房槽位确定没有，这几个模板已知不可行、不进参考集合
+        # 用车的参考生活（E3B 映射修正，reference_housing_by_job_reach_v2）：同样的基本 / 较舒适含义，住房换成用车槽位、另加用车权。
+        # 开车能到达全部参考岗位片区时就绑定，可不可行由估值期的检查判定（一条过慢的无车路线不会把它提前禁用）；模板数不变
         cars = []
         for t in base:
             car = copy.deepcopy(t)
@@ -901,7 +972,7 @@ def build_evaluation(cfg: dict[str, Any], pack: PackBuild) -> dict[str, Any]:
     spec["life_templates"] = _templates()
     spec["note"] = (
         "E3B 六城的期末参考生活：模板与选择规则同产品基础样例的思路，槽位按真实目录绑定；参考住房按参考岗位与通勤关系从完整候选池"
-        f"选（{REFERENCE_HOUSING_RULE}），用车的参考生活只在不用车到不了参考岗位时绑定；估值期沿用第 3 年菜单加绑定的槽位机会、"
+        f"选（{REFERENCE_HOUSING_RULE}），开车能到达全部参考岗位片区时也绑定用车的参考生活；估值期沿用第 3 年菜单加绑定的槽位机会、"
         "不抽设备故障；没有可绑定的槽位写确定没有并说明原因"
     )
     bindings = []
@@ -913,7 +984,7 @@ def build_evaluation(cfg: dict[str, Any], pack: PackBuild) -> dict[str, Any]:
         ref = pack.cities[k].reference
         assert ref is not None
         award_jobs = [
-            f"{k}.job.{g[4:-6].replace('_', '-')}.p50"
+            f"{k}.job.{g[4:-6].replace('_', '-')}.start"
             for o in opps.values()
             if o["category"] == "training"
             for g in o.get("grants", ())
@@ -940,8 +1011,8 @@ def build_evaluation(cfg: dict[str, Any], pack: PackBuild) -> dict[str, Any]:
                         )
                     ),
                     _target("car_access", f"{k}.service.car_access", ids, "本城没有用车权"),
-                    _target("food_basic", f"{k}.food.home_staples", ids, "没有主食为主的方案"),
-                    _target("food_comfort", f"{k}.food.home_fresh", ids, "没有鲜食较多的方案"),
+                    _target("food_basic", f"{k}.food.staples.h21", ids, "没有主食为主的方案"),
+                    _target("food_comfort", f"{k}.food.fresh.h21", ids, "没有鲜食较多的方案"),
                     _target(
                         "convenience_device",
                         f"{k}.durable.pair_top_dryer",
@@ -1221,7 +1292,11 @@ def build_all(
         "files": digests,
         "tax_blocked": pack.tax_blocked,
         "cities": {
-            k: {"counts": c.counts, "excluded": dict(sorted(c.excluded.items()))}
+            k: {
+                "counts": c.counts,
+                "excluded": dict(sorted(c.excluded.items())),
+                **c.diagnostics,
+            }
             for k, c in pack.cities.items()
         },
         "backgrounds": {

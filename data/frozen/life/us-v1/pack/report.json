@@ -109,11 +109,11 @@
    ]
   }
  },
- "build_identity": "7cc386653ec876d1569eb41a76358918b11826d4d524aef11e4502f2a18b8139",
+ "build_identity": "c832ce9e861b84eb3c052dbe6f4888c5e33181f0900e7e014cb48086f5867fb8",
  "build_inputs": {
   "base_files": {
-   "configs/intake/life_pack_us_v1.yaml": "29f1aba8e78405d605c772532d1d5b48a9d066eca0cba037d50de89373fa1312",
-   "configs/intake/occupations_us_v1.yaml": "d5b325bfa7c1d62586d659444b01b3dd413cf090d1530a516cb5f6a578d421b7",
+   "configs/intake/life_pack_us_v1.yaml": "45774c486ca231beab3073ffa793f85847e3ec1bcfb5fc7a49684e5ce5d9659b",
+   "configs/intake/occupations_us_v1.yaml": "cf63f672634afa11fdbb9e7db599043dc623bce1ea6fcc0a3d6c30185268ffcf",
    "configs/intake/tax_us_2024.yaml": "8023942148aaebac6f5d35e62697e79d96216a8f087039766bac7bf2c3153bc5",
    "configs/life/city_facts_product.yaml": "e98654fc23b6cce39dba90b2907a48abea7875e719d978e842bc0fa040d095e4",
    "configs/life/evaluation_product.yaml": "fdcbb21c0c277acf622ebb5ee43b3324c29066366c8d90b503c65424d9e160b0",
@@ -122,42 +122,48 @@
    "configs/product/e3a_synthetic_pack.yaml": "9eb059bc62eb41bf4d3243aa6cbe29f4a6163aab52abc13ff37b45a0ded91fac"
   },
   "commute": {
-   "chi": "23758cd61204b4d06563706dcb66ed6b22ed6690f075af83489df4e6a539da09",
-   "hou": "56cfc8319e213a7b2c8e53514210694ce10c273cbce760f89fadc65ef93cb0f9",
-   "la": "2fd773fb316d8f79a3424a5f3e1d270bacb12d49f8e5ad1586a44e10caa779da",
-   "nyc": "3dd16e7ca7839b80e5db212af64a52d245561a76af20fbdf2c82aad78132c7b9",
-   "sea": "12875ef0f9662d4f620e2b8bf955653963c6b9705d1a76365f81d6aa52b7b33d",
-   "sf": "847a1e23cdf6aba3cf3c8f04a11b76b28642657145c4ed6001ef789c6a3a6aa5"
+   "chi": "3f1b8d0c72993896b4d2cc27f73fa20de0a8574b2d8cca04bdba3f6f8b8fd7d6",
+   "hou": "5c6a00a7de0e8ac654dcd4f991c1a6de9d47d3621663e664274e52faf620c6a1",
+   "la": "01a48607fb922111a4445544d40f13dadf691fa85ca96a0b2f9f9b6ef11cf53a",
+   "nyc": "e78639458d0157e88f40ab4a281a712dadd0adc2d2a40a090f29c25afda5df49",
+   "sea": "38bfd3e789505a4759d874a7f2754a373e8f799a9e81d86e23ea369923744f62",
+   "sf": "f7313587f4faf74e5e36f1af7eb73ca52ea6093d78b13ec8a7abf60ba4125652"
   },
-  "config": "b70f27f8114d6b4e3f478783c8bfb5104074f951cebaf85cd7d76b72aab29fee",
-  "intake_build": "562c32339bbae67fd1917b7ac67f4b5b28f55d07e88a8c78ee6fe371ed863691",
+  "config": "892fc9039eede1d90218d19b3ccb19419b9946b97ab07e1544a3d95b72e556aa",
+  "intake_build": "35667f4101a71c0e5ea6c1aaa8e5f45cd83c825d6b1393bde1104d3d571a96b7",
   "intake_reads": {
    "16980": {
     "city_facts": "2123b0a5efcf23c8fd39c30bf83dc0bdaa0741f893cec08906a9851f5da3ef6e",
-    "rental_candidates": "522a9d543ce6ee7fa1ee2f4742a433285219414831c48b0592e115b68f89b6e4"
+    "housing_support_tables": "97ce7d34de1e2ff0f44705997f8d4fe1b3238698f30abc220f83dc7f9924da18",
+    "rental_support_cells": "e9ddc3e2475dec349d1158f339b44b6aad6ee1890941557f3ec5d4376dc55de2"
    },
    "26420": {
     "city_facts": "ffebb89bc5be0d8c91322b41418e0bfa017266fcafd0b990fc88b7d87f254d0e",
-    "rental_candidates": "41f021912cd0ca01bbc53719a3434cf94ef22b6130ee0b77bdc121e01191db85"
+    "housing_support_tables": "294320ced026dee04ffe089d265db91c65d30f8efd558086ce2d5b051cdcac36",
+    "rental_support_cells": "478d88d558fe9aadece21e463fdd28a8c90e86ceb5bc90d0f782a3745a633493"
    },
    "31080": {
     "city_facts": "72ea3c7ae941275d0c56fd11df8995b43212bf24adcfcd9baee04fae6d6aed8f",
-    "rental_candidates": "06338c08776bbd041c7aca2dec33b7ba7f24f5fa12af52e04ba52361e272fd86"
+    "housing_support_tables": "9f4d75d8bcacdac5c73010137ac841f5792d01c90125ec0a0482bc70aaa652d4",
+    "rental_support_cells": "0e641dfa8f1be071f54f841a7322fe88f269261e911ce47339e32e3b8be82de1"
    },
    "35620": {
     "city_facts": "83aa76fbf09a3cb26302f7c5127c4c5ae84ad68f3cdd1daaf578b15c3981495f",
-    "rental_candidates": "3ff94ff7e04043d522e604c2579a0c8f89dca67637b382b353dfefd9b8b25746"
+    "housing_support_tables": "c563b5f4e6444191ffc252f58b338cc3dff59b45ec760fbebc2c5e418f000238",
+    "rental_support_cells": "a485a4c07851b355b629fb82f7e8305b1dfb74aa0420f194ba4120f6877fee87"
    },
    "41860": {
     "city_facts": "eb5bfc9cf931b526c99b6e31c9531f69b8c8084c413a33f142acbb13fbe91ba6",
-    "rental_candidates": "59c3d6e7f557914c5012b826a2311e455ce4f4343bd13cdbec84b2c2aefd6ae1"
+    "housing_support_tables": "2b2dc80d1bd9529f386a6e85c5cb39f9f117a7ef3967863230919d8b8979adcb",
+    "rental_support_cells": "5d3bedd4ab67a19cc602540a208acb4d93fdc5f0120a41497ae07c678418c0f7"
    },
    "42660": {
     "city_facts": "15884e6f33e3562cf1f51a08e453748f5c81e21829b06a562fc25870bc814a16",
-    "rental_candidates": "b891a80f5a5b39af9df0b93be4d96c667bb7e2c6490db293e8f70023d2cb8876"
+    "housing_support_tables": "0ea8525a97dafb6c635e8f29c36038316c7d5503d3937487d2df4af22626bcc5",
+    "rental_support_cells": "8b53c3b738dd8d60731b1b4f1fc60e627c1798413c70ca4e8f1bd133cabf5483"
    }
   },
-  "items": "cf5ceaf809d8b8a4ed382194eec9d0d2166073cc14197b678e83517ad0863d5b",
+  "items": "f180711dbe12a2b748f4c060b3e01d01a57eaa24ae67830323d75d1ef327d9d8",
   "raw_geography": {
    "cbsa_delineation": "952c4b1e78acbb54e6ec9412434b7602fedacbf021736351a63c181bdb753629",
    "tract_puma": "5262f460b2c8dbe86b00549e916317b1791fdc595c9af72ab18f6f6a67040531"
@@ -180,145 +186,959 @@
    "counts": {
     "areas": 66,
     "commute_legs": 394,
-    "housing_candidates": 717,
-    "housing_executable": 601,
-    "housing_in_catalog": 61,
+    "housing_candidates": 31670,
+    "housing_in_catalog": 345,
     "items_by_domain": {
-     "activity": 10,
+     "activity": 11,
      "device": 5,
      "enjoyment": 3,
      "equipment": 2,
-     "food": 15,
-     "job": 120,
+     "food": 327,
      "service": 3
     },
-    "jobs_placed": 120,
-    "menus": 12
+    "job_candidates": 133740,
+    "jobs_in_catalog": 354,
+    "menus": 12,
+    "start_jobs": 40
    },
    "excluded": {
-    "housing.outside_tax_scope": 57,
-    "housing.rent_unknown": 59
+    "housing.outside_tax_scope": 19
+   },
+   "menu_size_diagnostics": {
+    "housing": {
+     "pool": {
+      "areas": 60,
+      "candidates": 31670,
+      "groups": 4,
+      "value_weighted_p10_p50_p90": [
+       1020.0,
+       1734.0,
+       2761.0
+      ]
+     },
+     "repeats": 20,
+     "sizes": {
+      "120": {
+       "mean_areas": 44.05,
+       "mean_groups": 4.0,
+       "mean_min_value": 186.1,
+       "mean_pool_weight_share": 0.038307,
+       "mean_value_p10_p50_p90": [
+        991.15,
+        1735.85,
+        2740.35
+       ]
+      },
+      "30": {
+       "mean_areas": 19.95,
+       "mean_groups": 3.95,
+       "mean_min_value": 473.55,
+       "mean_pool_weight_share": 0.01126,
+       "mean_value_p10_p50_p90": [
+        971.2,
+        1711.2,
+        2675.9
+       ]
+      },
+      "60": {
+       "mean_areas": 31.1,
+       "mean_groups": 4.0,
+       "mean_min_value": 348.6,
+       "mean_pool_weight_share": 0.021148,
+       "mean_value_p10_p50_p90": [
+        1004.9,
+        1720.9,
+        2720.55
+       ]
+      }
+     }
+    },
+    "job": {
+     "pool": {
+      "areas": 6,
+      "candidates": 133740,
+      "groups": 40,
+      "value_weighted_p10_p50_p90": [
+       31925.33,
+       42086.62,
+       82452.12
+      ]
+     },
+     "repeats": 20,
+     "sizes": {
+      "120": {
+       "mean_areas": 6.0,
+       "mean_groups": 31.8,
+       "mean_min_value": 29144.03,
+       "mean_pool_weight_share": 0.024002,
+       "mean_value_p10_p50_p90": [
+        31964.19,
+        43062.65,
+        83534.18
+       ]
+      },
+      "30": {
+       "mean_areas": 5.25,
+       "mean_groups": 17.95,
+       "mean_min_value": 30131.36,
+       "mean_pool_weight_share": 0.006348,
+       "mean_value_p10_p50_p90": [
+        31974.51,
+        41238.29,
+        82397.41
+       ]
+      },
+      "60": {
+       "mean_areas": 5.9,
+       "mean_groups": 26.1,
+       "mean_min_value": 29324.07,
+       "mean_pool_weight_share": 0.011368,
+       "mean_value_p10_p50_p90": [
+        31990.14,
+        41876.19,
+        82729.45
+       ]
+      }
+     }
+    }
+   },
+   "pools": {
+    "housing": {
+     "candidates": 31670,
+     "excluded": {
+      "outside_tax_scope": 19
+     },
+     "masses": {
+      "executable": "286274.30",
+      "facilities_incomplete": "7409.14",
+      "price_censored": "16177.26",
+      "raw": "309748.00"
+     },
+     "shares_of_raw": {
+      "executable": "0.9242",
+      "facilities_incomplete": "0.0239",
+      "price_censored": "0.0522"
+     }
+    },
+    "job": {
+     "candidates": 133740,
+     "excluded": {},
+     "masses": {
+      "executable": "1235318.95",
+      "hours_missing": "0.00",
+      "hours_topcoded": "817.05",
+      "raw": "1545170.00",
+      "wage_unidentified": "309034.00"
+     },
+     "shares_of_raw": {
+      "executable": "0.7995",
+      "hours_missing": "0.0000",
+      "hours_topcoded": "0.0005",
+      "wage_unidentified": "0.2000"
+     }
+    },
+    "menu_sizes": {
+     "housing": 60,
+     "job": 60
+    }
    }
   },
   "hou": {
    "counts": {
     "areas": 59,
     "commute_legs": 258,
-    "housing_candidates": 651,
-    "housing_executable": 651,
-    "housing_in_catalog": 68,
+    "housing_candidates": 43339,
+    "housing_in_catalog": 357,
     "items_by_domain": {
-     "activity": 10,
+     "activity": 11,
      "device": 5,
      "enjoyment": 3,
      "equipment": 2,
-     "food": 15,
-     "job": 120,
+     "food": 327,
      "service": 3,
      "training": 3
     },
-    "jobs_placed": 120,
-    "menus": 12
+    "job_candidates": 92240,
+    "jobs_in_catalog": 338,
+    "menus": 12,
+    "start_jobs": 40
    },
-   "excluded": {}
+   "excluded": {},
+   "menu_size_diagnostics": {
+    "housing": {
+     "pool": {
+      "areas": 55,
+      "candidates": 43339,
+      "groups": 4,
+      "value_weighted_p10_p50_p90": [
+       960.0,
+       1477.0,
+       2317.0
+      ]
+     },
+     "repeats": 20,
+     "sizes": {
+      "120": {
+       "mean_areas": 44.6,
+       "mean_groups": 4.0,
+       "mean_min_value": 389.25,
+       "mean_pool_weight_share": 0.019725,
+       "mean_value_p10_p50_p90": [
+        954.0,
+        1482.7,
+        2323.35
+       ]
+      },
+      "30": {
+       "mean_areas": 22.0,
+       "mean_groups": 3.85,
+       "mean_min_value": 623.95,
+       "mean_pool_weight_share": 0.005174,
+       "mean_value_p10_p50_p90": [
+        922.2,
+        1451.4,
+        2260.85
+       ]
+      },
+      "60": {
+       "mean_areas": 33.55,
+       "mean_groups": 4.0,
+       "mean_min_value": 468.25,
+       "mean_pool_weight_share": 0.009669,
+       "mean_value_p10_p50_p90": [
+        942.15,
+        1498.9,
+        2306.7
+       ]
+      }
+     }
+    },
+    "job": {
+     "pool": {
+      "areas": 4,
+      "candidates": 92240,
+      "groups": 40,
+      "value_weighted_p10_p50_p90": [
+       25822.32,
+       37111.05,
+       78642.33
+      ]
+     },
+     "repeats": 20,
+     "sizes": {
+      "120": {
+       "mean_areas": 4.0,
+       "mean_groups": 30.85,
+       "mean_min_value": 18702.26,
+       "mean_pool_weight_share": 0.038113,
+       "mean_value_p10_p50_p90": [
+        25314.9,
+        36933.79,
+        78391.13
+       ]
+      },
+      "30": {
+       "mean_areas": 3.8,
+       "mean_groups": 17.1,
+       "mean_min_value": 20829.49,
+       "mean_pool_weight_share": 0.010504,
+       "mean_value_p10_p50_p90": [
+        24974.93,
+        36569.29,
+        71410.83
+       ]
+      },
+      "60": {
+       "mean_areas": 4.0,
+       "mean_groups": 23.95,
+       "mean_min_value": 19470.77,
+       "mean_pool_weight_share": 0.020345,
+       "mean_value_p10_p50_p90": [
+        24932.6,
+        37068.0,
+        77637.6
+       ]
+      }
+     }
+    }
+   },
+   "pools": {
+    "housing": {
+     "candidates": 43339,
+     "excluded": {},
+     "masses": {
+      "executable": "448682.03",
+      "facilities_incomplete": "10032.92",
+      "price_censored": "11973.06",
+      "raw": "470373.00"
+     },
+     "shares_of_raw": {
+      "executable": "0.9539",
+      "facilities_incomplete": "0.0213",
+      "price_censored": "0.0255"
+     }
+    },
+    "job": {
+     "candidates": 92240,
+     "excluded": {},
+     "masses": {
+      "executable": "857524.66",
+      "hours_missing": "0.00",
+      "hours_topcoded": "403.34",
+      "raw": "1072410.00",
+      "wage_unidentified": "214482.00"
+     },
+     "shares_of_raw": {
+      "executable": "0.7996",
+      "hours_missing": "0.0000",
+      "hours_topcoded": "0.0004",
+      "wage_unidentified": "0.2000"
+     }
+    },
+    "menu_sizes": {
+     "housing": 60,
+     "job": 60
+    }
+   }
   },
   "la": {
    "counts": {
     "areas": 93,
     "commute_legs": 303,
-    "housing_candidates": 1074,
-    "housing_executable": 1074,
-    "housing_in_catalog": 70,
+    "housing_candidates": 95025,
+    "housing_in_catalog": 360,
     "items_by_domain": {
-     "activity": 10,
+     "activity": 11,
      "device": 5,
      "enjoyment": 3,
      "equipment": 2,
-     "food": 15,
-     "job": 120,
+     "food": 327,
      "service": 3
     },
-    "jobs_placed": 120,
-    "menus": 12
+    "job_candidates": 82200,
+    "jobs_in_catalog": 348,
+    "menus": 12,
+    "start_jobs": 40
    },
-   "excluded": {}
+   "excluded": {},
+   "menu_size_diagnostics": {
+    "housing": {
+     "pool": {
+      "areas": 91,
+      "candidates": 95025,
+      "groups": 4,
+      "value_weighted_p10_p50_p90": [
+       1380.0,
+       2500.0,
+       4060.0
+      ]
+     },
+     "repeats": 20,
+     "sizes": {
+      "120": {
+       "mean_areas": 58.25,
+       "mean_groups": 4.0,
+       "mean_min_value": 296.75,
+       "mean_pool_weight_share": 0.012156,
+       "mean_value_p10_p50_p90": [
+        1314.95,
+        2453.0,
+        4032.8
+       ]
+      },
+      "30": {
+       "mean_areas": 24.95,
+       "mean_groups": 4.0,
+       "mean_min_value": 591.95,
+       "mean_pool_weight_share": 0.002919,
+       "mean_value_p10_p50_p90": [
+        1124.55,
+        2355.95,
+        3907.8
+       ]
+      },
+      "60": {
+       "mean_areas": 40.45,
+       "mean_groups": 4.0,
+       "mean_min_value": 418.15,
+       "mean_pool_weight_share": 0.005608,
+       "mean_value_p10_p50_p90": [
+        1183.75,
+        2425.65,
+        3896.25
+       ]
+      }
+     }
+    },
+    "job": {
+     "pool": {
+      "areas": 2,
+      "candidates": 82200,
+      "groups": 40,
+      "value_weighted_p10_p50_p90": [
+       35504.99,
+       44681.87,
+       94413.63
+      ]
+     },
+     "repeats": 20,
+     "sizes": {
+      "120": {
+       "mean_areas": 2.0,
+       "mean_groups": 32.6,
+       "mean_min_value": 34105.05,
+       "mean_pool_weight_share": 0.041347,
+       "mean_value_p10_p50_p90": [
+        35547.34,
+        44953.49,
+        91413.35
+       ]
+      },
+      "30": {
+       "mean_areas": 2.0,
+       "mean_groups": 18.5,
+       "mean_min_value": 34660.29,
+       "mean_pool_weight_share": 0.010009,
+       "mean_value_p10_p50_p90": [
+        35407.72,
+        43797.94,
+        78575.41
+       ]
+      },
+      "60": {
+       "mean_areas": 2.0,
+       "mean_groups": 26.3,
+       "mean_min_value": 34268.2,
+       "mean_pool_weight_share": 0.020625,
+       "mean_value_p10_p50_p90": [
+        35529.87,
+        44724.28,
+        86712.88
+       ]
+      }
+     }
+    }
+   },
+   "pools": {
+    "housing": {
+     "candidates": 95025,
+     "excluded": {},
+     "masses": {
+      "executable": "472885.00",
+      "facilities_incomplete": "28052.71",
+      "price_censored": "19682.29",
+      "raw": "519780.00"
+     },
+     "shares_of_raw": {
+      "executable": "0.9098",
+      "facilities_incomplete": "0.0540",
+      "price_censored": "0.0379"
+     }
+    },
+    "job": {
+     "candidates": 82200,
+     "excluded": {},
+     "masses": {
+      "executable": "1532475.34",
+      "hours_missing": "0.00",
+      "hours_topcoded": "1804.66",
+      "raw": "1917850.00",
+      "wage_unidentified": "383570.00"
+     },
+     "shares_of_raw": {
+      "executable": "0.7991",
+      "hours_missing": "0.0000",
+      "hours_topcoded": "0.0009",
+      "wage_unidentified": "0.2000"
+     }
+    },
+    "menu_sizes": {
+     "housing": 60,
+     "job": 60
+    }
+   }
   },
   "nyc": {
    "counts": {
     "areas": 63,
     "commute_legs": 690,
-    "housing_candidates": 1635,
-    "housing_executable": 628,
-    "housing_in_catalog": 72,
+    "housing_candidates": 60853,
+    "housing_in_catalog": 353,
     "items_by_domain": {
-     "activity": 10,
+     "activity": 11,
      "device": 5,
      "enjoyment": 3,
      "equipment": 2,
-     "food": 15,
-     "job": 120,
+     "food": 327,
      "service": 3,
      "training": 3
     },
-    "jobs_placed": 120,
-    "menus": 12
+    "job_candidates": 204420,
+    "jobs_in_catalog": 359,
+    "menus": 12,
+    "start_jobs": 40
    },
    "excluded": {
-    "housing.outside_tax_scope": 990,
-    "housing.rent_unknown": 17
+    "housing.outside_tax_scope": 330
+   },
+   "menu_size_diagnostics": {
+    "housing": {
+     "pool": {
+      "areas": 55,
+      "candidates": 60853,
+      "groups": 4,
+      "value_weighted_p10_p50_p90": [
+       1030.0,
+       2400.0,
+       4520.0
+      ]
+     },
+     "repeats": 20,
+     "sizes": {
+      "120": {
+       "mean_areas": 44.5,
+       "mean_groups": 4.0,
+       "mean_min_value": 171.15,
+       "mean_pool_weight_share": 0.021017,
+       "mean_value_p10_p50_p90": [
+        969.4,
+        2389.25,
+        4371.95
+       ]
+      },
+      "30": {
+       "mean_areas": 21.25,
+       "mean_groups": 3.95,
+       "mean_min_value": 397.95,
+       "mean_pool_weight_share": 0.005732,
+       "mean_value_p10_p50_p90": [
+        944.05,
+        2379.15,
+        4357.5
+       ]
+      },
+      "60": {
+       "mean_areas": 32.85,
+       "mean_groups": 4.0,
+       "mean_min_value": 232.65,
+       "mean_pool_weight_share": 0.011164,
+       "mean_value_p10_p50_p90": [
+        963.35,
+        2424.15,
+        4348.3
+       ]
+      }
+     }
+    },
+    "job": {
+     "pool": {
+      "areas": 8,
+      "candidates": 204420,
+      "groups": 40,
+      "value_weighted_p10_p50_p90": [
+       34992.28,
+       48142.08,
+       116425.63
+      ]
+     },
+     "repeats": 20,
+     "sizes": {
+      "120": {
+       "mean_areas": 8.0,
+       "mean_groups": 31.8,
+       "mean_min_value": 31941.24,
+       "mean_pool_weight_share": 0.013075,
+       "mean_value_p10_p50_p90": [
+        34903.63,
+        48612.24,
+        114250.54
+       ]
+      },
+      "30": {
+       "mean_areas": 7.65,
+       "mean_groups": 18.65,
+       "mean_min_value": 32846.23,
+       "mean_pool_weight_share": 0.003119,
+       "mean_value_p10_p50_p90": [
+        34774.51,
+        48926.77,
+        108118.48
+       ]
+      },
+      "60": {
+       "mean_areas": 7.95,
+       "mean_groups": 25.7,
+       "mean_min_value": 32327.17,
+       "mean_pool_weight_share": 0.006311,
+       "mean_value_p10_p50_p90": [
+        34945.53,
+        48311.04,
+        106902.13
+       ]
+      }
+     }
+    }
+   },
+   "pools": {
+    "housing": {
+     "candidates": 60853,
+     "excluded": {
+      "outside_tax_scope": 330
+     },
+     "masses": {
+      "executable": "350513.25",
+      "facilities_incomplete": "7763.74",
+      "price_censored": "10518.74",
+      "raw": "368703.00"
+     },
+     "shares_of_raw": {
+      "executable": "0.9507",
+      "facilities_incomplete": "0.0211",
+      "price_censored": "0.0285"
+     }
+    },
+    "job": {
+     "candidates": 204420,
+     "excluded": {},
+     "masses": {
+      "executable": "2397574.28",
+      "hours_missing": "0.00",
+      "hours_topcoded": "1761.72",
+      "raw": "2999170.00",
+      "wage_unidentified": "599834.00"
+     },
+     "shares_of_raw": {
+      "executable": "0.7994",
+      "hours_missing": "0.0000",
+      "hours_topcoded": "0.0006",
+      "wage_unidentified": "0.2000"
+     }
+    },
+    "menu_sizes": {
+     "housing": 60,
+     "job": 60
+    }
    }
   },
   "sea": {
    "counts": {
     "areas": 35,
     "commute_legs": 147,
-    "housing_candidates": 375,
-    "housing_executable": 369,
-    "housing_in_catalog": 68,
+    "housing_candidates": 14214,
+    "housing_in_catalog": 342,
     "items_by_domain": {
-     "activity": 10,
+     "activity": 11,
      "device": 5,
      "enjoyment": 3,
      "equipment": 2,
-     "food": 15,
-     "job": 120,
+     "food": 327,
      "service": 3
     },
-    "jobs_placed": 120,
-    "menus": 12
+    "job_candidates": 73912,
+    "jobs_in_catalog": 347,
+    "menus": 12,
+    "start_jobs": 40
    },
-   "excluded": {
-    "housing.rent_unknown": 6
+   "excluded": {},
+   "menu_size_diagnostics": {
+    "housing": {
+     "pool": {
+      "areas": 32,
+      "candidates": 14214,
+      "groups": 4,
+      "value_weighted_p10_p50_p90": [
+       1354.0,
+       2092.0,
+       3300.0
+      ]
+     },
+     "repeats": 20,
+     "sizes": {
+      "120": {
+       "mean_areas": 29.05,
+       "mean_groups": 4.0,
+       "mean_min_value": 350.95,
+       "mean_pool_weight_share": 0.038244,
+       "mean_value_p10_p50_p90": [
+        1355.3,
+        2092.25,
+        3165.4
+       ]
+      },
+      "30": {
+       "mean_areas": 18.1,
+       "mean_groups": 4.0,
+       "mean_min_value": 741.75,
+       "mean_pool_weight_share": 0.00941,
+       "mean_value_p10_p50_p90": [
+        1259.8,
+        2093.45,
+        3188.5
+       ]
+      },
+      "60": {
+       "mean_areas": 24.6,
+       "mean_groups": 4.0,
+       "mean_min_value": 479.2,
+       "mean_pool_weight_share": 0.020381,
+       "mean_value_p10_p50_p90": [
+        1326.25,
+        2105.15,
+        3157.55
+       ]
+      }
+     }
+    },
+    "job": {
+     "pool": {
+      "areas": 3,
+      "candidates": 73912,
+      "groups": 40,
+      "value_weighted_p10_p50_p90": [
+       38443.43,
+       54255.88,
+       137727.16
+      ]
+     },
+     "repeats": 20,
+     "sizes": {
+      "120": {
+       "mean_areas": 3.0,
+       "mean_groups": 32.8,
+       "mean_min_value": 35843.34,
+       "mean_pool_weight_share": 0.045876,
+       "mean_value_p10_p50_p90": [
+        38370.53,
+        53398.93,
+        135996.66
+       ]
+      },
+      "30": {
+       "mean_areas": 2.95,
+       "mean_groups": 18.9,
+       "mean_min_value": 36355.49,
+       "mean_pool_weight_share": 0.011955,
+       "mean_value_p10_p50_p90": [
+        38706.83,
+        54232.85,
+        133210.5
+       ]
+      },
+      "60": {
+       "mean_areas": 3.0,
+       "mean_groups": 26.2,
+       "mean_min_value": 36167.45,
+       "mean_pool_weight_share": 0.023111,
+       "mean_value_p10_p50_p90": [
+        38375.4,
+        53771.0,
+        133747.37
+       ]
+      }
+     }
+    }
+   },
+   "pools": {
+    "housing": {
+     "candidates": 14214,
+     "excluded": {},
+     "masses": {
+      "executable": "233270.04",
+      "facilities_incomplete": "9410.27",
+      "price_censored": "7516.69",
+      "raw": "249646.00"
+     },
+     "shares_of_raw": {
+      "executable": "0.9344",
+      "facilities_incomplete": "0.0377",
+      "price_censored": "0.0301"
+     }
+    },
+    "job": {
+     "candidates": 73912,
+     "excluded": {},
+     "masses": {
+      "executable": "564963.56",
+      "hours_missing": "0.00",
+      "hours_topcoded": "207.64",
+      "raw": "721010.00",
+      "wage_unidentified": "155838.80"
+     },
+     "shares_of_raw": {
+      "executable": "0.7836",
+      "hours_missing": "0.0000",
+      "hours_topcoded": "0.0003",
+      "wage_unidentified": "0.2161"
+     }
+    },
+    "menu_sizes": {
+     "housing": 60,
+     "job": 60
+    }
    }
   },
   "sf": {
    "counts": {
     "areas": 44,
     "commute_legs": 197,
-    "housing_candidates": 453,
-    "housing_executable": 442,
-    "housing_in_catalog": 62,
+    "housing_candidates": 18481,
+    "housing_in_catalog": 340,
     "items_by_domain": {
-     "activity": 9,
+     "activity": 10,
      "device": 5,
      "enjoyment": 3,
      "equipment": 2,
-     "food": 15,
-     "job": 120,
+     "food": 327,
      "service": 3
     },
-    "jobs_placed": 120,
-    "menus": 12
+    "job_candidates": 105564,
+    "jobs_in_catalog": 351,
+    "menus": 12,
+    "start_jobs": 40
    },
-   "excluded": {
-    "housing.rent_unknown": 11
+   "excluded": {},
+   "menu_size_diagnostics": {
+    "housing": {
+     "pool": {
+      "areas": 39,
+      "candidates": 18481,
+      "groups": 4,
+      "value_weighted_p10_p50_p90": [
+       1550.0,
+       2672.0,
+       4403.0
+      ]
+     },
+     "repeats": 20,
+     "sizes": {
+      "120": {
+       "mean_areas": 33.9,
+       "mean_groups": 4.0,
+       "mean_min_value": 184.9,
+       "mean_pool_weight_share": 0.036628,
+       "mean_value_p10_p50_p90": [
+        1506.3,
+        2689.75,
+        4346.7
+       ]
+      },
+      "30": {
+       "mean_areas": 18.8,
+       "mean_groups": 4.0,
+       "mean_min_value": 604.4,
+       "mean_pool_weight_share": 0.009719,
+       "mean_value_p10_p50_p90": [
+        1395.05,
+        2720.65,
+        4285.75
+       ]
+      },
+      "60": {
+       "mean_areas": 27.3,
+       "mean_groups": 4.0,
+       "mean_min_value": 329.0,
+       "mean_pool_weight_share": 0.018728,
+       "mean_value_p10_p50_p90": [
+        1468.05,
+        2695.6,
+        4334.8
+       ]
+      }
+     }
+    },
+    "job": {
+     "pool": {
+      "areas": 5,
+      "candidates": 105564,
+      "groups": 40,
+      "value_weighted_p10_p50_p90": [
+       38966.39,
+       55860.33,
+       157963.45
+      ]
+     },
+     "repeats": 20,
+     "sizes": {
+      "120": {
+       "mean_areas": 5.0,
+       "mean_groups": 32.05,
+       "mean_min_value": 35281.65,
+       "mean_pool_weight_share": 0.022696,
+       "mean_value_p10_p50_p90": [
+        39124.37,
+        56968.56,
+        151897.64
+       ]
+      },
+      "30": {
+       "mean_areas": 4.9,
+       "mean_groups": 18.4,
+       "mean_min_value": 36633.81,
+       "mean_pool_weight_share": 0.006161,
+       "mean_value_p10_p50_p90": [
+        39244.12,
+        60020.18,
+        154896.27
+       ]
+      },
+      "60": {
+       "mean_areas": 4.95,
+       "mean_groups": 26.05,
+       "mean_min_value": 35753.98,
+       "mean_pool_weight_share": 0.01214,
+       "mean_value_p10_p50_p90": [
+        39136.7,
+        58936.12,
+        152821.57
+       ]
+      }
+     }
+    }
+   },
+   "pools": {
+    "housing": {
+     "candidates": 18481,
+     "excluded": {},
+     "masses": {
+      "executable": "207726.29",
+      "facilities_incomplete": "7446.88",
+      "price_censored": "9514.37",
+      "raw": "224490.00"
+     },
+     "shares_of_raw": {
+      "executable": "0.9253",
+      "facilities_incomplete": "0.0332",
+      "price_censored": "0.0424"
+     }
+    },
+    "job": {
+     "candidates": 105564,
+     "excluded": {},
+     "masses": {
+      "executable": "579747.56",
+      "hours_missing": "0.00",
+      "hours_topcoded": "484.44",
+      "raw": "740670.00",
+      "wage_unidentified": "160438.00"
+     },
+     "shares_of_raw": {
+      "executable": "0.7827",
+      "hours_missing": "0.0000",
+      "hours_topcoded": "0.0007",
+      "wage_unidentified": "0.2166"
+     }
+    },
+    "menu_sizes": {
+     "housing": 60,
+     "job": 60
+    }
    }
   }
  },
  "files": {
   "city_facts.json": "9e8b1979b60d2dacaa9e41faa27365366cb129b925e39961267e2b87b9ac54cd",
-  "evaluation.json": "31114cfc036ba3abd40a15456ad9988a55f885d86c29f36c23140ba674bb3979",
-  "life_input.json": "5fd2ea199e8ae3f5f932df8b8872a648c6e666c31f2436fb8a9b1a8e14e8ced1",
+  "evaluation.json": "1a4d766a362dd6eb39f6d7441f085cb22eff5bb473d8c9321f68f075660baa1b",
+  "life_input.json": "b7d5442914fe014c4194dbe8d9c07775ca822d9b9ee8293d7a9fc81a9ae9a724",
   "scoring.json": "dcd046abf9e30c32d644e9e24a3d91a11877f7a545d825c5b89d51b62e119d0e"
  },
  "safety_inputs": {

@@ -136,6 +136,40 @@ def parse_topcodes(content: bytes) -> dict[str, TopcodeRule]:
     return out
 
 
+#: 毛租金的组成部分也会顶码（官方表同一行）：电费、燃气费是月费，水费、其他燃料费是年费。列名是（阈值，替代值）。
+UTILITY_TOPCODE_COLUMNS = {
+    "ELEP": ("ELETPCT", "T_ELE"),
+    "GASP": ("GASTPCT", "T_GAS"),
+    "WATP": ("WATTPCT", "T_WAT"),
+    "FULP": ("FULTPCT", "T_FUL"),
+}
+
+
+def parse_utility_topcodes(content: bytes) -> dict[str, dict[str, tuple[float, float]]]:
+    """官方顶码表里水电燃料的阈值与替代值 → 州代码 → {变量: (阈值, 替代值)}。"""
+    out: dict[str, dict[str, tuple[float, float]]] = {}
+    for row in csv.DictReader(io.StringIO(content.decode("utf-8-sig"))):
+        st = str(row.get("STATE", "")).strip().zfill(2)
+        rules: dict[str, tuple[float, float]] = {}
+        for var, (t, r) in UTILITY_TOPCODE_COLUMNS.items():
+            try:
+                rules[var] = (float(row[t]), float(row[r]))
+            except (KeyError, TypeError, ValueError):
+                continue
+        if rules:
+            out[st] = rules
+    return out
+
+
+def utility_topcoded(value: float, rule: tuple[float, float] | None) -> bool:
+    """一个水电燃料金额受不受顶码影响：等于替代值（且替代值高于阈值）是顶码；高于阈值却不等于替代值说明对不上，也当受影响。
+    没有这个州的规则时不能判断：当受影响（不拿可能是替代值的数当真实费用）。"""
+    if rule is None:
+        return True
+    threshold, replacement = rule
+    return value > threshold or (value == replacement and replacement > threshold)
+
+
 def rent_top_values(content: bytes) -> tuple[float | None, float | None]:
     """整州住房文件里合同租金的最大值与第二大的不同值（只在官方表缺这个州时使用）。"""
     z, name = _csv_member(content, "psam_h")

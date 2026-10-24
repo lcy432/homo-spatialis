@@ -28,7 +28,7 @@ from product.realdata.occupations import start_job
 
 ITEMS_CONFIG = Path("configs/intake/life_items_us_v1.yaml")
 OCC_CONFIG = Path("configs/intake/occupations_us_v1.yaml")
-INTAKE_DB = Path("runs/intake/us-v1/work/freeze/562c32339bbae67f/intake.sqlite")
+INTAKE_DB = Path("runs/intake/us-v1/work/freeze/35667f4101a71c0e/intake.sqlite")
 SLICE = Path("runs/life_items/slice.json")
 OUT = Path("data/frozen/life/us-v1/items")
 FIXTURE = Path("tests/fixtures/life_items/slice_sample.json")

@@ -4,10 +4,12 @@
 外加诊断（缺口、不支持、设备故障设定）。规则：
 
 * 金额一律 ``USD_2024_LOCAL``，精确到分：先用分数精确计算，最后一步四舍五入到分（规则写进来源）；小时最多两位小数。
-* 价格指数只乘在明确的基础报价或篮子上：食材篮子是 intake 的都会区估计价（已经过一次 RPP 商品类换算，这里不再乘）；外食是 CE
-  都会区支出（当地名义值，只换时期、不做空间换算）；设备与装备是全国类别设定 × intake 的商品类空间换算系数；场地设定 × RPP 总水平。
+* 价格指数只乘在明确的基础报价或篮子上：食材篮子是 intake 的都会区估计价（已经过一次 RPP 商品类换算，这里不再乘）；外食按统一
+  成本代理（篮子食材 + 厨师人工 + 场地及其他 × 其他服务 RPP，外送另加配送人工）；设备与装备是全国类别设定 × intake 的商品类空间
+  换算系数；场地设定 × RPP 总水平。CE 都会区支出只做量级对照。
 * 未知不当零：门票没有资料就是 ``unknown``，日期、年龄与整期报名表达不了的真实活动标成需要 E1 扩展，原样保留限制，不删。
-* 外食只经饮食生活评分（新鲜餐与菜系），不做营养声明。
+* 外食只经饮食生活评分（新鲜餐与菜系），不做营养声明；新鲜餐按组成比例，外食不自动算新鲜。
+* 每个 A 板块的共同结构（方案族、参数、先验、城市证据、零售修正与状态）见 ``a_blocks``。
 """
 
 from __future__ import annotations
@@ -245,26 +247,45 @@ def complete_week_cost(b: BasketWeek, complement: BasketWeek, target_kcal: Fract
     return b.cost + gap * complement.cost / complement.kcal
 
 
-def away_meal_price(ctx: Ctx) -> Fraction:
-    """平均每顿外食花费 = CE 每户在外饮食年支出 × CPI(2024) ÷ CPI(2023–24) ÷ 每户人数 ÷ 52 ÷ 每人每周外食餐数。"""
-    ce, f = ctx.metro["ce"], ctx.slice["cpi"]["ce_2023_2024_to_2024"]
-    factor = Fraction(f["numerator"], f["denominator"])
-    per_week = dec(ce["food_away_per_cu_year"]) * factor / dec(ce["persons_per_cu"]) / 52
-    return per_week / ctx.cfg["food"]["dining"]["meals_away_per_person_week"]
+def away_meal_cost(ctx: Ctx, week_cost: Fraction) -> dict[str, Any] | None:
+    """外食一顿的统一成本代理（``food_away_cost_proxy_v1``，共同探索假设，不是已验证的零售价）：食材 = 所用篮子补齐后每周花费 ÷ 21；
+    厨房人工 = 每顿 0.25 小时 × 厨师（35-2014）中位时薪 × 人工费用倍率；场地及其他 = 每顿全国基准 2 美元 × 其他服务 RPP ÷ 100；
+    外送再加每顿 0.2 小时配送人工（53-3033 中位时薪 × 人工费用倍率）。税费、配送费与小费按成本里没有单列：不另加，写明。"""
+    ac, sc = ctx.cfg["food"]["away_cost"], ctx.cfg["services"]
+    overhead = dec(sc["labor_overhead_multiplier"])
+    cook_w, driver_w = ctx.wage(ac["cook_soc"]), ctx.wage(ac["delivery_soc"])
+    cook = None if cook_w is None else hourly_wage(cook_w, sc["hours_per_year"])
+    driver = None if driver_w is None else hourly_wage(driver_w, sc["hours_per_year"])
+    other = ctx.metro["rpp"].get("rpp_other")
+    if cook is None or driver is None or other is None:
+        return None
+    ingredients = week_cost / MEALS_PER_WEEK
+    kitchen = dec(ac["kitchen_hours_per_meal"]) * cook * overhead
+    venue = dec(ac["venue_other_per_meal_usd"]) * dec(other) / 100
+    delivery = dec(ac["delivery_hours_per_meal"]) * driver * overhead
+    return {
+        "ingredients": ingredients,
+        "kitchen": kitchen,
+        "venue": venue,
+        "delivery_extra": delivery,
+        "dine": ingredients + kitchen + venue,
+        "delivered": ingredients + kitchen + venue + delivery,
+        "cook_hourly": cook,
+        "driver_hourly": driver,
+        "rpp_other": dec(other),
+    }
 
 
-def city_cuisines(ctx: Ctx) -> list[tuple[str, int]]:
-    """本城 OSM restaurant 里够门槛的菜系（家数从多到少，最多 ``max_cuisines_per_city`` 个）。一家写了几个同组标签只算一家。"""
+def cuisine_evidence(ctx: Ctx) -> dict[str, int]:
+    """完整菜系词表里每个外食菜系在本城 OSM restaurant 的家数（一家写了几个同组标签只算一家）。不再截取前几名；家数不够门槛只说明
+    缺少供应证据，不删掉这个菜系（按共同可得假设提供，并标明）。"""
     dining = ctx.cfg["food"]["dining"]
-    counts = []
+    out = {}
     for key, tags in dining["osm_cuisine_tags"].items():
-        n = sum(
+        out[key] = sum(
             s["count"] for s in ctx.metro["restaurants"]["tag_sets"] if set(s["tags"]) & set(tags)
         )
-        if n >= dining["min_restaurants"]:
-            counts.append((key, n))
-    counts.sort(key=lambda kv: (-kv[1], kv[0]))
-    return counts[: dining["max_cuisines_per_city"]]
+    return out
 
 
 def _prep_hours(meals: int, minutes: int, shopping: Fraction) -> Fraction:
@@ -341,134 +362,153 @@ def food_plans(ctx: Ctx, baskets: dict[str, Any], report: Report) -> list[Item]:
         return Item("food", o, "executable", assumptions, records)
 
     coverage = "一个成年人一周 21 餐：篮子食材按热量补齐到每天 2,000 千卡的参照量（只说吃饱的量，不是营养方案；不含油盐调料）"
-    for p in fc["home_plans"]:
-        b = weeks[p["basket"]]
+    evidence = cuisine_evidence(ctx)
+    threshold = fc["dining"]["min_restaurants"]
+    modes = {
+        "dine_out": ("外食", lambda a: (a, Fraction(0))),
+        "delivery": ("外送", lambda a: (Fraction(0), a)),
+        "half": ("外食外送各半", lambda a: (a / 2, a / 2)),
+    }
+    for b_cfg in fc["plan_baskets"]:
+        b = weeks[b_cfg["basket"]]
         week = complete_week_cost(b, complement, target)
-        prep = _prep_hours(MEALS_PER_WEEK, p["minutes_per_meal"], shopping)
         share = min(Fraction(1), b.kcal / target)
-        out.append(
-            build(
-                f"{ctx.key}.food.{p['plan']}",
-                p["label"],
-                p["quality"],
-                [
-                    FoodPlanPart(
-                        part_id="home",
-                        mode="home_cooked",
-                        meals_per_week=MEALS_PER_WEEK,
-                        fresh_meals_per_week=p["fresh_meals_per_week"],
-                        cuisine="home_style",
-                        note="自己做的家常饭",
-                    )
-                ],
-                week * WEEKS_PER_MONTH,
-                prep,
-                Fraction(0),
-                coverage,
-                f"每顿做饭与收拾约 {p['minutes_per_meal']} 分钟、买菜每周 {fc['shopping_hours_per_week']} 小时，× 52 ÷ 12"
-                "（设定；量级核对：BLS ATUS 2025 年平均，做饭的人每天 1.09 小时）",
-                [*b.records, *complement.records, fdc_ref],
-                f"篮子 {p['basket']} 每周花费 + 热量差额 × 补齐篮子每千卡花费，× 52 ÷ 12，四舍五入到分；"
-                f"篮子自身热量占参照量 {round_to(share * 100, 1)}%",
-                base_assumptions,
-                tuple(dict.fromkeys((*b.records, *complement.records))),
-                {"basket": p["basket"], "basket_energy_share": round_to(share, 4)},
+        fresh_share = Fraction(b_cfg["fresh_meals_per_week"], MEALS_PER_WEEK)
+        away = away_meal_cost(ctx, week)
+        for h in fc["home_meals_grid"]:
+            away_meals = Fraction(MEALS_PER_WEEK - h)
+            variants = (
+                [(None, None)]
+                if away_meals == 0
+                else [(m, c) for m in fc["away_modes"] for c in fc["dining"]["cuisine_order"]]
             )
-        )
-
-    meal_price = away_meal_price(ctx)
-    ce = ctx.metro["ce"]
-    cuisines = city_cuisines(ctx)
-    if not cuisines:
-        report.add(
-            "food",
-            "gap",
-            "dining_cuisines",
-            "本城 OSM restaurant 里没有够门槛的菜系，不生成外食方案",
-        )
-    for p in fc["mixed_plans"]:
-        b = weeks[p["home_basket"]]
-        home_week = complete_week_cost(b, complement, target) * Fraction(
-            p["home_meals"], MEALS_PER_WEEK
-        )
-        out_week = meal_price * p["out_meals"]
-        monthly = (home_week + out_week) * WEEKS_PER_MONTH
-        prep = _prep_hours(p["home_meals"], p["minutes_per_meal"], shopping)
-        dining = Fraction(0)
-        if p["out_mode"] == "delivery":
-            prep += dec(fc["dining"]["delivery_hours_per_meal"]) * p["out_meals"] * WEEKS_PER_MONTH
-            out_time = (
-                f"外送每顿下单与收取 {fc['dining']['delivery_hours_per_meal']} 小时（算进准备时间）"
-            )
-        else:
-            dining = dec(fc["dining"]["dine_out_hours_per_meal"]) * p["out_meals"] * WEEKS_PER_MONTH
-            out_time = f"外食每顿连往返 {fc['dining']['dine_out_hours_per_meal']} 小时"
-        for key, n in cuisines:
-            name = labels[key]
-            mode_zh = "外送" if p["out_mode"] == "delivery" else "外食"
-            assumptions = (
-                *base_assumptions,
-                "food_home_share_by_meals_v1",
-                "fafh_meals_per_person_week_v1",
-                "dining_hours_v1",
-                "cuisine_presence_threshold_v1",
-                *(("fafh_delivery_same_average_v1",) if p["out_mode"] == "delivery" else ()),
-            )
-            out.append(
-                build(
-                    f"{ctx.key}.food.{p['plan']}.{key}",
-                    f"{p['label']}（{name}）",
-                    f"每周 {p['home_meals']} 顿自己做（荤素搭配，其中 {p['home_fresh']} 顿新鲜），另外 {p['out_meals']} 顿{name}"
-                    f"{mode_zh}；{mode_zh}的钱已含在月费里，不另收"
-                    + ("；配送费与小费资料里没有，没有另加" if p["out_mode"] == "delivery" else ""),
-                    [
+            if away_meals > 0 and away is None:
+                report.add(
+                    "food",
+                    "gap",
+                    f"{b_cfg['key']}.h{h}",
+                    "外食成本代理缺资料（厨师或配送工资、其他服务 RPP）：不生成含外食的方案",
+                )
+                continue
+            for mode, cuisine in variants:
+                dine, deliv = (
+                    (Fraction(0), Fraction(0)) if mode is None else modes[mode][1](away_meals)
+                )
+                home_week = week * Fraction(h, MEALS_PER_WEEK)
+                away_week = (
+                    Fraction(0) if mode is None else dine * away["dine"] + deliv * away["delivered"]
+                )
+                monthly = (home_week + away_week) * WEEKS_PER_MONTH
+                prep = _prep_hours(h, b_cfg["minutes_per_meal"], shopping if h > 0 else Fraction(0))
+                prep += dec(fc["dining"]["delivery_hours_per_meal"]) * deliv * WEEKS_PER_MONTH
+                dining_h = dec(fc["dining"]["dine_out_hours_per_meal"]) * dine * WEEKS_PER_MONTH
+                parts = []
+                if h > 0:
+                    parts.append(
                         FoodPlanPart(
                             part_id="home",
                             mode="home_cooked",
-                            meals_per_week=p["home_meals"],
-                            fresh_meals_per_week=p["home_fresh"],
+                            meals_per_week=h,
+                            fresh_meals_per_week=round_to(fresh_share * h, 2),
                             cuisine="home_style",
                             note="自己做的家常饭",
-                        ),
-                        FoodPlanPart(
-                            part_id="out",
-                            mode=p["out_mode"],
-                            meals_per_week=p["out_meals"],
-                            fresh_meals_per_week=p["out_fresh"],
-                            cuisine=key,
-                            note=f"每周 {p['out_meals']} 顿{name}{mode_zh}",
-                        ),
-                    ],
-                    monthly,
-                    prep,
-                    dining,
-                    f"一个成年人一周 21 餐：自己做 {p['home_meals']} 顿（按热量补齐的篮子按餐数折算）+ {mode_zh} {p['out_meals']} 顿"
-                    "（每顿按本都会区平均外食花费）；不是营养方案",
-                    f"每顿做饭与收拾约 {p['minutes_per_meal']} 分钟、买菜每周 {fc['shopping_hours_per_week']} 小时；{out_time}；× 52 ÷ 12（设定）",
-                    [
-                        *b.records,
-                        *complement.records,
-                        fdc_ref,
-                        ce["record_id"],
-                        "bls_cpi_u CUUR0000SA0",
-                    ],
-                    f"家里部分 = {p['home_basket']} 补齐后的一周花费 × {p['home_meals']}/21；外面每顿 = CE 每户在外饮食 "
-                    f"{ce['food_away_per_cu_year']}（2023–24 名义）× CPI 换到 2024 ÷ 每户 {ce['persons_per_cu']} 人 ÷ 52 ÷ 每人每周 "
-                    f"{fc['dining']['meals_away_per_person_week']} 顿 = {cents(meal_price)}；合计 × 52 ÷ 12，四舍五入到分",
-                    assumptions,
-                    tuple(dict.fromkeys((*b.records, *complement.records, ce["record_id"]))),
-                    {
-                        "basket": p["home_basket"],
-                        "away_meal_average": cents(meal_price),
-                        "osm_restaurants_with_cuisine": n,
-                        **(
-                            {"delivery_fee": "unknown", "tip": "unknown"}
-                            if p["out_mode"] == "delivery"
-                            else {}
-                        ),
-                    },
+                        )
+                    )
+                name = None if cuisine is None else labels[cuisine]
+                for part, mmode, n in (("out", "dine_out", dine), ("delivery", "delivery", deliv)):
+                    if n > 0:
+                        parts.append(
+                            FoodPlanPart(
+                                part_id=part,
+                                mode=mmode,
+                                meals_per_week=round_to(n, 2),
+                                fresh_meals_per_week=round_to(fresh_share * n, 2),
+                                cuisine=cuisine,
+                                note=f"每周 {round_to(n, 2):g} 顿{name}{'外食' if mmode == 'dine_out' else '外送'}",
+                            )
+                        )
+                seen = evidence.get(cuisine, 0) if cuisine else None
+                assumed = cuisine is not None and (seen or 0) < threshold
+                assumptions = (
+                    *base_assumptions,
+                    "food_home_share_by_meals_v1",
+                    "food_fresh_by_basket_share_v1",
+                    *(
+                        (
+                            "food_away_cost_proxy_v1",
+                            "dining_hours_v1",
+                            "cuisine_evidence_threshold_v2",
+                            "oews_hourly_from_annual_v1",
+                            "labor_overhead_v1",
+                        )
+                        if mode is not None
+                        else ()
+                    ),
+                    *(("food_cuisine_common_availability_v1",) if assumed else ()),
                 )
-            )
+                if mode is None:
+                    oid = f"{ctx.key}.food.{b_cfg['key']}.h21"
+                    label = f"自己做·{b_cfg['label']}"
+                    quality = b_cfg["quality"]
+                else:
+                    oid = f"{ctx.key}.food.{b_cfg['key']}.h{h:02d}.{mode}.{cuisine}"
+                    label = f"自己做 {h} 顿·{b_cfg['label']} + {modes[mode][0]} {round_to(away_meals, 2):g} 顿（{name}）"
+                    quality = (
+                        f"每周 {h} 顿自己做（{b_cfg['label']}），另外 {round_to(away_meals, 2):g} 顿{name}{modes[mode][0]}；"
+                        "外面的钱含在月费里，不另收；外食按统一成本代理估计，不是某家餐馆的报价"
+                        + (
+                            "；本城 OSM 里这个菜系的餐馆不到门槛，按共同可得假设提供"
+                            if assumed
+                            else ""
+                        )
+                    )
+                attrs: dict[str, Any] = {
+                    "basket": b_cfg["basket"],
+                    "basket_energy_share": round_to(share, 4),
+                    "home_meals_per_week": h,
+                }
+                rule = (
+                    f"家里 = {b_cfg['basket']} 补齐后的一周花费 × {h}/21"
+                    if mode is None
+                    else (
+                        f"家里 = {b_cfg['basket']} 补齐后的一周花费 × {h}/21；外面每顿 = 食材 {cents(away['ingredients'])} + 厨房 0.25 小时 × "
+                        f"{cents(away['cook_hourly'])}/时 × 倍率 + 场地 2 × 其他服务 RPP {ctx.metro['rpp']['rpp_other']} ÷ 100"
+                        + ("；外送再加 0.2 小时配送人工" if deliv else "")
+                    )
+                ) + "；合计 × 52 ÷ 12，四舍五入到分"
+                if mode is not None:
+                    attrs.update(
+                        away_mode=mode,
+                        away_meal_dine_cost=cents(away["dine"]),
+                        away_meal_delivered_cost=cents(away["delivered"]),
+                        osm_restaurants_with_cuisine=seen or 0,
+                        cuisine_supply_evidence="osm_presence"
+                        if not assumed
+                        else "common_availability_assumed",
+                        taxes_fees_tips="not_itemized",
+                    )
+                out.append(
+                    build(
+                        oid,
+                        label[:120],
+                        quality[:280],
+                        parts,
+                        monthly,
+                        prep,
+                        dining_h,
+                        coverage,
+                        (
+                            f"每顿做饭与收拾约 {b_cfg['minutes_per_meal']} 分钟、有自己做时买菜每周 {fc['shopping_hours_per_week']} 小时；"
+                            f"外食每顿连往返 {fc['dining']['dine_out_hours_per_meal']} 小时、外送每顿 {fc['dining']['delivery_hours_per_meal']} 小时；"
+                            "× 52 ÷ 12（设定）"
+                        )[:280],
+                        [*dict.fromkeys((*b.records, *complement.records)), fdc_ref],
+                        rule[:280],
+                        assumptions,
+                        tuple(dict.fromkeys((*b.records, *complement.records))),
+                        attrs,
+                    )
+                )
     return out
 
 
@@ -491,8 +531,33 @@ def food_check(ctx: Ctx, baskets: dict[str, Any]) -> dict[str, Any]:
         "ce_food_at_home_per_person_month": cents(
             dec(ce["food_at_home_per_cu_year"]) * factor / dec(ce["persons_per_cu"]) / 12
         ),
+        # 外食只做量级对照：CE 每户“在外饮食”年支出 × CPI ÷ 每户人数 ÷ 12（不再除以设定餐数去当单餐价）
+        "ce_food_away_per_person_month": cents(
+            dec(ce["food_away_per_cu_year"]) * factor / dec(ce["persons_per_cu"]) / 12
+        ),
+        "away_cost_proxy_per_meal": _away_proxy_summary(ctx, baskets),
         "ce_record": ce["record_id"],
     }
+    return out
+
+
+def _away_proxy_summary(ctx: Ctx, baskets: dict[str, Any]) -> dict[str, Any]:
+    """每个方案篮子的外食成本代理（每顿堂食 / 外送，分项），供与 CE 量级对照；缺资料写 None。"""
+    fc = ctx.cfg["food"]
+    target = dec(fc["energy_reference_kcal_per_day"]) * 7
+    weeks = {k: basket_week(ctx, v["items"]) for k, v in baskets.items()}
+    complement = weeks[fc["complement_basket"]]
+    out: dict[str, Any] = {}
+    for b_cfg in fc["plan_baskets"]:
+        away = away_meal_cost(ctx, complete_week_cost(weeks[b_cfg["basket"]], complement, target))
+        out[b_cfg["key"]] = (
+            None
+            if away is None
+            else {
+                k: cents(away[k])
+                for k in ("ingredients", "kitchen", "venue", "delivery_extra", "dine", "delivered")
+            }
+        )
     return out
 
 
@@ -845,7 +910,7 @@ def template_activities(ctx: Ctx, report: Report) -> list[Item]:
             availability, status = "available", "executable"
             price = quote(sum(parts.values(), Fraction(0)), ctx.numeraire, "one_time", "session")
         spec: dict[str, Any] = {f"{k}_component": cents(v) for k, v in parts.items()}
-        rule = "；".join(rule_text) + "；合计四舍五入到分" if rule_text else "在家进行，不收费"
+        rule = "；".join(rule_text) + "；合计四舍五入到分" if rule_text else "自己进行，不收费"
         note = "老师小时、人数、场地与器材是登记的模型活动设定（activity_template_v1），不是某个场所的真实报价"
         inputs = [
             *records,
@@ -903,6 +968,77 @@ def template_activities(ctx: Ctx, report: Report) -> list[Item]:
             )
         )
     return out
+
+
+def block_evidence(ctx: Ctx) -> dict[str, dict[str, Any]]:
+    """每个 A 板块在这座城实际用到的证据值（``a_blocks`` 的 city_evidence）：时薪写到分，没有资料的写 None（未知，不当 0）。"""
+    sc, fc, ac = ctx.cfg["services"], ctx.cfg["food"], ctx.cfg["activities"]
+
+    def hourly(soc: str) -> str | None:
+        w = ctx.wage(soc)
+        h = None if w is None else hourly_wage(w, sc["hours_per_year"])
+        return None if h is None else f"{cents(h):.2f}"
+
+    rpp, goods = ctx.metro["rpp"], ctx.metro["food"]["goods_factor"]
+    return {
+        "food": {
+            "basket_item_prices": len(ctx.metro["food"]["items"]),
+            "cook_hourly_median": hourly(fc["away_cost"]["cook_soc"]),
+            "delivery_driver_hourly_median": hourly(fc["away_cost"]["delivery_soc"]),
+            "rpp_other": rpp.get("rpp_other"),
+            "osm_restaurants_by_cuisine": cuisine_evidence(ctx),
+        },
+        "services": {
+            "hourly_median_by_soc": {
+                s["soc"]: hourly(s["soc"]) for s in [*sc["chores"], *sc["enjoyment"]]
+            }
+        },
+        "devices": {"goods_factor": goods},
+        "equipment": {"goods_factor": goods},
+        "activities": {
+            "rpp_all": rpp.get("rpp_all"),
+            "goods_factor": goods,
+            "hourly_median_by_soc": {
+                x["soc"]: hourly(x["soc"]) for x in ac["templates"] if x.get("soc")
+            },
+            "venue_counts": {k: venue_count(ctx, r) for k, r in ac["venue_rules"].items()},
+        },
+    }
+
+
+def activity_dominance(items: list[Item]) -> list[dict[str, Any]]:
+    """付费活动被免费活动支配的情况（只报告，不为付费方案新增奖励）。休闲评分只读参与小时与兴趣匹配，所以同一类别里，免费方案的
+    装备要求不多于付费方案、每参与一小时花的总时间不多于付费方案时，付费方案在评分口径下被支配。"""
+
+    def facts(i: Item) -> tuple[str, float, float, frozenset[str]] | None:
+        o = i.opportunity
+        if o.activity is None or o.price is None or i.status != "executable":
+            return None
+        a = o.activity
+        if a.participation_hours <= 0:
+            return None
+        per_hour = (a.participation_hours + a.overhead_hours) / a.participation_hours
+        return a.primary_category, o.price.amount.amount, per_hour, frozenset(a.requires)
+
+    rows = [(i, f) for i in items if (f := facts(i)) is not None]
+    out = []
+    for paid, (cat, price, per_hour, needs) in rows:
+        if price <= 0:
+            continue
+        for free, (cat2, price2, per_hour2, needs2) in rows:
+            if cat2 == cat and price2 == 0 and needs2 <= needs and per_hour2 <= per_hour:
+                out.append(
+                    {
+                        "paid": paid.opportunity.opportunity_id,
+                        "dominated_by": free.opportunity.opportunity_id,
+                        "category": cat,
+                        "reason_zh": (
+                            f"同类别（{cat}）的免费方案不要更多装备，每参与一小时总共花 {per_hour2:g} 小时（付费方案 {per_hour:g} 小时）；"
+                            "休闲评分只读参与小时与兴趣匹配，付费方案在评分口径下被支配"
+                        ),
+                    }
+                )
+    return sorted(out, key=lambda r: (r["paid"], r["dominated_by"]))
 
 
 # --------------------------------------------------------------------------- 活动：芝加哥公园管理局的真实活动

@@ -169,6 +169,7 @@ def rows(
     count: int,
     weight: int = 1,
     soc: str = "43",
+    hours: float = 40,
 ) -> list[dict]:
     powsp, powpuma = POW[work]
     return [
@@ -181,6 +182,7 @@ def rows(
             "POWSP": powsp,
             "POWPUMA": powpuma,
             "SOC2": soc,
+            "WKHP": hours,
         }
     ] * count
 
@@ -189,7 +191,7 @@ def commuters() -> pd.DataFrame:
     """A→曼哈顿坐公交的 30 人是 SOC 15（计算机与数学），其余都是 43（办公室与行政支持）。"""
     car, bus, walk, taxi = 1, 2, 10, 7
     r = (
-        rows(A, "M", bus, 20, 30, soc="15")
+        rows(A, "M", bus, 20, 30, soc="15", hours=45)
         + rows(A, "M", walk, 15, 30)
         + rows(A, "M", car, 30, 5)
         + rows(A, "M", taxi, 30, 4)
@@ -199,7 +201,7 @@ def commuters() -> pd.DataFrame:
         + rows(A, "albany", car, 70, 2)
         + rows(D, "M", car, 40, 30)
         + rows(D, "K", car, 25, 30)
-        + rows(B, "K", car, 20, 3)
+        + rows(B, "K", car, 20, 3, hours=99)  # WKHP = 99：99 小时或以上（顶码）
         + rows(B, "M", bus, 45, 30)
         + rows(B, "N", car, 60, 3)
     )
@@ -407,24 +409,30 @@ def test_ids_follow_the_shared_life_pack_convention(city):
     }
 
 
-def test_work_area_job_shares_by_soc_major_group(city):
-    # 全部：600 / 300 / 60 / 40；SOC 15 只有 A→曼哈顿的 30 人；SOC 43 = 570 / 300 / 60 / 40（合计 970）
-    s = city["work_area_job_shares"]
-    assert s["all"]["weight"] == 1000
-    assert s["all"]["shares"] == {M: "0.6000", K: "0.3000", N: "0.0600", OTHER: "0.0400"}
-    assert s["by_soc_major"]["15"]["shares"] == {
-        M: "1.0000",
-        K: "0.0000",
-        N: "0.0000",
-        OTHER: "0.0000",
-    }
-    assert s["by_soc_major"]["43"]["weight"] == 970
-    assert s["by_soc_major"]["43"]["shares"] == {
-        M: "0.5876",
-        K: "0.3093",
-        N: "0.0619",
-        OTHER: "0.0412",
-    }
+def test_hours_and_work_area_come_from_the_same_records(city):
+    """（通常每周工时 × 就业片区）的加权经验联合分布：同一条记录的工时与工作地一起数，不取片区众数、不把工时压成中位数。"""
+    j = city["hours_area_joint"]
+    assert j["all"]["weight"] == 1000
+    # SOC 15：A→曼哈顿坐公交的 30 人，每周 45 小时——一个点，权重 30
+    assert j["by_soc_major"]["15"]["points"] == [{"hours": 45, "area": M, "weight": 30, "n": 30}]
+    s43 = j["by_soc_major"]["43"]
+    assert s43["weight"] == 970
+    # B→布鲁克林开车的 3 人 WKHP = 99：顶码，单独计数，不进可执行的组合
+    assert s43["weight_hours_topcoded"] == 3 and s43["weight_hours_missing"] == 0
+    assert sum(p["weight"] for p in s43["points"]) == 967
+    assert {p["hours"] for p in s43["points"]} == {40}
+    by_area = {}
+    for p in s43["points"]:
+        by_area[p["area"]] = by_area.get(p["area"], 0) + p["weight"]
+    assert by_area == {M: 570, K: 297, N: 60, OTHER: 40}
+
+
+def test_each_line_keeps_its_full_time_distribution_for_diagnostics(costs):
+    r = build_city(CFG, NYC, raw_inputs(), intake_facts(), costs)
+    lines = r.times["lines"]
+    assert lines[f"{A}|{M}|transit"] == {"n": 30, "oneway_minutes": [[20, 30, 30]]}
+    assert r.payload["time_distributions"]["content_identity"] == r.times["content_identity"]
+    assert r.payload["time_distributions"]["lines"] == len(lines)
 
 
 def test_resident_diagnostics(city):
@@ -498,15 +506,16 @@ def test_read_commuters_keeps_employed_non_wfh_commuters():
             "POWSP",
             "POWPUMA",
             "SOCP",
+            "WKHP",
         ]
     )
     lines = [
         header,
-        "1,36,4101,12,1,25,3,036,4100,151252",  # 留下：在职、坐地铁
-        "2,36,4101,12,1,,11,036,4100,151252",  # 在家工作
-        "3,36,4101,12,3,30,1,036,4100,",  # 失业
-        "4,36,4101,12,2,,,,,4110XX",  # 有工作但上周没上班
-        "5,36,4101,12,1,40,1,034,600,",  # 留下：去新泽西开车（没有职业代码）
+        "1,36,4101,12,1,25,3,036,4100,151252,38",  # 留下：在职、坐地铁
+        "2,36,4101,12,1,,11,036,4100,151252,40",  # 在家工作
+        "3,36,4101,12,3,30,1,036,4100,,",  # 失业
+        "4,36,4101,12,2,,,,,4110XX,20",  # 有工作但上周没上班
+        "5,36,4101,12,1,40,1,034,600,,99",  # 留下：去新泽西开车（没有职业代码），WKHP 顶码照实保留
     ]
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w") as z:
@@ -516,6 +525,7 @@ def test_read_commuters_keeps_employed_non_wfh_commuters():
     assert df["PUMA"].tolist() == ["04101", "04101"]
     assert df["POWSP"].tolist() == ["036", "034"] and df["POWPUMA"].tolist() == ["04100", "00600"]
     assert df["SOC2"].tolist() == ["15", ""]
+    assert df["WKHP"].tolist() == [38, 99]  # 99 = 99 小时或以上，读入时不改，联合分布里单独计数
 
 
 def test_parse_powpuma_lookup():

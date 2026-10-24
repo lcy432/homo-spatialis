@@ -2,9 +2,9 @@
  "schema": "e3b-life-items-frozen-v1",
  "versions": {
   "items": "e3b-life-items-v1",
-  "occupations": "e3b-occupations-v1"
+  "occupations": "e3b-occupations-v2"
  },
- "intake_build_id": "562c32339bbae67fd1917b7ac67f4b5b28f55d07e88a8c78ee6fe371ed863691",
+ "intake_build_id": "35667f4101a71c0e5ea6c1aaa8e5f45cd83c825d6b1393bde1104d3d571a96b7",
  "raw_sha256": {
   "bls_atus": "4fe7b39ff435416aee80ac1c23a95a7067e9c6c23dd5c99d9631dda9b567ba6c",
   "bls_cpi_u": "f3c22c8592d9134fa5ab305fa2df6e37dfd2388f10168985fdbc84082deb4ff0",
@@ -12,10 +12,10 @@
   "usda_fdc_sr_legacy": "b80817294b8850530aaedf2e515c02593b1824f763a0ff356e5c2081643e6fd0"
  },
  "identities": {
-  "items_config": "3abf5d155177fca574c0667bd621bd7250a917b6bec2c1b3956d103a3840281f",
-  "occupations_config": "494a4f01ab49c9601030badaf66be98cd40d6a27d3f718e00ba286be91b6d871",
+  "items_config": "012f9621d945bc3e95d51cf9611d8a724a2b9ae6290ba1d76f381b80426dcde4",
+  "occupations_config": "f2ce1008acbef70db9e60afe0c09ef2bfd2614f5f8094bc9ce83133d82b4c627",
   "baskets": "8714cbfd8ebb7dfbd39fb6f9bd9bcc2489d4841fe6caefbbdb88bbac1388d19f",
-  "slice": "b88559d4d698d701f018b0054d066120d327ffb04f2312baa2c31086a8fcc243"
+  "slice": "d8a4f8150f99c2dfbe923e9dde7ee4f59279fe651e41a5284b0ee7541878249e"
  },
  "numeraire": "USD_2024_LOCAL",
  "vocabulary": {
@@ -52,23 +52,25 @@
   "attribute_keys": [
    "activity_type",
    "age_rule",
-   "away_meal_average",
+   "away_meal_delivered_cost",
+   "away_meal_dine_cost",
+   "away_mode",
    "basket",
    "basket_energy_share",
    "chicago_category",
    "cip",
+   "cuisine_supply_evidence",
    "date_notes",
    "days",
-   "delivery_fee",
    "employer",
    "employment",
    "end_date",
    "entry_education",
    "equipment_requirements",
    "facility",
-   "group_wfh_share",
+   "home_meals_per_week",
    "hourly_wage_median",
-   "hours_table_level",
+   "hours_area_level",
    "installation",
    "institution",
    "model_plan",
@@ -84,7 +86,7 @@
    "soc_title",
    "start_calendar",
    "start_date",
-   "tip",
+   "taxes_fees_tips",
    "venue_evidence",
    "wage_soc"
   ]
@@ -499,6 +501,15 @@
   },
   "title": "Table 1. Time spent in primary activities and percent of the civilian population engaging in each activity, averages per day by sex, 2025 annual averages"
  },
+ "job_rules": {
+  "scheme": "SOC2018",
+  "arrangement": {
+   "days_per_week": 5,
+   "hybrid_onsite_share": "3/5",
+   "burden_per_work_hour": 1.0
+  },
+  "mapping_version": "e3b-life-items-v1"
+ },
  "assumptions": [
   {
    "id": "food_energy_completion_v1",
@@ -524,7 +535,7 @@
   {
    "id": "food_plan_composition_v1",
    "nature": "assumption",
-   "statement_zh": "每个方案的每周新鲜餐数与每顿做饭分钟（food.home_plans / mixed_plans），外食与外送的餐都按新鲜餐计（与合成样例 SC-25 相同的口径）",
+   "statement_zh": "三个篮子各自的每周新鲜餐数（主食为主 4、荤素搭配 10、鲜肉蔬果较多 17，按 21 餐计）与每顿做饭分钟（20、25、30），见 food.plan_baskets；所有方案共用",
    "basis_zh": "篮子是“主食为主 / 荤素搭配 / 鲜肉蔬果较多”的设定，新鲜餐数按篮子里生鲜食材的多少写定；量级核对：BLS ATUS 2025 年平均，做饭的人每天花 1.09 小时在做饭与收拾上（见 food_time_check_v1）",
    "config": "life-items-us-v1"
   },
@@ -538,20 +549,21 @@
   {
    "id": "food_home_share_by_meals_v1",
    "nature": "rule",
-   "statement_zh": "混合方案里家里部分的费用 = 同一篮子补齐后的一周费用 × 家里餐数 ÷ 21",
+   "statement_zh": "方案里家里部分的费用 = 同一篮子补齐后的一周费用 × 家里餐数 ÷ 21；家里餐数取共同网格 0、3、7、14、21",
    "config": "life-items-us-v1"
   },
   {
-   "id": "fafh_meals_per_person_week_v1",
-   "nature": "assumption",
-   "value": "每人每周 3 顿在外饮食",
-   "basis_zh": "没有公开的都会区“每人外食餐数”资料；CE 的在外饮食支出含零食与饮品，除以这个数得到的是“平均每顿外食花费”，不是菜单价；同一个数用于六城，城市差异只来自 CE",
+   "id": "food_fresh_by_basket_share_v1",
+   "nature": "rule",
+   "statement_zh": "每个组成的新鲜餐 = 这一组成的每周餐数 × 篮子新鲜餐数 ÷ 21（家里与外面同一比例），四舍五入到 0.01；外食与外送不自动算新鲜",
+   "basis_zh": "外食的食材口径就是所用篮子（food_away_cost_proxy_v1），新鲜程度跟着篮子走；没有餐馆新鲜度资料",
    "config": "life-items-us-v1"
   },
   {
-   "id": "fafh_delivery_same_average_v1",
+   "id": "food_away_cost_proxy_v1",
    "nature": "assumption",
-   "statement_zh": "外送的一顿按同一“平均每顿外食花费”计；配送费与小费没有资料，不另加（terms 写 unknown）",
+   "statement_zh": "外食一顿 = 所用篮子补齐后每周花费 ÷ 21 + 厨房 0.25 小时 × 厨师（35-2014）都会区中位时薪 × 人工费用倍率 2.0 + 场地及其他 2 美元（全国基准）× 其他服务 RPP ÷ 100；外送每顿再加 0.2 小时 × 配送司机（53-3033）中位时薪 × 2.0",
+   "basis_zh": "共同探索假设，六城同一公式，城市差异只来自食材价、工资与 RPP；不是已验证的菜单价。销售税、平台费与小费没有单列，不另加（机会属性 taxes_fees_tips = not_itemized）。CE 都会区的在外饮食支出只做量级对照（food_check）",
    "config": "life-items-us-v1"
   },
   {
@@ -561,10 +573,24 @@
    "config": "life-items-us-v1"
   },
   {
-   "id": "cuisine_presence_threshold_v1",
+   "id": "cuisine_evidence_threshold_v2",
    "nature": "assumption",
-   "value": "本城至少 20 家 OSM restaurant 写了这个菜系标签；每城最多 6 个菜系（按家数从多到少）",
-   "basis_zh": "只有确实看得到的菜系才提供对应外食方案；家数只说明存在，不说明质量或价格",
+   "value": "本城至少 20 家 OSM restaurant 写了这个菜系标签才算“有供应证据”；只用来标明证据，不再决定提供与否，也不截取前几名",
+   "basis_zh": "家数只说明存在，不说明质量或价格；OSM 的覆盖不完整",
+   "config": "life-items-us-v1"
+  },
+  {
+   "id": "food_cuisine_common_availability_v1",
+   "nature": "assumption",
+   "statement_zh": "产品资料包外食菜系词表里的 9 个菜系在六个都会区都按共同可得提供；本城 OSM 不到证据门槛的方案在机会里标明（cuisine_supply_evidence = common_availability_assumed），不冒充某家餐馆的报价",
+   "basis_zh": "OSM 未发现只表示缺少供应证据，不等于买不到；用同一个成本代理计价，不制造城市差异",
+   "config": "life-items-us-v1"
+  },
+  {
+   "id": "retail_correction_lognormal_v1",
+   "nature": "assumption",
+   "statement_zh": "同规格零售价相对基础成本预测的修正 δ = log(实际价 ÷ 基础预测价)，共同先验 N(0, log(1.5)²)；同规格直接报价按供应商去重、每家一个对数比值；本地均值观测方差 max(s²/n, log(1.1)²)，只有一家时 log(1.5)²；正态共轭更新，执行价 = 基础预测 × exp(后验均值)",
+   "basis_zh": "方差是登记的探索设定，不是从报价估计的；现在六城没有合格的同规格直接报价，所以全部“未发生本地报价更新”，执行价就是基础预测（标为估计）",
    "config": "life-items-us-v1"
   },
   {
@@ -679,7 +705,20 @@
   {
    "id": "job_arrangement_v1",
    "nature": "rule",
-   "statement_zh": "每周工时取工时表；每月 = 每周 × 52 ÷ 12（0.01）；每周 5 天、每月 22 个工作日；薪酬 = 年薪 × 每周工时 ÷ 40（分）",
+   "statement_zh": "每周工时取联合分布里这一点的工时；每月 = 每周 × 52 ÷ 12（0.01）；每周 5 天、每月 22 个工作日（低工时 = 每天工作短）；薪酬 = 年薪 × 每周工时 ÷ 40（分）",
+   "config": "occupations-us-v1"
+  },
+  {
+   "id": "job_wage_support_v1",
+   "nature": "rule",
+   "statement_zh": "OEWS p10、p25、p50、p75、p90 之间分段线性的分位函数，在 p10–p90 里切 20 个等概率区间、取每个区间中点的年薪（每点概率 0.04）；两端共 20% 是未识别，不生成尾部；有分位没有发布时，落在那一段的区间也是未识别",
+   "config": "occupations-us-v1"
+  },
+  {
+   "id": "job_wage_independent_of_hours_area_v1",
+   "nature": "assumption",
+   "statement_zh": "给定职业后，工资与（每周工时 × 就业片区）条件独立：两者分别来自 OEWS 与 ACS PUMS，拼接是登记的假设，不是观测到的完整联合关系",
+   "basis_zh": "OEWS 不给工时与工作地点，PUMS 的 WAGP 是过去一年的收入（不是岗位工资）；两套资料没有共同的个人记录",
    "config": "occupations-us-v1"
   },
   {
@@ -697,9 +736,9 @@
    "config": "occupations-us-v1"
   },
   {
-   "id": "start_job_median_v1",
+   "id": "start_job_median_v2",
    "nature": "rule",
-   "statement_zh": "开局岗位 = 开局城市里用户确认职业的中位数档；职业不在范围或本城没有这个职业的工资资料就拒绝并说明原因，不替换",
+   "statement_zh": "开局岗位 = 开局城市里用户确认职业的 OEWS 中位年薪；每周工时与就业片区取这一职业大类联合分布里权重最大的一点（只用于统一开局，不压缩候选池）；职业不在范围或本城没有工资资料就拒绝并说明原因，不替换",
    "config": "occupations-us-v1"
   },
   {
@@ -720,10 +759,10 @@
  "cities": {
   "35620": {
    "key": "nyc",
-   "content_identity": "26948b1cf5d0d323c9be3afcae180ac07a2b4ed69c59461e4ab7961d84db3370",
+   "content_identity": "e07c0363df9263bc62b69112c87376446a2c0179f18559d324c998ca94478b52",
    "counts": {
     "raw_inputs": {
-     "intake_records_referenced": 84,
+     "intake_records_referenced": 34,
      "food_item_prices": 52,
      "osm_restaurants": 7936,
      "osm_venues": 4278,
@@ -733,25 +772,24 @@
      "energy_star_us_models": 917
     },
     "generated": {
-     "activity": 10,
+     "activity": 11,
      "device": 5,
      "enjoyment": 3,
      "equipment": 2,
-     "food": 15,
-     "job": 120,
+     "food": 327,
      "service": 3,
      "training": 3
     },
     "by_status": {
-     "executable": 40,
-     "needs_area": 120,
+     "executable": 353,
+     "needs_area": 0,
      "needs_e1_extension": 0,
      "data_unknown": 1
     },
     "by_domain_status": {
      "activity": {
       "data_unknown": 1,
-      "executable": 9
+      "executable": 10
      },
      "device": {
       "executable": 5
@@ -763,10 +801,7 @@
       "executable": 2
      },
      "food": {
-      "executable": 15
-     },
-     "job": {
-      "needs_area": 120
+      "executable": 327
      },
      "service": {
       "executable": 3
@@ -783,10 +818,10 @@
   },
   "31080": {
    "key": "la",
-   "content_identity": "535eed69132e9a9b43812f1ccee11e8a125b5ddb91c2c6c59252ac12b5d17111",
+   "content_identity": "e0f7dacab9912eb1f1d9df2b46ec9dd2ce71df1123e76316faeeba0f81ee9675",
    "counts": {
     "raw_inputs": {
-     "intake_records_referenced": 81,
+     "intake_records_referenced": 31,
      "food_item_prices": 52,
      "osm_restaurants": 2904,
      "osm_venues": 9750,
@@ -796,17 +831,71 @@
      "energy_star_us_models": 917
     },
     "generated": {
+     "activity": 11,
+     "device": 5,
+     "enjoyment": 3,
+     "equipment": 2,
+     "food": 327,
+     "service": 3
+    },
+    "by_status": {
+     "executable": 350,
+     "needs_area": 0,
+     "needs_e1_extension": 0,
+     "data_unknown": 1
+    },
+    "by_domain_status": {
+     "activity": {
+      "data_unknown": 1,
+      "executable": 10
+     },
+     "device": {
+      "executable": 5
+     },
+     "enjoyment": {
+      "executable": 3
+     },
+     "equipment": {
+      "executable": 2
+     },
+     "food": {
+      "executable": 327
+     },
+     "service": {
+      "executable": 3
+     }
+    },
+    "not_generated": {
+     "gap": 9,
+     "not_applicable": 677
+    }
+   }
+  },
+  "41860": {
+   "key": "sf",
+   "content_identity": "bcb8b11b5bff70fd85b9d34d045d990e3f65d00c71968f6d8d659798e8590ff8",
+   "counts": {
+    "raw_inputs": {
+     "intake_records_referenced": 30,
+     "food_item_prices": 52,
+     "osm_restaurants": 1924,
+     "osm_venues": 739,
+     "oews_occupations": 53,
+     "chicago_programs": 0,
+     "ipeds_programs": 114,
+     "energy_star_us_models": 917
+    },
+    "generated": {
      "activity": 10,
      "device": 5,
      "enjoyment": 3,
      "equipment": 2,
-     "food": 15,
-     "job": 120,
+     "food": 327,
      "service": 3
     },
     "by_status": {
-     "executable": 37,
-     "needs_area": 120,
+     "executable": 349,
+     "needs_area": 0,
      "needs_e1_extension": 0,
      "data_unknown": 1
     },
@@ -825,76 +914,14 @@
       "executable": 2
      },
      "food": {
-      "executable": 15
-     },
-     "job": {
-      "needs_area": 120
+      "executable": 327
      },
      "service": {
       "executable": 3
      }
     },
     "not_generated": {
-     "gap": 9,
-     "not_applicable": 677
-    }
-   }
-  },
-  "41860": {
-   "key": "sf",
-   "content_identity": "ee6219e1ed1986e25ce03d4fce0a3ffe77056c88d2a63b19a964dec3ac668cb5",
-   "counts": {
-    "raw_inputs": {
-     "intake_records_referenced": 80,
-     "food_item_prices": 52,
-     "osm_restaurants": 1924,
-     "osm_venues": 739,
-     "oews_occupations": 53,
-     "chicago_programs": 0,
-     "ipeds_programs": 114,
-     "energy_star_us_models": 917
-    },
-    "generated": {
-     "activity": 9,
-     "device": 5,
-     "enjoyment": 3,
-     "equipment": 2,
-     "food": 15,
-     "job": 120,
-     "service": 3
-    },
-    "by_status": {
-     "executable": 36,
-     "needs_area": 120,
-     "needs_e1_extension": 0,
-     "data_unknown": 1
-    },
-    "by_domain_status": {
-     "activity": {
-      "data_unknown": 1,
-      "executable": 8
-     },
-     "device": {
-      "executable": 5
-     },
-     "enjoyment": {
-      "executable": 3
-     },
-     "equipment": {
-      "executable": 2
-     },
-     "food": {
-      "executable": 15
-     },
-     "job": {
-      "needs_area": 120
-     },
-     "service": {
-      "executable": 3
-     }
-    },
-    "not_generated": {
-     "gap": 2,
+     "gap": 3,
      "not_applicable": 114,
      "not_offered": 1
     }
@@ -902,10 +929,10 @@
   },
   "16980": {
    "key": "chi",
-   "content_identity": "e8a2ec330d4d57f6abb31acc49ccefa1c9c2d108042a784d057568c395ae9287",
+   "content_identity": "12964491af6d088d0ef1bb1b847b183157fbff1038b5a264e39ab5e30e08f985",
    "counts": {
     "raw_inputs": {
-     "intake_records_referenced": 1779,
+     "intake_records_referenced": 1729,
      "food_item_prices": 52,
      "osm_restaurants": 2405,
      "osm_venues": 1235,
@@ -915,24 +942,23 @@
      "energy_star_us_models": 917
     },
     "generated": {
-     "activity": 1708,
+     "activity": 1709,
      "device": 5,
      "enjoyment": 3,
      "equipment": 2,
-     "food": 15,
-     "job": 120,
+     "food": 327,
      "service": 3
     },
     "by_status": {
-     "executable": 37,
-     "needs_area": 120,
+     "executable": 350,
+     "needs_area": 0,
      "needs_e1_extension": 1698,
      "data_unknown": 1
     },
     "by_domain_status": {
      "activity": {
       "data_unknown": 1,
-      "executable": 9,
+      "executable": 10,
       "needs_e1_extension": 1698
      },
      "device": {
@@ -945,10 +971,7 @@
       "executable": 2
      },
      "food": {
-      "executable": 15
-     },
-     "job": {
-      "needs_area": 120
+      "executable": 327
      },
      "service": {
       "executable": 3
@@ -963,10 +986,10 @@
   },
   "26420": {
    "key": "hou",
-   "content_identity": "dd42ea580012bf2f161d5353d74722d16aab053cf5fb8bc2340cfe6675326e99",
+   "content_identity": "6b3c6a96f9e6565bcb0820418230af5a4e664370d465f0ade2ac8b8e4390a06b",
    "counts": {
     "raw_inputs": {
-     "intake_records_referenced": 84,
+     "intake_records_referenced": 34,
      "food_item_prices": 52,
      "osm_restaurants": 1543,
      "osm_venues": 3150,
@@ -976,25 +999,24 @@
      "energy_star_us_models": 917
     },
     "generated": {
-     "activity": 10,
+     "activity": 11,
      "device": 5,
      "enjoyment": 3,
      "equipment": 2,
-     "food": 15,
-     "job": 120,
+     "food": 327,
      "service": 3,
      "training": 3
     },
     "by_status": {
-     "executable": 40,
-     "needs_area": 120,
+     "executable": 353,
+     "needs_area": 0,
      "needs_e1_extension": 0,
      "data_unknown": 1
     },
     "by_domain_status": {
      "activity": {
       "data_unknown": 1,
-      "executable": 9
+      "executable": 10
      },
      "device": {
       "executable": 5
@@ -1006,10 +1028,7 @@
       "executable": 2
      },
      "food": {
-      "executable": 15
-     },
-     "job": {
-      "needs_area": 120
+      "executable": 327
      },
      "service": {
       "executable": 3
@@ -1026,10 +1045,10 @@
   },
   "42660": {
    "key": "sea",
-   "content_identity": "a942e4f9e511e95efe133f5c52336f35814a2a243454a750dc4bdb4854985ed0",
+   "content_identity": "5912a55e8f8c375a943433c0ee909528454563ef1cda3a7108217d626cefe360",
    "counts": {
     "raw_inputs": {
-     "intake_records_referenced": 81,
+     "intake_records_referenced": 31,
      "food_item_prices": 52,
      "osm_restaurants": 1419,
      "osm_venues": 838,
@@ -1039,24 +1058,23 @@
      "energy_star_us_models": 917
     },
     "generated": {
-     "activity": 10,
+     "activity": 11,
      "device": 5,
      "enjoyment": 3,
      "equipment": 2,
-     "food": 15,
-     "job": 120,
+     "food": 327,
      "service": 3
     },
     "by_status": {
-     "executable": 37,
-     "needs_area": 120,
+     "executable": 350,
+     "needs_area": 0,
      "needs_e1_extension": 0,
      "data_unknown": 1
     },
     "by_domain_status": {
      "activity": {
       "data_unknown": 1,
-      "executable": 9
+      "executable": 10
      },
      "device": {
       "executable": 5
@@ -1068,21 +1086,18 @@
       "executable": 2
      },
      "food": {
-      "executable": 15
-     },
-     "job": {
-      "needs_area": 120
+      "executable": 327
      },
      "service": {
       "executable": 3
      }
     },
     "not_generated": {
-     "gap": 3,
+     "gap": 4,
      "not_applicable": 59
     }
    }
   }
  },
- "content_identity": "1b6e7f19ac9b5985a92409f8a9400ddb536cb16af899f6e647277fdd2b9807cb"
+ "content_identity": "9fa5b5456f5c09bf73d30ca6454cf8a0cd0756f13f91ddf3b6687f53e5ac6404"
 }

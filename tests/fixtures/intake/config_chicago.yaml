@@ -273,6 +273,18 @@ pums:
   - ELEFP
   - GASFP
   - WATFP
+  - FULFP
+  - ELEP
+  - GASP
+  - WATP
+  - FULP
+  - KIT
+  - PLM
+  - ACCESSINET
+  - HISPEED
+  - BROADBND
+  - SMARTPHONE
+  - TEL
   person_vars:
   - SERIALNO
   - SPORDER
@@ -426,9 +438,7 @@ menus:
   - 2
   policies:
     housing:
-      kind: annual_exposure_sample
-      strata_key: bedrooms
-      per_stratum: 3
+      kind: full_catalog
     jobs:
       kind: annual_exposure_sample
       strata_key: soc_major
@@ -444,10 +454,4 @@ menus:
     background:
       kind: full_catalog
   size_diagnostic:
-    housing_per_stratum:
-    - 1
-    - 2
-    - 3
-    - 5
-    - 8
     repeats: 20

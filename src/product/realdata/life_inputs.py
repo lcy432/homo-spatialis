@@ -254,7 +254,14 @@ def _wages(conn: sqlite3.Connection, cbsa: str, socs: list[str]) -> dict[str, An
             "period": rec["period"]["label"],
             **{
                 k: (f[k]["value"] if k in f and f[k]["status"] == "present" else None)
-                for k in ("employment", "annual_wage_p25", "annual_wage_median", "annual_wage_p75")
+                for k in (
+                    "employment",
+                    "annual_wage_p10",
+                    "annual_wage_p25",
+                    "annual_wage_median",
+                    "annual_wage_p75",
+                    "annual_wage_p90",
+                )
             },
             "conversion": (f.get("annual_wage_median") or {}).get("method"),
         }

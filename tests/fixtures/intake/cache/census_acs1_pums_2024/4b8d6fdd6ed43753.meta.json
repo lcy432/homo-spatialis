@@ -3,8 +3,8 @@
  "url": "https://www2.census.gov/programs-surveys/acs/data/pums/2024/1-Year/csv_hil.zip",
  "method": "GET",
  "http_status": 200,
- "sha256": "999eeca122215203d2f2e224bc9c930322a8b84956c7759374918c0d1db4c6aa",
- "bytes": 32031,
+ "sha256": "1aa3827237c51b0b4a9785861a20624dbde4311b904cd85811066a30a7fa74cd",
+ "bytes": 33432,
  "retrieved_at": "2026-10-22T08:04:43Z",
  "subset_of": {
   "sha256": "a3d31bd4102fb7d7180215a2266ad195c093bd23f46244bcf1b3de9a50710d81",

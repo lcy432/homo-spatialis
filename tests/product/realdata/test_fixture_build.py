@@ -141,9 +141,7 @@ def test_data_gaps_and_e1_gaps_are_reported_separately(built):
     by_kind: dict[str, list[Opportunity]] = {}
     for o in opps:
         by_kind.setdefault(o.kind, []).append(o)
-    listing = next(
-        o for o in by_kind["rental_listing_candidate"] if o.data_status != "insufficient"
-    )
+    listing = next(o for o in by_kind["rental_support_cell"] if o.attributes.get("support_table"))
     # 住房缺面积、通勤不是按房源算的：都是资料缺口，改 E1 也执行不了（旧报告把它写成“需要 E1 扩展”）
     assert listing.compile.status == "needs_data" and listing.compile.e1_gaps == ()
     assert "missing:floor_area" in listing.compile.data_gaps
@@ -381,17 +379,50 @@ def test_cell_median_pairs_match_an_independent_recomputation(built):
     assert plain >= 1 and censored >= 1
 
 
-def test_insufficient_housing_cells_stay_unpriced_and_are_never_sampled(built):
-    _, _, opps, _, menus, _ = built
-    b = [o for o in opps if o.kind == "rental_listing_candidate"]
-    unpriced = {o.opportunity_id for o in b if o.attributes["price_level_used"] is None}
-    assert unpriced
-    for o in b:
-        if o.opportunity_id in unpriced:
-            assert o.fact("monthly_rent").status == "missing" and o.data_status == "insufficient"
-    for m in menus:
-        if m.policy == "annual_exposure_sample":
-            assert not (set(m.selected) & unpriced)
+def test_housing_cells_keep_the_full_weighted_support_and_borrow_only_shape(built):
+    """B 住房（housing_rent_support@1）：每个目标格引用一张完整支持表；支持点合并后权重不变；回退只借形状，总权重取目标格。"""
+    ctx, refs, opps, *_ = built
+    tables = {
+        t["table_id"]: t
+        for t in _jsonl(ctx.work / refs["map"].path / "tables.jsonl.gz")
+        if t["method"] == "housing_rent_support@1"
+    }
+    cells = [o for o in opps if o.kind == "rental_support_cell"]
+    assert cells and tables
+    assert not [o for o in opps if o.kind == "rental_listing_candidate"]  # 旧的三个价位已经删除
+    for t in tables.values():
+        pts = t["points"]
+        assert sum(p["weight"] for p in pts) == t["weight_sum"]  # 合并相同特征不改变概率质量
+        m = t["masses"]
+        assert m["observed"] + m["imputed"] + m["censored"] + m["unknown"] == m["raw"]
+        assert (
+            m["facilities_complete"] + m["facilities_incomplete"] + m["facilities_unknown"]
+            == m["raw"]
+        )
+        for p in pts:
+            assert p["quality_tier"] in (1, 2, 3)
+            assert (p["gross_rent"] is None) == (p["price_status"] in ("censored", "unknown"))
+            if p["price_status"] == "censored":
+                assert p["censored_by"] is not None
+        ids = [r for p in pts for r in p["records"]]
+        assert len(ids) == len(set(ids)) == t["n"]  # 每条原始记录恰好进一个支持点
+    # 目标格的总权重 = 本格新租市场代理样本的 WGTP 之和，不论用的是哪一层的形状
+    _, _, _, recs, _, _ = built
+    market: dict[tuple[str, str], int] = {}
+    for r in recs:
+        a = r.attributes
+        if (
+            r.record_type == "rental_unit_sample"
+            and a.get("full_puma")
+            and a.get("segment") in ("vacant_for_rent", "recent_mover")
+        ):
+            k = (r.geo.code, str(a["bedroom_class"]))
+            market[k] = market.get(k, 0) + int(r.weight)
+    for o in cells:
+        assert Decimal(o.target_weight) == market[(o.geo.code, o.stratum)]
+        t = tables.get(str(o.attributes.get("support_table")))
+        if t is not None and t["level"] != "puma_bed":
+            assert o.attributes["shape_borrowed"] is True  # 回退：只借上层分布的形状
 
 
 def test_food_plan_cost_is_basket_quantity_times_item_price(built):
@@ -418,15 +449,18 @@ def test_cli_query_and_menu_print_amounts_with_unit_numeraire_and_reasons(built,
     rent = _run_cli(
         capsys, db, "query", "--sector", "housing", "--cbsa", "16980", "--per-page", "500"
     )["items"]
-    priced = [i for i in rent if i["amount"].get("value") is not None]
+    cells = [i for i in rent if i["opportunity_id"].startswith("housing.b.")]
+    # 住房目标格没有单一价格：价格在它引用的完整支持表里（每个支持点一行），查询里金额是空
+    assert cells and all(i["amount"] is None for i in cells)
+    plans = _run_cli(
+        capsys, db, "query", "--sector", "food", "--kind", "food_plan", "--per-page", "50"
+    )["items"]
+    priced = [i for i in plans if i["amount"] and i["amount"].get("value") is not None]
     assert priced and all(
-        i["amount"]["fact"] == "monthly_rent" and i["amount"]["unit"] == "USD/month" for i in priced
+        i["amount"]["fact"] == "monthly_food_cost" and i["amount"]["unit"] == "USD/month"
+        for i in priced
     )
     assert all(i["amount"]["numeraire"] == "USD_2024_LOCAL" for i in priced)
-    unpriced = [i for i in rent if i["data_status"] == "insufficient"]
-    assert unpriced and all(
-        i["amount"]["status"] == "missing" and i["amount"]["reason"] for i in unpriced
-    )
     acts = _run_cli(
         capsys,
         db,
@@ -489,9 +523,12 @@ def test_menus_are_unique_per_environment_and_independent_of_clones(built):
     _, _, _, _, menus, _ = built
     keys = [(m.cbsa, m.year, m.sector, m.env_repeat) for m in menus]
     assert len(keys) == len(set(keys))
-    h = {(m.year, m.env_repeat): m for m in menus if m.sector == "housing"}
-    assert h[(1, 0)].seed != h[(1, 1)].seed and h[(1, 0)].seed != h[(2, 0)].seed
-    assert all(m.selection == "listed" and m.selected for m in h.values())
+    j = {(m.year, m.env_repeat): m for m in menus if m.sector == "jobs"}
+    assert j[(1, 0)].seed != j[(1, 1)].seed and j[(1, 0)].seed != j[(2, 0)].seed
+    assert all(m.selection == "listed" and m.selected for m in j.values())
+    # 住房的候选池是完整支持表的目标格：全部列出，不在 intake 里抽年度菜单（年度菜单在 E3B 资料包里从展开的完整池抽）
+    h = [m for m in menus if m.sector == "housing"]
+    assert h and all(m.policy == "full_catalog" and m.selection == "all_eligible" for m in h)
 
 
 def test_rerun_reuses_every_stage_and_gives_the_same_build(built):
@@ -570,15 +607,11 @@ def _tamper(ctx, refs, tmp_path, change):
 
 def test_ledger_catches_menu_items_outside_the_eligible_set(built, tmp_path):
     ctx, refs, opps, *_ = built
-    unpriced = next(
-        o.opportunity_id
-        for o in opps
-        if o.kind == "rental_listing_candidate" and o.data_status == "insufficient"
-    )
+    outside = next(o.opportunity_id for o in opps if o.sector == "food")
 
     def add_unpriced(docs):
-        target = next(d for d in docs if d["sector"] == "housing" and d["selected"])
-        target["selected"] = [*target["selected"][:-1], unpriced]
+        target = next(d for d in docs if d["sector"] == "jobs" and d["selected"])
+        target["selected"] = [*target["selected"][:-1], outside]
 
     problems = _tamper(ctx, refs, tmp_path, add_unpriced)
     assert any("合格集合以外" in p for p in problems)

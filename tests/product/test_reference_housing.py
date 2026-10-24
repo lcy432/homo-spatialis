@@ -1,7 +1,7 @@
 """期末参考生活的住房（独立审核 F3、F4，DECISIONS/0042）：按参考岗位与通勤关系从完整候选池绑定，与年度菜单无关。
 
 审核时的问题：参考住房从菜单裁剪后的目录里挑、不看参考岗位在哪——西雅图的固定住房从岗位片区出发超过通勤上限，三年都正常
-生活的分身全部无法估值；菜单一换，参考集合也跟着换。规则 ``reference_housing_by_job_reach_v1`` 见
+生活的分身全部无法估值；菜单一换，参考集合也跟着换。规则 ``reference_housing_by_job_reach_v2`` 见
 ``product.realdata.reference_housing``。
 """
 
@@ -56,7 +56,8 @@ def test_basic_is_the_cheapest_home_that_reaches_every_reference_job():
     assert ref.slots["housing_basic"] == "x.housing.ok"  # 不是到不了岗位的 500
     assert ref.worst_minutes["housing_basic"] == 80
     assert ref.slots["housing_comfort"] == "x.housing.mid"
-    assert ref.slots["housing_basic_car"] is None and "不设用车" in ref.reasons["housing_basic_car"]
+    # 开车也能到的住房里最便宜的同样是它：用车的参考生活照样绑定，可不可行交给估值期的检查
+    assert ref.slots["housing_basic_car"] == "x.housing.ok"
 
 
 def test_comfort_is_the_one_bedroom_mid_tier_with_the_shortest_worst_commute():
@@ -95,7 +96,24 @@ def test_every_reference_job_area_must_be_reachable():
     assert ref.slots["housing_basic"] == "x.housing.b" and ref.worst_minutes["housing_basic"] == 50
 
 
-def test_a_car_reference_life_only_when_no_home_reaches_without_a_car():
+def test_a_slow_route_without_a_car_does_not_disable_the_car_reference_life():
+    """v1 的问题：有一条（过慢的）无车路线，就不设用车参考生活；估值期无车方案违反通勤硬要求时，整个参考集合都不可行。"""
+    housing = [home("x.housing.a", "h_a", 1000), home("x.housing.b", "h_b", 1200)]
+    rel = {
+        "modes": MODES,
+        "legs": [
+            leg("h_a", "w1", "transit", 240),  # 存在但很慢
+            leg("h_a", "w1", "drive", 60),
+            leg("h_b", "w1", "drive", 30),
+        ],
+    }
+    ref = choose_reference_housing(housing, JOB_W, rel)
+    assert ref.slots["housing_basic"] == "x.housing.a" and ref.worst_minutes["housing_basic"] == 240
+    assert ref.slots["housing_basic_car"] == "x.housing.a"
+    assert ref.slots["housing_comfort_car"] == "x.housing.b"  # 开车最长往返 30 < 60
+
+
+def test_a_car_reference_life_when_no_home_reaches_without_a_car():
     jobs = [*JOB_W, {"opportunity_id": "x.job.b", "area": "w2", "availability": "available"}]
     housing = [home("x.housing.a", "h_a", 1000), home("x.housing.b", "h_b", 1200)]
     rel = {
@@ -126,26 +144,33 @@ def test_no_home_reaches_even_by_car_is_reported_not_relaxed():
 # --------------------------------------------------------------------------- 组装：参考集合与菜单无关
 
 
-def _cand(puma: str, bed: str, pos: str, rent: str) -> dict:
+def _point(pid: str, rent: str, bedrooms: int, tier: int) -> dict:
     return {
-        "opportunity_id": f"housing.b.x.{puma}.{bed}.{pos}",
-        "stratum": bed,
-        "supply_status": "offered",
-        "target_weight": "10",
-        "geo": {"code": puma, "label": f"Somewhere {puma} PUMA; Texas"},
-        "attributes": {
-            "price_position": pos,
-            "utilities_median_month": "120.00",
-            "price_level_used": "tier_bed",
-        },
-        "facts": [{"name": "monthly_rent", "status": "present", "value": rent}],
+        "id": pid,
+        "weight": 10,
+        "price_status": "observed",
+        "gross_rent": rent,
+        "contract_rent": rent,
+        "kitchen": "complete",
+        "plumbing": "complete",
+        "bedrooms": bedrooms,
+        "rooms": bedrooms + 2,
+        "structure": "05",
+        "year_built": 1990,
+        "quality_tier": tier,
+        "censor_bound": None,
+        "censored_by": None,
+        "records": [f"housing.acs2024.{pid}"],
     }
 
 
 def _hou_inputs():
-    """休斯敦的真实通勤与生活机会资料（冻结、进仓库），加手写的住房候选：离就业中心近的片区几处、远的片区很多便宜的。"""
+    """休斯敦的真实通勤与岗位模板（冻结、进仓库），加手写的住房目标格与支持表：离就业中心近的片区几处、远的片区很多便宜的。"""
     commute = json.loads((FROZEN / "commute" / "hou.json").read_text(encoding="utf-8"))
     items = json.loads((FROZEN / "items" / "26420.json").read_text(encoding="utf-8"))
+    rules = json.loads((FROZEN / "items" / "manifest.json").read_text(encoding="utf-8"))[
+        "job_rules"
+    ]
     rel = commute["commute"]
     free = {m["mode"] for m in rel["modes"] if not m.get("requires_function")}
     homes = sorted({a["area_id"] for a in commute["areas"] if a["kind"] == "home"})
@@ -165,19 +190,32 @@ def _hou_inputs():
     near = sorted(homes, key=lambda h: (free_minutes[h], h))[:3]
     far = sorted(homes, key=lambda h: (-free_minutes[h], h))[:3]
     assert near and far and not set(near) & set(far)
-    cands = []
-    for h in far:  # 远处很多便宜的：菜单常常抽到它们
+    cells, tables = [], {}
+    for h, rent in [(h, "600.00") for h in far] + [
+        (h, f"{1500 + 50 * i}.00") for i, h in enumerate(near)
+    ]:
         puma = h.rsplit(".", 1)[1]
-        for bed in ("0", "1", "2", "3plus"):
-            for pos in ("1/6", "1/2", "5/6"):
-                cands.append(_cand(puma, bed, pos, "600.00"))
-    for i, h in enumerate(near):
-        puma = h.rsplit(".", 1)[1]
-        for bed in ("0", "1", "2"):
-            for pos in ("1/6", "1/2", "5/6"):
-                cands.append(_cand(puma, bed, pos, f"{1500 + 50 * i}.00"))
+        for bed, nbed in (("0", 0), ("1", 1), ("2", 2)):
+            tid = f"t.{puma}.{bed}"
+            tables[tid] = {
+                "table_id": tid,
+                "level": "puma_bed",
+                "weight_sum": 30,
+                "donors": {"n": 3, "utilities_median_month": "100.00", "assumption": "x"},
+                "points": [_point(f"s{k}", rent, nbed, k) for k in (1, 2, 3)],
+            }
+            cells.append(
+                {
+                    "opportunity_id": f"housing.b.x.{puma}.{bed}",
+                    "stratum": bed,
+                    "supply_status": "offered",
+                    "target_weight": "10" if h in far else "1",  # 远处权重大：菜单常常抽到它们
+                    "geo": {"code": puma, "label": f"Somewhere {puma} PUMA; Texas"},
+                    "attributes": {"support_table": tid},
+                }
+            )
     counties = {h.rsplit(".", 1)[1]: ("48201",) for h in near + far}
-    return commute, items, cands, counties
+    return commute, items, cells, tables, counties, rules
 
 
 def _build(seed: str):
@@ -186,15 +224,19 @@ def _build(seed: str):
 
     cfg = copy.deepcopy(load_pack_config())
     cfg["menus"]["seed"] = seed
+    cfg["menus"]["housing"]["size"] = 4
+    cfg["menu_size_diagnostic"] = {"sizes": [2, 4], "repeats": 2}
     hou = next(c for c in cfg["cities"] if c["key"] == "hou")
-    commute, items, cands, counties = _hou_inputs()
+    commute, items, cells, tables, counties, rules = _hou_inputs()
     return assemble_city(
         hou,
         cfg,
-        candidates=cands,
+        cells=cells,
+        tables=tables,
         puma_counties=counties,
         commute=commute,
         items=items,
+        job_rules=rules,
         settings_identity=menu_settings_identity(cfg),
     )
 
@@ -212,7 +254,7 @@ def test_changing_only_the_menu_seed_keeps_the_reference_housing():
         ids = {o["opportunity_id"] for o in cb.catalog["opportunities"]}
         assert set(cb.reference.bound()) <= ids  # 参考住房一定在目录里（菜单没抽到也在）
         on_menu = {i for v in menus(cb).values() for i in v}
-        assert cb.reference.slots["housing_basic"] is not None
+        assert cb.reference.bound()
         # 参考专用项不因此进菜单：没被抽中就不在任何一份菜单上
         extra = set(cb.reference.bound()) - on_menu
         assert all(i not in on_menu for i in extra)
@@ -275,27 +317,36 @@ def test_every_bound_reference_home_reaches_every_reference_job(pack):
 
 def test_the_switch_job_templates_check_their_target_job(pack):
     bundle, ev = pack
+    checked = 0
     for b in ev.spec.city_bindings:
         q = b.target("qualified_job")
         if q.status != "opportunity":
             continue
         cat = bundle.catalog_for(str(b.city))
         area = cat.opportunity(q.opportunity_id).area
-        for slot in ("housing_basic", "housing_comfort"):
+        for slot, car in (
+            ("housing_basic", False),
+            ("housing_comfort", False),
+            ("housing_basic_car", True),
+            ("housing_comfort_car", True),
+        ):
             t = b.target(slot)
-            assert t.status == "opportunity"
-            assert _reach(cat, cat.opportunity(t.opportunity_id).area, area, False) is not None
+            if t.status == "opportunity":
+                h = cat.opportunity(t.opportunity_id).area
+                assert _reach(cat, h, area, car) is not None
+                checked += 1
+    assert checked
 
 
-def test_car_reference_lives_only_where_needed(pack):
+def test_car_reference_lives_are_bound_wherever_a_car_reaches(pack):
+    """参考岗位片区是完整岗位池的全部就业片区；开车能到达全部片区就绑定用车参考生活（不再因为有一条无车路线就不设）。"""
     _, ev = pack
     for b in ev.spec.city_bindings:
-        code = str(b.city).rsplit(":", 1)[1]
-        basic, car = b.target("housing_basic"), b.target("housing_basic_car")
-        if code == "41860":  # 旧金山：没有公交资料，岗位分在两个就业片区，不用车到不了全部参考岗位
-            assert basic.status == "unavailable" and car.status == "opportunity"
-        else:
-            assert basic.status == "opportunity" and car.status == "unavailable"
+        for slot in ("housing_basic", "housing_comfort"):
+            plain, car = b.target(slot), b.target(f"{slot}_car")
+            if plain.status != "opportunity":
+                assert "没有不用车" in plain.reason
+            assert car.status == "opportunity" or "开车也没有" in car.reason
     templates = {p.template_id: p for p in ev.spec.life_templates}
     assert "car_access" in templates["p1_basic_car"].service_slots
     assert "car_access" not in templates["p1_basic"].service_slots

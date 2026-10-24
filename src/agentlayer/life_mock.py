@@ -313,11 +313,17 @@ class ProductMockPlanner:
 
     # ------------------------------------------------------------------ M1–M8
 
-    def _decide(self, v: _View, notes: list[str]) -> dict[str, Any]:
+    def _decide(
+        self, v: _View, notes: list[str], keep_jobs: list[str] | None = None
+    ) -> dict[str, Any]:
         jobs = [self.opps_job(v, j) for j in v.current_jobs()]
         current_pay = max((_pay(o) for o in jobs), default=0.0)
         chosen_jobs = [o["opportunity_id"] for o in jobs]
-        if v.career_minded():
+        if keep_jobs:
+            # 修订时上一份计划的岗位已经定下（例如超限后退回了现职）：只围绕这些岗位重新挑住房与通勤，不再换岗
+            chosen_jobs = list(keep_jobs)
+            notes.append(f"M3 沿用上一份计划的岗位 {chosen_jobs}，重新安排住房与通勤")
+        elif v.career_minded():
             options = [o for o in v.of("job") if _available(o) and _qualified(o)]
             best = max(options, key=lambda o: (_pay(o), o["opportunity_id"]), default=None)
             if best is not None and _pay(best) > current_pay:
@@ -656,6 +662,32 @@ class ProductMockPlanner:
             return 1 if (te.get("hours") or 0) > 0 else None
         return _PRIORITY.get(c)
 
+    @staticmethod
+    def _lighter_job(v: _View, job: str | None, d: dict[str, Any]) -> str | None:
+        """能把超出量消掉的较轻岗位：现在能选、资格够，这份岗位每月的工作量（时间看工时，精力看工时 × 每小时负担）至少少掉超出量；
+        取月薪最高的。只读观察里公开的岗位安排与诊断里的超出量。"""
+        if job is None or job not in v.opps or d.get("excess") is None:
+            return None
+
+        def load(o: dict[str, Any]) -> float:
+            j = (o.get("time_energy") or {}).get("job") or {}
+            hours = float(j.get("work_hours_per_month") or 0)
+            return (
+                hours
+                if d["code"].startswith("time")
+                else hours * float(j.get("burden_per_work_hour") or 0)
+            )
+
+        excess = float(d["excess"]["value"] if isinstance(d["excess"], dict) else d["excess"])
+        room = load(v.opps[job]) - excess
+        options = [
+            o
+            for o in v.of("job")
+            if _available(o) and _qualified(o) and o["opportunity_id"] != job and load(o) <= room
+        ]
+        best = max(options, key=lambda o: (_pay(o), o["opportunity_id"]), default=None)
+        return None if best is None else best["opportunity_id"]
+
     def _revise(self, v: _View, revision: dict[str, Any], notes: list[str]) -> dict[str, Any]:
         try:
             prev = json.loads(revision["previous_output_text"])
@@ -666,6 +698,14 @@ class ProductMockPlanner:
             return self._decide(v, notes)
         diags = revision["diagnostics"]
         codes = {d["code"] for d in diags}
+        if codes == {"commute_unavailable"}:
+            kept = [
+                i["opportunity_id"]
+                for i in action["items"]
+                if v.opps.get(i["opportunity_id"], {}).get("category") == "job"
+            ]
+            notes.append("修订：住处到岗位没有可用的通勤方式，围绕上一份计划的岗位重新规划")
+            return self._decide(v, notes, keep_jobs=kept or None)
         handled = {
             "time_over_limit",
             "energy_over_limit",
@@ -682,9 +722,31 @@ class ProductMockPlanner:
             if v.opps.get(i["opportunity_id"], {}).get("category") == "job"
         ]
         top_job = max(jobs, key=lambda j: (_pay(v.opps[j]), j), default=None)
+        current = [j for j in v.current_jobs() if j in v.opps]
         for d in diags:
             if d["code"] in ("time_over_limit", "energy_over_limit"):
                 named = [c["item"] for c in d.get("contributors", [])]
+                what = "时间" if d["code"].startswith("time") else "精力"
+                if top_job is not None and top_job in named and current and top_job not in current:
+                    # 新换的岗位本身就让这个月超限（真实工时分布里有每周 50 小时以上的岗位）：退回现职，不删别的必需项
+                    items = [i for i in items if i["opportunity_id"] != top_job]
+                    held = {i["opportunity_id"] for i in items}
+                    items += [_period(j, 1, 12) for j in current if j not in held]
+                    notes.append(
+                        f"修订：第 {d.get('month')} 月{what}超限里有新岗位 {top_job}，退回现职"
+                    )
+                    top_job = max(current, key=lambda j: (_pay(v.opps[j]), j))
+                    continue
+                lighter = self._lighter_job(v, top_job, d) if top_job in named else None
+                if lighter is not None:
+                    # 现职本身就让这个月超限（例如精力额度降了）：换成菜单上能选、工作负担减少到不超限的岗位里工资最高的
+                    items = [i for i in items if i["opportunity_id"] != top_job]
+                    items.append(_period(lighter, 1, 12))
+                    notes.append(
+                        f"修订：第 {d.get('month')} 月{what}超限主要来自岗位 {top_job}，换成负担较轻的 {lighter}"
+                    )
+                    top_job = lighter
+                    continue
                 ranked = [
                     (r, oid)
                     for oid in named

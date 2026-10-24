@@ -246,7 +246,8 @@ sources:
 pums:
   year: 2024
   # 住房记录：租住（TEN=3）或空置待租（VACS=1）。RNTP 对“待租”空置房是要价（rent asked），对租住户是合同租金。
-  housing_vars: [SERIALNO, STATE, PUMA, WGTP, TEN, VACS, RNTP, GRNTP, BDSP, RMSP, BLD, YRBLT, MV, NP, RNTM, ADJHSG, ELEFP, GASFP, WATFP]
+  # E3B 映射修正：厨卫条件（KIT、PLM）、水电燃料金额（判断毛租金是否受顶码影响）、上网与通信设备（只作描述）
+  housing_vars: [SERIALNO, STATE, PUMA, WGTP, TEN, VACS, RNTP, GRNTP, BDSP, RMSP, BLD, YRBLT, MV, NP, RNTM, ADJHSG, ELEFP, GASFP, WATFP, FULFP, ELEP, GASP, WATP, FULP, KIT, PLM, ACCESSINET, HISPEED, BROADBND, SMARTPHONE, TEL]
   # 人员记录：在职（ESR = 1、2），按通勤与工时整理（只取汇总需要的字段）。
   person_vars: [SERIALNO, SPORDER, STATE, PUMA, PWGTP, ESR, SOCP, WKHP, JWMNP, JWTRNS, WAGP, ADJINC]
 
@@ -335,7 +336,8 @@ menus:
   env_repeats: 2
   years: [1, 2, 3]
   policies:
-    housing: {kind: annual_exposure_sample, strata_key: bedrooms, per_stratum: 3}
+    # 住房的候选池是完整加权经验支持表（每个目标格一条），这里只列出；年度接触菜单在 E3B 资料包里从完整可执行池按 60 个抽
+    housing: {kind: full_catalog}
     jobs: {kind: annual_exposure_sample, strata_key: soc_major, size: 30}
     training: {kind: calendar_open}
     food: {kind: full_catalog}
@@ -343,5 +345,4 @@ menus:
     activities: {kind: calendar_open}
     background: {kind: full_catalog}
   size_diagnostic:
-    housing_per_stratum: [1, 2, 3, 5, 8]
     repeats: 20

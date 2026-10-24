@@ -19,9 +19,9 @@ from product.realdata.life_items import (
     STATUSES,
     BasketWeek,
     Ctx,
-    away_meal_price,
-    city_cuisines,
+    away_meal_cost,
     complete_week_cost,
+    cuisine_evidence,
     failure_spec,
     item_grams,
     representative_model,
@@ -106,7 +106,7 @@ def test_energy_completion_hand_example():
 def test_home_plans_follow_the_basket_and_its_energy_share(frozen):
     """补齐后的主食方案 = intake 篮子月费 ÷ 篮子热量占参照量的比例；荤素搭配 = 自己的篮子 + (1 − 比例) × 补齐后的主食方案。"""
     items, check = items_by_id(frozen, "35620"), city(frozen, "35620")["food_check"]["baskets"]
-    staples, varied = items["nyc.food.home_staples"], items["nyc.food.home_varied"]
+    staples, varied = items["nyc.food.staples.h21"], items["nyc.food.varied.h21"]
     s_share = Fraction(str(staples["opportunity"]["attributes"]["basket_energy_share"]))
     v_share = Fraction(str(varied["opportunity"]["attributes"]["basket_energy_share"]))
     assert check["staples_home"]["recomputed"] == float(check["staples_home"]["intake"]) == 76.83
@@ -143,36 +143,91 @@ def _fake_ctx(cfgs, metro: dict, cpi=(1, 1)) -> Ctx:
     return Ctx("99999", "tst", "测试都会区", "测试城", cfgs[0], metro, sl)
 
 
-def test_away_meal_price_hand_example(cfgs):
-    # 每户在外饮食 5,200 ÷ 2 人 ÷ 52 周 ÷ 每人每周 3 顿 = 16.666… → 16.67（CPI 比值取 1）
-    ctx = _fake_ctx(cfgs, {"ce": {"food_away_per_cu_year": "5200", "persons_per_cu": "2"}})
-    assert away_meal_price(ctx) == Fraction(5200, 2 * 52 * 3)
-    assert round(float(away_meal_price(ctx)), 2) == 16.67
+def test_away_cost_proxy_hand_example(cfgs):
+    """外食一顿 = 篮子补齐后每周花费 ÷ 21 + 厨房 0.25 小时 × 厨师时薪 × 2 + 场地 2 × 其他服务 RPP ÷ 100；外送再加 0.2 小时 × 司机时薪 × 2。"""
+    hourly = {"wage_basis": "annual_and_hourly"}
+    ctx = _fake_ctx(
+        cfgs,
+        {
+            "wages": {
+                "35-2014": {**hourly, "annual_wage_median": "41600"},  # 时薪 20
+                "53-3033": {**hourly, "annual_wage_median": "52000"},  # 时薪 25
+            },
+            "rpp": {"rpp_other": "110"},
+        },
+    )
+    a = away_meal_cost(ctx, Fraction(42))
+    assert a is not None
+    # 食材 42 ÷ 21 = 2；厨房 0.25 × 20 × 2 = 10；场地 2 × 1.10 = 2.2；外送 0.2 × 25 × 2 = 10
+    assert (a["ingredients"], a["kitchen"], a["venue"], a["delivery_extra"]) == (
+        2,
+        10,
+        Fraction(22, 10),
+        10,
+    )
+    assert (a["dine"], a["delivered"]) == (Fraction(142, 10), Fraction(242, 10))
+    # 缺一项资料就没有代理（不当 0）：没有配送司机的工资
+    del ctx.metro["wages"]["53-3033"]
+    assert away_meal_cost(ctx, Fraction(42)) is None
 
 
-def test_cuisines_need_enough_osm_restaurants_and_count_each_restaurant_once(cfgs):
+def test_cuisine_evidence_counts_each_restaurant_once_and_keeps_every_cuisine(cfgs):
     sets = [
         {"tags": ["japanese", "sushi"], "count": 12},  # 一家写了两个日料标签：只算一家
         {"tags": ["sushi"], "count": 8},
-        {"tags": ["thai"], "count": 19},  # 不够 20 家
+        {"tags": ["thai"], "count": 19},  # 不够 20 家：照样提供，只是按共同可得假设标明
         {"tags": ["chinese"], "count": 40},
     ]
     ctx = _fake_ctx(cfgs, {"restaurants": {"tag_sets": sets}})
-    assert city_cuisines(ctx) == [("chinese", 40), ("japanese", 20)]
+    got = cuisine_evidence(ctx)
+    assert got["japanese"] == 20 and got["thai"] == 19 and got["chinese"] == 40
+    assert got["korean"] == 0 and len(got) == 9  # 完整词表，不截取前几名
 
 
-def test_mixed_plan_splits_home_cooking_and_dining_time(frozen):
+def test_the_food_grid_has_every_combination_and_merges_the_degenerate_ones(frozen):
+    """3 个篮子 × (家里做 21 顿 1 个 + 家里做 0 / 3 / 7 / 14 顿 × 3 种外面的方式 × 9 个菜系) = 3 × 109 = 327。"""
+    foods = [k for k in items_by_id(frozen, "35620") if k.startswith("nyc.food.")]
+    assert len(foods) == 327
+    for b in ("staples", "varied", "fresh"):
+        assert [k for k in foods if k.startswith(f"nyc.food.{b}.h21")] == [f"nyc.food.{b}.h21"]
+        assert len([k for k in foods if k.startswith(f"nyc.food.{b}.h00.")]) == 27
+
+
+def test_grid_plans_split_home_cooking_dining_and_delivery_time(frozen):
     items = items_by_id(frozen, "35620")
-    dine = next(i for k, i in items.items() if k.startswith("nyc.food.cook_dine."))
+    dine = items["nyc.food.varied.h14.dine_out.italian"]
     fp = dine["opportunity"]["food_plan"]
     # 外食 7 顿 × 1.25 小时 × 52 ÷ 12 = 37.92；家里 14 顿 × 25 分钟 + 买菜 2 小时 = 每周 7.83… × 52 ÷ 12 = 33.94
     assert fp["dining_hours_per_month"] == 37.92 and fp["prep_hours_per_month"] == 33.94
     assert dine["opportunity"]["resource"]["hours"] == 71.86
     assert [p["mode"] for p in fp["parts"]] == ["home_cooked", "dine_out"]
     assert sum(p["meals_per_week"] for p in fp["parts"]) == 21
-    delivery = next(i for k, i in items.items() if k.startswith("nyc.food.cook_delivery."))
-    assert delivery["opportunity"]["attributes"]["delivery_fee"] == "unknown"
-    assert "fafh_delivery_same_average_v1" in delivery["assumptions"]
+    # 外送 7 顿：每顿 0.25 小时算进准备时间：33.94… + 7 × 0.25 × 52 ÷ 12 = 41.53
+    deliv = items["nyc.food.varied.h14.delivery.italian"]["opportunity"]
+    assert deliv["food_plan"]["prep_hours_per_month"] == 41.53
+    assert deliv["food_plan"]["dining_hours_per_month"] == 0
+    assert deliv["attributes"]["taxes_fees_tips"] == "not_itemized"
+    assert "food_away_cost_proxy_v1" in items["nyc.food.varied.h14.delivery.italian"]["assumptions"]
+    # 各半：家里 7、外食 7、外送 7
+    half = items["nyc.food.varied.h07.half.thai"]["opportunity"]["food_plan"]
+    assert [(p["mode"], p["meals_per_week"]) for p in half["parts"]] == [
+        ("home_cooked", 7),
+        ("dine_out", 7),
+        ("delivery", 7),
+    ]
+
+
+def test_away_meals_are_priced_by_the_proxy_and_fresh_only_by_the_basket_share(frozen):
+    items = items_by_id(frozen, "35620")
+    o = items["nyc.food.staples.h00.dine_out.chinese"]["opportunity"]
+    (part,) = o["food_plan"]["parts"]
+    # 主食为主的篮子 21 餐里 4 餐新鲜：外食 21 顿也只有 4 顿算新鲜（不自动全算新鲜）
+    assert part["mode"] == "dine_out" and part["fresh_meals_per_week"] == 4
+    # 月费 = 21 顿 × 每顿堂食代理 × 52 ÷ 12（分项在属性里，四舍五入后差不过 1 分 × 21 × 52 ÷ 12）
+    per_meal = o["attributes"]["away_meal_dine_cost"]
+    assert abs(o["price"]["amount"]["amount"] - per_meal * 21 * 52 / 12) < 0.5
+    fresh = items["nyc.food.fresh.h07.dine_out.chinese"]["opportunity"]["food_plan"]["parts"]
+    assert [p["fresh_meals_per_week"] for p in fresh] == [5.67, 11.33]  # 17/21 × 7、17/21 × 14
 
 
 def test_chore_service_is_wage_times_hours_times_overhead(frozen, sl):
@@ -226,6 +281,21 @@ def test_model_activities_need_a_venue_and_unknown_tickets_stay_unknown(frozen):
     assert practice["price"]["amount"]["amount"] == 0 and practice["activity"]["requires"] == [
         "guitar_playable"
     ]
+    # 自主参与路径：无器械锻炼，不收费、不要装备、不要场所；时长只有方案规定的 1 小时一个版本
+    workout = ny["nyc.experience.bodyweight_workout"]["opportunity"]
+    assert workout["price"]["amount"]["amount"] == 0 and workout["activity"]["requires"] == []
+    assert workout["activity"]["primary_category"] == "fitness"
+    assert workout["activity"]["participation_hours"] == 1.0
+
+
+def test_paid_activities_dominated_by_free_ones_are_reported_not_rewarded(frozen):
+    rows = city(frozen, "35620")["activity_dominance"]
+    pairs = {(r["paid"], r["dominated_by"]) for r in rows}
+    # 团体课 1 + 0.75 小时 vs 无器械锻炼 1 + 0.25 小时：同类别、不要更多装备、每参与一小时花的时间更少、免费
+    assert ("nyc.experience.group_fitness", "nyc.experience.bodyweight_workout") in pairs
+    assert ("nyc.experience.guitar_lesson", "nyc.experience.guitar_practice") in pairs
+    # 网球两种都付费：没有免费方案，不报
+    assert not any("tennis" in r["paid"] for r in rows)
 
 
 def test_chicago_programs_keep_real_facts_and_are_never_executable(frozen):
@@ -311,18 +381,18 @@ def test_e1_compile_check_accepts_real_items_placed_in_a_synthetic_city(frozen):
             bundle, "US:SYNTH2026:K51", LifeItemCandidate(oid, kind, oid, items[oid]["opportunity"])
         )
 
-    assert check("nyc.food.cook_dine.italian", "food_plan").status == "executable"
+    assert check("nyc.food.varied.h14.dine_out.italian", "food_plan").status == "executable"
     assert check("nyc.experience.group_fitness", "activity").status == "executable"
     assert check("nyc.experience.tennis_rental", "activity").status == "executable"
     assert check("nyc.durable.acoustic_guitar", "equipment").status == "executable"
     assert check("nyc.service.massage_studio_1", "enjoyment").status == "executable"
-    cheap = check("nyc.food.home_staples", "food_plan")
+    cheap = check("nyc.food.staples.h21", "food_plan")
     assert cheap.status == "rejected" and any("最低食品方案" in r for r in cheap.reasons_zh)
     assert (
-        city(frozen, "35620")["minimum_food_candidate"]["opportunity_id"] == "nyc.food.home_staples"
+        city(frozen, "35620")["minimum_food_candidate"]["opportunity_id"] == "nyc.food.staples.h21"
     )
     assert check("chi.experience.cpd.584854", "activity").status == "rejected"
-    assert check("nyc.food.cook_dine.chinese", "food_plan").status == "unsupported"
+    assert check("nyc.food.varied.h14.dine_out.chinese", "food_plan").status == "unsupported"
 
 
 def test_failure_spec_combines_parts_of_a_set(cfgs):
@@ -349,3 +419,35 @@ def test_city_files_carry_the_shared_city_identity_and_id_prefix(frozen):
             "code": cbsa,
         }
         assert all(oid.startswith(f"{key}.") for oid in items_by_id(frozen, cbsa))
+
+
+def test_each_city_keeps_the_common_a_structure_and_no_price_was_updated(frozen):
+    """每城每个 A 板块都有方案族、参数（含义、单位、支持范围、先验、来源）、城市证据与状态；现在没有合格的同规格直接报价，所以
+    全部“未发生本地报价更新”（芝加哥公园管理局的整期价格本身就是直接报价，原样保留）。"""
+    for cbsa in ("35620", "16980", "41860"):
+        blocks = {b["block"]: b for b in city(frozen, cbsa)["a_blocks"]}
+        assert set(blocks) == {"food", "services", "devices", "equipment", "activities"}
+        for b in blocks.values():
+            assert b["parameters"] and all(
+                {"meaning_zh", "unit", "support", "prior", "source", "city_updatable"} <= set(p)
+                for p in b["parameters"]
+            )
+            assert "市场份额" in b["coverage_note_zh"]
+            for f in b["families"]:
+                rc = f["retail_correction"]
+                assert not rc["by_status"].get("updated")
+                if f["family"] != "cpd_program_session":
+                    assert rc["note_zh"] == "未发生本地报价更新" and rc["comparable_quotes"] == 0
+        food = blocks["food"]
+        assert food["families"][0]["opportunities"] == 327
+        assert set(food["city_evidence"]["osm_restaurants_by_cuisine"]) == {
+            "chinese",
+            "italian",
+            "mexican",
+            "japanese",
+            "indian",
+            "thai",
+            "korean",
+            "vietnamese",
+            "mediterranean",
+        }

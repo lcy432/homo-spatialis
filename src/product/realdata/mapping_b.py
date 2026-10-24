@@ -25,6 +25,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field
 from fractions import Fraction
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -68,11 +69,52 @@ JOBS_METHOD = MethodSpec(
         "在家工作比例是这一大类在职者的比例，不是某个岗位的固定安排",
     ),
 )
+SUPPORT_METHOD = MethodSpec(
+    method_id="housing_rent_support",
+    version="1",
+    family="mapping_b",
+    summary_zh=(
+        "每个条件格保存完整的加权经验支持点：同一条原始记录的合同租金、毛租金、卧室、房间、楼型、建成年代与厨卫条件一起保留，完全"
+        "相同的特征合并（权重相加、保留来源记录）；回退格只借上层条件分布的形状，总权重仍取目标 PUMA × 卧室格；合法、未受顶码影响的"
+        "毛租金同记录使用，缺毛租金的记录按本格条件水电中位数插补（供体合法、未顶码），没有供体保留未知；顶码记录保留权重与阈值、标为"
+        "删失；品质三档 = 本格合同租金加权分布里的三分位位置。"
+    ),
+    inputs=("census_acs1_pums_2024",),
+    known_biases_zh=(
+        "支持点是调查记录的报告值，不是房源广告；新租市场代理的偏差照旧（见 housing_rent_conditional@2）",
+        "回退格的特征来自上层（通勤层或全都会区）的记录，位置换成目标 PUMA",
+        "插补的水电燃料费是本格供体的中位数，不是这套房的真实费用",
+    ),
+)
+UTILITIES_IMPUTATION = AssumptionSpec(
+    assumption_id="housing_utilities_conditional_median_v1",
+    kind="assumption",
+    statement_zh=(
+        "没有毛租金的记录（空置待租的要价、少数缺毛租金的租住户）：毛租金 = 合同租金 + 同一条件格里供体（合法、未受顶码影响、毛租金与"
+        "合同租金都有的租住户）水电燃料月费的加权中位数；格里没有供体就保留未知，不补零。记录供体格与供体数。"
+    ),
+    applies_to=("housing_rent_support@1",),
+    why_not_measured_zh="空置房只有要价，ACS 不问空置房的水电燃料费。",
+)
+INTERNET_METHOD = MethodSpec(
+    method_id="household_internet_access",
+    version="1",
+    family="mapping_b",
+    summary_zh=(
+        "按都会区（完整在内的 PUMA）的租住户（WGTP 加权）：ACS 上网方式（ACCESSINET）、宽带（HISPEED）、手机数据套餐（BROADBND）、"
+        "智能手机（SMARTPHONE）、电话服务（TEL）的分布。不适用（b）与 2024 年部分 PUMA 的抑制值（8）不进分母，单独计数。"
+    ),
+    inputs=("census_acs1_pums_2024",),
+    known_biases_zh=(
+        "只用于描述与核对：接入率不是运营商可得率，不能据此让一部分分身买不到网络",
+        "HISPEED、BROADBND 只问付费上网的住户，分母与 ACCESSINET 不同",
+    ),
+)
 MARKET_PROXY = AssumptionSpec(
     assumption_id="housing_new_market_proxy",
     kind="exploratory_proxy",
     statement_zh="空置待租房的要价与过去 12 个月内迁入者的合同租金，近似一个新来的人在这座城会看到的租金分布。",
-    applies_to=("housing_rent_conditional@2", "housing_coverage_grid@1"),
+    applies_to=("housing_rent_conditional@2", "housing_rent_support@1", "housing_coverage_grid@1"),
     why_not_measured_zh="没有可用的公开房源成交资料；HUD 公平市场租金文件访问被拒（反爬挑战）。",
 )
 ROUNDTRIP = AssumptionSpec(
@@ -365,15 +407,15 @@ class RentModel:
         return None, tried
 
 
-#: 候选价位：每一格租金分布三等分区间的中点。它是 ``housing_rent_conditional@2`` 与 ``housing_coverage_grid@1`` 定义的一部分
-#: （每个候选代表这一格三分之一的目标人群）；要改价位就升方法版本，不只改配置。
-PRICE_POSITIONS = ("1/6", "1/2", "5/6")
+#: A 覆盖网格（``housing_coverage_grid@1``）的价位：每一格租金分布三等分区间的中点。只给 A 网格用；B 的候选是完整的加权经验
+#: 支持点（``housing_rent_support@1``），不再压成三个价位。要改价位就升 A 网格的方法版本，不只改配置。
+GRID_POSITIONS = ("1/6", "1/2", "5/6")
 
 
 def rent_model(df: pd.DataFrame, cbsa: str, tiers: dict[str, str], cfg: dict) -> RentModel:
     """估计一个都会区所有层级的条件租金格。只用完整在内的 PUMA 的样本（部分在内的 PUMA 在覆盖报告里单列）。"""
     min_n = int(cfg["min_unweighted_n"])
-    qs = list(dict.fromkeys([*cfg["quantiles"], *PRICE_POSITIONS]))
+    qs = list(dict.fromkeys([*cfg["quantiles"], *GRID_POSITIONS]))
     rep_cols = [c for c in df.columns if c.startswith("WGTP") and c[4:].isdigit()]
     rep_cols = rep_cols[: int(cfg.get("replicate_weights", 80))]
     d = df[df["full_puma"]].copy()
@@ -398,6 +440,201 @@ def rent_model(df: pd.DataFrame, cbsa: str, tiers: dict[str, str], cfg: dict) ->
     add(market, "metro_bed", ["bed_class"], "new_market_proxy")
     add(d[d["segment"] != "vacant_for_rent"], "metro_bed_stock", ["bed_class"], "renter_stock_all")
     return RentModel(cbsa=cbsa, min_n=min_n, cells=cells, tiers=tiers)
+
+
+#: B 住房候选的回退顺序（``housing_rent_support@1``）：PUMA × 卧室 → 通勤层 × 卧室 → 都会区 × 卧室 → 存量 × 卧室。
+SUPPORT_LEVELS = ("puma_bed", "tier_bed", "metro_bed", "metro_bed_stock")
+PRICE_STATUS_ORDER = {"observed": 0, "imputed": 1, "censored": 2, "unknown": 3}
+
+
+def quality_tiers(contract: np.ndarray, censored: np.ndarray, weights: np.ndarray) -> np.ndarray:
+    """每条记录在本格合同租金加权分布里的三分位位置（1、2、3）：并列的记录取同一个位置（并列组累计权重的中点）；顶码记录的真实
+    值只知道高于阈值，排在最上面。这是旧的 1/6、1/2、5/6 三个价位的推广：每条记录落在哪个三分之一，就是哪一档。"""
+    key = np.where(censored, np.inf, contract)
+    order = np.argsort(key, kind="stable")
+    total = float(weights.sum())
+    tiers = np.empty(len(key), dtype=int)
+    i, cum = 0, 0.0
+    while i < len(order):
+        j = i
+        while j + 1 < len(order) and key[order[j + 1]] == key[order[i]]:
+            j += 1
+        grp = order[i : j + 1]
+        gw = float(weights[grp].sum())
+        mid = (cum + gw / 2) / total if total > 0 else 0.5
+        tiers[grp] = 1 if mid < 1 / 3 else (2 if mid < 2 / 3 else 3)
+        cum += gw
+        i = j + 1
+    return tiers
+
+
+def support_table_id(cell: RentCell) -> str:
+    return f"b.housing_support.{cell.cbsa}.{cell.level}." + ".".join(cell.key)
+
+
+def _num(v: object) -> float | None:
+    try:
+        f = float(v)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return None
+    return None if math.isnan(f) else f
+
+
+def support_table(cell: RentCell, rows: pd.DataFrame) -> dict[str, Any]:
+    """一格的完整加权经验支持点（``housing_rent_support@1``）。``rows`` 是这一格的全部样本记录（与 ``cell.record_ids`` 相同）。
+
+    价格状态：``observed`` = 租住户合法、未受顶码影响的毛租金（同记录的 GRNTP）；``imputed`` = 没有毛租金（空置待租的要价、缺
+    毛租金的租住户）：合同租金 + 本格供体水电燃料月费的加权中位数；``censored`` = 合同租金或水电燃料顶码，只知道下界；``unknown``
+    = 要插补而格里没有供体。完全相同的特征（价格状态、毛租金、合同租金、下界、卧室、房间、楼型、建成年代、厨卫、品质档）合并。"""
+    w = rows["WGTP"].to_numpy(float)
+    renter = (rows["segment"] != "vacant_for_rent").to_numpy(bool)
+    censored = rows["censored"].to_numpy(bool)
+    contract = rows["rent_contract"].to_numpy(float)
+    gross = pd.to_numeric(rows["rent_gross"], errors="coerce").to_numpy(float)
+    affected = rows["gross_affected_by"].notna().to_numpy(bool)
+    observed = renter & ~censored & ~affected & ~np.isnan(gross) & (gross > 0) & (gross >= contract)
+    util = gross - contract
+    util_med = wquantile(util[observed], w[observed], 0.5) if observed.any() else None
+    tiers = quality_tiers(contract, censored, w)
+    groups: dict[tuple, dict[str, Any]] = {}
+    for i, r in enumerate(rows.itertuples(index=False)):
+        if censored[i] or (renter[i] and affected[i]):
+            status, price, cval = "censored", None, None if censored[i] else contract[i]
+        elif observed[i]:
+            status, price, cval = "observed", round(float(gross[i]), 2), contract[i]
+        elif util_med is not None:
+            status, price, cval = "imputed", round(float(contract[i] + util_med), 2), contract[i]
+        else:
+            status, price, cval = "unknown", None, contract[i]
+        bound = _num(r.censor_bound) if censored[i] else None
+        kit = {1: "complete", 2: "incomplete"}.get(int(_num(r.KIT) or 0), "unknown")
+        plm = {1: "complete", 2: "incomplete"}.get(int(_num(r.PLM) or 0), "unknown")
+        yrblt = _num(r.YRBLT)
+        key = (
+            status,
+            price,
+            None if cval is None else round(float(cval), 2),
+            bound,
+            int(r.BDSP),
+            int(r.RMSP),
+            str(r.BLD).zfill(2),
+            None if yrblt is None else int(yrblt),
+            kit,
+            plm,
+            int(tiers[i]),
+            r.gross_affected_by if status == "censored" and not censored[i] else None,
+        )
+        g = groups.setdefault(key, {"weight": 0.0, "records": []})
+        g["weight"] += float(w[i])
+        g["records"].append(r.record_id)
+
+    def order(k: tuple) -> tuple:
+        return (PRICE_STATUS_ORDER[k[0]], -1 if k[1] is None else k[1], *[str(x) for x in k[2:]])
+
+    points = []
+    for n, k in enumerate(sorted(groups, key=order), start=1):
+        g = groups[k]
+        points.append(
+            {
+                "id": f"s{n:04d}",
+                "weight": round(g["weight"]),
+                "price_status": k[0],
+                "gross_rent": None if k[1] is None else money_text(k[1]),
+                "contract_rent": None if k[2] is None else money_text(k[2]),
+                "censor_bound": k[3],
+                "censored_by": "RNTP" if k[0] == "censored" and k[11] is None else k[11],
+                "bedrooms": k[4],
+                "rooms": k[5],
+                "structure": k[6],
+                "year_built": k[7],
+                "kitchen": k[8],
+                "plumbing": k[9],
+                "quality_tier": k[10],
+                "records": sorted(g["records"]),
+            }
+        )
+    total = round(float(w.sum()))
+
+    def mass(pred) -> int:
+        return sum(p["weight"] for p in points if pred(p))
+
+    complete = lambda p: p["kitchen"] == "complete" and p["plumbing"] == "complete"  # noqa: E731
+    return {
+        "table_id": support_table_id(cell),
+        "method": SUPPORT_METHOD.ref,
+        "cbsa": cell.cbsa,
+        "level": cell.level,
+        "key": list(cell.key),
+        "population": cell.population,
+        "cell_table": cell.table_id,
+        "n": cell.n,
+        "n_eff": round(cell.n_eff, 2),
+        "weight_sum": total,
+        "donors": {
+            "n": int(observed.sum()),
+            "utilities_median_month": None if util_med is None else money_text(util_med),
+            "assumption": UTILITIES_IMPUTATION.assumption_id,
+        },
+        "masses": {
+            "raw": total,
+            "observed": mass(lambda p: p["price_status"] == "observed"),
+            "imputed": mass(lambda p: p["price_status"] == "imputed"),
+            "censored": mass(lambda p: p["price_status"] == "censored"),
+            "unknown": mass(lambda p: p["price_status"] == "unknown"),
+            "facilities_complete": mass(complete),
+            "facilities_incomplete": mass(lambda p: "incomplete" in (p["kitchen"], p["plumbing"])),
+            "facilities_unknown": mass(
+                lambda p: not complete(p) and "incomplete" not in (p["kitchen"], p["plumbing"])
+            ),
+            "executable": mass(
+                lambda p: p["price_status"] in ("observed", "imputed") and complete(p)
+            ),
+        },
+        "points": points,
+    }
+
+
+INTERNET_VARIABLES = {
+    "ACCESSINET": {1: "paid", 2: "without_paying", 3: "no_access"},
+    "HISPEED": {1: "yes", 2: "no"},
+    "BROADBND": {1: "yes", 2: "no"},
+    "SMARTPHONE": {1: "yes", 2: "no"},
+    "TEL": {1: "yes", 2: "no"},
+}
+
+
+def internet_access(df: pd.DataFrame, cbsa: str) -> dict[str, Any]:
+    """都会区（完整在内的 PUMA）租住户的上网与通信设备分布（``household_internet_access@1``）。抑制值 8 与不适用（空值）不进分母，
+    单独计数；不是运营商可得率。"""
+    occ = df[df["full_puma"] & (df["segment"] != "vacant_for_rent")]
+    w = occ["WGTP"].to_numpy(float)
+    out: dict[str, Any] = {
+        "table_id": f"b.internet.{cbsa}",
+        "method": INTERNET_METHOD.ref,
+        "cbsa": cbsa,
+        "population": "renter_occupied_full_pumas",
+        "n": len(occ),
+        "weight_sum": int(w.sum()),
+        "variables": {},
+    }
+    for var, labels in INTERNET_VARIABLES.items():
+        col = pd.to_numeric(occ[var], errors="coerce") if var in occ else pd.Series(dtype=float)
+        if col.empty:
+            out["variables"][var] = {"status": "not_read"}
+            continue
+        codes = col.to_numpy(float)
+        valid = np.isin(codes, list(labels))
+        valid_w = float(w[valid].sum())
+        out["variables"][var] = {
+            "weight_valid": int(valid_w),
+            "weight_suppressed": int(w[codes == 8].sum()),
+            "weight_not_applicable": int(w[np.isnan(codes)].sum()),
+            "shares_of_valid": {
+                lab: None if valid_w == 0 else round(float(w[codes == c].sum()) / valid_w, 4)
+                for c, lab in labels.items()
+            },
+        }
+    return out
 
 
 def stock_median_gross_by_bed(df: pd.DataFrame) -> dict[str, float]:

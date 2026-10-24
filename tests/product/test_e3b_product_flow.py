@@ -86,8 +86,9 @@ def _check_public_facts(s) -> None:
                 cat.tax_policy_id,
                 "official_2024_rules",
             )
-            # mock 不买用车权；资料包里的设备都是模拟期内不随机坏
-            assert facts.car_access.status == "not_bought"
+            # 开车上班的年份就是买了用车权的年份（mock 只在菜单上没有不用车就能到岗的住房时买）；资料包里的设备都是模拟期内不随机坏
+            drives = any(t.mode == "drive" for g in facts.commute for t in g.trips)
+            assert drives == (facts.car_access.status == "bought")
             assert facts.device_failures == () and out.device_failures == ()
     assert [d.city_ref for d in result.data_nature] == [HOU, SEA]
     assert all(d.build_status == "from_pack_report" for d in result.data_nature)

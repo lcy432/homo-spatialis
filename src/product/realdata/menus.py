@@ -2,13 +2,13 @@
 
 三种政策：
 
-* ``full_catalog``（食品、普通商品、常规服务、城市背景）：菜单 = 本资料包成功映射的全部合格机会，不随机删减。为了不在每一年每一份
+* ``full_catalog``（住房的目标格、食品、普通商品、常规服务、城市背景）：菜单 = 本资料包成功映射的全部合格机会，不随机删减。为了不在每一年每一份
   菜单里重复抄几万个编号，菜单只记“全部合格”与合格集合的内容身份；查询时分页读取。完整可访问 ≠ 单轮请求能容纳全部记录，两件事
   分开报告。
 * ``calendar_open``（培训、活动）：目标是按事实日历开放，但**模拟年份与真实日期的对应还没定义**，所以现在不按日历筛选：菜单
   列出全部观测到的项目及其原始日历，标明 ``calendar_filter = pending_mapping``，并分开数日历已知与未知（例如 IPEDS 不记开课
   日期）。不声称已经按日历筛过；没有观测的未来日历也不编造。
-* ``annual_exposure_sample``（住房、新岗位）：抽取本年接触到的机会。只模拟接触机会，不抽成交或录用。资料不足（必需事实缺，
+* ``annual_exposure_sample``（新岗位）：抽取本年接触到的机会。只模拟接触机会，不抽成交或录用。资料不足（必需事实缺，
   例如回退之后仍没有租金）的候选不进抽样。
 
 **抽样算法 ``weighted_keyed_sample@1``**（Efraimidis–Spirakis 加权无放回抽样）：每个合格机会的键 = u^(1/w)，u 由
@@ -16,13 +16,15 @@ SHA-256(种子, 机会编号) 映射到 (0, 1)，w 是目标权重；每层取�
 算法版本, 配置种子)——**不含分身编号**：同一环境重复下的分身共享同一份菜单；恢复、重新查询、修改计划都得到同一份，不重抽。
 抽样权重不是入选概率：无放回抽样里权重大的机会入选概率小于“权重 × k”，报告里用模拟估计实际入选概率。
 
-住房：每个卧室层从 B 候选里抽；某一层没有 B 候选时才用这一层的 A 网格候选补（A 补共同覆盖）。权重为 0 或未知、供给不确定、
-资料不足的机会不合格。合格规则与检查器（``ledger.intake_data``）共用同一条定义：改了规则要升 ``MENU_RULES_VERSION``。
+住房（E3B 映射修正）：候选池是完整加权经验支持表（``housing_rent_support@1``，每个 PUMA × 卧室目标格一条，这里全部列出、不抽样）；
+每年的接触菜单在 E3B 资料包里从展开后的完整可执行池抽（``product.realdata.life_pack``）。权重为 0 或未知、供给不确定、资料不足的
+机会不合格。合格规则与检查器（``ledger.intake_data``）共用同一条定义：改了规则要升 ``MENU_RULES_VERSION``。
 """
 
 from __future__ import annotations
 
 import hashlib
+import heapq
 import math
 from collections import defaultdict
 from collections.abc import Iterable
@@ -83,9 +85,8 @@ def _u(seed: str, opportunity_id: str) -> float:
 
 def keyed_sample(items: list[tuple[str, float]], k: int, seed: str) -> list[str]:
     """加权无放回：返回键最大的 k 个编号（按键从大到小）。权重 ≤ 0 的不参加。"""
-    keyed = [(math.log(_u(seed, oid)) / w, oid) for oid, w in items if w > 0]
-    keyed.sort(reverse=True)
-    return [oid for _, oid in keyed[:k]]
+    keyed = ((math.log(_u(seed, oid)) / w, oid) for oid, w in items if w > 0)
+    return [oid for _, oid in heapq.nlargest(k, keyed)]
 
 
 def eligible_identity(ids: Iterable[str]) -> str:

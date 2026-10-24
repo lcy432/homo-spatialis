@@ -3,8 +3,8 @@
  "url": "https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMS_Data_Dictionary_2024.csv",
  "method": "GET",
  "http_status": 200,
- "sha256": "843087a33f140a946f737bb21e5b193dd8ae8f8950660da146c901d084152950",
- "bytes": 50569,
+ "sha256": "5fdc0784ee9f7ed5ca38267d45641c23e5df677fbfac367d6f49abda91ff2939",
+ "bytes": 53683,
  "retrieved_at": "2026-10-22T08:02:40Z",
  "subset_of": {
   "sha256": "cd562a3719c6cdf79736bd9cfbacf8c20e650d641c62abd7e67fd131da036e18",

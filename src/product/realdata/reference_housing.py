@@ -1,16 +1,17 @@
 """期末参考生活的住房绑定（独立审核 F3、F4，DECISIONS/0042）：按参考岗位与通勤关系，从完整候选池选。
 
 参考生活的住房以前从按菜单裁剪后的目录里挑，而且不看参考岗位在哪：固定住房可能到不了岗位（通勤不合法），菜单一换参考集合就
-跟着变。现在的规则（``reference_housing_by_job_reach_v1``，六城统一、在看结果之前写定）：
+跟着变。现在的规则（``reference_housing_by_job_reach_v2``，六城统一、在看结果之前写定）：
 
-* **参考岗位集合**：现职模板的岗位是估值期初分身手上的岗位，事先不知道是哪一个，所以取本城目录里全部可得岗位的就业片区；
-  换岗模板的目标岗位也在这个集合里（组装时另外核对）。
+* **参考岗位集合**：现职模板的岗位是估值期初分身手上的岗位，事先不知道是哪一个，所以取本城完整岗位池与开局岗位的全部就业
+  片区（与菜单无关）；换岗模板的目标岗位也在这个集合里（组装时另外核对）。
 * **合法**：从住处片区到每个参考岗位片区都有一条可执行的通勤线——不用车的模板只认不需要用车权的方式（公交、步行骑车）；用车
   模板也认开车（用车权的月费与油费在估值结算里照付）。
 * **基本住房**：完整候选池（不是菜单）里合法的住房中最便宜的一处；**较舒适的住房**：合法的一卧中档里，到参考岗位最长的往返
   分钟最短的一处（同分钟取便宜的）。
-* **必要交通服务**：只在没有不用车就合法的住房时，才设用车的参考生活（同样的基本 / 较舒适含义，另加用车权）；有不用车就合法
-  的住房时用车参考生活确定不设，不让一辆车抬高参考集合。
+* **用车的参考生活**（E3B 映射修正：v1 的“只在没有不用车就合法的住房时才设”会让一条存在但过慢的无车路线把合法的用车参考
+  生活提前禁用）：开车能到达全部参考岗位片区时就绑定（同样的基本 / 较舒适含义，另加用车权），可不可行交给估值期现有的通勤、
+  现金与硬要求检查判定；模板数不变。
 * 用车也到不了的：这一档确定没有，用到它的参考方案已知不可行——资料确实不足时估值如实报不完整，不放宽条件。
 
 参考集合只由完整候选池、参考岗位与通勤关系决定，与年度菜单无关：只换菜单抽样种子不会改变参考住房。
@@ -22,7 +23,7 @@ from collections.abc import Iterable
 from dataclasses import dataclass, field
 from typing import Any
 
-REFERENCE_HOUSING_RULE = "reference_housing_by_job_reach_v1"
+REFERENCE_HOUSING_RULE = "reference_housing_by_job_reach_v2"
 COMFORT_SPEC = {"bedrooms": 1, "quality_level": 2}
 
 
@@ -121,18 +122,14 @@ def choose_reference_housing(
     )
     labels = {"housing_basic": "合法住房", "housing_comfort": "合法的一卧中档"}
     for slot, got in no_car.items():
-        car_slot = f"{slot}_car"
         if got is not None:
             slots[slot], worst[slot] = got[0]["opportunity_id"], got[1]
-            slots[car_slot] = None
-            reasons[car_slot] = (
-                f"不用车就有能到达全部参考岗位片区的{labels[slot]}：不设用车的参考生活（必要交通服务只在需要时加）"
+        else:
+            slots[slot] = None
+            reasons[slot] = (
+                f"完整候选池里没有不用车就能到达全部参考岗位片区（{len(job_areas)} 个）的{labels[slot]}"
             )
-            continue
-        slots[slot] = None
-        reasons[slot] = (
-            f"完整候选池里没有不用车就能到达全部参考岗位片区（{len(job_areas)} 个）的{labels[slot]}"
-        )
+        car_slot = f"{slot}_car"
         car = with_car[car_slot]
         if car is not None:
             slots[car_slot], worst[car_slot] = car[0]["opportunity_id"], car[1]

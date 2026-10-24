@@ -17,20 +17,10 @@ from product.realdata.life_assembly import (
     _rescope,
     background_numbers,
     load_pack_config,
-    modal_work_area,
 )
 
 PACK = Path("data/frozen/life/us-v1/pack")
 CFG = load_pack_config()
-
-
-def test_jobs_go_to_the_modal_work_area_of_their_occupation_group():
-    shares = {
-        "all": {"shares": {"x.area.w.a": "0.6", "x.area.w.b": "0.4"}},
-        "by_soc_major": {"15": {"shares": {"x.area.w.a": "0.3", "x.area.w.b": "0.7"}}},
-    }
-    assert modal_work_area(shares, "15-1252") == "x.area.w.b"
-    assert modal_work_area(shares, "43-9061") == "x.area.w.a"  # 没有这一大类：看全体
 
 
 def test_every_source_gets_the_group_label_and_keeps_its_detail():
@@ -42,26 +32,25 @@ def test_every_source_gets_the_group_label_and_keeps_its_detail():
 
 
 def test_background_numbers_by_hand():
+    # 支持职业共 4 个（固定分母：职业配置的范围，每城相同）；本城有岗位模板的 2 个、其中 1 个有培训
     items = {
+        "job_templates": [{"soc": c} for c in ("11-1021", "43-9061")],
+        "start_jobs": {c: {} for c in ("11-1021", "43-9061", "15-1252", "29-1141")},
         "items": [
-            {"domain": "job", "opportunity": {"occupation": {"code": c}}, "status": "needs_area"}
-            for c in ("11-1021", "43-9061")
-        ]
-        + [
             {
                 "domain": "training",
                 "status": "executable",
                 "opportunity": {"grants": ["soc_43_9061_award"]},
             }
-        ]
+        ],
     }
     n = background_numbers(CFG, {"share_good_days": {"value": "0.5589"}}, items)
     assert n["environment"] == (
         Decimal("5.589"),
         Decimal("2.7945"),
     )  # 指数 = 10 × 好天比例，b = 0.5 × 指数
-    # 两个支持职业都有岗位、一个有培训：b = 2 × 1 + 2 × 0.5 = 3，指数 6
-    assert n["opportunity"] == (Decimal("6.000"), Decimal("3.000"))
+    # b = 2 × 2/4 + 2 × 1/4 = 1.5，指数 3（分母是固定的支持职业总数，不是本城自己的职业数）
+    assert n["opportunity"] == (Decimal("3.000"), Decimal("1.500"))
     assert n["leisure"] == (Decimal(2), Decimal(1))  # 共同休闲背景 b = 1（所有者 2026-10-23）
     assert n["safety"] is None  # 没有给治安资料：未知，不当零犯罪，也不用他城平均填补
     assert background_numbers(CFG, {}, items)["environment"] is None  # 没有 AQI：未知，不当 0
@@ -110,6 +99,24 @@ def test_six_cities_with_official_tax_menus_areas_and_commute(loaded):
         assert all(o.area is not None and cat.area(o.area) is not None for o in homes)
         jobs = [o for o in cat.opportunities if o.category == "job"]
         assert jobs and all(o.area is not None for o in jobs)
+        # 菜单每份最多 60 个，从完整池抽；目录只展开菜单上出现过的（加最低住房、参考住房与开局岗位）
+        assert all(len(m.opportunity_ids) <= 60 for m in cat.menus)
+        on_menu = {i for m in cat.menus for i in m.opportunity_ids}
+        assert {
+            o.opportunity_id for o in jobs if not o.opportunity_id.endswith(".start")
+        } <= on_menu
+
+
+def test_the_report_keeps_pool_masses_and_size_diagnostics():
+    rep = json.loads((PACK / "report.json").read_text(encoding="utf-8"))
+    for city in rep["cities"].values():
+        hp, jp = city["pools"]["housing"], city["pools"]["job"]
+        assert hp["candidates"] > 1000 and jp["candidates"] > 1000
+        # 不进池的质量照实报告：删失、厨卫不完整、两端工资未识别、工时顶码
+        assert {"price_censored", "facilities_incomplete"} <= set(hp["shares_of_raw"])
+        assert float(jp["shares_of_raw"]["wage_unidentified"]) >= 0.2
+        d = city["menu_size_diagnostics"]
+        assert set(d["housing"]["sizes"]) == set(d["job"]["sizes"]) == {"30", "60", "120"}
 
 
 def test_scoring_reads_area_values_and_the_group_is_six_real_cities(loaded):
