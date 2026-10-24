@@ -1,6 +1,6 @@
 # E3C 托管服务交给界面层（E3 → E5）
 
-日期：2026-10-23。规则见 [ADR0043](../../DECISIONS/0043-e3c-hosted-service.md)，机制见 [E3C 托管服务](../design/e3c-service.md)。本轮只提供服务、接口与样例，**没有改 E5 页面**。
+日期：2026-10-23；2026-10-24 E3C 收尾（运行选项、独立审核 R1–R6 的修复，第 11 节是本轮的改动清单）。规则见 [ADR0043](../../DECISIONS/0043-e3c-hosted-service.md)，机制见 [E3C 托管服务](../design/e3c-service.md)。本轮只提供服务、接口与样例，**没有改 E5 页面**。
 
 ## 1. 现在能做什么、不能做什么
 
@@ -13,8 +13,8 @@
 | 文件 | 用途 |
 |---|---|
 | [`contracts/product/v3/openapi.json`](../../contracts/product/v3/openapi.json) | 全部 HTTP 接口（路径、请求与回复的结构、错误码）。生产不在线公开 `/docs`；本地 mock 服务在 `http://127.0.0.1:8765/api/v1/docs` 有交互式文档 |
-| `contracts/product/v3/*.schema.json`、`index.json` | 公共结构 `e3a-product-schema-v3.2`（28 份消息）。唯一权威是 `src/common/product_contracts.py` |
-| `contracts/product/v3/samples/60_…–96_…` | 服务的样例（第 8 节），全部由服务端真实代码路径产生，凭证是明确无效的测试值 |
+| `contracts/product/v3/*.schema.json`、`index.json` | 公共结构 `e3a-product-schema-v3.3`（28 份消息）。唯一权威是 `src/common/product_contracts.py` |
+| `contracts/product/v3/samples/60_…–104_…` | 服务的样例（第 8 节），全部由服务端真实代码路径产生，凭证是明确无效的测试值 |
 | `configs/product/service_local_mock.yaml` | 本地联调配置（`site_origin = http://localhost:5173`） |
 
 ## 3. 本地接线
@@ -76,7 +76,7 @@ fetch(url, { method, headers: { "Content-Type": "application/json", "X-CSRF-Toke
 | 读 / 存 / 删草稿 | `GET` / `PUT`（`DraftSaveRequest`：`expected_revision` + 草稿）/ `DELETE /api/v1/drafts/{id}` | `DraftView` / `DraftView`（修订号 +1）/ `DeletionReceipt`；旧修订号 409 `revision_conflict` |
 | 审阅 | `POST /api/v1/drafts/{id}/review` | `ReviewReply`（审阅服务端保存的那一版） |
 | 确认画像 | `POST /api/v1/profiles/confirm`（`ProfileConfirmRequest`：审阅编号、草稿编号、修订号、知悉项） | `ProfileConfirmReply`：`confirmed` 带确认画像，`refused` 带原因（草稿改过、知悉项缺失、审阅过时） |
-| 准备模拟 | `POST /api/v1/run-intents`（`confirmed_id`） | 202 `RunIntentView`（`checking`，排队检查）；同样条件再点一次 200 返回原意图 |
+| 准备模拟 | `POST /api/v1/run-intents`（`RunIntentCreateRequest`：`confirmed_id`，可选 `clones_per_city`、`years`、`max_cost_cny`） | 202 `RunIntentView`（`checking`，排队检查；`settings` 是这次保存的有效设置）；同一份画像、同样的设置再点一次 200 返回原意图；选项越界 409 `run_options_invalid` |
 | 看流程 | `GET /api/v1/run-intents/{id}` | `RunIntentView`（只读快照） |
 | 确认开始 | `POST /api/v1/run-intents/{id}/submit`（`RunSubmitRequest`：`confirm_with`、`idempotency_key`、`accept_scope: true`） | 202 `RunSubmitReply`（`accepted`，预留 1 次，`queued`）；重复 200（`duplicate_same_run`） |
 | 开始前取消 | `POST /api/v1/run-intents/{id}/cancel` | `RunIntentView`（`cancelled`，预留退回） |
@@ -119,7 +119,8 @@ fetch(url, { method, headers: { "Content-Type": "application/json", "X-CSRF-Toke
 | `not_resumable` / `result_unavailable` | 409 | 刷新状态，不重试 |
 | `deleting` / `deleted` / `expired` | 409 / 410 / 410 | 内容已经不可查看 |
 | `paid_calls_disabled` | 409 | 服务没有开启付费调用：可以填写与检查，不能开始 |
-| `run_scale_fixed` | 409 | 固定比较全部六个都会区：在草稿里选全部城市 |
+| `run_options_invalid` | 409 | 运行选项不在允许范围里：`field` 指出哪一项（`clones_per_city`、`years`、`max_cost_cny`、`cities`），按 `SessionView.rules.options` 的范围改了再提交；不回显用户填的值 |
+| `run_settings_unavailable` | 409 | 这次运行保存的设置读不到：不要换成默认值重试，联系维护者（报支持编号） |
 | `data_pack_unavailable` | 503 | 稍后再试 |
 | `csrf_failed` / `origin_rejected` | 403 | 刷新页面（重新 `GET /api/v1/session` 取 CSRF） |
 | `payload_too_large` | 413 | 缩短填写内容 |
@@ -138,21 +139,38 @@ fetch(url, { method, headers: { "Content-Type": "application/json", "X-CSRF-Toke
 | 部分结果（受控夹具：一个分身出错，结果里有 M） | 84 |
 | 次数用完 | 85 |
 | 暂停（服务暂时不可用，可以恢复） | 82、83 |
+| 停下且不能由用户恢复（**测试传输**：同一份规划的服务尝试已经用完；按钮与进度 `resumable = false` 一致） | 100、101 |
+| 预算停下（测试传输，这次费用上限 0.1 元：下一次预留会超过上限，停在发送之前） | 102 |
+| 开始之后的失败（受控夹具：暂停期间快照被改动、恢复被拒绝；说明写“已经用掉 1 次机会”，没有“取消”） | 103 |
+| 运行选项：默认（只给 `confirmed_id`，服务用默认值）、较小规模的请求与保存的有效设置、越界 | 69、97、98、99 |
+| 最新六城资料（冻结的 E3B 真实资料包，样例说明里写着内容身份与构建身份）的结果：六城各 1 个分身、3 年、离线 mock；逐城的资料性质与覆盖说明在 `data_nature` | 104 |
 | 删除 | 86（回执）、87（墓碑）、88（已删除的结果 410）、89（删除全部） |
 | 过期 | 90（意图）、91（结果 410） |
-| 其他错误 | 65 版本冲突、75 键冲突、92 未登录、93 CSRF、94 限流、95 付费未开、96 预检查过时 |
+| 其他错误 | 65 版本冲突、75 键冲突、92 未登录、93 CSRF、94 限流、95 付费未开、96 预检查过时（服务设置变了：重新看运行前说明再确认，没有扣次数） |
 
-样例用测试时钟（2026-10-24 起）与测试配置（合成资料包、每城 1 个分身）；生产固定六城 × 每城 4 个分身 × 3 年（`SessionView.rules` 写明）。
+样例用测试时钟（2026-10-24 起）与测试配置（合成资料包、默认每城 1 个分身；104 用 E3B 资料包）；生产默认六城 × 每城 4 个分身 × 3 年、20 元，允许每城 1–4 个分身、只开放 3 年、0.01–20 元（`SessionView.rules.options` 写明）。
 
 ## 9. 新字段要点
 
 * `QuotaSummary`：`total = used + reserved + available`；`reserved` 是确认开始但还没启动的。
-* `ServiceRules`：规模、规划器种类、付费开关、费用上限与币种、各项保存天数、`notes_zh`（原样显示）。
+* `ServiceRules`：默认规模（`cities`、`clones_per_city`、`years`、`max_cost`）、规划器种类、付费开关、币种、各项保存天数（含 `profile_retention_days`）、`notes_zh`（原样显示）；`options` 是用户能选的范围（`RunOptionsPolicy`：`cities_allowed`、`clones_per_city` 的默认 / 最小 / 最大、`years_default`、`years_allowed`、`max_cost` 的默认 / 最小 / 最大与币种、`notes_zh`）。
+* `RunIntentView.settings` / `RunSummary.settings`（`RunSettingsView`）：这次运行保存的有效设置——城市、每城分身数、年数、分身总数、规划器种类、费用上限与币种、规划候选上限、服务尝试上限、`settings_fingerprint`。运行前说明、进度与结果都按它，不按服务现在的默认值。删除或过期之后不出现。
+* `ServiceError.field`：只在 `run_options_invalid` 时出现，指出哪一项选项。
 * `CostStatus`（v3.2 新增的可选字段，mock 时不出现）：`currency`、`price_version`、`max_cost`、`settled_cost`、`uncertain_cost`、`in_flight_cost`、`service_attempts`、`service_attempt_limit`、`uncertain_attempts`。金额是应用侧按报价的估算，必须同时显示 `note`（不是供应商账单）。
 * `RunProgress.updated_at`：快照写下的时间（UTC）；离线桥接不写。
 * `RunReceipt.service = hosted_service`：服务端 SQLite 登记的提交。
 
 ## 10. 已验收与没有验证的
 
-* 已验收（离线，`tests/product_service/` 与全量测试）：身份隔离与重发链接、草稿冲突、确认不可伪造、次数并发与重发、预留释放与不退款、固定规模与身份一致、四个中断点的重启恢复、发送不确定、费用上限、查询无副作用、worker 独占、五种删除竞争、过期、清理范围、信息隔离、结果语义、E3B 六城 × 4 × 3 全规模离线闭环。
+* 已验收（离线，`tests/product_service/` 与全量测试）：身份隔离与重发链接、草稿冲突、确认不可伪造、次数并发与重发、预留释放与不退款、运行选项（默认值、允许范围、越界在预留之前拒绝、保存后处处用它、同设置返回原意图与不同设置冲突、重启、设置过时）与身份一致、四个中断点的重启恢复、发送不确定、费用上限、查询无副作用、worker 独占、五种删除竞争与删除全部的并发写入、确认画像 30 天、过了到期时间的动作、恢复资格、开始前后的说明、过期、清理范围、信息隔离、结果语义、E3B 六城 × 4 × 3 全规模离线闭环。
 * 没有验证：真实模型在这条服务链上的表现与费用（`live_calls_enabled` 没开过）；真实部署（主机、TLS、反向代理、systemd、磁盘与备份策略、日志轮转）；浏览器里的真实页面（E5 尚未接线）；多人同时使用时的排队等待时间（单个 worker 串行，一次全规模运行要几分钟到更久）。
+
+## 11. E3C 收尾（2026-10-24）给 E5 的改动清单
+
+1. **运行选项（新）**：“准备模拟”页可以让用户选每城分身数、年数与这次的费用上限（元，字符串，最多到分，例如 `"5"`、`"12.5"`）；不选就省略字段（服务用默认值）。范围只读 `SessionView.rules.options`，不要在页面里写死 1–4、3 年或 20 元。城市不是这里的选项：来自用户确认的画像（草稿里选的城市），必须在 `cities_allowed` 里。
+2. **显示有效设置**：运行前说明旁边显示 `RunIntentView.settings`（城市、每城分身数、年数、分身总数、费用上限）；“我的运行”用 `RunSummary.settings`。有效设置在创建时就定了，之后改服务默认值不影响它。
+3. **按钮仍只看 `allowed_actions`**：开始之后停下的运行，只有服务判断 E1 还能接着跑时才有 `resume`（`RunProgress.resumable` 与它一致）；没有 `resume` 时显示说明里的“不需要重新填写：等维护者处理，或删除这次运行”。运行进行中 `resumable = false`，`resume_note` 写“这次运行正在进行，不需要恢复”，原样显示即可。说明分开始前与开始后：开始前写“预留的次数已经退回”并给 `cancel`；开始后写“已经用掉 1 次机会（开始之后不退）”，没有 `cancel`。原样显示 `explanation` 的三句，不自己拼。
+4. **错误码**：`run_scale_fixed` 删掉了（规模不再固定）；新增 `run_options_invalid`（带 `field`）与 `run_settings_unavailable`。`preflight_stale`：重新读意图、看新的运行前说明、换新键再确认。
+5. **过期与删除**：确认画像从第一次确认起 30 天可以用来准备模拟（`rules.profile_retention_days`），重复确认不续期；过了页面显示的到期时间，确认开始、恢复、取消都会被拒绝（410 `expired`），不扣次数。删除全部之后，之前打开的页面再保存或确认都会被拒绝，不会把内容写回来。
+6. **公共结构仍是 `e3a-product-schema-v3.3`**（E5 还没接服务，所以没有另开版本号）；`openapi.json` 与样例重新导出：`uv run python scripts/product_service.py check-openapi` 核对提交的接口文档与实际应用一致，`uv run python scripts/product_e3a.py check-schema` 核对结构与样例。
+7. **本地联调不变**：`configs/product/service_local_mock.yaml`（离线 mock，只绑定 127.0.0.1），起服务与建链接的命令见第 3 节；离线联调脚本 `uv run python scripts/product_service.py e2e --out <新目录>` 不起端口，走同一条服务路径，可以用来对照页面看到的结果。
