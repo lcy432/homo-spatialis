@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from agentlayer.life_llm import InputSizeCheck
 from common.life_contracts import canonical_fingerprint, to_fraction
 from common.life_planning_contracts import MockScript
 from common.product_contracts import (
@@ -33,7 +34,12 @@ from common.product_contracts import (
 )
 from econ.life_coverage import coverage_report
 from econ.life_scoring import preference_from_confirmed_profile
-from orchestration.life_runner import RunRefusedError, RunWorld, preflight
+from orchestration.life_runner import (
+    RunRefusedError,
+    RunWorld,
+    first_year_input_checks,
+    preflight,
+)
 from product.answers import confirmation_problems, issue
 from product.catalog import inventory_coverage
 from product.compile import CompiledInputs, CompileRefusedError, compile_inputs
@@ -91,6 +97,36 @@ def _blocked(
     unsealed = ProductPreflight.model_construct(**fields, preflight_fingerprint="0" * 64)
     pre = ProductPreflight(**fields, preflight_fingerprint=content_fingerprint(unsealed.content()))
     return PreflightRun(pre, compiled=compiled, inventory=inventory, e1_refusal=e1_refusal)
+
+
+#: 预检查时还不知道真正的运行编号（由提交时的幂等键决定）：用同样长度的占位估计首年请求（估计只看字符数）。
+#: 长度必须与 ``product.bridge.run_id_for`` 的编号相同；启动前按真正的编号再核对一次（``workflows.e3_adapters``）。
+PLACEHOLDER_RUN_ID = "run-e3a-" + "0" * 16
+
+
+def _oversize_issues(world: RunWorld, oversize: list[InputSizeCheck]) -> list[ProductIssue]:
+    """首年请求超过输入上限：按城市各写一条（最大的估计与上限），不写请求内容、提示或任何评分参数。"""
+    by_city: dict[str, list[InputSizeCheck]] = {}
+    city_of = {e.clone_id: str(e.city) for e in world.roster.entries}
+    for c in oversize:
+        clone_id = c.request_id.split("/")[1]
+        by_city.setdefault(city_of[clone_id], []).append(c)
+    out = []
+    for city, checks in by_city.items():
+        cat = world.bundle.catalog_for(city)
+        label = cat.label if cat is not None else city
+        worst = max(checks, key=lambda c: c.estimate)
+        out.append(
+            issue(
+                "planning_request_too_large",
+                f"cities.{city}",
+                f"{label}的首年规划请求估计约 {worst.estimate} 个输入 token（{len(checks)} 个分身超过），"
+                f"超过本次规划器的单次输入上限 {worst.limit}",
+                "这次模拟不能开始：系统不会删减请求里的选项或事实来塞进上限，也不会悄悄换成别的模型；没有发出请求，没有使用次数",
+                "等维护者调整资料或请求格式、或选择输入上限更大的运行设置后，重新准备并检查",
+            )
+        )
+    return out
 
 
 def _planner(pack: DataPack, calls: int, execution: ExecutionSpec | None = None) -> PlannerAndCost:
@@ -166,6 +202,19 @@ def run_preflight(
             compiled=compiled,
             inventory=inventory,
             e1_refusal=message,
+            execution=execution,
+        )
+    # E3B 收尾 §6：本次运行绑定的全部首年请求按真实发送的同一条路渲染、估计，超过规划器的输入上限就不能确认开始
+    with contextlib.chdir(repo_root) if repo_root is not None else contextlib.nullcontext():
+        oversize = [c for c in first_year_input_checks(world, PLACEHOLDER_RUN_ID) if not c.fits]
+    if oversize:
+        return _blocked(
+            pack,
+            confirmed,
+            _oversize_issues(world, oversize),
+            sample,
+            compiled=compiled,
+            inventory=inventory,
             execution=execution,
         )
     protocol = world.bundle.protocol

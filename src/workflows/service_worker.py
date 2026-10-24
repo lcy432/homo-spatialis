@@ -39,6 +39,7 @@ _PRESTART = {
     "credentials_missing": "credentials_missing",
     "start_refused": "start_refused",
     "model_mismatch": "model_mismatch",
+    "request_too_large": "request_too_large",
 }
 #: 用户可以自己点“恢复”的停止原因（E1 支持从这里恢复，已保存的回复复用）
 _USER_RESUMABLE = frozenset({"service_unavailable"})

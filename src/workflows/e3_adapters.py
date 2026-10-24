@@ -77,7 +77,13 @@ from common.product_contracts import (
 )
 from common.run_store import RunStore
 from orchestration.life_outcome import FINISHED_WITH_REPORT, outcome_from_archive
-from orchestration.life_runner import RunRefusedError, RunWorld, resume_run, start_run
+from orchestration.life_runner import (
+    RunRefusedError,
+    RunWorld,
+    first_year_input_checks,
+    resume_run,
+    start_run,
+)
 from orchestration.life_runner import preflight as e1_preflight
 from product import bridge
 from product.bridge import SubmissionRegistry
@@ -626,6 +632,10 @@ class E1RunAdapter:
             run_dir = Path("archive") / run_id
             if run_dir.exists():
                 raise AttentionRequiredError("archive_conflict", audit_ref=f"wf-run-{run_id}")
+            # E3B 收尾 §6：扣次数之前按真正的运行编号再核对一次全部首年请求的输入上限（旧预检查或配置变化不能绕过）；
+            # 超过就不启动：没有服务调用，预留的次数由服务退回
+            if any(not c.fits for c in first_year_input_checks(world, run_id)):
+                raise AttentionRequiredError("request_too_large", audit_ref=f"wf-run-{run_id}")
             planner = ctx.planner(world)
             if ctx.on_start is not None:
                 ctx.on_start(run_id)  # 最后一步核对（托管服务：预留转为已使用）；拒绝就不启动
