@@ -28,7 +28,7 @@
   "meta": {
    "conversion_version": "e3a-conversion-v2",
    "data_pack": {
-    "content_fingerprint": "7face3610cd86d6e2cb7442017661fce2abb3c4a2b1a4e6740ab70ddf23ca9ae",
+    "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
     "pack_id": "pack.e3a.synthetic-v2",
     "status": "synthetic_fixture_only"
@@ -45,7 +45,7 @@
    "vocabulary_version": "e3a-vocabulary-v4"
   },
   "pause": {
-   "audit_ref": "run:run-e3a-ed89b146c038aa5e record:progress.json, failures.json",
+   "audit_ref": "run:run-e3a-1076f95bba021f69 record:progress.json, failures.json",
    "category": "batch_paused_program_error",
    "impact_zh": "这两类分身都是模拟缺失（不是生活出局），不进完成者平均；评价与汇总已经生成，可以查看结果（C / E / M 按上面的分类）",
    "next_action_zh": "维护者按审计编号查看内部记录并修复；这次运行不能恢复，处理之后用新的运行重跑",
@@ -54,7 +54,7 @@
   "report_available": true,
   "resumable": false,
   "resume_note": "这次运行已经结束，没有可以恢复的部分",
-  "run_id": "run-e3a-ed89b146c038aa5e",
+  "run_id": "run-e3a-1076f95bba021f69",
   "stage": "paused",
   "stage_zh": "批次暂停（程序或配置问题）"
  }

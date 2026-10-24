@@ -29,10 +29,10 @@ pack:
     protocol_id: life-v1-e3a-product
     scoring_version: e1-life-v1
     scoring_content_fingerprint: c36f768cbb84afd5398b4afedeafbf2aa1a117bf61cfd944a453eb3cdc1e7d75
-    prompt_template: e3b-product-prompt-v2
+    prompt_template: e3b-product-prompt-v3
 
   run:
-    prompt_template: e3b-product-prompt-v2
+    prompt_template: e3b-product-prompt-v3
     repeat_indexes: [0]
     max_revisions_per_year: 2
     permission_version: e3a-product-v1

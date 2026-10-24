@@ -109,28 +109,28 @@
    ]
   }
  },
- "build_identity": "45e28b1ae30dea76195fb4a9ed94b88a2f39ec005fbbfae94bc3be0da14da4eb",
+ "build_identity": "357adf13c588406d5ad3719e246903d3af9dace90c0bb482ed5e05336bd0f6db",
  "build_inputs": {
   "base_files": {
    "configs/intake/life_pack_us_v1.yaml": "45774c486ca231beab3073ffa793f85847e3ec1bcfb5fc7a49684e5ce5d9659b",
-   "configs/intake/occupations_us_v1.yaml": "cf63f672634afa11fdbb9e7db599043dc623bce1ea6fcc0a3d6c30185268ffcf",
+   "configs/intake/occupations_us_v1.yaml": "3d8b88e510f20864bad17abaf875a790183290729882bdb5d0020645adc5df9d",
    "configs/intake/tax_us_2024.yaml": "8023942148aaebac6f5d35e62697e79d96216a8f087039766bac7bf2c3153bc5",
    "configs/life/city_facts_product.yaml": "e98654fc23b6cce39dba90b2907a48abea7875e719d978e842bc0fa040d095e4",
    "configs/life/evaluation_product.yaml": "b579d2e6f9ea91786a5c55817c4c39cdccf4f7a9b926b2e40d8b4c384b2e8983",
    "configs/life/scoring_product.yaml": "0e9259b36d9382e6c592b6262b7e9cecd00768d3125d799596cdfd2aee7ee975",
    "configs/life/synthetic_product.yaml": "17acb466f7e10fe986a852f446022b90965ff06fb9ef697d6e858003770edb72",
-   "configs/product/e3a_synthetic_pack.yaml": "3f5263b60aeef7e1be41f1a1a2ae4328832b8b52322cfd0eedac1b09c3afd6bb"
+   "configs/product/e3a_synthetic_pack.yaml": "813d8fb714b29f55e3b64f8e7c7c063dbe77d5449dc4c814539588dc1c4110f7"
   },
   "commute": {
-   "chi": "3f1b8d0c72993896b4d2cc27f73fa20de0a8574b2d8cca04bdba3f6f8b8fd7d6",
-   "hou": "5c6a00a7de0e8ac654dcd4f991c1a6de9d47d3621663e664274e52faf620c6a1",
-   "la": "01a48607fb922111a4445544d40f13dadf691fa85ca96a0b2f9f9b6ef11cf53a",
-   "nyc": "e78639458d0157e88f40ab4a281a712dadd0adc2d2a40a090f29c25afda5df49",
-   "sea": "38bfd3e789505a4759d874a7f2754a373e8f799a9e81d86e23ea369923744f62",
-   "sf": "f7313587f4faf74e5e36f1af7eb73ca52ea6093d78b13ec8a7abf60ba4125652"
+   "chi": "f6c2c63953270c678018e31bdb123fdb00fd2840f30bd5d2f069fccf413fdcb0",
+   "hou": "dc7dbdae6e868821e560991e2b752a05d278c6639e8749488c0f5b89dc6d8db2",
+   "la": "ff5083723052327f6eca04d80b3d193b3469c1e1cf96cc7493038d5d2f9a98de",
+   "nyc": "65c8b816cb9076e1dd2a44c93788989afde1ce86cb31b9781baa813125322268",
+   "sea": "077a3bf33cd34881bb4bd6de3db99ea7c02168e9b1567eb0bdd64e9ae60ccbb3",
+   "sf": "d6829a8183b7511e1ae0ae1969e3d38821dc701cce5a49c5a8798b01ec583591"
   },
   "config": "892fc9039eede1d90218d19b3ccb19419b9946b97ab07e1544a3d95b72e556aa",
-  "intake_build": "35667f4101a71c0e5ea6c1aaa8e5f45cd83c825d6b1393bde1104d3d571a96b7",
+  "intake_build": "60cf49b404831f495388e9c91e6e7ee6d9fa93d819bebf1158aaac70c3a918fb",
   "intake_reads": {
    "16980": {
     "city_facts": "2123b0a5efcf23c8fd39c30bf83dc0bdaa0741f893cec08906a9851f5da3ef6e",
@@ -163,7 +163,7 @@
     "rental_support_cells": "8b53c3b738dd8d60731b1b4f1fc60e627c1798413c70ca4e8f1bd133cabf5483"
    }
   },
-  "items": "c1fa08ef2a4d8dc9d67cf28bef0c20274c8e00fd3b0e97a0b71c88515e4231c7",
+  "items": "aacf216d1598b9330e4b89d6e69d897ae67a59808fa16d28cb1bba8c611cf806",
   "raw_geography": {
    "cbsa_delineation": "952c4b1e78acbb54e6ec9412434b7602fedacbf021736351a63c181bdb753629",
    "tract_puma": "5262f460b2c8dbe86b00549e916317b1791fdc595c9af72ab18f6f6a67040531"
@@ -186,8 +186,8 @@
    "counts": {
     "areas": 66,
     "commute_legs": 394,
-    "housing_candidates": 31670,
-    "housing_in_catalog": 345,
+    "housing_candidates": 27986,
+    "housing_in_catalog": 457,
     "items_by_domain": {
      "activity": 11,
      "consumption": 7,
@@ -209,47 +209,47 @@
     "housing": {
      "pool": {
       "areas": 60,
-      "candidates": 31670,
+      "candidates": 27986,
       "groups": 4,
       "value_weighted_p10_p50_p90": [
-       1020.0,
-       1734.0,
-       2761.0
+       1226.0,
+       1812.0,
+       2820.0
       ]
      },
      "repeats": 20,
      "sizes": {
       "120": {
-       "mean_areas": 44.05,
+       "mean_areas": 43.35,
        "mean_groups": 4.0,
-       "mean_min_value": 186.1,
-       "mean_pool_weight_share": 0.038307,
+       "mean_min_value": 980.85,
+       "mean_pool_weight_share": 0.044555,
        "mean_value_p10_p50_p90": [
-        991.15,
-        1735.85,
-        2740.35
+        1213.1,
+        1837.1,
+        2801.85
        ]
       },
       "30": {
-       "mean_areas": 19.95,
+       "mean_areas": 19.75,
        "mean_groups": 3.95,
-       "mean_min_value": 473.55,
-       "mean_pool_weight_share": 0.01126,
+       "mean_min_value": 1049.9,
+       "mean_pool_weight_share": 0.012552,
        "mean_value_p10_p50_p90": [
-        971.2,
-        1711.2,
-        2675.9
+        1191.3,
+        1793.9,
+        2720.4
        ]
       },
       "60": {
-       "mean_areas": 31.1,
+       "mean_areas": 31.05,
        "mean_groups": 4.0,
-       "mean_min_value": 348.6,
-       "mean_pool_weight_share": 0.021148,
+       "mean_min_value": 1001.45,
+       "mean_pool_weight_share": 0.023717,
        "mean_value_p10_p50_p90": [
-        1004.9,
-        1720.9,
-        2720.55
+        1187.15,
+        1801.2,
+        2786.0
        ]
       }
      }
@@ -305,19 +305,69 @@
    },
    "pools": {
     "housing": {
-     "candidates": 31670,
+     "candidates": 27986,
      "excluded": {
       "outside_tax_scope": 19
      },
      "masses": {
-      "executable": "286274.30",
+      "access_unverified_low_tail": "28152.88",
+      "executable": "258121.42",
       "facilities_incomplete": "7409.14",
+      "prequalified": "286274.30",
       "price_censored": "16177.26",
       "raw": "309748.00"
      },
+     "ordinary_access": {
+      "city_independent_records": 1734,
+      "city_threshold": "1020.00",
+      "groups": {
+       "0": {
+        "excluded_share_of_prequalified": "0.0981",
+        "excluded_weight": "4386.06",
+        "independent_records": 202,
+        "level": "bedroom_group",
+        "min_rent_after": "980.00",
+        "min_rent_before": "80.00",
+        "threshold": "980.00"
+       },
+       "1": {
+        "excluded_share_of_prequalified": "0.0982",
+        "excluded_weight": "9119.85",
+        "independent_records": 547,
+        "level": "bedroom_group",
+        "min_rent_after": "900.00",
+        "min_rent_before": "217.00",
+        "threshold": "900.00"
+       },
+       "2": {
+        "excluded_share_of_prequalified": "0.0983",
+        "excluded_weight": "10208.02",
+        "independent_records": 654,
+        "level": "bedroom_group",
+        "min_rent_after": "1150.00",
+        "min_rent_before": "30.00",
+        "threshold": "1150.00"
+       },
+       "3plus": {
+        "excluded_share_of_prequalified": "0.0989",
+        "excluded_weight": "4438.95",
+        "independent_records": 331,
+        "level": "bedroom_group",
+        "min_rent_after": "1020.00",
+        "min_rent_before": "12.00",
+        "threshold": "1020.00"
+       }
+      },
+      "min_independent_records": 30,
+      "note_zh": "普通租赁市场的保守模型代理：低于本组 P10 的实付租金记录照实保留在资料层，但不当成普通新租客能租到的价格；ACS 不能证明保留的住房正在挂牌或对所有人开放",
+      "quantile": "1/10",
+      "rule": "ordinary_rental_access_p10_v1"
+     },
      "shares_of_raw": {
-      "executable": "0.9242",
+      "access_unverified_low_tail": "0.0909",
+      "executable": "0.8333",
       "facilities_incomplete": "0.0239",
+      "prequalified": "0.9242",
       "price_censored": "0.0522"
      }
     },
@@ -341,6 +391,20 @@
     "menu_sizes": {
      "housing": 60,
      "job": 60
+    },
+    "reference_housing": {
+     "candidates": {
+      "basic": 60,
+      "comfort": 56
+     },
+     "coverage_threshold": "3/5",
+     "home_areas_by_coverage": {
+      "eligible": 60,
+      "excluded": 0,
+      "unknown": 0
+     },
+     "job_areas": 6,
+     "rule": "reference_housing_coverage_commute_v3"
     }
    }
   },
@@ -348,8 +412,8 @@
    "counts": {
     "areas": 59,
     "commute_legs": 258,
-    "housing_candidates": 43339,
-    "housing_in_catalog": 357,
+    "housing_candidates": 38109,
+    "housing_in_catalog": 457,
     "items_by_domain": {
      "activity": 11,
      "consumption": 7,
@@ -370,47 +434,47 @@
     "housing": {
      "pool": {
       "areas": 55,
-      "candidates": 43339,
+      "candidates": 38109,
       "groups": 4,
       "value_weighted_p10_p50_p90": [
-       960.0,
-       1477.0,
-       2317.0
+       1052.0,
+       1550.0,
+       2361.0
       ]
      },
      "repeats": 20,
      "sizes": {
       "120": {
-       "mean_areas": 44.6,
+       "mean_areas": 44.7,
        "mean_groups": 4.0,
-       "mean_min_value": 389.25,
-       "mean_pool_weight_share": 0.019725,
+       "mean_min_value": 919.75,
+       "mean_pool_weight_share": 0.02231,
        "mean_value_p10_p50_p90": [
-        954.0,
-        1482.7,
-        2323.35
+        1061.75,
+        1534.7,
+        2352.15
        ]
       },
       "30": {
-       "mean_areas": 22.0,
+       "mean_areas": 21.95,
        "mean_groups": 3.85,
-       "mean_min_value": 623.95,
-       "mean_pool_weight_share": 0.005174,
+       "mean_min_value": 958.05,
+       "mean_pool_weight_share": 0.005669,
        "mean_value_p10_p50_p90": [
-        922.2,
-        1451.4,
-        2260.85
+        1057.25,
+        1519.4,
+        2312.15
        ]
       },
       "60": {
-       "mean_areas": 33.55,
-       "mean_groups": 4.0,
-       "mean_min_value": 468.25,
-       "mean_pool_weight_share": 0.009669,
+       "mean_areas": 33.8,
+       "mean_groups": 3.95,
+       "mean_min_value": 933.15,
+       "mean_pool_weight_share": 0.010854,
        "mean_value_p10_p50_p90": [
-        942.15,
-        1498.9,
-        2306.7
+        1066.05,
+        1531.85,
+        2337.2
        ]
       }
      }
@@ -466,17 +530,67 @@
    },
    "pools": {
     "housing": {
-     "candidates": 43339,
+     "candidates": 38109,
      "excluded": {},
      "masses": {
-      "executable": "448682.03",
+      "access_unverified_low_tail": "42913.34",
+      "executable": "405768.69",
       "facilities_incomplete": "10032.92",
+      "prequalified": "448682.03",
       "price_censored": "11973.06",
       "raw": "470373.00"
      },
+     "ordinary_access": {
+      "city_independent_records": 2685,
+      "city_threshold": "960.00",
+      "groups": {
+       "0": {
+        "excluded_share_of_prequalified": "0.0951",
+        "excluded_weight": "3342.00",
+        "independent_records": 214,
+        "level": "bedroom_group",
+        "min_rent_after": "890.00",
+        "min_rent_before": "150.00",
+        "threshold": "890.00"
+       },
+       "1": {
+        "excluded_share_of_prequalified": "0.0933",
+        "excluded_weight": "16185.75",
+        "independent_records": 1022,
+        "level": "bedroom_group",
+        "min_rent_after": "920.00",
+        "min_rent_before": "210.00",
+        "threshold": "920.00"
+       },
+       "2": {
+        "excluded_share_of_prequalified": "0.0962",
+        "excluded_weight": "14330.65",
+        "independent_records": 859,
+        "level": "bedroom_group",
+        "min_rent_after": "1080.00",
+        "min_rent_before": "140.00",
+        "threshold": "1080.00"
+       },
+       "3plus": {
+        "excluded_share_of_prequalified": "0.0994",
+        "excluded_weight": "9054.95",
+        "independent_records": 590,
+        "level": "bedroom_group",
+        "min_rent_after": "1278.00",
+        "min_rent_before": "12.00",
+        "threshold": "1278.00"
+       }
+      },
+      "min_independent_records": 30,
+      "note_zh": "普通租赁市场的保守模型代理：低于本组 P10 的实付租金记录照实保留在资料层，但不当成普通新租客能租到的价格；ACS 不能证明保留的住房正在挂牌或对所有人开放",
+      "quantile": "1/10",
+      "rule": "ordinary_rental_access_p10_v1"
+     },
      "shares_of_raw": {
-      "executable": "0.9539",
+      "access_unverified_low_tail": "0.0912",
+      "executable": "0.8627",
       "facilities_incomplete": "0.0213",
+      "prequalified": "0.9539",
       "price_censored": "0.0255"
      }
     },
@@ -500,6 +614,20 @@
     "menu_sizes": {
      "housing": 60,
      "job": 60
+    },
+    "reference_housing": {
+     "candidates": {
+      "basic": 55,
+      "comfort": 55
+     },
+     "coverage_threshold": "3/5",
+     "home_areas_by_coverage": {
+      "eligible": 55,
+      "excluded": 0,
+      "unknown": 0
+     },
+     "job_areas": 4,
+     "rule": "reference_housing_coverage_commute_v3"
     }
    }
   },
@@ -507,8 +635,8 @@
    "counts": {
     "areas": 93,
     "commute_legs": 303,
-    "housing_candidates": 95025,
-    "housing_in_catalog": 360,
+    "housing_candidates": 84851,
+    "housing_in_catalog": 532,
     "items_by_domain": {
      "activity": 11,
      "consumption": 7,
@@ -528,47 +656,47 @@
     "housing": {
      "pool": {
       "areas": 91,
-      "candidates": 95025,
+      "candidates": 84851,
       "groups": 4,
       "value_weighted_p10_p50_p90": [
-       1380.0,
-       2500.0,
-       4060.0
+       1750.0,
+       2600.0,
+       4140.0
       ]
      },
      "repeats": 20,
      "sizes": {
       "120": {
-       "mean_areas": 58.25,
+       "mean_areas": 57.75,
        "mean_groups": 4.0,
-       "mean_min_value": 296.75,
-       "mean_pool_weight_share": 0.012156,
+       "mean_min_value": 1281.3,
+       "mean_pool_weight_share": 0.014133,
        "mean_value_p10_p50_p90": [
-        1314.95,
-        2453.0,
-        4032.8
+        1760.8,
+        2599.65,
+        4150.3
        ]
       },
       "30": {
        "mean_areas": 24.95,
        "mean_groups": 4.0,
-       "mean_min_value": 591.95,
-       "mean_pool_weight_share": 0.002919,
+       "mean_min_value": 1394.45,
+       "mean_pool_weight_share": 0.003293,
        "mean_value_p10_p50_p90": [
-        1124.55,
-        2355.95,
-        3907.8
+        1709.75,
+        2510.8,
+        3992.7
        ]
       },
       "60": {
-       "mean_areas": 40.45,
+       "mean_areas": 40.05,
        "mean_groups": 4.0,
-       "mean_min_value": 418.15,
-       "mean_pool_weight_share": 0.005608,
+       "mean_min_value": 1348.45,
+       "mean_pool_weight_share": 0.006794,
        "mean_value_p10_p50_p90": [
-        1183.75,
-        2425.65,
-        3896.25
+        1745.5,
+        2554.3,
+        4055.6
        ]
       }
      }
@@ -624,17 +752,67 @@
    },
    "pools": {
     "housing": {
-     "candidates": 95025,
+     "candidates": 84851,
      "excluded": {},
      "masses": {
-      "executable": "472885.00",
+      "access_unverified_low_tail": "46986.69",
+      "executable": "425898.32",
       "facilities_incomplete": "28052.71",
+      "prequalified": "472885.00",
       "price_censored": "19682.29",
       "raw": "519780.00"
      },
+     "ordinary_access": {
+      "city_independent_records": 3379,
+      "city_threshold": "1380.00",
+      "groups": {
+       "0": {
+        "excluded_share_of_prequalified": "0.0998",
+        "excluded_weight": "8201.98",
+        "independent_records": 573,
+        "level": "bedroom_group",
+        "min_rent_after": "1100.00",
+        "min_rent_before": "50.00",
+        "threshold": "1100.00"
+       },
+       "1": {
+        "excluded_share_of_prequalified": "0.0990",
+        "excluded_weight": "14930.61",
+        "independent_records": 1069,
+        "level": "bedroom_group",
+        "min_rent_after": "1330.00",
+        "min_rent_before": "200.00",
+        "threshold": "1330.00"
+       },
+       "2": {
+        "excluded_share_of_prequalified": "0.0998",
+        "excluded_weight": "16442.10",
+        "independent_records": 1179,
+        "level": "bedroom_group",
+        "min_rent_after": "1650.00",
+        "min_rent_before": "120.00",
+        "threshold": "1650.00"
+       },
+       "3plus": {
+        "excluded_share_of_prequalified": "0.0988",
+        "excluded_weight": "7412.00",
+        "independent_records": 558,
+        "level": "bedroom_group",
+        "min_rent_after": "1320.00",
+        "min_rent_before": "80.00",
+        "threshold": "1320.00"
+       }
+      },
+      "min_independent_records": 30,
+      "note_zh": "普通租赁市场的保守模型代理：低于本组 P10 的实付租金记录照实保留在资料层，但不当成普通新租客能租到的价格；ACS 不能证明保留的住房正在挂牌或对所有人开放",
+      "quantile": "1/10",
+      "rule": "ordinary_rental_access_p10_v1"
+     },
      "shares_of_raw": {
-      "executable": "0.9098",
+      "access_unverified_low_tail": "0.0904",
+      "executable": "0.8194",
       "facilities_incomplete": "0.0540",
+      "prequalified": "0.9098",
       "price_censored": "0.0379"
      }
     },
@@ -658,6 +836,20 @@
     "menu_sizes": {
      "housing": 60,
      "job": 60
+    },
+    "reference_housing": {
+     "candidates": {
+      "basic": 91,
+      "comfort": 90
+     },
+     "coverage_threshold": "3/5",
+     "home_areas_by_coverage": {
+      "eligible": 91,
+      "excluded": 0,
+      "unknown": 0
+     },
+     "job_areas": 2,
+     "rule": "reference_housing_coverage_commute_v3"
     }
    }
   },
@@ -665,8 +857,8 @@
    "counts": {
     "areas": 63,
     "commute_legs": 690,
-    "housing_candidates": 60853,
-    "housing_in_catalog": 353,
+    "housing_candidates": 54868,
+    "housing_in_catalog": 457,
     "items_by_domain": {
      "activity": 11,
      "consumption": 7,
@@ -689,47 +881,47 @@
     "housing": {
      "pool": {
       "areas": 55,
-      "candidates": 60853,
+      "candidates": 54868,
       "groups": 4,
       "value_weighted_p10_p50_p90": [
-       1030.0,
-       2400.0,
-       4520.0
+       1470.0,
+       2520.0,
+       4627.0
       ]
      },
      "repeats": 20,
      "sizes": {
       "120": {
-       "mean_areas": 44.5,
+       "mean_areas": 44.0,
        "mean_groups": 4.0,
-       "mean_min_value": 171.15,
-       "mean_pool_weight_share": 0.021017,
+       "mean_min_value": 854.0,
+       "mean_pool_weight_share": 0.023859,
        "mean_value_p10_p50_p90": [
-        969.4,
-        2389.25,
-        4371.95
+        1468.2,
+        2550.75,
+        4496.6
        ]
       },
       "30": {
-       "mean_areas": 21.25,
+       "mean_areas": 21.6,
        "mean_groups": 3.95,
-       "mean_min_value": 397.95,
-       "mean_pool_weight_share": 0.005732,
+       "mean_min_value": 1099.4,
+       "mean_pool_weight_share": 0.006558,
        "mean_value_p10_p50_p90": [
-        944.05,
-        2379.15,
-        4357.5
+        1470.85,
+        2521.65,
+        4463.9
        ]
       },
       "60": {
        "mean_areas": 32.85,
        "mean_groups": 4.0,
-       "mean_min_value": 232.65,
-       "mean_pool_weight_share": 0.011164,
+       "mean_min_value": 992.75,
+       "mean_pool_weight_share": 0.012534,
        "mean_value_p10_p50_p90": [
-        963.35,
-        2424.15,
-        4348.3
+        1434.55,
+        2538.15,
+        4458.7
        ]
       }
      }
@@ -785,19 +977,69 @@
    },
    "pools": {
     "housing": {
-     "candidates": 60853,
+     "candidates": 54868,
      "excluded": {
       "outside_tax_scope": 330
      },
      "masses": {
-      "executable": "350513.25",
+      "access_unverified_low_tail": "33960.06",
+      "executable": "316553.19",
       "facilities_incomplete": "7763.74",
+      "prequalified": "350513.25",
       "price_censored": "10518.74",
       "raw": "368703.00"
      },
+     "ordinary_access": {
+      "city_independent_records": 4189,
+      "city_threshold": "1030.00",
+      "groups": {
+       "0": {
+        "excluded_share_of_prequalified": "0.0991",
+        "excluded_weight": "5824.95",
+        "independent_records": 579,
+        "level": "bedroom_group",
+        "min_rent_after": "680.00",
+        "min_rent_before": "4.00",
+        "threshold": "680.00"
+       },
+       "1": {
+        "excluded_share_of_prequalified": "0.0923",
+        "excluded_weight": "11917.65",
+        "independent_records": 1521,
+        "level": "bedroom_group",
+        "min_rent_after": "1100.00",
+        "min_rent_before": "100.00",
+        "threshold": "1100.00"
+       },
+       "2": {
+        "excluded_share_of_prequalified": "0.0997",
+        "excluded_weight": "10552.67",
+        "independent_records": 1313,
+        "level": "bedroom_group",
+        "min_rent_after": "1050.00",
+        "min_rent_before": "8.00",
+        "threshold": "1050.00"
+       },
+       "3plus": {
+        "excluded_share_of_prequalified": "0.0997",
+        "excluded_weight": "5664.80",
+        "independent_records": 776,
+        "level": "bedroom_group",
+        "min_rent_after": "1170.00",
+        "min_rent_before": "10.00",
+        "threshold": "1170.00"
+       }
+      },
+      "min_independent_records": 30,
+      "note_zh": "普通租赁市场的保守模型代理：低于本组 P10 的实付租金记录照实保留在资料层，但不当成普通新租客能租到的价格；ACS 不能证明保留的住房正在挂牌或对所有人开放",
+      "quantile": "1/10",
+      "rule": "ordinary_rental_access_p10_v1"
+     },
      "shares_of_raw": {
-      "executable": "0.9507",
+      "access_unverified_low_tail": "0.0921",
+      "executable": "0.8586",
       "facilities_incomplete": "0.0211",
+      "prequalified": "0.9507",
       "price_censored": "0.0285"
      }
     },
@@ -821,6 +1063,20 @@
     "menu_sizes": {
      "housing": 60,
      "job": 60
+    },
+    "reference_housing": {
+     "candidates": {
+      "basic": 55,
+      "comfort": 55
+     },
+     "coverage_threshold": "3/5",
+     "home_areas_by_coverage": {
+      "eligible": 55,
+      "excluded": 0,
+      "unknown": 0
+     },
+     "job_areas": 8,
+     "rule": "reference_housing_coverage_commute_v3"
     }
    }
   },
@@ -828,8 +1084,8 @@
    "counts": {
     "areas": 35,
     "commute_legs": 147,
-    "housing_candidates": 14214,
-    "housing_in_catalog": 342,
+    "housing_candidates": 12861,
+    "housing_in_catalog": 397,
     "items_by_domain": {
      "activity": 11,
      "consumption": 7,
@@ -849,47 +1105,47 @@
     "housing": {
      "pool": {
       "areas": 32,
-      "candidates": 14214,
+      "candidates": 12861,
       "groups": 4,
       "value_weighted_p10_p50_p90": [
-       1354.0,
-       2092.0,
-       3300.0
+       1589.0,
+       2160.0,
+       3321.0
       ]
      },
      "repeats": 20,
      "sizes": {
       "120": {
-       "mean_areas": 29.05,
+       "mean_areas": 28.9,
        "mean_groups": 4.0,
-       "mean_min_value": 350.95,
-       "mean_pool_weight_share": 0.038244,
+       "mean_min_value": 1231.6,
+       "mean_pool_weight_share": 0.042461,
        "mean_value_p10_p50_p90": [
-        1355.3,
-        2092.25,
-        3165.4
+        1585.0,
+        2156.8,
+        3223.3
        ]
       },
       "30": {
        "mean_areas": 18.1,
-       "mean_groups": 4.0,
-       "mean_min_value": 741.75,
-       "mean_pool_weight_share": 0.00941,
+       "mean_groups": 3.95,
+       "mean_min_value": 1404.1,
+       "mean_pool_weight_share": 0.010287,
        "mean_value_p10_p50_p90": [
-        1259.8,
-        2093.45,
-        3188.5
+        1574.5,
+        2172.85,
+        3256.75
        ]
       },
       "60": {
-       "mean_areas": 24.6,
+       "mean_areas": 24.65,
        "mean_groups": 4.0,
-       "mean_min_value": 479.2,
-       "mean_pool_weight_share": 0.020381,
+       "mean_min_value": 1306.8,
+       "mean_pool_weight_share": 0.021697,
        "mean_value_p10_p50_p90": [
-        1326.25,
-        2105.15,
-        3157.55
+        1583.6,
+        2170.65,
+        3207.7
        ]
       }
      }
@@ -945,17 +1201,67 @@
    },
    "pools": {
     "housing": {
-     "candidates": 14214,
+     "candidates": 12861,
      "excluded": {},
      "masses": {
-      "executable": "233270.04",
+      "access_unverified_low_tail": "21536.19",
+      "executable": "211733.86",
       "facilities_incomplete": "9410.27",
+      "prequalified": "233270.04",
       "price_censored": "7516.69",
       "raw": "249646.00"
      },
+     "ordinary_access": {
+      "city_independent_records": 1468,
+      "city_threshold": "1354.00",
+      "groups": {
+       "0": {
+        "excluded_share_of_prequalified": "0.0794",
+        "excluded_weight": "3036.02",
+        "independent_records": 215,
+        "level": "bedroom_group",
+        "min_rent_after": "1150.00",
+        "min_rent_before": "100.00",
+        "threshold": "1150.00"
+       },
+       "1": {
+        "excluded_share_of_prequalified": "0.0952",
+        "excluded_weight": "7404.48",
+        "independent_records": 463,
+        "level": "bedroom_group",
+        "min_rent_after": "1330.00",
+        "min_rent_before": "290.00",
+        "threshold": "1330.00"
+       },
+       "2": {
+        "excluded_share_of_prequalified": "0.0964",
+        "excluded_weight": "7237.82",
+        "independent_records": 473,
+        "level": "bedroom_group",
+        "min_rent_after": "1520.00",
+        "min_rent_before": "80.00",
+        "threshold": "1520.00"
+       },
+       "3plus": {
+        "excluded_share_of_prequalified": "0.0916",
+        "excluded_weight": "3857.86",
+        "independent_records": 317,
+        "level": "bedroom_group",
+        "min_rent_after": "1600.00",
+        "min_rent_before": "100.00",
+        "threshold": "1600.00"
+       }
+      },
+      "min_independent_records": 30,
+      "note_zh": "普通租赁市场的保守模型代理：低于本组 P10 的实付租金记录照实保留在资料层，但不当成普通新租客能租到的价格；ACS 不能证明保留的住房正在挂牌或对所有人开放",
+      "quantile": "1/10",
+      "rule": "ordinary_rental_access_p10_v1"
+     },
      "shares_of_raw": {
-      "executable": "0.9344",
+      "access_unverified_low_tail": "0.0863",
+      "executable": "0.8481",
       "facilities_incomplete": "0.0377",
+      "prequalified": "0.9344",
       "price_censored": "0.0301"
      }
     },
@@ -979,6 +1285,20 @@
     "menu_sizes": {
      "housing": 60,
      "job": 60
+    },
+    "reference_housing": {
+     "candidates": {
+      "basic": 32,
+      "comfort": 30
+     },
+     "coverage_threshold": "3/5",
+     "home_areas_by_coverage": {
+      "eligible": 32,
+      "excluded": 0,
+      "unknown": 0
+     },
+     "job_areas": 3,
+     "rule": "reference_housing_coverage_commute_v3"
     }
    }
   },
@@ -986,8 +1306,8 @@
    "counts": {
     "areas": 44,
     "commute_legs": 197,
-    "housing_candidates": 18481,
-    "housing_in_catalog": 340,
+    "housing_candidates": 16736,
+    "housing_in_catalog": 414,
     "items_by_domain": {
      "activity": 10,
      "consumption": 7,
@@ -1007,47 +1327,47 @@
     "housing": {
      "pool": {
       "areas": 39,
-      "candidates": 18481,
+      "candidates": 16736,
       "groups": 4,
       "value_weighted_p10_p50_p90": [
-       1550.0,
-       2672.0,
-       4403.0
+       1940.0,
+       2810.0,
+       4500.0
       ]
      },
      "repeats": 20,
      "sizes": {
       "120": {
-       "mean_areas": 33.9,
+       "mean_areas": 34.35,
        "mean_groups": 4.0,
-       "mean_min_value": 184.9,
-       "mean_pool_weight_share": 0.036628,
+       "mean_min_value": 1379.45,
+       "mean_pool_weight_share": 0.038782,
        "mean_value_p10_p50_p90": [
-        1506.3,
-        2689.75,
-        4346.7
+        1941.15,
+        2811.95,
+        4431.75
        ]
       },
       "30": {
-       "mean_areas": 18.8,
+       "mean_areas": 18.95,
        "mean_groups": 4.0,
-       "mean_min_value": 604.4,
-       "mean_pool_weight_share": 0.009719,
+       "mean_min_value": 1541.3,
+       "mean_pool_weight_share": 0.010356,
        "mean_value_p10_p50_p90": [
-        1395.05,
-        2720.65,
-        4285.75
+        1964.15,
+        2858.2,
+        4341.15
        ]
       },
       "60": {
-       "mean_areas": 27.3,
+       "mean_areas": 27.25,
        "mean_groups": 4.0,
-       "mean_min_value": 329.0,
-       "mean_pool_weight_share": 0.018728,
+       "mean_min_value": 1470.05,
+       "mean_pool_weight_share": 0.019366,
        "mean_value_p10_p50_p90": [
-        1468.05,
-        2695.6,
-        4334.8
+        1942.15,
+        2861.1,
+        4427.3
        ]
       }
      }
@@ -1103,17 +1423,67 @@
    },
    "pools": {
     "housing": {
-     "candidates": 18481,
+     "candidates": 16736,
      "excluded": {},
      "masses": {
-      "executable": "207726.29",
+      "access_unverified_low_tail": "20268.24",
+      "executable": "187458.05",
       "facilities_incomplete": "7446.88",
+      "prequalified": "207726.29",
       "price_censored": "9514.37",
       "raw": "224490.00"
      },
+     "ordinary_access": {
+      "city_independent_records": 1603,
+      "city_threshold": "1550.00",
+      "groups": {
+       "0": {
+        "excluded_share_of_prequalified": "0.0957",
+        "excluded_weight": "3152.62",
+        "independent_records": 250,
+        "level": "bedroom_group",
+        "min_rent_after": "1234.00",
+        "min_rent_before": "240.00",
+        "threshold": "1234.00"
+       },
+       "1": {
+        "excluded_share_of_prequalified": "0.0973",
+        "excluded_weight": "6846.63",
+        "independent_records": 527,
+        "level": "bedroom_group",
+        "min_rent_after": "1670.00",
+        "min_rent_before": "30.00",
+        "threshold": "1670.00"
+       },
+       "2": {
+        "excluded_share_of_prequalified": "0.0990",
+        "excluded_weight": "7006.99",
+        "independent_records": 554,
+        "level": "bedroom_group",
+        "min_rent_after": "1770.00",
+        "min_rent_before": "50.00",
+        "threshold": "1770.00"
+       },
+       "3plus": {
+        "excluded_share_of_prequalified": "0.0971",
+        "excluded_weight": "3262.00",
+        "independent_records": 272,
+        "level": "bedroom_group",
+        "min_rent_after": "1253.00",
+        "min_rent_before": "215.00",
+        "threshold": "1253.00"
+       }
+      },
+      "min_independent_records": 30,
+      "note_zh": "普通租赁市场的保守模型代理：低于本组 P10 的实付租金记录照实保留在资料层，但不当成普通新租客能租到的价格；ACS 不能证明保留的住房正在挂牌或对所有人开放",
+      "quantile": "1/10",
+      "rule": "ordinary_rental_access_p10_v1"
+     },
      "shares_of_raw": {
-      "executable": "0.9253",
+      "access_unverified_low_tail": "0.0903",
+      "executable": "0.8350",
       "facilities_incomplete": "0.0332",
+      "prequalified": "0.9253",
       "price_censored": "0.0424"
      }
     },
@@ -1137,14 +1507,28 @@
     "menu_sizes": {
      "housing": 60,
      "job": 60
+    },
+    "reference_housing": {
+     "candidates": {
+      "basic": 39,
+      "comfort": 39
+     },
+     "coverage_threshold": "3/5",
+     "home_areas_by_coverage": {
+      "eligible": 39,
+      "excluded": 0,
+      "unknown": 0
+     },
+     "job_areas": 5,
+     "rule": "reference_housing_coverage_commute_v3"
     }
    }
   }
  },
  "files": {
   "city_facts.json": "9e8b1979b60d2dacaa9e41faa27365366cb129b925e39961267e2b87b9ac54cd",
-  "evaluation.json": "e4bc4a2d77631277b5e3297430d50b1d7b1a32cf3436cf8e95237f770364b72e",
-  "life_input.json": "ed4995dc72ae2e5d37d01c3b00ad3066ecb5044376561081af914240178c3f8d",
+  "evaluation.json": "d6cb1725f712255cc16c5c4476e1f8550a5d04e29998d7191af2f34e3ca8f44a",
+  "life_input.json": "66f30eda96492f54f1fec7e68ff3478a6c6f3201ccdfc9ae8b9552b3317fd3ba",
   "scoring.json": "2fca0e5daaaa50c15379c5780330b6014ec0e8b0b63dedc600d105196e23e9b5"
  },
  "safety_inputs": {

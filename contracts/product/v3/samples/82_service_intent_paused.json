@@ -10,7 +10,7 @@
   "confirm_with": null,
   "confirmed": {
    "confirmed_id": "confirmed.draft-000000000000000f.r2",
-   "content_fingerprint": "a6d563c929db90c732c914fd74d7560f6f2ecae59bf614ea5f18b70174571164"
+   "content_fingerprint": "807757941d31280e6a845e0172615ad343986912e2aecd0b0b86177cec584a7a"
   },
   "created_at": "2026-10-24T09:00:00Z",
   "deletion": {
@@ -30,7 +30,7 @@
   "meta": {
    "conversion_version": "e3a-conversion-v2",
    "data_pack": {
-    "content_fingerprint": "7face3610cd86d6e2cb7442017661fce2abb3c4a2b1a4e6740ab70ddf23ca9ae",
+    "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
     "pack_id": "pack.e3a.synthetic-v2",
     "status": "synthetic_fixture_only"
@@ -49,16 +49,16 @@
   "preflight": {
    "binding": {
     "compiled_inputs": {
-     "life_input": "10105d6f018c788bfed6492b9a6fa14e7bff95026ba81adc30c8e46ef286e68f",
+     "life_input": "e8e2d0f04dbe21fc2be75e1ef78d145efa29be47b86939f0c487546f23125dac",
      "roster": "ad0722c332c4ba9980c87446690ca4456c8ab8a77dd740785e15e7f5c673a97a",
-     "run_config": "83206ae62b1cb3838cc13170f5febc8f8702bbd3807b1da8667efcfc5df8b30e",
+     "run_config": "6628c98013928e8079d1be1ea906538135c13477ada6391c2ecece5d54e23703",
      "scoring_config": "0735d4bb47d38688b41e95ed1bd253b624130ed19ad150e846ad020fed7159f5"
     },
     "evaluation_spec_id": "eval.e1-life.main",
-    "identities_fingerprint": "7d2dbba8a48d876aae9a70d558ce960d87765e2b15133a28f7a4a9a78ff39308",
+    "identities_fingerprint": "6051a80c14160d137dd9176c91a7bbb0938d3a1034423d3bbd986e14ed68f6c0",
     "planner_id": "mock.rules.e3a-product",
     "planner_kind": "mock",
-    "prompt_template": "e3b-product-prompt-v2",
+    "prompt_template": "e3b-product-prompt-v3",
     "protocol_id": "life-v1-e3a-product",
     "scoring_content_fingerprint": "c36f768cbb84afd5398b4afedeafbf2aa1a117bf61cfd944a453eb3cdc1e7d75",
     "scoring_version": "e1-life-v1"
@@ -707,7 +707,7 @@
    "clones_per_city": 1,
    "confirmed": {
     "confirmed_id": "confirmed.draft-000000000000000f.r2",
-    "content_fingerprint": "a6d563c929db90c732c914fd74d7560f6f2ecae59bf614ea5f18b70174571164"
+    "content_fingerprint": "807757941d31280e6a845e0172615ad343986912e2aecd0b0b86177cec584a7a"
    },
    "executable": {
     "reasons": [
@@ -725,7 +725,7 @@
    "meta": {
     "conversion_version": "e3a-conversion-v2",
     "data_pack": {
-     "content_fingerprint": "7face3610cd86d6e2cb7442017661fce2abb3c4a2b1a4e6740ab70ddf23ca9ae",
+     "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
      "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
      "pack_id": "pack.e3a.synthetic-v2",
      "status": "synthetic_fixture_only"
@@ -744,7 +744,7 @@
     "planner_id": "mock.rules.e3a-product",
     "planner_kind": "mock"
    },
-   "preflight_fingerprint": "59078147e8964a490523ed0600a95f108c7b7bf3a8f273a77d1c9319ec6b1fa1",
+   "preflight_fingerprint": "9888c97b4ab9a9d13353bd8962f25b225f26794a6eaa222c32e76403f5a7862c",
    "preflight_id": "preflight.confirmed.draft-000000000000000f.r2",
    "scope_zh": [
     "生活协议 life-v1-e3a-product（状态 synthetic_fixture_only）、评分 score.e1-life.explore（探索版）：城市、报价、工资、疾病、治疗与评分参数全部是合成设定，不是现实城市，不排序真实城市",
@@ -796,7 +796,7 @@
    "meta": {
     "conversion_version": "e3a-conversion-v2",
     "data_pack": {
-     "content_fingerprint": "7face3610cd86d6e2cb7442017661fce2abb3c4a2b1a4e6740ab70ddf23ca9ae",
+     "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
      "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
      "pack_id": "pack.e3a.synthetic-v2",
      "status": "synthetic_fixture_only"
@@ -808,7 +808,7 @@
     "vocabulary_version": "e3a-vocabulary-v4"
    },
    "pause": {
-    "audit_ref": "run:run-e3a-e214e782acfb0709 record:progress.json",
+    "audit_ref": "run:run-e3a-892b2f5c5bc9b73a record:progress.json",
     "category": "batch_halted_service_unavailable",
     "impact_zh": "不是生活结果；还没有生成评价与汇总，不擅自给出分类或分数",
     "next_action_zh": "维护者处理服务、凭证、预算或请求的问题；可以恢复同一次运行（恢复前逐条核对归档，已用的调用次数与预算不清零）；系统不会替分身生成计划",
@@ -817,7 +817,7 @@
    "report_available": false,
    "resumable": true,
    "resume_note": "可以从年度边界或两份候选之间恢复（E1 的恢复入口逐条核对归档，尝试次数与调用次数不清零）",
-   "run_id": "run-e3a-e214e782acfb0709",
+   "run_id": "run-e3a-892b2f5c5bc9b73a",
    "stage": "halted",
    "stage_zh": "批次停下（服务、预算或请求检查）",
    "updated_at": "2026-10-24T09:00:00Z"
@@ -829,7 +829,7 @@
    "used": 1
   },
   "result_available": false,
-  "run_id": "run-e3a-e214e782acfb0709",
+  "run_id": "run-e3a-892b2f5c5bc9b73a",
   "stage": "needs_attention",
   "stage_zh": "停下了，需要处理",
   "support_ref": "sup-0000000000000011",

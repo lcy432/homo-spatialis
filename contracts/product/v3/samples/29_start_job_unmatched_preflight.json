@@ -7,7 +7,7 @@
   "clones_per_city": 0,
   "confirmed": {
    "confirmed_id": "confirmed.draft.u501.cashier.r1",
-   "content_fingerprint": "3f8e584418872d797cc1456c6849c496c463857953e856ca385bd22378d1b323"
+   "content_fingerprint": "6ae6db4de8a1f9b409dba7ad5ec7f7df46fb1847ccb311a250a607f76e43d9ec"
   },
   "executable": {
    "reasons": [
@@ -45,7 +45,7 @@
   "meta": {
    "conversion_version": "e3a-conversion-v2",
    "data_pack": {
-    "content_fingerprint": "7face3610cd86d6e2cb7442017661fce2abb3c4a2b1a4e6740ab70ddf23ca9ae",
+    "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
     "pack_id": "pack.e3a.synthetic-v2",
     "status": "synthetic_fixture_only"
@@ -69,7 +69,7 @@
    "planner_id": "mock.rules.e3a-product",
    "planner_kind": "mock"
   },
-  "preflight_fingerprint": "4eabfe1001ae9448ecccc39774fb28d3de4fe04123566c49b620e2dd02b98301",
+  "preflight_fingerprint": "ea8a208cb1e17c76c8922d7062b1b386060176614f4e41aa7efb5066fc484085",
   "preflight_id": "preflight.confirmed.draft.u501.cashier.r1",
   "scope_zh": [
    "城市、报价、工资、税、疾病与治疗全部是合成设定；结果不排序真实城市，也不是现实推荐",

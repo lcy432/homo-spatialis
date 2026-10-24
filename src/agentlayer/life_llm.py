@@ -136,6 +136,41 @@ def estimate_input_tokens(messages: Sequence[dict[str, str]]) -> int:
     return total
 
 
+# ---------------------------------------------------------------------- 输入大小的检查（发送前护栏与开跑前预检查共用）
+
+
+@dataclass(frozen=True)
+class InputSizeCheck:
+    """一份请求的输入估计与它绑定的上限。超过就不发送（发送前护栏）、不能确认开始（产品预检查）、不启动（服务启动前核对）。"""
+
+    request_id: str
+    estimate: int
+    limit: int
+    rule: str
+
+    @property
+    def fits(self) -> bool:
+        return self.estimate <= self.limit
+
+
+def input_size_check(
+    settings: LlmSettings, request_id: str, messages: Sequence[dict[str, str]]
+) -> InputSizeCheck:
+    """估计输入（``estimate_input_tokens``）并与设定的上限比较。不调用模型、不扣额度；估计规则与上限都照设定，不另调。"""
+    return InputSizeCheck(
+        request_id=request_id,
+        estimate=estimate_input_tokens(messages),
+        limit=settings.max_input_tokens,
+        rule=settings.token_estimate,
+    )
+
+
+def request_input_check(settings: LlmSettings, payload: dict[str, Any]) -> InputSizeCheck:
+    """一份安全载荷按真实发送的同一条路渲染成请求体（``expected_provider_body``：规范渲染与紧凑表示），再估计、比较。"""
+    body = expected_provider_body(settings, payload)
+    return input_size_check(settings, str(payload["request_id"]), body["messages"])
+
+
 # ---------------------------------------------------------------------- 传输层（可替换；离线测试用替身）
 
 
@@ -757,11 +792,12 @@ class LlmPlanner:
             raise PlannerHalt("request_check", "规划器还没有绑定到运行归档：没有发送")
         s = self.settings
         body = self.provider_body(call)
-        estimate = estimate_input_tokens(body["messages"])
-        if estimate > s.max_input_tokens:
+        size = input_size_check(s, call.request_id, body["messages"])
+        estimate = size.estimate
+        if not size.fits:
             raise PlannerHalt(
                 "input_limit",
-                f"{call.request_id} 的输入估计 {estimate} token（规则 {s.token_estimate}）超过上限 {s.max_input_tokens}："
+                f"{call.request_id} 的输入估计 {estimate} token（规则 {size.rule}）超过上限 {size.limit}："
                 "在本地拒绝，没有发送，也没有删减请求里的任何事实",
             )
         hist = self._history(call, body)

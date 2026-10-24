@@ -47,7 +47,7 @@ def ready(tmp_path_factory):
     return s
 
 
-def _request(s, perm=None, template="e3b-product-prompt-v2", profile=None):
+def _request(s, perm=None, template="e3b-product-prompt-v3", profile=None):
     w = s.pre.world
     with contextlib.chdir(s.work):
         catalog = w.bundle.catalog_for(K51)

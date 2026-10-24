@@ -23,20 +23,20 @@
       "violated": 0
      }
     ],
-    "headline_zh": "旧金山：原计划 2 个分身——2 个完成且可评价、0 个生活出局、0 个模拟问题；2 个完成且可评价分身的平均 J 为 0.5716（分母只数完成且可评价的分身，不是原计划的全部分身）",
+    "headline_zh": "旧金山：原计划 2 个分身——2 个完成且可评价、0 个生活出局、0 个模拟问题；2 个完成且可评价分身的平均 J 为 0.5675（分母只数完成且可评价的分身，不是原计划的全部分身）",
     "label": "旧金山",
     "mean_denominator": 2,
     "mean_j": {
-     "display": "0.5716",
-     "exact": "45728696658033269/80000000000000000"
+     "display": "0.5675",
+     "exact": "1134949517129511/2000000000000000"
     },
     "mean_l": {
-     "display": "0.5553",
-     "exact": "5552745246442671/10000000000000000"
+     "display": "0.5479",
+     "exact": "2739359845884117/5000000000000000"
     },
     "mean_v": {
-     "display": "0.6206",
-     "exact": "12412225179377243/20000000000000000"
+     "display": "0.6263",
+     "exact": "3131415633642759/5000000000000000"
     },
     "missing": 0,
     "missing_reasons": [],
@@ -48,12 +48,12 @@
     "planned": 2,
     "range_denominator": 2,
     "range_lower": {
-     "display": "0.5716",
-     "exact": "45728696658033269/80000000000000000"
+     "display": "0.5675",
+     "exact": "1134949517129511/2000000000000000"
     },
     "range_upper": {
-     "display": "0.5716",
-     "exact": "45728696658033269/80000000000000000"
+     "display": "0.5675",
+     "exact": "1134949517129511/2000000000000000"
     }
    }
   ],
@@ -82,28 +82,28 @@
      }
     ],
     "j": {
-     "display": "0.5695",
-     "exact": "11390476899614923/20000000000000000"
+     "display": "0.5656",
+     "exact": "22623843626747079/40000000000000000"
     },
     "l_actual": {
-     "display": "0.5522",
-     "exact": "3313256913725413/6000000000000000"
+     "display": "0.5454",
+     "exact": "5453670786487187/10000000000000000"
     },
     "missing_reason": null,
     "missing_reason_zh": null,
     "range_lower": {
-     "display": "0.5695",
-     "exact": "11390476899614923/20000000000000000"
+     "display": "0.5656",
+     "exact": "22623843626747079/40000000000000000"
     },
     "range_upper": {
-     "display": "0.5695",
-     "exact": "11390476899614923/20000000000000000"
+     "display": "0.5656",
+     "exact": "22623843626747079/40000000000000000"
     },
-    "reference_plan": "p3_service_car",
+    "reference_plan": "p3_service",
     "repeat_index": 0,
     "v_reference": {
-     "display": "0.6215",
-     "exact": "6214669230602781/10000000000000000"
+     "display": "0.6263",
+     "exact": "3131415633642759/5000000000000000"
     },
     "years": [
      {
@@ -147,9 +147,9 @@
        "status": "bought"
       },
       "cash_end": {
-       "amount_minor": 5503453,
+       "amount_minor": 4058653,
        "currency": "USD",
-       "display": "55,034.53",
+       "display": "40,586.53",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
@@ -160,8 +160,8 @@
       },
       "commute": [
        {
-        "home_area_id": "sf.area.h.0600113",
-        "home_area_label": "居住片区·Alameda County (West)--Oakland City (Elmhurst/Central/East Oakland) PUMA（PUMA 0600113）",
+        "home_area_id": "sf.area.h.0600101",
+        "home_area_label": "居住片区·Alameda County (North)--Berkeley & Albany Cities PUMA（PUMA 0600101）",
         "monthly_paid": {
          "amount_minor": 7612,
          "currency": "USD",
@@ -257,10 +257,10 @@
       ],
       "homes": [
        {
-        "area_id": "sf.area.h.0600113",
-        "area_label": "居住片区·Alameda County (West)--Oakland City (Elmhurst/Central/East Oakland) PUMA（PUMA 0600113）",
-        "area_typical_roundtrip_minutes": 50,
-        "label": "1 卧整套租住（Alameda County (West)--Oakland City (Elmhurst/Central/East O，低档）",
+        "area_id": "sf.area.h.0600101",
+        "area_label": "居住片区·Alameda County (North)--Berkeley & Albany Cities PUMA（PUMA 0600101）",
+        "area_typical_roundtrip_minutes": 40,
+        "label": "开间整套租住（Alameda County (North)--Berkeley & Albany Cities，低档）",
         "months": [
          1,
          2,
@@ -275,7 +275,7 @@
          11,
          12
         ],
-        "opportunity_id": "sf.housing.0600113.1.s0001"
+        "opportunity_id": "sf.housing.0600101.0.s0020"
        }
       ],
       "household": [
@@ -315,7 +315,7 @@
        }
       ],
       "housing": [
-       "1 卧整套租住（Alameda County (West)--Oakland City (Elmhurst/Central/East O，低档）（1–12 月）"
+       "开间整套租住（Alameda County (North)--Berkeley & Albany Cities，低档）（1–12 月）"
       ],
       "jobs": [
        "秘书与行政助理·工资约在本职业 88 分位（1–12 月）"
@@ -323,9 +323,9 @@
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 1422296,
+       "amount_minor": 2867096,
        "currency": "USD",
-       "display": "14,222.96",
+       "display": "28,670.96",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [],
@@ -455,15 +455,15 @@
        "status": "not_bought"
       },
       "cash_end": {
-       "amount_minor": 11748193,
+       "amount_minor": 11162593,
        "currency": "USD",
-       "display": "117,481.93",
+       "display": "111,625.93",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
-       "amount_minor": 5503453,
+       "amount_minor": 4058653,
        "currency": "USD",
-       "display": "55,034.53",
+       "display": "40,586.53",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "commute": [
@@ -568,7 +568,7 @@
         "area_id": "sf.area.h.0600101",
         "area_label": "居住片区·Alameda County (North)--Berkeley & Albany Cities PUMA（PUMA 0600101）",
         "area_typical_roundtrip_minutes": 40,
-        "label": "2 卧整套租住（Alameda County (North)--Berkeley & Albany Cities，中档）",
+        "label": "开间整套租住（Alameda County (North)--Berkeley & Albany Cities，低档）",
         "months": [
          1,
          2,
@@ -583,7 +583,7 @@
          11,
          12
         ],
-        "opportunity_id": "sf.housing.0600101.2.s0007"
+        "opportunity_id": "sf.housing.0600101.0.s0020"
        }
       ],
       "household": [
@@ -623,7 +623,7 @@
        }
       ],
       "housing": [
-       "2 卧整套租住（Alameda County (North)--Berkeley & Albany Cities，中档）（1–12 月）"
+       "开间整套租住（Alameda County (North)--Berkeley & Albany Cities，低档）（1–12 月）"
       ],
       "jobs": [
        "服务类销售代表·工资约在本职业 68 分位（1–12 月）"
@@ -631,9 +631,9 @@
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 2836896,
+       "amount_minor": 1977696,
        "currency": "USD",
-       "display": "28,368.96",
+       "display": "19,776.96",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [],
@@ -763,21 +763,21 @@
        "status": "not_bought"
       },
       "cash_end": {
-       "amount_minor": 18792133,
+       "amount_minor": 18266533,
        "currency": "USD",
-       "display": "187,921.33",
+       "display": "182,665.33",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
-       "amount_minor": 11748193,
+       "amount_minor": 11162593,
        "currency": "USD",
-       "display": "117,481.93",
+       "display": "111,625.93",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "commute": [
        {
-        "home_area_id": "sf.area.h.0600111",
-        "home_area_label": "居住片区·Alameda County (Northwest)--Oakland City (Downtown/West Oakland/North Oakland) PUMA（PUMA 0600111）",
+        "home_area_id": "sf.area.h.0600101",
+        "home_area_label": "居住片区·Alameda County (North)--Berkeley & Albany Cities PUMA（PUMA 0600101）",
         "monthly_paid": {
          "amount_minor": 0,
          "currency": "USD",
@@ -807,7 +807,7 @@
           "mode": "walk_bike",
           "mode_zh": "步行或骑车",
           "onsite_visits": 13,
-          "roundtrip_minutes": 32,
+          "roundtrip_minutes": 30,
           "work_area_id": "sf.area.w.0600100",
           "work_area_label": "就业片区·Alameda County"
          }
@@ -873,10 +873,10 @@
       ],
       "homes": [
        {
-        "area_id": "sf.area.h.0600111",
-        "area_label": "居住片区·Alameda County (Northwest)--Oakland City (Downtown/West Oakland/North Oakland) PUMA（PUMA 0600111）",
-        "area_typical_roundtrip_minutes": 60,
-        "label": "开间整套租住（Alameda County (Northwest)--Oakland City (Downtown/West Oakl，低档）",
+        "area_id": "sf.area.h.0600101",
+        "area_label": "居住片区·Alameda County (North)--Berkeley & Albany Cities PUMA（PUMA 0600101）",
+        "area_typical_roundtrip_minutes": 40,
+        "label": "开间整套租住（Alameda County (North)--Berkeley & Albany Cities，低档）",
         "months": [
          1,
          2,
@@ -891,7 +891,7 @@
          11,
          12
         ],
-        "opportunity_id": "sf.housing.0600111.0.s0078"
+        "opportunity_id": "sf.housing.0600101.0.s0020"
        }
       ],
       "household": [
@@ -931,7 +931,7 @@
        }
       ],
       "housing": [
-       "开间整套租住（Alameda County (Northwest)--Oakland City (Downtown/West Oakl，低档）（1–12 月）"
+       "开间整套租住（Alameda County (North)--Berkeley & Albany Cities，低档）（1–12 月）"
       ],
       "jobs": [
        "服务类销售代表·工资约在本职业 68 分位（1–12 月）"
@@ -939,9 +939,9 @@
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 2037696,
+       "amount_minor": 1977696,
        "currency": "USD",
-       "display": "20,376.96",
+       "display": "19,776.96",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [],
@@ -1090,28 +1090,28 @@
      }
     ],
     "j": {
-     "display": "0.5737",
-     "exact": "22947742858803423/40000000000000000"
+     "display": "0.5694",
+     "exact": "22774137058433361/40000000000000000"
     },
     "l_actual": {
-     "display": "0.5583",
-     "exact": "16750186910028961/30000000000000000"
+     "display": "0.5504",
+     "exact": "5503768597049281/10000000000000000"
     },
     "missing_reason": null,
     "missing_reason_zh": null,
     "range_lower": {
-     "display": "0.5737",
-     "exact": "22947742858803423/40000000000000000"
+     "display": "0.5694",
+     "exact": "22774137058433361/40000000000000000"
     },
     "range_upper": {
-     "display": "0.5737",
-     "exact": "22947742858803423/40000000000000000"
+     "display": "0.5694",
+     "exact": "22774137058433361/40000000000000000"
     },
-    "reference_plan": "p3_service_car",
+    "reference_plan": "p3_service",
     "repeat_index": 1,
     "v_reference": {
-     "display": "0.6198",
-     "exact": "3098777974387231/5000000000000000"
+     "display": "0.6263",
+     "exact": "3131415633642759/5000000000000000"
     },
     "years": [
      {
@@ -1155,9 +1155,9 @@
        "status": "bought"
       },
       "cash_end": {
-       "amount_minor": 8919985,
+       "amount_minor": 7475185,
        "currency": "USD",
-       "display": "89,199.85",
+       "display": "74,751.85",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
@@ -1168,8 +1168,8 @@
       },
       "commute": [
        {
-        "home_area_id": "sf.area.h.0600113",
-        "home_area_label": "居住片区·Alameda County (West)--Oakland City (Elmhurst/Central/East Oakland) PUMA（PUMA 0600113）",
+        "home_area_id": "sf.area.h.0600101",
+        "home_area_label": "居住片区·Alameda County (North)--Berkeley & Albany Cities PUMA（PUMA 0600101）",
         "monthly_paid": {
          "amount_minor": 4498,
          "currency": "USD",
@@ -1265,10 +1265,10 @@
       ],
       "homes": [
        {
-        "area_id": "sf.area.h.0600113",
-        "area_label": "居住片区·Alameda County (West)--Oakland City (Elmhurst/Central/East Oakland) PUMA（PUMA 0600113）",
-        "area_typical_roundtrip_minutes": 50,
-        "label": "1 卧整套租住（Alameda County (West)--Oakland City (Elmhurst/Central/East O，低档）",
+        "area_id": "sf.area.h.0600101",
+        "area_label": "居住片区·Alameda County (North)--Berkeley & Albany Cities PUMA（PUMA 0600101）",
+        "area_typical_roundtrip_minutes": 40,
+        "label": "开间整套租住（Alameda County (North)--Berkeley & Albany Cities，低档）",
         "months": [
          1,
          2,
@@ -1283,7 +1283,7 @@
          11,
          12
         ],
-        "opportunity_id": "sf.housing.0600113.1.s0001"
+        "opportunity_id": "sf.housing.0600101.0.s0020"
        }
       ],
       "household": [
@@ -1323,7 +1323,7 @@
        }
       ],
       "housing": [
-       "1 卧整套租住（Alameda County (West)--Oakland City (Elmhurst/Central/East O，低档）（1–12 月）"
+       "开间整套租住（Alameda County (North)--Berkeley & Albany Cities，低档）（1–12 月）"
       ],
       "jobs": [
        "服务类销售代表·工资约在本职业 76 分位（1–12 月）"
@@ -1331,9 +1331,9 @@
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 1384928,
+       "amount_minor": 2829728,
        "currency": "USD",
-       "display": "13,849.28",
+       "display": "28,297.28",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [],
@@ -1463,21 +1463,21 @@
        "status": "not_bought"
       },
       "cash_end": {
-       "amount_minor": 20084310,
+       "amount_minor": 18430710,
        "currency": "USD",
-       "display": "200,843.10",
+       "display": "184,307.10",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
-       "amount_minor": 8919985,
+       "amount_minor": 7475185,
        "currency": "USD",
-       "display": "89,199.85",
+       "display": "74,751.85",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "commute": [
        {
-        "home_area_id": "sf.area.h.0607512",
-        "home_area_label": "居住片区·San Francisco County (Southwest)--Outer Sunset & Inner Sunset PUMA（PUMA 0607512）",
+        "home_area_id": "sf.area.h.0607509",
+        "home_area_label": "居住片区·San Francisco County (Northeast)--Chinatown, North Beach & Russian Hill PUMA（PUMA 0607509）",
         "monthly_paid": {
          "amount_minor": 0,
          "currency": "USD",
@@ -1573,10 +1573,10 @@
       ],
       "homes": [
        {
-        "area_id": "sf.area.h.0607512",
-        "area_label": "居住片区·San Francisco County (Southwest)--Outer Sunset & Inner Sunset PUMA（PUMA 0607512）",
-        "area_typical_roundtrip_minutes": 60,
-        "label": "2 卧整套租住（San Francisco County (Southwest)--Outer Sunset & Inner Sunse，低档）",
+        "area_id": "sf.area.h.0607509",
+        "area_label": "居住片区·San Francisco County (Northeast)--Chinatown, North Beach & Russian Hill PUMA（PUMA 0607509）",
+        "area_typical_roundtrip_minutes": 50,
+        "label": "开间整套租住（San Francisco County (Northeast)--Chinatown, North Beach & R，中档）",
         "months": [
          1,
          2,
@@ -1591,7 +1591,7 @@
          11,
          12
         ],
-        "opportunity_id": "sf.housing.0607512.2.s0004"
+        "opportunity_id": "sf.housing.0607509.0.s0009"
        }
       ],
       "household": [
@@ -1631,7 +1631,7 @@
        }
       ],
       "housing": [
-       "2 卧整套租住（San Francisco County (Southwest)--Outer Sunset & Inner Sunse，低档）（1–12 月）"
+       "开间整套租住（San Francisco County (Northeast)--Chinatown, North Beach & R，中档）（1–12 月）"
       ],
       "jobs": [
        "服务类销售代表·工资约在本职业 84 分位（1–12 月）"
@@ -1639,9 +1639,9 @@
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 1768896,
+       "amount_minor": 1977696,
        "currency": "USD",
-       "display": "17,688.96",
+       "display": "19,776.96",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [],
@@ -1771,21 +1771,21 @@
        "status": "not_bought"
       },
       "cash_end": {
-       "amount_minor": 31248635,
+       "amount_minor": 29386235,
        "currency": "USD",
-       "display": "312,486.35",
+       "display": "293,862.35",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
-       "amount_minor": 20084310,
+       "amount_minor": 18430710,
        "currency": "USD",
-       "display": "200,843.10",
+       "display": "184,307.10",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "commute": [
        {
-        "home_area_id": "sf.area.h.0607512",
-        "home_area_label": "居住片区·San Francisco County (Southwest)--Outer Sunset & Inner Sunset PUMA（PUMA 0607512）",
+        "home_area_id": "sf.area.h.0607509",
+        "home_area_label": "居住片区·San Francisco County (Northeast)--Chinatown, North Beach & Russian Hill PUMA（PUMA 0607509）",
         "monthly_paid": {
          "amount_minor": 0,
          "currency": "USD",
@@ -1881,10 +1881,10 @@
       ],
       "homes": [
        {
-        "area_id": "sf.area.h.0607512",
-        "area_label": "居住片区·San Francisco County (Southwest)--Outer Sunset & Inner Sunset PUMA（PUMA 0607512）",
-        "area_typical_roundtrip_minutes": 60,
-        "label": "2 卧整套租住（San Francisco County (Southwest)--Outer Sunset & Inner Sunse，低档）",
+        "area_id": "sf.area.h.0607509",
+        "area_label": "居住片区·San Francisco County (Northeast)--Chinatown, North Beach & Russian Hill PUMA（PUMA 0607509）",
+        "area_typical_roundtrip_minutes": 50,
+        "label": "开间整套租住（San Francisco County (Northeast)--Chinatown, North Beach & R，中档）",
         "months": [
          1,
          2,
@@ -1899,7 +1899,7 @@
          11,
          12
         ],
-        "opportunity_id": "sf.housing.0607512.2.s0004"
+        "opportunity_id": "sf.housing.0607509.0.s0009"
        }
       ],
       "household": [
@@ -1939,7 +1939,7 @@
        }
       ],
       "housing": [
-       "2 卧整套租住（San Francisco County (Southwest)--Outer Sunset & Inner Sunse，低档）（1–12 月）"
+       "开间整套租住（San Francisco County (Northeast)--Chinatown, North Beach & R，中档）（1–12 月）"
       ],
       "jobs": [
        "服务类销售代表·工资约在本职业 84 分位（1–12 月）"
@@ -1947,9 +1947,9 @@
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 1768896,
+       "amount_minor": 1977696,
        "currency": "USD",
-       "display": "17,688.96",
+       "display": "19,776.96",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [],
@@ -2078,7 +2078,7 @@
   "comparisons": [],
   "confirmed": {
    "confirmed_id": "confirmed.draft.u501.r1",
-   "content_fingerprint": "84ff83df0a4acde01db18a80e306e3993cad3b2c4ab148407ecd0c14d1c5a297"
+   "content_fingerprint": "e0cbfa2e6484d79efc5f6fd6450381d1e3cd3fa12c17d211bab0159c0bc4c098"
   },
   "data_nature": [
    {
@@ -2094,12 +2094,12 @@
       "label_zh": "通勤关系表的线（住处片区 × 就业片区 × 方式）"
      },
      {
-      "count": 18481,
+      "count": 16736,
       "key": "housing_candidates",
       "label_zh": "完整可执行住房池的候选（目标格 × 经验支持点）"
      },
      {
-      "count": 340,
+      "count": 414,
       "key": "housing_in_catalog",
       "label_zh": "放进目录的住房（菜单上出现过的，加最低住房与参考住房）"
      },
@@ -2256,7 +2256,7 @@
         "kind": "derived"
        },
        {
-        "count": 340,
+        "count": 414,
         "kind": "estimated"
        },
        {
@@ -2265,7 +2265,7 @@
        }
       ],
       "category": "housing",
-      "total": 340
+      "total": 414
      },
      {
       "by_kind": [
@@ -2401,7 +2401,7 @@
      }
     ],
     "pack_status": "real_data_frozen",
-    "summary_zh": "旧金山：目录 1090 项机会里，观测 0、派生 2、估计 1076、合成设定 12。城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定，不据此排序真实城市",
+    "summary_zh": "旧金山：目录 1164 项机会里，观测 0、派生 2、估计 1150、合成设定 12。城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定，不据此排序真实城市",
     "tax": {
      "absent_zh": [],
      "not_modeled_zh": [
@@ -2436,7 +2436,7 @@
       "kind": "derived"
      },
      {
-      "count": 1076,
+      "count": 1150,
       "kind": "estimated"
      },
      {
@@ -2464,7 +2464,7 @@
   "meta": {
    "conversion_version": "e3a-conversion-v2",
    "data_pack": {
-    "content_fingerprint": "61851b0ac141128642c5d9aa795d51c15a3515d0f931a3b86829d3a90c5b0f64",
+    "content_fingerprint": "51ea50b0bde90ace59bad07ea263bb6359c3bec8329bba81725592a0976e7da8",
     "note": "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定",
     "pack_id": "pack.e3b.us-v1",
     "status": "real_data_frozen"
@@ -2501,7 +2501,7 @@
    "planner_kind": "mock"
   },
   "preflight": {
-   "preflight_fingerprint": "d34011fc51d553cbafa934b13edf41b7a6d17075356067da8c890262fccb593a",
+   "preflight_fingerprint": "0e02de665f9aa7f2174d7f69ff35cd5a6c3484f35bea3449432af9ec12dd0fac",
    "preflight_id": "preflight.confirmed.draft.u501.r1"
   },
   "reading_guide_zh": [
@@ -2515,15 +2515,15 @@
    "分数是当前合成模型下、按你确认的陈述偏好计算的结果；小数末位的差异不构成可靠的排序"
   ],
   "real_model_calls": 0,
-  "result_fingerprint": "6e022f4f2a071a3330d1ff4c0dc7bac7ad0bd9d47323a75265ef75196755a439",
-  "result_id": "result.run-e3a-485634acb09a1840",
-  "run_id": "run-e3a-485634acb09a1840",
+  "result_fingerprint": "f302109fb23e76f09adb7ca0d24df6cc822b4fd53355464c60e74e53d3d75bf6",
+  "result_id": "result.run-e3a-aedc8b45790efdd3",
+  "run_id": "run-e3a-aedc8b45790efdd3",
   "run_stage": "completed",
   "sources_zh": [
    "生活事实：E1 结算记录（钱、岗位、住房、食品、服务月份）与月度资源账（本人家务小时）",
    "片区、通勤、用车权、设备故障与税：E1 月度资源账里每月唯一的通勤记录与结算记录（不含故障抽签）",
    "评价：E1-6A 单分身跨期评价（L / V / J）；汇总：E1-6B 城市报告（C / E / M、均值、模拟缺失范围、事件链、硬要求）",
-   "资料：冻结的真实资料包 pack.e3b.us-v1（61851b0ac141…）：城市资料来自公开来源与登记的模型设定（逐城的来源性质见 data_nature）；生活规则、评分与评价参数是合成探索设定"
+   "资料：冻结的真实资料包 pack.e3b.us-v1（51ea50b0bde9…）：城市资料来自公开来源与登记的模型设定（逐城的来源性质见 data_nature）；生活规则、评分与评价参数是合成探索设定"
   ]
  }
 }

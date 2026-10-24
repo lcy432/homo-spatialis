@@ -23,20 +23,20 @@
       "violated": 0
      }
     ],
-    "headline_zh": "休斯敦：原计划 1 个分身——1 个完成且可评价、0 个生活出局、0 个模拟问题；1 个完成且可评价分身的平均 J 为 0.5310（分母只数完成且可评价的分身，不是原计划的全部分身）",
+    "headline_zh": "休斯敦：原计划 1 个分身——1 个完成且可评价、0 个生活出局、0 个模拟问题；1 个完成且可评价分身的平均 J 为 0.5141（分母只数完成且可评价的分身，不是原计划的全部分身）",
     "label": "休斯敦",
     "mean_denominator": 1,
     "mean_j": {
-     "display": "0.5310",
-     "exact": "21239531576537783/40000000000000000"
+     "display": "0.5141",
+     "exact": "1028154786161723/2000000000000000"
     },
     "mean_l": {
-     "display": "0.5301",
-     "exact": "1060154786161723/2000000000000000"
+     "display": "0.5141",
+     "exact": "1028154786161723/2000000000000000"
     },
     "mean_v": {
-     "display": "0.5337",
-     "exact": "2668604892055969/5000000000000000"
+     "display": "0.5141",
+     "exact": "1028154786161723/2000000000000000"
     },
     "missing": 0,
     "missing_reasons": [],
@@ -50,12 +50,12 @@
     "planned": 1,
     "range_denominator": 1,
     "range_lower": {
-     "display": "0.5310",
-     "exact": "21239531576537783/40000000000000000"
+     "display": "0.5141",
+     "exact": "1028154786161723/2000000000000000"
     },
     "range_upper": {
-     "display": "0.5310",
-     "exact": "21239531576537783/40000000000000000"
+     "display": "0.5141",
+     "exact": "1028154786161723/2000000000000000"
     }
    },
    {
@@ -78,20 +78,20 @@
       "violated": 0
      }
     ],
-    "headline_zh": "西雅图：原计划 1 个分身——1 个完成且可评价、0 个生活出局、0 个模拟问题；1 个完成且可评价分身的平均 J 为 0.5721（分母只数完成且可评价的分身，不是原计划的全部分身）",
+    "headline_zh": "西雅图：原计划 1 个分身——1 个完成且可评价、0 个生活出局、0 个模拟问题；1 个完成且可评价分身的平均 J 为 0.5746（分母只数完成且可评价的分身，不是原计划的全部分身）",
     "label": "西雅图",
     "mean_denominator": 1,
     "mean_j": {
-     "display": "0.5721",
-     "exact": "22882954153290223/40000000000000000"
+     "display": "0.5746",
+     "exact": "22982155462388093/40000000000000000"
     },
     "mean_l": {
-     "display": "0.5536",
-     "exact": "2075905999056973/3750000000000000"
+     "display": "0.5542",
+     "exact": "5542234693343317/10000000000000000"
     },
     "mean_v": {
-     "display": "0.6276",
-     "exact": "6275706160834439/10000000000000000"
+     "display": "0.6355",
+     "exact": "3177725691179071/5000000000000000"
     },
     "missing": 0,
     "missing_reasons": [],
@@ -105,12 +105,12 @@
     "planned": 1,
     "range_denominator": 1,
     "range_lower": {
-     "display": "0.5721",
-     "exact": "22882954153290223/40000000000000000"
+     "display": "0.5746",
+     "exact": "22982155462388093/40000000000000000"
     },
     "range_upper": {
-     "display": "0.5721",
-     "exact": "22882954153290223/40000000000000000"
+     "display": "0.5746",
+     "exact": "22982155462388093/40000000000000000"
     }
    }
   ],
@@ -139,28 +139,28 @@
      }
     ],
     "j": {
-     "display": "0.5310",
-     "exact": "21239531576537783/40000000000000000"
+     "display": "0.5141",
+     "exact": "1028154786161723/2000000000000000"
     },
     "l_actual": {
-     "display": "0.5301",
-     "exact": "1060154786161723/2000000000000000"
+     "display": "0.5141",
+     "exact": "1028154786161723/2000000000000000"
     },
     "missing_reason": null,
     "missing_reason_zh": null,
     "range_lower": {
-     "display": "0.5310",
-     "exact": "21239531576537783/40000000000000000"
+     "display": "0.5141",
+     "exact": "1028154786161723/2000000000000000"
     },
     "range_upper": {
-     "display": "0.5310",
-     "exact": "21239531576537783/40000000000000000"
+     "display": "0.5141",
+     "exact": "1028154786161723/2000000000000000"
     },
-    "reference_plan": "p1_basic_car",
+    "reference_plan": "p1_basic",
     "repeat_index": 0,
     "v_reference": {
-     "display": "0.5337",
-     "exact": "2668604892055969/5000000000000000"
+     "display": "0.5141",
+     "exact": "1028154786161723/2000000000000000"
     },
     "years": [
      {
@@ -170,9 +170,9 @@
        "status": "not_bought"
       },
       "cash_end": {
-       "amount_minor": 4274575,
+       "amount_minor": 3220975,
        "currency": "USD",
-       "display": "42,745.75",
+       "display": "32,209.75",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
@@ -283,7 +283,7 @@
         "area_id": "hou.area.h.4804503",
         "area_label": "居住片区·Houston-Galveston Area Council--Montgomery County (South), The Woodlands (North) PUMA（PUMA 4804503）",
         "area_typical_roundtrip_minutes": 40,
-        "label": "4 卧整套租住（Houston-Galveston Area Council--Montgomery County (South), T，低档）",
+        "label": "开间整套租住（Houston-Galveston Area Council--Montgomery County (South), T，低档）",
         "months": [
          1,
          2,
@@ -298,7 +298,7 @@
          11,
          12
         ],
-        "opportunity_id": "hou.housing.4804503.3plus.s0001"
+        "opportunity_id": "hou.housing.4804503.0.s0075"
        }
       ],
       "household": [
@@ -338,7 +338,7 @@
        }
       ],
       "housing": [
-       "4 卧整套租住（Houston-Galveston Area Council--Montgomery County (South), T，低档）（1–12 月）"
+       "开间整套租住（Houston-Galveston Area Council--Montgomery County (South), T，低档）（1–12 月）"
       ],
       "jobs": [
        "秘书与行政助理·工资约在本职业 76 分位（1–12 月）"
@@ -346,9 +346,9 @@
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 634250,
+       "amount_minor": 1687850,
        "currency": "USD",
-       "display": "6,342.50",
+       "display": "16,878.50",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [],
@@ -478,15 +478,15 @@
        "status": "not_bought"
       },
       "cash_end": {
-       "amount_minor": 9178760,
+       "amount_minor": 7071560,
        "currency": "USD",
-       "display": "91,787.60",
+       "display": "70,715.60",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
-       "amount_minor": 4274575,
+       "amount_minor": 3220975,
        "currency": "USD",
-       "display": "42,745.75",
+       "display": "32,209.75",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "commute": [
@@ -591,7 +591,7 @@
         "area_id": "hou.area.h.4804503",
         "area_label": "居住片区·Houston-Galveston Area Council--Montgomery County (South), The Woodlands (North) PUMA（PUMA 4804503）",
         "area_typical_roundtrip_minutes": 40,
-        "label": "4 卧整套租住（Houston-Galveston Area Council--Montgomery County (South), T，低档）",
+        "label": "开间整套租住（Houston-Galveston Area Council--Montgomery County (South), T，低档）",
         "months": [
          1,
          2,
@@ -606,7 +606,7 @@
          11,
          12
         ],
-        "opportunity_id": "hou.housing.4804503.3plus.s0001"
+        "opportunity_id": "hou.housing.4804503.0.s0075"
        }
       ],
       "household": [
@@ -646,7 +646,7 @@
        }
       ],
       "housing": [
-       "4 卧整套租住（Houston-Galveston Area Council--Montgomery County (South), T，低档）（1–12 月）"
+       "开间整套租住（Houston-Galveston Area Council--Montgomery County (South), T，低档）（1–12 月）"
       ],
       "jobs": [
        "健身教练与团体课老师·工资约在本职业 68 分位（1–12 月）"
@@ -654,9 +654,9 @@
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 563496,
+       "amount_minor": 1617096,
        "currency": "USD",
-       "display": "5,634.96",
+       "display": "16,170.96",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [],
@@ -786,15 +786,15 @@
        "status": "not_bought"
       },
       "cash_end": {
-       "amount_minor": 14082945,
+       "amount_minor": 10922145,
        "currency": "USD",
-       "display": "140,829.45",
+       "display": "109,221.45",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
-       "amount_minor": 9178760,
+       "amount_minor": 7071560,
        "currency": "USD",
-       "display": "91,787.60",
+       "display": "70,715.60",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "commute": [
@@ -899,7 +899,7 @@
         "area_id": "hou.area.h.4804503",
         "area_label": "居住片区·Houston-Galveston Area Council--Montgomery County (South), The Woodlands (North) PUMA（PUMA 4804503）",
         "area_typical_roundtrip_minutes": 40,
-        "label": "4 卧整套租住（Houston-Galveston Area Council--Montgomery County (South), T，低档）",
+        "label": "开间整套租住（Houston-Galveston Area Council--Montgomery County (South), T，低档）",
         "months": [
          1,
          2,
@@ -914,7 +914,7 @@
          11,
          12
         ],
-        "opportunity_id": "hou.housing.4804503.3plus.s0001"
+        "opportunity_id": "hou.housing.4804503.0.s0075"
        }
       ],
       "household": [
@@ -954,7 +954,7 @@
        }
       ],
       "housing": [
-       "4 卧整套租住（Houston-Galveston Area Council--Montgomery County (South), T，低档）（1–12 月）"
+       "开间整套租住（Houston-Galveston Area Council--Montgomery County (South), T，低档）（1–12 月）"
       ],
       "jobs": [
        "健身教练与团体课老师·工资约在本职业 68 分位（1–12 月）"
@@ -962,9 +962,9 @@
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 563496,
+       "amount_minor": 1617096,
        "currency": "USD",
-       "display": "5,634.96",
+       "display": "16,170.96",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [],
@@ -1113,28 +1113,28 @@
      }
     ],
     "j": {
-     "display": "0.5721",
-     "exact": "22882954153290223/40000000000000000"
+     "display": "0.5746",
+     "exact": "22982155462388093/40000000000000000"
     },
     "l_actual": {
-     "display": "0.5536",
-     "exact": "2075905999056973/3750000000000000"
+     "display": "0.5542",
+     "exact": "5542234693343317/10000000000000000"
     },
     "missing_reason": null,
     "missing_reason_zh": null,
     "range_lower": {
-     "display": "0.5721",
-     "exact": "22882954153290223/40000000000000000"
+     "display": "0.5746",
+     "exact": "22982155462388093/40000000000000000"
     },
     "range_upper": {
-     "display": "0.5721",
-     "exact": "22882954153290223/40000000000000000"
+     "display": "0.5746",
+     "exact": "22982155462388093/40000000000000000"
     },
-    "reference_plan": "p3_service_car",
+    "reference_plan": "p3_service",
     "repeat_index": 0,
     "v_reference": {
-     "display": "0.6276",
-     "exact": "6275706160834439/10000000000000000"
+     "display": "0.6355",
+     "exact": "3177725691179071/5000000000000000"
     },
     "years": [
      {
@@ -1178,9 +1178,9 @@
        "status": "bought"
       },
       "cash_end": {
-       "amount_minor": 3245534,
+       "amount_minor": 2002454,
        "currency": "USD",
-       "display": "32,455.34",
+       "display": "20,024.54",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
@@ -1191,12 +1191,12 @@
       },
       "commute": [
        {
-        "home_area_id": "sea.area.h.5323306",
-        "home_area_label": "居住片区·King County (Southeast)--Maple Valley, Covington & Enumclaw Cities PUMA（PUMA 5323306）",
+        "home_area_id": "sea.area.h.5323303",
+        "home_area_label": "居住片区·King County (Northwest)--Redmond, Kirkland Cities, Ingelwood & Finn Hill PUMA（PUMA 5323303）",
         "monthly_paid": {
-         "amount_minor": 10274,
+         "amount_minor": 6864,
          "currency": "USD",
-         "display": "102.74",
+         "display": "68.64",
          "numeraire_id": "USD_2024_LOCAL"
         },
         "months": [
@@ -1222,7 +1222,7 @@
           "mode": "drive",
           "mode_zh": "开车",
           "onsite_visits": 22,
-          "roundtrip_minutes": 60,
+          "roundtrip_minutes": 40,
           "work_area_id": "sea.area.w.5323300",
           "work_area_label": "就业片区·King County"
          }
@@ -1288,10 +1288,10 @@
       ],
       "homes": [
        {
-        "area_id": "sea.area.h.5323306",
-        "area_label": "居住片区·King County (Southeast)--Maple Valley, Covington & Enumclaw Cities PUMA（PUMA 5323306）",
-        "area_typical_roundtrip_minutes": 66,
-        "label": "2 卧整套租住（King County (Southeast)--Maple Valley, Covington & Enumclaw ，低档）",
+        "area_id": "sea.area.h.5323303",
+        "area_label": "居住片区·King County (Northwest)--Redmond, Kirkland Cities, Ingelwood & Finn Hill PUMA（PUMA 5323303）",
+        "area_typical_roundtrip_minutes": 40,
+        "label": "开间整套租住（King County (Northwest)--Redmond, Kirkland Cities, Ingelwood，低档）",
         "months": [
          1,
          2,
@@ -1306,7 +1306,7 @@
          11,
          12
         ],
-        "opportunity_id": "sea.housing.5323306.2.s0001"
+        "opportunity_id": "sea.housing.5323303.0.s0008"
        }
       ],
       "household": [
@@ -1346,7 +1346,7 @@
        }
       ],
       "housing": [
-       "2 卧整套租住（King County (Southeast)--Maple Valley, Covington & Enumclaw ，低档）（1–12 月）"
+       "开间整套租住（King County (Northwest)--Redmond, Kirkland Cities, Ingelwood，低档）（1–12 月）"
       ],
       "jobs": [
        "办公室文员·p50（1–12 月）"
@@ -1354,9 +1354,9 @@
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 1498157,
+       "amount_minor": 2741237,
        "currency": "USD",
-       "display": "14,981.57",
+       "display": "27,412.37",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [],
@@ -1486,15 +1486,15 @@
        "status": "not_bought"
       },
       "cash_end": {
-       "amount_minor": 8616542,
+       "amount_minor": 7373462,
        "currency": "USD",
-       "display": "86,165.42",
+       "display": "73,734.62",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
-       "amount_minor": 3245534,
+       "amount_minor": 2002454,
        "currency": "USD",
-       "display": "32,455.34",
+       "display": "20,024.54",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "commute": [
@@ -1794,25 +1794,25 @@
        "status": "not_bought"
       },
       "cash_end": {
-       "amount_minor": 14024750,
+       "amount_minor": 12744470,
        "currency": "USD",
-       "display": "140,247.50",
+       "display": "127,444.70",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
-       "amount_minor": 8616542,
+       "amount_minor": 7373462,
        "currency": "USD",
-       "display": "86,165.42",
+       "display": "73,734.62",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "commute": [
        {
-        "home_area_id": "sea.area.h.5323311",
-        "home_area_label": "居住片区·King County (West Central)--Burien, SeaTac, Tukwila Cities & White Center PUMA（PUMA 5323311）",
+        "home_area_id": "sea.area.h.5323314",
+        "home_area_label": "居住片区·Seattle City (Central) PUMA（PUMA 5323314）",
         "monthly_paid": {
-         "amount_minor": 9900,
+         "amount_minor": 0,
          "currency": "USD",
-         "display": "99.00",
+         "display": "0.00",
          "numeraire_id": "USD_2024_LOCAL"
         },
         "months": [
@@ -1835,10 +1835,10 @@
          {
           "job_label": "健身教练与团体课老师·工资约在本职业 80 分位",
           "job_opportunity_id": "sea.job.39-9031.w17.h40.w.5323300",
-          "mode": "transit",
-          "mode_zh": "公共交通",
+          "mode": "walk_bike",
+          "mode_zh": "步行或骑车",
           "onsite_visits": 22,
-          "roundtrip_minutes": 60,
+          "roundtrip_minutes": 30,
           "work_area_id": "sea.area.w.5323300",
           "work_area_label": "就业片区·King County"
          }
@@ -1904,10 +1904,10 @@
       ],
       "homes": [
        {
-        "area_id": "sea.area.h.5323311",
-        "area_label": "居住片区·King County (West Central)--Burien, SeaTac, Tukwila Cities & White Center PUMA（PUMA 5323311）",
+        "area_id": "sea.area.h.5323314",
+        "area_label": "居住片区·Seattle City (Central) PUMA（PUMA 5323314）",
         "area_typical_roundtrip_minutes": 40,
-        "label": "1 卧整套租住（King County (West Central)--Burien, SeaTac, Tukwila Cities &，低档）",
+        "label": "开间整套租住（Seattle City (Central)，低档）",
         "months": [
          1,
          2,
@@ -1922,7 +1922,7 @@
          11,
          12
         ],
-        "opportunity_id": "sea.housing.5323311.1.s0004"
+        "opportunity_id": "sea.housing.5323314.0.s0004"
        }
       ],
       "household": [
@@ -1962,7 +1962,7 @@
        }
       ],
       "housing": [
-       "1 卧整套租住（King County (West Central)--Burien, SeaTac, Tukwila Cities &，低档）（1–12 月）"
+       "开间整套租住（Seattle City (Central)，低档）（1–12 月）"
       ],
       "jobs": [
        "健身教练与团体课老师·工资约在本职业 80 分位（1–12 月）"
@@ -1970,9 +1970,9 @@
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 1826772,
+       "amount_minor": 1863972,
        "currency": "USD",
-       "display": "18,267.72",
+       "display": "18,639.72",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [],
@@ -2105,18 +2105,18 @@
     "direction": "b_higher",
     "note_zh": "在这些缺失范围下 B 城始终更高：方向一致；不是显著性检验，也不是总体因果结论。出局比例 A 0%、B 0%，有效分身数 A 1/1、B 1/1",
     "range_difference_high": {
-     "display": "-0.0411",
-     "exact": "-41085564418811/1000000000000000"
+     "display": "-0.0605",
+     "exact": "-2419059739153633/40000000000000000"
     },
     "range_difference_low": {
-     "display": "-0.0411",
-     "exact": "-41085564418811/1000000000000000"
+     "display": "-0.0605",
+     "exact": "-2419059739153633/40000000000000000"
     }
    }
   ],
   "confirmed": {
    "confirmed_id": "confirmed.draft.u501.r1",
-   "content_fingerprint": "a6be91680c5acbeb906d69c2a8680fc1c5eab828b6a5bc0feacc59bcde442f8b"
+   "content_fingerprint": "29ac5008e79bf4e423ee48c1b6963a660742d131370b68ad61c7e36c9f132882"
   },
   "data_nature": [
    {
@@ -2132,12 +2132,12 @@
       "label_zh": "通勤关系表的线（住处片区 × 就业片区 × 方式）"
      },
      {
-      "count": 43339,
+      "count": 38109,
       "key": "housing_candidates",
       "label_zh": "完整可执行住房池的候选（目标格 × 经验支持点）"
      },
      {
-      "count": 357,
+      "count": 457,
       "key": "housing_in_catalog",
       "label_zh": "放进目录的住房（菜单上出现过的，加最低住房与参考住房）"
      },
@@ -2299,7 +2299,7 @@
         "kind": "derived"
        },
        {
-        "count": 357,
+        "count": 457,
         "kind": "estimated"
        },
        {
@@ -2308,7 +2308,7 @@
        }
       ],
       "category": "housing",
-      "total": 357
+      "total": 457
      },
      {
       "by_kind": [
@@ -2444,7 +2444,7 @@
      }
     ],
     "pack_status": "real_data_frozen",
-    "summary_zh": "休斯敦：目录 1097 项机会里，观测 0、派生 1、估计 1084、合成设定 12。城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定，不据此排序真实城市",
+    "summary_zh": "休斯敦：目录 1197 项机会里，观测 0、派生 1、估计 1184、合成设定 12。城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定，不据此排序真实城市",
     "tax": {
      "absent_zh": [
       "德州没有州个人所得税"
@@ -2476,7 +2476,7 @@
       "kind": "derived"
      },
      {
-      "count": 1084,
+      "count": 1184,
       "kind": "estimated"
      },
      {
@@ -2502,12 +2502,12 @@
       "label_zh": "通勤关系表的线（住处片区 × 就业片区 × 方式）"
      },
      {
-      "count": 14214,
+      "count": 12861,
       "key": "housing_candidates",
       "label_zh": "完整可执行住房池的候选（目标格 × 经验支持点）"
      },
      {
-      "count": 342,
+      "count": 397,
       "key": "housing_in_catalog",
       "label_zh": "放进目录的住房（菜单上出现过的，加最低住房与参考住房）"
      },
@@ -2664,7 +2664,7 @@
         "kind": "derived"
        },
        {
-        "count": 342,
+        "count": 397,
         "kind": "estimated"
        },
        {
@@ -2673,7 +2673,7 @@
        }
       ],
       "category": "housing",
-      "total": 342
+      "total": 397
      },
      {
       "by_kind": [
@@ -2809,7 +2809,7 @@
      }
     ],
     "pack_status": "real_data_frozen",
-    "summary_zh": "西雅图：目录 1089 项机会里，观测 0、派生 2、估计 1075、合成设定 12。城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定，不据此排序真实城市",
+    "summary_zh": "西雅图：目录 1144 项机会里，观测 0、派生 2、估计 1130、合成设定 12。城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定，不据此排序真实城市",
     "tax": {
      "absent_zh": [
       "华盛顿州 2024 年没有个人所得税"
@@ -2844,7 +2844,7 @@
       "kind": "derived"
      },
      {
-      "count": 1075,
+      "count": 1130,
       "kind": "estimated"
      },
      {
@@ -2872,7 +2872,7 @@
   "meta": {
    "conversion_version": "e3a-conversion-v2",
    "data_pack": {
-    "content_fingerprint": "13818ee9953d39624b45dbe4e21bf4f84cc10014d1c381343526a0add55b7f39",
+    "content_fingerprint": "2d234a5137dedf2f9b6d5dc08d662d1eec113cb6dbe346e50e2f537c940e50c3",
     "note": "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定",
     "pack_id": "pack.e3b.us-v1",
     "status": "real_data_frozen"
@@ -2918,7 +2918,7 @@
    "planner_kind": "mock"
   },
   "preflight": {
-   "preflight_fingerprint": "16bed759e9055f91510b39198f475b4ed914ef56e95f850af5b070ff0fa43184",
+   "preflight_fingerprint": "2c4fbfcc9997c3d5eeceb5ef81d9c288b6e2fb9040f2ec9ac60e9f262ecac29d",
    "preflight_id": "preflight.confirmed.draft.u501.r1"
   },
   "reading_guide_zh": [
@@ -2932,15 +2932,15 @@
    "分数是当前合成模型下、按你确认的陈述偏好计算的结果；小数末位的差异不构成可靠的排序"
   ],
   "real_model_calls": 0,
-  "result_fingerprint": "d326e0e3cf371717e9268b470bf9ca7fa3f583b170878be2567094caa9466369",
-  "result_id": "result.run-e3a-53fe62fff574b5d5",
-  "run_id": "run-e3a-53fe62fff574b5d5",
+  "result_fingerprint": "6f9ce0877ce82677cd9feeb60de32cc3ed40a219e3ede4364c36ba7d0237310c",
+  "result_id": "result.run-e3a-7bfc31c3905d0627",
+  "run_id": "run-e3a-7bfc31c3905d0627",
   "run_stage": "completed",
   "sources_zh": [
    "生活事实：E1 结算记录（钱、岗位、住房、食品、服务月份）与月度资源账（本人家务小时）",
    "片区、通勤、用车权、设备故障与税：E1 月度资源账里每月唯一的通勤记录与结算记录（不含故障抽签）",
    "评价：E1-6A 单分身跨期评价（L / V / J）；汇总：E1-6B 城市报告（C / E / M、均值、模拟缺失范围、事件链、硬要求）",
-   "资料：冻结的真实资料包 pack.e3b.us-v1（13818ee9953d…）：城市资料来自公开来源与登记的模型设定（逐城的来源性质见 data_nature）；生活规则、评分与评价参数是合成探索设定"
+   "资料：冻结的真实资料包 pack.e3b.us-v1（2d234a5137de…）：城市资料来自公开来源与登记的模型设定（逐城的来源性质见 data_nature）；生活规则、评分与评价参数是合成探索设定"
   ]
  }
 }

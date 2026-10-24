@@ -54,7 +54,7 @@ RUN_CONFIG_VERSION = "e1-7a-run-v1"
 RUN_CONFIG_VERSION_LIVE = "e1-7b-run-v1"
 #: 提示模板与它带的行动说明书（DECISIONS/0031、0033、0034）。提示模板 = 系统提示、用户开头与输出格式 + 一版行动说明书。
 #: 改了任何文字就换版本号，并在 ``PROMPT_TEMPLATE_GUIDES`` 里登记；运行配置的 prompt_template 只能写这里的键。
-PROMPT_TEMPLATE_VERSION = "e3b-product-prompt-v2"
+PROMPT_TEMPLATE_VERSION = "e3b-product-prompt-v3"
 ACTION_GUIDE_VERSION = "e3b-product-action-guide-v3"
 PROMPT_TEMPLATE_GUIDES: dict[str, str] = {PROMPT_TEMPLATE_VERSION: ACTION_GUIDE_VERSION}
 MEMORY_POLICY_VERSION = "e1-life-memory-v2"

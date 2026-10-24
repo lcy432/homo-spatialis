@@ -4,16 +4,16 @@
  "payload": {
   "binding": {
    "compiled_inputs": {
-    "life_input": "35657ae076b9a8168481201a4ab860437f3aa7540326a7351377f68fa2a46c89",
+    "life_input": "a9eea7db64dc606d57b03e9c148c619fb24db59addab0cbb66d6d08f0175e080",
     "roster": "51dca4668a02721eced9efb166cdf68afd71cea4f2cf61af72f0694bfbfba255",
-    "run_config": "3adc816d54fba0c5edd3c8c7f52a4491a533e8962ae3feb46daf1d3193b601ad",
+    "run_config": "cef071d1d457a6a2429b353a21dc390b5d7a0097d90033bb4602d312cdb40511",
     "scoring_config": "9e36ac1da414f1b4929c83f3d3976b77a11f323b4de8681a50383c22ab3b3727"
    },
    "evaluation_spec_id": "eval.e3b-us.main",
-   "identities_fingerprint": "78c9fb3698adb5a69d01488259825f051da2a1f4ab5c8e367c4a494e8586f7f1",
+   "identities_fingerprint": "9687f849d8193c1e5b36d11af6f6c53e3b6a8e151dc26b47c0a9259f0b57c7b0",
    "planner_id": "mock.rules.e3a-product",
    "planner_kind": "mock",
-   "prompt_template": "e3b-product-prompt-v2",
+   "prompt_template": "e3b-product-prompt-v3",
    "protocol_id": "life-v1-e3b-us",
    "scoring_content_fingerprint": "c36f768cbb84afd5398b4afedeafbf2aa1a117bf61cfd944a453eb3cdc1e7d75",
    "scoring_version": "e1-life-v1"
@@ -51,12 +51,12 @@
        "label_zh": "通勤关系表的线（住处片区 × 就业片区 × 方式）"
       },
       {
-       "count": 43339,
+       "count": 38109,
        "key": "housing_candidates",
        "label_zh": "完整可执行住房池的候选（目标格 × 经验支持点）"
       },
       {
-       "count": 357,
+       "count": 457,
        "key": "housing_in_catalog",
        "label_zh": "放进目录的住房（菜单上出现过的，加最低住房与参考住房）"
       },
@@ -218,7 +218,7 @@
          "kind": "derived"
         },
         {
-         "count": 357,
+         "count": 457,
          "kind": "estimated"
         },
         {
@@ -227,7 +227,7 @@
         }
        ],
        "category": "housing",
-       "total": 357
+       "total": 457
       },
       {
        "by_kind": [
@@ -363,7 +363,7 @@
       }
      ],
      "pack_status": "real_data_frozen",
-     "summary_zh": "休斯敦：目录 1097 项机会里，观测 0、派生 1、估计 1084、合成设定 12。城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定，不据此排序真实城市",
+     "summary_zh": "休斯敦：目录 1197 项机会里，观测 0、派生 1、估计 1184、合成设定 12。城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定，不据此排序真实城市",
      "tax": {
       "absent_zh": [
        "德州没有州个人所得税"
@@ -395,7 +395,7 @@
        "kind": "derived"
       },
       {
-       "count": 1084,
+       "count": 1184,
        "kind": "estimated"
       },
       {
@@ -462,12 +462,12 @@
        "label_zh": "通勤关系表的线（住处片区 × 就业片区 × 方式）"
       },
       {
-       "count": 14214,
+       "count": 12861,
        "key": "housing_candidates",
        "label_zh": "完整可执行住房池的候选（目标格 × 经验支持点）"
       },
       {
-       "count": 342,
+       "count": 397,
        "key": "housing_in_catalog",
        "label_zh": "放进目录的住房（菜单上出现过的，加最低住房与参考住房）"
       },
@@ -624,7 +624,7 @@
          "kind": "derived"
         },
         {
-         "count": 342,
+         "count": 397,
          "kind": "estimated"
         },
         {
@@ -633,7 +633,7 @@
         }
        ],
        "category": "housing",
-       "total": 342
+       "total": 397
       },
       {
        "by_kind": [
@@ -769,7 +769,7 @@
       }
      ],
      "pack_status": "real_data_frozen",
-     "summary_zh": "西雅图：目录 1089 项机会里，观测 0、派生 2、估计 1075、合成设定 12。城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定，不据此排序真实城市",
+     "summary_zh": "西雅图：目录 1144 项机会里，观测 0、派生 2、估计 1130、合成设定 12。城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定，不据此排序真实城市",
      "tax": {
       "absent_zh": [
        "华盛顿州 2024 年没有个人所得税"
@@ -804,7 +804,7 @@
        "kind": "derived"
       },
       {
-       "count": 1075,
+       "count": 1130,
        "kind": "estimated"
       },
       {
@@ -843,7 +843,7 @@
   "clones_per_city": 1,
   "confirmed": {
    "confirmed_id": "confirmed.draft.u501.r1",
-   "content_fingerprint": "a6be91680c5acbeb906d69c2a8680fc1c5eab828b6a5bc0feacc59bcde442f8b"
+   "content_fingerprint": "29ac5008e79bf4e423ee48c1b6963a660742d131370b68ad61c7e36c9f132882"
   },
   "executable": {
    "reasons": [
@@ -861,7 +861,7 @@
   "meta": {
    "conversion_version": "e3a-conversion-v2",
    "data_pack": {
-    "content_fingerprint": "13818ee9953d39624b45dbe4e21bf4f84cc10014d1c381343526a0add55b7f39",
+    "content_fingerprint": "2d234a5137dedf2f9b6d5dc08d662d1eec113cb6dbe346e50e2f537c940e50c3",
     "note": "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定",
     "pack_id": "pack.e3b.us-v1",
     "status": "real_data_frozen"
@@ -885,7 +885,7 @@
    "planner_id": "mock.rules.e3a-product",
    "planner_kind": "mock"
   },
-  "preflight_fingerprint": "16bed759e9055f91510b39198f475b4ed914ef56e95f850af5b070ff0fa43184",
+  "preflight_fingerprint": "2c4fbfcc9997c3d5eeceb5ef81d9c288b6e2fb9040f2ec9ac60e9f262ecac29d",
   "preflight_id": "preflight.confirmed.draft.u501.r1",
   "scope_notes": [
    {

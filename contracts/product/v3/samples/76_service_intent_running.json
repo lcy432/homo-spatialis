@@ -9,7 +9,7 @@
   "confirm_with": null,
   "confirmed": {
    "confirmed_id": "confirmed.draft-0000000000000029.r2",
-   "content_fingerprint": "29ea68fe250878113fc73e9101101985c99379727471a289100c94fbe6658f4b"
+   "content_fingerprint": "6b664bef9bf837be8bc710762a016d18c7c1e044b57a51fd314c1a0302ad1eb4"
   },
   "created_at": "2026-10-24T09:00:00Z",
   "deletion": {
@@ -23,7 +23,7 @@
   "meta": {
    "conversion_version": "e3a-conversion-v2",
    "data_pack": {
-    "content_fingerprint": "7face3610cd86d6e2cb7442017661fce2abb3c4a2b1a4e6740ab70ddf23ca9ae",
+    "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
     "pack_id": "pack.e3a.synthetic-v2",
     "status": "synthetic_fixture_only"
@@ -42,16 +42,16 @@
   "preflight": {
    "binding": {
     "compiled_inputs": {
-     "life_input": "70145548fd4f12424cee3cc6deab3181eb218c4ac6837cc9d5f15bcfe9839d03",
+     "life_input": "0768c0f22abaf27970ebe07d8f73f2e82cb2cbcdc64bbaacc3578110b5aaadc4",
      "roster": "94ddea158a90a8d2ab924ea5a5751e1521e1fb721839dcc8afa4470396645a8e",
-     "run_config": "986128f15d5a8c214827dd38dedb0e6389d53bb57b986c57f5064f22a2a3ca2e",
+     "run_config": "268c1d1b951bb35c32e13e9a29a95bedf9164f41d71c5208bd101fc61981e467",
      "scoring_config": "9dbae9d435ab74cc64beac6604352033194e6f024ae45304a4ab06ca86ac2947"
     },
     "evaluation_spec_id": "eval.e1-life.main",
-    "identities_fingerprint": "a816b537223afeff52e3853968480256a59c83061c281d80f863af26176f5603",
+    "identities_fingerprint": "4046be0248158db3233e214098594cae55bccf2dfa0150ae513524796b6615c9",
     "planner_id": "llm.qwen.product_planner",
     "planner_kind": "llm",
-    "prompt_template": "e3b-product-prompt-v2",
+    "prompt_template": "e3b-product-prompt-v3",
     "protocol_id": "life-v1-e3a-product",
     "scoring_content_fingerprint": "c36f768cbb84afd5398b4afedeafbf2aa1a117bf61cfd944a453eb3cdc1e7d75",
     "scoring_version": "e1-life-v1"
@@ -700,7 +700,7 @@
    "clones_per_city": 1,
    "confirmed": {
     "confirmed_id": "confirmed.draft-0000000000000029.r2",
-    "content_fingerprint": "29ea68fe250878113fc73e9101101985c99379727471a289100c94fbe6658f4b"
+    "content_fingerprint": "6b664bef9bf837be8bc710762a016d18c7c1e044b57a51fd314c1a0302ad1eb4"
    },
    "executable": {
     "reasons": [
@@ -718,7 +718,7 @@
    "meta": {
     "conversion_version": "e3a-conversion-v2",
     "data_pack": {
-     "content_fingerprint": "7face3610cd86d6e2cb7442017661fce2abb3c4a2b1a4e6740ab70ddf23ca9ae",
+     "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
      "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
      "pack_id": "pack.e3a.synthetic-v2",
      "status": "synthetic_fixture_only"
@@ -737,7 +737,7 @@
     "planner_id": "llm.qwen.product_planner",
     "planner_kind": "llm"
    },
-   "preflight_fingerprint": "e22e1117dee18e7e25c1d0f9a6044f556a52a1887add70b4fa325d5f4b4e21d3",
+   "preflight_fingerprint": "d366b04182c604127bb8ee6dfe1c8b1d23984fcea2e24f81c431f255ad757ea1",
    "preflight_id": "preflight.confirmed.draft-0000000000000029.r2",
    "scope_zh": [
     "生活协议 life-v1-e3a-product（状态 synthetic_fixture_only）、评分 score.e1-life.explore（探索版）：城市、报价、工资、疾病、治疗与评分参数全部是合成设定，不是现实城市，不排序真实城市",
@@ -791,22 +791,22 @@
     "call_limit": 18,
     "calls_used": 3,
     "currency": "CNY",
-    "estimated_cost": "0.087809",
-    "in_flight_cost": "0.044597",
+    "estimated_cost": "0.084645",
+    "in_flight_cost": "0.043107",
     "kind": "estimated_from_quote",
     "max_cost": "10",
     "note": "应用侧按报价 qwen3.8-flash@beijing@2026-10-09 估算，不是供应商账单（以账单为准）：已核算 + 用量不确定（保留预留，不记 0） + 在途预留；本次运行上限 10 CNY",
     "price_version": "qwen3.8-flash@beijing@2026-10-09",
     "service_attempt_limit": 36,
     "service_attempts": 4,
-    "settled_cost": "0.043212",
+    "settled_cost": "0.041538",
     "uncertain_attempts": 0,
     "uncertain_cost": "0.000000"
    },
    "meta": {
     "conversion_version": "e3a-conversion-v2",
     "data_pack": {
-     "content_fingerprint": "7face3610cd86d6e2cb7442017661fce2abb3c4a2b1a4e6740ab70ddf23ca9ae",
+     "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
      "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
      "pack_id": "pack.e3a.synthetic-v2",
      "status": "synthetic_fixture_only"
@@ -821,7 +821,7 @@
    "report_available": false,
    "resumable": true,
    "resume_note": "可以从年度边界或两份候选之间恢复（E1 的恢复入口逐条核对归档，尝试次数与调用次数不清零）",
-   "run_id": "run-e3a-a3335253578a062b",
+   "run_id": "run-e3a-e2e5e47eeb2ec30b",
    "stage": "running",
    "stage_zh": "运行中",
    "updated_at": "2026-10-24T09:00:00Z"
@@ -833,7 +833,7 @@
    "used": 1
   },
   "result_available": false,
-  "run_id": "run-e3a-a3335253578a062b",
+  "run_id": "run-e3a-e2e5e47eeb2ec30b",
   "stage": "running",
   "stage_zh": "模拟进行中",
   "support_ref": null,

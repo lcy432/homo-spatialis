@@ -4,7 +4,7 @@
   "items": "e3b-life-items-v1",
   "occupations": "e3b-occupations-v2"
  },
- "intake_build_id": "35667f4101a71c0e5ea6c1aaa8e5f45cd83c825d6b1393bde1104d3d571a96b7",
+ "intake_build_id": "60cf49b404831f495388e9c91e6e7ee6d9fa93d819bebf1158aaac70c3a918fb",
  "raw_sha256": {
   "bls_atus": "4fe7b39ff435416aee80ac1c23a95a7067e9c6c23dd5c99d9631dda9b567ba6c",
   "bls_ce_national_2024_detail": "6efdb40841f80cbda56b59039a5a0b1dafceccaaebb686443fb233246fb553ad",
@@ -17,10 +17,11 @@
   "usda_fdc_sr_legacy": "b80817294b8850530aaedf2e515c02593b1824f763a0ff356e5c2081643e6fd0"
  },
  "identities": {
-  "items_config": "b92dc9e9e3e6aa5cccd54d4021baff673e8d8c70464e0afba1698b954e68ae90",
-  "occupations_config": "f2ce1008acbef70db9e60afe0c09ef2bfd2614f5f8094bc9ce83133d82b4c627",
+  "items_config": "5bfd573dd8c7a87fe6acfa4385addd2abcb370c4180b4e4bda5e5002016df30a",
+  "occupations_config": "f7816be430235fe24187bf350b7b99cdfdcf3cbb9dca728b920e73f4050b104d",
   "baskets": "8714cbfd8ebb7dfbd39fb6f9bd9bcc2489d4841fe6caefbbdb88bbac1388d19f",
-  "slice": "c35cfdc56b5e261130e01dc4b4235a8b7a38fc0739266010355c0b5c65d50ddf"
+  "slice": "3ec870c16354eddd806c5eeb480c51c3095d9e1cce67154c2e982c1054a40ed7",
+  "local_quotes": "6a02611dbcc0c0e6b625ed0dcad2488bf472b27715b0f208247fe16ea1d5e10e"
  },
  "numeraire": "USD_2024_LOCAL",
  "vocabulary": {
@@ -617,6 +618,13 @@
    "config": "life-items-us-v1"
   },
   {
+   "id": "local_quote_comparability_v1",
+   "nature": "rule",
+   "statement_zh": "本地报价（configs/intake/local_quotes_us_v1.yaml）只有在规格键（机会编号去掉城市前缀）、计价口径（币种_基年_LOCAL）、计费周期、计价单位都与机会报价相同，且税费口径为未含销售税、单独购买（不捆绑）时，才参与这个规格的零售修正；其余只记录不更新，不做税费、捆绑或时期换算。修正后的执行价只写进机会价格一次",
+   "basis_zh": "基础预测统一按“未含销售税、单独购买”的口径比较是登记的设定，没有逐个规格核对基础价的税费口径（例如 CE 支出含销售税）；有报价时要先核对这一点",
+   "config": "life-items-us-v1"
+  },
+  {
    "id": "daily_support_cost_order_v1",
    "nature": "rule",
    "statement_zh": "日常支持的费用顺序：同规格直接报价 → FCC 同规格大区参照（家庭宽带，大区至少 30 条同规格报价）→ FCC 全国参照 → CE 一人消费单位预算代理；现在六城都没有直接报价",
@@ -627,6 +635,13 @@
    "nature": "assumption",
    "statement_zh": "手机通信月费 = CE 2024 一人消费单位手机服务年均支出 ÷ 12（共同预算代理，各城相同）；不是单人套餐报价，不能把全部家庭的通信支出叫单人套餐价",
    "basis_zh": "没有可用的单人套餐直接报价；CE 是全国一人消费单位的平均支出，含不同套餐与使用量",
+   "config": "life-items-us-v1"
+  },
+  {
+   "id": "ce_internet_budget_proxy_v1",
+   "nature": "assumption",
+   "statement_zh": "FCC 原始资料未获取或明确不可得（或缺少把 2023 年调查价换到 2024 年的 CPI）时，家庭宽带月费 = CE 2024 一人消费单位“其他家庭开支”× 全国详细表互联网服务占比 ÷ 12（分配估计、共同预算代理，各城相同）；CE 已是 2024 年口径，不再乘 CPI；不对应任何速度、上行或流量档",
+   "basis_zh": "只是平均支出，含不同套餐与用量，不是某家运营商的报价；FCC 文件在缓存里但指纹不符、损坏或格式不对时拒绝构建，不走这条回退",
    "config": "life-items-us-v1"
   },
   {
@@ -822,7 +837,7 @@
  "cities": {
   "35620": {
    "key": "nyc",
-   "content_identity": "8153155bf228bb94f4d818e764000f56199b74556942ee73d72d4773fa75623b",
+   "content_identity": "c30a00b3a621af44d7cc769ea2da305b0a048700e2dc40c76102245b5b098425",
    "counts": {
     "raw_inputs": {
      "intake_records_referenced": 33,
@@ -885,7 +900,7 @@
   },
   "31080": {
    "key": "la",
-   "content_identity": "ce90639d8e1701f4e0eba99cd82e8f9b6f5a6804afeafd42e7d4fc407ac364bb",
+   "content_identity": "aa9529060db724ac821fc1198d08c392f2670f36a11ecb7a89565aed430fd583",
    "counts": {
     "raw_inputs": {
      "intake_records_referenced": 30,
@@ -944,7 +959,7 @@
   },
   "41860": {
    "key": "sf",
-   "content_identity": "ac82fd7c09328366c59075da85465357758bea41100438cec7a89a30d90cfcb3",
+   "content_identity": "ed409ada69d6ae71a422dfda077b56cce3c2b705bb2e6ef377c746b4ee3a0bfb",
    "counts": {
     "raw_inputs": {
      "intake_records_referenced": 29,
@@ -1004,7 +1019,7 @@
   },
   "16980": {
    "key": "chi",
-   "content_identity": "3272c578e3547a3327da576e04cce2e9244aac8b95471a2f89276a9729ec629f",
+   "content_identity": "4e45b4f3031147a6063d45ac2b46f3a3c17173cfe256019f392dcb89c3fe49fa",
    "counts": {
     "raw_inputs": {
      "intake_records_referenced": 1728,
@@ -1065,7 +1080,7 @@
   },
   "26420": {
    "key": "hou",
-   "content_identity": "e1dee0155e89b20d6f6009f87cf685d28ad63617ab1730fb1d102be78fbce035",
+   "content_identity": "6cd698a4f192cfab115acc54adee0396a66cb027ce4960e9e4c76701df410642",
    "counts": {
     "raw_inputs": {
      "intake_records_referenced": 33,
@@ -1128,7 +1143,7 @@
   },
   "42660": {
    "key": "sea",
-   "content_identity": "42c3734a80ec3fd57ccd9ff74df4ba7240644e3815b8192b06335055d836ef52",
+   "content_identity": "cc239d75b1733bb55dcd5cd2585b0c481bc73ed002b876e3ac0e23cde9a1f9e9",
    "counts": {
     "raw_inputs": {
      "intake_records_referenced": 30,
@@ -1186,5 +1201,5 @@
    }
   }
  },
- "content_identity": "4b53c6b1fa394ca05398921f24da978106d248ce61ca4b5e5bbed8e8a1c9593e"
+ "content_identity": "3d56ea78ec9198e5fbdb520935fbcb42956927e06fe75587c74d50cc44d1a0ce"
 }

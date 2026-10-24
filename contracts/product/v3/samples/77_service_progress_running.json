@@ -15,22 +15,22 @@
    "call_limit": 18,
    "calls_used": 3,
    "currency": "CNY",
-   "estimated_cost": "0.087809",
-   "in_flight_cost": "0.044597",
+   "estimated_cost": "0.084645",
+   "in_flight_cost": "0.043107",
    "kind": "estimated_from_quote",
    "max_cost": "10",
    "note": "应用侧按报价 qwen3.8-flash@beijing@2026-10-09 估算，不是供应商账单（以账单为准）：已核算 + 用量不确定（保留预留，不记 0） + 在途预留；本次运行上限 10 CNY",
    "price_version": "qwen3.8-flash@beijing@2026-10-09",
    "service_attempt_limit": 36,
    "service_attempts": 4,
-   "settled_cost": "0.043212",
+   "settled_cost": "0.041538",
    "uncertain_attempts": 0,
    "uncertain_cost": "0.000000"
   },
   "meta": {
    "conversion_version": "e3a-conversion-v2",
    "data_pack": {
-    "content_fingerprint": "7face3610cd86d6e2cb7442017661fce2abb3c4a2b1a4e6740ab70ddf23ca9ae",
+    "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
     "pack_id": "pack.e3a.synthetic-v2",
     "status": "synthetic_fixture_only"
@@ -50,7 +50,7 @@
   "report_available": false,
   "resumable": true,
   "resume_note": "可以从年度边界或两份候选之间恢复（E1 的恢复入口逐条核对归档，尝试次数与调用次数不清零）",
-  "run_id": "run-e3a-a3335253578a062b",
+  "run_id": "run-e3a-e2e5e47eeb2ec30b",
   "stage": "running",
   "stage_zh": "运行中",
   "updated_at": "2026-10-24T09:00:00Z"

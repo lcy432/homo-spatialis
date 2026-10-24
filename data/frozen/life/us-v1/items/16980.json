@@ -1,5 +1,5 @@
 {
- "content_identity": "3272c578e3547a3327da576e04cce2e9244aac8b95471a2f89276a9729ec629f",
+ "content_identity": "4e45b4f3031147a6063d45ac2b46f3a3c17173cfe256019f392dcb89c3fe49fa",
  "schema": "e3b-life-items-frozen-v1",
  "cbsa": "16980",
  "key": "chi",
@@ -9,12 +9,13 @@
   "code": "16980"
  },
  "label": "Chicago-Naperville-Elgin 都会区",
- "intake_build_id": "35667f4101a71c0e5ea6c1aaa8e5f45cd83c825d6b1393bde1104d3d571a96b7",
+ "intake_build_id": "60cf49b404831f495388e9c91e6e7ee6d9fa93d819bebf1158aaac70c3a918fb",
  "identities": {
-  "items_config": "b92dc9e9e3e6aa5cccd54d4021baff673e8d8c70464e0afba1698b954e68ae90",
-  "occupations_config": "f2ce1008acbef70db9e60afe0c09ef2bfd2614f5f8094bc9ce83133d82b4c627",
+  "items_config": "5bfd573dd8c7a87fe6acfa4385addd2abcb370c4180b4e4bda5e5002016df30a",
+  "occupations_config": "f7816be430235fe24187bf350b7b99cdfdcf3cbb9dca728b920e73f4050b104d",
   "baskets": "8714cbfd8ebb7dfbd39fb6f9bd9bcc2489d4841fe6caefbbdb88bbac1388d19f",
-  "slice": "c35cfdc56b5e261130e01dc4b4235a8b7a38fc0739266010355c0b5c65d50ddf"
+  "slice": "3ec870c16354eddd806c5eeb480c51c3095d9e1cce67154c2e982c1054a40ed7",
+  "local_quotes": "6a02611dbcc0c0e6b625ed0dcad2488bf472b27715b0f208247fe16ea1d5e10e"
  },
  "counts": {
   "raw_inputs": {
@@ -1499,7 +1500,7 @@
    "geography_scope": "CBSA2023 16980 Chicago-Naperville-Elgin 都会区",
    "ep": {
     "entry_education": "No formal educational credential",
-    "related_experience": "nan",
+    "related_experience": "None",
     "on_the_job_training": "Short-term on-the-job training"
    },
    "assumptions": [
@@ -1654,7 +1655,7 @@
    "geography_scope": "CBSA2023 16980 Chicago-Naperville-Elgin 都会区",
    "ep": {
     "entry_education": "No formal educational credential",
-    "related_experience": "nan",
+    "related_experience": "None",
     "on_the_job_training": "Short-term on-the-job training"
    },
    "assumptions": [
@@ -1809,7 +1810,7 @@
    "geography_scope": "CBSA2023 16980 Chicago-Naperville-Elgin 都会区",
    "ep": {
     "entry_education": "No formal educational credential",
-    "related_experience": "nan",
+    "related_experience": "None",
     "on_the_job_training": "Short-term on-the-job training"
    },
    "assumptions": [
@@ -1964,7 +1965,7 @@
    "geography_scope": "CBSA2023 16980 Chicago-Naperville-Elgin 都会区",
    "ep": {
     "entry_education": "No formal educational credential",
-    "related_experience": "nan",
+    "related_experience": "None",
     "on_the_job_training": "Short-term on-the-job training"
    },
    "assumptions": [
@@ -2119,7 +2120,7 @@
    "geography_scope": "CBSA2023 16980 Chicago-Naperville-Elgin 都会区",
    "ep": {
     "entry_education": "No formal educational credential",
-    "related_experience": "nan",
+    "related_experience": "None",
     "on_the_job_training": "Short-term on-the-job training"
    },
    "assumptions": [
@@ -2434,7 +2435,7 @@
    "geography_scope": "CBSA2023 16980 Chicago-Naperville-Elgin 都会区",
    "ep": {
     "entry_education": "No formal educational credential",
-    "related_experience": "nan",
+    "related_experience": "None",
     "on_the_job_training": "Short-term on-the-job training"
    },
    "assumptions": [
@@ -2589,7 +2590,7 @@
    "geography_scope": "CBSA2023 16980 Chicago-Naperville-Elgin 都会区",
    "ep": {
     "entry_education": "No formal educational credential",
-    "related_experience": "nan",
+    "related_experience": "None",
     "on_the_job_training": "Short-term on-the-job training"
    },
    "assumptions": [
@@ -2744,7 +2745,7 @@
    "geography_scope": "CBSA2023 16980 Chicago-Naperville-Elgin 都会区",
    "ep": {
     "entry_education": "No formal educational credential",
-    "related_experience": "nan",
+    "related_experience": "None",
     "on_the_job_training": "Short-term on-the-job training"
    },
    "assumptions": [
@@ -2899,7 +2900,7 @@
    "geography_scope": "CBSA2023 16980 Chicago-Naperville-Elgin 都会区",
    "ep": {
     "entry_education": "No formal educational credential",
-    "related_experience": "nan",
+    "related_experience": "None",
     "on_the_job_training": "Short-term on-the-job training"
    },
    "assumptions": [
@@ -3054,7 +3055,7 @@
    "geography_scope": "CBSA2023 16980 Chicago-Naperville-Elgin 都会区",
    "ep": {
     "entry_education": "No formal educational credential",
-    "related_experience": "nan",
+    "related_experience": "None",
     "on_the_job_training": "Short-term on-the-job training"
    },
    "assumptions": [
@@ -3209,7 +3210,7 @@
    "geography_scope": "CBSA2023 16980 Chicago-Naperville-Elgin 都会区",
    "ep": {
     "entry_education": "No formal educational credential",
-    "related_experience": "nan",
+    "related_experience": "None",
     "on_the_job_training": "Short-term on-the-job training"
    },
    "assumptions": [
@@ -3368,7 +3369,7 @@
    "geography_scope": "CBSA2023 16980 Chicago-Naperville-Elgin 都会区",
    "ep": {
     "entry_education": "High school diploma or equivalent",
-    "related_experience": "nan",
+    "related_experience": "None",
     "on_the_job_training": "Short-term on-the-job training"
    },
    "assumptions": [
@@ -3527,7 +3528,7 @@
    "geography_scope": "CBSA2023 16980 Chicago-Naperville-Elgin 都会区",
    "ep": {
     "entry_education": "High school diploma or equivalent",
-    "related_experience": "nan",
+    "related_experience": "None",
     "on_the_job_training": "Short-term on-the-job training"
    },
    "assumptions": [
@@ -3686,7 +3687,7 @@
    "geography_scope": "CBSA2023 16980 Chicago-Naperville-Elgin 都会区",
    "ep": {
     "entry_education": "High school diploma or equivalent",
-    "related_experience": "nan",
+    "related_experience": "None",
     "on_the_job_training": "Short-term on-the-job training"
    },
    "assumptions": [
@@ -3845,7 +3846,7 @@
    "geography_scope": "CBSA2023 16980 Chicago-Naperville-Elgin 都会区",
    "ep": {
     "entry_education": "High school diploma or equivalent",
-    "related_experience": "nan",
+    "related_experience": "None",
     "on_the_job_training": "Short-term on-the-job training"
    },
    "assumptions": [
@@ -4004,7 +4005,7 @@
    "geography_scope": "CBSA2023 16980 Chicago-Naperville-Elgin 都会区",
    "ep": {
     "entry_education": "High school diploma or equivalent",
-    "related_experience": "nan",
+    "related_experience": "None",
     "on_the_job_training": "Short-term on-the-job training"
    },
    "assumptions": [
@@ -4163,7 +4164,7 @@
    "geography_scope": "CBSA2023 16980 Chicago-Naperville-Elgin 都会区",
    "ep": {
     "entry_education": "High school diploma or equivalent",
-    "related_experience": "nan",
+    "related_experience": "None",
     "on_the_job_training": "Short-term on-the-job training"
    },
    "assumptions": [
@@ -4322,7 +4323,7 @@
    "geography_scope": "CBSA2023 16980 Chicago-Naperville-Elgin 都会区",
    "ep": {
     "entry_education": "High school diploma or equivalent",
-    "related_experience": "nan",
+    "related_experience": "None",
     "on_the_job_training": "Moderate-term on-the-job training"
    },
    "assumptions": [
@@ -4481,7 +4482,7 @@
    "geography_scope": "CBSA2023 16980 Chicago-Naperville-Elgin 都会区",
    "ep": {
     "entry_education": "High school diploma or equivalent",
-    "related_experience": "nan",
+    "related_experience": "None",
     "on_the_job_training": "Moderate-term on-the-job training"
    },
    "assumptions": [
@@ -4640,7 +4641,7 @@
    "geography_scope": "CBSA2023 16980 Chicago-Naperville-Elgin 都会区",
    "ep": {
     "entry_education": "High school diploma or equivalent",
-    "related_experience": "nan",
+    "related_experience": "None",
     "on_the_job_training": "Short-term on-the-job training"
    },
    "assumptions": [
@@ -4799,7 +4800,7 @@
    "geography_scope": "CBSA2023 16980 Chicago-Naperville-Elgin 都会区",
    "ep": {
     "entry_education": "High school diploma or equivalent",
-    "related_experience": "nan",
+    "related_experience": "None",
     "on_the_job_training": "Moderate-term on-the-job training"
    },
    "assumptions": [
@@ -4958,7 +4959,7 @@
    "geography_scope": "CBSA2023 16980 Chicago-Naperville-Elgin 都会区",
    "ep": {
     "entry_education": "Some college, no degree",
-    "related_experience": "nan",
+    "related_experience": "None",
     "on_the_job_training": "Moderate-term on-the-job training"
    },
    "assumptions": [
@@ -5117,7 +5118,7 @@
    "geography_scope": "CBSA2023 16980 Chicago-Naperville-Elgin 都会区",
    "ep": {
     "entry_education": "Some college, no degree",
-    "related_experience": "nan",
+    "related_experience": "None",
     "on_the_job_training": "Moderate-term on-the-job training"
    },
    "assumptions": [
@@ -5276,7 +5277,7 @@
    "geography_scope": "CBSA2023 16980 Chicago-Naperville-Elgin 都会区",
    "ep": {
     "entry_education": "Postsecondary nondegree award",
-    "related_experience": "nan",
+    "related_experience": "None",
     "on_the_job_training": "Short-term on-the-job training"
    },
    "assumptions": [
@@ -5435,7 +5436,7 @@
    "geography_scope": "CBSA2023 16980 Chicago-Naperville-Elgin 都会区",
    "ep": {
     "entry_education": "Postsecondary nondegree award",
-    "related_experience": "nan",
+    "related_experience": "None",
     "on_the_job_training": "Moderate-term on-the-job training"
    },
    "assumptions": [
@@ -5594,7 +5595,7 @@
    "geography_scope": "CBSA2023 16980 Chicago-Naperville-Elgin 都会区",
    "ep": {
     "entry_education": "Postsecondary nondegree award",
-    "related_experience": "nan",
+    "related_experience": "None",
     "on_the_job_training": "Short-term on-the-job training"
    },
    "assumptions": [
@@ -5753,8 +5754,8 @@
    "geography_scope": "CBSA2023 16980 Chicago-Naperville-Elgin 都会区",
    "ep": {
     "entry_education": "Associate's degree",
-    "related_experience": "nan",
-    "on_the_job_training": "nan"
+    "related_experience": "None",
+    "on_the_job_training": "None"
    },
    "assumptions": [
     "job_scope_v1",
@@ -5912,7 +5913,7 @@
    "geography_scope": "CBSA2023 16980 Chicago-Naperville-Elgin 都会区",
    "ep": {
     "entry_education": "Associate's degree",
-    "related_experience": "nan",
+    "related_experience": "None",
     "on_the_job_training": "Moderate-term on-the-job training"
    },
    "assumptions": [
@@ -6071,8 +6072,8 @@
    "geography_scope": "CBSA2023 16980 Chicago-Naperville-Elgin 都会区",
    "ep": {
     "entry_education": "Bachelor's degree",
-    "related_experience": "nan",
-    "on_the_job_training": "nan"
+    "related_experience": "None",
+    "on_the_job_training": "None"
    },
    "assumptions": [
     "job_scope_v1",
@@ -6230,8 +6231,8 @@
    "geography_scope": "CBSA2023 16980 Chicago-Naperville-Elgin 都会区",
    "ep": {
     "entry_education": "Bachelor's degree",
-    "related_experience": "nan",
-    "on_the_job_training": "nan"
+    "related_experience": "None",
+    "on_the_job_training": "None"
    },
    "assumptions": [
     "job_scope_v1",
@@ -6389,8 +6390,8 @@
    "geography_scope": "CBSA2023 16980 Chicago-Naperville-Elgin 都会区",
    "ep": {
     "entry_education": "Bachelor's degree",
-    "related_experience": "nan",
-    "on_the_job_training": "nan"
+    "related_experience": "None",
+    "on_the_job_training": "None"
    },
    "assumptions": [
     "job_scope_v1",
@@ -6548,8 +6549,8 @@
    "geography_scope": "CBSA2023 16980 Chicago-Naperville-Elgin 都会区",
    "ep": {
     "entry_education": "Bachelor's degree",
-    "related_experience": "nan",
-    "on_the_job_training": "nan"
+    "related_experience": "None",
+    "on_the_job_training": "None"
    },
    "assumptions": [
     "job_scope_v1",
@@ -6707,8 +6708,8 @@
    "geography_scope": "CBSA2023 16980 Chicago-Naperville-Elgin 都会区",
    "ep": {
     "entry_education": "Bachelor's degree",
-    "related_experience": "nan",
-    "on_the_job_training": "nan"
+    "related_experience": "None",
+    "on_the_job_training": "None"
    },
    "assumptions": [
     "job_scope_v1",
@@ -6866,8 +6867,8 @@
    "geography_scope": "CBSA2023 16980 Chicago-Naperville-Elgin 都会区",
    "ep": {
     "entry_education": "Bachelor's degree",
-    "related_experience": "nan",
-    "on_the_job_training": "nan"
+    "related_experience": "None",
+    "on_the_job_training": "None"
    },
    "assumptions": [
     "job_scope_v1",
@@ -7025,8 +7026,8 @@
    "geography_scope": "CBSA2023 16980 Chicago-Naperville-Elgin 都会区",
    "ep": {
     "entry_education": "Bachelor's degree",
-    "related_experience": "nan",
-    "on_the_job_training": "nan"
+    "related_experience": "None",
+    "on_the_job_training": "None"
    },
    "assumptions": [
     "job_scope_v1",
@@ -7184,8 +7185,8 @@
    "geography_scope": "CBSA2023 16980 Chicago-Naperville-Elgin 都会区",
    "ep": {
     "entry_education": "Bachelor's degree",
-    "related_experience": "nan",
-    "on_the_job_training": "nan"
+    "related_experience": "None",
+    "on_the_job_training": "None"
    },
    "assumptions": [
     "job_scope_v1",
@@ -7346,7 +7347,7 @@
    "ep": {
     "entry_education": "High school diploma or equivalent",
     "related_experience": "Less than 5 years",
-    "on_the_job_training": "nan"
+    "on_the_job_training": "None"
    },
    "assumptions": [
     "job_scope_v1",
@@ -7508,7 +7509,7 @@
    "ep": {
     "entry_education": "High school diploma or equivalent",
     "related_experience": "Less than 5 years",
-    "on_the_job_training": "nan"
+    "on_the_job_training": "None"
    },
    "assumptions": [
     "job_scope_v1",
@@ -7670,7 +7671,7 @@
    "ep": {
     "entry_education": "High school diploma or equivalent",
     "related_experience": "Less than 5 years",
-    "on_the_job_training": "nan"
+    "on_the_job_training": "None"
    },
    "assumptions": [
     "job_scope_v1",

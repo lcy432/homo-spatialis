@@ -19,6 +19,7 @@ E1-7B（DECISIONS/0031）：请求另有两部分公开说明——本城实际�
 
 from __future__ import annotations
 
+import functools
 import hashlib
 import json
 from collections.abc import Sequence
@@ -104,10 +105,22 @@ PROMPT_SYSTEM = (
     "5. 一年只交一份计划，环境按月执行。计划会先在不发生新随机事件的前提下逐月试算：没有通过时什么都不提交，你会收到诊断并可以"
     "修改（次数有限）；通过之后真实执行，之后发生的疾病等事件不能回到年初重选。\n"
     "6. 只输出一个 JSON 对象，字段见请求里的 output_format；需求摘要与理由写简短的结论，不需要长篇推理；不要输出别的文字或代码。\n"
-    '7. 请求用紧凑表示写同类对象的列表：{"$table": {"columns": [列名], "common": {列名: 每一行都相同的值}, "rows": [[每行的值]]}}'
-    "——每一行是一个对象，字段 = common 加上 columns 与这一行的值逐个对应；列名里的“.”表示嵌套字段（price.amount.amount 就是"
-    'price 里 amount 里的 amount）；{"$absent": 1} 表示这一行没有这个字段（不是 null）；flat 为 false 的表不展开嵌套字段。'
-    "有的表用 sparse_rows 代替 rows：每行是 {列号: 值}，列号是 columns 里的位置（从 0 开始），没写的列号就是这一行没有这个字段。"
+    "7. 请求用紧凑表示省去重复，不删字段、不改取值，按下面的规则直接读：\n"
+    '(1) 行表 {"$table": …} 是一组对象：columns 是列名，rows 每行的值与 columns 逐个对应；sparse_rows 每行是 {列号: 值}'
+    "（列号是 columns 里的位置，从 0 开始，没写的列这一行没有）；group 与 groups 按一列分组，groups 每项是 [这一列的值, [这一组的各行]]。"
+    'common 是每一行都相同的字段；{"$absent": 1} 表示这一行没有这个字段（不是 null）；flat 为 true 时列名里的“.”表示嵌套字段'
+    "（price.amount.amount 就是 price 里 amount 里的 amount）。\n"
+    "(2) 表头还可能有：lookup——几张查表，每张 {key: 键列, columns: [列…], values: {键列的值: [这几列的值]}}，按这一行键列的值查出"
+    "这几列（按列出的先后查，前一张查出的列可以是后一张的键列；一张查表也可以带自己的 common、same、lookup，读法相同）；same——{列: 另一列}，这一列与另一列相同；format——{列: 模板}，这一列的文字 = 把模板里的 {0}、{1}… 依次换成这一行"
+    "“列#0”“列#1”…的值（这一行直接写了这一列时就是原文）；nested——{列: 子表头}，这一列的值是一组对象，每个对象写成一行，按子表头的"
+    " columns、common、lookup、same 读。\n"
+    '(3) 分板块 {"$sections": {"parts": {板块: 对象列表}, "order": [[板块, 个数], …]}}：住房、岗位、食品等各成一张表；原来的先后是'
+    "按 order 依次从各板块取对应个数。\n"
+    '(4) 组合展开 {"$grid": …}：rows 里每一行按维度表 values（axis 是维度名）逐行展开成多项，把 {维度名.列名} 换成维度表那一行'
+    "这一列的值（整段只有一个占位时换成原值，数字照旧是数字）；single 里是不展开的单项；order 给出两者的先后（rows 按展开前的行"
+    "计数）；overrides 是 {编号: {字段: 值}}，展开后这几项的这些字段以它为准。合法编号就是展开出来的这些：基础行编号 X.{cuisine.key}"
+    " 遇到维度表 key 为 korean 的一行，就是 X.korean。\n"
+    '(5) {"$ids": 板块} 是同一观察里这一板块全部机会的编号（按字符排序的列表）。'
 )
 PROMPT_USER_HEAD = "以下是今年的规划请求（JSON）。请按 output_format 只返回一个 JSON 对象。\n"
 
@@ -755,12 +768,23 @@ def payload_fingerprint(payload: dict[str, Any]) -> str:
 def render_prompt(payload: dict[str, Any]) -> tuple[str, str]:
     """把请求渲染成（系统提示，用户提示）。用户提示里嵌的就是 ``payload`` 本身——mock 读的结构与真实模型读到的文字是同一份。
 
-    E1-7B：紧凑 JSON（不缩进、分隔符后不加空格）；E3B 映射修正：同类对象的列表写成共同字段 + 行表（``compact_payload``）。
-    只省重复与空白，不删字段、不改取值，从提示文字可以原样还原 ``payload``（编码时当场核对）。"""
-    body = json.dumps(
-        encode_payload(payload), ensure_ascii=False, separators=(",", ":"), sort_keys=True
+    E1-7B：紧凑 JSON（不缩进、分隔符后不加空格）；E3B 映射修正：同类对象的列表写成共同字段 + 行表；E3B 收尾：按板块分表、
+    食品组合展开、文字模板与查表（``compact_payload``）。只省重复与空白，不删字段、不改取值，从提示文字可以原样还原
+    ``payload``（编码时当场核对）。同一份载荷在一次运行里会渲染好几次（发送、最终检查、重放核对），按载荷的规范文字缓存。"""
+    return PROMPT_SYSTEM, _render_user(
+        json.dumps(payload, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
     )
-    return PROMPT_SYSTEM, PROMPT_USER_HEAD + "```json\n" + body + "\n```"
+
+
+@functools.lru_cache(maxsize=16)
+def _render_user(canonical: str) -> str:
+    body = json.dumps(
+        encode_payload(json.loads(canonical)),
+        ensure_ascii=False,
+        separators=(",", ":"),
+        sort_keys=True,
+    )
+    return PROMPT_USER_HEAD + "```json\n" + body + "\n```"
 
 
 def payload_from_user_prompt(user: str) -> dict[str, Any]:

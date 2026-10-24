@@ -3,7 +3,7 @@
  "cities": {
   "nyc": {
    "cbsa": "35620",
-   "content_identity": "e78639458d0157e88f40ab4a281a712dadd0adc2d2a40a090f29c25afda5df49",
+   "content_identity": "65c8b816cb9076e1dd2a44c93788989afde1ce86cb31b9781baa813125322268",
    "status": "complete",
    "modes": [
     "walk_bike",
@@ -17,7 +17,7 @@
   },
   "la": {
    "cbsa": "31080",
-   "content_identity": "01a48607fb922111a4445544d40f13dadf691fa85ca96a0b2f9f9b6ef11cf53a",
+   "content_identity": "ff5083723052327f6eca04d80b3d193b3469c1e1cf96cc7493038d5d2f9a98de",
    "status": "complete",
    "modes": [
     "walk_bike",
@@ -31,7 +31,7 @@
   },
   "sf": {
    "cbsa": "41860",
-   "content_identity": "f7313587f4faf74e5e36f1af7eb73ca52ea6093d78b13ec8a7abf60ba4125652",
+   "content_identity": "d6829a8183b7511e1ae0ae1969e3d38821dc701cce5a49c5a8798b01ec583591",
    "status": "partial",
    "modes": [
     "walk_bike",
@@ -46,7 +46,7 @@
   },
   "chi": {
    "cbsa": "16980",
-   "content_identity": "3f1b8d0c72993896b4d2cc27f73fa20de0a8574b2d8cca04bdba3f6f8b8fd7d6",
+   "content_identity": "f6c2c63953270c678018e31bdb123fdb00fd2840f30bd5d2f069fccf413fdcb0",
    "status": "complete",
    "modes": [
     "walk_bike",
@@ -60,7 +60,7 @@
   },
   "hou": {
    "cbsa": "26420",
-   "content_identity": "5c6a00a7de0e8ac654dcd4f991c1a6de9d47d3621663e664274e52faf620c6a1",
+   "content_identity": "dc7dbdae6e868821e560991e2b752a05d278c6639e8749488c0f5b89dc6d8db2",
    "status": "complete",
    "modes": [
     "walk_bike",
@@ -74,7 +74,7 @@
   },
   "sea": {
    "cbsa": "42660",
-   "content_identity": "38bfd3e789505a4759d874a7f2754a373e8f799a9e81d86e23ea369923744f62",
+   "content_identity": "077a3bf33cd34881bb4bd6de3db99ea7c02168e9b1567eb0bdd64e9ae60ccbb3",
    "status": "complete",
    "modes": [
     "walk_bike",
@@ -87,5 +87,5 @@
    "legs": 147
   }
  },
- "content_identity": "63d6a9817214bf3b5de313fd2bc3d83e0196a0deca141d6141560b02842bde47"
+ "content_identity": "7717e6703b4af0a7bccb47c623f5dafcef94266c90f15cf595161eae82c805e5"
 }

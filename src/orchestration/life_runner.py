@@ -40,10 +40,12 @@ from pathlib import Path
 from typing import Any
 
 from agentlayer.life_llm import (
+    InputSizeCheck,
     ProviderCallLog,
     ServiceRecordMismatchError,
     expected_provider_body,
     final_request_problems,
+    request_input_check,
     service_history,
 )
 from agentlayer.life_planning import (
@@ -53,6 +55,7 @@ from agentlayer.life_planning import (
     PlannerCall,
     PlannerHalt,
     PlannerReply,
+    PlanningRequest,
     RunControl,
     action_rules,
     build_memory,
@@ -110,6 +113,7 @@ from common.life_planning_contracts import (
     RunManifest,
     RunProgress,
     VisibleDiagnostic,
+    VisibleRevision,
 )
 from common.life_scoring_contracts import ScoringPreference
 from common.runlog import new_run_id, utc_now_iso
@@ -207,6 +211,79 @@ def _tax_policy(bundle: LifeBundle, city: str) -> SyntheticTaxPolicy | RealTaxPo
 
 def _tax(bundle: LifeBundle, city: str) -> LifeTaxBinding:
     return binding_from_policy(_tax_policy(bundle, city))
+
+
+def request_id_for(run_id: str, clone_id: str, year: int, attempt: int) -> str:
+    return f"{run_id}/{clone_id}/y{year}/a{attempt}"
+
+
+def year_request(
+    world: RunWorld,
+    *,
+    request_id: str,
+    clone_id: str,
+    person_id: str,
+    city: str,
+    state: PersonYearState,
+    year: int,
+    attempt: int,
+    memory_years: Sequence[MemoryYear],
+    last_feedback: VisibleFeedback | None,
+    revision: VisibleRevision | None,
+) -> PlanningRequest:
+    """一份年度规划请求：运行时发送与开跑前的输入大小检查（``first_year_input_checks``）用同一份构造，不另写近似。"""
+    facts = world.facts.sheet_for(city)
+    catalog = world.bundle.catalog_for(city)
+    profile = world.bundle.profile_for(person_id)
+    assert facts is not None and catalog is not None and profile is not None
+    return build_request(
+        request_id=request_id,
+        attempt=attempt,
+        attempts_allowed=world.config.planning.attempts_per_year,
+        permission=world.permission,
+        profile=profile,
+        state=state,
+        catalog=catalog,
+        protocol=world.bundle.protocol,
+        facts=facts,
+        memory=build_memory(clone_id=clone_id, city=city, current_year=year, years=memory_years),
+        last_feedback=last_feedback,
+        revision=revision,
+        tax_policy=_tax_policy(world.bundle, city),
+        prompt_template=world.config.prompt_template,
+    )
+
+
+def first_year_input_checks(world: RunWorld, run_id: str) -> tuple[InputSizeCheck, ...]:
+    """本次运行配置绑定的全部首年请求（每个分身第 1 年第 1 份候选）的输入大小检查：构造公开观察 → 规范渲染 → 输入估计 →
+    与真实模型设定的上限比较，和发送前护栏是同一条路（``agentlayer.life_llm.request_input_check``）。不调用模型、不扣额度、
+    不写文件。离线 mock 规划器没有输入上限，返回空。
+
+    首年请求只取决于名单、标准开局与资料（没有记忆、反馈或修订），所以开跑前就能完整算出；后续年份与修订带着当时的反馈，
+    仍由发送前护栏逐次检查。运行编号出现在请求编号里：预检查时还不知道真正的编号，用同样长度的占位（编号固定是
+    ``run-e3a-`` 加 16 位十六进制，估计只看字符数，结果相同），启动前再按真正的编号核对一次。"""
+    llm = world.config.planner.llm
+    if world.config.planner.identity.kind != "llm" or llm is None:
+        return ()
+    out = []
+    for entry in world.roster.entries:
+        state = world.bundle.initial_state(entry.clone_id)
+        assert state is not None
+        request = year_request(
+            world,
+            request_id=request_id_for(run_id, entry.clone_id, 1, 1),
+            clone_id=entry.clone_id,
+            person_id=entry.person_id,
+            city=str(entry.city),
+            state=state,
+            year=1,
+            attempt=1,
+            memory_years=(),
+            last_feedback=None,
+            revision=None,
+        )
+        out.append(request_input_check(llm, request_payload(request)))
+    return tuple(out)
 
 
 def _input_files(
@@ -1192,31 +1269,22 @@ class LifeRunner:
         w = self.world
         policy = w.config.planning
         allowed = policy.attempts_per_year
-        facts = w.facts.sheet_for(c.city)
-        assert facts is not None
-        profile = self._profile(c.person_id)
         revision = None
         c.attempts.append(0)
         for attempt in range(1, allowed + 1):
-            request_id = f"{self.run_id}/{c.clone_id}/y{year}/a{attempt}"
-            memory = build_memory(
-                clone_id=c.clone_id, city=c.city, current_year=year, years=c.memory
-            )
-            request = build_request(
+            request_id = request_id_for(self.run_id, c.clone_id, year, attempt)
+            request = year_request(
+                w,
                 request_id=request_id,
-                attempt=attempt,
-                attempts_allowed=allowed,
-                permission=w.permission,
-                profile=profile,
+                clone_id=c.clone_id,
+                person_id=c.person_id,
+                city=c.city,
                 state=c.state,
-                catalog=catalog,
-                protocol=w.bundle.protocol,
-                facts=facts,
-                memory=memory,
+                year=year,
+                attempt=attempt,
+                memory_years=c.memory,
                 last_feedback=c.last_feedback,
                 revision=revision,
-                tax_policy=_tax_policy(w.bundle, c.city),
-                prompt_template=w.config.prompt_template,
             )
             payload = request_payload(request)
             fp = payload_fingerprint(payload)
