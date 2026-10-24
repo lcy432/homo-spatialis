@@ -127,3 +127,5 @@
 * **界面与接入层对同一份草稿的理解**：`web/tests/draft-fixtures.test.ts` 用页面同一个状态更新函数、按页面操作生成 4 份草稿样本，存在
   `web/tests/fixtures/drafts/`；`tests/product/test_web_drafts.py` 把它们交给 E3 的 `review_draft`，核对未答、0、无所谓、暂不确定、均分之后多出的
   10/3 与金额写法。任何一边改了理解，这两个测试之一就会失败；有意的改动之后用 `UPDATE_DRAFT_FIXTURES=1` 重新生成样本。
+  样本按接入层当前的公共结构生成（能力清单取 `contracts/product/v3` 的样例 01，按 v3 的草稿结构校验）；页面本身还读 v2 的样例，界面改接 v3
+  之后改回用页面自己的样例与校验。这 4 份草稿只用到六维、健康题与现金，这几处 v3 与 v2 相同。
