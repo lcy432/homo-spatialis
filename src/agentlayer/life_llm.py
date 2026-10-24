@@ -48,9 +48,11 @@ from typing import Any, Protocol
 
 from agentlayer.life_planning import (
     PROMPT_USER_HEAD,
+    USER_DELETION_HALT,
     PlannerCall,
     PlannerHalt,
     PlannerReply,
+    RunControl,
     developer_note_problems,
     render_prompt,
 )
@@ -616,7 +618,10 @@ class LlmPlanner:
     注入（离线测试用替身；真实运行用 ``make_transport`` 按服务商选的传输层与 ``orchestration.life_budget.RoundBudget``）。
 
     计费可选（2026-10-18，DECISIONS/0035）：``budget`` 为 None 时不预留、不核算，请求明细的费用状态记为 ``unmetered``，其余检查照旧。
-    运行器只在运行配置写了 ``unmetered_reason`` 时才接受不带账本的真实模型规划器。"""
+    运行器只在运行配置写了 ``unmetered_reason`` 时才接受不带账本的真实模型规划器。
+
+    发送许可（E3C）：给了 ``control`` 时，每一次服务尝试（包括服务重试）在预留与发送之前都要先拿到许可；拒绝就停在
+    ``user_deletion``，不预留、不发送。没有 ``control`` 时行为与之前完全相同。"""
 
     def __init__(
         self,
@@ -626,12 +631,14 @@ class LlmPlanner:
         budget: BudgetGate | None,
         sleep: Callable[[float], None] = time.sleep,
         clock: Callable[[], float] = time.monotonic,
+        control: RunControl | None = None,
     ) -> None:
         if type(settings) is not LlmSettings:
             raise LifeContractError(f"settings 必须是 LlmSettings，得到 {type(settings).__name__}")
         self.settings = settings
         self.identity = llm_identity(settings)
         self.transport, self.budget = transport, budget
+        self.control = control
         self._sleep, self._clock = sleep, clock
         self.log: ProviderCallLog | None = None
         self.run_id: str | None = None
@@ -773,6 +780,11 @@ class LlmPlanner:
         while attempt < allowed:
             attempt += 1
             key = f"{self.run_id}/{call.request_id}#s{attempt}"
+            if self.control is not None and not self.control.permit_send(key):
+                raise PlannerHalt(
+                    USER_DELETION_HALT,
+                    f"{call.request_id} 第 {attempt} 次服务尝试没有拿到发送许可（运行已被删除）：没有预留，也没有发送",
+                )
             money: dict[str, Any] = {}
             if metered:
                 try:

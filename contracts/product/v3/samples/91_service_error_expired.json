@@ -1,0 +1,26 @@
+{
+ "description_zh": "查询过期的结果：410",
+ "message": "ServiceError",
+ "payload": {
+  "code": "expired",
+  "impact_zh": "内容已经不能查看（保存期从首次结束起 30 天，查看不续期）",
+  "message_zh": "这项内容已经超过保存期限",
+  "meta": null,
+  "next_action_zh": "需要的话重新创建",
+  "retry_after_seconds": null,
+  "sample": {
+   "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+   "origin": "offline_run",
+   "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+   "synthetic": true
+  },
+  "status": 410,
+  "support_ref": null
+ },
+ "sample": {
+  "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+  "origin": "offline_run",
+  "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+  "synthetic": true
+ }
+}

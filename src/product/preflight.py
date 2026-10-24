@@ -10,7 +10,7 @@ from __future__ import annotations
 import contextlib
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from common.life_contracts import canonical_fingerprint, to_fraction
 from common.life_planning_contracts import MockScript
@@ -42,6 +42,9 @@ from product.pack import DataPack
 from product.pack_facts import city_data_nature, commute_gaps, scope_notes
 from product.public_errors import e1_refusal_issue
 
+if TYPE_CHECKING:
+    from product.execution import ExecutionSpec
+
 
 @dataclass
 class PreflightRun:
@@ -63,6 +66,7 @@ def _blocked(
     compiled: CompiledInputs | None = None,
     inventory: OptionInventoryCoverage | None = None,
     e1_refusal: str | None = None,
+    execution: ExecutionSpec | None = None,
 ) -> PreflightRun:
     no = CapabilityStatus(status="no", reasons=tuple(i.message_zh for i in issues[:4]))
     fields: dict[str, Any] = dict(
@@ -79,7 +83,7 @@ def _blocked(
         feedback=CapabilityStatus(status="unknown", reasons=("运行前检查没有通过",)),
         clones_per_city=0,
         years=years,
-        planner=_planner(pack, 0),
+        planner=_planner(pack, 0, execution),
         issues=tuple(issues),
         scope_zh=pack.body.limits,
         scope_notes=scope_notes(pack),
@@ -89,7 +93,10 @@ def _blocked(
     return PreflightRun(pre, compiled=compiled, inventory=inventory, e1_refusal=e1_refusal)
 
 
-def _planner(pack: DataPack, calls: int) -> PlannerAndCost:
+def _planner(pack: DataPack, calls: int, execution: ExecutionSpec | None = None) -> PlannerAndCost:
+    """给用户看的规划器与费用。给了正式运行设置（E3C）就是它的规划器与上限——用户确认的就是后台实际要用的那一个。"""
+    if execution is not None:
+        return execution.planner_and_cost().model_copy(update={"call_limit": calls})
     p = pack.body.run.planner
     return PlannerAndCost(
         planner_kind="mock",
@@ -112,11 +119,14 @@ def run_preflight(
     illness_events: dict[str, Any] | None = None,
     sample: SampleLabel | None = None,
     run_label: str | None = None,
+    execution: ExecutionSpec | None = None,
 ) -> PreflightRun:
-    """确认画像 → 编译 → E1 运行前检查 → 产品预检查。任何一步不通过都返回 ``blocked``（带原因），不偷偷删城市或分身。"""
+    """确认画像 → 编译 → E1 运行前检查 → 产品预检查。任何一步不通过都返回 ``blocked``（带原因），不偷偷删城市或分身。
+
+    ``execution``（E3C）：先按正式运行设置编译运行配置，**再**做运行前检查——预检查绑定的就是真实的规划器、调用设置、报价与上限。"""
     problems = confirmation_problems(pack, confirmed, draft)
     if problems:
-        return _blocked(pack, confirmed, problems, sample)
+        return _blocked(pack, confirmed, problems, sample, execution=execution)
     try:
         compiled = compile_inputs(
             pack,
@@ -126,13 +136,20 @@ def run_preflight(
             scripts=scripts,
             illness_events=illness_events,
             run_label=run_label,
+            execution=execution,
         )
     except CompileRefusedError as exc:
-        return _blocked(pack, confirmed, list(exc.issues), sample)
+        return _blocked(pack, confirmed, list(exc.issues), sample, execution=execution)
     inventory = inventory_coverage(pack, compiled.catalog, sample=sample)
     if any(i.severity == "error" for i in compiled.issues):
         return _blocked(
-            pack, confirmed, list(compiled.issues), sample, compiled=compiled, inventory=inventory
+            pack,
+            confirmed,
+            list(compiled.issues),
+            sample,
+            compiled=compiled,
+            inventory=inventory,
+            execution=execution,
         )
     cwd = contextlib.chdir(repo_root) if repo_root is not None else contextlib.nullcontext()
     try:
@@ -149,6 +166,7 @@ def run_preflight(
             compiled=compiled,
             inventory=inventory,
             e1_refusal=message,
+            execution=execution,
         )
     protocol = world.bundle.protocol
     years = protocol.simulation_years
@@ -305,7 +323,7 @@ def run_preflight(
         ),
         clones_per_city=len(pack.body.run.repeat_indexes),
         years=years,
-        planner=_planner(pack, calls),
+        planner=_planner(pack, calls, execution),
         binding=binding,
         issues=tuple(compiled.issues) + tuple(g for c in cities for g in c.data_gaps),
         # 收尾 R7：这次按什么个性化、哪些没有（未答、暂不确定、没有固定爱好、通用评价分开写）

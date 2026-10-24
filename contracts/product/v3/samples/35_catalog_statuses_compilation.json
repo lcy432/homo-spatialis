@@ -6,7 +6,7 @@
    "US:SYNTH2026:K51",
    "US:SYNTH2026:M52"
   ],
-  "compilation_fingerprint": "47219f02b65a3d41eb6ef5470033dd1c8a2841239d7546150978d47bcf37aa77",
+  "compilation_fingerprint": "96c4ce2a9c82cf34df93104b3a8b0db6dfa3bc6930d9bebce143fef8a8d6f343",
   "compilation_id": "catalog.pack.e3a.synthetic-v2",
   "compiled": [
    {
@@ -364,7 +364,7 @@
     "produced_by": "product.scenarios.catalog_statuses",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.1",
+   "schema_version": "e3a-product-schema-v3.2",
    "vocabulary_version": "e3a-vocabulary-v3"
   },
   "scope_zh": "合成资料包里两座城的“日常杂务”设备与人工服务：只调查能替代洗衣或打扫（协议的代表性杂务组合）的方案；做饭、照护、维修等不在 本次调查范围。调查范围之外的东西不计入分母，也不代表城市没有。",

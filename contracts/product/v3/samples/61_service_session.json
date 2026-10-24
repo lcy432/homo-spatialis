@@ -1,0 +1,55 @@
+{
+ "description_zh": "当前会话：到期时间（固定 7 天，查询不续期）、本会话的 CSRF token（样例里换成了无效测试值）、次数 3/0/0/3 与服务规则（这是测试配置：合成资料包、每城 1 个分身；生产配置固定六城 × 每城 4 个分身 × 3 年）",
+ "message": "SessionView",
+ "payload": {
+  "csrf_token": "TEST_ONLY_invalid_csrf_token_000000000000000",
+  "drafts": [],
+  "meta": {
+   "conversion_version": "e3a-conversion-v2",
+   "data_pack": {
+    "content_fingerprint": "726c75d7b9d0f879c1f41f17dd23ecabc58e9417af0317e8a140745fc41bbca8",
+    "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
+    "pack_id": "pack.e3a.synthetic-v2",
+    "status": "synthetic_fixture_only"
+   },
+   "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.2-draft",
+   "sample": {
+    "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+    "origin": "offline_run",
+    "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+    "synthetic": true
+   },
+   "schema_version": "e3a-product-schema-v3.2",
+   "vocabulary_version": "e3a-vocabulary-v3"
+  },
+  "open_intent_id": null,
+  "quota": {
+   "available": 3,
+   "reserved": 0,
+   "total": 3,
+   "used": 0
+  },
+  "rules": {
+   "cities": 2,
+   "clones_per_city": 1,
+   "currency": "CNY",
+   "draft_retention_days": 30,
+   "intent_retention_days": 30,
+   "live_calls_enabled": false,
+   "max_cost": "0",
+   "notes_zh": [
+    "每个专属空间一共 3 次启动模拟的机会，不自动重置；3 次是启动机会，不保证每次所有分身都完整",
+    "每次固定比较 2 个都会区、每城 1 个分身、每个分身 3 年",
+    "结果从运行首次结束起保存 30 天，查看不续期；可以随时删除",
+    "这个服务实例使用离线规划器（mock）：没有网络调用、费用为 0，不代表真实模型的能力"
+   ],
+   "planner_kind": "mock",
+   "result_retention_days": 30,
+   "runs_total": 3,
+   "session_days": 7,
+   "years": 3
+  },
+  "session_expires_at": "2026-10-31T09:00:00Z"
+ }
+}

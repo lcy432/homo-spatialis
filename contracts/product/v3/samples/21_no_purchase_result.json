@@ -1122,7 +1122,7 @@
   ],
   "confirmed": {
    "confirmed_id": "confirmed.draft.u502.r1",
-   "content_fingerprint": "03008135b1f77a72c2f5886fbcf3c64c17c96ff5e81534ffb5395ec0e74ea57c"
+   "content_fingerprint": "f97e575eb3ba923b2b9ea68fe4b5ae0d16be73bf1d9e001942d72acf6b352bf4"
   },
   "data_nature": [
    {
@@ -1709,7 +1709,7 @@
     "produced_by": "product.scenarios.closed_loop(no_purchase)",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.1",
+   "schema_version": "e3a-product-schema-v3.2",
    "vocabulary_version": "e3a-vocabulary-v3"
   },
   "not_generated_reason": null,
@@ -1742,7 +1742,7 @@
    "planner_kind": "mock"
   },
   "preflight": {
-   "preflight_fingerprint": "ac22b3e0bdcaff4e8ab0ee84848715e6c7f149fd92f2c94e2ac4c4c5226ca01a",
+   "preflight_fingerprint": "aaf3e01d20d7a4de1074c834d189afe01f369271496681cf4255bef868e33ee6",
    "preflight_id": "preflight.confirmed.draft.u502.r1"
   },
   "reading_guide_zh": [
@@ -1756,9 +1756,9 @@
    "分数是当前合成模型下、按你确认的陈述偏好计算的结果；小数末位的差异不构成可靠的排序"
   ],
   "real_model_calls": 0,
-  "result_fingerprint": "e9e88be947893297c8bb3807cde4037124deff68ff9a39f8aacde444498531d6",
-  "result_id": "result.run-e3a-dfda442f34d13e8d",
-  "run_id": "run-e3a-dfda442f34d13e8d",
+  "result_fingerprint": "b3ef018f3f4961292cf633c768460ebc2900c16e38c1f285a4da54072bc171c7",
+  "result_id": "result.run-e3a-6e4b39f9e800b2c2",
+  "run_id": "run-e3a-6e4b39f9e800b2c2",
   "run_stage": "completed",
   "sources_zh": [
    "生活事实：E1 结算记录（钱、岗位、住房、食品、服务月份）与月度资源账（本人家务小时）",

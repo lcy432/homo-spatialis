@@ -1,0 +1,57 @@
+{
+ "description_zh": "过期：结果从首次结束起 30 天（查看不续期）；API 访问时就按到期时间判断，内容不再返回",
+ "message": "RunIntentView",
+ "payload": {
+  "allowed_actions": [
+   "create_new_intent"
+  ],
+  "confirm_with": null,
+  "confirmed": {
+   "confirmed_id": "confirmed.draft-000000000000002e.r2",
+   "content_fingerprint": "360631e7007f58a59f8c3ae5a1cf75fa4f78eefef2da0f7acde6b061ad912f5d"
+  },
+  "created_at": "2026-10-24T09:00:00Z",
+  "deletion": {
+   "completed_at": null,
+   "requested_at": null,
+   "state": "none"
+  },
+  "expires_at": "2026-11-23T09:00:00Z",
+  "explanation": null,
+  "intent_id": "intent-000000000000002f",
+  "meta": {
+   "conversion_version": "e3a-conversion-v2",
+   "data_pack": {
+    "content_fingerprint": "726c75d7b9d0f879c1f41f17dd23ecabc58e9417af0317e8a140745fc41bbca8",
+    "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
+    "pack_id": "pack.e3a.synthetic-v2",
+    "status": "synthetic_fixture_only"
+   },
+   "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.2-draft",
+   "sample": {
+    "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+    "origin": "offline_run",
+    "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+    "synthetic": true
+   },
+   "schema_version": "e3a-product-schema-v3.2",
+   "vocabulary_version": "e3a-vocabulary-v3"
+  },
+  "preflight": null,
+  "progress": null,
+  "quota": {
+   "available": 2,
+   "reserved": 0,
+   "total": 3,
+   "used": 1
+  },
+  "result_available": false,
+  "run_id": "run-e3a-40a72a307f873e6f",
+  "stage": "expired",
+  "stage_zh": "已过期",
+  "support_ref": null,
+  "updated_at": "2026-10-24T09:00:00Z",
+  "waiting_for": "none"
+ }
+}

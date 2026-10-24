@@ -1,0 +1,13 @@
+{
+ "description_zh": "准备一次模拟：引用一份确认画像（服务端排队做运行前检查，不扣次数）",
+ "message": "RunIntentCreateRequest",
+ "payload": {
+  "confirmed_id": "confirmed.draft-0000000000000005.r2"
+ },
+ "sample": {
+  "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+  "origin": "offline_run",
+  "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+  "synthetic": true
+ }
+}

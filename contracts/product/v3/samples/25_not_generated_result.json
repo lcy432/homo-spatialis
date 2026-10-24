@@ -7,7 +7,7 @@
   "comparisons": [],
   "confirmed": {
    "confirmed_id": "confirmed.draft.u506.r1",
-   "content_fingerprint": "2063eee4c1eaa627ec6505b8bf7ba972f4ed4087ee29d0f910db563d0e9c95fe"
+   "content_fingerprint": "5485fbbc4fdfcec8e7cdce4872f55f0ae7621c10eb507e807a1a18ee8b2f9eaa"
   },
   "evaluation_status": "not_generated",
   "limitations_zh": [
@@ -35,7 +35,7 @@
     "produced_by": "product.scenarios.closed_loop(interrupted)",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.1",
+   "schema_version": "e3a-product-schema-v3.2",
    "vocabulary_version": "e3a-vocabulary-v3"
   },
   "not_generated_reason": "运行状态是“在两次规划调用之间中断”，还没有生成评价与汇总；不擅自生成分类或分数",
@@ -68,7 +68,7 @@
    "planner_kind": "mock"
   },
   "preflight": {
-   "preflight_fingerprint": "416e5ed5a506637c7f945dec1aba0186f87addaad423bfd7b38c194e02392c74",
+   "preflight_fingerprint": "f46b3c2f119f2dd69064ac05254178fff15bb02be6f82ee964ea5b57141d427a",
    "preflight_id": "preflight.confirmed.draft.u506.r1"
   },
   "reading_guide_zh": [
@@ -82,9 +82,9 @@
    "分数是当前合成模型下、按你确认的陈述偏好计算的结果；小数末位的差异不构成可靠的排序"
   ],
   "real_model_calls": 0,
-  "result_fingerprint": "9341bb89b1aaa2c4fd091c5b86ab02f7ebf9bf2386ed189ac410fb71b9c58f6f",
-  "result_id": "result.run-e3a-fcb8f3f0d080abe1",
-  "run_id": "run-e3a-fcb8f3f0d080abe1",
+  "result_fingerprint": "6d37e75fbda5d118e645462cfceaa206246c7f7e8f280b305dae644a9c15e631",
+  "result_id": "result.run-e3a-5c61c60d7c473685",
+  "run_id": "run-e3a-5c61c60d7c473685",
   "run_stage": "interrupted",
   "sources_zh": [
    "生活事实：E1 结算记录（钱、岗位、住房、食品、服务月份）与月度资源账（本人家务小时）",

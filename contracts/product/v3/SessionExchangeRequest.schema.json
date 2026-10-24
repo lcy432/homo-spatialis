@@ -1,0 +1,18 @@
+{
+ "additionalProperties": false,
+ "description": "用专属链接换会话（``POST /api/v1/session``，同源 JSON）。``invite_token`` 是链接 ``#token=`` 后面的随机秘密：网页从地址的\n片段里读出、交换后立即从地址栏移除；它不进查询串、路径、localStorage 或任何模型请求，服务端只存它的摘要。",
+ "properties": {
+  "invite_token": {
+   "maxLength": 128,
+   "minLength": 32,
+   "pattern": "^[A-Za-z0-9_\\-]+$",
+   "title": "Invite Token",
+   "type": "string"
+  }
+ },
+ "required": [
+  "invite_token"
+ ],
+ "title": "SessionExchangeRequest",
+ "type": "object"
+}

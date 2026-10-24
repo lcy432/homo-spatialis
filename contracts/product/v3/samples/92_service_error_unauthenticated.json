@@ -1,0 +1,26 @@
+{
+ "description_zh": "没有有效的会话（到期、退出或链接被重发过）：重新打开专属链接",
+ "message": "ServiceError",
+ "payload": {
+  "code": "unauthenticated",
+  "impact_zh": "不能读取或修改这个空间里的任何内容",
+  "message_zh": "没有有效的会话，或专属链接已经失效",
+  "meta": null,
+  "next_action_zh": "重新打开你的专属链接；如果链接被重发过，请使用最新的那一个",
+  "retry_after_seconds": null,
+  "sample": {
+   "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+   "origin": "offline_run",
+   "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+   "synthetic": true
+  },
+  "status": 401,
+  "support_ref": null
+ },
+ "sample": {
+  "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+  "origin": "offline_run",
+  "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+  "synthetic": true
+ }
+}

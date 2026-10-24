@@ -1,0 +1,38 @@
+{
+ "additionalProperties": false,
+ "description": "确认画像（``POST /api/v1/profiles/confirm``）：只带服务端审阅的引用与知悉项；服务端重新校验并生成确认画像。",
+ "properties": {
+  "acknowledged": {
+   "default": [],
+   "items": {
+    "maxLength": 160,
+    "minLength": 1,
+    "type": "string"
+   },
+   "title": "Acknowledged",
+   "type": "array"
+  },
+  "draft_id": {
+   "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+   "title": "Draft Id",
+   "type": "string"
+  },
+  "draft_revision": {
+   "minimum": 1,
+   "title": "Draft Revision",
+   "type": "integer"
+  },
+  "review_id": {
+   "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+   "title": "Review Id",
+   "type": "string"
+  }
+ },
+ "required": [
+  "review_id",
+  "draft_id",
+  "draft_revision"
+ ],
+ "title": "ProfileConfirmRequest",
+ "type": "object"
+}

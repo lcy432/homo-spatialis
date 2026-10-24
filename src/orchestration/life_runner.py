@@ -47,11 +47,13 @@ from agentlayer.life_llm import (
     service_history,
 )
 from agentlayer.life_planning import (
+    USER_DELETION_HALT,
     MemoryYear,
     Planner,
     PlannerCall,
     PlannerHalt,
     PlannerReply,
+    RunControl,
     action_rules,
     build_memory,
     build_request,
@@ -678,12 +680,15 @@ class LifeRunner:
         records: ArchiveRecords | None = None,
         expected: Sequence[CloneRunRecord] = (),
         workers: int = 1,
+        control: RunControl | None = None,
     ) -> None:
         _check_planner(world, planner)
         if workers < 1:
             raise ValueError("workers 至少是 1")
         self.world, self.planner, self.archive, self.run_id = world, planner, archive, run_id
         self.workers = workers
+        #: 运行外面的停止信号（E3C：用户删除）。在每次规划调用占位之前检查；为空时行为与之前完全相同
+        self.control = control
         self._lock = threading.RLock()
         self._in_flight = 0
         self._aborted = False
@@ -1173,6 +1178,9 @@ class LifeRunner:
             self._pending[c.clone_id] = (year, attempt - 1)
             if self._halting():
                 raise _Suspended()
+            if self.control is not None and self.control.stop_requested():
+                # 用户删除了这次运行：在占位与发送之前停下（与服务失败同样保存现场，不是生活结果，不写半年记录）
+                raise PlannerHalt(USER_DELETION_HALT, "这次运行已被用户删除：不再开始新的规划调用")
             used = self.calls_used + self._in_flight
             if used >= policy.global_call_limit:
                 raise _BudgetExhausted()
@@ -1992,6 +2000,7 @@ def start_run(
     stop_after_calls: int | None = None,
     stop_after_commits: int | None = None,
     workers: int = 1,
+    control: RunControl | None = None,
 ) -> RunOutcome:
     """新运行：先核对实际规划器与运行配置的声明（不一致就拒绝，不建归档），再建归档（目录已存在就拒绝）、写运行清单与运行前
     说明、冻结输入文件（第一次规划调用之前），然后调度（``workers`` 个分身同时过，1 是顺序）。"""
@@ -2017,6 +2026,7 @@ def start_run(
         stop_after_calls=stop_after_calls,
         stop_after_commits=stop_after_commits,
         workers=workers,
+        control=control,
     )
     runner._write_progress()
     return runner.run()
@@ -2098,6 +2108,7 @@ def resume_run(
     stop_after_calls: int | None = None,
     stop_after_commits: int | None = None,
     workers: int = 1,
+    control: RunControl | None = None,
 ) -> RunOutcome:
     """从年度边界或两份候选之间恢复（E1-7A 收尾 F1）。
 
@@ -2137,6 +2148,7 @@ def resume_run(
         records=records,
         expected=progress.clones,
         workers=workers,
+        control=control,
     )
     runner.calls_used = len(records.calls)
     _attach(planner, archive, manifest.run_id)

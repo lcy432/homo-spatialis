@@ -635,13 +635,14 @@ def project_result(
             if c.city_ref in confirmed.cities
         )
     )
+    # 规划器与费用照用户确认的那份预检查（E3C：真实模型写“付费、按报价估算的上限”，mock 写零费用），身份与上限按实际运行配置
     planner = PlannerAndCost(
         planner_kind=world.config.planner.identity.kind,
         planner_id=world.config.planner.identity.planner_id,
         description_zh=pre.planner.description_zh,
         call_limit=world.config.planning.global_call_limit,
-        paid=False,
-        max_cost=None,
+        paid=pre.planner.paid,
+        max_cost=pre.planner.max_cost,
     )
     fields: dict[str, Any] = dict(
         meta=pack.meta(sample),

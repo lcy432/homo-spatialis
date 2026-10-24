@@ -29,6 +29,9 @@ dependencies = [
     "claude-agent-sdk>=0.2.168",
     "langgraph>=1.0",
     "langgraph-checkpoint-sqlite>=2.0",
+    "fastapi>=0.115",
+    "portalocker>=2.10",
+    "uvicorn>=0.30",
 ]
 
 [dependency-groups]

@@ -785,6 +785,19 @@ class PlannerHalt(Exception):  # noqa: N818 - 这是一个"停下"的信号，�
         self.kind, self.message = kind, message
 
 
+class RunControl(Protocol):
+    """运行外面的停止与发送许可（E3C 托管服务：用户删除运行）。很窄：运行器在每次规划调用占位之前问 ``stop_requested``，真实模型
+    规划器在每一次服务尝试（包括服务重试）预留与发送之前问 ``permit_send``——许可与删除标记在服务库里串行裁决，不预先批量批准。
+    拒绝时以 ``PlannerHalt("user_deletion")`` 停在发送之前：不破坏年度原子提交，已经发出的请求照常记账。"""
+
+    def stop_requested(self) -> bool: ...
+
+    def permit_send(self, key: str) -> bool: ...
+
+
+USER_DELETION_HALT = "user_deletion"
+
+
 def incomplete_output_diagnostics(finish_reason: str) -> tuple[VisibleDiagnostic, ...]:
     """回答没有正常结束（例如达到输出上限被截断）：不接受半截行动，按格式问题进入修订。"""
     return (

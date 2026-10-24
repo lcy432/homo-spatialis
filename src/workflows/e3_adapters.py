@@ -28,8 +28,17 @@
 
 E3 的提交记录在 ``registry/``，E1 的运行归档在 ``archive/<运行编号>/``，编译产物在 ``compiled/<名字>/``——都是 E3 / E1 自己的格式。
 
-本原型只接受资料包声明的离线 mock 规划器（与 ``bridge.run_offline`` 相同）；真实模型运行要按 E1-7B 的规则另行授权预算后接入，
-这里报 ``real_planner_not_supported``，不调用任何模型。
+默认只接受资料包声明的离线 mock 规划器（与 ``bridge.run_offline`` 相同），真实模型报 ``real_planner_not_supported``。托管服务
+（E3C，``workflows.service_worker``）在构造上下文时注入：
+
+* ``planner_factory``：按运行配置造规划器（离线 mock，或 ``LlmPlanner`` + ``make_transport`` + 本次运行自己的 ``RoundBudget``）；
+  付费开关没开或缺凭证就报公开代码，不换成 mock；
+* ``control``：用户删除时的停止与逐次发送许可（``agentlayer.life_planning.RunControl``）；
+* ``on_start``：首次启动 E1 之前的最后一步（把预留的次数转为已使用）；拒绝就不启动；
+* ``registry``：提交登记表（服务端 SQLite 是权威记录，没有第二份 JSON 登记），回执写 ``hosted_service``；
+* ``workers``：一次运行内同时过生活的分身数（≤ 16）。
+
+``RunRequest.execution`` 是正式运行设置（``product.execution.ExecutionSpec``）：预检查按它编译，资料包按它核对与设定规模。
 
 测试钩子（只在构造参数 ``faults`` 或环境变量 ``HS_WF_E3_FAULT`` 里显式写了才生效）：``submit:after_register``（E3 登记写完后进程立刻
 退出，退出码 51）、``life:crash_at_call:<n>``（本进程第 n 次规划调用开始时退出，52）、``life:halt_at_call:<n>:<种类>``（第 n 次规划
@@ -46,14 +55,14 @@ import hashlib
 import json
 import os
 import re
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from pathlib import Path
 from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, ValidationError
 
 from agentlayer.life_mock import mock_planner_for
-from agentlayer.life_planning import PlannerHalt
+from agentlayer.life_planning import PlannerHalt, RunControl
 from common.life_contracts import canonical_fingerprint
 from common.life_planning_contracts import MockScript
 from common.life_planning_contracts import RunProgress as E1RunProgress
@@ -71,6 +80,8 @@ from orchestration.life_outcome import FINISHED_WITH_REPORT, outcome_from_archiv
 from orchestration.life_runner import RunRefusedError, RunWorld, resume_run, start_run
 from orchestration.life_runner import preflight as e1_preflight
 from product import bridge
+from product.bridge import SubmissionRegistry
+from product.execution import ExecutionSpec, service_pack
 from product.fixtures import prepare_workspace
 from product.pack import DataPack, load_pack
 from product.preflight import run_preflight
@@ -99,6 +110,7 @@ HALT_CODES: dict[str, str | None] = {
     "uncertain_send": "uncertain_send",
     "budget": "budget_blocked",
     "model_mismatch": "model_mismatch",
+    "user_deletion": "run_deleted",
 }
 
 
@@ -115,6 +127,8 @@ class RunRequest(BaseModel):
     scripts: tuple[MockScript, ...] = ()
     illness_events: dict[str, Any] | None = None
     note: str | None = Field(default=None, max_length=300)
+    #: 正式运行设置（E3C 托管服务）：规模、规划器、调用设置、报价与上限；它的内容进入本次输入的身份
+    execution: ExecutionSpec | None = None
 
 
 def _sha(data: bytes) -> str:
@@ -255,12 +269,33 @@ class _InstrumentedPlanner:
 
 
 class E3Context:
-    """四个接口共用的上下文：工作目录、测试钩子、按引用加载并核对 E3 对象、重建 E1 运行世界。"""
+    """四个接口共用的上下文：工作目录、测试钩子、按引用加载并核对 E3 对象、重建 E1 运行世界。托管服务注入的东西见模块说明。"""
 
-    def __init__(self, workspace: E3Workspace, *, faults: set[str] | None = None) -> None:
+    def __init__(
+        self,
+        workspace: E3Workspace,
+        *,
+        faults: set[str] | None = None,
+        planner_factory: Callable[[RunWorld], Any] | None = None,
+        control: RunControl | None = None,
+        on_start: Callable[[str], None] | None = None,
+        registry: SubmissionRegistry | None = None,
+        service: str = "offline_bridge",
+        workers: int = 1,
+    ) -> None:
         self.ws = workspace
         env = {f for f in os.environ.get("HS_WF_E3_FAULT", "").split(",") if f}
         self.faults = _Faults(set(faults or set()) | env)
+        self.planner_factory = planner_factory
+        self.control = control
+        self.on_start = on_start
+        self.registry = registry
+        self.service = service
+        self.workers = workers
+
+    @property
+    def hosted(self) -> bool:
+        return self.planner_factory is not None
 
     # ---- 加载与核对（都在 cwd 里调用） ----
     def confirmed(self, ref: ContentRef) -> ConfirmedProfile | None:
@@ -288,6 +323,14 @@ class E3Context:
             return None
 
     def pack(self, request: RunRequest) -> DataPack | None:
+        if request.execution is not None:
+            # 正式运行设置：文件内容身份必须是设置记下的那一份，规模按设置（不读仓库里更新过的资料冒充）
+            if request.execution.pack_fingerprint != request.pack_fingerprint:
+                return None
+            try:
+                return service_pack(Path(request.pack_path), request.execution)
+            except (OSError, ValueError):
+                return None
         pack = load_pack(Path(request.pack_path))
         if pack.fingerprint != request.pack_fingerprint:
             return None
@@ -354,10 +397,13 @@ class E3Context:
         return world, pre, confirmed, pack, rec
 
     def planner(self, world: RunWorld) -> Any:
-        spec = world.config.planner
-        if spec.identity.kind != "mock":
-            raise AttentionRequiredError("real_planner_not_supported")
-        inner = mock_planner_for(spec)
+        if self.planner_factory is not None:
+            inner = self.planner_factory(world)
+        else:
+            spec = world.config.planner
+            if spec.identity.kind != "mock":
+                raise AttentionRequiredError("real_planner_not_supported")
+            inner = mock_planner_for(spec)
         if not self.faults.wraps_planner:
             return inner
         return _InstrumentedPlanner(inner, self.faults, Path("workflow/planner_invocations.jsonl"))
@@ -407,6 +453,7 @@ class E3PreflightAdapter:
                 repo_root=Path("."),
                 scripts=request.scripts,
                 illness_events=request.illness_events,
+                execution=request.execution,
             )
             pre = run.preflight
             fp = pre.preflight_fingerprint
@@ -488,7 +535,14 @@ class E3SubmissionAdapter:
                 ),
                 idempotency_key=idempotency_key,
             )
-            receipt = bridge.submit(pack, confirmed, pre, submission, Path("registry"))
+            receipt = bridge.submit(
+                pack,
+                confirmed,
+                pre,
+                submission,
+                ctx.registry if ctx.registry is not None else Path("registry"),
+                service=ctx.service,
+            )
             audit = "wf-receipt-" + _sha(idempotency_key.encode())[:16]
             _write_json(
                 Path("workflow/receipts") / f"{audit}.json", receipt.model_dump(mode="json")
@@ -573,9 +627,18 @@ class E1RunAdapter:
             if run_dir.exists():
                 raise AttentionRequiredError("archive_conflict", audit_ref=f"wf-run-{run_id}")
             planner = ctx.planner(world)
+            if ctx.on_start is not None:
+                ctx.on_start(run_id)  # 最后一步核对（托管服务：预留转为已使用）；拒绝就不启动
             try:
-                if ctx.faults.wraps_planner:
-                    start_run(world, planner, run_dir, run_id=run_id)
+                if ctx.faults.wraps_planner or ctx.hosted:
+                    start_run(
+                        world,
+                        planner,
+                        run_dir,
+                        run_id=run_id,
+                        workers=ctx.workers,
+                        control=ctx.control,
+                    )
                 else:
                     # E3 原有的启动入口（产品 mock，零网络）
                     bridge.run_offline(world, run_dir, run_id)
@@ -594,7 +657,14 @@ class E1RunAdapter:
             world, *_ = ctx.world(run_id)
             planner = ctx.planner(world)
             try:
-                resume_run(world, planner, Path("archive") / run_id)  # E1 原有的恢复入口
+                # E1 原有的恢复入口
+                resume_run(
+                    world,
+                    planner,
+                    Path("archive") / run_id,
+                    workers=ctx.workers,
+                    control=ctx.control,
+                )
             except RunRefusedError as exc:
                 raise AttentionRequiredError(
                     "archive_conflict", audit_ref=f"wf-run-{run_id}"
@@ -613,11 +683,14 @@ class E3ProjectionAdapter:
         ctx = self.ctx
         with ctx.ws.cwd():
             idx = ctx.run_index(run_id)
-            _pre, _confirmed, _request, pack, _rec = ctx.e3_inputs(idx["preflight_fingerprint"])
+            _pre, _confirmed, request, pack, _rec = ctx.e3_inputs(idx["preflight_fingerprint"])
             run_dir = Path("archive") / run_id
             if not (run_dir / "progress.json").is_file():
                 return None  # 还没有开始：没有进度，不编一个
-            return bridge.progress(pack, run_dir).model_dump(mode="json")
+            ledger = Path("budget") if request.execution is not None else None
+            return bridge.progress(
+                pack, run_dir, execution=request.execution, ledger_dir=ledger
+            ).model_dump(mode="json")
 
     def result(self, run_id: str) -> ResultView:
         ctx = self.ctx
@@ -656,7 +729,12 @@ class E3ProjectionAdapter:
                 if rec["inventory"] is None
                 else _validated(OptionInventoryCoverage, rec["inventory"], "archive_conflict")
             )
-            result = project_result(pack, confirmed, pre, world, outcome, inventory)
+            sent = sum(
+                1 for r in RunStore(run_dir).records("provider_calls") if r.get("event") == "intent"
+            )
+            result = project_result(
+                pack, confirmed, pre, world, outcome, inventory, real_model_calls=sent
+            )
             _write_json(cached, result.model_dump(mode="json"))
             return _view(result)
 
@@ -671,11 +749,14 @@ def _view(result: ProductResult) -> ResultView:
 
 
 def e3_services(
-    workspace: E3Workspace | Path | str, *, faults: set[str] | None = None
+    workspace: E3Workspace | Path | str,
+    *,
+    faults: set[str] | None = None,
+    context: E3Context | None = None,
 ) -> WorkflowServices:
-    """真实 E3 / E1 接入的服务组合。"""
+    """真实 E3 / E1 接入的服务组合。托管服务传自己构造的 ``context``（规划器、停止控制、启动核对与登记表）。"""
     ws = workspace if isinstance(workspace, E3Workspace) else E3Workspace(workspace)
-    ctx = E3Context(ws, faults=faults)
+    ctx = context if context is not None else E3Context(ws, faults=faults)
     return WorkflowServices(
         preflight=E3PreflightAdapter(ctx),
         submission=E3SubmissionAdapter(ctx),

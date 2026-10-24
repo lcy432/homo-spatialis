@@ -10,7 +10,7 @@
   ],
   "confirmable": false,
   "draft": {
-   "draft_fingerprint": "86873b9d9aa7589846988b7cc6cc53f640399e1b42620a3a4544f5867f04db60",
+   "draft_fingerprint": "137898aa7672a89c8f86819bf628f7dbc5004e6df072372947a65be288f3a931",
    "draft_id": "draft.u501.legacy_laundry",
    "revision": 1
   },
@@ -293,7 +293,7 @@
     "produced_by": "product.scenarios.review_only(legacy_laundry)",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.1",
+   "schema_version": "e3a-product-schema-v3.2",
    "vocabulary_version": "e3a-vocabulary-v3"
   },
   "money": {

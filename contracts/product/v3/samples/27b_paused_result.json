@@ -119,7 +119,7 @@
     "clone_ref": "u507.k51.r0",
     "event_chain": [],
     "explanation": {
-     "audit_ref": "run:run-e3a-ee63d3e23b8ed46c clone:u507.k51.r0 record:failures.json",
+     "audit_ref": "run:run-e3a-d056f37d856a710f clone:u507.k51.r0 record:failures.json",
      "category": "program_error",
      "impact_zh": "不进完成者平均；城市的模拟缺失范围把它当作未知（0 到 1 之间都保留），不写成生活出局",
      "next_action_zh": "维护者按审计编号查看内部记录、修复之后用新的运行重跑；这里不显示内部错误内容",
@@ -150,7 +150,7 @@
     "clone_ref": "u507.m52.r0",
     "event_chain": [],
     "explanation": {
-     "audit_ref": "run:run-e3a-ee63d3e23b8ed46c clone:u507.m52.r0 record:progress.json",
+     "audit_ref": "run:run-e3a-d056f37d856a710f clone:u507.m52.r0 record:progress.json",
      "category": "not_run",
      "impact_zh": "不进完成者平均；城市的模拟缺失范围把它当作未知（0 到 1 之间都保留），不写成生活出局",
      "next_action_zh": "批次的问题处理之后，用新的运行重跑",
@@ -193,7 +193,7 @@
   ],
   "confirmed": {
    "confirmed_id": "confirmed.draft.u507.r1",
-   "content_fingerprint": "c29cbace5f0676e1bd218639e58cacaa2bace003a9bee276bce660a0bedd651d"
+   "content_fingerprint": "7e18e2d38ac6642c8bd2216b28a02c61d68e3d8c68ded4154460b78e58344e56"
   },
   "data_nature": [
    {
@@ -780,7 +780,7 @@
     "produced_by": "product.scenarios.closed_loop(paused)",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.1",
+   "schema_version": "e3a-product-schema-v3.2",
    "vocabulary_version": "e3a-vocabulary-v3"
   },
   "not_generated_reason": null,
@@ -813,7 +813,7 @@
    "planner_kind": "mock"
   },
   "preflight": {
-   "preflight_fingerprint": "4833bd5ae4f12d67923fca6a915cf46601a0b575280fc90a6c7e6622b04164af",
+   "preflight_fingerprint": "eaf945427b7796d29ba760315affd97b1f0dd4127cf813150c4b45ed35e48344",
    "preflight_id": "preflight.confirmed.draft.u507.r1"
   },
   "reading_guide_zh": [
@@ -827,9 +827,9 @@
    "分数是当前合成模型下、按你确认的陈述偏好计算的结果；小数末位的差异不构成可靠的排序"
   ],
   "real_model_calls": 0,
-  "result_fingerprint": "88148d539744b6f3b090fd3cddec53d590509e1e901b249ddaf87a358c825deb",
-  "result_id": "result.run-e3a-ee63d3e23b8ed46c",
-  "run_id": "run-e3a-ee63d3e23b8ed46c",
+  "result_fingerprint": "05b729055815591105a4d7ee2cb3154fbbf122ba5b02b30a95af532a1b9822af",
+  "result_id": "result.run-e3a-d056f37d856a710f",
+  "run_id": "run-e3a-d056f37d856a710f",
   "run_stage": "paused",
   "sources_zh": [
    "生活事实：E1 结算记录（钱、岗位、住房、食品、服务月份）与月度资源账（本人家务小时）",

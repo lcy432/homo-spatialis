@@ -22,7 +22,7 @@
     "produced_by": "product.scenarios.life_item_compilation",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.1",
+   "schema_version": "e3a-product-schema-v3.2",
    "vocabulary_version": "e3a-vocabulary-v3"
   },
   "scope_zh": "生活扩展候选：完整食品方案、休闲活动、装备与享受型用品或服务；检查能不能交给 E1 执行，不补价格、寿命、时间或限制；只有受控样例，还没有接真实资料导出",

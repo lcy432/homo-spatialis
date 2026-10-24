@@ -1,0 +1,237 @@
+{
+ "$defs": {
+  "DataPackRef": {
+   "additionalProperties": false,
+   "description": "一份资料包的身份：编号、内容指纹与状态（合成测试资料，或冻结的真实资料包）。",
+   "properties": {
+    "content_fingerprint": {
+     "pattern": "^[0-9a-f]{64}$",
+     "title": "Content Fingerprint",
+     "type": "string"
+    },
+    "note": {
+     "maxLength": 400,
+     "minLength": 1,
+     "title": "Note",
+     "type": "string"
+    },
+    "pack_id": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+     "title": "Pack Id",
+     "type": "string"
+    },
+    "status": {
+     "enum": [
+      "synthetic_fixture_only",
+      "real_data_frozen"
+     ],
+     "title": "Status",
+     "type": "string"
+    }
+   },
+   "required": [
+    "pack_id",
+    "content_fingerprint",
+    "status",
+    "note"
+   ],
+   "title": "DataPackRef",
+   "type": "object"
+  },
+  "ProductMeta": {
+   "additionalProperties": false,
+   "description": "每条产品消息都带的共同元数据：结构、问卷、词表、健康问卷、转换的版本与资料包身份。",
+   "properties": {
+    "conversion_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Conversion Version",
+     "type": "string"
+    },
+    "data_pack": {
+     "$ref": "#/$defs/DataPackRef"
+    },
+    "health_questionnaire_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Health Questionnaire Version",
+     "type": "string"
+    },
+    "questionnaire_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Questionnaire Version",
+     "type": "string"
+    },
+    "sample": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/SampleLabel"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "schema_version": {
+     "const": "e3a-product-schema-v3.2",
+     "title": "Schema Version",
+     "type": "string"
+    },
+    "vocabulary_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Vocabulary Version",
+     "type": "string"
+    }
+   },
+   "required": [
+    "schema_version",
+    "questionnaire_version",
+    "vocabulary_version",
+    "health_questionnaire_version",
+    "conversion_version",
+    "data_pack"
+   ],
+   "title": "ProductMeta",
+   "type": "object"
+  },
+  "QuotaSummary": {
+   "additionalProperties": false,
+   "description": "这个专属空间的使用次数：一共 ``total`` 次启动模拟的机会；``used`` 已开始的、``reserved`` 已确认开始但还没有启动的、\n``available`` 还能用的。次数不自动重置；删除结果、换设备、重发链接都不改变它。3 次是启动模拟的机会，不保证每次所有分身都完整。",
+   "properties": {
+    "available": {
+     "minimum": 0,
+     "title": "Available",
+     "type": "integer"
+    },
+    "reserved": {
+     "minimum": 0,
+     "title": "Reserved",
+     "type": "integer"
+    },
+    "total": {
+     "minimum": 0,
+     "title": "Total",
+     "type": "integer"
+    },
+    "used": {
+     "minimum": 0,
+     "title": "Used",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "total",
+    "used",
+    "reserved",
+    "available"
+   ],
+   "title": "QuotaSummary",
+   "type": "object"
+  },
+  "SampleLabel": {
+   "additionalProperties": false,
+   "description": "公共样例的出处标签（只出现在样例里；真实运行的消息不写）。\n\n* ``offline_run``：由离线闭环实际执行产生；\n* ``controlled_fixture``：受控测试夹具（例如写好的计划、注入的事件、构造的资料缺口），标明来源；\n* ``contract_example``：线上服务（幂等提交、查询、断线恢复）尚未实现，这里只是**标明为示例**的契约响应。",
+   "properties": {
+    "note": {
+     "maxLength": 600,
+     "minLength": 1,
+     "title": "Note",
+     "type": "string"
+    },
+    "origin": {
+     "enum": [
+      "offline_run",
+      "controlled_fixture",
+      "contract_example"
+     ],
+     "title": "Origin",
+     "type": "string"
+    },
+    "produced_by": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Produced By",
+     "type": "string"
+    },
+    "synthetic": {
+     "const": true,
+     "default": true,
+     "title": "Synthetic",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "origin",
+    "produced_by",
+    "note"
+   ],
+   "title": "SampleLabel",
+   "type": "object"
+  }
+ },
+ "additionalProperties": false,
+ "description": "删除回执。运行中删除：立即不可查询、标为删除中、不再批准新的模型请求；已经发出的请求可能完成并记账，不能撤回。收尾之后清掉\n内容，标为已删除。保留的最小记录只有不透明身份、次数事件、必要的费用摘要、删除时间与防重记录，不含答案、模型正文或生活故事。",
+ "properties": {
+  "kept_zh": {
+   "default": [],
+   "items": {
+    "type": "string"
+   },
+   "title": "Kept Zh",
+   "type": "array"
+  },
+  "meta": {
+   "$ref": "#/$defs/ProductMeta"
+  },
+  "note_zh": {
+   "maxLength": 400,
+   "minLength": 1,
+   "title": "Note Zh",
+   "type": "string"
+  },
+  "quota": {
+   "$ref": "#/$defs/QuotaSummary"
+  },
+  "scope": {
+   "enum": [
+    "run",
+    "draft",
+    "all_data"
+   ],
+   "title": "Scope",
+   "type": "string"
+  },
+  "status": {
+   "enum": [
+    "deleting",
+    "deleted"
+   ],
+   "title": "Status",
+   "type": "string"
+  },
+  "target_ref": {
+   "anyOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Target Ref"
+  }
+ },
+ "required": [
+  "meta",
+  "scope",
+  "status",
+  "note_zh",
+  "quota"
+ ],
+ "title": "DeletionReceipt",
+ "type": "object"
+}

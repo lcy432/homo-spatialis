@@ -1,0 +1,26 @@
+{
+ "description_zh": "另一个标签页拿着旧修订号保存：冲突，较新的答案没有被覆盖",
+ "message": "ServiceError",
+ "payload": {
+  "code": "revision_conflict",
+  "impact_zh": "这次保存没有写入，较新的答案没有被覆盖",
+  "message_zh": "这份草稿已经在别处（例如另一个标签页）保存了更新的版本",
+  "meta": null,
+  "next_action_zh": "重新读取最新的草稿，在它的基础上修改后再保存",
+  "retry_after_seconds": null,
+  "sample": {
+   "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+   "origin": "offline_run",
+   "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+   "synthetic": true
+  },
+  "status": 409,
+  "support_ref": null
+ },
+ "sample": {
+  "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+  "origin": "offline_run",
+  "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+  "synthetic": true
+ }
+}

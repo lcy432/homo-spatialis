@@ -1,0 +1,26 @@
+{
+ "description_zh": "同一来源一分钟里交换邀请超过 10 次：429，带等待秒数",
+ "message": "ServiceError",
+ "payload": {
+  "code": "rate_limited",
+  "impact_zh": "这次请求没有被执行",
+  "message_zh": "请求太频繁",
+  "meta": null,
+  "next_action_zh": "稍等一分钟再试",
+  "retry_after_seconds": 61,
+  "sample": {
+   "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+   "origin": "offline_run",
+   "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+   "synthetic": true
+  },
+  "status": 429,
+  "support_ref": null
+ },
+ "sample": {
+  "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+  "origin": "offline_run",
+  "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+  "synthetic": true
+ }
+}

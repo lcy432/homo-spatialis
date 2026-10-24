@@ -35,7 +35,9 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 #: 结构版本（字段形状）。字段含义或形状一变就换名字，并在 ADR 记录。v3.1（DECISIONS/0042）：结果里的住处、通勤、用车权、
 #: 设备故障与税，逐城的资料性质，预检查的范围说明——都是新增的可选字段，v3 的字段含义不变；目录仍是 contracts/product/v3。
-PRODUCT_SCHEMA_VERSION = "e3a-product-schema-v3.1"
+#: v3.2（E3C，DECISIONS/0043）：托管服务的消息（会话与次数、草稿保存、确认请求、运行意图、删除回执、统一错误），费用状态的
+#: 分项（已结算、不确定、在途），进度的更新时间与回执的 ``hosted_service``——都是新增，v3.1 的字段含义不变。
+PRODUCT_SCHEMA_VERSION = "e3a-product-schema-v3.2"
 #: 问卷 / 题干语义版本：六维与物质的题干、定义、参考改善范围与控件规则。题干一变，旧确认失效、需要重新确认。
 QUESTIONNAIRE_VERSION = "e3a-questionnaire-v0.2-draft"
 #: 词表版本：六维键、物质键、职业受控词表、硬要求选项与属性偏好种类。
@@ -116,7 +118,7 @@ class SampleLabel(ProductModel):
 class ProductMeta(ProductModel):
     """每条产品消息都带的共同元数据：结构、问卷、词表、健康问卷、转换的版本与资料包身份。"""
 
-    schema_version: Literal["e3a-product-schema-v3.1"]
+    schema_version: Literal["e3a-product-schema-v3.2"]
     questionnaire_version: str = Field(min_length=1, max_length=80)
     vocabulary_version: str = Field(min_length=1, max_length=80)
     health_questionnaire_version: str = Field(min_length=1, max_length=80)
@@ -1081,7 +1083,8 @@ class RunReceipt(ProductModel):
     run_id: str | None = None
     idempotency_key: str
     reasons: tuple[ProductIssue, ...] = ()
-    service: Literal["offline_bridge", "contract_example_only"]
+    #: 谁登记的：本地离线桥接、托管服务（E3C，服务端 SQLite 是提交与次数的权威记录），或标明为示例的契约响应。
+    service: Literal["offline_bridge", "hosted_service", "contract_example_only"]
 
     @model_validator(mode="after")
     def _run_id(self) -> RunReceipt:
@@ -1098,14 +1101,37 @@ class CloneProgress(ProductModel):
     years_committed: Annotated[int, Field(ge=0)]
 
 
+_MONEY_TEXT = r"^(0|[1-9][0-9]*)(\.[0-9]{1,6})?$"
+MoneyText = Annotated[str, Field(pattern=_MONEY_TEXT)]
+
+
+def _optional(default: Any = None) -> Any:
+    """没有时不序列化的可选字段（离线 mock 与旧样例不多出空字段）。"""
+    return Field(default=default, exclude_if=lambda v: v is None)
+
+
 class CostStatus(ProductModel):
-    """费用状态：离线 mock 为零；真实模型只能写“按报价估算”，以供应商账单为准。"""
+    """费用状态：离线 mock 为零；真实模型只能写“按报价估算”，以供应商账单为准。
+
+    ``calls_used`` / ``call_limit`` 数的是**规划候选**（每个分身每年一次正常规划、最多两次修订）；``service_attempts`` 数的是实际发给
+    服务的尝试（每份候选最多再试一次服务请求），两者不是同一个计数。金额都是应用侧按已记录报价估算（E3C）：``settled_cost`` 是返回了
+    用量、已核算的；``uncertain_cost`` 是请求可能已经发出、用量不确定、按预留保留的（不改成 0）；``in_flight_cost`` 是已经预留、还没有
+    结果的；``estimated_cost`` 是三者之和。``max_cost`` 是这次运行的应用侧上限，不是供应商的账单上限。"""
 
     kind: Literal["offline_mock_zero_cost", "estimated_from_quote"]
     calls_used: Annotated[int, Field(ge=0)]
     call_limit: Annotated[int, Field(ge=0)]
     estimated_cost: str | None = None
     note: str
+    currency: Literal["CNY", "USD"] | None = _optional()
+    price_version: str | None = _optional()
+    max_cost: MoneyText | None = _optional()
+    settled_cost: MoneyText | None = _optional()
+    uncertain_cost: MoneyText | None = _optional()
+    in_flight_cost: MoneyText | None = _optional()
+    service_attempts: Annotated[int, Field(ge=0)] | None = _optional()
+    service_attempt_limit: Annotated[int, Field(ge=0)] | None = _optional()
+    uncertain_attempts: Annotated[int, Field(ge=0)] | None = _optional()
 
 
 class RunProgress(ProductModel):
@@ -1124,6 +1150,8 @@ class RunProgress(ProductModel):
     resumable: bool
     resume_note: str
     report_available: bool
+    #: 这份进度快照是什么时候写下的（E3C：worker 从权威进度与账本生成；UTC ISO 8601）。离线桥接不写。
+    updated_at: str | None = _optional()
 
 
 # ==========================================================================
@@ -1693,6 +1721,283 @@ class LifeItemCompilation(ProductModel):
     compilation_fingerprint: Sha256
 
 
+# ==========================================================================
+# 托管服务（E3C，DECISIONS/0043）：会话与次数、草稿保存、确认请求、运行意图、删除回执与统一错误
+#
+# 这些消息只描述网页与服务之间的业务请求与回复；分身、生活、评分与 C / E / M 的含义都沿用上面的消息与 E1。浏览器从不提交
+# ``person_ref``、``user_id``、完整的确认画像或运行设置：身份由会话决定，确认画像由服务端按审阅过的草稿生成。
+# ==========================================================================
+
+#: 网页流程的阶段（不是 E1 的 C / E / M）：检查中、等用户确认、被阻断、排队、运行中、等维护者、本次服务流程结束（不代表所有分身
+#: 都完整）、开始前取消、删除中、已删除、已过期。
+ServiceStage = Literal[
+    "checking",
+    "awaiting_confirmation",
+    "blocked",
+    "queued",
+    "running",
+    "needs_attention",
+    "finished",
+    "cancelled",
+    "deleting",
+    "deleted",
+    "expired",
+]
+#: 现在在等谁：用户（确认、修改条件）、维护者（不确定的发送、身份冲突、需要人工核对）、服务（排队检查、模拟进行中）或谁都不等。
+WaitingFor = Literal["user", "maintainer", "service", "none"]
+#: 服务端此刻允许的操作。前端只显示这里列出的按钮。
+IntentAction = Literal[
+    "submit", "cancel", "resume", "delete", "view_progress", "view_result", "create_new_intent"
+]
+_SUPPORT_REF = r"^sup-[0-9a-f]{16}$"
+SupportRef = Annotated[str, Field(pattern=_SUPPORT_REF)]
+_TIME = r"^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+UtcTime = Annotated[str, Field(pattern=_TIME)]
+
+
+class QuotaSummary(ProductModel):
+    """这个专属空间的使用次数：一共 ``total`` 次启动模拟的机会；``used`` 已开始的、``reserved`` 已确认开始但还没有启动的、
+    ``available`` 还能用的。次数不自动重置；删除结果、换设备、重发链接都不改变它。3 次是启动模拟的机会，不保证每次所有分身都完整。"""
+
+    total: Annotated[int, Field(ge=0)]
+    used: Annotated[int, Field(ge=0)]
+    reserved: Annotated[int, Field(ge=0)]
+    available: Annotated[int, Field(ge=0)]
+
+    @model_validator(mode="after")
+    def _sum(self) -> QuotaSummary:
+        if self.used + self.reserved + self.available != self.total:
+            raise ValueError("used + reserved + available 必须等于 total")
+        return self
+
+
+class ServiceRules(ProductModel):
+    """服务的固定规则（服务端配置产生，网页只显示，不能修改）。"""
+
+    runs_total: Annotated[int, Field(ge=1)]
+    cities: Annotated[int, Field(ge=1)]
+    clones_per_city: Annotated[int, Field(ge=1)]
+    years: Annotated[int, Field(ge=1)]
+    planner_kind: Literal["mock", "llm"]
+    live_calls_enabled: bool
+    max_cost: MoneyText
+    currency: Literal["CNY", "USD"]
+    result_retention_days: Annotated[int, Field(ge=1)]
+    draft_retention_days: Annotated[int, Field(ge=1)]
+    intent_retention_days: Annotated[int, Field(ge=1)]
+    session_days: Annotated[int, Field(ge=1)]
+    notes_zh: tuple[str, ...] = ()
+
+
+class DraftSummary(ProductModel):
+    draft_id: RefStr
+    revision: Annotated[int, Field(ge=1)]
+    updated_at: UtcTime
+    expires_at: UtcTime
+
+
+class SessionExchangeRequest(ProductModel):
+    """用专属链接换会话（``POST /api/v1/session``，同源 JSON）。``invite_token`` 是链接 ``#token=`` 后面的随机秘密：网页从地址的
+    片段里读出、交换后立即从地址栏移除；它不进查询串、路径、localStorage 或任何模型请求，服务端只存它的摘要。"""
+
+    invite_token: Annotated[str, Field(min_length=32, max_length=128, pattern=r"^[A-Za-z0-9_\-]+$")]
+
+
+class SessionView(ProductModel):
+    """当前会话（``POST /api/v1/session`` 交换邀请之后、``GET /api/v1/session``）：到期时间、本会话的 CSRF token、次数与服务规则。
+    会话由 HttpOnly Cookie 携带，这里不返回会话秘密；``csrf_token`` 只在修改请求的 ``X-CSRF-Token`` 头里带回。"""
+
+    meta: ProductMeta
+    session_expires_at: UtcTime
+    csrf_token: Annotated[str, Field(min_length=32, max_length=128, pattern=r"^[A-Za-z0-9_\-]+$")]
+    quota: QuotaSummary
+    rules: ServiceRules
+    #: 本人还在保存期内的草稿（新的在前）：换设备后从这里接着填
+    drafts: tuple[DraftSummary, ...] = ()
+    #: 本人尚未结束的那一次运行意图（同一身份最多一个）：换设备后从这里接着走流程
+    open_intent_id: RefStr | None = None
+
+
+class DraftView(ProductModel):
+    """服务端保存的一份草稿：草稿编号与修订号由服务器分配；``expires_at`` 是最后一次编辑后 30 天。"""
+
+    meta: ProductMeta
+    draft: UserInputDraft
+    updated_at: UtcTime
+    expires_at: UtcTime
+
+
+class DraftSaveRequest(ProductModel):
+    """保存草稿（``PUT /api/v1/drafts/{id}``）：``expected_revision`` 必须等于服务端当前的修订号，否则返回冲突，不覆盖新答案。
+    ``draft.draft_id`` 必须是路径里的编号；服务端写入时修订号加一。"""
+
+    expected_revision: Annotated[int, Field(ge=1)]
+    draft: UserInputDraft
+
+
+class ReviewReply(ProductModel):
+    """审阅已保存的那一版草稿（``POST /api/v1/drafts/{id}/review``）。审阅绑定草稿编号、修订号、内容与所用资料包。"""
+
+    meta: ProductMeta
+    review: ProfileReview
+    reviewed_revision: Annotated[int, Field(ge=1)]
+
+
+class ProfileConfirmRequest(ProductModel):
+    """确认画像（``POST /api/v1/profiles/confirm``）：只带服务端审阅的引用与知悉项；服务端重新校验并生成确认画像。"""
+
+    review_id: RefStr
+    draft_id: RefStr
+    draft_revision: Annotated[int, Field(ge=1)]
+    acknowledged: tuple[Annotated[str, Field(min_length=1, max_length=160)], ...] = ()
+
+
+class ProfileConfirmReply(ProductModel):
+    """确认的结果：成功时是服务端生成的确认画像；被拒时列出原因（草稿改过、知悉项缺失、审阅过时……）。"""
+
+    meta: ProductMeta
+    status: Literal["confirmed", "refused"]
+    confirmed: ConfirmedProfile | None = None
+    issues: tuple[ProductIssue, ...] = ()
+
+    @model_validator(mode="after")
+    def _shape(self) -> ProfileConfirmReply:
+        if (self.status == "confirmed") != (self.confirmed is not None):
+            raise ValueError("只有 confirmed 带确认画像")
+        if self.status == "refused" and not self.issues:
+            raise ValueError("被拒时必须写原因")
+        return self
+
+
+class RunIntentCreateRequest(ProductModel):
+    """准备一次模拟（``POST /api/v1/run-intents``）：引用一份确认画像。服务端排队做运行前检查（不扣次数）。"""
+
+    confirmed_id: RefStr
+
+
+class DeletionState(ProductModel):
+    state: Literal["none", "deleting", "deleted"]
+    requested_at: UtcTime | None = None
+    completed_at: UtcTime | None = None
+
+
+class RunIntentView(ProductModel):
+    """一次运行意图的公开视图（网页流程）：阶段与中文说明、当前预检查与确认身份、进度、是否有结果、此刻允许的操作、在等谁、
+    时间与删除状态、安全解释与支持编号。不含流程内部编号、checkpoint、文件路径、堆栈或内部诊断正文。
+
+    ``stage = finished`` 只表示本次服务流程结束：结果里的 C / E / M、未知与部分结果照 E1 原样显示；没有结果时 ``result_available``
+    为假，不编一个。"""
+
+    meta: ProductMeta
+    intent_id: RefStr
+    run_id: str | None = None
+    stage: ServiceStage
+    stage_zh: str = Field(min_length=1, max_length=120)
+    waiting_for: WaitingFor
+    confirmed: ConfirmedRef
+    preflight: ProductPreflight | None = None
+    confirm_with: Sha256 | None = None
+    progress: RunProgress | None = None
+    result_available: bool
+    allowed_actions: tuple[IntentAction, ...] = ()
+    created_at: UtcTime
+    updated_at: UtcTime
+    expires_at: UtcTime | None = None
+    deletion: DeletionState
+    explanation: PublicExplanation | None = None
+    support_ref: SupportRef | None = None
+    quota: QuotaSummary
+
+
+class RunSubmitRequest(ProductModel):
+    """确认开始（``POST /api/v1/run-intents/{id}/submit``）：``confirm_with`` 是用户看到的那份预检查的身份；``accept_scope`` 表示“我知道
+    这次范围、限制和费用保护，使用一次机会开始”。同一意图重复确认只对应一个运行，即使换了幂等键；同一个键配不同内容返回冲突。"""
+
+    confirm_with: Sha256
+    idempotency_key: Annotated[
+        str, Field(min_length=8, max_length=80, pattern=r"^[A-Za-z0-9_.:\-]+$")
+    ]
+    accept_scope: Literal[True]
+
+
+class RunSubmitReply(ProductModel):
+    meta: ProductMeta
+    receipt: RunReceipt
+    intent: RunIntentView
+
+
+class RunSummary(ProductModel):
+    intent_id: RefStr
+    run_id: str | None = None
+    stage: ServiceStage
+    stage_zh: str
+    result_available: bool
+    created_at: UtcTime
+    finished_at: UtcTime | None = None
+    expires_at: UtcTime | None = None
+
+
+class RunList(ProductModel):
+    """本人的运行列表（``GET /api/v1/runs``），新的在前；已删除的只剩不含内容的条目时不列出。"""
+
+    meta: ProductMeta
+    runs: tuple[RunSummary, ...] = ()
+    quota: QuotaSummary
+
+
+class DeletionReceipt(ProductModel):
+    """删除回执。运行中删除：立即不可查询、标为删除中、不再批准新的模型请求；已经发出的请求可能完成并记账，不能撤回。收尾之后清掉
+    内容，标为已删除。保留的最小记录只有不透明身份、次数事件、必要的费用摘要、删除时间与防重记录，不含答案、模型正文或生活故事。"""
+
+    meta: ProductMeta
+    scope: Literal["run", "draft", "all_data"]
+    target_ref: str | None = None
+    status: Literal["deleting", "deleted"]
+    note_zh: str = Field(min_length=1, max_length=400)
+    kept_zh: tuple[str, ...] = ()
+    quota: QuotaSummary
+
+
+ServiceErrorCode = Literal[
+    "unauthenticated",
+    "not_found",
+    "revision_conflict",
+    "preflight_stale",
+    "quota_exhausted",
+    "idempotency_conflict",
+    "intent_conflict",
+    "not_resumable",
+    "result_unavailable",
+    "deleting",
+    "deleted",
+    "expired",
+    "data_pack_unavailable",
+    "paid_calls_disabled",
+    "run_scale_fixed",
+    "rate_limited",
+    "csrf_failed",
+    "origin_rejected",
+    "payload_too_large",
+    "invalid_request",
+    "internal_error",
+]
+
+
+class ServiceError(ProductModel):
+    """统一的安全错误：机器代码、HTTP 状态与“发生了什么—影响是什么—下一步怎么做”的中文，加一个支持编号。不含用户输入、内部路径、
+    堆栈、原始校验异常或秘密。"""
+
+    meta: ProductMeta | None = None
+    status: Annotated[int, Field(ge=400, le=599)]
+    code: ServiceErrorCode
+    message_zh: str = Field(min_length=1, max_length=300)
+    impact_zh: str = Field(min_length=1, max_length=300)
+    next_action_zh: str = Field(min_length=1, max_length=300)
+    support_ref: SupportRef | None = None
+    retry_after_seconds: Annotated[int, Field(ge=1)] | None = None
+    sample: SampleLabel | None = None
+
+
 #: 消息名 → 类。``scripts/product_e3a.py export-schema`` 按这份清单导出，``check-schema`` 按它核对。
 PRODUCT_MESSAGES: dict[str, type[ProductModel]] = {
     "ProductCapabilities": ProductCapabilities,
@@ -1709,6 +2014,21 @@ PRODUCT_MESSAGES: dict[str, type[ProductModel]] = {
     "CatalogCompilation": CatalogCompilation,
     "OptionInventoryCoverage": OptionInventoryCoverage,
     "LifeItemCompilation": LifeItemCompilation,
+    # 托管服务（E3C，v3.2）
+    "SessionExchangeRequest": SessionExchangeRequest,
+    "SessionView": SessionView,
+    "DraftView": DraftView,
+    "DraftSaveRequest": DraftSaveRequest,
+    "ReviewReply": ReviewReply,
+    "ProfileConfirmRequest": ProfileConfirmRequest,
+    "ProfileConfirmReply": ProfileConfirmReply,
+    "RunIntentCreateRequest": RunIntentCreateRequest,
+    "RunIntentView": RunIntentView,
+    "RunSubmitRequest": RunSubmitRequest,
+    "RunSubmitReply": RunSubmitReply,
+    "RunList": RunList,
+    "DeletionReceipt": DeletionReceipt,
+    "ServiceError": ServiceError,
 }
 
 

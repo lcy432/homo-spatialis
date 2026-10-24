@@ -4,13 +4,13 @@
  "payload": {
   "binding": {
    "compiled_inputs": {
-    "life_input": "eaca6f16efd7c9045e236001a911134b08367451f7e90e5db039fad3e27a9416",
+    "life_input": "9efb71421bfe40a97c29c3bbe81fc682cb2e6e32ed1a48eba1c51a753d67bfb2",
     "roster": "837ef513e4116b24f75b2f29c0edd9b0ea40b12dfa12c8c3979c7074e8b59b4c",
     "run_config": "65332df48551eff1b65f1fd12742ed598fade9e5f9b63d633eab09905c34727a",
     "scoring_config": "130e822068dd45e7fe265d4220999b8f8530789d2be3073e39085014156efdea"
    },
    "evaluation_spec_id": "eval.e1-life.main",
-   "identities_fingerprint": "c74652862e727bae62f231427f1ea530258d93969ba3d27d59bf25e917b0dc75",
+   "identities_fingerprint": "94d436916f461ad95d3d043515c516bb012b32ab7b12b47116f9325ea334898e",
    "planner_id": "mock.rules.e3a-product",
    "planner_kind": "mock",
    "prompt_template": "e3b-product-prompt-v1",
@@ -662,7 +662,7 @@
   "clones_per_city": 1,
   "confirmed": {
    "confirmed_id": "confirmed.draft.u501.r1",
-   "content_fingerprint": "e46da82ce8e348e5ddcf6cea12f89e00feecf891fdcb883e0e544874e1bf4e02"
+   "content_fingerprint": "2fb9c8c83ce5a92a114c2d37ca96d2e2d336f0f32f3dae6680b93dcfa69c400b"
   },
   "executable": {
    "reasons": [
@@ -693,7 +693,7 @@
     "produced_by": "product.scenarios.closed_loop(normal)",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.1",
+   "schema_version": "e3a-product-schema-v3.2",
    "vocabulary_version": "e3a-vocabulary-v3"
   },
   "planner": {
@@ -704,7 +704,7 @@
    "planner_id": "mock.rules.e3a-product",
    "planner_kind": "mock"
   },
-  "preflight_fingerprint": "f545a9207b4d76452e42896403320c5f7e2b022a1b8c98efb73cf0742fb7c034",
+  "preflight_fingerprint": "76a58bd526ca8a8ab0c74ab941d5485bafa2fb1dbbda773a7b0bb65c6c91f7d9",
   "preflight_id": "preflight.confirmed.draft.u501.r1",
   "scope_zh": [
    "生活协议 life-v1-e3a-product（状态 synthetic_fixture_only）、评分 score.e1-life.explore（探索版）：城市、报价、工资、疾病、治疗与评分参数全部是合成设定，不是现实城市，不排序真实城市",

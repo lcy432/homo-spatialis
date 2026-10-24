@@ -856,7 +856,7 @@
     "clone_ref": "u503.m52.r0",
     "event_chain": [],
     "explanation": {
-     "audit_ref": "run:run-e3a-85f758d9dc20ccbd clone:u503.m52.r0 record:progress.json",
+     "audit_ref": "run:run-e3a-95eeb837274ba3fe clone:u503.m52.r0 record:progress.json",
      "category": "plan_or_execution_incomplete",
      "impact_zh": "不进完成者平均；城市的模拟缺失范围把它当作未知（0 到 1 之间都保留），不写成生活出局",
      "next_action_zh": "这是规划或模拟的问题，不是生活出局；改进规划器或说明之后重跑",
@@ -1090,7 +1090,7 @@
   ],
   "confirmed": {
    "confirmed_id": "confirmed.draft.u503.r1",
-   "content_fingerprint": "a5c1d377b6144ec8b5224ab524b81d444de5698de3f9ceb0135d5a8c8c8a5f8a"
+   "content_fingerprint": "7146ae31af10b69b039190ce59ede17a61dcabf51afb7b16aebdbc86d3027068"
   },
   "data_nature": [
    {
@@ -1677,7 +1677,7 @@
     "produced_by": "product.scenarios.closed_loop(mixed_cem)",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.1",
+   "schema_version": "e3a-product-schema-v3.2",
    "vocabulary_version": "e3a-vocabulary-v3"
   },
   "not_generated_reason": null,
@@ -1710,7 +1710,7 @@
    "planner_kind": "mock"
   },
   "preflight": {
-   "preflight_fingerprint": "1a6288c630c77e437c81cb09de0b0a882de8a1c87fa01be809d5dbea497bbf2f",
+   "preflight_fingerprint": "a2b3f79e9ec05e7e01bc439753eaec68d5bca495d121843c8353509382037891",
    "preflight_id": "preflight.confirmed.draft.u503.r1"
   },
   "reading_guide_zh": [
@@ -1724,9 +1724,9 @@
    "分数是当前合成模型下、按你确认的陈述偏好计算的结果；小数末位的差异不构成可靠的排序"
   ],
   "real_model_calls": 0,
-  "result_fingerprint": "a88ab916394266839270f3b1eaa62cba4e4302ef1ce7b763e83b2ea68746830d",
-  "result_id": "result.run-e3a-85f758d9dc20ccbd",
-  "run_id": "run-e3a-85f758d9dc20ccbd",
+  "result_fingerprint": "16146babced8b562a418405cc92aaacf6f73befa411eb0429bc890aefa8d0860",
+  "result_id": "result.run-e3a-95eeb837274ba3fe",
+  "run_id": "run-e3a-95eeb837274ba3fe",
   "run_stage": "completed",
   "sources_zh": [
    "生活事实：E1 结算记录（钱、岗位、住房、食品、服务月份）与月度资源账（本人家务小时）",

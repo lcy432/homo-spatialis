@@ -142,7 +142,7 @@
      "default": null
     },
     "schema_version": {
-     "const": "e3a-product-schema-v3.1",
+     "const": "e3a-product-schema-v3.2",
      "title": "Schema Version",
      "type": "string"
     },
@@ -238,6 +238,7 @@
   "service": {
    "enum": [
     "offline_bridge",
+    "hosted_service",
     "contract_example_only"
    ],
    "title": "Service",

@@ -1,0 +1,26 @@
+{
+ "description_zh": "确认的不是当前这一份运行前说明：没有开始，也没有使用次数",
+ "message": "ServiceError",
+ "payload": {
+  "code": "preflight_stale",
+  "impact_zh": "没有开始模拟，也没有使用次数",
+  "message_zh": "你确认的不是当前这一份运行前说明（条件或资料变了，或说明已经更新）",
+  "meta": null,
+  "next_action_zh": "查看最新的运行前说明后再确认",
+  "retry_after_seconds": null,
+  "sample": {
+   "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+   "origin": "offline_run",
+   "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+   "synthetic": true
+  },
+  "status": 409,
+  "support_ref": null
+ },
+ "sample": {
+  "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+  "origin": "offline_run",
+  "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+  "synthetic": true
+ }
+}

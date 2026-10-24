@@ -6,7 +6,6 @@
 
 from __future__ import annotations
 
-import shutil
 from pathlib import Path
 from typing import Any
 
@@ -29,6 +28,8 @@ from common.product_contracts import (
     UserInputDraft,
 )
 from product.pack import DataPack
+from product.workspace import WORKSPACE_FILES as WORKSPACE_FILES
+from product.workspace import prepare_workspace as _prepare
 
 K51, M52 = "US:SYNTH2026:K51", "US:SYNTH2026:M52"
 HEALTH_IDS = (
@@ -151,30 +152,8 @@ def make_draft(
     )
 
 
-#: 一个自包含的“小仓库”需要的文件：资料包与它显式采用的产品协议基础样例（相对路径与仓库里相同）。场景在这样的目录里运行，编译产物与
-#: 运行配置里的路径都是相对路径，结果不依赖目录放在哪里。
-WORKSPACE_FILES = (
-    "configs/product/e3a_synthetic_pack.yaml",
-    "configs/life/synthetic_product.yaml",
-    "configs/life/scoring_product.yaml",
-    "configs/life/evaluation_product.yaml",
-    "configs/life/city_facts_product.yaml",
-    # E3B 六城真实资料包（DECISIONS/0042）
-    "configs/product/e3b_us_v1_pack.yaml",
-    "data/frozen/life/us-v1/pack/life_input.json",
-    "data/frozen/life/us-v1/pack/scoring.json",
-    "data/frozen/life/us-v1/pack/evaluation.json",
-    "data/frozen/life/us-v1/pack/city_facts.json",
-    # 构建报告：产品消息里的资料性质读它的计数（product.pack_facts）
-    "data/frozen/life/us-v1/pack/report.json",
-)
-
-
 def prepare_workspace(work: Path, repo: Path) -> Path:
-    """把资料包与基础样例按原相对路径复制进 ``work``（只复制，不修改）。"""
-    work.mkdir(parents=True, exist_ok=True)
-    for rel in WORKSPACE_FILES:
-        dst = work / rel
-        dst.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(repo / rel, dst)
+    """把资料包与基础样例按原相对路径复制进 ``work``（只复制，不修改）。正式实现在 ``product.workspace``（E3C 提取，生产服务与测试
+    共用）；这里沿用旧的返回值（工作目录本身）。"""
+    _prepare(work, repo)
     return work

@@ -1,0 +1,26 @@
+{
+ "description_zh": "同一个幂等键配了不同的内容：冲突，什么也没做",
+ "message": "ServiceError",
+ "payload": {
+  "code": "idempotency_conflict",
+  "impact_zh": "这次请求没有被执行",
+  "message_zh": "这个请求编号已经用于另一份不同的请求",
+  "meta": null,
+  "next_action_zh": "为新的请求生成新的请求编号；重发同一个请求时请保持内容不变",
+  "retry_after_seconds": null,
+  "sample": {
+   "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+   "origin": "offline_run",
+   "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+   "synthetic": true
+  },
+  "status": 409,
+  "support_ref": null
+ },
+ "sample": {
+  "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+  "origin": "offline_run",
+  "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+  "synthetic": true
+ }
+}

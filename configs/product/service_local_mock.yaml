@@ -1,0 +1,22 @@
+# E3C 本地联调服务（E5 接线用，DECISIONS/0043）：显式的本地 HTTP 模式，只绑定 127.0.0.1；规划器是离线 mock（零网络、零费用，
+# 不代表真实模型的能力）。规模与生产相同（六个都会区 × 每城 4 个分身 × 3 年）。
+#
+# site_origin 是浏览器地址栏里的来源：E5 的 Vite 开发服务器（http://localhost:5173）把 /api 代理到这里的 127.0.0.1:8765，所以修改请求
+# 的 Origin 是 5173 那个来源。换了打开方式（例如用 127.0.0.1:5173 打开），这里跟着改，不放宽成多个来源。
+# 会话 Cookie 不带 Secure（本地是 http），所以名字不用 __Host- 前缀；其余保护（Origin、CSRF、限流、请求体上限）与生产相同。交互式文档
+# 在 http://127.0.0.1:8765/api/v1/docs（只在本地开）。
+
+service:
+  version: e3c-service-config-v1
+  profile: local_mock
+  data_dir: runs/product-service-local
+  site_origin: http://localhost:5173
+  bind_host: 127.0.0.1
+  bind_port: 8765
+  pack_path: configs/product/e3b_us_v1_pack.yaml
+  planner: mock
+  live_calls_enabled: false
+  workers: 16
+  progress_poll_seconds: 2
+  worker_poll_seconds: 1
+  expose_docs: true

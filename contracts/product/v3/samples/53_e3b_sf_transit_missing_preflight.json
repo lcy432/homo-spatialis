@@ -4,13 +4,13 @@
  "payload": {
   "binding": {
    "compiled_inputs": {
-    "life_input": "dee948e68b698812a887893d4b86409633dd95a880d6dff685218cfe361c9191",
+    "life_input": "4eca345f27c1813be36ad8c50b7af4cd53c1456a3014f75c0ab8cb6e70bb31a4",
     "roster": "fe27d033d8e815602223784c92f75aefcf7f25ffe0887293c3b114d72283c688",
     "run_config": "dbd726d0bebbec3ce2104a3abfff8f9465c86fa54c3d490db651d17fcee0d3f0",
     "scoring_config": "c929881cb54d0d198a90d2106bf65d541a3175a14564f0994abe2fb76ddad571"
    },
    "evaluation_spec_id": "eval.e3b-us.main",
-   "identities_fingerprint": "55354dc6e41d21a2807fd4a5dce757cc0f33cb8d420e8605c32795769f0967bf",
+   "identities_fingerprint": "e5fdb55087623aff0ab53e5a00c80ab048544760c1ed1588f03949dbcd9058d1",
    "planner_id": "mock.rules.e3a-product",
    "planner_kind": "mock",
    "prompt_template": "e3b-product-prompt-v1",
@@ -846,7 +846,7 @@
   "clones_per_city": 4,
   "confirmed": {
    "confirmed_id": "confirmed.draft.u501.e3b_sf.r1",
-   "content_fingerprint": "be0259f76fe06bf6d78021b24055c614532b35305a7f42a8761cffff4038aaa2"
+   "content_fingerprint": "2c8e544eb1fd063853d7fd9a649ba5be9a5b4487ee479b354e24f6eab23e8ac7"
   },
   "executable": {
    "reasons": [
@@ -887,7 +887,7 @@
     "produced_by": "product.scenarios.preflight_only(e3b_sf)",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.1",
+   "schema_version": "e3a-product-schema-v3.2",
    "vocabulary_version": "e3a-vocabulary-v3"
   },
   "planner": {
@@ -898,7 +898,7 @@
    "planner_id": "mock.rules.e3a-product",
    "planner_kind": "mock"
   },
-  "preflight_fingerprint": "a975922287812b5cc5274da067bf40ec69a8de82a0ac6f217433666f424b34d2",
+  "preflight_fingerprint": "425259b908a5d176e26e9dfc3eaabec13bd6a82b76b1b1adb66d5957613b8572",
   "preflight_id": "preflight.confirmed.draft.u501.e3b_sf.r1",
   "scope_notes": [
    {

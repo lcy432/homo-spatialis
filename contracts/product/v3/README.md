@@ -4,9 +4,10 @@ v3 取代 [v2](../v2/README.md)（v2 目录原样保留为历史导出，界面�
 
 ## 1. 这里有什么
 
-* `*.schema.json`：14 份消息的 JSON Schema，由唯一权威结构 [src/common/product_contracts.py](../../../src/common/product_contracts.py) 导出，**不要手改**。
+* `*.schema.json`：28 份消息的 JSON Schema（v3.2 起含托管服务的 14 份），由唯一权威结构 [src/common/product_contracts.py](../../../src/common/product_contracts.py) 导出，**不要手改**。
 * `index.json`：结构版本、问卷 / 词表 / 健康问卷 / 转换版本，以及每份 schema 的 SHA-256。
-* `samples/`：55 份公共样例，每份是 `{"message", "description_zh", "payload"}`，`payload` 按对应 schema 校验。
+* `samples/`：93 份公共样例，每份是 `{"message", "description_zh", "payload"}`，`payload` 按对应 schema 校验。
+* `openapi.json`：托管服务（E3C）的 HTTP 接口，由 `uv run python scripts/product_service.py openapi` 导出，**不要手改**。
 
 ```bash
 uv run python scripts/product_e3a.py check-schema
@@ -14,12 +15,12 @@ uv run python scripts/product_e3a.py check-schema
 
 ## 2. 版本
 
-| 项 | v2 | v3 | v3.1（E3B，仍在本目录） |
-|---|---|---|---|
-| 结构 | `e3a-product-schema-v2` | `e3a-product-schema-v3` | `e3a-product-schema-v3.1` |
-| 问卷 | `e3a-questionnaire-v0.1-draft` | `e3a-questionnaire-v0.2-draft` | 同 v3 |
-| 词表 | `e3a-vocabulary-v1`（物质三项） | `e3a-vocabulary-v2`（物质四项） | `e3a-vocabulary-v3`（居住条件取代居住空间） |
-| 资料包 | `pack.e3a.synthetic-v1` | `pack.e3a.synthetic-v2` | 同 v3，另加 `pack.e3b.us-v1`（`real_data_frozen`） |
+| 项 | v2 | v3 | v3.1（E3B） | v3.2（E3C，本目录现在的版本） |
+|---|---|---|---|---|
+| 结构 | `e3a-product-schema-v2` | `e3a-product-schema-v3` | `e3a-product-schema-v3.1` | `e3a-product-schema-v3.2` |
+| 问卷 | `e3a-questionnaire-v0.1-draft` | `e3a-questionnaire-v0.2-draft` | 同 v3 | 同 v3 |
+| 词表 | `e3a-vocabulary-v1`（物质三项） | `e3a-vocabulary-v2`（物质四项） | `e3a-vocabulary-v3`（居住条件取代居住空间） | 同 v3.1 |
+| 资料包 | `pack.e3a.synthetic-v1` | `pack.e3a.synthetic-v2` | 同 v3，另加 `pack.e3b.us-v1`（`real_data_frozen`） | 同 v3.1 |
 
 ## 3. 新样例
 
@@ -44,3 +45,21 @@ v3 在独立复核之前按收尾修复（ADR0041 收尾一节）修订过一次
 | 53 | ProductPreflight | 旧金山的通勤关系表没有公共交通：警告 `commute_mode_missing` 与范围说明，预检查仍通过 |
 | 54 | ProductPreflight | 没有确认高中学历：开局岗位要求的资格不从职称或自由文字授予，预检查阻断 |
 | 55 | ProductResult | 旧金山（没有公交资料）：一个分身步行骑车上班；另一个分身两年买用车权开车上班（月费不含油费、油费按次），两个都完整 |
+
+## 5. v3.2：托管服务（E3C）
+
+只加了消息与可选字段，v3.1 的字段含义不变（旧样例只是重新盖了版本号，内容身份随之更新）。规则见 [ADR0043](../../../DECISIONS/0043-e3c-hosted-service.md)，接线见 [E3C 交接](../../../docs/handoffs/e3c-to-e5-service.md)。
+
+* 新消息：`SessionExchangeRequest`、`SessionView`、`DraftView`、`DraftSaveRequest`、`ReviewReply`、`ProfileConfirmRequest`、`ProfileConfirmReply`、`RunIntentCreateRequest`、`RunIntentView`、`RunSubmitRequest`、`RunSubmitReply`、`RunList`、`DeletionReceipt`、`ServiceError`。
+* 已有消息的变化：`RunReceipt.service` 增加 `hosted_service`；`CostStatus` 增加可选的币种、报价版本、上限、已核算 / 用量不确定 / 在途预留金额与服务尝试计数（mock 时不出现）；`RunProgress.updated_at`（可选）。
+* 样例 60–96 由服务端的真实代码路径产生（测试时钟、测试秘密、合成人物、离线 mock；76–77 是**测试传输**，不是真实模型；凭证都是明确无效的测试值）：
+
+| 样例 | 演示 |
+|---|---|
+| 60–61 | 专属链接换会话；会话视图（次数、规则、草稿与未结束的意图） |
+| 62–68 | 新建草稿、带版本保存、旧版本冲突、审阅、确认请求与回复 |
+| 69–75 | 准备模拟（排队检查）、等确认、确认开始、重复提交、键冲突 |
+| 76–80 | 运行中（测试传输）、结束、进度、我的运行 |
+| 81–85 | 阻断、暂停（可恢复）、部分结果、次数用完 |
+| 86–91 | 删除回执、墓碑、已删除、删除全部、过期 |
+| 92–96 | 未登录、CSRF、限流、付费未开、预检查过时 |

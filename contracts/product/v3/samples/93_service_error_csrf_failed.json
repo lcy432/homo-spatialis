@@ -1,0 +1,26 @@
+{
+ "description_zh": "修改请求缺少会话绑定的 X-CSRF-Token：没有执行",
+ "message": "ServiceError",
+ "payload": {
+  "code": "csrf_failed",
+  "impact_zh": "这次修改没有被执行",
+  "message_zh": "请求缺少或带错了页面校验码",
+  "meta": null,
+  "next_action_zh": "刷新页面后再试",
+  "retry_after_seconds": null,
+  "sample": {
+   "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+   "origin": "offline_run",
+   "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+   "synthetic": true
+  },
+  "status": 403,
+  "support_ref": null
+ },
+ "sample": {
+  "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+  "origin": "offline_run",
+  "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+  "synthetic": true
+ }
+}

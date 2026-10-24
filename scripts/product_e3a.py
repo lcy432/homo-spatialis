@@ -822,6 +822,10 @@ def generate_samples(out: Path, work: Path) -> None:
         dump(hobby.result),
     )
     _e3b_samples(out, work)
+    # 托管服务（E3C，v3.2）：服务端的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock 或标明的测试传输）
+    from _service_samples import service_samples
+
+    service_samples(out, work / "service", _sample_file)
     print(f"写出 {len(list(out.glob('*.json')))} 份样例到 {out}")
 
 

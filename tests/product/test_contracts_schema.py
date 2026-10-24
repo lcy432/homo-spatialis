@@ -43,7 +43,9 @@ def test_every_message_exports_a_schema_and_the_committed_files_match():
         assert path.exists(), f"缺少 {name}：先运行 export-schema"
         assert path.read_text(encoding="utf-8") == text, f"{name} 与权威结构不一致"
     index = json.loads(texts["index.json"])
-    assert index["schema_version"] == "e3a-product-schema-v3.1"  # E3B 的公开事实（DECISIONS/0042）
+    assert (
+        index["schema_version"] == "e3a-product-schema-v3.2"
+    )  # E3C 托管服务的消息（DECISIONS/0043）
     assert index["conversion_version"] == "e3a-conversion-v2"  # 收尾 F3：金额写法规则变了
     assert index["health_questionnaire_version"] == "e3a-health-coping-q-v0.1-draft"
 
@@ -82,16 +84,48 @@ def test_public_samples_validate_and_cover_the_required_cases():
         "36_catalog_statuses_coverage",
         "37_money_separator_rejected_review",
         "38_duplicate_answers_rejected_review",
+        # 托管服务（E3C）：正常、阻断、排队、运行中、部分结果、次数用完、暂停、删除、过期
+        "61_service_session",
+        "71_service_intent_awaiting_confirmation",
+        "73_service_submit_accepted",
+        "74_service_submit_duplicate",
+        "76_service_intent_running",
+        "77_service_progress_running",
+        "78_service_intent_finished",
+        "81_service_intent_blocked",
+        "82_service_intent_paused",
+        "84_service_partial_result",
+        "85_service_error_quota_exhausted",
+        "86_service_deletion_receipt",
+        "87_service_intent_deleted",
+        "90_service_intent_expired",
     ):
         assert required in names, f"缺少公共样例 {required}"
     for p in samples:
         assert cli.sample_problems(p) == [], p.name
-    # 线上服务没有实现：断线查询与服务暂停只能是标明为示例的契约响应
+    # 离线桥接时代的断线查询与服务暂停样例仍是标明为示例的契约响应；托管服务的样例来自服务端的真实代码路径
     for name in ("32_contract_example_disconnect_query", "33_contract_example_halted_progress"):
         payload = json.loads((SCHEMA_DIR / "samples" / f"{name}.json").read_text(encoding="utf-8"))[
             "payload"
         ]
         assert payload["meta"]["sample"]["origin"] == "contract_example"
+    service = {
+        p.stem: json.loads(p.read_text(encoding="utf-8")) for p in samples if "_service_" in p.stem
+    }
+    for name, body in service.items():
+        payload = body["payload"]
+        label = (payload.get("meta") or {}).get("sample") or body.get("sample")
+        assert label["origin"] in ("offline_run", "controlled_fixture"), name
+    # 测试传输的样例写明是测试传输；样例里的凭证都是明确无效的测试值
+    for name in ("76_service_intent_running", "77_service_progress_running"):
+        assert service[name]["payload"]["meta"]["sample"]["origin"] == "controlled_fixture"
+        assert "测试传输" in service[name]["description_zh"]
+    assert service["61_service_session"]["payload"]["csrf_token"].startswith("TEST_ONLY_invalid")
+    token = service["60_service_session_exchange_request"]["payload"]["invite_token"]
+    assert token.startswith("TEST_ONLY_invalid")
+    assert (
+        service["73_service_submit_accepted"]["payload"]["receipt"]["service"] == "hosted_service"
+    )
 
 
 def test_states_are_distinct_and_explicit_zero_is_a_provided_value():

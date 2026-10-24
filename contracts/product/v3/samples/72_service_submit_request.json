@@ -1,0 +1,15 @@
+{
+ "description_zh": "确认开始：带用户看到的那份预检查身份、幂等键与“知道范围、限制和费用保护，使用一次机会开始”",
+ "message": "RunSubmitRequest",
+ "payload": {
+  "accept_scope": true,
+  "confirm_with": "2c30cc0ec6446c5bf523d4955da288f40e30ac051975a6613e817cb0dc308800",
+  "idempotency_key": "tab-1-click-0001"
+ },
+ "sample": {
+  "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+  "origin": "offline_run",
+  "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+  "synthetic": true
+ }
+}

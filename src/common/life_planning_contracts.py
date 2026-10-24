@@ -813,7 +813,7 @@ class CloneRunRecord(ContractModel):
 #: pause_reason；paused：程序或共享配置错误；其余是结局。
 RunStatus = Literal["running", "completed", "paused", "budget_exhausted", "interrupted", "halted"]
 #: halted 的原因（E1-7B）。都不是生活结果：服务失败、凭证、账户、请求配置不支持、付费预算不够、输入超过估计上限、上一次请求
-#: 可能已发出但结果没有可靠落盘、最终请求检查不过、返回的模型与设定不同。
+#: 可能已发出但结果没有可靠落盘、最终请求检查不过、返回的模型与设定不同；E3C：用户删除了这次运行（不再批准新的发送）。
 HaltKind = Literal[
     "service_unavailable",
     "credentials",
@@ -824,6 +824,7 @@ HaltKind = Literal[
     "uncertain_send",
     "request_check",
     "model_mismatch",
+    "user_deletion",
 ]
 
 

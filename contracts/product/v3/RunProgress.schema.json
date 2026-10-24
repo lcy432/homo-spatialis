@@ -37,7 +37,7 @@
   },
   "CostStatus": {
    "additionalProperties": false,
-   "description": "费用状态：离线 mock 为零；真实模型只能写“按报价估算”，以供应商账单为准。",
+   "description": "费用状态：离线 mock 为零；真实模型只能写“按报价估算”，以供应商账单为准。\n\n``calls_used`` / ``call_limit`` 数的是**规划候选**（每个分身每年一次正常规划、最多两次修订）；``service_attempts`` 数的是实际发给\n服务的尝试（每份候选最多再试一次服务请求），两者不是同一个计数。金额都是应用侧按已记录报价估算（E3C）：``settled_cost`` 是返回了\n用量、已核算的；``uncertain_cost`` 是请求可能已经发出、用量不确定、按预留保留的（不改成 0）；``in_flight_cost`` 是已经预留、还没有\n结果的；``estimated_cost`` 是三者之和。``max_cost`` 是这次运行的应用侧上限，不是供应商的账单上限。",
    "properties": {
     "call_limit": {
      "minimum": 0,
@@ -48,6 +48,22 @@
      "minimum": 0,
      "title": "Calls Used",
      "type": "integer"
+    },
+    "currency": {
+     "anyOf": [
+      {
+       "enum": [
+        "CNY",
+        "USD"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Currency"
     },
     "estimated_cost": {
      "anyOf": [
@@ -61,6 +77,19 @@
      "default": null,
      "title": "Estimated Cost"
     },
+    "in_flight_cost": {
+     "anyOf": [
+      {
+       "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "In Flight Cost"
+    },
     "kind": {
      "enum": [
       "offline_mock_zero_cost",
@@ -69,9 +98,99 @@
      "title": "Kind",
      "type": "string"
     },
+    "max_cost": {
+     "anyOf": [
+      {
+       "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Max Cost"
+    },
     "note": {
      "title": "Note",
      "type": "string"
+    },
+    "price_version": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Price Version"
+    },
+    "service_attempt_limit": {
+     "anyOf": [
+      {
+       "minimum": 0,
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Service Attempt Limit"
+    },
+    "service_attempts": {
+     "anyOf": [
+      {
+       "minimum": 0,
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Service Attempts"
+    },
+    "settled_cost": {
+     "anyOf": [
+      {
+       "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Settled Cost"
+    },
+    "uncertain_attempts": {
+     "anyOf": [
+      {
+       "minimum": 0,
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Uncertain Attempts"
+    },
+    "uncertain_cost": {
+     "anyOf": [
+      {
+       "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Uncertain Cost"
     }
    },
    "required": [
@@ -158,7 +277,7 @@
      "default": null
     },
     "schema_version": {
-     "const": "e3a-product-schema-v3.1",
+     "const": "e3a-product-schema-v3.2",
      "title": "Schema Version",
      "type": "string"
     },
@@ -331,6 +450,18 @@
   "stage_zh": {
    "title": "Stage Zh",
    "type": "string"
+  },
+  "updated_at": {
+   "anyOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Updated At"
   }
  },
  "required": [

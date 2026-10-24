@@ -1,0 +1,30 @@
+{
+ "additionalProperties": false,
+ "description": "确认开始（``POST /api/v1/run-intents/{id}/submit``）：``confirm_with`` 是用户看到的那份预检查的身份；``accept_scope`` 表示“我知道\n这次范围、限制和费用保护，使用一次机会开始”。同一意图重复确认只对应一个运行，即使换了幂等键；同一个键配不同内容返回冲突。",
+ "properties": {
+  "accept_scope": {
+   "const": true,
+   "title": "Accept Scope",
+   "type": "boolean"
+  },
+  "confirm_with": {
+   "pattern": "^[0-9a-f]{64}$",
+   "title": "Confirm With",
+   "type": "string"
+  },
+  "idempotency_key": {
+   "maxLength": 80,
+   "minLength": 8,
+   "pattern": "^[A-Za-z0-9_.:\\-]+$",
+   "title": "Idempotency Key",
+   "type": "string"
+  }
+ },
+ "required": [
+  "confirm_with",
+  "idempotency_key",
+  "accept_scope"
+ ],
+ "title": "RunSubmitRequest",
+ "type": "object"
+}

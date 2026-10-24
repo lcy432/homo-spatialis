@@ -13,6 +13,10 @@
    用户确认的事实，不凭职业文字推断。不随机生成家具、病史或财富。
 
 便利设备与服务由 ``product.catalog`` 从资料候选编入城市目录（替换基础样例里的同类机会）；其余目录原样复制。
+
+正式运行设置（E3C，``product.execution.ExecutionSpec``）：给了就按它写运行配置——规划器（离线 mock 或真实模型）、规划候选上限、
+服务重试、付费预算（每次运行一本新账，在工作目录的 ``budget/`` 里）。规模（城市、每城分身、年数）必须与设置一致，不一致就拒绝，
+不偷偷删城或减分身。没有给时沿用资料包声明的离线 mock（与之前逐字节相同）。
 """
 
 from __future__ import annotations
@@ -22,7 +26,7 @@ import hashlib
 from dataclasses import dataclass, field
 from decimal import Decimal
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import yaml
 from pydantic import ValidationError
@@ -41,6 +45,9 @@ from product.answers import health_meaning, issue
 from product.catalog import compile_catalog
 from product.pack import DataPack
 from product.public_errors import profile_contract_issue
+
+if TYPE_CHECKING:
+    from product.execution import ExecutionSpec
 
 COMPILER = "e3a-compile-v1"
 
@@ -177,6 +184,99 @@ def _planner_identity(pack: DataPack) -> dict[str, Any]:
     return ident.model_dump(mode="json", exclude_none=True)
 
 
+def _execution_problems(
+    pack: DataPack, confirmed: ConfirmedProfile, execution: ExecutionSpec
+) -> list[ProductIssue]:
+    """规模与资料包：确认的城市、每城分身与资料包身份都必须是正式运行设置写的那一份（不删城、不减分身）。"""
+    out: list[ProductIssue] = []
+    if execution.pack_fingerprint != pack.fingerprint:
+        out.append(
+            issue(
+                "execution_pack_mismatch",
+                "pack",
+                "资料包的内容与正式运行设置记下的不同",
+                "不能编译运行配置",
+                "重新做运行前检查",
+            )
+        )
+    if tuple(pack.body.run.repeat_indexes) != tuple(execution.repeat_indexes):
+        out.append(
+            issue(
+                "run_scale_mismatch",
+                "pack.run.repeat_indexes",
+                f"每城分身是 {list(pack.body.run.repeat_indexes)}，正式运行设置是 {list(execution.repeat_indexes)}",
+                "不能编译运行配置",
+                "维护者核对服务配置",
+            )
+        )
+    if set(confirmed.cities) != set(execution.cities):
+        out.append(
+            issue(
+                "run_scale_mismatch",
+                "cities",
+                "确认的城市与这次服务固定比较的城市不同",
+                "不能编译运行配置（不删城、不补城）",
+                "选择服务规定的全部城市后重新确认",
+            )
+        )
+    return out
+
+
+def _apply_execution(
+    run: dict[str, Any],
+    execution: ExecutionSpec,
+    scripts: tuple[MockScript, ...],
+    *,
+    computed: int | None,
+) -> None:
+    """按正式运行设置写运行配置的规划器、调用上限与付费预算。mock 设置写出来与资料包声明的离线 mock 相同。"""
+    if computed is not None and execution.global_call_limit != computed:
+        raise CompileRefusedError(
+            (
+                issue(
+                    "run_scale_mismatch",
+                    "execution.global_call_limit",
+                    f"正式运行设置的规划候选上限 {execution.global_call_limit} 与编译出的规模 {computed} 不同",
+                    "不能编译运行配置",
+                    "维护者核对服务配置",
+                ),
+            )
+        )
+    planning = run["planning"]
+    planning["global_call_limit"] = execution.global_call_limit
+    planning["transport_retries"] = execution.transport_retries
+    if execution.planner_kind == "mock":
+        run["planner"] = {
+            **execution.run_planner_block(),
+            "scripts": [s.model_dump(mode="json", exclude_none=True) for s in scripts],
+        }
+        return
+    if scripts:
+        raise CompileRefusedError(
+            (
+                issue(
+                    "scripts_need_mock",
+                    "scripts",
+                    "受控的 mock 行为只能配离线规划器",
+                    "不能编译运行配置",
+                    "去掉受控行为",
+                ),
+            )
+        )
+    run["version"] = "e1-7b-run-v1"
+    run["planner"] = execution.run_planner_block()
+    run["paid_budget"] = execution.paid_budget_block()
+    planning["note"] = (
+        f"真实模型（{execution.planner_identity['planner_id']}）：每个分身每年一次规划、最多 "
+        f"{execution.max_revisions_per_year} 次修订；每份候选最多再试 {execution.transport_retries} 次服务请求；"
+        f"规划候选上限 {execution.global_call_limit}、服务尝试上限 {execution.max_requests}"
+    )
+    run["note"] = (
+        f"E3C 托管服务的正式运行：费用上限 {execution.max_cost} {execution.currency}（应用侧按报价 "
+        f"{execution.price_version} 估算，不是供应商账单上限）；本次运行自己的新账本在工作目录的 budget/。"
+    )
+
+
 def _relative(p: Path, root: Path | None) -> str:
     if root is not None:
         try:
@@ -204,6 +304,7 @@ def compile_inputs(
     scripts: tuple[MockScript, ...] = (),
     illness_events: dict[str, Any] | None = None,
     run_label: str | None = None,
+    execution: ExecutionSpec | None = None,
 ) -> CompiledInputs:
     """把一份确认画像编译成 E1 输入文件（写进 ``out_dir``）。开局岗位匹配不到等问题收进 ``issues``（预检查据此阻断）；配置不是
     声明的基础样例、确认画像被改写等全局问题直接拒绝（``CompileRefusedError``）。
@@ -223,6 +324,8 @@ def compile_inputs(
             )
         )
     problems = base_problems(pack)
+    if execution is not None:
+        problems += _execution_problems(pack, confirmed, execution)
     if problems:
         raise CompileRefusedError(tuple(problems))
     b = pack.body
@@ -500,6 +603,18 @@ def compile_inputs(
     _dump(paths["roster"], header, roster)
     years = int(protocol.get("simulation_years", 3))
     attempts = 1 + b.run.max_revisions_per_year
+    if execution is not None and execution.years != years:
+        raise CompileRefusedError(
+            (
+                issue(
+                    "run_scale_mismatch",
+                    "execution.years",
+                    f"正式运行设置是 {execution.years} 年，产品协议是 {years} 年",
+                    "不能编译运行配置",
+                    "维护者核对服务配置",
+                ),
+            )
+        )
     run = {
         "run_notice": notice,
         "run": {
@@ -536,6 +651,11 @@ def compile_inputs(
             "note": "E3-A 离线闭环：新增真实模型调用 0 次、费用 0。",
         },
     }
+    if execution is not None:
+        # 有阻断问题（某座城不能开局）时预检查本来就不通过，规模不另比，不让它盖住具体原因
+        blocked = any(i.severity == "error" for i in issues)
+        computed = None if blocked else len(entries) * years * attempts
+        _apply_execution(run["run"], execution, scripts, computed=computed)
     _dump(paths["run_config"], header, run)
     return CompiledInputs(
         out_dir=out_dir,

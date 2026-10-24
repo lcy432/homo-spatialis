@@ -1,0 +1,16 @@
+{
+ "additionalProperties": false,
+ "description": "准备一次模拟（``POST /api/v1/run-intents``）：引用一份确认画像。服务端排队做运行前检查（不扣次数）。",
+ "properties": {
+  "confirmed_id": {
+   "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+   "title": "Confirmed Id",
+   "type": "string"
+  }
+ },
+ "required": [
+  "confirmed_id"
+ ],
+ "title": "RunIntentCreateRequest",
+ "type": "object"
+}

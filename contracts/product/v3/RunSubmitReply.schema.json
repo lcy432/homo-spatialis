@@ -1,0 +1,1914 @@
+{
+ "$defs": {
+  "BuildCount": {
+   "additionalProperties": false,
+   "description": "资料包构建报告里的一个计数（片区、通勤线、住房候选与排除的原因、放进目录的岗位、菜单……）。",
+   "properties": {
+    "count": {
+     "minimum": 0,
+     "title": "Count",
+     "type": "integer"
+    },
+    "key": {
+     "maxLength": 64,
+     "minLength": 1,
+     "title": "Key",
+     "type": "string"
+    },
+    "label_zh": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Label Zh",
+     "type": "string"
+    }
+   },
+   "required": [
+    "key",
+    "label_zh",
+    "count"
+   ],
+   "title": "BuildCount",
+   "type": "object"
+  },
+  "CapabilityStatus": {
+   "additionalProperties": false,
+   "description": "一种能力在当前输入与声明范围内的状态。**不保证**未来每份计划都合法、每个月都能完整评分。",
+   "properties": {
+    "reasons": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Reasons",
+     "type": "array"
+    },
+    "status": {
+     "enum": [
+      "yes",
+      "no",
+      "partial",
+      "unknown"
+     ],
+     "title": "Status",
+     "type": "string"
+    }
+   },
+   "required": [
+    "status"
+   ],
+   "title": "CapabilityStatus",
+   "type": "object"
+  },
+  "CategorySources": {
+   "additionalProperties": false,
+   "description": "目录里一类机会（住房、岗位、食品、服务……）的条数，按来源性质分开数（四种性质都列，没有的写 0）。",
+   "properties": {
+    "by_kind": {
+     "items": {
+      "$ref": "#/$defs/SourceKindCount"
+     },
+     "maxItems": 4,
+     "minItems": 4,
+     "title": "By Kind",
+     "type": "array"
+    },
+    "category": {
+     "maxLength": 48,
+     "minLength": 1,
+     "title": "Category",
+     "type": "string"
+    },
+    "total": {
+     "minimum": 0,
+     "title": "Total",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "category",
+    "total",
+    "by_kind"
+   ],
+   "title": "CategorySources",
+   "type": "object"
+  },
+  "CityCoverageSummary": {
+   "additionalProperties": false,
+   "description": "一座城的偏好覆盖摘要（E1 覆盖报告的投影）。不是阈值，也不解锁不完整的总分。\n\n* ``common_weight``：整个比较组**共同**覆盖的权重（每座城资料都齐、规则都有的叶子之和；各城相同，城市比较只在这部分上是同口径的）；\n* ``unknown_weight``：**这座城**资料未知的正权重之和（这些月份的总分会不完整，不补 0、不删掉再重新归一化）；\n* ``no_component_weight``：本版评分没有分项的正权重之和（各城相同）；\n* ``unsupported_positive_leaves``：**这座城**资料未知或没有评分分项的正权重叶子。",
+   "properties": {
+    "common_weight": {
+     "$ref": "#/$defs/ExactNumber"
+    },
+    "label": {
+     "title": "Label",
+     "type": "string"
+    },
+    "no_component_weight": {
+     "$ref": "#/$defs/ExactNumber"
+    },
+    "unknown_weight": {
+     "$ref": "#/$defs/ExactNumber"
+    },
+    "unsupported_positive_leaves": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Unsupported Positive Leaves",
+     "type": "array"
+    }
+   },
+   "required": [
+    "common_weight",
+    "unknown_weight",
+    "no_component_weight",
+    "label"
+   ],
+   "title": "CityCoverageSummary",
+   "type": "object"
+  },
+  "CityDataNature": {
+   "additionalProperties": false,
+   "description": "一座城的资料是怎么来的（DECISIONS/0042）：目录各类机会按来源性质的条数、登记的模型设定、共同先验、治疗的共同假设、\n模型活动设定、片区、通勤方式、菜单、税的范围，以及资料包构建报告的计数。\n\n只有公开的来源性质与说明：没有评分参数（η、τ、c、背景量）、抽签或内部状态。``build_status = not_available`` 表示构建报告\n不在这份资料包里或与目录对不上——计数未知，不是 0。",
+   "properties": {
+    "build": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/BuildCount"
+     },
+     "title": "Build",
+     "type": "array"
+    },
+    "build_status": {
+     "enum": [
+      "from_pack_report",
+      "not_available"
+     ],
+     "title": "Build Status",
+     "type": "string"
+    },
+    "city_ref": {
+     "title": "City Ref",
+     "type": "string"
+    },
+    "common_priors": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/CommonPrior"
+     },
+     "title": "Common Priors",
+     "type": "array"
+    },
+    "commute_modes": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/CommuteModeAvailability"
+     },
+     "title": "Commute Modes",
+     "type": "array"
+    },
+    "home_areas": {
+     "default": 0,
+     "minimum": 0,
+     "title": "Home Areas",
+     "type": "integer"
+    },
+    "label": {
+     "title": "Label",
+     "type": "string"
+    },
+    "menus": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/MenuSummary"
+     },
+     "title": "Menus",
+     "type": "array"
+    },
+    "model_plan_activities": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Model Plan Activities",
+     "type": "array"
+    },
+    "named_assumptions": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/NamedAssumption"
+     },
+     "title": "Named Assumptions",
+     "type": "array"
+    },
+    "opportunities": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/CategorySources"
+     },
+     "title": "Opportunities",
+     "type": "array"
+    },
+    "pack_status": {
+     "enum": [
+      "synthetic_fixture_only",
+      "real_data_frozen"
+     ],
+     "title": "Pack Status",
+     "type": "string"
+    },
+    "summary_zh": {
+     "maxLength": 400,
+     "minLength": 1,
+     "title": "Summary Zh",
+     "type": "string"
+    },
+    "tax": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/TaxScope"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "totals": {
+     "items": {
+      "$ref": "#/$defs/SourceKindCount"
+     },
+     "maxItems": 4,
+     "minItems": 4,
+     "title": "Totals",
+     "type": "array"
+    },
+    "treatment_assumptions_zh": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Treatment Assumptions Zh",
+     "type": "array"
+    },
+    "work_areas": {
+     "default": 0,
+     "minimum": 0,
+     "title": "Work Areas",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "city_ref",
+    "label",
+    "pack_status",
+    "summary_zh",
+    "totals",
+    "build_status"
+   ],
+   "title": "CityDataNature",
+   "type": "object"
+  },
+  "CityPreflight": {
+   "additionalProperties": false,
+   "properties": {
+    "city_ref": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+     "title": "City Ref",
+     "type": "string"
+    },
+    "coverage": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/CityCoverageSummary"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "data_gaps": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/ProductIssue"
+     },
+     "title": "Data Gaps",
+     "type": "array"
+    },
+    "data_nature": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/CityDataNature"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "executable": {
+     "$ref": "#/$defs/CapabilityStatus"
+    },
+    "feedback": {
+     "$ref": "#/$defs/CapabilityStatus"
+    },
+    "label": {
+     "title": "Label",
+     "type": "string"
+    },
+    "option_inventory_status": {
+     "enum": [
+      "complete_for_declared_scope",
+      "partial",
+      "not_assessed"
+     ],
+     "title": "Option Inventory Status",
+     "type": "string"
+    },
+    "scorable": {
+     "$ref": "#/$defs/CapabilityStatus"
+    },
+    "start_job_label": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Start Job Label"
+    }
+   },
+   "required": [
+    "city_ref",
+    "label",
+    "executable",
+    "scorable",
+    "feedback",
+    "option_inventory_status"
+   ],
+   "title": "CityPreflight",
+   "type": "object"
+  },
+  "CloneProgress": {
+   "additionalProperties": false,
+   "properties": {
+    "city_ref": {
+     "title": "City Ref",
+     "type": "string"
+    },
+    "clone_ref": {
+     "title": "Clone Ref",
+     "type": "string"
+    },
+    "status": {
+     "title": "Status",
+     "type": "string"
+    },
+    "status_zh": {
+     "title": "Status Zh",
+     "type": "string"
+    },
+    "years_committed": {
+     "minimum": 0,
+     "title": "Years Committed",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "clone_ref",
+    "city_ref",
+    "status",
+    "status_zh",
+    "years_committed"
+   ],
+   "title": "CloneProgress",
+   "type": "object"
+  },
+  "CommonPrior": {
+   "additionalProperties": false,
+   "description": "一项比较组各城共用的背景设定（没有可比资料时登记的共同先验，例如休闲；安全按各都会区的犯罪资料换算，不在这里）：事实的\n名称与含义。不制造城市差异；\n这里不写它换算成评分输入的规则与参数。",
+   "properties": {
+    "fact_id": {
+     "maxLength": 64,
+     "minLength": 1,
+     "title": "Fact Id",
+     "type": "string"
+    },
+    "label": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Label",
+     "type": "string"
+    },
+    "meaning_zh": {
+     "maxLength": 400,
+     "minLength": 1,
+     "title": "Meaning Zh",
+     "type": "string"
+    }
+   },
+   "required": [
+    "fact_id",
+    "label",
+    "meaning_zh"
+   ],
+   "title": "CommonPrior",
+   "type": "object"
+  },
+  "CommuteModeAvailability": {
+   "additionalProperties": false,
+   "description": "这座城的通勤关系表里有没有一种方式：有几条片区之间的线、使用条件与封顶的说明（与给分身看的同一份公开说明）。\n\n``in_relation = False``：关系表里没有这种方式（资料缺失或本城不建模），到岗时不能用它——不当 0 分钟，也不当免费。",
+   "properties": {
+    "condition_zh": {
+     "anyOf": [
+      {
+       "maxLength": 400,
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Condition Zh"
+    },
+    "in_relation": {
+     "title": "In Relation",
+     "type": "boolean"
+    },
+    "lines": {
+     "minimum": 0,
+     "title": "Lines",
+     "type": "integer"
+    },
+    "mode": {
+     "enum": [
+      "walk_bike",
+      "transit",
+      "drive"
+     ],
+     "title": "Mode",
+     "type": "string"
+    },
+    "mode_zh": {
+     "maxLength": 20,
+     "minLength": 1,
+     "title": "Mode Zh",
+     "type": "string"
+    }
+   },
+   "required": [
+    "mode",
+    "mode_zh",
+    "in_relation",
+    "lines"
+   ],
+   "title": "CommuteModeAvailability",
+   "type": "object"
+  },
+  "ConfirmedRef": {
+   "additionalProperties": false,
+   "properties": {
+    "confirmed_id": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+     "title": "Confirmed Id",
+     "type": "string"
+    },
+    "content_fingerprint": {
+     "pattern": "^[0-9a-f]{64}$",
+     "title": "Content Fingerprint",
+     "type": "string"
+    }
+   },
+   "required": [
+    "confirmed_id",
+    "content_fingerprint"
+   ],
+   "title": "ConfirmedRef",
+   "type": "object"
+  },
+  "CostStatus": {
+   "additionalProperties": false,
+   "description": "费用状态：离线 mock 为零；真实模型只能写“按报价估算”，以供应商账单为准。\n\n``calls_used`` / ``call_limit`` 数的是**规划候选**（每个分身每年一次正常规划、最多两次修订）；``service_attempts`` 数的是实际发给\n服务的尝试（每份候选最多再试一次服务请求），两者不是同一个计数。金额都是应用侧按已记录报价估算（E3C）：``settled_cost`` 是返回了\n用量、已核算的；``uncertain_cost`` 是请求可能已经发出、用量不确定、按预留保留的（不改成 0）；``in_flight_cost`` 是已经预留、还没有\n结果的；``estimated_cost`` 是三者之和。``max_cost`` 是这次运行的应用侧上限，不是供应商的账单上限。",
+   "properties": {
+    "call_limit": {
+     "minimum": 0,
+     "title": "Call Limit",
+     "type": "integer"
+    },
+    "calls_used": {
+     "minimum": 0,
+     "title": "Calls Used",
+     "type": "integer"
+    },
+    "currency": {
+     "anyOf": [
+      {
+       "enum": [
+        "CNY",
+        "USD"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Currency"
+    },
+    "estimated_cost": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Estimated Cost"
+    },
+    "in_flight_cost": {
+     "anyOf": [
+      {
+       "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "In Flight Cost"
+    },
+    "kind": {
+     "enum": [
+      "offline_mock_zero_cost",
+      "estimated_from_quote"
+     ],
+     "title": "Kind",
+     "type": "string"
+    },
+    "max_cost": {
+     "anyOf": [
+      {
+       "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Max Cost"
+    },
+    "note": {
+     "title": "Note",
+     "type": "string"
+    },
+    "price_version": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Price Version"
+    },
+    "service_attempt_limit": {
+     "anyOf": [
+      {
+       "minimum": 0,
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Service Attempt Limit"
+    },
+    "service_attempts": {
+     "anyOf": [
+      {
+       "minimum": 0,
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Service Attempts"
+    },
+    "settled_cost": {
+     "anyOf": [
+      {
+       "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Settled Cost"
+    },
+    "uncertain_attempts": {
+     "anyOf": [
+      {
+       "minimum": 0,
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Uncertain Attempts"
+    },
+    "uncertain_cost": {
+     "anyOf": [
+      {
+       "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Uncertain Cost"
+    }
+   },
+   "required": [
+    "kind",
+    "calls_used",
+    "call_limit",
+    "note"
+   ],
+   "title": "CostStatus",
+   "type": "object"
+  },
+  "DataPackRef": {
+   "additionalProperties": false,
+   "description": "一份资料包的身份：编号、内容指纹与状态（合成测试资料，或冻结的真实资料包）。",
+   "properties": {
+    "content_fingerprint": {
+     "pattern": "^[0-9a-f]{64}$",
+     "title": "Content Fingerprint",
+     "type": "string"
+    },
+    "note": {
+     "maxLength": 400,
+     "minLength": 1,
+     "title": "Note",
+     "type": "string"
+    },
+    "pack_id": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+     "title": "Pack Id",
+     "type": "string"
+    },
+    "status": {
+     "enum": [
+      "synthetic_fixture_only",
+      "real_data_frozen"
+     ],
+     "title": "Status",
+     "type": "string"
+    }
+   },
+   "required": [
+    "pack_id",
+    "content_fingerprint",
+    "status",
+    "note"
+   ],
+   "title": "DataPackRef",
+   "type": "object"
+  },
+  "DeletionState": {
+   "additionalProperties": false,
+   "properties": {
+    "completed_at": {
+     "anyOf": [
+      {
+       "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Completed At"
+    },
+    "requested_at": {
+     "anyOf": [
+      {
+       "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Requested At"
+    },
+    "state": {
+     "enum": [
+      "none",
+      "deleting",
+      "deleted"
+     ],
+     "title": "State",
+     "type": "string"
+    }
+   },
+   "required": [
+    "state"
+   ],
+   "title": "DeletionState",
+   "type": "object"
+  },
+  "ExactNumber": {
+   "additionalProperties": false,
+   "description": "一个精确数：``exact`` 是规范分数写法（参与计算与比较），``display`` 只供显示（四舍五入，不回流计算）。",
+   "properties": {
+    "display": {
+     "maxLength": 40,
+     "minLength": 1,
+     "title": "Display",
+     "type": "string"
+    },
+    "exact": {
+     "pattern": "^(0|-?[1-9][0-9]*)(/[1-9][0-9]*)?$",
+     "title": "Exact",
+     "type": "string"
+    }
+   },
+   "required": [
+    "exact",
+    "display"
+   ],
+   "title": "ExactNumber",
+   "type": "object"
+  },
+  "MenuSummary": {
+   "additionalProperties": false,
+   "description": "一类机会的年度菜单（DECISIONS/0042）：每年、每个环境重复给分身看的一份抽样。菜单是接触机会，不是成交或录用。",
+   "properties": {
+    "category": {
+     "maxLength": 48,
+     "minLength": 1,
+     "title": "Category",
+     "type": "string"
+    },
+    "env_repeats": {
+     "minimum": 1,
+     "title": "Env Repeats",
+     "type": "integer"
+    },
+    "items_max": {
+     "minimum": 1,
+     "title": "Items Max",
+     "type": "integer"
+    },
+    "items_min": {
+     "minimum": 1,
+     "title": "Items Min",
+     "type": "integer"
+    },
+    "years": {
+     "minimum": 1,
+     "title": "Years",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "category",
+    "years",
+    "env_repeats",
+    "items_min",
+    "items_max"
+   ],
+   "title": "MenuSummary",
+   "type": "object"
+  },
+  "NamedAssumption": {
+   "additionalProperties": false,
+   "description": "一条登记的模型设定（来源性质是合成）：设定说明的原文、用到它的机会条数与几个例子。不是资料，也不是某个商品或场所的报价。",
+   "properties": {
+    "count": {
+     "minimum": 1,
+     "title": "Count",
+     "type": "integer"
+    },
+    "examples": {
+     "items": {
+      "type": "string"
+     },
+     "maxItems": 3,
+     "minItems": 1,
+     "title": "Examples",
+     "type": "array"
+    },
+    "note_zh": {
+     "maxLength": 400,
+     "minLength": 1,
+     "title": "Note Zh",
+     "type": "string"
+    }
+   },
+   "required": [
+    "note_zh",
+    "count",
+    "examples"
+   ],
+   "title": "NamedAssumption",
+   "type": "object"
+  },
+  "PlannerAndCost": {
+   "additionalProperties": false,
+   "properties": {
+    "call_limit": {
+     "title": "Call Limit",
+     "type": "integer"
+    },
+    "description_zh": {
+     "title": "Description Zh",
+     "type": "string"
+    },
+    "max_cost": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Max Cost"
+    },
+    "paid": {
+     "title": "Paid",
+     "type": "boolean"
+    },
+    "planner_id": {
+     "title": "Planner Id",
+     "type": "string"
+    },
+    "planner_kind": {
+     "enum": [
+      "mock",
+      "llm"
+     ],
+     "title": "Planner Kind",
+     "type": "string"
+    }
+   },
+   "required": [
+    "planner_kind",
+    "planner_id",
+    "description_zh",
+    "call_limit",
+    "paid"
+   ],
+   "title": "PlannerAndCost",
+   "type": "object"
+  },
+  "ProductIssue": {
+   "additionalProperties": false,
+   "description": "一条可展示的问题：机器代码、字段位置、中文原因、影响与下一步动作。E5 原样展示中文，不另写解释。",
+   "properties": {
+    "audit_ref": {
+     "anyOf": [
+      {
+       "maxLength": 200,
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Audit Ref"
+    },
+    "code": {
+     "pattern": "^[a-z][a-z0-9_]{1,63}$",
+     "title": "Code",
+     "type": "string"
+    },
+    "field": {
+     "maxLength": 160,
+     "minLength": 1,
+     "title": "Field",
+     "type": "string"
+    },
+    "impact_zh": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Impact Zh",
+     "type": "string"
+    },
+    "message_zh": {
+     "maxLength": 400,
+     "minLength": 1,
+     "title": "Message Zh",
+     "type": "string"
+    },
+    "next_action_zh": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Next Action Zh",
+     "type": "string"
+    },
+    "severity": {
+     "enum": [
+      "error",
+      "warning",
+      "info"
+     ],
+     "title": "Severity",
+     "type": "string"
+    }
+   },
+   "required": [
+    "code",
+    "severity",
+    "field",
+    "message_zh",
+    "impact_zh",
+    "next_action_zh"
+   ],
+   "title": "ProductIssue",
+   "type": "object"
+  },
+  "ProductMeta": {
+   "additionalProperties": false,
+   "description": "每条产品消息都带的共同元数据：结构、问卷、词表、健康问卷、转换的版本与资料包身份。",
+   "properties": {
+    "conversion_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Conversion Version",
+     "type": "string"
+    },
+    "data_pack": {
+     "$ref": "#/$defs/DataPackRef"
+    },
+    "health_questionnaire_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Health Questionnaire Version",
+     "type": "string"
+    },
+    "questionnaire_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Questionnaire Version",
+     "type": "string"
+    },
+    "sample": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/SampleLabel"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "schema_version": {
+     "const": "e3a-product-schema-v3.2",
+     "title": "Schema Version",
+     "type": "string"
+    },
+    "vocabulary_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Vocabulary Version",
+     "type": "string"
+    }
+   },
+   "required": [
+    "schema_version",
+    "questionnaire_version",
+    "vocabulary_version",
+    "health_questionnaire_version",
+    "conversion_version",
+    "data_pack"
+   ],
+   "title": "ProductMeta",
+   "type": "object"
+  },
+  "ProductMoney": {
+   "additionalProperties": false,
+   "description": "一笔钱：整数最小单位（美元是分）、币种与计价口径；``display`` 只供显示。",
+   "properties": {
+    "amount_minor": {
+     "title": "Amount Minor",
+     "type": "integer"
+    },
+    "currency": {
+     "pattern": "^[A-Z]{3}$",
+     "title": "Currency",
+     "type": "string"
+    },
+    "display": {
+     "maxLength": 40,
+     "minLength": 1,
+     "title": "Display",
+     "type": "string"
+    },
+    "numeraire_id": {
+     "maxLength": 40,
+     "minLength": 1,
+     "title": "Numeraire Id",
+     "type": "string"
+    }
+   },
+   "required": [
+    "amount_minor",
+    "currency",
+    "numeraire_id",
+    "display"
+   ],
+   "title": "ProductMoney",
+   "type": "object"
+  },
+  "ProductPreflight": {
+   "additionalProperties": false,
+   "description": "一次运行前检查。``preflight_fingerprint`` 覆盖除它本身以外的全部内容；确认画像或运行身份变了，旧预检查失效。",
+   "properties": {
+    "binding": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/RunBinding"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "cities": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/CityPreflight"
+     },
+     "title": "Cities",
+     "type": "array"
+    },
+    "clones_per_city": {
+     "minimum": 0,
+     "title": "Clones Per City",
+     "type": "integer"
+    },
+    "confirmed": {
+     "$ref": "#/$defs/ConfirmedRef"
+    },
+    "executable": {
+     "$ref": "#/$defs/CapabilityStatus"
+    },
+    "feedback": {
+     "$ref": "#/$defs/CapabilityStatus"
+    },
+    "issues": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/ProductIssue"
+     },
+     "title": "Issues",
+     "type": "array"
+    },
+    "meta": {
+     "$ref": "#/$defs/ProductMeta"
+    },
+    "planner": {
+     "$ref": "#/$defs/PlannerAndCost"
+    },
+    "preflight_fingerprint": {
+     "pattern": "^[0-9a-f]{64}$",
+     "title": "Preflight Fingerprint",
+     "type": "string"
+    },
+    "preflight_id": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+     "title": "Preflight Id",
+     "type": "string"
+    },
+    "scope_notes": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/ScopeNote"
+     },
+     "title": "Scope Notes",
+     "type": "array"
+    },
+    "scope_zh": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Scope Zh",
+     "type": "array"
+    },
+    "scorable": {
+     "$ref": "#/$defs/CapabilityStatus"
+    },
+    "start": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/StartSummary"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "status": {
+     "enum": [
+      "ready",
+      "blocked"
+     ],
+     "title": "Status",
+     "type": "string"
+    },
+    "years": {
+     "minimum": 1,
+     "title": "Years",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "meta",
+    "preflight_id",
+    "confirmed",
+    "status",
+    "executable",
+    "scorable",
+    "feedback",
+    "clones_per_city",
+    "years",
+    "planner",
+    "preflight_fingerprint"
+   ],
+   "title": "ProductPreflight",
+   "type": "object"
+  },
+  "PublicExplanation": {
+   "additionalProperties": false,
+   "description": "给用户看的状态说明（E3-A 收尾 F5）：只由结构化类别生成——类别代码、中文原因、影响与下一步，加一个不含内部内容的审计编号。\n\n不透传异常原文、内部路径或参数；完整原文留在运行归档或内部诊断里，``audit_ref`` 指向它（运行编号、分身与记录文件）。",
+   "properties": {
+    "audit_ref": {
+     "anyOf": [
+      {
+       "maxLength": 200,
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Audit Ref"
+    },
+    "category": {
+     "pattern": "^[a-z][a-z0-9_]{1,63}$",
+     "title": "Category",
+     "type": "string"
+    },
+    "impact_zh": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Impact Zh",
+     "type": "string"
+    },
+    "next_action_zh": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Next Action Zh",
+     "type": "string"
+    },
+    "reason_zh": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Reason Zh",
+     "type": "string"
+    }
+   },
+   "required": [
+    "category",
+    "reason_zh",
+    "impact_zh",
+    "next_action_zh"
+   ],
+   "title": "PublicExplanation",
+   "type": "object"
+  },
+  "QuotaSummary": {
+   "additionalProperties": false,
+   "description": "这个专属空间的使用次数：一共 ``total`` 次启动模拟的机会；``used`` 已开始的、``reserved`` 已确认开始但还没有启动的、\n``available`` 还能用的。次数不自动重置；删除结果、换设备、重发链接都不改变它。3 次是启动模拟的机会，不保证每次所有分身都完整。",
+   "properties": {
+    "available": {
+     "minimum": 0,
+     "title": "Available",
+     "type": "integer"
+    },
+    "reserved": {
+     "minimum": 0,
+     "title": "Reserved",
+     "type": "integer"
+    },
+    "total": {
+     "minimum": 0,
+     "title": "Total",
+     "type": "integer"
+    },
+    "used": {
+     "minimum": 0,
+     "title": "Used",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "total",
+    "used",
+    "reserved",
+    "available"
+   ],
+   "title": "QuotaSummary",
+   "type": "object"
+  },
+  "RunBinding": {
+   "additionalProperties": false,
+   "description": "预检查绑定的运行身份：编译出的 E1 输入、协议、评分、评价、提示模板、规划器与运行清单的内容身份。变了就要重新预检查。",
+   "properties": {
+    "compiled_inputs": {
+     "additionalProperties": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+     },
+     "title": "Compiled Inputs",
+     "type": "object"
+    },
+    "evaluation_spec_id": {
+     "title": "Evaluation Spec Id",
+     "type": "string"
+    },
+    "identities_fingerprint": {
+     "pattern": "^[0-9a-f]{64}$",
+     "title": "Identities Fingerprint",
+     "type": "string"
+    },
+    "planner_id": {
+     "title": "Planner Id",
+     "type": "string"
+    },
+    "planner_kind": {
+     "enum": [
+      "mock",
+      "llm"
+     ],
+     "title": "Planner Kind",
+     "type": "string"
+    },
+    "prompt_template": {
+     "title": "Prompt Template",
+     "type": "string"
+    },
+    "protocol_id": {
+     "title": "Protocol Id",
+     "type": "string"
+    },
+    "scoring_content_fingerprint": {
+     "pattern": "^[0-9a-f]{64}$",
+     "title": "Scoring Content Fingerprint",
+     "type": "string"
+    },
+    "scoring_version": {
+     "title": "Scoring Version",
+     "type": "string"
+    }
+   },
+   "required": [
+    "protocol_id",
+    "scoring_version",
+    "scoring_content_fingerprint",
+    "evaluation_spec_id",
+    "prompt_template",
+    "planner_kind",
+    "planner_id",
+    "compiled_inputs",
+    "identities_fingerprint"
+   ],
+   "title": "RunBinding",
+   "type": "object"
+  },
+  "RunIntentView": {
+   "additionalProperties": false,
+   "description": "一次运行意图的公开视图（网页流程）：阶段与中文说明、当前预检查与确认身份、进度、是否有结果、此刻允许的操作、在等谁、\n时间与删除状态、安全解释与支持编号。不含流程内部编号、checkpoint、文件路径、堆栈或内部诊断正文。\n\n``stage = finished`` 只表示本次服务流程结束：结果里的 C / E / M、未知与部分结果照 E1 原样显示；没有结果时 ``result_available``\n为假，不编一个。",
+   "properties": {
+    "allowed_actions": {
+     "default": [],
+     "items": {
+      "enum": [
+       "submit",
+       "cancel",
+       "resume",
+       "delete",
+       "view_progress",
+       "view_result",
+       "create_new_intent"
+      ],
+      "type": "string"
+     },
+     "title": "Allowed Actions",
+     "type": "array"
+    },
+    "confirm_with": {
+     "anyOf": [
+      {
+       "pattern": "^[0-9a-f]{64}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Confirm With"
+    },
+    "confirmed": {
+     "$ref": "#/$defs/ConfirmedRef"
+    },
+    "created_at": {
+     "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+     "title": "Created At",
+     "type": "string"
+    },
+    "deletion": {
+     "$ref": "#/$defs/DeletionState"
+    },
+    "expires_at": {
+     "anyOf": [
+      {
+       "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Expires At"
+    },
+    "explanation": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/PublicExplanation"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "intent_id": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+     "title": "Intent Id",
+     "type": "string"
+    },
+    "meta": {
+     "$ref": "#/$defs/ProductMeta"
+    },
+    "preflight": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/ProductPreflight"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "progress": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/RunProgress"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "quota": {
+     "$ref": "#/$defs/QuotaSummary"
+    },
+    "result_available": {
+     "title": "Result Available",
+     "type": "boolean"
+    },
+    "run_id": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Run Id"
+    },
+    "stage": {
+     "enum": [
+      "checking",
+      "awaiting_confirmation",
+      "blocked",
+      "queued",
+      "running",
+      "needs_attention",
+      "finished",
+      "cancelled",
+      "deleting",
+      "deleted",
+      "expired"
+     ],
+     "title": "Stage",
+     "type": "string"
+    },
+    "stage_zh": {
+     "maxLength": 120,
+     "minLength": 1,
+     "title": "Stage Zh",
+     "type": "string"
+    },
+    "support_ref": {
+     "anyOf": [
+      {
+       "pattern": "^sup-[0-9a-f]{16}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Support Ref"
+    },
+    "updated_at": {
+     "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+     "title": "Updated At",
+     "type": "string"
+    },
+    "waiting_for": {
+     "enum": [
+      "user",
+      "maintainer",
+      "service",
+      "none"
+     ],
+     "title": "Waiting For",
+     "type": "string"
+    }
+   },
+   "required": [
+    "meta",
+    "intent_id",
+    "stage",
+    "stage_zh",
+    "waiting_for",
+    "confirmed",
+    "result_available",
+    "created_at",
+    "updated_at",
+    "deletion",
+    "quota"
+   ],
+   "title": "RunIntentView",
+   "type": "object"
+  },
+  "RunProgress": {
+   "additionalProperties": false,
+   "description": "一次运行的进度（断线后用运行 ID 查询；不重发付费规划）。请求成功、计划可执行、生活完成、评分完整分别记录。",
+   "properties": {
+    "clones": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/CloneProgress"
+     },
+     "title": "Clones",
+     "type": "array"
+    },
+    "cost": {
+     "$ref": "#/$defs/CostStatus"
+    },
+    "meta": {
+     "$ref": "#/$defs/ProductMeta"
+    },
+    "pause": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/PublicExplanation"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "report_available": {
+     "title": "Report Available",
+     "type": "boolean"
+    },
+    "resumable": {
+     "title": "Resumable",
+     "type": "boolean"
+    },
+    "resume_note": {
+     "title": "Resume Note",
+     "type": "string"
+    },
+    "run_id": {
+     "title": "Run Id",
+     "type": "string"
+    },
+    "stage": {
+     "enum": [
+      "queued",
+      "running",
+      "completed",
+      "paused",
+      "halted",
+      "interrupted",
+      "budget_exhausted"
+     ],
+     "title": "Stage",
+     "type": "string"
+    },
+    "stage_zh": {
+     "title": "Stage Zh",
+     "type": "string"
+    },
+    "updated_at": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Updated At"
+    }
+   },
+   "required": [
+    "meta",
+    "run_id",
+    "stage",
+    "stage_zh",
+    "cost",
+    "resumable",
+    "resume_note",
+    "report_available"
+   ],
+   "title": "RunProgress",
+   "type": "object"
+  },
+  "RunReceipt": {
+   "additionalProperties": false,
+   "description": "提交回执：接受、重复提交（返回原运行 ID，不再生成新的一批分身）或拒绝（附原因）。",
+   "properties": {
+    "idempotency_key": {
+     "title": "Idempotency Key",
+     "type": "string"
+    },
+    "meta": {
+     "$ref": "#/$defs/ProductMeta"
+    },
+    "reasons": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/ProductIssue"
+     },
+     "title": "Reasons",
+     "type": "array"
+    },
+    "run_id": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Run Id"
+    },
+    "service": {
+     "enum": [
+      "offline_bridge",
+      "hosted_service",
+      "contract_example_only"
+     ],
+     "title": "Service",
+     "type": "string"
+    },
+    "status": {
+     "enum": [
+      "accepted",
+      "duplicate_same_run",
+      "rejected"
+     ],
+     "title": "Status",
+     "type": "string"
+    }
+   },
+   "required": [
+    "meta",
+    "status",
+    "idempotency_key",
+    "service"
+   ],
+   "title": "RunReceipt",
+   "type": "object"
+  },
+  "SampleLabel": {
+   "additionalProperties": false,
+   "description": "公共样例的出处标签（只出现在样例里；真实运行的消息不写）。\n\n* ``offline_run``：由离线闭环实际执行产生；\n* ``controlled_fixture``：受控测试夹具（例如写好的计划、注入的事件、构造的资料缺口），标明来源；\n* ``contract_example``：线上服务（幂等提交、查询、断线恢复）尚未实现，这里只是**标明为示例**的契约响应。",
+   "properties": {
+    "note": {
+     "maxLength": 600,
+     "minLength": 1,
+     "title": "Note",
+     "type": "string"
+    },
+    "origin": {
+     "enum": [
+      "offline_run",
+      "controlled_fixture",
+      "contract_example"
+     ],
+     "title": "Origin",
+     "type": "string"
+    },
+    "produced_by": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Produced By",
+     "type": "string"
+    },
+    "synthetic": {
+     "const": true,
+     "default": true,
+     "title": "Synthetic",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "origin",
+    "produced_by",
+    "note"
+   ],
+   "title": "SampleLabel",
+   "type": "object"
+  },
+  "ScopeNote": {
+   "additionalProperties": false,
+   "description": "预检查的一条范围说明（DECISIONS/0042）：这版支持什么、不支持什么、为什么。``cities`` 为空表示对全部候选城市都适用。\nE5 原样展示中文，不另写解释。",
+   "properties": {
+    "cities": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Cities",
+     "type": "array"
+    },
+    "text_zh": {
+     "maxLength": 600,
+     "minLength": 1,
+     "title": "Text Zh",
+     "type": "string"
+    },
+    "title_zh": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Title Zh",
+     "type": "string"
+    },
+    "topic": {
+     "enum": [
+      "occupations",
+      "tax",
+      "commute",
+      "menus",
+      "unsupported",
+      "data"
+     ],
+     "title": "Topic",
+     "type": "string"
+    }
+   },
+   "required": [
+    "topic",
+    "title_zh",
+    "text_zh"
+   ],
+   "title": "ScopeNote",
+   "type": "object"
+  },
+  "SourceKindCount": {
+   "additionalProperties": false,
+   "properties": {
+    "count": {
+     "minimum": 0,
+     "title": "Count",
+     "type": "integer"
+    },
+    "kind": {
+     "enum": [
+      "observed",
+      "derived",
+      "estimated",
+      "synthetic"
+     ],
+     "title": "Kind",
+     "type": "string"
+    }
+   },
+   "required": [
+    "kind",
+    "count"
+   ],
+   "title": "SourceKindCount",
+   "type": "object"
+  },
+  "StartSummary": {
+   "additionalProperties": false,
+   "description": "标准开局摘要：同一用户跨城、跨重复序号相同的个人条件。",
+   "properties": {
+    "abilities": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Abilities",
+     "type": "array"
+    },
+    "age_years": {
+     "title": "Age Years",
+     "type": "integer"
+    },
+    "cash": {
+     "$ref": "#/$defs/ProductMoney"
+    },
+    "monthly_energy_note": {
+     "title": "Monthly Energy Note",
+     "type": "string"
+    },
+    "monthly_time_note": {
+     "title": "Monthly Time Note",
+     "type": "string"
+    },
+    "occupation_label": {
+     "title": "Occupation Label",
+     "type": "string"
+    },
+    "rule": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Rule",
+     "type": "string"
+    },
+    "scenario_zh": {
+     "items": {
+      "type": "string"
+     },
+     "minItems": 1,
+     "title": "Scenario Zh",
+     "type": "array"
+    }
+   },
+   "required": [
+    "rule",
+    "age_years",
+    "cash",
+    "occupation_label",
+    "monthly_time_note",
+    "monthly_energy_note",
+    "scenario_zh"
+   ],
+   "title": "StartSummary",
+   "type": "object"
+  },
+  "TaxScope": {
+   "additionalProperties": false,
+   "description": "这座城适用的税（DECISIONS/0042）：官方 2024 年规则（单身、只有工资收入、标准扣除）或合成测试替身；支持的居住与工作地、\n规则名称、官方说明没有的税，以及没有建模的部分（照实写，不当作已经覆盖）。",
+   "properties": {
+    "absent_zh": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Absent Zh",
+     "type": "array"
+    },
+    "not_modeled_zh": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Not Modeled Zh",
+     "type": "array"
+    },
+    "policy_id": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Policy Id",
+     "type": "string"
+    },
+    "residence_scope_zh": {
+     "anyOf": [
+      {
+       "maxLength": 400,
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Residence Scope Zh"
+    },
+    "rules_zh": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Rules Zh",
+     "type": "array"
+    },
+    "status": {
+     "enum": [
+      "official_2024_rules",
+      "synthetic_test_double"
+     ],
+     "title": "Status",
+     "type": "string"
+    },
+    "status_zh": {
+     "maxLength": 120,
+     "minLength": 1,
+     "title": "Status Zh",
+     "type": "string"
+    }
+   },
+   "required": [
+    "policy_id",
+    "status",
+    "status_zh"
+   ],
+   "title": "TaxScope",
+   "type": "object"
+  }
+ },
+ "additionalProperties": false,
+ "properties": {
+  "intent": {
+   "$ref": "#/$defs/RunIntentView"
+  },
+  "meta": {
+   "$ref": "#/$defs/ProductMeta"
+  },
+  "receipt": {
+   "$ref": "#/$defs/RunReceipt"
+  }
+ },
+ "required": [
+  "meta",
+  "receipt",
+  "intent"
+ ],
+ "title": "RunSubmitReply",
+ "type": "object"
+}

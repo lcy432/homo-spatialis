@@ -1,0 +1,13 @@
+{
+ "description_zh": "用专属链接换会话（POST /api/v1/session，同源 JSON）：invite_token 是链接 #token= 后面的秘密；这里是明确无效的测试值",
+ "message": "SessionExchangeRequest",
+ "payload": {
+  "invite_token": "TEST_ONLY_invalid_invite_token_00000000000000"
+ },
+ "sample": {
+  "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+  "origin": "offline_run",
+  "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+  "synthetic": true
+ }
+}

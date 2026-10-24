@@ -10,7 +10,7 @@
   ],
   "confirmable": false,
   "draft": {
-   "draft_fingerprint": "7d414c413b9e71a93e5a342b4fa8a2b26b16df3390843847f84aece82c84338a",
+   "draft_fingerprint": "a045784be4f8ae905933d01941609ff8a3ab38ea6c84ec906a37eadcd93b93e0",
    "draft_id": "draft.u511.duplicates",
    "revision": 1
   },
@@ -293,7 +293,7 @@
     "produced_by": "product.scenarios.duplicate_answers",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.1",
+   "schema_version": "e3a-product-schema-v3.2",
    "vocabulary_version": "e3a-vocabulary-v3"
   },
   "money": {

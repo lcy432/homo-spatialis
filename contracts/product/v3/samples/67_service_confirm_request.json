@@ -1,0 +1,19 @@
+{
+ "description_zh": "确认画像：只带审阅引用与知悉项；服务端重新校验并生成确认画像",
+ "message": "ProfileConfirmRequest",
+ "payload": {
+  "acknowledged": [
+   "ack:interests_not_personalized",
+   "ack:standard_start"
+  ],
+  "draft_id": "draft-0000000000000005",
+  "draft_revision": 2,
+  "review_id": "review.draft-0000000000000005.r2"
+ },
+ "sample": {
+  "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+  "origin": "offline_run",
+  "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+  "synthetic": true
+ }
+}

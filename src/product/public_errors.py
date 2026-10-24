@@ -106,6 +106,7 @@ _HALT_TEXT: dict[str, str] = {
     "uncertain_send": "上一次请求可能已经发出但结果没有可靠落盘，为免重复付费，批次停下",
     "request_check": "最终请求没有通过信息隔离检查，批次停下",
     "model_mismatch": "服务返回的模型与设定不同，回复不能用于规划，批次停下",
+    "user_deletion": "你删除了这次运行，系统不再发出新的模型请求，批次停下",
 }
 
 

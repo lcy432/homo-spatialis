@@ -19,11 +19,11 @@
     "produced_by": "product.scenarios.closed_loop(normal)",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.1",
+   "schema_version": "e3a-product-schema-v3.2",
    "vocabulary_version": "e3a-vocabulary-v3"
   },
   "reasons": [],
-  "run_id": "run-e3a-92db3ca11973fbf1",
+  "run_id": "run-e3a-dcdce9fe3445d138",
   "service": "offline_bridge",
   "status": "accepted"
  }
