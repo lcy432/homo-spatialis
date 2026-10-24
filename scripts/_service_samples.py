@@ -1,4 +1,4 @@
-"""托管服务（E3C，``e3a-product-schema-v3.2``）的公共样例：全部由服务端的真实代码路径产生（HTTP → 业务函数 → worker →
+"""托管服务（E3C，``e3a-product-schema-v3.3``）的公共样例：全部由服务端的真实代码路径产生（HTTP → 业务函数 → worker →
 LangGraph → E1），由 ``scripts/product_e3a.py samples`` 调用。
 
 * 人物是合成的；资料是合成资料包；规划器是离线 mock，零网络、零费用；
@@ -44,7 +44,7 @@ class _Box:
             "data_dir": str(work / "data"),
             "site_origin": ORIGIN,
             "pack_path": "configs/product/e3a_synthetic_pack.yaml",
-            "repeat_indexes": (0,),
+            "default_clones_per_city": 1,
             "planner": "mock",
             "workers": 1,
             "progress_poll_seconds": 3600,
@@ -93,7 +93,7 @@ class _Box:
             self.ctx.pack,
             draft_id=d["draft_id"],
             revision=d["revision"],
-            cities=tuple(self.ctx.spec.cities),
+            cities=kw.pop("cities", tuple(self.ctx.policy.cities_allowed)),
             **kw,
         )
         return {"expected_revision": d["revision"], "draft": draft.model_dump(mode="json")}
@@ -110,10 +110,11 @@ class _Box:
         }
         return req, self.post("/profiles/confirm", req).json()
 
-    def ready(self, **kw: Any) -> dict[str, Any]:
+    def ready(self, options: dict[str, Any] | None = None, **kw: Any) -> dict[str, Any]:
         _, reply = self.confirmed(**kw)
         intent = self.post(
-            "/run-intents", {"confirmed_id": reply["confirmed"]["confirmed_id"]}
+            "/run-intents",
+            {"confirmed_id": reply["confirmed"]["confirmed_id"], **(options or {})},
         ).json()
         self.worker.run_pending()
         return self.get(f"/run-intents/{intent['intent_id']}").json()
@@ -124,8 +125,8 @@ class _Box:
             {"confirm_with": view["confirm_with"], "idempotency_key": key, "accept_scope": True},
         )
 
-    def finished(self, **kw: Any) -> dict[str, Any]:
-        view = self.ready(**kw)
+    def finished(self, options: dict[str, Any] | None = None, **kw: Any) -> dict[str, Any]:
+        view = self.ready(options, **kw)
         self.submit(view, f"key-{view['intent_id']}")
         self.worker.run_pending()
         return self.get(f"/run-intents/{view['intent_id']}").json()
@@ -233,7 +234,153 @@ class _Samples:
         self.quota(box)
         self.deletion(box)
         self.running()
+        self.options(box)
+        self.stops()
+        self.e3b_result()
         self.expiry_and_errors(box)
+
+    # ---- 运行选项：较小规模、越界（E3C 收尾第二步）
+    def options(self, box: _Box) -> None:
+        w = self.w
+        box.person("合成人物 u530")
+        req, reply = box.confirmed(cities=("US:SYNTH2026:K51",))
+        create = {
+            "confirmed_id": reply["confirmed"]["confirmed_id"],
+            "clones_per_city": 2,
+            "max_cost_cny": "5",
+        }
+        w(
+            "97_service_intent_create_smaller",
+            "RunIntentCreateRequest",
+            "准备一次较小规模的模拟：城市来自确认画像（这里只确认了 K51 一座城），每城 2 个分身、这次费用上限 5 元；省略的年数用服务默认",
+            create,
+        )
+        intent = box.post("/run-intents", create).json()
+        box.worker.run_pending()
+        w(
+            "98_service_intent_smaller_ready",
+            "RunIntentView",
+            "较小规模的运行意图：settings 是这次保存的有效设置（1 座城 × 每城 2 个分身 × 3 年，规划候选上限 1 × 2 × 3 × 3 = 18）；"
+            "之后的检查、确认、执行与恢复都用这一份，改服务默认值不影响它",
+            box.get(f"/run-intents/{intent['intent_id']}").json(),
+        )
+        box.post(f"/run-intents/{intent['intent_id']}/cancel")
+        w(
+            "99_service_error_run_options_invalid",
+            "ServiceError",
+            "选项不在服务允许的范围里（这里每城 9 个分身，允许 1–4）：在预留与任何调用之前就拒绝；field 指出是哪一项，不回显填的值",
+            box.post(
+                "/run-intents",
+                {"confirmed_id": reply["confirmed"]["confirmed_id"], "clones_per_city": 9},
+            ).json(),
+        )
+        del req
+
+    # ---- 停下：服务尝试用完（不能恢复）、预算停下、开始之后的失败（测试传输与受控夹具）
+    def stops(self) -> None:
+        from agentlayer.life_llm import TransportError
+
+        w = self.w
+
+        class Flaky:
+            """测试传输：前两次服务请求都超时（同一份候选的两次服务尝试用完）。"""
+
+            def __init__(self) -> None:
+                self.n = 0
+
+            def send(self, body: dict[str, Any], *, timeout: float) -> Any:
+                self.n += 1
+                raise TransportError("timeout", retryable=True)
+
+        exhausted = _Box(
+            self.work / "exhausted", self.clock, planner="llm", live_calls_enabled=True
+        )
+        flaky = Flaky()
+        exhausted.worker.transport_factory = lambda _s: flaky
+        exhausted.person("合成人物 u531")
+        view = exhausted.ready()
+        exhausted.submit(view, "key-exhausted-0001")
+        exhausted.worker.run_pending()
+        stopped = exhausted.get(f"/run-intents/{view['intent_id']}").json()
+        w(
+            "100_service_intent_not_resumable",
+            "RunIntentView",
+            "停下且不能由你恢复（测试传输：同一份规划的两次服务尝试都超时，尝试次数已经用完）：waiting_for = maintainer，"
+            "没有“恢复”按钮——E1 不会再发这份请求，也不会清零尝试次数或另开账本",
+            stopped,
+            self.fixture,
+        )
+        w(
+            "101_service_progress_not_resumable",
+            "RunProgress",
+            "同一次运行的进度：resumable = false，与按钮一致（测试传输）",
+            exhausted.get(f"/runs/{stopped['run_id']}/progress").json(),
+            self.fixture,
+        )
+        budget = _Box(
+            self.work / "budget",
+            self.clock,
+            planner="llm",
+            live_calls_enabled=True,
+            max_cost_cny="0.1",
+        )
+        gate, reached = threading.Event(), threading.Event()
+        gate.set()
+        budget.worker.transport_factory = lambda _s: _test_transport(None, gate, reached)
+        budget.person("合成人物 u532")
+        bv = budget.ready()
+        budget.submit(bv, "key-budget-0001")
+        budget.worker.run_pending()
+        w(
+            "102_service_intent_budget_stopped",
+            "RunIntentView",
+            "预算停下（测试传输，这次费用上限 0.1 元）：发下一次请求的预留会超过上限，就停在发送之前；不自动追加预算，已经完成的部分"
+            "保留；开始之后不退次数",
+            budget.get(f"/run-intents/{bv['intent_id']}").json(),
+            self.fixture,
+        )
+        charged = _Box(self.work / "charged", self.clock)
+        charged.person("合成人物 u533")
+        cv = charged.ready()
+        charged.submit(cv, "key-charged-0001")
+        charged.worker.faults = {"life:halt_at_call:3:service_unavailable"}
+        charged.worker.run_pending()
+        charged.worker.faults = None
+        snap = charged.ctx.run_dir(cv["intent_id"]) / "ws/configs/life/synthetic_product.yaml"
+        snap.write_bytes(snap.read_bytes() + b"\n# controlled fixture change\n")
+        paused = charged.get(f"/run-intents/{cv['intent_id']}").json()
+        charged.post(f"/runs/{paused['run_id']}/resume")
+        charged.worker.run_pending()
+        w(
+            "103_service_intent_charged_failure",
+            "RunIntentView",
+            "开始之后的失败（受控夹具：暂停期间这次运行绑定的资料快照被改动，恢复被拒绝）：说明写“模拟已经开始、已经用掉 1 次机会”，"
+            "不说“没有开始”“已经退回”；没有“取消”，等维护者或删除",
+            charged.get(f"/run-intents/{cv['intent_id']}").json(),
+            self.fixture,
+        )
+
+    # ---- 最新六城资料：E3B 真实资料包经服务路径的结果（每城 1 个分身，离线 mock）
+    def e3b_result(self) -> None:
+        real = _Box(
+            self.work / "e3b",
+            self.clock,
+            pack_path="configs/product/e3b_us_v1_pack.yaml",
+            workers=6,
+        )
+        real.person("合成人物 u534")
+        done = real.finished(abilities=("edu_at_least_hs",))
+        result = real.get(f"/runs/{done['run_id']}/result").json()
+        ident = real.ctx.pack.fingerprint
+        report = real.ctx.repo / "data/frozen/life/us-v1/pack/report.json"
+        build = json.loads(report.read_text(encoding="utf-8")).get("build_identity", "?")
+        self.w(
+            "104_service_e3b_result",
+            "ProductResult",
+            f"最新六城资料（冻结的 E3B 真实资料包，内容身份 {ident[:12]}…，构建身份 {build[:12]}…）经托管服务路径的结果：六座城各 1 个"
+            "分身、3 年，离线 mock；逐城的资料性质与覆盖说明在 data_nature，C / E / M 与模拟缺失照 E1 原样（不是“全部 C”）",
+            result,
+        )
 
     # ---- 正常路径：链接 → 草稿 → 审阅 → 确认 → 排队检查 → 确认开始 → 结束
     def normal_path(self, box: _Box) -> None:
@@ -251,7 +398,7 @@ class _Samples:
             "61_service_session",
             "SessionView",
             "当前会话：到期时间（固定 7 天，查询不续期）、本会话的 CSRF token（样例里换成了无效测试值）、次数 3/0/0/3 与服务规则"
-            "（这是测试配置：合成资料包、每城 1 个分身；生产配置固定六城 × 每城 4 个分身 × 3 年）",
+            "（这是测试配置：合成资料包、默认每城 1 个分身；生产默认六城 × 每城 4 个分身 × 3 年、20 元，可选范围在 rules.options）",
             session,
         )
         blank = box.post("/drafts").json()
@@ -488,7 +635,9 @@ class _Samples:
             if not reached.wait(120):
                 raise RuntimeError("测试传输没有收到第 4 次发送")
             row = live.ctx.store.intent_row(view["intent_id"])
-            live.worker._write_progress(view["intent_id"], row["run_id"])
+            live.worker._write_progress(
+                view["intent_id"], row["run_id"], running_now=True
+            )  # 与监测线程运行中的那一次写相同
             running = live.get(f"/run-intents/{view['intent_id']}").json()
             progress = live.get(f"/runs/{row['run_id']}/progress").json()
         finally:
@@ -506,7 +655,8 @@ class _Samples:
             "77_service_progress_running",
             "RunProgress",
             "运行中的进度（测试传输）：费用按报价估算——已核算、用量不确定（保留预留）与在途预留分开写；规划候选数（calls_used）"
-            "与服务尝试数（service_attempts）分开计；10 元是应用侧上限，不是供应商账单",
+            "与服务尝试数（service_attempts）分开计；费用上限（这次运行的有效设置，默认 20 元）是应用侧上限，不是供应商账单；"
+            "运行还在进行，没有要恢复的东西",
             progress,
             self.fixture,
         )

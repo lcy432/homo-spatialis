@@ -1,0 +1,8864 @@
+{
+ "description_zh": "最新六城资料（冻结的 E3B 真实资料包，内容身份 48eda959e2eb…，构建身份 4a1e73793ef4…）经托管服务路径的结果：六座城各 1 个分身、3 年，离线 mock；逐城的资料性质与覆盖说明在 data_nature，C / E / M 与模拟缺失照 E1 原样（不是“全部 C”）",
+ "message": "ProductResult",
+ "payload": {
+  "cities": [
+   {
+    "city_ref": "US:CBSA2023:35620",
+    "complete": 1,
+    "exit_share": {
+     "display": "0.0000",
+     "exact": "0"
+    },
+    "exits": 0,
+    "hard_requirements": [
+     {
+      "checked": 1,
+      "need": "commute_limit",
+      "not_checked": 0,
+      "planned": 1,
+      "satisfied_every_month": 1,
+      "satisfied_in_lived_months": 0,
+      "unknown": 0,
+      "violated": 0
+     }
+    ],
+    "headline_zh": "纽约（纽约市五区居民）：原计划 1 个分身——1 个完成且可评价、0 个生活出局、0 个模拟问题；1 个完成且可评价分身的平均 J 为 0.5683（分母只数完成且可评价的分身，不是原计划的全部分身）",
+    "label": "纽约（纽约市五区居民）",
+    "mean_denominator": 1,
+    "mean_j": {
+     "display": "0.5683",
+     "exact": "11365686247228193/20000000000000000"
+    },
+    "mean_l": {
+     "display": "0.5439",
+     "exact": "8158896043229863/15000000000000000"
+    },
+    "mean_v": {
+     "display": "0.6414",
+     "exact": "320679020399833/500000000000000"
+    },
+    "missing": 0,
+    "missing_reasons": [],
+    "missing_share": {
+     "display": "0.0000",
+     "exact": "0"
+    },
+    "notes_zh": [
+     "只有 1 个完整评价分身：均值就是它的 J，不是稳定的抽样证据"
+    ],
+    "planned": 1,
+    "range_denominator": 1,
+    "range_lower": {
+     "display": "0.5683",
+     "exact": "11365686247228193/20000000000000000"
+    },
+    "range_upper": {
+     "display": "0.5683",
+     "exact": "11365686247228193/20000000000000000"
+    }
+   },
+   {
+    "city_ref": "US:CBSA2023:31080",
+    "complete": 1,
+    "exit_share": {
+     "display": "0.0000",
+     "exact": "0"
+    },
+    "exits": 0,
+    "hard_requirements": [
+     {
+      "checked": 1,
+      "need": "commute_limit",
+      "not_checked": 0,
+      "planned": 1,
+      "satisfied_every_month": 1,
+      "satisfied_in_lived_months": 0,
+      "unknown": 0,
+      "violated": 0
+     }
+    ],
+    "headline_zh": "洛杉矶：原计划 1 个分身——1 个完成且可评价、0 个生活出局、0 个模拟问题；1 个完成且可评价分身的平均 J 为 0.5672（分母只数完成且可评价的分身，不是原计划的全部分身）",
+    "label": "洛杉矶",
+    "mean_denominator": 1,
+    "mean_j": {
+     "display": "0.5672",
+     "exact": "22689484873187433/40000000000000000"
+    },
+    "mean_l": {
+     "display": "0.5510",
+     "exact": "1102003572595937/2000000000000000"
+    },
+    "mean_v": {
+     "display": "0.6159",
+     "exact": "3079715642124189/5000000000000000"
+    },
+    "missing": 0,
+    "missing_reasons": [],
+    "missing_share": {
+     "display": "0.0000",
+     "exact": "0"
+    },
+    "notes_zh": [
+     "只有 1 个完整评价分身：均值就是它的 J，不是稳定的抽样证据"
+    ],
+    "planned": 1,
+    "range_denominator": 1,
+    "range_lower": {
+     "display": "0.5672",
+     "exact": "22689484873187433/40000000000000000"
+    },
+    "range_upper": {
+     "display": "0.5672",
+     "exact": "22689484873187433/40000000000000000"
+    }
+   },
+   {
+    "city_ref": "US:CBSA2023:41860",
+    "complete": 1,
+    "exit_share": {
+     "display": "0.0000",
+     "exact": "0"
+    },
+    "exits": 0,
+    "hard_requirements": [
+     {
+      "checked": 1,
+      "need": "commute_limit",
+      "not_checked": 0,
+      "planned": 1,
+      "satisfied_every_month": 1,
+      "satisfied_in_lived_months": 0,
+      "unknown": 0,
+      "violated": 0
+     }
+    ],
+    "headline_zh": "旧金山：原计划 1 个分身——1 个完成且可评价、0 个生活出局、0 个模拟问题；1 个完成且可评价分身的平均 J 为 0.5656（分母只数完成且可评价的分身，不是原计划的全部分身）",
+    "label": "旧金山",
+    "mean_denominator": 1,
+    "mean_j": {
+     "display": "0.5656",
+     "exact": "22623843626747079/40000000000000000"
+    },
+    "mean_l": {
+     "display": "0.5454",
+     "exact": "5453670786487187/10000000000000000"
+    },
+    "mean_v": {
+     "display": "0.6263",
+     "exact": "3131415633642759/5000000000000000"
+    },
+    "missing": 0,
+    "missing_reasons": [],
+    "missing_share": {
+     "display": "0.0000",
+     "exact": "0"
+    },
+    "notes_zh": [
+     "只有 1 个完整评价分身：均值就是它的 J，不是稳定的抽样证据"
+    ],
+    "planned": 1,
+    "range_denominator": 1,
+    "range_lower": {
+     "display": "0.5656",
+     "exact": "22623843626747079/40000000000000000"
+    },
+    "range_upper": {
+     "display": "0.5656",
+     "exact": "22623843626747079/40000000000000000"
+    }
+   },
+   {
+    "city_ref": "US:CBSA2023:16980",
+    "complete": 1,
+    "exit_share": {
+     "display": "0.0000",
+     "exact": "0"
+    },
+    "exits": 0,
+    "hard_requirements": [
+     {
+      "checked": 1,
+      "need": "commute_limit",
+      "not_checked": 0,
+      "planned": 1,
+      "satisfied_every_month": 1,
+      "satisfied_in_lived_months": 0,
+      "unknown": 0,
+      "violated": 0
+     }
+    ],
+    "headline_zh": "芝加哥（伊利诺伊州部分）：原计划 1 个分身——1 个完成且可评价、0 个生活出局、0 个模拟问题；1 个完成且可评价分身的平均 J 为 0.5881（分母只数完成且可评价的分身，不是原计划的全部分身）",
+    "label": "芝加哥（伊利诺伊州部分）",
+    "mean_denominator": 1,
+    "mean_j": {
+     "display": "0.5881",
+     "exact": "23523416383189337/40000000000000000"
+    },
+    "mean_l": {
+     "display": "0.5672",
+     "exact": "17014580446059713/30000000000000000"
+    },
+    "mean_v": {
+     "display": "0.6509",
+     "exact": "813604492141203/1250000000000000"
+    },
+    "missing": 0,
+    "missing_reasons": [],
+    "missing_share": {
+     "display": "0.0000",
+     "exact": "0"
+    },
+    "notes_zh": [
+     "只有 1 个完整评价分身：均值就是它的 J，不是稳定的抽样证据"
+    ],
+    "planned": 1,
+    "range_denominator": 1,
+    "range_lower": {
+     "display": "0.5881",
+     "exact": "23523416383189337/40000000000000000"
+    },
+    "range_upper": {
+     "display": "0.5881",
+     "exact": "23523416383189337/40000000000000000"
+    }
+   },
+   {
+    "city_ref": "US:CBSA2023:26420",
+    "complete": 1,
+    "exit_share": {
+     "display": "0.0000",
+     "exact": "0"
+    },
+    "exits": 0,
+    "hard_requirements": [
+     {
+      "checked": 1,
+      "need": "commute_limit",
+      "not_checked": 0,
+      "planned": 1,
+      "satisfied_every_month": 1,
+      "satisfied_in_lived_months": 0,
+      "unknown": 0,
+      "violated": 0
+     }
+    ],
+    "headline_zh": "休斯敦：原计划 1 个分身——1 个完成且可评价、0 个生活出局、0 个模拟问题；1 个完成且可评价分身的平均 J 为 0.5141（分母只数完成且可评价的分身，不是原计划的全部分身）",
+    "label": "休斯敦",
+    "mean_denominator": 1,
+    "mean_j": {
+     "display": "0.5141",
+     "exact": "1028154786161723/2000000000000000"
+    },
+    "mean_l": {
+     "display": "0.5141",
+     "exact": "1028154786161723/2000000000000000"
+    },
+    "mean_v": {
+     "display": "0.5141",
+     "exact": "1028154786161723/2000000000000000"
+    },
+    "missing": 0,
+    "missing_reasons": [],
+    "missing_share": {
+     "display": "0.0000",
+     "exact": "0"
+    },
+    "notes_zh": [
+     "只有 1 个完整评价分身：均值就是它的 J，不是稳定的抽样证据"
+    ],
+    "planned": 1,
+    "range_denominator": 1,
+    "range_lower": {
+     "display": "0.5141",
+     "exact": "1028154786161723/2000000000000000"
+    },
+    "range_upper": {
+     "display": "0.5141",
+     "exact": "1028154786161723/2000000000000000"
+    }
+   },
+   {
+    "city_ref": "US:CBSA2023:42660",
+    "complete": 1,
+    "exit_share": {
+     "display": "0.0000",
+     "exact": "0"
+    },
+    "exits": 0,
+    "hard_requirements": [
+     {
+      "checked": 1,
+      "need": "commute_limit",
+      "not_checked": 0,
+      "planned": 1,
+      "satisfied_every_month": 1,
+      "satisfied_in_lived_months": 0,
+      "unknown": 0,
+      "violated": 0
+     }
+    ],
+    "headline_zh": "西雅图：原计划 1 个分身——1 个完成且可评价、0 个生活出局、0 个模拟问题；1 个完成且可评价分身的平均 J 为 0.5746（分母只数完成且可评价的分身，不是原计划的全部分身）",
+    "label": "西雅图",
+    "mean_denominator": 1,
+    "mean_j": {
+     "display": "0.5746",
+     "exact": "22982155462388093/40000000000000000"
+    },
+    "mean_l": {
+     "display": "0.5542",
+     "exact": "5542234693343317/10000000000000000"
+    },
+    "mean_v": {
+     "display": "0.6355",
+     "exact": "3177725691179071/5000000000000000"
+    },
+    "missing": 0,
+    "missing_reasons": [],
+    "missing_share": {
+     "display": "0.0000",
+     "exact": "0"
+    },
+    "notes_zh": [
+     "只有 1 个完整评价分身：均值就是它的 J，不是稳定的抽样证据"
+    ],
+    "planned": 1,
+    "range_denominator": 1,
+    "range_lower": {
+     "display": "0.5746",
+     "exact": "22982155462388093/40000000000000000"
+    },
+    "range_upper": {
+     "display": "0.5746",
+     "exact": "22982155462388093/40000000000000000"
+    }
+   }
+  ],
+  "clones": [
+   {
+    "category": "C",
+    "category_zh": "完成且评价完整",
+    "city_ref": "US:CBSA2023:35620",
+    "clone_ref": "pbc633718ac.35620.r0",
+    "event_chain": [],
+    "explanation": {
+     "audit_ref": null,
+     "category": "complete",
+     "impact_zh": "计入这座城完成且可评价分身的平均",
+     "next_action_zh": "看逐年生活事实；这是合成模型下的结果，不是现实预测",
+     "reason_zh": "三年生活正常完成，实际评分与期末估值都完整"
+    },
+    "hard_requirements": [
+     {
+      "months_not_lived": 0,
+      "months_not_satisfied": 0,
+      "months_satisfied": 36,
+      "months_unknown": 0,
+      "need": "commute_limit",
+      "summary": "satisfied_every_month"
+     }
+    ],
+    "j": {
+     "display": "0.5683",
+     "exact": "11365686247228193/20000000000000000"
+    },
+    "l_actual": {
+     "display": "0.5439",
+     "exact": "8158896043229863/15000000000000000"
+    },
+    "missing_reason": null,
+    "missing_reason_zh": null,
+    "range_lower": {
+     "display": "0.5683",
+     "exact": "11365686247228193/20000000000000000"
+    },
+    "range_upper": {
+     "display": "0.5683",
+     "exact": "11365686247228193/20000000000000000"
+    },
+    "reference_plan": "p3_service",
+    "repeat_index": 0,
+    "v_reference": {
+     "display": "0.6414",
+     "exact": "320679020399833/500000000000000"
+    },
+    "years": [
+     {
+      "car_access": {
+       "lines": [],
+       "note_zh": "今年没有用上用车权：这一年不能开车通勤，到岗只用通勤关系表里不需要用车权的方式",
+       "status": "not_bought"
+      },
+      "cash_end": {
+       "amount_minor": 2552881,
+       "currency": "USD",
+       "display": "25,528.81",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "cash_start": {
+       "amount_minor": 300000,
+       "currency": "USD",
+       "display": "3,000.00",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "commute": [
+       {
+        "home_area_id": "nyc.area.h.3604103",
+        "home_area_label": "居住片区·NYC-Manhattan Community District 3--Lower East Side & Chinatown PUMA（PUMA 3604103）",
+        "monthly_paid": {
+         "amount_minor": 0,
+         "currency": "USD",
+         "display": "0.00",
+         "numeraire_id": "USD_2024_LOCAL"
+        },
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "status": "computed",
+        "status_zh": "按通勤关系表执行：实际住处片区到各个到岗岗位的就业片区，取可用方式里往返最少的一种",
+        "trips": [
+         {
+          "job_label": "办公室文员·p50",
+          "job_opportunity_id": "nyc.job.43-9061.start",
+          "mode": "walk_bike",
+          "mode_zh": "步行或骑车",
+          "onsite_visits": 22,
+          "roundtrip_minutes": 30,
+          "work_area_id": "nyc.area.w.3604100",
+          "work_area_label": "就业片区·New York County"
+         }
+        ]
+       }
+      ],
+      "consumption": {
+       "baskets_by_month": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+       ],
+       "months_not_obtained": [],
+       "opportunity_ids": [
+        "nyc.service.personal_basket.u1"
+       ]
+      },
+      "devices": [],
+      "food": [
+       "自己做·主食为主（1–12 月）"
+      ],
+      "health_months": [
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy"
+      ],
+      "homes": [
+       {
+        "area_id": "nyc.area.h.3604103",
+        "area_label": "居住片区·NYC-Manhattan Community District 3--Lower East Side & Chinatown PUMA（PUMA 3604103）",
+        "area_typical_roundtrip_minutes": 50,
+        "label": "开间整套租住（NYC-Manhattan Community District 3--Lower East Side & Chinat，低档）",
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "nyc.housing.3604103.0.s0017"
+       }
+      ],
+      "household": [
+       {
+        "monthly_hours": [
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10"
+        ],
+        "task": "cleaning"
+       },
+       {
+        "monthly_hours": [
+         "12",
+         "12",
+         "12",
+         "12",
+         "12",
+         "12",
+         "12",
+         "12",
+         "12",
+         "12",
+         "12",
+         "12"
+        ],
+        "task": "laundry"
+       }
+      ],
+      "housing": [
+       "开间整套租住（NYC-Manhattan Community District 3--Lower East Side & Chinat，低档）（1–12 月）"
+      ],
+      "jobs": [
+       "办公室文员·p50（1–12 月）"
+      ],
+      "months_lived": 12,
+      "notes": [],
+      "paid_total": {
+       "amount_minor": 1355052,
+       "currency": "USD",
+       "display": "13,550.52",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "services": [],
+      "status": "completed",
+      "support": [
+       {
+        "function": "personal_communication",
+        "label_zh": "个人通信",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "nyc.service.mobile_basic"
+        ]
+       },
+       {
+        "function": "home_connectivity",
+        "label_zh": "居家联网",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "nyc.service.home_internet_basic"
+        ]
+       },
+       {
+        "function": "household_supplies",
+        "label_zh": "家用日耗品",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "nyc.service.household_supplies_basic"
+        ]
+       }
+      ],
+      "tax": {
+       "policy_id": "tax.us2024.nyc",
+       "status": "official_2024_rules",
+       "status_zh": "官方 2024 年规则（单身、只有工资收入、标准扣除）"
+      },
+      "training": [],
+      "year_index": 1
+     },
+     {
+      "car_access": {
+       "lines": [],
+       "note_zh": "今年没有用上用车权：这一年不能开车通勤，到岗只用通勤关系表里不需要用车权的方式",
+       "status": "not_bought"
+      },
+      "cash_end": {
+       "amount_minor": 7065552,
+       "currency": "USD",
+       "display": "70,655.52",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "cash_start": {
+       "amount_minor": 2552881,
+       "currency": "USD",
+       "display": "25,528.81",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "commute": [
+       {
+        "home_area_id": "nyc.area.h.3604103",
+        "home_area_label": "居住片区·NYC-Manhattan Community District 3--Lower East Side & Chinatown PUMA（PUMA 3604103）",
+        "monthly_paid": {
+         "amount_minor": 12760,
+         "currency": "USD",
+         "display": "127.60",
+         "numeraire_id": "USD_2024_LOCAL"
+        },
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "status": "computed",
+        "status_zh": "按通勤关系表执行：实际住处片区到各个到岗岗位的就业片区，取可用方式里往返最少的一种",
+        "trips": [
+         {
+          "job_label": "健身教练与团体课老师·工资约在本职业 88 分位",
+          "job_opportunity_id": "nyc.job.39-9031.w19.h33.w.3604300",
+          "mode": "transit",
+          "mode_zh": "公共交通",
+          "onsite_visits": 22,
+          "roundtrip_minutes": 60,
+          "work_area_id": "nyc.area.w.3604300",
+          "work_area_label": "就业片区·Kings County"
+         }
+        ]
+       }
+      ],
+      "consumption": {
+       "baskets_by_month": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+       ],
+       "months_not_obtained": [],
+       "opportunity_ids": [
+        "nyc.service.personal_basket.u1"
+       ]
+      },
+      "devices": [
+       {
+        "label": "顶开洗衣机",
+        "months_in_service": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "nyc.durable.washer_top"
+       }
+      ],
+      "food": [
+       "自己做·主食为主（1–12 月）"
+      ],
+      "health_months": [
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy"
+      ],
+      "homes": [
+       {
+        "area_id": "nyc.area.h.3604103",
+        "area_label": "居住片区·NYC-Manhattan Community District 3--Lower East Side & Chinatown PUMA（PUMA 3604103）",
+        "area_typical_roundtrip_minutes": 50,
+        "label": "开间整套租住（NYC-Manhattan Community District 3--Lower East Side & Chinat，低档）",
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "nyc.housing.3604103.0.s0017"
+       }
+      ],
+      "household": [
+       {
+        "monthly_hours": [
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10"
+        ],
+        "task": "cleaning"
+       },
+       {
+        "monthly_hours": [
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7"
+        ],
+        "task": "laundry"
+       }
+      ],
+      "housing": [
+       "开间整套租住（NYC-Manhattan Community District 3--Lower East Side & Chinat，低档）（1–12 月）"
+      ],
+      "jobs": [
+       "健身教练与团体课老师·工资约在本职业 88 分位（1–12 月）"
+      ],
+      "months_lived": 12,
+      "notes": [],
+      "paid_total": {
+       "amount_minor": 1585690,
+       "currency": "USD",
+       "display": "15,856.90",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "services": [],
+      "status": "completed",
+      "support": [
+       {
+        "function": "personal_communication",
+        "label_zh": "个人通信",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "nyc.service.mobile_basic"
+        ]
+       },
+       {
+        "function": "home_connectivity",
+        "label_zh": "居家联网",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "nyc.service.home_internet_basic"
+        ]
+       },
+       {
+        "function": "household_supplies",
+        "label_zh": "家用日耗品",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "nyc.service.household_supplies_basic"
+        ]
+       }
+      ],
+      "tax": {
+       "policy_id": "tax.us2024.nyc",
+       "status": "official_2024_rules",
+       "status_zh": "官方 2024 年规则（单身、只有工资收入、标准扣除）"
+      },
+      "training": [],
+      "year_index": 2
+     },
+     {
+      "car_access": {
+       "lines": [],
+       "note_zh": "今年没有用上用车权：这一年不能开车通勤，到岗只用通勤关系表里不需要用车权的方式",
+       "status": "not_bought"
+      },
+      "cash_end": {
+       "amount_minor": 11655741,
+       "currency": "USD",
+       "display": "116,557.41",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "cash_start": {
+       "amount_minor": 7065552,
+       "currency": "USD",
+       "display": "70,655.52",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "commute": [
+       {
+        "home_area_id": "nyc.area.h.3604103",
+        "home_area_label": "居住片区·NYC-Manhattan Community District 3--Lower East Side & Chinatown PUMA（PUMA 3604103）",
+        "monthly_paid": {
+         "amount_minor": 12760,
+         "currency": "USD",
+         "display": "127.60",
+         "numeraire_id": "USD_2024_LOCAL"
+        },
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "status": "computed",
+        "status_zh": "按通勤关系表执行：实际住处片区到各个到岗岗位的就业片区，取可用方式里往返最少的一种",
+        "trips": [
+         {
+          "job_label": "健身教练与团体课老师·工资约在本职业 88 分位",
+          "job_opportunity_id": "nyc.job.39-9031.w19.h33.w.3604300",
+          "mode": "transit",
+          "mode_zh": "公共交通",
+          "onsite_visits": 22,
+          "roundtrip_minutes": 60,
+          "work_area_id": "nyc.area.w.3604300",
+          "work_area_label": "就业片区·Kings County"
+         }
+        ]
+       }
+      ],
+      "consumption": {
+       "baskets_by_month": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+       ],
+       "months_not_obtained": [],
+       "opportunity_ids": [
+        "nyc.service.personal_basket.u1"
+       ]
+      },
+      "devices": [
+       {
+        "label": "顶开洗衣机",
+        "months_in_service": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "nyc.durable.washer_top"
+       }
+      ],
+      "food": [
+       "自己做·主食为主（1–12 月）"
+      ],
+      "health_months": [
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy"
+      ],
+      "homes": [
+       {
+        "area_id": "nyc.area.h.3604103",
+        "area_label": "居住片区·NYC-Manhattan Community District 3--Lower East Side & Chinatown PUMA（PUMA 3604103）",
+        "area_typical_roundtrip_minutes": 50,
+        "label": "开间整套租住（NYC-Manhattan Community District 3--Lower East Side & Chinat，低档）",
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "nyc.housing.3604103.0.s0017"
+       }
+      ],
+      "household": [
+       {
+        "monthly_hours": [
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10"
+        ],
+        "task": "cleaning"
+       },
+       {
+        "monthly_hours": [
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7"
+        ],
+        "task": "laundry"
+       }
+      ],
+      "housing": [
+       "开间整套租住（NYC-Manhattan Community District 3--Lower East Side & Chinat，低档）（1–12 月）"
+      ],
+      "jobs": [
+       "健身教练与团体课老师·工资约在本职业 88 分位（1–12 月）"
+      ],
+      "months_lived": 12,
+      "notes": [],
+      "paid_total": {
+       "amount_minor": 1508172,
+       "currency": "USD",
+       "display": "15,081.72",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "services": [],
+      "status": "completed",
+      "support": [
+       {
+        "function": "personal_communication",
+        "label_zh": "个人通信",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "nyc.service.mobile_basic"
+        ]
+       },
+       {
+        "function": "home_connectivity",
+        "label_zh": "居家联网",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "nyc.service.home_internet_basic"
+        ]
+       },
+       {
+        "function": "household_supplies",
+        "label_zh": "家用日耗品",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "nyc.service.household_supplies_basic"
+        ]
+       }
+      ],
+      "tax": {
+       "policy_id": "tax.us2024.nyc",
+       "status": "official_2024_rules",
+       "status_zh": "官方 2024 年规则（单身、只有工资收入、标准扣除）"
+      },
+      "training": [],
+      "year_index": 3
+     }
+    ]
+   },
+   {
+    "category": "C",
+    "category_zh": "完成且评价完整",
+    "city_ref": "US:CBSA2023:31080",
+    "clone_ref": "pbc633718ac.31080.r0",
+    "event_chain": [],
+    "explanation": {
+     "audit_ref": null,
+     "category": "complete",
+     "impact_zh": "计入这座城完成且可评价分身的平均",
+     "next_action_zh": "看逐年生活事实；这是合成模型下的结果，不是现实预测",
+     "reason_zh": "三年生活正常完成，实际评分与期末估值都完整"
+    },
+    "hard_requirements": [
+     {
+      "months_not_lived": 0,
+      "months_not_satisfied": 0,
+      "months_satisfied": 36,
+      "months_unknown": 0,
+      "need": "commute_limit",
+      "summary": "satisfied_every_month"
+     }
+    ],
+    "j": {
+     "display": "0.5672",
+     "exact": "22689484873187433/40000000000000000"
+    },
+    "l_actual": {
+     "display": "0.5510",
+     "exact": "1102003572595937/2000000000000000"
+    },
+    "missing_reason": null,
+    "missing_reason_zh": null,
+    "range_lower": {
+     "display": "0.5672",
+     "exact": "22689484873187433/40000000000000000"
+    },
+    "range_upper": {
+     "display": "0.5672",
+     "exact": "22689484873187433/40000000000000000"
+    },
+    "reference_plan": "p3_service",
+    "repeat_index": 0,
+    "v_reference": {
+     "display": "0.6159",
+     "exact": "3079715642124189/5000000000000000"
+    },
+    "years": [
+     {
+      "car_access": {
+       "lines": [],
+       "note_zh": "今年没有用上用车权：这一年不能开车通勤，到岗只用通勤关系表里不需要用车权的方式",
+       "status": "not_bought"
+      },
+      "cash_end": {
+       "amount_minor": 4145837,
+       "currency": "USD",
+       "display": "41,458.37",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "cash_start": {
+       "amount_minor": 300000,
+       "currency": "USD",
+       "display": "3,000.00",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "commute": [
+       {
+        "home_area_id": "la.area.h.0603744",
+        "home_area_label": "居住片区·Los Angeles County (Central)--LA City (East Central/Central City & Boyle Heights) PUMA（PUMA 0603744）",
+        "monthly_paid": {
+         "amount_minor": 0,
+         "currency": "USD",
+         "display": "0.00",
+         "numeraire_id": "USD_2024_LOCAL"
+        },
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "status": "computed",
+        "status_zh": "按通勤关系表执行：实际住处片区到各个到岗岗位的就业片区，取可用方式里往返最少的一种",
+        "trips": [
+         {
+          "job_label": "服务类销售代表·工资约在本职业 56 分位",
+          "job_opportunity_id": "la.job.41-3091.w11.h40.w.0603700",
+          "mode": "walk_bike",
+          "mode_zh": "步行或骑车",
+          "onsite_visits": 13,
+          "roundtrip_minutes": 20,
+          "work_area_id": "la.area.w.0603700",
+          "work_area_label": "就业片区·Los Angeles County"
+         }
+        ]
+       }
+      ],
+      "consumption": {
+       "baskets_by_month": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+       ],
+       "months_not_obtained": [],
+       "opportunity_ids": [
+        "la.service.personal_basket.u1"
+       ]
+      },
+      "devices": [
+       {
+        "label": "顶开洗衣机",
+        "months_in_service": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "la.durable.washer_top"
+       }
+      ],
+      "food": [
+       "自己做·主食为主（1–12 月）"
+      ],
+      "health_months": [
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy"
+      ],
+      "homes": [
+       {
+        "area_id": "la.area.h.0603744",
+        "area_label": "居住片区·Los Angeles County (Central)--LA City (East Central/Central City & Boyle Heights) PUMA（PUMA 0603744）",
+        "area_typical_roundtrip_minutes": 50,
+        "label": "1 卧整套租住（Los Angeles County (Central)--LA City (East Central/Central ，低档）",
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "la.housing.0603744.1.s0006"
+       }
+      ],
+      "household": [
+       {
+        "monthly_hours": [
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10"
+        ],
+        "task": "cleaning"
+       },
+       {
+        "monthly_hours": [
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7"
+        ],
+        "task": "laundry"
+       }
+      ],
+      "housing": [
+       "1 卧整套租住（Los Angeles County (Central)--LA City (East Central/Central ，低档）（1–12 月）"
+      ],
+      "jobs": [
+       "服务类销售代表·工资约在本职业 56 分位（1–12 月）"
+      ],
+      "months_lived": 12,
+      "notes": [],
+      "paid_total": {
+       "amount_minor": 2425917,
+       "currency": "USD",
+       "display": "24,259.17",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "services": [],
+      "status": "completed",
+      "support": [
+       {
+        "function": "personal_communication",
+        "label_zh": "个人通信",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "la.service.mobile_basic"
+        ]
+       },
+       {
+        "function": "home_connectivity",
+        "label_zh": "居家联网",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "la.service.home_internet_basic"
+        ]
+       },
+       {
+        "function": "household_supplies",
+        "label_zh": "家用日耗品",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "la.service.household_supplies_basic"
+        ]
+       }
+      ],
+      "tax": {
+       "policy_id": "tax.us2024.ca",
+       "status": "official_2024_rules",
+       "status_zh": "官方 2024 年规则（单身、只有工资收入、标准扣除）"
+      },
+      "training": [],
+      "year_index": 1
+     },
+     {
+      "car_access": {
+       "lines": [],
+       "note_zh": "今年没有用上用车权：这一年不能开车通勤，到岗只用通勤关系表里不需要用车权的方式",
+       "status": "not_bought"
+      },
+      "cash_end": {
+       "amount_minor": 8066635,
+       "currency": "USD",
+       "display": "80,666.35",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "cash_start": {
+       "amount_minor": 4145837,
+       "currency": "USD",
+       "display": "41,458.37",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "commute": [
+       {
+        "home_area_id": "la.area.h.0603744",
+        "home_area_label": "居住片区·Los Angeles County (Central)--LA City (East Central/Central City & Boyle Heights) PUMA（PUMA 0603744）",
+        "monthly_paid": {
+         "amount_minor": 0,
+         "currency": "USD",
+         "display": "0.00",
+         "numeraire_id": "USD_2024_LOCAL"
+        },
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "status": "computed",
+        "status_zh": "按通勤关系表执行：实际住处片区到各个到岗岗位的就业片区，取可用方式里往返最少的一种",
+        "trips": [
+         {
+          "job_label": "服务类销售代表·工资约在本职业 56 分位",
+          "job_opportunity_id": "la.job.41-3091.w11.h40.w.0603700",
+          "mode": "walk_bike",
+          "mode_zh": "步行或骑车",
+          "onsite_visits": 13,
+          "roundtrip_minutes": 20,
+          "work_area_id": "la.area.w.0603700",
+          "work_area_label": "就业片区·Los Angeles County"
+         }
+        ]
+       }
+      ],
+      "consumption": {
+       "baskets_by_month": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+       ],
+       "months_not_obtained": [],
+       "opportunity_ids": [
+        "la.service.personal_basket.u1"
+       ]
+      },
+      "devices": [
+       {
+        "label": "顶开洗衣机",
+        "months_in_service": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "la.durable.washer_top"
+       }
+      ],
+      "food": [
+       "自己做·主食为主（1–12 月）"
+      ],
+      "health_months": [
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy"
+      ],
+      "homes": [
+       {
+        "area_id": "la.area.h.0603744",
+        "area_label": "居住片区·Los Angeles County (Central)--LA City (East Central/Central City & Boyle Heights) PUMA（PUMA 0603744）",
+        "area_typical_roundtrip_minutes": 50,
+        "label": "1 卧整套租住（Los Angeles County (Central)--LA City (East Central/Central ，低档）",
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "la.housing.0603744.1.s0006"
+       }
+      ],
+      "household": [
+       {
+        "monthly_hours": [
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10"
+        ],
+        "task": "cleaning"
+       },
+       {
+        "monthly_hours": [
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7"
+        ],
+        "task": "laundry"
+       }
+      ],
+      "housing": [
+       "1 卧整套租住（Los Angeles County (Central)--LA City (East Central/Central ，低档）（1–12 月）"
+      ],
+      "jobs": [
+       "服务类销售代表·工资约在本职业 56 分位（1–12 月）"
+      ],
+      "months_lived": 12,
+      "notes": [],
+      "paid_total": {
+       "amount_minor": 2350956,
+       "currency": "USD",
+       "display": "23,509.56",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "services": [],
+      "status": "completed",
+      "support": [
+       {
+        "function": "personal_communication",
+        "label_zh": "个人通信",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "la.service.mobile_basic"
+        ]
+       },
+       {
+        "function": "home_connectivity",
+        "label_zh": "居家联网",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "la.service.home_internet_basic"
+        ]
+       },
+       {
+        "function": "household_supplies",
+        "label_zh": "家用日耗品",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "la.service.household_supplies_basic"
+        ]
+       }
+      ],
+      "tax": {
+       "policy_id": "tax.us2024.ca",
+       "status": "official_2024_rules",
+       "status_zh": "官方 2024 年规则（单身、只有工资收入、标准扣除）"
+      },
+      "training": [],
+      "year_index": 2
+     },
+     {
+      "car_access": {
+       "lines": [],
+       "note_zh": "今年没有用上用车权：这一年不能开车通勤，到岗只用通勤关系表里不需要用车权的方式",
+       "status": "not_bought"
+      },
+      "cash_end": {
+       "amount_minor": 12442745,
+       "currency": "USD",
+       "display": "124,427.45",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "cash_start": {
+       "amount_minor": 8066635,
+       "currency": "USD",
+       "display": "80,666.35",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "commute": [
+       {
+        "home_area_id": "la.area.h.0605924",
+        "home_area_label": "居住片区·Orange County (Central)--Irvine City (South) PUMA（PUMA 0605924）",
+        "monthly_paid": {
+         "amount_minor": 0,
+         "currency": "USD",
+         "display": "0.00",
+         "numeraire_id": "USD_2024_LOCAL"
+        },
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "status": "computed",
+        "status_zh": "按通勤关系表执行：实际住处片区到各个到岗岗位的就业片区，取可用方式里往返最少的一种",
+        "trips": [
+         {
+          "job_label": "服务类销售代表·工资约在本职业 76 分位",
+          "job_opportunity_id": "la.job.41-3091.w16.h40.w.0605900",
+          "mode": "walk_bike",
+          "mode_zh": "步行或骑车",
+          "onsite_visits": 13,
+          "roundtrip_minutes": 30,
+          "work_area_id": "la.area.w.0605900",
+          "work_area_label": "就业片区·Orange County"
+         }
+        ]
+       }
+      ],
+      "consumption": {
+       "baskets_by_month": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+       ],
+       "months_not_obtained": [],
+       "opportunity_ids": [
+        "la.service.personal_basket.u1"
+       ]
+      },
+      "devices": [
+       {
+        "label": "顶开洗衣机",
+        "months_in_service": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "la.durable.washer_top"
+       }
+      ],
+      "food": [
+       "自己做·主食为主（1–12 月）"
+      ],
+      "health_months": [
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy"
+      ],
+      "homes": [
+       {
+        "area_id": "la.area.h.0605924",
+        "area_label": "居住片区·Orange County (Central)--Irvine City (South) PUMA（PUMA 0605924）",
+        "area_typical_roundtrip_minutes": 40,
+        "label": "1 卧整套租住（Orange County (Central)--Irvine City (South)，中档）",
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "la.housing.0605924.1.s0146"
+       }
+      ],
+      "household": [
+       {
+        "monthly_hours": [
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10"
+        ],
+        "task": "cleaning"
+       },
+       {
+        "monthly_hours": [
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7"
+        ],
+        "task": "laundry"
+       }
+      ],
+      "housing": [
+       "1 卧整套租住（Orange County (Central)--Irvine City (South)，中档）（1–12 月）"
+      ],
+      "jobs": [
+       "服务类销售代表·工资约在本职业 76 分位（1–12 月）"
+      ],
+      "months_lived": 12,
+      "notes": [],
+      "paid_total": {
+       "amount_minor": 3130956,
+       "currency": "USD",
+       "display": "31,309.56",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "services": [],
+      "status": "completed",
+      "support": [
+       {
+        "function": "personal_communication",
+        "label_zh": "个人通信",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "la.service.mobile_basic"
+        ]
+       },
+       {
+        "function": "home_connectivity",
+        "label_zh": "居家联网",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "la.service.home_internet_basic"
+        ]
+       },
+       {
+        "function": "household_supplies",
+        "label_zh": "家用日耗品",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "la.service.household_supplies_basic"
+        ]
+       }
+      ],
+      "tax": {
+       "policy_id": "tax.us2024.ca",
+       "status": "official_2024_rules",
+       "status_zh": "官方 2024 年规则（单身、只有工资收入、标准扣除）"
+      },
+      "training": [],
+      "year_index": 3
+     }
+    ]
+   },
+   {
+    "category": "C",
+    "category_zh": "完成且评价完整",
+    "city_ref": "US:CBSA2023:41860",
+    "clone_ref": "pbc633718ac.41860.r0",
+    "event_chain": [],
+    "explanation": {
+     "audit_ref": null,
+     "category": "complete",
+     "impact_zh": "计入这座城完成且可评价分身的平均",
+     "next_action_zh": "看逐年生活事实；这是合成模型下的结果，不是现实预测",
+     "reason_zh": "三年生活正常完成，实际评分与期末估值都完整"
+    },
+    "hard_requirements": [
+     {
+      "months_not_lived": 0,
+      "months_not_satisfied": 0,
+      "months_satisfied": 36,
+      "months_unknown": 0,
+      "need": "commute_limit",
+      "summary": "satisfied_every_month"
+     }
+    ],
+    "j": {
+     "display": "0.5656",
+     "exact": "22623843626747079/40000000000000000"
+    },
+    "l_actual": {
+     "display": "0.5454",
+     "exact": "5453670786487187/10000000000000000"
+    },
+    "missing_reason": null,
+    "missing_reason_zh": null,
+    "range_lower": {
+     "display": "0.5656",
+     "exact": "22623843626747079/40000000000000000"
+    },
+    "range_upper": {
+     "display": "0.5656",
+     "exact": "22623843626747079/40000000000000000"
+    },
+    "reference_plan": "p3_service",
+    "repeat_index": 0,
+    "v_reference": {
+     "display": "0.6263",
+     "exact": "3131415633642759/5000000000000000"
+    },
+    "years": [
+     {
+      "car_access": {
+       "lines": [
+        {
+         "label": "用车权（一辆小型轿车，按月）",
+         "months_covered": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+         ],
+         "months_not_obtained": [],
+         "months_planned": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+         ],
+         "opportunity_id": "sf.service.car_access"
+        }
+       ],
+       "note_zh": "开车通勤要这个月有在用的用车权（按月付费）：用上的月份里，到岗时在可用方式里取往返最少的一种",
+       "status": "bought"
+      },
+      "cash_end": {
+       "amount_minor": 4058653,
+       "currency": "USD",
+       "display": "40,586.53",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "cash_start": {
+       "amount_minor": 300000,
+       "currency": "USD",
+       "display": "3,000.00",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "commute": [
+       {
+        "home_area_id": "sf.area.h.0600101",
+        "home_area_label": "居住片区·Alameda County (North)--Berkeley & Albany Cities PUMA（PUMA 0600101）",
+        "monthly_paid": {
+         "amount_minor": 7612,
+         "currency": "USD",
+         "display": "76.12",
+         "numeraire_id": "USD_2024_LOCAL"
+        },
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "status": "computed",
+        "status_zh": "按通勤关系表执行：实际住处片区到各个到岗岗位的就业片区，取可用方式里往返最少的一种",
+        "trips": [
+         {
+          "job_label": "秘书与行政助理·工资约在本职业 88 分位",
+          "job_opportunity_id": "sf.job.43-6014.w19.h40.w.0608100",
+          "mode": "drive",
+          "mode_zh": "开车",
+          "onsite_visits": 22,
+          "roundtrip_minutes": 40,
+          "work_area_id": "sf.area.w.0608100",
+          "work_area_label": "就业片区·San Mateo County"
+         }
+        ]
+       }
+      ],
+      "consumption": {
+       "baskets_by_month": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+       ],
+       "months_not_obtained": [],
+       "opportunity_ids": [
+        "sf.service.personal_basket.u1"
+       ]
+      },
+      "devices": [
+       {
+        "label": "顶开洗衣机",
+        "months_in_service": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "sf.durable.washer_top"
+       }
+      ],
+      "food": [
+       "自己做·主食为主（1–12 月）"
+      ],
+      "health_months": [
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy"
+      ],
+      "homes": [
+       {
+        "area_id": "sf.area.h.0600101",
+        "area_label": "居住片区·Alameda County (North)--Berkeley & Albany Cities PUMA（PUMA 0600101）",
+        "area_typical_roundtrip_minutes": 40,
+        "label": "开间整套租住（Alameda County (North)--Berkeley & Albany Cities，低档）",
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "sf.housing.0600101.0.s0020"
+       }
+      ],
+      "household": [
+       {
+        "monthly_hours": [
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10"
+        ],
+        "task": "cleaning"
+       },
+       {
+        "monthly_hours": [
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7"
+        ],
+        "task": "laundry"
+       }
+      ],
+      "housing": [
+       "开间整套租住（Alameda County (North)--Berkeley & Albany Cities，低档）（1–12 月）"
+      ],
+      "jobs": [
+       "秘书与行政助理·工资约在本职业 88 分位（1–12 月）"
+      ],
+      "months_lived": 12,
+      "notes": [],
+      "paid_total": {
+       "amount_minor": 2867096,
+       "currency": "USD",
+       "display": "28,670.96",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "services": [],
+      "status": "completed",
+      "support": [
+       {
+        "function": "personal_communication",
+        "label_zh": "个人通信",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "sf.service.mobile_basic"
+        ]
+       },
+       {
+        "function": "home_connectivity",
+        "label_zh": "居家联网",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "sf.service.home_internet_basic"
+        ]
+       },
+       {
+        "function": "household_supplies",
+        "label_zh": "家用日耗品",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "sf.service.household_supplies_basic"
+        ]
+       }
+      ],
+      "tax": {
+       "policy_id": "tax.us2024.ca",
+       "status": "official_2024_rules",
+       "status_zh": "官方 2024 年规则（单身、只有工资收入、标准扣除）"
+      },
+      "training": [],
+      "year_index": 1
+     },
+     {
+      "car_access": {
+       "lines": [],
+       "note_zh": "今年没有用上用车权：这一年不能开车通勤，到岗只用通勤关系表里不需要用车权的方式",
+       "status": "not_bought"
+      },
+      "cash_end": {
+       "amount_minor": 11162593,
+       "currency": "USD",
+       "display": "111,625.93",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "cash_start": {
+       "amount_minor": 4058653,
+       "currency": "USD",
+       "display": "40,586.53",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "commute": [
+       {
+        "home_area_id": "sf.area.h.0600101",
+        "home_area_label": "居住片区·Alameda County (North)--Berkeley & Albany Cities PUMA（PUMA 0600101）",
+        "monthly_paid": {
+         "amount_minor": 0,
+         "currency": "USD",
+         "display": "0.00",
+         "numeraire_id": "USD_2024_LOCAL"
+        },
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "status": "computed",
+        "status_zh": "按通勤关系表执行：实际住处片区到各个到岗岗位的就业片区，取可用方式里往返最少的一种",
+        "trips": [
+         {
+          "job_label": "服务类销售代表·工资约在本职业 68 分位",
+          "job_opportunity_id": "sf.job.41-3091.w14.h40.w.0600100",
+          "mode": "walk_bike",
+          "mode_zh": "步行或骑车",
+          "onsite_visits": 13,
+          "roundtrip_minutes": 30,
+          "work_area_id": "sf.area.w.0600100",
+          "work_area_label": "就业片区·Alameda County"
+         }
+        ]
+       }
+      ],
+      "consumption": {
+       "baskets_by_month": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+       ],
+       "months_not_obtained": [],
+       "opportunity_ids": [
+        "sf.service.personal_basket.u1"
+       ]
+      },
+      "devices": [
+       {
+        "label": "顶开洗衣机",
+        "months_in_service": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "sf.durable.washer_top"
+       }
+      ],
+      "food": [
+       "自己做·主食为主（1–12 月）"
+      ],
+      "health_months": [
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy"
+      ],
+      "homes": [
+       {
+        "area_id": "sf.area.h.0600101",
+        "area_label": "居住片区·Alameda County (North)--Berkeley & Albany Cities PUMA（PUMA 0600101）",
+        "area_typical_roundtrip_minutes": 40,
+        "label": "开间整套租住（Alameda County (North)--Berkeley & Albany Cities，低档）",
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "sf.housing.0600101.0.s0020"
+       }
+      ],
+      "household": [
+       {
+        "monthly_hours": [
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10"
+        ],
+        "task": "cleaning"
+       },
+       {
+        "monthly_hours": [
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7"
+        ],
+        "task": "laundry"
+       }
+      ],
+      "housing": [
+       "开间整套租住（Alameda County (North)--Berkeley & Albany Cities，低档）（1–12 月）"
+      ],
+      "jobs": [
+       "服务类销售代表·工资约在本职业 68 分位（1–12 月）"
+      ],
+      "months_lived": 12,
+      "notes": [],
+      "paid_total": {
+       "amount_minor": 1977696,
+       "currency": "USD",
+       "display": "19,776.96",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "services": [],
+      "status": "completed",
+      "support": [
+       {
+        "function": "personal_communication",
+        "label_zh": "个人通信",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "sf.service.mobile_basic"
+        ]
+       },
+       {
+        "function": "home_connectivity",
+        "label_zh": "居家联网",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "sf.service.home_internet_basic"
+        ]
+       },
+       {
+        "function": "household_supplies",
+        "label_zh": "家用日耗品",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "sf.service.household_supplies_basic"
+        ]
+       }
+      ],
+      "tax": {
+       "policy_id": "tax.us2024.ca",
+       "status": "official_2024_rules",
+       "status_zh": "官方 2024 年规则（单身、只有工资收入、标准扣除）"
+      },
+      "training": [],
+      "year_index": 2
+     },
+     {
+      "car_access": {
+       "lines": [],
+       "note_zh": "今年没有用上用车权：这一年不能开车通勤，到岗只用通勤关系表里不需要用车权的方式",
+       "status": "not_bought"
+      },
+      "cash_end": {
+       "amount_minor": 18266533,
+       "currency": "USD",
+       "display": "182,665.33",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "cash_start": {
+       "amount_minor": 11162593,
+       "currency": "USD",
+       "display": "111,625.93",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "commute": [
+       {
+        "home_area_id": "sf.area.h.0600101",
+        "home_area_label": "居住片区·Alameda County (North)--Berkeley & Albany Cities PUMA（PUMA 0600101）",
+        "monthly_paid": {
+         "amount_minor": 0,
+         "currency": "USD",
+         "display": "0.00",
+         "numeraire_id": "USD_2024_LOCAL"
+        },
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "status": "computed",
+        "status_zh": "按通勤关系表执行：实际住处片区到各个到岗岗位的就业片区，取可用方式里往返最少的一种",
+        "trips": [
+         {
+          "job_label": "服务类销售代表·工资约在本职业 68 分位",
+          "job_opportunity_id": "sf.job.41-3091.w14.h40.w.0600100",
+          "mode": "walk_bike",
+          "mode_zh": "步行或骑车",
+          "onsite_visits": 13,
+          "roundtrip_minutes": 30,
+          "work_area_id": "sf.area.w.0600100",
+          "work_area_label": "就业片区·Alameda County"
+         }
+        ]
+       }
+      ],
+      "consumption": {
+       "baskets_by_month": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+       ],
+       "months_not_obtained": [],
+       "opportunity_ids": [
+        "sf.service.personal_basket.u1"
+       ]
+      },
+      "devices": [
+       {
+        "label": "顶开洗衣机",
+        "months_in_service": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "sf.durable.washer_top"
+       }
+      ],
+      "food": [
+       "自己做·主食为主（1–12 月）"
+      ],
+      "health_months": [
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy"
+      ],
+      "homes": [
+       {
+        "area_id": "sf.area.h.0600101",
+        "area_label": "居住片区·Alameda County (North)--Berkeley & Albany Cities PUMA（PUMA 0600101）",
+        "area_typical_roundtrip_minutes": 40,
+        "label": "开间整套租住（Alameda County (North)--Berkeley & Albany Cities，低档）",
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "sf.housing.0600101.0.s0020"
+       }
+      ],
+      "household": [
+       {
+        "monthly_hours": [
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10"
+        ],
+        "task": "cleaning"
+       },
+       {
+        "monthly_hours": [
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7"
+        ],
+        "task": "laundry"
+       }
+      ],
+      "housing": [
+       "开间整套租住（Alameda County (North)--Berkeley & Albany Cities，低档）（1–12 月）"
+      ],
+      "jobs": [
+       "服务类销售代表·工资约在本职业 68 分位（1–12 月）"
+      ],
+      "months_lived": 12,
+      "notes": [],
+      "paid_total": {
+       "amount_minor": 1977696,
+       "currency": "USD",
+       "display": "19,776.96",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "services": [],
+      "status": "completed",
+      "support": [
+       {
+        "function": "personal_communication",
+        "label_zh": "个人通信",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "sf.service.mobile_basic"
+        ]
+       },
+       {
+        "function": "home_connectivity",
+        "label_zh": "居家联网",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "sf.service.home_internet_basic"
+        ]
+       },
+       {
+        "function": "household_supplies",
+        "label_zh": "家用日耗品",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "sf.service.household_supplies_basic"
+        ]
+       }
+      ],
+      "tax": {
+       "policy_id": "tax.us2024.ca",
+       "status": "official_2024_rules",
+       "status_zh": "官方 2024 年规则（单身、只有工资收入、标准扣除）"
+      },
+      "training": [],
+      "year_index": 3
+     }
+    ]
+   },
+   {
+    "category": "C",
+    "category_zh": "完成且评价完整",
+    "city_ref": "US:CBSA2023:16980",
+    "clone_ref": "pbc633718ac.16980.r0",
+    "event_chain": [],
+    "explanation": {
+     "audit_ref": null,
+     "category": "complete",
+     "impact_zh": "计入这座城完成且可评价分身的平均",
+     "next_action_zh": "看逐年生活事实；这是合成模型下的结果，不是现实预测",
+     "reason_zh": "三年生活正常完成，实际评分与期末估值都完整"
+    },
+    "hard_requirements": [
+     {
+      "months_not_lived": 0,
+      "months_not_satisfied": 0,
+      "months_satisfied": 36,
+      "months_unknown": 0,
+      "need": "commute_limit",
+      "summary": "satisfied_every_month"
+     }
+    ],
+    "j": {
+     "display": "0.5881",
+     "exact": "23523416383189337/40000000000000000"
+    },
+    "l_actual": {
+     "display": "0.5672",
+     "exact": "17014580446059713/30000000000000000"
+    },
+    "missing_reason": null,
+    "missing_reason_zh": null,
+    "range_lower": {
+     "display": "0.5881",
+     "exact": "23523416383189337/40000000000000000"
+    },
+    "range_upper": {
+     "display": "0.5881",
+     "exact": "23523416383189337/40000000000000000"
+    },
+    "reference_plan": "p3_service",
+    "repeat_index": 0,
+    "v_reference": {
+     "display": "0.6509",
+     "exact": "813604492141203/1250000000000000"
+    },
+    "years": [
+     {
+      "car_access": {
+       "lines": [
+        {
+         "label": "用车权（一辆小型轿车，按月）",
+         "months_covered": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+         ],
+         "months_not_obtained": [],
+         "months_planned": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+         ],
+         "opportunity_id": "chi.service.car_access"
+        }
+       ],
+       "note_zh": "开车通勤要这个月有在用的用车权（按月付费）：用上的月份里，到岗时在可用方式里取往返最少的一种",
+       "status": "bought"
+      },
+      "cash_end": {
+       "amount_minor": 4877142,
+       "currency": "USD",
+       "display": "48,771.42",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "cash_start": {
+       "amount_minor": 300000,
+       "currency": "USD",
+       "display": "3,000.00",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "commute": [
+       {
+        "home_area_id": "chi.area.h.1703109",
+        "home_area_label": "居住片区·Cook County (West)--Leyden & Norwood Park Townships PUMA（PUMA 1703109）",
+        "monthly_paid": {
+         "amount_minor": 5187,
+         "currency": "USD",
+         "display": "51.87",
+         "numeraire_id": "USD_2024_LOCAL"
+        },
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "status": "computed",
+        "status_zh": "按通勤关系表执行：实际住处片区到各个到岗岗位的就业片区，取可用方式里往返最少的一种",
+        "trips": [
+         {
+          "job_label": "服务类销售代表·工资约在本职业 72 分位",
+          "job_opportunity_id": "chi.job.41-3091.w15.h40.w.1704300",
+          "mode": "drive",
+          "mode_zh": "开车",
+          "onsite_visits": 13,
+          "roundtrip_minutes": 60,
+          "work_area_id": "chi.area.w.1704300",
+          "work_area_label": "就业片区·DuPage County"
+         }
+        ]
+       }
+      ],
+      "consumption": {
+       "baskets_by_month": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+       ],
+       "months_not_obtained": [],
+       "opportunity_ids": [
+        "chi.service.personal_basket.u1"
+       ]
+      },
+      "devices": [
+       {
+        "label": "顶开洗衣机",
+        "months_in_service": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "chi.durable.washer_top"
+       }
+      ],
+      "food": [
+       "自己做·主食为主（1–12 月）"
+      ],
+      "health_months": [
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy"
+      ],
+      "homes": [
+       {
+        "area_id": "chi.area.h.1703109",
+        "area_label": "居住片区·Cook County (West)--Leyden & Norwood Park Townships PUMA（PUMA 1703109）",
+        "area_typical_roundtrip_minutes": 60,
+        "label": "1 卧整套租住（Cook County (West)--Leyden & Norwood Park Townships，低档）",
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "chi.housing.1703109.1.s0018"
+       }
+      ],
+      "household": [
+       {
+        "monthly_hours": [
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10"
+        ],
+        "task": "cleaning"
+       },
+       {
+        "monthly_hours": [
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7"
+        ],
+        "task": "laundry"
+       }
+      ],
+      "housing": [
+       "1 卧整套租住（Cook County (West)--Leyden & Norwood Park Townships，低档）（1–12 月）"
+      ],
+      "jobs": [
+       "服务类销售代表·工资约在本职业 72 分位（1–12 月）"
+      ],
+      "months_lived": 12,
+      "notes": [],
+      "paid_total": {
+       "amount_minor": 2437127,
+       "currency": "USD",
+       "display": "24,371.27",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "services": [],
+      "status": "completed",
+      "support": [
+       {
+        "function": "personal_communication",
+        "label_zh": "个人通信",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "chi.service.mobile_basic"
+        ]
+       },
+       {
+        "function": "home_connectivity",
+        "label_zh": "居家联网",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "chi.service.home_internet_basic"
+        ]
+       },
+       {
+        "function": "household_supplies",
+        "label_zh": "家用日耗品",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "chi.service.household_supplies_basic"
+        ]
+       }
+      ],
+      "tax": {
+       "policy_id": "tax.us2024.il",
+       "status": "official_2024_rules",
+       "status_zh": "官方 2024 年规则（单身、只有工资收入、标准扣除）"
+      },
+      "training": [],
+      "year_index": 1
+     },
+     {
+      "car_access": {
+       "lines": [
+        {
+         "label": "用车权（一辆小型轿车，按月）",
+         "months_covered": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+         ],
+         "months_not_obtained": [],
+         "months_planned": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+         ],
+         "opportunity_id": "chi.service.car_access"
+        }
+       ],
+       "note_zh": "开车通勤要这个月有在用的用车权（按月付费）：用上的月份里，到岗时在可用方式里取往返最少的一种",
+       "status": "bought"
+      },
+      "cash_end": {
+       "amount_minor": 9529691,
+       "currency": "USD",
+       "display": "95,296.91",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "cash_start": {
+       "amount_minor": 4877142,
+       "currency": "USD",
+       "display": "48,771.42",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "commute": [
+       {
+        "home_area_id": "chi.area.h.1703109",
+        "home_area_label": "居住片区·Cook County (West)--Leyden & Norwood Park Townships PUMA（PUMA 1703109）",
+        "monthly_paid": {
+         "amount_minor": 5187,
+         "currency": "USD",
+         "display": "51.87",
+         "numeraire_id": "USD_2024_LOCAL"
+        },
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "status": "computed",
+        "status_zh": "按通勤关系表执行：实际住处片区到各个到岗岗位的就业片区，取可用方式里往返最少的一种",
+        "trips": [
+         {
+          "job_label": "服务类销售代表·工资约在本职业 72 分位",
+          "job_opportunity_id": "chi.job.41-3091.w15.h40.w.1704300",
+          "mode": "drive",
+          "mode_zh": "开车",
+          "onsite_visits": 13,
+          "roundtrip_minutes": 60,
+          "work_area_id": "chi.area.w.1704300",
+          "work_area_label": "就业片区·DuPage County"
+         }
+        ]
+       }
+      ],
+      "consumption": {
+       "baskets_by_month": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+       ],
+       "months_not_obtained": [],
+       "opportunity_ids": [
+        "chi.service.personal_basket.u1"
+       ]
+      },
+      "devices": [
+       {
+        "label": "顶开洗衣机",
+        "months_in_service": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "chi.durable.washer_top"
+       }
+      ],
+      "food": [
+       "自己做·主食为主（1–12 月）"
+      ],
+      "health_months": [
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy"
+      ],
+      "homes": [
+       {
+        "area_id": "chi.area.h.1703109",
+        "area_label": "居住片区·Cook County (West)--Leyden & Norwood Park Townships PUMA（PUMA 1703109）",
+        "area_typical_roundtrip_minutes": 60,
+        "label": "1 卧整套租住（Cook County (West)--Leyden & Norwood Park Townships，低档）",
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "chi.housing.1703109.1.s0018"
+       }
+      ],
+      "household": [
+       {
+        "monthly_hours": [
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10"
+        ],
+        "task": "cleaning"
+       },
+       {
+        "monthly_hours": [
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7"
+        ],
+        "task": "laundry"
+       }
+      ],
+      "housing": [
+       "1 卧整套租住（Cook County (West)--Leyden & Norwood Park Townships，低档）（1–12 月）"
+      ],
+      "jobs": [
+       "服务类销售代表·工资约在本职业 72 分位（1–12 月）"
+      ],
+      "months_lived": 12,
+      "notes": [],
+      "paid_total": {
+       "amount_minor": 2361720,
+       "currency": "USD",
+       "display": "23,617.20",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "services": [],
+      "status": "completed",
+      "support": [
+       {
+        "function": "personal_communication",
+        "label_zh": "个人通信",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "chi.service.mobile_basic"
+        ]
+       },
+       {
+        "function": "home_connectivity",
+        "label_zh": "居家联网",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "chi.service.home_internet_basic"
+        ]
+       },
+       {
+        "function": "household_supplies",
+        "label_zh": "家用日耗品",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "chi.service.household_supplies_basic"
+        ]
+       }
+      ],
+      "tax": {
+       "policy_id": "tax.us2024.il",
+       "status": "official_2024_rules",
+       "status_zh": "官方 2024 年规则（单身、只有工资收入、标准扣除）"
+      },
+      "training": [],
+      "year_index": 2
+     },
+     {
+      "car_access": {
+       "lines": [],
+       "note_zh": "今年没有用上用车权：这一年不能开车通勤，到岗只用通勤关系表里不需要用车权的方式",
+       "status": "not_bought"
+      },
+      "cash_end": {
+       "amount_minor": 16310401,
+       "currency": "USD",
+       "display": "163,104.01",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "cash_start": {
+       "amount_minor": 9529691,
+       "currency": "USD",
+       "display": "95,296.91",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "commute": [
+       {
+        "home_area_id": "chi.area.h.1703159",
+        "home_area_label": "居住片区·Chicago City (West)--West Town & Near West Side PUMA（PUMA 1703159）",
+        "monthly_paid": {
+         "amount_minor": 0,
+         "currency": "USD",
+         "display": "0.00",
+         "numeraire_id": "USD_2024_LOCAL"
+        },
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "status": "computed",
+        "status_zh": "按通勤关系表执行：实际住处片区到各个到岗岗位的就业片区，取可用方式里往返最少的一种",
+        "trips": [
+         {
+          "job_label": "服务类销售代表·工资约在本职业 88 分位",
+          "job_opportunity_id": "chi.job.41-3091.w19.h36.w.1703100",
+          "mode": "walk_bike",
+          "mode_zh": "步行或骑车",
+          "onsite_visits": 13,
+          "roundtrip_minutes": 30,
+          "work_area_id": "chi.area.w.1703100",
+          "work_area_label": "就业片区·Cook County"
+         }
+        ]
+       }
+      ],
+      "consumption": {
+       "baskets_by_month": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+       ],
+       "months_not_obtained": [],
+       "opportunity_ids": [
+        "chi.service.personal_basket.u1"
+       ]
+      },
+      "devices": [
+       {
+        "label": "顶开洗衣机",
+        "months_in_service": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "chi.durable.washer_top"
+       }
+      ],
+      "food": [
+       "自己做·主食为主（1–12 月）"
+      ],
+      "health_months": [
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy"
+      ],
+      "homes": [
+       {
+        "area_id": "chi.area.h.1703159",
+        "area_label": "居住片区·Chicago City (West)--West Town & Near West Side PUMA（PUMA 1703159）",
+        "area_typical_roundtrip_minutes": 50,
+        "label": "1 卧整套租住（Chicago City (West)--West Town & Near West Side，低档）",
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "chi.housing.1703159.1.s0028"
+       }
+      ],
+      "household": [
+       {
+        "monthly_hours": [
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10"
+        ],
+        "task": "cleaning"
+       },
+       {
+        "monthly_hours": [
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7"
+        ],
+        "task": "laundry"
+       }
+      ],
+      "housing": [
+       "1 卧整套租住（Chicago City (West)--West Town & Near West Side，低档）（1–12 月）"
+      ],
+      "jobs": [
+       "服务类销售代表·工资约在本职业 88 分位（1–12 月）"
+      ],
+      "months_lived": 12,
+      "notes": [],
+      "paid_total": {
+       "amount_minor": 1745676,
+       "currency": "USD",
+       "display": "17,456.76",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "services": [],
+      "status": "completed",
+      "support": [
+       {
+        "function": "personal_communication",
+        "label_zh": "个人通信",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "chi.service.mobile_basic"
+        ]
+       },
+       {
+        "function": "home_connectivity",
+        "label_zh": "居家联网",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "chi.service.home_internet_basic"
+        ]
+       },
+       {
+        "function": "household_supplies",
+        "label_zh": "家用日耗品",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "chi.service.household_supplies_basic"
+        ]
+       }
+      ],
+      "tax": {
+       "policy_id": "tax.us2024.il",
+       "status": "official_2024_rules",
+       "status_zh": "官方 2024 年规则（单身、只有工资收入、标准扣除）"
+      },
+      "training": [],
+      "year_index": 3
+     }
+    ]
+   },
+   {
+    "category": "C",
+    "category_zh": "完成且评价完整",
+    "city_ref": "US:CBSA2023:26420",
+    "clone_ref": "pbc633718ac.26420.r0",
+    "event_chain": [],
+    "explanation": {
+     "audit_ref": null,
+     "category": "complete",
+     "impact_zh": "计入这座城完成且可评价分身的平均",
+     "next_action_zh": "看逐年生活事实；这是合成模型下的结果，不是现实预测",
+     "reason_zh": "三年生活正常完成，实际评分与期末估值都完整"
+    },
+    "hard_requirements": [
+     {
+      "months_not_lived": 0,
+      "months_not_satisfied": 0,
+      "months_satisfied": 36,
+      "months_unknown": 0,
+      "need": "commute_limit",
+      "summary": "satisfied_every_month"
+     }
+    ],
+    "j": {
+     "display": "0.5141",
+     "exact": "1028154786161723/2000000000000000"
+    },
+    "l_actual": {
+     "display": "0.5141",
+     "exact": "1028154786161723/2000000000000000"
+    },
+    "missing_reason": null,
+    "missing_reason_zh": null,
+    "range_lower": {
+     "display": "0.5141",
+     "exact": "1028154786161723/2000000000000000"
+    },
+    "range_upper": {
+     "display": "0.5141",
+     "exact": "1028154786161723/2000000000000000"
+    },
+    "reference_plan": "p1_basic",
+    "repeat_index": 0,
+    "v_reference": {
+     "display": "0.5141",
+     "exact": "1028154786161723/2000000000000000"
+    },
+    "years": [
+     {
+      "car_access": {
+       "lines": [],
+       "note_zh": "今年没有用上用车权：这一年不能开车通勤，到岗只用通勤关系表里不需要用车权的方式",
+       "status": "not_bought"
+      },
+      "cash_end": {
+       "amount_minor": 3220975,
+       "currency": "USD",
+       "display": "32,209.75",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "cash_start": {
+       "amount_minor": 300000,
+       "currency": "USD",
+       "display": "3,000.00",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "commute": [
+       {
+        "home_area_id": "hou.area.h.4804503",
+        "home_area_label": "居住片区·Houston-Galveston Area Council--Montgomery County (South), The Woodlands (North) PUMA（PUMA 4804503）",
+        "monthly_paid": {
+         "amount_minor": 5500,
+         "currency": "USD",
+         "display": "55.00",
+         "numeraire_id": "USD_2024_LOCAL"
+        },
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "status": "computed",
+        "status_zh": "按通勤关系表执行：实际住处片区到各个到岗岗位的就业片区，取可用方式里往返最少的一种",
+        "trips": [
+         {
+          "job_label": "秘书与行政助理·工资约在本职业 76 分位",
+          "job_opportunity_id": "hou.job.43-6014.w16.h40.w.4804600",
+          "mode": "transit",
+          "mode_zh": "公共交通",
+          "onsite_visits": 22,
+          "roundtrip_minutes": 60,
+          "work_area_id": "hou.area.w.4804600",
+          "work_area_label": "就业片区·Harris County"
+         }
+        ]
+       }
+      ],
+      "consumption": {
+       "baskets_by_month": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+       ],
+       "months_not_obtained": [],
+       "opportunity_ids": [
+        "hou.service.personal_basket.u1"
+       ]
+      },
+      "devices": [
+       {
+        "label": "顶开洗衣机",
+        "months_in_service": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "hou.durable.washer_top"
+       }
+      ],
+      "food": [
+       "自己做·主食为主（1–12 月）"
+      ],
+      "health_months": [
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy"
+      ],
+      "homes": [
+       {
+        "area_id": "hou.area.h.4804503",
+        "area_label": "居住片区·Houston-Galveston Area Council--Montgomery County (South), The Woodlands (North) PUMA（PUMA 4804503）",
+        "area_typical_roundtrip_minutes": 40,
+        "label": "开间整套租住（Houston-Galveston Area Council--Montgomery County (South), T，低档）",
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "hou.housing.4804503.0.s0075"
+       }
+      ],
+      "household": [
+       {
+        "monthly_hours": [
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10"
+        ],
+        "task": "cleaning"
+       },
+       {
+        "monthly_hours": [
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7"
+        ],
+        "task": "laundry"
+       }
+      ],
+      "housing": [
+       "开间整套租住（Houston-Galveston Area Council--Montgomery County (South), T，低档）（1–12 月）"
+      ],
+      "jobs": [
+       "秘书与行政助理·工资约在本职业 76 分位（1–12 月）"
+      ],
+      "months_lived": 12,
+      "notes": [],
+      "paid_total": {
+       "amount_minor": 1687850,
+       "currency": "USD",
+       "display": "16,878.50",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "services": [],
+      "status": "completed",
+      "support": [
+       {
+        "function": "personal_communication",
+        "label_zh": "个人通信",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "hou.service.mobile_basic"
+        ]
+       },
+       {
+        "function": "home_connectivity",
+        "label_zh": "居家联网",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "hou.service.home_internet_basic"
+        ]
+       },
+       {
+        "function": "household_supplies",
+        "label_zh": "家用日耗品",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "hou.service.household_supplies_basic"
+        ]
+       }
+      ],
+      "tax": {
+       "policy_id": "tax.us2024.tx",
+       "status": "official_2024_rules",
+       "status_zh": "官方 2024 年规则（单身、只有工资收入、标准扣除）"
+      },
+      "training": [],
+      "year_index": 1
+     },
+     {
+      "car_access": {
+       "lines": [],
+       "note_zh": "今年没有用上用车权：这一年不能开车通勤，到岗只用通勤关系表里不需要用车权的方式",
+       "status": "not_bought"
+      },
+      "cash_end": {
+       "amount_minor": 7071560,
+       "currency": "USD",
+       "display": "70,715.60",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "cash_start": {
+       "amount_minor": 3220975,
+       "currency": "USD",
+       "display": "32,209.75",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "commute": [
+       {
+        "home_area_id": "hou.area.h.4804503",
+        "home_area_label": "居住片区·Houston-Galveston Area Council--Montgomery County (South), The Woodlands (North) PUMA（PUMA 4804503）",
+        "monthly_paid": {
+         "amount_minor": 5500,
+         "currency": "USD",
+         "display": "55.00",
+         "numeraire_id": "USD_2024_LOCAL"
+        },
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "status": "computed",
+        "status_zh": "按通勤关系表执行：实际住处片区到各个到岗岗位的就业片区，取可用方式里往返最少的一种",
+        "trips": [
+         {
+          "job_label": "健身教练与团体课老师·工资约在本职业 68 分位",
+          "job_opportunity_id": "hou.job.39-9031.w14.h50.w.4804600",
+          "mode": "transit",
+          "mode_zh": "公共交通",
+          "onsite_visits": 22,
+          "roundtrip_minutes": 60,
+          "work_area_id": "hou.area.w.4804600",
+          "work_area_label": "就业片区·Harris County"
+         }
+        ]
+       }
+      ],
+      "consumption": {
+       "baskets_by_month": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+       ],
+       "months_not_obtained": [],
+       "opportunity_ids": [
+        "hou.service.personal_basket.u1"
+       ]
+      },
+      "devices": [
+       {
+        "label": "顶开洗衣机",
+        "months_in_service": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "hou.durable.washer_top"
+       }
+      ],
+      "food": [
+       "自己做·主食为主（1–12 月）"
+      ],
+      "health_months": [
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy"
+      ],
+      "homes": [
+       {
+        "area_id": "hou.area.h.4804503",
+        "area_label": "居住片区·Houston-Galveston Area Council--Montgomery County (South), The Woodlands (North) PUMA（PUMA 4804503）",
+        "area_typical_roundtrip_minutes": 40,
+        "label": "开间整套租住（Houston-Galveston Area Council--Montgomery County (South), T，低档）",
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "hou.housing.4804503.0.s0075"
+       }
+      ],
+      "household": [
+       {
+        "monthly_hours": [
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10"
+        ],
+        "task": "cleaning"
+       },
+       {
+        "monthly_hours": [
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7"
+        ],
+        "task": "laundry"
+       }
+      ],
+      "housing": [
+       "开间整套租住（Houston-Galveston Area Council--Montgomery County (South), T，低档）（1–12 月）"
+      ],
+      "jobs": [
+       "健身教练与团体课老师·工资约在本职业 68 分位（1–12 月）"
+      ],
+      "months_lived": 12,
+      "notes": [],
+      "paid_total": {
+       "amount_minor": 1617096,
+       "currency": "USD",
+       "display": "16,170.96",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "services": [],
+      "status": "completed",
+      "support": [
+       {
+        "function": "personal_communication",
+        "label_zh": "个人通信",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "hou.service.mobile_basic"
+        ]
+       },
+       {
+        "function": "home_connectivity",
+        "label_zh": "居家联网",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "hou.service.home_internet_basic"
+        ]
+       },
+       {
+        "function": "household_supplies",
+        "label_zh": "家用日耗品",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "hou.service.household_supplies_basic"
+        ]
+       }
+      ],
+      "tax": {
+       "policy_id": "tax.us2024.tx",
+       "status": "official_2024_rules",
+       "status_zh": "官方 2024 年规则（单身、只有工资收入、标准扣除）"
+      },
+      "training": [],
+      "year_index": 2
+     },
+     {
+      "car_access": {
+       "lines": [],
+       "note_zh": "今年没有用上用车权：这一年不能开车通勤，到岗只用通勤关系表里不需要用车权的方式",
+       "status": "not_bought"
+      },
+      "cash_end": {
+       "amount_minor": 10922145,
+       "currency": "USD",
+       "display": "109,221.45",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "cash_start": {
+       "amount_minor": 7071560,
+       "currency": "USD",
+       "display": "70,715.60",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "commute": [
+       {
+        "home_area_id": "hou.area.h.4804503",
+        "home_area_label": "居住片区·Houston-Galveston Area Council--Montgomery County (South), The Woodlands (North) PUMA（PUMA 4804503）",
+        "monthly_paid": {
+         "amount_minor": 5500,
+         "currency": "USD",
+         "display": "55.00",
+         "numeraire_id": "USD_2024_LOCAL"
+        },
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "status": "computed",
+        "status_zh": "按通勤关系表执行：实际住处片区到各个到岗岗位的就业片区，取可用方式里往返最少的一种",
+        "trips": [
+         {
+          "job_label": "健身教练与团体课老师·工资约在本职业 68 分位",
+          "job_opportunity_id": "hou.job.39-9031.w14.h50.w.4804600",
+          "mode": "transit",
+          "mode_zh": "公共交通",
+          "onsite_visits": 22,
+          "roundtrip_minutes": 60,
+          "work_area_id": "hou.area.w.4804600",
+          "work_area_label": "就业片区·Harris County"
+         }
+        ]
+       }
+      ],
+      "consumption": {
+       "baskets_by_month": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+       ],
+       "months_not_obtained": [],
+       "opportunity_ids": [
+        "hou.service.personal_basket.u1"
+       ]
+      },
+      "devices": [
+       {
+        "label": "顶开洗衣机",
+        "months_in_service": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "hou.durable.washer_top"
+       }
+      ],
+      "food": [
+       "自己做·主食为主（1–12 月）"
+      ],
+      "health_months": [
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy"
+      ],
+      "homes": [
+       {
+        "area_id": "hou.area.h.4804503",
+        "area_label": "居住片区·Houston-Galveston Area Council--Montgomery County (South), The Woodlands (North) PUMA（PUMA 4804503）",
+        "area_typical_roundtrip_minutes": 40,
+        "label": "开间整套租住（Houston-Galveston Area Council--Montgomery County (South), T，低档）",
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "hou.housing.4804503.0.s0075"
+       }
+      ],
+      "household": [
+       {
+        "monthly_hours": [
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10"
+        ],
+        "task": "cleaning"
+       },
+       {
+        "monthly_hours": [
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7"
+        ],
+        "task": "laundry"
+       }
+      ],
+      "housing": [
+       "开间整套租住（Houston-Galveston Area Council--Montgomery County (South), T，低档）（1–12 月）"
+      ],
+      "jobs": [
+       "健身教练与团体课老师·工资约在本职业 68 分位（1–12 月）"
+      ],
+      "months_lived": 12,
+      "notes": [],
+      "paid_total": {
+       "amount_minor": 1617096,
+       "currency": "USD",
+       "display": "16,170.96",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "services": [],
+      "status": "completed",
+      "support": [
+       {
+        "function": "personal_communication",
+        "label_zh": "个人通信",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "hou.service.mobile_basic"
+        ]
+       },
+       {
+        "function": "home_connectivity",
+        "label_zh": "居家联网",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "hou.service.home_internet_basic"
+        ]
+       },
+       {
+        "function": "household_supplies",
+        "label_zh": "家用日耗品",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "hou.service.household_supplies_basic"
+        ]
+       }
+      ],
+      "tax": {
+       "policy_id": "tax.us2024.tx",
+       "status": "official_2024_rules",
+       "status_zh": "官方 2024 年规则（单身、只有工资收入、标准扣除）"
+      },
+      "training": [],
+      "year_index": 3
+     }
+    ]
+   },
+   {
+    "category": "C",
+    "category_zh": "完成且评价完整",
+    "city_ref": "US:CBSA2023:42660",
+    "clone_ref": "pbc633718ac.42660.r0",
+    "event_chain": [],
+    "explanation": {
+     "audit_ref": null,
+     "category": "complete",
+     "impact_zh": "计入这座城完成且可评价分身的平均",
+     "next_action_zh": "看逐年生活事实；这是合成模型下的结果，不是现实预测",
+     "reason_zh": "三年生活正常完成，实际评分与期末估值都完整"
+    },
+    "hard_requirements": [
+     {
+      "months_not_lived": 0,
+      "months_not_satisfied": 0,
+      "months_satisfied": 36,
+      "months_unknown": 0,
+      "need": "commute_limit",
+      "summary": "satisfied_every_month"
+     }
+    ],
+    "j": {
+     "display": "0.5746",
+     "exact": "22982155462388093/40000000000000000"
+    },
+    "l_actual": {
+     "display": "0.5542",
+     "exact": "5542234693343317/10000000000000000"
+    },
+    "missing_reason": null,
+    "missing_reason_zh": null,
+    "range_lower": {
+     "display": "0.5746",
+     "exact": "22982155462388093/40000000000000000"
+    },
+    "range_upper": {
+     "display": "0.5746",
+     "exact": "22982155462388093/40000000000000000"
+    },
+    "reference_plan": "p3_service",
+    "repeat_index": 0,
+    "v_reference": {
+     "display": "0.6355",
+     "exact": "3177725691179071/5000000000000000"
+    },
+    "years": [
+     {
+      "car_access": {
+       "lines": [
+        {
+         "label": "用车权（一辆小型轿车，按月）",
+         "months_covered": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+         ],
+         "months_not_obtained": [],
+         "months_planned": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+         ],
+         "opportunity_id": "sea.service.car_access"
+        }
+       ],
+       "note_zh": "开车通勤要这个月有在用的用车权（按月付费）：用上的月份里，到岗时在可用方式里取往返最少的一种",
+       "status": "bought"
+      },
+      "cash_end": {
+       "amount_minor": 2002454,
+       "currency": "USD",
+       "display": "20,024.54",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "cash_start": {
+       "amount_minor": 300000,
+       "currency": "USD",
+       "display": "3,000.00",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "commute": [
+       {
+        "home_area_id": "sea.area.h.5323303",
+        "home_area_label": "居住片区·King County (Northwest)--Redmond, Kirkland Cities, Ingelwood & Finn Hill PUMA（PUMA 5323303）",
+        "monthly_paid": {
+         "amount_minor": 6864,
+         "currency": "USD",
+         "display": "68.64",
+         "numeraire_id": "USD_2024_LOCAL"
+        },
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "status": "computed",
+        "status_zh": "按通勤关系表执行：实际住处片区到各个到岗岗位的就业片区，取可用方式里往返最少的一种",
+        "trips": [
+         {
+          "job_label": "办公室文员·p50",
+          "job_opportunity_id": "sea.job.43-9061.start",
+          "mode": "drive",
+          "mode_zh": "开车",
+          "onsite_visits": 22,
+          "roundtrip_minutes": 40,
+          "work_area_id": "sea.area.w.5323300",
+          "work_area_label": "就业片区·King County"
+         }
+        ]
+       }
+      ],
+      "consumption": {
+       "baskets_by_month": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+       ],
+       "months_not_obtained": [],
+       "opportunity_ids": [
+        "sea.service.personal_basket.u1"
+       ]
+      },
+      "devices": [
+       {
+        "label": "顶开洗衣机",
+        "months_in_service": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "sea.durable.washer_top"
+       }
+      ],
+      "food": [
+       "自己做·主食为主（1–12 月）"
+      ],
+      "health_months": [
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy"
+      ],
+      "homes": [
+       {
+        "area_id": "sea.area.h.5323303",
+        "area_label": "居住片区·King County (Northwest)--Redmond, Kirkland Cities, Ingelwood & Finn Hill PUMA（PUMA 5323303）",
+        "area_typical_roundtrip_minutes": 40,
+        "label": "开间整套租住（King County (Northwest)--Redmond, Kirkland Cities, Ingelwood，低档）",
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "sea.housing.5323303.0.s0008"
+       }
+      ],
+      "household": [
+       {
+        "monthly_hours": [
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10"
+        ],
+        "task": "cleaning"
+       },
+       {
+        "monthly_hours": [
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7"
+        ],
+        "task": "laundry"
+       }
+      ],
+      "housing": [
+       "开间整套租住（King County (Northwest)--Redmond, Kirkland Cities, Ingelwood，低档）（1–12 月）"
+      ],
+      "jobs": [
+       "办公室文员·p50（1–12 月）"
+      ],
+      "months_lived": 12,
+      "notes": [],
+      "paid_total": {
+       "amount_minor": 2741237,
+       "currency": "USD",
+       "display": "27,412.37",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "services": [],
+      "status": "completed",
+      "support": [
+       {
+        "function": "personal_communication",
+        "label_zh": "个人通信",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "sea.service.mobile_basic"
+        ]
+       },
+       {
+        "function": "home_connectivity",
+        "label_zh": "居家联网",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "sea.service.home_internet_basic"
+        ]
+       },
+       {
+        "function": "household_supplies",
+        "label_zh": "家用日耗品",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "sea.service.household_supplies_basic"
+        ]
+       }
+      ],
+      "tax": {
+       "policy_id": "tax.us2024.wa",
+       "status": "official_2024_rules",
+       "status_zh": "官方 2024 年规则（单身、只有工资收入、标准扣除）"
+      },
+      "training": [],
+      "year_index": 1
+     },
+     {
+      "car_access": {
+       "lines": [],
+       "note_zh": "今年没有用上用车权：这一年不能开车通勤，到岗只用通勤关系表里不需要用车权的方式",
+       "status": "not_bought"
+      },
+      "cash_end": {
+       "amount_minor": 7373462,
+       "currency": "USD",
+       "display": "73,734.62",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "cash_start": {
+       "amount_minor": 2002454,
+       "currency": "USD",
+       "display": "20,024.54",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "commute": [
+       {
+        "home_area_id": "sea.area.h.5323314",
+        "home_area_label": "居住片区·Seattle City (Central) PUMA（PUMA 5323314）",
+        "monthly_paid": {
+         "amount_minor": 0,
+         "currency": "USD",
+         "display": "0.00",
+         "numeraire_id": "USD_2024_LOCAL"
+        },
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "status": "computed",
+        "status_zh": "按通勤关系表执行：实际住处片区到各个到岗岗位的就业片区，取可用方式里往返最少的一种",
+        "trips": [
+         {
+          "job_label": "健身教练与团体课老师·工资约在本职业 80 分位",
+          "job_opportunity_id": "sea.job.39-9031.w17.h40.w.5323300",
+          "mode": "walk_bike",
+          "mode_zh": "步行或骑车",
+          "onsite_visits": 22,
+          "roundtrip_minutes": 30,
+          "work_area_id": "sea.area.w.5323300",
+          "work_area_label": "就业片区·King County"
+         }
+        ]
+       }
+      ],
+      "consumption": {
+       "baskets_by_month": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+       ],
+       "months_not_obtained": [],
+       "opportunity_ids": [
+        "sea.service.personal_basket.u1"
+       ]
+      },
+      "devices": [
+       {
+        "label": "顶开洗衣机",
+        "months_in_service": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "sea.durable.washer_top"
+       }
+      ],
+      "food": [
+       "自己做·主食为主（1–12 月）"
+      ],
+      "health_months": [
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy"
+      ],
+      "homes": [
+       {
+        "area_id": "sea.area.h.5323314",
+        "area_label": "居住片区·Seattle City (Central) PUMA（PUMA 5323314）",
+        "area_typical_roundtrip_minutes": 40,
+        "label": "开间整套租住（Seattle City (Central)，低档）",
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "sea.housing.5323314.0.s0004"
+       }
+      ],
+      "household": [
+       {
+        "monthly_hours": [
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10"
+        ],
+        "task": "cleaning"
+       },
+       {
+        "monthly_hours": [
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7"
+        ],
+        "task": "laundry"
+       }
+      ],
+      "housing": [
+       "开间整套租住（Seattle City (Central)，低档）（1–12 月）"
+      ],
+      "jobs": [
+       "健身教练与团体课老师·工资约在本职业 80 分位（1–12 月）"
+      ],
+      "months_lived": 12,
+      "notes": [],
+      "paid_total": {
+       "amount_minor": 1863972,
+       "currency": "USD",
+       "display": "18,639.72",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "services": [],
+      "status": "completed",
+      "support": [
+       {
+        "function": "personal_communication",
+        "label_zh": "个人通信",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "sea.service.mobile_basic"
+        ]
+       },
+       {
+        "function": "home_connectivity",
+        "label_zh": "居家联网",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "sea.service.home_internet_basic"
+        ]
+       },
+       {
+        "function": "household_supplies",
+        "label_zh": "家用日耗品",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "sea.service.household_supplies_basic"
+        ]
+       }
+      ],
+      "tax": {
+       "policy_id": "tax.us2024.wa",
+       "status": "official_2024_rules",
+       "status_zh": "官方 2024 年规则（单身、只有工资收入、标准扣除）"
+      },
+      "training": [],
+      "year_index": 2
+     },
+     {
+      "car_access": {
+       "lines": [],
+       "note_zh": "今年没有用上用车权：这一年不能开车通勤，到岗只用通勤关系表里不需要用车权的方式",
+       "status": "not_bought"
+      },
+      "cash_end": {
+       "amount_minor": 12744470,
+       "currency": "USD",
+       "display": "127,444.70",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "cash_start": {
+       "amount_minor": 7373462,
+       "currency": "USD",
+       "display": "73,734.62",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "commute": [
+       {
+        "home_area_id": "sea.area.h.5323314",
+        "home_area_label": "居住片区·Seattle City (Central) PUMA（PUMA 5323314）",
+        "monthly_paid": {
+         "amount_minor": 0,
+         "currency": "USD",
+         "display": "0.00",
+         "numeraire_id": "USD_2024_LOCAL"
+        },
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "status": "computed",
+        "status_zh": "按通勤关系表执行：实际住处片区到各个到岗岗位的就业片区，取可用方式里往返最少的一种",
+        "trips": [
+         {
+          "job_label": "健身教练与团体课老师·工资约在本职业 80 分位",
+          "job_opportunity_id": "sea.job.39-9031.w17.h40.w.5323300",
+          "mode": "walk_bike",
+          "mode_zh": "步行或骑车",
+          "onsite_visits": 22,
+          "roundtrip_minutes": 30,
+          "work_area_id": "sea.area.w.5323300",
+          "work_area_label": "就业片区·King County"
+         }
+        ]
+       }
+      ],
+      "consumption": {
+       "baskets_by_month": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+       ],
+       "months_not_obtained": [],
+       "opportunity_ids": [
+        "sea.service.personal_basket.u1"
+       ]
+      },
+      "devices": [
+       {
+        "label": "顶开洗衣机",
+        "months_in_service": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "sea.durable.washer_top"
+       }
+      ],
+      "food": [
+       "自己做·主食为主（1–12 月）"
+      ],
+      "health_months": [
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy"
+      ],
+      "homes": [
+       {
+        "area_id": "sea.area.h.5323314",
+        "area_label": "居住片区·Seattle City (Central) PUMA（PUMA 5323314）",
+        "area_typical_roundtrip_minutes": 40,
+        "label": "开间整套租住（Seattle City (Central)，低档）",
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "sea.housing.5323314.0.s0004"
+       }
+      ],
+      "household": [
+       {
+        "monthly_hours": [
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10"
+        ],
+        "task": "cleaning"
+       },
+       {
+        "monthly_hours": [
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7"
+        ],
+        "task": "laundry"
+       }
+      ],
+      "housing": [
+       "开间整套租住（Seattle City (Central)，低档）（1–12 月）"
+      ],
+      "jobs": [
+       "健身教练与团体课老师·工资约在本职业 80 分位（1–12 月）"
+      ],
+      "months_lived": 12,
+      "notes": [],
+      "paid_total": {
+       "amount_minor": 1863972,
+       "currency": "USD",
+       "display": "18,639.72",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "services": [],
+      "status": "completed",
+      "support": [
+       {
+        "function": "personal_communication",
+        "label_zh": "个人通信",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "sea.service.mobile_basic"
+        ]
+       },
+       {
+        "function": "home_connectivity",
+        "label_zh": "居家联网",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "sea.service.home_internet_basic"
+        ]
+       },
+       {
+        "function": "household_supplies",
+        "label_zh": "家用日耗品",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "sea.service.household_supplies_basic"
+        ]
+       }
+      ],
+      "tax": {
+       "policy_id": "tax.us2024.wa",
+       "status": "official_2024_rules",
+       "status_zh": "官方 2024 年规则（单身、只有工资收入、标准扣除）"
+      },
+      "training": [],
+      "year_index": 3
+     }
+    ]
+   }
+  ],
+  "comparisons": [
+   {
+    "city_a": "US:CBSA2023:35620",
+    "city_b": "US:CBSA2023:31080",
+    "direction": "a_higher",
+    "note_zh": "在这些缺失范围下 A 城始终更高：方向一致；不是显著性检验，也不是总体因果结论。出局比例 A 0%、B 0%，有效分身数 A 1/1、B 1/1",
+    "range_difference_high": {
+     "display": "0.0010",
+     "exact": "41887621268953/40000000000000000"
+    },
+    "range_difference_low": {
+     "display": "0.0010",
+     "exact": "41887621268953/40000000000000000"
+    }
+   },
+   {
+    "city_a": "US:CBSA2023:35620",
+    "city_b": "US:CBSA2023:41860",
+    "direction": "a_higher",
+    "note_zh": "在这些缺失范围下 A 城始终更高：方向一致；不是显著性检验，也不是总体因果结论。出局比例 A 0%、B 0%，有效分身数 A 1/1、B 1/1",
+    "range_difference_high": {
+     "display": "0.0027",
+     "exact": "107528867709307/40000000000000000"
+    },
+    "range_difference_low": {
+     "display": "0.0027",
+     "exact": "107528867709307/40000000000000000"
+    }
+   },
+   {
+    "city_a": "US:CBSA2023:35620",
+    "city_b": "US:CBSA2023:16980",
+    "direction": "b_higher",
+    "note_zh": "在这些缺失范围下 B 城始终更高：方向一致；不是显著性检验，也不是总体因果结论。出局比例 A 0%、B 0%，有效分身数 A 1/1、B 1/1",
+    "range_difference_high": {
+     "display": "-0.0198",
+     "exact": "-792043888732951/40000000000000000"
+    },
+    "range_difference_low": {
+     "display": "-0.0198",
+     "exact": "-792043888732951/40000000000000000"
+    }
+   },
+   {
+    "city_a": "US:CBSA2023:35620",
+    "city_b": "US:CBSA2023:26420",
+    "direction": "a_higher",
+    "note_zh": "在这些缺失范围下 A 城始终更高：方向一致；不是显著性检验，也不是总体因果结论。出局比例 A 0%、B 0%，有效分身数 A 1/1、B 1/1",
+    "range_difference_high": {
+     "display": "0.0542",
+     "exact": "1084138385610963/20000000000000000"
+    },
+    "range_difference_low": {
+     "display": "0.0542",
+     "exact": "1084138385610963/20000000000000000"
+    }
+   },
+   {
+    "city_a": "US:CBSA2023:35620",
+    "city_b": "US:CBSA2023:42660",
+    "direction": "b_higher",
+    "note_zh": "在这些缺失范围下 B 城始终更高：方向一致；不是显著性检验，也不是总体因果结论。出局比例 A 0%、B 0%，有效分身数 A 1/1、B 1/1",
+    "range_difference_high": {
+     "display": "-0.0063",
+     "exact": "-250782967931707/40000000000000000"
+    },
+    "range_difference_low": {
+     "display": "-0.0063",
+     "exact": "-250782967931707/40000000000000000"
+    }
+   },
+   {
+    "city_a": "US:CBSA2023:31080",
+    "city_b": "US:CBSA2023:41860",
+    "direction": "a_higher",
+    "note_zh": "在这些缺失范围下 A 城始终更高：方向一致；不是显著性检验，也不是总体因果结论。出局比例 A 0%、B 0%，有效分身数 A 1/1、B 1/1",
+    "range_difference_high": {
+     "display": "0.0016",
+     "exact": "32820623220177/20000000000000000"
+    },
+    "range_difference_low": {
+     "display": "0.0016",
+     "exact": "32820623220177/20000000000000000"
+    }
+   },
+   {
+    "city_a": "US:CBSA2023:31080",
+    "city_b": "US:CBSA2023:16980",
+    "direction": "b_higher",
+    "note_zh": "在这些缺失范围下 B 城始终更高：方向一致；不是显著性检验，也不是总体因果结论。出局比例 A 0%、B 0%，有效分身数 A 1/1、B 1/1",
+    "range_difference_high": {
+     "display": "-0.0208",
+     "exact": "-52120719375119/2500000000000000"
+    },
+    "range_difference_low": {
+     "display": "-0.0208",
+     "exact": "-52120719375119/2500000000000000"
+    }
+   },
+   {
+    "city_a": "US:CBSA2023:31080",
+    "city_b": "US:CBSA2023:26420",
+    "direction": "a_higher",
+    "note_zh": "在这些缺失范围下 A 城始终更高：方向一致；不是显著性检验，也不是总体因果结论。出局比例 A 0%、B 0%，有效分身数 A 1/1、B 1/1",
+    "range_difference_high": {
+     "display": "0.0532",
+     "exact": "2126389149952973/40000000000000000"
+    },
+    "range_difference_low": {
+     "display": "0.0532",
+     "exact": "2126389149952973/40000000000000000"
+    }
+   },
+   {
+    "city_a": "US:CBSA2023:31080",
+    "city_b": "US:CBSA2023:42660",
+    "direction": "b_higher",
+    "note_zh": "在这些缺失范围下 B 城始终更高：方向一致；不是显著性检验，也不是总体因果结论。出局比例 A 0%、B 0%，有效分身数 A 1/1、B 1/1",
+    "range_difference_high": {
+     "display": "-0.0073",
+     "exact": "-14633529460033/2000000000000000"
+    },
+    "range_difference_low": {
+     "display": "-0.0073",
+     "exact": "-14633529460033/2000000000000000"
+    }
+   },
+   {
+    "city_a": "US:CBSA2023:41860",
+    "city_b": "US:CBSA2023:16980",
+    "direction": "b_higher",
+    "note_zh": "在这些缺失范围下 B 城始终更高：方向一致；不是显著性检验，也不是总体因果结论。出局比例 A 0%、B 0%，有效分身数 A 1/1、B 1/1",
+    "range_difference_high": {
+     "display": "-0.0225",
+     "exact": "-449786378221129/20000000000000000"
+    },
+    "range_difference_low": {
+     "display": "-0.0225",
+     "exact": "-449786378221129/20000000000000000"
+    }
+   },
+   {
+    "city_a": "US:CBSA2023:41860",
+    "city_b": "US:CBSA2023:26420",
+    "direction": "a_higher",
+    "note_zh": "在这些缺失范围下 A 城始终更高：方向一致；不是显著性检验，也不是总体因果结论。出局比例 A 0%、B 0%，有效分身数 A 1/1、B 1/1",
+    "range_difference_high": {
+     "display": "0.0515",
+     "exact": "2060747903512619/40000000000000000"
+    },
+    "range_difference_low": {
+     "display": "0.0515",
+     "exact": "2060747903512619/40000000000000000"
+    }
+   },
+   {
+    "city_a": "US:CBSA2023:41860",
+    "city_b": "US:CBSA2023:42660",
+    "direction": "b_higher",
+    "note_zh": "在这些缺失范围下 B 城始终更高：方向一致；不是显著性检验，也不是总体因果结论。出局比例 A 0%、B 0%，有效分身数 A 1/1、B 1/1",
+    "range_difference_high": {
+     "display": "-0.0090",
+     "exact": "-179155917820507/20000000000000000"
+    },
+    "range_difference_low": {
+     "display": "-0.0090",
+     "exact": "-179155917820507/20000000000000000"
+    }
+   },
+   {
+    "city_a": "US:CBSA2023:16980",
+    "city_b": "US:CBSA2023:26420",
+    "direction": "a_higher",
+    "note_zh": "在这些缺失范围下 A 城始终更高：方向一致；不是显著性检验，也不是总体因果结论。出局比例 A 0%、B 0%，有效分身数 A 1/1、B 1/1",
+    "range_difference_high": {
+     "display": "0.0740",
+     "exact": "2960320659954877/40000000000000000"
+    },
+    "range_difference_low": {
+     "display": "0.0740",
+     "exact": "2960320659954877/40000000000000000"
+    }
+   },
+   {
+    "city_a": "US:CBSA2023:16980",
+    "city_b": "US:CBSA2023:42660",
+    "direction": "a_higher",
+    "note_zh": "在这些缺失范围下 A 城始终更高：方向一致；不是显著性检验，也不是总体因果结论。出局比例 A 0%、B 0%，有效分身数 A 1/1、B 1/1",
+    "range_difference_high": {
+     "display": "0.0135",
+     "exact": "135315230200311/10000000000000000"
+    },
+    "range_difference_low": {
+     "display": "0.0135",
+     "exact": "135315230200311/10000000000000000"
+    }
+   },
+   {
+    "city_a": "US:CBSA2023:26420",
+    "city_b": "US:CBSA2023:42660",
+    "direction": "b_higher",
+    "note_zh": "在这些缺失范围下 B 城始终更高：方向一致；不是显著性检验，也不是总体因果结论。出局比例 A 0%、B 0%，有效分身数 A 1/1、B 1/1",
+    "range_difference_high": {
+     "display": "-0.0605",
+     "exact": "-2419059739153633/40000000000000000"
+    },
+    "range_difference_low": {
+     "display": "-0.0605",
+     "exact": "-2419059739153633/40000000000000000"
+    }
+   }
+  ],
+  "confirmed": {
+   "confirmed_id": "confirmed.draft-0000000000000046.r2",
+   "content_fingerprint": "077a1d54c75b12b911ce407c4d77ba10ff262d4df9b93ac51d0f7cc1af87367b"
+  },
+  "data_nature": [
+   {
+    "build": [
+     {
+      "count": 63,
+      "key": "areas",
+      "label_zh": "片区（居住与就业）"
+     },
+     {
+      "count": 690,
+      "key": "commute_legs",
+      "label_zh": "通勤关系表的线（住处片区 × 就业片区 × 方式）"
+     },
+     {
+      "count": 330,
+      "key": "excluded.housing.outside_tax_scope",
+      "label_zh": "没有进住房池的目标格：在税务支持范围之外"
+     },
+     {
+      "count": 54868,
+      "key": "housing_candidates",
+      "label_zh": "完整可执行住房池的候选（目标格 × 经验支持点）"
+     },
+     {
+      "count": 457,
+      "key": "housing_in_catalog",
+      "label_zh": "放进目录的住房（菜单上出现过的，加最低住房与参考住房）"
+     },
+     {
+      "count": 11,
+      "key": "items_by_domain.activity",
+      "label_zh": "生活物品候选：活动"
+     },
+     {
+      "count": 7,
+      "key": "items_by_domain.consumption",
+      "label_zh": "items_by_domain.consumption"
+     },
+     {
+      "count": 3,
+      "key": "items_by_domain.daily_support",
+      "label_zh": "items_by_domain.daily_support"
+     },
+     {
+      "count": 5,
+      "key": "items_by_domain.device",
+      "label_zh": "生活物品候选：省家务设备"
+     },
+     {
+      "count": 2,
+      "key": "items_by_domain.equipment",
+      "label_zh": "生活物品候选：爱好装备"
+     },
+     {
+      "count": 327,
+      "key": "items_by_domain.food",
+      "label_zh": "生活物品候选：食品方案"
+     },
+     {
+      "count": 3,
+      "key": "items_by_domain.service",
+      "label_zh": "生活物品候选：服务"
+     },
+     {
+      "count": 3,
+      "key": "items_by_domain.training",
+      "label_zh": "生活物品候选：培训"
+     },
+     {
+      "count": 204420,
+      "key": "job_candidates",
+      "label_zh": "完整可执行岗位池的候选（职业 × 年薪支持点 × 工时与就业片区）"
+     },
+     {
+      "count": 359,
+      "key": "jobs_in_catalog",
+      "label_zh": "放进目录的岗位（菜单上出现过的）"
+     },
+     {
+      "count": 12,
+      "key": "menus",
+      "label_zh": "年度菜单"
+     },
+     {
+      "count": 40,
+      "key": "start_jobs",
+      "label_zh": "各职业的开局岗位"
+     }
+    ],
+    "build_status": "from_pack_report",
+    "city_ref": "US:CBSA2023:35620",
+    "common_priors": [
+     {
+      "fact_id": "leisure_index",
+      "label": "基本休闲条件（共同先验）",
+      "meaning_zh": "住在一座城市就有的少量基本休闲条件，0–10；六城没有可比资料，这里是登记的共同先验。主要的休闲满足来自实际参加的活动（健身、课程、爱好等另外安排、另外付费）"
+     }
+    ],
+    "commute_modes": [
+     {
+      "condition_zh": "步行或骑车：没有使用条件、不封顶；每次往返记 0（不计自行车、共享单车与鞋的费用）",
+      "in_relation": true,
+      "lines": 32,
+      "mode": "walk_bike",
+      "mode_zh": "步行或骑车"
+     },
+     {
+      "condition_zh": "MTA 纽约市地铁与本地公交：单程 2.9，每次往返两次单程 5.8；月票 132 当作每月封顶；2023-08-20 起的票价（页面是 2023 年的新闻稿）",
+      "in_relation": true,
+      "lines": 310,
+      "mode": "transit",
+      "mode_zh": "公共交通"
+     },
+     {
+      "condition_zh": "开车要有在用的用车权（car_access，一项按月付费的机会）；每次往返另付油费 = 往返分钟 / 60 × 25 英里每小时 ÷ 23.4 英里每加仑 × 汽油 3.351 美元每加仑；不封顶；停车与过路费没有建模",
+      "in_relation": true,
+      "lines": 348,
+      "mode": "drive",
+      "mode_zh": "开车"
+     }
+    ],
+    "home_areas": 55,
+    "label": "纽约（纽约市五区居民）",
+    "menus": [
+     {
+      "category": "housing",
+      "env_repeats": 2,
+      "items_max": 60,
+      "items_min": 60,
+      "years": 3
+     },
+     {
+      "category": "job",
+      "env_repeats": 2,
+      "items_max": 60,
+      "items_min": 60,
+      "years": 3
+     }
+    ],
+    "model_plan_activities": [
+     "网球场地连球拍租借（一次）",
+     "网球场地（自带球拍，一次）",
+     "在家练吉他（一次 1 小时）",
+     "无器械锻炼（一次 1 小时）",
+     "参观博物馆（一次）"
+    ],
+    "named_assumptions": [
+     {
+      "count": 5,
+      "examples": [
+       "顶开洗衣机",
+       "前开洗衣机",
+       "顶开洗衣机 + 电烘干机一套"
+      ],
+      "note_zh": "价格、寿命与替代后残余是登记的类别设定（device_category_v1），不是型号报价；型号来自 ENERGY STAR 记录（geography: CBSA2023 35620 New York-Newark-Jersey City 都会区）"
+     },
+     {
+      "count": 2,
+      "examples": [
+       "网球拍",
+       "民谣吉他"
+      ],
+      "note_zh": "价格与寿命是登记的类别设定（equipment_category_v1），不是某个商品的报价（geography: CBSA2023 35620 New York-Newark-Jersey City 都会区）"
+     },
+     {
+      "count": 5,
+      "examples": [
+       "网球场地连球拍租借（一次）",
+       "网球场地（自带球拍，一次）",
+       "在家练吉他（一次 1 小时）"
+      ],
+      "note_zh": "老师小时、人数、场地与器材是登记的模型活动设定（activity_template_v1），不是某个场所的真实报价（geography: CBSA2023 35620 New York-Newark-Jersey City 都会区）"
+     }
+    ],
+    "opportunities": [
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 0,
+        "kind": "derived"
+       },
+       {
+        "count": 457,
+        "kind": "estimated"
+       },
+       {
+        "count": 0,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "housing",
+      "total": 457
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 0,
+        "kind": "derived"
+       },
+       {
+        "count": 399,
+        "kind": "estimated"
+       },
+       {
+        "count": 0,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "job",
+      "total": 399
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 0,
+        "kind": "derived"
+       },
+       {
+        "count": 327,
+        "kind": "estimated"
+       },
+       {
+        "count": 0,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "food",
+      "total": 327
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 1,
+        "kind": "derived"
+       },
+       {
+        "count": 13,
+        "kind": "estimated"
+       },
+       {
+        "count": 0,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "service",
+      "total": 14
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 0,
+        "kind": "derived"
+       },
+       {
+        "count": 0,
+        "kind": "estimated"
+       },
+       {
+        "count": 7,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "durable",
+      "total": 7
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 0,
+        "kind": "derived"
+       },
+       {
+        "count": 6,
+        "kind": "estimated"
+       },
+       {
+        "count": 5,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "experience",
+      "total": 11
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 0,
+        "kind": "derived"
+       },
+       {
+        "count": 3,
+        "kind": "estimated"
+       },
+       {
+        "count": 0,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "training",
+      "total": 3
+     }
+    ],
+    "pack_status": "real_data_frozen",
+    "summary_zh": "纽约（纽约市五区居民）：目录 1218 项机会里，观测 0、派生 1、估计 1205、合成设定 12。城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定，不据此排序真实城市",
+    "tax": {
+     "absent_zh": [],
+     "not_modeled_zh": [
+      "联邦与州的税表（收入较低时按 50 美元一档、取档中点）没有用，统一用税率表，差几美元",
+      "抵免（劳动所得抵免 EITC 等）、税前扣除（401(k)、医疗保险费）与逐项扣除都没有建模",
+      "只有工资收入：利息、股息、资本利得与副业收入不在支持范围",
+      "预扣按全年累计工资每月重算（年初少扣、年底多扣），全年合计等于全年应缴；没有年终退税或补税的时点",
+      "纽约州 AGI 超过 107,650 时的税收优惠回收（supplemental tax）没有建模：高收入的人纽约州税少算",
+      "纽约州与纽约市的家庭抵免、学校税抵免与 EITC 没有建模",
+      "纽约州短期残障保险按年合计 31.20 处理（真实是每周最多 60 美分）"
+     ],
+     "policy_id": "tax.us2024.nyc",
+     "residence_scope_zh": "纽约市五个区（Bronx、Kings、New York、Queens、Richmond 县）的居民；工作地在纽约州境内（新泽西、宾州的就业片区不支持）",
+     "rules_zh": [
+      "联邦个人所得税",
+      "社会保障税（雇员部分）",
+      "联邦医疗保险税（雇员部分）",
+      "联邦附加医疗保险税",
+      "纽约州个人所得税",
+      "纽约市居民所得税",
+      "纽约州短期残障保险（雇员缴费）",
+      "纽约州带薪家事假（雇员缴费）"
+     ],
+     "status": "official_2024_rules",
+     "status_zh": "官方 2024 年规则（单身、只有工资收入、标准扣除）"
+    },
+    "totals": [
+     {
+      "count": 0,
+      "kind": "observed"
+     },
+     {
+      "count": 1,
+      "kind": "derived"
+     },
+     {
+      "count": 1205,
+      "kind": "estimated"
+     },
+     {
+      "count": 12,
+      "kind": "synthetic"
+     }
+    ],
+    "treatment_assumptions_zh": [
+     "没有真实医疗价格资料：六城用同一个登记的名义价与就医时间，不制造城市差异；不是任何医疗机构的报价（geography: 六城共同假设（没有真实医疗价格资料））"
+    ],
+    "work_areas": 8
+   },
+   {
+    "build": [
+     {
+      "count": 93,
+      "key": "areas",
+      "label_zh": "片区（居住与就业）"
+     },
+     {
+      "count": 303,
+      "key": "commute_legs",
+      "label_zh": "通勤关系表的线（住处片区 × 就业片区 × 方式）"
+     },
+     {
+      "count": 84851,
+      "key": "housing_candidates",
+      "label_zh": "完整可执行住房池的候选（目标格 × 经验支持点）"
+     },
+     {
+      "count": 532,
+      "key": "housing_in_catalog",
+      "label_zh": "放进目录的住房（菜单上出现过的，加最低住房与参考住房）"
+     },
+     {
+      "count": 11,
+      "key": "items_by_domain.activity",
+      "label_zh": "生活物品候选：活动"
+     },
+     {
+      "count": 7,
+      "key": "items_by_domain.consumption",
+      "label_zh": "items_by_domain.consumption"
+     },
+     {
+      "count": 3,
+      "key": "items_by_domain.daily_support",
+      "label_zh": "items_by_domain.daily_support"
+     },
+     {
+      "count": 5,
+      "key": "items_by_domain.device",
+      "label_zh": "生活物品候选：省家务设备"
+     },
+     {
+      "count": 2,
+      "key": "items_by_domain.equipment",
+      "label_zh": "生活物品候选：爱好装备"
+     },
+     {
+      "count": 327,
+      "key": "items_by_domain.food",
+      "label_zh": "生活物品候选：食品方案"
+     },
+     {
+      "count": 3,
+      "key": "items_by_domain.service",
+      "label_zh": "生活物品候选：服务"
+     },
+     {
+      "count": 82200,
+      "key": "job_candidates",
+      "label_zh": "完整可执行岗位池的候选（职业 × 年薪支持点 × 工时与就业片区）"
+     },
+     {
+      "count": 348,
+      "key": "jobs_in_catalog",
+      "label_zh": "放进目录的岗位（菜单上出现过的）"
+     },
+     {
+      "count": 12,
+      "key": "menus",
+      "label_zh": "年度菜单"
+     },
+     {
+      "count": 40,
+      "key": "start_jobs",
+      "label_zh": "各职业的开局岗位"
+     }
+    ],
+    "build_status": "from_pack_report",
+    "city_ref": "US:CBSA2023:31080",
+    "common_priors": [
+     {
+      "fact_id": "leisure_index",
+      "label": "基本休闲条件（共同先验）",
+      "meaning_zh": "住在一座城市就有的少量基本休闲条件，0–10；六城没有可比资料，这里是登记的共同先验。主要的休闲满足来自实际参加的活动（健身、课程、爱好等另外安排、另外付费）"
+     }
+    ],
+    "commute_modes": [
+     {
+      "condition_zh": "步行或骑车：没有使用条件、不封顶；每次往返记 0（不计自行车、共享单车与鞋的费用）",
+      "in_relation": true,
+      "lines": 15,
+      "mode": "walk_bike",
+      "mode_zh": "步行或骑车"
+     },
+     {
+      "condition_zh": "洛杉矶县都会交通局（LA Metro）：单程 1.75，每次往返两次单程 3.50；没有月票，不封顶；2023-07-01 起的票价政策（取消月票、改为按日与按 7 天封顶）",
+      "in_relation": true,
+      "lines": 107,
+      "mode": "transit",
+      "mode_zh": "公共交通"
+     },
+     {
+      "condition_zh": "开车要有在用的用车权（car_access，一项按月付费的机会）；每次往返另付油费 = 往返分钟 / 60 × 25 英里每小时 ÷ 23.4 英里每加仑 × 汽油 4.721 美元每加仑；不封顶；停车与过路费没有建模",
+      "in_relation": true,
+      "lines": 181,
+      "mode": "drive",
+      "mode_zh": "开车"
+     }
+    ],
+    "home_areas": 91,
+    "label": "洛杉矶",
+    "menus": [
+     {
+      "category": "housing",
+      "env_repeats": 2,
+      "items_max": 60,
+      "items_min": 60,
+      "years": 3
+     },
+     {
+      "category": "job",
+      "env_repeats": 2,
+      "items_max": 60,
+      "items_min": 60,
+      "years": 3
+     }
+    ],
+    "model_plan_activities": [
+     "网球场地连球拍租借（一次）",
+     "网球场地（自带球拍，一次）",
+     "在家练吉他（一次 1 小时）",
+     "无器械锻炼（一次 1 小时）",
+     "参观博物馆（一次）"
+    ],
+    "named_assumptions": [
+     {
+      "count": 5,
+      "examples": [
+       "顶开洗衣机",
+       "前开洗衣机",
+       "顶开洗衣机 + 电烘干机一套"
+      ],
+      "note_zh": "价格、寿命与替代后残余是登记的类别设定（device_category_v1），不是型号报价；型号来自 ENERGY STAR 记录（geography: CBSA2023 31080 Los Angeles-Long Beach-Anaheim 都会区）"
+     },
+     {
+      "count": 2,
+      "examples": [
+       "网球拍",
+       "民谣吉他"
+      ],
+      "note_zh": "价格与寿命是登记的类别设定（equipment_category_v1），不是某个商品的报价（geography: CBSA2023 31080 Los Angeles-Long Beach-Anaheim 都会区）"
+     },
+     {
+      "count": 5,
+      "examples": [
+       "网球场地连球拍租借（一次）",
+       "网球场地（自带球拍，一次）",
+       "在家练吉他（一次 1 小时）"
+      ],
+      "note_zh": "老师小时、人数、场地与器材是登记的模型活动设定（activity_template_v1），不是某个场所的真实报价（geography: CBSA2023 31080 Los Angeles-Long Beach-Anaheim 都会区）"
+     }
+    ],
+    "opportunities": [
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 0,
+        "kind": "derived"
+       },
+       {
+        "count": 532,
+        "kind": "estimated"
+       },
+       {
+        "count": 0,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "housing",
+      "total": 532
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 0,
+        "kind": "derived"
+       },
+       {
+        "count": 388,
+        "kind": "estimated"
+       },
+       {
+        "count": 0,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "job",
+      "total": 388
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 0,
+        "kind": "derived"
+       },
+       {
+        "count": 327,
+        "kind": "estimated"
+       },
+       {
+        "count": 0,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "food",
+      "total": 327
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 1,
+        "kind": "derived"
+       },
+       {
+        "count": 13,
+        "kind": "estimated"
+       },
+       {
+        "count": 0,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "service",
+      "total": 14
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 0,
+        "kind": "derived"
+       },
+       {
+        "count": 0,
+        "kind": "estimated"
+       },
+       {
+        "count": 7,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "durable",
+      "total": 7
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 0,
+        "kind": "derived"
+       },
+       {
+        "count": 6,
+        "kind": "estimated"
+       },
+       {
+        "count": 5,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "experience",
+      "total": 11
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 1,
+        "kind": "derived"
+       },
+       {
+        "count": 0,
+        "kind": "estimated"
+       },
+       {
+        "count": 0,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "training",
+      "total": 1
+     }
+    ],
+    "pack_status": "real_data_frozen",
+    "summary_zh": "洛杉矶：目录 1280 项机会里，观测 0、派生 2、估计 1266、合成设定 12。城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定，不据此排序真实城市",
+    "tax": {
+     "absent_zh": [],
+     "not_modeled_zh": [
+      "联邦与州的税表（收入较低时按 50 美元一档、取档中点）没有用，统一用税率表，差几美元",
+      "抵免（劳动所得抵免 EITC 等）、税前扣除（401(k)、医疗保险费）与逐项扣除都没有建模",
+      "只有工资收入：利息、股息、资本利得与副业收入不在支持范围",
+      "预扣按全年累计工资每月重算（年初少扣、年底多扣），全年合计等于全年应缴；没有年终退税或补税的时点",
+      "加州个人免税额抵免与它在高收入时的递减没有建模",
+      "加州租房者抵免、加州 EITC 与幼儿抵免没有建模"
+     ],
+     "policy_id": "tax.us2024.ca",
+     "residence_scope_zh": "加州居民、工作地在加州（洛杉矶都会区与旧金山都会区全部在加州）",
+     "rules_zh": [
+      "联邦个人所得税",
+      "社会保障税（雇员部分）",
+      "联邦医疗保险税（雇员部分）",
+      "联邦附加医疗保险税",
+      "加州个人所得税",
+      "加州精神健康服务税",
+      "加州州残障保险（雇员缴费）"
+     ],
+     "status": "official_2024_rules",
+     "status_zh": "官方 2024 年规则（单身、只有工资收入、标准扣除）"
+    },
+    "totals": [
+     {
+      "count": 0,
+      "kind": "observed"
+     },
+     {
+      "count": 2,
+      "kind": "derived"
+     },
+     {
+      "count": 1266,
+      "kind": "estimated"
+     },
+     {
+      "count": 12,
+      "kind": "synthetic"
+     }
+    ],
+    "treatment_assumptions_zh": [
+     "没有真实医疗价格资料：六城用同一个登记的名义价与就医时间，不制造城市差异；不是任何医疗机构的报价（geography: 六城共同假设（没有真实医疗价格资料））"
+    ],
+    "work_areas": 2
+   },
+   {
+    "build": [
+     {
+      "count": 44,
+      "key": "areas",
+      "label_zh": "片区（居住与就业）"
+     },
+     {
+      "count": 197,
+      "key": "commute_legs",
+      "label_zh": "通勤关系表的线（住处片区 × 就业片区 × 方式）"
+     },
+     {
+      "count": 16736,
+      "key": "housing_candidates",
+      "label_zh": "完整可执行住房池的候选（目标格 × 经验支持点）"
+     },
+     {
+      "count": 414,
+      "key": "housing_in_catalog",
+      "label_zh": "放进目录的住房（菜单上出现过的，加最低住房与参考住房）"
+     },
+     {
+      "count": 10,
+      "key": "items_by_domain.activity",
+      "label_zh": "生活物品候选：活动"
+     },
+     {
+      "count": 7,
+      "key": "items_by_domain.consumption",
+      "label_zh": "items_by_domain.consumption"
+     },
+     {
+      "count": 3,
+      "key": "items_by_domain.daily_support",
+      "label_zh": "items_by_domain.daily_support"
+     },
+     {
+      "count": 5,
+      "key": "items_by_domain.device",
+      "label_zh": "生活物品候选：省家务设备"
+     },
+     {
+      "count": 2,
+      "key": "items_by_domain.equipment",
+      "label_zh": "生活物品候选：爱好装备"
+     },
+     {
+      "count": 327,
+      "key": "items_by_domain.food",
+      "label_zh": "生活物品候选：食品方案"
+     },
+     {
+      "count": 3,
+      "key": "items_by_domain.service",
+      "label_zh": "生活物品候选：服务"
+     },
+     {
+      "count": 105564,
+      "key": "job_candidates",
+      "label_zh": "完整可执行岗位池的候选（职业 × 年薪支持点 × 工时与就业片区）"
+     },
+     {
+      "count": 351,
+      "key": "jobs_in_catalog",
+      "label_zh": "放进目录的岗位（菜单上出现过的）"
+     },
+     {
+      "count": 12,
+      "key": "menus",
+      "label_zh": "年度菜单"
+     },
+     {
+      "count": 40,
+      "key": "start_jobs",
+      "label_zh": "各职业的开局岗位"
+     }
+    ],
+    "build_status": "from_pack_report",
+    "city_ref": "US:CBSA2023:41860",
+    "common_priors": [
+     {
+      "fact_id": "leisure_index",
+      "label": "基本休闲条件（共同先验）",
+      "meaning_zh": "住在一座城市就有的少量基本休闲条件，0–10；六城没有可比资料，这里是登记的共同先验。主要的休闲满足来自实际参加的活动（健身、课程、爱好等另外安排、另外付费）"
+     }
+    ],
+    "commute_modes": [
+     {
+      "condition_zh": "步行或骑车：没有使用条件、不封顶；每次往返记 0（不计自行车、共享单车与鞋的费用）",
+      "in_relation": true,
+      "lines": 10,
+      "mode": "walk_bike",
+      "mode_zh": "步行或骑车"
+     },
+     {
+      "condition_zh": null,
+      "in_relation": false,
+      "lines": 0,
+      "mode": "transit",
+      "mode_zh": "公共交通"
+     },
+     {
+      "condition_zh": "开车要有在用的用车权（car_access，一项按月付费的机会）；每次往返另付油费 = 往返分钟 / 60 × 25 英里每小时 ÷ 23.4 英里每加仑 × 汽油 4.864 美元每加仑；不封顶；停车与过路费没有建模",
+      "in_relation": true,
+      "lines": 187,
+      "mode": "drive",
+      "mode_zh": "开车"
+     }
+    ],
+    "home_areas": 39,
+    "label": "旧金山",
+    "menus": [
+     {
+      "category": "housing",
+      "env_repeats": 2,
+      "items_max": 60,
+      "items_min": 60,
+      "years": 3
+     },
+     {
+      "category": "job",
+      "env_repeats": 2,
+      "items_max": 60,
+      "items_min": 60,
+      "years": 3
+     }
+    ],
+    "model_plan_activities": [
+     "网球场地连球拍租借（一次）",
+     "网球场地（自带球拍，一次）",
+     "在家练吉他（一次 1 小时）",
+     "无器械锻炼（一次 1 小时）",
+     "参观博物馆（一次）"
+    ],
+    "named_assumptions": [
+     {
+      "count": 5,
+      "examples": [
+       "顶开洗衣机",
+       "前开洗衣机",
+       "顶开洗衣机 + 电烘干机一套"
+      ],
+      "note_zh": "价格、寿命与替代后残余是登记的类别设定（device_category_v1），不是型号报价；型号来自 ENERGY STAR 记录（geography: CBSA2023 41860 San Francisco-Oakland-Fremont 都会区）"
+     },
+     {
+      "count": 2,
+      "examples": [
+       "网球拍",
+       "民谣吉他"
+      ],
+      "note_zh": "价格与寿命是登记的类别设定（equipment_category_v1），不是某个商品的报价（geography: CBSA2023 41860 San Francisco-Oakland-Fremont 都会区）"
+     },
+     {
+      "count": 5,
+      "examples": [
+       "网球场地连球拍租借（一次）",
+       "网球场地（自带球拍，一次）",
+       "在家练吉他（一次 1 小时）"
+      ],
+      "note_zh": "老师小时、人数、场地与器材是登记的模型活动设定（activity_template_v1），不是某个场所的真实报价（geography: CBSA2023 41860 San Francisco-Oakland-Fremont 都会区）"
+     }
+    ],
+    "opportunities": [
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 0,
+        "kind": "derived"
+       },
+       {
+        "count": 414,
+        "kind": "estimated"
+       },
+       {
+        "count": 0,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "housing",
+      "total": 414
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 0,
+        "kind": "derived"
+       },
+       {
+        "count": 391,
+        "kind": "estimated"
+       },
+       {
+        "count": 0,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "job",
+      "total": 391
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 0,
+        "kind": "derived"
+       },
+       {
+        "count": 327,
+        "kind": "estimated"
+       },
+       {
+        "count": 0,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "food",
+      "total": 327
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 1,
+        "kind": "derived"
+       },
+       {
+        "count": 13,
+        "kind": "estimated"
+       },
+       {
+        "count": 0,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "service",
+      "total": 14
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 0,
+        "kind": "derived"
+       },
+       {
+        "count": 0,
+        "kind": "estimated"
+       },
+       {
+        "count": 7,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "durable",
+      "total": 7
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 0,
+        "kind": "derived"
+       },
+       {
+        "count": 5,
+        "kind": "estimated"
+       },
+       {
+        "count": 5,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "experience",
+      "total": 10
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 1,
+        "kind": "derived"
+       },
+       {
+        "count": 0,
+        "kind": "estimated"
+       },
+       {
+        "count": 0,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "training",
+      "total": 1
+     }
+    ],
+    "pack_status": "real_data_frozen",
+    "summary_zh": "旧金山：目录 1164 项机会里，观测 0、派生 2、估计 1150、合成设定 12。城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定，不据此排序真实城市",
+    "tax": {
+     "absent_zh": [],
+     "not_modeled_zh": [
+      "联邦与州的税表（收入较低时按 50 美元一档、取档中点）没有用，统一用税率表，差几美元",
+      "抵免（劳动所得抵免 EITC 等）、税前扣除（401(k)、医疗保险费）与逐项扣除都没有建模",
+      "只有工资收入：利息、股息、资本利得与副业收入不在支持范围",
+      "预扣按全年累计工资每月重算（年初少扣、年底多扣），全年合计等于全年应缴；没有年终退税或补税的时点",
+      "加州个人免税额抵免与它在高收入时的递减没有建模",
+      "加州租房者抵免、加州 EITC 与幼儿抵免没有建模"
+     ],
+     "policy_id": "tax.us2024.ca",
+     "residence_scope_zh": "加州居民、工作地在加州（洛杉矶都会区与旧金山都会区全部在加州）",
+     "rules_zh": [
+      "联邦个人所得税",
+      "社会保障税（雇员部分）",
+      "联邦医疗保险税（雇员部分）",
+      "联邦附加医疗保险税",
+      "加州个人所得税",
+      "加州精神健康服务税",
+      "加州州残障保险（雇员缴费）"
+     ],
+     "status": "official_2024_rules",
+     "status_zh": "官方 2024 年规则（单身、只有工资收入、标准扣除）"
+    },
+    "totals": [
+     {
+      "count": 0,
+      "kind": "observed"
+     },
+     {
+      "count": 2,
+      "kind": "derived"
+     },
+     {
+      "count": 1150,
+      "kind": "estimated"
+     },
+     {
+      "count": 12,
+      "kind": "synthetic"
+     }
+    ],
+    "treatment_assumptions_zh": [
+     "没有真实医疗价格资料：六城用同一个登记的名义价与就医时间，不制造城市差异；不是任何医疗机构的报价（geography: 六城共同假设（没有真实医疗价格资料））"
+    ],
+    "work_areas": 5
+   },
+   {
+    "build": [
+     {
+      "count": 66,
+      "key": "areas",
+      "label_zh": "片区（居住与就业）"
+     },
+     {
+      "count": 394,
+      "key": "commute_legs",
+      "label_zh": "通勤关系表的线（住处片区 × 就业片区 × 方式）"
+     },
+     {
+      "count": 19,
+      "key": "excluded.housing.outside_tax_scope",
+      "label_zh": "没有进住房池的目标格：在税务支持范围之外"
+     },
+     {
+      "count": 27986,
+      "key": "housing_candidates",
+      "label_zh": "完整可执行住房池的候选（目标格 × 经验支持点）"
+     },
+     {
+      "count": 457,
+      "key": "housing_in_catalog",
+      "label_zh": "放进目录的住房（菜单上出现过的，加最低住房与参考住房）"
+     },
+     {
+      "count": 11,
+      "key": "items_by_domain.activity",
+      "label_zh": "生活物品候选：活动"
+     },
+     {
+      "count": 7,
+      "key": "items_by_domain.consumption",
+      "label_zh": "items_by_domain.consumption"
+     },
+     {
+      "count": 3,
+      "key": "items_by_domain.daily_support",
+      "label_zh": "items_by_domain.daily_support"
+     },
+     {
+      "count": 5,
+      "key": "items_by_domain.device",
+      "label_zh": "生活物品候选：省家务设备"
+     },
+     {
+      "count": 2,
+      "key": "items_by_domain.equipment",
+      "label_zh": "生活物品候选：爱好装备"
+     },
+     {
+      "count": 327,
+      "key": "items_by_domain.food",
+      "label_zh": "生活物品候选：食品方案"
+     },
+     {
+      "count": 3,
+      "key": "items_by_domain.service",
+      "label_zh": "生活物品候选：服务"
+     },
+     {
+      "count": 133740,
+      "key": "job_candidates",
+      "label_zh": "完整可执行岗位池的候选（职业 × 年薪支持点 × 工时与就业片区）"
+     },
+     {
+      "count": 354,
+      "key": "jobs_in_catalog",
+      "label_zh": "放进目录的岗位（菜单上出现过的）"
+     },
+     {
+      "count": 12,
+      "key": "menus",
+      "label_zh": "年度菜单"
+     },
+     {
+      "count": 40,
+      "key": "start_jobs",
+      "label_zh": "各职业的开局岗位"
+     }
+    ],
+    "build_status": "from_pack_report",
+    "city_ref": "US:CBSA2023:16980",
+    "common_priors": [
+     {
+      "fact_id": "leisure_index",
+      "label": "基本休闲条件（共同先验）",
+      "meaning_zh": "住在一座城市就有的少量基本休闲条件，0–10；六城没有可比资料，这里是登记的共同先验。主要的休闲满足来自实际参加的活动（健身、课程、爱好等另外安排、另外付费）"
+     }
+    ],
+    "commute_modes": [
+     {
+      "condition_zh": "步行或骑车：没有使用条件、不封顶；每次往返记 0（不计自行车、共享单车与鞋的费用）",
+      "in_relation": true,
+      "lines": 9,
+      "mode": "walk_bike",
+      "mode_zh": "步行或骑车"
+     },
+     {
+      "condition_zh": "芝加哥交通局（CTA）：单程 2.5，每次往返两次单程 5.0；月票 75 当作每月封顶；2023-02-20 起的票价表（获取时仍是现行表）；单程取轻轨（'L'）票价，公交 2.25",
+      "in_relation": true,
+      "lines": 77,
+      "mode": "transit",
+      "mode_zh": "公共交通"
+     },
+     {
+      "condition_zh": "开车要有在用的用车权（car_access，一项按月付费的机会）；每次往返另付油费 = 往返分钟 / 60 × 25 英里每小时 ÷ 23.4 英里每加仑 × 汽油 3.731 美元每加仑；不封顶；停车与过路费没有建模",
+      "in_relation": true,
+      "lines": 308,
+      "mode": "drive",
+      "mode_zh": "开车"
+     }
+    ],
+    "home_areas": 60,
+    "label": "芝加哥（伊利诺伊州部分）",
+    "menus": [
+     {
+      "category": "housing",
+      "env_repeats": 2,
+      "items_max": 60,
+      "items_min": 60,
+      "years": 3
+     },
+     {
+      "category": "job",
+      "env_repeats": 2,
+      "items_max": 60,
+      "items_min": 60,
+      "years": 3
+     }
+    ],
+    "model_plan_activities": [
+     "网球场地连球拍租借（一次）",
+     "网球场地（自带球拍，一次）",
+     "在家练吉他（一次 1 小时）",
+     "无器械锻炼（一次 1 小时）",
+     "参观博物馆（一次）"
+    ],
+    "named_assumptions": [
+     {
+      "count": 5,
+      "examples": [
+       "顶开洗衣机",
+       "前开洗衣机",
+       "顶开洗衣机 + 电烘干机一套"
+      ],
+      "note_zh": "价格、寿命与替代后残余是登记的类别设定（device_category_v1），不是型号报价；型号来自 ENERGY STAR 记录（geography: CBSA2023 16980 Chicago-Naperville-Elgin 都会区）"
+     },
+     {
+      "count": 2,
+      "examples": [
+       "网球拍",
+       "民谣吉他"
+      ],
+      "note_zh": "价格与寿命是登记的类别设定（equipment_category_v1），不是某个商品的报价（geography: CBSA2023 16980 Chicago-Naperville-Elgin 都会区）"
+     },
+     {
+      "count": 5,
+      "examples": [
+       "网球场地连球拍租借（一次）",
+       "网球场地（自带球拍，一次）",
+       "在家练吉他（一次 1 小时）"
+      ],
+      "note_zh": "老师小时、人数、场地与器材是登记的模型活动设定（activity_template_v1），不是某个场所的真实报价（geography: CBSA2023 16980 Chicago-Naperville-Elgin 都会区）"
+     }
+    ],
+    "opportunities": [
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 0,
+        "kind": "derived"
+       },
+       {
+        "count": 457,
+        "kind": "estimated"
+       },
+       {
+        "count": 0,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "housing",
+      "total": 457
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 0,
+        "kind": "derived"
+       },
+       {
+        "count": 394,
+        "kind": "estimated"
+       },
+       {
+        "count": 0,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "job",
+      "total": 394
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 0,
+        "kind": "derived"
+       },
+       {
+        "count": 327,
+        "kind": "estimated"
+       },
+       {
+        "count": 0,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "food",
+      "total": 327
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 1,
+        "kind": "derived"
+       },
+       {
+        "count": 13,
+        "kind": "estimated"
+       },
+       {
+        "count": 0,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "service",
+      "total": 14
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 0,
+        "kind": "derived"
+       },
+       {
+        "count": 0,
+        "kind": "estimated"
+       },
+       {
+        "count": 7,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "durable",
+      "total": 7
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 0,
+        "kind": "derived"
+       },
+       {
+        "count": 6,
+        "kind": "estimated"
+       },
+       {
+        "count": 5,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "experience",
+      "total": 11
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 1,
+        "kind": "derived"
+       },
+       {
+        "count": 0,
+        "kind": "estimated"
+       },
+       {
+        "count": 0,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "training",
+      "total": 1
+     }
+    ],
+    "pack_status": "real_data_frozen",
+    "summary_zh": "芝加哥（伊利诺伊州部分）：目录 1211 项机会里，观测 0、派生 2、估计 1197、合成设定 12。城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定，不据此排序真实城市",
+    "tax": {
+     "absent_zh": [],
+     "not_modeled_zh": [
+      "联邦与州的税表（收入较低时按 50 美元一档、取档中点）没有用，统一用税率表，差几美元",
+      "抵免（劳动所得抵免 EITC 等）、税前扣除（401(k)、医疗保险费）与逐项扣除都没有建模",
+      "只有工资收入：利息、股息、资本利得与副业收入不在支持范围",
+      "预扣按全年累计工资每月重算（年初少扣、年底多扣），全年合计等于全年应缴；没有年终退税或补税的时点",
+      "伊利诺伊州个人免税额在 AGI 超过 250,000 时取消，没有建模",
+      "伊利诺伊州 EITC 等抵免没有建模"
+     ],
+     "policy_id": "tax.us2024.il",
+     "residence_scope_zh": "芝加哥都会区的伊利诺伊州部分；居住地与工作地都在伊利诺伊州（印第安纳州的县不支持）",
+     "rules_zh": [
+      "联邦个人所得税",
+      "社会保障税（雇员部分）",
+      "联邦医疗保险税（雇员部分）",
+      "联邦附加医疗保险税",
+      "伊利诺伊州个人所得税"
+     ],
+     "status": "official_2024_rules",
+     "status_zh": "官方 2024 年规则（单身、只有工资收入、标准扣除）"
+    },
+    "totals": [
+     {
+      "count": 0,
+      "kind": "observed"
+     },
+     {
+      "count": 2,
+      "kind": "derived"
+     },
+     {
+      "count": 1197,
+      "kind": "estimated"
+     },
+     {
+      "count": 12,
+      "kind": "synthetic"
+     }
+    ],
+    "treatment_assumptions_zh": [
+     "没有真实医疗价格资料：六城用同一个登记的名义价与就医时间，不制造城市差异；不是任何医疗机构的报价（geography: 六城共同假设（没有真实医疗价格资料））"
+    ],
+    "work_areas": 6
+   },
+   {
+    "build": [
+     {
+      "count": 59,
+      "key": "areas",
+      "label_zh": "片区（居住与就业）"
+     },
+     {
+      "count": 258,
+      "key": "commute_legs",
+      "label_zh": "通勤关系表的线（住处片区 × 就业片区 × 方式）"
+     },
+     {
+      "count": 38109,
+      "key": "housing_candidates",
+      "label_zh": "完整可执行住房池的候选（目标格 × 经验支持点）"
+     },
+     {
+      "count": 457,
+      "key": "housing_in_catalog",
+      "label_zh": "放进目录的住房（菜单上出现过的，加最低住房与参考住房）"
+     },
+     {
+      "count": 11,
+      "key": "items_by_domain.activity",
+      "label_zh": "生活物品候选：活动"
+     },
+     {
+      "count": 7,
+      "key": "items_by_domain.consumption",
+      "label_zh": "items_by_domain.consumption"
+     },
+     {
+      "count": 3,
+      "key": "items_by_domain.daily_support",
+      "label_zh": "items_by_domain.daily_support"
+     },
+     {
+      "count": 5,
+      "key": "items_by_domain.device",
+      "label_zh": "生活物品候选：省家务设备"
+     },
+     {
+      "count": 2,
+      "key": "items_by_domain.equipment",
+      "label_zh": "生活物品候选：爱好装备"
+     },
+     {
+      "count": 327,
+      "key": "items_by_domain.food",
+      "label_zh": "生活物品候选：食品方案"
+     },
+     {
+      "count": 3,
+      "key": "items_by_domain.service",
+      "label_zh": "生活物品候选：服务"
+     },
+     {
+      "count": 3,
+      "key": "items_by_domain.training",
+      "label_zh": "生活物品候选：培训"
+     },
+     {
+      "count": 92240,
+      "key": "job_candidates",
+      "label_zh": "完整可执行岗位池的候选（职业 × 年薪支持点 × 工时与就业片区）"
+     },
+     {
+      "count": 338,
+      "key": "jobs_in_catalog",
+      "label_zh": "放进目录的岗位（菜单上出现过的）"
+     },
+     {
+      "count": 12,
+      "key": "menus",
+      "label_zh": "年度菜单"
+     },
+     {
+      "count": 40,
+      "key": "start_jobs",
+      "label_zh": "各职业的开局岗位"
+     }
+    ],
+    "build_status": "from_pack_report",
+    "city_ref": "US:CBSA2023:26420",
+    "common_priors": [
+     {
+      "fact_id": "leisure_index",
+      "label": "基本休闲条件（共同先验）",
+      "meaning_zh": "住在一座城市就有的少量基本休闲条件，0–10；六城没有可比资料，这里是登记的共同先验。主要的休闲满足来自实际参加的活动（健身、课程、爱好等另外安排、另外付费）"
+     }
+    ],
+    "commute_modes": [
+     {
+      "condition_zh": "步行或骑车：没有使用条件、不封顶；每次往返记 0（不计自行车、共享单车与鞋的费用）",
+      "in_relation": true,
+      "lines": 2,
+      "mode": "walk_bike",
+      "mode_zh": "步行或骑车"
+     },
+     {
+      "condition_zh": "哈里斯县都会交通局（METRO）：单程 1.25，每次往返两次单程 2.50；没有月票，不封顶；获取时（2026-10）的现行票价，页面没有写生效日期",
+      "in_relation": true,
+      "lines": 50,
+      "mode": "transit",
+      "mode_zh": "公共交通"
+     },
+     {
+      "condition_zh": "开车要有在用的用车权（car_access，一项按月付费的机会）；每次往返另付油费 = 往返分钟 / 60 × 25 英里每小时 ÷ 23.4 英里每加仑 × 汽油 2.858 美元每加仑；不封顶；停车与过路费没有建模",
+      "in_relation": true,
+      "lines": 206,
+      "mode": "drive",
+      "mode_zh": "开车"
+     }
+    ],
+    "home_areas": 55,
+    "label": "休斯敦",
+    "menus": [
+     {
+      "category": "housing",
+      "env_repeats": 2,
+      "items_max": 60,
+      "items_min": 60,
+      "years": 3
+     },
+     {
+      "category": "job",
+      "env_repeats": 2,
+      "items_max": 60,
+      "items_min": 60,
+      "years": 3
+     }
+    ],
+    "model_plan_activities": [
+     "网球场地连球拍租借（一次）",
+     "网球场地（自带球拍，一次）",
+     "在家练吉他（一次 1 小时）",
+     "无器械锻炼（一次 1 小时）",
+     "参观博物馆（一次）"
+    ],
+    "named_assumptions": [
+     {
+      "count": 5,
+      "examples": [
+       "顶开洗衣机",
+       "前开洗衣机",
+       "顶开洗衣机 + 电烘干机一套"
+      ],
+      "note_zh": "价格、寿命与替代后残余是登记的类别设定（device_category_v1），不是型号报价；型号来自 ENERGY STAR 记录（geography: CBSA2023 26420 Houston-Pasadena-The Woodlands 都会区）"
+     },
+     {
+      "count": 2,
+      "examples": [
+       "网球拍",
+       "民谣吉他"
+      ],
+      "note_zh": "价格与寿命是登记的类别设定（equipment_category_v1），不是某个商品的报价（geography: CBSA2023 26420 Houston-Pasadena-The Woodlands 都会区）"
+     },
+     {
+      "count": 5,
+      "examples": [
+       "网球场地连球拍租借（一次）",
+       "网球场地（自带球拍，一次）",
+       "在家练吉他（一次 1 小时）"
+      ],
+      "note_zh": "老师小时、人数、场地与器材是登记的模型活动设定（activity_template_v1），不是某个场所的真实报价（geography: CBSA2023 26420 Houston-Pasadena-The Woodlands 都会区）"
+     }
+    ],
+    "opportunities": [
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 0,
+        "kind": "derived"
+       },
+       {
+        "count": 457,
+        "kind": "estimated"
+       },
+       {
+        "count": 0,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "housing",
+      "total": 457
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 0,
+        "kind": "derived"
+       },
+       {
+        "count": 378,
+        "kind": "estimated"
+       },
+       {
+        "count": 0,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "job",
+      "total": 378
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 0,
+        "kind": "derived"
+       },
+       {
+        "count": 327,
+        "kind": "estimated"
+       },
+       {
+        "count": 0,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "food",
+      "total": 327
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 1,
+        "kind": "derived"
+       },
+       {
+        "count": 13,
+        "kind": "estimated"
+       },
+       {
+        "count": 0,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "service",
+      "total": 14
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 0,
+        "kind": "derived"
+       },
+       {
+        "count": 0,
+        "kind": "estimated"
+       },
+       {
+        "count": 7,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "durable",
+      "total": 7
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 0,
+        "kind": "derived"
+       },
+       {
+        "count": 6,
+        "kind": "estimated"
+       },
+       {
+        "count": 5,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "experience",
+      "total": 11
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 0,
+        "kind": "derived"
+       },
+       {
+        "count": 3,
+        "kind": "estimated"
+       },
+       {
+        "count": 0,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "training",
+      "total": 3
+     }
+    ],
+    "pack_status": "real_data_frozen",
+    "summary_zh": "休斯敦：目录 1197 项机会里，观测 0、派生 1、估计 1184、合成设定 12。城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定，不据此排序真实城市",
+    "tax": {
+     "absent_zh": [
+      "德州没有州个人所得税"
+     ],
+     "not_modeled_zh": [
+      "联邦与州的税表（收入较低时按 50 美元一档、取档中点）没有用，统一用税率表，差几美元",
+      "抵免（劳动所得抵免 EITC 等）、税前扣除（401(k)、医疗保险费）与逐项扣除都没有建模",
+      "只有工资收入：利息、股息、资本利得与副业收入不在支持范围",
+      "预扣按全年累计工资每月重算（年初少扣、年底多扣），全年合计等于全年应缴；没有年终退税或补税的时点"
+     ],
+     "policy_id": "tax.us2024.tx",
+     "residence_scope_zh": "德州居民、工作地在德州（休斯敦都会区全部在德州）",
+     "rules_zh": [
+      "联邦个人所得税",
+      "社会保障税（雇员部分）",
+      "联邦医疗保险税（雇员部分）",
+      "联邦附加医疗保险税"
+     ],
+     "status": "official_2024_rules",
+     "status_zh": "官方 2024 年规则（单身、只有工资收入、标准扣除）"
+    },
+    "totals": [
+     {
+      "count": 0,
+      "kind": "observed"
+     },
+     {
+      "count": 1,
+      "kind": "derived"
+     },
+     {
+      "count": 1184,
+      "kind": "estimated"
+     },
+     {
+      "count": 12,
+      "kind": "synthetic"
+     }
+    ],
+    "treatment_assumptions_zh": [
+     "没有真实医疗价格资料：六城用同一个登记的名义价与就医时间，不制造城市差异；不是任何医疗机构的报价（geography: 六城共同假设（没有真实医疗价格资料））"
+    ],
+    "work_areas": 4
+   },
+   {
+    "build": [
+     {
+      "count": 35,
+      "key": "areas",
+      "label_zh": "片区（居住与就业）"
+     },
+     {
+      "count": 147,
+      "key": "commute_legs",
+      "label_zh": "通勤关系表的线（住处片区 × 就业片区 × 方式）"
+     },
+     {
+      "count": 12861,
+      "key": "housing_candidates",
+      "label_zh": "完整可执行住房池的候选（目标格 × 经验支持点）"
+     },
+     {
+      "count": 397,
+      "key": "housing_in_catalog",
+      "label_zh": "放进目录的住房（菜单上出现过的，加最低住房与参考住房）"
+     },
+     {
+      "count": 11,
+      "key": "items_by_domain.activity",
+      "label_zh": "生活物品候选：活动"
+     },
+     {
+      "count": 7,
+      "key": "items_by_domain.consumption",
+      "label_zh": "items_by_domain.consumption"
+     },
+     {
+      "count": 3,
+      "key": "items_by_domain.daily_support",
+      "label_zh": "items_by_domain.daily_support"
+     },
+     {
+      "count": 5,
+      "key": "items_by_domain.device",
+      "label_zh": "生活物品候选：省家务设备"
+     },
+     {
+      "count": 2,
+      "key": "items_by_domain.equipment",
+      "label_zh": "生活物品候选：爱好装备"
+     },
+     {
+      "count": 327,
+      "key": "items_by_domain.food",
+      "label_zh": "生活物品候选：食品方案"
+     },
+     {
+      "count": 3,
+      "key": "items_by_domain.service",
+      "label_zh": "生活物品候选：服务"
+     },
+     {
+      "count": 73912,
+      "key": "job_candidates",
+      "label_zh": "完整可执行岗位池的候选（职业 × 年薪支持点 × 工时与就业片区）"
+     },
+     {
+      "count": 347,
+      "key": "jobs_in_catalog",
+      "label_zh": "放进目录的岗位（菜单上出现过的）"
+     },
+     {
+      "count": 12,
+      "key": "menus",
+      "label_zh": "年度菜单"
+     },
+     {
+      "count": 40,
+      "key": "start_jobs",
+      "label_zh": "各职业的开局岗位"
+     }
+    ],
+    "build_status": "from_pack_report",
+    "city_ref": "US:CBSA2023:42660",
+    "common_priors": [
+     {
+      "fact_id": "leisure_index",
+      "label": "基本休闲条件（共同先验）",
+      "meaning_zh": "住在一座城市就有的少量基本休闲条件，0–10；六城没有可比资料，这里是登记的共同先验。主要的休闲满足来自实际参加的活动（健身、课程、爱好等另外安排、另外付费）"
+     }
+    ],
+    "commute_modes": [
+     {
+      "condition_zh": "步行或骑车：没有使用条件、不封顶；每次往返记 0（不计自行车、共享单车与鞋的费用）",
+      "in_relation": true,
+      "lines": 6,
+      "mode": "walk_bike",
+      "mode_zh": "步行或骑车"
+     },
+     {
+      "condition_zh": "金县交通局（King County Metro）：单程 2.75，每次往返两次单程 5.50；月票 99 当作每月封顶；2025-09-01 调价前的成人票价与月票（2018 年统一票价以来第一次调价）",
+      "in_relation": true,
+      "lines": 50,
+      "mode": "transit",
+      "mode_zh": "公共交通"
+     },
+     {
+      "condition_zh": "开车要有在用的用车权（car_access，一项按月付费的机会）；每次往返另付油费 = 往返分钟 / 60 × 25 英里每小时 ÷ 23.4 英里每加仑 × 汽油 4.374 美元每加仑；不封顶；停车与过路费没有建模",
+      "in_relation": true,
+      "lines": 91,
+      "mode": "drive",
+      "mode_zh": "开车"
+     }
+    ],
+    "home_areas": 32,
+    "label": "西雅图",
+    "menus": [
+     {
+      "category": "housing",
+      "env_repeats": 2,
+      "items_max": 60,
+      "items_min": 60,
+      "years": 3
+     },
+     {
+      "category": "job",
+      "env_repeats": 2,
+      "items_max": 60,
+      "items_min": 60,
+      "years": 3
+     }
+    ],
+    "model_plan_activities": [
+     "网球场地连球拍租借（一次）",
+     "网球场地（自带球拍，一次）",
+     "在家练吉他（一次 1 小时）",
+     "无器械锻炼（一次 1 小时）",
+     "参观博物馆（一次）"
+    ],
+    "named_assumptions": [
+     {
+      "count": 5,
+      "examples": [
+       "顶开洗衣机",
+       "前开洗衣机",
+       "顶开洗衣机 + 电烘干机一套"
+      ],
+      "note_zh": "价格、寿命与替代后残余是登记的类别设定（device_category_v1），不是型号报价；型号来自 ENERGY STAR 记录（geography: CBSA2023 42660 Seattle-Tacoma-Bellevue 都会区）"
+     },
+     {
+      "count": 2,
+      "examples": [
+       "网球拍",
+       "民谣吉他"
+      ],
+      "note_zh": "价格与寿命是登记的类别设定（equipment_category_v1），不是某个商品的报价（geography: CBSA2023 42660 Seattle-Tacoma-Bellevue 都会区）"
+     },
+     {
+      "count": 5,
+      "examples": [
+       "网球场地连球拍租借（一次）",
+       "网球场地（自带球拍，一次）",
+       "在家练吉他（一次 1 小时）"
+      ],
+      "note_zh": "老师小时、人数、场地与器材是登记的模型活动设定（activity_template_v1），不是某个场所的真实报价（geography: CBSA2023 42660 Seattle-Tacoma-Bellevue 都会区）"
+     }
+    ],
+    "opportunities": [
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 0,
+        "kind": "derived"
+       },
+       {
+        "count": 397,
+        "kind": "estimated"
+       },
+       {
+        "count": 0,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "housing",
+      "total": 397
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 0,
+        "kind": "derived"
+       },
+       {
+        "count": 387,
+        "kind": "estimated"
+       },
+       {
+        "count": 0,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "job",
+      "total": 387
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 0,
+        "kind": "derived"
+       },
+       {
+        "count": 327,
+        "kind": "estimated"
+       },
+       {
+        "count": 0,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "food",
+      "total": 327
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 1,
+        "kind": "derived"
+       },
+       {
+        "count": 13,
+        "kind": "estimated"
+       },
+       {
+        "count": 0,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "service",
+      "total": 14
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 0,
+        "kind": "derived"
+       },
+       {
+        "count": 0,
+        "kind": "estimated"
+       },
+       {
+        "count": 7,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "durable",
+      "total": 7
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 0,
+        "kind": "derived"
+       },
+       {
+        "count": 6,
+        "kind": "estimated"
+       },
+       {
+        "count": 5,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "experience",
+      "total": 11
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 1,
+        "kind": "derived"
+       },
+       {
+        "count": 0,
+        "kind": "estimated"
+       },
+       {
+        "count": 0,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "training",
+      "total": 1
+     }
+    ],
+    "pack_status": "real_data_frozen",
+    "summary_zh": "西雅图：目录 1144 项机会里，观测 0、派生 2、估计 1130、合成设定 12。城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定，不据此排序真实城市",
+    "tax": {
+     "absent_zh": [
+      "华盛顿州 2024 年没有个人所得税"
+     ],
+     "not_modeled_zh": [
+      "联邦与州的税表（收入较低时按 50 美元一档、取档中点）没有用，统一用税率表，差几美元",
+      "抵免（劳动所得抵免 EITC 等）、税前扣除（401(k)、医疗保险费）与逐项扣除都没有建模",
+      "只有工资收入：利息、股息、资本利得与副业收入不在支持范围",
+      "预扣按全年累计工资每月重算（年初少扣、年底多扣），全年合计等于全年应缴；没有年终退税或补税的时点",
+      "WA Cares 的豁免（已有长期护理保险等）没有建模"
+     ],
+     "policy_id": "tax.us2024.wa",
+     "residence_scope_zh": "华盛顿州居民、工作地在华盛顿州（西雅图都会区全部在华盛顿州）",
+     "rules_zh": [
+      "联邦个人所得税",
+      "社会保障税（雇员部分）",
+      "联邦医疗保险税（雇员部分）",
+      "联邦附加医疗保险税",
+      "华盛顿州带薪家事与病假保险（雇员缴费）",
+      "华盛顿州长期护理保险 WA Cares（雇员缴费）"
+     ],
+     "status": "official_2024_rules",
+     "status_zh": "官方 2024 年规则（单身、只有工资收入、标准扣除）"
+    },
+    "totals": [
+     {
+      "count": 0,
+      "kind": "observed"
+     },
+     {
+      "count": 2,
+      "kind": "derived"
+     },
+     {
+      "count": 1130,
+      "kind": "estimated"
+     },
+     {
+      "count": 12,
+      "kind": "synthetic"
+     }
+    ],
+    "treatment_assumptions_zh": [
+     "没有真实医疗价格资料：六城用同一个登记的名义价与就医时间，不制造城市差异；不是任何医疗机构的报价（geography: 六城共同假设（没有真实医疗价格资料））"
+    ],
+    "work_areas": 3
+   }
+  ],
+  "evaluation_status": "generated",
+  "limitations_zh": [
+   "城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定：结果不排序真实城市，也不是现实推荐",
+   "安全背景按各都会区 2024 年犯罪统计换算（统计代理，不是个人遭遇犯罪的概率；纽约只覆盖都会区的纽约州部分）；休闲背景是六城共同设定；治疗价格是共同假设；外食、服务、设备寿命与活动价格含登记的模型设定",
+   "离线规划器是可控的 mock，不代表真实大语言模型的能力或偏好理解",
+   "问卷文案与参考改善范围是暂定稿，没有做认知访谈与量表验证",
+   "休闲兴趣：你没有回答，本次不按具体兴趣个性化（按中性规则评价）",
+   "口味与菜系：你没有回答，本次不按具体菜系个性化（只看新鲜餐）",
+   "选项目录覆盖只说明声明范围内调查过的候选资料齐不齐，不保证穷尽整个城市市场",
+   "结果只给用户看，不回灌给仍在生活中的分身"
+  ],
+  "meta": {
+   "conversion_version": "e3a-conversion-v2",
+   "data_pack": {
+    "content_fingerprint": "48eda959e2eb8254c891d1de88b92f792ccf8ecbaadac8037d548279cd9dd22b",
+    "note": "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定",
+    "pack_id": "pack.e3b.us-v1",
+    "status": "real_data_frozen"
+   },
+   "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.3-draft",
+   "sample": {
+    "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+    "origin": "offline_run",
+    "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+    "synthetic": true
+   },
+   "schema_version": "e3a-product-schema-v3.3",
+   "vocabulary_version": "e3a-vocabulary-v4"
+  },
+  "not_generated_reason": null,
+  "option_coverage": [
+   {
+    "city_ref": "US:CBSA2023:35620",
+    "excluded": 0,
+    "note_zh": "选项目录覆盖：声明范围内调查过的便利设备与服务资料齐不齐；与这座城的轨迹能否评分是两件事",
+    "resolved": 0,
+    "status": "not_assessed",
+    "surveyed": 0,
+    "unresolved": 0
+   },
+   {
+    "city_ref": "US:CBSA2023:31080",
+    "excluded": 0,
+    "note_zh": "选项目录覆盖：声明范围内调查过的便利设备与服务资料齐不齐；与这座城的轨迹能否评分是两件事",
+    "resolved": 0,
+    "status": "not_assessed",
+    "surveyed": 0,
+    "unresolved": 0
+   },
+   {
+    "city_ref": "US:CBSA2023:41860",
+    "excluded": 0,
+    "note_zh": "选项目录覆盖：声明范围内调查过的便利设备与服务资料齐不齐；与这座城的轨迹能否评分是两件事",
+    "resolved": 0,
+    "status": "not_assessed",
+    "surveyed": 0,
+    "unresolved": 0
+   },
+   {
+    "city_ref": "US:CBSA2023:16980",
+    "excluded": 0,
+    "note_zh": "选项目录覆盖：声明范围内调查过的便利设备与服务资料齐不齐；与这座城的轨迹能否评分是两件事",
+    "resolved": 0,
+    "status": "not_assessed",
+    "surveyed": 0,
+    "unresolved": 0
+   },
+   {
+    "city_ref": "US:CBSA2023:26420",
+    "excluded": 0,
+    "note_zh": "选项目录覆盖：声明范围内调查过的便利设备与服务资料齐不齐；与这座城的轨迹能否评分是两件事",
+    "resolved": 0,
+    "status": "not_assessed",
+    "surveyed": 0,
+    "unresolved": 0
+   },
+   {
+    "city_ref": "US:CBSA2023:42660",
+    "excluded": 0,
+    "note_zh": "选项目录覆盖：声明范围内调查过的便利设备与服务资料齐不齐；与这座城的轨迹能否评分是两件事",
+    "resolved": 0,
+    "status": "not_assessed",
+    "surveyed": 0,
+    "unresolved": 0
+   }
+  ],
+  "planner": {
+   "call_limit": 54,
+   "description_zh": "可控的确定性离线规划器（mock）：只检验接线、状态传递与信息隔离，不代表真实大语言模型的能力；没有网络调用，费用为 0",
+   "max_cost": null,
+   "paid": false,
+   "planner_id": "mock.rules.e3a-product",
+   "planner_kind": "mock"
+  },
+  "preflight": {
+   "preflight_fingerprint": "0c8f02f722253e9cbc9c230a74a0fc8b55c9028774b847c1808682901b230d00",
+   "preflight_id": "preflight.confirmed.draft-0000000000000046.r2"
+  },
+  "reading_guide_zh": [
+   "完整者平均 J 的分母是 C（完成且评价完整的分身），不是原计划人数；C = 0 时没有平均值，不显示为 0",
+   "确认的生活出局（E）不进均值，也不进模拟缺失范围；出局与缺失的比例以原计划人数为分母",
+   "模拟缺失范围的分母是 C + M：已知的月份照算，未知部分在 0 到 1 之间都保留。它不是置信区间，也不是现实幸福的概率",
+   "L 是实际几年逐月满足感的平均；V 是从终态出发、在预先冻结的参考生活模板与治疗分支里的估值，不是对未来的预测，也不是全局最优；J 按月份权重合成两者",
+   "资料缺失、规划没有完成、停止与程序问题是模拟问题（M），不写成“在这座城活不下去”",
+   "减少日常杂务本身对应便利满足感；没有安排的空闲时间不额外加分",
+   "事件链按核对过的环境记录写成，不是模型的理由，也不是因果证明；硬要求单独报告，不扣分、不删人",
+   "分数是当前合成模型下、按你确认的陈述偏好计算的结果；小数末位的差异不构成可靠的排序"
+  ],
+  "real_model_calls": 0,
+  "result_fingerprint": "b320529a86b6e1125fa6bd8acc9479c9e8b6cfca234fed81907b06938c86cd6c",
+  "result_id": "result.run-e3a-92b261206572b7e1",
+  "run_id": "run-e3a-92b261206572b7e1",
+  "run_stage": "completed",
+  "sources_zh": [
+   "生活事实：E1 结算记录（钱、岗位、住房、食品、服务月份）与月度资源账（本人家务小时）",
+   "片区、通勤、用车权、设备故障与税：E1 月度资源账里每月唯一的通勤记录与结算记录（不含故障抽签）",
+   "评价：E1-6A 单分身跨期评价（L / V / J）；汇总：E1-6B 城市报告（C / E / M、均值、模拟缺失范围、事件链、硬要求）",
+   "资料：冻结的真实资料包 pack.e3b.us-v1（48eda959e2eb…）：城市资料来自公开来源与登记的模型设定（逐城的来源性质见 data_nature）；生活规则、评分与评价参数是合成探索设定"
+  ]
+ }
+}

@@ -20,7 +20,7 @@
   "explanation": {
    "audit_ref": null,
    "category": "service_preflight_blocked",
-   "impact_zh": "这次模拟不能开始，没有使用次数",
+   "impact_zh": "没有开始模拟，没有使用次数",
    "next_action_zh": "按说明修改答案，重新审阅、确认画像后再准备一次",
    "reason_zh": "运行前检查没有通过（原因逐条写在运行前说明里）"
   },
@@ -133,6 +133,21 @@
   },
   "result_available": false,
   "run_id": null,
+  "settings": {
+   "call_limit": 18,
+   "cities": [
+    "US:SYNTH2026:K51",
+    "US:SYNTH2026:M52"
+   ],
+   "clones_per_city": 1,
+   "clones_total": 2,
+   "currency": "CNY",
+   "max_cost": "20",
+   "planner_kind": "mock",
+   "service_attempt_limit": null,
+   "settings_fingerprint": "abad17408a53d78b458ab17172dc89028fcb59201857cdea81336c0559a52938",
+   "years": 3
+  },
   "stage": "blocked",
   "stage_zh": "运行前检查没有通过",
   "support_ref": null,

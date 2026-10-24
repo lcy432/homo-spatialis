@@ -22,9 +22,9 @@
   "explanation": {
    "audit_ref": "sup-0000000000000011",
    "category": "service_service_unavailable",
-   "impact_zh": "已经保存的回复不会重新请求；次数不会因此另扣",
-   "next_action_zh": "稍后点“恢复”继续同一次运行",
-   "reason_zh": "模型服务暂时不可用，模拟按规则在年度边界或两份候选之间暂停"
+   "impact_zh": "模拟已经开始，这次运行已经用掉 1 次机会（开始之后不退）；已经保存的回复不会重新请求",
+   "next_action_zh": "稍后点“恢复”继续同一次运行（不另扣次数）",
+   "reason_zh": "模型服务暂时不可用，模拟按规则在年度边界或两份候选之间停下"
   },
   "intent_id": "intent-0000000000000010",
   "meta": {
@@ -830,6 +830,21 @@
   },
   "result_available": false,
   "run_id": "run-e3a-a1efed5232c22ea9",
+  "settings": {
+   "call_limit": 18,
+   "cities": [
+    "US:SYNTH2026:K51",
+    "US:SYNTH2026:M52"
+   ],
+   "clones_per_city": 1,
+   "clones_total": 2,
+   "currency": "CNY",
+   "max_cost": "20",
+   "planner_kind": "mock",
+   "service_attempt_limit": null,
+   "settings_fingerprint": "abad17408a53d78b458ab17172dc89028fcb59201857cdea81336c0559a52938",
+   "years": 3
+  },
   "stage": "needs_attention",
   "stage_zh": "停下了，需要处理",
   "support_ref": "sup-0000000000000011",

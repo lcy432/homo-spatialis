@@ -3,14 +3,17 @@
 * 草稿：服务器分配编号与修订号；带版本保存，旧版本冲突，不覆盖新答案。
 * 审阅：``product.answers.review_draft``，绑定草稿编号、修订号、内容与所用资料包。
 * 确认画像：只收审阅引用与知悉项；服务器重新校验后调用 ``product.answers.confirm_profile``（不接受浏览器构造的确认画像）。
-* 运行意图：一份确认画像 + 服务端的正式运行设置；排队做运行前检查（worker 做，不扣次数）。
+* 运行意图：一份确认画像 + 用户选的运行选项（每城分身数、年数、费用上限，可以省略）→ 服务端按 ``RunPolicy`` 校验并保存这次的有效
+  设置（``ExecutionSpec``）；排队做运行前检查（worker 做，不扣次数）。之后的检查、确认、执行、进度、结果与恢复都用这一份设置，
+  不回退到服务现在的默认值。
 * 确认开始：复用 ``product.bridge.submission_problems`` 的核对，稳定运行编号用 ``product.bridge.run_id_for``——与之后 LangGraph 登记
   用的编号一致；预留次数、排队在服务库的一个短事务里完成。
+
+会产生或恢复正文的写入都带着请求开始时读到的数据代次（``generation``），服务库在写回事务里核对（见 ``product.service.store``）。
 """
 
 from __future__ import annotations
 
-import json
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
@@ -61,11 +64,12 @@ from product.answers import (
 )
 from product.bridge import run_id_for, submission_problems
 from product.capabilities import build_capabilities
-from product.execution import ExecutionSpec, build_execution_spec, service_pack
+from product.execution import ExecutionSpec, RunOptions, RunOptionsError, RunPolicy, service_pack
 from product.pack import DataPack, load_pack
 from product.service.clock import Clock, system_clock
 from product.service.config import REPO, ServiceConfig
 from product.service.errors import ServiceFailure
+from product.service.explain import service_explanation
 from product.service.store import INTENT_CONTENT, ServiceStore, intent_due
 from product.service.tokens import csrf_for, digest, server_key
 from product.service.views import (
@@ -87,7 +91,8 @@ KEPT_AFTER_DELETE = (
 
 @dataclass
 class ServiceContext:
-    """一个服务实例共用的东西：配置、服务库、时钟、HMAC 密钥、当前的资料包与正式运行设置。"""
+    """一个服务实例共用的东西：配置、服务库、时钟、HMAC 密钥、当前的资料包、运行选项政策与默认设置（只用于显示规则与预填草稿；
+    每次运行用它自己保存的设置）。"""
 
     config: ServiceConfig
     store: ServiceStore
@@ -96,30 +101,29 @@ class ServiceContext:
     data_root: Path
     key: bytes
     pack: DataPack
-    spec: ExecutionSpec
+    policy: RunPolicy
+    default_spec: ExecutionSpec
 
     @classmethod
     def open(
         cls, config: ServiceConfig, *, clock: Clock = system_clock, repo: Path = REPO
     ) -> ServiceContext:
         data_root = config.data_root(repo)
-        store = ServiceStore(data_root / "service.sqlite", clock, runs_total=config.runs_total)
+        store = ServiceStore(
+            data_root / "service.sqlite",
+            clock,
+            runs_total=config.runs_total,
+            intent_days=config.intent_retention_days,
+            profile_days=config.profile_retention_days,
+        )
         key = server_key(data_root / "server.key")
-        pack_file = (repo / config.pack_path).resolve()
-        file_pack = load_pack(pack_file)
-        if config.profile != "test" and file_pack.body.status != "real_data_frozen":
+        pack = load_pack((repo / config.pack_path).resolve())
+        if config.profile != "test" and pack.body.status != "real_data_frozen":
             # 生产入口显式配置 E3B 资料包，不回退到合成资料包
             raise ValueError(f"{config.pack_path} 不是冻结的真实资料包：服务不使用合成资料包")
-        spec = build_execution_spec(
-            pack=file_pack,
-            pack_path=config.pack_path,
-            planner=config.planner,
-            cities=config.cities,
-            repeat_indexes=tuple(config.repeat_indexes),
-            years=config.years,
-            flash_config=repo / config.flash_config,
-            max_cost_cny=config.max_cost_cny,
-        )
+        policy = RunPolicy.from_config(config, pack, repo)
+        # 启动时就按默认选项算一遍：规划器设定、报价与资料包对不上就不启动服务
+        default_spec = policy.derive(policy.default_options())
         return cls(
             config=config,
             store=store,
@@ -127,8 +131,9 @@ class ServiceContext:
             repo=repo,
             data_root=data_root,
             key=key,
-            pack=service_pack(pack_file, spec),
-            spec=spec,
+            pack=pack,
+            policy=policy,
+            default_spec=default_spec,
         )
 
     def meta(self) -> ProductMeta:
@@ -149,6 +154,21 @@ class ServiceContext:
         return csrf_for(self.key, session_secret)
 
 
+def intent_spec(row: Mapping[str, Any]) -> ExecutionSpec:
+    """这次运行意图保存的有效设置。缺了或坏了就明确拒绝——不回退到服务现在的默认值。"""
+    try:
+        return ExecutionSpec.model_validate_json(row["execution_body"])
+    except (TypeError, ValueError) as exc:
+        raise ServiceFailure("run_settings_unavailable") from exc
+
+
+def intent_options(row: Mapping[str, Any]) -> RunOptions:
+    try:
+        return RunOptions.model_validate_json(row["run_options"])
+    except (TypeError, ValueError) as exc:
+        raise ServiceFailure("run_settings_unavailable") from exc
+
+
 # ---------------------------------------------------------------------- 会话与能力
 
 
@@ -160,7 +180,7 @@ def session_view(
         session_expires_at=expires,
         csrf_token=ctx.csrf(session_secret),
         quota=quota_view(ctx.store.quota(principal_id)),
-        rules=rules_view(ctx.config, ctx.spec),
+        rules=rules_view(ctx.config, ctx.policy, ctx.default_spec),
         drafts=tuple(
             DraftSummary(
                 draft_id=r["draft_id"],
@@ -182,13 +202,13 @@ def capabilities(ctx: ServiceContext) -> ProductCapabilities:
 
 
 def blank_draft(ctx: ServiceContext, draft_id: str, revision: int = 1) -> UserInputDraft:
-    """一份空白草稿：全部未答（未答不是 0）；城市按服务规则预先选好全部六个都会区。"""
+    """一份空白草稿：全部未答（未答不是 0）；城市预先选好服务允许的全部都会区（用户可以去掉，不能加别的）。"""
     b = ctx.pack.body
     return UserInputDraft(
         meta=ctx.meta(),
         draft_id=draft_id,
         revision=revision,
-        cities=CitiesAnswer(state="provided", city_refs=tuple(ctx.spec.cities)),
+        cities=CitiesAnswer(state="provided", city_refs=tuple(ctx.policy.cities_allowed)),
         occupation=OccupationAnswer(state="unanswered"),
         age=AgeAnswer(state="unanswered"),
         cash=CashAnswer(state="unanswered"),
@@ -205,11 +225,12 @@ def blank_draft(ctx: ServiceContext, draft_id: str, revision: int = 1) -> UserIn
     )
 
 
-def create_draft(ctx: ServiceContext, principal_id: str) -> DraftView:
+def create_draft(ctx: ServiceContext, principal_id: str, *, generation: int) -> DraftView:
     row = ctx.store.create_draft(
         principal_id,
         lambda draft_id: blank_draft(ctx, draft_id).model_dump_json(),
         ctx.config.draft_retention_days,
+        generation=generation,
     )
     return draft_view(ctx.meta(), row)
 
@@ -219,7 +240,12 @@ def get_draft(ctx: ServiceContext, principal_id: str, draft_id: str) -> DraftVie
 
 
 def save_draft(
-    ctx: ServiceContext, principal_id: str, draft_id: str, req: DraftSaveRequest
+    ctx: ServiceContext,
+    principal_id: str,
+    draft_id: str,
+    req: DraftSaveRequest,
+    *,
+    generation: int,
 ) -> DraftView:
     if req.draft.draft_id != draft_id or req.draft.revision != req.expected_revision:
         raise ServiceFailure("invalid_request")
@@ -229,6 +255,7 @@ def save_draft(
         req.expected_revision,
         lambda revision: req.draft.model_copy(update={"revision": revision}).model_dump_json(),
         ctx.config.draft_retention_days,
+        generation=generation,
     )
     return draft_view(ctx.meta(), row)
 
@@ -240,13 +267,16 @@ def delete_draft(ctx: ServiceContext, principal_id: str, draft_id: str) -> Delet
         scope="draft",
         target_ref=draft_id,
         status="deleted",
-        note_zh="草稿与它的审阅已经删除；已经确认的画像与运行不受影响",
+        note_zh="草稿、它的审阅与由它确认的画像已经删除；已经开始检查或运行的模拟用自己保存的副本，不受影响",
         kept_zh=(),
         quota=quota_view(ctx.store.quota(principal_id)),
     )
 
 
-def review(ctx: ServiceContext, principal_id: str, draft_id: str) -> ReviewReply:
+def review(
+    ctx: ServiceContext, principal_id: str, draft_id: str, *, generation: int
+) -> ReviewReply:
+    """审阅。写回时服务库在事务里重新核对草稿（还在、没过期、修订号没变）与数据代次：审阅进行中草稿被删或“删除全部”，就不写回。"""
     row = ctx.store.draft(principal_id, draft_id)
     draft = UserInputDraft.model_validate_json(row["body"])
     result = review_draft(ctx.pack, draft)
@@ -258,16 +288,39 @@ def review(ctx: ServiceContext, principal_id: str, draft_id: str) -> ReviewReply
         draft_fingerprint=draft_fingerprint(draft),
         pack_fingerprint=ctx.pack.fingerprint,
         body=result.model_dump_json(),
+        generation=generation,
     )
     return ReviewReply(meta=ctx.meta(), review=result, reviewed_revision=row["revision"])
 
 
+def _review_stale(ctx: ServiceContext) -> ProfileConfirmReply:
+    return ProfileConfirmReply(
+        meta=ctx.meta(),
+        status="refused",
+        issues=(
+            issue(
+                "review_stale",
+                "review_id",
+                "确认引用的审阅不是当前这一版草稿的审阅（草稿或资料包在审阅之后变了）",
+                "没有确认",
+                "重新审阅当前的草稿后再确认",
+            ),
+        ),
+    )
+
+
 def confirm(
-    ctx: ServiceContext, principal_id: str, req: ProfileConfirmRequest
+    ctx: ServiceContext, principal_id: str, req: ProfileConfirmRequest, *, generation: int
 ) -> ProfileConfirmReply:
-    """确认画像。服务器按保存的草稿与审阅重新校验：审阅之后草稿改过、资料包换过或引用对不上都拒绝。"""
-    rev = ctx.store.review(principal_id, req.review_id)
-    row = ctx.store.draft(principal_id, req.draft_id)
+    """确认画像。服务器按保存的草稿与审阅重新校验：审阅之后草稿改过、资料包换过或引用对不上都拒绝。写回事务里再核对一次草稿、审阅
+    与数据代次（确认进行中被删除或改动就不写回）。同一份画像重复确认不续期。"""
+    row = ctx.store.draft(principal_id, req.draft_id)  # 草稿删了或过期，就没有可以确认的东西
+    try:
+        rev = ctx.store.review(principal_id, req.review_id)
+    except ServiceFailure as exc:
+        if exc.code == "revision_conflict":
+            return _review_stale(ctx)  # 草稿改了新修订，旧审阅已经作废
+        raise
     draft = UserInputDraft.model_validate_json(row["body"])
     stale = (
         rev["draft_id"] != req.draft_id
@@ -277,19 +330,7 @@ def confirm(
         or rev["pack_fingerprint"] != ctx.pack.fingerprint
     )
     if stale:
-        return ProfileConfirmReply(
-            meta=ctx.meta(),
-            status="refused",
-            issues=(
-                issue(
-                    "review_stale",
-                    "review_id",
-                    "确认引用的审阅不是当前这一版草稿的审阅（草稿或资料包在审阅之后变了）",
-                    "没有确认",
-                    "重新审阅当前的草稿后再确认",
-                ),
-            ),
-        )
+        return _review_stale(ctx)
     try:
         confirmed = confirm_profile(
             ctx.pack,
@@ -299,24 +340,25 @@ def confirm(
         )
     except ConfirmationRefusedError as exc:
         return ProfileConfirmReply(meta=ctx.meta(), status="refused", issues=exc.issues)
-    ctx.store.save_profile(
-        principal_id,
-        confirmed_id=confirmed.confirmed_id,
-        draft_id=req.draft_id,
-        revision=req.draft_revision,
-        review_id=req.review_id,
-        fingerprint=confirmed.content_fingerprint,
-        body=confirmed.model_dump_json(),
-    )
+    try:
+        ctx.store.save_profile(
+            principal_id,
+            confirmed_id=confirmed.confirmed_id,
+            draft_id=req.draft_id,
+            revision=req.draft_revision,
+            review_id=req.review_id,
+            fingerprint=confirmed.content_fingerprint,
+            body=confirmed.model_dump_json(),
+            generation=generation,
+        )
+    except ServiceFailure as exc:
+        if exc.code == "revision_conflict":
+            return _review_stale(ctx)  # 确认进行中草稿又被改了
+        raise
     return ProfileConfirmReply(meta=ctx.meta(), status="confirmed", confirmed=confirmed)
 
 
 # ---------------------------------------------------------------------- 运行意图
-
-
-def _confirmed(ctx: ServiceContext, principal_id: str, confirmed_id: str) -> ConfirmedProfile:
-    row = ctx.store.profile(principal_id, confirmed_id)
-    return ConfirmedProfile.model_validate_json(row["body"])
 
 
 def view(ctx: ServiceContext, principal_id: str, row: Mapping[str, Any]) -> RunIntentView:
@@ -333,19 +375,33 @@ def _expired_view(ctx: ServiceContext, row: Mapping[str, Any]) -> Mapping[str, A
 
 
 def create_intent(
-    ctx: ServiceContext, principal_id: str, req: RunIntentCreateRequest
+    ctx: ServiceContext, principal_id: str, req: RunIntentCreateRequest, *, generation: int
 ) -> tuple[RunIntentView, bool]:
-    confirmed = _confirmed(ctx, principal_id, req.confirmed_id)
-    if set(confirmed.cities) != set(ctx.spec.cities):
-        raise ServiceFailure("run_scale_fixed")
+    """准备一次模拟。城市来自确认画像；每城分身数、年数与费用上限按服务政策校验（越界在预留与任何调用之前就拒绝），省略的用默认值。
+    这次的有效设置在这里就保存下来。"""
+    row = ctx.store.profile(principal_id, req.confirmed_id)
+    confirmed = ConfirmedProfile.model_validate_json(row["body"])
     if confirmation_problems(ctx.pack, confirmed):
         raise ServiceFailure("preflight_stale")
+    try:
+        options = ctx.policy.resolve(
+            tuple(confirmed.cities),
+            clones_per_city=req.clones_per_city,
+            years=req.years,
+            max_cost_cny=req.max_cost_cny,
+        )
+        spec = ctx.policy.derive(options)
+    except RunOptionsError as exc:
+        raise ServiceFailure("run_options_invalid", field=exc.field) from exc
     row, created = ctx.store.create_intent(
         principal_id,
         confirmed_id=confirmed.confirmed_id,
         confirmed_fingerprint=confirmed.content_fingerprint,
-        execution_fingerprint=ctx.spec.fingerprint,
+        execution_fingerprint=spec.fingerprint,
+        execution_body=spec.model_dump_json(),
+        run_options=options.model_dump_json(),
         workflow_key=lambda intent_id: ctx.workflow_key(principal_id, intent_id),
+        generation=generation,
     )
     return view(ctx, principal_id, row), created
 
@@ -354,33 +410,49 @@ def get_intent(ctx: ServiceContext, principal_id: str, intent_id: str) -> RunInt
     return view(ctx, principal_id, ctx.store.intent(principal_id, intent_id))
 
 
+def _run_confirmed(ctx: ServiceContext, intent_id: str, confirmed_id: str) -> ConfirmedProfile:
+    """这次运行自己保存的确认画像副本（排队检查时复制进工作目录；画像到期或草稿删了也不影响已经准备的运行）。"""
+    path = ctx.run_dir(intent_id) / "ws" / "workflow" / "confirmed" / f"{confirmed_id}.json"
+    try:
+        return ConfirmedProfile.model_validate_json(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        raise ServiceFailure("run_settings_unavailable") from exc
+
+
 def submit(
     ctx: ServiceContext, principal_id: str, intent_id: str, req: RunSubmitRequest
 ) -> RunSubmitReply:
-    """确认开始。核对在事务之外做（读快照里的资料包、复用提交核对）；接受、预留、写运行编号与排队在一个短事务里。"""
+    """确认开始。先核对截止时间；再按保存的运行选项与服务现在的政策重算有效设置——资料包、规划器设定或报价变了，就回到排队检查
+    （用户要看新的运行前说明再确认，不扣次数）；选项已经不被允许，就标为检查没通过。核对在事务之外做（读运行自己的资料快照、复用
+    提交核对）；接受、预留、写运行编号与排队在一个短事务里。"""
+    ctx.store.ensure_not_due(principal_id, intent_id)
     row = ctx.store.intent(principal_id, intent_id)
+    spec = intent_spec(row) if row["execution_body"] is not None else None
     if row["run_id"] is None and row["stage"] == "awaiting_confirmation":
-        if row["execution_fingerprint"] != ctx.spec.fingerprint:
-            # 服务的运行设置或资料包更新了：尚未确认的意图要按新设置重新检查（不扣次数）
-            ctx.store.update_intent(
+        if spec is None:
+            raise ServiceFailure("run_settings_unavailable")
+        try:
+            current = ctx.policy.derive(intent_options(row))
+        except RunOptionsError as exc:
+            explanation = service_explanation("options_not_allowed").model_dump_json()
+            ctx.store.block_intent(principal_id, intent_id, explanation)
+            raise ServiceFailure("run_options_invalid", field=exc.field) from exc
+        if current.fingerprint != spec.fingerprint:
+            ctx.store.recheck_intent(
+                principal_id,
                 intent_id,
-                only_stages=("awaiting_confirmation",),
-                stage="checking",
-                execution_fingerprint=ctx.spec.fingerprint,
-                preflight_fingerprint=None,
-                preflight_body=None,
-                last_activity_at=ctx.store.now(),
+                execution_fingerprint=current.fingerprint,
+                execution_body=current.model_dump_json(),
             )
-            ctx.store.enqueue("preflight", intent_id)
             raise ServiceFailure("preflight_stale")
-        if ctx.spec.planner_kind == "llm" and not ctx.config.live_calls_enabled:
+        if spec.planner_kind == "llm" and not ctx.config.live_calls_enabled:
             raise ServiceFailure("paid_calls_disabled")
         if row["preflight_fingerprint"] != req.confirm_with or row["preflight_body"] is None:
             raise ServiceFailure("preflight_stale")
         pre = ProductPreflight.model_validate_json(row["preflight_body"])
-        confirmed = _confirmed(ctx, principal_id, row["confirmed_id"])
+        confirmed = _run_confirmed(ctx, intent_id, row["confirmed_id"])
         try:
-            pack = service_pack(ctx.run_dir(intent_id) / "ws" / ctx.spec.pack_path, ctx.spec)
+            pack = service_pack(ctx.run_dir(intent_id) / "ws" / spec.pack_path, spec)
         except (OSError, ValueError) as exc:
             raise ServiceFailure("data_pack_unavailable") from exc
         submission = RunSubmission(
@@ -405,6 +477,7 @@ def submit(
         confirm_with=req.confirm_with,
         key=req.idempotency_key,
         run_id=run_id,
+        execution_fingerprint=row["execution_fingerprint"],
     )
     receipt = RunReceipt(
         meta=ctx.meta(),
@@ -450,25 +523,15 @@ def _visible_run(ctx: ServiceContext, principal_id: str, run_id: str) -> Mapping
     return row
 
 
-def _run_spec(ctx: ServiceContext, intent_id: str) -> ExecutionSpec:
-    """这次运行绑定的正式运行设置（排队检查时写进工作目录的本次输入；只读，绝对路径）。读不到时用服务现在的设置。"""
-    path = ctx.run_dir(intent_id) / "ws" / "workflow" / "requests" / "svc.json"
-    try:
-        raw = json.loads(path.read_text(encoding="utf-8")).get("execution")
-        return ExecutionSpec.model_validate(raw) if raw else ctx.spec
-    except (OSError, ValueError):
-        return ctx.spec
-
-
 def progress(ctx: ServiceContext, principal_id: str, run_id: str) -> RunProgress:
-    """只读 worker 写下的公开进度快照：查询不会恢复运行、调用规划器或重放历史。排队中或刚开始（第一份快照还没写下）时给一份
-    最小的快照；其他没有快照的阶段没有进度，不编一个。"""
+    """只读 worker 写下的公开进度快照：查询不会恢复运行、调用规划器或重放历史。排队中或刚开始（第一份快照还没写下）时按这次运行
+    保存的设置给一份最小的快照；其他没有快照的阶段没有进度，不编一个。"""
     row = _visible_run(ctx, principal_id, run_id)
     if row["progress_body"] is not None:
         return RunProgress.model_validate_json(row["progress_body"])
     if row["stage"] not in ("queued", "running"):
         raise ServiceFailure("result_unavailable")
-    spec = _run_spec(ctx, row["intent_id"])
+    spec = intent_spec(row)
     queued = row["stage"] == "queued"
     return RunProgress(
         meta=ctx.meta(),
@@ -486,9 +549,9 @@ def progress(ctx: ServiceContext, principal_id: str, run_id: str) -> RunProgress
             note="还没有开始：没有发出任何模型请求"
             if queued
             else "刚开始：费用以下一份进度快照为准",
-            currency=spec.currency,
+            currency=spec.currency if spec.planner_kind == "llm" else None,
             price_version=spec.price_version,
-            max_cost=spec.max_cost,
+            max_cost=spec.max_cost if spec.planner_kind == "llm" else None,
         ),
         resumable=False,
         resume_note="还没有开始，没有可以恢复的部分" if queued else "运行中，不需要恢复",
@@ -533,7 +596,8 @@ def delete_all(ctx: ServiceContext, principal_id: str) -> DeletionReceipt:
         target_ref=None,
         status="deleting",
         note_zh=(
-            "你的草稿、审阅、确认与全部运行都在删除：运行中的模拟不再批准新的模型请求，收尾后清掉内容。专属链接仍然有效"
+            "你的草稿、审阅、确认与全部运行都在删除：运行中的模拟不再批准新的模型请求，收尾后清掉内容；之前已经开始、还没有完成的"
+            "审阅或确认不会再写回。专属链接仍然有效"
         ),
         kept_zh=KEPT_AFTER_DELETE,
         quota=quota_view(ctx.store.quota(principal_id)),

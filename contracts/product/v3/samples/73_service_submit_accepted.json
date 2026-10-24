@@ -782,6 +782,21 @@
    },
    "result_available": false,
    "run_id": "run-e3a-f3a01238e9f2bfbb",
+   "settings": {
+    "call_limit": 18,
+    "cities": [
+     "US:SYNTH2026:K51",
+     "US:SYNTH2026:M52"
+    ],
+    "clones_per_city": 1,
+    "clones_total": 2,
+    "currency": "CNY",
+    "max_cost": "20",
+    "planner_kind": "mock",
+    "service_attempt_limit": null,
+    "settings_fingerprint": "abad17408a53d78b458ab17172dc89028fcb59201857cdea81336c0559a52938",
+    "years": 3
+   },
    "stage": "queued",
    "stage_zh": "已确认，排队等待开始",
    "support_ref": null,

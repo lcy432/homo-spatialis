@@ -6,8 +6,8 @@ v3 取代 [v2](../v2/README.md)（v2 目录原样保留为历史导出，界面�
 
 * `*.schema.json`：28 份消息的 JSON Schema（v3.2 起含托管服务的 14 份），由唯一权威结构 [src/common/product_contracts.py](../../../src/common/product_contracts.py) 导出，**不要手改**。
 * `index.json`：结构版本、问卷 / 词表 / 健康问卷 / 转换版本，以及每份 schema 的 SHA-256。
-* `samples/`：93 份公共样例，每份是 `{"message", "description_zh", "payload"}`，`payload` 按对应 schema 校验。
-* `openapi.json`：托管服务（E3C）的 HTTP 接口，由 `uv run python scripts/product_service.py openapi` 导出，**不要手改**。
+* `samples/`：101 份公共样例，每份是 `{"message", "description_zh", "payload"}`，`payload` 按对应 schema 校验。
+* `openapi.json`：托管服务（E3C）的 HTTP 接口，由 `uv run python scripts/product_service.py openapi` 导出，**不要手改**；`uv run python scripts/product_service.py check-openapi` 核对它与实际应用生成的逐字段相同。
 
 ```bash
 uv run python scripts/product_e3a.py check-schema
@@ -15,12 +15,12 @@ uv run python scripts/product_e3a.py check-schema
 
 ## 2. 版本
 
-| 项 | v2 | v3 | v3.1（E3B） | v3.2（E3C，本目录现在的版本） |
-|---|---|---|---|---|
-| 结构 | `e3a-product-schema-v2` | `e3a-product-schema-v3` | `e3a-product-schema-v3.1` | `e3a-product-schema-v3.2` |
-| 问卷 | `e3a-questionnaire-v0.1-draft` | `e3a-questionnaire-v0.2-draft` | 同 v3 | 同 v3 |
-| 词表 | `e3a-vocabulary-v1`（物质三项） | `e3a-vocabulary-v2`（物质四项） | `e3a-vocabulary-v3`（居住条件取代居住空间） | 同 v3.1 |
-| 资料包 | `pack.e3a.synthetic-v1` | `pack.e3a.synthetic-v2` | 同 v3，另加 `pack.e3b.us-v1`（`real_data_frozen`） | 同 v3.1 |
+| 项 | v2 | v3 | v3.1（E3B） | v3.2（E3C） | v3.3（E3B 映射修正、E3C 收尾，本目录现在的版本） |
+|---|---|---|---|---|---|
+| 结构 | `e3a-product-schema-v2` | `e3a-product-schema-v3` | `e3a-product-schema-v3.1` | `e3a-product-schema-v3.2` | `e3a-product-schema-v3.3` |
+| 问卷 | `e3a-questionnaire-v0.1-draft` | `e3a-questionnaire-v0.2-draft` | 同 v3 | 同 v3 | `e3a-questionnaire-v0.3-draft` |
+| 词表 | `e3a-vocabulary-v1`（物质三项） | `e3a-vocabulary-v2`（物质四项） | `e3a-vocabulary-v3`（居住条件取代居住空间） | 同 v3.1 | `e3a-vocabulary-v4` |
+| 资料包 | `pack.e3a.synthetic-v1` | `pack.e3a.synthetic-v2` | 同 v3，另加 `pack.e3b.us-v1`（`real_data_frozen`） | 同 v3.1 | 同 v3.1（E3B 资料包重新冻结） |
 
 ## 3. 新样例
 
@@ -63,3 +63,21 @@ v3 在独立复核之前按收尾修复（ADR0041 收尾一节）修订过一次
 | 81–85 | 阻断、暂停（可恢复）、部分结果、次数用完 |
 | 86–91 | 删除回执、墓碑、已删除、删除全部、过期 |
 | 92–96 | 未登录、CSRF、限流、付费未开、预检查过时 |
+
+## 6. v3.3：E3B 映射修正与 E3C 收尾
+
+v3.3 由 E3B 映射修正引入（问卷、词表、日常支持与抽象消费篮子，见 [E3B 映射修正 → E5](../../../docs/handoffs/e3b-mapping-to-e5.md)）。E3C 收尾在同一版本里加了托管服务的运行选项——只加可选字段；E5 还没有接服务，所以没有另开版本号。规则见 [ADR0043](../../../DECISIONS/0043-e3c-hosted-service.md) 收尾一节，给界面层的改动清单见 [E3C 交接](../../../docs/handoffs/e3c-to-e5-service.md) 第 11 节：
+
+* `RunIntentCreateRequest` 增加可选的 `clones_per_city`、`years`、`max_cost_cny`（元，字符串，最多到分）；
+* `ServiceRules.options`（用户能选的范围：`RunOptionsPolicy`）与 `ServiceRules.profile_retention_days`；`RunIntentView.settings`、`RunSummary.settings`（这次保存的有效设置：`RunSettingsView`）；`ServiceError.field`（只在 `run_options_invalid` 时出现）；
+* 错误码 `run_scale_fixed` 换成 `run_options_invalid` 与 `run_settings_unavailable`。
+
+| 样例 | 演示 |
+|---|---|
+| 97–99 | 较小规模的请求（1 座城、每城 2 个分身、5 元）、保存的有效设置、选项越界 |
+| 100–101 | 停下且不能由用户恢复（**测试传输**：同一份规划的服务尝试已经用完；按钮与进度 `resumable = false` 一致） |
+| 102 | 预算停下（测试传输，这次费用上限 0.1 元：下一次预留会超过上限，停在发送之前） |
+| 103 | 开始之后的失败（受控夹具：暂停期间快照被改动、恢复被拒绝；说明写“已经用掉 1 次机会”，没有“取消”） |
+| 104 | 最新六城资料（冻结的 E3B 真实资料包，说明里写着内容身份与构建身份）经托管服务路径的结果：六城各 1 个分身、3 年、离线 mock |
+
+服务样例 60–104 在只含 HEAD 与 E3C 改动的干净工作树里由服务端真实代码路径重新导出（测试时钟、测试秘密、合成人物、离线 mock 或测试传输；凭证都是明确无效的测试值）。

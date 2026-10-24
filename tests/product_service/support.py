@@ -26,14 +26,14 @@ E3B = "configs/product/e3b_us_v1_pack.yaml"
 
 
 def config(data: Path, **over: Any) -> ServiceConfig:
-    """测试配置：临时数据目录；默认合成资料包、每城 1 个分身、离线 mock（快）。"""
+    """测试配置：临时数据目录；默认合成资料包、默认每城 1 个分身、离线 mock（快）。"""
     base: dict[str, Any] = {
         "version": "e3c-service-config-v1",
         "profile": "test",
         "data_dir": str(data),
         "site_origin": ORIGIN,
         "pack_path": SYNTH,
-        "repeat_indexes": (0,),
+        "default_clones_per_city": 1,
         "planner": "mock",
         "workers": 4,
         "progress_poll_seconds": 0.05,
@@ -131,9 +131,9 @@ class Browser:
     def fill(self, draft_view: dict[str, Any], **draft_kwargs: Any) -> dict[str, Any]:
         """按合成人物 u501 填完整草稿，带版本保存。"""
         d = draft_view["draft"]
-        spec = self.svc.ctx.spec
-        kwargs: dict[str, Any] = {"cities": tuple(spec.cities)}
-        if spec.pack_path == E3B:
+        ctx = self.svc.ctx
+        kwargs: dict[str, Any] = {"cities": tuple(ctx.policy.cities_allowed)}
+        if ctx.config.pack_path == E3B:
             kwargs["abilities"] = ("edu_at_least_hs",)
         kwargs.update(draft_kwargs)
         draft = make_draft(
@@ -165,10 +165,12 @@ class Browser:
         assert reply["status"] == "confirmed", reply
         return reply["confirmed"]
 
-    def prepare(self, **draft_kwargs: Any) -> dict[str, Any]:
-        """草稿 → 审阅 → 确认 → 运行意图（排队检查）。返回意图视图。"""
+    def prepare(self, options: dict[str, Any] | None = None, **draft_kwargs: Any) -> dict[str, Any]:
+        """草稿 → 审阅 → 确认 → 运行意图（排队检查；``options`` 是运行选项）。返回意图视图。"""
         confirmed = self.confirm(self.fill(self.new_draft(), **draft_kwargs))
-        r = self.post("/run-intents", json={"confirmed_id": confirmed["confirmed_id"]})
+        r = self.post(
+            "/run-intents", json={"confirmed_id": confirmed["confirmed_id"], **(options or {})}
+        )
         assert r.status_code == 202, r.text
         return r.json()
 
@@ -192,17 +194,21 @@ class Browser:
         return self.get("/session").json()["quota"]
 
 
-def ready_intent(svc: Service, b: Browser, **draft_kwargs: Any) -> dict[str, Any]:
+def ready_intent(
+    svc: Service, b: Browser, options: dict[str, Any] | None = None, **draft_kwargs: Any
+) -> dict[str, Any]:
     """准备到“等你确认开始”。"""
-    intent = b.prepare(**draft_kwargs)
+    intent = b.prepare(options, **draft_kwargs)
     svc.work()
     view = b.intent(intent["intent_id"])
     assert view["stage"] == "awaiting_confirmation", view
     return view
 
 
-def finished_run(svc: Service, b: Browser, **draft_kwargs: Any) -> dict[str, Any]:
-    view = ready_intent(svc, b, **draft_kwargs)
+def finished_run(
+    svc: Service, b: Browser, options: dict[str, Any] | None = None, **draft_kwargs: Any
+) -> dict[str, Any]:
+    view = ready_intent(svc, b, options, **draft_kwargs)
     r = b.submit(view, key=f"key-{view['intent_id']}")
     assert r.status_code == 202, r.text
     svc.work()

@@ -14,17 +14,21 @@ from common.product_contracts import (
     ConfirmedRef,
     DeletionState,
     DraftView,
+    IntRange,
+    MoneyRange,
     ProductMeta,
     ProductPreflight,
     PublicExplanation,
     QuotaSummary,
     RunIntentView,
+    RunOptionsPolicy,
     RunProgress,
+    RunSettingsView,
     RunSummary,
     ServiceRules,
     UserInputDraft,
 )
-from product.execution import ExecutionSpec
+from product.execution import ExecutionSpec, RunPolicy
 from product.service.config import ServiceConfig
 from product.service.store import Quota
 
@@ -47,15 +51,50 @@ def quota_view(q: Quota) -> QuotaSummary:
     return QuotaSummary(**q.as_dict())
 
 
-def rules_view(config: ServiceConfig, spec: ExecutionSpec) -> ServiceRules:
+def _money(value: object) -> str:
+    text = format(value, "f")
+    return text.rstrip("0").rstrip(".") if "." in text else text
+
+
+def options_view(config: ServiceConfig, policy: RunPolicy) -> RunOptionsPolicy:
+    """用户能选什么（默认值与允许范围），网页照着显示控件。"""
     notes = [
-        f"每个专属空间一共 {config.runs_total} 次启动模拟的机会，不自动重置；3 次是启动机会，不保证每次所有分身都完整",
-        f"每次固定比较 {len(spec.cities)} 个都会区、每城 {len(spec.repeat_indexes)} 个分身、每个分身 {spec.years} 年",
+        "城市来自你确认的画像：可以只比较其中几座，但都要在允许的城市里，不会替你删城或补城",
+        f"每城分身 {policy.clones_min}–{policy.clones_max} 个（不选就是 {policy.clones_default} 个）；分身越多，"
+        "同一座城的结果越能看出运气的影响，但规划请求与费用也按比例增加",
+        f"年数只开放资料包配套验证过的 {', '.join(str(y) for y in policy.years_allowed)} 年",
+        f"费用上限 {_money(policy.cost_min)}–{_money(policy.cost_max)} 元（不选就是 {_money(policy.cost_default)} 元）："
+        "这次运行的全部城市、全部分身、全部服务尝试共用；扩大规模不会自动加预算，费用不够发下一次请求时就停下",
+    ]
+    return RunOptionsPolicy(
+        cities_allowed=tuple(policy.cities_allowed),
+        clones_per_city=IntRange(
+            default=policy.clones_default, minimum=policy.clones_min, maximum=policy.clones_max
+        ),
+        years_default=policy.years_default,
+        years_allowed=tuple(policy.years_allowed),
+        max_cost=MoneyRange(
+            default=_money(policy.cost_default),
+            minimum=_money(policy.cost_min),
+            maximum=_money(policy.cost_max),
+            currency="CNY",
+        ),
+        notes_zh=tuple(notes),
+    )
+
+
+def rules_view(config: ServiceConfig, policy: RunPolicy, spec: ExecutionSpec) -> ServiceRules:
+    """服务的规则。``spec`` 是按默认选项、全部允许城市算出的设置（只用来显示默认规模与费用上限）。"""
+    notes = [
+        f"每个专属空间一共 {config.runs_total} 次启动模拟的机会，不自动重置；无论选多大的规模，真正开始一次就用掉一次机会，"
+        "不保证每次所有分身都完整",
+        f"默认比较 {len(spec.cities)} 个都会区、每城 {len(spec.repeat_indexes)} 个分身、每个分身 {spec.years} 年",
         f"结果从运行首次结束起保存 {config.result_retention_days} 天，查看不续期；可以随时删除",
+        f"确认画像从首次确认起 {config.profile_retention_days} 天内可以用来准备新的模拟",
     ]
     if spec.planner_kind == "llm":
         notes.append(
-            f"每次运行的费用由应用侧按报价控制在 {spec.max_cost} {spec.currency} 以内（不是供应商账单上限），不自动加预算"
+            f"默认每次运行的费用上限是 {spec.max_cost} {spec.currency}（应用侧按报价预留，不是供应商账单上限），不自动加预算"
         )
         if not config.live_calls_enabled:
             notes.append("付费模型调用现在没有开启：可以填写与检查，但不能开始模拟")
@@ -76,7 +115,29 @@ def rules_view(config: ServiceConfig, spec: ExecutionSpec) -> ServiceRules:
         draft_retention_days=config.draft_retention_days,
         intent_retention_days=config.intent_retention_days,
         session_days=config.session_days,
+        profile_retention_days=config.profile_retention_days,
+        options=options_view(config, policy),
         notes_zh=tuple(notes),
+    )
+
+
+def settings_view(row: Mapping[str, Any]) -> RunSettingsView | None:
+    """这次运行保存的有效设置（删除、过期之后已经清掉，就不显示）。"""
+    if row["execution_body"] is None:
+        return None
+    spec = ExecutionSpec.model_validate_json(row["execution_body"])
+    llm = spec.planner_kind == "llm"
+    return RunSettingsView(
+        cities=tuple(spec.cities),
+        clones_per_city=len(spec.repeat_indexes),
+        years=spec.years,
+        clones_total=spec.clones,
+        planner_kind=spec.planner_kind,
+        max_cost=spec.max_cost,  # mock 不花钱，但用户选的上限照样是这次设置的一部分（进入设置的身份）
+        currency=spec.currency,
+        call_limit=spec.global_call_limit,
+        service_attempt_limit=spec.max_requests if llm else None,
+        settings_fingerprint=row["execution_fingerprint"],
     )
 
 
@@ -164,6 +225,7 @@ def intent_view(meta: ProductMeta, row: Mapping[str, Any], quota: Quota) -> RunI
         else PublicExplanation.model_validate(explanation),
         support_ref=row["support_ref"],
         quota=quota_view(quota),
+        settings=None if gone else settings_view(row),
     )
 
 
@@ -177,4 +239,5 @@ def run_summary(row: Mapping[str, Any]) -> RunSummary:
         created_at=row["created_at"],
         finished_at=row["first_finished_at"],
         expires_at=row["result_expires_at"],
+        settings=None if row["stage"] in ("deleting", "deleted", "expired") else settings_view(row),
     )

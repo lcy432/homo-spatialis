@@ -370,7 +370,9 @@ def run_preflight(
             status=overall_scor if effective else "no",  # type: ignore[arg-type]
             reasons=("上一年完整评分才更新下一年额度；不完整时这个分身的下一年会受阻",),
         ),
-        clones_per_city=len(pack.body.run.repeat_indexes),
+        clones_per_city=len(
+            execution.repeat_indexes if execution is not None else pack.body.run.repeat_indexes
+        ),
         years=years,
         planner=_planner(pack, calls, execution),
         binding=binding,

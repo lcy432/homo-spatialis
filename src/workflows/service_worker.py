@@ -7,6 +7,9 @@
   确认、登记、启动 E1、投影；首次启动 E1 之前把预留转为已使用）、``resume``（服务端判定安全的恢复）、``delete``（安全收尾后清理）。
 * 一次运行进行中时，监测线程按绝对路径读 E1 的进度与这次运行的账本，写白名单进度快照（不切换工作目录、不推进流程）；维护线程
   按时检查过期并清理不在执行中的意图。删除与完成同时发生时删除优先：只有仍在“运行中”的意图才会被写回进度或结果。
+* 停下时（E3C 收尾 R4、R6）：能不能由用户恢复按 E1 的进度、请求尝试、预算与发送状态判断（``RunDir.resume_state``），按钮、公开进度
+  与说明用同一个结论；说明按服务库里的实际记录写（有没有开始、预留有没有真的退回），不按停止原因猜。
+* 重启时（R3）：先按截止时间处理过期——上一个进程留下的“运行中”记录没有执行者，同样按期限处理——然后才把剩下的任务退回待办。
 * 日志只记任务种类、意图编号、公开代码、异常类型与代码位置，不记答案、模型正文、异常信息或任何秘密。
 """
 
@@ -24,12 +27,14 @@ from typing import Any
 import portalocker
 
 from common.product_contracts import ConfirmedProfile, ProductResult
+from product.execution import ExecutionSpec
 from product.service.actions import ServiceContext
+from product.service.explain import service_explanation
 from product.service.tokens import support_ref
 from product.workspace import SnapshotError
 from workflows.ports import AttentionRequiredError
 from workflows.runtime import WorkflowRefusedError
-from workflows.service_runs import RunDir, TransportFactory, explanation
+from workflows.service_runs import RunDir, TransportFactory
 
 log = logging.getLogger("workflows.service_worker")
 
@@ -41,8 +46,6 @@ _PRESTART = {
     "model_mismatch": "model_mismatch",
     "request_too_large": "request_too_large",
 }
-#: 用户可以自己点“恢复”的停止原因（E1 支持从这里恢复，已保存的回复复用）
-_USER_RESUMABLE = frozenset({"service_unavailable"})
 
 
 class WorkerLockedError(RuntimeError):
@@ -102,7 +105,8 @@ class Worker:
     # ------------------------------------------------------------------ 启动与循环
 
     def recover(self) -> None:
-        """启动时：先检查过期（停机之后，到期的不再恢复或付费），再把上一个进程留下的进行中任务退回待办。"""
+        """启动时：先按截止时间处理过期（停机之后，到期的不再恢复或付费；上一个进程留下的“运行中”记录没有执行者，同样按期限
+        处理），再把剩下的进行中任务退回待办。"""
         self.maintain()
         for job in self.store.requeue_active():
             self._diag("requeued", job["intent_id"], kind=job["kind"])
@@ -154,14 +158,18 @@ class Worker:
             self._block(intent, "reference_stale", only=("checking",))
             return
         confirmed = ConfirmedProfile.model_validate_json(body)
-        spec = self.ctx.spec
+        try:
+            # 这次运行意图创建时保存的有效设置；缺了就拒绝，不回退到服务现在的默认值
+            spec = ExecutionSpec.model_validate_json(row["execution_body"])
+        except (TypeError, ValueError):
+            self._block(intent, "settings_missing", only=("checking",))
+            return
         rd = RunDir(self.ctx, intent)
         snapshot = rd.prepare(confirmed, spec)
         self.store.update_intent(
             intent,
             only_stages=("checking",),
             snapshot=json.dumps(snapshot, sort_keys=True),
-            execution_fingerprint=spec.fingerprint,
         )
         profile_ref, inputs_ref = rd.refs(confirmed.confirmed_id)
         with rd.runtime(faults=self.faults) as rt:
@@ -219,23 +227,21 @@ class Worker:
         elif row["stage"] != "running":
             return  # 取消、删除、过期或已经结束：不开始
         rd = RunDir(self.ctx, intent)
-        started = self.store.consumed(intent)
         try:
             snapshot = json.loads(row["snapshot"]) if row["snapshot"] else None
             if not snapshot:
                 raise SnapshotError("没有记下资料快照")
             rd.verify(snapshot)  # 已确认的运行绑定当时那份快照：缺失或被改动就停，不拿新资料冒充
+            execution = rd.saved_request().execution
         except (SnapshotError, OSError, ValueError):
-            self._stop(intent, "snapshot_broken", started=started)
+            self._stop(intent, "snapshot_broken")
             return
-        execution = rd.saved_request().execution
         if (
-            not started
-            and execution is not None
+            execution is not None
             and execution.planner_kind == "llm"
             and not self.ctx.config.live_calls_enabled
         ):
-            self._stop(intent, "paid_calls_disabled", started=False)
+            self._stop(intent, "paid_calls_disabled")
             return
         run_id = row["run_id"]
         monitor = _Monitor(self, intent, run_id, self.ctx.config.progress_poll_seconds)
@@ -259,8 +265,9 @@ class Worker:
                         )  # 上一个进程在流程中途退出：交给原流程与 E1 的恢复核对
         finally:
             monitor.stop()
-        self._write_progress(intent, run_id)
         self._publish_run(intent, view)
+        after = self.store.intent_row(intent)
+        self._write_progress(intent, run_id, resumable=bool(after and after["resume_allowed"]))
 
     def _on_start(self, intent: str) -> None:
         """首次启动 E1 之前的最后一步：删除或取消优先；有效的预留转为已使用（重复调用不重复扣）。"""
@@ -286,28 +293,34 @@ class Worker:
             return
         if code == "run_deleted":
             return  # 用户删除：收尾与清理由删除任务做
-        started = self.store.consumed(intent)
-        if not started:
+        if not self.store.consumed(intent):
             if view["stage"] in ("awaiting_confirmation", "blocked"):
                 reason = "inputs_changed"  # 确认之后的再核对发现条件变了
             else:
                 reason = _PRESTART.get(code or "", "internal_error")
-            self._stop(intent, reason, started=False, support=self._error_ref(view))
+            self._stop(intent, reason, support=self._error_ref(view))
             return
         if view["stage"] == "needs_attention" and code:
-            self._stop(intent, code, started=True, support=self._error_ref(view))
+            self._stop(intent, code, support=self._error_ref(view))
             return
-        self._stop(intent, "internal_error", started=True, support=self._error_ref(view))
+        self._stop(intent, "internal_error", support=self._error_ref(view))
 
-    def _stop(self, intent: str, code: str, *, started: bool, support: str | None = None) -> None:
-        """运行停下。还没有启动 E1：退回预留，意图回到“检查没有通过”（用户可以取消后重新准备）。已经启动：等用户恢复或等维护者。"""
+    def _stop(self, intent: str, code: str, *, support: str | None = None) -> None:
+        """运行停下。按服务库里的实际记录处理：还没有启动 E1（次数没有转为已使用）→ 退回预留，意图回到“检查没有通过”（用户可以
+        取消后重新准备）；已经启动 → 不退次数，服务不可用时再按 E1 的记录判断能不能真的恢复，能就等用户点“恢复”，不能就等维护者。"""
         ref = support or support_ref()
-        self._diag("stopped", intent, code=code, support=ref, started=started)
-        if not started:
-            self.store.release(intent, f"启动前停下：{code}")
-            self._block(intent, code, only=("queued", "running"), support=ref)
+        state = self.store.quota_state(intent)
+        if not state["used"]:
+            released = self.store.release(intent, f"启动前停下：{code}") or state["released"]
+            self._diag("stopped", intent, code=code, support=ref, started=False, released=released)
+            self._block(intent, code, only=("queued", "running"), support=ref, released=released)
             return
-        resumable = code in _USER_RESUMABLE
+        resumable = False
+        if code == "service_unavailable":
+            row = self.store.intent_row(intent)
+            ok, why = RunDir(self.ctx, intent).resume_state(row["run_id"]) if row else (False, None)
+            resumable, code = ok, (code if ok else why or "run_halted")
+        self._diag("stopped", intent, code=code, support=ref, started=True, resumable=resumable)
         self.store.update_intent(
             intent,
             only_stages=("running",),
@@ -315,7 +328,9 @@ class Worker:
             waiting_for="user" if resumable else "maintainer",
             resume_allowed=int(resumable),
             support_ref=ref,
-            explanation=explanation(code, support=ref).model_dump_json(),
+            explanation=service_explanation(
+                code, phase="after_start", resumable=resumable, support=ref
+            ).model_dump_json(),
         )
 
     def _block(
@@ -326,6 +341,7 @@ class Worker:
         only: tuple[str, ...],
         support: str | None = None,
         preflight_body: str | None = None,
+        released: bool = False,
     ) -> None:
         self.store.update_intent(
             intent,
@@ -335,16 +351,27 @@ class Worker:
             preflight_fingerprint=None,
             preflight_body=preflight_body,
             support_ref=support,
-            explanation=explanation(code, support=support).model_dump_json(),
+            explanation=service_explanation(
+                code, phase="before_start", released=released, support=support
+            ).model_dump_json(),
         )
 
     # ------------------------------------------------------------------ 进度快照（只读）
 
-    def _write_progress(self, intent: str, run_id: str | None) -> None:
+    def _write_progress(
+        self,
+        intent: str,
+        run_id: str | None,
+        *,
+        resumable: bool = False,
+        running_now: bool = False,
+    ) -> None:
         if run_id is None:
             return
         try:
-            snap = RunDir(self.ctx, intent).progress_snapshot(run_id, self.store.now())
+            snap = RunDir(self.ctx, intent).progress_snapshot(
+                run_id, self.store.now(), resumable=resumable, running_now=running_now
+            )
         except Exception:  # 进度文件正被替换、账本正被写：这一轮跳过，下一轮再读
             return
         if snap is not None:
@@ -375,8 +402,10 @@ class Worker:
         self._diag("cleaned", intent, stage=final or "")
 
     def maintain(self) -> None:
-        """过期（按注入的时钟）与清理：不碰正在执行的那一个意图。"""
-        for intent in self.store.expire_due(self.ctx.config.intent_retention_days):
+        """过期（按注入的时钟）与清理：不碰正在执行的那一个意图；其他“运行中”的记录没有执行者，按期限处理。"""
+        with self._guard:
+            expired = self.store.expire_due(active=self.active)
+        for intent in expired:
             self._diag("expired", intent)
         for row in self.store.cleanup_candidates():
             intent = row["intent_id"]
@@ -413,7 +442,7 @@ class Worker:
         if row["stage"] == "checking":
             self._block(intent, "internal_error", only=("checking",), support=ref)
         elif row["stage"] in ("queued", "running"):
-            self._stop(intent, "internal_error", started=self.store.consumed(intent), support=ref)
+            self._stop(intent, "internal_error", support=ref)
 
     def _error_ref(self, view: dict[str, Any]) -> str:
         """流程公开视图里的审计编号只记进 worker 的诊断，对外给一个新的支持编号。"""
@@ -453,4 +482,4 @@ class _Monitor:
 
     def _loop(self) -> None:
         while not self._stop.wait(self.every):
-            self.worker._write_progress(self.intent, self.run_id)
+            self.worker._write_progress(self.intent, self.run_id, running_now=True)

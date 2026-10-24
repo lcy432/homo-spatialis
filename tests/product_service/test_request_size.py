@@ -48,7 +48,9 @@ def test_an_oversized_first_year_request_blocks_the_preflight_without_calls_or_q
     pre = view["preflight"]
     assert pre["status"] == "blocked" and pre["planner"]["planner_kind"] == "llm"
     issues = [i for i in pre["issues"] if i["code"] == "planning_request_too_large"]
-    assert issues and {i["field"] for i in issues} == {f"cities.{c}" for c in svc.ctx.spec.cities}
+    assert issues and {i["field"] for i in issues} == {
+        f"cities.{c}" for c in svc.ctx.default_spec.cities
+    }
     text = " ".join(i["message_zh"] + i["impact_zh"] + i["next_action_zh"] for i in issues)
     assert "2000" in text and "不会删减" in text
     for leaked in ("你是一位用户", "$table", "$grid", "scoring", "spec_id"):
@@ -125,13 +127,13 @@ def test_normal_requests_still_start_and_the_preflight_uses_the_sending_path(tmp
     svc.work()
     done = b.intent(view["intent_id"])
     assert done["stage"] == "finished", done
-    settings = svc.ctx.spec.llm_settings
+    settings = svc.ctx.default_spec.llm_settings
     firsts = []
     for body in transport.bodies:
         payload = payload_from_user_prompt(body["messages"][1]["content"])
         if payload["request_id"].endswith("/y1/a1"):
             firsts.append((body, payload))
-    assert len(firsts) == svc.ctx.spec.clones
+    assert len(firsts) == svc.ctx.default_spec.clones
     for body, payload in firsts:
         assert payload["request_id"].startswith(f"{receipt['run_id']}/")
         assert body["messages"] == expected_provider_body(settings, payload)["messages"]

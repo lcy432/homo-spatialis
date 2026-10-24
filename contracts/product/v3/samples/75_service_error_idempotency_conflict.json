@@ -3,6 +3,7 @@
  "message": "ServiceError",
  "payload": {
   "code": "idempotency_conflict",
+  "field": null,
   "impact_zh": "这次请求没有被执行",
   "message_zh": "这个请求编号已经用于另一份不同的请求",
   "meta": null,

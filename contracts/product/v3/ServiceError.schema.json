@@ -157,7 +157,8 @@
     "expired",
     "data_pack_unavailable",
     "paid_calls_disabled",
-    "run_scale_fixed",
+    "run_options_invalid",
+    "run_settings_unavailable",
     "rate_limited",
     "csrf_failed",
     "origin_rejected",
@@ -167,6 +168,24 @@
    ],
    "title": "Code",
    "type": "string"
+  },
+  "field": {
+   "anyOf": [
+    {
+     "enum": [
+      "clones_per_city",
+      "years",
+      "max_cost_cny",
+      "cities"
+     ],
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Field"
   },
   "impact_zh": {
    "maxLength": 300,

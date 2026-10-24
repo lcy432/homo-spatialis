@@ -71,6 +71,71 @@
    "title": "DraftSummary",
    "type": "object"
   },
+  "IntRange": {
+   "additionalProperties": false,
+   "description": "一个整数选项：不选时用 ``default``；允许 ``minimum``–``maximum``（含两端）。",
+   "properties": {
+    "default": {
+     "minimum": 1,
+     "title": "Default",
+     "type": "integer"
+    },
+    "maximum": {
+     "minimum": 1,
+     "title": "Maximum",
+     "type": "integer"
+    },
+    "minimum": {
+     "minimum": 1,
+     "title": "Minimum",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "default",
+    "minimum",
+    "maximum"
+   ],
+   "title": "IntRange",
+   "type": "object"
+  },
+  "MoneyRange": {
+   "additionalProperties": false,
+   "description": "一次运行的费用上限选项（应用侧按报价估算，不是供应商账单上限）。",
+   "properties": {
+    "currency": {
+     "enum": [
+      "CNY",
+      "USD"
+     ],
+     "title": "Currency",
+     "type": "string"
+    },
+    "default": {
+     "pattern": "^(0|[1-9][0-9]{0,6})(\\.[0-9]{1,2})?$",
+     "title": "Default",
+     "type": "string"
+    },
+    "maximum": {
+     "pattern": "^(0|[1-9][0-9]{0,6})(\\.[0-9]{1,2})?$",
+     "title": "Maximum",
+     "type": "string"
+    },
+    "minimum": {
+     "pattern": "^(0|[1-9][0-9]{0,6})(\\.[0-9]{1,2})?$",
+     "title": "Minimum",
+     "type": "string"
+    }
+   },
+   "required": [
+    "default",
+    "minimum",
+    "maximum",
+    "currency"
+   ],
+   "title": "MoneyRange",
+   "type": "object"
+  },
   "ProductMeta": {
    "additionalProperties": false,
    "description": "每条产品消息都带的共同元数据：结构、问卷、词表、健康问卷、转换的版本与资料包身份。",
@@ -164,6 +229,58 @@
    "title": "QuotaSummary",
    "type": "object"
   },
+  "RunOptionsPolicy": {
+   "additionalProperties": false,
+   "description": "服务允许用户为一次模拟选择什么（维护者在服务配置里定，网页只照着显示控件，不另做判断）。\n\n* 城市：来自用户确认的画像（不另交一份城市列表），必须是 ``cities_allowed`` 里不重复的非空子集；不会替用户删城或补城；\n* 每城分身数、年数、这次运行的费用上限：创建运行意图时可以选，省略就用默认值；\n* 年数取服务允许与资料包支持的交集（``years_allowed``）：资料包没有验证过的年数不开放，不为此生成更多年份的菜单。\n规划模型、报价、并发、修订与重试、请求长度上限由维护者控制，不是用户选项。",
+   "properties": {
+    "cities_allowed": {
+     "items": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+      "type": "string"
+     },
+     "minItems": 1,
+     "title": "Cities Allowed",
+     "type": "array"
+    },
+    "clones_per_city": {
+     "$ref": "#/$defs/IntRange"
+    },
+    "max_cost": {
+     "$ref": "#/$defs/MoneyRange"
+    },
+    "notes_zh": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Notes Zh",
+     "type": "array"
+    },
+    "years_allowed": {
+     "items": {
+      "minimum": 1,
+      "type": "integer"
+     },
+     "minItems": 1,
+     "title": "Years Allowed",
+     "type": "array"
+    },
+    "years_default": {
+     "minimum": 1,
+     "title": "Years Default",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "cities_allowed",
+    "clones_per_city",
+    "years_default",
+    "years_allowed",
+    "max_cost"
+   ],
+   "title": "RunOptionsPolicy",
+   "type": "object"
+  },
   "SampleLabel": {
    "additionalProperties": false,
    "description": "公共样例的出处标签（只出现在样例里；真实运行的消息不写）。\n\n* ``offline_run``：由离线闭环实际执行产生；\n* ``controlled_fixture``：受控测试夹具（例如写好的计划、注入的事件、构造的资料缺口），标明来源；\n* ``contract_example``：线上服务（幂等提交、查询、断线恢复）尚未实现，这里只是**标明为示例**的契约响应。",
@@ -206,7 +323,7 @@
   },
   "ServiceRules": {
    "additionalProperties": false,
-   "description": "服务的固定规则（服务端配置产生，网页只显示，不能修改）。",
+   "description": "服务的规则（服务端配置产生，网页只显示，不能修改）。``cities``、``clones_per_city``、``years``、``max_cost`` 是不选时的默认\n规模与费用上限；能选什么见 ``options``。",
    "properties": {
     "cities": {
      "minimum": 1,
@@ -253,6 +370,9 @@
      "title": "Notes Zh",
      "type": "array"
     },
+    "options": {
+     "$ref": "#/$defs/RunOptionsPolicy"
+    },
     "planner_kind": {
      "enum": [
       "mock",
@@ -260,6 +380,11 @@
      ],
      "title": "Planner Kind",
      "type": "string"
+    },
+    "profile_retention_days": {
+     "minimum": 1,
+     "title": "Profile Retention Days",
+     "type": "integer"
     },
     "result_retention_days": {
      "minimum": 1,
@@ -294,7 +419,9 @@
     "result_retention_days",
     "draft_retention_days",
     "intent_retention_days",
-    "session_days"
+    "session_days",
+    "profile_retention_days",
+    "options"
    ],
    "title": "ServiceRules",
    "type": "object"

@@ -17,6 +17,12 @@
         修正误扣的次数：追加一条记录，不改历史
     uv run python scripts/product_service.py openapi [--out contracts/product/v3/openapi.json]
         导出给 E5 的 OpenAPI 文档（生产不在线公开 /docs）
+    uv run python scripts/product_service.py check-openapi
+        离线核对：实际 FastAPI 应用生成的 OpenAPI 与提交的 contracts/product/v3/openapi.json 逐字段相同（不一致退出码 1）
+    uv run python scripts/product_service.py e2e --out <新目录> [--pack <资料包>] [--cities <城市,…>] [--clones N] [--years N]
+        离线联调：一个合成人物沿真实的服务路径（HTTP → 业务函数 → worker → LangGraph → E1 → 产品结果）走完一次 mock 模拟，
+        写 summary.json（资料身份、有效设置、计划与实际分身数、逐城 C / E / M、费用与真实模型调用数）；
+        --planner llm：生产配置的形态（付费开关关闭），只走到运行前检查与被明确拒绝的确认开始，不发送任何请求
 
 默认配置是 ``configs/product/service.yaml``（生产，真实规划器、付费开关关闭）；本地联调用
 ``configs/product/service_local_mock.yaml``（只绑定 127.0.0.1、离线 mock、零费用）。
@@ -153,21 +159,71 @@ def cmd_quota(args: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_openapi(args: argparse.Namespace) -> int:
+def openapi_text() -> str:
+    """实际 FastAPI 应用的 OpenAPI（规范写法）。只为生成文档：数据目录放在临时目录里，不碰真实的服务数据。"""
     from product.service.api import openapi_document
 
     raw = load_service_config(REPO / "configs/product/service_local_mock.yaml")
     with tempfile.TemporaryDirectory() as tmp:
-        # 只为生成文档：数据目录放在临时目录里，不碰真实的服务数据
         cfg = ServiceConfig.model_validate({**raw.model_dump(mode="json"), "data_dir": tmp})
         doc = openapi_document(ServiceContext.open(cfg))
+    return json.dumps(doc, ensure_ascii=False, indent=1, sort_keys=True) + "\n"
+
+
+def cmd_check_openapi(_: argparse.Namespace) -> int:
+    actual = json.loads(openapi_text())
+    saved = json.loads(OPENAPI_OUT.read_text(encoding="utf-8")) if OPENAPI_OUT.is_file() else {}
+    if saved == actual:
+        print("OpenAPI 与实际应用一致")
+        return 0
+    now, old = (
+        actual.get("components", {}).get("schemas", {}),
+        saved.get("components", {}).get("schemas", {}),
+    )
+    changed = sorted(k for k in set(now) | set(old) if now.get(k) != old.get(k))
+    paths = sorted(
+        k
+        for k in set(actual.get("paths", {})) | set(saved.get("paths", {}))
+        if actual.get("paths", {}).get(k) != saved.get("paths", {}).get(k)
+    )
+    print("✗ 提交的 openapi.json 与实际应用不同（用 openapi 子命令重新导出，不要手改）")
+    if changed:
+        print("  结构：" + "、".join(changed[:20]) + (" 等" if len(changed) > 20 else ""))
+    if paths:
+        print("  接口：" + "、".join(paths[:20]))
+    return 1
+
+
+def cmd_e2e(args: argparse.Namespace) -> int:
+    from _service_e2e import run_e2e
+
+    out = Path(args.out)
+    if out.exists():
+        print(f"{out} 已经存在：换一个新目录", file=sys.stderr)
+        return 2
+    out.mkdir(parents=True)
+    summary = run_e2e(
+        out,
+        pack_path=args.pack,
+        cities=tuple(c for c in (args.cities or "").split(",") if c) or None,
+        clones=args.clones,
+        years=args.years,
+        max_cost=args.max_cost,
+        workers=args.workers,
+        planner=args.planner,
+    )
+    (out / "summary.json").write_text(
+        json.dumps(summary, ensure_ascii=False, indent=1) + "\n", encoding="utf-8", newline="\n"
+    )
+    print(json.dumps(summary, ensure_ascii=False, indent=1))
+    return 0
+
+
+def cmd_openapi(args: argparse.Namespace) -> int:
+    text = openapi_text()
     out = Path(args.out) if args.out else OPENAPI_OUT
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(
-        json.dumps(doc, ensure_ascii=False, indent=1, sort_keys=True) + "\n",
-        encoding="utf-8",
-        newline="\n",
-    )
+    out.write_text(text, encoding="utf-8", newline="\n")
     print(f"已写 {out.relative_to(REPO) if out.is_relative_to(REPO) else out.name}")
     return 0
 
@@ -196,6 +252,21 @@ def main(argv: list[str] | None = None) -> int:
     qa.add_argument("--config")
     oa = sub.add_parser("openapi")
     oa.add_argument("--out")
+    sub.add_parser("check-openapi")
+    e2e = sub.add_parser("e2e")
+    e2e.add_argument("--out", required=True)
+    e2e.add_argument("--pack", default="configs/product/e3b_us_v1_pack.yaml")
+    e2e.add_argument("--cities", help="逗号分隔的城市编号（默认：服务允许的全部城市）")
+    e2e.add_argument("--clones", type=int, help="每城分身数（默认：服务默认）")
+    e2e.add_argument("--years", type=int, help="年数（默认：资料包协议的年数）")
+    e2e.add_argument("--max-cost", help="这次运行的费用上限（元；mock 不花钱，只记下设置）")
+    e2e.add_argument("--workers", type=int, default=16)
+    e2e.add_argument(
+        "--planner",
+        choices=("mock", "llm"),
+        default="mock",
+        help="llm = 生产配置的形态、付费开关关闭：只做运行前检查（含首年请求大小）与被拒绝的确认开始，不发送任何请求",
+    )
     args = ap.parse_args(argv)
     handlers = {
         "api": cmd_api,
@@ -204,6 +275,8 @@ def main(argv: list[str] | None = None) -> int:
         "jobs": cmd_jobs,
         "quota-adjust": cmd_quota,
         "openapi": cmd_openapi,
+        "check-openapi": cmd_check_openapi,
+        "e2e": cmd_e2e,
     }
     return handlers[args.command](args)
 

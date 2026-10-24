@@ -27,7 +27,7 @@
    "schema_version": "e3a-product-schema-v3.3",
    "vocabulary_version": "e3a-vocabulary-v4"
   },
-  "note_zh": "你的草稿、审阅、确认与全部运行都在删除：运行中的模拟不再批准新的模型请求，收尾后清掉内容。专属链接仍然有效",
+  "note_zh": "你的草稿、审阅、确认与全部运行都在删除：运行中的模拟不再批准新的模型请求，收尾后清掉内容；之前已经开始、还没有完成的审阅或确认不会再写回。专属链接仍然有效",
   "quota": {
    "available": 2,
    "reserved": 0,

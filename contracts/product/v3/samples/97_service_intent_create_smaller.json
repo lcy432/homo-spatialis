@@ -1,0 +1,15 @@
+{
+ "description_zh": "准备一次较小规模的模拟：城市来自确认画像（这里只确认了 K51 一座城），每城 2 个分身、这次费用上限 5 元；省略的年数用服务默认",
+ "message": "RunIntentCreateRequest",
+ "payload": {
+  "clones_per_city": 2,
+  "confirmed_id": "confirmed.draft-000000000000002e.r2",
+  "max_cost_cny": "5"
+ },
+ "sample": {
+  "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+  "origin": "offline_run",
+  "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+  "synthetic": true
+ }
+}

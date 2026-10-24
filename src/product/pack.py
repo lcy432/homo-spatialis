@@ -62,6 +62,8 @@ class RunDecl(_Strict):
     prompt_template: str
     repeat_indexes: tuple[int, ...] = Field(min_length=1)
     max_revisions_per_year: int
+    #: 资料包配套验证过、可以开放的模拟年数（E3C 收尾）。不写 = 只有基础样例协议的那一个年数；服务的年数选项与它取交集。
+    years_supported: tuple[int, ...] | None = None
     permission_version: str
     show_health_answers: bool
     planner: PlannerDecl

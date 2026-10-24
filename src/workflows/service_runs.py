@@ -21,15 +21,19 @@ import stat
 import sys
 import time
 from collections.abc import Callable
+from decimal import ROUND_CEILING, Decimal
 from pathlib import Path
 from typing import Any
 
-from agentlayer.life_llm import LlmPlanner, make_transport
+from agentlayer.life_llm import LlmPlanner, make_transport, service_history
 from agentlayer.life_mock import mock_planner_for
 from common.config import ConfigError, ModelsConfig
 from common.life_planning_contracts import LlmSettings
-from common.product_contracts import ConfirmedProfile, PublicExplanation, RunProgress
-from orchestration.life_budget import RoundBudget
+from common.life_planning_contracts import RunProgress as E1RunProgress
+from common.product_contracts import ConfirmedProfile, RunProgress
+from common.run_store import RunStore
+from common.runlog import ProviderCallRecord
+from orchestration.life_budget import RoundBudget, ledger_state, read_ledger
 from orchestration.life_runner import RunWorld
 from product.bridge import cost_status, progress
 from product.execution import ExecutionSpec, service_pack
@@ -88,17 +92,20 @@ def planner_factory(
     control: ServiceRunControl,
     transport_factory: TransportFactory | None,
     sleep: Callable[[float], None] = time.sleep,
+    *,
+    expected: str,
 ) -> Callable[[RunWorld], Any]:
-    """按运行配置造规划器。真实模型：付费开关、模型角色表、凭证逐项核对，任何一项不行都停在公开代码——不换成 mock。账本是这次
-    运行工作目录里的 ``budget/``（调用发生在工作目录里，``RoundBudget`` 建立时就定成绝对路径）。"""
+    """按运行配置造规划器。``expected`` 是这次运行保存的设置里的规划器种类（编译出的运行配置必须是同一种）。真实模型：付费开关、
+    模型角色表、凭证逐项核对，任何一项不行都停在公开代码——不换成 mock。账本是这次运行工作目录里的 ``budget/``（调用发生在工作目录里，
+    ``RoundBudget`` 建立时就定成绝对路径）。"""
 
     def build(world: RunWorld) -> Any:
         spec = world.config.planner
         if spec.identity.kind == "mock":
-            if ctx.spec.planner_kind != "mock":
+            if expected != "mock":
                 raise AttentionRequiredError("archive_conflict")
             return mock_planner_for(spec)
-        if ctx.spec.planner_kind != "llm" or spec.llm is None:
+        if expected != "llm" or spec.llm is None:
             raise AttentionRequiredError("archive_conflict")
         if not ctx.config.live_calls_enabled:
             raise AttentionRequiredError("paid_calls_disabled")
@@ -163,6 +170,12 @@ class RunDir:
         ws = E3Workspace(self.ws_root)
         return ws.confirmed_ref(confirmed_id), ws.request_ref(LABEL)
 
+    def _planner_kind(self) -> str:
+        execution = self.saved_request().execution
+        if execution is None:
+            raise AttentionRequiredError("archive_conflict")
+        return execution.planner_kind
+
     def saved_request(self) -> RunRequest:
         path = self.ws_root / "workflow/requests" / f"{LABEL}.json"
         return RunRequest.model_validate(json.loads(path.read_text(encoding="utf-8")))
@@ -184,7 +197,9 @@ class RunDir:
         e3 = E3Context(
             E3Workspace(self.ws_root),
             faults=faults,
-            planner_factory=planner_factory(ctx, control, transport_factory, sleep),
+            planner_factory=planner_factory(
+                ctx, control, transport_factory, sleep, expected=self._planner_kind()
+            ),
             control=control,
             on_start=on_start,
             registry=ServiceSubmissionRegistry(ctx, self.intent_id),
@@ -201,7 +216,11 @@ class RunDir:
     def archive(self, run_id: str) -> Path:
         return self.ws_root / "archive" / run_id
 
-    def progress_snapshot(self, run_id: str, updated_at: str) -> RunProgress | None:
+    def progress_snapshot(
+        self, run_id: str, updated_at: str, *, resumable: bool = False, running_now: bool = False
+    ) -> RunProgress | None:
+        """白名单进度快照。``resumable`` 是服务端的恢复许可（``resume_state``），公开进度与按钮用同一个结论；``running_now``
+        表示监测线程在运行进行中写（见 ``product.bridge.progress``）。"""
         run_dir = self.archive(run_id)
         if not (run_dir / "progress.json").is_file():
             return None
@@ -214,7 +233,89 @@ class RunDir:
             execution=req.execution,
             ledger_dir=self.ws_root / "budget",
             updated_at=updated_at,
+            resumable=resumable,
+            running_now=running_now,
         )
+
+    def resume_state(self, run_id: str) -> tuple[bool, str | None]:
+        """这次运行停下之后，用户点“恢复”能不能真的继续（只读：读 E1 的进度、请求明细与这次运行的账本，不调用规划器、不写文件）。
+        判断与 E1 恢复时 ``LlmPlanner`` 的做法一致：每个正在规划的候选按 E1 的 ``service_history`` 看——回复已经可靠落盘就复用（能继续）；
+        有一次可能已经发出、结果没落盘 → 发送不确定；返回型号不符 → 型号不符；这份候选的服务尝试（``1 + service_retries``）已经
+        用完 → 尝试用完（E1 不会再发，也不清零计数）；账本不够再预留一次 → 预算不够。返回（能否继续，不能继续时的公开代码）。"""
+        run_dir = self.archive(run_id)
+        try:
+            p = E1RunProgress.model_validate_json(
+                (run_dir / "progress.json").read_text(encoding="utf-8")
+            )
+            spec = self.saved_request().execution
+        except (OSError, ValueError):
+            return False, "archive_conflict"
+        if p.status not in ("running", "interrupted", "halted") or spec is None:
+            return False, "run_halted"
+        if p.status == "halted" and p.halt_kind not in (None, "service_unavailable"):
+            return False, {
+                "budget": "budget_blocked",
+                "uncertain_send": "uncertain_send",
+                "model_mismatch": "model_mismatch",
+            }.get(p.halt_kind, "run_halted")
+        settings = spec.llm_settings
+        if settings is None:
+            return True, None  # 离线 mock：没有服务尝试与账本，E1 从边界接着跑
+        records = [
+            ProviderCallRecord.model_validate(r)
+            for r in RunStore(run_dir).records("provider_calls")
+        ]
+        allowed = 1 + settings.service_retries
+        estimates: list[int] = []
+        for pending in p.pending:
+            request_id = (
+                f"{p.run_id}/{pending.clone_id}/y{pending.year_index}/a{pending.attempts_used + 1}"
+            )
+            hist = service_history(
+                records,
+                request_id=request_id,
+                run_id=p.run_id,
+                settings=settings,
+                price_version=spec.price_version,
+            )
+            if hist.problems:
+                return False, "archive_conflict"
+            if hist.pending is not None:
+                return False, "uncertain_send"
+            if hist.rejected is not None:
+                return False, "model_mismatch"
+            if hist.usable is not None:
+                continue
+            if len(hist.attempts) >= allowed:
+                return False, "attempts_exhausted"
+            estimates += [a.intent.input_tokens_estimate or 0 for a in hist.attempts[-1:]]
+        if not self._budget_fits(spec, settings, max(estimates, default=0)):
+            return False, "budget_blocked"
+        return True, None
+
+    def _budget_fits(self, spec: ExecutionSpec, settings: LlmSettings, estimate: int) -> bool:
+        """这本账还够不够再预留一次（按 E1 的预留写法：输入估计 × 输入单价 + 输出上限 × 输出单价，向上取到 0.000001 元）。"""
+        found = read_ledger(self.ws_root / "budget")
+        if found is None:
+            return True
+        header, events = found
+        cur = (spec.currency or "CNY").lower()
+        reserves, closes = ledger_state(events)
+        committed = Decimal(0)
+        for key, r in reserves.items():
+            c = closes.get(key)
+            committed += Decimal(r[f"reserved_{cur}"] if c is None else c[f"cost_{cur}"])
+        price = spec.price or {}
+        need = (
+            Decimal(estimate) * Decimal(str(price.get("input_per_million", 0)))
+            + Decimal(settings.max_output_tokens) * Decimal(str(price.get("output_per_million", 0)))
+        ) / Decimal(1_000_000)
+        need = need.quantize(Decimal("0.000001"), rounding=ROUND_CEILING)
+        cap = header.get(f"max_cost_{cur}")
+        if cap is not None and committed + need > Decimal(str(cap)):
+            return False
+        max_requests = header.get("max_requests")
+        return max_requests is None or len(reserves) + 1 <= int(max_requests)
 
     def cost_summary(self) -> dict[str, Any] | None:
         """删除后保留的最小费用摘要（金额、尝试次数；不确定的金额照原样保留，不改成 0）。mock 运行没有账本。"""
@@ -274,110 +375,3 @@ def _is_link(p: Path) -> bool:
         return True
     is_junction = getattr(p, "is_junction", None)
     return bool(is_junction and is_junction())
-
-
-def explanation(code: str, *, support: str | None = None) -> PublicExplanation:
-    """服务流程的公开说明（固定中文，不透传内部原文）。"""
-    reason, impact, step = EXPLANATIONS.get(code, EXPLANATIONS["internal_error"])
-    return PublicExplanation(
-        category=f"service_{code}" if code in EXPLANATIONS else "service_internal_error",
-        reason_zh=reason,
-        impact_zh=impact,
-        next_action_zh=step,
-        audit_ref=support,
-    )
-
-
-#: 公开代码 → (原因, 影响, 下一步)。都是固定文字。
-EXPLANATIONS: dict[str, tuple[str, str, str]] = {
-    "preflight_blocked": (
-        "运行前检查没有通过（原因逐条写在运行前说明里）",
-        "这次模拟不能开始，没有使用次数",
-        "按说明修改答案，重新审阅、确认画像后再准备一次",
-    ),
-    "reference_stale": (
-        "确认的画像或服务的运行设置在检查时对不上",
-        "这次模拟不能开始，没有使用次数",
-        "重新审阅并确认画像后再准备一次",
-    ),
-    "inputs_changed": (
-        "确认开始之后、启动之前的最后核对发现运行条件变了",
-        "没有开始模拟，预留的次数已经退回",
-        "取消这次准备，重新准备并查看新的运行前说明",
-    ),
-    "snapshot_broken": (
-        "这次模拟绑定的资料快照缺失或被改动",
-        "没有开始模拟（预留的次数已经退回）；系统不会拿新资料冒充旧资料",
-        "取消这次准备后重新准备；问题一直出现时请联系维护者并提供支持编号",
-    ),
-    "paid_calls_disabled": (
-        "服务现在没有开启付费模型调用",
-        "没有开始模拟，预留的次数已经退回；系统不会悄悄换成离线规划器",
-        "等服务开启后，取消这次准备并重新准备",
-    ),
-    "credentials_missing": (
-        "真实模型的凭证现在不可用",
-        "没有发出任何请求，预留的次数已经退回；系统不会换成离线规划器",
-        "等维护者处理后，取消这次准备并重新准备",
-    ),
-    "request_too_large": (
-        "启动前核对发现首年规划请求超过规划器的单次输入上限",
-        "没有开始模拟，没有发出请求，预留的次数已经退回；系统不会删减选项或换模型",
-        "等维护者调整后，取消这次准备并重新准备",
-    ),
-    "start_refused": (
-        "启动前的最后核对没有通过",
-        "没有开始模拟",
-        "查看这次运行的状态；需要的话重新准备",
-    ),
-    "service_unavailable": (
-        "模型服务暂时不可用，模拟按规则在年度边界或两份候选之间暂停",
-        "已经保存的回复不会重新请求；次数不会因此另扣",
-        "稍后点“恢复”继续同一次运行",
-    ),
-    "uncertain_send": (
-        "有一次模型请求是否已经发出无法确认",
-        "为了不重复付费，模拟已暂停；这次的预留费用照原样保留",
-        "不需要重新填写；等维护者核对后处理（不会自动重发）",
-    ),
-    "budget_blocked": (
-        "这次运行的费用或请求次数到了上限",
-        "模拟停下，不会自动追加预算；已经完成的部分保留",
-        "查看进度；需要维护者决定后续",
-    ),
-    "model_mismatch": (
-        "模型服务返回的型号与设定不符",
-        "那份回复不用于规划；模拟停下，不自动换模型",
-        "等维护者核对",
-    ),
-    "archive_conflict": (
-        "运行记录与绑定的输入对不上",
-        "模拟停下，原始记录没有被改动",
-        "等维护者核对",
-    ),
-    "run_binding_conflict": (
-        "找到的运行与这次确认登记的运行不一致",
-        "模拟停下，没有开始新的模拟",
-        "等维护者核对",
-    ),
-    "run_partially_initialized": (
-        "运行目录在启动时只建了一半（进程中断）",
-        "系统不猜它的状态，也不删掉重建",
-        "等维护者核对",
-    ),
-    "run_halted": (
-        "模拟按 E1 的规则停下",
-        "流程不会自动重试，也不会再请求规划",
-        "等维护者核对",
-    ),
-    "result_unavailable": (
-        "模拟已结束，但结果暂时无法读取",
-        "没有重新模拟",
-        "等维护者核对",
-    ),
-    "internal_error": (
-        "服务出现了内部问题",
-        "这次模拟停在当前位置，没有重新开始，也没有重复使用次数",
-        "等维护者处理；联系时请提供支持编号",
-    ),
-}

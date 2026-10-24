@@ -3,9 +3,14 @@
 #
 # * 同源 HTTPS（site_origin 改成真实站点；部署前不要用这里的占位域名）；会话 Cookie 是 Secure、HttpOnly、SameSite=Strict 的 __Host- Cookie；
 #   不公开交互式文档。HTTP 只绑定本机，由反向代理对外（docs/design/e3c-service.md 有示例）。
-# * 固定规模：资料包里的全部六个都会区 × 每城 4 个分身 × 3 年；规划器是 product_planner 角色的真实模型（调用设定与报价读
-#   configs/life/run_product_flash.yaml）；每次运行一本新账本（在这次运行的工作目录里），停机预算 20 元（所有者 2026-10-24；应用侧
-#   发送前按报价预留、超过就停下，不是供应商账单上限，也不保证修订再多也能跑完）。
+# * 运行选项分三层（E3C 收尾，ADR0043）：下面的默认值（用户不选时用什么）与允许范围（用户能选什么）；每次运行的有效设置在
+#   创建运行意图时由服务端校验并保存，之后的检查、确认、执行与恢复都用那一份——改这里只影响之后新建的运行。
+#   默认：资料包里的全部六个都会区 × 每城 4 个分身 × 资料包协议的年数（E3B 包只开放 3 年）。城市来自用户确认的画像，必须是
+#   allowed_cities（空 = 资料包里的全部城市）的子集；年数取 years_allowed（空 = 资料包支持的全部）与资料包支持年数的交集。
+#   规划次数、服务请求上限都由城市数 × 每城分身数 × 年数推出来，不另写常数。
+# * 规划器是 product_planner 角色的真实模型（调用设定与报价读 configs/life/run_product_flash.yaml）；每次运行一本新账本（在这次
+#   运行的工作目录里），费用上限默认 20 元（所有者 2026-10-24；全部城市、分身与服务尝试共用；应用侧发送前按报价预留、超过就停下，
+#   不是供应商账单上限，也不保证修订再多也能跑完）。max_cost_cny_max 不写就等于默认值（用户只能选更低的上限）。
 # * live_calls_enabled 默认 false：可以填写、确认与做运行前检查，但确认开始会被明确拒绝（不换成 mock）。打开它要所有者决定。
 # * data_dir 放服务库、每次模拟的工作目录、账本与诊断：必须在 git 忽略、不做长期备份的持久盘上（服务器上改成绝对路径）。
 
@@ -18,17 +23,26 @@ service:
   bind_port: 8765
   forwarded_allow_ips: 127.0.0.1
   pack_path: configs/product/e3b_us_v1_pack.yaml
+  allowed_cities: []
+  default_clones_per_city: 4
+  clones_per_city_min: 1
+  clones_per_city_max: 4
+  default_years: null
+  years_allowed: []
   planner: llm
   live_calls_enabled: false
   flash_config: configs/life/run_product_flash.yaml
   models_config: configs/models.yaml
   max_cost_cny: "20"
+  max_cost_cny_min: "0.01"
+  max_cost_cny_max: "20"
   workers: 16
   runs_total: 3
   session_days: 7
   result_retention_days: 30
   draft_retention_days: 30
   intent_retention_days: 30
+  profile_retention_days: 30
   max_body_bytes: 262144
   invite_rate_per_minute: 10
   write_rate_per_minute: 60

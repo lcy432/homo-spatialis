@@ -3,6 +3,7 @@
  "message": "ServiceError",
  "payload": {
   "code": "unauthenticated",
+  "field": null,
   "impact_zh": "不能读取或修改这个空间里的任何内容",
   "message_zh": "没有有效的会话，或专属链接已经失效",
   "meta": null,

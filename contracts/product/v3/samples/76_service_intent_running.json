@@ -44,11 +44,11 @@
     "compiled_inputs": {
      "life_input": "0768c0f22abaf27970ebe07d8f73f2e82cb2cbcdc64bbaacc3578110b5aaadc4",
      "roster": "94ddea158a90a8d2ab924ea5a5751e1521e1fb721839dcc8afa4470396645a8e",
-     "run_config": "2bd3ba137143ea1634a0d5f633d5611bc7ad4eadbde76d2e29f4fc2577d1d183",
+     "run_config": "b12fa205efaeba170bafb2b4eb27d9bcf35c6e8155e43e7deb09fc3994a1bed2",
      "scoring_config": "9dbae9d435ab74cc64beac6604352033194e6f024ae45304a4ab06ca86ac2947"
     },
     "evaluation_spec_id": "eval.e1-life.main",
-    "identities_fingerprint": "dcc8c0484b21f1619cf8c24b6987bce28e820de702c5d8a693baf2c8512692d8",
+    "identities_fingerprint": "952cd72eab93373d9178604c421d3a26a02a74e55c76845f4a42a1e251c68a68",
     "planner_id": "llm.qwen.product_planner",
     "planner_kind": "llm",
     "prompt_template": "e3b-product-prompt-v3",
@@ -732,12 +732,12 @@
    "planner": {
     "call_limit": 18,
     "description_zh": "真实模型规划器：qwen3.8-flash（product_planner 角色，滚动型号），每个分身每年一次正常规划、最多 2 次修订，每份候选最多再试 1 次服务请求；只收到给分身看的安全投影，计划仍由环境检查与结算",
-    "max_cost": "10 CNY（应用侧按报价 qwen3.8-flash@beijing@2026-10-09 估算的上限，不是供应商账单上限）",
+    "max_cost": "20 CNY（应用侧按报价 qwen3.8-flash@beijing@2026-10-09 估算的上限，不是供应商账单上限）",
     "paid": true,
     "planner_id": "llm.qwen.product_planner",
     "planner_kind": "llm"
    },
-   "preflight_fingerprint": "4ad26c591bffbf8782d26da042f03387c850aac0d15ca6d9205ddc87248d0304",
+   "preflight_fingerprint": "9424b2079beb04a03e3a6f7050db1169a15dd1067184f87c8caa73042f7f4702",
    "preflight_id": "preflight.confirmed.draft-0000000000000029.r2",
    "scope_zh": [
     "生活协议 life-v1-e3a-product（状态 synthetic_fixture_only）、评分 score.e1-life.explore（探索版）：城市、报价、工资、疾病、治疗与评分参数全部是合成设定，不是现实城市，不排序真实城市",
@@ -794,8 +794,8 @@
     "estimated_cost": "0.084626",
     "in_flight_cost": "0.043107",
     "kind": "estimated_from_quote",
-    "max_cost": "10",
-    "note": "应用侧按报价 qwen3.8-flash@beijing@2026-10-09 估算，不是供应商账单（以账单为准）：已核算 + 用量不确定（保留预留，不记 0） + 在途预留；本次运行上限 10 CNY",
+    "max_cost": "20",
+    "note": "应用侧按报价 qwen3.8-flash@beijing@2026-10-09 估算，不是供应商账单（以账单为准）：已核算 + 用量不确定（保留预留，不记 0） + 在途预留；本次运行上限 20 CNY",
     "price_version": "qwen3.8-flash@beijing@2026-10-09",
     "service_attempt_limit": 36,
     "service_attempts": 4,
@@ -819,9 +819,9 @@
    },
    "pause": null,
    "report_available": false,
-   "resumable": true,
-   "resume_note": "可以从年度边界或两份候选之间恢复（E1 的恢复入口逐条核对归档，尝试次数与调用次数不清零）",
-   "run_id": "run-e3a-e63009b5df3e5850",
+   "resumable": false,
+   "resume_note": "这次运行正在进行，不需要恢复；结束或暂停之后这里会更新",
+   "run_id": "run-e3a-1a77490b2307bdf6",
    "stage": "running",
    "stage_zh": "运行中",
    "updated_at": "2026-10-24T09:00:00Z"
@@ -833,7 +833,22 @@
    "used": 1
   },
   "result_available": false,
-  "run_id": "run-e3a-e63009b5df3e5850",
+  "run_id": "run-e3a-1a77490b2307bdf6",
+  "settings": {
+   "call_limit": 18,
+   "cities": [
+    "US:SYNTH2026:K51",
+    "US:SYNTH2026:M52"
+   ],
+   "clones_per_city": 1,
+   "clones_total": 2,
+   "currency": "CNY",
+   "max_cost": "20",
+   "planner_kind": "llm",
+   "service_attempt_limit": 36,
+   "settings_fingerprint": "6fa32c94204ac6ef88d9798cf4766396607765ae5cce39b607e950beb3cc4e98",
+   "years": 3
+  },
   "stage": "running",
   "stage_zh": "模拟进行中",
   "support_ref": null,

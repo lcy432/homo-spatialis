@@ -2126,6 +2126,40 @@
     "title": "ConfirmedRef",
     "type": "object"
    },
+   "ConsumptionLine": {
+    "additionalProperties": false,
+    "description": "个人消费篮子这一年的事实（E3B 映射修正 §6）：每月实际获得的标准篮子数（精确写法，“0” = 没有，“—” = 那个月没有生活），\n计划买却没获得的月份。它是当月的消费服务流，不是可以转卖的资产。",
+    "properties": {
+     "baskets_by_month": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Baskets By Month",
+      "type": "array"
+     },
+     "months_not_obtained": {
+      "default": [],
+      "items": {
+       "type": "integer"
+      },
+      "title": "Months Not Obtained",
+      "type": "array"
+     },
+     "opportunity_ids": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Opportunity Ids",
+      "type": "array"
+     }
+    },
+    "required": [
+     "opportunity_ids",
+     "baskets_by_month"
+    ],
+    "title": "ConsumptionLine",
+    "type": "object"
+   },
    "ConvenienceDevice": {
     "additionalProperties": false,
     "properties": {
@@ -3371,6 +3405,34 @@
     "title": "HouseholdHours",
     "type": "object"
    },
+   "IntRange": {
+    "additionalProperties": false,
+    "description": "一个整数选项：不选时用 ``default``；允许 ``minimum``–``maximum``（含两端）。",
+    "properties": {
+     "default": {
+      "minimum": 1.0,
+      "title": "Default",
+      "type": "integer"
+     },
+     "maximum": {
+      "minimum": 1.0,
+      "title": "Maximum",
+      "type": "integer"
+     },
+     "minimum": {
+      "minimum": 1.0,
+      "title": "Minimum",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "default",
+     "minimum",
+     "maximum"
+    ],
+    "title": "IntRange",
+    "type": "object"
+   },
    "InterestCapability": {
     "additionalProperties": false,
     "description": "兴趣与口味（DECISIONS/0041）：可选的文字描述先形成待确认的解释；用户确认后的类别才进入共同、有限的匹配规则。",
@@ -3788,6 +3850,43 @@
      "note"
     ],
     "title": "MoneyBasisOption",
+    "type": "object"
+   },
+   "MoneyRange": {
+    "additionalProperties": false,
+    "description": "一次运行的费用上限选项（应用侧按报价估算，不是供应商账单上限）。",
+    "properties": {
+     "currency": {
+      "enum": [
+       "CNY",
+       "USD"
+      ],
+      "title": "Currency",
+      "type": "string"
+     },
+     "default": {
+      "pattern": "^(0|[1-9][0-9]{0,6})(\\.[0-9]{1,2})?$",
+      "title": "Default",
+      "type": "string"
+     },
+     "maximum": {
+      "pattern": "^(0|[1-9][0-9]{0,6})(\\.[0-9]{1,2})?$",
+      "title": "Maximum",
+      "type": "string"
+     },
+     "minimum": {
+      "pattern": "^(0|[1-9][0-9]{0,6})(\\.[0-9]{1,2})?$",
+      "title": "Minimum",
+      "type": "string"
+     }
+    },
+    "required": [
+     "default",
+     "minimum",
+     "maximum",
+     "currency"
+    ],
+    "title": "MoneyRange",
     "type": "object"
    },
    "MoneyReview": {
@@ -4625,7 +4724,7 @@
       ]
      },
      "schema_version": {
-      "const": "e3a-product-schema-v3.2",
+      "const": "e3a-product-schema-v3.3",
       "title": "Schema Version",
       "type": "string"
      },
@@ -5541,12 +5640,50 @@
    },
    "RunIntentCreateRequest": {
     "additionalProperties": false,
-    "description": "准备一次模拟（``POST /api/v1/run-intents``）：引用一份确认画像。服务端排队做运行前检查（不扣次数）。",
+    "description": "准备一次模拟（``POST /api/v1/run-intents``）：引用一份确认画像，可以选每城分身数、年数与这次的费用上限（省略就用服务默认值，\n能选什么见 ``ServiceRules.options``）。城市来自确认画像。服务端校验后保存这次的有效设置，再排队做运行前检查（不扣次数）。",
     "properties": {
+     "clones_per_city": {
+      "anyOf": [
+       {
+        "maximum": 1000.0,
+        "minimum": 1.0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Clones Per City"
+     },
      "confirmed_id": {
       "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
       "title": "Confirmed Id",
       "type": "string"
+     },
+     "max_cost_cny": {
+      "anyOf": [
+       {
+        "pattern": "^(0|[1-9][0-9]{0,6})(\\.[0-9]{1,2})?$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Max Cost Cny"
+     },
+     "years": {
+      "anyOf": [
+       {
+        "maximum": 100.0,
+        "minimum": 1.0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Years"
      }
     },
     "required": [
@@ -5667,6 +5804,16 @@
       ],
       "title": "Run Id"
      },
+     "settings": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/RunSettingsView"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
      "stage": {
       "enum": [
        "checking",
@@ -5758,6 +5905,58 @@
      "quota"
     ],
     "title": "RunList",
+    "type": "object"
+   },
+   "RunOptionsPolicy": {
+    "additionalProperties": false,
+    "description": "服务允许用户为一次模拟选择什么（维护者在服务配置里定，网页只照着显示控件，不另做判断）。\n\n* 城市：来自用户确认的画像（不另交一份城市列表），必须是 ``cities_allowed`` 里不重复的非空子集；不会替用户删城或补城；\n* 每城分身数、年数、这次运行的费用上限：创建运行意图时可以选，省略就用默认值；\n* 年数取服务允许与资料包支持的交集（``years_allowed``）：资料包没有验证过的年数不开放，不为此生成更多年份的菜单。\n规划模型、报价、并发、修订与重试、请求长度上限由维护者控制，不是用户选项。",
+    "properties": {
+     "cities_allowed": {
+      "items": {
+       "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+       "type": "string"
+      },
+      "minItems": 1,
+      "title": "Cities Allowed",
+      "type": "array"
+     },
+     "clones_per_city": {
+      "$ref": "#/components/schemas/IntRange"
+     },
+     "max_cost": {
+      "$ref": "#/components/schemas/MoneyRange"
+     },
+     "notes_zh": {
+      "default": [],
+      "items": {
+       "type": "string"
+      },
+      "title": "Notes Zh",
+      "type": "array"
+     },
+     "years_allowed": {
+      "items": {
+       "minimum": 1.0,
+       "type": "integer"
+      },
+      "minItems": 1,
+      "title": "Years Allowed",
+      "type": "array"
+     },
+     "years_default": {
+      "minimum": 1.0,
+      "title": "Years Default",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "cities_allowed",
+     "clones_per_city",
+     "years_default",
+     "years_allowed",
+     "max_cost"
+    ],
+    "title": "RunOptionsPolicy",
     "type": "object"
    },
    "RunProgress": {
@@ -5904,6 +6103,104 @@
     "title": "RunReceipt",
     "type": "object"
    },
+   "RunSettingsView": {
+    "additionalProperties": false,
+    "description": "一次运行意图的有效设置：创建时由服务端校验并保存，之后的检查、确认、执行、进度、结果与恢复都用这一份（改服务默认值不影响它）。\n规划候选上限与服务尝试上限按这次的规模与修订、重试规则算出。离线 mock 不花钱：费用上限照样写用户这次的选择（它进入设置的\n身份），服务尝试上限不出现。",
+    "properties": {
+     "call_limit": {
+      "minimum": 1.0,
+      "title": "Call Limit",
+      "type": "integer"
+     },
+     "cities": {
+      "items": {
+       "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+       "type": "string"
+      },
+      "minItems": 1,
+      "title": "Cities",
+      "type": "array"
+     },
+     "clones_per_city": {
+      "minimum": 1.0,
+      "title": "Clones Per City",
+      "type": "integer"
+     },
+     "clones_total": {
+      "minimum": 1.0,
+      "title": "Clones Total",
+      "type": "integer"
+     },
+     "currency": {
+      "anyOf": [
+       {
+        "enum": [
+         "CNY",
+         "USD"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Currency"
+     },
+     "max_cost": {
+      "anyOf": [
+       {
+        "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Max Cost"
+     },
+     "planner_kind": {
+      "enum": [
+       "mock",
+       "llm"
+      ],
+      "title": "Planner Kind",
+      "type": "string"
+     },
+     "service_attempt_limit": {
+      "anyOf": [
+       {
+        "minimum": 0.0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Service Attempt Limit"
+     },
+     "settings_fingerprint": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Settings Fingerprint",
+      "type": "string"
+     },
+     "years": {
+      "minimum": 1.0,
+      "title": "Years",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "cities",
+     "clones_per_city",
+     "years",
+     "clones_total",
+     "planner_kind",
+     "call_limit",
+     "settings_fingerprint"
+    ],
+    "title": "RunSettingsView",
+    "type": "object"
+   },
    "RunSubmitReply": {
     "additionalProperties": false,
     "properties": {
@@ -6006,6 +6303,16 @@
        }
       ],
       "title": "Run Id"
+     },
+     "settings": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/RunSettingsView"
+       },
+       {
+        "type": "null"
+       }
+      ]
      },
      "stage": {
       "enum": [
@@ -6144,7 +6451,8 @@
        "expired",
        "data_pack_unavailable",
        "paid_calls_disabled",
-       "run_scale_fixed",
+       "run_options_invalid",
+       "run_settings_unavailable",
        "rate_limited",
        "csrf_failed",
        "origin_rejected",
@@ -6154,6 +6462,23 @@
       ],
       "title": "Code",
       "type": "string"
+     },
+     "field": {
+      "anyOf": [
+       {
+        "enum": [
+         "clones_per_city",
+         "years",
+         "max_cost_cny",
+         "cities"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Field"
      },
      "impact_zh": {
       "maxLength": 300,
@@ -6236,7 +6561,7 @@
    },
    "ServiceRules": {
     "additionalProperties": false,
-    "description": "服务的固定规则（服务端配置产生，网页只显示，不能修改）。",
+    "description": "服务的规则（服务端配置产生，网页只显示，不能修改）。``cities``、``clones_per_city``、``years``、``max_cost`` 是不选时的默认\n规模与费用上限；能选什么见 ``options``。",
     "properties": {
      "cities": {
       "minimum": 1.0,
@@ -6283,6 +6608,9 @@
       "title": "Notes Zh",
       "type": "array"
      },
+     "options": {
+      "$ref": "#/components/schemas/RunOptionsPolicy"
+     },
      "planner_kind": {
       "enum": [
        "mock",
@@ -6290,6 +6618,11 @@
       ],
       "title": "Planner Kind",
       "type": "string"
+     },
+     "profile_retention_days": {
+      "minimum": 1.0,
+      "title": "Profile Retention Days",
+      "type": "integer"
      },
      "result_retention_days": {
       "minimum": 1.0,
@@ -6324,7 +6657,9 @@
      "result_retention_days",
      "draft_retention_days",
      "intent_retention_days",
-     "session_days"
+     "session_days",
+     "profile_retention_days",
+     "options"
     ],
     "title": "ServiceRules",
     "type": "object"
@@ -6550,6 +6885,63 @@
      "message_zh"
     ],
     "title": "StatementReview",
+    "type": "object"
+   },
+   "SupportLine": {
+    "additionalProperties": false,
+    "description": "一项日常支持功能这一年的事实（E3B 映射修正 §5）：计划买的月份、实际获得的月份（付了钱、服务在用）与没获得的月份，由哪项\n服务提供。同功能买两份不多算；没获得的月份这项功能就是没有（不会因此出局、生病或少拿工资，也不节省小时）。",
+    "properties": {
+     "function": {
+      "enum": [
+       "personal_communication",
+       "home_connectivity",
+       "household_supplies"
+      ],
+      "title": "Function",
+      "type": "string"
+     },
+     "label_zh": {
+      "title": "Label Zh",
+      "type": "string"
+     },
+     "months_not_obtained": {
+      "default": [],
+      "items": {
+       "type": "integer"
+      },
+      "title": "Months Not Obtained",
+      "type": "array"
+     },
+     "months_obtained": {
+      "default": [],
+      "items": {
+       "type": "integer"
+      },
+      "title": "Months Obtained",
+      "type": "array"
+     },
+     "months_planned": {
+      "default": [],
+      "items": {
+       "type": "integer"
+      },
+      "title": "Months Planned",
+      "type": "array"
+     },
+     "opportunity_ids": {
+      "default": [],
+      "items": {
+       "type": "string"
+      },
+      "title": "Opportunity Ids",
+      "type": "array"
+     }
+    },
+    "required": [
+     "function",
+     "label_zh"
+    ],
+    "title": "SupportLine",
     "type": "object"
    },
    "TasteAnswer": {
@@ -6919,6 +7311,16 @@
       "title": "Commute",
       "type": "array"
      },
+     "consumption": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/ConsumptionLine"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
      "device_failures": {
       "default": [],
       "items": {
@@ -7027,6 +7429,14 @@
      "status": {
       "title": "Status",
       "type": "string"
+     },
+     "support": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/SupportLine"
+      },
+      "title": "Support",
+      "type": "array"
      },
      "tax": {
       "anyOf": [

@@ -7,8 +7,8 @@
   ],
   "confirm_with": null,
   "confirmed": {
-   "confirmed_id": "confirmed.draft-000000000000002e.r2",
-   "content_fingerprint": "79f43126b6991f87191310d9db8ffa53955009e9e135a90104267227b14d6edb"
+   "confirmed_id": "confirmed.draft-000000000000004b.r2",
+   "content_fingerprint": "d93aca1522c392ee43ae35af435558271734a88cdad0c2e5738aedf109fa6e29"
   },
   "created_at": "2026-10-24T09:00:00Z",
   "deletion": {
@@ -18,7 +18,7 @@
   },
   "expires_at": "2026-11-23T09:00:00Z",
   "explanation": null,
-  "intent_id": "intent-000000000000002f",
+  "intent_id": "intent-000000000000004c",
   "meta": {
    "conversion_version": "e3a-conversion-v2",
    "data_pack": {
@@ -47,7 +47,8 @@
    "used": 1
   },
   "result_available": false,
-  "run_id": "run-e3a-3ed52a1bcde9dade",
+  "run_id": "run-e3a-5ff8298db9844a83",
+  "settings": null,
   "stage": "expired",
   "stage_zh": "已过期",
   "support_ref": null,

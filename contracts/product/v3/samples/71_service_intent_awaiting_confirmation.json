@@ -786,6 +786,21 @@
   },
   "result_available": false,
   "run_id": null,
+  "settings": {
+   "call_limit": 18,
+   "cities": [
+    "US:SYNTH2026:K51",
+    "US:SYNTH2026:M52"
+   ],
+   "clones_per_city": 1,
+   "clones_total": 2,
+   "currency": "CNY",
+   "max_cost": "20",
+   "planner_kind": "mock",
+   "service_attempt_limit": null,
+   "settings_fingerprint": "abad17408a53d78b458ab17172dc89028fcb59201857cdea81336c0559a52938",
+   "years": 3
+  },
   "stage": "awaiting_confirmation",
   "stage_zh": "等你确认开始",
   "support_ref": null,

@@ -35,6 +35,21 @@
     "intent_id": "intent-0000000000000006",
     "result_available": true,
     "run_id": "run-e3a-f3a01238e9f2bfbb",
+    "settings": {
+     "call_limit": 18,
+     "cities": [
+      "US:SYNTH2026:K51",
+      "US:SYNTH2026:M52"
+     ],
+     "clones_per_city": 1,
+     "clones_total": 2,
+     "currency": "CNY",
+     "max_cost": "20",
+     "planner_kind": "mock",
+     "service_attempt_limit": null,
+     "settings_fingerprint": "abad17408a53d78b458ab17172dc89028fcb59201857cdea81336c0559a52938",
+     "years": 3
+    },
     "stage": "finished",
     "stage_zh": "本次服务流程结束（结果里逐城写明完成、出局与模拟缺失）"
    }

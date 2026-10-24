@@ -1437,6 +1437,17 @@
      "default": null,
      "title": "Run Id"
     },
+    "settings": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/RunSettingsView"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
     "stage": {
      "enum": [
       "checking",
@@ -1650,6 +1661,107 @@
     "service"
    ],
    "title": "RunReceipt",
+   "type": "object"
+  },
+  "RunSettingsView": {
+   "additionalProperties": false,
+   "description": "一次运行意图的有效设置：创建时由服务端校验并保存，之后的检查、确认、执行、进度、结果与恢复都用这一份（改服务默认值不影响它）。\n规划候选上限与服务尝试上限按这次的规模与修订、重试规则算出。离线 mock 不花钱：费用上限照样写用户这次的选择（它进入设置的\n身份），服务尝试上限不出现。",
+   "properties": {
+    "call_limit": {
+     "minimum": 1,
+     "title": "Call Limit",
+     "type": "integer"
+    },
+    "cities": {
+     "items": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+      "type": "string"
+     },
+     "minItems": 1,
+     "title": "Cities",
+     "type": "array"
+    },
+    "clones_per_city": {
+     "minimum": 1,
+     "title": "Clones Per City",
+     "type": "integer"
+    },
+    "clones_total": {
+     "minimum": 1,
+     "title": "Clones Total",
+     "type": "integer"
+    },
+    "currency": {
+     "anyOf": [
+      {
+       "enum": [
+        "CNY",
+        "USD"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Currency"
+    },
+    "max_cost": {
+     "anyOf": [
+      {
+       "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Max Cost"
+    },
+    "planner_kind": {
+     "enum": [
+      "mock",
+      "llm"
+     ],
+     "title": "Planner Kind",
+     "type": "string"
+    },
+    "service_attempt_limit": {
+     "anyOf": [
+      {
+       "minimum": 0,
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Service Attempt Limit"
+    },
+    "settings_fingerprint": {
+     "pattern": "^[0-9a-f]{64}$",
+     "title": "Settings Fingerprint",
+     "type": "string"
+    },
+    "years": {
+     "minimum": 1,
+     "title": "Years",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "cities",
+    "clones_per_city",
+    "years",
+    "clones_total",
+    "planner_kind",
+    "call_limit",
+    "settings_fingerprint"
+   ],
+   "title": "RunSettingsView",
    "type": "object"
   },
   "SampleLabel": {

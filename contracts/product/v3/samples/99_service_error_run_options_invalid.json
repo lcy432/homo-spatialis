@@ -1,0 +1,27 @@
+{
+ "description_zh": "选项不在服务允许的范围里（这里每城 9 个分身，允许 1–4）：在预留与任何调用之前就拒绝；field 指出是哪一项，不回显填的值",
+ "message": "ServiceError",
+ "payload": {
+  "code": "run_options_invalid",
+  "field": "clones_per_city",
+  "impact_zh": "没有准备模拟，也没有使用次数（field 指出是哪一项）",
+  "message_zh": "这次选的城市、每城分身数、年数或费用上限不在服务允许的范围里",
+  "meta": null,
+  "next_action_zh": "按服务规则里的默认值与允许范围重新选择；城市要在草稿里改，再重新审阅与确认",
+  "retry_after_seconds": null,
+  "sample": {
+   "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+   "origin": "offline_run",
+   "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+   "synthetic": true
+  },
+  "status": 409,
+  "support_ref": null
+ },
+ "sample": {
+  "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+  "origin": "offline_run",
+  "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+  "synthetic": true
+ }
+}

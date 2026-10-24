@@ -54,7 +54,10 @@ def test_concurrent_intent_creation_yields_one_open_intent(tmp_path):
 
         gate.wait()
         view, _ = actions.create_intent(
-            svc.ctx, principal, RunIntentCreateRequest(confirmed_id=confirmed["confirmed_id"])
+            svc.ctx,
+            principal,
+            RunIntentCreateRequest(confirmed_id=confirmed["confirmed_id"]),
+            generation=0,
         )
         got.append(view.intent_id)
 
@@ -153,7 +156,7 @@ def test_failed_final_check_releases_and_started_runs_are_not_refunded(tmp_path)
     view = ready_intent(svc, b)
     assert b.submit(view).status_code == 202
     # 快照在排队期间被改坏：最后核对不通过，不开始，预留退回
-    pack = svc.ctx.run_dir(view["intent_id"]) / "ws" / svc.ctx.spec.pack_path
+    pack = svc.ctx.run_dir(view["intent_id"]) / "ws" / svc.ctx.config.pack_path
     pack.write_text(pack.read_text(encoding="utf-8") + "\n# 改动\n", encoding="utf-8")
     svc.work()
     after = b.intent(view["intent_id"])

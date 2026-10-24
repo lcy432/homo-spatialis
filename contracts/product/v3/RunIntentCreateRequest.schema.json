@@ -1,11 +1,52 @@
 {
  "additionalProperties": false,
- "description": "准备一次模拟（``POST /api/v1/run-intents``）：引用一份确认画像。服务端排队做运行前检查（不扣次数）。",
+ "description": "准备一次模拟（``POST /api/v1/run-intents``）：引用一份确认画像，可以选每城分身数、年数与这次的费用上限（省略就用服务默认值，\n能选什么见 ``ServiceRules.options``）。城市来自确认画像。服务端校验后保存这次的有效设置，再排队做运行前检查（不扣次数）。",
  "properties": {
+  "clones_per_city": {
+   "anyOf": [
+    {
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Clones Per City"
+  },
   "confirmed_id": {
    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
    "title": "Confirmed Id",
    "type": "string"
+  },
+  "max_cost_cny": {
+   "anyOf": [
+    {
+     "pattern": "^(0|[1-9][0-9]{0,6})(\\.[0-9]{1,2})?$",
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Max Cost Cny"
+  },
+  "years": {
+   "anyOf": [
+    {
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Years"
   }
  },
  "required": [

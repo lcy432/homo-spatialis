@@ -1798,8 +1798,53 @@ class QuotaSummary(ProductModel):
         return self
 
 
+#: 一次运行的费用金额（元，最多到分）：选项与范围都用这种写法，边界按分比较，不用浮点。
+_CENTS = r"^(0|[1-9][0-9]{0,6})(\.[0-9]{1,2})?$"
+CentsText = Annotated[str, Field(pattern=_CENTS)]
+
+
+class IntRange(ProductModel):
+    """一个整数选项：不选时用 ``default``；允许 ``minimum``–``maximum``（含两端）。"""
+
+    default: Annotated[int, Field(ge=1)]
+    minimum: Annotated[int, Field(ge=1)]
+    maximum: Annotated[int, Field(ge=1)]
+
+    @model_validator(mode="after")
+    def _ordered(self) -> IntRange:
+        if not self.minimum <= self.default <= self.maximum:
+            raise ValueError("必须 minimum ≤ default ≤ maximum")
+        return self
+
+
+class MoneyRange(ProductModel):
+    """一次运行的费用上限选项（应用侧按报价估算，不是供应商账单上限）。"""
+
+    default: CentsText
+    minimum: CentsText
+    maximum: CentsText
+    currency: Literal["CNY", "USD"]
+
+
+class RunOptionsPolicy(ProductModel):
+    """服务允许用户为一次模拟选择什么（维护者在服务配置里定，网页只照着显示控件，不另做判断）。
+
+    * 城市：来自用户确认的画像（不另交一份城市列表），必须是 ``cities_allowed`` 里不重复的非空子集；不会替用户删城或补城；
+    * 每城分身数、年数、这次运行的费用上限：创建运行意图时可以选，省略就用默认值；
+    * 年数取服务允许与资料包支持的交集（``years_allowed``）：资料包没有验证过的年数不开放，不为此生成更多年份的菜单。
+    规划模型、报价、并发、修订与重试、请求长度上限由维护者控制，不是用户选项。"""
+
+    cities_allowed: tuple[RefStr, ...] = Field(min_length=1)
+    clones_per_city: IntRange
+    years_default: Annotated[int, Field(ge=1)]
+    years_allowed: tuple[Annotated[int, Field(ge=1)], ...] = Field(min_length=1)
+    max_cost: MoneyRange
+    notes_zh: tuple[str, ...] = ()
+
+
 class ServiceRules(ProductModel):
-    """服务的固定规则（服务端配置产生，网页只显示，不能修改）。"""
+    """服务的规则（服务端配置产生，网页只显示，不能修改）。``cities``、``clones_per_city``、``years``、``max_cost`` 是不选时的默认
+    规模与费用上限；能选什么见 ``options``。"""
 
     runs_total: Annotated[int, Field(ge=1)]
     cities: Annotated[int, Field(ge=1)]
@@ -1813,7 +1858,27 @@ class ServiceRules(ProductModel):
     draft_retention_days: Annotated[int, Field(ge=1)]
     intent_retention_days: Annotated[int, Field(ge=1)]
     session_days: Annotated[int, Field(ge=1)]
+    #: 确认画像从首次确认起可以用来准备新模拟的天数（重复确认与查询不续期）
+    profile_retention_days: Annotated[int, Field(ge=1)]
+    options: RunOptionsPolicy
     notes_zh: tuple[str, ...] = ()
+
+
+class RunSettingsView(ProductModel):
+    """一次运行意图的有效设置：创建时由服务端校验并保存，之后的检查、确认、执行、进度、结果与恢复都用这一份（改服务默认值不影响它）。
+    规划候选上限与服务尝试上限按这次的规模与修订、重试规则算出。离线 mock 不花钱：费用上限照样写用户这次的选择（它进入设置的
+    身份），服务尝试上限不出现。"""
+
+    cities: tuple[RefStr, ...] = Field(min_length=1)
+    clones_per_city: Annotated[int, Field(ge=1)]
+    years: Annotated[int, Field(ge=1)]
+    clones_total: Annotated[int, Field(ge=1)]
+    planner_kind: Literal["mock", "llm"]
+    max_cost: MoneyText | None = None
+    currency: Literal["CNY", "USD"] | None = None
+    call_limit: Annotated[int, Field(ge=1)]
+    service_attempt_limit: Annotated[int, Field(ge=0)] | None = None
+    settings_fingerprint: Sha256
 
 
 class DraftSummary(ProductModel):
@@ -1897,9 +1962,13 @@ class ProfileConfirmReply(ProductModel):
 
 
 class RunIntentCreateRequest(ProductModel):
-    """准备一次模拟（``POST /api/v1/run-intents``）：引用一份确认画像。服务端排队做运行前检查（不扣次数）。"""
+    """准备一次模拟（``POST /api/v1/run-intents``）：引用一份确认画像，可以选每城分身数、年数与这次的费用上限（省略就用服务默认值，
+    能选什么见 ``ServiceRules.options``）。城市来自确认画像。服务端校验后保存这次的有效设置，再排队做运行前检查（不扣次数）。"""
 
     confirmed_id: RefStr
+    clones_per_city: Annotated[int, Field(ge=1, le=1000)] | None = None
+    years: Annotated[int, Field(ge=1, le=100)] | None = None
+    max_cost_cny: CentsText | None = None
 
 
 class DeletionState(ProductModel):
@@ -1934,6 +2003,8 @@ class RunIntentView(ProductModel):
     explanation: PublicExplanation | None = None
     support_ref: SupportRef | None = None
     quota: QuotaSummary
+    #: 这次的有效设置（删除或过期之后不再显示：里面有用户选的城市）
+    settings: RunSettingsView | None = None
 
 
 class RunSubmitRequest(ProductModel):
@@ -1962,6 +2033,7 @@ class RunSummary(ProductModel):
     created_at: UtcTime
     finished_at: UtcTime | None = None
     expires_at: UtcTime | None = None
+    settings: RunSettingsView | None = None
 
 
 class RunList(ProductModel):
@@ -2000,7 +2072,8 @@ ServiceErrorCode = Literal[
     "expired",
     "data_pack_unavailable",
     "paid_calls_disabled",
-    "run_scale_fixed",
+    "run_options_invalid",
+    "run_settings_unavailable",
     "rate_limited",
     "csrf_failed",
     "origin_rejected",
@@ -2022,6 +2095,8 @@ class ServiceError(ProductModel):
     next_action_zh: str = Field(min_length=1, max_length=300)
     support_ref: SupportRef | None = None
     retry_after_seconds: Annotated[int, Field(ge=1)] | None = None
+    #: 哪个选项不行（``run_options_invalid`` 时写 ``clones_per_city`` / ``years`` / ``max_cost_cny`` / ``cities``；不回显用户填的值）
+    field: Literal["clones_per_city", "years", "max_cost_cny", "cities"] | None = None
     sample: SampleLabel | None = None
 
 

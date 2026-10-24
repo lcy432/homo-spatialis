@@ -3,6 +3,7 @@
  "message": "ServiceError",
  "payload": {
   "code": "preflight_stale",
+  "field": null,
   "impact_zh": "没有开始模拟，也没有使用次数",
   "message_zh": "你确认的不是当前这一份运行前说明（条件或资料变了，或说明已经更新）",
   "meta": null,

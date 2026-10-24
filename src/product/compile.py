@@ -199,12 +199,13 @@ def _execution_problems(
                 "重新做运行前检查",
             )
         )
-    if tuple(pack.body.run.repeat_indexes) != tuple(execution.repeat_indexes):
+    repeats = tuple(execution.repeat_indexes)
+    if not repeats or len(set(repeats)) != len(repeats) or min(repeats) < 0:
         out.append(
             issue(
                 "run_scale_mismatch",
-                "pack.run.repeat_indexes",
-                f"每城分身是 {list(pack.body.run.repeat_indexes)}，正式运行设置是 {list(execution.repeat_indexes)}",
+                "execution.repeat_indexes",
+                f"正式运行设置的分身编号 {list(repeats)} 不合法",
                 "不能编译运行配置",
                 "维护者核对服务配置",
             )
@@ -220,6 +221,28 @@ def _execution_problems(
             )
         )
     return out
+
+
+def _apply_years(pack: DataPack, protocol: dict[str, Any], years: int) -> None:
+    """这次运行的年数（E3C 收尾）：与协议相同就原样；资料包在 ``run.years_supported`` 里声明过的其他年数，写进这次编译出的协议
+    （是另一份协议内容身份）；没有声明的年数拒绝——不为此生成更多年份的菜单。"""
+    base = int(protocol.get("simulation_years", 3))
+    if years == base:
+        return
+    supported = pack.body.run.years_supported or (base,)
+    if years not in supported:
+        raise CompileRefusedError(
+            (
+                issue(
+                    "run_scale_mismatch",
+                    "execution.years",
+                    f"这次运行设置是 {years} 年，资料包只配套验证了 {sorted(supported)} 年",
+                    "不能编译运行配置",
+                    "选择资料包支持的年数后重新准备",
+                ),
+            )
+        )
+    protocol["simulation_years"] = years
 
 
 def _apply_execution(
@@ -339,6 +362,8 @@ def compile_inputs(
     protocol["health_input"]["questionnaire_version"] = confirmed.health.questionnaire_version
     if illness_events is not None:
         protocol["illness_events"] = illness_events
+    if execution is not None:
+        _apply_years(pack, protocol, execution.years)
 
     # ---- 城市目录：便利设备与服务换成资料候选编入的那几项，其余原样
     compilation, compiled_by_city = compile_catalog(pack, protocol)
@@ -463,7 +488,8 @@ def compile_inputs(
         )[0]
         envs = max((m["env_repeat"] for m in cat.get("menus", [])), default=0)
         start_jobs[ref] = job["label"]
-        for k in b.run.repeat_indexes:
+        # 分身编号：正式运行设置写的（E3C 收尾：每城分身数是这次运行的设置，不改资料包的内容身份）；没有就用资料包的运行声明
+        for k in execution.repeat_indexes if execution is not None else b.run.repeat_indexes:
             clone = f"{confirmed.person_ref}.{cat['city']['code'].lower()}.r{k}"
             clones.append(clone)
             states.append(
@@ -603,18 +629,6 @@ def compile_inputs(
     _dump(paths["roster"], header, roster)
     years = int(protocol.get("simulation_years", 3))
     attempts = 1 + b.run.max_revisions_per_year
-    if execution is not None and execution.years != years:
-        raise CompileRefusedError(
-            (
-                issue(
-                    "run_scale_mismatch",
-                    "execution.years",
-                    f"正式运行设置是 {execution.years} 年，产品协议是 {years} 年",
-                    "不能编译运行配置",
-                    "维护者核对服务配置",
-                ),
-            )
-        )
     run = {
         "run_notice": notice,
         "run": {

@@ -3,6 +3,7 @@
  "message": "ServiceError",
  "payload": {
   "code": "deleted",
+  "field": null,
   "impact_zh": "内容不能再查看或恢复；删除不会重置使用次数",
   "message_zh": "这项内容已经删除",
   "meta": null,

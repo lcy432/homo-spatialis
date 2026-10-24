@@ -29,7 +29,7 @@ def _archive(svc, intent_id: str, run_id: str) -> Path:
 
 
 def test_full_scale_offline_closed_loop_on_the_e3b_pack(tmp_path):
-    svc = start(tmp_path, pack_path=E3B, repeat_indexes=(0, 1, 2, 3), workers=16)
+    svc = start(tmp_path, pack_path=E3B, default_clones_per_city=4, workers=16)
     _, b = svc.person()
     rules = b.get("/session").json()["rules"]
     assert (rules["cities"], rules["clones_per_city"], rules["years"]) == (6, 4, 3)
@@ -82,7 +82,7 @@ def test_llm_planner_path_with_a_test_transport_keeps_budget_and_service_records
     pre = view["preflight"]
     # 用户确认的预检查就是真实规划器与上限（不是 mock 预检查）
     assert pre["planner"]["planner_kind"] == "llm" and pre["planner"]["paid"] is True
-    assert "10 CNY" in pre["planner"]["max_cost"]
+    assert "20 CNY" in pre["planner"]["max_cost"]
     receipt = b.submit(view).json()["receipt"]
     svc.work()
     done = b.intent(view["intent_id"])
@@ -95,7 +95,7 @@ def test_llm_planner_path_with_a_test_transport_keeps_budget_and_service_records
     # 这次运行自己的新账本（工作目录里），不是仓库里的历史账本
     ledger = svc.ctx.run_dir(view["intent_id"]) / "ws" / "budget"
     header, events = read_ledger(ledger)  # type: ignore[misc]
-    spec = svc.ctx.spec
+    spec = svc.ctx.default_spec
     assert header["max_requests"] == spec.max_requests == 6 * 3 * 2
     assert header["price"]["price_version"] == spec.price_version
     assert sum(e["event"] == "reserve" for e in events) == len(transport.bodies)
@@ -105,7 +105,7 @@ def test_llm_planner_path_with_a_test_transport_keeps_budget_and_service_records
     progress = b.get(f"/runs/{receipt['run_id']}/progress").json()
     cost = progress["cost"]
     assert cost["kind"] == "estimated_from_quote"
-    assert cost["currency"] == "CNY" and cost["max_cost"] == "10"
+    assert cost["currency"] == "CNY" and cost["max_cost"] == "20"
     assert cost["service_attempts"] == len(transport.bodies)
     assert cost["service_attempt_limit"] == 36 and cost["call_limit"] == 18
     assert float(cost["settled_cost"]) > 0

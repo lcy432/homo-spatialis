@@ -256,13 +256,24 @@ def progress(
     execution: ExecutionSpec | None = None,
     ledger_dir: Path | None = None,
     updated_at: str | None = None,
+    resumable: bool | None = None,
+    running_now: bool = False,
 ) -> RunProgress:
     """从运行归档的进度记录投影出产品进度（断线后按运行 ID 查询；不重发规划）。路径可以是绝对路径（托管服务的监测线程不切换
-    工作目录）；``execution`` 与 ``ledger_dir`` 决定费用怎么写（见 ``cost_status``）。"""
+    工作目录）；``execution`` 与 ``ledger_dir`` 决定费用怎么写（见 ``cost_status``）。``resumable`` 不写时按 E1 的进度状态；
+    托管服务传它自己的恢复许可（按 E1 的请求尝试、预算与发送状态判断），公开进度、暂停说明与“恢复”按钮用同一个结论。
+    ``running_now``：托管服务的监测线程在运行进行中写快照——E1 的状态还是 ``running`` 时，这次运行正在跑，没有要恢复的东西，
+    也不是“停下了”（E1 已经写下结束或暂停状态时照常按那个状态写，不受它影响）。离线桥接不写它：那里查询时还是 ``running``
+    说明上一个进程中途退出了。"""
     archive = RunArchive(Path(run_dir), create=False)
     p = E1RunProgress.model_validate(archive.read_json("progress.json"))
     report = (Path(run_dir) / "reports" / "arm.main.json").exists()
-    resumable = p.status in ("running", "interrupted", "halted")
+    stopped = p.status in ("running", "interrupted", "halted")
+    live = running_now and p.status == "running"
+    if live:
+        resumable = False
+    elif resumable is None:
+        resumable = stopped
     return RunProgress(
         meta=pack.meta(sample),
         run_id=p.run_id,
@@ -283,8 +294,12 @@ def progress(
         cost=cost_status(execution, ledger_dir, calls_used=p.calls_used, call_limit=p.call_limit),
         resumable=resumable,
         resume_note=(
-            "可以从年度边界或两份候选之间恢复（E1 的恢复入口逐条核对归档，尝试次数与调用次数不清零）"
+            "这次运行正在进行，不需要恢复；结束或暂停之后这里会更新"
+            if live
+            else "可以从年度边界或两份候选之间恢复（E1 的恢复入口逐条核对归档，尝试次数与调用次数不清零）"
             if resumable
+            else "这次运行停在不能由你恢复的位置：等维护者处理（尝试次数与预算不会被清零来绕过）"
+            if stopped
             else "这次运行已经结束，没有可以恢复的部分"
         ),
         report_available=report,

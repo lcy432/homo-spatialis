@@ -116,7 +116,7 @@ def test_production_cookie_is_host_only_strict_and_docs_are_closed(tmp_path):
         tmp_path / "data",
         profile="production",
         pack_path=E3B,
-        repeat_indexes=(0, 1, 2, 3),
+        default_clones_per_city=4,
         planner="llm",
     )
     ctx = ServiceContext.open(cfg, clock=FakeClock())
@@ -141,7 +141,18 @@ def test_production_cookie_is_host_only_strict_and_docs_are_closed(tmp_path):
     rules = r.json()["rules"]
     assert (rules["cities"], rules["clones_per_city"], rules["years"]) == (6, 4, 3)
     assert rules["planner_kind"] == "llm" and rules["live_calls_enabled"] is False
-    assert (rules["max_cost"], rules["currency"]) == ("10", "CNY")
+    # 所有者 2026-10-24 的标准：默认每次运行 20 元（允许范围默认到这个值为止）
+    assert (rules["max_cost"], rules["currency"]) == ("20", "CNY")
+    opts = rules["options"]
+    assert opts["max_cost"] == {
+        "default": "20",
+        "minimum": "0.01",
+        "maximum": "20",
+        "currency": "CNY",
+    }
+    assert opts["clones_per_city"] == {"default": 4, "minimum": 1, "maximum": 4}
+    assert (opts["years_default"], opts["years_allowed"]) == (3, [3])
+    assert len(opts["cities_allowed"]) == 6
 
 
 # ---------------------------------------------------------------------- HTTP 保护
@@ -241,6 +252,7 @@ def test_errors_are_safe_and_never_echo_the_input(tmp_path):
         "next_action_zh",
         "support_ref",
         "retry_after_seconds",
+        "field",
         "meta",
         "sample",
     }
@@ -382,16 +394,22 @@ def test_start_confirmation_binds_the_preflight_and_rejects_browser_run_settings
     # 规模固定：预检查与回执里是服务规定的规模
     pre = view["preflight"]
     assert pre["clones_per_city"] == 1 and pre["years"] == 3
-    assert {c["city_ref"] for c in pre["cities"]} == set(svc.ctx.spec.cities)
+    assert {c["city_ref"] for c in pre["cities"]} == set(svc.ctx.policy.cities_allowed)
 
 
-def test_scale_is_fixed_by_the_server_not_the_draft(tmp_path):
-    svc = start(tmp_path)
+def test_cities_come_from_the_confirmed_profile_and_must_be_allowed(tmp_path):
+    # 服务只允许第一座城：确认了两座城的画像不能准备（不替用户删城），只确认第一座的可以
+    svc = start(tmp_path, allowed_cities=("US:SYNTH2026:K51",))
     _, b = svc.person()
-    one_city = (svc.ctx.spec.cities[0],)
-    confirmed = b.confirm(b.fill(b.new_draft(), cities=one_city))
-    r = b.post("/run-intents", json={"confirmed_id": confirmed["confirmed_id"]})
-    assert r.status_code == 409 and r.json()["code"] == "run_scale_fixed"
+    both = b.confirm(b.fill(b.new_draft(), cities=("US:SYNTH2026:K51", "US:SYNTH2026:M52")))
+    r = b.post("/run-intents", json={"confirmed_id": both["confirmed_id"]})
+    assert r.status_code == 409 and r.json()["code"] == "run_options_invalid"
+    assert r.json()["field"] == "cities"
+    assert b.quota()["reserved"] == 0 and svc.store.pending_jobs() == []
+    one = b.confirm(b.fill(b.new_draft(), cities=("US:SYNTH2026:K51",)))
+    r = b.post("/run-intents", json={"confirmed_id": one["confirmed_id"]})
+    assert r.status_code == 202
+    assert r.json()["settings"]["cities"] == ["US:SYNTH2026:K51"]
 
 
 # ---------------------------------------------------------------------- 11. 查询没有副作用
@@ -427,13 +445,21 @@ def test_reads_need_a_session(tmp_path, path):
     assert r.status_code == 401 and r.json()["code"] == "unauthenticated"
 
 
-def test_changed_server_run_settings_force_a_fresh_preflight(tmp_path):
-    svc = start(tmp_path)
+def test_changed_service_quote_forces_a_fresh_preflight(tmp_path):
+    import dataclasses
+
+    import yaml
+
+    svc = start(tmp_path, planner="llm", live_calls_enabled=True)
     principal, b = svc.person()
     view = ready_intent(svc, b)
-    # 服务的正式运行设置在用户确认开始之前变了（例如资料包或上限更新）：旧预检查不能用来开始，按新设置重新检查
-    ctx = svc.ctx
-    ctx.spec = ctx.spec.model_copy(update={"max_cost": "9"})
+    before = svc.store.intent(principal, view["intent_id"])["execution_fingerprint"]
+    # 维护者在用户确认开始之前换了报价（同一份运行选项算出的有效设置就不同了）：旧预检查不能用来开始，按新设置重新检查
+    flash = yaml.safe_load(svc.ctx.policy.flash_config.read_text(encoding="utf-8"))
+    flash["run"]["paid_budget"]["price"]["price_version"] = "test-price-v2"
+    newer = tmp_path / "flash_v2.yaml"
+    newer.write_text(yaml.safe_dump(flash, allow_unicode=True), encoding="utf-8")
+    svc.ctx.policy = dataclasses.replace(svc.ctx.policy, flash_config=newer)
     r = b.submit(view)
     assert r.status_code == 409 and r.json()["code"] == "preflight_stale"
     assert b.intent(view["intent_id"])["stage"] == "checking"
@@ -441,8 +467,7 @@ def test_changed_server_run_settings_force_a_fresh_preflight(tmp_path):
     svc.work()
     again = b.intent(view["intent_id"])
     assert again["stage"] == "awaiting_confirmation"
-    assert (
-        svc.store.intent(principal, view["intent_id"])["execution_fingerprint"]
-        == ctx.spec.fingerprint
-    )
+    after = svc.store.intent(principal, view["intent_id"])["execution_fingerprint"]
+    assert after != before and again["confirm_with"] != view["confirm_with"]
+    assert "test-price-v2" in again["preflight"]["planner"]["max_cost"]
     assert b.submit(again, key="key-0002").status_code == 202

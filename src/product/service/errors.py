@@ -94,11 +94,17 @@ ERRORS: dict[str, tuple[int, str, str, str]] = {
         "不能开始需要真实模型的模拟，系统不会悄悄换成离线规划器",
         "等服务开启后再试；没有使用次数",
     ),
-    "run_scale_fixed": (
+    "run_options_invalid": (
         409,
-        "本服务固定比较全部六个都会区（每城 4 个分身、3 年）",
-        "这份确认的城市范围与服务规则不同，不能开始",
-        "在草稿里选择全部六个都会区，重新审阅并确认",
+        "这次选的城市、每城分身数、年数或费用上限不在服务允许的范围里",
+        "没有准备模拟，也没有使用次数（field 指出是哪一项）",
+        "按服务规则里的默认值与允许范围重新选择；城市要在草稿里改，再重新审阅与确认",
+    ),
+    "run_settings_unavailable": (
+        409,
+        "这次运行保存的设置或确认画像副本缺失、损坏",
+        "系统不会改用服务现在的默认设置继续，没有开始，也没有使用次数",
+        "取消这次准备后重新准备；问题一直出现时请联系维护者并提供支持编号",
     ),
     "rate_limited": (
         429,
@@ -143,7 +149,12 @@ class ServiceFailure(Exception):  # noqa: N818 - 业务拒绝，不是程序错�
     """业务拒绝：只带公开代码与支持编号。"""
 
     def __init__(
-        self, code: str, *, support_ref: str | None = None, retry_after: int | None = None
+        self,
+        code: str,
+        *,
+        support_ref: str | None = None,
+        retry_after: int | None = None,
+        field: str | None = None,
     ) -> None:
         if code not in ERRORS:
             raise ValueError(f"没有登记的错误代码 {code!r}")
@@ -151,6 +162,7 @@ class ServiceFailure(Exception):  # noqa: N818 - 业务拒绝，不是程序错�
         self.code = code
         self.support_ref = support_ref
         self.retry_after = retry_after
+        self.field = field
 
     @property
     def status(self) -> int:
@@ -163,6 +175,7 @@ def error_body(
     meta: ProductMeta | None = None,
     support_ref: str | None = None,
     retry_after: int | None = None,
+    field: str | None = None,
 ) -> ServiceError:
     status, what, impact, step = ERRORS[code]
     return ServiceError(
@@ -174,4 +187,5 @@ def error_body(
         next_action_zh=step,
         support_ref=support_ref,
         retry_after_seconds=retry_after,
+        field=field,  # type: ignore[arg-type]
     )

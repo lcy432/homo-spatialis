@@ -71,14 +71,19 @@ def cookie_name(ctx: ServiceContext) -> str:
     return "__Host-hs_session" if ctx.config.secure_cookies else "hs_session"
 
 
+#: 运行选项的字段：请求格式不对时回 ``run_options_invalid`` 并写出是哪一项（不回显用户填的值）
+OPTION_FIELDS = ("clones_per_city", "years", "max_cost_cny")
+
+
 def _error_response(
     code: str,
     *,
     status: int | None = None,
     support: str | None = None,
     retry_after: int | None = None,
+    field: str | None = None,
 ) -> JSONResponse:
-    body = error_body(code, support_ref=support, retry_after=retry_after)
+    body = error_body(code, support_ref=support, retry_after=retry_after, field=field)
     if status is not None:
         body = body.model_copy(update={"status": status})
     headers = {"Retry-After": str(retry_after)} if retry_after else None
@@ -200,6 +205,8 @@ class Caller:
     principal_id: str
     session_secret: str
     expires: str
+    #: 请求开始时的数据代次：写回正文时服务库核对它（中途“删除全部”的请求不再写回）
+    generation: int
 
 
 def create_app(ctx: ServiceContext) -> FastAPI:
@@ -222,11 +229,18 @@ def create_app(ctx: ServiceContext) -> FastAPI:
 
     @app.exception_handler(ServiceFailure)
     async def _failure(_: Request, exc: ServiceFailure) -> JSONResponse:
-        return _error_response(exc.code, support=exc.support_ref, retry_after=exc.retry_after)
+        return _error_response(
+            exc.code, support=exc.support_ref, retry_after=exc.retry_after, field=exc.field
+        )
 
     @app.exception_handler(RequestValidationError)
-    async def _invalid(_: Request, __: RequestValidationError) -> JSONResponse:
-        # 不回显原始校验异常（它可能带着用户输入）
+    async def _invalid(request: Request, exc: RequestValidationError) -> JSONResponse:
+        # 不回显原始校验异常（它可能带着用户输入）；运行选项格式不对时只说是哪一项
+        if request.url.path == f"{API}/run-intents" and request.method == "POST":
+            for err in exc.errors():
+                loc = tuple(err.get("loc") or ())
+                if len(loc) >= 2 and loc[0] == "body" and loc[1] in OPTION_FIELDS:
+                    return _error_response("run_options_invalid", field=str(loc[1]))
         return _error_response("invalid_request")
 
     @app.exception_handler(StarletteHTTPException)
@@ -251,7 +265,7 @@ def create_app(ctx: ServiceContext) -> FastAPI:
         got = ctx.store.session(secret)
         if got is None:
             raise ServiceFailure("unauthenticated")
-        return Caller(principal_id=got[0], session_secret=secret, expires=got[1])
+        return Caller(principal_id=got[0], session_secret=secret, expires=got[1], generation=got[2])
 
     def writer(request: Request) -> Caller:
         _origin(request)
@@ -344,7 +358,7 @@ def create_app(ctx: ServiceContext) -> FastAPI:
         summary="新建草稿（编号与修订号由服务器分配）",
     )
     def create_draft(who: Caller = write) -> DraftView:
-        return actions.create_draft(ctx, who.principal_id)
+        return actions.create_draft(ctx, who.principal_id, generation=who.generation)
 
     @app.get(
         f"{API}/drafts/{{draft_id}}",
@@ -362,7 +376,7 @@ def create_app(ctx: ServiceContext) -> FastAPI:
         summary="带版本保存草稿（旧版本返回冲突，不覆盖）",
     )
     def save_draft(draft_id: str, body: DraftSaveRequest, who: Caller = write) -> DraftView:
-        return actions.save_draft(ctx, who.principal_id, draft_id, body)
+        return actions.save_draft(ctx, who.principal_id, draft_id, body, generation=who.generation)
 
     @app.delete(
         f"{API}/drafts/{{draft_id}}",
@@ -380,7 +394,7 @@ def create_app(ctx: ServiceContext) -> FastAPI:
         summary="审阅已保存的那一版草稿",
     )
     def review(draft_id: str, who: Caller = write) -> ReviewReply:
-        return actions.review(ctx, who.principal_id, draft_id)
+        return actions.review(ctx, who.principal_id, draft_id, generation=who.generation)
 
     @app.post(
         f"{API}/profiles/confirm",
@@ -389,7 +403,7 @@ def create_app(ctx: ServiceContext) -> FastAPI:
         summary="确认审阅过的画像（服务端重新校验并生成确认画像）",
     )
     def confirm(body: ProfileConfirmRequest, who: Caller = write) -> ProfileConfirmReply:
-        return actions.confirm(ctx, who.principal_id, body)
+        return actions.confirm(ctx, who.principal_id, body, generation=who.generation)
 
     # ------------------------------------------------------------------ 运行意图
 
@@ -403,7 +417,9 @@ def create_app(ctx: ServiceContext) -> FastAPI:
     def create_intent(
         body: RunIntentCreateRequest, response: Response, who: Caller = write
     ) -> RunIntentView:
-        view, created = actions.create_intent(ctx, who.principal_id, body)
+        view, created = actions.create_intent(
+            ctx, who.principal_id, body, generation=who.generation
+        )
         response.status_code = 202 if created else 200
         return view
 
