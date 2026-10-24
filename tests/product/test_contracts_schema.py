@@ -44,8 +44,10 @@ def test_every_message_exports_a_schema_and_the_committed_files_match():
         assert path.read_text(encoding="utf-8") == text, f"{name} 与权威结构不一致"
     index = json.loads(texts["index.json"])
     assert (
-        index["schema_version"] == "e3a-product-schema-v3.2"
-    )  # E3C 托管服务的消息（DECISIONS/0043）
+        index["schema_version"] == "e3a-product-schema-v3.3"
+    )  # E3B 映射修正：日常支持与消费篮子的年度事实，物质两项的含义（DECISIONS/0044）
+    assert index["questionnaire_version"] == "e3a-questionnaire-v0.3-draft"
+    assert index["vocabulary_version"] == "e3a-vocabulary-v4"
     assert index["conversion_version"] == "e3a-conversion-v2"  # 收尾 F3：金额写法规则变了
     assert index["health_questionnaire_version"] == "e3a-health-coping-q-v0.1-draft"
 

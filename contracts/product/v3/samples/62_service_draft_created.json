@@ -60,16 +60,16 @@
    "meta": {
     "conversion_version": "e3a-conversion-v2",
     "data_pack": {
-     "content_fingerprint": "726c75d7b9d0f879c1f41f17dd23ecabc58e9417af0317e8a140745fc41bbca8",
+     "content_fingerprint": "7face3610cd86d6e2cb7442017661fce2abb3c4a2b1a4e6740ab70ddf23ca9ae",
      "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
      "pack_id": "pack.e3a.synthetic-v2",
      "status": "synthetic_fixture_only"
     },
     "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-    "questionnaire_version": "e3a-questionnaire-v0.2-draft",
+    "questionnaire_version": "e3a-questionnaire-v0.3-draft",
     "sample": null,
-    "schema_version": "e3a-product-schema-v3.2",
-    "vocabulary_version": "e3a-vocabulary-v3"
+    "schema_version": "e3a-product-schema-v3.3",
+    "vocabulary_version": "e3a-vocabulary-v4"
    },
    "occupation": {
     "language": "zh",
@@ -92,21 +92,21 @@
   "meta": {
    "conversion_version": "e3a-conversion-v2",
    "data_pack": {
-    "content_fingerprint": "726c75d7b9d0f879c1f41f17dd23ecabc58e9417af0317e8a140745fc41bbca8",
+    "content_fingerprint": "7face3610cd86d6e2cb7442017661fce2abb3c4a2b1a4e6740ab70ddf23ca9ae",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
     "pack_id": "pack.e3a.synthetic-v2",
     "status": "synthetic_fixture_only"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.2-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.3-draft",
    "sample": {
     "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
     "origin": "offline_run",
     "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.2",
-   "vocabulary_version": "e3a-vocabulary-v3"
+   "schema_version": "e3a-product-schema-v3.3",
+   "vocabulary_version": "e3a-vocabulary-v4"
   },
   "updated_at": "2026-10-24T09:00:00Z"
  }

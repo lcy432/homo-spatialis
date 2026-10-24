@@ -35,6 +35,7 @@ from common.product_contracts import (
     ComparisonLine,
     ConfirmedProfile,
     ConfirmedRef,
+    ConsumptionLine,
     ConvenienceDevice,
     ConvenienceService,
     DeviceFailureFact,
@@ -54,6 +55,7 @@ from common.product_contracts import (
     RequirementLine,
     RequirementSummaryLine,
     SampleLabel,
+    SupportLine,
     TaxFact,
     ValuationScopeNote,
     YearFacts,
@@ -205,7 +207,83 @@ def year_facts(world: RunWorld, city: str, result: LifeYearResult) -> YearFacts:
         purchases_not_made=not_made,
         activities=activities,
         **_area_facts(world, city, out),
+        **_support_facts(world, city, out),
     )
+
+
+#: 日常支持三项功能的公开名称（E3B 映射修正 §5）
+SUPPORT_LABEL_ZH = {
+    "personal_communication": "个人通信",
+    "home_connectivity": "居家联网",
+    "household_supplies": "家用日耗品",
+}
+BASKET_FUNCTION = "personal_consumption"
+
+
+def _support_facts(world: RunWorld, city: str, out: Any) -> dict[str, Any]:
+    """日常支持与个人消费篮子（白名单，逐字段取自结算记录）：按月服务的计划月份与实际获得的月份；篮子按每月实际获得的份数。"""
+    cat = world.bundle.catalog_for(city)
+    assert cat is not None
+    services = [it for it in out.items if it.role == "periodic_service"]
+    support = []
+    for f, label in SUPPORT_LABEL_ZH.items():
+        mine = [
+            it
+            for it in services
+            if (o := cat.opportunity(it.opportunity_id)) is not None and f in o.functions
+        ]
+        if not mine:
+            continue
+        planned = sorted({m for it in mine for m in it.requested_months})
+        got = sorted({m for it in mine for m in it.covered_months})
+        support.append(
+            SupportLine(
+                function=f,  # type: ignore[arg-type]
+                label_zh=label,
+                opportunity_ids=tuple(sorted({it.opportunity_id for it in mine})),
+                months_planned=tuple(planned),
+                months_obtained=tuple(got),
+                months_not_obtained=tuple(m for m in planned if m not in got),
+            )
+        )
+    baskets = []
+    for it in services:
+        o = cat.opportunity(it.opportunity_id)
+        units = next(
+            (
+                e.units_per_month
+                for e in (o.enjoyment if o else ())
+                if e.function == BASKET_FUNCTION
+            ),
+            None,
+        )
+        if units is not None:
+            baskets.append(
+                (
+                    it,
+                    Fraction(Decimal(repr(units))) * Fraction(Decimal(repr(it.requested_quantity))),
+                )
+            )
+    consumption = None
+    if baskets:
+        lived = {m.month for m in out.months}
+        by_month = []
+        for m in range(1, 13):
+            if m not in lived:
+                by_month.append("—")
+                continue
+            q = sum((u for it, u in baskets if m in it.covered_months), Fraction(0))
+            by_month.append(
+                str(q.numerator) if q.denominator == 1 else f"{q.numerator}/{q.denominator}"
+            )
+        planned = {m for it, _ in baskets for m in it.requested_months}
+        got = {m for it, _ in baskets for m in it.covered_months}
+        consumption = ConsumptionLine(
+            opportunity_ids=tuple(sorted({it.opportunity_id for it, _ in baskets})),
+            baskets_by_month=tuple(by_month),
+            months_not_obtained=tuple(sorted(planned - got)),
+        )
+    return {"support": tuple(support), "consumption": consumption}
 
 
 #: 没成交的一次性购买与没能进行的活动：固定的公开说明（不透传结算里的内部原因文字）。

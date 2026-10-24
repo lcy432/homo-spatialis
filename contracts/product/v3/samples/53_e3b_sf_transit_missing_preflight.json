@@ -4,18 +4,18 @@
  "payload": {
   "binding": {
    "compiled_inputs": {
-    "life_input": "4eca345f27c1813be36ad8c50b7af4cd53c1456a3014f75c0ab8cb6e70bb31a4",
+    "life_input": "63d5952b3fa3e667236cc6f1c4f9cbf8a8303cb1a12fda6fbe40eb47e7dee3e9",
     "roster": "fe27d033d8e815602223784c92f75aefcf7f25ffe0887293c3b114d72283c688",
-    "run_config": "dbd726d0bebbec3ce2104a3abfff8f9465c86fa54c3d490db651d17fcee0d3f0",
-    "scoring_config": "c929881cb54d0d198a90d2106bf65d541a3175a14564f0994abe2fb76ddad571"
+    "run_config": "7bc347486f570ed23cc85bc91a5ddef0f8be73bd7059338fc3617b338b1265c4",
+    "scoring_config": "0a476a4b1fb8676a8330c3100f0e57e7fb577b4122516f73c4b8b087764d8985"
    },
    "evaluation_spec_id": "eval.e3b-us.main",
-   "identities_fingerprint": "e5fdb55087623aff0ab53e5a00c80ab048544760c1ed1588f03949dbcd9058d1",
+   "identities_fingerprint": "84169dff0c6d46bd4b35c75ea6b34f0c8ae3dba443801a9106b1f070e99130b6",
    "planner_id": "mock.rules.e3a-product",
    "planner_kind": "mock",
-   "prompt_template": "e3b-product-prompt-v1",
+   "prompt_template": "e3b-product-prompt-v2",
    "protocol_id": "life-v1-e3b-us",
-   "scoring_content_fingerprint": "180fd9389343bac1da0fac4528e4eb6e9c6d7e069bddd56ea47acdcc4380bce0",
+   "scoring_content_fingerprint": "c36f768cbb84afd5398b4afedeafbf2aa1a117bf61cfd944a453eb3cdc1e7d75",
    "scoring_version": "e1-life-v1"
   },
   "cities": [
@@ -61,29 +61,29 @@
        "label_zh": "通勤关系表的线（住处片区 × 就业片区 × 方式）"
       },
       {
-       "count": 11,
-       "key": "excluded.housing.rent_unknown",
-       "label_zh": "没有放进目录的住房：租金未知"
-      },
-      {
-       "count": 453,
+       "count": 18481,
        "key": "housing_candidates",
-       "label_zh": "住房候选"
+       "label_zh": "完整可执行住房池的候选（目标格 × 经验支持点）"
       },
       {
-       "count": 442,
-       "key": "housing_executable",
-       "label_zh": "可执行的住房候选"
-      },
-      {
-       "count": 62,
+       "count": 340,
        "key": "housing_in_catalog",
-       "label_zh": "放进目录的住房"
+       "label_zh": "放进目录的住房（菜单上出现过的，加最低住房与参考住房）"
       },
       {
-       "count": 9,
+       "count": 10,
        "key": "items_by_domain.activity",
        "label_zh": "生活物品候选：活动"
+      },
+      {
+       "count": 7,
+       "key": "items_by_domain.consumption",
+       "label_zh": "items_by_domain.consumption"
+      },
+      {
+       "count": 3,
+       "key": "items_by_domain.daily_support",
+       "label_zh": "items_by_domain.daily_support"
       },
       {
        "count": 5,
@@ -91,24 +91,14 @@
        "label_zh": "生活物品候选：省家务设备"
       },
       {
-       "count": 3,
-       "key": "items_by_domain.enjoyment",
-       "label_zh": "生活物品候选：享受型用品与服务"
-      },
-      {
        "count": 2,
        "key": "items_by_domain.equipment",
        "label_zh": "生活物品候选：爱好装备"
       },
       {
-       "count": 15,
+       "count": 327,
        "key": "items_by_domain.food",
        "label_zh": "生活物品候选：食品方案"
-      },
-      {
-       "count": 120,
-       "key": "items_by_domain.job",
-       "label_zh": "生活物品候选：岗位"
       },
       {
        "count": 3,
@@ -116,14 +106,24 @@
        "label_zh": "生活物品候选：服务"
       },
       {
-       "count": 120,
-       "key": "jobs_placed",
-       "label_zh": "放进目录的岗位（已补上就业片区）"
+       "count": 105564,
+       "key": "job_candidates",
+       "label_zh": "完整可执行岗位池的候选（职业 × 年薪支持点 × 工时与就业片区）"
+      },
+      {
+       "count": 351,
+       "key": "jobs_in_catalog",
+       "label_zh": "放进目录的岗位（菜单上出现过的）"
       },
       {
        "count": 12,
        "key": "menus",
        "label_zh": "年度菜单"
+      },
+      {
+       "count": 40,
+       "key": "start_jobs",
+       "label_zh": "各职业的开局岗位"
       }
      ],
      "build_status": "from_pack_report",
@@ -164,15 +164,15 @@
       {
        "category": "housing",
        "env_repeats": 2,
-       "items_max": 12,
-       "items_min": 12,
+       "items_max": 60,
+       "items_min": 60,
        "years": 3
       },
       {
        "category": "job",
        "env_repeats": 2,
-       "items_max": 30,
-       "items_min": 30,
+       "items_max": 60,
+       "items_min": 60,
        "years": 3
       }
      ],
@@ -180,6 +180,7 @@
       "网球场地连球拍租借（一次）",
       "网球场地（自带球拍，一次）",
       "在家练吉他（一次 1 小时）",
+      "无器械锻炼（一次 1 小时）",
       "参观博物馆（一次）"
      ],
      "named_assumptions": [
@@ -201,7 +202,7 @@
        "note_zh": "价格与寿命是登记的类别设定（equipment_category_v1），不是某个商品的报价（geography: CBSA2023 41860 San Francisco-Oakland-Fremont 都会区）"
       },
       {
-       "count": 4,
+       "count": 5,
        "examples": [
         "网球场地连球拍租借（一次）",
         "网球场地（自带球拍，一次）",
@@ -222,7 +223,7 @@
          "kind": "derived"
         },
         {
-         "count": 62,
+         "count": 340,
          "kind": "estimated"
         },
         {
@@ -231,7 +232,7 @@
         }
        ],
        "category": "housing",
-       "total": 62
+       "total": 340
       },
       {
        "by_kind": [
@@ -244,7 +245,29 @@
          "kind": "derived"
         },
         {
-         "count": 15,
+         "count": 391,
+         "kind": "estimated"
+        },
+        {
+         "count": 0,
+         "kind": "synthetic"
+        }
+       ],
+       "category": "job",
+       "total": 391
+      },
+      {
+       "by_kind": [
+        {
+         "count": 0,
+         "kind": "observed"
+        },
+        {
+         "count": 0,
+         "kind": "derived"
+        },
+        {
+         "count": 327,
          "kind": "estimated"
         },
         {
@@ -253,7 +276,7 @@
         }
        ],
        "category": "food",
-       "total": 15
+       "total": 327
       },
       {
        "by_kind": [
@@ -266,7 +289,7 @@
          "kind": "derived"
         },
         {
-         "count": 6,
+         "count": 13,
          "kind": "estimated"
         },
         {
@@ -275,7 +298,7 @@
         }
        ],
        "category": "service",
-       "total": 7
+       "total": 14
       },
       {
        "by_kind": [
@@ -314,34 +337,12 @@
          "kind": "estimated"
         },
         {
-         "count": 4,
+         "count": 5,
          "kind": "synthetic"
         }
        ],
        "category": "experience",
-       "total": 9
-      },
-      {
-       "by_kind": [
-        {
-         "count": 0,
-         "kind": "observed"
-        },
-        {
-         "count": 0,
-         "kind": "derived"
-        },
-        {
-         "count": 120,
-         "kind": "estimated"
-        },
-        {
-         "count": 0,
-         "kind": "synthetic"
-        }
-       ],
-       "category": "job",
-       "total": 120
+       "total": 10
       },
       {
        "by_kind": [
@@ -367,7 +368,7 @@
       }
      ],
      "pack_status": "real_data_frozen",
-     "summary_zh": "旧金山：目录 221 项机会里，观测 0、派生 2、估计 208、合成设定 11。城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定，不据此排序真实城市",
+     "summary_zh": "旧金山：目录 1090 项机会里，观测 0、派生 2、估计 1076、合成设定 12。城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定，不据此排序真实城市",
      "tax": {
       "absent_zh": [],
       "not_modeled_zh": [
@@ -402,11 +403,11 @@
        "kind": "derived"
       },
       {
-       "count": 208,
+       "count": 1076,
        "kind": "estimated"
       },
       {
-       "count": 11,
+       "count": 12,
        "kind": "synthetic"
       }
      ],
@@ -435,7 +436,7 @@
      ],
      "status": "yes"
     },
-    "start_job_label": "办公室文员·工资在本职业中位数"
+    "start_job_label": "办公室文员·p50"
    },
    {
     "city_ref": "US:CBSA2023:26420",
@@ -469,24 +470,29 @@
        "label_zh": "通勤关系表的线（住处片区 × 就业片区 × 方式）"
       },
       {
-       "count": 651,
+       "count": 43339,
        "key": "housing_candidates",
-       "label_zh": "住房候选"
+       "label_zh": "完整可执行住房池的候选（目标格 × 经验支持点）"
       },
       {
-       "count": 651,
-       "key": "housing_executable",
-       "label_zh": "可执行的住房候选"
-      },
-      {
-       "count": 68,
+       "count": 357,
        "key": "housing_in_catalog",
-       "label_zh": "放进目录的住房"
+       "label_zh": "放进目录的住房（菜单上出现过的，加最低住房与参考住房）"
       },
       {
-       "count": 10,
+       "count": 11,
        "key": "items_by_domain.activity",
        "label_zh": "生活物品候选：活动"
+      },
+      {
+       "count": 7,
+       "key": "items_by_domain.consumption",
+       "label_zh": "items_by_domain.consumption"
+      },
+      {
+       "count": 3,
+       "key": "items_by_domain.daily_support",
+       "label_zh": "items_by_domain.daily_support"
       },
       {
        "count": 5,
@@ -494,24 +500,14 @@
        "label_zh": "生活物品候选：省家务设备"
       },
       {
-       "count": 3,
-       "key": "items_by_domain.enjoyment",
-       "label_zh": "生活物品候选：享受型用品与服务"
-      },
-      {
        "count": 2,
        "key": "items_by_domain.equipment",
        "label_zh": "生活物品候选：爱好装备"
       },
       {
-       "count": 15,
+       "count": 327,
        "key": "items_by_domain.food",
        "label_zh": "生活物品候选：食品方案"
-      },
-      {
-       "count": 120,
-       "key": "items_by_domain.job",
-       "label_zh": "生活物品候选：岗位"
       },
       {
        "count": 3,
@@ -524,14 +520,24 @@
        "label_zh": "生活物品候选：培训"
       },
       {
-       "count": 120,
-       "key": "jobs_placed",
-       "label_zh": "放进目录的岗位（已补上就业片区）"
+       "count": 92240,
+       "key": "job_candidates",
+       "label_zh": "完整可执行岗位池的候选（职业 × 年薪支持点 × 工时与就业片区）"
+      },
+      {
+       "count": 338,
+       "key": "jobs_in_catalog",
+       "label_zh": "放进目录的岗位（菜单上出现过的）"
       },
       {
        "count": 12,
        "key": "menus",
        "label_zh": "年度菜单"
+      },
+      {
+       "count": 40,
+       "key": "start_jobs",
+       "label_zh": "各职业的开局岗位"
       }
      ],
      "build_status": "from_pack_report",
@@ -572,15 +578,15 @@
       {
        "category": "housing",
        "env_repeats": 2,
-       "items_max": 12,
-       "items_min": 12,
+       "items_max": 60,
+       "items_min": 60,
        "years": 3
       },
       {
        "category": "job",
        "env_repeats": 2,
-       "items_max": 30,
-       "items_min": 30,
+       "items_max": 60,
+       "items_min": 60,
        "years": 3
       }
      ],
@@ -588,6 +594,7 @@
       "网球场地连球拍租借（一次）",
       "网球场地（自带球拍，一次）",
       "在家练吉他（一次 1 小时）",
+      "无器械锻炼（一次 1 小时）",
       "参观博物馆（一次）"
      ],
      "named_assumptions": [
@@ -609,7 +616,7 @@
        "note_zh": "价格与寿命是登记的类别设定（equipment_category_v1），不是某个商品的报价（geography: CBSA2023 26420 Houston-Pasadena-The Woodlands 都会区）"
       },
       {
-       "count": 4,
+       "count": 5,
        "examples": [
         "网球场地连球拍租借（一次）",
         "网球场地（自带球拍，一次）",
@@ -630,7 +637,7 @@
          "kind": "derived"
         },
         {
-         "count": 68,
+         "count": 357,
          "kind": "estimated"
         },
         {
@@ -639,7 +646,7 @@
         }
        ],
        "category": "housing",
-       "total": 68
+       "total": 357
       },
       {
        "by_kind": [
@@ -652,7 +659,29 @@
          "kind": "derived"
         },
         {
-         "count": 15,
+         "count": 378,
+         "kind": "estimated"
+        },
+        {
+         "count": 0,
+         "kind": "synthetic"
+        }
+       ],
+       "category": "job",
+       "total": 378
+      },
+      {
+       "by_kind": [
+        {
+         "count": 0,
+         "kind": "observed"
+        },
+        {
+         "count": 0,
+         "kind": "derived"
+        },
+        {
+         "count": 327,
          "kind": "estimated"
         },
         {
@@ -661,7 +690,7 @@
         }
        ],
        "category": "food",
-       "total": 15
+       "total": 327
       },
       {
        "by_kind": [
@@ -674,7 +703,7 @@
          "kind": "derived"
         },
         {
-         "count": 6,
+         "count": 13,
          "kind": "estimated"
         },
         {
@@ -683,7 +712,7 @@
         }
        ],
        "category": "service",
-       "total": 7
+       "total": 14
       },
       {
        "by_kind": [
@@ -722,34 +751,12 @@
          "kind": "estimated"
         },
         {
-         "count": 4,
+         "count": 5,
          "kind": "synthetic"
         }
        ],
        "category": "experience",
-       "total": 10
-      },
-      {
-       "by_kind": [
-        {
-         "count": 0,
-         "kind": "observed"
-        },
-        {
-         "count": 0,
-         "kind": "derived"
-        },
-        {
-         "count": 120,
-         "kind": "estimated"
-        },
-        {
-         "count": 0,
-         "kind": "synthetic"
-        }
-       ],
-       "category": "job",
-       "total": 120
+       "total": 11
       },
       {
        "by_kind": [
@@ -775,7 +782,7 @@
       }
      ],
      "pack_status": "real_data_frozen",
-     "summary_zh": "休斯敦：目录 230 项机会里，观测 0、派生 1、估计 218、合成设定 11。城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定，不据此排序真实城市",
+     "summary_zh": "休斯敦：目录 1097 项机会里，观测 0、派生 1、估计 1084、合成设定 12。城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定，不据此排序真实城市",
      "tax": {
       "absent_zh": [
        "德州没有州个人所得税"
@@ -807,11 +814,11 @@
        "kind": "derived"
       },
       {
-       "count": 218,
+       "count": 1084,
        "kind": "estimated"
       },
       {
-       "count": 11,
+       "count": 12,
        "kind": "synthetic"
       }
      ],
@@ -840,13 +847,13 @@
      ],
      "status": "yes"
     },
-    "start_job_label": "办公室文员·工资在本职业中位数"
+    "start_job_label": "办公室文员·p50"
    }
   ],
   "clones_per_city": 4,
   "confirmed": {
    "confirmed_id": "confirmed.draft.u501.e3b_sf.r1",
-   "content_fingerprint": "2c8e544eb1fd063853d7fd9a649ba5be9a5b4487ee479b354e24f6eab23e8ac7"
+   "content_fingerprint": "16c8610e05048542b1b2c9047c6779f05bd709b8699283f7e25db693a46707d5"
   },
   "executable": {
    "reasons": [
@@ -874,21 +881,21 @@
   "meta": {
    "conversion_version": "e3a-conversion-v2",
    "data_pack": {
-    "content_fingerprint": "ac537a6c6f2c67673969cbed8116ca85033c7a26ac84a957ee5ba1d57e4e82fc",
+    "content_fingerprint": "c8409403f5fac15b38ed59b3c8514c0e62fb1568602e7fe0cc24d1cb67740427",
     "note": "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定",
     "pack_id": "pack.e3b.us-v1",
     "status": "real_data_frozen"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.2-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.3-draft",
    "sample": {
     "note": "预检查的实际输出（没有运行生活）",
     "origin": "offline_run",
     "produced_by": "product.scenarios.preflight_only(e3b_sf)",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.2",
-   "vocabulary_version": "e3a-vocabulary-v3"
+   "schema_version": "e3a-product-schema-v3.3",
+   "vocabulary_version": "e3a-vocabulary-v4"
   },
   "planner": {
    "call_limit": 72,
@@ -898,7 +905,7 @@
    "planner_id": "mock.rules.e3a-product",
    "planner_kind": "mock"
   },
-  "preflight_fingerprint": "425259b908a5d176e26e9dfc3eaabec13bd6a82b76b1b1adb66d5957613b8572",
+  "preflight_fingerprint": "7bd84eac33934473c625dd819c9ee51c2f60865cd7265e248b3defce47ead747",
   "preflight_id": "preflight.confirmed.draft.u501.e3b_sf.r1",
   "scope_notes": [
    {

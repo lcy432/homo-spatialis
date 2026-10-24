@@ -2,7 +2,7 @@
 
 只写**当前阶段与下一步**。层与命名、各轮状态、默认入口见 [docs/INDEX.md](docs/INDEX.md)；愿景与方法见 [README](README.md)。2026-10-18 之前的完整计划（逐轮记录、P1–P10 账本、V1 各阶段验收细则）存档在 [docs/history/pre-dev-refactor-2026-10-18/PLAN.md](docs/history/pre-dev-refactor-2026-10-18/PLAN.md)；旧文档里的"PLAN §3.0.x"指那份存档。
 
-更新：2026-10-23。
+更新：2026-10-24。
 
 ## 当前阶段
 
@@ -10,13 +10,14 @@
 
 ## 下一步
 
-1. **E3B 收尾**（intake-03）：六城真实生活资料包与最小引擎适配已实现；独立审核 F1–F6 修复及离线自测完成，待独立复核（[ADR0042](DECISIONS/0042-e3b-real-life-pack.md)、[说明](docs/design/e3b-life-pack.md)）。资料方面的后续（另排，intake-06）：旧金山公交票价的另一来源、芝加哥公园活动需要的 E1 扩展（所有者暂缓）、其他四城的培训项目、纽约都会区新泽西与宾州部分的犯罪资料；界面层渲染真实资料包的公共事实。
-2. **接入层（原计划，部分由 E3B 完成）**（intake-03）：真实税与公开说明同源；资料包与确认画像接上运行入口。真实资料数据库（intake-02）已经建成，下一步是把它接进生活运行：先由所有者决定 [intake-02 技术说明](docs/design/intake-02-real-data.md) 第 9 节的 E1 扩展（菜单约束观察与权威检查、同一机会按月重复、续租与已持有的东西、开局工作选法、食品方案、属性分类、菜单身份），再补资料缺口（住房面积、按房源与岗位配对的通勤、做饭时间、家电价格与寿命、其他城市的活动日历、税率）。共享消息结构由接入层统一维护（[共享约定](docs/design/e3-e5-product-contract.md)、[E3 交接](docs/handoffs/e3-data-input-handoff.md)）。
-3. **生活扩展**（engine-09）：收尾修复（R1–R9）待独立复核；界面层把页面改读 `contracts/product/v3/`（物质四项、兴趣与口味的作答与审阅、生活事实里的其他耐用品 / 没买成的购买 / 活动参与、生活扩展候选的编译检查；[交接](docs/handoffs/e3-to-e5-life-extension.md)）；真实资料补做饭时间、每周新鲜餐数与活动参与时间之后，把 intake-02 的导出接上编译检查（`src/product/life_items.py`）。
-4. **托管服务**（intake-05，E3C）：专属链接与会话、3 次启动机会、服务端确认、运行意图、单个 worker 驱动 LangGraph 与 E1、删除与过期已实现，离线验收通过（[ADR0043](DECISIONS/0043-e3c-hosted-service.md)、[说明](docs/design/e3c-service.md)）。没有部署，付费调用开关关闭；部署与打开真实调用由所有者另定。
-5. **界面层**（ui-02）：网页接 E3C 托管服务（[E3C 交接](docs/handoffs/e3c-to-e5-service.md)：本地 mock 服务、OpenAPI、会话与 CSRF、样例）。次数、排队、预算与后台调度由 E3C 负责，界面不另做一套。
-6. **代理层**：汇总 Haiku / Sonnet 的真实试跑结果；后续的真实 LLM 测试默认用 Haiku（见 INDEX 第 3 节）。
-7. **工程卫生**：
+1. **E3B 映射修正**（intake-03b）：完整 B 分布与年度菜单、A 共同结构、日常支持与抽象消费篮子、公共结构 v3.3 已实现，离线验收完成（[ADR0044](DECISIONS/0044-e3b-mapping-daily-support.md)、[说明](docs/design/e3b-mapping-and-daily-support.md)）。要所有者决定的两件事：完整 E3B 目录超过真实模型的上下文上限（要不要缩小食品网格或分批呈现，不能按评分筛选）；最低住房落在经验分布最低端（要不要登记一条最低住房资格规则）。界面层按 [迁移说明](docs/handoffs/e3b-mapping-to-e5.md) 读 v3.3，旧确认要重新审阅。
+2. **E3B 收尾**（intake-03）：六城真实生活资料包与最小引擎适配已实现；独立审核 F1–F6 修复及离线自测完成，待独立复核（[ADR0042](DECISIONS/0042-e3b-real-life-pack.md)、[说明](docs/design/e3b-life-pack.md)）。资料方面的后续（另排，intake-06）：旧金山公交票价的另一来源、芝加哥公园活动需要的 E1 扩展（所有者暂缓）、其他四城的培训项目、纽约都会区新泽西与宾州部分的犯罪资料；界面层渲染真实资料包的公共事实。
+3. **接入层（原计划，部分由 E3B 完成）**（intake-03）：真实税与公开说明同源；资料包与确认画像接上运行入口。真实资料数据库（intake-02）已经建成，下一步是把它接进生活运行：先由所有者决定 [intake-02 技术说明](docs/design/intake-02-real-data.md) 第 9 节的 E1 扩展（菜单约束观察与权威检查、同一机会按月重复、续租与已持有的东西、开局工作选法、食品方案、属性分类、菜单身份），再补资料缺口（住房面积、按房源与岗位配对的通勤、做饭时间、家电价格与寿命、其他城市的活动日历、税率）。共享消息结构由接入层统一维护（[共享约定](docs/design/e3-e5-product-contract.md)、[E3 交接](docs/handoffs/e3-data-input-handoff.md)）。
+4. **生活扩展**（engine-09）：收尾修复（R1–R9）待独立复核；界面层把页面改读 `contracts/product/v3/`（物质四项、兴趣与口味的作答与审阅、生活事实里的其他耐用品 / 没买成的购买 / 活动参与、生活扩展候选的编译检查；[交接](docs/handoffs/e3-to-e5-life-extension.md)）；真实资料补做饭时间、每周新鲜餐数与活动参与时间之后，把 intake-02 的导出接上编译检查（`src/product/life_items.py`）。
+5. **托管服务**（intake-05，E3C）：专属链接与会话、3 次启动机会、服务端确认、运行意图、单个 worker 驱动 LangGraph 与 E1、删除与过期已实现，离线验收通过（[ADR0043](DECISIONS/0043-e3c-hosted-service.md)、[说明](docs/design/e3c-service.md)）。没有部署，付费调用开关关闭；部署与打开真实调用由所有者另定。
+6. **界面层**（ui-02）：网页接 E3C 托管服务（[E3C 交接](docs/handoffs/e3c-to-e5-service.md)：本地 mock 服务、OpenAPI、会话与 CSRF、样例）。次数、排队、预算与后台调度由 E3C 负责，界面不另做一套。
+7. **代理层**：汇总 Haiku / Sonnet 的真实试跑结果；后续的真实 LLM 测试默认用 Haiku（见 INDEX 第 3 节）。
+8. **工程卫生**：
    - 把未提交的工作分批提交到功能分支（由所有者提交）；`runs/` 里的大目录（审核留下的 `pytest-temp` 等）清理或不提交。
    - 可选：把生活模型从 `life_` 文件名前缀改成子包、拆分几千行的大文件、配置按"当前 / 历史"分目录、通用入口 `run_life_e1_7b.py` 改名。涉及 `src/econ/` 的移动要先说明。
 

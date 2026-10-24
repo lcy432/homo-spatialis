@@ -4,18 +4,18 @@
  "payload": {
   "binding": {
    "compiled_inputs": {
-    "life_input": "9efb71421bfe40a97c29c3bbe81fc682cb2e6e32ed1a48eba1c51a753d67bfb2",
+    "life_input": "a77e18dc2f163f1fd7cf0f48b8d0fca6c65e56c3eb0b95e097b327a31670ace7",
     "roster": "837ef513e4116b24f75b2f29c0edd9b0ea40b12dfa12c8c3979c7074e8b59b4c",
-    "run_config": "65332df48551eff1b65f1fd12742ed598fade9e5f9b63d633eab09905c34727a",
-    "scoring_config": "130e822068dd45e7fe265d4220999b8f8530789d2be3073e39085014156efdea"
+    "run_config": "6639d6ecc6919fc4fe248d6b52bbd924d09cebcfd459e2a1c84d8faae35c8b19",
+    "scoring_config": "6e3ad207c3579c6a6920270528dd50dedc0549c8a1b886ec042fd392e2b35bac"
    },
    "evaluation_spec_id": "eval.e1-life.main",
-   "identities_fingerprint": "94d436916f461ad95d3d043515c516bb012b32ab7b12b47116f9325ea334898e",
+   "identities_fingerprint": "988ec52682c235c7dee45c9361603bd85b60d17ce5b702f4f9bbe55fa081a11e",
    "planner_id": "mock.rules.e3a-product",
    "planner_kind": "mock",
-   "prompt_template": "e3b-product-prompt-v1",
+   "prompt_template": "e3b-product-prompt-v2",
    "protocol_id": "life-v1-e3a-product",
-   "scoring_content_fingerprint": "180fd9389343bac1da0fac4528e4eb6e9c6d7e069bddd56ea47acdcc4380bce0",
+   "scoring_content_fingerprint": "c36f768cbb84afd5398b4afedeafbf2aa1a117bf61cfd944a453eb3cdc1e7d75",
    "scoring_version": "e1-life-v1"
   },
   "cities": [
@@ -100,7 +100,7 @@
      ],
      "named_assumptions": [
       {
-       "count": 22,
+       "count": 25,
        "examples": [
         "一居室（离工作地近）",
         "一居室（离工作地远）",
@@ -190,12 +190,12 @@
          "kind": "estimated"
         },
         {
-         "count": 3,
+         "count": 8,
          "kind": "synthetic"
         }
        ],
        "category": "service",
-       "total": 3
+       "total": 8
       },
       {
        "by_kind": [
@@ -234,12 +234,12 @@
          "kind": "estimated"
         },
         {
-         "count": 6,
+         "count": 4,
          "kind": "synthetic"
         }
        ],
        "category": "durable",
-       "total": 6
+       "total": 4
       },
       {
        "by_kind": [
@@ -287,7 +287,7 @@
       }
      ],
      "pack_status": "synthetic_fixture_only",
-     "summary_zh": "合成城 K51：合成资料包，目录 25 项机会全部是手工合成的模型设定或测试资料，不是真实城市资料",
+     "summary_zh": "合成城 K51：合成资料包，目录 28 项机会全部是手工合成的模型设定或测试资料，不是真实城市资料",
      "tax": {
       "absent_zh": [],
       "not_modeled_zh": [],
@@ -311,7 +311,7 @@
        "kind": "estimated"
       },
       {
-       "count": 25,
+       "count": 28,
        "kind": "synthetic"
       }
      ],
@@ -423,7 +423,7 @@
      ],
      "named_assumptions": [
       {
-       "count": 22,
+       "count": 25,
        "examples": [
         "一居室（离工作地近）",
         "一居室（离工作地远）",
@@ -506,12 +506,12 @@
          "kind": "estimated"
         },
         {
-         "count": 3,
+         "count": 8,
          "kind": "synthetic"
         }
        ],
        "category": "service",
-       "total": 3
+       "total": 8
       },
       {
        "by_kind": [
@@ -550,12 +550,12 @@
          "kind": "estimated"
         },
         {
-         "count": 5,
+         "count": 3,
          "kind": "synthetic"
         }
        ],
        "category": "durable",
-       "total": 5
+       "total": 3
       },
       {
        "by_kind": [
@@ -603,7 +603,7 @@
       }
      ],
      "pack_status": "synthetic_fixture_only",
-     "summary_zh": "合成城 M52：合成资料包，目录 24 项机会全部是手工合成的模型设定或测试资料，不是真实城市资料",
+     "summary_zh": "合成城 M52：合成资料包，目录 27 项机会全部是手工合成的模型设定或测试资料，不是真实城市资料",
      "tax": {
       "absent_zh": [],
       "not_modeled_zh": [],
@@ -627,7 +627,7 @@
        "kind": "estimated"
       },
       {
-       "count": 24,
+       "count": 27,
        "kind": "synthetic"
       }
      ],
@@ -662,7 +662,7 @@
   "clones_per_city": 1,
   "confirmed": {
    "confirmed_id": "confirmed.draft.u501.r1",
-   "content_fingerprint": "2fb9c8c83ce5a92a114c2d37ca96d2e2d336f0f32f3dae6680b93dcfa69c400b"
+   "content_fingerprint": "74f5afbc4f2651c898fc900238503498f06262736042601c14c170b6203d6e41"
   },
   "executable": {
    "reasons": [
@@ -680,21 +680,21 @@
   "meta": {
    "conversion_version": "e3a-conversion-v2",
    "data_pack": {
-    "content_fingerprint": "726c75d7b9d0f879c1f41f17dd23ecabc58e9417af0317e8a140745fc41bbca8",
+    "content_fingerprint": "7face3610cd86d6e2cb7442017661fce2abb3c4a2b1a4e6740ab70ddf23ca9ae",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
     "pack_id": "pack.e3a.synthetic-v2",
     "status": "synthetic_fixture_only"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.2-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.3-draft",
    "sample": {
     "note": "离线闭环实际执行的结果（mock 规划器，零网络）",
     "origin": "offline_run",
     "produced_by": "product.scenarios.closed_loop(normal)",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.2",
-   "vocabulary_version": "e3a-vocabulary-v3"
+   "schema_version": "e3a-product-schema-v3.3",
+   "vocabulary_version": "e3a-vocabulary-v4"
   },
   "planner": {
    "call_limit": 18,
@@ -704,7 +704,7 @@
    "planner_id": "mock.rules.e3a-product",
    "planner_kind": "mock"
   },
-  "preflight_fingerprint": "76a58bd526ca8a8ab0c74ab941d5485bafa2fb1dbbda773a7b0bb65c6c91f7d9",
+  "preflight_fingerprint": "ceee8b3b2362e74bd176a15612d4dd1491d5587bd15fef8e00547478e05eacef",
   "preflight_id": "preflight.confirmed.draft.u501.r1",
   "scope_zh": [
    "生活协议 life-v1-e3a-product（状态 synthetic_fixture_only）、评分 score.e1-life.explore（探索版）：城市、报价、工资、疾病、治疗与评分参数全部是合成设定，不是现实城市，不排序真实城市",

@@ -135,7 +135,7 @@ def _test_transport(block_at: int | None, gate: threading.Event, reached: thread
     """测试传输：按 mock 规则给计划；第 ``block_at`` 次发送时停住，等样例拍下“运行中”的快照。"""
     from agentlayer.life_llm import TransportResponse, estimate_input_tokens
     from agentlayer.life_mock import ProductMockPlanner
-    from agentlayer.life_planning import PROMPT_USER_HEAD, PlannerCall
+    from agentlayer.life_planning import PlannerCall, payload_from_user_prompt
 
     count = itertools.count(1)
 
@@ -146,7 +146,7 @@ def _test_transport(block_at: int | None, gate: threading.Event, reached: thread
                 reached.set()
                 gate.wait(120)
             user = body["messages"][1]["content"]
-            payload = json.loads(user[len(PROMPT_USER_HEAD) + len("```json\n") : -len("\n```")])
+            payload = payload_from_user_prompt(user)  # 紧凑表示要解开（E3B 映射修正）
             text = ProductMockPlanner().plan(
                 PlannerCall(payload["request_id"], body["messages"][0]["content"], user, payload)
             )

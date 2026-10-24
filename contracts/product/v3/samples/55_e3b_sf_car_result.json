@@ -23,20 +23,20 @@
       "violated": 0
      }
     ],
-    "headline_zh": "旧金山：原计划 2 个分身——2 个完成且可评价、0 个生活出局、0 个模拟问题；2 个完成且可评价分身的平均 J 为 0.5319（分母只数完成且可评价的分身，不是原计划的全部分身）",
+    "headline_zh": "旧金山：原计划 2 个分身——2 个完成且可评价、0 个生活出局、0 个模拟问题；2 个完成且可评价分身的平均 J 为 0.5716（分母只数完成且可评价的分身，不是原计划的全部分身）",
     "label": "旧金山",
     "mean_denominator": 2,
     "mean_j": {
-     "display": "0.5319",
-     "exact": "42548802321697083/80000000000000000"
+     "display": "0.5716",
+     "exact": "45728696658033269/80000000000000000"
     },
     "mean_l": {
-     "display": "0.5115",
-     "exact": "30687463860491521/60000000000000000"
+     "display": "0.5553",
+     "exact": "5552745246442671/10000000000000000"
     },
     "mean_v": {
-     "display": "0.5931",
-     "exact": "5930669230602781/10000000000000000"
+     "display": "0.6206",
+     "exact": "12412225179377243/20000000000000000"
     },
     "missing": 0,
     "missing_reasons": [],
@@ -48,12 +48,12 @@
     "planned": 2,
     "range_denominator": 2,
     "range_lower": {
-     "display": "0.5319",
-     "exact": "42548802321697083/80000000000000000"
+     "display": "0.5716",
+     "exact": "45728696658033269/80000000000000000"
     },
     "range_upper": {
-     "display": "0.5319",
-     "exact": "42548802321697083/80000000000000000"
+     "display": "0.5716",
+     "exact": "45728696658033269/80000000000000000"
     }
    }
   ],
@@ -82,30 +82,372 @@
      }
     ],
     "j": {
-     "display": "0.5340",
-     "exact": "21361916927663493/40000000000000000"
+     "display": "0.5695",
+     "exact": "11390476899614923/20000000000000000"
     },
     "l_actual": {
-     "display": "0.5144",
-     "exact": "1928905962132589/3750000000000000"
+     "display": "0.5522",
+     "exact": "3313256913725413/6000000000000000"
     },
     "missing_reason": null,
     "missing_reason_zh": null,
     "range_lower": {
-     "display": "0.5340",
-     "exact": "21361916927663493/40000000000000000"
+     "display": "0.5695",
+     "exact": "11390476899614923/20000000000000000"
     },
     "range_upper": {
-     "display": "0.5340",
-     "exact": "21361916927663493/40000000000000000"
+     "display": "0.5695",
+     "exact": "11390476899614923/20000000000000000"
     },
     "reference_plan": "p3_service_car",
     "repeat_index": 0,
     "v_reference": {
-     "display": "0.5931",
-     "exact": "5930669230602781/10000000000000000"
+     "display": "0.6215",
+     "exact": "6214669230602781/10000000000000000"
     },
     "years": [
+     {
+      "car_access": {
+       "lines": [
+        {
+         "label": "用车权（一辆小型轿车，按月）",
+         "months_covered": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+         ],
+         "months_not_obtained": [],
+         "months_planned": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+         ],
+         "opportunity_id": "sf.service.car_access"
+        }
+       ],
+       "note_zh": "开车通勤要这个月有在用的用车权（按月付费）：用上的月份里，到岗时在可用方式里取往返最少的一种",
+       "status": "bought"
+      },
+      "cash_end": {
+       "amount_minor": 5503453,
+       "currency": "USD",
+       "display": "55,034.53",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "cash_start": {
+       "amount_minor": 300000,
+       "currency": "USD",
+       "display": "3,000.00",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "commute": [
+       {
+        "home_area_id": "sf.area.h.0600113",
+        "home_area_label": "居住片区·Alameda County (West)--Oakland City (Elmhurst/Central/East Oakland) PUMA（PUMA 0600113）",
+        "monthly_paid": {
+         "amount_minor": 7612,
+         "currency": "USD",
+         "display": "76.12",
+         "numeraire_id": "USD_2024_LOCAL"
+        },
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "status": "computed",
+        "status_zh": "按通勤关系表执行：实际住处片区到各个到岗岗位的就业片区，取可用方式里往返最少的一种",
+        "trips": [
+         {
+          "job_label": "秘书与行政助理·工资约在本职业 88 分位",
+          "job_opportunity_id": "sf.job.43-6014.w19.h40.w.0608100",
+          "mode": "drive",
+          "mode_zh": "开车",
+          "onsite_visits": 22,
+          "roundtrip_minutes": 40,
+          "work_area_id": "sf.area.w.0608100",
+          "work_area_label": "就业片区·San Mateo County"
+         }
+        ]
+       }
+      ],
+      "consumption": {
+       "baskets_by_month": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+       ],
+       "months_not_obtained": [],
+       "opportunity_ids": [
+        "sf.service.personal_basket.u1"
+       ]
+      },
+      "devices": [
+       {
+        "label": "顶开洗衣机",
+        "months_in_service": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "sf.durable.washer_top"
+       }
+      ],
+      "food": [
+       "自己做·主食为主（1–12 月）"
+      ],
+      "health_months": [
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy"
+      ],
+      "homes": [
+       {
+        "area_id": "sf.area.h.0600113",
+        "area_label": "居住片区·Alameda County (West)--Oakland City (Elmhurst/Central/East Oakland) PUMA（PUMA 0600113）",
+        "area_typical_roundtrip_minutes": 50,
+        "label": "1 卧整套租住（Alameda County (West)--Oakland City (Elmhurst/Central/East O，低档）",
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "sf.housing.0600113.1.s0001"
+       }
+      ],
+      "household": [
+       {
+        "monthly_hours": [
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10"
+        ],
+        "task": "cleaning"
+       },
+       {
+        "monthly_hours": [
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7"
+        ],
+        "task": "laundry"
+       }
+      ],
+      "housing": [
+       "1 卧整套租住（Alameda County (West)--Oakland City (Elmhurst/Central/East O，低档）（1–12 月）"
+      ],
+      "jobs": [
+       "秘书与行政助理·工资约在本职业 88 分位（1–12 月）"
+      ],
+      "months_lived": 12,
+      "notes": [],
+      "paid_total": {
+       "amount_minor": 1422296,
+       "currency": "USD",
+       "display": "14,222.96",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "services": [],
+      "status": "completed",
+      "support": [
+       {
+        "function": "personal_communication",
+        "label_zh": "个人通信",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "sf.service.mobile_basic"
+        ]
+       },
+       {
+        "function": "home_connectivity",
+        "label_zh": "居家联网",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "sf.service.home_internet_basic"
+        ]
+       },
+       {
+        "function": "household_supplies",
+        "label_zh": "家用日耗品",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "sf.service.household_supplies_basic"
+        ]
+       }
+      ],
+      "tax": {
+       "policy_id": "tax.us2024.ca",
+       "status": "official_2024_rules",
+       "status_zh": "官方 2024 年规则（单身、只有工资收入、标准扣除）"
+      },
+      "training": [],
+      "year_index": 1
+     },
      {
       "car_access": {
        "lines": [],
@@ -113,15 +455,15 @@
        "status": "not_bought"
       },
       "cash_end": {
-       "amount_minor": 3080828,
+       "amount_minor": 11748193,
        "currency": "USD",
-       "display": "30,808.28",
+       "display": "117,481.93",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
-       "amount_minor": 300000,
+       "amount_minor": 5503453,
        "currency": "USD",
-       "display": "3,000.00",
+       "display": "55,034.53",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "commute": [
@@ -152,11 +494,11 @@
         "status_zh": "按通勤关系表执行：实际住处片区到各个到岗岗位的就业片区，取可用方式里往返最少的一种",
         "trips": [
          {
-          "job_label": "综合维修工·工资在本职业 75 分位",
-          "job_opportunity_id": "sf.job.49-9071.p75",
+          "job_label": "服务类销售代表·工资约在本职业 68 分位",
+          "job_opportunity_id": "sf.job.41-3091.w14.h40.w.0600100",
           "mode": "walk_bike",
           "mode_zh": "步行或骑车",
-          "onsite_visits": 22,
+          "onsite_visits": 13,
           "roundtrip_minutes": 30,
           "work_area_id": "sf.area.w.0600100",
           "work_area_label": "就业片区·Alameda County"
@@ -164,6 +506,26 @@
         ]
        }
       ],
+      "consumption": {
+       "baskets_by_month": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+       ],
+       "months_not_obtained": [],
+       "opportunity_ids": [
+        "sf.service.personal_basket.u1"
+       ]
+      },
       "devices": [
        {
         "label": "顶开洗衣机",
@@ -221,7 +583,7 @@
          11,
          12
         ],
-        "opportunity_id": "sf.housing.0600101.2.1-2"
+        "opportunity_id": "sf.housing.0600101.2.s0007"
        }
       ],
       "household": [
@@ -264,25 +626,135 @@
        "2 卧整套租住（Alameda County (North)--Berkeley & Albany Cities，中档）（1–12 月）"
       ],
       "jobs": [
-       "综合维修工·工资在本职业 75 分位（1–12 月）"
+       "服务类销售代表·工资约在本职业 68 分位（1–12 月）"
       ],
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 3302192,
+       "amount_minor": 2836896,
        "currency": "USD",
-       "display": "33,021.92",
+       "display": "28,368.96",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [],
       "status": "completed",
+      "support": [
+       {
+        "function": "personal_communication",
+        "label_zh": "个人通信",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "sf.service.mobile_basic"
+        ]
+       },
+       {
+        "function": "home_connectivity",
+        "label_zh": "居家联网",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "sf.service.home_internet_basic"
+        ]
+       },
+       {
+        "function": "household_supplies",
+        "label_zh": "家用日耗品",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "sf.service.household_supplies_basic"
+        ]
+       }
+      ],
       "tax": {
        "policy_id": "tax.us2024.ca",
        "status": "official_2024_rules",
        "status_zh": "官方 2024 年规则（单身、只有工资收入、标准扣除）"
       },
       "training": [],
-      "year_index": 1
+      "year_index": 2
      },
      {
       "car_access": {
@@ -291,15 +763,15 @@
        "status": "not_bought"
       },
       "cash_end": {
-       "amount_minor": 10013811,
+       "amount_minor": 18792133,
        "currency": "USD",
-       "display": "100,138.11",
+       "display": "187,921.33",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
-       "amount_minor": 3080828,
+       "amount_minor": 11748193,
        "currency": "USD",
-       "display": "30,808.28",
+       "display": "117,481.93",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "commute": [
@@ -330,8 +802,8 @@
         "status_zh": "按通勤关系表执行：实际住处片区到各个到岗岗位的就业片区，取可用方式里往返最少的一种",
         "trips": [
          {
-          "job_label": "服务类销售代表·工资在本职业 75 分位",
-          "job_opportunity_id": "sf.job.41-3091.p75",
+          "job_label": "服务类销售代表·工资约在本职业 68 分位",
+          "job_opportunity_id": "sf.job.41-3091.w14.h40.w.0600100",
           "mode": "walk_bike",
           "mode_zh": "步行或骑车",
           "onsite_visits": 13,
@@ -342,6 +814,26 @@
         ]
        }
       ],
+      "consumption": {
+       "baskets_by_month": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+       ],
+       "months_not_obtained": [],
+       "opportunity_ids": [
+        "sf.service.personal_basket.u1"
+       ]
+      },
       "devices": [
        {
         "label": "顶开洗衣机",
@@ -384,7 +876,7 @@
         "area_id": "sf.area.h.0600111",
         "area_label": "居住片区·Alameda County (Northwest)--Oakland City (Downtown/West Oakland/North Oakland) PUMA（PUMA 0600111）",
         "area_typical_roundtrip_minutes": 60,
-        "label": "3+ 卧整套租住（Alameda County (Northwest)--Oakland City (Downtown/West Oakl，低档）",
+        "label": "开间整套租住（Alameda County (Northwest)--Oakland City (Downtown/West Oakl，低档）",
         "months": [
          1,
          2,
@@ -399,7 +891,7 @@
          11,
          12
         ],
-        "opportunity_id": "sf.housing.0600111.3plus.1-6"
+        "opportunity_id": "sf.housing.0600111.0.s0078"
        }
       ],
       "household": [
@@ -439,58 +931,27 @@
        }
       ],
       "housing": [
-       "3+ 卧整套租住（Alameda County (Northwest)--Oakland City (Downtown/West Oakl，低档）（1–12 月）"
+       "开间整套租住（Alameda County (Northwest)--Oakland City (Downtown/West Oakl，低档）（1–12 月）"
       ],
       "jobs": [
-       "服务类销售代表·工资在本职业 75 分位（1–12 月）"
+       "服务类销售代表·工资约在本职业 68 分位（1–12 月）"
       ],
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 2883936,
+       "amount_minor": 2037696,
        "currency": "USD",
-       "display": "28,839.36",
+       "display": "20,376.96",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [],
       "status": "completed",
-      "tax": {
-       "policy_id": "tax.us2024.ca",
-       "status": "official_2024_rules",
-       "status_zh": "官方 2024 年规则（单身、只有工资收入、标准扣除）"
-      },
-      "training": [],
-      "year_index": 2
-     },
-     {
-      "car_access": {
-       "lines": [],
-       "note_zh": "今年没有用上用车权：这一年不能开车通勤，到岗只用通勤关系表里不需要用车权的方式",
-       "status": "not_bought"
-      },
-      "cash_end": {
-       "amount_minor": 18407194,
-       "currency": "USD",
-       "display": "184,071.94",
-       "numeraire_id": "USD_2024_LOCAL"
-      },
-      "cash_start": {
-       "amount_minor": 10013811,
-       "currency": "USD",
-       "display": "100,138.11",
-       "numeraire_id": "USD_2024_LOCAL"
-      },
-      "commute": [
+      "support": [
        {
-        "home_area_id": "sf.area.h.0600101",
-        "home_area_label": "居住片区·Alameda County (North)--Berkeley & Albany Cities PUMA（PUMA 0600101）",
-        "monthly_paid": {
-         "amount_minor": 0,
-         "currency": "USD",
-         "display": "0.00",
-         "numeraire_id": "USD_2024_LOCAL"
-        },
-        "months": [
+        "function": "personal_communication",
+        "label_zh": "个人通信",
+        "months_not_obtained": [],
+        "months_obtained": [
          1,
          2,
          3,
@@ -504,134 +965,97 @@
          11,
          12
         ],
-        "status": "computed",
-        "status_zh": "按通勤关系表执行：实际住处片区到各个到岗岗位的就业片区，取可用方式里往返最少的一种",
-        "trips": [
-         {
-          "job_label": "服务类销售代表·工资在本职业 75 分位",
-          "job_opportunity_id": "sf.job.41-3091.p75",
-          "mode": "walk_bike",
-          "mode_zh": "步行或骑车",
-          "onsite_visits": 13,
-          "roundtrip_minutes": 30,
-          "work_area_id": "sf.area.w.0600100",
-          "work_area_label": "就业片区·Alameda County"
-         }
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "sf.service.mobile_basic"
+        ]
+       },
+       {
+        "function": "home_connectivity",
+        "label_zh": "居家联网",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "sf.service.home_internet_basic"
+        ]
+       },
+       {
+        "function": "household_supplies",
+        "label_zh": "家用日耗品",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "sf.service.household_supplies_basic"
         ]
        }
       ],
-      "devices": [
-       {
-        "label": "顶开洗衣机",
-        "months_in_service": [
-         1,
-         2,
-         3,
-         4,
-         5,
-         6,
-         7,
-         8,
-         9,
-         10,
-         11,
-         12
-        ],
-        "opportunity_id": "sf.durable.washer_top"
-       }
-      ],
-      "food": [
-       "自己做·主食为主（1–12 月）"
-      ],
-      "health_months": [
-       "healthy",
-       "healthy",
-       "healthy",
-       "healthy",
-       "healthy",
-       "healthy",
-       "healthy",
-       "healthy",
-       "healthy",
-       "healthy",
-       "healthy",
-       "healthy"
-      ],
-      "homes": [
-       {
-        "area_id": "sf.area.h.0600101",
-        "area_label": "居住片区·Alameda County (North)--Berkeley & Albany Cities PUMA（PUMA 0600101）",
-        "area_typical_roundtrip_minutes": 40,
-        "label": "开间整套租住（Alameda County (North)--Berkeley & Albany Cities，低档）",
-        "months": [
-         1,
-         2,
-         3,
-         4,
-         5,
-         6,
-         7,
-         8,
-         9,
-         10,
-         11,
-         12
-        ],
-        "opportunity_id": "sf.housing.0600101.0.1-6"
-       }
-      ],
-      "household": [
-       {
-        "monthly_hours": [
-         "10",
-         "10",
-         "10",
-         "10",
-         "10",
-         "10",
-         "10",
-         "10",
-         "10",
-         "10",
-         "10",
-         "10"
-        ],
-        "task": "cleaning"
-       },
-       {
-        "monthly_hours": [
-         "7",
-         "7",
-         "7",
-         "7",
-         "7",
-         "7",
-         "7",
-         "7",
-         "7",
-         "7",
-         "7",
-         "7"
-        ],
-        "task": "laundry"
-       }
-      ],
-      "housing": [
-       "开间整套租住（Alameda County (North)--Berkeley & Albany Cities，低档）（1–12 月）"
-      ],
-      "jobs": [
-       "服务类销售代表·工资在本职业 75 分位（1–12 月）"
-      ],
-      "months_lived": 12,
-      "notes": [],
-      "paid_total": {
-       "amount_minor": 1423536,
-       "currency": "USD",
-       "display": "14,235.36",
-       "numeraire_id": "USD_2024_LOCAL"
-      },
-      "services": [],
-      "status": "completed",
       "tax": {
        "policy_id": "tax.us2024.ca",
        "status": "official_2024_rules",
@@ -666,28 +1090,28 @@
      }
     ],
     "j": {
-     "display": "0.5297",
-     "exact": "2118688539403359/4000000000000000"
+     "display": "0.5737",
+     "exact": "22947742858803423/40000000000000000"
     },
     "l_actual": {
-     "display": "0.5085",
-     "exact": "15256216163430809/30000000000000000"
+     "display": "0.5583",
+     "exact": "16750186910028961/30000000000000000"
     },
     "missing_reason": null,
     "missing_reason_zh": null,
     "range_lower": {
-     "display": "0.5297",
-     "exact": "2118688539403359/4000000000000000"
+     "display": "0.5737",
+     "exact": "22947742858803423/40000000000000000"
     },
     "range_upper": {
-     "display": "0.5297",
-     "exact": "2118688539403359/4000000000000000"
+     "display": "0.5737",
+     "exact": "22947742858803423/40000000000000000"
     },
     "reference_plan": "p3_service_car",
     "repeat_index": 1,
     "v_reference": {
-     "display": "0.5931",
-     "exact": "5930669230602781/10000000000000000"
+     "display": "0.6198",
+     "exact": "3098777974387231/5000000000000000"
     },
     "years": [
      {
@@ -731,9 +1155,9 @@
        "status": "bought"
       },
       "cash_end": {
-       "amount_minor": 8102951,
+       "amount_minor": 8919985,
        "currency": "USD",
-       "display": "81,029.51",
+       "display": "89,199.85",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
@@ -744,8 +1168,8 @@
       },
       "commute": [
        {
-        "home_area_id": "sf.area.h.0607509",
-        "home_area_label": "居住片区·San Francisco County (Northeast)--Chinatown, North Beach & Russian Hill PUMA（PUMA 0607509）",
+        "home_area_id": "sf.area.h.0600113",
+        "home_area_label": "居住片区·Alameda County (West)--Oakland City (Elmhurst/Central/East Oakland) PUMA（PUMA 0600113）",
         "monthly_paid": {
          "amount_minor": 4498,
          "currency": "USD",
@@ -770,18 +1194,38 @@
         "status_zh": "按通勤关系表执行：实际住处片区到各个到岗岗位的就业片区，取可用方式里往返最少的一种",
         "trips": [
          {
-          "job_label": "服务类销售代表·工资在本职业 75 分位",
-          "job_opportunity_id": "sf.job.41-3091.p75",
+          "job_label": "服务类销售代表·工资约在本职业 76 分位",
+          "job_opportunity_id": "sf.job.41-3091.w16.h40.w.0601300",
           "mode": "drive",
           "mode_zh": "开车",
           "onsite_visits": 13,
           "roundtrip_minutes": 40,
-          "work_area_id": "sf.area.w.0600100",
-          "work_area_label": "就业片区·Alameda County"
+          "work_area_id": "sf.area.w.0601300",
+          "work_area_label": "就业片区·Contra Costa County"
          }
         ]
        }
       ],
+      "consumption": {
+       "baskets_by_month": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+       ],
+       "months_not_obtained": [],
+       "opportunity_ids": [
+        "sf.service.personal_basket.u1"
+       ]
+      },
       "devices": [
        {
         "label": "顶开洗衣机",
@@ -821,10 +1265,10 @@
       ],
       "homes": [
        {
-        "area_id": "sf.area.h.0607509",
-        "area_label": "居住片区·San Francisco County (Northeast)--Chinatown, North Beach & Russian Hill PUMA（PUMA 0607509）",
+        "area_id": "sf.area.h.0600113",
+        "area_label": "居住片区·Alameda County (West)--Oakland City (Elmhurst/Central/East Oakland) PUMA（PUMA 0600113）",
         "area_typical_roundtrip_minutes": 50,
-        "label": "开间整套租住（San Francisco County (Northeast)--Chinatown, North Beach & R，低档）",
+        "label": "1 卧整套租住（Alameda County (West)--Oakland City (Elmhurst/Central/East O，低档）",
         "months": [
          1,
          2,
@@ -839,7 +1283,7 @@
          11,
          12
         ],
-        "opportunity_id": "sf.housing.0607509.0.1-6"
+        "opportunity_id": "sf.housing.0600113.1.s0001"
        }
       ],
       "household": [
@@ -879,21 +1323,131 @@
        }
       ],
       "housing": [
-       "开间整套租住（San Francisco County (Northeast)--Chinatown, North Beach & R，低档）（1–12 月）"
+       "1 卧整套租住（Alameda County (West)--Oakland City (Elmhurst/Central/East O，低档）（1–12 月）"
       ],
       "jobs": [
-       "服务类销售代表·工资在本职业 75 分位（1–12 月）"
+       "服务类销售代表·工资约在本职业 76 分位（1–12 月）"
       ],
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 2013968,
+       "amount_minor": 1384928,
        "currency": "USD",
-       "display": "20,139.68",
+       "display": "13,849.28",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [],
       "status": "completed",
+      "support": [
+       {
+        "function": "personal_communication",
+        "label_zh": "个人通信",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "sf.service.mobile_basic"
+        ]
+       },
+       {
+        "function": "home_connectivity",
+        "label_zh": "居家联网",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "sf.service.home_internet_basic"
+        ]
+       },
+       {
+        "function": "household_supplies",
+        "label_zh": "家用日耗品",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "sf.service.household_supplies_basic"
+        ]
+       }
+      ],
       "tax": {
        "policy_id": "tax.us2024.ca",
        "status": "official_2024_rules",
@@ -904,238 +1458,26 @@
      },
      {
       "car_access": {
-       "lines": [
-        {
-         "label": "用车权（一辆小型轿车，按月）",
-         "months_covered": [
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9,
-          10,
-          11,
-          12
-         ],
-         "months_not_obtained": [],
-         "months_planned": [
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9,
-          10,
-          11,
-          12
-         ],
-         "opportunity_id": "sf.service.car_access"
-        }
-       ],
-       "note_zh": "开车通勤要这个月有在用的用车权（按月付费）：用上的月份里，到岗时在可用方式里取往返最少的一种",
-       "status": "bought"
-      },
-      "cash_end": {
-       "amount_minor": 15982158,
-       "currency": "USD",
-       "display": "159,821.58",
-       "numeraire_id": "USD_2024_LOCAL"
-      },
-      "cash_start": {
-       "amount_minor": 8102951,
-       "currency": "USD",
-       "display": "81,029.51",
-       "numeraire_id": "USD_2024_LOCAL"
-      },
-      "commute": [
-       {
-        "home_area_id": "sf.area.h.0607509",
-        "home_area_label": "居住片区·San Francisco County (Northeast)--Chinatown, North Beach & Russian Hill PUMA（PUMA 0607509）",
-        "monthly_paid": {
-         "amount_minor": 4498,
-         "currency": "USD",
-         "display": "44.98",
-         "numeraire_id": "USD_2024_LOCAL"
-        },
-        "months": [
-         1,
-         2,
-         3,
-         4,
-         5,
-         6,
-         7,
-         8,
-         9,
-         10,
-         11,
-         12
-        ],
-        "status": "computed",
-        "status_zh": "按通勤关系表执行：实际住处片区到各个到岗岗位的就业片区，取可用方式里往返最少的一种",
-        "trips": [
-         {
-          "job_label": "服务类销售代表·工资在本职业 75 分位",
-          "job_opportunity_id": "sf.job.41-3091.p75",
-          "mode": "drive",
-          "mode_zh": "开车",
-          "onsite_visits": 13,
-          "roundtrip_minutes": 40,
-          "work_area_id": "sf.area.w.0600100",
-          "work_area_label": "就业片区·Alameda County"
-         }
-        ]
-       }
-      ],
-      "devices": [
-       {
-        "label": "顶开洗衣机",
-        "months_in_service": [
-         1,
-         2,
-         3,
-         4,
-         5,
-         6,
-         7,
-         8,
-         9,
-         10,
-         11,
-         12
-        ],
-        "opportunity_id": "sf.durable.washer_top"
-       }
-      ],
-      "food": [
-       "自己做·主食为主（1–12 月）"
-      ],
-      "health_months": [
-       "healthy",
-       "healthy",
-       "healthy",
-       "healthy",
-       "healthy",
-       "healthy",
-       "healthy",
-       "healthy",
-       "healthy",
-       "healthy",
-       "healthy",
-       "healthy"
-      ],
-      "homes": [
-       {
-        "area_id": "sf.area.h.0607509",
-        "area_label": "居住片区·San Francisco County (Northeast)--Chinatown, North Beach & Russian Hill PUMA（PUMA 0607509）",
-        "area_typical_roundtrip_minutes": 50,
-        "label": "开间整套租住（San Francisco County (Northeast)--Chinatown, North Beach & R，低档）",
-        "months": [
-         1,
-         2,
-         3,
-         4,
-         5,
-         6,
-         7,
-         8,
-         9,
-         10,
-         11,
-         12
-        ],
-        "opportunity_id": "sf.housing.0607509.0.1-6"
-       }
-      ],
-      "household": [
-       {
-        "monthly_hours": [
-         "10",
-         "10",
-         "10",
-         "10",
-         "10",
-         "10",
-         "10",
-         "10",
-         "10",
-         "10",
-         "10",
-         "10"
-        ],
-        "task": "cleaning"
-       },
-       {
-        "monthly_hours": [
-         "7",
-         "7",
-         "7",
-         "7",
-         "7",
-         "7",
-         "7",
-         "7",
-         "7",
-         "7",
-         "7",
-         "7"
-        ],
-        "task": "laundry"
-       }
-      ],
-      "housing": [
-       "开间整套租住（San Francisco County (Northeast)--Chinatown, North Beach & R，低档）（1–12 月）"
-      ],
-      "jobs": [
-       "服务类销售代表·工资在本职业 75 分位（1–12 月）"
-      ],
-      "months_lived": 12,
-      "notes": [],
-      "paid_total": {
-       "amount_minor": 1937712,
-       "currency": "USD",
-       "display": "19,377.12",
-       "numeraire_id": "USD_2024_LOCAL"
-      },
-      "services": [],
-      "status": "completed",
-      "tax": {
-       "policy_id": "tax.us2024.ca",
-       "status": "official_2024_rules",
-       "status_zh": "官方 2024 年规则（单身、只有工资收入、标准扣除）"
-      },
-      "training": [],
-      "year_index": 2
-     },
-     {
-      "car_access": {
        "lines": [],
        "note_zh": "今年没有用上用车权：这一年不能开车通勤，到岗只用通勤关系表里不需要用车权的方式",
        "status": "not_bought"
       },
       "cash_end": {
-       "amount_minor": 22915141,
+       "amount_minor": 20084310,
        "currency": "USD",
-       "display": "229,151.41",
+       "display": "200,843.10",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
-       "amount_minor": 15982158,
+       "amount_minor": 8919985,
        "currency": "USD",
-       "display": "159,821.58",
+       "display": "89,199.85",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "commute": [
        {
-        "home_area_id": "sf.area.h.0600111",
-        "home_area_label": "居住片区·Alameda County (Northwest)--Oakland City (Downtown/West Oakland/North Oakland) PUMA（PUMA 0600111）",
+        "home_area_id": "sf.area.h.0607512",
+        "home_area_label": "居住片区·San Francisco County (Southwest)--Outer Sunset & Inner Sunset PUMA（PUMA 0607512）",
         "monthly_paid": {
          "amount_minor": 0,
          "currency": "USD",
@@ -1160,18 +1502,38 @@
         "status_zh": "按通勤关系表执行：实际住处片区到各个到岗岗位的就业片区，取可用方式里往返最少的一种",
         "trips": [
          {
-          "job_label": "服务类销售代表·工资在本职业 75 分位",
-          "job_opportunity_id": "sf.job.41-3091.p75",
+          "job_label": "服务类销售代表·工资约在本职业 84 分位",
+          "job_opportunity_id": "sf.job.41-3091.w18.h45.w.0607500",
           "mode": "walk_bike",
           "mode_zh": "步行或骑车",
           "onsite_visits": 13,
-          "roundtrip_minutes": 32,
-          "work_area_id": "sf.area.w.0600100",
-          "work_area_label": "就业片区·Alameda County"
+          "roundtrip_minutes": 30,
+          "work_area_id": "sf.area.w.0607500",
+          "work_area_label": "就业片区·San Francisco County"
          }
         ]
        }
       ],
+      "consumption": {
+       "baskets_by_month": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+       ],
+       "months_not_obtained": [],
+       "opportunity_ids": [
+        "sf.service.personal_basket.u1"
+       ]
+      },
       "devices": [
        {
         "label": "顶开洗衣机",
@@ -1211,10 +1573,10 @@
       ],
       "homes": [
        {
-        "area_id": "sf.area.h.0600111",
-        "area_label": "居住片区·Alameda County (Northwest)--Oakland City (Downtown/West Oakland/North Oakland) PUMA（PUMA 0600111）",
+        "area_id": "sf.area.h.0607512",
+        "area_label": "居住片区·San Francisco County (Southwest)--Outer Sunset & Inner Sunset PUMA（PUMA 0607512）",
         "area_typical_roundtrip_minutes": 60,
-        "label": "3+ 卧整套租住（Alameda County (Northwest)--Oakland City (Downtown/West Oakl，低档）",
+        "label": "2 卧整套租住（San Francisco County (Southwest)--Outer Sunset & Inner Sunse，低档）",
         "months": [
          1,
          2,
@@ -1229,7 +1591,7 @@
          11,
          12
         ],
-        "opportunity_id": "sf.housing.0600111.3plus.1-6"
+        "opportunity_id": "sf.housing.0607512.2.s0004"
        }
       ],
       "household": [
@@ -1269,21 +1631,439 @@
        }
       ],
       "housing": [
-       "3+ 卧整套租住（Alameda County (Northwest)--Oakland City (Downtown/West Oakl，低档）（1–12 月）"
+       "2 卧整套租住（San Francisco County (Southwest)--Outer Sunset & Inner Sunse，低档）（1–12 月）"
       ],
       "jobs": [
-       "服务类销售代表·工资在本职业 75 分位（1–12 月）"
+       "服务类销售代表·工资约在本职业 84 分位（1–12 月）"
       ],
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 2883936,
+       "amount_minor": 1768896,
        "currency": "USD",
-       "display": "28,839.36",
+       "display": "17,688.96",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [],
       "status": "completed",
+      "support": [
+       {
+        "function": "personal_communication",
+        "label_zh": "个人通信",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "sf.service.mobile_basic"
+        ]
+       },
+       {
+        "function": "home_connectivity",
+        "label_zh": "居家联网",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "sf.service.home_internet_basic"
+        ]
+       },
+       {
+        "function": "household_supplies",
+        "label_zh": "家用日耗品",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "sf.service.household_supplies_basic"
+        ]
+       }
+      ],
+      "tax": {
+       "policy_id": "tax.us2024.ca",
+       "status": "official_2024_rules",
+       "status_zh": "官方 2024 年规则（单身、只有工资收入、标准扣除）"
+      },
+      "training": [],
+      "year_index": 2
+     },
+     {
+      "car_access": {
+       "lines": [],
+       "note_zh": "今年没有用上用车权：这一年不能开车通勤，到岗只用通勤关系表里不需要用车权的方式",
+       "status": "not_bought"
+      },
+      "cash_end": {
+       "amount_minor": 31248635,
+       "currency": "USD",
+       "display": "312,486.35",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "cash_start": {
+       "amount_minor": 20084310,
+       "currency": "USD",
+       "display": "200,843.10",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "commute": [
+       {
+        "home_area_id": "sf.area.h.0607512",
+        "home_area_label": "居住片区·San Francisco County (Southwest)--Outer Sunset & Inner Sunset PUMA（PUMA 0607512）",
+        "monthly_paid": {
+         "amount_minor": 0,
+         "currency": "USD",
+         "display": "0.00",
+         "numeraire_id": "USD_2024_LOCAL"
+        },
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "status": "computed",
+        "status_zh": "按通勤关系表执行：实际住处片区到各个到岗岗位的就业片区，取可用方式里往返最少的一种",
+        "trips": [
+         {
+          "job_label": "服务类销售代表·工资约在本职业 84 分位",
+          "job_opportunity_id": "sf.job.41-3091.w18.h45.w.0607500",
+          "mode": "walk_bike",
+          "mode_zh": "步行或骑车",
+          "onsite_visits": 13,
+          "roundtrip_minutes": 30,
+          "work_area_id": "sf.area.w.0607500",
+          "work_area_label": "就业片区·San Francisco County"
+         }
+        ]
+       }
+      ],
+      "consumption": {
+       "baskets_by_month": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+       ],
+       "months_not_obtained": [],
+       "opportunity_ids": [
+        "sf.service.personal_basket.u1"
+       ]
+      },
+      "devices": [
+       {
+        "label": "顶开洗衣机",
+        "months_in_service": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "sf.durable.washer_top"
+       }
+      ],
+      "food": [
+       "自己做·主食为主（1–12 月）"
+      ],
+      "health_months": [
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy",
+       "healthy"
+      ],
+      "homes": [
+       {
+        "area_id": "sf.area.h.0607512",
+        "area_label": "居住片区·San Francisco County (Southwest)--Outer Sunset & Inner Sunset PUMA（PUMA 0607512）",
+        "area_typical_roundtrip_minutes": 60,
+        "label": "2 卧整套租住（San Francisco County (Southwest)--Outer Sunset & Inner Sunse，低档）",
+        "months": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_id": "sf.housing.0607512.2.s0004"
+       }
+      ],
+      "household": [
+       {
+        "monthly_hours": [
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10",
+         "10"
+        ],
+        "task": "cleaning"
+       },
+       {
+        "monthly_hours": [
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7",
+         "7"
+        ],
+        "task": "laundry"
+       }
+      ],
+      "housing": [
+       "2 卧整套租住（San Francisco County (Southwest)--Outer Sunset & Inner Sunse，低档）（1–12 月）"
+      ],
+      "jobs": [
+       "服务类销售代表·工资约在本职业 84 分位（1–12 月）"
+      ],
+      "months_lived": 12,
+      "notes": [],
+      "paid_total": {
+       "amount_minor": 1768896,
+       "currency": "USD",
+       "display": "17,688.96",
+       "numeraire_id": "USD_2024_LOCAL"
+      },
+      "services": [],
+      "status": "completed",
+      "support": [
+       {
+        "function": "personal_communication",
+        "label_zh": "个人通信",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "sf.service.mobile_basic"
+        ]
+       },
+       {
+        "function": "home_connectivity",
+        "label_zh": "居家联网",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "sf.service.home_internet_basic"
+        ]
+       },
+       {
+        "function": "household_supplies",
+        "label_zh": "家用日耗品",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "sf.service.household_supplies_basic"
+        ]
+       }
+      ],
       "tax": {
        "policy_id": "tax.us2024.ca",
        "status": "official_2024_rules",
@@ -1298,7 +2078,7 @@
   "comparisons": [],
   "confirmed": {
    "confirmed_id": "confirmed.draft.u501.r1",
-   "content_fingerprint": "1f15a12ac723478cbc34634331cec274b4bc1464a057e0b54a73190348b64539"
+   "content_fingerprint": "84ff83df0a4acde01db18a80e306e3993cad3b2c4ab148407ecd0c14d1c5a297"
   },
   "data_nature": [
    {
@@ -1314,29 +2094,29 @@
       "label_zh": "通勤关系表的线（住处片区 × 就业片区 × 方式）"
      },
      {
-      "count": 11,
-      "key": "excluded.housing.rent_unknown",
-      "label_zh": "没有放进目录的住房：租金未知"
-     },
-     {
-      "count": 453,
+      "count": 18481,
       "key": "housing_candidates",
-      "label_zh": "住房候选"
+      "label_zh": "完整可执行住房池的候选（目标格 × 经验支持点）"
      },
      {
-      "count": 442,
-      "key": "housing_executable",
-      "label_zh": "可执行的住房候选"
-     },
-     {
-      "count": 62,
+      "count": 340,
       "key": "housing_in_catalog",
-      "label_zh": "放进目录的住房"
+      "label_zh": "放进目录的住房（菜单上出现过的，加最低住房与参考住房）"
      },
      {
-      "count": 9,
+      "count": 10,
       "key": "items_by_domain.activity",
       "label_zh": "生活物品候选：活动"
+     },
+     {
+      "count": 7,
+      "key": "items_by_domain.consumption",
+      "label_zh": "items_by_domain.consumption"
+     },
+     {
+      "count": 3,
+      "key": "items_by_domain.daily_support",
+      "label_zh": "items_by_domain.daily_support"
      },
      {
       "count": 5,
@@ -1344,24 +2124,14 @@
       "label_zh": "生活物品候选：省家务设备"
      },
      {
-      "count": 3,
-      "key": "items_by_domain.enjoyment",
-      "label_zh": "生活物品候选：享受型用品与服务"
-     },
-     {
       "count": 2,
       "key": "items_by_domain.equipment",
       "label_zh": "生活物品候选：爱好装备"
      },
      {
-      "count": 15,
+      "count": 327,
       "key": "items_by_domain.food",
       "label_zh": "生活物品候选：食品方案"
-     },
-     {
-      "count": 120,
-      "key": "items_by_domain.job",
-      "label_zh": "生活物品候选：岗位"
      },
      {
       "count": 3,
@@ -1369,14 +2139,24 @@
       "label_zh": "生活物品候选：服务"
      },
      {
-      "count": 120,
-      "key": "jobs_placed",
-      "label_zh": "放进目录的岗位（已补上就业片区）"
+      "count": 105564,
+      "key": "job_candidates",
+      "label_zh": "完整可执行岗位池的候选（职业 × 年薪支持点 × 工时与就业片区）"
+     },
+     {
+      "count": 351,
+      "key": "jobs_in_catalog",
+      "label_zh": "放进目录的岗位（菜单上出现过的）"
      },
      {
       "count": 12,
       "key": "menus",
       "label_zh": "年度菜单"
+     },
+     {
+      "count": 40,
+      "key": "start_jobs",
+      "label_zh": "各职业的开局岗位"
      }
     ],
     "build_status": "from_pack_report",
@@ -1417,15 +2197,15 @@
      {
       "category": "housing",
       "env_repeats": 2,
-      "items_max": 12,
-      "items_min": 12,
+      "items_max": 60,
+      "items_min": 60,
       "years": 3
      },
      {
       "category": "job",
       "env_repeats": 2,
-      "items_max": 30,
-      "items_min": 30,
+      "items_max": 60,
+      "items_min": 60,
       "years": 3
      }
     ],
@@ -1433,6 +2213,7 @@
      "网球场地连球拍租借（一次）",
      "网球场地（自带球拍，一次）",
      "在家练吉他（一次 1 小时）",
+     "无器械锻炼（一次 1 小时）",
      "参观博物馆（一次）"
     ],
     "named_assumptions": [
@@ -1454,7 +2235,7 @@
       "note_zh": "价格与寿命是登记的类别设定（equipment_category_v1），不是某个商品的报价（geography: CBSA2023 41860 San Francisco-Oakland-Fremont 都会区）"
      },
      {
-      "count": 4,
+      "count": 5,
       "examples": [
        "网球场地连球拍租借（一次）",
        "网球场地（自带球拍，一次）",
@@ -1475,7 +2256,7 @@
         "kind": "derived"
        },
        {
-        "count": 62,
+        "count": 340,
         "kind": "estimated"
        },
        {
@@ -1484,7 +2265,7 @@
        }
       ],
       "category": "housing",
-      "total": 62
+      "total": 340
      },
      {
       "by_kind": [
@@ -1497,7 +2278,29 @@
         "kind": "derived"
        },
        {
-        "count": 15,
+        "count": 391,
+        "kind": "estimated"
+       },
+       {
+        "count": 0,
+        "kind": "synthetic"
+       }
+      ],
+      "category": "job",
+      "total": 391
+     },
+     {
+      "by_kind": [
+       {
+        "count": 0,
+        "kind": "observed"
+       },
+       {
+        "count": 0,
+        "kind": "derived"
+       },
+       {
+        "count": 327,
         "kind": "estimated"
        },
        {
@@ -1506,7 +2309,7 @@
        }
       ],
       "category": "food",
-      "total": 15
+      "total": 327
      },
      {
       "by_kind": [
@@ -1519,7 +2322,7 @@
         "kind": "derived"
        },
        {
-        "count": 6,
+        "count": 13,
         "kind": "estimated"
        },
        {
@@ -1528,7 +2331,7 @@
        }
       ],
       "category": "service",
-      "total": 7
+      "total": 14
      },
      {
       "by_kind": [
@@ -1567,34 +2370,12 @@
         "kind": "estimated"
        },
        {
-        "count": 4,
+        "count": 5,
         "kind": "synthetic"
        }
       ],
       "category": "experience",
-      "total": 9
-     },
-     {
-      "by_kind": [
-       {
-        "count": 0,
-        "kind": "observed"
-       },
-       {
-        "count": 0,
-        "kind": "derived"
-       },
-       {
-        "count": 120,
-        "kind": "estimated"
-       },
-       {
-        "count": 0,
-        "kind": "synthetic"
-       }
-      ],
-      "category": "job",
-      "total": 120
+      "total": 10
      },
      {
       "by_kind": [
@@ -1620,7 +2401,7 @@
      }
     ],
     "pack_status": "real_data_frozen",
-    "summary_zh": "旧金山：目录 221 项机会里，观测 0、派生 2、估计 208、合成设定 11。城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定，不据此排序真实城市",
+    "summary_zh": "旧金山：目录 1090 项机会里，观测 0、派生 2、估计 1076、合成设定 12。城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定，不据此排序真实城市",
     "tax": {
      "absent_zh": [],
      "not_modeled_zh": [
@@ -1655,11 +2436,11 @@
       "kind": "derived"
      },
      {
-      "count": 208,
+      "count": 1076,
       "kind": "estimated"
      },
      {
-      "count": 11,
+      "count": 12,
       "kind": "synthetic"
      }
     ],
@@ -1683,21 +2464,21 @@
   "meta": {
    "conversion_version": "e3a-conversion-v2",
    "data_pack": {
-    "content_fingerprint": "c6566a52be777473d74b146f1cb179ffea3033ae9724ceac62066243696ecd1d",
+    "content_fingerprint": "61851b0ac141128642c5d9aa795d51c15a3515d0f931a3b86829d3a90c5b0f64",
     "note": "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定",
     "pack_id": "pack.e3b.us-v1",
     "status": "real_data_frozen"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.2-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.3-draft",
    "sample": {
     "note": "离线闭环实际执行的结果（mock 规划器，零网络）；旧金山没有公交资料，不用车到不了岗位的年份买用车权开车上班",
     "origin": "offline_run",
     "produced_by": "product.scenarios.closed_loop(e3b_sf_car)",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.2",
-   "vocabulary_version": "e3a-vocabulary-v3"
+   "schema_version": "e3a-product-schema-v3.3",
+   "vocabulary_version": "e3a-vocabulary-v4"
   },
   "not_generated_reason": null,
   "option_coverage": [
@@ -1720,7 +2501,7 @@
    "planner_kind": "mock"
   },
   "preflight": {
-   "preflight_fingerprint": "767d6c2b706016edb0fdd73778b303b9cb28f827095d5584a1a21a6e39117a79",
+   "preflight_fingerprint": "d34011fc51d553cbafa934b13edf41b7a6d17075356067da8c890262fccb593a",
    "preflight_id": "preflight.confirmed.draft.u501.r1"
   },
   "reading_guide_zh": [
@@ -1734,15 +2515,15 @@
    "分数是当前合成模型下、按你确认的陈述偏好计算的结果；小数末位的差异不构成可靠的排序"
   ],
   "real_model_calls": 0,
-  "result_fingerprint": "0b6689d4cb7f5f3b6dd5c45c8bffd15b51b06bd91cbf921b206f97aed9c736fc",
-  "result_id": "result.run-e3a-d5570fc36a3f4c40",
-  "run_id": "run-e3a-d5570fc36a3f4c40",
+  "result_fingerprint": "6e022f4f2a071a3330d1ff4c0dc7bac7ad0bd9d47323a75265ef75196755a439",
+  "result_id": "result.run-e3a-485634acb09a1840",
+  "run_id": "run-e3a-485634acb09a1840",
   "run_stage": "completed",
   "sources_zh": [
    "生活事实：E1 结算记录（钱、岗位、住房、食品、服务月份）与月度资源账（本人家务小时）",
    "片区、通勤、用车权、设备故障与税：E1 月度资源账里每月唯一的通勤记录与结算记录（不含故障抽签）",
    "评价：E1-6A 单分身跨期评价（L / V / J）；汇总：E1-6B 城市报告（C / E / M、均值、模拟缺失范围、事件链、硬要求）",
-   "资料：冻结的真实资料包 pack.e3b.us-v1（c6566a52be77…）：城市资料来自公开来源与登记的模型设定（逐城的来源性质见 data_nature）；生活规则、评分与评价参数是合成探索设定"
+   "资料：冻结的真实资料包 pack.e3b.us-v1（61851b0ac141…）：城市资料来自公开来源与登记的模型设定（逐城的来源性质见 data_nature）；生活规则、评分与评价参数是合成探索设定"
   ]
  }
 }

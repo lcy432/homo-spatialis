@@ -37,11 +37,14 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 #: 设备故障与税，逐城的资料性质，预检查的范围说明——都是新增的可选字段，v3 的字段含义不变；目录仍是 contracts/product/v3。
 #: v3.2（E3C，DECISIONS/0043）：托管服务的消息（会话与次数、草稿保存、确认请求、运行意图、删除回执、统一错误），费用状态的
 #: 分项（已结算、不确定、在途），进度的更新时间与回执的 ``hosted_service``——都是新增，v3.1 的字段含义不变。
-PRODUCT_SCHEMA_VERSION = "e3a-product-schema-v3.2"
+#: v3.3（E3B 映射修正，DECISIONS/0044）：年度事实新增日常支持（``support``）与个人消费篮子（``consumption``）；物质四项里
+#: ``daily_convenience`` 改为“日常支持与便利”、``personal_enjoyment`` 改为抽象消费篮子——含义变了，问卷与词表一起升版本，旧的确认
+#: 画像要重新审阅确认。
+PRODUCT_SCHEMA_VERSION = "e3a-product-schema-v3.3"
 #: 问卷 / 题干语义版本：六维与物质的题干、定义、参考改善范围与控件规则。题干一变，旧确认失效、需要重新确认。
-QUESTIONNAIRE_VERSION = "e3a-questionnaire-v0.2-draft"
+QUESTIONNAIRE_VERSION = "e3a-questionnaire-v0.3-draft"
 #: 词表版本：六维键、物质键、职业受控词表、硬要求选项与属性偏好种类。
-VOCABULARY_VERSION = "e3a-vocabulary-v3"
+VOCABULARY_VERSION = "e3a-vocabulary-v4"
 #: 独立健康问卷版本（暂定文案，未经量表验证）。
 HEALTH_QUESTIONNAIRE_VERSION = "e3a-health-coping-q-v0.1-draft"
 #: 转换版本：原始答案 → 确认画像 → E1 输入的规则（精确分数、规范写法、金额换算、标准开局编译）。
@@ -118,7 +121,7 @@ class SampleLabel(ProductModel):
 class ProductMeta(ProductModel):
     """每条产品消息都带的共同元数据：结构、问卷、词表、健康问卷、转换的版本与资料包身份。"""
 
-    schema_version: Literal["e3a-product-schema-v3.2"]
+    schema_version: Literal["e3a-product-schema-v3.3"]
     questionnaire_version: str = Field(min_length=1, max_length=80)
     vocabulary_version: str = Field(min_length=1, max_length=80)
     health_questionnaire_version: str = Field(min_length=1, max_length=80)
@@ -1288,6 +1291,27 @@ class TaxFact(ProductModel):
     status_zh: str
 
 
+class SupportLine(ProductModel):
+    """一项日常支持功能这一年的事实（E3B 映射修正 §5）：计划买的月份、实际获得的月份（付了钱、服务在用）与没获得的月份，由哪项
+    服务提供。同功能买两份不多算；没获得的月份这项功能就是没有（不会因此出局、生病或少拿工资，也不节省小时）。"""
+
+    function: Literal["personal_communication", "home_connectivity", "household_supplies"]
+    label_zh: str
+    opportunity_ids: tuple[str, ...] = ()
+    months_planned: tuple[int, ...] = ()
+    months_obtained: tuple[int, ...] = ()
+    months_not_obtained: tuple[int, ...] = ()
+
+
+class ConsumptionLine(ProductModel):
+    """个人消费篮子这一年的事实（E3B 映射修正 §6）：每月实际获得的标准篮子数（精确写法，“0” = 没有，“—” = 那个月没有生活），
+    计划买却没获得的月份。它是当月的消费服务流，不是可以转卖的资产。"""
+
+    opportunity_ids: tuple[str, ...]
+    baskets_by_month: tuple[str, ...]
+    months_not_obtained: tuple[int, ...] = ()
+
+
 class YearFacts(ProductModel):
     """一个分身一年的生活事实（取自 E1 的结算记录与资源账；不含模型理由与内部评分对象）。"""
 
@@ -1319,6 +1343,9 @@ class YearFacts(ProductModel):
     car_access: CarAccessFact | None = Field(default=None, exclude_if=lambda v: v is None)
     device_failures: tuple[DeviceFailureFact, ...] = Field(default=(), exclude_if=lambda v: v == ())
     tax: TaxFact | None = Field(default=None, exclude_if=lambda v: v is None)
+    #: 日常支持与个人消费篮子（E3B 映射修正）。没有时不序列化。
+    support: tuple[SupportLine, ...] = Field(default=(), exclude_if=lambda v: v == ())
+    consumption: ConsumptionLine | None = Field(default=None, exclude_if=lambda v: v is None)
 
 
 class RequirementLine(ProductModel):

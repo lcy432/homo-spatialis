@@ -97,21 +97,21 @@
   "meta": {
    "conversion_version": "e3a-conversion-v2",
    "data_pack": {
-    "content_fingerprint": "726c75d7b9d0f879c1f41f17dd23ecabc58e9417af0317e8a140745fc41bbca8",
+    "content_fingerprint": "7face3610cd86d6e2cb7442017661fce2abb3c4a2b1a4e6740ab70ddf23ca9ae",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
     "pack_id": "pack.e3a.synthetic-v2",
     "status": "synthetic_fixture_only"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.2-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.3-draft",
    "sample": {
     "note": "离线闭环实际执行的结果（mock 规划器，零网络）",
     "origin": "offline_run",
     "produced_by": "product.scenarios.closed_loop(normal)",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.2",
-   "vocabulary_version": "e3a-vocabulary-v3"
+   "schema_version": "e3a-product-schema-v3.3",
+   "vocabulary_version": "e3a-vocabulary-v4"
   },
   "not_exhaustive_zh": "这只说明声明范围内调查过的候选资料齐不齐，不保证穷尽整个城市市场；没有记录不等于城市没有。供给状态（有卖 / 确定没有 / 不知道）、资料状态与编译状态分开记：确定没有是已确定的调查结果，但不是可购买的方案。它与实际轨迹能否评分、分身的 C / E / M 是不同的判断：目录缺口不改写已发生轨迹的评分",
   "scope_version": "e3a-convenience-inventory-scope-v1"

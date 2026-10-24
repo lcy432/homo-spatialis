@@ -956,7 +956,8 @@ def life_extension_year_facts(work: Path) -> dict[str, YearFacts]:
                     {
                         "opportunity_id": "k51.service.personal_basket.u1",
                         "quantity": 1,
-                        "months": list(range(1, 13)),
+                        "start_month": 1,
+                        "end_month": 12,
                     },
                 ]
             ),

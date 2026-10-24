@@ -915,6 +915,40 @@
    "title": "ConfirmedRef",
    "type": "object"
   },
+  "ConsumptionLine": {
+   "additionalProperties": false,
+   "description": "个人消费篮子这一年的事实（E3B 映射修正 §6）：每月实际获得的标准篮子数（精确写法，“0” = 没有，“—” = 那个月没有生活），\n计划买却没获得的月份。它是当月的消费服务流，不是可以转卖的资产。",
+   "properties": {
+    "baskets_by_month": {
+     "items": {
+      "type": "string"
+     },
+     "title": "Baskets By Month",
+     "type": "array"
+    },
+    "months_not_obtained": {
+     "default": [],
+     "items": {
+      "type": "integer"
+     },
+     "title": "Months Not Obtained",
+     "type": "array"
+    },
+    "opportunity_ids": {
+     "items": {
+      "type": "string"
+     },
+     "title": "Opportunity Ids",
+     "type": "array"
+    }
+   },
+   "required": [
+    "opportunity_ids",
+    "baskets_by_month"
+   ],
+   "title": "ConsumptionLine",
+   "type": "object"
+  },
   "ConvenienceDevice": {
    "additionalProperties": false,
    "properties": {
@@ -1529,7 +1563,7 @@
      "default": null
     },
     "schema_version": {
-     "const": "e3a-product-schema-v3.2",
+     "const": "e3a-product-schema-v3.3",
      "title": "Schema Version",
      "type": "string"
     },
@@ -1839,6 +1873,63 @@
    "title": "SourceKindCount",
    "type": "object"
   },
+  "SupportLine": {
+   "additionalProperties": false,
+   "description": "一项日常支持功能这一年的事实（E3B 映射修正 §5）：计划买的月份、实际获得的月份（付了钱、服务在用）与没获得的月份，由哪项\n服务提供。同功能买两份不多算；没获得的月份这项功能就是没有（不会因此出局、生病或少拿工资，也不节省小时）。",
+   "properties": {
+    "function": {
+     "enum": [
+      "personal_communication",
+      "home_connectivity",
+      "household_supplies"
+     ],
+     "title": "Function",
+     "type": "string"
+    },
+    "label_zh": {
+     "title": "Label Zh",
+     "type": "string"
+    },
+    "months_not_obtained": {
+     "default": [],
+     "items": {
+      "type": "integer"
+     },
+     "title": "Months Not Obtained",
+     "type": "array"
+    },
+    "months_obtained": {
+     "default": [],
+     "items": {
+      "type": "integer"
+     },
+     "title": "Months Obtained",
+     "type": "array"
+    },
+    "months_planned": {
+     "default": [],
+     "items": {
+      "type": "integer"
+     },
+     "title": "Months Planned",
+     "type": "array"
+    },
+    "opportunity_ids": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Opportunity Ids",
+     "type": "array"
+    }
+   },
+   "required": [
+    "function",
+    "label_zh"
+   ],
+   "title": "SupportLine",
+   "type": "object"
+  },
   "TaxFact": {
    "additionalProperties": false,
    "description": "这一年的工资按哪一份税规则预扣（DECISIONS/0042）：官方 2024 年规则，或合成测试替身。范围与没有建模的部分见资料性质。",
@@ -2034,6 +2125,17 @@
      "title": "Commute",
      "type": "array"
     },
+    "consumption": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/ConsumptionLine"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
     "device_failures": {
      "default": [],
      "items": {
@@ -2142,6 +2244,14 @@
     "status": {
      "title": "Status",
      "type": "string"
+    },
+    "support": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/SupportLine"
+     },
+     "title": "Support",
+     "type": "array"
     },
     "tax": {
      "anyOf": [

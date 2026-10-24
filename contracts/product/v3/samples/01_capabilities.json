@@ -94,12 +94,12 @@
   ],
   "dimensions": [
    {
-    "definition": "住得多宽敞、吃得是否新鲜、日常杂务能不能花钱省掉等实际消费得到的条件（内部还要再分三项）",
+    "definition": "住的房子条件、吃得是否新鲜合口味、通信联网与日用品是否方便、日常杂务是否省心、衣着与个人护理等实际消费得到的条件（内部再分四项）",
     "key": "material",
     "label": "物质生活",
     "reference_improvement": "参考情境：从远处一居室、以米面罐头为主、洗衣打扫全部自己做，改善到每天三顿新鲜食材、每月少做约 18 小时家务（本版合成模型里的一档改善）",
     "support": "supported",
-    "support_note": "居住空间、新鲜食品、日常生活便利三项都能按实际生活评分；物质生活里的其他需求（通信、储物、衣着）本版没有"
+    "support_note": "居住条件、饮食生活、日常支持与便利、个人消费与享受四项都按实际生活评分；储物等其他物质需求本版没有"
    },
    {
     "definition": "城市的公共安全条件",
@@ -335,38 +335,38 @@
     "support": "partially_supported"
    },
    {
-    "definition": "你愿意在多大程度上花钱减少日常杂务（洗衣与打扫）",
+    "definition": "通信联网、家用日耗品是否方便获得，以及日常杂务是否省心。",
     "key": "daily_convenience",
-    "label": "日常生活便利",
-    "note": "只看本人实际少做了多少小时；设备与人工服务是两种实现方式，不分别打分；它是相对重要程度，不是预算或必须购买的指令；不是旧问卷的“洗衣”题",
+    "label": "日常支持与便利",
+    "note": "杂务看本人实际少做了多少小时（设备与人工服务是两种实现方式，不分别打分）；通信、居家联网与家用日耗品看实际买到的月份，同一项买两份不多算；它是相对重要程度，不是预算或必须购买的指令；含义比旧版“日常生活便利”多了通信与日耗品，旧的确认要重新审阅",
     "support": "supported"
    },
    {
-    "definition": "实际在用的居家舒适用品与实际接受的享受型服务（例如舒适的椅子、按摩）",
+    "definition": "在其他生活开支之外，获得衣着、个人护理等个人消费的满足。",
     "key": "personal_enjoyment",
     "label": "个人消费与享受",
-    "note": "按实际提供的功能或服务量评价，不按花了多少钱或买了几件；同一种舒适多买一件不再加分；纯爱好装备（吉他、球拍）只让活动可以开展，放在家里不算享受",
+    "note": "按每月实际获得的标准个人消费篮子（衣着、鞋履与配饰、个人护理）评价，不按花了多少钱；同样的篮子涨价不改变这一项，买得少才会少；是可解释的模型抽象，没有测量真实人的幸福感；不再单独计算按摩或居家舒适用品；含义与旧版不同，旧的确认要重新审阅",
     "support": "partially_supported"
    }
   ],
   "meta": {
    "conversion_version": "e3a-conversion-v2",
    "data_pack": {
-    "content_fingerprint": "726c75d7b9d0f879c1f41f17dd23ecabc58e9417af0317e8a140745fc41bbca8",
+    "content_fingerprint": "7face3610cd86d6e2cb7442017661fce2abb3c4a2b1a4e6740ab70ddf23ca9ae",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
     "pack_id": "pack.e3a.synthetic-v2",
     "status": "synthetic_fixture_only"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.2-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.3-draft",
    "sample": {
     "note": "合成资料包发布的能力清单",
     "origin": "offline_run",
     "produced_by": "product.capabilities.build_capabilities",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.2",
-   "vocabulary_version": "e3a-vocabulary-v3"
+   "schema_version": "e3a-product-schema-v3.3",
+   "vocabulary_version": "e3a-vocabulary-v4"
   },
   "money_bases": [
    {
@@ -389,7 +389,7 @@
    "method": "controlled_vocabulary_alias_match_v1",
    "note": "用自然语言描述你的工作；系统按受控词表的别名给出少量可读候选（名称与职责），由你确认。分类代码只在内部保留，不需要、也不会请你填写；匹配不到时说明原因，不自动改成“普通白领”",
    "users_enter_codes": false,
-   "vocabulary_version": "e3a-vocabulary-v3"
+   "vocabulary_version": "e3a-vocabulary-v4"
   },
   "points": {
    "canonical_form": "约分后的整数（30）或 分子/分母（50/3）；计算与比较都用它，显示四舍五入到 1 位小数，显示值不回流计算",

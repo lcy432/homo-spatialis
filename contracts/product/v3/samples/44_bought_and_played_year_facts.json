@@ -19,9 +19,9 @@
    }
   ],
   "cash_end": {
-   "amount_minor": 1410000,
+   "amount_minor": 1282284,
    "currency": "USD",
-   "display": "14,100.00",
+   "display": "12,822.84",
    "numeraire_id": "USD_2024_LOCAL"
   },
   "cash_start": {
@@ -70,32 +70,31 @@
     ]
    }
   ],
+  "consumption": {
+   "baskets_by_month": [
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1"
+   ],
+   "months_not_obtained": [],
+   "opportunity_ids": [
+    "k51.service.personal_basket.u1"
+   ]
+  },
   "devices": [],
   "food": [
    "基本食品方案（自己做）（1–12 月）"
   ],
   "goods": [
-   {
-    "bought_month": 1,
-    "expired": false,
-    "label": "舒适的阅读椅",
-    "months_in_service": [
-     1,
-     2,
-     3,
-     4,
-     5,
-     6,
-     7,
-     8,
-     9,
-     10,
-     11,
-     12
-    ],
-    "months_left_after_year": 48,
-    "opportunity_id": "k51.durable.comfort_chair"
-   },
    {
     "bought_month": 2,
     "expired": false,
@@ -199,9 +198,9 @@
   "months_lived": 12,
   "notes": [],
   "paid_total": {
-   "amount_minor": 1710000,
+   "amount_minor": 1837716,
    "currency": "USD",
-   "display": "17,100.00",
+   "display": "18,377.16",
    "numeraire_id": "USD_2024_LOCAL"
   },
   "services": [],

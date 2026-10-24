@@ -10,7 +10,7 @@
   ],
   "confirmable": true,
   "draft": {
-   "draft_fingerprint": "2e39f089db108891eebe095d0f1607c3a9676985aad7d10631ff35da92ea1bd6",
+   "draft_fingerprint": "6a6a3a2326c7bc0b5f4a4bd6f88b6d5cb52ec2eb3c3c132f6aa6ab28c492b916",
    "draft_id": "draft.u501.interest_confirmed",
    "revision": 1
   },
@@ -231,7 +231,7 @@
      "display": "30.0",
      "exact": "30",
      "key": "daily_convenience",
-     "label": "日常生活便利",
+     "label": "日常支持与便利",
      "state": "provided",
      "support": "supported",
      "usage": [
@@ -262,21 +262,21 @@
   "meta": {
    "conversion_version": "e3a-conversion-v2",
    "data_pack": {
-    "content_fingerprint": "726c75d7b9d0f879c1f41f17dd23ecabc58e9417af0317e8a140745fc41bbca8",
+    "content_fingerprint": "7face3610cd86d6e2cb7442017661fce2abb3c4a2b1a4e6740ab70ddf23ca9ae",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
     "pack_id": "pack.e3a.synthetic-v2",
     "status": "synthetic_fixture_only"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.2-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.3-draft",
    "sample": {
     "note": "审阅与确认的实际输出（没有运行生活）",
     "origin": "offline_run",
     "produced_by": "product.scenarios.review_only(interest_confirmed)",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.2",
-   "vocabulary_version": "e3a-vocabulary-v3"
+   "schema_version": "e3a-product-schema-v3.3",
+   "vocabulary_version": "e3a-vocabulary-v4"
   },
   "money": {
    "amount_text": "3000",

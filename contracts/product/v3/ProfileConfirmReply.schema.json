@@ -827,7 +827,7 @@
      "default": null
     },
     "schema_version": {
-     "const": "e3a-product-schema-v3.2",
+     "const": "e3a-product-schema-v3.3",
      "title": "Schema Version",
      "type": "string"
     },

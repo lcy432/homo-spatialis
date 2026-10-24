@@ -23,20 +23,20 @@
       "violated": 0
      }
     ],
-    "headline_zh": "合成城 K51：原计划 1 个分身——1 个完成且可评价、0 个生活出局、0 个模拟问题；1 个完成且可评价分身的平均 J 为 0.5892（分母只数完成且可评价的分身，不是原计划的全部分身）",
+    "headline_zh": "合成城 K51：原计划 1 个分身——1 个完成且可评价、0 个生活出局、0 个模拟问题；1 个完成且可评价分身的平均 J 为 0.6204（分母只数完成且可评价的分身，不是原计划的全部分身）",
     "label": "合成城 K51",
     "mean_denominator": 1,
     "mean_j": {
-     "display": "0.5892",
-     "exact": "2356979487179487/4000000000000000"
+     "display": "0.6204",
+     "exact": "24816564102564103/40000000000000000"
     },
     "mean_l": {
-     "display": "0.5699",
-     "exact": "17095999999999999/30000000000000000"
+     "display": "0.6047",
+     "exact": "6046666666666667/10000000000000000"
     },
     "mean_v": {
-     "display": "0.6474",
-     "exact": "6473794871794871/10000000000000000"
+     "display": "0.6677",
+     "exact": "3338282051282051/5000000000000000"
     },
     "missing": 0,
     "missing_reasons": [],
@@ -50,12 +50,12 @@
     "planned": 1,
     "range_denominator": 1,
     "range_lower": {
-     "display": "0.5892",
-     "exact": "2356979487179487/4000000000000000"
+     "display": "0.6204",
+     "exact": "24816564102564103/40000000000000000"
     },
     "range_upper": {
-     "display": "0.5892",
-     "exact": "2356979487179487/4000000000000000"
+     "display": "0.6204",
+     "exact": "24816564102564103/40000000000000000"
     }
    },
    {
@@ -78,20 +78,20 @@
       "violated": 0
      }
     ],
-    "headline_zh": "合成城 M52：原计划 1 个分身——1 个完成且可评价、0 个生活出局、0 个模拟问题；1 个完成且可评价分身的平均 J 为 0.5917（分母只数完成且可评价的分身，不是原计划的全部分身）",
+    "headline_zh": "合成城 M52：原计划 1 个分身——1 个完成且可评价、0 个生活出局、0 个模拟问题；1 个完成且可评价分身的平均 J 为 0.6204（分母只数完成且可评价的分身，不是原计划的全部分身）",
     "label": "合成城 M52",
     "mean_denominator": 1,
     "mean_j": {
-     "display": "0.5917",
-     "exact": "739661858974359/1250000000000000"
+     "display": "0.6204",
+     "exact": "24816256410256411/40000000000000000"
     },
     "mean_l": {
-     "display": "0.5765",
-     "exact": "2161923076923077/3750000000000000"
+     "display": "0.6080",
+     "exact": "18239692307692309/30000000000000000"
     },
     "mean_v": {
-     "display": "0.6374",
-     "exact": "796724358974359/1250000000000000"
+     "display": "0.6577",
+     "exact": "3288282051282051/5000000000000000"
     },
     "missing": 0,
     "missing_reasons": [],
@@ -105,12 +105,12 @@
     "planned": 1,
     "range_denominator": 1,
     "range_lower": {
-     "display": "0.5917",
-     "exact": "739661858974359/1250000000000000"
+     "display": "0.6204",
+     "exact": "24816256410256411/40000000000000000"
     },
     "range_upper": {
-     "display": "0.5917",
-     "exact": "739661858974359/1250000000000000"
+     "display": "0.6204",
+     "exact": "24816256410256411/40000000000000000"
     }
    }
   ],
@@ -139,28 +139,28 @@
      }
     ],
     "j": {
-     "display": "0.5892",
-     "exact": "2356979487179487/4000000000000000"
+     "display": "0.6204",
+     "exact": "24816564102564103/40000000000000000"
     },
     "l_actual": {
-     "display": "0.5699",
-     "exact": "17095999999999999/30000000000000000"
+     "display": "0.6047",
+     "exact": "6046666666666667/10000000000000000"
     },
     "missing_reason": null,
     "missing_reason_zh": null,
     "range_lower": {
-     "display": "0.5892",
-     "exact": "2356979487179487/4000000000000000"
+     "display": "0.6204",
+     "exact": "24816564102564103/40000000000000000"
     },
     "range_upper": {
-     "display": "0.5892",
-     "exact": "2356979487179487/4000000000000000"
+     "display": "0.6204",
+     "exact": "24816564102564103/40000000000000000"
     },
     "reference_plan": "p3_current_service",
     "repeat_index": 0,
     "v_reference": {
-     "display": "0.6474",
-     "exact": "6473794871794871/10000000000000000"
+     "display": "0.6677",
+     "exact": "3338282051282051/5000000000000000"
     },
     "valuation_scope": [
      {
@@ -187,9 +187,9 @@
     "years": [
      {
       "cash_end": {
-       "amount_minor": 720000,
+       "amount_minor": 368232,
        "currency": "USD",
-       "display": "7,200.00",
+       "display": "3,682.32",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
@@ -238,6 +238,26 @@
         ]
        }
       ],
+      "consumption": {
+       "baskets_by_month": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+       ],
+       "months_not_obtained": [],
+       "opportunity_ids": [
+        "k51.service.personal_basket.u1"
+       ]
+      },
       "devices": [
        {
         "label": "便利设备包（洗烘一体机＋扫地机器人）",
@@ -343,13 +363,123 @@
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 2400000,
+       "amount_minor": 2751768,
        "currency": "USD",
-       "display": "24,000.00",
+       "display": "27,517.68",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [],
       "status": "completed",
+      "support": [
+       {
+        "function": "personal_communication",
+        "label_zh": "个人通信",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "k51.service.mobile_basic"
+        ]
+       },
+       {
+        "function": "home_connectivity",
+        "label_zh": "居家联网",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "k51.service.home_internet_basic"
+        ]
+       },
+       {
+        "function": "household_supplies",
+        "label_zh": "家用日耗品",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "k51.service.household_supplies_basic"
+        ]
+       }
+      ],
       "tax": {
        "policy_id": "tax.synth.e1conv",
        "status": "synthetic_test_double",
@@ -362,15 +492,15 @@
      },
      {
       "cash_end": {
-       "amount_minor": 1884000,
+       "amount_minor": 1180464,
        "currency": "USD",
-       "display": "18,840.00",
+       "display": "11,804.64",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
-       "amount_minor": 720000,
+       "amount_minor": 368232,
        "currency": "USD",
-       "display": "7,200.00",
+       "display": "3,682.32",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "commute": [
@@ -413,6 +543,26 @@
         ]
        }
       ],
+      "consumption": {
+       "baskets_by_month": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+       ],
+       "months_not_obtained": [],
+       "opportunity_ids": [
+        "k51.service.personal_basket.u1"
+       ]
+      },
       "devices": [
        {
         "label": "便利设备包（洗烘一体机＋扫地机器人）",
@@ -518,13 +668,123 @@
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 2136000,
+       "amount_minor": 2487768,
        "currency": "USD",
-       "display": "21,360.00",
+       "display": "24,877.68",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [],
       "status": "completed",
+      "support": [
+       {
+        "function": "personal_communication",
+        "label_zh": "个人通信",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "k51.service.mobile_basic"
+        ]
+       },
+       {
+        "function": "home_connectivity",
+        "label_zh": "居家联网",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "k51.service.home_internet_basic"
+        ]
+       },
+       {
+        "function": "household_supplies",
+        "label_zh": "家用日耗品",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "k51.service.household_supplies_basic"
+        ]
+       }
+      ],
       "tax": {
        "policy_id": "tax.synth.e1conv",
        "status": "synthetic_test_double",
@@ -535,15 +795,15 @@
      },
      {
       "cash_end": {
-       "amount_minor": 3015000,
+       "amount_minor": 1959696,
        "currency": "USD",
-       "display": "30,150.00",
+       "display": "19,596.96",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
-       "amount_minor": 1884000,
+       "amount_minor": 1180464,
        "currency": "USD",
-       "display": "18,840.00",
+       "display": "11,804.64",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "commute": [
@@ -586,6 +846,26 @@
         ]
        }
       ],
+      "consumption": {
+       "baskets_by_month": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+       ],
+       "months_not_obtained": [],
+       "opportunity_ids": [
+        "k51.service.personal_basket.u1"
+       ]
+      },
       "devices": [
        {
         "label": "便利设备包（洗烘一体机＋扫地机器人）",
@@ -735,13 +1015,123 @@
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 2169000,
+       "amount_minor": 2520768,
        "currency": "USD",
-       "display": "21,690.00",
+       "display": "25,207.68",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [],
       "status": "completed",
+      "support": [
+       {
+        "function": "personal_communication",
+        "label_zh": "个人通信",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "k51.service.mobile_basic"
+        ]
+       },
+       {
+        "function": "home_connectivity",
+        "label_zh": "居家联网",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "k51.service.home_internet_basic"
+        ]
+       },
+       {
+        "function": "household_supplies",
+        "label_zh": "家用日耗品",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "k51.service.household_supplies_basic"
+        ]
+       }
+      ],
       "tax": {
        "policy_id": "tax.synth.e1conv",
        "status": "synthetic_test_double",
@@ -776,35 +1166,35 @@
      }
     ],
     "j": {
-     "display": "0.5917",
-     "exact": "739661858974359/1250000000000000"
+     "display": "0.6204",
+     "exact": "24816256410256411/40000000000000000"
     },
     "l_actual": {
-     "display": "0.5765",
-     "exact": "2161923076923077/3750000000000000"
+     "display": "0.6080",
+     "exact": "18239692307692309/30000000000000000"
     },
     "missing_reason": null,
     "missing_reason_zh": null,
     "range_lower": {
-     "display": "0.5917",
-     "exact": "739661858974359/1250000000000000"
+     "display": "0.6204",
+     "exact": "24816256410256411/40000000000000000"
     },
     "range_upper": {
-     "display": "0.5917",
-     "exact": "739661858974359/1250000000000000"
+     "display": "0.6204",
+     "exact": "24816256410256411/40000000000000000"
     },
     "reference_plan": "p3_current_service",
     "repeat_index": 0,
     "v_reference": {
-     "display": "0.6374",
-     "exact": "796724358974359/1250000000000000"
+     "display": "0.6577",
+     "exact": "3288282051282051/5000000000000000"
     },
     "years": [
      {
       "cash_end": {
-       "amount_minor": 734400,
+       "amount_minor": 382632,
        "currency": "USD",
-       "display": "7,344.00",
+       "display": "3,826.32",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
@@ -853,6 +1243,26 @@
         ]
        }
       ],
+      "consumption": {
+       "baskets_by_month": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+       ],
+       "months_not_obtained": [],
+       "opportunity_ids": [
+        "m52.service.personal_basket.u1"
+       ]
+      },
       "devices": [],
       "food": [
        "基本食品方案（自己做）（1–12 月）"
@@ -939,9 +1349,9 @@
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 2385600,
+       "amount_minor": 2737368,
        "currency": "USD",
-       "display": "23,856.00",
+       "display": "27,373.68",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [
@@ -980,6 +1390,116 @@
        }
       ],
       "status": "completed",
+      "support": [
+       {
+        "function": "personal_communication",
+        "label_zh": "个人通信",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "m52.service.mobile_basic"
+        ]
+       },
+       {
+        "function": "home_connectivity",
+        "label_zh": "居家联网",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "m52.service.home_internet_basic"
+        ]
+       },
+       {
+        "function": "household_supplies",
+        "label_zh": "家用日耗品",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "m52.service.household_supplies_basic"
+        ]
+       }
+      ],
       "tax": {
        "policy_id": "tax.synth.e1conv",
        "status": "synthetic_test_double",
@@ -992,15 +1512,15 @@
      },
      {
       "cash_end": {
-       "amount_minor": 1768800,
+       "amount_minor": 1065264,
        "currency": "USD",
-       "display": "17,688.00",
+       "display": "10,652.64",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
-       "amount_minor": 734400,
+       "amount_minor": 382632,
        "currency": "USD",
-       "display": "7,344.00",
+       "display": "3,826.32",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "commute": [
@@ -1043,6 +1563,26 @@
         ]
        }
       ],
+      "consumption": {
+       "baskets_by_month": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+       ],
+       "months_not_obtained": [],
+       "opportunity_ids": [
+        "m52.service.personal_basket.u1"
+       ]
+      },
       "devices": [],
       "food": [
        "基本食品方案（自己做）（1–12 月）"
@@ -1129,9 +1669,9 @@
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 2265600,
+       "amount_minor": 2617368,
        "currency": "USD",
-       "display": "22,656.00",
+       "display": "26,173.68",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [
@@ -1170,6 +1710,116 @@
        }
       ],
       "status": "completed",
+      "support": [
+       {
+        "function": "personal_communication",
+        "label_zh": "个人通信",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "m52.service.mobile_basic"
+        ]
+       },
+       {
+        "function": "home_connectivity",
+        "label_zh": "居家联网",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "m52.service.home_internet_basic"
+        ]
+       },
+       {
+        "function": "household_supplies",
+        "label_zh": "家用日耗品",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "m52.service.household_supplies_basic"
+        ]
+       }
+      ],
       "tax": {
        "policy_id": "tax.synth.e1conv",
        "status": "synthetic_test_double",
@@ -1180,15 +1830,15 @@
      },
      {
       "cash_end": {
-       "amount_minor": 2803200,
+       "amount_minor": 1747896,
        "currency": "USD",
-       "display": "28,032.00",
+       "display": "17,478.96",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
-       "amount_minor": 1768800,
+       "amount_minor": 1065264,
        "currency": "USD",
-       "display": "17,688.00",
+       "display": "10,652.64",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "commute": [
@@ -1231,6 +1881,26 @@
         ]
        }
       ],
+      "consumption": {
+       "baskets_by_month": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+       ],
+       "months_not_obtained": [],
+       "opportunity_ids": [
+        "m52.service.personal_basket.u1"
+       ]
+      },
       "devices": [],
       "food": [
        "基本食品方案（自己做）（1–12 月）"
@@ -1317,9 +1987,9 @@
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 2265600,
+       "amount_minor": 2617368,
        "currency": "USD",
-       "display": "22,656.00",
+       "display": "26,173.68",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [
@@ -1358,6 +2028,116 @@
        }
       ],
       "status": "completed",
+      "support": [
+       {
+        "function": "personal_communication",
+        "label_zh": "个人通信",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "m52.service.mobile_basic"
+        ]
+       },
+       {
+        "function": "home_connectivity",
+        "label_zh": "居家联网",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "m52.service.home_internet_basic"
+        ]
+       },
+       {
+        "function": "household_supplies",
+        "label_zh": "家用日耗品",
+        "months_not_obtained": [],
+        "months_obtained": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "months_planned": [
+         1,
+         2,
+         3,
+         4,
+         5,
+         6,
+         7,
+         8,
+         9,
+         10,
+         11,
+         12
+        ],
+        "opportunity_ids": [
+         "m52.service.household_supplies_basic"
+        ]
+       }
+      ],
       "tax": {
        "policy_id": "tax.synth.e1conv",
        "status": "synthetic_test_double",
@@ -1373,21 +2153,21 @@
    {
     "city_a": "US:SYNTH2026:K51",
     "city_b": "US:SYNTH2026:M52",
-    "direction": "b_higher",
-    "note_zh": "在这些缺失范围下 B 城始终更高：方向一致；不是显著性检验，也不是总体因果结论。出局比例 A 0%、B 0%，有效分身数 A 1/1、B 1/1",
+    "direction": "a_higher",
+    "note_zh": "在这些缺失范围下 A 城始终更高：方向一致；不是显著性检验，也不是总体因果结论。出局比例 A 0%、B 0%，有效分身数 A 1/1、B 1/1",
     "range_difference_high": {
-     "display": "-0.0025",
-     "exact": "-49692307692309/20000000000000000"
+     "display": "0.0000",
+     "exact": "76923076923/10000000000000000"
     },
     "range_difference_low": {
-     "display": "-0.0025",
-     "exact": "-49692307692309/20000000000000000"
+     "display": "0.0000",
+     "exact": "76923076923/10000000000000000"
     }
    }
   ],
   "confirmed": {
    "confirmed_id": "confirmed.draft.u512.r1",
-   "content_fingerprint": "2d6497ede0cd78888bd2b39385ed0c134eaad48f14d8c9a53846db06645d48c8"
+   "content_fingerprint": "38e4d217692c32f3df4efa0edc1f627953562f865276646c7666ee6f68086ab4"
   },
   "data_nature": [
    {
@@ -1452,7 +2232,7 @@
     ],
     "named_assumptions": [
      {
-      "count": 22,
+      "count": 25,
       "examples": [
        "一居室（离工作地近）",
        "一居室（离工作地远）",
@@ -1542,12 +2322,12 @@
         "kind": "estimated"
        },
        {
-        "count": 3,
+        "count": 8,
         "kind": "synthetic"
        }
       ],
       "category": "service",
-      "total": 3
+      "total": 8
      },
      {
       "by_kind": [
@@ -1586,12 +2366,12 @@
         "kind": "estimated"
        },
        {
-        "count": 6,
+        "count": 4,
         "kind": "synthetic"
        }
       ],
       "category": "durable",
-      "total": 6
+      "total": 4
      },
      {
       "by_kind": [
@@ -1639,7 +2419,7 @@
      }
     ],
     "pack_status": "synthetic_fixture_only",
-    "summary_zh": "合成城 K51：合成资料包，目录 25 项机会全部是手工合成的模型设定或测试资料，不是真实城市资料",
+    "summary_zh": "合成城 K51：合成资料包，目录 28 项机会全部是手工合成的模型设定或测试资料，不是真实城市资料",
     "tax": {
      "absent_zh": [],
      "not_modeled_zh": [],
@@ -1663,7 +2443,7 @@
       "kind": "estimated"
      },
      {
-      "count": 25,
+      "count": 28,
       "kind": "synthetic"
      }
     ],
@@ -1734,7 +2514,7 @@
     ],
     "named_assumptions": [
      {
-      "count": 22,
+      "count": 25,
       "examples": [
        "一居室（离工作地近）",
        "一居室（离工作地远）",
@@ -1817,12 +2597,12 @@
         "kind": "estimated"
        },
        {
-        "count": 3,
+        "count": 8,
         "kind": "synthetic"
        }
       ],
       "category": "service",
-      "total": 3
+      "total": 8
      },
      {
       "by_kind": [
@@ -1861,12 +2641,12 @@
         "kind": "estimated"
        },
        {
-        "count": 5,
+        "count": 3,
         "kind": "synthetic"
        }
       ],
       "category": "durable",
-      "total": 5
+      "total": 3
      },
      {
       "by_kind": [
@@ -1914,7 +2694,7 @@
      }
     ],
     "pack_status": "synthetic_fixture_only",
-    "summary_zh": "合成城 M52：合成资料包，目录 24 项机会全部是手工合成的模型设定或测试资料，不是真实城市资料",
+    "summary_zh": "合成城 M52：合成资料包，目录 27 项机会全部是手工合成的模型设定或测试资料，不是真实城市资料",
     "tax": {
      "absent_zh": [],
      "not_modeled_zh": [],
@@ -1938,7 +2718,7 @@
       "kind": "estimated"
      },
      {
-      "count": 24,
+      "count": 27,
       "kind": "synthetic"
      }
     ],
@@ -1961,21 +2741,21 @@
   "meta": {
    "conversion_version": "e3a-conversion-v2",
    "data_pack": {
-    "content_fingerprint": "726c75d7b9d0f879c1f41f17dd23ecabc58e9417af0317e8a140745fc41bbca8",
+    "content_fingerprint": "7face3610cd86d6e2cb7442017661fce2abb3c4a2b1a4e6740ab70ddf23ca9ae",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
     "pack_id": "pack.e3a.synthetic-v2",
     "status": "synthetic_fixture_only"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.2-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.3-draft",
    "sample": {
     "note": "受控夹具：mock 在 K51 分身第 3 年第 1 月买下目录里的爱好装备（吉他、网球拍）",
     "origin": "controlled_fixture",
     "produced_by": "product.scenarios.closed_loop(hobby_gear)",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.2",
-   "vocabulary_version": "e3a-vocabulary-v3"
+   "schema_version": "e3a-product-schema-v3.3",
+   "vocabulary_version": "e3a-vocabulary-v4"
   },
   "not_generated_reason": null,
   "option_coverage": [
@@ -2007,7 +2787,7 @@
    "planner_kind": "mock"
   },
   "preflight": {
-   "preflight_fingerprint": "1eae54f5cec208111d45065f45f397238e0643439808f0e21be718b463e87c7c",
+   "preflight_fingerprint": "12a7d615cf591214d7c504935d53322b86c7c0d04fa9e2a8c87dc5e3938930f8",
    "preflight_id": "preflight.confirmed.draft.u512.r1"
   },
   "reading_guide_zh": [
@@ -2021,15 +2801,15 @@
    "分数是当前合成模型下、按你确认的陈述偏好计算的结果；小数末位的差异不构成可靠的排序"
   ],
   "real_model_calls": 0,
-  "result_fingerprint": "02a44a9619260b48375b0cf8aca4268febdc860f90601f698871e9dd0af1f552",
-  "result_id": "result.run-e3a-9a47d771703c4ed7",
-  "run_id": "run-e3a-9a47d771703c4ed7",
+  "result_fingerprint": "b6855a85cefc77c5eabda5ce98dda0d3e127c78fe6a0629e21ae2b3f832acfae",
+  "result_id": "result.run-e3a-6baa9d90c1b43d8d",
+  "run_id": "run-e3a-6baa9d90c1b43d8d",
   "run_stage": "completed",
   "sources_zh": [
    "生活事实：E1 结算记录（钱、岗位、住房、食品、服务月份）与月度资源账（本人家务小时）",
    "片区、通勤、用车权、设备故障与税：E1 月度资源账里每月唯一的通勤记录与结算记录（不含故障抽签）",
    "评价：E1-6A 单分身跨期评价（L / V / J）；汇总：E1-6B 城市报告（C / E / M、均值、模拟缺失范围、事件链、硬要求）",
-   "资料：合成资料包 pack.e3a.synthetic-v2（726c75d7b9d0…）与产品协议的基础样例；全部是合成设定"
+   "资料：合成资料包 pack.e3a.synthetic-v2（7face3610cd8…）与产品协议的基础样例；全部是合成设定"
   ]
  }
 }
