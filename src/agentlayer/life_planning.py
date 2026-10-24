@@ -28,6 +28,8 @@ from typing import Any, Literal, Protocol
 
 from pydantic import ValidationError
 
+from agentlayer.compact_payload import FORMAT as COMPACT_FORMAT
+from agentlayer.compact_payload import decode, encode_payload
 from agentlayer.life_views import (
     AgentObservation,
     ObservationPermission,
@@ -101,7 +103,11 @@ PROMPT_SYSTEM = (
     "4. 工资按请求里的 tax（本城合成税制）预扣；请按税后收入安排支出。行动的字段、单位与月份见 guide。\n"
     "5. 一年只交一份计划，环境按月执行。计划会先在不发生新随机事件的前提下逐月试算：没有通过时什么都不提交，你会收到诊断并可以"
     "修改（次数有限）；通过之后真实执行，之后发生的疾病等事件不能回到年初重选。\n"
-    "6. 只输出一个 JSON 对象，字段见请求里的 output_format；需求摘要与理由写简短的结论，不需要长篇推理；不要输出别的文字或代码。"
+    "6. 只输出一个 JSON 对象，字段见请求里的 output_format；需求摘要与理由写简短的结论，不需要长篇推理；不要输出别的文字或代码。\n"
+    '7. 请求用紧凑表示写同类对象的列表：{"$table": {"columns": [列名], "common": {列名: 每一行都相同的值}, "rows": [[每行的值]]}}'
+    "——每一行是一个对象，字段 = common 加上 columns 与这一行的值逐个对应；列名里的“.”表示嵌套字段（price.amount.amount 就是"
+    'price 里 amount 里的 amount）；{"$absent": 1} 表示这一行没有这个字段（不是 null）；flat 为 false 的表不展开嵌套字段。'
+    "有的表用 sparse_rows 代替 rows：每行是 {列号: 值}，列号是 columns 里的位置（从 0 开始），没写的列号就是这一行没有这个字段。"
 )
 PROMPT_USER_HEAD = "以下是今年的规划请求（JSON）。请按 output_format 只返回一个 JSON 对象。\n"
 
@@ -136,7 +142,7 @@ def prompt_template_fingerprint(template: str = PROMPT_TEMPLATE_VERSION) -> str:
             "system": PROMPT_SYSTEM,
             "user_head": PROMPT_USER_HEAD,
             "output_format": OUTPUT_FORMAT,
-            "json_rendering": "compact",
+            "json_rendering": f"{COMPACT_FORMAT}+sorted_keys",
             "guide_version": guide_version_of(template),
             "tax_version": VISIBLE_TAX_VERSION,
         },
@@ -301,6 +307,35 @@ def visible_tax_rules(policy: SyntheticTaxPolicy | RealTaxPolicy) -> VisibleTaxR
 
 def _ex(label: str, fragment: dict[str, Any]) -> VisibleGuideExample:
     return VisibleGuideExample(label=label, fragment=fragment)
+
+
+def daily_support_guide_section() -> VisibleGuideSection:
+    """说明书 e3b-product-action-guide-v3 多出的一节（E3B 映射修正 §5、§6）：日常支持服务与个人消费篮子怎样起作用。只讲机制与
+    写法，不说哪种更好，也不给评分参数。"""
+    return VisibleGuideSection(
+        topic="日常支持与个人消费（可选）",
+        rules=(
+            "用户陈述里的 daily_convenience 是“通信联网、家用日耗品是否方便获得，以及日常杂务是否省心”；personal_enjoyment 是"
+            "“在其他生活开支之外，获得衣着、个人护理等个人消费的满足”。点数是用户的取舍，不是必须购买的指令",
+            "functions 写着 personal_communication（个人通信）、home_connectivity（居家联网）、household_supplies（家用日耗品）的"
+            "按月服务：只在实际付了钱的月份提供这项功能；同一功能买两份不多算；没买的月份这项功能就没有，但不会因此出局、生病或少"
+            "拿工资，也不会节省任何小时",
+            "个人消费篮子按月买（写 start_month 与 end_month），enjoyment.units_per_month 是每月几个标准篮子（衣着、鞋履、个人护理"
+            "的固定构成）；月费 = 份数 × 本城标准篮子价格；它是当月的消费，不占时间、不算活动参与、不留下可以转卖的东西",
+            "价格是怎么来的写在 attributes.cost_basis：预算代理、大区参照与按价格系数的估计都不是本地观测的单价",
+        ),
+        examples=(
+            _ex(
+                "按月购买一项支持服务（写法示例，不是建议）",
+                {
+                    "opportunity_id": "example.support",
+                    "quantity": 1,
+                    "start_month": 1,
+                    "end_month": 12,
+                },
+            ),
+        ),
+    )
 
 
 def household_guide_section(protocol: LifeProtocol) -> VisibleGuideSection:
@@ -572,6 +607,7 @@ def action_guide(
     )
     if protocol.resource_rules.household_tasks:
         sections.append(household_guide_section(protocol))
+    sections.append(daily_support_guide_section())
     sections.append(
         VisibleGuideSection(
             topic="四件不同的事",
@@ -719,9 +755,23 @@ def payload_fingerprint(payload: dict[str, Any]) -> str:
 def render_prompt(payload: dict[str, Any]) -> tuple[str, str]:
     """把请求渲染成（系统提示，用户提示）。用户提示里嵌的就是 ``payload`` 本身——mock 读的结构与真实模型读到的文字是同一份。
 
-    E1-7B：紧凑 JSON（不缩进、分隔符后不加空格）。只省空白，不删字段、不改取值，所以从提示文字可以原样还原 ``payload``。"""
-    body = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
+    E1-7B：紧凑 JSON（不缩进、分隔符后不加空格）；E3B 映射修正：同类对象的列表写成共同字段 + 行表（``compact_payload``）。
+    只省重复与空白，不删字段、不改取值，从提示文字可以原样还原 ``payload``（编码时当场核对）。"""
+    body = json.dumps(
+        encode_payload(payload), ensure_ascii=False, separators=(",", ":"), sort_keys=True
+    )
     return PROMPT_SYSTEM, PROMPT_USER_HEAD + "```json\n" + body + "\n```"
+
+
+def payload_from_user_prompt(user: str) -> dict[str, Any]:
+    """从渲染好的用户提示取回请求载荷（去掉固定开头与代码块标记，解开紧凑表示）。格式不对就报错。"""
+    head = PROMPT_USER_HEAD + "```json\n"
+    if not (user.startswith(head) and user.endswith("\n```")):
+        raise LifeContractError("用户提示不是“固定开头 + JSON 代码块”的格式")
+    payload = decode(json.loads(user[len(head) : -len("\n```")]))
+    if not isinstance(payload, dict):
+        raise LifeContractError("用户提示里的 JSON 不是一个对象")
+    return payload
 
 
 def _strings(obj: Any) -> list[str]:

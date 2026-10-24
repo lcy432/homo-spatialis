@@ -29,7 +29,9 @@ from product.realdata.life_items import (
     activity_dominance,
     block_evidence,
     chicago_programs,
+    consumption_basket,
     contexts,
+    daily_support,
     device_failure,
     devices,
     equipment,
@@ -99,6 +101,8 @@ def compile_city(
     items = [
         *food_plans(ctx, baskets, report),
         *services(ctx, report),
+        *daily_support(ctx, report),
+        *consumption_basket(ctx, report),
         *devices(ctx, report),
         *equipment(ctx),
         *template_activities(ctx, report),

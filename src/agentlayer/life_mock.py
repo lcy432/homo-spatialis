@@ -62,6 +62,11 @@ PRODUCT_MOCK_IDENTITY = PlannerIdentity(
 )
 #: 修订时删项目的先后（数小的先删）：额外的第二份工作 0、有参与时间的服务 1、体验 2、课程 3、耐用品 4。
 _PRIORITY: dict[str, int] = {"experience": 2, "training": 3, "durable": 4}
+#: 日常支持的三项公开功能（E3B 映射修正 §5）：机会的 ``functions`` 里写着，mock 只按这些公开功能名挑
+_SUPPORT = ("personal_communication", "home_connectivity", "household_supplies")
+#: 个人消费篮子的公开享受功能与 mock 想要的标准篮子数（从大到小试，买得起就停）
+_BASKET = "personal_consumption"
+_BASKET_TARGETS = (1.0, 0.5, 0.25)
 MALFORMED_TEXT = "（受控的格式错误：这不是 JSON）今年我想多赚点钱，具体怎么安排还没想好。"
 
 
@@ -533,7 +538,77 @@ class ProductMockPlanner:
     def _extras(
         self, v: _View, monthly_net: float, spend: float, notes: list[str]
     ) -> list[dict[str, Any]]:
-        """M5 便利：住房、食品、岗位与课程之外的物质安排。"""
+        """M5 住房、食品、岗位与课程之外的物质安排：日常支持（M5s）、个人消费篮子（M5e）、家务替代（M5c）。每一步按推算的年末
+        现金不低于最低生活 3 个月的花费来决定买不买，后一步用前一步扣掉月费之后的结余。"""
+        out, cost = self._support(v, monthly_net, spend, notes)
+        basket, basket_cost = self._basket(v, monthly_net - cost, spend, notes)
+        out += basket
+        return out + self._chores(v, monthly_net - cost - basket_cost, spend, notes)
+
+    def _support(
+        self, v: _View, monthly_net: float, spend: float, notes: list[str]
+    ) -> tuple[list[dict[str, Any]], float]:
+        """M5s 日常支持：用户的日常便利点数大于 0 时，三项公开支持功能各按月买最便宜的一项（同功能只买一份）。"""
+        if v.material_points.get("daily_convenience", 0) <= 0:
+            return [], 0.0
+        floor = 3 * v.min_living()
+        out: list[dict[str, Any]] = []
+        cost = 0.0
+        for f in _SUPPORT:
+            options = sorted(
+                (
+                    o
+                    for o in v.opps.values()
+                    if f in (o.get("functions") or ()) and _available(o) and _monthly(o) is not None
+                ),
+                key=lambda o: (_monthly(o), o["opportunity_id"]),
+            )
+            if not options:
+                continue
+            o = options[0]
+            price = _monthly(o) or 0.0
+            end = v.cash + 12 * (monthly_net - cost - price) - spend
+            if end >= floor:
+                out.append(_period(o["opportunity_id"], 1, 12))
+                cost += price
+                notes.append(f"M5s 日常支持：按月买 {o['opportunity_id']}（每月 {price:,.0f}）")
+            else:
+                notes.append(
+                    f"M5s 日常支持：{o['opportunity_id']} 每月 {price:,.0f}，推算年末现金约 {end:,.0f}，今年不买"
+                )
+        return out, cost
+
+    def _basket(
+        self, v: _View, monthly_net: float, spend: float, notes: list[str]
+    ) -> tuple[list[dict[str, Any]], float]:
+        """M5e 个人消费：用户的个人享受点数大于 0 时，按月买一个消费篮子档位——每月 1 个标准篮子，付不起就半个、四分之一个。"""
+        if v.material_points.get("personal_enjoyment", 0) <= 0:
+            return [], 0.0
+        floor = 3 * v.min_living()
+        tiers: dict[float, dict[str, Any]] = {}
+        for o in v.opps.values():
+            for e in o.get("enjoyment") or ():
+                if e.get("function") == _BASKET and _available(o) and _monthly(o) is not None:
+                    tiers[float(e.get("units_per_month") or 0)] = o
+        for u in _BASKET_TARGETS:
+            o = tiers.get(u)
+            if o is None:
+                continue
+            price = _monthly(o) or 0.0
+            end = v.cash + 12 * (monthly_net - price) - spend
+            if end >= floor:
+                notes.append(
+                    f"M5e 个人消费：按月买 {o['opportunity_id']}（每月 {u:g} 个标准篮子，{price:,.0f}）"
+                )
+                return [_period(o["opportunity_id"], 1, 12)], price
+        if tiers:
+            notes.append("M5e 个人消费：消费篮子今年都付不起（按推算的年末现金），不买")
+        return [], 0.0
+
+    def _chores(
+        self, v: _View, monthly_net: float, spend: float, notes: list[str]
+    ) -> list[dict[str, Any]]:
+        """M5c 家务替代：用户的日常便利点数大于 0 时，买每小时减负最便宜、付得起的一项设备或服务。"""
         if v.material_points.get("daily_convenience", 0) <= 0:
             return []
         substitutes = {

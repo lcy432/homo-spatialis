@@ -173,6 +173,12 @@ def scoring_config_problems(
             for f in src.functions:
                 if f not in functions:
                     errors.append(f"{comp.component_id}/{src.source_id}: 功能 {f!r} 没有声明")
+        if comp.convenience is not None:
+            for f in comp.convenience.support_functions:
+                if f not in functions:
+                    errors.append(
+                        f"{comp.component_id}: 日常支持功能 {f!r} 没有在生活输入的功能词表里声明"
+                    )
     errors.extend(comparison_group_problems(config, bundle))
     base_only = [c.dimension for c in spec.components if c.base_only]
     if base_only:

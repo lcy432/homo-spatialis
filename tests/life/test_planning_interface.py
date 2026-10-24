@@ -118,8 +118,9 @@ def test_the_planner_gets_plain_json_and_the_prompt_embeds_exactly_it(env):
     payload = request_payload(_request(env))
     assert _plain(payload)  # 没有任何对象：规划器拿不到内部运行 bundle 或评分配置
     system, user = render_prompt(payload)
-    body = user.split("```json\n", 1)[1].rsplit("\n```", 1)[0]
-    assert json.loads(body) == payload
+    from agentlayer.life_planning import payload_from_user_prompt
+
+    assert payload_from_user_prompt(user) == payload  # 紧凑表示可以原样还原
     assert "不是给你的指令" in system and "不会让存款增加" in system
     text = json.dumps(payload, ensure_ascii=False)
     for hidden in (

@@ -7,15 +7,20 @@
  "intake_build_id": "35667f4101a71c0e5ea6c1aaa8e5f45cd83c825d6b1393bde1104d3d571a96b7",
  "raw_sha256": {
   "bls_atus": "4fe7b39ff435416aee80ac1c23a95a7067e9c6c23dd5c99d9631dda9b567ba6c",
+  "bls_ce_national_2024_detail": "6efdb40841f80cbda56b59039a5a0b1dafceccaaebb686443fb233246fb553ad",
+  "bls_ce_national_2024_size": "6378f4aa2e2f54bfe758c7604aeb366e8cc38d0d626a583bd77ba6aee87d28f9",
   "bls_cpi_u": "f3c22c8592d9134fa5ab305fa2df6e37dfd2388f10168985fdbc84082deb4ff0",
+  "bls_cpi_u_education_communication": "caf82762c60f6972767406ed67238ee8b2ed1b26f5525904553d777a0dda69ad",
   "chicago_park_activities": "7cee342c3b4e904d1a03c642a3695dc9ec704d302c1d970e6f6cb5fed0b3d108",
+  "fcc_urs_2024_broadband": "2081022e4ee75f8663d3894a321d7253039727597dcb1767b9d298d893cc372e",
+  "fcc_urs_2024_methodology": "a5f6eda0ab4b9e19ef74a2f9f67be54abe958586b5e4c598565cee88e4a23d46",
   "usda_fdc_sr_legacy": "b80817294b8850530aaedf2e515c02593b1824f763a0ff356e5c2081643e6fd0"
  },
  "identities": {
-  "items_config": "012f9621d945bc3e95d51cf9611d8a724a2b9ae6290ba1d76f381b80426dcde4",
+  "items_config": "b92dc9e9e3e6aa5cccd54d4021baff673e8d8c70464e0afba1698b954e68ae90",
   "occupations_config": "f2ce1008acbef70db9e60afe0c09ef2bfd2614f5f8094bc9ce83133d82b4c627",
   "baskets": "8714cbfd8ebb7dfbd39fb6f9bd9bcc2489d4841fe6caefbbdb88bbac1388d19f",
-  "slice": "d8a4f8150f99c2dfbe923e9dde7ee4f59279fe651e41a5284b0ee7541878249e"
+  "slice": "c35cfdc56b5e261130e01dc4b4235a8b7a38fc0739266010355c0b5c65d50ddf"
  },
  "numeraire": "USD_2024_LOCAL",
  "vocabulary": {
@@ -43,31 +48,42 @@
    "racket_playable"
   ],
   "enjoyment_functions": [
-   "personal_care"
+   "personal_consumption"
   ],
   "household_tasks": [
    "laundry",
    "cleaning"
   ],
+  "functions": [
+   "personal_communication",
+   "home_connectivity",
+   "household_supplies"
+  ],
   "attribute_keys": [
    "activity_type",
    "age_rule",
+   "allocated_share_estimate",
    "away_meal_delivered_cost",
    "away_meal_dine_cost",
    "away_mode",
    "basket",
    "basket_energy_share",
+   "ce_annual_one_person",
    "chicago_category",
    "cip",
+   "cost_basis",
    "cuisine_supply_evidence",
    "date_notes",
    "days",
+   "download_mbps",
    "employer",
    "employment",
    "end_date",
    "entry_education",
    "equipment_requirements",
    "facility",
+   "fcc_offers",
+   "fcc_weighted_median_2023",
    "home_meals_per_week",
    "hourly_wage_median",
    "hours_area_level",
@@ -75,18 +91,25 @@
    "institution",
    "model_plan",
    "months_to_complete",
+   "observed_unit_price",
    "on_the_job_training",
    "osm_restaurants_with_cuisine",
    "price_basis",
+   "price_geography",
    "registration_fee",
    "related_experience",
    "related_socs",
    "season",
    "sessions_per_registration",
    "soc_title",
+   "standard_basket_price",
+   "standard_baskets_per_month",
    "start_calendar",
    "start_date",
+   "taxes",
    "taxes_fees_tips",
+   "upload_min_mbps",
+   "usage_allowance",
    "venue_evidence",
    "wage_soc"
   ]
@@ -594,6 +617,46 @@
    "config": "life-items-us-v1"
   },
   {
+   "id": "daily_support_cost_order_v1",
+   "nature": "rule",
+   "statement_zh": "日常支持的费用顺序：同规格直接报价 → FCC 同规格大区参照（家庭宽带，大区至少 30 条同规格报价）→ FCC 全国参照 → CE 一人消费单位预算代理；现在六城都没有直接报价",
+   "config": "life-items-us-v1"
+  },
+  {
+   "id": "ce_one_person_budget_proxy_v1",
+   "nature": "assumption",
+   "statement_zh": "手机通信月费 = CE 2024 一人消费单位手机服务年均支出 ÷ 12（共同预算代理，各城相同）；不是单人套餐报价，不能把全部家庭的通信支出叫单人套餐价",
+   "basis_zh": "没有可用的单人套餐直接报价；CE 是全国一人消费单位的平均支出，含不同套餐与使用量",
+   "config": "life-items-us-v1"
+  },
+  {
+   "id": "fcc_broadband_basic_tier_v1",
+   "nature": "assumption",
+   "statement_zh": "家庭宽带基本档 = FCC 2024 城市费率调查里下行 100–199 Mbps、上行至少 20 Mbps、不限流量的报价；参照价 = 本城所在人口普查大区这些报价按调查权重的中位数总月费（月费 + 强制收费 + 附加费，不含税），按 CPI 互联网服务（CUUR0000SEEE03）2024 ÷ 2023 年平均换到 2024 年",
+   "basis_zh": "100/20 是 FCC 2024 年的宽带速度定义；只取这一档是因为更快的套餐不另加分（所有达到 100/20 的套餐的中位数高约一半）；URS 2024 是 2023 年调查的价格（抽样框为 2022 年 12 月的资料，2023 年 12 月发布），具体调查月份没有核到，按年平均换算",
+   "config": "life-items-us-v1"
+  },
+  {
+   "id": "household_supplies_ce_v1",
+   "nature": "assumption",
+   "statement_zh": "家用日耗品月费 = CE 2024 一人消费单位（洗衣清洁用品 + 其他家用品里纸品与杂项的分配额）÷ 12 × 本城商品类 RPP ÷ 100；草坪园艺用品与邮资文具不算",
+   "basis_zh": "一人表的“其他家用品”没有细项：按全国详细表的子项占比拆分（分配估计）",
+   "config": "life-items-us-v1"
+  },
+  {
+   "id": "basic_device_access_v1",
+   "nature": "assumption",
+   "statement_zh": "基本终端（能用的手机与电脑）是所有分身一致的使用条件：不买、不计财富、不计享受、不进期末资产；本轮只模拟服务接入与日耗品",
+   "config": "life-items-us-v1"
+  },
+  {
+   "id": "consumption_basket_ce_v1",
+   "nature": "assumption",
+   "statement_zh": "标准个人消费篮子 = CE 2024 一人消费单位白名单条目（16 岁以上男女衣着、成人鞋履、首饰手表、衣着修补租赁存放、个人护理产品与服务）的月均构成 e_j；P_c = Σ e_j × 价格系数（商品 → 商品类 RPP，服务 → 其他服务 RPP）；档位 u ∈ {0.25, 0.5, 1, 1.5, 2, 3, 4}，费用 u × P_c",
+   "basis_zh": "固定构成的粗粒度成本模型，不是从城市居民支出识别出的零售价；一人表缺细分类时按全国详细表的子项占比拆分（分配估计）；各城 CE 均值只做外部对照，不改个人偏好或制造城市享受优势",
+   "config": "life-items-us-v1"
+  },
+  {
    "id": "home_style_cuisine_v1",
    "nature": "assumption",
    "statement_zh": "自己做的饭菜系按“家常”（home_style）计",
@@ -759,10 +822,10 @@
  "cities": {
   "35620": {
    "key": "nyc",
-   "content_identity": "e07c0363df9263bc62b69112c87376446a2c0179f18559d324c998ca94478b52",
+   "content_identity": "8153155bf228bb94f4d818e764000f56199b74556942ee73d72d4773fa75623b",
    "counts": {
     "raw_inputs": {
-     "intake_records_referenced": 34,
+     "intake_records_referenced": 33,
      "food_item_prices": 52,
      "osm_restaurants": 7936,
      "osm_venues": 4278,
@@ -773,15 +836,16 @@
     },
     "generated": {
      "activity": 11,
+     "consumption": 7,
+     "daily_support": 3,
      "device": 5,
-     "enjoyment": 3,
      "equipment": 2,
      "food": 327,
      "service": 3,
      "training": 3
     },
     "by_status": {
-     "executable": 353,
+     "executable": 360,
      "needs_area": 0,
      "needs_e1_extension": 0,
      "data_unknown": 1
@@ -791,11 +855,14 @@
       "data_unknown": 1,
       "executable": 10
      },
+     "consumption": {
+      "executable": 7
+     },
+     "daily_support": {
+      "executable": 3
+     },
      "device": {
       "executable": 5
-     },
-     "enjoyment": {
-      "executable": 3
      },
      "equipment": {
       "executable": 2
@@ -818,10 +885,10 @@
   },
   "31080": {
    "key": "la",
-   "content_identity": "e0f7dacab9912eb1f1d9df2b46ec9dd2ce71df1123e76316faeeba0f81ee9675",
+   "content_identity": "ce90639d8e1701f4e0eba99cd82e8f9b6f5a6804afeafd42e7d4fc407ac364bb",
    "counts": {
     "raw_inputs": {
-     "intake_records_referenced": 31,
+     "intake_records_referenced": 30,
      "food_item_prices": 52,
      "osm_restaurants": 2904,
      "osm_venues": 9750,
@@ -832,14 +899,15 @@
     },
     "generated": {
      "activity": 11,
+     "consumption": 7,
+     "daily_support": 3,
      "device": 5,
-     "enjoyment": 3,
      "equipment": 2,
      "food": 327,
      "service": 3
     },
     "by_status": {
-     "executable": 350,
+     "executable": 357,
      "needs_area": 0,
      "needs_e1_extension": 0,
      "data_unknown": 1
@@ -849,11 +917,14 @@
       "data_unknown": 1,
       "executable": 10
      },
+     "consumption": {
+      "executable": 7
+     },
+     "daily_support": {
+      "executable": 3
+     },
      "device": {
       "executable": 5
-     },
-     "enjoyment": {
-      "executable": 3
      },
      "equipment": {
       "executable": 2
@@ -873,10 +944,10 @@
   },
   "41860": {
    "key": "sf",
-   "content_identity": "bcb8b11b5bff70fd85b9d34d045d990e3f65d00c71968f6d8d659798e8590ff8",
+   "content_identity": "ac82fd7c09328366c59075da85465357758bea41100438cec7a89a30d90cfcb3",
    "counts": {
     "raw_inputs": {
-     "intake_records_referenced": 30,
+     "intake_records_referenced": 29,
      "food_item_prices": 52,
      "osm_restaurants": 1924,
      "osm_venues": 739,
@@ -887,14 +958,15 @@
     },
     "generated": {
      "activity": 10,
+     "consumption": 7,
+     "daily_support": 3,
      "device": 5,
-     "enjoyment": 3,
      "equipment": 2,
      "food": 327,
      "service": 3
     },
     "by_status": {
-     "executable": 349,
+     "executable": 356,
      "needs_area": 0,
      "needs_e1_extension": 0,
      "data_unknown": 1
@@ -904,11 +976,14 @@
       "data_unknown": 1,
       "executable": 9
      },
+     "consumption": {
+      "executable": 7
+     },
+     "daily_support": {
+      "executable": 3
+     },
      "device": {
       "executable": 5
-     },
-     "enjoyment": {
-      "executable": 3
      },
      "equipment": {
       "executable": 2
@@ -929,10 +1004,10 @@
   },
   "16980": {
    "key": "chi",
-   "content_identity": "12964491af6d088d0ef1bb1b847b183157fbff1038b5a264e39ab5e30e08f985",
+   "content_identity": "3272c578e3547a3327da576e04cce2e9244aac8b95471a2f89276a9729ec629f",
    "counts": {
     "raw_inputs": {
-     "intake_records_referenced": 1729,
+     "intake_records_referenced": 1728,
      "food_item_prices": 52,
      "osm_restaurants": 2405,
      "osm_venues": 1235,
@@ -943,14 +1018,15 @@
     },
     "generated": {
      "activity": 1709,
+     "consumption": 7,
+     "daily_support": 3,
      "device": 5,
-     "enjoyment": 3,
      "equipment": 2,
      "food": 327,
      "service": 3
     },
     "by_status": {
-     "executable": 350,
+     "executable": 357,
      "needs_area": 0,
      "needs_e1_extension": 1698,
      "data_unknown": 1
@@ -961,11 +1037,14 @@
       "executable": 10,
       "needs_e1_extension": 1698
      },
+     "consumption": {
+      "executable": 7
+     },
+     "daily_support": {
+      "executable": 3
+     },
      "device": {
       "executable": 5
-     },
-     "enjoyment": {
-      "executable": 3
      },
      "equipment": {
       "executable": 2
@@ -986,10 +1065,10 @@
   },
   "26420": {
    "key": "hou",
-   "content_identity": "6b3c6a96f9e6565bcb0820418230af5a4e664370d465f0ade2ac8b8e4390a06b",
+   "content_identity": "e1dee0155e89b20d6f6009f87cf685d28ad63617ab1730fb1d102be78fbce035",
    "counts": {
     "raw_inputs": {
-     "intake_records_referenced": 34,
+     "intake_records_referenced": 33,
      "food_item_prices": 52,
      "osm_restaurants": 1543,
      "osm_venues": 3150,
@@ -1000,15 +1079,16 @@
     },
     "generated": {
      "activity": 11,
+     "consumption": 7,
+     "daily_support": 3,
      "device": 5,
-     "enjoyment": 3,
      "equipment": 2,
      "food": 327,
      "service": 3,
      "training": 3
     },
     "by_status": {
-     "executable": 353,
+     "executable": 360,
      "needs_area": 0,
      "needs_e1_extension": 0,
      "data_unknown": 1
@@ -1018,11 +1098,14 @@
       "data_unknown": 1,
       "executable": 10
      },
+     "consumption": {
+      "executable": 7
+     },
+     "daily_support": {
+      "executable": 3
+     },
      "device": {
       "executable": 5
-     },
-     "enjoyment": {
-      "executable": 3
      },
      "equipment": {
       "executable": 2
@@ -1045,10 +1128,10 @@
   },
   "42660": {
    "key": "sea",
-   "content_identity": "5912a55e8f8c375a943433c0ee909528454563ef1cda3a7108217d626cefe360",
+   "content_identity": "42c3734a80ec3fd57ccd9ff74df4ba7240644e3815b8192b06335055d836ef52",
    "counts": {
     "raw_inputs": {
-     "intake_records_referenced": 31,
+     "intake_records_referenced": 30,
      "food_item_prices": 52,
      "osm_restaurants": 1419,
      "osm_venues": 838,
@@ -1059,14 +1142,15 @@
     },
     "generated": {
      "activity": 11,
+     "consumption": 7,
+     "daily_support": 3,
      "device": 5,
-     "enjoyment": 3,
      "equipment": 2,
      "food": 327,
      "service": 3
     },
     "by_status": {
-     "executable": 350,
+     "executable": 357,
      "needs_area": 0,
      "needs_e1_extension": 0,
      "data_unknown": 1
@@ -1076,11 +1160,14 @@
       "data_unknown": 1,
       "executable": 10
      },
+     "consumption": {
+      "executable": 7
+     },
+     "daily_support": {
+      "executable": 3
+     },
      "device": {
       "executable": 5
-     },
-     "enjoyment": {
-      "executable": 3
      },
      "equipment": {
       "executable": 2
@@ -1099,5 +1186,5 @@
    }
   }
  },
- "content_identity": "9fa5b5456f5c09bf73d30ca6454cf8a0cd0756f13f91ddf3b6687f53e5ac6404"
+ "content_identity": "4b53c6b1fa394ca05398921f24da978106d248ce61ca4b5e5bbed8e8a1c9593e"
 }

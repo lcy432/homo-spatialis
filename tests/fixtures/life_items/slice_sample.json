@@ -327,6 +327,99 @@
   },
   "series": "CUUR0000SA0"
  },
+ "daily_support": {
+  "ce": {
+   "all_units_size_table": {
+    "Cellular phone service": "1359.0",
+    "Footwear": "461.0",
+    "Laundry and cleaning products": "209.0",
+    "Men, 16 and over": "374.0",
+    "Other apparel products and services": "252.0",
+    "Other household expenses": "1374.0",
+    "Other household products": "537.0",
+    "Personal care products and services": "978.0",
+    "Women, 16 and over": "632.0"
+   },
+   "detail_all_units": {
+    "Alteration, repair, and tailoring of apparel and accessories [I]": "6.29",
+    "Clothing rental [I]": "4.0",
+    "Clothing storage [I]": "1.43",
+    "Computer information services (internet) [I]": "697.9",
+    "Footwear [D]": "461.15",
+    "Jewelry [I]": "89.75",
+    "Men's footwear [D]": "153.93",
+    "Miscellaneous household products [D]": "277.18",
+    "Other apparel products and services": "252.09",
+    "Other household expenses": "1373.59",
+    "Other household products [D]": "537.09",
+    "Paper towels, napkins, and toilet tissue [D]": "131.24",
+    "Personal care products": "499.2",
+    "Personal care products and services": "977.71",
+    "Personal care services": "478.51",
+    "Shoe repair and other shoe services [I]": "2.0",
+    "Watch and jewelry repair [I]": "6.84",
+    "Watches [I]": "25.84",
+    "Women's footwear [D]": "209.69"
+   },
+   "detail_table": "Table 2500. All consumer units: Annual expenditure means, shares, standard errors, relative standard errors, and weekly (D) or quarterly (I) percent reporting, Consumer Expenditure Surveys, 2024",
+   "one_person": {
+    "Cellular phone service": "733.0",
+    "Footwear": "289.0",
+    "Laundry and cleaning products": "120.0",
+    "Men, 16 and over": "249.0",
+    "Other apparel products and services": "156.0",
+    "Other household expenses": "1015.0",
+    "Other household products": "293.0",
+    "Personal care products and services": "619.0",
+    "Women, 16 and over": "397.0"
+   },
+   "size_table": "Table 1400. Size of consumer unit: Annual expenditure means, shares, standard errors, and relative standard errors, Consumer Expenditure Surveys, 2024",
+   "unit": "USD per consumer unit per year (CE 2024 calendar year)"
+  },
+  "cpi_internet": {
+   "annual": {
+    "2023": "83.670",
+    "2024": "86.136"
+   },
+   "series": "CUUR0000SEEE03"
+  },
+  "fcc": {
+   "by_region": {
+    "Midwest": {
+     "offers": 239,
+     "weight_sum": "2381076.23881759482",
+     "weighted_median_total_charge": "64.95"
+    },
+    "Northeast": {
+     "offers": 66,
+     "weight_sum": "1172939.80409214309",
+     "weighted_median_total_charge": "89.99"
+    },
+    "South": {
+     "offers": 133,
+     "weight_sum": "1832454.122729567476",
+     "weighted_median_total_charge": "70"
+    },
+    "West": {
+     "offers": 123,
+     "weight_sum": "1041338.08421329160286",
+     "weighted_median_total_charge": "60"
+    }
+   },
+   "national": {
+    "offers": 563,
+    "weight_sum": "6442646.52586809626886",
+    "weighted_median_total_charge": "70"
+   },
+   "rows": 13133,
+   "spec": {
+    "download_below_mbps": 200,
+    "download_min_mbps": 100,
+    "upload_min_mbps": 20,
+    "usage": "unlimited"
+   }
+  }
+ },
  "ep": {
   "13-1071": {
    "related_work_experience": "nan",
@@ -1386,6 +1479,59 @@
      "n": 3170,
      "table_id": "b.jobs.16980.53",
      "wfh_share": "0.0411"
+    }
+   },
+   "internet_access": {
+    "n": 7467,
+    "population": "renter_occupied_full_pumas",
+    "table_id": "b.internet.16980",
+    "variables": {
+     "ACCESSINET": {
+      "shares_of_valid": {
+       "no_access": 0.0579,
+       "paid": 0.9048,
+       "without_paying": 0.0373
+      },
+      "weight_not_applicable": 0,
+      "weight_suppressed": 0,
+      "weight_valid": 1184566
+     },
+     "BROADBND": {
+      "shares_of_valid": {
+       "no": 0.0353,
+       "yes": 0.9647
+      },
+      "weight_not_applicable": 112807,
+      "weight_suppressed": 0,
+      "weight_valid": 1071759
+     },
+     "HISPEED": {
+      "shares_of_valid": {
+       "no": 0.2235,
+       "yes": 0.7765
+      },
+      "weight_not_applicable": 112807,
+      "weight_suppressed": 0,
+      "weight_valid": 1071759
+     },
+     "SMARTPHONE": {
+      "shares_of_valid": {
+       "no": 0.0784,
+       "yes": 0.9216
+      },
+      "weight_not_applicable": 0,
+      "weight_suppressed": 0,
+      "weight_valid": 1184566
+     },
+     "TEL": {
+      "shares_of_valid": {
+       "no": 0.0107,
+       "yes": 0.9893
+      },
+      "weight_not_applicable": 0,
+      "weight_suppressed": 0,
+      "weight_valid": 1184566
+     }
     }
    },
    "programs": [
@@ -4213,6 +4359,59 @@
      "n": 5142,
      "table_id": "b.jobs.35620.53",
      "wfh_share": "0.0424"
+    }
+   },
+   "internet_access": {
+    "n": 24860,
+    "population": "renter_occupied_full_pumas",
+    "table_id": "b.internet.35620",
+    "variables": {
+     "ACCESSINET": {
+      "shares_of_valid": {
+       "no_access": 0.0582,
+       "paid": 0.9209,
+       "without_paying": 0.0209
+      },
+      "weight_not_applicable": 0,
+      "weight_suppressed": 0,
+      "weight_valid": 3535420
+     },
+     "BROADBND": {
+      "shares_of_valid": {
+       "no": 0.0442,
+       "yes": 0.9558
+      },
+      "weight_not_applicable": 279724,
+      "weight_suppressed": 0,
+      "weight_valid": 3255696
+     },
+     "HISPEED": {
+      "shares_of_valid": {
+       "no": 0.2023,
+       "yes": 0.7977
+      },
+      "weight_not_applicable": 279724,
+      "weight_suppressed": 0,
+      "weight_valid": 3255696
+     },
+     "SMARTPHONE": {
+      "shares_of_valid": {
+       "no": 0.0787,
+       "yes": 0.9213
+      },
+      "weight_not_applicable": 0,
+      "weight_suppressed": 0,
+      "weight_valid": 3535420
+     },
+     "TEL": {
+      "shares_of_valid": {
+       "no": 0.0095,
+       "yes": 0.9905
+      },
+      "weight_not_applicable": 0,
+      "weight_suppressed": 0,
+      "weight_valid": 3535420
+     }
     }
    },
    "programs": [],
@@ -9022,6 +9221,59 @@
      "wfh_share": "0.0510"
     }
    },
+   "internet_access": {
+    "n": 6802,
+    "population": "renter_occupied_full_pumas",
+    "table_id": "b.internet.41860",
+    "variables": {
+     "ACCESSINET": {
+      "shares_of_valid": {
+       "no_access": 0.0344,
+       "paid": 0.939,
+       "without_paying": 0.0266
+      },
+      "weight_not_applicable": 0,
+      "weight_suppressed": 0,
+      "weight_valid": 770398
+     },
+     "BROADBND": {
+      "shares_of_valid": {
+       "no": 0.0345,
+       "yes": 0.9655
+      },
+      "weight_not_applicable": 47030,
+      "weight_suppressed": 0,
+      "weight_valid": 723368
+     },
+     "HISPEED": {
+      "shares_of_valid": {
+       "no": 0.1695,
+       "yes": 0.8305
+      },
+      "weight_not_applicable": 47030,
+      "weight_suppressed": 0,
+      "weight_valid": 723368
+     },
+     "SMARTPHONE": {
+      "shares_of_valid": {
+       "no": 0.0513,
+       "yes": 0.9487
+      },
+      "weight_not_applicable": 0,
+      "weight_suppressed": 0,
+      "weight_valid": 770398
+     },
+     "TEL": {
+      "shares_of_valid": {
+       "no": 0.0092,
+       "yes": 0.9908
+      },
+      "weight_not_applicable": 0,
+      "weight_suppressed": 0,
+      "weight_valid": 770398
+     }
+    }
+   },
    "programs": [],
    "restaurants": {
     "restaurant_total": 1924,
@@ -11166,9 +11418,14 @@
  },
  "raw": {
   "bls_atus": "4fe7b39ff435416aee80ac1c23a95a7067e9c6c23dd5c99d9631dda9b567ba6c",
+  "bls_ce_national_2024_detail": "6efdb40841f80cbda56b59039a5a0b1dafceccaaebb686443fb233246fb553ad",
+  "bls_ce_national_2024_size": "6378f4aa2e2f54bfe758c7604aeb366e8cc38d0d626a583bd77ba6aee87d28f9",
   "bls_cpi_u": "f3c22c8592d9134fa5ab305fa2df6e37dfd2388f10168985fdbc84082deb4ff0",
+  "bls_cpi_u_education_communication": "caf82762c60f6972767406ed67238ee8b2ed1b26f5525904553d777a0dda69ad",
   "chicago_park_activities": "7cee342c3b4e904d1a03c642a3695dc9ec704d302c1d970e6f6cb5fed0b3d108",
+  "fcc_urs_2024_broadband": "2081022e4ee75f8663d3894a321d7253039727597dcb1767b9d298d893cc372e",
+  "fcc_urs_2024_methodology": "a5f6eda0ab4b9e19ef74a2f9f67be54abe958586b5e4c598565cee88e4a23d46",
   "usda_fdc_sr_legacy": "b80817294b8850530aaedf2e515c02593b1824f763a0ff356e5c2081643e6fd0"
  },
- "schema": "e3b-items-slice-v1"
+ "schema": "e3b-items-slice-v2"
 }

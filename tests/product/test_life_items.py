@@ -24,7 +24,7 @@ def by_id(compilation):
 
 def test_each_kind_has_a_passing_example_and_a_free_activity_still_passes(compilation):
     v = by_id(compilation)
-    for cid in ("food.sichuan_home", "equipment.guitar", "enjoyment.massage", "activity.choir"):
+    for cid in ("food.sichuan_home", "equipment.guitar", "enjoyment.basket", "activity.choir"):
         assert v[cid].status == "executable" and v[cid].reasons_zh == ()
 
 
@@ -50,7 +50,7 @@ def test_r5_e1_checks_cannot_be_bypassed(compilation):
 
 def test_unknown_unavailable_and_unsupported_reasons_stay_apart(compilation):
     v = by_id(compilation)
-    assert (v["enjoyment.massage_unknown"].status, v["enjoyment.luxury_spa"].status) == (
+    assert (v["enjoyment.basket_unknown"].status, v["enjoyment.luxury_spa"].status) == (
         "data_unknown",
         "unsupported",
     )

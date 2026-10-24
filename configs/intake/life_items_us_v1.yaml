@@ -27,8 +27,10 @@ vocabulary:
   cuisines: [home_style, chinese, italian, mexican, japanese, indian, thai, korean, vietnamese, mediterranean]
   leisure_categories: [music, racket_sports, arts_culture, culinary, fitness]
   capabilities: [guitar_playable, racket_playable]
-  enjoyment_functions: [personal_care]
+  enjoyment_functions: [personal_consumption]
   household_tasks: [laundry, cleaning]
+  # 日常支持的三个功能（E3B 映射修正 §5）：只在付费成功、实际获得的月份提供
+  functions: [personal_communication, home_connectivity, household_supplies]
 
 # ============================================================================ A 板块的共同结构（E3B 映射修正 §4）
 # 每个板块：方案族与合法组合、参数（含义、单位、支持范围、共同先验与来源）、允许按城市证据更新的参数、真实差异与估计不确定性的
@@ -61,8 +63,8 @@ a_blocks:
     model_support_zh: 食品方案覆盖整月基本饮食（按热量补齐，不是营养方案）；饮食生活评分只读新鲜餐与菜系匹配
 
   - block: services
-    label_zh: 人工杂务服务与享受型服务
-    domains: [service, enjoyment]
+    label_zh: 人工杂务服务
+    domains: [service]
     legal_combinations_zh: 每项服务按月购买，可以同时买几项；同一家务的减负取现有有效残余时间规则，不叠加
     parameters:
       - {id: worker_and_client_hours, meaning_zh: 每项服务的工人小时、本人小时与替代后的残余家务小时, unit: 小时/月, support: 非负, prior: {kind: point}, source: service_hours_v1, city_updatable: false}
@@ -72,10 +74,39 @@ a_blocks:
     families:
       - {family: chore_service_month, label_zh: 上门洗衣与保洁（按月）, id_prefixes: [service.laundry, service.cleaning],
          why_no_quotes_zh: 没有同规格（同样频次与工时）的本地直接报价}
-      - {family: enjoyment_service_month, label_zh: 按摩（按月）, id_prefixes: [service.massage],
-         why_no_quotes_zh: 没有同规格的本地直接报价}
     variation_vs_uncertainty_zh: 服务之间的差异是频次与工时；工资是城市证据；效果（替代后的残余小时）是共同设定，不随工资或报价改变
     model_support_zh: 只在付了钱的月份起作用；家务减负读资源账里的残余小时
+
+  - block: daily_support
+    label_zh: 日常支持（通信、居家联网、家用日耗品）
+    domains: [daily_support]
+    legal_combinations_zh: 三个支持功能各一个按月服务，可以同时买；同功能买两份不叠加；更贵更快的套餐不另加分；未买或买不起时这项功能是 0，不触发出局、患病或工资损失
+    parameters:
+      - {id: mobile_budget_proxy, meaning_zh: 手机通信月费（CE 2024 一人消费单位手机服务年均 ÷ 12）, unit: USD_2024/月, support: 正数, prior: {kind: point}, source: ce_one_person_budget_proxy_v1, city_updatable: false}
+      - {id: broadband_regional_reference, meaning_zh: 家庭宽带基本档月费（FCC URS 2024 同规格报价的大区加权中位数 × CPI 互联网服务）, unit: USD_2024/月, support: 正数, prior: {kind: city_evidence}, source: fcc_broadband_basic_tier_v1, city_updatable: true}
+      - {id: supplies_budget, meaning_zh: 家用日耗品的共同篮子尺度（CE 2024 一人消费单位 ÷ 12）, unit: USD_2024/月, support: 正数, prior: {kind: point}, source: household_supplies_ce_v1, city_updatable: false}
+      - {id: rpp_goods, meaning_zh: 商品类 RPP（日耗品的城市成本）, unit: 指数（全国 = 100）, support: 正数, prior: {kind: city_evidence}, source: BEA RPP 2023, city_updatable: true}
+      - {id: retail_correction, meaning_zh: 同规格零售价相对基础预测的对数比值 δ, unit: 对数比值, support: 实数, prior: {kind: normal, mean: 0, sd: log(1.5)}, source: retail_correction_lognormal_v1, city_updatable: true}
+    families:
+      - {family: daily_support_service_month, label_zh: 通信、宽带与日耗品（按月）, id_prefixes: [service.mobile, service.home_internet, service.household_supplies],
+         why_no_quotes_zh: 没有同规格的单人套餐、本地宽带或日耗品直接报价；预算代理与大区参照不是本地观测价}
+    variation_vs_uncertainty_zh: 三项是不同功能，不是同一功能的档位；城市差异只来自 FCC 大区与商品类 RPP；手机按共同预算代理各城相同；ACS 接入率只作描述，不当运营商可得率
+    model_support_zh: 只在付费成功、实际获得的月份提供功能；不制造节省小时、活动小时或健康效果；基本终端按共同使用条件（basic_device_access_v1）
+
+  - block: consumption_basket
+    label_zh: 抽象个人消费篮子
+    domains: [consumption]
+    legal_combinations_zh: 每月最多按档位买（u = 0.25、0.5、1、1.5、2、3、4 个标准篮子）；0 是不买；同时买两个档位时份数相加（消费服务流）
+    parameters:
+      - {id: reference_vector, meaning_zh: 共同参考支出向量 e_j（CE 2024 一人消费单位白名单条目月均）, unit: USD_2024/月, support: 非负, prior: {kind: point}, source: consumption_basket_ce_v1, city_updatable: false}
+      - {id: price_factors, meaning_zh: 商品类 RPP（商品）与其他服务 RPP（服务）, unit: 指数（全国 = 100）, support: 正数, prior: {kind: city_evidence}, source: BEA RPP 2023, city_updatable: true}
+      - {id: quantity_grid, meaning_zh: 档位 u（共同覆盖网格，不是居民购买比例）, unit: 标准篮子/月, support: "{0.25, 0.5, 1, 1.5, 2, 3, 4}", prior: {kind: grid}, source: consumption_basket_ce_v1, city_updatable: false}
+      - {id: retail_correction, meaning_zh: 同规格零售价相对基础预测的对数比值 δ, unit: 对数比值, support: 实数, prior: {kind: normal, mean: 0, sd: log(1.5)}, source: retail_correction_lognormal_v1, city_updatable: true}
+    families:
+      - {family: personal_consumption_basket, label_zh: 个人消费篮子（按月）, id_prefixes: [service.personal_basket],
+         why_no_quotes_zh: 篮子是固定构成的成本模型，没有同规格的直接报价}
+    variation_vs_uncertainty_zh: 档位之间只有数量不同；城市差异只来自价格系数；同样数量只改价格时直接享受分不变
+    model_support_zh: 评分读实际获得的标准篮子数量，不读付款金额；不加休闲参与小时、不得兴趣匹配、不留资产或装备能力
 
   - block: devices
     label_zh: 家务设备（洗衣机、烘干机）
@@ -226,16 +257,97 @@ services:
     - {service: cleaning_weekly, soc: 37-2012, worker_hours_per_month: 10, client_hours_per_month: 0,
        substitutes: {cleaning: 2}, label: 上门保洁（每周一次）,
        quality: 每周上门打扫约 2.5 小时；本人每月还要约 2 小时日常整理}
-  enjoyment:
-    - {service: massage_studio_1, soc: 31-9011, sessions_per_month: 1, worker_hours_per_session: 1.25,
-       client_hours_per_session: 1.5, burden_per_hour: 0.2, label: 按摩（店里，每月一次）,
-       quality: 每月一次约 1 小时的放松按摩；往返约半小时}
-    - {service: massage_studio_2, soc: 31-9011, sessions_per_month: 2, worker_hours_per_session: 1.25,
-       client_hours_per_session: 1.5, burden_per_hour: 0.2, label: 按摩（店里，每月两次）,
-       quality: 每月两次、每次约 1 小时的放松按摩；每次往返约半小时}
-    - {service: massage_home_1, soc: 31-9011, sessions_per_month: 1, worker_hours_per_session: 2,
-       client_hours_per_session: 1, burden_per_hour: 0.2, label: 上门按摩（每月一次）,
-       quality: 按摩师上门，每月一次约 1 小时；按摩师的路上时间计进价格，本人不用出门}
+
+# ============================================================================ 日常支持（E3B 映射修正 §5）
+# 三个支持功能各一个按月服务：只在付费成功、实际获得的月份提供（未知不当已获得）；同功能买两份不叠加；更贵、更快的套餐不另加分。
+# 费用顺序：同规格直接报价 → FCC 同规格大区参照（家庭宽带）→ FCC 全国参照 → CE 预算代理；预算代理不是观测单价，字段与文案保持区别。
+# 基本终端（手机、电脑）是所有分身一致的使用条件（basic_device_access_v1），不买、不计财富、不计享受、不进期末资产。
+daily_support:
+  ce_size_column_all: 1
+  ce_size_column_one_person: 2
+  ce_detail_column_all: 1
+  personal_communication:
+    function: personal_communication
+    service: mobile_basic
+    label: 手机通信（基本单人套餐）
+    quality: 个人联系与基本移动通信；月费是 CE 2024 一人消费单位的手机服务月均支出（共同预算代理，不是某家运营商的套餐报价，各城相同）
+    line: {key: cellular, size_label: Cellular phone service}
+  home_connectivity:
+    function: home_connectivity
+    service: home_internet_basic
+    label: 家庭宽带（基本档）
+    quality: 居家互联网接入：下行 100–199 Mbps、上行至少 20 Mbps、不限流量；月费是 FCC 2024 城市费率调查同规格报价的大区加权中位数，换到 2024 年（不含税）
+    # 同规格（fcc_broadband_basic_tier_v1）：FCC 2024 宽带定义 100/20 Mbps 那一档的报价（下行 100–199），不是所有达到 100/20 的套餐
+    fcc_spec: {download_min_mbps: 100, download_below_mbps: 200, upload_min_mbps: 20, usage: unlimited}
+    min_offers: 30
+    cpi_series: CUUR0000SEEE03
+    cpi_from_year: 2023
+    cpi_to_year: 2024
+    regions:
+      Northeast: [CONNECTICUT, MAINE, MASSACHUSETTS, NEW HAMPSHIRE, RHODE ISLAND, VERMONT, NEW JERSEY, NEW YORK, PENNSYLVANIA]
+      Midwest: [ILLINOIS, INDIANA, MICHIGAN, OHIO, WISCONSIN, IOWA, KANSAS, MINNESOTA, MISSOURI, NEBRASKA, NORTH DAKOTA, SOUTH DAKOTA]
+      South: [DELAWARE, DISTRICT OF COLUMBIA, FLORIDA, GEORGIA, MARYLAND, NORTH CAROLINA, SOUTH CAROLINA, VIRGINIA, WEST VIRGINIA,
+              ALABAMA, KENTUCKY, MISSISSIPPI, TENNESSEE, ARKANSAS, LOUISIANA, OKLAHOMA, TEXAS]
+      West: [ARIZONA, COLORADO, IDAHO, MONTANA, NEVADA, NEW MEXICO, UTAH, WYOMING, ALASKA, CALIFORNIA, HAWAII, OREGON, WASHINGTON]
+    metro_region: {"35620": Northeast, "31080": West, "41860": West, "16980": Midwest, "26420": South, "42660": West}
+    # FCC 资料无法取得时才用：一人表没有互联网细项，按全国详细表的子项占比拆分一人“其他家庭开支”（分配估计）
+    ce_fallback_line: {key: internet, size_label: Other household expenses, detail_parent: Other household expenses,
+                       detail_items: ["Computer information services (internet) [I]"]}
+  household_supplies:
+    function: household_supplies
+    service: household_supplies_basic
+    label: 家用日耗品（清洁用品与纸品）
+    quality: 洗衣清洁用品、纸巾卫生纸等家用日耗品；不含个人化妆护理、家电家具；月费是 CE 2024 一人消费单位相应支出的月均 × 本城商品类 RPP（估计）
+    lines:
+      - {key: laundry_cleaning, size_label: Laundry and cleaning products}
+      - {key: paper_and_misc, size_label: Other household products, detail_parent: "Other household products [D]",
+         detail_items: ["Paper towels, napkins, and toilet tissue [D]", "Miscellaneous household products [D]"]}
+    exclusions:
+      - {label: "Lawn and garden supplies [D]", reason_zh: 草坪园艺用品不是租住单人的日常家用耗品}
+      - {label: Postage and stationery, reason_zh: 邮资与文具不是清洁用品与纸品类日耗品}
+
+# ============================================================================ 抽象个人消费篮子（E3B 映射修正 §6）
+# 用户含义：在其他生活开支之外，获得衣着、个人护理等个人消费的满足。消费服务流的抽象，不是买资产，也不按收入比例花钱。
+# 共同参考支出向量 e_j = CE 2024 一人消费单位白名单条目的月均（一人表缺细分类时按全国详细表的子项占比拆分，标为分配估计）；
+# 城市标准篮子价格 P_c = Σ e_j × 对应价格系数（商品 → 商品类 RPP，服务 → 其他服务 RPP）。所有城市与用户共用同一个 e_j。
+# 档位 u 是共同覆盖网格（不是居民购买比例，也不按收入定）；0 = 不买，不生成机会；费用 u × P_c，四舍五入到分。
+consumption_basket:
+  function: personal_consumption
+  service: personal_basket
+  grid: ["0.25", "0.5", "1", "1.5", "2", "3", "4"]
+  label: 个人消费篮子
+  quality: 成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）
+  lines:
+    - {key: apparel_men, size_label: "Men, 16 and over", price_index: goods}
+    - {key: apparel_women, size_label: "Women, 16 and over", price_index: goods}
+    - {key: footwear_adult, size_label: Footwear, detail_parent: "Footwear [D]",
+       detail_items: ["Men's footwear [D]", "Women's footwear [D]"], price_index: goods}
+    - {key: accessories, size_label: Other apparel products and services, detail_parent: Other apparel products and services,
+       detail_items: ["Jewelry [I]", "Watches [I]"], price_index: goods}
+    - {key: apparel_services, size_label: Other apparel products and services, detail_parent: Other apparel products and services,
+       detail_items: ["Shoe repair and other shoe services [I]", "Alteration, repair, and tailoring of apparel and accessories [I]",
+                      "Clothing rental [I]", "Watch and jewelry repair [I]", "Clothing storage [I]"], price_index: other}
+    - {key: personal_care_products, size_label: Personal care products and services, detail_parent: Personal care products and services,
+       detail_items: [Personal care products], price_index: goods}
+    - {key: personal_care_services, size_label: Personal care products and services, detail_parent: Personal care products and services,
+       detail_items: [Personal care services], price_index: other}
+  # 排除表：白名单所在大类里拿掉的叶子，与整类不进篮子的范围（与其他板块不交叉收费）
+  exclusions:
+    - {label: "Boys, 2 to 15", reason_zh: 不是成人衣着}
+    - {label: "Girls, 2 to 15", reason_zh: 不是成人衣着}
+    - {label: Children under 2, reason_zh: 不是成人衣着}
+    - {label: "Boys' footwear [D]", reason_zh: 不是成人鞋履}
+    - {label: "Girls' footwear [D]", reason_zh: 不是成人鞋履}
+    - {label: "Coin-operated apparel laundry and dry cleaning [I]", reason_zh: 洗衣与干洗属于家务服务，按规定排除}
+    - {label: "Apparel laundry and dry cleaning not coin-operated [I]", reason_zh: 洗衣与干洗属于家务服务，按规定排除}
+    - {label: "Material and supplies for sewing, needlework, and quilting (includes household items) [D]", reason_zh: 缝纫、刺绣与拼布材料属于爱好活动材料，并含家用品}
+  excluded_categories_zh:
+    - 房租、水电燃气、食品（住房与食品板块）
+    - 通信网络与家用清洁日耗品（日常支持）
+    - 洗衣、打扫与家务设备（日常便利）
+    - 交通、医疗、培训
+    - 爱好课程、门票、活动材料与装备（不用 CE 整个 Entertainment 大类）
+    - 储蓄、赠与、赌博、税费
 
 # ============================================================================ 设备（ENERGY STAR 型号 + 类别设定）
 devices:
@@ -396,6 +508,28 @@ assumptions:
     nature: assumption
     statement_zh: 同规格零售价相对基础成本预测的修正 δ = log(实际价 ÷ 基础预测价)，共同先验 N(0, log(1.5)²)；同规格直接报价按供应商去重、每家一个对数比值；本地均值观测方差 max(s²/n, log(1.1)²)，只有一家时 log(1.5)²；正态共轭更新，执行价 = 基础预测 × exp(后验均值)
     basis_zh: 方差是登记的探索设定，不是从报价估计的；现在六城没有合格的同规格直接报价，所以全部“未发生本地报价更新”，执行价就是基础预测（标为估计）
+  - id: daily_support_cost_order_v1
+    nature: rule
+    statement_zh: 日常支持的费用顺序：同规格直接报价 → FCC 同规格大区参照（家庭宽带，大区至少 30 条同规格报价）→ FCC 全国参照 → CE 一人消费单位预算代理；现在六城都没有直接报价
+  - id: ce_one_person_budget_proxy_v1
+    nature: assumption
+    statement_zh: 手机通信月费 = CE 2024 一人消费单位手机服务年均支出 ÷ 12（共同预算代理，各城相同）；不是单人套餐报价，不能把全部家庭的通信支出叫单人套餐价
+    basis_zh: 没有可用的单人套餐直接报价；CE 是全国一人消费单位的平均支出，含不同套餐与使用量
+  - id: fcc_broadband_basic_tier_v1
+    nature: assumption
+    statement_zh: 家庭宽带基本档 = FCC 2024 城市费率调查里下行 100–199 Mbps、上行至少 20 Mbps、不限流量的报价；参照价 = 本城所在人口普查大区这些报价按调查权重的中位数总月费（月费 + 强制收费 + 附加费，不含税），按 CPI 互联网服务（CUUR0000SEEE03）2024 ÷ 2023 年平均换到 2024 年
+    basis_zh: 100/20 是 FCC 2024 年的宽带速度定义；只取这一档是因为更快的套餐不另加分（所有达到 100/20 的套餐的中位数高约一半）；URS 2024 是 2023 年调查的价格（抽样框为 2022 年 12 月的资料，2023 年 12 月发布），具体调查月份没有核到，按年平均换算
+  - id: household_supplies_ce_v1
+    nature: assumption
+    statement_zh: 家用日耗品月费 = CE 2024 一人消费单位（洗衣清洁用品 + 其他家用品里纸品与杂项的分配额）÷ 12 × 本城商品类 RPP ÷ 100；草坪园艺用品与邮资文具不算
+    basis_zh: 一人表的“其他家用品”没有细项：按全国详细表的子项占比拆分（分配估计）
+  - id: basic_device_access_v1
+    nature: assumption
+    statement_zh: 基本终端（能用的手机与电脑）是所有分身一致的使用条件：不买、不计财富、不计享受、不进期末资产；本轮只模拟服务接入与日耗品
+  - id: consumption_basket_ce_v1
+    nature: assumption
+    statement_zh: 标准个人消费篮子 = CE 2024 一人消费单位白名单条目（16 岁以上男女衣着、成人鞋履、首饰手表、衣着修补租赁存放、个人护理产品与服务）的月均构成 e_j；P_c = Σ e_j × 价格系数（商品 → 商品类 RPP，服务 → 其他服务 RPP）；档位 u ∈ {0.25, 0.5, 1, 1.5, 2, 3, 4}，费用 u × P_c
+    basis_zh: 固定构成的粗粒度成本模型，不是从城市居民支出识别出的零售价；一人表缺细分类时按全国详细表的子项占比拆分（分配估计）；各城 CE 均值只做外部对照，不改个人偏好或制造城市享受优势
   - id: home_style_cuisine_v1
     nature: assumption
     statement_zh: 自己做的饭菜系按“家常”（home_style）计

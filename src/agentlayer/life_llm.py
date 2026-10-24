@@ -47,13 +47,13 @@ from pathlib import Path
 from typing import Any, Protocol
 
 from agentlayer.life_planning import (
-    PROMPT_USER_HEAD,
     USER_DELETION_HALT,
     PlannerCall,
     PlannerHalt,
     PlannerReply,
     RunControl,
     developer_note_problems,
+    payload_from_user_prompt,
     render_prompt,
 )
 from agentlayer.life_views import FORBIDDEN_PAYLOAD_KEYS, assert_payload_clean
@@ -374,14 +374,9 @@ _REQUEST_ID = re.compile(r"^(?P<run>.+)/(?P<clone>[^/]+)/y(?P<year>\d+)/a(?P<can
 def _payload_from_body(body: Any) -> dict[str, Any] | None:
     """从请求体的用户提示里取回嵌入的 JSON 载荷（渲染只加了固定的开头与代码块标记）；取不回就是 None。"""
     try:
-        user = body["messages"][1]["content"]
-        head = PROMPT_USER_HEAD + "```json\n"
-        if not (isinstance(user, str) and user.startswith(head) and user.endswith("\n```")):
-            return None
-        payload = json.loads(user[len(head) : -len("\n```")])
-    except (KeyError, IndexError, TypeError, ValueError):
+        return payload_from_user_prompt(body["messages"][1]["content"])
+    except (KeyError, IndexError, TypeError, ValueError, AttributeError, LifeContractError):
         return None
-    return payload if isinstance(payload, dict) else None
 
 
 @dataclass(frozen=True)

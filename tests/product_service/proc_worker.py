@@ -41,9 +41,9 @@ class FileTransport:
         n = (
             len(self.log.read_text(encoding="utf-8").splitlines()) if self.log.is_file() else 0
         ) + 1
-        payload = json.loads(
-            body["messages"][1]["content"].split("```json\n", 1)[1].rsplit("\n```", 1)[0]
-        )
+        from agentlayer.life_planning import payload_from_user_prompt
+
+        payload = payload_from_user_prompt(body["messages"][1]["content"])
         with self.log.open("a", encoding="utf-8", newline="\n") as fh:
             fh.write(
                 json.dumps({"n": n, "pid": os.getpid(), "request_id": payload["request_id"]}) + "\n"

@@ -26,12 +26,23 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
+from product.realdata.daily_support_data import (
+    CE_DETAIL_REQUEST,
+    CE_SIZE_REQUEST,
+    CPI_COMMUNICATION_REQUEST,
+    FCC_METHOD_REQUEST,
+    FCC_URS_REQUEST,
+    ce_title,
+    read_ce_means,
+    read_cpi_annual,
+    read_fcc_urs,
+)
 from product.realdata.fetch import DEFAULT_CACHE, Request, read_cached
 from product.realdata.prices import months, parse_cpi
 from product.realdata.sources import chicago_activities_request, cpi_request
 from product.realdata.tax_rules import page_text
 
-SLICE_SCHEMA = "e3b-items-slice-v1"
+SLICE_SCHEMA = "e3b-items-slice-v2"
 FDC_REQUEST = Request(
     source_id="usda_fdc_sr_legacy",
     url="https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_sr_legacy_food_csv_2018-04.zip",
@@ -129,6 +140,75 @@ def _raw(req: Request, cache: Path) -> tuple[bytes, str]:
         raise SliceError(f"原始缓存里没有 {req.source_id}：{got.record.note or got.record.status}")
     assert got.record.raw_sha256 is not None
     return got.content, got.record.raw_sha256
+
+
+def _ce_lines(items_cfg: dict[str, Any]) -> list[dict[str, Any]]:
+    """日常支持与消费篮子要读的全部 CE 条目（一人表的条目与详细表里拆分用的大类、子项）。"""
+    ds, cb = items_cfg["daily_support"], items_cfg["consumption_basket"]
+    return [
+        ds["personal_communication"]["line"],
+        ds["home_connectivity"]["ce_fallback_line"],
+        *ds["household_supplies"]["lines"],
+        *cb["lines"],
+    ]
+
+
+def _daily_support(items_cfg: dict[str, Any], cache: Path) -> tuple[dict[str, Any], dict[str, str]]:
+    """BLS CE 2024 全国表、FCC URS 2024 与 CPI 互联网服务：编译日常支持与消费篮子要用的数（只解析，不定价）。"""
+    ds = items_cfg["daily_support"]
+    hc = ds["home_connectivity"]
+    size_b, size_sha = _raw(CE_SIZE_REQUEST, cache)
+    det_b, det_sha = _raw(CE_DETAIL_REQUEST, cache)
+    fcc_b, fcc_sha = _raw(FCC_URS_REQUEST, cache)
+    _, method_sha = _raw(FCC_METHOD_REQUEST, cache)
+    cpi_b, cpi_sha = _raw(CPI_COMMUNICATION_REQUEST, cache)
+    lines = _ce_lines(items_cfg)
+    size_labels = sorted({x["size_label"] for x in lines})
+    detail_labels = sorted(
+        {x["detail_parent"] for x in lines if x.get("detail_items")}
+        | {i for x in lines for i in x.get("detail_items", ())}
+    )
+    years = (hc["cpi_from_year"], hc["cpi_to_year"])
+    out = {
+        "ce": {
+            "size_table": ce_title(size_b),
+            "detail_table": ce_title(det_b),
+            "one_person": read_ce_means(size_b, size_labels, ds["ce_size_column_one_person"]),
+            "all_units_size_table": read_ce_means(size_b, size_labels, ds["ce_size_column_all"]),
+            "detail_all_units": read_ce_means(det_b, detail_labels, ds["ce_detail_column_all"]),
+            "unit": "USD per consumer unit per year (CE 2024 calendar year)",
+        },
+        "fcc": read_fcc_urs(fcc_b, hc["fcc_spec"], hc["regions"]),
+        "cpi_internet": {
+            "series": hc["cpi_series"],
+            "annual": read_cpi_annual(cpi_b, hc["cpi_series"], years),
+        },
+    }
+    raw = {
+        "bls_ce_national_2024_size": size_sha,
+        "bls_ce_national_2024_detail": det_sha,
+        "fcc_urs_2024_broadband": fcc_sha,
+        "fcc_urs_2024_methodology": method_sha,
+        "bls_cpi_u_education_communication": cpi_sha,
+    }
+    return out, raw
+
+
+def _internet(conn: sqlite3.Connection, cbsa: str) -> dict[str, Any] | None:
+    """ACS 接入字段的描述（intake ``household_internet_access@1``，租住户）：只用于描述与核对，不当运营商可得率。"""
+    row = conn.execute(
+        "select json from tables where method = 'household_internet_access@1' and cbsa = ?",
+        (cbsa,),
+    ).fetchone()
+    if row is None:
+        return None
+    t = json.loads(row[0])
+    return {
+        "table_id": t["table_id"],
+        "population": t["population"],
+        "n": t["n"],
+        "variables": t["variables"],
+    }
 
 
 # --------------------------------------------------------------------------- 冻结库
@@ -432,8 +512,8 @@ def build_slice(
     scope = [s["soc"] for s in occ_cfg["supported"]]
     service_socs = sorted(
         {s["soc"] for s in items_cfg["services"]["chores"]}
-        | {s["soc"] for s in items_cfg["services"]["enjoyment"]}
         | {t["soc"] for t in items_cfg["activities"]["templates"] if t.get("soc")}
+        | {items_cfg["food"]["away_cost"][k] for k in ("cook_soc", "delivery_soc")}
     )
     socs = sorted(set(scope) | set(service_socs) | set(occ_cfg["excluded"]))
     majors = sorted({_soc_major(s) for s in socs})
@@ -446,6 +526,7 @@ def build_slice(
     atus_bytes, atus_sha = _raw(ATUS_REQUEST, cache)
     chi_bytes, chi_sha = _raw(chicago_activities_request(), cache)
     full_notes = (chicago_full_notes(chi_bytes), chi_sha)
+    daily, daily_raw = _daily_support(items_cfg, cache)
 
     metros: dict[str, Any] = {}
     for cbsa in cbsas:
@@ -458,6 +539,7 @@ def build_slice(
             "hours": _hours(conn, cbsa, majors),
             "programs": _programs(conn, cbsa, full_notes),
             "training": _training(conn, cbsa),
+            "internet_access": _internet(conn, cbsa),
         }
     return {
         "schema": SLICE_SCHEMA,
@@ -467,6 +549,7 @@ def build_slice(
             "usda_fdc_sr_legacy": fdc_sha,
             "bls_atus": atus_sha,
             "chicago_park_activities": chi_sha,
+            **daily_raw,
         },
         "cpi": {
             "series": "CUUR0000SA0",
@@ -481,5 +564,6 @@ def build_slice(
         "atus": read_atus(atus_bytes),
         "ep": _ep(conn, socs, cbsas),
         "appliances": _appliances(conn, items_cfg["devices"]["markets"], categories),
+        "daily_support": daily,
         "metros": metros,
     }

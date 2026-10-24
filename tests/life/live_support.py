@@ -27,7 +27,7 @@ from agentlayer.life_llm import (
     estimate_input_tokens,
 )
 from agentlayer.life_mock import ProductMockPlanner
-from agentlayer.life_planning import PROMPT_USER_HEAD, PlannerCall
+from agentlayer.life_planning import PlannerCall
 from orchestration.life_budget import RoundBudget
 from orchestration.life_runner import RunWorld, preflight
 
@@ -101,9 +101,9 @@ def mock_world() -> RunWorld:
 
 
 def payload_of(body: dict[str, Any]) -> dict[str, Any]:
-    user = body["messages"][1]["content"]
-    assert user.startswith(PROMPT_USER_HEAD + "```json\n") and user.endswith("\n```")
-    return json.loads(user[len(PROMPT_USER_HEAD) + len("```json\n") : -len("\n```")])
+    from agentlayer.life_planning import payload_from_user_prompt
+
+    return payload_from_user_prompt(body["messages"][1]["content"])
 
 
 def mock_text(body: dict[str, Any]) -> str:

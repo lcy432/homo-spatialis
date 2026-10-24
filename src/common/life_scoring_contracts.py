@@ -27,6 +27,7 @@
 from __future__ import annotations
 
 import math
+from decimal import Decimal
 from typing import Annotated, Literal
 
 from pydantic import Field, field_validator, model_validator
@@ -310,9 +311,14 @@ class HealthScoringSpec(ContractModel):
 
 
 class ConvenienceSpec(ContractModel):
-    """物质维"日常生活便利"分项（`DECISIONS/0033`）：这个月本人实际少做了多少小时家务。
+    """物质维"日常支持与便利"分项（`DECISIONS/0033`；E3B 映射修正 §5）：日常杂务是否省心，加上通信联网与家用日耗品是否方便获得。
 
-        q_m = Σ_{t ∈ tasks} (b_t − r_{t,m})        s = min(c, q_m / (q_m + τ))
+        q_m = Σ_{t ∈ tasks} (b_t − r_{t,m})        S_chore = min(c, q_m / (q_m + τ))
+        S_support = c_support × (这个月实际获得的支持功能数) / (支持功能总数)
+        s = w_chore × S_chore + w_support × S_support
+
+    支持功能（``support_functions``）各按"未获得 = 0、获得 = 1"：这个月有付了钱、实际在用的、提供这项功能的服务才算获得；同功能
+    买两份不叠加；更贵更快的套餐不另加分；不制造节省小时，不改时间账。权重、上限与三项等权是全组共用的探索设定，只写在评分规格里。
 
     * b_t：协议资源规则里任务 t 的每月基准小时（``MonthlyResourceRules.household_tasks``，结构化字段；同一协议所有城市、所有人共用）；
     * r_{t,m}：这个月资源账里任务 t 那一行的本人残余小时（``MonthResources.contributions``，category = household_task）。那一行由结算按
@@ -326,7 +332,11 @@ class ConvenienceSpec(ContractModel):
 
     tasks: tuple[KeyStr, ...] = Field(min_length=1)
     cap: Annotated[float, Field(ge=0, le=1, allow_inf_nan=False)]
-    rule: Literal["household_baseline_minus_residual_v1"]
+    rule: Literal["chores_and_daily_support_v1"]
+    support_functions: tuple[KeyStr, ...] = Field(min_length=1)
+    support_cap: Annotated[float, Field(ge=0, le=1, allow_inf_nan=False)]
+    chore_weight: Annotated[float, Field(ge=0, le=1, allow_inf_nan=False)]
+    support_weight: Annotated[float, Field(ge=0, le=1, allow_inf_nan=False)]
     unit: str = Field(min_length=1, max_length=80)
     definition: str = Field(min_length=1, max_length=400)
 
@@ -334,8 +344,13 @@ class ConvenienceSpec(ContractModel):
     def _consistent(self) -> ConvenienceSpec:
         if len(set(self.tasks)) != len(self.tasks):
             raise ValueError("日常生活便利的家务任务重复：同一项家务只计一次")
-        if not has_decimals(self.cap, 2):
-            raise ValueError(f"c = {self.cap!r} 的精度细于两位小数")
+        if len(set(self.support_functions)) != len(self.support_functions):
+            raise ValueError("日常支持功能重复：同一项功能只计一次")
+        for name in ("cap", "support_cap", "chore_weight", "support_weight"):
+            if not has_decimals(getattr(self, name), 2):
+                raise ValueError(f"{name} = {getattr(self, name)!r} 的精度细于两位小数")
+        if Decimal(repr(self.chore_weight)) + Decimal(repr(self.support_weight)) != 1:
+            raise ValueError("杂务与支持两部分的权重之和必须恰好是 1")
         return self
 
 
@@ -753,6 +768,7 @@ def convenience_problems(spec: LifeScoringSpec) -> list[str]:
                 f"{c.component_id}: 细需求 {DAILY_CONVENIENCE} 只能由 convenience 规则评价（读实际减少的家务小时）"
             )
     tasks = {t for c in declared for t in c.convenience.tasks}  # type: ignore[union-attr]
+    support = {f for c in declared for f in c.convenience.support_functions}  # type: ignore[union-attr]
     for c in spec.components:
         for src in c.sources:
             hit = sorted(set(src.functions) & tasks)
@@ -760,6 +776,11 @@ def convenience_problems(spec: LifeScoringSpec) -> list[str]:
                 out.append(
                     f"{c.component_id}/{src.source_id}: 按家务功能 {hit} 取“有没有”的来源与日常生活便利重复计分"
                     "（便利只读实际减少的家务小时）"
+                )
+            twice = sorted(set(src.functions) & support)
+            if twice:
+                out.append(
+                    f"{c.component_id}/{src.source_id}: 日常支持功能 {twice} 已经在日常支持与便利里计分，不能再由别的分项计一次"
                 )
     return out
 
@@ -1043,13 +1064,28 @@ class TaskRelief(ContractModel):
     opportunity_id: IdStr | None = None
 
 
+class SupportCoverage(ContractModel):
+    """一项日常支持功能这个月有没有获得（付了钱、实际在用的服务提供它），由哪几项提供。"""
+
+    function: KeyStr
+    covered: bool
+    via: tuple[IdStr, ...] = ()
+
+
 class ConvenienceTerm(ContractModel):
-    """日常生活便利一个月的明细：逐项家务与合计 q（小时/月）、τ 与 c。分数只取决于 q——设备还是人工、价格多少都不进入。"""
+    """日常支持与便利一个月的明细：逐项家务与合计 q（小时/月）、τ 与 c、杂务分；支持功能的覆盖与支持分；两部分权重。分数只取决于
+    q 与覆盖——设备还是人工、价格多少、买了几份都不进入。"""
 
     tasks: tuple[TaskRelief, ...]
     relief_hours: ExactAmount  # q_m
     tau_hours: float
     cap: Annotated[float, Field(ge=0, le=1)]
+    chore_s: Annotated[float, Field(ge=0, le=1)]  # S_chore
+    support: tuple[SupportCoverage, ...]
+    support_cap: Annotated[float, Field(ge=0, le=1)]
+    support_s: Annotated[float, Field(ge=0, le=1)]  # S_support
+    chore_weight: Annotated[float, Field(ge=0, le=1)]
+    support_weight: Annotated[float, Field(ge=0, le=1)]
 
 
 class FoodLifeTerm(ContractModel):

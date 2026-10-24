@@ -13,10 +13,10 @@ pack:
     city_facts: data/frozen/life/us-v1/pack/city_facts.json
     protocol_id: life-v1-e3b-us
     scoring_version: e1-life-v1
-    scoring_content_fingerprint: 180fd9389343bac1da0fac4528e4eb6e9c6d7e069bddd56ea47acdcc4380bce0
-    prompt_template: e3b-product-prompt-v1
+    scoring_content_fingerprint: c36f768cbb84afd5398b4afedeafbf2aa1a117bf61cfd944a453eb3cdc1e7d75
+    prompt_template: e3b-product-prompt-v2
   run:
-    prompt_template: e3b-product-prompt-v1
+    prompt_template: e3b-product-prompt-v2
     repeat_indexes:
     - 0
     - 1

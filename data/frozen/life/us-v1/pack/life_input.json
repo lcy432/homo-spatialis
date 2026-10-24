@@ -2,22 +2,28 @@
  "attribute_keys": [
   "activity_type",
   "age_rule",
+  "allocated_share_estimate",
   "away_meal_delivered_cost",
   "away_meal_dine_cost",
   "away_mode",
   "basket",
   "basket_energy_share",
+  "ce_annual_one_person",
   "chicago_category",
   "cip",
+  "cost_basis",
   "cuisine_supply_evidence",
   "date_notes",
   "days",
+  "download_mbps",
   "employer",
   "employment",
   "end_date",
   "entry_education",
   "equipment_requirements",
   "facility",
+  "fcc_offers",
+  "fcc_weighted_median_2023",
   "home_meals_per_week",
   "hourly_wage_median",
   "hours_area_level",
@@ -25,18 +31,25 @@
   "institution",
   "model_plan",
   "months_to_complete",
+  "observed_unit_price",
   "on_the_job_training",
   "osm_restaurants_with_cuisine",
   "price_basis",
+  "price_geography",
   "registration_fee",
   "related_experience",
   "related_socs",
   "season",
   "sessions_per_registration",
   "soc_title",
+  "standard_basket_price",
+  "standard_baskets_per_month",
   "start_calendar",
   "start_date",
+  "taxes",
   "taxes_fees_tips",
+  "upload_min_mbps",
+  "usage_allowance",
   "venue_evidence",
   "wage_soc"
  ],
@@ -107210,8 +107223,10 @@
     {
      "arrangement_options": {},
      "attributes": {
-      "hourly_wage_median": 27.69,
-      "wage_soc": "31-9011"
+      "ce_annual_one_person": 733.0,
+      "cost_basis": "ce_one_person_budget_proxy",
+      "observed_unit_price": false,
+      "price_geography": "national"
      },
      "availability": "available",
      "category": "service",
@@ -107223,35 +107238,28 @@
       "lasts_years": null
      },
      "eligibility": [],
-     "enjoyment": [
-      {
-       "basis": "每月实际接受 1 次按摩（享受型服务）",
-       "function": "personal_care",
-       "mode": "service_units",
-       "unit_label": "次",
-       "units_per_month": 1.0
-      }
+     "functions": [
+      "personal_communication"
      ],
-     "functions": [],
-     "label": "按摩（店里，每月一次）",
+     "label": "手机通信（基本单人套餐）",
      "occupation": null,
-     "opportunity_id": "nyc.service.massage_studio_1",
+     "opportunity_id": "nyc.service.mobile_basic",
      "price": {
       "amount": {
-       "amount": 69.22,
+       "amount": 61.08,
        "numeraire": "USD_2024_LOCAL"
       },
       "billing": "per_month",
       "kind": "actual_quote",
       "per_unit": "service-month"
      },
-     "quality": "每月一次约 1 小时的放松按摩；往返约半小时",
+     "quality": "个人联系与基本移动通信；月费是 CE 2024 一人消费单位的手机服务月均支出（共同预算代理，不是某家运营商的套餐报价，各城相同）",
      "resource": {
       "basis": "per_service_month",
-      "burden_per_hour": 0.2,
-      "hours": 1.5,
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
       "job": null,
-      "note": "按摩与往返的合计；生病暂停的月份不付款、不使用",
+      "note": "不占你自己的时间；只在实际付了钱的月份提供这项功能，买两份不叠加",
       "quantity_scales": false,
       "substitutes": [],
       "uses_per_month": null
@@ -107259,28 +107267,160 @@
      "source": {
       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
       "inputs": [
-       "jobs.oews2024.35620.31-9011",
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
        "geography: CBSA2023 35620 New York-Newark-Jersey City 都会区"
       ],
       "kind": "estimated",
       "mapping_version": "e3b-life-items-v1",
-      "observed_on": "2024-05-31",
+      "observed_on": "2024-12-31",
       "provenance": null,
-      "rule": "OEWS 31-9011 都会区中位年薪 57590.24 ÷ 2,080 = 时薪；× 每次 1.25 工人小时 × 每月 1 次 × 人工费用倍率 2.0，四舍五入到分",
+      "rule": "CE 2024 一人消费单位“Cellular phone service”年均 733.0 ÷ 12，四舍五入到分；共同预算代理（全国一人消费单位的平均支出，不是单人套餐报价，各城相同，不做空间换算）",
       "synthetic_note": null
      },
-     "spec": {
-      "sessions_per_month": 1,
-      "worker_hours_per_session": 1.25
-     },
+     "spec": {},
      "targets": [],
      "unit": "service-month"
     },
     {
      "arrangement_options": {},
      "attributes": {
-      "hourly_wage_median": 27.69,
-      "wage_soc": "31-9011"
+      "cost_basis": "fcc_regional_reference",
+      "download_mbps": "100–199",
+      "fcc_offers": 66,
+      "fcc_weighted_median_2023": 89.99,
+      "observed_unit_price": false,
+      "price_geography": "census_region:Northeast",
+      "taxes": "not_included",
+      "upload_min_mbps": 20,
+      "usage_allowance": "unlimited"
+     },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "functions": [
+      "home_connectivity"
+     ],
+     "label": "家庭宽带（基本档）",
+     "occupation": null,
+     "opportunity_id": "nyc.service.home_internet_basic",
+     "price": {
+      "amount": {
+       "amount": 92.64,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "居家互联网接入：下行 100–199 Mbps、上行至少 20 Mbps、不限流量；月费是 FCC 2024 城市费率调查同规格报价的大区加权中位数，换到 2024 年（不含税）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "不占你自己的时间；只在实际付了钱的月份提供这项功能，买两份不叠加",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "fcc_urs_2024_broadband:2081022e4ee75f86",
+       "bls_cpi_u_education_communication:caf82762c60f6972",
+       "geography: CBSA2023 35620 New York-Newark-Jersey City 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "FCC 2024 城市费率调查：census_region:Northeast 同规格报价（下行 100–199 Mbps、上行 ≥ 20、不限流量）66 条按调查权重的中位数总月费 89.99（2023 年调查价，不含税）× CPI CUUR0000SEEE03 86.136 ÷ 83.670，四舍五入到分；不是本城某家运营商的报价",
+      "synthetic_note": null
+     },
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "ce_annual_one_person": 342.81,
+      "cost_basis": "ce_one_person_budget_x_rpp_goods",
+      "observed_unit_price": false,
+      "price_geography": "metro_estimate"
+     },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "functions": [
+      "household_supplies"
+     ],
+     "label": "家用日耗品（清洁用品与纸品）",
+     "occupation": null,
+     "opportunity_id": "nyc.service.household_supplies_basic",
+     "price": {
+      "amount": {
+       "amount": 31.5,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "洗衣清洁用品、纸巾卫生纸等家用日耗品；不含个人化妆护理、家电家具；月费是 CE 2024 一人消费单位相应支出的月均 × 本城商品类 RPP（估计）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "不占你自己的时间；只在实际付了钱的月份提供这项功能，买两份不叠加",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp_goods 110.261",
+       "geography: CBSA2023 35620 New York-Newark-Jersey City 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "CE 2024 一人消费单位：laundry_cleaning 120.0、paper_and_misc 222.81（按全国详细表占比分配），合计 ÷ 12 × 商品类 RPP 110.261 ÷ 100，四舍五入到分（估计，不是本地报价）",
+      "synthetic_note": null
+     },
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 143.75,
+      "standard_baskets_per_month": 0.25
      },
      "availability": "available",
      "category": "service",
@@ -107294,33 +107434,317 @@
      "eligibility": [],
      "enjoyment": [
       {
-       "basis": "每月实际接受 2 次按摩（享受型服务）",
-       "function": "personal_care",
+       "basis": "这个月实际获得 0.25 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
        "mode": "service_units",
-       "unit_label": "次",
+       "unit_label": "标准篮子",
+       "units_per_month": 0.25
+      }
+     ],
+     "functions": [],
+     "label": "个人消费篮子（每月 0.25 个标准篮子）",
+     "occupation": null,
+     "opportunity_id": "nyc.service.personal_basket.u0_25",
+     "price": {
+      "amount": {
+       "amount": 35.94,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 110.261/105.836",
+       "geography: CBSA2023 35620 New York-Newark-Jersey City 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 110.261、其他服务 RPP 105.836，÷ 100）= 143.75；费用 = u × P_c，四舍五入到分",
+      "synthetic_note": null
+     },
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 143.75,
+      "standard_baskets_per_month": 0.5
+     },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "enjoyment": [
+      {
+       "basis": "这个月实际获得 0.5 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
+       "mode": "service_units",
+       "unit_label": "标准篮子",
+       "units_per_month": 0.5
+      }
+     ],
+     "functions": [],
+     "label": "个人消费篮子（每月 0.5 个标准篮子）",
+     "occupation": null,
+     "opportunity_id": "nyc.service.personal_basket.u0_5",
+     "price": {
+      "amount": {
+       "amount": 71.87,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 110.261/105.836",
+       "geography: CBSA2023 35620 New York-Newark-Jersey City 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 110.261、其他服务 RPP 105.836，÷ 100）= 143.75；费用 = u × P_c，四舍五入到分",
+      "synthetic_note": null
+     },
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 143.75,
+      "standard_baskets_per_month": 1.0
+     },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "enjoyment": [
+      {
+       "basis": "这个月实际获得 1 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
+       "mode": "service_units",
+       "unit_label": "标准篮子",
+       "units_per_month": 1.0
+      }
+     ],
+     "functions": [],
+     "label": "个人消费篮子（每月 1 个标准篮子）",
+     "occupation": null,
+     "opportunity_id": "nyc.service.personal_basket.u1",
+     "price": {
+      "amount": {
+       "amount": 143.75,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 110.261/105.836",
+       "geography: CBSA2023 35620 New York-Newark-Jersey City 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 110.261、其他服务 RPP 105.836，÷ 100）= 143.75；费用 = u × P_c，四舍五入到分",
+      "synthetic_note": null
+     },
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 143.75,
+      "standard_baskets_per_month": 1.5
+     },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "enjoyment": [
+      {
+       "basis": "这个月实际获得 1.5 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
+       "mode": "service_units",
+       "unit_label": "标准篮子",
+       "units_per_month": 1.5
+      }
+     ],
+     "functions": [],
+     "label": "个人消费篮子（每月 1.5 个标准篮子）",
+     "occupation": null,
+     "opportunity_id": "nyc.service.personal_basket.u1_5",
+     "price": {
+      "amount": {
+       "amount": 215.62,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 110.261/105.836",
+       "geography: CBSA2023 35620 New York-Newark-Jersey City 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 110.261、其他服务 RPP 105.836，÷ 100）= 143.75；费用 = u × P_c，四舍五入到分",
+      "synthetic_note": null
+     },
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 143.75,
+      "standard_baskets_per_month": 2.0
+     },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "enjoyment": [
+      {
+       "basis": "这个月实际获得 2 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
+       "mode": "service_units",
+       "unit_label": "标准篮子",
        "units_per_month": 2.0
       }
      ],
      "functions": [],
-     "label": "按摩（店里，每月两次）",
+     "label": "个人消费篮子（每月 2 个标准篮子）",
      "occupation": null,
-     "opportunity_id": "nyc.service.massage_studio_2",
+     "opportunity_id": "nyc.service.personal_basket.u2",
      "price": {
       "amount": {
-       "amount": 138.44,
+       "amount": 287.5,
        "numeraire": "USD_2024_LOCAL"
       },
       "billing": "per_month",
       "kind": "actual_quote",
       "per_unit": "service-month"
      },
-     "quality": "每月两次、每次约 1 小时的放松按摩；每次往返约半小时",
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
      "resource": {
       "basis": "per_service_month",
-      "burden_per_hour": 0.2,
-      "hours": 3.0,
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
       "job": null,
-      "note": "按摩与往返的合计；生病暂停的月份不付款、不使用",
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
       "quantity_scales": false,
       "substitutes": [],
       "uses_per_month": null
@@ -107328,28 +107752,30 @@
      "source": {
       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
       "inputs": [
-       "jobs.oews2024.35620.31-9011",
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 110.261/105.836",
        "geography: CBSA2023 35620 New York-Newark-Jersey City 都会区"
       ],
       "kind": "estimated",
       "mapping_version": "e3b-life-items-v1",
-      "observed_on": "2024-05-31",
+      "observed_on": "2024-12-31",
       "provenance": null,
-      "rule": "OEWS 31-9011 都会区中位年薪 57590.24 ÷ 2,080 = 时薪；× 每次 1.25 工人小时 × 每月 2 次 × 人工费用倍率 2.0，四舍五入到分",
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 110.261、其他服务 RPP 105.836，÷ 100）= 143.75；费用 = u × P_c，四舍五入到分",
       "synthetic_note": null
      },
-     "spec": {
-      "sessions_per_month": 2,
-      "worker_hours_per_session": 1.25
-     },
+     "spec": {},
      "targets": [],
      "unit": "service-month"
     },
     {
      "arrangement_options": {},
      "attributes": {
-      "hourly_wage_median": 27.69,
-      "wage_soc": "31-9011"
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 143.75,
+      "standard_baskets_per_month": 3.0
      },
      "availability": "available",
      "category": "service",
@@ -107363,33 +107789,33 @@
      "eligibility": [],
      "enjoyment": [
       {
-       "basis": "每月实际接受 1 次按摩（享受型服务）",
-       "function": "personal_care",
+       "basis": "这个月实际获得 3 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
        "mode": "service_units",
-       "unit_label": "次",
-       "units_per_month": 1.0
+       "unit_label": "标准篮子",
+       "units_per_month": 3.0
       }
      ],
      "functions": [],
-     "label": "上门按摩（每月一次）",
+     "label": "个人消费篮子（每月 3 个标准篮子）",
      "occupation": null,
-     "opportunity_id": "nyc.service.massage_home_1",
+     "opportunity_id": "nyc.service.personal_basket.u3",
      "price": {
       "amount": {
-       "amount": 110.75,
+       "amount": 431.25,
        "numeraire": "USD_2024_LOCAL"
       },
       "billing": "per_month",
       "kind": "actual_quote",
       "per_unit": "service-month"
      },
-     "quality": "按摩师上门，每月一次约 1 小时；按摩师的路上时间计进价格，本人不用出门",
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
      "resource": {
       "basis": "per_service_month",
-      "burden_per_hour": 0.2,
-      "hours": 1.0,
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
       "job": null,
-      "note": "按摩与往返的合计；生病暂停的月份不付款、不使用",
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
       "quantity_scales": false,
       "substitutes": [],
       "uses_per_month": null
@@ -107397,20 +107823,90 @@
      "source": {
       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
       "inputs": [
-       "jobs.oews2024.35620.31-9011",
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 110.261/105.836",
        "geography: CBSA2023 35620 New York-Newark-Jersey City 都会区"
       ],
       "kind": "estimated",
       "mapping_version": "e3b-life-items-v1",
-      "observed_on": "2024-05-31",
+      "observed_on": "2024-12-31",
       "provenance": null,
-      "rule": "OEWS 31-9011 都会区中位年薪 57590.24 ÷ 2,080 = 时薪；× 每次 2 工人小时 × 每月 1 次 × 人工费用倍率 2.0，四舍五入到分",
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 110.261、其他服务 RPP 105.836，÷ 100）= 143.75；费用 = u × P_c，四舍五入到分",
       "synthetic_note": null
      },
-     "spec": {
-      "sessions_per_month": 1,
-      "worker_hours_per_session": 2
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 143.75,
+      "standard_baskets_per_month": 4.0
      },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "enjoyment": [
+      {
+       "basis": "这个月实际获得 4 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
+       "mode": "service_units",
+       "unit_label": "标准篮子",
+       "units_per_month": 4.0
+      }
+     ],
+     "functions": [],
+     "label": "个人消费篮子（每月 4 个标准篮子）",
+     "occupation": null,
+     "opportunity_id": "nyc.service.personal_basket.u4",
+     "price": {
+      "amount": {
+       "amount": 575.0,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 110.261/105.836",
+       "geography: CBSA2023 35620 New York-Newark-Jersey City 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 110.261、其他服务 RPP 105.836，÷ 100）= 143.75；费用 = u × P_c，四舍五入到分",
+      "synthetic_note": null
+     },
+     "spec": {},
      "targets": [],
      "unit": "service-month"
     },
@@ -208329,8 +208825,10 @@
     {
      "arrangement_options": {},
      "attributes": {
-      "hourly_wage_median": 28.23,
-      "wage_soc": "31-9011"
+      "ce_annual_one_person": 733.0,
+      "cost_basis": "ce_one_person_budget_proxy",
+      "observed_unit_price": false,
+      "price_geography": "national"
      },
      "availability": "available",
      "category": "service",
@@ -208342,35 +208840,28 @@
       "lasts_years": null
      },
      "eligibility": [],
-     "enjoyment": [
-      {
-       "basis": "每月实际接受 1 次按摩（享受型服务）",
-       "function": "personal_care",
-       "mode": "service_units",
-       "unit_label": "次",
-       "units_per_month": 1.0
-      }
+     "functions": [
+      "personal_communication"
      ],
-     "functions": [],
-     "label": "按摩（店里，每月一次）",
+     "label": "手机通信（基本单人套餐）",
      "occupation": null,
-     "opportunity_id": "la.service.massage_studio_1",
+     "opportunity_id": "la.service.mobile_basic",
      "price": {
       "amount": {
-       "amount": 70.58,
+       "amount": 61.08,
        "numeraire": "USD_2024_LOCAL"
       },
       "billing": "per_month",
       "kind": "actual_quote",
       "per_unit": "service-month"
      },
-     "quality": "每月一次约 1 小时的放松按摩；往返约半小时",
+     "quality": "个人联系与基本移动通信；月费是 CE 2024 一人消费单位的手机服务月均支出（共同预算代理，不是某家运营商的套餐报价，各城相同）",
      "resource": {
       "basis": "per_service_month",
-      "burden_per_hour": 0.2,
-      "hours": 1.5,
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
       "job": null,
-      "note": "按摩与往返的合计；生病暂停的月份不付款、不使用",
+      "note": "不占你自己的时间；只在实际付了钱的月份提供这项功能，买两份不叠加",
       "quantity_scales": false,
       "substitutes": [],
       "uses_per_month": null
@@ -208378,28 +208869,160 @@
      "source": {
       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
       "inputs": [
-       "jobs.oews2024.31080.31-9011",
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
        "geography: CBSA2023 31080 Los Angeles-Long Beach-Anaheim 都会区"
       ],
       "kind": "estimated",
       "mapping_version": "e3b-life-items-v1",
-      "observed_on": "2024-05-31",
+      "observed_on": "2024-12-31",
       "provenance": null,
-      "rule": "OEWS 31-9011 都会区中位年薪 58718.87 ÷ 2,080 = 时薪；× 每次 1.25 工人小时 × 每月 1 次 × 人工费用倍率 2.0，四舍五入到分",
+      "rule": "CE 2024 一人消费单位“Cellular phone service”年均 733.0 ÷ 12，四舍五入到分；共同预算代理（全国一人消费单位的平均支出，不是单人套餐报价，各城相同，不做空间换算）",
       "synthetic_note": null
      },
-     "spec": {
-      "sessions_per_month": 1,
-      "worker_hours_per_session": 1.25
-     },
+     "spec": {},
      "targets": [],
      "unit": "service-month"
     },
     {
      "arrangement_options": {},
      "attributes": {
-      "hourly_wage_median": 28.23,
-      "wage_soc": "31-9011"
+      "cost_basis": "fcc_regional_reference",
+      "download_mbps": "100–199",
+      "fcc_offers": 123,
+      "fcc_weighted_median_2023": 60.0,
+      "observed_unit_price": false,
+      "price_geography": "census_region:West",
+      "taxes": "not_included",
+      "upload_min_mbps": 20,
+      "usage_allowance": "unlimited"
+     },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "functions": [
+      "home_connectivity"
+     ],
+     "label": "家庭宽带（基本档）",
+     "occupation": null,
+     "opportunity_id": "la.service.home_internet_basic",
+     "price": {
+      "amount": {
+       "amount": 61.77,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "居家互联网接入：下行 100–199 Mbps、上行至少 20 Mbps、不限流量；月费是 FCC 2024 城市费率调查同规格报价的大区加权中位数，换到 2024 年（不含税）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "不占你自己的时间；只在实际付了钱的月份提供这项功能，买两份不叠加",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "fcc_urs_2024_broadband:2081022e4ee75f86",
+       "bls_cpi_u_education_communication:caf82762c60f6972",
+       "geography: CBSA2023 31080 Los Angeles-Long Beach-Anaheim 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "FCC 2024 城市费率调查：census_region:West 同规格报价（下行 100–199 Mbps、上行 ≥ 20、不限流量）123 条按调查权重的中位数总月费 60.0（2023 年调查价，不含税）× CPI CUUR0000SEEE03 86.136 ÷ 83.670，四舍五入到分；不是本城某家运营商的报价",
+      "synthetic_note": null
+     },
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "ce_annual_one_person": 342.81,
+      "cost_basis": "ce_one_person_budget_x_rpp_goods",
+      "observed_unit_price": false,
+      "price_geography": "metro_estimate"
+     },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "functions": [
+      "household_supplies"
+     ],
+     "label": "家用日耗品（清洁用品与纸品）",
+     "occupation": null,
+     "opportunity_id": "la.service.household_supplies_basic",
+     "price": {
+      "amount": {
+       "amount": 30.46,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "洗衣清洁用品、纸巾卫生纸等家用日耗品；不含个人化妆护理、家电家具；月费是 CE 2024 一人消费单位相应支出的月均 × 本城商品类 RPP（估计）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "不占你自己的时间；只在实际付了钱的月份提供这项功能，买两份不叠加",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp_goods 106.623",
+       "geography: CBSA2023 31080 Los Angeles-Long Beach-Anaheim 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "CE 2024 一人消费单位：laundry_cleaning 120.0、paper_and_misc 222.81（按全国详细表占比分配），合计 ÷ 12 × 商品类 RPP 106.623 ÷ 100，四舍五入到分（估计，不是本地报价）",
+      "synthetic_note": null
+     },
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 139.54,
+      "standard_baskets_per_month": 0.25
      },
      "availability": "available",
      "category": "service",
@@ -208413,33 +209036,317 @@
      "eligibility": [],
      "enjoyment": [
       {
-       "basis": "每月实际接受 2 次按摩（享受型服务）",
-       "function": "personal_care",
+       "basis": "这个月实际获得 0.25 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
        "mode": "service_units",
-       "unit_label": "次",
+       "unit_label": "标准篮子",
+       "units_per_month": 0.25
+      }
+     ],
+     "functions": [],
+     "label": "个人消费篮子（每月 0.25 个标准篮子）",
+     "occupation": null,
+     "opportunity_id": "la.service.personal_basket.u0_25",
+     "price": {
+      "amount": {
+       "amount": 34.88,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 106.623/104.362",
+       "geography: CBSA2023 31080 Los Angeles-Long Beach-Anaheim 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 106.623、其他服务 RPP 104.362，÷ 100）= 139.54；费用 = u × P_c，四舍五入到分",
+      "synthetic_note": null
+     },
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 139.54,
+      "standard_baskets_per_month": 0.5
+     },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "enjoyment": [
+      {
+       "basis": "这个月实际获得 0.5 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
+       "mode": "service_units",
+       "unit_label": "标准篮子",
+       "units_per_month": 0.5
+      }
+     ],
+     "functions": [],
+     "label": "个人消费篮子（每月 0.5 个标准篮子）",
+     "occupation": null,
+     "opportunity_id": "la.service.personal_basket.u0_5",
+     "price": {
+      "amount": {
+       "amount": 69.77,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 106.623/104.362",
+       "geography: CBSA2023 31080 Los Angeles-Long Beach-Anaheim 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 106.623、其他服务 RPP 104.362，÷ 100）= 139.54；费用 = u × P_c，四舍五入到分",
+      "synthetic_note": null
+     },
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 139.54,
+      "standard_baskets_per_month": 1.0
+     },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "enjoyment": [
+      {
+       "basis": "这个月实际获得 1 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
+       "mode": "service_units",
+       "unit_label": "标准篮子",
+       "units_per_month": 1.0
+      }
+     ],
+     "functions": [],
+     "label": "个人消费篮子（每月 1 个标准篮子）",
+     "occupation": null,
+     "opportunity_id": "la.service.personal_basket.u1",
+     "price": {
+      "amount": {
+       "amount": 139.54,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 106.623/104.362",
+       "geography: CBSA2023 31080 Los Angeles-Long Beach-Anaheim 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 106.623、其他服务 RPP 104.362，÷ 100）= 139.54；费用 = u × P_c，四舍五入到分",
+      "synthetic_note": null
+     },
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 139.54,
+      "standard_baskets_per_month": 1.5
+     },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "enjoyment": [
+      {
+       "basis": "这个月实际获得 1.5 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
+       "mode": "service_units",
+       "unit_label": "标准篮子",
+       "units_per_month": 1.5
+      }
+     ],
+     "functions": [],
+     "label": "个人消费篮子（每月 1.5 个标准篮子）",
+     "occupation": null,
+     "opportunity_id": "la.service.personal_basket.u1_5",
+     "price": {
+      "amount": {
+       "amount": 209.31,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 106.623/104.362",
+       "geography: CBSA2023 31080 Los Angeles-Long Beach-Anaheim 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 106.623、其他服务 RPP 104.362，÷ 100）= 139.54；费用 = u × P_c，四舍五入到分",
+      "synthetic_note": null
+     },
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 139.54,
+      "standard_baskets_per_month": 2.0
+     },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "enjoyment": [
+      {
+       "basis": "这个月实际获得 2 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
+       "mode": "service_units",
+       "unit_label": "标准篮子",
        "units_per_month": 2.0
       }
      ],
      "functions": [],
-     "label": "按摩（店里，每月两次）",
+     "label": "个人消费篮子（每月 2 个标准篮子）",
      "occupation": null,
-     "opportunity_id": "la.service.massage_studio_2",
+     "opportunity_id": "la.service.personal_basket.u2",
      "price": {
       "amount": {
-       "amount": 141.15,
+       "amount": 279.07,
        "numeraire": "USD_2024_LOCAL"
       },
       "billing": "per_month",
       "kind": "actual_quote",
       "per_unit": "service-month"
      },
-     "quality": "每月两次、每次约 1 小时的放松按摩；每次往返约半小时",
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
      "resource": {
       "basis": "per_service_month",
-      "burden_per_hour": 0.2,
-      "hours": 3.0,
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
       "job": null,
-      "note": "按摩与往返的合计；生病暂停的月份不付款、不使用",
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
       "quantity_scales": false,
       "substitutes": [],
       "uses_per_month": null
@@ -208447,28 +209354,30 @@
      "source": {
       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
       "inputs": [
-       "jobs.oews2024.31080.31-9011",
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 106.623/104.362",
        "geography: CBSA2023 31080 Los Angeles-Long Beach-Anaheim 都会区"
       ],
       "kind": "estimated",
       "mapping_version": "e3b-life-items-v1",
-      "observed_on": "2024-05-31",
+      "observed_on": "2024-12-31",
       "provenance": null,
-      "rule": "OEWS 31-9011 都会区中位年薪 58718.87 ÷ 2,080 = 时薪；× 每次 1.25 工人小时 × 每月 2 次 × 人工费用倍率 2.0，四舍五入到分",
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 106.623、其他服务 RPP 104.362，÷ 100）= 139.54；费用 = u × P_c，四舍五入到分",
       "synthetic_note": null
      },
-     "spec": {
-      "sessions_per_month": 2,
-      "worker_hours_per_session": 1.25
-     },
+     "spec": {},
      "targets": [],
      "unit": "service-month"
     },
     {
      "arrangement_options": {},
      "attributes": {
-      "hourly_wage_median": 28.23,
-      "wage_soc": "31-9011"
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 139.54,
+      "standard_baskets_per_month": 3.0
      },
      "availability": "available",
      "category": "service",
@@ -208482,33 +209391,33 @@
      "eligibility": [],
      "enjoyment": [
       {
-       "basis": "每月实际接受 1 次按摩（享受型服务）",
-       "function": "personal_care",
+       "basis": "这个月实际获得 3 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
        "mode": "service_units",
-       "unit_label": "次",
-       "units_per_month": 1.0
+       "unit_label": "标准篮子",
+       "units_per_month": 3.0
       }
      ],
      "functions": [],
-     "label": "上门按摩（每月一次）",
+     "label": "个人消费篮子（每月 3 个标准篮子）",
      "occupation": null,
-     "opportunity_id": "la.service.massage_home_1",
+     "opportunity_id": "la.service.personal_basket.u3",
      "price": {
       "amount": {
-       "amount": 112.92,
+       "amount": 418.61,
        "numeraire": "USD_2024_LOCAL"
       },
       "billing": "per_month",
       "kind": "actual_quote",
       "per_unit": "service-month"
      },
-     "quality": "按摩师上门，每月一次约 1 小时；按摩师的路上时间计进价格，本人不用出门",
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
      "resource": {
       "basis": "per_service_month",
-      "burden_per_hour": 0.2,
-      "hours": 1.0,
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
       "job": null,
-      "note": "按摩与往返的合计；生病暂停的月份不付款、不使用",
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
       "quantity_scales": false,
       "substitutes": [],
       "uses_per_month": null
@@ -208516,20 +209425,90 @@
      "source": {
       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
       "inputs": [
-       "jobs.oews2024.31080.31-9011",
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 106.623/104.362",
        "geography: CBSA2023 31080 Los Angeles-Long Beach-Anaheim 都会区"
       ],
       "kind": "estimated",
       "mapping_version": "e3b-life-items-v1",
-      "observed_on": "2024-05-31",
+      "observed_on": "2024-12-31",
       "provenance": null,
-      "rule": "OEWS 31-9011 都会区中位年薪 58718.87 ÷ 2,080 = 时薪；× 每次 2 工人小时 × 每月 1 次 × 人工费用倍率 2.0，四舍五入到分",
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 106.623、其他服务 RPP 104.362，÷ 100）= 139.54；费用 = u × P_c，四舍五入到分",
       "synthetic_note": null
      },
-     "spec": {
-      "sessions_per_month": 1,
-      "worker_hours_per_session": 2
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 139.54,
+      "standard_baskets_per_month": 4.0
      },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "enjoyment": [
+      {
+       "basis": "这个月实际获得 4 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
+       "mode": "service_units",
+       "unit_label": "标准篮子",
+       "units_per_month": 4.0
+      }
+     ],
+     "functions": [],
+     "label": "个人消费篮子（每月 4 个标准篮子）",
+     "occupation": null,
+     "opportunity_id": "la.service.personal_basket.u4",
+     "price": {
+      "amount": {
+       "amount": 558.15,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 106.623/104.362",
+       "geography: CBSA2023 31080 Los Angeles-Long Beach-Anaheim 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 106.623、其他服务 RPP 104.362，÷ 100）= 139.54；费用 = u × P_c，四舍五入到分",
+      "synthetic_note": null
+     },
+     "spec": {},
      "targets": [],
      "unit": "service-month"
     },
@@ -305028,8 +306007,10 @@
     {
      "arrangement_options": {},
      "attributes": {
-      "hourly_wage_median": 20.7,
-      "wage_soc": "31-9011"
+      "ce_annual_one_person": 733.0,
+      "cost_basis": "ce_one_person_budget_proxy",
+      "observed_unit_price": false,
+      "price_geography": "national"
      },
      "availability": "available",
      "category": "service",
@@ -305041,35 +306022,28 @@
       "lasts_years": null
      },
      "eligibility": [],
-     "enjoyment": [
-      {
-       "basis": "每月实际接受 1 次按摩（享受型服务）",
-       "function": "personal_care",
-       "mode": "service_units",
-       "unit_label": "次",
-       "units_per_month": 1.0
-      }
+     "functions": [
+      "personal_communication"
      ],
-     "functions": [],
-     "label": "按摩（店里，每月一次）",
+     "label": "手机通信（基本单人套餐）",
      "occupation": null,
-     "opportunity_id": "sf.service.massage_studio_1",
+     "opportunity_id": "sf.service.mobile_basic",
      "price": {
       "amount": {
-       "amount": 51.75,
+       "amount": 61.08,
        "numeraire": "USD_2024_LOCAL"
       },
       "billing": "per_month",
       "kind": "actual_quote",
       "per_unit": "service-month"
      },
-     "quality": "每月一次约 1 小时的放松按摩；往返约半小时",
+     "quality": "个人联系与基本移动通信；月费是 CE 2024 一人消费单位的手机服务月均支出（共同预算代理，不是某家运营商的套餐报价，各城相同）",
      "resource": {
       "basis": "per_service_month",
-      "burden_per_hour": 0.2,
-      "hours": 1.5,
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
       "job": null,
-      "note": "按摩与往返的合计；生病暂停的月份不付款、不使用",
+      "note": "不占你自己的时间；只在实际付了钱的月份提供这项功能，买两份不叠加",
       "quantity_scales": false,
       "substitutes": [],
       "uses_per_month": null
@@ -305077,28 +306051,160 @@
      "source": {
       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
       "inputs": [
-       "jobs.oews2024.41860.31-9011",
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
        "geography: CBSA2023 41860 San Francisco-Oakland-Fremont 都会区"
       ],
       "kind": "estimated",
       "mapping_version": "e3b-life-items-v1",
-      "observed_on": "2024-05-31",
+      "observed_on": "2024-12-31",
       "provenance": null,
-      "rule": "OEWS 31-9011 都会区中位年薪 43057.84 ÷ 2,080 = 时薪；× 每次 1.25 工人小时 × 每月 1 次 × 人工费用倍率 2.0，四舍五入到分",
+      "rule": "CE 2024 一人消费单位“Cellular phone service”年均 733.0 ÷ 12，四舍五入到分；共同预算代理（全国一人消费单位的平均支出，不是单人套餐报价，各城相同，不做空间换算）",
       "synthetic_note": null
      },
-     "spec": {
-      "sessions_per_month": 1,
-      "worker_hours_per_session": 1.25
-     },
+     "spec": {},
      "targets": [],
      "unit": "service-month"
     },
     {
      "arrangement_options": {},
      "attributes": {
-      "hourly_wage_median": 20.7,
-      "wage_soc": "31-9011"
+      "cost_basis": "fcc_regional_reference",
+      "download_mbps": "100–199",
+      "fcc_offers": 123,
+      "fcc_weighted_median_2023": 60.0,
+      "observed_unit_price": false,
+      "price_geography": "census_region:West",
+      "taxes": "not_included",
+      "upload_min_mbps": 20,
+      "usage_allowance": "unlimited"
+     },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "functions": [
+      "home_connectivity"
+     ],
+     "label": "家庭宽带（基本档）",
+     "occupation": null,
+     "opportunity_id": "sf.service.home_internet_basic",
+     "price": {
+      "amount": {
+       "amount": 61.77,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "居家互联网接入：下行 100–199 Mbps、上行至少 20 Mbps、不限流量；月费是 FCC 2024 城市费率调查同规格报价的大区加权中位数，换到 2024 年（不含税）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "不占你自己的时间；只在实际付了钱的月份提供这项功能，买两份不叠加",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "fcc_urs_2024_broadband:2081022e4ee75f86",
+       "bls_cpi_u_education_communication:caf82762c60f6972",
+       "geography: CBSA2023 41860 San Francisco-Oakland-Fremont 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "FCC 2024 城市费率调查：census_region:West 同规格报价（下行 100–199 Mbps、上行 ≥ 20、不限流量）123 条按调查权重的中位数总月费 60.0（2023 年调查价，不含税）× CPI CUUR0000SEEE03 86.136 ÷ 83.670，四舍五入到分；不是本城某家运营商的报价",
+      "synthetic_note": null
+     },
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "ce_annual_one_person": 342.81,
+      "cost_basis": "ce_one_person_budget_x_rpp_goods",
+      "observed_unit_price": false,
+      "price_geography": "metro_estimate"
+     },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "functions": [
+      "household_supplies"
+     ],
+     "label": "家用日耗品（清洁用品与纸品）",
+     "occupation": null,
+     "opportunity_id": "sf.service.household_supplies_basic",
+     "price": {
+      "amount": {
+       "amount": 30.99,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "洗衣清洁用品、纸巾卫生纸等家用日耗品；不含个人化妆护理、家电家具；月费是 CE 2024 一人消费单位相应支出的月均 × 本城商品类 RPP（估计）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "不占你自己的时间；只在实际付了钱的月份提供这项功能，买两份不叠加",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp_goods 108.465",
+       "geography: CBSA2023 41860 San Francisco-Oakland-Fremont 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "CE 2024 一人消费单位：laundry_cleaning 120.0、paper_and_misc 222.81（按全国详细表占比分配），合计 ÷ 12 × 商品类 RPP 108.465 ÷ 100，四舍五入到分（估计，不是本地报价）",
+      "synthetic_note": null
+     },
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 141.96,
+      "standard_baskets_per_month": 0.25
      },
      "availability": "available",
      "category": "service",
@@ -305112,33 +306218,317 @@
      "eligibility": [],
      "enjoyment": [
       {
-       "basis": "每月实际接受 2 次按摩（享受型服务）",
-       "function": "personal_care",
+       "basis": "这个月实际获得 0.25 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
        "mode": "service_units",
-       "unit_label": "次",
+       "unit_label": "标准篮子",
+       "units_per_month": 0.25
+      }
+     ],
+     "functions": [],
+     "label": "个人消费篮子（每月 0.25 个标准篮子）",
+     "occupation": null,
+     "opportunity_id": "sf.service.personal_basket.u0_25",
+     "price": {
+      "amount": {
+       "amount": 35.49,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 108.465/106.207",
+       "geography: CBSA2023 41860 San Francisco-Oakland-Fremont 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 108.465、其他服务 RPP 106.207，÷ 100）= 141.96；费用 = u × P_c，四舍五入到分",
+      "synthetic_note": null
+     },
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 141.96,
+      "standard_baskets_per_month": 0.5
+     },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "enjoyment": [
+      {
+       "basis": "这个月实际获得 0.5 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
+       "mode": "service_units",
+       "unit_label": "标准篮子",
+       "units_per_month": 0.5
+      }
+     ],
+     "functions": [],
+     "label": "个人消费篮子（每月 0.5 个标准篮子）",
+     "occupation": null,
+     "opportunity_id": "sf.service.personal_basket.u0_5",
+     "price": {
+      "amount": {
+       "amount": 70.98,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 108.465/106.207",
+       "geography: CBSA2023 41860 San Francisco-Oakland-Fremont 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 108.465、其他服务 RPP 106.207，÷ 100）= 141.96；费用 = u × P_c，四舍五入到分",
+      "synthetic_note": null
+     },
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 141.96,
+      "standard_baskets_per_month": 1.0
+     },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "enjoyment": [
+      {
+       "basis": "这个月实际获得 1 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
+       "mode": "service_units",
+       "unit_label": "标准篮子",
+       "units_per_month": 1.0
+      }
+     ],
+     "functions": [],
+     "label": "个人消费篮子（每月 1 个标准篮子）",
+     "occupation": null,
+     "opportunity_id": "sf.service.personal_basket.u1",
+     "price": {
+      "amount": {
+       "amount": 141.96,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 108.465/106.207",
+       "geography: CBSA2023 41860 San Francisco-Oakland-Fremont 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 108.465、其他服务 RPP 106.207，÷ 100）= 141.96；费用 = u × P_c，四舍五入到分",
+      "synthetic_note": null
+     },
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 141.96,
+      "standard_baskets_per_month": 1.5
+     },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "enjoyment": [
+      {
+       "basis": "这个月实际获得 1.5 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
+       "mode": "service_units",
+       "unit_label": "标准篮子",
+       "units_per_month": 1.5
+      }
+     ],
+     "functions": [],
+     "label": "个人消费篮子（每月 1.5 个标准篮子）",
+     "occupation": null,
+     "opportunity_id": "sf.service.personal_basket.u1_5",
+     "price": {
+      "amount": {
+       "amount": 212.94,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 108.465/106.207",
+       "geography: CBSA2023 41860 San Francisco-Oakland-Fremont 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 108.465、其他服务 RPP 106.207，÷ 100）= 141.96；费用 = u × P_c，四舍五入到分",
+      "synthetic_note": null
+     },
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 141.96,
+      "standard_baskets_per_month": 2.0
+     },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "enjoyment": [
+      {
+       "basis": "这个月实际获得 2 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
+       "mode": "service_units",
+       "unit_label": "标准篮子",
        "units_per_month": 2.0
       }
      ],
      "functions": [],
-     "label": "按摩（店里，每月两次）",
+     "label": "个人消费篮子（每月 2 个标准篮子）",
      "occupation": null,
-     "opportunity_id": "sf.service.massage_studio_2",
+     "opportunity_id": "sf.service.personal_basket.u2",
      "price": {
       "amount": {
-       "amount": 103.5,
+       "amount": 283.92,
        "numeraire": "USD_2024_LOCAL"
       },
       "billing": "per_month",
       "kind": "actual_quote",
       "per_unit": "service-month"
      },
-     "quality": "每月两次、每次约 1 小时的放松按摩；每次往返约半小时",
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
      "resource": {
       "basis": "per_service_month",
-      "burden_per_hour": 0.2,
-      "hours": 3.0,
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
       "job": null,
-      "note": "按摩与往返的合计；生病暂停的月份不付款、不使用",
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
       "quantity_scales": false,
       "substitutes": [],
       "uses_per_month": null
@@ -305146,28 +306536,30 @@
      "source": {
       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
       "inputs": [
-       "jobs.oews2024.41860.31-9011",
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 108.465/106.207",
        "geography: CBSA2023 41860 San Francisco-Oakland-Fremont 都会区"
       ],
       "kind": "estimated",
       "mapping_version": "e3b-life-items-v1",
-      "observed_on": "2024-05-31",
+      "observed_on": "2024-12-31",
       "provenance": null,
-      "rule": "OEWS 31-9011 都会区中位年薪 43057.84 ÷ 2,080 = 时薪；× 每次 1.25 工人小时 × 每月 2 次 × 人工费用倍率 2.0，四舍五入到分",
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 108.465、其他服务 RPP 106.207，÷ 100）= 141.96；费用 = u × P_c，四舍五入到分",
       "synthetic_note": null
      },
-     "spec": {
-      "sessions_per_month": 2,
-      "worker_hours_per_session": 1.25
-     },
+     "spec": {},
      "targets": [],
      "unit": "service-month"
     },
     {
      "arrangement_options": {},
      "attributes": {
-      "hourly_wage_median": 20.7,
-      "wage_soc": "31-9011"
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 141.96,
+      "standard_baskets_per_month": 3.0
      },
      "availability": "available",
      "category": "service",
@@ -305181,33 +306573,33 @@
      "eligibility": [],
      "enjoyment": [
       {
-       "basis": "每月实际接受 1 次按摩（享受型服务）",
-       "function": "personal_care",
+       "basis": "这个月实际获得 3 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
        "mode": "service_units",
-       "unit_label": "次",
-       "units_per_month": 1.0
+       "unit_label": "标准篮子",
+       "units_per_month": 3.0
       }
      ],
      "functions": [],
-     "label": "上门按摩（每月一次）",
+     "label": "个人消费篮子（每月 3 个标准篮子）",
      "occupation": null,
-     "opportunity_id": "sf.service.massage_home_1",
+     "opportunity_id": "sf.service.personal_basket.u3",
      "price": {
       "amount": {
-       "amount": 82.8,
+       "amount": 425.88,
        "numeraire": "USD_2024_LOCAL"
       },
       "billing": "per_month",
       "kind": "actual_quote",
       "per_unit": "service-month"
      },
-     "quality": "按摩师上门，每月一次约 1 小时；按摩师的路上时间计进价格，本人不用出门",
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
      "resource": {
       "basis": "per_service_month",
-      "burden_per_hour": 0.2,
-      "hours": 1.0,
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
       "job": null,
-      "note": "按摩与往返的合计；生病暂停的月份不付款、不使用",
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
       "quantity_scales": false,
       "substitutes": [],
       "uses_per_month": null
@@ -305215,20 +306607,90 @@
      "source": {
       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
       "inputs": [
-       "jobs.oews2024.41860.31-9011",
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 108.465/106.207",
        "geography: CBSA2023 41860 San Francisco-Oakland-Fremont 都会区"
       ],
       "kind": "estimated",
       "mapping_version": "e3b-life-items-v1",
-      "observed_on": "2024-05-31",
+      "observed_on": "2024-12-31",
       "provenance": null,
-      "rule": "OEWS 31-9011 都会区中位年薪 43057.84 ÷ 2,080 = 时薪；× 每次 2 工人小时 × 每月 1 次 × 人工费用倍率 2.0，四舍五入到分",
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 108.465、其他服务 RPP 106.207，÷ 100）= 141.96；费用 = u × P_c，四舍五入到分",
       "synthetic_note": null
      },
-     "spec": {
-      "sessions_per_month": 1,
-      "worker_hours_per_session": 2
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 141.96,
+      "standard_baskets_per_month": 4.0
      },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "enjoyment": [
+      {
+       "basis": "这个月实际获得 4 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
+       "mode": "service_units",
+       "unit_label": "标准篮子",
+       "units_per_month": 4.0
+      }
+     ],
+     "functions": [],
+     "label": "个人消费篮子（每月 4 个标准篮子）",
+     "occupation": null,
+     "opportunity_id": "sf.service.personal_basket.u4",
+     "price": {
+      "amount": {
+       "amount": 567.84,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 108.465/106.207",
+       "geography: CBSA2023 41860 San Francisco-Oakland-Fremont 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 108.465、其他服务 RPP 106.207，÷ 100）= 141.96；费用 = u × P_c，四舍五入到分",
+      "synthetic_note": null
+     },
+     "spec": {},
      "targets": [],
      "unit": "service-month"
     },
@@ -406731,8 +408193,10 @@
     {
      "arrangement_options": {},
      "attributes": {
-      "hourly_wage_median": 29.57,
-      "wage_soc": "31-9011"
+      "ce_annual_one_person": 733.0,
+      "cost_basis": "ce_one_person_budget_proxy",
+      "observed_unit_price": false,
+      "price_geography": "national"
      },
      "availability": "available",
      "category": "service",
@@ -406744,35 +408208,28 @@
       "lasts_years": null
      },
      "eligibility": [],
-     "enjoyment": [
-      {
-       "basis": "每月实际接受 1 次按摩（享受型服务）",
-       "function": "personal_care",
-       "mode": "service_units",
-       "unit_label": "次",
-       "units_per_month": 1.0
-      }
+     "functions": [
+      "personal_communication"
      ],
-     "functions": [],
-     "label": "按摩（店里，每月一次）",
+     "label": "手机通信（基本单人套餐）",
      "occupation": null,
-     "opportunity_id": "chi.service.massage_studio_1",
+     "opportunity_id": "chi.service.mobile_basic",
      "price": {
       "amount": {
-       "amount": 73.94,
+       "amount": 61.08,
        "numeraire": "USD_2024_LOCAL"
       },
       "billing": "per_month",
       "kind": "actual_quote",
       "per_unit": "service-month"
      },
-     "quality": "每月一次约 1 小时的放松按摩；往返约半小时",
+     "quality": "个人联系与基本移动通信；月费是 CE 2024 一人消费单位的手机服务月均支出（共同预算代理，不是某家运营商的套餐报价，各城相同）",
      "resource": {
       "basis": "per_service_month",
-      "burden_per_hour": 0.2,
-      "hours": 1.5,
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
       "job": null,
-      "note": "按摩与往返的合计；生病暂停的月份不付款、不使用",
+      "note": "不占你自己的时间；只在实际付了钱的月份提供这项功能，买两份不叠加",
       "quantity_scales": false,
       "substitutes": [],
       "uses_per_month": null
@@ -406780,28 +408237,160 @@
      "source": {
       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
       "inputs": [
-       "jobs.oews2024.16980.31-9011",
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
        "geography: CBSA2023 16980 Chicago-Naperville-Elgin 都会区"
       ],
       "kind": "estimated",
       "mapping_version": "e3b-life-items-v1",
-      "observed_on": "2024-05-31",
+      "observed_on": "2024-12-31",
       "provenance": null,
-      "rule": "OEWS 31-9011 都会区中位年薪 61515.48 ÷ 2,080 = 时薪；× 每次 1.25 工人小时 × 每月 1 次 × 人工费用倍率 2.0，四舍五入到分",
+      "rule": "CE 2024 一人消费单位“Cellular phone service”年均 733.0 ÷ 12，四舍五入到分；共同预算代理（全国一人消费单位的平均支出，不是单人套餐报价，各城相同，不做空间换算）",
       "synthetic_note": null
      },
-     "spec": {
-      "sessions_per_month": 1,
-      "worker_hours_per_session": 1.25
-     },
+     "spec": {},
      "targets": [],
      "unit": "service-month"
     },
     {
      "arrangement_options": {},
      "attributes": {
-      "hourly_wage_median": 29.57,
-      "wage_soc": "31-9011"
+      "cost_basis": "fcc_regional_reference",
+      "download_mbps": "100–199",
+      "fcc_offers": 239,
+      "fcc_weighted_median_2023": 64.95,
+      "observed_unit_price": false,
+      "price_geography": "census_region:Midwest",
+      "taxes": "not_included",
+      "upload_min_mbps": 20,
+      "usage_allowance": "unlimited"
+     },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "functions": [
+      "home_connectivity"
+     ],
+     "label": "家庭宽带（基本档）",
+     "occupation": null,
+     "opportunity_id": "chi.service.home_internet_basic",
+     "price": {
+      "amount": {
+       "amount": 66.86,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "居家互联网接入：下行 100–199 Mbps、上行至少 20 Mbps、不限流量；月费是 FCC 2024 城市费率调查同规格报价的大区加权中位数，换到 2024 年（不含税）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "不占你自己的时间；只在实际付了钱的月份提供这项功能，买两份不叠加",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "fcc_urs_2024_broadband:2081022e4ee75f86",
+       "bls_cpi_u_education_communication:caf82762c60f6972",
+       "geography: CBSA2023 16980 Chicago-Naperville-Elgin 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "FCC 2024 城市费率调查：census_region:Midwest 同规格报价（下行 100–199 Mbps、上行 ≥ 20、不限流量）239 条按调查权重的中位数总月费 64.95（2023 年调查价，不含税）× CPI CUUR0000SEEE03 86.136 ÷ 83.670，四舍五入到分；不是本城某家运营商的报价",
+      "synthetic_note": null
+     },
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "ce_annual_one_person": 342.81,
+      "cost_basis": "ce_one_person_budget_x_rpp_goods",
+      "observed_unit_price": false,
+      "price_geography": "metro_estimate"
+     },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "functions": [
+      "household_supplies"
+     ],
+     "label": "家用日耗品（清洁用品与纸品）",
+     "occupation": null,
+     "opportunity_id": "chi.service.household_supplies_basic",
+     "price": {
+      "amount": {
+       "amount": 30.64,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "洗衣清洁用品、纸巾卫生纸等家用日耗品；不含个人化妆护理、家电家具；月费是 CE 2024 一人消费单位相应支出的月均 × 本城商品类 RPP（估计）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "不占你自己的时间；只在实际付了钱的月份提供这项功能，买两份不叠加",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp_goods 107.258",
+       "geography: CBSA2023 16980 Chicago-Naperville-Elgin 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "CE 2024 一人消费单位：laundry_cleaning 120.0、paper_and_misc 222.81（按全国详细表占比分配），合计 ÷ 12 × 商品类 RPP 107.258 ÷ 100，四舍五入到分（估计，不是本地报价）",
+      "synthetic_note": null
+     },
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 139.19,
+      "standard_baskets_per_month": 0.25
      },
      "availability": "available",
      "category": "service",
@@ -406815,33 +408404,317 @@
      "eligibility": [],
      "enjoyment": [
       {
-       "basis": "每月实际接受 2 次按摩（享受型服务）",
-       "function": "personal_care",
+       "basis": "这个月实际获得 0.25 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
        "mode": "service_units",
-       "unit_label": "次",
+       "unit_label": "标准篮子",
+       "units_per_month": 0.25
+      }
+     ],
+     "functions": [],
+     "label": "个人消费篮子（每月 0.25 个标准篮子）",
+     "occupation": null,
+     "opportunity_id": "chi.service.personal_basket.u0_25",
+     "price": {
+      "amount": {
+       "amount": 34.8,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 107.258/100.492",
+       "geography: CBSA2023 16980 Chicago-Naperville-Elgin 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 107.258、其他服务 RPP 100.492，÷ 100）= 139.19；费用 = u × P_c，四舍五入到分",
+      "synthetic_note": null
+     },
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 139.19,
+      "standard_baskets_per_month": 0.5
+     },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "enjoyment": [
+      {
+       "basis": "这个月实际获得 0.5 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
+       "mode": "service_units",
+       "unit_label": "标准篮子",
+       "units_per_month": 0.5
+      }
+     ],
+     "functions": [],
+     "label": "个人消费篮子（每月 0.5 个标准篮子）",
+     "occupation": null,
+     "opportunity_id": "chi.service.personal_basket.u0_5",
+     "price": {
+      "amount": {
+       "amount": 69.59,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 107.258/100.492",
+       "geography: CBSA2023 16980 Chicago-Naperville-Elgin 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 107.258、其他服务 RPP 100.492，÷ 100）= 139.19；费用 = u × P_c，四舍五入到分",
+      "synthetic_note": null
+     },
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 139.19,
+      "standard_baskets_per_month": 1.0
+     },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "enjoyment": [
+      {
+       "basis": "这个月实际获得 1 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
+       "mode": "service_units",
+       "unit_label": "标准篮子",
+       "units_per_month": 1.0
+      }
+     ],
+     "functions": [],
+     "label": "个人消费篮子（每月 1 个标准篮子）",
+     "occupation": null,
+     "opportunity_id": "chi.service.personal_basket.u1",
+     "price": {
+      "amount": {
+       "amount": 139.19,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 107.258/100.492",
+       "geography: CBSA2023 16980 Chicago-Naperville-Elgin 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 107.258、其他服务 RPP 100.492，÷ 100）= 139.19；费用 = u × P_c，四舍五入到分",
+      "synthetic_note": null
+     },
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 139.19,
+      "standard_baskets_per_month": 1.5
+     },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "enjoyment": [
+      {
+       "basis": "这个月实际获得 1.5 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
+       "mode": "service_units",
+       "unit_label": "标准篮子",
+       "units_per_month": 1.5
+      }
+     ],
+     "functions": [],
+     "label": "个人消费篮子（每月 1.5 个标准篮子）",
+     "occupation": null,
+     "opportunity_id": "chi.service.personal_basket.u1_5",
+     "price": {
+      "amount": {
+       "amount": 208.78,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 107.258/100.492",
+       "geography: CBSA2023 16980 Chicago-Naperville-Elgin 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 107.258、其他服务 RPP 100.492，÷ 100）= 139.19；费用 = u × P_c，四舍五入到分",
+      "synthetic_note": null
+     },
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 139.19,
+      "standard_baskets_per_month": 2.0
+     },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "enjoyment": [
+      {
+       "basis": "这个月实际获得 2 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
+       "mode": "service_units",
+       "unit_label": "标准篮子",
        "units_per_month": 2.0
       }
      ],
      "functions": [],
-     "label": "按摩（店里，每月两次）",
+     "label": "个人消费篮子（每月 2 个标准篮子）",
      "occupation": null,
-     "opportunity_id": "chi.service.massage_studio_2",
+     "opportunity_id": "chi.service.personal_basket.u2",
      "price": {
       "amount": {
-       "amount": 147.87,
+       "amount": 278.37,
        "numeraire": "USD_2024_LOCAL"
       },
       "billing": "per_month",
       "kind": "actual_quote",
       "per_unit": "service-month"
      },
-     "quality": "每月两次、每次约 1 小时的放松按摩；每次往返约半小时",
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
      "resource": {
       "basis": "per_service_month",
-      "burden_per_hour": 0.2,
-      "hours": 3.0,
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
       "job": null,
-      "note": "按摩与往返的合计；生病暂停的月份不付款、不使用",
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
       "quantity_scales": false,
       "substitutes": [],
       "uses_per_month": null
@@ -406849,28 +408722,30 @@
      "source": {
       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
       "inputs": [
-       "jobs.oews2024.16980.31-9011",
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 107.258/100.492",
        "geography: CBSA2023 16980 Chicago-Naperville-Elgin 都会区"
       ],
       "kind": "estimated",
       "mapping_version": "e3b-life-items-v1",
-      "observed_on": "2024-05-31",
+      "observed_on": "2024-12-31",
       "provenance": null,
-      "rule": "OEWS 31-9011 都会区中位年薪 61515.48 ÷ 2,080 = 时薪；× 每次 1.25 工人小时 × 每月 2 次 × 人工费用倍率 2.0，四舍五入到分",
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 107.258、其他服务 RPP 100.492，÷ 100）= 139.19；费用 = u × P_c，四舍五入到分",
       "synthetic_note": null
      },
-     "spec": {
-      "sessions_per_month": 2,
-      "worker_hours_per_session": 1.25
-     },
+     "spec": {},
      "targets": [],
      "unit": "service-month"
     },
     {
      "arrangement_options": {},
      "attributes": {
-      "hourly_wage_median": 29.57,
-      "wage_soc": "31-9011"
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 139.19,
+      "standard_baskets_per_month": 3.0
      },
      "availability": "available",
      "category": "service",
@@ -406884,33 +408759,33 @@
      "eligibility": [],
      "enjoyment": [
       {
-       "basis": "每月实际接受 1 次按摩（享受型服务）",
-       "function": "personal_care",
+       "basis": "这个月实际获得 3 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
        "mode": "service_units",
-       "unit_label": "次",
-       "units_per_month": 1.0
+       "unit_label": "标准篮子",
+       "units_per_month": 3.0
       }
      ],
      "functions": [],
-     "label": "上门按摩（每月一次）",
+     "label": "个人消费篮子（每月 3 个标准篮子）",
      "occupation": null,
-     "opportunity_id": "chi.service.massage_home_1",
+     "opportunity_id": "chi.service.personal_basket.u3",
      "price": {
       "amount": {
-       "amount": 118.3,
+       "amount": 417.56,
        "numeraire": "USD_2024_LOCAL"
       },
       "billing": "per_month",
       "kind": "actual_quote",
       "per_unit": "service-month"
      },
-     "quality": "按摩师上门，每月一次约 1 小时；按摩师的路上时间计进价格，本人不用出门",
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
      "resource": {
       "basis": "per_service_month",
-      "burden_per_hour": 0.2,
-      "hours": 1.0,
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
       "job": null,
-      "note": "按摩与往返的合计；生病暂停的月份不付款、不使用",
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
       "quantity_scales": false,
       "substitutes": [],
       "uses_per_month": null
@@ -406918,20 +408793,90 @@
      "source": {
       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
       "inputs": [
-       "jobs.oews2024.16980.31-9011",
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 107.258/100.492",
        "geography: CBSA2023 16980 Chicago-Naperville-Elgin 都会区"
       ],
       "kind": "estimated",
       "mapping_version": "e3b-life-items-v1",
-      "observed_on": "2024-05-31",
+      "observed_on": "2024-12-31",
       "provenance": null,
-      "rule": "OEWS 31-9011 都会区中位年薪 61515.48 ÷ 2,080 = 时薪；× 每次 2 工人小时 × 每月 1 次 × 人工费用倍率 2.0，四舍五入到分",
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 107.258、其他服务 RPP 100.492，÷ 100）= 139.19；费用 = u × P_c，四舍五入到分",
       "synthetic_note": null
      },
-     "spec": {
-      "sessions_per_month": 1,
-      "worker_hours_per_session": 2
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 139.19,
+      "standard_baskets_per_month": 4.0
      },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "enjoyment": [
+      {
+       "basis": "这个月实际获得 4 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
+       "mode": "service_units",
+       "unit_label": "标准篮子",
+       "units_per_month": 4.0
+      }
+     ],
+     "functions": [],
+     "label": "个人消费篮子（每月 4 个标准篮子）",
+     "occupation": null,
+     "opportunity_id": "chi.service.personal_basket.u4",
+     "price": {
+      "amount": {
+       "amount": 556.75,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 107.258/100.492",
+       "geography: CBSA2023 16980 Chicago-Naperville-Elgin 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 107.258、其他服务 RPP 100.492，÷ 100）= 139.19；费用 = u × P_c，四舍五入到分",
+      "synthetic_note": null
+     },
+     "spec": {},
      "targets": [],
      "unit": "service-month"
     },
@@ -505140,8 +507085,10 @@
     {
      "arrangement_options": {},
      "attributes": {
-      "hourly_wage_median": 27.72,
-      "wage_soc": "31-9011"
+      "ce_annual_one_person": 733.0,
+      "cost_basis": "ce_one_person_budget_proxy",
+      "observed_unit_price": false,
+      "price_geography": "national"
      },
      "availability": "available",
      "category": "service",
@@ -505153,35 +507100,28 @@
       "lasts_years": null
      },
      "eligibility": [],
-     "enjoyment": [
-      {
-       "basis": "每月实际接受 1 次按摩（享受型服务）",
-       "function": "personal_care",
-       "mode": "service_units",
-       "unit_label": "次",
-       "units_per_month": 1.0
-      }
+     "functions": [
+      "personal_communication"
      ],
-     "functions": [],
-     "label": "按摩（店里，每月一次）",
+     "label": "手机通信（基本单人套餐）",
      "occupation": null,
-     "opportunity_id": "hou.service.massage_studio_1",
+     "opportunity_id": "hou.service.mobile_basic",
      "price": {
       "amount": {
-       "amount": 69.3,
+       "amount": 61.08,
        "numeraire": "USD_2024_LOCAL"
       },
       "billing": "per_month",
       "kind": "actual_quote",
       "per_unit": "service-month"
      },
-     "quality": "每月一次约 1 小时的放松按摩；往返约半小时",
+     "quality": "个人联系与基本移动通信；月费是 CE 2024 一人消费单位的手机服务月均支出（共同预算代理，不是某家运营商的套餐报价，各城相同）",
      "resource": {
       "basis": "per_service_month",
-      "burden_per_hour": 0.2,
-      "hours": 1.5,
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
       "job": null,
-      "note": "按摩与往返的合计；生病暂停的月份不付款、不使用",
+      "note": "不占你自己的时间；只在实际付了钱的月份提供这项功能，买两份不叠加",
       "quantity_scales": false,
       "substitutes": [],
       "uses_per_month": null
@@ -505189,28 +507129,160 @@
      "source": {
       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
       "inputs": [
-       "jobs.oews2024.26420.31-9011",
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
        "geography: CBSA2023 26420 Houston-Pasadena-The Woodlands 都会区"
       ],
       "kind": "estimated",
       "mapping_version": "e3b-life-items-v1",
-      "observed_on": "2024-05-31",
+      "observed_on": "2024-12-31",
       "provenance": null,
-      "rule": "OEWS 31-9011 都会区中位年薪 57660.15 ÷ 2,080 = 时薪；× 每次 1.25 工人小时 × 每月 1 次 × 人工费用倍率 2.0，四舍五入到分",
+      "rule": "CE 2024 一人消费单位“Cellular phone service”年均 733.0 ÷ 12，四舍五入到分；共同预算代理（全国一人消费单位的平均支出，不是单人套餐报价，各城相同，不做空间换算）",
       "synthetic_note": null
      },
-     "spec": {
-      "sessions_per_month": 1,
-      "worker_hours_per_session": 1.25
-     },
+     "spec": {},
      "targets": [],
      "unit": "service-month"
     },
     {
      "arrangement_options": {},
      "attributes": {
-      "hourly_wage_median": 27.72,
-      "wage_soc": "31-9011"
+      "cost_basis": "fcc_regional_reference",
+      "download_mbps": "100–199",
+      "fcc_offers": 133,
+      "fcc_weighted_median_2023": 70.0,
+      "observed_unit_price": false,
+      "price_geography": "census_region:South",
+      "taxes": "not_included",
+      "upload_min_mbps": 20,
+      "usage_allowance": "unlimited"
+     },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "functions": [
+      "home_connectivity"
+     ],
+     "label": "家庭宽带（基本档）",
+     "occupation": null,
+     "opportunity_id": "hou.service.home_internet_basic",
+     "price": {
+      "amount": {
+       "amount": 72.06,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "居家互联网接入：下行 100–199 Mbps、上行至少 20 Mbps、不限流量；月费是 FCC 2024 城市费率调查同规格报价的大区加权中位数，换到 2024 年（不含税）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "不占你自己的时间；只在实际付了钱的月份提供这项功能，买两份不叠加",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "fcc_urs_2024_broadband:2081022e4ee75f86",
+       "bls_cpi_u_education_communication:caf82762c60f6972",
+       "geography: CBSA2023 26420 Houston-Pasadena-The Woodlands 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "FCC 2024 城市费率调查：census_region:South 同规格报价（下行 100–199 Mbps、上行 ≥ 20、不限流量）133 条按调查权重的中位数总月费 70.0（2023 年调查价，不含税）× CPI CUUR0000SEEE03 86.136 ÷ 83.670，四舍五入到分；不是本城某家运营商的报价",
+      "synthetic_note": null
+     },
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "ce_annual_one_person": 342.81,
+      "cost_basis": "ce_one_person_budget_x_rpp_goods",
+      "observed_unit_price": false,
+      "price_geography": "metro_estimate"
+     },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "functions": [
+      "household_supplies"
+     ],
+     "label": "家用日耗品（清洁用品与纸品）",
+     "occupation": null,
+     "opportunity_id": "hou.service.household_supplies_basic",
+     "price": {
+      "amount": {
+       "amount": 28.75,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "洗衣清洁用品、纸巾卫生纸等家用日耗品；不含个人化妆护理、家电家具；月费是 CE 2024 一人消费单位相应支出的月均 × 本城商品类 RPP（估计）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "不占你自己的时间；只在实际付了钱的月份提供这项功能，买两份不叠加",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp_goods 100.639",
+       "geography: CBSA2023 26420 Houston-Pasadena-The Woodlands 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "CE 2024 一人消费单位：laundry_cleaning 120.0、paper_and_misc 222.81（按全国详细表占比分配），合计 ÷ 12 × 商品类 RPP 100.639 ÷ 100，四舍五入到分（估计，不是本地报价）",
+      "synthetic_note": null
+     },
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 130.94,
+      "standard_baskets_per_month": 0.25
      },
      "availability": "available",
      "category": "service",
@@ -505224,33 +507296,317 @@
      "eligibility": [],
      "enjoyment": [
       {
-       "basis": "每月实际接受 2 次按摩（享受型服务）",
-       "function": "personal_care",
+       "basis": "这个月实际获得 0.25 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
        "mode": "service_units",
-       "unit_label": "次",
+       "unit_label": "标准篮子",
+       "units_per_month": 0.25
+      }
+     ],
+     "functions": [],
+     "label": "个人消费篮子（每月 0.25 个标准篮子）",
+     "occupation": null,
+     "opportunity_id": "hou.service.personal_basket.u0_25",
+     "price": {
+      "amount": {
+       "amount": 32.74,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 100.639/95.595",
+       "geography: CBSA2023 26420 Houston-Pasadena-The Woodlands 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 100.639、其他服务 RPP 95.595，÷ 100）= 130.94；费用 = u × P_c，四舍五入到分",
+      "synthetic_note": null
+     },
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 130.94,
+      "standard_baskets_per_month": 0.5
+     },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "enjoyment": [
+      {
+       "basis": "这个月实际获得 0.5 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
+       "mode": "service_units",
+       "unit_label": "标准篮子",
+       "units_per_month": 0.5
+      }
+     ],
+     "functions": [],
+     "label": "个人消费篮子（每月 0.5 个标准篮子）",
+     "occupation": null,
+     "opportunity_id": "hou.service.personal_basket.u0_5",
+     "price": {
+      "amount": {
+       "amount": 65.47,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 100.639/95.595",
+       "geography: CBSA2023 26420 Houston-Pasadena-The Woodlands 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 100.639、其他服务 RPP 95.595，÷ 100）= 130.94；费用 = u × P_c，四舍五入到分",
+      "synthetic_note": null
+     },
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 130.94,
+      "standard_baskets_per_month": 1.0
+     },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "enjoyment": [
+      {
+       "basis": "这个月实际获得 1 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
+       "mode": "service_units",
+       "unit_label": "标准篮子",
+       "units_per_month": 1.0
+      }
+     ],
+     "functions": [],
+     "label": "个人消费篮子（每月 1 个标准篮子）",
+     "occupation": null,
+     "opportunity_id": "hou.service.personal_basket.u1",
+     "price": {
+      "amount": {
+       "amount": 130.94,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 100.639/95.595",
+       "geography: CBSA2023 26420 Houston-Pasadena-The Woodlands 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 100.639、其他服务 RPP 95.595，÷ 100）= 130.94；费用 = u × P_c，四舍五入到分",
+      "synthetic_note": null
+     },
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 130.94,
+      "standard_baskets_per_month": 1.5
+     },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "enjoyment": [
+      {
+       "basis": "这个月实际获得 1.5 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
+       "mode": "service_units",
+       "unit_label": "标准篮子",
+       "units_per_month": 1.5
+      }
+     ],
+     "functions": [],
+     "label": "个人消费篮子（每月 1.5 个标准篮子）",
+     "occupation": null,
+     "opportunity_id": "hou.service.personal_basket.u1_5",
+     "price": {
+      "amount": {
+       "amount": 196.41,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 100.639/95.595",
+       "geography: CBSA2023 26420 Houston-Pasadena-The Woodlands 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 100.639、其他服务 RPP 95.595，÷ 100）= 130.94；费用 = u × P_c，四舍五入到分",
+      "synthetic_note": null
+     },
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 130.94,
+      "standard_baskets_per_month": 2.0
+     },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "enjoyment": [
+      {
+       "basis": "这个月实际获得 2 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
+       "mode": "service_units",
+       "unit_label": "标准篮子",
        "units_per_month": 2.0
       }
      ],
      "functions": [],
-     "label": "按摩（店里，每月两次）",
+     "label": "个人消费篮子（每月 2 个标准篮子）",
      "occupation": null,
-     "opportunity_id": "hou.service.massage_studio_2",
+     "opportunity_id": "hou.service.personal_basket.u2",
      "price": {
       "amount": {
-       "amount": 138.61,
+       "amount": 261.88,
        "numeraire": "USD_2024_LOCAL"
       },
       "billing": "per_month",
       "kind": "actual_quote",
       "per_unit": "service-month"
      },
-     "quality": "每月两次、每次约 1 小时的放松按摩；每次往返约半小时",
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
      "resource": {
       "basis": "per_service_month",
-      "burden_per_hour": 0.2,
-      "hours": 3.0,
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
       "job": null,
-      "note": "按摩与往返的合计；生病暂停的月份不付款、不使用",
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
       "quantity_scales": false,
       "substitutes": [],
       "uses_per_month": null
@@ -505258,28 +507614,30 @@
      "source": {
       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
       "inputs": [
-       "jobs.oews2024.26420.31-9011",
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 100.639/95.595",
        "geography: CBSA2023 26420 Houston-Pasadena-The Woodlands 都会区"
       ],
       "kind": "estimated",
       "mapping_version": "e3b-life-items-v1",
-      "observed_on": "2024-05-31",
+      "observed_on": "2024-12-31",
       "provenance": null,
-      "rule": "OEWS 31-9011 都会区中位年薪 57660.15 ÷ 2,080 = 时薪；× 每次 1.25 工人小时 × 每月 2 次 × 人工费用倍率 2.0，四舍五入到分",
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 100.639、其他服务 RPP 95.595，÷ 100）= 130.94；费用 = u × P_c，四舍五入到分",
       "synthetic_note": null
      },
-     "spec": {
-      "sessions_per_month": 2,
-      "worker_hours_per_session": 1.25
-     },
+     "spec": {},
      "targets": [],
      "unit": "service-month"
     },
     {
      "arrangement_options": {},
      "attributes": {
-      "hourly_wage_median": 27.72,
-      "wage_soc": "31-9011"
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 130.94,
+      "standard_baskets_per_month": 3.0
      },
      "availability": "available",
      "category": "service",
@@ -505293,33 +507651,33 @@
      "eligibility": [],
      "enjoyment": [
       {
-       "basis": "每月实际接受 1 次按摩（享受型服务）",
-       "function": "personal_care",
+       "basis": "这个月实际获得 3 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
        "mode": "service_units",
-       "unit_label": "次",
-       "units_per_month": 1.0
+       "unit_label": "标准篮子",
+       "units_per_month": 3.0
       }
      ],
      "functions": [],
-     "label": "上门按摩（每月一次）",
+     "label": "个人消费篮子（每月 3 个标准篮子）",
      "occupation": null,
-     "opportunity_id": "hou.service.massage_home_1",
+     "opportunity_id": "hou.service.personal_basket.u3",
      "price": {
       "amount": {
-       "amount": 110.88,
+       "amount": 392.82,
        "numeraire": "USD_2024_LOCAL"
       },
       "billing": "per_month",
       "kind": "actual_quote",
       "per_unit": "service-month"
      },
-     "quality": "按摩师上门，每月一次约 1 小时；按摩师的路上时间计进价格，本人不用出门",
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
      "resource": {
       "basis": "per_service_month",
-      "burden_per_hour": 0.2,
-      "hours": 1.0,
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
       "job": null,
-      "note": "按摩与往返的合计；生病暂停的月份不付款、不使用",
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
       "quantity_scales": false,
       "substitutes": [],
       "uses_per_month": null
@@ -505327,20 +507685,90 @@
      "source": {
       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
       "inputs": [
-       "jobs.oews2024.26420.31-9011",
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 100.639/95.595",
        "geography: CBSA2023 26420 Houston-Pasadena-The Woodlands 都会区"
       ],
       "kind": "estimated",
       "mapping_version": "e3b-life-items-v1",
-      "observed_on": "2024-05-31",
+      "observed_on": "2024-12-31",
       "provenance": null,
-      "rule": "OEWS 31-9011 都会区中位年薪 57660.15 ÷ 2,080 = 时薪；× 每次 2 工人小时 × 每月 1 次 × 人工费用倍率 2.0，四舍五入到分",
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 100.639、其他服务 RPP 95.595，÷ 100）= 130.94；费用 = u × P_c，四舍五入到分",
       "synthetic_note": null
      },
-     "spec": {
-      "sessions_per_month": 1,
-      "worker_hours_per_session": 2
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 130.94,
+      "standard_baskets_per_month": 4.0
      },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "enjoyment": [
+      {
+       "basis": "这个月实际获得 4 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
+       "mode": "service_units",
+       "unit_label": "标准篮子",
+       "units_per_month": 4.0
+      }
+     ],
+     "functions": [],
+     "label": "个人消费篮子（每月 4 个标准篮子）",
+     "occupation": null,
+     "opportunity_id": "hou.service.personal_basket.u4",
+     "price": {
+      "amount": {
+       "amount": 523.76,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 100.639/95.595",
+       "geography: CBSA2023 26420 Houston-Pasadena-The Woodlands 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 100.639、其他服务 RPP 95.595，÷ 100）= 130.94；费用 = u × P_c，四舍五入到分",
+      "synthetic_note": null
+     },
+     "spec": {},
      "targets": [],
      "unit": "service-month"
     },
@@ -600624,8 +603052,10 @@
     {
      "arrangement_options": {},
      "attributes": {
-      "hourly_wage_median": 42.44,
-      "wage_soc": "31-9011"
+      "ce_annual_one_person": 733.0,
+      "cost_basis": "ce_one_person_budget_proxy",
+      "observed_unit_price": false,
+      "price_geography": "national"
      },
      "availability": "available",
      "category": "service",
@@ -600637,35 +603067,28 @@
       "lasts_years": null
      },
      "eligibility": [],
-     "enjoyment": [
-      {
-       "basis": "每月实际接受 1 次按摩（享受型服务）",
-       "function": "personal_care",
-       "mode": "service_units",
-       "unit_label": "次",
-       "units_per_month": 1.0
-      }
+     "functions": [
+      "personal_communication"
      ],
-     "functions": [],
-     "label": "按摩（店里，每月一次）",
+     "label": "手机通信（基本单人套餐）",
      "occupation": null,
-     "opportunity_id": "sea.service.massage_studio_1",
+     "opportunity_id": "sea.service.mobile_basic",
      "price": {
       "amount": {
-       "amount": 106.11,
+       "amount": 61.08,
        "numeraire": "USD_2024_LOCAL"
       },
       "billing": "per_month",
       "kind": "actual_quote",
       "per_unit": "service-month"
      },
-     "quality": "每月一次约 1 小时的放松按摩；往返约半小时",
+     "quality": "个人联系与基本移动通信；月费是 CE 2024 一人消费单位的手机服务月均支出（共同预算代理，不是某家运营商的套餐报价，各城相同）",
      "resource": {
       "basis": "per_service_month",
-      "burden_per_hour": 0.2,
-      "hours": 1.5,
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
       "job": null,
-      "note": "按摩与往返的合计；生病暂停的月份不付款、不使用",
+      "note": "不占你自己的时间；只在实际付了钱的月份提供这项功能，买两份不叠加",
       "quantity_scales": false,
       "substitutes": [],
       "uses_per_month": null
@@ -600673,28 +603096,160 @@
      "source": {
       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
       "inputs": [
-       "jobs.oews2024.42660.31-9011",
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
        "geography: CBSA2023 42660 Seattle-Tacoma-Bellevue 都会区"
       ],
       "kind": "estimated",
       "mapping_version": "e3b-life-items-v1",
-      "observed_on": "2024-05-31",
+      "observed_on": "2024-12-31",
       "provenance": null,
-      "rule": "OEWS 31-9011 都会区中位年薪 88283.05 ÷ 2,080 = 时薪；× 每次 1.25 工人小时 × 每月 1 次 × 人工费用倍率 2.0，四舍五入到分",
+      "rule": "CE 2024 一人消费单位“Cellular phone service”年均 733.0 ÷ 12，四舍五入到分；共同预算代理（全国一人消费单位的平均支出，不是单人套餐报价，各城相同，不做空间换算）",
       "synthetic_note": null
      },
-     "spec": {
-      "sessions_per_month": 1,
-      "worker_hours_per_session": 1.25
-     },
+     "spec": {},
      "targets": [],
      "unit": "service-month"
     },
     {
      "arrangement_options": {},
      "attributes": {
-      "hourly_wage_median": 42.44,
-      "wage_soc": "31-9011"
+      "cost_basis": "fcc_regional_reference",
+      "download_mbps": "100–199",
+      "fcc_offers": 123,
+      "fcc_weighted_median_2023": 60.0,
+      "observed_unit_price": false,
+      "price_geography": "census_region:West",
+      "taxes": "not_included",
+      "upload_min_mbps": 20,
+      "usage_allowance": "unlimited"
+     },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "functions": [
+      "home_connectivity"
+     ],
+     "label": "家庭宽带（基本档）",
+     "occupation": null,
+     "opportunity_id": "sea.service.home_internet_basic",
+     "price": {
+      "amount": {
+       "amount": 61.77,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "居家互联网接入：下行 100–199 Mbps、上行至少 20 Mbps、不限流量；月费是 FCC 2024 城市费率调查同规格报价的大区加权中位数，换到 2024 年（不含税）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "不占你自己的时间；只在实际付了钱的月份提供这项功能，买两份不叠加",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "fcc_urs_2024_broadband:2081022e4ee75f86",
+       "bls_cpi_u_education_communication:caf82762c60f6972",
+       "geography: CBSA2023 42660 Seattle-Tacoma-Bellevue 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "FCC 2024 城市费率调查：census_region:West 同规格报价（下行 100–199 Mbps、上行 ≥ 20、不限流量）123 条按调查权重的中位数总月费 60.0（2023 年调查价，不含税）× CPI CUUR0000SEEE03 86.136 ÷ 83.670，四舍五入到分；不是本城某家运营商的报价",
+      "synthetic_note": null
+     },
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "ce_annual_one_person": 342.81,
+      "cost_basis": "ce_one_person_budget_x_rpp_goods",
+      "observed_unit_price": false,
+      "price_geography": "metro_estimate"
+     },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "functions": [
+      "household_supplies"
+     ],
+     "label": "家用日耗品（清洁用品与纸品）",
+     "occupation": null,
+     "opportunity_id": "sea.service.household_supplies_basic",
+     "price": {
+      "amount": {
+       "amount": 29.7,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "洗衣清洁用品、纸巾卫生纸等家用日耗品；不含个人化妆护理、家电家具；月费是 CE 2024 一人消费单位相应支出的月均 × 本城商品类 RPP（估计）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "不占你自己的时间；只在实际付了钱的月份提供这项功能，买两份不叠加",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp_goods 103.972",
+       "geography: CBSA2023 42660 Seattle-Tacoma-Bellevue 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "CE 2024 一人消费单位：laundry_cleaning 120.0、paper_and_misc 222.81（按全国详细表占比分配），合计 ÷ 12 × 商品类 RPP 103.972 ÷ 100，四舍五入到分（估计，不是本地报价）",
+      "synthetic_note": null
+     },
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 137.4,
+      "standard_baskets_per_month": 0.25
      },
      "availability": "available",
      "category": "service",
@@ -600708,33 +603263,317 @@
      "eligibility": [],
      "enjoyment": [
       {
-       "basis": "每月实际接受 2 次按摩（享受型服务）",
-       "function": "personal_care",
+       "basis": "这个月实际获得 0.25 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
        "mode": "service_units",
-       "unit_label": "次",
+       "unit_label": "标准篮子",
+       "units_per_month": 0.25
+      }
+     ],
+     "functions": [],
+     "label": "个人消费篮子（每月 0.25 个标准篮子）",
+     "occupation": null,
+     "opportunity_id": "sea.service.personal_basket.u0_25",
+     "price": {
+      "amount": {
+       "amount": 34.35,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 103.972/106.835",
+       "geography: CBSA2023 42660 Seattle-Tacoma-Bellevue 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 103.972、其他服务 RPP 106.835，÷ 100）= 137.4；费用 = u × P_c，四舍五入到分",
+      "synthetic_note": null
+     },
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 137.4,
+      "standard_baskets_per_month": 0.5
+     },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "enjoyment": [
+      {
+       "basis": "这个月实际获得 0.5 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
+       "mode": "service_units",
+       "unit_label": "标准篮子",
+       "units_per_month": 0.5
+      }
+     ],
+     "functions": [],
+     "label": "个人消费篮子（每月 0.5 个标准篮子）",
+     "occupation": null,
+     "opportunity_id": "sea.service.personal_basket.u0_5",
+     "price": {
+      "amount": {
+       "amount": 68.7,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 103.972/106.835",
+       "geography: CBSA2023 42660 Seattle-Tacoma-Bellevue 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 103.972、其他服务 RPP 106.835，÷ 100）= 137.4；费用 = u × P_c，四舍五入到分",
+      "synthetic_note": null
+     },
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 137.4,
+      "standard_baskets_per_month": 1.0
+     },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "enjoyment": [
+      {
+       "basis": "这个月实际获得 1 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
+       "mode": "service_units",
+       "unit_label": "标准篮子",
+       "units_per_month": 1.0
+      }
+     ],
+     "functions": [],
+     "label": "个人消费篮子（每月 1 个标准篮子）",
+     "occupation": null,
+     "opportunity_id": "sea.service.personal_basket.u1",
+     "price": {
+      "amount": {
+       "amount": 137.4,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 103.972/106.835",
+       "geography: CBSA2023 42660 Seattle-Tacoma-Bellevue 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 103.972、其他服务 RPP 106.835，÷ 100）= 137.4；费用 = u × P_c，四舍五入到分",
+      "synthetic_note": null
+     },
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 137.4,
+      "standard_baskets_per_month": 1.5
+     },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "enjoyment": [
+      {
+       "basis": "这个月实际获得 1.5 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
+       "mode": "service_units",
+       "unit_label": "标准篮子",
+       "units_per_month": 1.5
+      }
+     ],
+     "functions": [],
+     "label": "个人消费篮子（每月 1.5 个标准篮子）",
+     "occupation": null,
+     "opportunity_id": "sea.service.personal_basket.u1_5",
+     "price": {
+      "amount": {
+       "amount": 206.1,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 103.972/106.835",
+       "geography: CBSA2023 42660 Seattle-Tacoma-Bellevue 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 103.972、其他服务 RPP 106.835，÷ 100）= 137.4；费用 = u × P_c，四舍五入到分",
+      "synthetic_note": null
+     },
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 137.4,
+      "standard_baskets_per_month": 2.0
+     },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "enjoyment": [
+      {
+       "basis": "这个月实际获得 2 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
+       "mode": "service_units",
+       "unit_label": "标准篮子",
        "units_per_month": 2.0
       }
      ],
      "functions": [],
-     "label": "按摩（店里，每月两次）",
+     "label": "个人消费篮子（每月 2 个标准篮子）",
      "occupation": null,
-     "opportunity_id": "sea.service.massage_studio_2",
+     "opportunity_id": "sea.service.personal_basket.u2",
      "price": {
       "amount": {
-       "amount": 212.22,
+       "amount": 274.8,
        "numeraire": "USD_2024_LOCAL"
       },
       "billing": "per_month",
       "kind": "actual_quote",
       "per_unit": "service-month"
      },
-     "quality": "每月两次、每次约 1 小时的放松按摩；每次往返约半小时",
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
      "resource": {
       "basis": "per_service_month",
-      "burden_per_hour": 0.2,
-      "hours": 3.0,
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
       "job": null,
-      "note": "按摩与往返的合计；生病暂停的月份不付款、不使用",
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
       "quantity_scales": false,
       "substitutes": [],
       "uses_per_month": null
@@ -600742,28 +603581,30 @@
      "source": {
       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
       "inputs": [
-       "jobs.oews2024.42660.31-9011",
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 103.972/106.835",
        "geography: CBSA2023 42660 Seattle-Tacoma-Bellevue 都会区"
       ],
       "kind": "estimated",
       "mapping_version": "e3b-life-items-v1",
-      "observed_on": "2024-05-31",
+      "observed_on": "2024-12-31",
       "provenance": null,
-      "rule": "OEWS 31-9011 都会区中位年薪 88283.05 ÷ 2,080 = 时薪；× 每次 1.25 工人小时 × 每月 2 次 × 人工费用倍率 2.0，四舍五入到分",
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 103.972、其他服务 RPP 106.835，÷ 100）= 137.4；费用 = u × P_c，四舍五入到分",
       "synthetic_note": null
      },
-     "spec": {
-      "sessions_per_month": 2,
-      "worker_hours_per_session": 1.25
-     },
+     "spec": {},
      "targets": [],
      "unit": "service-month"
     },
     {
      "arrangement_options": {},
      "attributes": {
-      "hourly_wage_median": 42.44,
-      "wage_soc": "31-9011"
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 137.4,
+      "standard_baskets_per_month": 3.0
      },
      "availability": "available",
      "category": "service",
@@ -600777,33 +603618,33 @@
      "eligibility": [],
      "enjoyment": [
       {
-       "basis": "每月实际接受 1 次按摩（享受型服务）",
-       "function": "personal_care",
+       "basis": "这个月实际获得 3 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
        "mode": "service_units",
-       "unit_label": "次",
-       "units_per_month": 1.0
+       "unit_label": "标准篮子",
+       "units_per_month": 3.0
       }
      ],
      "functions": [],
-     "label": "上门按摩（每月一次）",
+     "label": "个人消费篮子（每月 3 个标准篮子）",
      "occupation": null,
-     "opportunity_id": "sea.service.massage_home_1",
+     "opportunity_id": "sea.service.personal_basket.u3",
      "price": {
       "amount": {
-       "amount": 169.78,
+       "amount": 412.2,
        "numeraire": "USD_2024_LOCAL"
       },
       "billing": "per_month",
       "kind": "actual_quote",
       "per_unit": "service-month"
      },
-     "quality": "按摩师上门，每月一次约 1 小时；按摩师的路上时间计进价格，本人不用出门",
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
      "resource": {
       "basis": "per_service_month",
-      "burden_per_hour": 0.2,
-      "hours": 1.0,
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
       "job": null,
-      "note": "按摩与往返的合计；生病暂停的月份不付款、不使用",
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
       "quantity_scales": false,
       "substitutes": [],
       "uses_per_month": null
@@ -600811,20 +603652,90 @@
      "source": {
       "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
       "inputs": [
-       "jobs.oews2024.42660.31-9011",
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 103.972/106.835",
        "geography: CBSA2023 42660 Seattle-Tacoma-Bellevue 都会区"
       ],
       "kind": "estimated",
       "mapping_version": "e3b-life-items-v1",
-      "observed_on": "2024-05-31",
+      "observed_on": "2024-12-31",
       "provenance": null,
-      "rule": "OEWS 31-9011 都会区中位年薪 88283.05 ÷ 2,080 = 时薪；× 每次 2 工人小时 × 每月 1 次 × 人工费用倍率 2.0，四舍五入到分",
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 103.972、其他服务 RPP 106.835，÷ 100）= 137.4；费用 = u × P_c，四舍五入到分",
       "synthetic_note": null
      },
-     "spec": {
-      "sessions_per_month": 1,
-      "worker_hours_per_session": 2
+     "spec": {},
+     "targets": [],
+     "unit": "service-month"
+    },
+    {
+     "arrangement_options": {},
+     "attributes": {
+      "allocated_share_estimate": true,
+      "cost_basis": "ce_one_person_vector_x_rpp",
+      "observed_unit_price": false,
+      "standard_basket_price": 137.4,
+      "standard_baskets_per_month": 4.0
      },
+     "availability": "available",
+     "category": "service",
+     "compensation": null,
+     "duration": {
+      "completion_years": null,
+      "effective_from": "same_year",
+      "kind": "ongoing_service",
+      "lasts_years": null
+     },
+     "eligibility": [],
+     "enjoyment": [
+      {
+       "basis": "这个月实际获得 4 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+       "function": "personal_consumption",
+       "mode": "service_units",
+       "unit_label": "标准篮子",
+       "units_per_month": 4.0
+      }
+     ],
+     "functions": [],
+     "label": "个人消费篮子（每月 4 个标准篮子）",
+     "occupation": null,
+     "opportunity_id": "sea.service.personal_basket.u4",
+     "price": {
+      "amount": {
+       "amount": 549.6,
+       "numeraire": "USD_2024_LOCAL"
+      },
+      "billing": "per_month",
+      "kind": "actual_quote",
+      "per_unit": "service-month"
+     },
+     "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
+     "resource": {
+      "basis": "per_service_month",
+      "burden_per_hour": 0.0,
+      "hours": 0.0,
+      "job": null,
+      "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
+      "quantity_scales": false,
+      "substitutes": [],
+      "uses_per_month": null
+     },
+     "source": {
+      "geography_scope": "CBSA 2023 MSA（按税务支持范围裁剪的 2020 PUMA）",
+      "inputs": [
+       "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+       "bls_ce_national_2024_detail:6efdb40841f80cbd",
+       "rpp 103.972/106.835",
+       "geography: CBSA2023 42660 Seattle-Tacoma-Bellevue 都会区"
+      ],
+      "kind": "estimated",
+      "mapping_version": "e3b-life-items-v1",
+      "observed_on": "2024-12-31",
+      "provenance": null,
+      "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 103.972、其他服务 RPP 106.835，÷ 100）= 137.4；费用 = u × P_c，四舍五入到分",
+      "synthetic_note": null
+     },
+     "spec": {},
      "targets": [],
      "unit": "service-month"
     },
@@ -602333,14 +605244,17 @@
   "mediterranean"
  ],
  "enjoyment_functions": [
-  "personal_care"
+  "personal_consumption"
  ],
  "fixture_notice": "E3B 六城真实资料包（life-pack-us-v1）：城市资料来自公开来源，生活规则与评分参数仍是合成探索设定；不能据此排序真实城市",
  "function_kinds": {},
  "functions": [
   "car_access",
   "food",
-  "housing"
+  "home_connectivity",
+  "household_supplies",
+  "housing",
+  "personal_communication"
  ],
  "initial_states": [],
  "leisure_categories": [
@@ -602721,7 +605635,7 @@
    "preference_source": "product_confirmed_six_dim",
    "quantization": "floor_to_0.01",
    "score_statistic": "complete_year_mean_u",
-   "scoring_content_fingerprint": "180fd9389343bac1da0fac4528e4eb6e9c6d7e069bddd56ea47acdcc4380bce0",
+   "scoring_content_fingerprint": "c36f768cbb84afd5398b4afedeafbf2aa1a117bf61cfd944a453eb3cdc1e7d75",
    "scoring_spec_id": "score.e1-life.explore",
    "scoring_version": "e1-life-v1",
    "source": {

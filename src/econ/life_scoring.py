@@ -99,6 +99,7 @@ from common.life_scoring_contracts import (
     RequirementEvidence,
     ScoringComponent,
     ScoringPreference,
+    SupportCoverage,
     TaskRelief,
     TransportTerm,
 )
@@ -539,8 +540,11 @@ def _score_convenience(
     cond: CityComponentCondition,
     resources: MonthResources | None,
     rules: MonthlyResourceRules | None,
+    in_use: list[_InUse],
 ) -> ComponentMonth:
-    """物质维"日常生活便利"（`DECISIONS/0033`）：q = Σ_t（协议基准小时 − 当月资源账里本人的残余小时），s = min(c, q/(q + τ))。
+    """物质维"日常支持与便利"（`DECISIONS/0033`；E3B 映射修正 §5）：杂务部分 q = Σ_t（协议基准小时 − 当月资源账里本人的残余小时），
+    S_chore = min(c, q/(q + τ))；支持部分 S_support = c_support × 这个月实际获得的支持功能数 ÷ 功能总数（在用记录里有提供这项功能的服务
+    才算获得，同功能多份不叠加）；s = w_chore·S_chore + w_support·S_support。
 
     只读两样结构化事实：协议资源规则里每项家务的基准小时，与这个月资源账 household_task 那几行的本人小时——那几行是结算按"同一
     任务取当月在用方案里残余最小的那一个"写出的，所以设备与人工同时在用不会把节省相加，第二台同样的设备也不会多减负。不解析说明
@@ -616,16 +620,36 @@ def _score_convenience(
         )
     tau = to_fraction(comp.tau)
     cap = to_fraction(cv.cap)
-    raw = total / (total + tau)
-    s_value = min(cap, raw)
+    chore_raw = total / (total + tau)
+    chore_s = min(cap, chore_raw)
+    coverage = [
+        SupportCoverage(
+            function=f,
+            covered=bool(
+                via := sorted({r.opp.opportunity_id for r in in_use if f in r.opp.functions})
+            ),
+            via=tuple(via),
+        )
+        for f in cv.support_functions
+    ]
+    got = sum(1 for c in coverage if c.covered)
+    support_s = to_fraction(cv.support_cap) * got / len(coverage)
+    w_chore, w_support = to_fraction(cv.chore_weight), to_fraction(cv.support_weight)
+    raw = w_chore * chore_raw + w_support * support_s
+    s_value = w_chore * chore_s + w_support * support_s
     if total == 0:
         why = "这个月没有在用的家务替代：本人全部自己做，减少 0 小时（确定的 0，不是数据缺失）"
     else:
         by = sorted({r.opportunity_id for r in reliefs if r.opportunity_id is not None})
         why = (
-            f"这个月本人少做 {_fraction_hours(total)} 小时家务（由 {by} 承担）：s = min(c, q/(q + τ))；"
+            f"这个月本人少做 {_fraction_hours(total)} 小时家务（由 {by} 承担）：S_chore = min(c, q/(q + τ))；"
             "同一项家务只取残余最小的那个方案，成交与花钱不另计分"
         )
+    support_why = (
+        f"日常支持：这个月实际获得 {got}/{len(coverage)} 项（"
+        + "；".join(f"{c.function} {'是' if c.covered else '否'}" for c in coverage)
+        + "）；只在付了钱、实际在用的月份算获得，同功能多份不叠加，不制造节省小时"
+    )
     return ComponentMonth(
         **head,
         status="known",
@@ -633,13 +657,19 @@ def _score_convenience(
         z=float(total),
         raw=float(raw),
         s=float(s_value),
-        capped=raw > cap,
-        reasons=(why,),
+        capped=chore_raw > cap,
+        reasons=(why, support_why),
         convenience=ConvenienceTerm(
             tasks=tuple(reliefs),
             relief_hours=ExactAmount.of(total),
             tau_hours=comp.tau,
             cap=cv.cap,
+            chore_s=float(chore_s),
+            support=tuple(coverage),
+            support_cap=cv.support_cap,
+            support_s=float(support_s),
+            chore_weight=cv.chore_weight,
+            support_weight=cv.support_weight,
         ),
     )
 
@@ -899,7 +929,7 @@ def _score_component(
     if comp.transport is not None:
         return _score_transport(comp, cond, in_use, resources, catalog)
     if comp.convenience is not None:
-        return _score_convenience(comp, cond, resources, rules)
+        return _score_convenience(comp, cond, resources, rules, in_use)
     if comp.food_life is not None:
         assert pref is not None
         return _score_food_life(comp, cond, in_use, pref)

@@ -241,10 +241,69 @@ def test_chore_service_is_wage_times_hours_times_overhead(frozen, sl):
     )
 
 
-def test_massage_is_counted_by_sessions_received(frozen):
-    o = items_by_id(frozen, "35620")["nyc.service.massage_studio_2"]["opportunity"]
-    assert o["enjoyment"][0]["function"] == "personal_care"
-    assert o["enjoyment"][0]["units_per_month"] == 2 and o["resource"]["hours"] == 3.0
+def test_massage_is_gone_and_daily_support_prices_follow_the_cost_order_by_hand(frozen, sl):
+    """独立按摩不再生成（与消费篮子重复计分）。三项日常支持：手机 = CE 一人消费单位年均 ÷ 12（共同预算代理，各城相同）；宽带 =
+    FCC 2024 东北区同规格报价加权中位数 × CPI 互联网 2024 ÷ 2023；日耗品 = CE 一人（洗衣清洁 + 纸品与杂项的分配额）÷ 12 × 商品 RPP。"""
+    items = items_by_id(frozen, "35620")
+    assert not any("massage" in k for k in items)
+    ce, one = sl["daily_support"]["ce"], sl["daily_support"]["ce"]["one_person"]
+    det = ce["detail_all_units"]
+    mobile = items["nyc.service.mobile_basic"]["opportunity"]
+    assert amount(items["nyc.service.mobile_basic"]) == round(
+        float(Fraction(one["Cellular phone service"]) / 12), 2
+    )
+    assert mobile["functions"] == ["personal_communication"]
+    assert mobile["attributes"]["cost_basis"] == "ce_one_person_budget_proxy"
+    assert mobile["attributes"]["observed_unit_price"] is False
+    cpi = sl["daily_support"]["cpi_internet"]["annual"]
+    ne = Fraction(
+        sl["daily_support"]["fcc"]["by_region"]["Northeast"]["weighted_median_total_charge"]
+    )
+    net = items["nyc.service.home_internet_basic"]
+    assert amount(net) == round(float(ne * Fraction(cpi["2024"]) / Fraction(cpi["2023"])), 2)
+    assert net["opportunity"]["attributes"]["price_geography"] == "census_region:Northeast"
+    paper = Fraction(det["Paper towels, napkins, and toilet tissue [D]"]) + Fraction(
+        det["Miscellaneous household products [D]"]
+    )
+    supplies = (
+        Fraction(one["Laundry and cleaning products"])
+        + Fraction(one["Other household products"])
+        * paper
+        / Fraction(det["Other household products [D]"])
+    ) / 12
+    goods = Fraction(sl["metros"]["35620"]["rpp"]["rpp_goods"]) / 100
+    assert amount(items["nyc.service.household_supplies_basic"]) == round(
+        float(supplies * goods), 2
+    )
+    for k in ("mobile_basic", "home_internet_basic", "household_supplies_basic"):
+        r = items[f"nyc.service.{k}"]["opportunity"]["resource"]
+        assert r["hours"] == 0 and not r["substitutes"]  # 不制造节省小时
+
+
+def test_the_basket_is_the_fixed_reference_vector_times_city_price_factors(frozen, sl):
+    """P_c = Σ e_j × 价格系数（商品 → 商品类 RPP，服务 → 其他服务 RPP）；档位 u 的月费 = u × P_c；享受功能每月 u 份。"""
+    from product.realdata.daily_support_data import allocated_annual
+
+    cfg = yaml.safe_load(
+        (REPO / "configs/intake/life_items_us_v1.yaml").read_text(encoding="utf-8")
+    )
+    ce, rpp = sl["daily_support"]["ce"], sl["metros"]["35620"]["rpp"]
+    factor = {"goods": Fraction(rpp["rpp_goods"]) / 100, "other": Fraction(rpp["rpp_other"]) / 100}
+    p_c = sum(
+        allocated_annual(ce["one_person"], ce["detail_all_units"], line)[0]
+        / 12
+        * factor[line["price_index"]]
+        for line in cfg["consumption_basket"]["lines"]
+    )
+    items = items_by_id(frozen, "35620")
+    baskets = sorted(k for k in items if ".personal_basket." in k)
+    assert len(baskets) == 7  # 0.25 … 4；0 是不买，不生成机会
+    for u, oid in (("1", "u1"), ("2", "u2"), ("0.25", "u0_25")):
+        o = items[f"nyc.service.personal_basket.{oid}"]["opportunity"]
+        assert o["price"]["amount"]["amount"] == round(float(Fraction(u) * p_c), 2)
+        assert o["enjoyment"][0]["function"] == "personal_consumption"
+        assert o["enjoyment"][0]["units_per_month"] == float(u)
+        assert o["resource"]["hours"] == 0 and not o.get("activity") and not o.get("equipment")
 
 
 def test_device_uses_the_median_energy_model_and_a_category_price(frozen, sl):
@@ -385,7 +444,7 @@ def test_e1_compile_check_accepts_real_items_placed_in_a_synthetic_city(frozen):
     assert check("nyc.experience.group_fitness", "activity").status == "executable"
     assert check("nyc.experience.tennis_rental", "activity").status == "executable"
     assert check("nyc.durable.acoustic_guitar", "equipment").status == "executable"
-    assert check("nyc.service.massage_studio_1", "enjoyment").status == "executable"
+    assert check("nyc.service.personal_basket.u1", "enjoyment").status == "executable"
     cheap = check("nyc.food.staples.h21", "food_plan")
     assert cheap.status == "rejected" and any("最低食品方案" in r for r in cheap.reasons_zh)
     assert (
@@ -426,7 +485,15 @@ def test_each_city_keeps_the_common_a_structure_and_no_price_was_updated(frozen)
     全部“未发生本地报价更新”（芝加哥公园管理局的整期价格本身就是直接报价，原样保留）。"""
     for cbsa in ("35620", "16980", "41860"):
         blocks = {b["block"]: b for b in city(frozen, cbsa)["a_blocks"]}
-        assert set(blocks) == {"food", "services", "devices", "equipment", "activities"}
+        assert set(blocks) == {
+            "food",
+            "services",
+            "daily_support",
+            "consumption_basket",
+            "devices",
+            "equipment",
+            "activities",
+        }
         for b in blocks.values():
             assert b["parameters"] and all(
                 {"meaning_zh", "unit", "support", "prior", "source", "city_updatable"} <= set(p)

@@ -858,9 +858,29 @@ EVAL_SLOTS = [
     {"slot_id": "laundry_service", "role": "service", "description": "上门取送洗衣，按月付费"},
     {"slot_id": "cleaning_service", "role": "service", "description": "两周一次上门打扫，按月付费"},
     {
-        "slot_id": "massage",
+        "slot_id": "communication",
         "role": "service",
-        "description": "每月一次按摩（享受型服务，按月付费）",
+        "description": "手机通信（基本单人套餐，按月付费）",
+    },
+    {
+        "slot_id": "connectivity",
+        "role": "service",
+        "description": "家庭宽带基本档（按月付费）",
+    },
+    {
+        "slot_id": "supplies",
+        "role": "service",
+        "description": "家用日耗品（清洁用品与纸品，按月付费）",
+    },
+    {
+        "slot_id": "basket_basic",
+        "role": "service",
+        "description": "个人消费篮子：每月 1 个标准篮子（按当期价格购买消费服务流）",
+    },
+    {
+        "slot_id": "basket_comfort",
+        "role": "service",
+        "description": "个人消费篮子：每月 2 个标准篮子（按当期价格购买消费服务流）",
     },
     {
         "slot_id": "exercise_class",
@@ -894,6 +914,7 @@ def _templates() -> list[dict[str, Any]]:
         "when_missing": "skip",
         "after_expiry": "stop",
     }
+    support = ["communication", "connectivity", "supplies"]
     out = []
     for jobs, prefix, label in (
         ("current_positions", "p", "现职"),
@@ -908,8 +929,12 @@ def _templates() -> list[dict[str, Any]]:
                 **extra,
                 "housing_slot": "housing_basic",
                 "food_slot": "food_basic",
+                "service_slots": [*support, "basket_basic"],
                 "activity_uses": [{**music, "after_expiry": "stop"}],
-                "description": "最便宜的住房、基本食品；已有的设备照用，不另买设备或服务；有吉他就练，到期即停",
+                "description": (
+                    "最便宜的住房、基本食品、通信网络日耗品、每月 1 个标准消费篮子；已有的设备照用，不另买设备或杂务服务；有吉他就练，"
+                    "到期即停"
+                ),
             },
             {
                 "template_id": f"{prefix}2_device",
@@ -918,13 +943,14 @@ def _templates() -> list[dict[str, Any]]:
                 **extra,
                 "housing_slot": "housing_comfort",
                 "food_slot": "food_comfort",
-                "service_slots": ["massage"],
+                "service_slots": [*support, "basket_comfort"],
                 "durable_purchases": [
                     {"slot_id": "convenience_device", "month": 1, "rule": "buy_if_not_held"}
                 ],
                 "activity_uses": [gym, {**music, "after_expiry": "replace"}],
                 "description": (
-                    "通勤短的一卧、新鲜食材、每月按摩、每月 8 次团体课；没有在用的洗衣设备就在第 1 月买；有吉他就练，到期换新"
+                    "通勤短的一卧、新鲜食材、通信网络日耗品、每月 2 个标准消费篮子、每月 8 次团体课；没有在用的洗衣设备就在第 1 月买；"
+                    "有吉他就练，到期换新"
                 ),
             },
             {
@@ -934,10 +960,16 @@ def _templates() -> list[dict[str, Any]]:
                 **extra,
                 "housing_slot": "housing_comfort",
                 "food_slot": "food_comfort",
-                "service_slots": ["laundry_service", "cleaning_service", "massage"],
+                "service_slots": [
+                    "laundry_service",
+                    "cleaning_service",
+                    *support,
+                    "basket_comfort",
+                ],
                 "activity_uses": [gym, {**music, "after_expiry": "replace"}],
                 "description": (
-                    "通勤短的一卧、新鲜食材、上门洗衣与打扫、每月按摩、每月 8 次团体课；有吉他就练，到期换新"
+                    "通勤短的一卧、新鲜食材、上门洗衣与打扫、通信网络日耗品、每月 2 个标准消费篮子、每月 8 次团体课；有吉他就练，"
+                    "到期换新"
                 ),
             },
         ]
@@ -1028,7 +1060,19 @@ def build_evaluation(cfg: dict[str, Any], pack: PackBuild) -> dict[str, Any]:
                         ids,
                         "没有两周一次的打扫服务",
                     ),
-                    _target("massage", f"{k}.service.massage_studio_1", ids, "没有按摩服务"),
+                    _target("communication", f"{k}.service.mobile_basic", ids, "没有手机通信"),
+                    _target(
+                        "connectivity", f"{k}.service.home_internet_basic", ids, "没有家庭宽带"
+                    ),
+                    _target(
+                        "supplies", f"{k}.service.household_supplies_basic", ids, "没有家用日耗品"
+                    ),
+                    _target(
+                        "basket_basic", f"{k}.service.personal_basket.u1", ids, "没有标准消费篮子"
+                    ),
+                    _target(
+                        "basket_comfort", f"{k}.service.personal_basket.u2", ids, "没有标准消费篮子"
+                    ),
                     _target(
                         "exercise_class",
                         f"{k}.experience.group_fitness",

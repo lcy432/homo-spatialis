@@ -29,7 +29,7 @@ spec:
     主设定 δ = 1：每个月同等重要（实际 36 个月与估值 12 个月逐月同权）。估值期只评价 12 个月，之后的剩余资产不追加第二次
     终值；六个基础生活模板 = 两种岗位安排（现职 / 已具资格的会计岗位）× 三种生活方案（基本、较舒适＋便利设备、较舒适＋人工杂务
     服务）；治疗选择是独立分支；不新开课程、不续学未完成的课程。每个模板每月 4 次音乐练习，用期末持有的吉他（按能力认）；
-    基本生活模板到期即停，较舒适的模板到期换新；较舒适的模板另有每月一次按摩。
+    基本生活模板到期即停，较舒适的模板到期换新。所有模板都买通信、宽带与家用日耗品；基本生活每月 1 个标准消费篮子，较舒适的每月 2 个。
   slots:
     - {slot_id: housing_basic, role: housing, description: 基本住房：离工作地远、房租较低的一居室}
     - {slot_id: housing_comfort, role: housing, description: 较舒适的住房：离工作地近、房租较高的一居室}
@@ -39,7 +39,11 @@ spec:
     - {slot_id: convenience_device, role: durable, description: 便利设备包（洗烘一体机＋扫地机器人）；估值期初还在服务期内就照用、不再买}
     - {slot_id: chore_service, role: service, description: 日常杂务服务（每月上门洗衣与打扫），按月付费}
     - {slot_id: qualified_job, role: job, description: 要求会计资格的全职岗位（只有估值期初已经合格才适用）}
-    - {slot_id: massage, role: service, description: 每月一次按摩（享受型服务，按月付费）}
+    - {slot_id: communication, role: service, description: 手机通信（基本单人套餐，按月付费）}
+    - {slot_id: connectivity, role: service, description: 家庭宽带基本档（按月付费）}
+    - {slot_id: supplies, role: service, description: 家用日耗品（清洁用品与纸品，按月付费）}
+    - {slot_id: basket_basic, role: service, description: 个人消费篮子：每月 1 个标准篮子（按当期价格购买消费服务流）}
+    - {slot_id: basket_comfort, role: service, description: 个人消费篮子：每月 2 个标准篮子（按当期价格购买消费服务流）}
     - {slot_id: music_practice, role: activity, description: 在家弹吉他练习（要能弹的吉他；按能力使用期末持有的装备）}
     - {slot_id: guitar, role: durable, description: 一把吉他（只在模板规定要替换时买）}
   life_templates:
@@ -48,52 +52,54 @@ spec:
       jobs: current_positions
       housing_slot: housing_basic
       food_slot: food_basic
+      service_slots: [communication, connectivity, supplies, basket_basic]
       activity_uses: [{activity_slot: music_practice, sessions_per_month: 4, equipment_slot: guitar, when_missing: skip, after_expiry: stop}]
-      description: 延续终态里的当前岗位，远处住房、基本食品；已有的设备照用，不另买设备或服务；有吉他就练，到期即停
+      description: 延续终态里的当前岗位，远处住房、基本食品、通信网络日耗品、每月 1 个标准消费篮子；已有的设备照用，不另买设备或服务；有吉他就练，到期即停
     - template_id: p2_current_device
       label: 现职 + 较舒适的生活 + 便利设备
       jobs: current_positions
       housing_slot: housing_comfort
       food_slot: food_comfort
-      service_slots: [exercise, massage]
+      service_slots: [exercise, communication, connectivity, supplies, basket_comfort]
       durable_purchases: [{slot_id: convenience_device, month: 1, rule: buy_if_not_held}]
       activity_uses: [{activity_slot: music_practice, sessions_per_month: 4, equipment_slot: guitar, when_missing: skip, after_expiry: replace}]
-      description: 延续当前岗位，近处住房、新鲜食材、健身、每月按摩；没有在用的便利设备就在第 1 月买一套；有吉他就练，到期换新
+      description: 延续当前岗位，近处住房、新鲜食材、健身、通信网络日耗品、每月 2 个标准消费篮子；没有在用的便利设备就在第 1 月买一套；有吉他就练，到期换新
     - template_id: p3_current_service
       label: 现职 + 较舒适的生活 + 人工杂务服务
       jobs: current_positions
       housing_slot: housing_comfort
       food_slot: food_comfort
-      service_slots: [exercise, chore_service, massage]
+      service_slots: [exercise, chore_service, communication, connectivity, supplies, basket_comfort]
       activity_uses: [{activity_slot: music_practice, sessions_per_month: 4, equipment_slot: guitar, when_missing: skip, after_expiry: replace}]
-      description: 延续当前岗位，近处住房、新鲜食材、健身、每月按摩，全年按月购买日常杂务服务；有吉他就练，到期换新
+      description: 延续当前岗位，近处住房、新鲜食材、健身、通信网络日耗品、每月 2 个标准消费篮子，全年按月购买日常杂务服务；有吉他就练，到期换新
     - template_id: p4_qualified_basic
       label: 改做已具资格的岗位 + 基本生活
       jobs: qualified_alternative
       job_slot: qualified_job
       housing_slot: housing_basic
       food_slot: food_basic
+      service_slots: [communication, connectivity, supplies, basket_basic]
       activity_uses: [{activity_slot: music_practice, sessions_per_month: 4, equipment_slot: guitar, when_missing: skip, after_expiry: stop}]
-      description: 估值期初已具会计资格才适用：改做会计，远处住房、基本食品；有吉他就练，到期即停
+      description: 估值期初已具会计资格才适用：改做会计，远处住房、基本食品、通信网络日耗品、每月 1 个标准消费篮子；有吉他就练，到期即停
     - template_id: p5_qualified_device
       label: 改做已具资格的岗位 + 较舒适的生活 + 便利设备
       jobs: qualified_alternative
       job_slot: qualified_job
       housing_slot: housing_comfort
       food_slot: food_comfort
-      service_slots: [exercise, massage]
+      service_slots: [exercise, communication, connectivity, supplies, basket_comfort]
       durable_purchases: [{slot_id: convenience_device, month: 1, rule: buy_if_not_held}]
       activity_uses: [{activity_slot: music_practice, sessions_per_month: 4, equipment_slot: guitar, when_missing: skip, after_expiry: replace}]
-      description: 估值期初已具会计资格才适用：改做会计，近处住房、新鲜食材、健身、每月按摩，没有便利设备就买；有吉他就练，到期换新
+      description: 估值期初已具会计资格才适用：改做会计，近处住房、新鲜食材、健身、通信网络日耗品、每月 2 个标准消费篮子，没有便利设备就买；有吉他就练，到期换新
     - template_id: p6_qualified_service
       label: 改做已具资格的岗位 + 较舒适的生活 + 人工杂务服务
       jobs: qualified_alternative
       job_slot: qualified_job
       housing_slot: housing_comfort
       food_slot: food_comfort
-      service_slots: [exercise, chore_service, massage]
+      service_slots: [exercise, chore_service, communication, connectivity, supplies, basket_comfort]
       activity_uses: [{activity_slot: music_practice, sessions_per_month: 4, equipment_slot: guitar, when_missing: skip, after_expiry: replace}]
-      description: 估值期初已具会计资格才适用：改做会计，近处住房、新鲜食材、健身、每月按摩，全年按月购买日常杂务服务；有吉他就练，到期换新
+      description: 估值期初已具会计资格才适用：改做会计，近处住房、新鲜食材、健身、通信网络日耗品、每月 2 个标准消费篮子，全年按月购买日常杂务服务；有吉他就练，到期换新
   city_bindings:
     - city: {country: US, scheme: SYNTH2026, code: K51}
       targets:
@@ -105,7 +111,11 @@ spec:
         - {slot_id: convenience_device, status: opportunity, opportunity_id: k51.durable.convenience_pack}
         - {slot_id: chore_service, status: opportunity, opportunity_id: k51.service.chores}
         - {slot_id: qualified_job, status: opportunity, opportunity_id: k51.job.accountant}
-        - {slot_id: massage, status: opportunity, opportunity_id: k51.service.massage}
+        - {slot_id: communication, status: opportunity, opportunity_id: k51.service.mobile_basic}
+        - {slot_id: connectivity, status: opportunity, opportunity_id: k51.service.home_internet_basic}
+        - {slot_id: supplies, status: opportunity, opportunity_id: k51.service.household_supplies_basic}
+        - {slot_id: basket_basic, status: opportunity, opportunity_id: k51.service.personal_basket.u1}
+        - {slot_id: basket_comfort, status: opportunity, opportunity_id: k51.service.personal_basket.u2}
         - {slot_id: music_practice, status: opportunity, opportunity_id: k51.experience.guitar_practice}
         - {slot_id: guitar, status: opportunity, opportunity_id: k51.durable.guitar}
     - city: {country: US, scheme: SYNTH2026, code: M52}
@@ -118,6 +128,10 @@ spec:
         - {slot_id: convenience_device, status: opportunity, opportunity_id: m52.durable.convenience_pack}
         - {slot_id: chore_service, status: opportunity, opportunity_id: m52.service.chores}
         - {slot_id: qualified_job, status: opportunity, opportunity_id: m52.job.accountant}
-        - {slot_id: massage, status: opportunity, opportunity_id: m52.service.massage}
+        - {slot_id: communication, status: opportunity, opportunity_id: m52.service.mobile_basic}
+        - {slot_id: connectivity, status: opportunity, opportunity_id: m52.service.home_internet_basic}
+        - {slot_id: supplies, status: opportunity, opportunity_id: m52.service.household_supplies_basic}
+        - {slot_id: basket_basic, status: opportunity, opportunity_id: m52.service.personal_basket.u1}
+        - {slot_id: basket_comfort, status: opportunity, opportunity_id: m52.service.personal_basket.u2}
         - {slot_id: music_practice, status: opportunity, opportunity_id: m52.experience.guitar_practice}
         - {slot_id: guitar, status: opportunity, opportunity_id: m52.durable.guitar}

@@ -1,6 +1,6 @@
 # 产品协议样例的真实 LLM 测试配置（DECISIONS/0035）：Claude Haiku 5.5（configs/models.yaml 的 test_planner 角色），经 Claude Agent SDK
 # 单轮调用。scripts/run_life_e1_7b.py 不写 --config 时就用它。名单 roster_product.yaml（一位用户 × 两座城 × 每城一个分身 × 3 年）、
-# 提示模板 e3b-product-prompt-v1。模型调用设定（自适应思考、effort max、输出不另设上限、超时 600 秒、每份候选最多 1 次服务重试）与
+# 提示模板 e3b-product-prompt-v2。模型调用设定（自适应思考、effort max、输出不另设上限、超时 600 秒、每份候选最多 1 次服务重试）与
 # 之前的 Haiku 测试配置逐项相同。不记账（unmetered_reason），只受全局规划调用上限约束。
 
 run_notice: >-
@@ -62,6 +62,6 @@ run:
   unmetered_reason: >-
     使用 Claude 订阅额度（auth: claude_subscription，所有者 2026-10-18：先不计算费用）；只受全局规划调用上限约束，
     token 用量照记在请求明细里
-  prompt_template: e3b-product-prompt-v1
+  prompt_template: e3b-product-prompt-v2
   memory_policy: e1-life-memory-v2
   note: 产品协议样例的真实 LLM 测试配置（Claude Haiku 5.5）；mock 对照见 run_product_mock.yaml。

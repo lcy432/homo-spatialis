@@ -953,7 +953,11 @@ def life_extension_year_facts(work: Path) -> dict[str, YearFacts]:
                 [
                     {"opportunity_id": "k51.durable.guitar", "quantity": 1, "month": 2},
                     {"opportunity_id": practice, "quantity": 2, "months": [2, 5, 9]},
-                    {"opportunity_id": "k51.durable.comfort_chair", "quantity": 1, "month": 1},
+                    {
+                        "opportunity_id": "k51.service.personal_basket.u1",
+                        "quantity": 1,
+                        "months": list(range(1, 13)),
+                    },
                 ]
             ),
             "bought_not_played": live(
@@ -1021,7 +1025,7 @@ def life_item_compilation(work: Path) -> Any:
             duration={"kind": "durable_good"},
             equipment={"provides": ["racket_playable"], "note": "球拍；资料没有写能用几年"},
         )
-        spa = item("k51.service.massage", "k51.service.luxury_spa")
+        spa = item("k51.service.personal_basket.u1", "k51.service.luxury_spa")
         spa["enjoyment"][0]["function"] = "luxury_spa"
         candidates = (
             # 通过的例子：每种一项（合唱免费，价格明确为 0）
@@ -1038,10 +1042,10 @@ def life_item_compilation(work: Path) -> Any:
                 item("k51.durable.guitar", "k51.durable.guitar_cand"),
             ),
             LifeItemCandidate(
-                "enjoyment.massage",
+                "enjoyment.basket",
                 "enjoyment",
-                "按摩（每月两次）",
-                item("k51.service.massage", "k51.service.massage_cand"),
+                "个人消费篮子（每月 1 个标准篮子）",
+                item("k51.service.personal_basket.u1", "k51.service.basket_cand"),
             ),
             LifeItemCandidate(
                 "activity.choir",
@@ -1125,12 +1129,12 @@ def life_item_compilation(work: Path) -> Any:
             LifeItemCandidate("equipment.racket", "equipment", "球拍（寿命不明）", gear),
             LifeItemCandidate("enjoyment.luxury_spa", "enjoyment", "高级水疗", spa),
             LifeItemCandidate(
-                "enjoyment.massage_unknown",
+                "enjoyment.basket_unknown",
                 "enjoyment",
-                "按摩（报价未知）",
+                "个人消费篮子（报价未知）",
                 item(
-                    "k51.service.massage",
-                    "k51.service.massage_unknown_price",
+                    "k51.service.personal_basket.u1",
+                    "k51.service.basket_unknown_price",
                     availability="unknown",
                     price=None,
                 ),

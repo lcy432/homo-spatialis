@@ -60,8 +60,28 @@
       "status": "opportunity"
      },
      {
-      "opportunity_id": "nyc.service.massage_studio_1",
-      "slot_id": "massage",
+      "opportunity_id": "nyc.service.mobile_basic",
+      "slot_id": "communication",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "nyc.service.home_internet_basic",
+      "slot_id": "connectivity",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "nyc.service.household_supplies_basic",
+      "slot_id": "supplies",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "nyc.service.personal_basket.u1",
+      "slot_id": "basket_basic",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "nyc.service.personal_basket.u2",
+      "slot_id": "basket_comfort",
       "status": "opportunity"
      },
      {
@@ -144,8 +164,28 @@
       "status": "opportunity"
      },
      {
-      "opportunity_id": "la.service.massage_studio_1",
-      "slot_id": "massage",
+      "opportunity_id": "la.service.mobile_basic",
+      "slot_id": "communication",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "la.service.home_internet_basic",
+      "slot_id": "connectivity",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "la.service.household_supplies_basic",
+      "slot_id": "supplies",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "la.service.personal_basket.u1",
+      "slot_id": "basket_basic",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "la.service.personal_basket.u2",
+      "slot_id": "basket_comfort",
       "status": "opportunity"
      },
      {
@@ -228,8 +268,28 @@
       "status": "opportunity"
      },
      {
-      "opportunity_id": "sf.service.massage_studio_1",
-      "slot_id": "massage",
+      "opportunity_id": "sf.service.mobile_basic",
+      "slot_id": "communication",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "sf.service.home_internet_basic",
+      "slot_id": "connectivity",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "sf.service.household_supplies_basic",
+      "slot_id": "supplies",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "sf.service.personal_basket.u1",
+      "slot_id": "basket_basic",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "sf.service.personal_basket.u2",
+      "slot_id": "basket_comfort",
       "status": "opportunity"
      },
      {
@@ -312,8 +372,28 @@
       "status": "opportunity"
      },
      {
-      "opportunity_id": "chi.service.massage_studio_1",
-      "slot_id": "massage",
+      "opportunity_id": "chi.service.mobile_basic",
+      "slot_id": "communication",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "chi.service.home_internet_basic",
+      "slot_id": "connectivity",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "chi.service.household_supplies_basic",
+      "slot_id": "supplies",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "chi.service.personal_basket.u1",
+      "slot_id": "basket_basic",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "chi.service.personal_basket.u2",
+      "slot_id": "basket_comfort",
       "status": "opportunity"
      },
      {
@@ -396,8 +476,28 @@
       "status": "opportunity"
      },
      {
-      "opportunity_id": "hou.service.massage_studio_1",
-      "slot_id": "massage",
+      "opportunity_id": "hou.service.mobile_basic",
+      "slot_id": "communication",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "hou.service.home_internet_basic",
+      "slot_id": "connectivity",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "hou.service.household_supplies_basic",
+      "slot_id": "supplies",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "hou.service.personal_basket.u1",
+      "slot_id": "basket_basic",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "hou.service.personal_basket.u2",
+      "slot_id": "basket_comfort",
       "status": "opportunity"
      },
      {
@@ -480,8 +580,28 @@
       "status": "opportunity"
      },
      {
-      "opportunity_id": "sea.service.massage_studio_1",
-      "slot_id": "massage",
+      "opportunity_id": "sea.service.mobile_basic",
+      "slot_id": "communication",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "sea.service.home_internet_basic",
+      "slot_id": "connectivity",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "sea.service.household_supplies_basic",
+      "slot_id": "supplies",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "sea.service.personal_basket.u1",
+      "slot_id": "basket_basic",
+      "status": "opportunity"
+     },
+     {
+      "opportunity_id": "sea.service.personal_basket.u2",
+      "slot_id": "basket_comfort",
       "status": "opportunity"
      },
      {
@@ -520,11 +640,17 @@
       "when_missing": "skip"
      }
     ],
-    "description": "最便宜的住房、基本食品；已有的设备照用，不另买设备或服务；有吉他就练，到期即停",
+    "description": "最便宜的住房、基本食品、通信网络日耗品、每月 1 个标准消费篮子；已有的设备照用，不另买设备或杂务服务；有吉他就练，到期即停",
     "food_slot": "food_basic",
     "housing_slot": "housing_basic",
     "jobs": "current_positions",
     "label": "现职 + 基本生活",
+    "service_slots": [
+     "communication",
+     "connectivity",
+     "supplies",
+     "basket_basic"
+    ],
     "template_id": "p1_basic"
    },
    {
@@ -543,7 +669,7 @@
       "when_missing": "skip"
      }
     ],
-    "description": "通勤短的一卧、新鲜食材、每月按摩、每月 8 次团体课；没有在用的洗衣设备就在第 1 月买；有吉他就练，到期换新",
+    "description": "通勤短的一卧、新鲜食材、通信网络日耗品、每月 2 个标准消费篮子、每月 8 次团体课；没有在用的洗衣设备就在第 1 月买；有吉他就练，到期换新",
     "durable_purchases": [
      {
       "month": 1,
@@ -556,7 +682,10 @@
     "jobs": "current_positions",
     "label": "现职 + 较舒适的生活 + 洗衣设备",
     "service_slots": [
-     "massage"
+     "communication",
+     "connectivity",
+     "supplies",
+     "basket_comfort"
     ],
     "template_id": "p2_device"
    },
@@ -576,7 +705,7 @@
       "when_missing": "skip"
      }
     ],
-    "description": "通勤短的一卧、新鲜食材、上门洗衣与打扫、每月按摩、每月 8 次团体课；有吉他就练，到期换新",
+    "description": "通勤短的一卧、新鲜食材、上门洗衣与打扫、通信网络日耗品、每月 2 个标准消费篮子、每月 8 次团体课；有吉他就练，到期换新",
     "food_slot": "food_comfort",
     "housing_slot": "housing_comfort",
     "jobs": "current_positions",
@@ -584,7 +713,10 @@
     "service_slots": [
      "laundry_service",
      "cleaning_service",
-     "massage"
+     "communication",
+     "connectivity",
+     "supplies",
+     "basket_comfort"
     ],
     "template_id": "p3_service"
    },
@@ -598,12 +730,16 @@
       "when_missing": "skip"
      }
     ],
-    "description": "最便宜的住房、基本食品；已有的设备照用，不另买设备或服务；有吉他就练，到期即停；住处只有开车能到岗，另付用车权月费与开车油费",
+    "description": "最便宜的住房、基本食品、通信网络日耗品、每月 1 个标准消费篮子；已有的设备照用，不另买设备或杂务服务；有吉他就练，到期即停；住处只有开车能到岗，另付用车权月费与开车油费",
     "food_slot": "food_basic",
     "housing_slot": "housing_basic_car",
     "jobs": "current_positions",
     "label": "现职 + 基本生活（用车）",
     "service_slots": [
+     "communication",
+     "connectivity",
+     "supplies",
+     "basket_basic",
      "car_access"
     ],
     "template_id": "p1_basic_car"
@@ -624,7 +760,7 @@
       "when_missing": "skip"
      }
     ],
-    "description": "通勤短的一卧、新鲜食材、每月按摩、每月 8 次团体课；没有在用的洗衣设备就在第 1 月买；有吉他就练，到期换新；住处只有开车能到岗，另付用车权月费与开车油费",
+    "description": "通勤短的一卧、新鲜食材、通信网络日耗品、每月 2 个标准消费篮子、每月 8 次团体课；没有在用的洗衣设备就在第 1 月买；有吉他就练，到期换新；住处只有开车能到岗，另付用车权月费与开车油费",
     "durable_purchases": [
      {
       "month": 1,
@@ -637,7 +773,10 @@
     "jobs": "current_positions",
     "label": "现职 + 较舒适的生活 + 洗衣设备（用车）",
     "service_slots": [
-     "massage",
+     "communication",
+     "connectivity",
+     "supplies",
+     "basket_comfort",
      "car_access"
     ],
     "template_id": "p2_device_car"
@@ -658,7 +797,7 @@
       "when_missing": "skip"
      }
     ],
-    "description": "通勤短的一卧、新鲜食材、上门洗衣与打扫、每月按摩、每月 8 次团体课；有吉他就练，到期换新；住处只有开车能到岗，另付用车权月费与开车油费",
+    "description": "通勤短的一卧、新鲜食材、上门洗衣与打扫、通信网络日耗品、每月 2 个标准消费篮子、每月 8 次团体课；有吉他就练，到期换新；住处只有开车能到岗，另付用车权月费与开车油费",
     "food_slot": "food_comfort",
     "housing_slot": "housing_comfort_car",
     "jobs": "current_positions",
@@ -666,7 +805,10 @@
     "service_slots": [
      "laundry_service",
      "cleaning_service",
-     "massage",
+     "communication",
+     "connectivity",
+     "supplies",
+     "basket_comfort",
      "car_access"
     ],
     "template_id": "p3_service_car"
@@ -681,12 +823,18 @@
       "when_missing": "skip"
      }
     ],
-    "description": "最便宜的住房、基本食品；已有的设备照用，不另买设备或服务；有吉他就练，到期即停",
+    "description": "最便宜的住房、基本食品、通信网络日耗品、每月 1 个标准消费篮子；已有的设备照用，不另买设备或杂务服务；有吉他就练，到期即停",
     "food_slot": "food_basic",
     "housing_slot": "housing_basic",
     "job_slot": "qualified_job",
     "jobs": "qualified_alternative",
     "label": "改做已具资格的岗位 + 基本生活",
+    "service_slots": [
+     "communication",
+     "connectivity",
+     "supplies",
+     "basket_basic"
+    ],
     "template_id": "q1_basic"
    },
    {
@@ -705,7 +853,7 @@
       "when_missing": "skip"
      }
     ],
-    "description": "通勤短的一卧、新鲜食材、每月按摩、每月 8 次团体课；没有在用的洗衣设备就在第 1 月买；有吉他就练，到期换新",
+    "description": "通勤短的一卧、新鲜食材、通信网络日耗品、每月 2 个标准消费篮子、每月 8 次团体课；没有在用的洗衣设备就在第 1 月买；有吉他就练，到期换新",
     "durable_purchases": [
      {
       "month": 1,
@@ -719,7 +867,10 @@
     "jobs": "qualified_alternative",
     "label": "改做已具资格的岗位 + 较舒适的生活 + 洗衣设备",
     "service_slots": [
-     "massage"
+     "communication",
+     "connectivity",
+     "supplies",
+     "basket_comfort"
     ],
     "template_id": "q2_device"
    },
@@ -739,7 +890,7 @@
       "when_missing": "skip"
      }
     ],
-    "description": "通勤短的一卧、新鲜食材、上门洗衣与打扫、每月按摩、每月 8 次团体课；有吉他就练，到期换新",
+    "description": "通勤短的一卧、新鲜食材、上门洗衣与打扫、通信网络日耗品、每月 2 个标准消费篮子、每月 8 次团体课；有吉他就练，到期换新",
     "food_slot": "food_comfort",
     "housing_slot": "housing_comfort",
     "job_slot": "qualified_job",
@@ -748,7 +899,10 @@
     "service_slots": [
      "laundry_service",
      "cleaning_service",
-     "massage"
+     "communication",
+     "connectivity",
+     "supplies",
+     "basket_comfort"
     ],
     "template_id": "q3_service"
    },
@@ -762,13 +916,17 @@
       "when_missing": "skip"
      }
     ],
-    "description": "最便宜的住房、基本食品；已有的设备照用，不另买设备或服务；有吉他就练，到期即停；住处只有开车能到岗，另付用车权月费与开车油费",
+    "description": "最便宜的住房、基本食品、通信网络日耗品、每月 1 个标准消费篮子；已有的设备照用，不另买设备或杂务服务；有吉他就练，到期即停；住处只有开车能到岗，另付用车权月费与开车油费",
     "food_slot": "food_basic",
     "housing_slot": "housing_basic_car",
     "job_slot": "qualified_job",
     "jobs": "qualified_alternative",
     "label": "改做已具资格的岗位 + 基本生活（用车）",
     "service_slots": [
+     "communication",
+     "connectivity",
+     "supplies",
+     "basket_basic",
      "car_access"
     ],
     "template_id": "q1_basic_car"
@@ -789,7 +947,7 @@
       "when_missing": "skip"
      }
     ],
-    "description": "通勤短的一卧、新鲜食材、每月按摩、每月 8 次团体课；没有在用的洗衣设备就在第 1 月买；有吉他就练，到期换新；住处只有开车能到岗，另付用车权月费与开车油费",
+    "description": "通勤短的一卧、新鲜食材、通信网络日耗品、每月 2 个标准消费篮子、每月 8 次团体课；没有在用的洗衣设备就在第 1 月买；有吉他就练，到期换新；住处只有开车能到岗，另付用车权月费与开车油费",
     "durable_purchases": [
      {
       "month": 1,
@@ -803,7 +961,10 @@
     "jobs": "qualified_alternative",
     "label": "改做已具资格的岗位 + 较舒适的生活 + 洗衣设备（用车）",
     "service_slots": [
-     "massage",
+     "communication",
+     "connectivity",
+     "supplies",
+     "basket_comfort",
      "car_access"
     ],
     "template_id": "q2_device_car"
@@ -824,7 +985,7 @@
       "when_missing": "skip"
      }
     ],
-    "description": "通勤短的一卧、新鲜食材、上门洗衣与打扫、每月按摩、每月 8 次团体课；有吉他就练，到期换新；住处只有开车能到岗，另付用车权月费与开车油费",
+    "description": "通勤短的一卧、新鲜食材、上门洗衣与打扫、通信网络日耗品、每月 2 个标准消费篮子、每月 8 次团体课；有吉他就练，到期换新；住处只有开车能到岗，另付用车权月费与开车油费",
     "food_slot": "food_comfort",
     "housing_slot": "housing_comfort_car",
     "job_slot": "qualified_job",
@@ -833,7 +994,10 @@
     "service_slots": [
      "laundry_service",
      "cleaning_service",
-     "massage",
+     "communication",
+     "connectivity",
+     "supplies",
+     "basket_comfort",
      "car_access"
     ],
     "template_id": "q3_service_car"
@@ -894,9 +1058,29 @@
     "slot_id": "cleaning_service"
    },
    {
-    "description": "每月一次按摩（享受型服务，按月付费）",
+    "description": "手机通信（基本单人套餐，按月付费）",
     "role": "service",
-    "slot_id": "massage"
+    "slot_id": "communication"
+   },
+   {
+    "description": "家庭宽带基本档（按月付费）",
+    "role": "service",
+    "slot_id": "connectivity"
+   },
+   {
+    "description": "家用日耗品（清洁用品与纸品，按月付费）",
+    "role": "service",
+    "slot_id": "supplies"
+   },
+   {
+    "description": "个人消费篮子：每月 1 个标准篮子（按当期价格购买消费服务流）",
+    "role": "service",
+    "slot_id": "basket_basic"
+   },
+   {
+    "description": "个人消费篮子：每月 2 个标准篮子（按当期价格购买消费服务流）",
+    "role": "service",
+    "slot_id": "basket_comfort"
    },
    {
     "description": "团体健身课（按次，模型方案）",

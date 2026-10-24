@@ -37,6 +37,7 @@ from common.life_contracts import (
 )
 from common.money import Money
 from product.realdata.activities import age_eligibility
+from product.realdata.daily_support_data import allocated_annual
 
 ITEMS_VERSION = "e3b-life-items-v1"
 WEEKS_PER_MONTH = Fraction(52, 12)
@@ -616,70 +617,274 @@ def services(ctx: Ctx, report: Report) -> list[Item]:
                 (w["record_id"],),
             )
         )
-    for s in sc["enjoyment"]:
-        w = ctx.wage(s["soc"])
-        hourly = None if w is None else hourly_wage(w, sc["hours_per_year"])
-        if hourly is None:
-            report.add(
-                "enjoyment",
-                "gap",
-                s["service"],
-                f"本城没有 {s['soc']} 的 OEWS 时薪，不能按工资定价",
-            )
-            continue
-        assert w is not None
-        n = s["sessions_per_month"]
-        price = hourly * dec(s["worker_hours_per_session"]) * n * overhead
-        o = LifeOpportunity(
-            opportunity_id=f"{ctx.key}.service.{s['service']}",
-            category="service",
-            label=s["label"],
-            unit="service-month",
-            quality=s["quality"],
-            availability="available",
-            price=quote(price, ctx.numeraire, "per_month", "service-month"),
-            duration=DurationSpec(kind="ongoing_service"),
-            enjoyment=(
-                EnjoymentProvision(
-                    function="personal_care",
-                    mode="service_units",
-                    units_per_month=n,
-                    unit_label="次",
-                    basis=f"每月实际接受 {n} 次按摩（享受型服务）",
-                ),
-            ),
-            resource=ResourceProfile(
-                basis="per_service_month",
-                hours=round_to(dec(s["client_hours_per_session"]) * n, 2),
-                burden_per_hour=s["burden_per_hour"],
-                quantity_scales=False,
-                note="按摩与往返的合计；生病暂停的月份不付款、不使用",
-            ),
-            spec={
-                "sessions_per_month": n,
-                "worker_hours_per_session": s["worker_hours_per_session"],
-            },
-            attributes={"wage_soc": s["soc"], "hourly_wage_median": cents(hourly)},
-            source=ctx.estimated(
-                "2024-05-31",
-                [w["record_id"]],
-                f"OEWS {s['soc']} 都会区中位年薪 {w['annual_wage_median']} ÷ 2,080 = 时薪；× 每次 {s['worker_hours_per_session']} 工人小时 "
-                f"× 每月 {n} 次 × 人工费用倍率 {sc['labor_overhead_multiplier']}，四舍五入到分",
-            ),
-        )
-        out.append(
-            Item(
-                "enjoyment",
-                o,
-                "executable",
-                ("oews_hourly_from_annual_v1", "labor_overhead_v1", "service_hours_v1"),
-                (w["record_id"],),
-            )
-        )
     return out
 
 
 # --------------------------------------------------------------------------- 设备与装备
+
+
+# --------------------------------------------------------------------------- 日常支持与抽象消费篮子（E3B 映射修正 §5、§6）
+
+
+def _raw_ref(ctx: Ctx, key: str) -> str:
+    return f"{key}:{ctx.slice['raw'][key][:16]}"
+
+
+def _support_item(
+    ctx: Ctx,
+    cfg: dict[str, Any],
+    monthly: Fraction,
+    *,
+    attributes: dict[str, Any],
+    inputs: list[str],
+    rule: str,
+    assumptions: tuple[str, ...],
+) -> Item:
+    o = LifeOpportunity(
+        opportunity_id=f"{ctx.key}.service.{cfg['service']}",
+        category="service",
+        label=cfg["label"],
+        unit="service-month",
+        quality=cfg["quality"][:280],
+        functions=(cfg["function"],),
+        attributes=attributes,
+        availability="available",
+        price=quote(monthly, ctx.numeraire, "per_month", "service-month"),
+        duration=DurationSpec(kind="ongoing_service"),
+        resource=ResourceProfile(
+            basis="per_service_month",
+            hours=0,
+            burden_per_hour=0,
+            quantity_scales=False,
+            note="不占你自己的时间；只在实际付了钱的月份提供这项功能，买两份不叠加",
+        ),
+        source=ctx.estimated("2024-12-31", inputs, rule),
+    )
+    return Item("daily_support", o, "executable", assumptions, ())
+
+
+def daily_support(ctx: Ctx, report: Report) -> list[Item]:
+    """三个支持功能各一个按月服务（见配置 daily_support）。费用顺序：同规格直接报价（现在没有）→ FCC 同规格大区参照（家庭宽带）
+    → FCC 全国参照 → CE 一人消费单位预算代理；预算代理标明，不叫观测单价。"""
+    ds, sl = ctx.cfg["daily_support"], ctx.slice["daily_support"]
+    one, det = sl["ce"]["one_person"], sl["ce"]["detail_all_units"]
+    ce_ref = [
+        _raw_ref(ctx, "bls_ce_national_2024_size"),
+        _raw_ref(ctx, "bls_ce_national_2024_detail"),
+    ]
+    common = ("daily_support_cost_order_v1", "basic_device_access_v1")
+    out: list[Item] = []
+
+    pc = ds["personal_communication"]
+    annual, _ = allocated_annual(one, det, pc["line"])
+    out.append(
+        _support_item(
+            ctx,
+            pc,
+            annual / 12,
+            attributes={
+                "cost_basis": "ce_one_person_budget_proxy",
+                "observed_unit_price": False,
+                "price_geography": "national",
+                "ce_annual_one_person": cents(annual),
+            },
+            inputs=ce_ref,
+            rule=(
+                f"CE 2024 一人消费单位“{pc['line']['size_label']}”年均 {cents(annual)} ÷ 12，四舍五入到分；共同预算代理"
+                "（全国一人消费单位的平均支出，不是单人套餐报价，各城相同，不做空间换算）"
+            ),
+            assumptions=(*common, "ce_one_person_budget_proxy_v1"),
+        )
+    )
+
+    hc = ds["home_connectivity"]
+    fcc, cpi = sl["fcc"], sl["cpi_internet"]["annual"]
+    factor = dec(cpi[str(hc["cpi_to_year"])]) / dec(cpi[str(hc["cpi_from_year"])])
+    region = hc["metro_region"][ctx.cbsa]
+    reg, nat = fcc["by_region"].get(region) or {}, fcc["national"]
+    if reg.get("weighted_median_total_charge") and reg["offers"] >= hc["min_offers"]:
+        base, basis, geo, n = (
+            dec(reg["weighted_median_total_charge"]),
+            "fcc_regional_reference",
+            f"census_region:{region}",
+            reg["offers"],
+        )
+    elif nat.get("weighted_median_total_charge") and nat["offers"] >= hc["min_offers"]:
+        base, basis, geo, n = (
+            dec(nat["weighted_median_total_charge"]),
+            "fcc_national_reference",
+            "national",
+            nat["offers"],
+        )
+        report.add(
+            "daily_support",
+            "gap",
+            "home_connectivity",
+            f"{region} 区同规格报价不到 {hc['min_offers']} 条：用全国参照",
+        )
+    else:
+        base = None
+    spec = hc["fcc_spec"]
+    if base is not None:
+        monthly = base * factor
+        attrs: dict[str, Any] = {
+            "cost_basis": basis,
+            "observed_unit_price": False,
+            "price_geography": geo,
+            "fcc_offers": n,
+            "fcc_weighted_median_2023": cents(base),
+            "taxes": "not_included",
+            "download_mbps": f"{spec['download_min_mbps']}–{spec['download_below_mbps'] - 1}",
+            "upload_min_mbps": spec["upload_min_mbps"],
+            "usage_allowance": spec["usage"],
+        }
+        inputs = [
+            _raw_ref(ctx, "fcc_urs_2024_broadband"),
+            _raw_ref(ctx, "bls_cpi_u_education_communication"),
+        ]
+        rule = (
+            f"FCC 2024 城市费率调查：{geo} 同规格报价（下行 {attrs['download_mbps']} Mbps、上行 ≥ {spec['upload_min_mbps']}、不限流量）"
+            f"{n} 条按调查权重的中位数总月费 {cents(base)}（2023 年调查价，不含税）× CPI {hc['cpi_series']} "
+            f"{cpi[str(hc['cpi_to_year'])]} ÷ {cpi[str(hc['cpi_from_year'])]}，四舍五入到分；不是本城某家运营商的报价"
+        )
+        assumptions = (*common, "fcc_broadband_basic_tier_v1")
+    else:
+        annual, _ = allocated_annual(one, det, hc["ce_fallback_line"])
+        monthly = annual / 12
+        attrs = {
+            "cost_basis": "ce_allocated_budget_proxy",
+            "observed_unit_price": False,
+            "price_geography": "national",
+        }
+        inputs, rule = (
+            ce_ref,
+            "FCC 资料不能用：CE 一人“其他家庭开支”× 全国详细表互联网服务占比 ÷ 12（分配估计、共同预算代理）",
+        )
+        assumptions = (*common, "ce_one_person_budget_proxy_v1")
+        report.add(
+            "daily_support",
+            "gap",
+            "home_connectivity",
+            "FCC 同规格报价不足：用 CE 分配估计的预算代理",
+        )
+    out.append(
+        _support_item(
+            ctx, hc, monthly, attributes=attrs, inputs=inputs, rule=rule, assumptions=assumptions
+        )
+    )
+
+    hs = ds["household_supplies"]
+    parts = [(line["key"], *allocated_annual(one, det, line)) for line in hs["lines"]]
+    annual = sum((a for _, a, _ in parts), Fraction(0))
+    goods = dec(ctx.metro["rpp"]["rpp_goods"])
+    out.append(
+        _support_item(
+            ctx,
+            hs,
+            annual / 12 * goods / 100,
+            attributes={
+                "cost_basis": "ce_one_person_budget_x_rpp_goods",
+                "observed_unit_price": False,
+                "price_geography": "metro_estimate",
+                "ce_annual_one_person": cents(annual),
+                "allocated_share_estimate": any(b != "one_person_table" for _, _, b in parts),
+            },
+            inputs=[*ce_ref, f"rpp_goods {ctx.metro['rpp']['rpp_goods']}"],
+            rule=(
+                "CE 2024 一人消费单位："
+                + "、".join(
+                    f"{k} {cents(a)}{'（按全国详细表占比分配）' if b != 'one_person_table' else ''}"
+                    for k, a, b in parts
+                )
+                + f"，合计 ÷ 12 × 商品类 RPP {ctx.metro['rpp']['rpp_goods']} ÷ 100，四舍五入到分（估计，不是本地报价）"
+            ),
+            assumptions=(*common, "household_supplies_ce_v1"),
+        )
+    )
+    return out
+
+
+def basket_vector(ctx: Ctx) -> list[dict[str, Any]]:
+    """共同参考支出向量 e_j（每月，全国 2024 美元）与本城价格系数：每条白名单条目一行。"""
+    cb, ce = ctx.cfg["consumption_basket"], ctx.slice["daily_support"]["ce"]
+    rpp = ctx.metro["rpp"]
+    index = {"goods": dec(rpp["rpp_goods"]) / 100, "other": dec(rpp["rpp_other"]) / 100}
+    out = []
+    for line in cb["lines"]:
+        annual, basis = allocated_annual(ce["one_person"], ce["detail_all_units"], line)
+        out.append(
+            {
+                "key": line["key"],
+                "monthly": annual / 12,
+                "basis": basis,
+                "price_index": line["price_index"],
+                "factor": index[line["price_index"]],
+            }
+        )
+    return out
+
+
+def consumption_basket(ctx: Ctx, report: Report) -> list[Item]:
+    """抽象个人消费篮子（配置 consumption_basket）：每个档位 u 一个按月服务，费用 u × P_c，享受功能 personal_consumption 每月 u 份。"""
+    cb = ctx.cfg["consumption_basket"]
+    vec = basket_vector(ctx)
+    p_c = sum((x["monthly"] * x["factor"] for x in vec), Fraction(0))
+    rpp = ctx.metro["rpp"]
+    rule = (
+        "P_c = Σ e_j × 价格系数 = "
+        + " + ".join(
+            f"{x['key']} {cents(x['monthly'])} × {'商品' if x['price_index'] == 'goods' else '其他服务'}"
+            for x in vec
+        )
+        + f"（商品类 RPP {rpp['rpp_goods']}、其他服务 RPP {rpp['rpp_other']}，÷ 100）= {cents(p_c)}；费用 = u × P_c，四舍五入到分"
+    )
+    out: list[Item] = []
+    for u_text in cb["grid"]:
+        u = dec(u_text)
+        o = LifeOpportunity(
+            opportunity_id=f"{ctx.key}.service.{cb['service']}.u{u_text.replace('.', '_')}",
+            category="service",
+            label=f"{cb['label']}（每月 {u_text} 个标准篮子）",
+            unit="service-month",
+            quality=cb["quality"][:280],
+            attributes={
+                "standard_baskets_per_month": float(u),
+                "standard_basket_price": cents(p_c),
+                "cost_basis": "ce_one_person_vector_x_rpp",
+                "observed_unit_price": False,
+                "allocated_share_estimate": any(x["basis"] != "one_person_table" for x in vec),
+            },
+            availability="available",
+            price=quote(u * p_c, ctx.numeraire, "per_month", "service-month"),
+            duration=DurationSpec(kind="ongoing_service"),
+            enjoyment=(
+                EnjoymentProvision(
+                    function=cb["function"],
+                    mode="service_units",
+                    units_per_month=float(u),
+                    unit_label="标准篮子",
+                    basis=f"这个月实际获得 {u_text} 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）",
+                ),
+            ),
+            resource=ResourceProfile(
+                basis="per_service_month",
+                hours=0,
+                burden_per_hour=0,
+                quantity_scales=False,
+                note="当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0",
+            ),
+            source=ctx.estimated(
+                "2024-12-31",
+                [
+                    _raw_ref(ctx, "bls_ce_national_2024_size"),
+                    _raw_ref(ctx, "bls_ce_national_2024_detail"),
+                    f"rpp {rpp['rpp_goods']}/{rpp['rpp_other']}",
+                ],
+                rule,
+            ),
+        )
+        out.append(Item("consumption", o, "executable", ("consumption_basket_ce_v1",), ()))
+    return out
 
 
 def representative_model(
@@ -988,10 +1193,18 @@ def block_evidence(ctx: Ctx) -> dict[str, dict[str, Any]]:
             "rpp_other": rpp.get("rpp_other"),
             "osm_restaurants_by_cuisine": cuisine_evidence(ctx),
         },
-        "services": {
-            "hourly_median_by_soc": {
-                s["soc"]: hourly(s["soc"]) for s in [*sc["chores"], *sc["enjoyment"]]
-            }
+        "services": {"hourly_median_by_soc": {s["soc"]: hourly(s["soc"]) for s in sc["chores"]}},
+        "daily_support": {
+            "census_region": ctx.cfg["daily_support"]["home_connectivity"]["metro_region"][
+                ctx.cbsa
+            ],
+            "rpp_goods": rpp.get("rpp_goods"),
+            "acs_internet_access_description": ctx.metro.get("internet_access"),
+        },
+        "consumption_basket": {
+            "rpp_goods": rpp.get("rpp_goods"),
+            "rpp_other": rpp.get("rpp_other"),
+            "standard_basket_price": f"{cents(sum((x['monthly'] * x['factor'] for x in basket_vector(ctx)), Fraction(0))):.2f}",
         },
         "devices": {"goods_factor": goods},
         "equipment": {"goods_factor": goods},

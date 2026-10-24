@@ -3,7 +3,7 @@
 只有 ``fetch`` 会联网（显式命令；通用 User-Agent，不带密钥、不注册、不付费；被拒的来源照实记录，不绕过）。其余命令都离线：
 ``slice`` 只读 intake-02 的冻结库与原始文件缓存，``build`` 只读切片。
 
-    uv run python scripts/life_pack_items.py fetch [--mode cache_first|refresh]      # USDA SR Legacy 与 BLS ATUS 表 1
+    uv run python scripts/life_pack_items.py fetch [--mode cache_first|refresh]      # USDA SR Legacy、BLS ATUS 表 1、CE 2024 全国表、FCC URS 2024、CPI
     uv run python scripts/life_pack_items.py slice --db <intake.sqlite> --out runs/life_items/slice.json
     uv run python scripts/life_pack_items.py build --slice runs/life_items/slice.json   # → data/frozen/life/us-v1/items/
     uv run python scripts/life_pack_items.py start-job --cbsa 16980 --soc 43-9061      # 读冻结输出
@@ -21,6 +21,7 @@ from typing import Any
 import yaml
 
 import _bootstrap  # noqa: F401
+from product.realdata.daily_support_data import REQUESTS as DAILY_SUPPORT_REQUESTS
 from product.realdata.fetch import DEFAULT_CACHE, fetch
 from product.realdata.life_freeze import freeze
 from product.realdata.life_inputs import ATUS_REQUEST, FDC_REQUEST, build_slice
@@ -53,7 +54,7 @@ def _write(path: Path, body: Any) -> None:
 
 def cmd_fetch(args: argparse.Namespace) -> int:
     bad = 0
-    for req in (FDC_REQUEST, ATUS_REQUEST):
+    for req in (FDC_REQUEST, ATUS_REQUEST, *DAILY_SUPPORT_REQUESTS):
         got = fetch(req, Path(args.cache), mode=args.mode)
         r = got.record
         print(f"{r.status:10} {r.bytes or '':>9} {req.source_id}  {r.url}  {r.note or ''}")

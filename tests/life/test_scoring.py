@@ -172,5 +172,5 @@ def test_a_mismatched_scoring_content_is_refused(bundle, scoring):
         }
     )
     other = type(scoring)(**{**scoring.__dict__, "spec": changed})
-    with pytest.raises(LifeContractError, match="180fd9389343"):  # 协议记着的旧身份
+    with pytest.raises(LifeContractError, match="c36f768cbb84"):  # 协议记着的旧身份
         live_year(bundle, other, bundle.initial_state(CLONE_K), base_items())

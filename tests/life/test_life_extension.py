@@ -230,30 +230,41 @@ def test_poorer_or_richer_states_do_not_change_the_saved_preference(bundle, scor
 # --------------------------------------------------------------------------- 4. 消费去重且不漏项
 
 
-def test_same_function_goods_do_not_add_and_different_functions_do(bundle, scoring, start):
-    one = live_year(bundle, scoring, start, plan(extra=[once("k51.durable.comfort_chair", 1)]))
-    two = live_year(
+def test_the_basket_counts_actual_baskets_not_money(bundle, scoring, start):
+    """个人消费篮子（E3B 映射修正 §6）：z = 3 × 当月实际获得的标准篮子数，s = min(0.9, z/(z + 3))；两个档位同时买时份数相加；
+    同样数量只改价格，直接分项不变。"""
+    one = live_year(bundle, scoring, start, plan(extra=[whole("k51.service.personal_basket.u1")]))
+    e = comp(one, 1, "personal_enjoyment")
+    assert e.z == pytest.approx(3.0, abs=TOL) and e.s == pytest.approx(0.5, abs=TOL)
+    half = live_year(
+        bundle, scoring, start, plan(extra=[whole("k51.service.personal_basket.u0_5")])
+    )
+    assert comp(half, 1, "personal_enjoyment").s == pytest.approx(1.5 / 4.5, abs=TOL)  # 约 0.333
+    both = live_year(
         bundle,
         scoring,
         start,
-        plan(extra=[once("k51.durable.comfort_chair", 1), once("k51.durable.cushion_set", 1)]),
+        plan(
+            extra=[
+                whole("k51.service.personal_basket.u1"),
+                whole("k51.service.personal_basket.u0_5", 2, 12),
+            ]
+        ),
     )
-    assert comp(one, 2, "personal_enjoyment").z == pytest.approx(1.5, abs=TOL)
-    assert comp(two, 2, "personal_enjoyment").z == pytest.approx(
-        1.5, abs=TOL
-    )  # 同一种居家舒适只算一份
-    mixed = live_year(
+    assert comp(both, 1, "personal_enjoyment").z == pytest.approx(3.0, abs=TOL)
+    assert comp(both, 2, "personal_enjoyment").z == pytest.approx(4.5, abs=TOL)  # 份数相加
+    dear = patched(
         bundle,
-        scoring,
-        start,
-        plan(extra=[once("k51.durable.comfort_chair", 1), whole("k51.service.massage", 2, 12)]),
+        "k51.service.personal_basket.u1",
+        price={"amount": {"amount": 200.0, "numeraire": "USD_2024_LOCAL"}},
     )
-    e = comp(mixed, 2, "personal_enjoyment")
-    assert e.z == pytest.approx(1.5 + 2 * 1.0, abs=TOL)  # 居家舒适 1.5 + 每月两次按摩 × 1.0
-    assert e.s == pytest.approx(3.5 / 6.5, abs=TOL)
-    assert comp(mixed, 1, "personal_enjoyment").z == pytest.approx(
-        1.5, abs=TOL
-    )  # 按摩从第 2 月才有
+    pricier = live_year(
+        bundle, scoring, start, plan(extra=[whole("k51.service.personal_basket.u1")]), catalog=dear
+    )
+    assert comp(pricier, 1, "personal_enjoyment").s == e.s  # 涨价不改直接分
+    assert (
+        comp(live_year(bundle, scoring, start, plan()), 1, "personal_enjoyment").z == 0
+    )  # 没买：0
 
 
 def test_an_unsupported_enjoyment_function_is_reported_not_zeroed(bundle, scoring, start):
@@ -263,10 +274,12 @@ def test_an_unsupported_enjoyment_function_is_reported_not_zeroed(bundle, scorin
     comps = []
     for c in spec.components:
         if c.component_id == "personal_enjoyment":
+            # 规格里只留一项没人提供的功能：篮子提供的 personal_consumption 就是“模型未支持”
             es = c.enjoyment.model_copy(
                 update={
                     "functions": tuple(
-                        f for f in c.enjoyment.functions if f.function != "personal_care"
+                        f.model_copy(update={"function": "not_provided_anywhere"})
+                        for f in c.enjoyment.functions
                     )
                 }
             )
@@ -295,14 +308,14 @@ def test_an_unsupported_enjoyment_function_is_reported_not_zeroed(bundle, scorin
     y = run_life_year(
         protocol=protocol,
         state=start,
-        action=year_action(start, plan(extra=[whole("k51.service.massage", 1, 12)])),
+        action=year_action(start, plan(extra=[whole("k51.service.personal_basket.u1", 1, 12)])),
         catalog=bundle.catalog_for(K51),
         tax=tax_for(bundle, K51),
         scoring=inputs,
     )
     e = comp(y, 1, "personal_enjoyment")
     assert e.status == "known" and e.z == 0
-    assert e.enjoyment.unsupported == ("k51.service.massage:personal_care",)
+    assert e.enjoyment.unsupported == ("k51.service.personal_basket.u1:personal_consumption",)
 
 
 # --------------------------------------------------------------------------- 5. 兴趣匹配有界
@@ -717,7 +730,7 @@ def slot(p, slot_id: str):
 
 @pytest.fixture(scope="module")
 def lives(bundle, scoring):
-    """三种期末：没有吉他；第 1 年 6 月买的吉他（期末还剩 5 个月）；第 3 年 1 月买的吉他（还剩 24 个月）；外加一把舒适椅。"""
+    """三种期末：没有吉他；第 1 年 6 月买的吉他（期末还剩 5 个月）；第 3 年 1 月买的吉他（还剩 24 个月）。"""
     return {
         "none": three_years(bundle, scoring, lambda y: []),
         "short": three_years(
@@ -725,9 +738,6 @@ def lives(bundle, scoring):
         ),
         "long": three_years(
             bundle, scoring, lambda y: [once("k51.durable.guitar", 1)] if y == 3 else []
-        ),
-        "chair": three_years(
-            bundle, scoring, lambda y: [once("k51.durable.comfort_chair", 1)] if y == 3 else []
         ),
     }
 
@@ -776,19 +786,13 @@ def test_without_equipment_the_template_neither_buys_nor_schedules(
             assert any("模板不买" in t for t in p.skipped_purchases)
 
 
-def test_equipment_and_comfort_count_through_use_not_purchase_price(
-    bundle, scoring, evaluation, lives
-):
+def test_equipment_counts_through_use_not_purchase_price(bundle, scoring, evaluation, lives):
     base = value(bundle, scoring, evaluation, lives["none"])
     guitar = value(bundle, scoring, evaluation, lives["long"])
-    chair = value(bundle, scoring, evaluation, lives["chair"])
     p1 = "p1_current_basic"
     assert (
         plan_of(guitar, p1).v_plan.fraction() > plan_of(base, p1).v_plan.fraction()
     )  # 练琴的参与小时
-    assert (
-        plan_of(chair, p1).v_plan.fraction() > plan_of(base, p1).v_plan.fraction()
-    )  # 在用的舒适椅
     dear = patched(
         bundle,
         "k51.durable.guitar",
@@ -814,14 +818,23 @@ def test_capabilities_no_template_uses_are_reported_as_a_scope_gap(bundle, evalu
     assert "guitar_playable" in gap and "范围缺口" in gap
 
 
-def test_every_city_binds_the_same_hobby_and_enjoyment_slots(evaluation):
+def test_every_city_binds_the_same_hobby_support_and_basket_slots(evaluation):
+    slots = (
+        "music_practice",
+        "guitar",
+        "communication",
+        "connectivity",
+        "supplies",
+        "basket_basic",
+        "basket_comfort",
+    )
     for b in evaluation.city_bindings:
-        assert {t.slot_id for t in b.targets} >= {"music_practice", "guitar", "massage"}
-        assert all(
-            t.status == "opportunity"
-            for t in b.targets
-            if t.slot_id in ("music_practice", "guitar", "massage")
-        )
+        assert {t.slot_id for t in b.targets} >= set(slots)
+        assert all(t.status == "opportunity" for t in b.targets if t.slot_id in slots)
+    basic = next(p for p in evaluation.life_templates if p.template_id == "p1_current_basic")
+    comfy = next(p for p in evaluation.life_templates if p.template_id == "p2_current_device")
+    assert "basket_basic" in basic.service_slots and "basket_comfort" in comfy.service_slots
+    assert {"communication", "connectivity", "supplies"} <= set(basic.service_slots)
 
 
 def test_an_expired_item_can_be_replaced_later_in_the_same_year(bundle, scoring, start):
@@ -892,7 +905,7 @@ def request_for(
         last_feedback=memory_years[-1].feedback if memory_years else None,
         revision=revision,
         tax_policy=bundle.tax_policy(catalog.tax_policy_id),
-        prompt_template="e3b-product-prompt-v1",
+        prompt_template="e3b-product-prompt-v2",
     )
     return request_payload(req)
 
@@ -944,7 +957,15 @@ def test_the_request_shows_life_facts_and_interests_but_no_scoring_internals(bun
     assert opps["k51.experience.tennis_with_rental"]["activity"]["kit_provides"] == [
         "racket_playable"
     ]
-    assert opps["k51.service.massage"]["enjoyment"][0]["function"] == "personal_care"
+    assert opps["k51.service.personal_basket.u1"]["enjoyment"] == [
+        {
+            "function": "personal_consumption",
+            "mode": "service_units",
+            "units_per_month": 1.0,
+            "unit_label": "标准篮子",
+        }
+    ]
+    assert opps["k51.service.mobile_basic"]["functions"] == ["personal_communication"]
     profile = payload["observation"]["profile"]
     assert (profile["leisure_interests"], profile["cuisines"]) == (["music"], ["sichuan"])
     assert "unsupported_requests" not in profile  # 品牌与没认出的描述只留存，不交给分身（收尾 R7）

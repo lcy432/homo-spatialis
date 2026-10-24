@@ -109,17 +109,17 @@
    ]
   }
  },
- "build_identity": "c832ce9e861b84eb3c052dbe6f4888c5e33181f0900e7e014cb48086f5867fb8",
+ "build_identity": "cdefb4722d9e9525e6d004355ea4360c892c233764bd08adb6abcf26a64e052a",
  "build_inputs": {
   "base_files": {
    "configs/intake/life_pack_us_v1.yaml": "45774c486ca231beab3073ffa793f85847e3ec1bcfb5fc7a49684e5ce5d9659b",
    "configs/intake/occupations_us_v1.yaml": "cf63f672634afa11fdbb9e7db599043dc623bce1ea6fcc0a3d6c30185268ffcf",
    "configs/intake/tax_us_2024.yaml": "8023942148aaebac6f5d35e62697e79d96216a8f087039766bac7bf2c3153bc5",
    "configs/life/city_facts_product.yaml": "e98654fc23b6cce39dba90b2907a48abea7875e719d978e842bc0fa040d095e4",
-   "configs/life/evaluation_product.yaml": "fdcbb21c0c277acf622ebb5ee43b3324c29066366c8d90b503c65424d9e160b0",
-   "configs/life/scoring_product.yaml": "814b1c4e4918ccc3bb3fe969b827c82d5e89509dbfb09fdb08d412f997384239",
-   "configs/life/synthetic_product.yaml": "72521724a098aa0a32cf1c32e9cc5150877114e6fcf6959d61f558ff772e227a",
-   "configs/product/e3a_synthetic_pack.yaml": "9eb059bc62eb41bf4d3243aa6cbe29f4a6163aab52abc13ff37b45a0ded91fac"
+   "configs/life/evaluation_product.yaml": "b579d2e6f9ea91786a5c55817c4c39cdccf4f7a9b926b2e40d8b4c384b2e8983",
+   "configs/life/scoring_product.yaml": "0e9259b36d9382e6c592b6262b7e9cecd00768d3125d799596cdfd2aee7ee975",
+   "configs/life/synthetic_product.yaml": "17acb466f7e10fe986a852f446022b90965ff06fb9ef697d6e858003770edb72",
+   "configs/product/e3a_synthetic_pack.yaml": "43dcf795a23689f7712d67fe1f86ae7839da99303a859b9649bf6536776bf733"
   },
   "commute": {
    "chi": "3f1b8d0c72993896b4d2cc27f73fa20de0a8574b2d8cca04bdba3f6f8b8fd7d6",
@@ -163,7 +163,7 @@
     "rental_support_cells": "8b53c3b738dd8d60731b1b4f1fc60e627c1798413c70ca4e8f1bd133cabf5483"
    }
   },
-  "items": "f180711dbe12a2b748f4c060b3e01d01a57eaa24ae67830323d75d1ef327d9d8",
+  "items": "c1fa08ef2a4d8dc9d67cf28bef0c20274c8e00fd3b0e97a0b71c88515e4231c7",
   "raw_geography": {
    "cbsa_delineation": "952c4b1e78acbb54e6ec9412434b7602fedacbf021736351a63c181bdb753629",
    "tract_puma": "5262f460b2c8dbe86b00549e916317b1791fdc595c9af72ab18f6f6a67040531"
@@ -190,8 +190,9 @@
     "housing_in_catalog": 345,
     "items_by_domain": {
      "activity": 11,
+     "consumption": 7,
+     "daily_support": 3,
      "device": 5,
-     "enjoyment": 3,
      "equipment": 2,
      "food": 327,
      "service": 3
@@ -351,8 +352,9 @@
     "housing_in_catalog": 357,
     "items_by_domain": {
      "activity": 11,
+     "consumption": 7,
+     "daily_support": 3,
      "device": 5,
-     "enjoyment": 3,
      "equipment": 2,
      "food": 327,
      "service": 3,
@@ -509,8 +511,9 @@
     "housing_in_catalog": 360,
     "items_by_domain": {
      "activity": 11,
+     "consumption": 7,
+     "daily_support": 3,
      "device": 5,
-     "enjoyment": 3,
      "equipment": 2,
      "food": 327,
      "service": 3
@@ -666,8 +669,9 @@
     "housing_in_catalog": 353,
     "items_by_domain": {
      "activity": 11,
+     "consumption": 7,
+     "daily_support": 3,
      "device": 5,
-     "enjoyment": 3,
      "equipment": 2,
      "food": 327,
      "service": 3,
@@ -828,8 +832,9 @@
     "housing_in_catalog": 342,
     "items_by_domain": {
      "activity": 11,
+     "consumption": 7,
+     "daily_support": 3,
      "device": 5,
-     "enjoyment": 3,
      "equipment": 2,
      "food": 327,
      "service": 3
@@ -985,8 +990,9 @@
     "housing_in_catalog": 340,
     "items_by_domain": {
      "activity": 10,
+     "consumption": 7,
+     "daily_support": 3,
      "device": 5,
-     "enjoyment": 3,
      "equipment": 2,
      "food": 327,
      "service": 3
@@ -1137,9 +1143,9 @@
  },
  "files": {
   "city_facts.json": "9e8b1979b60d2dacaa9e41faa27365366cb129b925e39961267e2b87b9ac54cd",
-  "evaluation.json": "1a4d766a362dd6eb39f6d7441f085cb22eff5bb473d8c9321f68f075660baa1b",
-  "life_input.json": "b7d5442914fe014c4194dbe8d9c07775ca822d9b9ee8293d7a9fc81a9ae9a724",
-  "scoring.json": "dcd046abf9e30c32d644e9e24a3d91a11877f7a545d825c5b89d51b62e119d0e"
+  "evaluation.json": "e4bc4a2d77631277b5e3297430d50b1d7b1a32cf3436cf8e95237f770364b72e",
+  "life_input.json": "ed4995dc72ae2e5d37d01c3b00ad3066ecb5044376561081af914240178c3f8d",
+  "scoring.json": "2fca0e5daaaa50c15379c5780330b6014ec0e8b0b63dedc600d105196e23e9b5"
  },
  "safety_inputs": {
   "chi": {

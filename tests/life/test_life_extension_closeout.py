@@ -315,10 +315,13 @@ def ill_in(bundle, month: int, severity: str = "major"):
 TREAT = {"minor": "treat_if_possible", "major": "treat_if_possible", "pause_order": []}
 
 
-def one_time_massage(o: dict) -> None:
-    """审核的反例：一次性的按摩体验，只有享受事实、没有活动事实（每次 1 份护理、1 小时）。"""
+BASKET = "k51.service.personal_basket.u1"
+
+
+def one_time_basket(o: dict) -> None:
+    """审核的反例改写：按次购买的一份消费篮子体验，只有享受事实、没有活动事实（每次 1 份、1 小时）。"""
     o.update(
-        label="按摩（一次）",
+        label="个人消费体验（一次）",
         unit="session",
         price={
             "amount": {"amount": 70, "numeraire": "USD_2024_LOCAL"},
@@ -340,29 +343,23 @@ def one_time_massage(o: dict) -> None:
 def test_r6_a_one_time_enjoyment_service_paused_by_illness_is_not_a_program_error(
     bundle, scoring, start
 ):
-    cat = catalog_with(bundle, "k51.service.massage", one_time_massage)
+    cat = catalog_with(bundle, BASKET, one_time_basket)
     y = live_year(
         bundle,
         scoring,
         start,
-        plan(extra=[{"opportunity_id": "k51.service.massage", "quantity": 1, "months": [2, 3, 4]}]),
+        plan(extra=[{"opportunity_id": BASKET, "quantity": 1, "months": [2, 3, 4]}]),
         catalog=cat,
         protocol=ill_in(bundle, 3),
         emergency=TREAT,
     )
     assert y.settlement.status == "completed"
-    item = next(i for i in y.settlement.outcome.items if i.opportunity_id == "k51.service.massage")
+    item = next(i for i in y.settlement.outcome.items if i.opportunity_id == BASKET)
     assert item.covered_months == (2, 4) and [p.month for p in item.months_paused] == [3]
-    paid = [
-        f.month
-        for f in y.settlement.outcome.cash_flows
-        if f.opportunity_id == "k51.service.massage"
-    ]
+    paid = [f.month for f in y.settlement.outcome.cash_flows if f.opportunity_id == BASKET]
     assert paid == [2, 4]  # 暂停的月份不付款，也没有退款或免费补上
-    assert [comp(y, m, "personal_enjoyment").z for m in (2, 3, 4)] == [1.0, 0.0, 1.0]
-    assert not [
-        p for p in y.settlement.outcome.participation if p.opportunity_id == "k51.service.massage"
-    ]
+    assert [comp(y, m, "personal_enjoyment").z for m in (2, 3, 4)] == [3.0, 0.0, 3.0]  # 每份 z = 3
+    assert not [p for p in y.settlement.outcome.participation if p.opportunity_id == BASKET]
 
 
 def test_r6_a_multi_month_activity_is_paused_only_in_the_ill_month(bundle, scoring, start):
@@ -653,7 +650,7 @@ RICH_ACTIVITIES = [
     {"opportunity_id": "k51.experience.gallery_tour", "quantity": 1, "months": [2, 6, 10]},
     {"opportunity_id": "k51.experience.cooking_class", "quantity": 1, "months": [4, 8, 12]},
     {"opportunity_id": "k51.experience.concert", "quantity": 1, "months": [5, 11]},
-    whole("k51.service.massage"),
+    whole("k51.service.personal_basket.u1"),
 ]
 
 
@@ -746,7 +743,7 @@ def test_r1_richer_combinations_later_years_and_revisions_fit_every_configured_c
     reqs = lived_requests(
         bundle,
         scoring,
-        [once("k51.durable.guitar", 1), once("k51.durable.comfort_chair", 1), *RICH_ACTIVITIES],
+        [once("k51.durable.guitar", 1), whole("k51.service.mobile_basic"), *RICH_ACTIVITIES],
         RICH_ACTIVITIES,
     )
     sizes = {k: estimate(v) for k, v in reqs.items()}
@@ -916,21 +913,13 @@ def test_r4_an_unknown_cuisine_is_a_gap_only_for_users_who_confirmed_a_cuisine(b
 
 
 def test_r4_an_unsupported_function_is_reported_apart_from_gaps_and_zeros(bundle, scoring, start):
-    aroma = catalog_with(
-        bundle, "k51.durable.cushion_set", lambda o: o["enjoyment"][0].update(function="aroma")
-    )
+    aroma = catalog_with(bundle, BASKET, lambda o: o["enjoyment"][0].update(function="aroma"))
     x = leaf(coverage(bundle, scoring, aroma), "personal_enjoyment")
     assert x.support == "supported" and x.data_gaps == ()
     assert any("模型未支持" in r and "aroma" in r for r in x.reasons)
-    y = live_year(
-        bundle, scoring, start, plan(extra=[once("k51.durable.cushion_set", 1)]), catalog=aroma
-    )
+    y = live_year(bundle, scoring, start, plan(extra=[whole(BASKET)]), catalog=aroma)
     e = comp(y, 1, "personal_enjoyment")
-    assert (
-        e.status == "known"
-        and e.z == 0
-        and e.enjoyment.unsupported == ("k51.durable.cushion_set:aroma",)
-    )
+    assert e.status == "known" and e.z == 0 and e.enjoyment.unsupported == (f"{BASKET}:aroma",)
 
 
 def test_r4_an_experience_without_facts_is_a_leisure_gap(bundle, scoring, start):

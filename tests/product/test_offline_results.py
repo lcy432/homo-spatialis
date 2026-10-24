@@ -43,7 +43,7 @@ def test_the_confirmed_profile_really_runs_through_the_existing_runner(normal):
     manifest = json.loads((archive / "manifest.json").read_text(encoding="utf-8"))
     assert manifest["identities"]["prompt_template"] and manifest["identities"][
         "scoring_content"
-    ].startswith("180fd938")
+    ].startswith("c36f768c")
     index = json.loads((archive / "inputs/index.json").read_text(encoding="utf-8"))
     assert index["replayable_from_snapshot"] is True  # 编译产物是相对路径：输入完整冻结进归档
 

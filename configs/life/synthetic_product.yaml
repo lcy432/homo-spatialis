@@ -103,7 +103,7 @@ protocol:
     scoring_version: e1-life-v1
     # 评分内容身份（DECISIONS/0025）：scoring_product.yaml 的规格的内容身份。规格一改（τ、c、任务组合……）这里就要换，
     # 并从共同初始状态重跑。
-    scoring_content_fingerprint: 180fd9389343bac1da0fac4528e4eb6e9c6d7e069bddd56ea47acdcc4380bce0
+    scoring_content_fingerprint: c36f768cbb84afd5398b4afedeafbf2aa1a117bf61cfd944a453eb3cdc1e7d75
     preference_source: product_confirmed_six_dim
     quantization: floor_to_0.01
     source: *rules
@@ -215,12 +215,13 @@ protocol:
 
 consumption_needs: [housing_condition, food_life, daily_convenience, personal_enjoyment]
 categories: [housing, food, durable, job, training, experience, service]
-functions: [housing, food]
+functions: [housing, food, personal_communication, home_connectivity, household_supplies]
 # 生活扩展（DECISIONS/0041）的公开词表：菜系、休闲活动类别、装备能力、享受功能。机会只能用这里声明过的键；怎样换算成满足感只在评分规格里。
 cuisines: [home_style, sichuan, italian]
 leisure_categories: [music, racket_sports, arts_culture, culinary, fitness]
 capabilities: [guitar_playable, racket_playable]
-enjoyment_functions: [home_comfort, personal_care]
+enjoyment_functions: [personal_consumption]
+# 合成样例的个人消费篮子只放 0.5、1、2 三个档位（真实资料包是 0.25–4 的完整网格）；合成价按全国一人消费单位的月均构成
 
 tax_policies:
   - policy_id: tax.synth.e1conv
@@ -455,39 +456,80 @@ catalogs:
         resource: {basis: per_service_month, hours: 36, burden_per_hour: 0.5, quantity_scales: false,
                    note: 做饭 28 小时 + 外食 8 小时}
         source: *synth
-      - opportunity_id: k51.durable.comfort_chair
-        category: durable
-        label: 舒适的阅读椅
-        unit: chair
-        quality: 一次买下、能用 5 年；放在家里每天都在用
-        availability: available
-        price: {amount: {amount: 300, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: chair}
-        duration: {kind: durable_good, lasts_years: 5}
-        enjoyment: [{function: home_comfort, mode: passive_service_month, basis: 每天在家坐着读书、休息时更舒服（居家舒适，在服务期内每月都在用）}]
-        resource: {basis: passive, note: 持有本身不占时间}
-        source: *synth
-      - opportunity_id: k51.durable.cushion_set
-        category: durable
-        label: 靠垫与软毯一套
-        unit: set
-        quality: 一次买下、能用 2 年；和阅读椅提供的是同一种居家舒适
-        availability: available
-        price: {amount: {amount: 80, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: set}
-        duration: {kind: durable_good, lasts_years: 2}
-        enjoyment: [{function: home_comfort, mode: passive_service_month, basis: 让沙发更舒服（居家舒适；与阅读椅同一功能）}]
-        resource: {basis: passive, note: 持有本身不占时间}
-        source: *synth
-      - opportunity_id: k51.service.massage
+      - opportunity_id: k51.service.mobile_basic
         category: service
-        label: 按摩（每月两次）
+        label: 手机通信（基本单人套餐）
         unit: service-month
-        quality: 每月两次、每次约 1 小时的放松按摩
+        quality: 个人联系与基本移动通信（合成样例：用全国一人消费单位的平均月支出作价，不是运营商报价）
+        functions: [personal_communication]
         availability: available
-        price: {amount: {amount: 140, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: service-month}
+        price: {amount: {amount: 61.08, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: service-month}
         duration: {kind: ongoing_service}
-        enjoyment: [{function: personal_care, mode: service_units, units_per_month: 2, unit_label: 次, basis: 每月实际接受两次按摩（享受型服务）}]
-        resource: {basis: per_service_month, hours: 2, burden_per_hour: 0.2, quantity_scales: false,
-                   note: 每月两次、每次约 1 小时；生病暂停的月份不付款、不使用}
+        resource: {basis: per_service_month, hours: 0, burden_per_hour: 0, quantity_scales: false,
+                   note: 不占你自己的时间；只在实际付了钱的月份提供这项功能，买两份不叠加}
+        source: *synth
+      - opportunity_id: k51.service.home_internet_basic
+        category: service
+        label: 家庭宽带（基本档）
+        unit: service-month
+        quality: 居家互联网接入，下行约 100 Mbps、不限流量（合成样例：用全国同规格报价的中位数作价）
+        functions: [home_connectivity]
+        availability: available
+        price: {amount: {amount: 72.06, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: service-month}
+        duration: {kind: ongoing_service}
+        resource: {basis: per_service_month, hours: 0, burden_per_hour: 0, quantity_scales: false,
+                   note: 不占你自己的时间；只在实际付了钱的月份提供这项功能，买两份不叠加}
+        source: *synth
+      - opportunity_id: k51.service.household_supplies_basic
+        category: service
+        label: 家用日耗品（清洁用品与纸品）
+        unit: service-month
+        quality: 洗衣清洁用品、纸巾卫生纸等家用日耗品（合成样例：用全国一人消费单位的平均月支出作价）
+        functions: [household_supplies]
+        availability: available
+        price: {amount: {amount: 28.57, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: service-month}
+        duration: {kind: ongoing_service}
+        resource: {basis: per_service_month, hours: 0, burden_per_hour: 0, quantity_scales: false,
+                   note: 不占你自己的时间；只在实际付了钱的月份提供这项功能，买两份不叠加}
+        source: *synth
+      - opportunity_id: k51.service.personal_basket.u0_5
+        category: service
+        label: 个人消费篮子（每月 0.5 个标准篮子）
+        unit: service-month
+        quality: 成人衣着、鞋履与个人配饰，非医疗的个人护理（合成样例：1 个标准篮子按全国一人消费单位的月均构成作价 131.43）
+        availability: available
+        price: {amount: {amount: 65.71, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: service-month}
+        duration: {kind: ongoing_service}
+        enjoyment: [{function: personal_consumption, mode: service_units, units_per_month: 0.5, unit_label: 标准篮子,
+                     basis: 这个月实际获得 0.5 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）}]
+        resource: {basis: per_service_month, hours: 0, burden_per_hour: 0, quantity_scales: false,
+                   note: 当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力}
+        source: *synth
+      - opportunity_id: k51.service.personal_basket.u1
+        category: service
+        label: 个人消费篮子（每月 1 个标准篮子）
+        unit: service-month
+        quality: 成人衣着、鞋履与个人配饰，非医疗的个人护理（合成样例：1 个标准篮子按全国一人消费单位的月均构成作价 131.43）
+        availability: available
+        price: {amount: {amount: 131.43, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: service-month}
+        duration: {kind: ongoing_service}
+        enjoyment: [{function: personal_consumption, mode: service_units, units_per_month: 1, unit_label: 标准篮子,
+                     basis: 这个月实际获得 1 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）}]
+        resource: {basis: per_service_month, hours: 0, burden_per_hour: 0, quantity_scales: false,
+                   note: 当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力}
+        source: *synth
+      - opportunity_id: k51.service.personal_basket.u2
+        category: service
+        label: 个人消费篮子（每月 2 个标准篮子）
+        unit: service-month
+        quality: 成人衣着、鞋履与个人配饰，非医疗的个人护理（合成样例：1 个标准篮子按全国一人消费单位的月均构成作价 131.43）
+        availability: available
+        price: {amount: {amount: 262.86, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: service-month}
+        duration: {kind: ongoing_service}
+        enjoyment: [{function: personal_consumption, mode: service_units, units_per_month: 2, unit_label: 标准篮子,
+                     basis: 这个月实际获得 2 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）}]
+        resource: {basis: per_service_month, hours: 0, burden_per_hour: 0, quantity_scales: false,
+                   note: 当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力}
         source: *synth
       - opportunity_id: k51.durable.guitar
         category: durable
@@ -835,39 +877,80 @@ catalogs:
         resource: {basis: per_service_month, hours: 36, burden_per_hour: 0.5, quantity_scales: false,
                    note: 做饭 28 小时 + 外食 8 小时}
         source: *synth
-      - opportunity_id: m52.durable.comfort_chair
-        category: durable
-        label: 舒适的阅读椅
-        unit: chair
-        quality: 一次买下、能用 5 年；放在家里每天都在用
-        availability: available
-        price: {amount: {amount: 360, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: chair}
-        duration: {kind: durable_good, lasts_years: 5}
-        enjoyment: [{function: home_comfort, mode: passive_service_month, basis: 每天在家坐着读书、休息时更舒服（居家舒适，在服务期内每月都在用）}]
-        resource: {basis: passive, note: 持有本身不占时间}
-        source: *synth
-      - opportunity_id: m52.durable.cushion_set
-        category: durable
-        label: 靠垫与软毯一套
-        unit: set
-        quality: 一次买下、能用 2 年；和阅读椅提供的是同一种居家舒适
-        availability: available
-        price: {amount: {amount: 90, numeraire: USD_2024_LOCAL}, billing: one_time, per_unit: set}
-        duration: {kind: durable_good, lasts_years: 2}
-        enjoyment: [{function: home_comfort, mode: passive_service_month, basis: 让沙发更舒服（居家舒适；与阅读椅同一功能）}]
-        resource: {basis: passive, note: 持有本身不占时间}
-        source: *synth
-      - opportunity_id: m52.service.massage
+      - opportunity_id: m52.service.mobile_basic
         category: service
-        label: 按摩（每月两次）
+        label: 手机通信（基本单人套餐）
         unit: service-month
-        quality: 每月两次、每次约 1 小时的放松按摩
+        quality: 个人联系与基本移动通信（合成样例：用全国一人消费单位的平均月支出作价，不是运营商报价）
+        functions: [personal_communication]
         availability: available
-        price: {amount: {amount: 110, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: service-month}
+        price: {amount: {amount: 61.08, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: service-month}
         duration: {kind: ongoing_service}
-        enjoyment: [{function: personal_care, mode: service_units, units_per_month: 2, unit_label: 次, basis: 每月实际接受两次按摩（享受型服务）}]
-        resource: {basis: per_service_month, hours: 2, burden_per_hour: 0.2, quantity_scales: false,
-                   note: 每月两次、每次约 1 小时；生病暂停的月份不付款、不使用}
+        resource: {basis: per_service_month, hours: 0, burden_per_hour: 0, quantity_scales: false,
+                   note: 不占你自己的时间；只在实际付了钱的月份提供这项功能，买两份不叠加}
+        source: *synth
+      - opportunity_id: m52.service.home_internet_basic
+        category: service
+        label: 家庭宽带（基本档）
+        unit: service-month
+        quality: 居家互联网接入，下行约 100 Mbps、不限流量（合成样例：用全国同规格报价的中位数作价）
+        functions: [home_connectivity]
+        availability: available
+        price: {amount: {amount: 72.06, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: service-month}
+        duration: {kind: ongoing_service}
+        resource: {basis: per_service_month, hours: 0, burden_per_hour: 0, quantity_scales: false,
+                   note: 不占你自己的时间；只在实际付了钱的月份提供这项功能，买两份不叠加}
+        source: *synth
+      - opportunity_id: m52.service.household_supplies_basic
+        category: service
+        label: 家用日耗品（清洁用品与纸品）
+        unit: service-month
+        quality: 洗衣清洁用品、纸巾卫生纸等家用日耗品（合成样例：用全国一人消费单位的平均月支出作价）
+        functions: [household_supplies]
+        availability: available
+        price: {amount: {amount: 28.57, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: service-month}
+        duration: {kind: ongoing_service}
+        resource: {basis: per_service_month, hours: 0, burden_per_hour: 0, quantity_scales: false,
+                   note: 不占你自己的时间；只在实际付了钱的月份提供这项功能，买两份不叠加}
+        source: *synth
+      - opportunity_id: m52.service.personal_basket.u0_5
+        category: service
+        label: 个人消费篮子（每月 0.5 个标准篮子）
+        unit: service-month
+        quality: 成人衣着、鞋履与个人配饰，非医疗的个人护理（合成样例：1 个标准篮子按全国一人消费单位的月均构成作价 131.43）
+        availability: available
+        price: {amount: {amount: 65.71, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: service-month}
+        duration: {kind: ongoing_service}
+        enjoyment: [{function: personal_consumption, mode: service_units, units_per_month: 0.5, unit_label: 标准篮子,
+                     basis: 这个月实际获得 0.5 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）}]
+        resource: {basis: per_service_month, hours: 0, burden_per_hour: 0, quantity_scales: false,
+                   note: 当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力}
+        source: *synth
+      - opportunity_id: m52.service.personal_basket.u1
+        category: service
+        label: 个人消费篮子（每月 1 个标准篮子）
+        unit: service-month
+        quality: 成人衣着、鞋履与个人配饰，非医疗的个人护理（合成样例：1 个标准篮子按全国一人消费单位的月均构成作价 131.43）
+        availability: available
+        price: {amount: {amount: 131.43, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: service-month}
+        duration: {kind: ongoing_service}
+        enjoyment: [{function: personal_consumption, mode: service_units, units_per_month: 1, unit_label: 标准篮子,
+                     basis: 这个月实际获得 1 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）}]
+        resource: {basis: per_service_month, hours: 0, burden_per_hour: 0, quantity_scales: false,
+                   note: 当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力}
+        source: *synth
+      - opportunity_id: m52.service.personal_basket.u2
+        category: service
+        label: 个人消费篮子（每月 2 个标准篮子）
+        unit: service-month
+        quality: 成人衣着、鞋履与个人配饰，非医疗的个人护理（合成样例：1 个标准篮子按全国一人消费单位的月均构成作价 131.43）
+        availability: available
+        price: {amount: {amount: 262.86, numeraire: USD_2024_LOCAL}, billing: per_month, per_unit: service-month}
+        duration: {kind: ongoing_service}
+        enjoyment: [{function: personal_consumption, mode: service_units, units_per_month: 2, unit_label: 标准篮子,
+                     basis: 这个月实际获得 2 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）}]
+        resource: {basis: per_service_month, hours: 0, burden_per_hour: 0, quantity_scales: false,
+                   note: 当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力}
         source: *synth
       - opportunity_id: m52.durable.guitar
         category: durable

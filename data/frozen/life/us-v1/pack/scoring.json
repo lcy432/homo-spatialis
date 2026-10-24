@@ -1738,15 +1738,23 @@
     "component_id": "daily_convenience",
     "convenience": {
      "cap": 0.9,
-     "definition": "q = Σ（协议家务基准小时 − 当月资源账里本人的残余小时），s = min(c, q/(q + τ))；同一项家务只取当月在用方案里残余最小的那一个 （结算写出），不读价格、付款或成交。代表性杂务组合，不含做饭、通勤、工作、学习与疾病恢复",
-     "rule": "household_baseline_minus_residual_v1",
+     "chore_weight": 0.5,
+     "definition": "S_chore = min(c, q/(q + τ))，q = Σ（协议家务基准小时 − 当月资源账里本人的残余小时）；S_support = 0.9 × 实际获得的支持功能数 ÷ 3 （每项未获得 = 0、获得 = 1）；s = 0.5·S_chore + 0.5·S_support。0.5、三项等权与二元功能是共同探索设定，不由城市资料拟合",
+     "rule": "chores_and_daily_support_v1",
+     "support_cap": 0.9,
+     "support_functions": [
+      "personal_communication",
+      "home_connectivity",
+      "household_supplies"
+     ],
+     "support_weight": 0.5,
      "tasks": [
       "laundry",
       "cleaning"
      ],
      "unit": "小时/月"
     },
-    "description": "日常生活便利：这个月本人实际少做了多少小时家务（洗衣与打扫这组代表性杂务）。设备（一次购买、服务期内持续）与人工服务（按月购买、 实际买到的月份）都只通过资源账里的本人残余小时起作用；成交、花钱与目标兑现不另计分。",
+    "description": "日常支持与便利：通信联网、家用日耗品是否方便获得，以及日常杂务是否省心。杂务部分读这个月本人实际少做了多少小时家务（洗衣与 打扫这组代表性杂务；设备与人工服务都只通过资源账里的本人残余小时起作用）；支持部分读这个月有没有实际获得个人通信、居家联网与 家用日耗品（付了钱、实际在用才算，同功能多份不叠加）。成交、花钱与目标兑现不另计分。",
     "dimension": "material",
     "material_need": "daily_convenience",
     "tau": 8,
@@ -1754,33 +1762,26 @@
    },
    {
     "component_id": "personal_enjoyment",
-    "description": "个人消费与享受：这个月实际在用的居家舒适用品与实际接受的享受型服务。按功能计：同功能的第二件用品不再加，服务按实际份数相加； 纯爱好装备没有享受功能（它只让活动可以开展）；成交、花钱与购买次数不计分。",
+    "description": "个人消费与享受：在其他生活开支之外，获得衣着、个人护理等个人消费的满足。读这个月实际获得的标准个人消费篮子数量（消费服务流， 不读付款金额）；同样篮子涨价，直接分不变；买不起时数量是 0，偏好权重不变；不加休闲参与小时、不得兴趣匹配、不留资产。",
     "dimension": "material",
     "enjoyment": {
      "cap": 0.9,
-     "definition": "v_f = 1（presence：这个月有在用的、提供功能 f 的用品）或 Σ 份数（units：实际接受的服务次数）；z = Σ η_f·v_f， s = min(c, z/(z + τ))。η 与 τ 是探索设定",
+     "definition": "z = 3 × 当月实际获得的标准篮子数量，s = min(0.9, z/(z + 3))：1 个标准篮子 0.5，半个约 0.333；共同量级设定，不是 CE 测量出的 幸福函数。独立的按摩与居家舒适用品不再计分（避免与篮子重复）",
      "functions": [
       {
-       "eta": 1.5,
-       "function": "home_comfort",
-       "label": "居家舒适",
-       "measure": "presence",
-       "unit": "在用"
-      },
-      {
-       "eta": 1.0,
-       "function": "personal_care",
-       "label": "放松护理",
+       "eta": 3.0,
+       "function": "personal_consumption",
+       "label": "个人消费",
        "measure": "units",
-       "unit": "次"
+       "unit": "标准篮子"
       }
      ],
      "rule": "enjoyment_by_function_v1",
-     "unit": "功能（折算）"
+     "unit": "标准篮子（折算）"
     },
     "material_need": "personal_enjoyment",
     "tau": 3,
-    "unit": "享受功能（折算）"
+    "unit": "标准篮子（折算）"
    },
    {
     "component_id": "safety",

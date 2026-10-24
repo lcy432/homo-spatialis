@@ -1,5 +1,5 @@
 {
- "content_identity": "5912a55e8f8c375a943433c0ee909528454563ef1cda3a7108217d626cefe360",
+ "content_identity": "42c3734a80ec3fd57ccd9ff74df4ba7240644e3815b8192b06335055d836ef52",
  "schema": "e3b-life-items-frozen-v1",
  "cbsa": "42660",
  "key": "sea",
@@ -11,14 +11,14 @@
  "label": "Seattle-Tacoma-Bellevue 都会区",
  "intake_build_id": "35667f4101a71c0e5ea6c1aaa8e5f45cd83c825d6b1393bde1104d3d571a96b7",
  "identities": {
-  "items_config": "012f9621d945bc3e95d51cf9611d8a724a2b9ae6290ba1d76f381b80426dcde4",
+  "items_config": "b92dc9e9e3e6aa5cccd54d4021baff673e8d8c70464e0afba1698b954e68ae90",
   "occupations_config": "f2ce1008acbef70db9e60afe0c09ef2bfd2614f5f8094bc9ce83133d82b4c627",
   "baskets": "8714cbfd8ebb7dfbd39fb6f9bd9bcc2489d4841fe6caefbbdb88bbac1388d19f",
-  "slice": "d8a4f8150f99c2dfbe923e9dde7ee4f59279fe651e41a5284b0ee7541878249e"
+  "slice": "c35cfdc56b5e261130e01dc4b4235a8b7a38fc0739266010355c0b5c65d50ddf"
  },
  "counts": {
   "raw_inputs": {
-   "intake_records_referenced": 31,
+   "intake_records_referenced": 30,
    "food_item_prices": 52,
    "osm_restaurants": 1419,
    "osm_venues": 838,
@@ -29,14 +29,15 @@
   },
   "generated": {
    "activity": 11,
+   "consumption": 7,
+   "daily_support": 3,
    "device": 5,
-   "enjoyment": 3,
    "equipment": 2,
    "food": 327,
    "service": 3
   },
   "by_status": {
-   "executable": 350,
+   "executable": 357,
    "needs_area": 0,
    "needs_e1_extension": 0,
    "data_unknown": 1
@@ -46,11 +47,14 @@
     "data_unknown": 1,
     "executable": 10
    },
+   "consumption": {
+    "executable": 7
+   },
+   "daily_support": {
+    "executable": 3
+   },
    "device": {
     "executable": 5
-   },
-   "enjoyment": {
-    "executable": 3
    },
    "equipment": {
     "executable": 2
@@ -332,7 +336,7 @@
   },
   {
    "block": "services",
-   "label_zh": "人工杂务服务与享受型服务",
+   "label_zh": "人工杂务服务",
    "legal_combinations_zh": "每项服务按月购买，可以同时买几项；同一家务的减负取现有有效残余时间规则，不叠加",
    "parameters": [
     {
@@ -386,8 +390,7 @@
    "city_evidence": {
     "hourly_median_by_soc": {
      "51-6011": "20.41",
-     "37-2012": "20.58",
-     "31-9011": "42.44"
+     "37-2012": "20.58"
     }
    },
    "families": [
@@ -412,10 +415,143 @@
       "note_zh": "未发生本地报价更新",
       "why_no_quotes_zh": "没有同规格（同样频次与工时）的本地直接报价"
      }
+    }
+   ],
+   "variation_vs_uncertainty_zh": "服务之间的差异是频次与工时；工资是城市证据；效果（替代后的残余小时）是共同设定，不随工资或报价改变",
+   "sensitivity_zh": "默认运行用中心参数；零售修正与参数不确定性只进独立的敏感性情景（同城所有分身共用同一组值），不生成额外机会",
+   "coverage_note_zh": "A 的覆盖网格不是市场份额：没有供给抽样资料，不声称知道某个方案的真实出现概率",
+   "status": {
+    "compiled": {
+     "executable": 3
+    },
+    "data_gaps": [],
+    "model_support_zh": "只在付了钱的月份起作用；家务减负读资源账里的残余小时"
+   }
+  },
+  {
+   "block": "daily_support",
+   "label_zh": "日常支持（通信、居家联网、家用日耗品）",
+   "legal_combinations_zh": "三个支持功能各一个按月服务，可以同时买；同功能买两份不叠加；更贵更快的套餐不另加分；未买或买不起时这项功能是 0，不触发出局、患病或工资损失",
+   "parameters": [
+    {
+     "id": "mobile_budget_proxy",
+     "meaning_zh": "手机通信月费（CE 2024 一人消费单位手机服务年均 ÷ 12）",
+     "unit": "USD_2024/月",
+     "support": "正数",
+     "prior": {
+      "kind": "point"
+     },
+     "source": "ce_one_person_budget_proxy_v1",
+     "city_updatable": false
     },
     {
-     "family": "enjoyment_service_month",
-     "label_zh": "按摩（按月）",
+     "id": "broadband_regional_reference",
+     "meaning_zh": "家庭宽带基本档月费（FCC URS 2024 同规格报价的大区加权中位数 × CPI 互联网服务）",
+     "unit": "USD_2024/月",
+     "support": "正数",
+     "prior": {
+      "kind": "city_evidence"
+     },
+     "source": "fcc_broadband_basic_tier_v1",
+     "city_updatable": true
+    },
+    {
+     "id": "supplies_budget",
+     "meaning_zh": "家用日耗品的共同篮子尺度（CE 2024 一人消费单位 ÷ 12）",
+     "unit": "USD_2024/月",
+     "support": "正数",
+     "prior": {
+      "kind": "point"
+     },
+     "source": "household_supplies_ce_v1",
+     "city_updatable": false
+    },
+    {
+     "id": "rpp_goods",
+     "meaning_zh": "商品类 RPP（日耗品的城市成本）",
+     "unit": "指数（全国 = 100）",
+     "support": "正数",
+     "prior": {
+      "kind": "city_evidence"
+     },
+     "source": "BEA RPP 2023",
+     "city_updatable": true
+    },
+    {
+     "id": "retail_correction",
+     "meaning_zh": "同规格零售价相对基础预测的对数比值 δ",
+     "unit": "对数比值",
+     "support": "实数",
+     "prior": {
+      "kind": "normal",
+      "mean": 0,
+      "sd": "log(1.5)"
+     },
+     "source": "retail_correction_lognormal_v1",
+     "city_updatable": true
+    }
+   ],
+   "city_evidence": {
+    "census_region": "West",
+    "rpp_goods": "103.972",
+    "acs_internet_access_description": {
+     "n": 4900,
+     "population": "renter_occupied_full_pumas",
+     "table_id": "b.internet.42660",
+     "variables": {
+      "ACCESSINET": {
+       "shares_of_valid": {
+        "no_access": 0.0304,
+        "paid": 0.9381,
+        "without_paying": 0.0314
+       },
+       "weight_not_applicable": 0,
+       "weight_suppressed": 0,
+       "weight_valid": 678535
+      },
+      "BROADBND": {
+       "shares_of_valid": {
+        "no": 0.0324,
+        "yes": 0.9676
+       },
+       "weight_not_applicable": 41970,
+       "weight_suppressed": 0,
+       "weight_valid": 636565
+      },
+      "HISPEED": {
+       "shares_of_valid": {
+        "no": 0.1557,
+        "yes": 0.8443
+       },
+       "weight_not_applicable": 41970,
+       "weight_suppressed": 0,
+       "weight_valid": 636565
+      },
+      "SMARTPHONE": {
+       "shares_of_valid": {
+        "no": 0.0427,
+        "yes": 0.9573
+       },
+       "weight_not_applicable": 0,
+       "weight_suppressed": 0,
+       "weight_valid": 678535
+      },
+      "TEL": {
+       "shares_of_valid": {
+        "no": 0.0056,
+        "yes": 0.9944
+       },
+       "weight_not_applicable": 0,
+       "weight_suppressed": 0,
+       "weight_valid": 678535
+      }
+     }
+    }
+   },
+   "families": [
+    {
+     "family": "daily_support_service_month",
+     "label_zh": "通信、宽带与日耗品（按月）",
      "opportunities": 3,
      "priced": 3,
      "retail_correction": {
@@ -432,19 +568,111 @@
       },
       "comparable_quotes": 0,
       "note_zh": "未发生本地报价更新",
-      "why_no_quotes_zh": "没有同规格的本地直接报价"
+      "why_no_quotes_zh": "没有同规格的单人套餐、本地宽带或日耗品直接报价；预算代理与大区参照不是本地观测价"
      }
     }
    ],
-   "variation_vs_uncertainty_zh": "服务之间的差异是频次与工时；工资是城市证据；效果（替代后的残余小时）是共同设定，不随工资或报价改变",
+   "variation_vs_uncertainty_zh": "三项是不同功能，不是同一功能的档位；城市差异只来自 FCC 大区与商品类 RPP；手机按共同预算代理各城相同；ACS 接入率只作描述，不当运营商可得率",
    "sensitivity_zh": "默认运行用中心参数；零售修正与参数不确定性只进独立的敏感性情景（同城所有分身共用同一组值），不生成额外机会",
    "coverage_note_zh": "A 的覆盖网格不是市场份额：没有供给抽样资料，不声称知道某个方案的真实出现概率",
    "status": {
     "compiled": {
-     "executable": 6
+     "executable": 3
     },
     "data_gaps": [],
-    "model_support_zh": "只在付了钱的月份起作用；家务减负读资源账里的残余小时"
+    "model_support_zh": "只在付费成功、实际获得的月份提供功能；不制造节省小时、活动小时或健康效果；基本终端按共同使用条件（basic_device_access_v1）"
+   }
+  },
+  {
+   "block": "consumption_basket",
+   "label_zh": "抽象个人消费篮子",
+   "legal_combinations_zh": "每月最多按档位买（u = 0.25、0.5、1、1.5、2、3、4 个标准篮子）；0 是不买；同时买两个档位时份数相加（消费服务流）",
+   "parameters": [
+    {
+     "id": "reference_vector",
+     "meaning_zh": "共同参考支出向量 e_j（CE 2024 一人消费单位白名单条目月均）",
+     "unit": "USD_2024/月",
+     "support": "非负",
+     "prior": {
+      "kind": "point"
+     },
+     "source": "consumption_basket_ce_v1",
+     "city_updatable": false
+    },
+    {
+     "id": "price_factors",
+     "meaning_zh": "商品类 RPP（商品）与其他服务 RPP（服务）",
+     "unit": "指数（全国 = 100）",
+     "support": "正数",
+     "prior": {
+      "kind": "city_evidence"
+     },
+     "source": "BEA RPP 2023",
+     "city_updatable": true
+    },
+    {
+     "id": "quantity_grid",
+     "meaning_zh": "档位 u（共同覆盖网格，不是居民购买比例）",
+     "unit": "标准篮子/月",
+     "support": "{0.25, 0.5, 1, 1.5, 2, 3, 4}",
+     "prior": {
+      "kind": "grid"
+     },
+     "source": "consumption_basket_ce_v1",
+     "city_updatable": false
+    },
+    {
+     "id": "retail_correction",
+     "meaning_zh": "同规格零售价相对基础预测的对数比值 δ",
+     "unit": "对数比值",
+     "support": "实数",
+     "prior": {
+      "kind": "normal",
+      "mean": 0,
+      "sd": "log(1.5)"
+     },
+     "source": "retail_correction_lognormal_v1",
+     "city_updatable": true
+    }
+   ],
+   "city_evidence": {
+    "rpp_goods": "103.972",
+    "rpp_other": "106.835",
+    "standard_basket_price": "137.40"
+   },
+   "families": [
+    {
+     "family": "personal_consumption_basket",
+     "label_zh": "个人消费篮子（按月）",
+     "opportunities": 7,
+     "priced": 7,
+     "retail_correction": {
+      "rule": "retail_correction_lognormal_v1",
+      "prior": {
+       "distribution": "normal",
+       "mean": 0.0,
+       "sd": 0.4054651081081644,
+       "of": "log(P_actual / P_base)"
+      },
+      "specs": 7,
+      "by_status": {
+       "no_local_quotes": 7
+      },
+      "comparable_quotes": 0,
+      "note_zh": "未发生本地报价更新",
+      "why_no_quotes_zh": "篮子是固定构成的成本模型，没有同规格的直接报价"
+     }
+    }
+   ],
+   "variation_vs_uncertainty_zh": "档位之间只有数量不同；城市差异只来自价格系数；同样数量只改价格时直接享受分不变",
+   "sensitivity_zh": "默认运行用中心参数；零售修正与参数不确定性只进独立的敏感性情景（同城所有分身共用同一组值），不生成额外机会",
+   "coverage_note_zh": "A 的覆盖网格不是市场份额：没有供给抽样资料，不声称知道某个方案的真实出现概率",
+   "status": {
+    "compiled": {
+     "executable": 7
+    },
+    "data_gaps": [],
+    "model_support_zh": "评分读实际获得的标准篮子数量，不读付款金额；不加休闲参与小时、不得兴趣匹配、不留资产或装备能力"
    }
   },
   {
@@ -55431,32 +55659,248 @@
    }
   },
   {
-   "domain": "enjoyment",
+   "domain": "daily_support",
    "status": "executable",
    "gaps": [],
    "assumptions": [
-    "oews_hourly_from_annual_v1",
-    "labor_overhead_v1",
-    "service_hours_v1"
+    "daily_support_cost_order_v1",
+    "basic_device_access_v1",
+    "ce_one_person_budget_proxy_v1"
    ],
-   "records": [
-    "jobs.oews2024.42660.31-9011"
-   ],
+   "records": [],
    "opportunity": {
-    "opportunity_id": "sea.service.massage_studio_1",
+    "opportunity_id": "sea.service.mobile_basic",
     "category": "service",
-    "label": "按摩（店里，每月一次）",
-    "spec": {
-     "sessions_per_month": 1,
-     "worker_hours_per_session": 1.25
-    },
+    "label": "手机通信（基本单人套餐）",
+    "spec": {},
     "unit": "service-month",
-    "quality": "每月一次约 1 小时的放松按摩；往返约半小时",
+    "quality": "个人联系与基本移动通信；月费是 CE 2024 一人消费单位的手机服务月均支出（共同预算代理，不是某家运营商的套餐报价，各城相同）",
     "availability": "available",
     "price": {
      "kind": "actual_quote",
      "amount": {
-      "amount": 106.11,
+      "amount": 61.08,
+      "numeraire": "USD_2024_LOCAL"
+     },
+     "billing": "per_month",
+     "per_unit": "service-month"
+    },
+    "compensation": null,
+    "occupation": null,
+    "eligibility": [],
+    "targets": [],
+    "functions": [
+     "personal_communication"
+    ],
+    "attributes": {
+     "cost_basis": "ce_one_person_budget_proxy",
+     "observed_unit_price": false,
+     "price_geography": "national",
+     "ce_annual_one_person": 733.0
+    },
+    "arrangement_options": {},
+    "duration": {
+     "kind": "ongoing_service",
+     "effective_from": "same_year",
+     "lasts_years": null,
+     "completion_years": null
+    },
+    "resource": {
+     "basis": "per_service_month",
+     "hours": 0.0,
+     "uses_per_month": null,
+     "burden_per_hour": 0.0,
+     "quantity_scales": false,
+     "job": null,
+     "substitutes": [],
+     "note": "不占你自己的时间；只在实际付了钱的月份提供这项功能，买两份不叠加"
+    },
+    "source": {
+     "kind": "estimated",
+     "observed_on": "2024-12-31",
+     "geography_scope": "CBSA2023 42660 Seattle-Tacoma-Bellevue 都会区",
+     "mapping_version": "e3b-life-items-v1",
+     "provenance": null,
+     "synthetic_note": null,
+     "inputs": [
+      "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+      "bls_ce_national_2024_detail:6efdb40841f80cbd"
+     ],
+     "rule": "CE 2024 一人消费单位“Cellular phone service”年均 733.0 ÷ 12，四舍五入到分；共同预算代理（全国一人消费单位的平均支出，不是单人套餐报价，各城相同，不做空间换算）"
+    }
+   }
+  },
+  {
+   "domain": "daily_support",
+   "status": "executable",
+   "gaps": [],
+   "assumptions": [
+    "daily_support_cost_order_v1",
+    "basic_device_access_v1",
+    "fcc_broadband_basic_tier_v1"
+   ],
+   "records": [],
+   "opportunity": {
+    "opportunity_id": "sea.service.home_internet_basic",
+    "category": "service",
+    "label": "家庭宽带（基本档）",
+    "spec": {},
+    "unit": "service-month",
+    "quality": "居家互联网接入：下行 100–199 Mbps、上行至少 20 Mbps、不限流量；月费是 FCC 2024 城市费率调查同规格报价的大区加权中位数，换到 2024 年（不含税）",
+    "availability": "available",
+    "price": {
+     "kind": "actual_quote",
+     "amount": {
+      "amount": 61.77,
+      "numeraire": "USD_2024_LOCAL"
+     },
+     "billing": "per_month",
+     "per_unit": "service-month"
+    },
+    "compensation": null,
+    "occupation": null,
+    "eligibility": [],
+    "targets": [],
+    "functions": [
+     "home_connectivity"
+    ],
+    "attributes": {
+     "cost_basis": "fcc_regional_reference",
+     "observed_unit_price": false,
+     "price_geography": "census_region:West",
+     "fcc_offers": 123,
+     "fcc_weighted_median_2023": 60.0,
+     "taxes": "not_included",
+     "download_mbps": "100–199",
+     "upload_min_mbps": 20,
+     "usage_allowance": "unlimited"
+    },
+    "arrangement_options": {},
+    "duration": {
+     "kind": "ongoing_service",
+     "effective_from": "same_year",
+     "lasts_years": null,
+     "completion_years": null
+    },
+    "resource": {
+     "basis": "per_service_month",
+     "hours": 0.0,
+     "uses_per_month": null,
+     "burden_per_hour": 0.0,
+     "quantity_scales": false,
+     "job": null,
+     "substitutes": [],
+     "note": "不占你自己的时间；只在实际付了钱的月份提供这项功能，买两份不叠加"
+    },
+    "source": {
+     "kind": "estimated",
+     "observed_on": "2024-12-31",
+     "geography_scope": "CBSA2023 42660 Seattle-Tacoma-Bellevue 都会区",
+     "mapping_version": "e3b-life-items-v1",
+     "provenance": null,
+     "synthetic_note": null,
+     "inputs": [
+      "fcc_urs_2024_broadband:2081022e4ee75f86",
+      "bls_cpi_u_education_communication:caf82762c60f6972"
+     ],
+     "rule": "FCC 2024 城市费率调查：census_region:West 同规格报价（下行 100–199 Mbps、上行 ≥ 20、不限流量）123 条按调查权重的中位数总月费 60.0（2023 年调查价，不含税）× CPI CUUR0000SEEE03 86.136 ÷ 83.670，四舍五入到分；不是本城某家运营商的报价"
+    }
+   }
+  },
+  {
+   "domain": "daily_support",
+   "status": "executable",
+   "gaps": [],
+   "assumptions": [
+    "daily_support_cost_order_v1",
+    "basic_device_access_v1",
+    "household_supplies_ce_v1"
+   ],
+   "records": [],
+   "opportunity": {
+    "opportunity_id": "sea.service.household_supplies_basic",
+    "category": "service",
+    "label": "家用日耗品（清洁用品与纸品）",
+    "spec": {},
+    "unit": "service-month",
+    "quality": "洗衣清洁用品、纸巾卫生纸等家用日耗品；不含个人化妆护理、家电家具；月费是 CE 2024 一人消费单位相应支出的月均 × 本城商品类 RPP（估计）",
+    "availability": "available",
+    "price": {
+     "kind": "actual_quote",
+     "amount": {
+      "amount": 29.7,
+      "numeraire": "USD_2024_LOCAL"
+     },
+     "billing": "per_month",
+     "per_unit": "service-month"
+    },
+    "compensation": null,
+    "occupation": null,
+    "eligibility": [],
+    "targets": [],
+    "functions": [
+     "household_supplies"
+    ],
+    "attributes": {
+     "cost_basis": "ce_one_person_budget_x_rpp_goods",
+     "observed_unit_price": false,
+     "price_geography": "metro_estimate",
+     "ce_annual_one_person": 342.81,
+     "allocated_share_estimate": true
+    },
+    "arrangement_options": {},
+    "duration": {
+     "kind": "ongoing_service",
+     "effective_from": "same_year",
+     "lasts_years": null,
+     "completion_years": null
+    },
+    "resource": {
+     "basis": "per_service_month",
+     "hours": 0.0,
+     "uses_per_month": null,
+     "burden_per_hour": 0.0,
+     "quantity_scales": false,
+     "job": null,
+     "substitutes": [],
+     "note": "不占你自己的时间；只在实际付了钱的月份提供这项功能，买两份不叠加"
+    },
+    "source": {
+     "kind": "estimated",
+     "observed_on": "2024-12-31",
+     "geography_scope": "CBSA2023 42660 Seattle-Tacoma-Bellevue 都会区",
+     "mapping_version": "e3b-life-items-v1",
+     "provenance": null,
+     "synthetic_note": null,
+     "inputs": [
+      "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+      "bls_ce_national_2024_detail:6efdb40841f80cbd",
+      "rpp_goods 103.972"
+     ],
+     "rule": "CE 2024 一人消费单位：laundry_cleaning 120.0、paper_and_misc 222.81（按全国详细表占比分配），合计 ÷ 12 × 商品类 RPP 103.972 ÷ 100，四舍五入到分（估计，不是本地报价）"
+    }
+   }
+  },
+  {
+   "domain": "consumption",
+   "status": "executable",
+   "gaps": [],
+   "assumptions": [
+    "consumption_basket_ce_v1"
+   ],
+   "records": [],
+   "opportunity": {
+    "opportunity_id": "sea.service.personal_basket.u0_25",
+    "category": "service",
+    "label": "个人消费篮子（每月 0.25 个标准篮子）",
+    "spec": {},
+    "unit": "service-month",
+    "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
+    "availability": "available",
+    "price": {
+     "kind": "actual_quote",
+     "amount": {
+      "amount": 34.35,
       "numeraire": "USD_2024_LOCAL"
      },
      "billing": "per_month",
@@ -55468,8 +55912,11 @@
     "targets": [],
     "functions": [],
     "attributes": {
-     "wage_soc": "31-9011",
-     "hourly_wage_median": 42.44
+     "standard_baskets_per_month": 0.25,
+     "standard_basket_price": 137.4,
+     "cost_basis": "ce_one_person_vector_x_rpp",
+     "observed_unit_price": false,
+     "allocated_share_estimate": true
     },
     "arrangement_options": {},
     "duration": {
@@ -55480,64 +55927,59 @@
     },
     "resource": {
      "basis": "per_service_month",
-     "hours": 1.5,
+     "hours": 0.0,
      "uses_per_month": null,
-     "burden_per_hour": 0.2,
+     "burden_per_hour": 0.0,
      "quantity_scales": false,
      "job": null,
      "substitutes": [],
-     "note": "按摩与往返的合计；生病暂停的月份不付款、不使用"
+     "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0"
     },
     "source": {
      "kind": "estimated",
-     "observed_on": "2024-05-31",
+     "observed_on": "2024-12-31",
      "geography_scope": "CBSA2023 42660 Seattle-Tacoma-Bellevue 都会区",
      "mapping_version": "e3b-life-items-v1",
      "provenance": null,
      "synthetic_note": null,
      "inputs": [
-      "jobs.oews2024.42660.31-9011"
+      "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+      "bls_ce_national_2024_detail:6efdb40841f80cbd",
+      "rpp 103.972/106.835"
      ],
-     "rule": "OEWS 31-9011 都会区中位年薪 88283.05 ÷ 2,080 = 时薪；× 每次 1.25 工人小时 × 每月 1 次 × 人工费用倍率 2.0，四舍五入到分"
+     "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 103.972、其他服务 RPP 106.835，÷ 100）= 137.4；费用 = u × P_c，四舍五入到分"
     },
     "enjoyment": [
      {
-      "function": "personal_care",
+      "function": "personal_consumption",
       "mode": "service_units",
-      "units_per_month": 1.0,
-      "unit_label": "次",
-      "basis": "每月实际接受 1 次按摩（享受型服务）"
+      "units_per_month": 0.25,
+      "unit_label": "标准篮子",
+      "basis": "这个月实际获得 0.25 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）"
      }
     ]
    }
   },
   {
-   "domain": "enjoyment",
+   "domain": "consumption",
    "status": "executable",
    "gaps": [],
    "assumptions": [
-    "oews_hourly_from_annual_v1",
-    "labor_overhead_v1",
-    "service_hours_v1"
+    "consumption_basket_ce_v1"
    ],
-   "records": [
-    "jobs.oews2024.42660.31-9011"
-   ],
+   "records": [],
    "opportunity": {
-    "opportunity_id": "sea.service.massage_studio_2",
+    "opportunity_id": "sea.service.personal_basket.u0_5",
     "category": "service",
-    "label": "按摩（店里，每月两次）",
-    "spec": {
-     "sessions_per_month": 2,
-     "worker_hours_per_session": 1.25
-    },
+    "label": "个人消费篮子（每月 0.5 个标准篮子）",
+    "spec": {},
     "unit": "service-month",
-    "quality": "每月两次、每次约 1 小时的放松按摩；每次往返约半小时",
+    "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
     "availability": "available",
     "price": {
      "kind": "actual_quote",
      "amount": {
-      "amount": 212.22,
+      "amount": 68.7,
       "numeraire": "USD_2024_LOCAL"
      },
      "billing": "per_month",
@@ -55549,8 +55991,11 @@
     "targets": [],
     "functions": [],
     "attributes": {
-     "wage_soc": "31-9011",
-     "hourly_wage_median": 42.44
+     "standard_baskets_per_month": 0.5,
+     "standard_basket_price": 137.4,
+     "cost_basis": "ce_one_person_vector_x_rpp",
+     "observed_unit_price": false,
+     "allocated_share_estimate": true
     },
     "arrangement_options": {},
     "duration": {
@@ -55561,64 +56006,296 @@
     },
     "resource": {
      "basis": "per_service_month",
-     "hours": 3.0,
+     "hours": 0.0,
      "uses_per_month": null,
-     "burden_per_hour": 0.2,
+     "burden_per_hour": 0.0,
      "quantity_scales": false,
      "job": null,
      "substitutes": [],
-     "note": "按摩与往返的合计；生病暂停的月份不付款、不使用"
+     "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0"
     },
     "source": {
      "kind": "estimated",
-     "observed_on": "2024-05-31",
+     "observed_on": "2024-12-31",
      "geography_scope": "CBSA2023 42660 Seattle-Tacoma-Bellevue 都会区",
      "mapping_version": "e3b-life-items-v1",
      "provenance": null,
      "synthetic_note": null,
      "inputs": [
-      "jobs.oews2024.42660.31-9011"
+      "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+      "bls_ce_national_2024_detail:6efdb40841f80cbd",
+      "rpp 103.972/106.835"
      ],
-     "rule": "OEWS 31-9011 都会区中位年薪 88283.05 ÷ 2,080 = 时薪；× 每次 1.25 工人小时 × 每月 2 次 × 人工费用倍率 2.0，四舍五入到分"
+     "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 103.972、其他服务 RPP 106.835，÷ 100）= 137.4；费用 = u × P_c，四舍五入到分"
     },
     "enjoyment": [
      {
-      "function": "personal_care",
+      "function": "personal_consumption",
+      "mode": "service_units",
+      "units_per_month": 0.5,
+      "unit_label": "标准篮子",
+      "basis": "这个月实际获得 0.5 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）"
+     }
+    ]
+   }
+  },
+  {
+   "domain": "consumption",
+   "status": "executable",
+   "gaps": [],
+   "assumptions": [
+    "consumption_basket_ce_v1"
+   ],
+   "records": [],
+   "opportunity": {
+    "opportunity_id": "sea.service.personal_basket.u1",
+    "category": "service",
+    "label": "个人消费篮子（每月 1 个标准篮子）",
+    "spec": {},
+    "unit": "service-month",
+    "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
+    "availability": "available",
+    "price": {
+     "kind": "actual_quote",
+     "amount": {
+      "amount": 137.4,
+      "numeraire": "USD_2024_LOCAL"
+     },
+     "billing": "per_month",
+     "per_unit": "service-month"
+    },
+    "compensation": null,
+    "occupation": null,
+    "eligibility": [],
+    "targets": [],
+    "functions": [],
+    "attributes": {
+     "standard_baskets_per_month": 1.0,
+     "standard_basket_price": 137.4,
+     "cost_basis": "ce_one_person_vector_x_rpp",
+     "observed_unit_price": false,
+     "allocated_share_estimate": true
+    },
+    "arrangement_options": {},
+    "duration": {
+     "kind": "ongoing_service",
+     "effective_from": "same_year",
+     "lasts_years": null,
+     "completion_years": null
+    },
+    "resource": {
+     "basis": "per_service_month",
+     "hours": 0.0,
+     "uses_per_month": null,
+     "burden_per_hour": 0.0,
+     "quantity_scales": false,
+     "job": null,
+     "substitutes": [],
+     "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0"
+    },
+    "source": {
+     "kind": "estimated",
+     "observed_on": "2024-12-31",
+     "geography_scope": "CBSA2023 42660 Seattle-Tacoma-Bellevue 都会区",
+     "mapping_version": "e3b-life-items-v1",
+     "provenance": null,
+     "synthetic_note": null,
+     "inputs": [
+      "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+      "bls_ce_national_2024_detail:6efdb40841f80cbd",
+      "rpp 103.972/106.835"
+     ],
+     "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 103.972、其他服务 RPP 106.835，÷ 100）= 137.4；费用 = u × P_c，四舍五入到分"
+    },
+    "enjoyment": [
+     {
+      "function": "personal_consumption",
+      "mode": "service_units",
+      "units_per_month": 1.0,
+      "unit_label": "标准篮子",
+      "basis": "这个月实际获得 1 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）"
+     }
+    ]
+   }
+  },
+  {
+   "domain": "consumption",
+   "status": "executable",
+   "gaps": [],
+   "assumptions": [
+    "consumption_basket_ce_v1"
+   ],
+   "records": [],
+   "opportunity": {
+    "opportunity_id": "sea.service.personal_basket.u1_5",
+    "category": "service",
+    "label": "个人消费篮子（每月 1.5 个标准篮子）",
+    "spec": {},
+    "unit": "service-month",
+    "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
+    "availability": "available",
+    "price": {
+     "kind": "actual_quote",
+     "amount": {
+      "amount": 206.1,
+      "numeraire": "USD_2024_LOCAL"
+     },
+     "billing": "per_month",
+     "per_unit": "service-month"
+    },
+    "compensation": null,
+    "occupation": null,
+    "eligibility": [],
+    "targets": [],
+    "functions": [],
+    "attributes": {
+     "standard_baskets_per_month": 1.5,
+     "standard_basket_price": 137.4,
+     "cost_basis": "ce_one_person_vector_x_rpp",
+     "observed_unit_price": false,
+     "allocated_share_estimate": true
+    },
+    "arrangement_options": {},
+    "duration": {
+     "kind": "ongoing_service",
+     "effective_from": "same_year",
+     "lasts_years": null,
+     "completion_years": null
+    },
+    "resource": {
+     "basis": "per_service_month",
+     "hours": 0.0,
+     "uses_per_month": null,
+     "burden_per_hour": 0.0,
+     "quantity_scales": false,
+     "job": null,
+     "substitutes": [],
+     "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0"
+    },
+    "source": {
+     "kind": "estimated",
+     "observed_on": "2024-12-31",
+     "geography_scope": "CBSA2023 42660 Seattle-Tacoma-Bellevue 都会区",
+     "mapping_version": "e3b-life-items-v1",
+     "provenance": null,
+     "synthetic_note": null,
+     "inputs": [
+      "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+      "bls_ce_national_2024_detail:6efdb40841f80cbd",
+      "rpp 103.972/106.835"
+     ],
+     "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 103.972、其他服务 RPP 106.835，÷ 100）= 137.4；费用 = u × P_c，四舍五入到分"
+    },
+    "enjoyment": [
+     {
+      "function": "personal_consumption",
+      "mode": "service_units",
+      "units_per_month": 1.5,
+      "unit_label": "标准篮子",
+      "basis": "这个月实际获得 1.5 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）"
+     }
+    ]
+   }
+  },
+  {
+   "domain": "consumption",
+   "status": "executable",
+   "gaps": [],
+   "assumptions": [
+    "consumption_basket_ce_v1"
+   ],
+   "records": [],
+   "opportunity": {
+    "opportunity_id": "sea.service.personal_basket.u2",
+    "category": "service",
+    "label": "个人消费篮子（每月 2 个标准篮子）",
+    "spec": {},
+    "unit": "service-month",
+    "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
+    "availability": "available",
+    "price": {
+     "kind": "actual_quote",
+     "amount": {
+      "amount": 274.8,
+      "numeraire": "USD_2024_LOCAL"
+     },
+     "billing": "per_month",
+     "per_unit": "service-month"
+    },
+    "compensation": null,
+    "occupation": null,
+    "eligibility": [],
+    "targets": [],
+    "functions": [],
+    "attributes": {
+     "standard_baskets_per_month": 2.0,
+     "standard_basket_price": 137.4,
+     "cost_basis": "ce_one_person_vector_x_rpp",
+     "observed_unit_price": false,
+     "allocated_share_estimate": true
+    },
+    "arrangement_options": {},
+    "duration": {
+     "kind": "ongoing_service",
+     "effective_from": "same_year",
+     "lasts_years": null,
+     "completion_years": null
+    },
+    "resource": {
+     "basis": "per_service_month",
+     "hours": 0.0,
+     "uses_per_month": null,
+     "burden_per_hour": 0.0,
+     "quantity_scales": false,
+     "job": null,
+     "substitutes": [],
+     "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0"
+    },
+    "source": {
+     "kind": "estimated",
+     "observed_on": "2024-12-31",
+     "geography_scope": "CBSA2023 42660 Seattle-Tacoma-Bellevue 都会区",
+     "mapping_version": "e3b-life-items-v1",
+     "provenance": null,
+     "synthetic_note": null,
+     "inputs": [
+      "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+      "bls_ce_national_2024_detail:6efdb40841f80cbd",
+      "rpp 103.972/106.835"
+     ],
+     "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 103.972、其他服务 RPP 106.835，÷ 100）= 137.4；费用 = u × P_c，四舍五入到分"
+    },
+    "enjoyment": [
+     {
+      "function": "personal_consumption",
       "mode": "service_units",
       "units_per_month": 2.0,
-      "unit_label": "次",
-      "basis": "每月实际接受 2 次按摩（享受型服务）"
+      "unit_label": "标准篮子",
+      "basis": "这个月实际获得 2 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）"
      }
     ]
    }
   },
   {
-   "domain": "enjoyment",
+   "domain": "consumption",
    "status": "executable",
    "gaps": [],
    "assumptions": [
-    "oews_hourly_from_annual_v1",
-    "labor_overhead_v1",
-    "service_hours_v1"
+    "consumption_basket_ce_v1"
    ],
-   "records": [
-    "jobs.oews2024.42660.31-9011"
-   ],
+   "records": [],
    "opportunity": {
-    "opportunity_id": "sea.service.massage_home_1",
+    "opportunity_id": "sea.service.personal_basket.u3",
     "category": "service",
-    "label": "上门按摩（每月一次）",
-    "spec": {
-     "sessions_per_month": 1,
-     "worker_hours_per_session": 2
-    },
+    "label": "个人消费篮子（每月 3 个标准篮子）",
+    "spec": {},
     "unit": "service-month",
-    "quality": "按摩师上门，每月一次约 1 小时；按摩师的路上时间计进价格，本人不用出门",
+    "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
     "availability": "available",
     "price": {
      "kind": "actual_quote",
      "amount": {
-      "amount": 169.78,
+      "amount": 412.2,
       "numeraire": "USD_2024_LOCAL"
      },
      "billing": "per_month",
@@ -55630,8 +56307,11 @@
     "targets": [],
     "functions": [],
     "attributes": {
-     "wage_soc": "31-9011",
-     "hourly_wage_median": 42.44
+     "standard_baskets_per_month": 3.0,
+     "standard_basket_price": 137.4,
+     "cost_basis": "ce_one_person_vector_x_rpp",
+     "observed_unit_price": false,
+     "allocated_share_estimate": true
     },
     "arrangement_options": {},
     "duration": {
@@ -55642,33 +56322,114 @@
     },
     "resource": {
      "basis": "per_service_month",
-     "hours": 1.0,
+     "hours": 0.0,
      "uses_per_month": null,
-     "burden_per_hour": 0.2,
+     "burden_per_hour": 0.0,
      "quantity_scales": false,
      "job": null,
      "substitutes": [],
-     "note": "按摩与往返的合计；生病暂停的月份不付款、不使用"
+     "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0"
     },
     "source": {
      "kind": "estimated",
-     "observed_on": "2024-05-31",
+     "observed_on": "2024-12-31",
      "geography_scope": "CBSA2023 42660 Seattle-Tacoma-Bellevue 都会区",
      "mapping_version": "e3b-life-items-v1",
      "provenance": null,
      "synthetic_note": null,
      "inputs": [
-      "jobs.oews2024.42660.31-9011"
+      "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+      "bls_ce_national_2024_detail:6efdb40841f80cbd",
+      "rpp 103.972/106.835"
      ],
-     "rule": "OEWS 31-9011 都会区中位年薪 88283.05 ÷ 2,080 = 时薪；× 每次 2 工人小时 × 每月 1 次 × 人工费用倍率 2.0，四舍五入到分"
+     "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 103.972、其他服务 RPP 106.835，÷ 100）= 137.4；费用 = u × P_c，四舍五入到分"
     },
     "enjoyment": [
      {
-      "function": "personal_care",
+      "function": "personal_consumption",
       "mode": "service_units",
-      "units_per_month": 1.0,
-      "unit_label": "次",
-      "basis": "每月实际接受 1 次按摩（享受型服务）"
+      "units_per_month": 3.0,
+      "unit_label": "标准篮子",
+      "basis": "这个月实际获得 3 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）"
+     }
+    ]
+   }
+  },
+  {
+   "domain": "consumption",
+   "status": "executable",
+   "gaps": [],
+   "assumptions": [
+    "consumption_basket_ce_v1"
+   ],
+   "records": [],
+   "opportunity": {
+    "opportunity_id": "sea.service.personal_basket.u4",
+    "category": "service",
+    "label": "个人消费篮子（每月 4 个标准篮子）",
+    "spec": {},
+    "unit": "service-month",
+    "quality": "成人衣着、鞋履与个人配饰，非医疗的个人护理产品与服务；1 个标准篮子 = CE 2024 一人消费单位这些支出的月均构成，按本城价格系数估计（不是某家店的报价）",
+    "availability": "available",
+    "price": {
+     "kind": "actual_quote",
+     "amount": {
+      "amount": 549.6,
+      "numeraire": "USD_2024_LOCAL"
+     },
+     "billing": "per_month",
+     "per_unit": "service-month"
+    },
+    "compensation": null,
+    "occupation": null,
+    "eligibility": [],
+    "targets": [],
+    "functions": [],
+    "attributes": {
+     "standard_baskets_per_month": 4.0,
+     "standard_basket_price": 137.4,
+     "cost_basis": "ce_one_person_vector_x_rpp",
+     "observed_unit_price": false,
+     "allocated_share_estimate": true
+    },
+    "arrangement_options": {},
+    "duration": {
+     "kind": "ongoing_service",
+     "effective_from": "same_year",
+     "lasts_years": null,
+     "completion_years": null
+    },
+    "resource": {
+     "basis": "per_service_month",
+     "hours": 0.0,
+     "uses_per_month": null,
+     "burden_per_hour": 0.0,
+     "quantity_scales": false,
+     "job": null,
+     "substitutes": [],
+     "note": "当月的消费服务流：不占时间、不加休闲参与小时、不留下资产或装备能力；买不起就是 0"
+    },
+    "source": {
+     "kind": "estimated",
+     "observed_on": "2024-12-31",
+     "geography_scope": "CBSA2023 42660 Seattle-Tacoma-Bellevue 都会区",
+     "mapping_version": "e3b-life-items-v1",
+     "provenance": null,
+     "synthetic_note": null,
+     "inputs": [
+      "bls_ce_national_2024_size:6378f4aa2e2f54bf",
+      "bls_ce_national_2024_detail:6efdb40841f80cbd",
+      "rpp 103.972/106.835"
+     ],
+     "rule": "P_c = Σ e_j × 价格系数 = apparel_men 20.75 × 商品 + apparel_women 33.08 × 商品 + footwear_adult 18.99 × 商品 + accessories 5.96 × 商品 + apparel_services 1.06 × 其他服务 + personal_care_products 26.34 × 商品 + personal_care_services 25.25 × 其他服务（商品类 RPP 103.972、其他服务 RPP 106.835，÷ 100）= 137.4；费用 = u × P_c，四舍五入到分"
+    },
+    "enjoyment": [
+     {
+      "function": "personal_consumption",
+      "mode": "service_units",
+      "units_per_month": 4.0,
+      "unit_label": "标准篮子",
+      "basis": "这个月实际获得 4 个标准篮子的衣着与个人护理消费（消费服务流，不是可转卖的资产）"
      }
     ]
    }

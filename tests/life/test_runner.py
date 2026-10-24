@@ -270,7 +270,9 @@ def test_the_mock_responds_to_what_it_is_shown(main):
     assert {"k51.job.clerk", "k51.training.accounting_course"} <= plans[1]
     assert "k51.job.accountant" in plans[2] and "k51.job.accountant" in plans[3]
     cash = [request(out, K, y)["observation"]["cash"]["amount"] for y in (1, 2, 3)]
-    assert cash == [3000.0, 12000.0, 24040.0]
+    # 第 2 年起 mock 按月买三项日常支持与每月 1 个标准篮子：61.08 + 72.06 + 28.57 + 131.43 = 293.14 / 月，一年 3,517.68
+    # （第 1 年在上课，结余不够推算的年末现金下限，不买）：12,000 − 3,517.68 = 8,482.32；24,040 − 2 × 3,517.68 = 17,004.64
+    assert cash == [3000.0, 8482.32, 17004.64]
 
 
 def test_same_actions_different_words_same_life(main, tmp_path):

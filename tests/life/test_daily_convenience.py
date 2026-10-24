@@ -156,9 +156,14 @@ def q_of(r) -> list[str]:
     return [c.convenience.relief_hours.exact for c in conv(r)]
 
 
-def s_hand(q) -> float:
+def chore_hand(q) -> Fraction:
     q = Fraction(q)
-    return float(min(Fraction(9, 10), q / (q + 8)))
+    return min(Fraction(9, 10), q / (q + 8))
+
+
+def s_hand(q, covered: int = 0) -> float:
+    """日常支持与便利：0.5 × min(0.9, q/(q + 8)) + 0.5 × 0.9 × 实际获得的支持功能数 / 3。"""
+    return float(Fraction(1, 2) * chore_hand(q) + Fraction(1, 2) * Fraction(9, 10) * covered / 3)
 
 
 # ---------------------------------------------------------------------- 1. 便利分：只读实际减少的家务小时
@@ -172,6 +177,7 @@ def test_none_device_service_give_the_hand_computed_relief_and_score(w):
     for r, q in ((none, "0"), (device, "12"), (service, "18")):
         assert set(q_of(r)) == {q}
         assert {c.s for c in conv(r)} == {s_hand(q)}
+        assert {c.convenience.chore_s for c in conv(r)} == {float(chore_hand(q))}
         assert all(c.status == "known" for c in conv(r))
     # 没有采用方案：确定的 0，不是未知
     assert conv(none)[0].reasons[0].startswith("这个月没有在用的家务替代")
@@ -555,7 +561,9 @@ def test_cap_binds_when_set_low(w):
         preference=preference_from_confirmed_profile(w.profile),
     )
     c0 = next(c for c in s.months[0].components if c.component_id == DAILY_CONVENIENCE)
-    assert (c0.s, c0.capped) == (0.5, True) and c0.raw == 18 / 26
+    # 杂务部分封顶在 0.5，没有支持功能：s = 0.5 × 0.5 + 0.5 × 0 = 0.25；raw 是加上限之前的 0.5 × 18/26
+    assert (c0.s, c0.capped) == (0.25, True) and c0.raw == 0.5 * 18 / 26
+    assert c0.convenience.chore_s == 0.5
 
 
 def test_coverage_reports_an_action_mechanism_for_every_arrangement(w):
@@ -693,7 +701,7 @@ def _m5(w, city, **kw):
     planner = ProductMockPlanner()
     notes: list[str] = []
     v = _View(_views(w, city, **kw))
-    return planner._extras(v, 2500 - 1380, 0.0, notes), notes
+    return planner._chores(v, 2500 - 1380, 0.0, notes), notes
 
 
 def test_mock_picks_the_cheaper_way_per_hour_from_public_facts(w):
@@ -719,6 +727,70 @@ def test_mock_picks_the_cheaper_way_per_hour_from_public_facts(w):
     assert items == [] and "已有" in notes[0]
 
 
+def test_the_mock_buys_daily_support_and_a_basket_from_public_facts(w):
+    """M5s / M5e：便利点数大于 0 就按月买三项支持功能里各自最便宜的一项；享受点数大于 0 就买每月 1 个标准篮子。只读公开的
+    功能名与每月份数。"""
+    from agentlayer.life_mock import _View
+
+    planner = ProductMockPlanner()
+    notes: list[str] = []
+    items = planner._extras(_View(_views(w, K51)), 2500 - 1380, 0.0, notes)
+    ids = [i["opportunity_id"] for i in items]
+    assert ids[:4] == [
+        "k51.service.mobile_basic",
+        "k51.service.home_internet_basic",
+        "k51.service.household_supplies_basic",
+        "k51.service.personal_basket.u1",
+    ]
+    assert all((i["start_month"], i["end_month"]) == (1, 12) for i in items[:4])
+    # 没有便利与享受点数：都不买
+    none = planner._extras(
+        _View(_views(w, K51, material={"housing_condition": "50", "food_life": "50"})),
+        2500 - 1380,
+        0.0,
+        [],
+    )
+    assert none == []
+
+
+def test_daily_support_counts_each_function_once_and_only_in_paid_months(w):
+    s0 = w.start(K51)
+    support = [
+        whole("k51.service.mobile_basic"),
+        whole("k51.service.home_internet_basic"),
+        whole("k51.service.household_supplies_basic"),
+    ]
+    all_three = w.year(s0, [*base(), *support])
+    assert {c.s for c in conv(all_three)} == {s_hand("0", covered=3)}  # 0.5 × 0.9 = 0.45
+    cov = conv(all_three)[0].convenience.support
+    assert [(c.function, c.covered) for c in cov] == [
+        ("personal_communication", True),
+        ("home_connectivity", True),
+        ("household_supplies", True),
+    ]
+    # 同功能买两份不叠加；支持服务不制造节省小时
+    twice = w.year(
+        s0,
+        [
+            *base(),
+            {
+                "opportunity_id": "k51.service.mobile_basic",
+                "quantity": 2,
+                "start_month": 1,
+                "end_month": 12,
+            },
+            *support[1:],
+        ],
+    )
+    assert [c.s for c in conv(twice)] == [c.s for c in conv(all_three)]
+    assert set(q_of(all_three)) == {"0"}
+    # 只买了 1–6 月的宽带：7–12 月这一项是 0
+    half = w.year(
+        s0, [*base(), support[0], support[2], whole("k51.service.home_internet_basic", 1, 6)]
+    )
+    assert [c.s for c in conv(half)] == [s_hand("0", 3)] * 6 + [s_hand("0", 2)] * 6
+
+
 def test_the_mock_factory_matches_the_product_identity_only():
     assert type(mock_planner_for(PlannerSpec(identity=PRODUCT_MOCK_IDENTITY))) is ProductMockPlanner
     with pytest.raises(ValueError, match="不认识的 mock 身份"):
@@ -727,11 +799,27 @@ def test_the_mock_factory_matches_the_product_identity_only():
         )
 
 
+def test_the_guide_explains_daily_support_and_the_basket_without_scoring_internals(w):
+    section = next(s for s in action_guide(w.protocol).sections if s.topic.startswith("日常支持"))
+    text = " ".join(section.rules)
+    for phrase in (
+        "通信联网、家用日耗品是否方便获得，以及日常杂务是否省心",
+        "在其他生活开支之外，获得衣着、个人护理等个人消费的满足",
+        "同一功能买两份不多算",
+        "不会节省任何小时",
+        "标准篮子",
+        "不是本地观测的单价",
+    ):
+        assert phrase in text
+    for secret in ("0.5", "0.9", "η", "tau", "τ", "chore_weight", "support_cap"):
+        assert secret not in text
+
+
 def test_the_guide_explains_devices_and_services_without_scoring_internals(w):
     new = action_guide(w.protocol)
     topics_new = [s.topic for s in new.sections]
-    assert topics_new[-2] == "日常杂务：设备与人工服务（可选）"
-    text = " ".join(new.sections[-2].rules)
+    assert topics_new[-3:-1] == ["日常杂务：设备与人工服务（可选）", "日常支持与个人消费（可选）"]
+    text = " ".join(new.sections[-3].rules)
     for phrase in (
         "一次性购买",
         "按月购买",
