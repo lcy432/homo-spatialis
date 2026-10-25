@@ -9,7 +9,7 @@ import Globe, { type GlobeMethods } from "react-globe.gl";
 import { useTranslation } from "react-i18next";
 import { type CountryFeature, countryName, loadCountries, mainland } from "../../geo/basemap";
 import { useLocale } from "../../i18n/index";
-import type { MapAnchor } from "./PaperMap";
+import type { MapAnchor } from "../../geo/anchors";
 import styles from "./Maps.module.css";
 
 export interface GlobeViewProps {
@@ -20,6 +20,9 @@ export interface GlobeViewProps {
   selected?: ReadonlySet<string>;
   colors?: ReadonlyMap<string, string>;
   onCity?(cityRef: string): void;
+  purpose?: "input" | "output";
+  /** 页面另有侧栏时把地球撑满可用高度。 */
+  fill?: boolean;
 }
 
 declare global {

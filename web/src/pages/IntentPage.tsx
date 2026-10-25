@@ -122,6 +122,12 @@ export function IntentPage() {
         <p data-waiting={v.waiting_for}>{t(`intent.waiting.${v.waiting_for}`)}</p>
         {v.stage === "checking" ? <p className="small muted">{t("intent.checkingNote")}</p> : null}
         <p className="small muted">{t("common.lastUpdated", { time: formatTime(v.updated_at, locale) })}</p>
+        <p className="small" data-expiry-basis={v.expiry_basis}>
+          {v.expires_at ? t("intent.expiresLine", { time: formatTime(v.expires_at, locale) }) : t("intent.expiresNone")}
+          {" "}
+          <span className="muted">（{t(`intent.expiryBasis.${v.expiry_basis}`)}）</span>
+        </p>
+        <p className="small muted">{t("intent.expiryNote")}</p>
         {intent.error ? <ApiErrorView error={intent.error} onRetry={() => void intent.refetch()} /> : null}
         <button type="button" onClick={() => void intent.refetch()}>
           {t("common.refresh")}

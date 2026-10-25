@@ -5,7 +5,7 @@ import { Link, useParams } from "react-router";
 import { PageTitle } from "../../components/Layout";
 import { PreflightView, ProgressView } from "../../components/RunViews";
 import { SAMPLE_IDS, sample, samplePayload } from "../../contract/samples";
-import type { ProductCapabilities, ProductPreflight, ProductResult, RunProgress } from "../../contract/types";
+import type { GeographyDisplayBundle, ProductCapabilities, ProductPreflight, ProductResult, RunProgress } from "../../contract/types";
 import { Zh } from "../../i18n/biz";
 import { CityDetail, CloneDetail, ResultsOverview } from "../results/ResultsPages";
 
@@ -15,6 +15,16 @@ const synthCaps = () => samplePayload<ProductCapabilities>("01");
 /** 合成资料包的样例用合成能力清单；真实资料包的样例不配能力清单（名称取结果里的标签）。 */
 function capsFor(res: { meta: { data_pack: { status: string } } }): ProductCapabilities | null {
   return res.meta.data_pack.status === "synthetic_fixture_only" ? synthCaps() : null;
+}
+
+/** 公共地理清单样例（123 真实六城、124 合成资料包）里指纹与这份结果相同的那一份；没有就不画点。 */
+function geographyFor(res: ProductResult): GeographyDisplayBundle | null {
+  for (const id of ["123", "124"]) {
+    if (!SAMPLE_IDS.includes(id)) continue;
+    const g = samplePayload<GeographyDisplayBundle>(id);
+    if (g.pack_fingerprint === res.meta.data_pack.content_fingerprint) return g;
+  }
+  return null;
 }
 
 export function GalleryIndex() {
@@ -72,7 +82,7 @@ export function GallerySample() {
         ) : cityRef ? (
           <CityDetail res={res} caps={caps} cityRef={cityRef} boundPreflight={null} base={base} />
         ) : (
-          <ResultsOverview res={res} caps={caps} settings={null} base={base} />
+          <ResultsOverview res={res} caps={caps} settings={null} geography={geographyFor(res)} base={base} />
         )}
       </div>
     );

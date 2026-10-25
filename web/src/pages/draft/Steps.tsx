@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import type { InterestReview, ProductCapabilities } from "../../contract/types";
 import { Allocator } from "../../components/Allocator";
 import { CityList } from "../../components/CityList";
+import { useGeography } from "../../api/queries";
 import { CityMapSlot } from "../../components/CityMapSlot";
 import { Section } from "../../components/common";
 import { PageTitle, StepNav } from "../../components/Layout";
@@ -24,6 +25,8 @@ export function PlaceStep() {
   const { caps, state, dispatch, draftId } = useDraftEditor();
   const [country, setCountry] = useState<string | null>(null);
   const selected = state.draft.cities.city_refs ?? [];
+  // 城市在地图上的位置：E3 的地理显示清单，按当前资料包的指纹读（读不到就不画点，列表照常）
+  const geo = useGeography(caps.meta.data_pack.content_fingerprint);
   return (
     <div>
       <PageTitle>{t("place.title")}</PageTitle>
@@ -32,6 +35,7 @@ export function PlaceStep() {
       <CityMapSlot
         purpose="input"
         cities={caps.cities}
+        geography={geo.data ?? (geo.isError ? null : undefined)}
         selected={selected}
         onToggle={(ref, on) => dispatch({ type: "cities/toggle", cityRef: ref, selected: on })}
         onCountry={setCountry}

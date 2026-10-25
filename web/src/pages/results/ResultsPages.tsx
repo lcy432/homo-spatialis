@@ -9,6 +9,7 @@ import type {
   CityDataNature,
   CityResult,
   ComparisonLine,
+  GeographyDisplayBundle,
   ProductCapabilities,
   ProductPreflight,
   ProductResult,
@@ -26,6 +27,7 @@ import { BizNotice, Zh, ZhList } from "../../i18n/biz";
 import { useMode } from "../../ui/mode";
 import { colorWindow, positionIn, rampColor } from "../../view/colorScale";
 import { type CityRow, cityRows, groupByCountry } from "../../view/results";
+import { useGeography } from "../../api/queries";
 import { useRunResult } from "./useRunResult";
 
 function useLoaded(intentId: string) {
@@ -178,9 +180,21 @@ function CityTable({ rows }: { rows: readonly CityRow[] }) {
 export function ResultsPage() {
   const { intentId = "" } = useParams();
   const loaded = useLoaded(intentId);
+  // 城市点：按这次结果自己的资料包指纹读地理清单（不是当前能力清单的资料包）。清单里每座城的 city_ref 自带地理版本，
+  // 只配给同一个 city_ref。E3C 把历史对象绑定的资源版本修好之前，不传“当前碰巧登记”的版本；读不到就不画点。
+  const pack = loaded.kind === "data" ? loaded.data.res.meta.data_pack.content_fingerprint : null;
+  const geo = useGeography(pack);
   if (loaded.kind === "node") return <div>{loaded.node}</div>;
   const { res, intentView: v, caps } = loaded.data;
-  return <ResultsOverview res={res} caps={caps.data ?? null} settings={v.settings ?? null} base={`/results/${encodeURIComponent(intentId)}`} />;
+  return (
+    <ResultsOverview
+      res={res}
+      caps={caps.data ?? null}
+      settings={v.settings ?? null}
+      geography={geo.data ?? (geo.isError ? null : undefined)}
+      base={`/results/${encodeURIComponent(intentId)}`}
+    />
+  );
 }
 
 /** 第一层：本轮城市比较（只接收数据；页面与开发画廊共用）。base 是这次结果的链接前缀。 */
@@ -188,11 +202,14 @@ export function ResultsOverview({
   res,
   caps,
   settings,
+  geography = null,
   base,
 }: {
   res: ProductResult;
   caps: ProductCapabilities | null;
   settings: RunSettingsView | null;
+  /** 地理显示清单（undefined = 还在读，null = 没有）。 */
+  geography?: GeographyDisplayBundle | null;
   base: string;
 }) {
   const { t } = useTranslation();
@@ -233,6 +250,8 @@ export function ResultsOverview({
             <CityMapSlot
               purpose="output"
               cities={caps?.cities ?? []}
+              cityRefs={rows.map((r) => r.cityRef)}
+              geography={geography}
               countries={[...new Set(rows.map((r) => r.country).filter((c): c is string => !!c))]}
               colors={colors}
               country={country}

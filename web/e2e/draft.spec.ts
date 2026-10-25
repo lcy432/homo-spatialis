@@ -1,7 +1,7 @@
 // 草稿：四种答案状态与精确均分在服务审阅里照实出现；语言与外观切换不改答案、不额外保存；两个标签页改同一份草稿时，旧内容
 // 不覆盖新内容；只用键盘也能完成主要操作。
 import { expect, test } from "@playwright/test";
-import { countRequests, createInvite, signIn, waitSaved } from "./helpers";
+import { countRequests, createInvite, shot, signIn, waitSaved } from "./helpers";
 
 async function newDraft(page: import("@playwright/test").Page, label: string): Promise<string> {
   await signIn(page, createInvite(label), "/start");
@@ -81,4 +81,24 @@ test("只用键盘：勾选城市、主动均分（对话框 Enter 确认）、E
   await page.getByRole("dialog").getByRole("button", { name: "平均分配" }).focus();
   await page.keyboard.press("Enter");
   await expect(page.locator('[data-allocator="six_dimensions"]').getByText(/每项 16.7 分（精确值 50\/3）/)).toBeVisible();
+});
+
+test("地图上的城市点来自服务的地理清单：真实六城都有点；点一个点就是切换这座城，与列表同步", async ({ page }, info) => {
+  await signIn(page, createInvite("e2e 城市点"), "/start");
+  await page.getByRole("button", { name: "开始填写" }).click();
+  await expect(page).toHaveURL(/\/place$/);
+  await expect(page.locator('[data-anchor-count="6"]')).toBeVisible();
+  await expect(page.locator('[data-map="paper"] [data-anchor]')).toHaveCount(6);
+  await expect(page.getByText(/城市点来自服务的地理显示清单/)).toBeVisible();
+  const count = page.getByRole("status").filter({ hasText: "已选" });
+  await expect(count).toHaveText("已选：6 座");
+  // 点西雅图的点：取消选择（列表里的勾也跟着掉）
+  await page.locator('[data-map="paper"] [data-anchor="US:CBSA2023:42660"] circle').click();
+  await expect(count).toHaveText("已选：5 座");
+  await expect(page.locator('[data-city-ref="US:CBSA2023:42660"] input')).not.toBeChecked();
+  // 再点一次：选回来
+  await page.locator('[data-map="paper"] [data-anchor="US:CBSA2023:42660"] circle').click();
+  await expect(count).toHaveText("已选：6 座");
+  await waitSaved(page);
+  await shot(page, info, "place-anchors");
 });

@@ -5,7 +5,7 @@
 // 从不自动重试——见各页面。
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import type { RunIntentView } from "../contract/types";
+import type { DisplayEnvelope, RunIntentView } from "../contract/types";
 import { isApiError } from "./errors";
 import { useSession } from "./session";
 
@@ -36,6 +36,9 @@ export function keysFor(epoch: number) {
     intent: (id: string) => ["s", epoch, "intent", id] as const,
     runs: ["s", epoch, "runs"] as const,
     result: (runId: string, version: string) => ["s", epoch, "result", runId, version] as const,
+    geography: (pack: string, version: string | null) => ["s", epoch, "geography", pack, version ?? ""] as const,
+    profiles: ["s", epoch, "profiles"] as const,
+    display: (kind: string, id: string, locale: string, version: string) => ["s", epoch, "display", kind, id, locale, version] as const,
   };
 }
 
@@ -96,6 +99,49 @@ export function useResult(runId: string | null | undefined, version: string, ena
     queryKey: keys.result(runId ?? "", version),
     queryFn: () => api.result(runId as string),
     enabled: status === "active" && !!runId && enabled,
+    retry: queryRetry,
+    retryDelay: queryRetryDelay,
+  });
+}
+
+/** 地理显示清单（按资料包指纹，可选明确的资源版本）。同一个资料包的清单不会变，长时间缓存。 */
+export function useGeography(packFingerprint: string | null | undefined, resourceVersion: string | null = null) {
+  const { api, status } = useSession();
+  const keys = useKeys();
+  return useQuery({
+    queryKey: keys.geography(packFingerprint ?? "", resourceVersion),
+    queryFn: () => api.geography(packFingerprint as string, resourceVersion),
+    enabled: status === "active" && !!packFingerprint,
+    staleTime: 60 * 60_000,
+    retry: queryRetry,
+    retryDelay: queryRetryDelay,
+  });
+}
+
+export function useProfiles() {
+  const { api, status } = useSession();
+  const keys = useKeys();
+  return useQuery({
+    queryKey: keys.profiles,
+    queryFn: () => api.profiles(),
+    enabled: status === "active",
+    retry: queryRetry,
+    retryDelay: queryRetryDelay,
+  });
+}
+
+/**
+ * 显示附层：某个对象在某种语言下的文字。键里带对象的版本（updated_at / revision），对象一变就重新读；
+ * 中文界面不读（中文原文就在业务对象里）。
+ */
+export function useDisplay(kind: DisplayEnvelope["kind"], id: string | null | undefined, locale: "zh" | "en", version: string, enabled = true) {
+  const { api, status } = useSession();
+  const keys = useKeys();
+  return useQuery({
+    queryKey: keys.display(kind, id ?? "", locale, version),
+    queryFn: () => api.display(kind, id ?? null, locale),
+    enabled: status === "active" && enabled && locale === "en",
+    staleTime: 5 * 60_000,
     retry: queryRetry,
     retryDelay: queryRetryDelay,
   });

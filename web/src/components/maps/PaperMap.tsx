@@ -8,14 +8,10 @@ import { type KeyboardEvent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { type CountryFeature, countryName, loadCountries, mainland } from "../../geo/basemap";
 import { useLocale } from "../../i18n/index";
+import type { MapAnchor } from "../../geo/anchors";
 import styles from "./Maps.module.css";
 
-export interface MapAnchor {
-  cityRef: string;
-  label: string;
-  latitude: number;
-  longitude: number;
-}
+export type { MapAnchor };
 
 export interface PaperMapProps {
   supported: ReadonlySet<string>;
@@ -27,6 +23,7 @@ export interface PaperMapProps {
   onCity?(cityRef: string): void;
   /** 输出时每个国家各画一张（多国并列）；输入时 null 表示世界图。 */
   focus?: string | null;
+  purpose?: "input" | "output";
 }
 
 const W = 960;

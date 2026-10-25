@@ -1,12 +1,16 @@
 // E3C 的业务接口（路径与回复形状以 contracts/product/v3/openapi.json 为准）。每个函数只发一次请求，不重试、不改写内容。
 import type {
+  ConfirmedProfileView,
   DeletionReceipt,
+  DisplayEnvelope,
+  GeographyDisplayBundle,
   DraftSaveRequest,
   DraftView,
   ProductCapabilities,
   ProductResult,
   ProfileConfirmReply,
   ProfileConfirmRequest,
+  ProfileList,
   ReviewReply,
   RunIntentCreateRequest,
   RunIntentView,
@@ -58,6 +62,33 @@ export function makeApi(ctx: HttpContext, fetchImpl: typeof fetch = (...a) => fe
           body: req,
           bodyMessage: "ProfileConfirmRequest",
           response: "ProfileConfirmReply",
+        }),
+      ),
+
+    /** 本人还在有效期内的确认画像（摘要：首次确认时间、到期时间）；单份带原 confirmed（别人的与不存在的一样 404，过期 410）。 */
+    profiles: () => data(call<ProfileList>({ method: "GET", path: "/profiles", response: "ProfileList" })),
+    profile: (confirmedId: string) =>
+      data(call<ConfirmedProfileView>({ method: "GET", path: `/profiles/${seg(confirmedId)}`, response: "ConfirmedProfileView" })),
+
+    /**
+     * 显示附层（e3-display-v1）：同一次返回业务对象 source 与各文字位置的译文；只读、不续期。
+     * 业务状态只从 source 读，fields 只用于文字；缺译文显示中文原文并标明，不自己翻译。
+     */
+    display: (kind: DisplayEnvelope["kind"], id: string | null, locale: "zh" | "en") =>
+      data(
+        call<DisplayEnvelope>({
+          method: "GET",
+          path: `/display?kind=${seg(kind)}${id ? `&id=${seg(id)}` : ""}&locale=${locale}`,
+          response: "DisplayEnvelope",
+        }),
+      ),
+    /** 地理显示清单：按资料包指纹；明确指定的资源版本不存在就是 404，不回退到最新版本。 */
+    geography: (packFingerprint: string, resourceVersion?: string | null) =>
+      data(
+        call<GeographyDisplayBundle>({
+          method: "GET",
+          path: `/display/geography?pack_fingerprint=${seg(packFingerprint)}${resourceVersion ? `&resource_version=${seg(resourceVersion)}` : ""}`,
+          response: "GeographyDisplayBundle",
         }),
       ),
 

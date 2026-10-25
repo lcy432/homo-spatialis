@@ -80,7 +80,13 @@ export function RunsPage() {
               </strong>{" "}
               <span className="small muted">{t("runs.created", { time: formatTime(r.created_at, locale) })}</span>
               {r.finished_at ? <span className="small muted"> · {t("runs.finished", { time: formatTime(r.finished_at, locale) })}</span> : null}
-              {r.expires_at ? <span className="small muted"> · {t("runs.expires", { time: formatTime(r.expires_at, locale) })}</span> : null}
+              {r.expires_at ? (
+                <span className="small muted" data-expiry-basis={r.expiry_basis}>
+                  {" "}· {t("runs.expires", { time: formatTime(r.expires_at, locale) })}（{t(`intent.expiryBasis.${r.expiry_basis}`)}）
+                </span>
+              ) : (
+                <span className="small muted"> · {t("intent.expiresNone")}</span>
+              )}
             </p>
             {r.settings ? (
               <p className="small">

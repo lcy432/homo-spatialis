@@ -271,6 +271,7 @@ export const en: Dict = {
     attrRemove: "Remove",
   },
   review: {
+    profileSummary: "Profile confirmed: first confirmed {{first}}, kept until {{expires}}. Re-confirming does not extend it. An expired profile cannot prepare a new simulation; simulations already prepared keep their own deadlines.",
     title: "How the system understands me",
     intro:
       "On the left is what you wrote; on the right is the understanding the service will use after review. Every item can be edited; after edits the draft is reviewed again.",
@@ -330,6 +331,15 @@ export const en: Dict = {
     outsideAllowed: "The confirmed profile has a city the service does not allow: go back to step 1, change it and confirm again.",
   },
   intent: {
+    expiresLine: "Retention that applies now: until {{time}}",
+    expiresNone: "The service gives no deadline for this stage (kept under the published retention rules)",
+    expiryBasis: {
+      intent_activity: "counted from the last effective action",
+      first_finished: "results are counted from the first finish",
+      active_execution: "running: the run's own deadline applies",
+      unavailable: "the service gives no basis for now",
+    },
+    expiryNote: "Reading, refreshing and switching languages never extend retention. The profile's deadline and this simulation's deadline are separate: an expired profile only means it cannot prepare a new simulation.",
     title: "Before the run, and progress",
     stage: "Current stage",
     waiting: {
@@ -633,8 +643,11 @@ export const en: Dict = {
     basemapNote:
       "Borders: Natural Earth (the Chinese interface uses its China point-of-view edition, the English interface its default edition). The country map only shows where countries are; it is not the simulation scope.",
     basemapFailed: "The base map did not load; the city list still works.",
-    anchorsPending:
-      "City positions on the map wait for trusted coordinates from the service (the display manifest has not been delivered), so no city points are drawn yet; use the list to choose and open cities.",
+    anchorLoading: "Loading city positions…",
+    anchorUnavailable: "The city position manifest cannot be read: no city points are drawn and no position is guessed; use the list to choose and open cities.",
+    anchorNote: "City points come from the service's geography manifest (version {{version}}).",
+    anchorMissing: "Cities without a point: ",
+    anchorStatus: { unknown: "no trusted coordinates", not_applicable: "synthetic city, no coordinates", not_in_bundle: "not in the manifest" },
     globeLoading: "Loading the globe…",
     globeUnavailable:
       "This device cannot open the 3D globe (WebGL unavailable or failed to load): the flat map is used instead; answering and results are unaffected.",

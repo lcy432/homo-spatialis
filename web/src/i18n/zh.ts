@@ -264,6 +264,7 @@ export const zh = {
   },
   review: {
     title: "系统怎样理解我",
+    profileSummary: "画像已确认：首次确认 {{first}}，保存到 {{expires}}。重复确认不延长。画像到期后不能再用它准备新的模拟；已经准备好的模拟按自己的期限保存。",
     intro: "左边是你填写的原文，右边是服务审阅后将采用的理解。每一项都可以回去修改；改过之后要重新审阅。",
     mine: "我填的",
     system: "系统将采用的理解",
@@ -320,6 +321,15 @@ export const zh = {
   },
   intent: {
     title: "运行前说明与进度",
+    expiresLine: "现在适用的保存期限：到 {{time}}",
+    expiresNone: "服务没有给出这一阶段的截止时间（按正式保存规则保存）",
+    expiryBasis: {
+      intent_activity: "从最后一次有效操作起算",
+      first_finished: "结果从首次结束起算",
+      active_execution: "正在运行：按运行自身的期限",
+      unavailable: "服务暂时没有给出依据",
+    },
+    expiryNote: "查询、刷新与切换语言都不会延长保存期限。画像的期限与这次模拟的期限是两回事：画像到期只是不能再用它准备新的模拟。",
     stage: "现在的阶段",
     waiting: {
       user: "在等你：确认、修改或恢复",
@@ -619,7 +629,11 @@ export const zh = {
     countryButton: "{{country}}：有当前可选的模拟地区（点一下只筛选城市列表，不替你选城）",
     basemapNote: "国界：Natural Earth（中文界面用中国立场版，英文界面用默认版）。国家底图只说明国家在哪里，不是模拟范围。",
     basemapFailed: "底图没有加载出来；城市列表照常可用。",
-    anchorsPending: "城市在地图上的位置要等服务提供可信坐标（显示清单尚未交付），所以地图上暂时不画城市点；请用列表选择与查看城市。",
+    anchorLoading: "正在读取城市位置……",
+    anchorUnavailable: "城市位置清单读不到：地图上不画城市点，不猜位置；请用列表选择与查看城市。",
+    anchorNote: "城市点来自服务的地理显示清单（版本 {{version}}）。",
+    anchorMissing: "没有画点的城市：",
+    anchorStatus: { unknown: "没有可靠坐标", not_applicable: "合成城市，没有坐标", not_in_bundle: "清单里没有这座城" },
     globeLoading: "正在加载地球……",
     globeUnavailable: "这台设备打不开 3D 地球（WebGL 不可用或加载失败）：已改用平面地图，填写与结果不受影响。",
     globeReset: "回到全球视角",

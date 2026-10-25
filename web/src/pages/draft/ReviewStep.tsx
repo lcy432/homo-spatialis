@@ -9,6 +9,7 @@ import { isApiError } from "../../api/errors";
 import { useSession } from "../../api/session";
 import type {
   ConfirmedProfile,
+  ConfirmedProfileSummary,
   ProductCapabilities,
   ProductIssue,
   ProfileReview,
@@ -21,6 +22,8 @@ import { useDraftEditor } from "../../draft/DraftEditor";
 import { Fraction } from "../../draft/exact";
 import { useDraftReview } from "../../draft/review";
 import { BizNotice, Zh, ZhList } from "../../i18n/biz";
+import { formatTime } from "../../i18n/format";
+import { useLocale } from "../../i18n/index";
 
 const CENTS = /^(0|[1-9][0-9]*)(\.[0-9]{1,2})?$/;
 
@@ -98,6 +101,7 @@ export function ReviewStep() {
   const { caps, state, dispatch, draftId, save, flush } = useDraftEditor();
   const { api, view: session, refresh } = useSession();
   const navigate = useNavigate();
+  const locale = useLocale();
   const d = state.draft;
   const { reply, review, current, query } = useDraftReview(true);
   const [acks, setAcks] = useState<Record<string, boolean>>({});
@@ -105,6 +109,7 @@ export function ReviewStep() {
   const [confirmError, setConfirmError] = useState<unknown>(null);
   const [refused, setRefused] = useState<ProductIssue[] | null>(null);
   const [confirmed, setConfirmed] = useState<ConfirmedProfile | null>(null);
+  const [summary, setSummary] = useState<ConfirmedProfileSummary | null>(null);
   const [versionAccepted, setVersionAccepted] = useState(false);
 
   // 进这一步先把改动存完：审阅只针对已保存的那一版
@@ -138,8 +143,10 @@ export function ReviewStep() {
         draft_revision: reply.reviewed_revision,
         acknowledged: pending,
       });
-      if (r.status === "confirmed" && r.confirmed) setConfirmed(r.confirmed);
-      else setRefused(r.issues ?? []);
+      if (r.status === "confirmed" && r.confirmed) {
+        setConfirmed(r.confirmed);
+        setSummary(r.profile_summary ?? null);
+      } else setRefused(r.issues ?? []);
     } catch (e) {
       setConfirmError(e);
     } finally {
@@ -408,6 +415,11 @@ export function ReviewStep() {
             ) : null}
           </Section>
 
+          {confirmed && confirmedStillValid && summary ? (
+            <p className="box ok" data-profile-expires={summary.expires_at}>
+              {t("review.profileSummary", { first: formatTime(summary.first_confirmed_at, locale), expires: formatTime(summary.expires_at, locale) })}
+            </p>
+          ) : null}
           {confirmed && confirmedStillValid ? (
             <PreparePanel
               confirmed={confirmed}
