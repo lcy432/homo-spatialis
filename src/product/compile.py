@@ -43,6 +43,7 @@ from ledger.life_catalog import load_life_bundle
 from ledger.life_scoring_config import load_scoring_config
 from product.answers import health_meaning, issue
 from product.catalog import compile_catalog
+from product.display import Code, Ent, Sub, t
 from product.pack import DataPack
 from product.public_errors import profile_contract_issue
 
@@ -60,7 +61,7 @@ class CompileRefusedError(ValueError):
 
 @dataclass
 class CompiledInputs:
-    """一次编译的产物：写好的 E1 输入文件（用途 → 路径）、画像、目录编译与开局岗位。"""
+    """一次编译的产物：写好的 E1 输入文件（用途 → 路径）、画像、目录编译与开局岗位（名称与机会编号）。"""
 
     out_dir: Path
     paths: dict[str, Path]
@@ -69,6 +70,8 @@ class CompiledInputs:
     start_jobs: dict[str, str]
     clones: tuple[str, ...]
     issues: tuple[ProductIssue, ...] = field(default_factory=tuple)
+    #: 城市 → 开局岗位的机会编号（显示附层按它绑定岗位名称）
+    start_job_ids: dict[str, str] = field(default_factory=dict)
 
     def file_fingerprints(self) -> dict[str, str]:
         return {
@@ -86,19 +89,43 @@ def base_problems(pack: DataPack) -> list[ProductIssue]:
     bundle, _ = load_life_bundle(Path(base.life_input), require_settlement_ready=True)
     scoring, _ = load_scoring_config(Path(base.scoring_config), bundle)
     out = []
-    for name, got, want in (
-        ("协议", bundle.protocol.protocol_id, base.protocol_id),
-        ("评分版本", scoring.spec.scoring_version, base.scoring_version),
-        ("评分内容身份", scoring.spec.content_fingerprint, base.scoring_content_fingerprint),
+    for name, what, got, want in (
+        (
+            "协议",
+            Sub("preflight.base_item.protocol", "协议"),
+            bundle.protocol.protocol_id,
+            base.protocol_id,
+        ),
+        (
+            "评分版本",
+            Sub("preflight.base_item.scoring_version", "评分版本"),
+            scoring.spec.scoring_version,
+            base.scoring_version,
+        ),
+        (
+            "评分内容身份",
+            Sub("preflight.base_item.scoring_fingerprint", "评分内容身份"),
+            scoring.spec.content_fingerprint,
+            base.scoring_content_fingerprint,
+        ),
     ):
         if got != want:
             out.append(
                 issue(
                     "base_config_changed",
                     f"pack.e1_base.{name}",
-                    f"资料包声明采用的基础样例{name}是 {want}，实际读到 {got}",
-                    "不能把另一套规则当成声明的基础样例来运行",
-                    "核对资料包与 E1 配置，换新的资料包版本",
+                    t(
+                        "preflight.base_changed.message",
+                        "资料包声明采用的基础样例{what}是 {want}，实际读到 {got}",
+                        what=what,
+                        want=want,
+                        got=got,
+                    ),
+                    t(
+                        "preflight.base_changed.impact",
+                        "不能把另一套规则当成声明的基础样例来运行",
+                    ),
+                    t("preflight.base_changed.next", "核对资料包与 E1 配置，换新的资料包版本"),
                 )
             )
     return out
@@ -153,8 +180,8 @@ def product_profile(
                     if r.kind in ("brand",)
                 ),
                 *(
-                    f"未认出的兴趣或口味描述：{t}"[:200]
-                    for t in confirmed.interests.unrecognized_text
+                    f"未认出的兴趣或口味描述：{text}"[:200]
+                    for text in confirmed.interests.unrecognized_text
                 ),
             ],
         }
@@ -175,9 +202,14 @@ def _planner_identity(pack: DataPack) -> dict[str, Any]:
                 issue(
                     "planner_unknown",
                     "pack.run.planner",
-                    f"资料包声明的规划器 {decl.planner_id} / {decl.rules_version} 不是已登记的产品 mock",
-                    "不能编译运行配置",
-                    "用 e3b-product-mock-rules-v2",
+                    t(
+                        "preflight.planner_unknown.message",
+                        "资料包声明的规划器 {planner} / {rules} 不是已登记的产品 mock",
+                        planner=Code(f"{decl.planner_id}"),
+                        rules=Code(f"{decl.rules_version}"),
+                    ),
+                    t("preflight.no_run_config", "不能编译运行配置"),
+                    t("preflight.planner_unknown.next", "用 e3b-product-mock-rules-v2"),
                 ),
             )
         )
@@ -194,9 +226,9 @@ def _execution_problems(
             issue(
                 "execution_pack_mismatch",
                 "pack",
-                "资料包的内容与正式运行设置记下的不同",
-                "不能编译运行配置",
-                "重新做运行前检查",
+                t("preflight.execution_pack.message", "资料包的内容与正式运行设置记下的不同"),
+                t("preflight.no_run_config", "不能编译运行配置"),
+                t("preflight.execution_pack.next", "重新做运行前检查"),
             )
         )
     repeats = tuple(execution.repeat_indexes)
@@ -205,9 +237,13 @@ def _execution_problems(
             issue(
                 "run_scale_mismatch",
                 "execution.repeat_indexes",
-                f"正式运行设置的分身编号 {list(repeats)} 不合法",
-                "不能编译运行配置",
-                "维护者核对服务配置",
+                t(
+                    "preflight.repeats_invalid.message",
+                    "正式运行设置的分身编号 {repeats} 不合法",
+                    repeats=Code(f"{list(repeats)}"),
+                ),
+                t("preflight.no_run_config", "不能编译运行配置"),
+                t("preflight.check_service_config", "维护者核对服务配置"),
             )
         )
     if set(confirmed.cities) != set(execution.cities):
@@ -215,9 +251,9 @@ def _execution_problems(
             issue(
                 "run_scale_mismatch",
                 "cities",
-                "确认的城市与这次服务固定比较的城市不同",
-                "不能编译运行配置（不删城、不补城）",
-                "选择服务规定的全部城市后重新确认",
+                t("preflight.cities_mismatch.message", "确认的城市与这次服务固定比较的城市不同"),
+                t("preflight.cities_mismatch.impact", "不能编译运行配置（不删城、不补城）"),
+                t("preflight.cities_mismatch.next", "选择服务规定的全部城市后重新确认"),
             )
         )
     return out
@@ -236,9 +272,14 @@ def _apply_years(pack: DataPack, protocol: dict[str, Any], years: int) -> None:
                 issue(
                     "run_scale_mismatch",
                     "execution.years",
-                    f"这次运行设置是 {years} 年，资料包只配套验证了 {sorted(supported)} 年",
-                    "不能编译运行配置",
-                    "选择资料包支持的年数后重新准备",
+                    t(
+                        "preflight.years_unsupported.message",
+                        "这次运行设置是 {years} 年，资料包只配套验证了 {supported} 年",
+                        years=years,
+                        supported=Code(f"{sorted(supported)}"),
+                    ),
+                    t("preflight.no_run_config", "不能编译运行配置"),
+                    t("preflight.years_unsupported.next", "选择资料包支持的年数后重新准备"),
                 ),
             )
         )
@@ -259,9 +300,14 @@ def _apply_execution(
                 issue(
                     "run_scale_mismatch",
                     "execution.global_call_limit",
-                    f"正式运行设置的规划候选上限 {execution.global_call_limit} 与编译出的规模 {computed} 不同",
-                    "不能编译运行配置",
-                    "维护者核对服务配置",
+                    t(
+                        "preflight.call_limit_mismatch.message",
+                        "正式运行设置的规划候选上限 {limit} 与编译出的规模 {computed} 不同",
+                        limit=execution.global_call_limit,
+                        computed=computed,
+                    ),
+                    t("preflight.no_run_config", "不能编译运行配置"),
+                    t("preflight.check_service_config", "维护者核对服务配置"),
                 ),
             )
         )
@@ -280,9 +326,9 @@ def _apply_execution(
                 issue(
                     "scripts_need_mock",
                     "scripts",
-                    "受控的 mock 行为只能配离线规划器",
-                    "不能编译运行配置",
-                    "去掉受控行为",
+                    t("preflight.scripts_need_mock.message", "受控的 mock 行为只能配离线规划器"),
+                    t("preflight.no_run_config", "不能编译运行配置"),
+                    t("preflight.scripts_need_mock.next", "去掉受控行为"),
                 ),
             )
         )
@@ -340,9 +386,12 @@ def compile_inputs(
                 issue(
                     "confirmation_tampered",
                     "content_fingerprint",
-                    "确认画像的内容与它记下的身份不一致",
-                    "不能编译",
-                    "重新确认",
+                    t(
+                        "preflight.confirmation_tampered.message",
+                        "确认画像的内容与它记下的身份不一致",
+                    ),
+                    t("preflight.confirmation_tampered.impact", "不能编译"),
+                    t("preflight.confirmation_tampered.next", "重新确认"),
                 ),
             )
         )
@@ -421,7 +470,9 @@ def compile_inputs(
     states: list[dict[str, Any]] = []
     entries: list[dict[str, Any]] = []
     start_jobs: dict[str, str] = {}
+    start_job_ids: dict[str, str] = {}
     clones: list[str] = []
+    occupation = Ent("occupation", confirmed.occupation.concept_id, confirmed.occupation.label)
     for ref in confirmed.cities:
         cat = catalog_by_ref.get(ref)
         if cat is None:
@@ -429,12 +480,13 @@ def compile_inputs(
                 issue(
                     "city_not_in_base",
                     "cities",
-                    f"城市 {ref} 不在基础样例里",
-                    "不能运行这座城",
-                    "从能力清单选择",
+                    t("preflight.city_not_in_base.message", "城市 {city} 不在基础样例里", city=ref),
+                    t("preflight.city_not_in_base.impact", "不能运行这座城"),
+                    t("preflight.city_not_in_base.next", "从能力清单选择"),
                 )
             )
             continue
+        city = Ent("city", ref, cat["label"])
         jobs = [
             o
             for o in cat["opportunities"]
@@ -457,23 +509,50 @@ def compile_inputs(
                 issue(
                     "start_job_unmatched",
                     f"cities.{ref}",
-                    f"{cat['label']} 的目录里没有与“{confirmed.occupation.label}”同一分类的岗位",
-                    "开局岗位无法匹配，这座城不能生成标准开局（不自动换成别的职业）",
-                    "换一座有对应岗位的城市，或核对职业描述",
+                    t(
+                        "preflight.start_job_unmatched.message",
+                        "{city} 的目录里没有与“{occupation}”同一分类的岗位",
+                        city=city,
+                        occupation=occupation,
+                    ),
+                    t(
+                        "preflight.start_job_unmatched.impact",
+                        "开局岗位无法匹配，这座城不能生成标准开局（不自动换成别的职业）",
+                    ),
+                    t(
+                        "preflight.start_job_unmatched.next",
+                        "换一座有对应岗位的城市，或核对职业描述",
+                    ),
                 )
             )
             continue
         if not usable:
             needed = sorted(
-                {t for o in jobs for t in o.get("eligibility", []) if t.startswith("ability:")}
+                {
+                    tag
+                    for o in jobs
+                    for tag in o.get("eligibility", [])
+                    if tag.startswith("ability:")
+                }
             )
             issues.append(
                 issue(
                     "start_job_requires_unconfirmed_ability",
                     f"cities.{ref}",
-                    f"{cat['label']} 与你职业对应的岗位要求 {needed}，你还没有确认持有这项资格",
-                    "系统不从职业称呼自动授予资格，这座城不能生成开局",
-                    "如果你确实持有，请在资格一栏明确确认",
+                    t(
+                        "preflight.start_job_ability.message",
+                        "{city} 与你职业对应的岗位要求 {needed}，你还没有确认持有这项资格",
+                        city=city,
+                        needed=Code(f"{needed}"),
+                    ),
+                    t(
+                        "preflight.start_job_ability.impact",
+                        "系统不从职业称呼自动授予资格，这座城不能生成开局",
+                    ),
+                    t(
+                        "preflight.start_job_ability.next",
+                        "如果你确实持有，请在资格一栏明确确认",
+                    ),
                 )
             )
             continue
@@ -488,6 +567,7 @@ def compile_inputs(
         )[0]
         envs = max((m["env_repeat"] for m in cat.get("menus", [])), default=0)
         start_jobs[ref] = job["label"]
+        start_job_ids[ref] = job["opportunity_id"]
         # 分身编号：正式运行设置写的（E3C 收尾：每城分身数是这次运行的设置，不改资料包的内容身份）；没有就用资料包的运行声明
         for k in execution.repeat_indexes if execution is not None else b.run.repeat_indexes:
             clone = f"{confirmed.person_ref}.{cat['city']['code'].lower()}.r{k}"
@@ -679,4 +759,5 @@ def compile_inputs(
         start_jobs=start_jobs,
         clones=tuple(clones),
         issues=tuple(issues),
+        start_job_ids=start_job_ids,
     )

@@ -19,19 +19,23 @@ from collections.abc import Awaitable, Callable, MutableMapping
 from dataclasses import dataclass
 from typing import Any
 
-from fastapi import Depends, FastAPI, Request, Response
+from fastapi import Depends, FastAPI, Query, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from common.product_contracts import (
+    ConfirmedProfileView,
     DeletionReceipt,
+    DisplayEnvelope,
     DraftSaveRequest,
     DraftView,
+    GeographyDisplayBundle,
     ProductCapabilities,
     ProductResult,
     ProfileConfirmReply,
     ProfileConfirmRequest,
+    ProfileList,
     ReviewReply,
     RunIntentCreateRequest,
     RunIntentView,
@@ -43,14 +47,16 @@ from common.product_contracts import (
     SessionExchangeRequest,
     SessionView,
 )
+from product.display import recording
 from product.service import actions
+from product.service import display as service_display
 from product.service.actions import ServiceContext
 from product.service.clock import parse
 from product.service.errors import ERRORS, ServiceFailure, error_body
 from product.service.tokens import same, support_ref
 
 API = "/api/v1"
-API_VERSION = "e3c-service-api-v1"
+API_VERSION = "e3c-service-api-v1.1"
 log = logging.getLogger("product.service.api")
 
 Scope = MutableMapping[str, Any]
@@ -64,6 +70,11 @@ ERROR_RESPONSES: dict[int | str, dict[str, Any]] = {
     status: {"model": ServiceError, "description": "统一的安全错误"}
     for status in sorted({v[0] for v in ERRORS.values()})
 }
+
+
+def _also(status: int, model: type, description: str) -> dict[int | str, dict[str, Any]]:
+    """错误响应之外再声明一个实际会返回的成功状态（例如重复操作返回 200、新建返回 202）。"""
+    return {**ERROR_RESPONSES, status: {"model": model, "description": description}}
 
 
 def cookie_name(ctx: ServiceContext) -> str:
@@ -82,10 +93,18 @@ def _error_response(
     support: str | None = None,
     retry_after: int | None = None,
     field: str | None = None,
+    subject: str | None = None,
+    pack: str | None = None,
 ) -> JSONResponse:
-    body = error_body(code, support_ref=support, retry_after=retry_after, field=field)
+    """统一的安全错误。给了 ``pack``（服务的资料包身份）就带上中英两种显示文字（固定双语目录生成，未登录时也有）。"""
+    with recording() as rec:
+        body = error_body(
+            code, support_ref=support, retry_after=retry_after, field=field, subject=subject
+        )
     if status is not None:
         body = body.model_copy(update={"status": status})
+    if pack is not None:
+        body = service_display.with_display(body, rec, pack_fingerprint=pack)
     headers = {"Retry-After": str(retry_after)} if retry_after else None
     return JSONResponse(body.model_dump(mode="json"), status_code=body.status, headers=headers)
 
@@ -117,10 +136,11 @@ class RateLimiter:
 class Guard:
     """最外层的 ASGI 包装：请求体上限（先完整读入，超过就 413，不交给应用）、安全响应头、未处理异常的安全错误。"""
 
-    def __init__(self, app: ASGIApp, *, limit: int, secure: bool) -> None:
+    def __init__(self, app: ASGIApp, *, limit: int, secure: bool, pack: str | None = None) -> None:
         self.app = app
         self.limit = limit
         self.secure = secure
+        self.pack = pack
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         if scope["type"] != "http":
@@ -129,7 +149,7 @@ class Guard:
         headers = dict(scope.get("headers") or ())
         declared = headers.get(b"content-length")
         if declared is not None and (not declared.isdigit() or int(declared) > self.limit):
-            await _send(send, _error_response("payload_too_large"), self._extra())
+            await _send(send, _error_response("payload_too_large", pack=self.pack), self._extra())
             return
         body = b""
         more = True
@@ -139,7 +159,9 @@ class Guard:
                 return  # 客户端断开
             body += message.get("body", b"")
             if len(body) > self.limit:
-                await _send(send, _error_response("payload_too_large"), self._extra())
+                await _send(
+                    send, _error_response("payload_too_large", pack=self.pack), self._extra()
+                )
                 return
             more = bool(message.get("more_body"))
         replayed = False
@@ -173,11 +195,13 @@ class Guard:
             log.error("internal_error %s %s at %s", ref, type(exc).__name__, where)
             if started:
                 raise
-            await _send(send, _error_response("internal_error", support=ref), self._extra())
+            await _send(
+                send, _error_response("internal_error", support=ref, pack=self.pack), self._extra()
+            )
 
     def _extra(self) -> list[tuple[bytes, bytes]]:
         out = [
-            (b"cache-control", b"no-store"),
+            (b"cache-control", b"private, no-store"),
             (b"x-content-type-options", b"nosniff"),
             (b"referrer-policy", b"no-referrer"),
             (b"x-frame-options", b"DENY"),
@@ -221,6 +245,7 @@ def create_app(ctx: ServiceContext) -> FastAPI:
         openapi_url=f"{API}/openapi.json" if docs else None,
     )
     cookie = cookie_name(ctx)
+    pack = ctx.pack.fingerprint
     now = lambda: ctx.clock().timestamp()  # noqa: E731
     invite_limit = RateLimiter(config.invite_rate_per_minute, now)
     write_limit = RateLimiter(config.write_rate_per_minute, now)
@@ -230,7 +255,12 @@ def create_app(ctx: ServiceContext) -> FastAPI:
     @app.exception_handler(ServiceFailure)
     async def _failure(_: Request, exc: ServiceFailure) -> JSONResponse:
         return _error_response(
-            exc.code, support=exc.support_ref, retry_after=exc.retry_after, field=exc.field
+            exc.code,
+            support=exc.support_ref,
+            retry_after=exc.retry_after,
+            field=exc.field,
+            subject=exc.subject,
+            pack=pack,
         )
 
     @app.exception_handler(RequestValidationError)
@@ -240,14 +270,14 @@ def create_app(ctx: ServiceContext) -> FastAPI:
             for err in exc.errors():
                 loc = tuple(err.get("loc") or ())
                 if len(loc) >= 2 and loc[0] == "body" and loc[1] in OPTION_FIELDS:
-                    return _error_response("run_options_invalid", field=str(loc[1]))
-        return _error_response("invalid_request")
+                    return _error_response("run_options_invalid", field=str(loc[1]), pack=pack)
+        return _error_response("invalid_request", pack=pack)
 
     @app.exception_handler(StarletteHTTPException)
     async def _http(_: Request, exc: StarletteHTTPException) -> JSONResponse:
         if exc.status_code == 404:
-            return _error_response("not_found")
-        return _error_response("invalid_request", status=exc.status_code)
+            return _error_response("not_found", pack=pack)
+        return _error_response("invalid_request", status=exc.status_code, pack=pack)
 
     # ------------------------------------------------------------------ 身份与修改保护
 
@@ -403,7 +433,35 @@ def create_app(ctx: ServiceContext) -> FastAPI:
         summary="确认审阅过的画像（服务端重新校验并生成确认画像）",
     )
     def confirm(body: ProfileConfirmRequest, who: Caller = write) -> ProfileConfirmReply:
-        return actions.confirm(ctx, who.principal_id, body, generation=who.generation)
+        with recording() as rec:
+            reply = actions.confirm(ctx, who.principal_id, body, generation=who.generation)
+        # 确认被拒时可能没有可以再读的对象：中英两种文字随回复一起给
+        from product.display import messages
+
+        return service_display.with_display(
+            reply,
+            rec,
+            pack_fingerprint=pack,
+            user_text=messages.under("/confirmed", messages.PROFILE),
+        )
+
+    @app.get(
+        f"{API}/profiles",
+        response_model=ProfileList,
+        responses=ERROR_RESPONSES,
+        summary="本人还能用来准备新模拟的确认画像摘要（首次确认与截止时间；查询不续期）",
+    )
+    def list_profiles(who: Caller = read) -> ProfileList:
+        return actions.profiles(ctx, who.principal_id)
+
+    @app.get(
+        f"{API}/profiles/{{confirmed_id}}",
+        response_model=ConfirmedProfileView,
+        responses=ERROR_RESPONSES,
+        summary="读取本人的一份确认画像与它的日期（别人的与不存在的一样 404）",
+    )
+    def get_profile(confirmed_id: str, who: Caller = read) -> ConfirmedProfileView:
+        return actions.profile_view(ctx, who.principal_id, confirmed_id)
 
     # ------------------------------------------------------------------ 运行意图
 
@@ -411,8 +469,10 @@ def create_app(ctx: ServiceContext) -> FastAPI:
         f"{API}/run-intents",
         status_code=202,
         response_model=RunIntentView,
-        responses=ERROR_RESPONSES,
-        summary="准备一次模拟：排队做运行前检查（不使用次数）",
+        responses=_also(
+            200, RunIntentView, "同一份确认画像、同样的有效设置已经有未结束的意图：返回原意图"
+        ),
+        summary="准备一次模拟：排队做运行前检查（不使用次数）；新建 202，返回已有 200",
     )
     def create_intent(
         body: RunIntentCreateRequest, response: Response, who: Caller = write
@@ -436,8 +496,10 @@ def create_app(ctx: ServiceContext) -> FastAPI:
         f"{API}/run-intents/{{intent_id}}/submit",
         status_code=202,
         response_model=RunSubmitReply,
-        responses=ERROR_RESPONSES,
-        summary="确认开始：预留 1 次并排队（重复提交返回原运行）",
+        responses=_also(
+            200, RunSubmitReply, "重复提交（duplicate_same_run）：返回原运行，不再预留、不再排队"
+        ),
+        summary="确认开始：预留 1 次并排队（accepted 202；重复提交 duplicate_same_run 200）",
     )
     def submit(
         intent_id: str, body: RunSubmitRequest, response: Response, who: Caller = write
@@ -493,8 +555,8 @@ def create_app(ctx: ServiceContext) -> FastAPI:
         f"{API}/runs/{{run_id}}",
         status_code=202,
         response_model=DeletionReceipt,
-        responses=ERROR_RESPONSES,
-        summary="删除一次运行（运行中也可以：不再批准新的模型请求）",
+        responses=_also(200, DeletionReceipt, "已经处理完的删除（deleted）：返回同一份回执"),
+        summary="删除一次运行（运行中也可以：不再批准新的模型请求）；进行中 202，已处理 200",
     )
     def delete_run(run_id: str, response: Response, who: Caller = write) -> DeletionReceipt:
         receipt = actions.delete_run(ctx, who.principal_id, run_id)
@@ -511,7 +573,40 @@ def create_app(ctx: ServiceContext) -> FastAPI:
     def delete_all(who: Caller = write) -> DeletionReceipt:
         return actions.delete_all(ctx, who.principal_id)
 
-    app.add_middleware(Guard, limit=config.max_body_bytes, secure=config.secure_cookies)
+    # ------------------------------------------------------------------ 显示附层（只读）
+
+    @app.get(
+        f"{API}/display",
+        response_model=DisplayEnvelope,
+        responses=ERROR_RESPONSES,
+        summary="一个公共消息与它的中英显示文字（同次返回；只读，不续期、不调用模型）",
+    )
+    def display(
+        kind: service_display.DisplayKindParam,
+        id: str | None = Query(default=None, pattern=r"^[A-Za-z0-9][A-Za-z0-9_.:\-]{0,127}$"),
+        locale: service_display.LocaleParam = "zh",
+        who: Caller = read,
+    ) -> DisplayEnvelope:
+        return service_display.envelope(
+            ctx, who.principal_id, who.session_secret, who.expires, kind, id, locale
+        )
+
+    @app.get(
+        f"{API}/display/geography",
+        response_model=GeographyDisplayBundle,
+        responses=ERROR_RESPONSES,
+        summary="一个资料包、一个显示资源版本的地理显示清单（不授予运行资格；缺坐标的为空）",
+    )
+    def geography(
+        pack_fingerprint: str = Query(pattern=r"^[0-9a-f]{64}$"),
+        resource_version: str | None = Query(
+            default=None, pattern=r"^e3-display-res-v1-[0-9a-f]{16}$"
+        ),
+        _: Caller = read,
+    ) -> GeographyDisplayBundle:
+        return service_display.geography(ctx, pack_fingerprint, resource_version)
+
+    app.add_middleware(Guard, limit=config.max_body_bytes, secure=config.secure_cookies, pack=pack)
     return app
 
 

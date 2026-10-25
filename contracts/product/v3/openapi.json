@@ -807,6 +807,93 @@
     "title": "CityDataNature",
     "type": "object"
    },
+   "CityGeography": {
+    "additionalProperties": false,
+    "properties": {
+     "anchor": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/GeographyAnchor"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "anchor_status": {
+      "enum": [
+       "available",
+       "unknown",
+       "not_applicable"
+      ],
+      "title": "Anchor Status",
+      "type": "string"
+     },
+     "city_ref": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+      "title": "City Ref",
+      "type": "string"
+     },
+     "code": {
+      "maxLength": 40,
+      "minLength": 1,
+      "title": "Code",
+      "type": "string"
+     },
+     "country": {
+      "pattern": "^[A-Z]{2}$",
+      "title": "Country",
+      "type": "string"
+     },
+     "country_names": {
+      "$ref": "#/components/schemas/LocalizedText"
+     },
+     "coverage_note": {
+      "$ref": "#/components/schemas/LocalizedText"
+     },
+     "geography_version": {
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "Geography Version",
+      "type": "string"
+     },
+     "model_kind": {
+      "enum": [
+       "real",
+       "synthetic"
+      ],
+      "title": "Model Kind",
+      "type": "string"
+     },
+     "names": {
+      "$ref": "#/components/schemas/LocalizedNames"
+     },
+     "scheme": {
+      "maxLength": 40,
+      "minLength": 1,
+      "title": "Scheme",
+      "type": "string"
+     },
+     "support_scope": {
+      "$ref": "#/components/schemas/SupportScope"
+     }
+    },
+    "required": [
+     "city_ref",
+     "country",
+     "scheme",
+     "code",
+     "geography_version",
+     "country_names",
+     "names",
+     "model_kind",
+     "anchor_status",
+     "support_scope",
+     "coverage_note"
+    ],
+    "title": "CityGeography",
+    "type": "object"
+   },
    "CityOption": {
     "additionalProperties": false,
     "description": "一个候选城市：完整身份（国家 / 地理体系 / 代码）与地理边界版本；不用中文名拼接资料。",
@@ -2105,6 +2192,74 @@
     "title": "ConfirmedProfile",
     "type": "object"
    },
+   "ConfirmedProfileSummary": {
+    "additionalProperties": false,
+    "description": "一份确认画像的服务端摘要（E3C 接口补齐）：首次确认时间与可以用来准备新模拟的截止时间都读服务库，重复确认、查询都不续期。\n它不是确认画像本体的一部分，不进入画像的内容身份；画像到期只影响准备新的模拟，已经准备的意图用自己的副本与期限。",
+    "properties": {
+     "confirmed_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+      "title": "Confirmed Id",
+      "type": "string"
+     },
+     "content_fingerprint": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Content Fingerprint",
+      "type": "string"
+     },
+     "draft_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+      "title": "Draft Id",
+      "type": "string"
+     },
+     "draft_revision": {
+      "minimum": 1.0,
+      "title": "Draft Revision",
+      "type": "integer"
+     },
+     "expires_at": {
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+      "title": "Expires At",
+      "type": "string"
+     },
+     "first_confirmed_at": {
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+      "title": "First Confirmed At",
+      "type": "string"
+     }
+    },
+    "required": [
+     "confirmed_id",
+     "content_fingerprint",
+     "draft_id",
+     "draft_revision",
+     "first_confirmed_at",
+     "expires_at"
+    ],
+    "title": "ConfirmedProfileSummary",
+    "type": "object"
+   },
+   "ConfirmedProfileView": {
+    "additionalProperties": false,
+    "description": "读取本人的一份确认画像（``GET /api/v1/profiles/{confirmed_id}``）：服务端摘要（日期）与原确认画像。",
+    "properties": {
+     "confirmed": {
+      "$ref": "#/components/schemas/ConfirmedProfile"
+     },
+     "meta": {
+      "$ref": "#/components/schemas/ProductMeta"
+     },
+     "summary": {
+      "$ref": "#/components/schemas/ConfirmedProfileSummary"
+     }
+    },
+    "required": [
+     "meta",
+     "summary",
+     "confirmed"
+    ],
+    "title": "ConfirmedProfileView",
+    "type": "object"
+   },
    "ConfirmedRef": {
     "additionalProperties": false,
     "properties": {
@@ -2677,6 +2832,296 @@
     "title": "DimensionDefinition",
     "type": "object"
    },
+   "DisplayAttachment": {
+    "additionalProperties": false,
+    "description": "即时回复（错误、确认结果）的显示附层：这类回复可能没有可以再读的对象，所以随回复一起给中英两种文字。\n``source_view_fingerprint`` 是去掉 ``display`` 之后的原回复的规范 JSON 摘要；``pointer`` 都相对那份原回复。",
+    "properties": {
+     "display_schema_version": {
+      "const": "e3-display-v1",
+      "title": "Display Schema Version",
+      "type": "string"
+     },
+     "resource_version": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Resource Version"
+     },
+     "source_view_fingerprint": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source View Fingerprint",
+      "type": "string"
+     },
+     "translations": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/DisplayTranslation"
+      },
+      "propertyNames": {
+       "enum": [
+        "zh",
+        "en"
+       ]
+      },
+      "title": "Translations",
+      "type": "object"
+     }
+    },
+    "required": [
+     "display_schema_version",
+     "source_view_fingerprint",
+     "translations"
+    ],
+    "title": "DisplayAttachment",
+    "type": "object"
+   },
+   "DisplayEnvelope": {
+    "additionalProperties": false,
+    "description": "一次显示读取（``GET /api/v1/display``）：原公共消息 ``source`` 与它的显示文字同次返回（避免进度更新后错配旧翻译）。页面把\n``source`` 当作原业务消息使用，``fields`` 只用来换文字；数字、权限与身份永远取 ``source``。读取只鉴权、读取与纯函数渲染：\n不保存答案、不预检查、不恢复、不重放、不调用模型。",
+    "properties": {
+     "display_schema_version": {
+      "const": "e3-display-v1",
+      "title": "Display Schema Version",
+      "type": "string"
+     },
+     "fields": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/DisplayField"
+      },
+      "title": "Fields",
+      "type": "array"
+     },
+     "id": {
+      "anyOf": [
+       {
+        "maxLength": 128,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Id"
+     },
+     "kind": {
+      "enum": [
+       "capabilities",
+       "session",
+       "draft",
+       "review",
+       "profile",
+       "intent",
+       "progress",
+       "result",
+       "runs"
+      ],
+      "title": "Kind",
+      "type": "string"
+     },
+     "locale": {
+      "enum": [
+       "zh",
+       "en"
+      ],
+      "title": "Locale",
+      "type": "string"
+     },
+     "metrics": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/MetricDisplaySpec"
+      },
+      "title": "Metrics",
+      "type": "array"
+     },
+     "resource_version": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Resource Version"
+     },
+     "source": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/ProductCapabilities"
+       },
+       {
+        "$ref": "#/components/schemas/SessionView"
+       },
+       {
+        "$ref": "#/components/schemas/DraftView"
+       },
+       {
+        "$ref": "#/components/schemas/ReviewReply"
+       },
+       {
+        "$ref": "#/components/schemas/ConfirmedProfileView"
+       },
+       {
+        "$ref": "#/components/schemas/RunIntentView"
+       },
+       {
+        "$ref": "#/components/schemas/RunProgress"
+       },
+       {
+        "$ref": "#/components/schemas/ProductResult"
+       },
+       {
+        "$ref": "#/components/schemas/RunList"
+       }
+      ],
+      "title": "Source"
+     },
+     "source_view_fingerprint": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source View Fingerprint",
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "complete",
+       "partial",
+       "unavailable"
+      ],
+      "title": "Status",
+      "type": "string"
+     }
+    },
+    "required": [
+     "display_schema_version",
+     "kind",
+     "source",
+     "source_view_fingerprint",
+     "locale",
+     "status"
+    ],
+    "title": "DisplayEnvelope",
+    "type": "object"
+   },
+   "DisplayField": {
+    "additionalProperties": false,
+    "description": "原消息里一个可展示文字位置的显示文字。``pointer`` 是相对原消息（或原回复）的 JSON Pointer，只指向含中文的业务说明文字——\n不指向数值、权重、编号、动作枚举、秘密，也不指向用户原文（用户原文保持原文，不翻译）。``key`` 是稳定的文案 / 实体键。",
+    "properties": {
+     "key": {
+      "maxLength": 300,
+      "minLength": 1,
+      "title": "Key",
+      "type": "string"
+     },
+     "missing_reason": {
+      "anyOf": [
+       {
+        "enum": [
+         "no_binding",
+         "translation_missing",
+         "translation_stale",
+         "source_changed",
+         "ambiguous",
+         "untranslated_param",
+         "resources_unavailable",
+         "binding_stale"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Missing Reason"
+     },
+     "pointer": {
+      "maxLength": 400,
+      "pattern": "^(/[^/]+)+$",
+      "title": "Pointer",
+      "type": "string"
+     },
+     "resource_version": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Resource Version"
+     },
+     "source_locale": {
+      "enum": [
+       "zh",
+       "en"
+      ],
+      "title": "Source Locale",
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "provided",
+       "missing"
+      ],
+      "title": "Status",
+      "type": "string"
+     },
+     "text": {
+      "anyOf": [
+       {
+        "maxLength": 6000,
+        "minLength": 1,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Text"
+     }
+    },
+    "required": [
+     "pointer",
+     "key",
+     "status",
+     "source_locale"
+    ],
+    "title": "DisplayField",
+    "type": "object"
+   },
+   "DisplayTranslation": {
+    "additionalProperties": false,
+    "properties": {
+     "fields": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/DisplayField"
+      },
+      "title": "Fields",
+      "type": "array"
+     },
+     "status": {
+      "enum": [
+       "complete",
+       "partial",
+       "unavailable"
+      ],
+      "title": "Status",
+      "type": "string"
+     }
+    },
+    "required": [
+     "status"
+    ],
+    "title": "DisplayTranslation",
+    "type": "object"
+   },
    "DraftRef": {
     "additionalProperties": false,
     "description": "引用一份草稿：编号、修订号与内容指纹（草稿改了，指纹就不同）。",
@@ -2905,6 +3350,194 @@
      "state"
     ],
     "title": "FreeTextAnswer",
+    "type": "object"
+   },
+   "GeographyAnchor": {
+    "additionalProperties": false,
+    "description": "城市的显示锚点：都会区的代表点，不是住宅、主城市中心或都会区边界。经纬度是具名字段（度），坐标系写明。",
+    "properties": {
+     "crs": {
+      "const": "EPSG:4326",
+      "title": "Crs",
+      "type": "string"
+     },
+     "kind": {
+      "enum": [
+       "principal_city_point",
+       "metro_internal_point"
+      ],
+      "title": "Kind",
+      "type": "string"
+     },
+     "latitude": {
+      "maximum": 90.0,
+      "minimum": -90.0,
+      "title": "Latitude",
+      "type": "number"
+     },
+     "longitude": {
+      "maximum": 180.0,
+      "minimum": -180.0,
+      "title": "Longitude",
+      "type": "number"
+     },
+     "source_refs": {
+      "items": {
+       "type": "string"
+      },
+      "minItems": 1,
+      "title": "Source Refs",
+      "type": "array"
+     }
+    },
+    "required": [
+     "latitude",
+     "longitude",
+     "crs",
+     "kind",
+     "source_refs"
+    ],
+    "title": "GeographyAnchor",
+    "type": "object"
+   },
+   "GeographyDisplayBundle": {
+    "additionalProperties": false,
+    "description": "一个资料包、一个显示资源版本的地理显示清单（``GET /api/v1/display/geography``）。地图底图、投影、纹理与标签由页面负责；\n这份清单不授予运行资格（能选哪些城市仍由能力清单与服务规则决定），缺少可靠坐标的城市锚点为空、仍可从列表访问。",
+    "properties": {
+     "cities": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/CityGeography"
+      },
+      "title": "Cities",
+      "type": "array"
+     },
+     "display_schema_version": {
+      "const": "e3-display-v1",
+      "title": "Display Schema Version",
+      "type": "string"
+     },
+     "notes": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/LocalizedText"
+      },
+      "title": "Notes",
+      "type": "array"
+     },
+     "pack_fingerprint": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Pack Fingerprint",
+      "type": "string"
+     },
+     "resource_version": {
+      "title": "Resource Version",
+      "type": "string"
+     },
+     "sources": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/GeographySource"
+      },
+      "title": "Sources",
+      "type": "array"
+     },
+     "status": {
+      "enum": [
+       "complete",
+       "partial",
+       "unavailable"
+      ],
+      "title": "Status",
+      "type": "string"
+     }
+    },
+    "required": [
+     "display_schema_version",
+     "resource_version",
+     "pack_fingerprint",
+     "status"
+    ],
+    "title": "GeographyDisplayBundle",
+    "type": "object"
+   },
+   "GeographyNames": {
+    "additionalProperties": false,
+    "properties": {
+     "official": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Official",
+      "type": "string"
+     },
+     "short": {
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "Short",
+      "type": "string"
+     }
+    },
+    "required": [
+     "official",
+     "short"
+    ],
+    "title": "GeographyNames",
+    "type": "object"
+   },
+   "GeographySource": {
+    "additionalProperties": false,
+    "properties": {
+     "content_sha256": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-f]{64}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Content Sha256"
+     },
+     "dataset": {
+      "maxLength": 300,
+      "minLength": 1,
+      "title": "Dataset",
+      "type": "string"
+     },
+     "public_url": {
+      "maxLength": 400,
+      "minLength": 1,
+      "title": "Public Url",
+      "type": "string"
+     },
+     "publisher": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Publisher",
+      "type": "string"
+     },
+     "source_ref": {
+      "maxLength": 120,
+      "minLength": 1,
+      "title": "Source Ref",
+      "type": "string"
+     },
+     "version": {
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "Version",
+      "type": "string"
+     }
+    },
+    "required": [
+     "source_ref",
+     "publisher",
+     "dataset",
+     "version",
+     "public_url"
+    ],
+    "title": "GeographySource",
     "type": "object"
    },
    "GoodsLine": {
@@ -3689,6 +4322,59 @@
     "title": "LeisureInterestAnswer",
     "type": "object"
    },
+   "LocalizedNames": {
+    "additionalProperties": false,
+    "properties": {
+     "en": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/GeographyNames"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "zh": {
+      "$ref": "#/components/schemas/GeographyNames"
+     }
+    },
+    "required": [
+     "zh"
+    ],
+    "title": "LocalizedNames",
+    "type": "object"
+   },
+   "LocalizedText": {
+    "additionalProperties": false,
+    "description": "一段中英对照的显示文字；没有英文时 ``en`` 为空（页面显示中文原文并标明英文缺失）。",
+    "properties": {
+     "en": {
+      "anyOf": [
+       {
+        "maxLength": 4000,
+        "minLength": 1,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "En"
+     },
+     "zh": {
+      "maxLength": 2000,
+      "minLength": 1,
+      "title": "Zh",
+      "type": "string"
+     }
+    },
+    "required": [
+     "zh"
+    ],
+    "title": "LocalizedText",
+    "type": "object"
+   },
    "MaterialLeafDefinition": {
     "additionalProperties": false,
     "description": "物质细项之一：含义、支持状态与说明。细分是父项内部的相对重要性，不是开支比例。",
@@ -3776,6 +4462,74 @@
      "items_max"
     ],
     "title": "MenuSummary",
+    "type": "object"
+   },
+   "MetricDisplaySpec": {
+    "additionalProperties": false,
+    "description": "结果色阶的显示约定：只声明已有分数的显示域与读法，不计算新分数、不公开评分系数。``mean_j`` 是同一城市“完成且评价完整”\n分身的 J 的算术平均，当前评价规则下有效值在 [0, 1]；同一结果里所有国家、两种地图共用这一固定尺度，不按国家或城市重新拉伸。",
+    "properties": {
+     "comparison_scope": {
+      "const": "within_result_only",
+      "title": "Comparison Scope",
+      "type": "string"
+     },
+     "denominator_field": {
+      "const": "mean_denominator",
+      "title": "Denominator Field",
+      "type": "string"
+     },
+     "direction": {
+      "const": "higher_model_evaluation",
+      "title": "Direction",
+      "type": "string"
+     },
+     "evaluation_refs": {
+      "default": [],
+      "items": {
+       "type": "string"
+      },
+      "title": "Evaluation Refs",
+      "type": "array"
+     },
+     "key": {
+      "const": "mean_j",
+      "title": "Key",
+      "type": "string"
+     },
+     "maximum": {
+      "const": "1",
+      "title": "Maximum",
+      "type": "string"
+     },
+     "minimum": {
+      "const": "0",
+      "title": "Minimum",
+      "type": "string"
+     },
+     "notes": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/LocalizedText"
+      },
+      "title": "Notes",
+      "type": "array"
+     },
+     "unit": {
+      "const": "model_score",
+      "title": "Unit",
+      "type": "string"
+     }
+    },
+    "required": [
+     "key",
+     "minimum",
+     "maximum",
+     "unit",
+     "direction",
+     "denominator_field",
+     "comparison_scope"
+    ],
+    "title": "MetricDisplaySpec",
     "type": "object"
    },
    "MissingReasonLine": {
@@ -5040,12 +5794,22 @@
    },
    "ProfileConfirmReply": {
     "additionalProperties": false,
-    "description": "确认的结果：成功时是服务端生成的确认画像；被拒时列出原因（草稿改过、知悉项缺失、审阅过时……）。",
+    "description": "确认的结果：成功时是服务端生成的确认画像与它的服务端摘要（首次确认与截止时间）；被拒时列出原因（草稿改过、知悉项缺失、\n审阅过时……），摘要为空。",
     "properties": {
      "confirmed": {
       "anyOf": [
        {
         "$ref": "#/components/schemas/ConfirmedProfile"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "display": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/DisplayAttachment"
        },
        {
         "type": "null"
@@ -5062,6 +5826,16 @@
      },
      "meta": {
       "$ref": "#/components/schemas/ProductMeta"
+     },
+     "profile_summary": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/ConfirmedProfileSummary"
+       },
+       {
+        "type": "null"
+       }
+      ]
      },
      "status": {
       "enum": [
@@ -5115,6 +5889,28 @@
      "draft_revision"
     ],
     "title": "ProfileConfirmRequest",
+    "type": "object"
+   },
+   "ProfileList": {
+    "additionalProperties": false,
+    "description": "本人还能用来准备新模拟的确认画像摘要（``GET /api/v1/profiles``），新的在前；已删除、已过期的不列出。",
+    "properties": {
+     "meta": {
+      "$ref": "#/components/schemas/ProductMeta"
+     },
+     "profiles": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/ConfirmedProfileSummary"
+      },
+      "title": "Profiles",
+      "type": "array"
+     }
+    },
+    "required": [
+     "meta"
+    ],
+    "title": "ProfileList",
     "type": "object"
    },
    "ProfileReview": {
@@ -5748,6 +6544,16 @@
       ],
       "title": "Expires At"
      },
+     "expiry_basis": {
+      "enum": [
+       "intent_activity",
+       "first_finished",
+       "active_execution",
+       "unavailable"
+      ],
+      "title": "Expiry Basis",
+      "type": "string"
+     },
      "explanation": {
       "anyOf": [
        {
@@ -5875,6 +6681,7 @@
      "result_available",
      "created_at",
      "updated_at",
+     "expiry_basis",
      "deletion",
      "quota"
     ],
@@ -6272,6 +7079,16 @@
       ],
       "title": "Expires At"
      },
+     "expiry_basis": {
+      "enum": [
+       "intent_activity",
+       "first_finished",
+       "active_execution",
+       "unavailable"
+      ],
+      "title": "Expiry Basis",
+      "type": "string"
+     },
      "finished_at": {
       "anyOf": [
        {
@@ -6341,7 +7158,8 @@
      "stage",
      "stage_zh",
      "result_available",
-     "created_at"
+     "created_at",
+     "expiry_basis"
     ],
     "title": "RunSummary",
     "type": "object"
@@ -6445,6 +7263,7 @@
        "idempotency_conflict",
        "intent_conflict",
        "not_resumable",
+       "cancel_not_allowed",
        "result_unavailable",
        "deleting",
        "deleted",
@@ -6462,6 +7281,16 @@
       ],
       "title": "Code",
       "type": "string"
+     },
+     "display": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/DisplayAttachment"
+       },
+       {
+        "type": "null"
+       }
+      ]
      },
      "field": {
       "anyOf": [
@@ -6942,6 +7771,42 @@
      "label_zh"
     ],
     "title": "SupportLine",
+    "type": "object"
+   },
+   "SupportScope": {
+    "additionalProperties": false,
+    "description": "模拟实际支持的居住与工作范围（来自资料包），与都会区本身、资料覆盖范围不一定相同。",
+    "properties": {
+     "note": {
+      "$ref": "#/components/schemas/LocalizedText"
+     },
+     "ref": {
+      "maxLength": 120,
+      "minLength": 1,
+      "title": "Ref",
+      "type": "string"
+     },
+     "residence": {
+      "$ref": "#/components/schemas/LocalizedText"
+     },
+     "version": {
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "Version",
+      "type": "string"
+     },
+     "work": {
+      "$ref": "#/components/schemas/LocalizedText"
+     }
+    },
+    "required": [
+     "ref",
+     "version",
+     "residence",
+     "work",
+     "note"
+    ],
+    "title": "SupportScope",
     "type": "object"
    },
    "TasteAnswer": {
@@ -7476,7 +8341,7 @@
  "info": {
   "description": "E3C 托管服务的公开接口（同源 HTTPS；会话 Cookie + CSRF；长任务由后台 worker 执行，网页轮询）。",
   "title": "Homo Spatialis 产品服务",
-  "version": "e3c-service-api-v1"
+  "version": "e3c-service-api-v1.1"
  },
  "openapi": "3.1.0",
  "paths": {
@@ -7596,6 +8461,324 @@
      }
     },
     "summary": "这个资料包支持的城市、职业、问题与说明"
+   }
+  },
+  "/api/v1/display": {
+   "get": {
+    "operationId": "display_api_v1_display_get",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "kind",
+      "required": true,
+      "schema": {
+       "enum": [
+        "capabilities",
+        "session",
+        "draft",
+        "review",
+        "profile",
+        "intent",
+        "progress",
+        "result",
+        "runs"
+       ],
+       "title": "Kind",
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "id",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-]{0,127}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Id"
+      }
+     },
+     {
+      "in": "query",
+      "name": "locale",
+      "required": false,
+      "schema": {
+       "default": "zh",
+       "enum": [
+        "zh",
+        "en"
+       ],
+       "title": "Locale",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DisplayEnvelope"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "403": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "409": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "410": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "413": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "429": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "503": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     }
+    },
+    "summary": "一个公共消息与它的中英显示文字（同次返回；只读，不续期、不调用模型）"
+   }
+  },
+  "/api/v1/display/geography": {
+   "get": {
+    "operationId": "geography_api_v1_display_geography_get",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "pack_fingerprint",
+      "required": true,
+      "schema": {
+       "pattern": "^[0-9a-f]{64}$",
+       "title": "Pack Fingerprint",
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "resource_version",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^e3-display-res-v1-[0-9a-f]{16}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Resource Version"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GeographyDisplayBundle"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "403": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "409": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "410": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "413": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "429": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "503": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     }
+    },
+    "summary": "一个资料包、一个显示资源版本的地理显示清单（不授予运行资格；缺坐标的为空）"
    }
   },
   "/api/v1/drafts": {
@@ -8356,6 +9539,124 @@
     "summary": "删除我的全部内容（保留次数记录与最小墓碑）"
    }
   },
+  "/api/v1/profiles": {
+   "get": {
+    "operationId": "list_profiles_api_v1_profiles_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ProfileList"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "403": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "409": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "410": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "413": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "429": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "503": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     }
+    },
+    "summary": "本人还能用来准备新模拟的确认画像摘要（首次确认与截止时间；查询不续期）"
+   }
+  },
   "/api/v1/profiles/confirm": {
    "post": {
     "operationId": "confirm_api_v1_profiles_confirm_post",
@@ -8484,6 +9785,135 @@
     "summary": "确认审阅过的画像（服务端重新校验并生成确认画像）"
    }
   },
+  "/api/v1/profiles/{confirmed_id}": {
+   "get": {
+    "operationId": "get_profile_api_v1_profiles__confirmed_id__get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "confirmed_id",
+      "required": true,
+      "schema": {
+       "title": "Confirmed Id",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ConfirmedProfileView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "403": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "409": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "410": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "413": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "429": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "503": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     }
+    },
+    "summary": "读取本人的一份确认画像与它的日期（别人的与不存在的一样 404）"
+   }
+  },
   "/api/v1/run-intents": {
    "post": {
     "operationId": "create_intent_api_v1_run_intents_post",
@@ -8498,6 +9928,16 @@
      "required": true
     },
     "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RunIntentView"
+        }
+       }
+      },
+      "description": "同一份确认画像、同样的有效设置已经有未结束的意图：返回原意图"
+     },
      "202": {
       "content": {
        "application/json": {
@@ -8609,7 +10049,7 @@
       "description": "统一的安全错误"
      }
     },
-    "summary": "准备一次模拟：排队做运行前检查（不使用次数）"
+    "summary": "准备一次模拟：排队做运行前检查（不使用次数）；新建 202，返回已有 200"
    }
   },
   "/api/v1/run-intents/{intent_id}": {
@@ -8895,6 +10335,16 @@
      "required": true
     },
     "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RunSubmitReply"
+        }
+       }
+      },
+      "description": "重复提交（duplicate_same_run）：返回原运行，不再预留、不再排队"
+     },
      "202": {
       "content": {
        "application/json": {
@@ -9006,7 +10456,7 @@
       "description": "统一的安全错误"
      }
     },
-    "summary": "确认开始：预留 1 次并排队（重复提交返回原运行）"
+    "summary": "确认开始：预留 1 次并排队（accepted 202；重复提交 duplicate_same_run 200）"
    }
   },
   "/api/v1/runs": {
@@ -9142,6 +10592,16 @@
      }
     ],
     "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DeletionReceipt"
+        }
+       }
+      },
+      "description": "已经处理完的删除（deleted）：返回同一份回执"
+     },
      "202": {
       "content": {
        "application/json": {
@@ -9253,7 +10713,7 @@
       "description": "统一的安全错误"
      }
     },
-    "summary": "删除一次运行（运行中也可以：不再批准新的模型请求）"
+    "summary": "删除一次运行（运行中也可以：不再批准新的模型请求）；进行中 202，已处理 200"
    }
   },
   "/api/v1/runs/{run_id}/progress": {

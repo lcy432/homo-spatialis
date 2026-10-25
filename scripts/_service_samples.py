@@ -238,6 +238,7 @@ class _Samples:
         self.stops()
         self.e3b_result()
         self.expiry_and_errors(box)
+        display_samples(self)  # 最后跑：前面的样例时间与编号都不受影响
 
     # ---- 运行选项：较小规模、越界（E3C 收尾第二步）
     def options(self, box: _Box) -> None:
@@ -734,4 +735,287 @@ class _Samples:
                     "accept_scope": True,
                 },
             ).json(),
+        )
+
+
+class _Resources:
+    """受控夹具用的临时显示资源：登记表与冻结目录换到工作目录，``publish`` 冻结一份（可改过的）源文件副本并登记为当前版本。"""
+
+    def __init__(self, root: Path) -> None:
+        from product.display import catalog
+
+        self.catalog, self.root = catalog, root
+        self.patches = [
+            mock.patch.object(catalog, "FROZEN", root / "frozen"),
+            mock.patch.object(catalog, "REGISTRY", root / "registry.yaml"),
+        ]
+
+    def __enter__(self) -> _Resources:
+        for p in self.patches:
+            p.start()
+        return self
+
+    def __exit__(self, *_exc: Any) -> None:
+        for p in reversed(self.patches):
+            p.stop()
+        self.catalog._load_frozen.cache_clear()
+
+    def publish(
+        self,
+        pack: Any,
+        name: str,
+        edit: Callable[[dict[str, Any]], None] | None = None,
+        geo_edit: Callable[[dict[str, Any]], None] | None = None,
+    ) -> str:
+        import shutil
+
+        import yaml
+
+        src = self.root / name
+        shutil.copytree(self.catalog.SOURCE, src)
+        if geo_edit is not None:
+            path = src / "geography" / f"{pack.body.pack_id}.json"
+            geo = json.loads(path.read_text(encoding="utf-8"))
+            geo_edit(geo)
+            path.write_text(json.dumps(geo, ensure_ascii=False), encoding="utf-8", newline="\n")
+        if edit is not None:
+            path = src / "templates" / "service.yaml"
+            data = yaml.safe_load(path.read_text(encoding="utf-8"))
+            edit(data["templates"])
+            path.write_text(
+                yaml.safe_dump(data, allow_unicode=True), encoding="utf-8", newline="\n"
+            )
+        version = self.catalog.freeze(pack.fingerprint, pack.body.pack_id, root=src)
+        self.catalog.register(pack.fingerprint, pack.body.pack_id, version)
+        return version
+
+
+def _display(box: _Box, kind: str, ident: str | None, locale: str) -> Any:
+    query = f"kind={kind}&locale={locale}" + (f"&id={ident}" if ident else "")
+    return box.get(f"/display?{query}")
+
+
+def display_samples(s: _Samples) -> None:
+    """显示附层的样例（105 起）：正常、不允许的动作、即时错误、过期、恢复排队、部分结果，中英各一份；缺译文与历史版本见
+    ``_fixture_resources``，地理清单见 ``_geography``。"""
+    from common.life_planning_contracts import MockScript
+    from workflows import service_runs as svc_runs
+
+    w = s.w
+    box = _Box(s.work / "display", s.clock)
+    box.person("合成人物 u540")
+    first = box.token or ""  # 同一台“浏览器”后面会换人：过期样例要换回这个人
+    ready = box.ready()
+    for n, locale in ((105, "zh"), (106, "en")):
+        w(
+            f"{n}_display_intent_ready_{locale}",
+            "DisplayEnvelope",
+            f"显示出口（GET /api/v1/display?kind=intent&id=…&locale={locale}）：等你确认开始的运行意图。source 与 "
+            "GET /api/v1/run-intents/{id} 完全相同（数字、动作与确认 token 只看 source）；fields 是逐个文字位置的显示文字："
+            + (
+                "中文逐字照原文"
+                if locale == "zh"
+                else "英文只来自冻结的显示资源，缺的照实标 missing 与原因"
+            ),
+            _display(box, "intent", ready["intent_id"], locale).json(),
+        )
+    w(
+        "107_service_profile_list",
+        "ProfileList",
+        "本人还在有效期内的确认画像摘要（GET /api/v1/profiles）：首次确认时间与截止时间来自服务库，重复确认不续期，换设备也能读回",
+        box.get("/profiles").json(),
+    )
+    cid = box.get("/profiles").json()["profiles"][0]["confirmed_id"]
+    w(
+        "108_service_profile_view",
+        "ConfirmedProfileView",
+        "一份确认画像（GET /api/v1/profiles/{confirmed_id}）：summary（日期）加原来的 confirmed 正文，正文与内容身份不变",
+        box.get(f"/profiles/{cid}").json(),
+    )
+    # 恢复排队：开始过的运行停下、点了恢复、又在排队——没有“取消”，直接取消也拒绝
+    box.submit(ready, "key-display-0001")
+    box.worker.faults = {"life:halt_at_call:3:service_unavailable"}
+    box.worker.run_pending()
+    box.worker.faults = None
+    run_id = box.get(f"/run-intents/{ready['intent_id']}").json()["run_id"]
+    box.post(f"/runs/{run_id}/resume")
+    for n, locale in ((109, "zh"), (110, "en")):
+        w(
+            f"{n}_display_intent_resume_queued_{locale}",
+            "DisplayEnvelope",
+            "恢复排队：这次运行已经开始过（用掉 1 次机会），停下后点了恢复、正在排队——阶段仍是 queued，但 allowed_actions 没有 "
+            f"cancel，说明分清“首次开始前的排队”与“恢复排队”（locale = {locale}）",
+            _display(box, "intent", ready["intent_id"], locale).json(),
+            s.fixture,
+        )
+    w(
+        "111_service_error_cancel_not_allowed",
+        "ServiceError",
+        "恢复排队时直接调用取消：409 cancel_not_allowed——已经开始过、没有取消、次数不退；可以等待或按公开动作删除。display 带中英"
+        "两种文字",
+        box.post(f"/run-intents/{ready['intent_id']}/cancel").json(),
+        s.fixture,
+    )
+    box.worker.run_pending()
+    # 不允许的动作：真实模型规划器、付费调用关闭——没有 submit，说明在等维护者开启
+    off = _Box(s.work / "display-off", s.clock, planner="llm", live_calls_enabled=False)
+    off.person("合成人物 u541")
+    waiting = off.ready()
+    for n, locale in ((112, "zh"), (113, "en")):
+        w(
+            f"{n}_display_intent_paid_off_{locale}",
+            "DisplayEnvelope",
+            "付费调用关闭（生产配置的默认）：真实模型的运行意图检查通过，但 allowed_actions 没有 submit，waiting_for = maintainer，"
+            f"说明写明原因；直接提交照旧被拒绝（样例 95），不扣次数（locale = {locale}）",
+            _display(off, "intent", waiting["intent_id"], locale).json(),
+        )
+    # 即时错误：确认被拒（审阅之后草稿又存了一版）——回复里没有可以再读的对象，中英文字随回复给
+    view = box.post("/drafts").json()
+    saved = box.put(f"/drafts/{view['draft']['draft_id']}", box.draft_body(view)).json()
+    review = box.post(f"/drafts/{saved['draft']['draft_id']}/review").json()
+    box.put(f"/drafts/{saved['draft']['draft_id']}", box.draft_body(saved))
+    w(
+        "114_service_confirm_refused_with_display",
+        "ProfileConfirmReply",
+        "即时错误：确认引用的审阅已经过时（审阅之后草稿又存了一版），status = refused、profile_summary = null；display 带这份回复"
+        "（去掉 display 之后）的中英两种文字，source_view_fingerprint 对得上",
+        box.post(
+            "/profiles/confirm",
+            {
+                "review_id": review["review"]["review_id"],
+                "draft_id": saved["draft"]["draft_id"],
+                "draft_revision": review["reviewed_revision"],
+                "acknowledged": list(review["review"]["pending_confirmations"]),
+            },
+        ).json(),
+    )
+    # 部分结果：一个分身第 1 年规划器出错（受控夹具），结果的显示附层带固定色阶
+    principal = box.person("合成人物 u542")
+    original = svc_runs.RunDir.request
+    clone = f"{box.ctx.person_ref(principal)}.k51.r0"
+
+    def with_script(rd: Any, spec: Any) -> Any:
+        script = MockScript(clone_id=clone, behavior="raise_error", years=[1], note="受控夹具")
+        return original(rd, spec).model_copy(update={"scripts": (script,)})
+
+    with mock.patch.object(svc_runs.RunDir, "request", with_script):
+        part = box.finished()
+    for n, locale in ((115, "zh"), (116, "en")):
+        w(
+            f"{n}_display_partial_result_{locale}",
+            "DisplayEnvelope",
+            "部分结果的显示（kind = result）：有模拟缺失 M 的结果，source 与 GET /api/v1/runs/{run_id}/result 相同；metrics 是 mean_j "
+            "的固定色阶 [0, 1]（分母 mean_denominator，只在这份结果内比较，缺失范围不是置信区间）"
+            f"（locale = {locale}）",
+            _display(box, "result", part["run_id"], locale).json(),
+            s.fixture,
+        )
+    # 过期：画像与运行意图的截止时间到了——错误说明分对象，过期意图的显示照样只读
+    s.clock.advance(days=31)
+    box.login(first)
+    w(
+        "117_service_error_profile_expired",
+        "ServiceError",
+        "确认画像过了截止时间（首次确认起 30 天，重复确认不续期）：410 expired，说明写的是“确认画像”；display 带中英两种文字",
+        box.get(f"/profiles/{cid}").json(),
+    )
+    for n, locale in ((118, "zh"), (119, "en")):
+        w(
+            f"{n}_display_intent_expired_{locale}",
+            "DisplayEnvelope",
+            "过期的运行意图（结果从首次结束起 30 天）：阶段 expired、expiry_basis = unavailable，内容不再返回"
+            f"（locale = {locale}）",
+            _display(box, "intent", ready["intent_id"], locale).json(),
+        )
+    # 地理清单（仓库里登记的当前版本）：六城都会区代表点；合成城市没有现实位置
+    from product.pack import load_pack
+
+    e3b = load_pack(box.ctx.repo / "configs/product/e3b_us_v1_pack.yaml")
+    w(
+        "123_display_geography_e3b",
+        "GeographyDisplayBundle",
+        "E3B 六城的地理显示清单（GET /api/v1/display/geography?pack_fingerprint=…，省略 resource_version 即当前登记的版本）："
+        "中英正式名与短名、CBSA 2023 代码、都会区代表点（Census Gazetteer 的 internal point，不是住宅、主城市中心或边界）、"
+        "坐标系与来源、模拟实际支持的居住与工作范围（纽约、芝加哥、旧金山的限制写明）；清单不授予运行资格",
+        box.get(f"/display/geography?pack_fingerprint={e3b.fingerprint}").json(),
+    )
+    w(
+        "124_display_geography_synthetic",
+        "GeographyDisplayBundle",
+        "合成资料包的地理显示清单：合成城市 model_kind = synthetic、anchor_status = not_applicable、anchor = null——不伪造现实位置，"
+        "页面用列表或示意位置",
+        box.get(f"/display/geography?pack_fingerprint={box.ctx.pack.fingerprint}").json(),
+    )
+    _fixture_resources(s, e3b)
+
+
+def _fixture_resources(s: _Samples, e3b: Any) -> None:
+    """历史版本、缺译文与缺坐标（受控夹具：临时的显示资源，不是仓库里登记的版本）。"""
+    w = s.w
+    with _Resources(s.work / "display-res") as res:
+        box = _Box(s.work / "display-history", s.clock)
+        pack = box.ctx.pack
+        v1 = res.publish(pack, "v1")
+        box.person("合成人物 u543")
+        view = box.ready()
+        box.submit(view, "key-history-0001")
+        box.worker.faults = {"life:halt_at_call:3:service_unavailable"}
+        box.worker.run_pending()
+        box.worker.faults = None
+
+        def reword(templates: dict[str, Any]) -> None:
+            for entry in templates.values():
+                if entry.get("en"):
+                    entry["en"] = entry["en"].replace("model service", "model provider")
+
+        v2 = res.publish(pack, "v2", reword)
+        w(
+            "120_display_historical_version_en",
+            "DisplayEnvelope",
+            f"历史版本（受控夹具）：停下的说明在资源版本 {v1} 时生成并保存了绑定；之后登记了新版本 {v2}（英文改了措辞）。读取时说明"
+            "部分仍按它记下的 v1 渲染（fields[].resource_version），当场生成的部分用当前版本；历史对象从不改用最新资源",
+            _display(box, "intent", view["intent_id"], "en").json(),
+            s.fixture,
+        )
+        w(
+            "121_service_error_geography_version_missing",
+            "ServiceError",
+            "明确请求一个不存在的显示资源版本（GET /api/v1/display/geography?pack_fingerprint=…&resource_version=…）：404，不回退"
+            "到当前版本",
+            box.get(
+                f"/display/geography?pack_fingerprint={pack.fingerprint}"
+                "&resource_version=e3-display-res-v1-0000000000000000"
+            ).json(),
+            s.fixture,
+        )
+
+        def drop(templates: dict[str, Any]) -> None:
+            for key in ("stage.awaiting_confirmation", "rules.mock"):
+                templates[key]["en"] = None
+
+        res.publish(pack, "v3", drop)
+        box.person("合成人物 u544")
+        ready = box.ready()
+        w(
+            "122_display_missing_translation_en",
+            "DisplayEnvelope",
+            "缺译文（受控夹具：这一版资源里有两条模板没有英文）：对应位置 status = missing、missing_reason = translation_missing、"
+            "text = null，整体 status = partial；业务读取不受影响。页面在这些位置显示 source 原文并标明“英文说明尚未提供”",
+            _display(box, "intent", ready["intent_id"], "en").json(),
+            s.fixture,
+        )
+
+        def unknown_anchor(geo: dict[str, Any]) -> None:
+            geo["status"] = "partial"
+            city = next(c for c in geo["cities"] if c["city_ref"] == "US:CBSA2023:16980")
+            city["anchor_status"], city["anchor"] = "unknown", None
+
+        res.publish(e3b, "geo-unknown", geo_edit=unknown_anchor)
+        w(
+            "125_display_geography_missing_coordinate",
+            "GeographyDisplayBundle",
+            "缺坐标（受控夹具：这一版地理资源里芝加哥没有可靠的代表点）：anchor_status = unknown、anchor = null，清单 status = partial；"
+            "城市仍在列表里、照常可选（地理清单不决定运行资格），页面不要用别的点代替，也不要画在地图上",
+            box.get(f"/display/geography?pack_fingerprint={e3b.fingerprint}").json(),
+            s.fixture,
         )

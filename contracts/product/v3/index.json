@@ -10,9 +10,21 @@
    "file": "ConfirmedProfile.schema.json",
    "sha256": "e715c60523a5103ebb0b671012451b0e7d9e970a03a0dd77d5aa3b5513db3b7e"
   },
+  "ConfirmedProfileView": {
+   "file": "ConfirmedProfileView.schema.json",
+   "sha256": "15c94c8987f14202b77d4529b371972ec04e2a2231a5d194a6cc3a0e181c52f4"
+  },
   "DeletionReceipt": {
    "file": "DeletionReceipt.schema.json",
    "sha256": "0a17c414ee47fa4c8c8c37a455b84e96cfdea5605bc5b8bbd8c8eb2230345dd2"
+  },
+  "DisplayAttachment": {
+   "file": "DisplayAttachment.schema.json",
+   "sha256": "26aa9381d918ecdc4312077cebee748245235ab14bfe918215ff6efce55a4f52"
+  },
+  "DisplayEnvelope": {
+   "file": "DisplayEnvelope.schema.json",
+   "sha256": "6ccb4f2fa8b91f76e8dc022bdb1761451784fd3953888457ffb8e57de7bd6a2c"
   },
   "DraftSaveRequest": {
    "file": "DraftSaveRequest.schema.json",
@@ -21,6 +33,10 @@
   "DraftView": {
    "file": "DraftView.schema.json",
    "sha256": "a655a3b446d565caf2e3754c6c724d6751e8116a1ca76608f50dd85cca657aa2"
+  },
+  "GeographyDisplayBundle": {
+   "file": "GeographyDisplayBundle.schema.json",
+   "sha256": "7ac9b45a92cafe25a0aae05ae37d3bba8f60050342ab1540939516f02ad4c50a"
   },
   "LifeItemCompilation": {
    "file": "LifeItemCompilation.schema.json",
@@ -48,11 +64,15 @@
   },
   "ProfileConfirmReply": {
    "file": "ProfileConfirmReply.schema.json",
-   "sha256": "e2d61b83cbf05856533278422bfba2801e5b5c6d094f6086728e432c6497eead"
+   "sha256": "6c24c6cabb5631a526d31fe0a5adfa858da8e0b4625f8eba040fa2aa9a9720c7"
   },
   "ProfileConfirmRequest": {
    "file": "ProfileConfirmRequest.schema.json",
    "sha256": "83364839c1c0af4249ad81264c70fd071bdc8408127f492bca1e614efae2cfd8"
+  },
+  "ProfileList": {
+   "file": "ProfileList.schema.json",
+   "sha256": "ae778edd64439ff7c96bbca7476c962cf1c97ba0557a35782a14fff6ab2ec971"
   },
   "ProfileReview": {
    "file": "ProfileReview.schema.json",
@@ -68,11 +88,11 @@
   },
   "RunIntentView": {
    "file": "RunIntentView.schema.json",
-   "sha256": "e722dc705847d46458ae85bde61db7006b37b2c7c7894fddbc0262f8d38a0074"
+   "sha256": "be59b4386f139dbee75cbb792a46a479cef4bd8ba35c4f0fd5e1558a8bbd6af8"
   },
   "RunList": {
    "file": "RunList.schema.json",
-   "sha256": "3aa9aaa5a506054c116c0240650fc3d5d28838f3533d647d91624fe1a25c67ad"
+   "sha256": "22ebe6775a38543767398c89f4502c14b1812d15d90b7e38f7edb9f03f071354"
   },
   "RunProgress": {
    "file": "RunProgress.schema.json",
@@ -88,7 +108,7 @@
   },
   "RunSubmitReply": {
    "file": "RunSubmitReply.schema.json",
-   "sha256": "7b0645eea77d7da3c0e8aae786a79f83cf42e21f4ed1dca7825073873c2bb625"
+   "sha256": "46d095198c5fd48ba570265df2d9ec92c28e7989af9241602b6379e2e9ddbaa8"
   },
   "RunSubmitRequest": {
    "file": "RunSubmitRequest.schema.json",
@@ -96,7 +116,7 @@
   },
   "ServiceError": {
    "file": "ServiceError.schema.json",
-   "sha256": "e88347f231527c0e56ad4118fea690b13f13598d96ef588a3313aae5ea7df53c"
+   "sha256": "baf2573d0a54d2a686dd1803543bdc79df75bfabc4b2c3b318d83d87d9f05db0"
   },
   "SessionExchangeRequest": {
    "file": "SessionExchangeRequest.schema.json",

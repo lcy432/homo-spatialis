@@ -17,7 +17,8 @@
    "requested_at": null,
    "state": "none"
   },
-  "expires_at": null,
+  "expires_at": "2026-11-23T09:00:00Z",
+  "expiry_basis": "intent_activity",
   "explanation": null,
   "intent_id": "intent-0000000000000006",
   "meta": {

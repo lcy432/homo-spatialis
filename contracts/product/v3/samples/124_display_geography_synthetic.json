@@ -1,0 +1,117 @@
+{
+ "description_zh": "合成资料包的地理显示清单：合成城市 model_kind = synthetic、anchor_status = not_applicable、anchor = null——不伪造现实位置，页面用列表或示意位置",
+ "message": "GeographyDisplayBundle",
+ "payload": {
+  "cities": [
+   {
+    "anchor": null,
+    "anchor_status": "not_applicable",
+    "city_ref": "US:SYNTH2026:K51",
+    "code": "K51",
+    "country": "US",
+    "country_names": {
+     "en": "United States",
+     "zh": "美国"
+    },
+    "coverage_note": {
+     "en": "All values are hand-made model settings or test data; there is no map position, so open it from the city list.",
+     "zh": "全部数值是手工合成的模型设定或测试资料，没有地图位置，只能从城市列表访问。"
+    },
+    "geography_version": "synthetic-2026-10",
+    "model_kind": "synthetic",
+    "names": {
+     "en": {
+      "official": "Synthetic city K51",
+      "short": "Synthetic K51"
+     },
+     "zh": {
+      "official": "合成城 K51",
+      "short": "合成城 K51"
+     }
+    },
+    "scheme": "SYNTH2026",
+    "support_scope": {
+     "note": {
+      "en": "Model settings of the synthetic pack (tax setting tax.synth.e1conv); it does not represent any real city.",
+      "zh": "合成资料包的模型设定（税务设定 tax.synth.e1conv），不代表任何真实城市。"
+     },
+     "ref": "tax.synth.e1conv",
+     "residence": {
+      "en": "A synthetic city, not a real place; homes are in its 2 synthetic home areas.",
+      "zh": "合成城市，不对应真实地点；居住地是它的 2 个合成居住片区。"
+     },
+     "version": "pack.e3a.synthetic-v2",
+     "work": {
+      "en": "Work is in the same synthetic city's 1 synthetic work area.",
+      "zh": "工作地是同一座合成城市的 1 个合成就业片区。"
+     }
+    }
+   },
+   {
+    "anchor": null,
+    "anchor_status": "not_applicable",
+    "city_ref": "US:SYNTH2026:M52",
+    "code": "M52",
+    "country": "US",
+    "country_names": {
+     "en": "United States",
+     "zh": "美国"
+    },
+    "coverage_note": {
+     "en": "All values are hand-made model settings or test data; there is no map position, so open it from the city list.",
+     "zh": "全部数值是手工合成的模型设定或测试资料，没有地图位置，只能从城市列表访问。"
+    },
+    "geography_version": "synthetic-2026-10",
+    "model_kind": "synthetic",
+    "names": {
+     "en": {
+      "official": "Synthetic city M52",
+      "short": "Synthetic M52"
+     },
+     "zh": {
+      "official": "合成城 M52",
+      "short": "合成城 M52"
+     }
+    },
+    "scheme": "SYNTH2026",
+    "support_scope": {
+     "note": {
+      "en": "Model settings of the synthetic pack (tax setting tax.synth.e1conv); it does not represent any real city.",
+      "zh": "合成资料包的模型设定（税务设定 tax.synth.e1conv），不代表任何真实城市。"
+     },
+     "ref": "tax.synth.e1conv",
+     "residence": {
+      "en": "A synthetic city, not a real place; homes are in its 2 synthetic home areas.",
+      "zh": "合成城市，不对应真实地点；居住地是它的 2 个合成居住片区。"
+     },
+     "version": "pack.e3a.synthetic-v2",
+     "work": {
+      "en": "Work is in the same synthetic city's 1 synthetic work area.",
+      "zh": "工作地是同一座合成城市的 1 个合成就业片区。"
+     }
+    }
+   }
+  ],
+  "display_schema_version": "e3-display-v1",
+  "notes": [
+   {
+    "en": "Synthetic cities are not real places and have no map position (anchor null, not_applicable); open them from the city list.",
+    "zh": "合成城市不对应真实地点，没有地图位置（锚点为空，not_applicable），只能从城市列表访问。"
+   },
+   {
+    "en": "This list does not grant run eligibility: the capabilities list and service rules decide which cities can be chosen, and a city without an anchor can still be opened from the city list.",
+    "zh": "这份清单不授予运行资格：能选哪些城市由能力清单与服务规则决定；没有锚点的城市仍可从城市列表访问。"
+   }
+  ],
+  "pack_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
+  "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+  "sources": [],
+  "status": "complete"
+ },
+ "sample": {
+  "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+  "origin": "offline_run",
+  "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+  "synthetic": true
+ }
+}

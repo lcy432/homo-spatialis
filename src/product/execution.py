@@ -27,6 +27,7 @@ from agentlayer.life_llm import llm_identity
 from agentlayer.life_mock import PRODUCT_MOCK_IDENTITY
 from common.life_planning_contracts import LlmSettings, PriceTable
 from common.product_contracts import PlannerAndCost, content_fingerprint
+from product.display import Code, Num, t
 from product.pack import DataPack, load_pack
 
 EXECUTION_VERSION = "e3c-execution-spec-v1"
@@ -73,9 +74,10 @@ class ExecutionSpec(BaseModel):
             return PlannerAndCost(
                 planner_kind="mock",
                 planner_id=str(self.planner_identity["planner_id"]),
-                description_zh=(
+                description_zh=t(
+                    "preflight.planner.mock_free",
                     "可控的确定性离线规划器（mock）：只检验接线、状态传递与信息隔离，不代表真实大语言模型的能力；"
-                    "没有网络调用，费用为 0"
+                    "没有网络调用，费用为 0",
                 ),
                 call_limit=self.global_call_limit,
                 paid=False,
@@ -86,14 +88,25 @@ class ExecutionSpec(BaseModel):
         return PlannerAndCost(
             planner_kind="llm",
             planner_id=str(self.planner_identity["planner_id"]),
-            description_zh=(
-                f"真实模型规划器：{settings.model}（{settings.model_role} 角色，滚动型号），每个分身每年一次正常规划、"
-                f"最多 {self.max_revisions_per_year} 次修订，每份候选最多再试 {self.transport_retries} 次服务请求；"
-                "只收到给分身看的安全投影，计划仍由环境检查与结算"
+            description_zh=t(
+                "preflight.planner.llm",
+                "真实模型规划器：{model}（{role} 角色，滚动型号），每个分身每年一次正常规划、"
+                "最多 {revisions} 次修订，每份候选最多再试 {retries} 次服务请求；"
+                "只收到给分身看的安全投影，计划仍由环境检查与结算",
+                model=Code(f"{settings.model}"),
+                role=Code(f"{settings.model_role}"),
+                revisions=self.max_revisions_per_year,
+                retries=self.transport_retries,
             ),
             call_limit=self.global_call_limit,
             paid=True,
-            max_cost=f"{self.max_cost} {self.currency}（应用侧按报价 {self.price_version} 估算的上限，不是供应商账单上限）",
+            max_cost=t(
+                "preflight.planner.max_cost",
+                "{amount} {currency}（应用侧按报价 {price} 估算的上限，不是供应商账单上限）",
+                amount=Num(f"{self.max_cost}"),
+                currency=Code(f"{self.currency}"),
+                price=Code(f"{self.price_version}"),
+            ),
         )
 
     @property

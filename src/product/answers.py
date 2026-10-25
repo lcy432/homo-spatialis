@@ -18,6 +18,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 from fractions import Fraction
+from typing import Any
 
 from common.product_contracts import (
     PRODUCT_SCHEMA_VERSION,
@@ -51,6 +52,8 @@ from common.product_contracts import (
     UserInputDraft,
     content_fingerprint,
 )
+from product.capabilities import matching_note
+from product.display import Code, Ent, Join, Num, Raw, Sub, label, t
 from product.exact import (
     ExactParseError,
     canonical,
@@ -59,11 +62,16 @@ from product.exact import (
     parse_money_text,
     parse_points,
 )
-from product.occupation import match_occupation
-from product.pack import DataPack
+from product.occupation import duties, match_occupation
+from product.pack import AttributeKindDecl, DataPack
 
 TOTAL = Fraction(100)
 SIX = ("material", "safety", "opportunity", "leisure", "environment", "commute")
+#: 两组定和分配的名称（问题说明与审阅条目共用）
+WHAT = {
+    "six": Sub("input.allocation.six", "六维"),
+    "material": Sub("input.allocation.material", "物质四项"),
+}
 #: 维度与细项的用途：用于评分，也交给分身做计划（按信息许可）。
 POINT_USAGE: tuple[str, ...] = ("scoring", "planning")
 
@@ -113,8 +121,20 @@ def draft_ref(draft: UserInputDraft) -> DraftRef:
 # ---------------------------------------------------------------------- 版本
 
 
+#: 版本问题出在哪一份对象上：（说明里的名称，问题字段里的名称）
+WHERE = {
+    "draft": (Sub("input.where.draft", "草稿"), Sub("input.where.draft.field", "草稿")),
+    "confirmed": (
+        Sub("input.where.confirmed", "确认画像"),
+        Sub("input.where.confirmed.field", "确认画像"),
+    ),
+}
+
+
 def _version_issues(pack: DataPack, meta_dump: dict, where: str) -> list[ProductIssue]:
+    """``where`` 是 ``WHERE`` 里的一种对象；别的写法照原样用作名称（没有译文）。"""
     want = pack.meta().model_dump(mode="json")
+    name, part = WHERE.get(where, (Raw(where), Raw(where)))
     out = []
     for key in (
         "schema_version",
@@ -127,10 +147,20 @@ def _version_issues(pack: DataPack, meta_dump: dict, where: str) -> list[Product
             out.append(
                 issue(
                     "version_changed",
-                    f"{where}.meta.{key}",
-                    f"{where} 用的 {key} 是 {meta_dump.get(key)}，现在是 {want[key]}",
-                    "按旧版本问卷、词表或转换规则填写的答案不能直接沿用",
-                    "按当前版本重新填写或重新确认相关答案",
+                    t("input.version_changed.field", "{where}.meta.{key}", where=part, key=key),
+                    t(
+                        "input.version_changed.message",
+                        "{where} 用的 {key} 是 {old}，现在是 {new}",
+                        where=name,
+                        key=key,
+                        old=Raw(str(meta_dump.get(key))),
+                        new=str(want[key]),
+                    ),
+                    t(
+                        "input.version_changed.impact",
+                        "按旧版本问卷、词表或转换规则填写的答案不能直接沿用",
+                    ),
+                    t("input.version_changed.next", "按当前版本重新填写或重新确认相关答案"),
                 )
             )
     if (
@@ -140,10 +170,14 @@ def _version_issues(pack: DataPack, meta_dump: dict, where: str) -> list[Product
         out.append(
             issue(
                 "data_pack_changed",
-                f"{where}.meta.data_pack",
-                f"{where} 所依据的资料包与现在的资料包内容不同",
-                "城市、词表或资料变了，旧的解释不一定还成立",
-                "用当前资料包重新审阅并确认",
+                t("input.data_pack_changed.field", "{where}.meta.data_pack", where=part),
+                t(
+                    "input.data_pack_changed.message",
+                    "{where} 所依据的资料包与现在的资料包内容不同",
+                    where=name,
+                ),
+                t("input.data_pack_changed.impact", "城市、词表或资料变了，旧的解释不一定还成立"),
+                t("input.data_pack_changed.next", "用当前资料包重新审阅并确认"),
             )
         )
     return out
@@ -157,15 +191,18 @@ def _allocation(
     answer: AllocationAnswer,
     *,
     keys: tuple[str, ...],
+    kind: str,
     labels: dict[str, str],
     supports: dict[str, str],
     equal_value: str,
     where: str,
-    what: str,
+    what: Sub,
 ) -> tuple[AllocationReview, dict[str, Fraction] | None, list[ProductIssue]]:
-    """审阅一组定和分配。返回（审阅，完整时的精确点数，问题）。"""
+    """审阅一组定和分配。返回（审阅，完整时的精确点数，问题）。``kind`` 是各项名称的显示实体种类（六维 ``dimension``、物质细项
+    ``leaf``）。"""
     digits = pack.body.points.display_decimals
     max_dec = pack.body.points.manual_max_decimals
+    name = {k: Ent(kind, k, labels[k]) for k in keys}
     issues: list[ProductIssue] = []
     for k in answer.entries:
         if k in keys:
@@ -175,9 +212,15 @@ def _allocation(
                 issue(
                     "healthcare_not_in_six_dimensions",
                     f"{where}.entries.healthcare",
-                    "健康不在六维 100 分里：新问卷的健康风险应对是一份独立问卷，不占这 100 分",
-                    "这里的医疗点数不会被使用，也不会被改读成健康回答",
-                    "删掉这一项，在健康问卷里回答",
+                    t(
+                        "input.allocation.healthcare.message",
+                        "健康不在六维 100 分里：新问卷的健康风险应对是一份独立问卷，不占这 100 分",
+                    ),
+                    t(
+                        "input.allocation.healthcare.impact",
+                        "这里的医疗点数不会被使用，也不会被改读成健康回答",
+                    ),
+                    t("input.allocation.healthcare.next", "删掉这一项，在健康问卷里回答"),
                 )
             )
         elif k == "laundry":
@@ -185,9 +228,15 @@ def _allocation(
                 issue(
                     "legacy_laundry_key",
                     f"{where}.entries.laundry",
-                    "旧问卷的“洗衣”问的是有没有洗衣条件，不能自动当作“日常生活便利”（愿意花钱减少日常杂务）",
-                    "这一项不会被使用，也不会被改读成新题目",
-                    "按新题目重新分配物质四项（居住空间、饮食生活、日常生活便利、个人消费与享受）",
+                    t(
+                        "input.allocation.laundry.message",
+                        "旧问卷的“洗衣”问的是有没有洗衣条件，不能自动当作“日常生活便利”（愿意花钱减少日常杂务）",
+                    ),
+                    t("input.allocation.laundry.impact", "这一项不会被使用，也不会被改读成新题目"),
+                    t(
+                        "input.allocation.laundry.next",
+                        "按新题目重新分配物质四项（居住空间、饮食生活、日常生活便利、个人消费与享受）",
+                    ),
                 )
             )
         else:
@@ -195,9 +244,18 @@ def _allocation(
                 issue(
                     "unknown_allocation_key",
                     f"{where}.entries.{k}",
-                    f"“{k}”不是本版{what}的一项",
-                    "这一项不会被使用",
-                    f"只在 {'、'.join(labels[x] for x in keys)} 之间分配",
+                    t(
+                        "input.allocation.unknown_key.message",
+                        "“{key}”不是本版{what}的一项",
+                        key=Raw(k),
+                        what=what,
+                    ),
+                    t("input.allocation.unknown_key.impact", "这一项不会被使用"),
+                    t(
+                        "input.allocation.unknown_key.next",
+                        "只在 {names} 之间分配",
+                        names=Join(tuple(name[x] for x in keys)),
+                    ),
                 )
             )
     lines: list[AllocationLine] = []
@@ -208,9 +266,18 @@ def _allocation(
                 issue(
                     "equal_split_with_values",
                     f"{where}.entries",
-                    "选择了“平均分配”，又提交了手工数值：两者只能选一种",
-                    "不能确定你要的是哪一种分配",
-                    "撤销平均分配，或清空手工数值",
+                    t(
+                        "input.allocation.equal_split_with_values.message",
+                        "选择了“平均分配”，又提交了手工数值：两者只能选一种",
+                    ),
+                    t(
+                        "input.allocation.equal_split_with_values.impact",
+                        "不能确定你要的是哪一种分配",
+                    ),
+                    t(
+                        "input.allocation.equal_split_with_values.next",
+                        "撤销平均分配，或清空手工数值",
+                    ),
                 )
             )
         q = Fraction(equal_value)
@@ -219,7 +286,7 @@ def _allocation(
             lines.append(
                 AllocationLine(
                     key=k,
-                    label=labels[k],
+                    label=label(kind, k, labels[k]),
                     state="provided",
                     exact=canonical(q),
                     display=display(q, digits),
@@ -241,9 +308,17 @@ def _allocation(
                         issue(
                             exc.code,
                             f"{where}.entries.{k}",
-                            f"{labels[k]}：{exc}",
-                            "这一项没有可用的数值",
-                            "改成最多两位小数的数，或使用平均分配",
+                            t(
+                                "input.allocation.parse_error.message",
+                                "{name}：{error}",
+                                name=name[k],
+                                error=exc.text,
+                            ),
+                            t("input.allocation.no_value.impact", "这一项没有可用的数值"),
+                            t(
+                                "input.allocation.parse_error.next",
+                                "改成最多两位小数的数，或使用平均分配",
+                            ),
                         )
                     )
                 else:
@@ -252,9 +327,14 @@ def _allocation(
                             issue(
                                 "points_out_of_range",
                                 f"{where}.entries.{k}",
-                                f"{labels[k]} 的 {entry.value_text} 分超过了 100",
-                                "这一项没有可用的数值",
-                                "每一项在 0 到 100 之间",
+                                t(
+                                    "input.allocation.out_of_range.message",
+                                    "{name} 的 {value} 分超过了 100",
+                                    name=name[k],
+                                    value=Raw(entry.value_text),
+                                ),
+                                t("input.allocation.no_value.impact", "这一项没有可用的数值"),
+                                t("input.allocation.out_of_range.next", "每一项在 0 到 100 之间"),
                             )
                         )
                     else:
@@ -263,7 +343,7 @@ def _allocation(
             lines.append(
                 AllocationLine(
                     key=k,
-                    label=labels[k],
+                    label=label(kind, k, labels[k]),
                     state=state,  # type: ignore[arg-type]
                     exact=exact,
                     display=shown,
@@ -274,31 +354,53 @@ def _allocation(
         not_given = [ln for ln in lines if ln.state != "provided"]
         for ln in not_given:
             text = {
-                "unanswered": "还没有分配",
-                "indifferent": "选了“无所谓”",
-                "unsure": "选了“暂不确定”",
+                "unanswered": Sub("input.allocation.state.unanswered", "还没有分配"),
+                "indifferent": Sub("input.allocation.state.indifferent", "选了“无所谓”"),
+                "unsure": Sub("input.allocation.state.unsure", "选了“暂不确定”"),
             }[ln.state]
             issues.append(
                 issue(
                     f"allocation_{ln.state}",
                     f"{where}.entries.{ln.key}",
-                    f"{ln.label} {text}：系统不会把它自动换成 0 分或平均分",
-                    f"{what}还不完整，不能确认",
-                    "给它一个明确的分数（可以是 0），或选择平均分配",
+                    t(
+                        "input.allocation.not_given.message",
+                        "{name} {state}：系统不会把它自动换成 0 分或平均分",
+                        name=name[ln.key],
+                        state=text,
+                    ),
+                    t("input.allocation.not_given.impact", "{what}还不完整，不能确认", what=what),
+                    t(
+                        "input.allocation.not_given.next",
+                        "给它一个明确的分数（可以是 0），或选择平均分配",
+                    ),
                 )
             )
     total = sum(values.values(), Fraction(0)) if values else None
     complete = len(values) == len(keys) and not any(i.severity == "error" for i in issues)
     if len(values) == len(keys) and total is not None and total != TOTAL:
         diff = TOTAL - total
-        gap = f"还差 {canonical(diff)} 分" if diff > 0 else f"多出 {canonical(-diff)} 分"
+        gap = (
+            Sub("input.allocation.gap.short", "还差 {n} 分", (("n", Num(canonical(diff))),))
+            if diff > 0
+            else Sub("input.allocation.gap.over", "多出 {n} 分", (("n", Num(canonical(-diff))),))
+        )
         issues.append(
             issue(
                 "points_sum_not_100",
                 f"{where}.entries",
-                f"{what}合计是 {canonical(total)}（显示 {display(total, digits)}），不是 100：{gap}",
-                "系统不会按比例自动扣减或补齐任何一项",
-                "由你决定从哪一项挪到哪一项，直到精确合计 100",
+                t(
+                    "input.allocation.sum_not_100.message",
+                    "{what}合计是 {total}（显示 {shown}），不是 100：{gap}",
+                    what=what,
+                    total=Num(canonical(total)),
+                    shown=Num(display(total, digits)),
+                    gap=gap,
+                ),
+                t("input.allocation.sum_not_100.impact", "系统不会按比例自动扣减或补齐任何一项"),
+                t(
+                    "input.allocation.sum_not_100.next",
+                    "由你决定从哪一项挪到哪一项，直到精确合计 100",
+                ),
             )
         )
         complete = False
@@ -319,17 +421,19 @@ def _allocation(
 def health_meaning(pack: DataPack, question_id: str, choice: str | None) -> tuple[str, str]:
     """一题作答的（含义，给分身的读法）。只照题目与选项写，不推断任何数值。"""
     q = next(x for x in pack.body.health_questionnaire.questions if x.question_id == question_id)
+    # 含义是显示文字（审阅与确认画像）；给分身的读法只进 E1 的产品画像，不是显示文字
     if choice is None:
-        meaning = "用户没有回答这一题"
+        meaning = t("input.health.meaning.unanswered", "用户没有回答这一题")
         note = "没有回答：没有这一项的明确指令，不要替用户补成某种倾向"
     elif choice == "unsure":
-        meaning = "用户暂不确定"
+        meaning = t("input.health.meaning.unsure", "用户暂不确定")
         note = "暂不确定：没有这一项的明确指令，不要替用户补成某种倾向"
     elif choice == "no_clear_tendency":
-        meaning = "用户在这一题上没有明显倾向"
+        meaning = t("input.health.meaning.no_clear_tendency", "用户在这一题上没有明显倾向")
         note = "用户表示没有明显倾向（只供做计划参考，不说明生病概率、病痛、疗效或愿付金额）"
     else:
-        meaning = q.agree_meaning if choice == "agree" else q.disagree_meaning
+        field = "agree_meaning" if choice == "agree" else "disagree_meaning"
+        meaning = label("health_question", question_id, getattr(q, field), field)
         note = f"用户自我描述：{meaning}（只供做计划参考，不说明生病概率、病痛、疗效或愿付金额）"
     return meaning, note
 
@@ -343,7 +447,7 @@ def review_draft(
     """审阅一份草稿：给出可读解释与全部问题。不修改草稿，不替用户补任何答案。"""
     b = pack.body
     issues: list[ProductIssue] = list(
-        _version_issues(pack, draft.meta.model_dump(mode="json"), "草稿")
+        _version_issues(pack, draft.meta.model_dump(mode="json"), "draft")
     )
     pending: list[str] = []
     summary: list[str] = []
@@ -356,9 +460,9 @@ def review_draft(
             issue(
                 "cities_missing",
                 "cities",
-                "还没有选择要比较的城市",
-                "没有城市就不能安排分身",
-                "从能力清单列出的城市里至少选一座",
+                t("input.cities_missing.message", "还没有选择要比较的城市"),
+                t("input.cities_missing.impact", "没有城市就不能安排分身"),
+                t("input.cities_missing.next", "从能力清单列出的城市里至少选一座"),
             )
         )
     else:
@@ -369,9 +473,13 @@ def review_draft(
                     issue(
                         "city_not_supported",
                         "cities.city_refs",
-                        f"城市 {ref} 不在本版能力清单里",
-                        "这座城市没有资料，不能运行",
-                        "从能力清单列出的城市里选择",
+                        t(
+                            "input.city_not_supported.message",
+                            "城市 {ref} 不在本版能力清单里",
+                            ref=Raw(ref),
+                        ),
+                        t("input.city_not_supported.impact", "这座城市没有资料，不能运行"),
+                        t("input.city_not_supported.next", "从能力清单列出的城市里选择"),
                     )
                 )
             elif ref in seen:
@@ -379,25 +487,30 @@ def review_draft(
                     issue(
                         "city_duplicated",
                         "cities.city_refs",
-                        f"城市 {ref} 选了两次",
-                        "同一座城不重复计数",
-                        "删掉重复的那一项",
+                        t("input.city_duplicated.message", "城市 {ref} 选了两次", ref=Code(ref)),
+                        t("input.city_duplicated.impact", "同一座城不重复计数"),
+                        t("input.city_duplicated.next", "删掉重复的那一项"),
                     )
                 )
             else:
                 seen.add(ref)
                 city_refs.append(ref)
         if len(city_refs) == 1:
-            summary.append("只选了一座城：可以运行，但没有城市之间的比较")
+            summary.append(
+                t("input.summary.single_city", "只选了一座城：可以运行，但没有城市之间的比较")
+            )
     items.append(
         ItemStatus(
             item="cities",
-            label="候选城市",
+            label=t("input.item.cities.label", "候选城市"),
             answer_state=draft.cities.state,
             support="supported",
             confirmation="pending",
             usage=("start_state",),
-            note="每座城一个分身固定生活三年；城市身份用完整的国家 / 体系 / 代码",
+            note=t(
+                "input.item.cities.note",
+                "每座城一个分身固定生活三年；城市身份用完整的国家 / 体系 / 代码",
+            ),
         )
     )
 
@@ -411,9 +524,12 @@ def review_draft(
             issue(
                 "occupation_missing",
                 "occupation.raw_text",
-                "还没有描述你主要做什么工作",
-                "开局岗位要按当地目录匹配，没有职业就不能生成开局",
-                "用一两句话描述你的主要工作内容",
+                t("input.occupation_missing.message", "还没有描述你主要做什么工作"),
+                t(
+                    "input.occupation_missing.impact",
+                    "开局岗位要按当地目录匹配，没有职业就不能生成开局",
+                ),
+                t("input.occupation_missing.next", "用一两句话描述你的主要工作内容"),
             )
         )
     elif match.status == "unknown":
@@ -422,8 +538,8 @@ def review_draft(
                 "occupation_unknown",
                 "occupation.raw_text",
                 match.message_zh,
-                "开局岗位无法匹配，不能生成开局",
-                "换一种说法描述主要职责",
+                t("input.occupation_unknown.impact", "开局岗位无法匹配，不能生成开局"),
+                t("input.occupation_unknown.next", "换一种说法描述主要职责"),
             )
         )
     elif selected is None:
@@ -432,8 +548,8 @@ def review_draft(
                 "occupation_needs_confirmation",
                 "occupation.selected_candidate",
                 match.message_zh,
-                "职业还没有确认，不能生成开局",
-                "在候选里选出你主要做的那一种",
+                t("input.occupation_needs_confirmation.impact", "职业还没有确认，不能生成开局"),
+                t("input.occupation_needs_confirmation.next", "在候选里选出你主要做的那一种"),
             )
         )
     elif selected not in {c.candidate_id for c in match.candidates}:
@@ -441,9 +557,12 @@ def review_draft(
             issue(
                 "occupation_selection_invalid",
                 "occupation.selected_candidate",
-                "选中的职业不在这段描述的候选里（描述改过之后要重新选）",
-                "职业还没有确认",
-                "按当前描述重新选择候选",
+                t(
+                    "input.occupation_selection_invalid.message",
+                    "选中的职业不在这段描述的候选里（描述改过之后要重新选）",
+                ),
+                t("input.occupation_selection_invalid.impact", "职业还没有确认"),
+                t("input.occupation_selection_invalid.next", "按当前描述重新选择候选"),
             )
         )
     occupation_review = OccupationReview(
@@ -456,12 +575,15 @@ def review_draft(
     items.append(
         ItemStatus(
             item="occupation",
-            label="职业",
+            label=t("input.item.occupation.label", "职业"),
             answer_state=draft.occupation.state,
             support="supported",
             confirmation="pending",
             usage=("start_state", "planning"),
-            note="用于匹配开局时的当地目录岗位；不授予任何资格，分类代码只在内部保留",
+            note=t(
+                "input.item.occupation.note",
+                "用于匹配开局时的当地目录岗位；不授予任何资格，分类代码只在内部保留",
+            ),
         )
     )
 
@@ -472,9 +594,12 @@ def review_draft(
             issue(
                 "age_missing",
                 "age",
-                "还没有填写年龄",
-                "开局状态需要年龄（模型的疾病规则按年龄段，未经医学标定）",
-                "填写模拟开始时的整数年龄",
+                t("input.age_missing.message", "还没有填写年龄"),
+                t(
+                    "input.age_missing.impact",
+                    "开局状态需要年龄（模型的疾病规则按年龄段，未经医学标定）",
+                ),
+                t("input.age_missing.next", "填写模拟开始时的整数年龄"),
             )
         )
     elif not b.age_min <= age <= b.age_max:
@@ -482,21 +607,30 @@ def review_draft(
             issue(
                 "age_out_of_range",
                 "age.value",
-                f"年龄 {age} 不在本版支持的 {b.age_min}–{b.age_max} 岁之间",
-                "本版只支持单个成年人的情景",
-                "填写支持范围内的年龄",
+                t(
+                    "input.age_out_of_range.message",
+                    "年龄 {age} 不在本版支持的 {low}–{high} 岁之间",
+                    age=age,
+                    low=b.age_min,
+                    high=b.age_max,
+                ),
+                t("input.age_out_of_range.impact", "本版只支持单个成年人的情景"),
+                t("input.age_out_of_range.next", "填写支持范围内的年龄"),
             )
         )
         age = None
     items.append(
         ItemStatus(
             item="age",
-            label="年龄",
+            label=t("input.item.age.label", "年龄"),
             answer_state=draft.age.state,
             support="supported",
             confirmation="pending",
             usage=("start_state",),
-            note="进入已有的年龄规则（合成设定，未经医学标定）；不从职业猜年龄",
+            note=t(
+                "input.item.age.note",
+                "进入已有的年龄规则（合成设定，未经医学标定）；不从职业猜年龄",
+            ),
         )
     )
 
@@ -506,12 +640,15 @@ def review_draft(
     items.append(
         ItemStatus(
             item="cash",
-            label="开始时可用于生活的钱",
+            label=t("input.item.cash.label", "开始时可用于生活的钱"),
             answer_state=draft.cash.state,
             support="supported",
             confirmation="pending",
             usage=("start_state", "planning"),
-            note="可动用的流动资金，不是房产总值、信用额度或月薪；没填不是 0，不静默借贷",
+            note=t(
+                "input.item.cash.note",
+                "可动用的流动资金，不是房产总值、信用额度或月薪；没填不是 0，不静默借贷",
+            ),
         )
     )
 
@@ -522,11 +659,12 @@ def review_draft(
         pack,
         draft.six_dimensions,
         keys=SIX,
+        kind="dimension",
         labels=dim_labels,
         supports=dim_support,
         equal_value=b.points.equal_split_six,
         where="six_dimensions",
-        what="六维",
+        what=WHAT["six"],
     )
     issues += six_issues
     leaf_keys = tuple(m.key for m in b.material_leaves)
@@ -540,9 +678,18 @@ def review_draft(
                 issue(
                     "material_parent_zero_ignored",
                     "material",
-                    "物质生活给了 0 分，物质内部的细分不适用：已填写的细分不会被使用",
-                    "这几项细分只留在原始答案里，不进入画像",
-                    "如果物质生活其实很重要，先把它的分数改成正数",
+                    t(
+                        "input.material_parent_zero.message",
+                        "物质生活给了 0 分，物质内部的细分不适用：已填写的细分不会被使用",
+                    ),
+                    t(
+                        "input.material_parent_zero.impact",
+                        "这几项细分只留在原始答案里，不进入画像",
+                    ),
+                    t(
+                        "input.material_parent_zero.next",
+                        "如果物质生活其实很重要，先把它的分数改成正数",
+                    ),
                     severity="info",
                 )
             )
@@ -551,11 +698,12 @@ def review_draft(
             pack,
             draft.material,
             keys=leaf_keys,
+            kind="leaf",
             labels=leaf_labels,
             supports=leaf_support,
             equal_value=b.points.equal_split_material,
             where="material",
-            what="物质四项",
+            what=WHAT["material"],
         )
         if material_parent is not None:
             issues += material_issues
@@ -565,22 +713,29 @@ def review_draft(
                 for i in material_issues
                 if i.code in ("legacy_laundry_key", "unknown_allocation_key")
             ]
-    for i, (label, review) in enumerate((("六维", six_review), ("物质四项", material_review))):
+    for item, review in (("six", six_review), ("material", material_review)):
         items.append(
             ItemStatus(
-                item="six_dimensions" if i == 0 else "material",
-                label=label,
+                item="six_dimensions" if item == "six" else "material",
+                label=t("input.item.six_dimensions.label", "六维")
+                if item == "six"
+                else t("input.item.material.label", "物质四项"),
                 answer_state="provided"
                 if review.status in ("complete", "not_applicable")
                 else "unanswered",
                 support="supported",
                 confirmation="pending",
                 usage=POINT_USAGE,  # type: ignore[arg-type]
-                note="陈述的相对重要程度，不是开支比例或预算；精确分数参与计算，显示值只供阅读",
+                note=t(
+                    "input.item.points.note",
+                    "陈述的相对重要程度，不是开支比例或预算；精确分数参与计算，显示值只供阅读",
+                ),
             )
         )
     if draft.six_dimensions.mode == "equal_split":
-        summary.append("六维选择了平均分配：每项 50/3 分（显示 16.7）")
+        summary.append(
+            t("input.summary.equal_split_six", "六维选择了平均分配：每项 50/3 分（显示 16.7）")
+        )
 
     # 健康问卷
     hq = b.health_questionnaire
@@ -590,9 +745,14 @@ def review_draft(
             issue(
                 "health_questionnaire_version_mismatch",
                 "health.questionnaire_version",
-                f"健康回答按问卷 {draft.health.questionnaire_version} 填写，现在的问卷是 {hq.version}",
-                "旧题目的答案不能改读成新题目的答案",
-                "按当前问卷重新回答",
+                t(
+                    "input.health_version_mismatch.message",
+                    "健康回答按问卷 {old} 填写，现在的问卷是 {new}",
+                    old=Raw(draft.health.questionnaire_version),
+                    new=hq.version,
+                ),
+                t("input.health_version_mismatch.impact", "旧题目的答案不能改读成新题目的答案"),
+                t("input.health_version_mismatch.next", "按当前问卷重新回答"),
             )
         )
     answers = {a.question_id: a.choice for a in draft.health.items}
@@ -602,17 +762,25 @@ def review_draft(
                 issue(
                     "health_question_unknown",
                     f"health.items.{qid}",
-                    f"问卷里没有题目 {qid}",
-                    "这一题不会被使用",
-                    "按当前问卷回答",
+                    t(
+                        "input.health_question_unknown.message",
+                        "问卷里没有题目 {qid}",
+                        qid=Raw(qid),
+                    ),
+                    t("input.health_question_unknown.impact", "这一题不会被使用"),
+                    t("input.health_question_unknown.next", "按当前问卷回答"),
                 )
             )
     labels = {o.option_id: o.label for o in hq.options}
     # E3-A 收尾 F4：同一题收到不止一个答案（包括两个相同的答案）一律拒绝，不按最后一个算、不替用户选
-    given: dict[str, list[str]] = {}
+    given: dict[str, list[tuple[str, Any]]] = {}
     for a in draft.health.items:
         given.setdefault(a.question_id, []).append(
-            "未答" if a.choice is None else labels.get(a.choice, a.choice)
+            ("未答", Sub("input.health.unanswered_short", "未答"))
+            if a.choice is None
+            else (labels[a.choice], Ent("health_option", a.choice, labels[a.choice]))
+            if a.choice in labels
+            else (a.choice, Raw(a.choice))
         )
     duplicated = {qid for qid, got in given.items() if len(got) > 1}
     for qid in sorted(duplicated):
@@ -620,22 +788,34 @@ def review_draft(
             issue(
                 "health_answer_duplicated",
                 f"health.items.{qid}",
-                f"健康题 {qid} 收到了 {len(given[qid])} 个答案（{'、'.join(sorted(given[qid]))}）："
-                "同一题只能有一个答案，系统不替你选，也不按最后一个算",
-                "这一题的倾向不能确定，画像不能确认",
-                "只保留一个答案（拿不准可以选“暂不确定”）",
+                t(
+                    "input.health_answer_duplicated.message",
+                    "健康题 {qid} 收到了 {n} 个答案（{choices}）：同一题只能有一个答案，系统不替你选，也不按最后一个算",
+                    qid=Raw(qid),
+                    n=len(given[qid]),
+                    choices=Join(tuple(p for _zh, p in sorted(given[qid], key=lambda x: x[0]))),
+                ),
+                t("input.health_answer_duplicated.impact", "这一题的倾向不能确定，画像不能确认"),
+                t(
+                    "input.health_answer_duplicated.next",
+                    "只保留一个答案（拿不准可以选“暂不确定”）",
+                ),
             )
         )
     for q in hq.questions:
+        question_text = label("health_question", q.question_id, q.text, "text")
         if q.question_id in duplicated:
             health_items.append(
                 HealthReviewItem(
                     question_id=q.question_id,
-                    text=q.text,
+                    text=question_text,
                     answer_state="unanswered",
                     option=None,
                     option_label=None,
-                    meaning="这一题收到了多个答案：确认前请只保留一个（系统不替你选）",
+                    meaning=t(
+                        "input.health.meaning.duplicated",
+                        "这一题收到了多个答案：确认前请只保留一个（系统不替你选）",
+                    ),
                 )
             )
             continue
@@ -645,29 +825,38 @@ def review_draft(
         health_items.append(
             HealthReviewItem(
                 question_id=q.question_id,
-                text=q.text,
+                text=question_text,
                 answer_state=state,  # type: ignore[arg-type]
                 option=choice if state == "provided" else None,  # type: ignore[arg-type]
-                option_label=labels[choice] if state == "provided" else None,
+                option_label=label("health_option", choice, labels[choice])
+                if state == "provided"
+                else None,
                 meaning=meaning,
             )
         )
     unclear = [h for h in health_items if h.answer_state != "provided"]
     if unclear:
         summary.append(
-            f"健康问卷有 {len(unclear)} 题没有明确倾向（未答或暂不确定）：照实保留，分身会被告知没有这几项的明确指令"
+            t(
+                "input.summary.health_unclear",
+                "健康问卷有 {n} 题没有明确倾向（未答或暂不确定）：照实保留，分身会被告知没有这几项的明确指令",
+                n=len(unclear),
+            )
         )
     items.append(
         ItemStatus(
             item="health",
-            label="健康风险应对（独立问卷）",
+            label=t("input.item.health.label", "健康风险应对（独立问卷）"),
             answer_state="provided"
             if not unclear
             else ("unanswered" if len(unclear) == len(health_items) else "provided"),
             support="partially_supported",
             confirmation="pending",
             usage=("planning",),
-            note="不占六维 100 分，不是第七个评分权重；只供分身做计划，不改变疾病规则、账目或满足感；题目是暂定文案",
+            note=t(
+                "input.item.health.note",
+                "不占六维 100 分，不是第七个评分权重；只供分身做计划，不改变疾病规则、账目或满足感；题目是暂定文案",
+            ),
         )
     )
 
@@ -679,20 +868,27 @@ def review_draft(
             issue(
                 "free_text_too_long",
                 "free_text.text",
-                f"补充文字有 {chars} 个字符，超过 2,000 的上限",
-                "系统不会自动截断，超出部分不能静默丢弃",
-                "自己删减到 2,000 字符以内",
+                t(
+                    "input.free_text_too_long.message",
+                    "补充文字有 {n} 个字符，超过 2,000 的上限",
+                    n=chars,
+                ),
+                t("input.free_text_too_long.impact", "系统不会自动截断，超出部分不能静默丢弃"),
+                t("input.free_text_too_long.next", "自己删减到 2,000 字符以内"),
             )
         )
     items.append(
         ItemStatus(
             item="free_text",
-            label="可选补充文字",
+            label=t("input.item.free_text.label", "可选补充文字"),
             answer_state=draft.free_text.state,
             support="partially_supported",
             confirmation="pending",
             usage=("planning",),
-            note="只供分身做计划参考；不会自动改分数、现金、资格或硬要求，本轮不用 LLM 提取",
+            note=t(
+                "input.item.free_text.note",
+                "只供分身做计划参考；不会自动改分数、现金、资格或硬要求，本轮不用 LLM 提取",
+            ),
         )
     )
 
@@ -703,21 +899,37 @@ def review_draft(
         decl = kinds.get(a.kind)
         support = decl.support if decl is not None else "unsupported"
         usage = decl.usage if decl is not None else ("retained_only",)
-        note = decl.note if decl is not None else "本版没有这类偏好的定义：只留存原文"
-        msg = f"“{a.raw_text}”：{note}"
+        note = _attribute_note(decl)
         if a.as_hard_requirement:
-            msg += (
-                "。你把它标成了不可妥协的要求，但本版没有执行保障：它不会拦截任何计划，只原样留存"
+            msg = t(
+                "input.statement.attribute_hard.message",
+                "“{text}”：{note}。你把它标成了不可妥协的要求，但本版没有执行保障：它不会拦截任何计划，只原样留存",
+                text=Raw(a.raw_text),
+                note=note,
             )
             issues.append(
                 issue(
                     "hard_requirement_not_enforceable",
                     f"attribute_preferences.{a.preference_id}",
-                    f"“{a.raw_text}”被标成不可妥协，但本版没有能核验或拦截它的机制",
-                    "分身仍可能选择与它冲突的方案（例如上门服务）；这条要求只留存，不保证执行",
-                    "知悉后确认，或改成普通偏好",
+                    t(
+                        "input.hard_requirement_not_enforceable.message",
+                        "“{text}”被标成不可妥协，但本版没有能核验或拦截它的机制",
+                        text=Raw(a.raw_text),
+                    ),
+                    t(
+                        "input.hard_requirement_not_enforceable.impact",
+                        "分身仍可能选择与它冲突的方案（例如上门服务）；这条要求只留存，不保证执行",
+                    ),
+                    t("input.hard_requirement_not_enforceable.next", "知悉后确认，或改成普通偏好"),
                     severity="warning",
                 )
+            )
+        else:
+            msg = t(
+                "input.statement.attribute.message",
+                "“{text}”：{note}",
+                text=Raw(a.raw_text),
+                note=note,
             )
         pending.append(f"ack:retained:{a.preference_id}")
         statements.append(
@@ -748,28 +960,55 @@ def review_draft(
                 issue(
                     "hard_requirement_duplicated",
                     f"hard_requirements.{rid}",
-                    f"硬要求编号 {rid} 出现了 {n} 次：系统不替你决定保留哪一条",
-                    "这条硬要求还不能使用，画像不能确认",
-                    "只保留一条",
+                    t(
+                        "input.hard_requirement_duplicated.message",
+                        "硬要求编号 {rid} 出现了 {n} 次：系统不替你决定保留哪一条",
+                        rid=Raw(rid),
+                        n=n,
+                    ),
+                    t(
+                        "input.hard_requirement_duplicated.impact",
+                        "这条硬要求还不能使用，画像不能确认",
+                    ),
+                    t("input.hard_requirement_duplicated.next", "只保留一条"),
                 )
             )
     for need, group in sorted(by_need.items()):
         if len(group) > 1:
             opt = options[group[0].option_id or ""]
-            values = "、".join(
-                sorted(
-                    "未填" if h.parameter_value is None else f"{h.parameter_value} {opt.unit}"
+            unit = Ent("hard_requirement", opt.option_id, opt.unit, "unit")
+            values = sorted(
+                (
+                    ("未填", Sub("input.hard_requirement.unfilled", "未填"))
+                    if h.parameter_value is None
+                    else (
+                        f"{h.parameter_value} {opt.unit}",
+                        Sub(
+                            "input.hard_requirement.value",
+                            "{value} {unit}",
+                            (("value", Num(str(h.parameter_value))), ("unit", unit)),
+                        ),
+                    )
                     for h in group
-                )
+                ),
+                key=lambda x: x[0],
             )
             issues.append(
                 issue(
                     "hard_requirement_conflict",
                     f"hard_requirements.need.{need}",
-                    f"“{opt.label}”收到了 {len(group)} 条（{values}）：同一项要求只能有一条，"
-                    "系统不自动取更严格的上限，也不按最后一条算",
-                    "这项硬要求还不能使用，画像不能确认",
-                    "只保留一条，写你真正要的那个数",
+                    t(
+                        "input.hard_requirement_conflict.message",
+                        "“{label}”收到了 {n} 条（{values}）：同一项要求只能有一条，系统不自动取更严格的上限，也不按最后一条算",
+                        label=Ent("hard_requirement", opt.option_id, opt.label),
+                        n=len(group),
+                        values=Join(tuple(p for _zh, p in values)),
+                    ),
+                    t(
+                        "input.hard_requirement_conflict.impact",
+                        "这项硬要求还不能使用，画像不能确认",
+                    ),
+                    t("input.hard_requirement_conflict.next", "只保留一条，写你真正要的那个数"),
                 )
             )
     for h in draft.hard_requirements:
@@ -780,9 +1019,19 @@ def review_draft(
                 issue(
                     "hard_requirement_unsupported",
                     f"hard_requirements.{h.requirement_id}",
-                    f"“{h.raw_text or h.option_id}”不是本版能核验的硬要求选项",
-                    "它只原样留存，不会拦截计划，也不会被核验",
-                    "知悉后确认，或从受支持的选项里选择",
+                    t(
+                        "input.hard_requirement_unsupported.message",
+                        "“{text}”不是本版能核验的硬要求选项",
+                        text=Raw(str(h.raw_text or h.option_id)),
+                    ),
+                    t(
+                        "input.hard_requirement_unsupported.impact",
+                        "它只原样留存，不会拦截计划，也不会被核验",
+                    ),
+                    t(
+                        "input.hard_requirement_unsupported.next",
+                        "知悉后确认，或从受支持的选项里选择",
+                    ),
                     severity="warning",
                 )
             )
@@ -795,7 +1044,7 @@ def review_draft(
                     usage=("retained_only",),
                     as_hard_requirement=True,
                     execution_guaranteed=False,
-                    message_zh="本版没有这项硬要求的定义与资料：只留存原文，不核验、不拦截",
+                    message_zh=_unsupported_hard_requirement(),
                 )
             )
             continue
@@ -805,9 +1054,18 @@ def review_draft(
                 issue(
                     "hard_requirement_parameter_invalid",
                     f"hard_requirements.{h.requirement_id}.parameter_value",
-                    f"“{opt.label}”需要 {opt.minimum}–{opt.maximum} {opt.unit}、步长 {opt.step} 的整数，得到 {v}",
-                    "这条硬要求还不能使用",
-                    "填写范围内的数值",
+                    t(
+                        "input.hard_requirement_parameter_invalid.message",
+                        "“{label}”需要 {low}–{high} {unit}、步长 {step} 的整数，得到 {got}",
+                        label=Ent("hard_requirement", opt.option_id, opt.label),
+                        low=opt.minimum,
+                        high=opt.maximum,
+                        unit=Ent("hard_requirement", opt.option_id, opt.unit, "unit"),
+                        step=opt.step,
+                        got=Raw(str(v)),
+                    ),
+                    t("input.hard_requirement_parameter_invalid.impact", "这条硬要求还不能使用"),
+                    t("input.hard_requirement_parameter_invalid.next", "填写范围内的数值"),
                 )
             )
         statements.append(
@@ -819,32 +1077,45 @@ def review_draft(
                 usage=("planning", "scoring"),
                 as_hard_requirement=True,
                 execution_guaranteed=False,
-                message_zh=f"{opt.verification}",
+                message_zh=label(
+                    "hard_requirement", opt.option_id, opt.verification, "verification"
+                ),
             )
         )
     # 资格
     known = {a.ability_id for a in b.abilities}
     abilities: list[str] = []
     # E3-A 收尾 F4：同一资格出现不止一次（状态冲突或完全相同）一律拒绝，不按“出现一次已提供就算持有”处理
-    claimed: dict[str, list[str]] = {}
+    claimed: dict[str, list[tuple[str, Any]]] = {}
     state_text = {
-        "provided": "已提供",
-        "unsure": "暂不确定",
-        "indifferent": "无所谓",
-        "unanswered": "未答",
+        "provided": Sub("input.ability.state.provided", "已提供"),
+        "unsure": Sub("input.ability.state.unsure", "暂不确定"),
+        "indifferent": Sub("input.ability.state.indifferent", "无所谓"),
+        "unanswered": Sub("input.ability.state.unanswered", "未答"),
     }
     for c in draft.abilities:
-        claimed.setdefault(c.ability_id, []).append(state_text.get(c.state, c.state))
+        said = state_text.get(c.state)
+        claimed.setdefault(c.ability_id, []).append(
+            (c.state, Raw(c.state)) if said is None else (said.zh, said)
+        )
     repeated = {aid for aid, got in claimed.items() if len(got) > 1}
     for aid in sorted(repeated):
         issues.append(
             issue(
                 "ability_duplicated",
                 f"abilities.{aid}",
-                f"资格 {aid} 出现了 {len(claimed[aid])} 次（{'、'.join(sorted(claimed[aid]))}）："
-                "系统不替你判断持不持有",
-                "这项资格不能进入开局，画像不能确认",
-                "只保留一条：持有就选“已提供”，不确定就选“暂不确定”",
+                t(
+                    "input.ability_duplicated.message",
+                    "资格 {aid} 出现了 {n} 次（{states}）：系统不替你判断持不持有",
+                    aid=Raw(aid),
+                    n=len(claimed[aid]),
+                    states=Join(tuple(p for _zh, p in sorted(claimed[aid], key=lambda x: x[0]))),
+                ),
+                t("input.ability_duplicated.impact", "这项资格不能进入开局，画像不能确认"),
+                t(
+                    "input.ability_duplicated.next",
+                    "只保留一条：持有就选“已提供”，不确定就选“暂不确定”",
+                ),
             )
         )
     for c in draft.abilities:
@@ -855,9 +1126,13 @@ def review_draft(
                 issue(
                     "ability_unknown",
                     f"abilities.{c.ability_id}",
-                    f"本版没有资格 {c.ability_id} 的定义",
-                    "这项资格不会进入开局",
-                    "只确认能力清单里列出的资格",
+                    t(
+                        "input.ability_unknown.message",
+                        "本版没有资格 {aid} 的定义",
+                        aid=Raw(c.ability_id),
+                    ),
+                    t("input.ability_unknown.impact", "这项资格不会进入开局"),
+                    t("input.ability_unknown.next", "只确认能力清单里列出的资格"),
                 )
             )
         elif c.state == "provided":
@@ -865,18 +1140,20 @@ def review_draft(
     items.append(
         ItemStatus(
             item="abilities",
-            label="已确认的资格",
+            label=t("input.item.abilities.label", "已确认的资格"),
             answer_state="provided" if abilities else "unanswered",
             support="supported",
             confirmation="pending",
             usage=("qualification", "start_state"),
-            note="只来自你明确确认的事实，不从职业称呼自动授予",
+            note=t("input.item.abilities.note", "只来自你明确确认的事实，不从职业称呼自动授予"),
         )
     )
     from product.interests import Term, review_one
 
-    leisure_terms = tuple(Term(t.key, t.label, t.aliases) for t in b.interests.leisure_categories)
-    cuisine_terms = tuple(Term(t.key, t.label, t.aliases) for t in b.interests.cuisines)
+    leisure_terms = tuple(
+        Term(term.key, term.label, term.aliases) for term in b.interests.leisure_categories
+    )
+    cuisine_terms = tuple(Term(term.key, term.label, term.aliases) for term in b.interests.cuisines)
     leisure_review, more, _ = review_one(
         "leisure",
         draft.leisure_interest.state,
@@ -889,14 +1166,16 @@ def review_draft(
         "taste", draft.taste.state, draft.taste.text, tuple(draft.taste.selected), cuisine_terms
     )
     issues += more
-    for key, label, r in (
-        ("leisure_interest", "休闲兴趣", leisure_review),
-        ("taste", "口味与菜系", taste_review),
+    from product.interests import KIND_LABEL
+
+    for key, kind, r in (
+        ("leisure_interest", "leisure", leisure_review),
+        ("taste", "taste", taste_review),
     ):
         items.append(
             ItemStatus(
                 item=key,
-                label=label,
+                label=_say(KIND_LABEL[kind]),
                 answer_state="provided"
                 if r.state == "described"
                 else (
@@ -919,7 +1198,13 @@ def review_draft(
     pending.append("ack:standard_start")
     confirmable = not any(i.severity == "error" for i in issues)
     if confirmable:
-        summary.insert(0, "答案可以确认：请核对下面的解释，并知悉标准开局与只留存的陈述")
+        summary.insert(
+            0,
+            t(
+                "input.summary.confirmable",
+                "答案可以确认：请核对下面的解释，并知悉标准开局与只留存的陈述",
+            ),
+        )
     review = ProfileReview(
         meta=pack.meta(sample),
         review_id=f"review.{draft.draft_id}.r{draft.revision}",
@@ -949,14 +1234,16 @@ def _money(pack: DataPack, draft: UserInputDraft) -> tuple[MoneyReview, list[Pro
     c = draft.cash
     if c.state != "provided" or c.amount_text is None:
         return (
-            MoneyReview(status="missing", meaning="可动用的流动资金"),
+            MoneyReview(
+                status="missing", meaning=t("input.money.meaning.short", "可动用的流动资金")
+            ),
             [
                 issue(
                     "cash_missing",
                     "cash.amount_text",
-                    "还没有填写开始时可用于生活的钱（没填不是 0）",
-                    "开局现金未知，不能生成开局",
-                    "填写金额、币种与金额时期",
+                    t("input.cash_missing.message", "还没有填写开始时可用于生活的钱（没填不是 0）"),
+                    t("input.cash_missing.impact", "开局现金未知，不能生成开局"),
+                    t("input.cash_missing.next", "填写金额、币种与金额时期"),
                 )
             ],
         )
@@ -971,8 +1258,8 @@ def _money(pack: DataPack, draft: UserInputDraft) -> tuple[MoneyReview, list[Pro
                 exc.code,
                 "cash.amount_text",
                 str(exc),
-                "开局现金不能确定：系统不会猜你想填的金额",
-                exc.next_action or "填写非负金额，最多两位小数",
+                t("input.money.parse_error.impact", "开局现金不能确定：系统不会猜你想填的金额"),
+                exc.next_action or t("input.money.parse_error.next", "填写非负金额，最多两位小数"),
             )
         )
     option = next(
@@ -988,9 +1275,24 @@ def _money(pack: DataPack, draft: UserInputDraft) -> tuple[MoneyReview, list[Pro
             issue(
                 "money_conversion_missing",
                 "cash",
-                f"{c.currency or '（未写币种）'} / {c.price_period or '（未写时期）'} 的金额在本版没有合法的换算依据",
-                "不能把这个金额直接改标签成 2024 年当地美元——那会改变它的含义",
-                "改用能力清单支持的币种与时期（本版：2024 年美元），或等待真实换算资料接入（E3-B/C）",
+                t(
+                    "input.money_conversion_missing.message",
+                    "{currency} / {period} 的金额在本版没有合法的换算依据",
+                    currency=Raw(c.currency)
+                    if c.currency
+                    else Sub("input.money.no_currency", "（未写币种）"),
+                    period=Raw(c.price_period)
+                    if c.price_period
+                    else Sub("input.money.no_period", "（未写时期）"),
+                ),
+                t(
+                    "input.money_conversion_missing.impact",
+                    "不能把这个金额直接改标签成 2024 年当地美元——那会改变它的含义",
+                ),
+                t(
+                    "input.money_conversion_missing.next",
+                    "改用能力清单支持的币种与时期（本版：2024 年美元），或等待真实换算资料接入（E3-B/C）",
+                ),
             )
         )
     review = MoneyReview(
@@ -998,7 +1300,7 @@ def _money(pack: DataPack, draft: UserInputDraft) -> tuple[MoneyReview, list[Pro
         amount_text=c.amount_text,
         currency=c.currency,
         price_period=c.price_period,
-        meaning="可动用的流动资金（不是总资产、信用额度或月薪）",
+        meaning=t("input.money.meaning", "可动用的流动资金（不是总资产、信用额度或月薪）"),
         conversion_rule=None if option is None else option.conversion_rule,
         converted=None
         if option is None or minor is None
@@ -1032,9 +1334,9 @@ def confirm_profile(
             issue(
                 "acknowledgement_missing",
                 k,
-                f"还没有确认：{_ack_text(k)}",
-                "没有知悉这项说明就不能确认画像",
-                "阅读说明后勾选确认",
+                t("input.ack_missing.message", "还没有确认：{what}", what=_ack_text(k)),
+                t("input.ack_missing.impact", "没有知悉这项说明就不能确认画像"),
+                t("input.ack_missing.next", "阅读说明后勾选确认"),
             )
             for k in missing_ack
         )
@@ -1091,7 +1393,7 @@ def confirm_profile(
                     support="unsupported",
                     usage=("retained_only",),
                     as_hard_requirement=True,
-                    message_zh="本版没有这项硬要求的定义与资料：只留存原文，不核验、不拦截",
+                    message_zh=_unsupported_hard_requirement(),
                 )
             )
             continue
@@ -1101,7 +1403,13 @@ def confirm_profile(
                 requirement_id=h.requirement_id,
                 option_id=opt.option_id,
                 parameter_value=h.parameter_value,
-                label_zh=f"{opt.label} {h.parameter_value} {opt.unit}（单独核验并报告，不拦截计划）",
+                label_zh=t(
+                    "input.confirmed.hard_requirement.label",
+                    "{label} {value} {unit}（单独核验并报告，不拦截计划）",
+                    label=Ent("hard_requirement", opt.option_id, opt.label),
+                    value=Num(str(h.parameter_value)),
+                    unit=Ent("hard_requirement", opt.option_id, opt.unit, "unit"),
+                ),
             )
         )
     kinds = {a.kind: a for a in b.attribute_kinds}
@@ -1119,7 +1427,9 @@ def confirm_profile(
                 usage=decl.usage if decl is not None else ("retained_only",),  # type: ignore[arg-type]
                 as_hard_requirement=a.as_hard_requirement,
                 message_zh=(
-                    decl.note if decl is not None else "本版没有这类偏好的定义：只留存原文"
+                    _say(_ATTRIBUTE_UNKNOWN)
+                    if decl is None
+                    else label("attribute_kind", decl.kind, decl.note, "note")
                 )[:400],
             )
         )
@@ -1159,8 +1469,8 @@ def confirm_profile(
         cities=review.cities,
         occupation=ConfirmedOccupation(
             concept_id=concept.concept_id,
-            label=concept.label,
-            duties=concept.duties,
+            label=label("occupation", concept.concept_id, concept.label),
+            duties=duties(concept),
             raw_text=draft.occupation.raw_text,
             language=draft.occupation.language,
             match_status=review.occupation.status,  # type: ignore[arg-type]
@@ -1170,9 +1480,9 @@ def confirm_profile(
                     scheme=m.scheme,
                     version=m.version,
                     code=m.code,
-                    basis=m.basis,
+                    basis=label("occupation", concept.concept_id, m.basis, f"basis.{i}"),
                 )
-                for m in concept.mappings
+                for i, m in enumerate(concept.mappings)
             ),
         ),
         age_years=review.age,
@@ -1199,10 +1509,12 @@ def confirm_profile(
         interests=confirmed_interests(
             review.leisure_interest,
             review.taste,
-            pack.body.interests.matching_note_zh,
+            matching_note(pack),
             {
-                "leisure": {t.key: t.label for t in pack.body.interests.leisure_categories},
-                "taste": {t.key: t.label for t in pack.body.interests.cuisines},
+                "leisure": {
+                    term.key: term.label for term in pack.body.interests.leisure_categories
+                },
+                "taste": {term.key: term.label for term in pack.body.interests.cuisines},
             },
         ),
     )
@@ -1210,19 +1522,50 @@ def confirm_profile(
     return ConfirmedProfile(**fields, content_fingerprint=unsealed.expected_fingerprint())
 
 
-def _ack_text(key: str) -> str:
+def _ack_text(key: str) -> Sub | Raw:
+    """一项待确认的说明（显示参数）。"""
     if key == "ack:standard_start":
-        return (
-            "这是一次从健康、没有已有物品、没有在学课程开始的简化情景（现实中的家具与病史暂未纳入）"
+        return Sub(
+            "input.ack.standard_start",
+            "这是一次从健康、没有已有物品、没有在学课程开始的简化情景（现实中的家具与病史暂未纳入）",
         )
     if key.startswith("ack:retained:"):
-        return f"陈述 {key.split(':', 2)[2]} 本版不评分、不保证执行，只留存原文"
-    if key == "ack:interests_not_personalized":
-        return (
-            "本次不按具体兴趣或口味个性化的部分按中性规则评价（未答、暂不确定、没有固定爱好或通用评价各自记下）；"
-            "写了但本版不支持的描述只留存原文"
+        return Sub(
+            "input.ack.retained",
+            "陈述 {ref} 本版不评分、不保证执行，只留存原文",
+            (("ref", Raw(key.split(":", 2)[2])),),
         )
-    return key
+    if key == "ack:interests_not_personalized":
+        return Sub(
+            "input.ack.interests_not_personalized",
+            "本次不按具体兴趣或口味个性化的部分按中性规则评价（未答、暂不确定、没有固定爱好或通用评价各自记下）；"
+            "写了但本版不支持的描述只留存原文",
+        )
+    return Raw(key)
+
+
+def _say(s: Sub) -> str:
+    """把一段固定说明（``Sub``）作为整段显示文字生成。"""
+    return t(s.key, s.zh, **dict(s.params))
+
+
+_ATTRIBUTE_UNKNOWN = Sub(
+    "input.statement.attribute_unknown_kind", "本版没有这类偏好的定义：只留存原文"
+)
+
+
+def _attribute_note(decl: AttributeKindDecl | None) -> Ent | Sub:
+    """一类属性偏好的支持说明（显示参数）；本版没有这类偏好时是统一的说明。"""
+    if decl is None:
+        return _ATTRIBUTE_UNKNOWN
+    return Ent("attribute_kind", decl.kind, decl.note, "note")
+
+
+def _unsupported_hard_requirement() -> str:
+    return t(
+        "input.statement.hard_requirement_unsupported",
+        "本版没有这项硬要求的定义与资料：只留存原文，不核验、不拦截",
+    )
 
 
 def confirmation_problems(
@@ -1235,9 +1578,12 @@ def confirmation_problems(
             issue(
                 "confirmation_tampered",
                 "content_fingerprint",
-                "确认画像的内容与它记下的身份不一致（可能被改写过）",
-                "不能用这份确认运行",
-                "重新审阅并确认",
+                t(
+                    "input.confirmation_tampered.message",
+                    "确认画像的内容与它记下的身份不一致（可能被改写过）",
+                ),
+                t("input.confirmation_tampered.impact", "不能用这份确认运行"),
+                t("input.confirmation_tampered.next", "重新审阅并确认"),
             )
         )
     if confirmed.meta.schema_version != PRODUCT_SCHEMA_VERSION:
@@ -1245,20 +1591,23 @@ def confirmation_problems(
             issue(
                 "version_changed",
                 "meta.schema_version",
-                "确认画像的结构版本与现在不同",
-                "旧结构的确认不能直接沿用",
-                "重新确认",
+                t("input.schema_version_changed.message", "确认画像的结构版本与现在不同"),
+                t("input.schema_version_changed.impact", "旧结构的确认不能直接沿用"),
+                t("input.schema_version_changed.next", "重新确认"),
             )
         )
-    out += _version_issues(pack, confirmed.meta.model_dump(mode="json"), "确认画像")
+    out += _version_issues(pack, confirmed.meta.model_dump(mode="json"), "confirmed")
     if draft is not None and draft_fingerprint(draft) != confirmed.draft.draft_fingerprint:
         out.append(
             issue(
                 "confirmation_invalidated_by_edit",
                 "draft",
-                "原始答案在确认之后改过：旧确认已经失效",
-                "改过的答案还没有确认，不能运行",
-                "按修改后的答案重新审阅并确认",
+                t(
+                    "input.confirmation_invalidated.message",
+                    "原始答案在确认之后改过：旧确认已经失效",
+                ),
+                t("input.confirmation_invalidated.impact", "改过的答案还没有确认，不能运行"),
+                t("input.confirmation_invalidated.next", "按修改后的答案重新审阅并确认"),
             )
         )
     return out

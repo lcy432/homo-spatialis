@@ -15,11 +15,19 @@ from dataclasses import dataclass
 
 from common.product_contracts import OccupationCandidate
 from product.capabilities import MAX_OCCUPATION_CANDIDATES
-from product.pack import DataPack
+from product.display import Ent, Join, label, t
+from product.pack import DataPack, OccupationDecl
 
 
 def _normalize(text: str) -> str:
     return "".join(text.split()).lower()
+
+
+def duties(concept: OccupationDecl) -> tuple[str, ...]:
+    """一个职业概念的职责（显示文字；编号是概念编号加序号）。"""
+    return tuple(
+        label("duty", f"{concept.concept_id}.{i}", d) for i, d in enumerate(concept.duties)
+    )
 
 
 @dataclass(frozen=True)
@@ -31,7 +39,9 @@ class OccupationMatch:
 
 def match_occupation(pack: DataPack, raw_text: str | None) -> OccupationMatch:
     if raw_text is None or not raw_text.strip():
-        return OccupationMatch("not_provided", (), "还没有描述你的工作")
+        return OccupationMatch(
+            "not_provided", (), t("input.occupation.not_provided", "还没有描述你的工作")
+        )
     text = _normalize(raw_text)
     found: list[OccupationCandidate] = []
     for concept in pack.body.occupations:
@@ -40,8 +50,8 @@ def match_occupation(pack: DataPack, raw_text: str | None) -> OccupationMatch:
             found.append(
                 OccupationCandidate(
                     candidate_id=concept.concept_id,
-                    label=concept.label,
-                    duties=concept.duties,
+                    label=label("occupation", concept.concept_id, concept.label),
+                    duties=duties(concept),
                     matched_terms=hits,
                 )
             )
@@ -49,21 +59,35 @@ def match_occupation(pack: DataPack, raw_text: str | None) -> OccupationMatch:
         return OccupationMatch(
             "unknown",
             (),
-            "受控词表里没有找到与这段描述对应的职业：请换一种说法描述主要职责，或从候选城市的岗位类型里选择；系统不会自动归成"
-            "“普通白领”",
+            t(
+                "input.occupation.unknown",
+                "受控词表里没有找到与这段描述对应的职业：请换一种说法描述主要职责，或从候选城市的岗位类型里选择；系统不会自动归成"
+                "“普通白领”",
+            ),
         )
+    names = tuple(Ent("occupation", c.candidate_id, c.label) for c in found)
     if len(found) == 1:
         return OccupationMatch(
             "explicit",
             tuple(found),
-            f"看起来你的工作是“{found[0].label}”；请确认这个理解是否正确",
+            t(
+                "input.occupation.explicit",
+                "看起来你的工作是“{label}”；请确认这个理解是否正确",
+                label=names[0],
+            ),
         )
     shown = tuple(found[:MAX_OCCUPATION_CANDIDATES])
-    more = "（还有更多匹配，请写得更具体）" if len(found) > MAX_OCCUPATION_CANDIDATES else ""
-    return OccupationMatch(
-        "ambiguous",
-        shown,
-        "这段描述对应不止一种职业："
-        + "、".join(c.label for c in shown)
-        + f"。请选出你主要做的那一种{more}",
-    )
+    listed = Join(names[:MAX_OCCUPATION_CANDIDATES])
+    if len(found) > MAX_OCCUPATION_CANDIDATES:
+        message = t(
+            "input.occupation.ambiguous_more",
+            "这段描述对应不止一种职业：{labels}。请选出你主要做的那一种（还有更多匹配，请写得更具体）",
+            labels=listed,
+        )
+    else:
+        message = t(
+            "input.occupation.ambiguous",
+            "这段描述对应不止一种职业：{labels}。请选出你主要做的那一种",
+            labels=listed,
+        )
+    return OccupationMatch("ambiguous", shown, message)

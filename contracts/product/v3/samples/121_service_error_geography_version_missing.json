@@ -1,0 +1,98 @@
+{
+ "description_zh": "明确请求一个不存在的显示资源版本（GET /api/v1/display/geography?pack_fingerprint=…&resource_version=…）：404，不回退到当前版本",
+ "message": "ServiceError",
+ "payload": {
+  "code": "not_found",
+  "display": {
+   "display_schema_version": "e3-display-v1",
+   "resource_version": "e3-display-res-v1-0e9324e9abeeb74e",
+   "source_view_fingerprint": "88e46650dd62536465cc95b63f6dfd80713994e1eee1b2006ead2a35f1863ab8",
+   "translations": {
+    "en": {
+     "fields": [
+      {
+       "key": "error.not_found.message",
+       "missing_reason": null,
+       "pointer": "/message_zh",
+       "resource_version": "e3-display-res-v1-0e9324e9abeeb74e",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "This content was not found"
+      },
+      {
+       "key": "error.not_found.impact",
+       "missing_reason": null,
+       "pointer": "/impact_zh",
+       "resource_version": "e3-display-res-v1-0e9324e9abeeb74e",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "This ID does not exist in your space (it may also have expired or been deleted)"
+      },
+      {
+       "key": "error.not_found.next",
+       "missing_reason": null,
+       "pointer": "/next_action_zh",
+       "resource_version": "e3-display-res-v1-0e9324e9abeeb74e",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "Go back to “My runs” or create it again"
+      }
+     ],
+     "status": "complete"
+    },
+    "zh": {
+     "fields": [
+      {
+       "key": "error.not_found.message",
+       "missing_reason": null,
+       "pointer": "/message_zh",
+       "resource_version": "e3-display-res-v1-0e9324e9abeeb74e",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "没有找到这项内容"
+      },
+      {
+       "key": "error.not_found.impact",
+       "missing_reason": null,
+       "pointer": "/impact_zh",
+       "resource_version": "e3-display-res-v1-0e9324e9abeeb74e",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "这个编号在你的空间里不存在（也可能已经过期或删除）"
+      },
+      {
+       "key": "error.not_found.next",
+       "missing_reason": null,
+       "pointer": "/next_action_zh",
+       "resource_version": "e3-display-res-v1-0e9324e9abeeb74e",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "回到“我的运行”或重新创建"
+      }
+     ],
+     "status": "complete"
+    }
+   }
+  },
+  "field": null,
+  "impact_zh": "这个编号在你的空间里不存在（也可能已经过期或删除）",
+  "message_zh": "没有找到这项内容",
+  "meta": null,
+  "next_action_zh": "回到“我的运行”或重新创建",
+  "retry_after_seconds": null,
+  "sample": {
+   "note": "受控夹具：故障注入或测试传输（离线替身，不是真实模型），零网络、零费用",
+   "origin": "controlled_fixture",
+   "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+   "synthetic": true
+  },
+  "status": 404,
+  "support_ref": null
+ },
+ "sample": {
+  "note": "受控夹具：故障注入或测试传输（离线替身，不是真实模型），零网络、零费用",
+  "origin": "controlled_fixture",
+  "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+  "synthetic": true
+ }
+}

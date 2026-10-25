@@ -1,0 +1,145 @@
+# 合成资料包（pack.e3a.synthetic-v2）的机会、片区与治疗名称（显示附层，产品结果与预检查共用）。
+# 编号是目录里的 opportunity_id / area_id / treatment_id；zh 是目录里的中文名称（configs/life/synthetic_product.yaml 与
+# configs/product/e3a_synthetic_pack.yaml 的候选），en 是手写的英文。目录里的中文改了而这里没跟上时显示为过时（缺失），不显示旧英文。
+# 城市名称不在这里（城市实体在输入一侧的资源里）。
+pack_id: pack.e3a.synthetic-v2
+entities:
+  opportunity:
+    k51.durable.convenience_pack:
+      label: {zh: 便利设备包（洗烘一体机＋扫地机器人）, en: Convenience device pack (washer-dryer + robot vacuum)}
+    k51.durable.cooker:
+      label: {zh: 自动炒菜机（单件）, en: Automatic cooking machine (single item)}
+    k51.durable.dryer:
+      label: {zh: 烘干机（单件）, en: Clothes dryer (single item)}
+    k51.durable.guitar:
+      label: {zh: 民谣吉他, en: Acoustic guitar}
+    k51.durable.robot:
+      label: {zh: 扫地机器人（单件）, en: Robot vacuum (single item)}
+    k51.durable.tennis_racket:
+      label: {zh: 网球拍, en: Tennis racket}
+    k51.experience.community_choir:
+      label: {zh: 社区合唱排练（免费，一次）, en: "Community choir rehearsal (free, one session)"}
+    k51.experience.concert:
+      label: {zh: 音乐会（一次）, en: Concert (one time)}
+    k51.experience.cooking_class:
+      label: {zh: 烹饪课（一次，不代替正餐）, en: "Cooking class (one session, does not replace a meal)"}
+    k51.experience.gallery_tour:
+      label: {zh: 美术馆导览（一次）, en: Art gallery tour (one time)}
+    k51.experience.guitar_practice:
+      label: {zh: 在家练吉他（一次 2 小时）, en: Guitar practice at home (one 2-hour session)}
+    k51.experience.tennis_with_rental:
+      label: {zh: 网球场地连球拍租借（一次）, en: Tennis court with racket rental (one session)}
+    k51.food.basic:
+      label: {zh: 基本食品方案（自己做）, en: Basic food plan (home-cooked)}
+    k51.food.fresh:
+      label: {zh: 新鲜食材方案（自己做）, en: Fresh ingredients plan (home-cooked)}
+    k51.food.home_and_dining:
+      label: {zh: 家常加每周四顿意式外食（一个月的完整方案）, en: Home cooking plus four Italian meals out a week (a complete plan for one month)}
+    k51.food.sichuan_home:
+      label: {zh: 川味家常方案（自己做）, en: Sichuan-style home cooking plan (home-cooked)}
+    k51.housing.far:
+      label: {zh: 一居室（离工作地远）, en: One-bedroom (far from work)}
+    k51.housing.near:
+      label: {zh: 一居室（离工作地近）, en: One-bedroom (near work)}
+    k51.job.accountant:
+      label: {zh: 会计（合成会计事务所）, en: Accountant (synthetic accounting firm)}
+    k51.job.clerk:
+      label: {zh: 全职文员（合成写字楼）, en: Full-time clerk (synthetic office building)}
+    k51.job.shop_parttime:
+      label: {zh: 门店兼职（合成百货）, en: Part-time shop assistant (synthetic department store)}
+    k51.service.chores:
+      label: {zh: 日常杂务服务（每月上门洗衣与打扫）, en: Daily chores service (monthly home laundry and cleaning)}
+    k51.service.gym:
+      label: {zh: 健身房月卡（每月去 8 次）, en: Monthly gym pass (8 visits a month)}
+    k51.service.home_internet_basic:
+      label: {zh: 家庭宽带（基本档）, en: Home broadband (basic tier)}
+    k51.service.household_supplies_basic:
+      label: {zh: 家用日耗品（清洁用品与纸品）, en: Household supplies (cleaning products and paper goods)}
+    k51.service.mobile_basic:
+      label: {zh: 手机通信（基本单人套餐）, en: Mobile phone service (basic single-line plan)}
+    k51.service.personal_basket.u0_5:
+      label: {zh: 个人消费篮子（每月 0.5 个标准篮子）, en: Personal consumption basket (0.5 standard baskets a month)}
+    k51.service.personal_basket.u1:
+      label: {zh: 个人消费篮子（每月 1 个标准篮子）, en: Personal consumption basket (1 standard basket a month)}
+    k51.service.personal_basket.u2:
+      label: {zh: 个人消费篮子（每月 2 个标准篮子）, en: Personal consumption basket (2 standard baskets a month)}
+    k51.training.accounting_course:
+      label: {zh: 会计资格课程（12 个月）, en: Accounting qualification course (12 months)}
+    m52.durable.convenience_pack:
+      label: {zh: 便利设备包（洗烘一体机＋扫地机器人）, en: Convenience device pack (washer-dryer + robot vacuum)}
+    m52.durable.guitar:
+      label: {zh: 民谣吉他, en: Acoustic guitar}
+    m52.durable.tennis_racket:
+      label: {zh: 网球拍, en: Tennis racket}
+    m52.experience.community_choir:
+      label: {zh: 社区合唱排练（免费，一次）, en: "Community choir rehearsal (free, one session)"}
+    m52.experience.concert:
+      label: {zh: 音乐会（一次）, en: Concert (one time)}
+    m52.experience.cooking_class:
+      label: {zh: 烹饪课（一次，不代替正餐）, en: "Cooking class (one session, does not replace a meal)"}
+    m52.experience.gallery_tour:
+      label: {zh: 美术馆导览（一次）, en: Art gallery tour (one time)}
+    m52.experience.guitar_practice:
+      label: {zh: 在家练吉他（一次 2 小时）, en: Guitar practice at home (one 2-hour session)}
+    m52.experience.tennis_with_rental:
+      label: {zh: 网球场地连球拍租借（一次）, en: Tennis court with racket rental (one session)}
+    m52.food.basic:
+      label: {zh: 基本食品方案（自己做）, en: Basic food plan (home-cooked)}
+    m52.food.fresh:
+      label: {zh: 新鲜食材方案（自己做）, en: Fresh ingredients plan (home-cooked)}
+    m52.food.home_and_dining:
+      label: {zh: 家常加每周四顿意式外食（一个月的完整方案）, en: Home cooking plus four Italian meals out a week (a complete plan for one month)}
+    m52.food.sichuan_home:
+      label: {zh: 川味家常方案（自己做）, en: Sichuan-style home cooking plan (home-cooked)}
+    m52.housing.far:
+      label: {zh: 一居室（离工作地远）, en: One-bedroom (far from work)}
+    m52.housing.near:
+      label: {zh: 一居室（离工作地近）, en: One-bedroom (near work)}
+    m52.job.accountant:
+      label: {zh: 会计（合成会计事务所）, en: Accountant (synthetic accounting firm)}
+    m52.job.clerk:
+      label: {zh: 全职文员（合成写字楼）, en: Full-time clerk (synthetic office building)}
+    m52.job.shop_parttime:
+      label: {zh: 门店兼职（合成百货）, en: Part-time shop assistant (synthetic department store)}
+    m52.service.chores:
+      label: {zh: 日常杂务服务（每月上门洗衣与打扫）, en: Daily chores service (monthly home laundry and cleaning)}
+    m52.service.cleaning:
+      label: {zh: 保洁服务（按月）, en: Cleaning service (monthly)}
+    m52.service.gym:
+      label: {zh: 健身房月卡（每月去 8 次）, en: Monthly gym pass (8 visits a month)}
+    m52.service.home_internet_basic:
+      label: {zh: 家庭宽带（基本档）, en: Home broadband (basic tier)}
+    m52.service.household_supplies_basic:
+      label: {zh: 家用日耗品（清洁用品与纸品）, en: Household supplies (cleaning products and paper goods)}
+    m52.service.mobile_basic:
+      label: {zh: 手机通信（基本单人套餐）, en: Mobile phone service (basic single-line plan)}
+    m52.service.personal_basket.u0_5:
+      label: {zh: 个人消费篮子（每月 0.5 个标准篮子）, en: Personal consumption basket (0.5 standard baskets a month)}
+    m52.service.personal_basket.u1:
+      label: {zh: 个人消费篮子（每月 1 个标准篮子）, en: Personal consumption basket (1 standard basket a month)}
+    m52.service.personal_basket.u2:
+      label: {zh: 个人消费篮子（每月 2 个标准篮子）, en: Personal consumption basket (2 standard baskets a month)}
+    m52.training.accounting_course:
+      label: {zh: 会计资格课程（12 个月）, en: Accounting qualification course (12 months)}
+  area:
+    k51.area.center:
+      label: {zh: 就业中心, en: Employment center}
+    k51.area.far:
+      label: {zh: 远处居住片区, en: Far residential area}
+    k51.area.near:
+      label: {zh: 近处居住片区, en: Near residential area}
+    m52.area.center:
+      label: {zh: 就业中心, en: Employment center}
+    m52.area.far:
+      label: {zh: 远处居住片区, en: Far residential area}
+    m52.area.near:
+      label: {zh: 近处居住片区, en: Near residential area}
+  treatment:
+    k51.care.clinic:
+      label: {zh: 社区门诊与药物, en: Community clinic visit and medicine}
+    k51.care.hospital:
+      label: {zh: 住院治疗, en: Inpatient treatment}
+    m52.care.clinic:
+      label: {zh: 社区门诊与药物, en: Community clinic visit and medicine}
+    m52.care.hospital:
+      label: {zh: 住院治疗, en: Inpatient treatment}

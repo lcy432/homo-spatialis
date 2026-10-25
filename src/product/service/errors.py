@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 from common.product_contracts import ProductMeta, ServiceError
+from product.display import t
 
 #: 代码 → (HTTP 状态, 发生了什么, 影响是什么, 下一步怎么做)
 ERRORS: dict[str, tuple[int, str, str, str]] = {
@@ -58,6 +59,12 @@ ERRORS: dict[str, tuple[int, str, str, str]] = {
         "没有发出新的模型请求，也没有改变运行",
         "如果页面说在等维护者处理，你不需要重新填写；否则查看运行状态",
     ),
+    "cancel_not_allowed": (
+        409,
+        "这次运行已经开始过，不能按“开始前取消”撤回",
+        "没有取消；已经用掉的 1 次机会不退，已有的进度与结果保持不变",
+        "可以等它接着运行，或者按页面上的动作删除这次运行",
+    ),
     "result_unavailable": (
         409,
         "这次运行现在没有可以查看的进度或结果",
@@ -79,7 +86,7 @@ ERRORS: dict[str, tuple[int, str, str, str]] = {
     "expired": (
         410,
         "这项内容已经超过保存期限",
-        "内容已经不能查看（保存期从首次结束起 30 天，查看不续期）",
+        "内容已经不能查看或使用；查看、刷新都不续期",
         "需要的话重新创建",
     ),
     "data_pack_unavailable": (
@@ -145,8 +152,39 @@ ERRORS: dict[str, tuple[int, str, str, str]] = {
 }
 
 
+#: ``expired`` 按对象分开说（E3C 接口补齐）：草稿、审阅、确认画像、运行意图与结果的保存规则不同，不能都说“首次结束起”。
+#: 具体天数在服务规则（``SessionView.rules``）里，这里不写死。没有写对象时用 ``ERRORS["expired"]`` 的通用说法。
+EXPIRED_SUBJECTS: dict[str, tuple[str, str, str]] = {
+    "draft": (
+        "这份草稿已经超过保存期限",
+        "草稿从最后一次编辑起按服务规则保存，查看不续期；内容已经不能读取、审阅或确认",
+        "新建一份草稿重新填写",
+    ),
+    "review": (
+        "这份审阅所属的草稿已经超过保存期限",
+        "审阅跟着它的草稿一起到期，不能再用来确认画像",
+        "新建一份草稿重新填写并审阅",
+    ),
+    "profile": (
+        "这份确认画像已经超过可以准备新模拟的期限",
+        "确认画像从首次确认起按服务规则可用，重复确认、查看都不续期；已经准备的模拟用自己的副本与期限，不受影响",
+        "重新审阅并确认还在保存期内的草稿，或新建草稿",
+    ),
+    "intent": (
+        "这次模拟的准备已经超过保存期限",
+        "等待确认、检查没通过、暂停或排队的准备从最后一次有效操作起按服务规则保存，查看不续期；没有开始或继续，也没有使用次数",
+        "需要的话重新准备一次模拟",
+    ),
+    "result": (
+        "这次运行的结果已经超过保存期限",
+        "结果从运行首次结束起按服务规则保存，查看不续期；内容已经不能查看",
+        "需要的话重新准备一次模拟",
+    ),
+}
+
+
 class ServiceFailure(Exception):  # noqa: N818 - 业务拒绝，不是程序错误
-    """业务拒绝：只带公开代码与支持编号。"""
+    """业务拒绝：只带公开代码与支持编号。``subject`` 只用于 ``expired``：说明到期的是哪一类内容。"""
 
     def __init__(
         self,
@@ -155,18 +193,30 @@ class ServiceFailure(Exception):  # noqa: N818 - 业务拒绝，不是程序错�
         support_ref: str | None = None,
         retry_after: int | None = None,
         field: str | None = None,
+        subject: str | None = None,
     ) -> None:
         if code not in ERRORS:
             raise ValueError(f"没有登记的错误代码 {code!r}")
+        if subject is not None and (code != "expired" or subject not in EXPIRED_SUBJECTS):
+            raise ValueError(f"没有登记的到期对象 {subject!r}")
         super().__init__(code)
         self.code = code
         self.support_ref = support_ref
         self.retry_after = retry_after
         self.field = field
+        self.subject = subject
 
     @property
     def status(self) -> int:
         return ERRORS[self.code][0]
+
+
+def error_text(code: str, subject: str | None = None) -> tuple[int, str, str, str]:
+    """（HTTP 状态，发生了什么，影响是什么，下一步怎么做）。``expired`` 写了对象就用那一类的说法。"""
+    status, what, impact, step = ERRORS[code]
+    if code == "expired" and subject in EXPIRED_SUBJECTS:
+        what, impact, step = EXPIRED_SUBJECTS[subject]
+    return status, what, impact, step
 
 
 def error_body(
@@ -176,15 +226,21 @@ def error_body(
     support_ref: str | None = None,
     retry_after: int | None = None,
     field: str | None = None,
+    subject: str | None = None,
 ) -> ServiceError:
-    status, what, impact, step = ERRORS[code]
+    status, what, impact, step = error_text(code, subject)
+    base = (
+        f"error.expired.{subject}"
+        if code == "expired" and subject in EXPIRED_SUBJECTS
+        else f"error.{code}"
+    )
     return ServiceError(
         meta=meta,
         status=status,
         code=code,  # type: ignore[arg-type]
-        message_zh=what,
-        impact_zh=impact,
-        next_action_zh=step,
+        message_zh=t(f"{base}.message", what),
+        impact_zh=t(f"{base}.impact", impact),
+        next_action_zh=t(f"{base}.next", step),
         support_ref=support_ref,
         retry_after_seconds=retry_after,
         field=field,  # type: ignore[arg-type]

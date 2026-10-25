@@ -28,6 +28,7 @@ from common.product_contracts import (
     SourceFact,
     content_fingerprint,
 )
+from product.display import t
 
 DEFAULT_PACK = Path("configs/product/e3a_synthetic_pack.yaml")
 
@@ -313,9 +314,15 @@ class DataPack:
             pack_id=self.body.pack_id,
             content_fingerprint=self.fingerprint,
             status=self.body.status,
-            note="合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料"
+            note=t(
+                "pack.note.synthetic",
+                "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
+            )
             if self.body.status == "synthetic_fixture_only"
-            else "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定",
+            else t(
+                "pack.note.real",
+                "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定",
+            ),
         )
 
     def meta(self, sample: SampleLabel | None = None) -> ProductMeta:

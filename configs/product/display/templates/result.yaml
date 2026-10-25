@@ -1,0 +1,452 @@
+# 结果、年度事实与进度的显示模板（E3 → E5 接口补齐）：产品结果、生活事实、运行进度与它们的公开说明、提交的问题。
+# zh 是代码里中文模板的对齐副本（代码才是唯一来源，scripts/product_display.py check 核对）；result.missing_reason.* 与
+# progress.clone_status.* 的中文来自 E1 的表格（MISSING_REASON_TEXT、CLONE_RUN_STATUS_TEXT），由 tests/product/test_display_result.py
+# 核对。en 是英文模板，占位与中文相同；不放 HTML、不放用户内容。
+templates:
+  fact.activity.not_done:
+    en: 'The equipment capability it needs was missing (no equipment in use at home, and no package provided it this time): it did not take place and nothing was charged'
+    zh: 缺少需要的装备能力（家里没有在用的装备，这次也没有套餐提供）：没有进行，也没有收费
+  fact.car_access.bought:
+    en: Commuting by car needs car access in use that month (paid monthly); in the months it was in use, trips to the workplace used whichever available mode had the shortest round trip
+    zh: 开车通勤要这个月有在用的用车权（按月付费）：用上的月份里，到岗时在可用方式里取往返最少的一种
+  fact.car_access.not_bought:
+    en: 'No car access was used this year: driving to work was not possible this year, and trips to the workplace used only the modes in the commute table that do not need car access'
+    zh: 今年没有用上用车权：这一年不能开车通勤，到岗只用通勤关系表里不需要用车权的方式
+  fact.commute_status.computed:
+    en: 'Computed from the commute table: from the area of the home actually lived in to the work area of each on-site job, using the available mode with the shortest round trip'
+    zh: 按通勤关系表执行：实际住处片区到各个到岗岗位的就业片区，取可用方式里往返最少的一种
+  fact.commute_status.no_onsite_work:
+    en: 'No on-site work this month: commuting is zero'
+    zh: 这个月没有需要到岗的工作：通勤为零
+  fact.commute_status.unknown_no_housing:
+    en: 'No housing in the month of the exit: the commute basis is missing, so it is recorded as unknown (not 0)'
+    zh: 出局当月没有住房：通勤依据缺失，记为未知（不是 0）
+  fact.item_months:
+    en: '{item} ({months})'
+    zh: '{item}（{months}）'
+  fact.not_made.cancelled_when_ill:
+    en: 'Cancelled under the annual contingency plan because of illness in the month of purchase: nothing was charged, and it is not postponed or bought later'
+    zh: 按年度应急安排，购买那个月生着病就取消：没有扣款，不顺延、不补购
+  fact.not_made.not_reached:
+    en: 'Already exited or stopped before that month: it did not happen'
+    zh: 那个月之前已经出局或停止：没有发生
+  fact.not_made.paused:
+    en: 'Paused that month because of illness: nothing was bought'
+    zh: 那个月生病暂停：没有购买
+  fact.not_made.rejected:
+    en: 'Not bought: that month it was unaffordable or the plan could not be carried out; nothing was charged and the item was not obtained'
+    zh: 没有买成：那个月付不起或计划不可执行；没有扣款，也没有得到这件东西
+  fact.note.exit:
+    en: 'Month {month}: could not pay for the minimum housing and food and exited (environment record)'
+    zh: 第 {month} 月付不起最低住房与食品而出局（环境记录）
+  fact.note.stop:
+    en: 'Month {month}: stopped (not enough contingency arrangements after an illness, or a data gap; a support limit of the simulation, not a life exit)'
+    zh: 第 {month} 月停止（疾病之后应急安排不足或资料缺口；模拟的支持边界，不是生活出局）
+  fact.replacement.bought:
+    en: The replacement declared in advance in the annual plan was bought the next month as a normal purchase
+    zh: 按年度计划预先声明的替换，在下个月按普通购买买到
+  fact.replacement.next_year:
+    en: 'Broke in month 12: the replacement is left to next year''s plan'
+    zh: 第 12 月坏的：替换留给下一年的计划
+  fact.replacement.not_declared:
+    en: 'The annual plan declared no replacement in advance: after it broke, the item was gone'
+    zh: 年度计划没有预先声明替换：坏了之后就没有这件东西了
+  fact.replacement.not_reached:
+    en: 'Already exited or stopped before the replacement month: it did not happen'
+    zh: 替换那个月之前已经出局或停止：没有发生
+  fact.replacement.rejected:
+    en: 'A replacement was declared in advance, but the next month it was unaffordable or the plan could not be carried out: not bought, and not postponed'
+    zh: 预先声明了替换，但下个月买不起或计划不可执行：没有买成，不顺延
+  fact.support.home_connectivity:
+    en: Home internet
+    zh: 居家联网
+  fact.support.household_supplies:
+    en: Household supplies
+    zh: 家用日耗品
+  fact.support.personal_communication:
+    en: Personal communication
+    zh: 个人通信
+  issue.e1_preflight_refused.impact:
+    en: This comparison cannot start; the system will not drop cities or clones and then claim it ran the original comparison
+    zh: 这次比较不能启动；系统不会删掉城市或分身再声称执行了原比较
+  issue.e1_preflight_refused.message:
+    en: 'The consistency check before the run did not pass: the compiled input, the data pack or the E1 configuration contradict each other (this is not a problem with your answers)'
+    zh: 运行前的一致性检查没有通过：编译出的输入、资料包或 E1 配置之间有矛盾（这不是你的答案的问题）
+  issue.e1_preflight_refused.next:
+    en: Ask the maintainer to look at the internal diagnostics by the audit reference and fix the data or configuration, then run the pre-run check again
+    zh: 请维护者按审计编号查看内部诊断并修复资料或配置，之后重新预检查
+  issue.idempotency_key_reused.impact:
+    en: Cannot run
+    zh: 不能运行
+  issue.idempotency_key_reused.message:
+    en: 'This idempotency key was already used for another pre-run check: different runs cannot be submitted with the same key'
+    zh: 这个幂等键已经用于另一份预检查：不能用同一个键提交不同的运行
+  issue.idempotency_key_reused.next:
+    en: Generate a new idempotency key for the new pre-run check
+    zh: 为新的预检查生成新的幂等键
+  issue.profile_contract_rejected.impact:
+    en: It cannot be compiled into E1 input, so this comparison cannot start
+    zh: 不能编译成 E1 输入，这次比较不能启动
+  issue.profile_contract_rejected.message:
+    en: The confirmed profile did not pass the E1 profile contract check (for example, two hard requirements for the same need)
+    zh: 确认画像没有通过 E1 画像契约的检查（例如同一项需求有两条硬要求）
+  issue.profile_contract_rejected.next:
+    en: Go back to the review page, correct it and confirm again; if the review page shows no hint, ask the maintainer to investigate by the audit reference
+    zh: 回到审阅页修正之后重新确认；如果审阅页没有提示，请维护者按审计编号排查
+  issue.submission_confirmed_mismatch.impact:
+    en: Cannot run
+    zh: 不能运行
+  issue.submission_confirmed_mismatch.message:
+    en: The confirmed profile the submission refers to is not the current one
+    zh: 提交引用的确认画像不是当前这一份
+  issue.submission_confirmed_mismatch.next:
+    en: Confirm again, then submit
+    zh: 重新确认后再提交
+  issue.submission_preflight_mismatch.impact:
+    en: Cannot run
+    zh: 不能运行
+  issue.submission_preflight_mismatch.message:
+    en: The pre-run check the submission refers to is not the current one (check again if the input, configuration or cities changed)
+    zh: 提交引用的预检查不是当前这一份（输入、配置或城市变了要重新检查）
+  issue.submission_preflight_mismatch.next:
+    en: Run the pre-run check again, then submit
+    zh: 重新预检查后再提交
+  progress.clone_status.completed:
+    en: Lived all N years normally
+    zh: 正常生活完 N 年
+  progress.clone_status.feedback_blocked:
+    en: Energy feedback blocked (the next year's allowance could not be determined)
+    zh: 精力反馈受阻（下一年额度无法确定）
+  progress.clone_status.life_exit:
+    en: Confirmed life exit (could not pay for the minimum housing and food)
+    zh: 确认的生活出局（付不起最低住房与食品）
+  progress.clone_status.not_run:
+    en: Not run (the global budget ran out, or the batch paused before reaching it)
+    zh: 没有运行（全局预算用尽或批次暂停之前没有轮到）
+  progress.clone_status.planning_stopped:
+    en: Planning not completed (revisions used up, a city data problem, or the global call limit used up)
+    zh: 规划没有完成（修订耗尽、城市资料问题或全局调用上限用尽）
+  progress.clone_status.program_error:
+    en: Program or configuration error (not assumed to affect only this clone)
+    zh: 程序或配置错误（不假定只影响这个分身）
+  progress.clone_status.stopped:
+    en: E1-5C stop (not enough contingency arrangements after an illness, or a data gap)
+    zh: E1-5C 停止（疾病之后应急安排不足或资料缺口）
+  progress.cost.estimated:
+    en: 'Estimated on the application side from quote {price_version}, not the provider''s bill (the bill prevails): settled + uncertain usage (reservation kept, not counted as 0) + reservations in flight; cap for this run {max_cost} {currency}'
+    zh: 应用侧按报价 {price_version} 估算，不是供应商账单（以账单为准）：已核算 + 用量不确定（保留预留，不记 0） + 在途预留；本次运行上限 {max_cost} {currency}
+  progress.cost.offline_mock:
+    en: 'Offline mock: no network calls, cost 0 (a real-model run says “estimated from the quote”, and the provider''s bill prevails)'
+    zh: 离线 mock：没有网络调用，费用为 0（真实模型运行会写“按报价估算”，以供应商账单为准）
+  progress.halt.account:
+    en: The model service account's status does not allow calls; the batch stopped
+    zh: 模型服务账户的状态不允许调用，批次停下
+  progress.halt.bad_request:
+    en: The model service does not support this request's configuration; the batch stopped
+    zh: 模型服务不支持这次请求的配置，批次停下
+  progress.halt.budget:
+    en: The paid budget is not enough to send the next request; the batch stopped
+    zh: 付费预算不足以发出下一次请求，批次停下
+  progress.halt.credentials:
+    en: The model service credentials are unavailable; the batch stopped
+    zh: 模型服务的凭证不可用，批次停下
+  progress.halt.impact:
+    en: This is not a life result
+    zh: 不是生活结果
+  progress.halt.input_limit:
+    en: The next request is over the input length limit; the batch stopped (no facts are cut)
+    zh: 下一份请求超过了输入长度上限，批次停下（不删减事实）
+  progress.halt.model_mismatch:
+    en: The service returned a different model from the configured one, so the reply cannot be used for planning; the batch stopped
+    zh: 服务返回的模型与设定不同，回复不能用于规划，批次停下
+  progress.halt.next:
+    en: The maintainer deals with the service, credential, budget or request problem
+    zh: 维护者处理服务、凭证、预算或请求的问题
+  progress.halt.request_check:
+    en: The final request did not pass the information-isolation check; the batch stopped
+    zh: 最终请求没有通过信息隔离检查，批次停下
+  progress.halt.service_unavailable:
+    en: The model service is temporarily unavailable (timeout, disconnection, rate limit or server error); the batch stopped
+    zh: 模型服务暂时不可用（超时、断连、限流或服务端错误），批次停下
+  progress.halt.uncertain_send:
+    en: The previous request may have been sent but its result was not reliably saved; to avoid paying twice, the batch stopped
+    zh: 上一次请求可能已经发出但结果没有可靠落盘，为免重复付费，批次停下
+  progress.halt.user_deletion:
+    en: You deleted this run; the system sends no new model requests, and the batch stopped
+    zh: 你删除了这次运行，系统不再发出新的模型请求，批次停下
+  progress.pause.batch_paused_program_error.impact:
+    en: Both kinds of clones are simulation gaps (not life exits) and are not in the average of complete clones
+    zh: 这两类分身都是模拟缺失（不是生活出局），不进完成者平均
+  progress.pause.batch_paused_program_error.next:
+    en: The maintainer looks at the internal records by the audit reference and fixes the problem
+    zh: 维护者按审计编号查看内部记录并修复
+  progress.pause.batch_paused_program_error.reason:
+    en: 'The batch paused because of a program or configuration problem: the clone with the error is recorded as a program error, and clones not yet reached are kept as not run'
+    zh: 批次因程序或配置问题暂停：出错的分身记为程序错误，还没轮到的分身保留为未运行
+  progress.pause.call_limit_reached.impact:
+    en: Clones that did not run are recorded as not run (simulation gaps), not as life exits
+    zh: 没有运行的分身记为未运行（模拟缺失），不写成生活出局
+  progress.pause.call_limit_reached.next:
+    en: The owner decides whether to raise the limit
+    zh: 由所有者决定是否提高上限
+  progress.pause.call_limit_reached.reason:
+    en: The global call limit ran out, so the remaining clones did not run
+    zh: 全局调用上限用尽，后面的分身没有运行
+  progress.pause.impact_line:
+    en: '{impact}; {report}'
+    zh: '{impact}；{report}'
+  progress.pause.interrupted.impact:
+    en: Years already committed are kept in the archive
+    zh: 已经提交的年份保留在归档里
+  progress.pause.interrupted.reason:
+    en: The run was interrupted between two planning calls
+    zh: 运行在两次规划调用之间中断
+  progress.pause.next_line:
+    en: '{step}; {resume}'
+    zh: '{step}；{resume}'
+  progress.pause.not_resumable:
+    en: This run cannot be resumed; after the problem is dealt with, rerun as a new run
+    zh: 这次运行不能恢复，处理之后用新的运行重跑
+  progress.pause.report_missing:
+    en: The evaluation and summary have not been generated yet; no categories or scores are made up
+    zh: 还没有生成评价与汇总，不擅自给出分类或分数
+  progress.pause.report_ready:
+    en: The evaluation and summary have been generated and the results can be viewed (C / E / M as categorised above)
+    zh: 评价与汇总已经生成，可以查看结果（C / E / M 按上面的分类）
+  progress.pause.resumable:
+    en: The same run can be resumed (the archive is checked item by item before resuming, and the calls and budget already used are not reset); the system does not make plans for clones
+    zh: 可以恢复同一次运行（恢复前逐条核对归档，已用的调用次数与预算不清零）；系统不会替分身生成计划
+  progress.resume.finished:
+    en: This run has finished; there is nothing to resume
+    zh: 这次运行已经结束，没有可以恢复的部分
+  progress.resume.maintainer:
+    en: 'This run stopped at a point you cannot resume from: wait for the maintainer (attempts and budget are not reset to get around it)'
+    zh: 这次运行停在不能由你恢复的位置：等维护者处理（尝试次数与预算不会被清零来绕过）
+  progress.resume.resumable:
+    en: It can resume from a year boundary or between two candidates (E1's resume entry checks the archive item by item; attempts and calls are not reset)
+    zh: 可以从年度边界或两份候选之间恢复（E1 的恢复入口逐条核对归档，尝试次数与调用次数不清零）
+  progress.resume.running:
+    en: This run is in progress and needs no resuming; this will update after it finishes or pauses
+    zh: 这次运行正在进行，不需要恢复；结束或暂停之后这里会更新
+  progress.stage.budget_exhausted:
+    en: Global call limit used up
+    zh: 全局调用上限用完
+  progress.stage.completed:
+    en: Completed
+    zh: 已完成
+  progress.stage.halted:
+    en: Batch stopped (service, budget or request check)
+    zh: 批次停下（服务、预算或请求检查）
+  progress.stage.interrupted:
+    en: Interrupted between two planning calls
+    zh: 在两次规划调用之间中断
+  progress.stage.paused:
+    en: Batch paused (program or configuration problem)
+    zh: 批次暂停（程序或配置问题）
+  progress.stage.running:
+    en: Running
+    zh: 运行中
+  result.category.C:
+    en: Completed with a full evaluation
+    zh: 完成且评价完整
+  result.category.E:
+    en: Confirmed life exit
+    zh: 确认的生活出局
+  result.category.M:
+    en: Simulation problem, cannot be fully evaluated
+    zh: 模拟问题，无法完整评价
+  result.city.counts:
+    en: '{city}: clones planned {planned} — completed and evaluable {complete}, life exits {exits}, simulation problems {missing}'
+    zh: '{city}：原计划 {planned} 个分身——{complete} 个完成且可评价、{exits} 个生活出局、{missing} 个模拟问题'
+  result.city.headline_mean:
+    en: '{counts}; the average J of the completed and evaluable clones ({complete}) is {mean_j} (the denominator counts only completed and evaluable clones, not all planned clones)'
+    zh: '{counts}；{complete} 个完成且可评价分身的平均 J 为 {mean_j}（分母只数完成且可评价的分身，不是原计划的全部分身）'
+  result.city.headline_no_mean:
+    en: '{counts}; no complete results to average'
+    zh: '{counts}；没有可用于平均的完整结果'
+  result.city.note.all_exit:
+    en: 'All confirmed exits: the average and the missing range are both empty; exit share 100%'
+    zh: 全部确认出局：均值与缺失范围都为空；出局比例 100%
+  result.city.note.hard_requirements:
+    en: 'Some clones did not meet, could not be judged against, or have not yet been checked against the user''s hard requirements (not checked = no trusted record, not checked and fine): see the hard requirements section; a high average does not mean the user''s requirements were fully met'
+    zh: 有分身没有满足、无法判断或尚未核验用户的硬要求（未核验 = 没有可信记录，不是核验过、没问题）：见硬要求一节；均值高不代表完全符合用户要求
+  result.city.note.no_complete:
+    en: 'No fully evaluated clones: the average of complete clones is empty (not filled with 0, and L is not used in place of J); only the missing range is given'
+    zh: 没有完整评价的分身：完整者均值为空（不填 0，不用 L 代替 J），只给缺失范围
+  result.city.note.no_range:
+    en: 'No clones that are complete or have a computable range (for example, all life exits): the simulation missing range is empty'
+    zh: 没有完整或可算范围的分身（例如全部生活出局）：模拟缺失范围为空
+  result.city.note.single_complete:
+    en: 'Only 1 fully evaluated clone: the average is just its J, not stable sampling evidence'
+    zh: 只有 1 个完整评价分身：均值就是它的 J，不是稳定的抽样证据
+  result.city.note.unexpected_error:
+    en: 'There was an unexpected program error: do not assume it affected only this clone; find the cause before reading this report'
+    zh: 有意外程序错误：不能假定它只影响这一个分身，先查原因再解读这份报告
+  result.clone.complete.impact:
+    en: Counted in this city's average of completed and evaluable clones
+    zh: 计入这座城完成且可评价分身的平均
+  result.clone.complete.next:
+    en: See the year-by-year life facts; this is a result under the synthetic model, not a real-world prediction
+    zh: 看逐年生活事实；这是合成模型下的结果，不是现实预测
+  result.clone.complete.reason:
+    en: Three years of life completed normally; the actual scores and the end-of-period valuation are both complete
+    zh: 三年生活正常完成，实际评分与期末估值都完整
+  result.clone.data_missing.next:
+    en: Rerun after the data is completed
+    zh: 补齐资料之后重跑
+  result.clone.data_missing.reason:
+    en: City data needed for settlement is missing or incomplete
+    zh: 结算要用的城市资料缺失或不完整
+  result.clone.feedback_blocked.next:
+    en: Rerun after the scoring data is completed
+    zh: 补齐评分资料之后重跑
+  result.clone.feedback_blocked.reason:
+    en: The previous year's score was incomplete, so the next year's energy allowance could not be determined and life did not continue
+    zh: 上一年评分不完整，下一年的精力额度无法确定，生活没有继续
+  result.clone.life_exit.impact:
+    en: Not in the average of complete clones, and not in the simulation missing range; the exit share uses the planned number of clones as its denominator
+    zh: 不进完成者平均，也不进模拟缺失范围；出局比例以原计划人数为分母
+  result.clone.life_exit.next:
+    en: See the event chain for what happened (environment records, not proof of cause)
+    zh: 看事件链了解经过（环境记录，不是因果证明）
+  result.clone.life_exit.reason:
+    en: 'Confirmed life exit: could not pay for the minimum housing and food'
+    zh: 确认的生活出局：付不起最低住房与食品
+  result.clone.not_in_mean:
+    en: Not in the average of complete clones; the city's simulation missing range treats it as unknown (anything from 0 to 1 is kept), and it is not written up as a life exit
+    zh: 不进完成者平均；城市的模拟缺失范围把它当作未知（0 到 1 之间都保留），不写成生活出局
+  result.clone.not_run.next:
+    en: After the batch problem is dealt with, rerun as a new run
+    zh: 批次的问题处理之后，用新的运行重跑
+  result.clone.not_run.reason:
+    en: This clone did not run or returned no result (for example, the batch paused before reaching it, or the global call limit ran out)
+    zh: 这个分身没有运行或没有返回结果（例如批次在轮到它之前暂停，或全局调用上限用尽）
+  result.clone.plan_or_execution_incomplete.next:
+    en: This is a planning or simulation problem, not a life exit; rerun after improving the planner or the instructions
+    zh: 这是规划或模拟的问题，不是生活出局；改进规划器或说明之后重跑
+  result.clone.plan_or_execution_incomplete.reason:
+    en: The annual plan was not completed (for example, planning revisions ran out, or the plan was never valid)
+    zh: 年度计划没有完成（例如规划修订次数用完、计划始终不合法）
+  result.clone.program_error.next:
+    en: The maintainer looks at the internal records by the audit reference, fixes the problem and reruns as a new run; internal error content is not shown here
+    zh: 维护者按审计编号查看内部记录、修复之后用新的运行重跑；这里不显示内部错误内容
+  result.clone.program_error.reason:
+    en: The simulation program or configuration failed, and this clone did not complete (not a life exit)
+    zh: 模拟程序或配置出错，这个分身没有完成（不是生活出局）
+  result.clone.score_incomplete.next:
+    en: Recompute after the scoring data is completed
+    zh: 补齐评分资料之后重算
+  result.clone.score_incomplete.reason:
+    en: Life ended normally, but some months' scoring data is unknown (data for an item with positive weight is missing)
+    zh: 生活正常结束，但有月份的评分资料未知（有正权重的项目资料缺失）
+  result.clone.stopped.next:
+    en: See the event records; rerun after improving the contingency arrangements or completing the treatment data
+    zh: 看事件记录；改进应急安排或补齐治疗资料之后重跑
+  result.clone.stopped.reason:
+    en: Not enough contingency arrangements after an illness, or a gap in the treatment data, so the simulation stopped in that month (a support limit of the simulation, not a life exit)
+    zh: 疾病之后应急安排不足或治疗资料缺口，模拟在那个月停止（模拟的支持边界，不是生活出局）
+  result.clone.valuation_incomplete.next:
+    en: This is a problem in the evaluation step; recompute after completing the data or the reference templates
+    zh: 这是评价环节的问题；补齐资料或参考模板之后重算
+  result.clone.valuation_incomplete.reason:
+    en: The actual life is complete, but the end-of-period valuation is incomplete or there is no usable reference branch
+    zh: 实际生活完整，但期末估值不完整或没有可用的参考分支
+  result.comparison.a_higher:
+    en: 'Under these missing ranges city A is always higher: the direction is consistent; this is not a significance test, nor a causal conclusion about the population'
+    zh: 在这些缺失范围下 A 城始终更高：方向一致；不是显著性检验，也不是总体因果结论
+  result.comparison.b_higher:
+    en: 'Under these missing ranges city B is always higher: the direction is consistent; this is not a significance test, nor a causal conclusion about the population'
+    zh: 在这些缺失范围下 B 城始终更高：方向一致；不是显著性检验，也不是总体因果结论
+  result.comparison.not_available:
+    en: One city had only confirmed exits, so there are no ranges to compare; look at the exit shares
+    zh: 有一座城全部确认出局，没有范围可比；看出局比例
+  result.comparison.note:
+    en: '{direction}. Exit share A {exit_a}, B {exit_b}; effective clones A {complete_a}/{planned_a}, B {complete_b}/{planned_b}'
+    zh: '{direction}。出局比例 A {exit_a}、B {exit_b}，有效分身数 A {complete_a}/{planned_a}、B {complete_b}/{planned_b}'
+  result.comparison.undetermined:
+    en: 'The range difference includes 0: the direction cannot be determined under these missing ranges'
+    zh: 范围差含 0：在这些缺失范围下不能确定方向
+  result.event_chain.step:
+    en: 'Year {year}, month {month}: {text}'
+    zh: 第 {year} 年第 {month} 月：{text}
+  result.limit.not_fed_back:
+    en: Results are shown only to the user and are not fed back to clones still living
+    zh: 结果只给用户看，不回灌给仍在生活中的分身
+  result.limit.option_coverage:
+    en: Option catalog coverage only says whether the candidates surveyed within the declared scope have complete data; it does not guarantee that the whole city market was covered
+    zh: 选项目录覆盖只说明声明范围内调查过的候选资料齐不齐，不保证穷尽整个城市市场
+  result.missing_reason.data_missing:
+    en: Data missing
+    zh: 资料缺失
+  result.missing_reason.feedback_blocked:
+    en: Energy feedback blocked
+    zh: 精力反馈受阻
+  result.missing_reason.input_config_program_error:
+    en: Input / configuration / program error
+    zh: 输入 / 配置 / 程序错误
+  result.missing_reason.not_run:
+    en: Not run / no result returned
+    zh: 未运行 / 未返回
+  result.missing_reason.plan_or_execution:
+    en: Plan or execution not completed
+    zh: 计划或执行未完成
+  result.missing_reason.score_incomplete:
+    en: Score incomplete
+    zh: 评分不完整
+  result.missing_reason.stopped:
+    en: E1-5C stop (not enough contingency arrangements, or a data gap)
+    zh: E1-5C 停止（应急安排不足或资料缺口）
+  result.missing_reason.valuation_incomplete:
+    en: End-of-period valuation incomplete, or no usable reference branch
+    zh: 期末估值不完整或没有可用参考分支
+  result.not_generated:
+    en: The run status is “{stage}”; the evaluation and summary have not been generated yet, and no categories or scores are made up
+    zh: 运行状态是“{stage}”，还没有生成评价与汇总；不擅自生成分类或分数
+  result.option_coverage.note:
+    en: 'Option catalog coverage: whether the data on the convenience devices and services surveyed within the declared scope is complete; this is separate from whether this city''s trajectories can be scored'
+    zh: 选项目录覆盖：声明范围内调查过的便利设备与服务资料齐不齐；与这座城的轨迹能否评分是两件事
+  result.reading.chores:
+    en: Reducing daily chores itself counts as convenience satisfaction; unscheduled free time earns no extra points
+    zh: 减少日常杂务本身对应便利满足感；没有安排的空闲时间不额外加分
+  result.reading.event_chain:
+    en: The event chain is written from checked environment records; it is not the model's reasoning, nor proof of cause; hard requirements are reported separately, without deducting points or removing anyone
+    zh: 事件链按核对过的环境记录写成，不是模型的理由，也不是因果证明；硬要求单独报告，不扣分、不删人
+  result.reading.exits:
+    en: Confirmed life exits (E) are not in the average, nor in the simulation missing range; the exit and missing shares use the planned number of clones as their denominator
+    zh: 确认的生活出局（E）不进均值，也不进模拟缺失范围；出局与缺失的比例以原计划人数为分母
+  result.reading.l_v_j:
+    en: L is the average monthly satisfaction over the actual years; V is the valuation from the end state within reference life templates and treatment branches frozen in advance — not a prediction of the future, nor a global optimum; J combines the two by month weights
+    zh: L 是实际几年逐月满足感的平均；V 是从终态出发、在预先冻结的参考生活模板与治疗分支里的估值，不是对未来的预测，也不是全局最优；J 按月份权重合成两者
+  result.reading.mean_denominator:
+    en: The denominator of the average J of complete clones is C (completed and fully evaluated clones), not the planned number; when C = 0 there is no average, and it is not shown as 0
+    zh: 完整者平均 J 的分母是 C（完成且评价完整的分身），不是原计划人数；C = 0 时没有平均值，不显示为 0
+  result.reading.missing_range:
+    en: 'The denominator of the simulation missing range is C + M: known months are counted as they are, and the unknown part keeps everything from 0 to 1. It is not a confidence interval, nor a probability of real-world happiness'
+    zh: 模拟缺失范围的分母是 C + M：已知的月份照算，未知部分在 0 到 1 之间都保留。它不是置信区间，也不是现实幸福的概率
+  result.reading.precision:
+    en: Scores are computed under the current synthetic model from the stated preferences you confirmed; differences in the last decimal places do not make a reliable ranking
+    zh: 分数是当前合成模型下、按你确认的陈述偏好计算的结果；小数末位的差异不构成可靠的排序
+  result.reading.simulation_problems:
+    en: Missing data, unfinished planning, stops and program problems are simulation problems (M), not written up as “could not make a living in this city”
+    zh: 资料缺失、规划没有完成、停止与程序问题是模拟问题（M），不写成“在这座城活不下去”
+  result.source.area_facts:
+    en: 'Areas, commuting, car access, device failures and tax: the single monthly commute record in E1''s monthly resource ledger and the settlement records (not including the failure draws)'
+    zh: 片区、通勤、用车权、设备故障与税：E1 月度资源账里每月唯一的通勤记录与结算记录（不含故障抽签）
+  result.source.evaluation:
+    en: 'Evaluation: E1-6A per-clone intertemporal evaluation (L / V / J); summary: E1-6B city report (C / E / M, averages, simulation missing ranges, event chains, hard requirements)'
+    zh: 评价：E1-6A 单分身跨期评价（L / V / J）；汇总：E1-6B 城市报告（C / E / M、均值、模拟缺失范围、事件链、硬要求）
+  result.source.life_facts:
+    en: 'Life facts: E1 settlement records (money, jobs, housing, food, service months) and the monthly resource ledger (own household hours)'
+    zh: 生活事实：E1 结算记录（钱、岗位、住房、食品、服务月份）与月度资源账（本人家务小时）
+  result.source.pack_real:
+    en: 'Data: frozen real data pack {pack_id} ({fingerprint}…): city data comes from public sources and registered model settings (the source nature of each city is in data_nature); life rules, scoring and evaluation parameters are synthetic exploratory settings'
+    zh: 资料：冻结的真实资料包 {pack_id}（{fingerprint}…）：城市资料来自公开来源与登记的模型设定（逐城的来源性质见 data_nature）；生活规则、评分与评价参数是合成探索设定
+  result.source.pack_synthetic:
+    en: 'Data: synthetic data pack {pack_id} ({fingerprint}…) and the product protocol''s base samples; everything is a synthetic setting'
+    zh: 资料：合成资料包 {pack_id}（{fingerprint}…）与产品协议的基础样例；全部是合成设定
+  result.valuation.use_not_in_templates:
+    en: 'The “{item}” held at the end has {months} more month(s) of use: the reference templates do not consider its use ({capabilities}), so the end-of-period valuation does not count this use — this is a scope limit of the reference templates, not a statement that the equipment has no value'
+    zh: 期末持有的「{item}」还能用 {months} 个月：参考模板没有考虑它的用途（{capabilities}），期末估值没有计入这项用途——这是参考模板的范围限制，不是说这件装备没有价值
+  result.valuation.use_valued:
+    en: 'The “{item}” held at the end has {months} more month(s) of use: the end-of-period reference life keeps arranging the matching activities by its capabilities ({capabilities}), using it for its remaining life without buying it again'
+    zh: 期末持有的「{item}」还能用 {months} 个月：期末参考生活按它的能力（{capabilities}）继续安排相应活动，剩余寿命内照用、不重复购买

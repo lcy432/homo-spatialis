@@ -1,6 +1,6 @@
 # E3C → E5：独立显示资源与服务边界补齐
 
-日期：2026-10-24。对应 [E5 请求单](../handoffs/e5-bilingual-map-service-requests.md)。**这是架构设计和工程交接，不是已实现的 API。** 当前代码基线为 `8ccec1c`；R3/R4 修复已通过独立复核（59 条定向、4 条补充边界、全量离线 1152 条通过；本机证据在 `runs/e3c-r3r4-review-20261024/`）。此结论不包含本文件尚待实现的接口补齐。本文件不取代 `docs/INDEX.md` 的实现状态。
+日期：2026-10-24。对应 [E5 请求单](../handoffs/e5-bilingual-map-service-requests.md)。本文件是架构设计和工程交接；**2026-10-24 已按本文件实现并离线自测，待独立复核**（实际路由、字段、样例号与接线见 [E3C → E5 交接第 12 节](../handoffs/e3c-to-e5-service.md)，状态以 `docs/INDEX.md` 为准）。实施时新增的两条规则（即时回复的双语、地理清单的历史版本选择）已并入第 3、4 节，与交接文件是同一套规则。当前代码基线为 `8ccec1c`；R3/R4 修复已通过独立复核（59 条定向、4 条补充边界、全量离线 1152 条通过；本机证据在 `runs/e3c-r3r4-review-20261024/`）。此结论不包含本文件尚待实现的接口补齐。本文件不取代 `docs/INDEX.md` 的实现状态。
 
 ## 1. 本轮做什么
 
@@ -79,11 +79,14 @@ metrics: [MetricDisplaySpec, ...]   # 结果显示时提供，其余为空
 - 私有绑定保存在所属审阅/意图/运行的数据范围内，与其同期限、同删除流程；不得复制到公共目录或共享 CDN。绑定不是新的业务状态，丢失只能导致显示缺口，不能改变原业务结果。GET 显示只读取或纯函数渲染，不能在查询时补跑 E1、写新结果或调用翻译模型。
 - 更新前生成的运行：有足够的结构化事实可确定性重建绑定时可在受控迁移中生成；否则标 missing，绝不按中文猜语义。不得因当前资料包更新而改写历史运行的名称、范围或解释。
 - 固定、无私人内容的 ServiceError 文案按 `code` 与受控 `field` 等参数导出双语目录，E5 可随包携带，供未登录/会话失效时使用；业务意义仍由 E3 维护。动态业务问题以服务生成的绑定为准，不能从任意中文或原始异常逆向翻译。
+- **即时回复的双语**（实施时补的规则）：没有可以再读的对象的回复——`ServiceError`（含未登录、CSRF、限流、请求体过大、内部错误）与 `ProfileConfirmReply`（含被拒）——带可选的 `display: DisplayAttachment`：`display_schema_version`、`resource_version`、`source_view_fingerprint`（对去掉 `display` 之后的回复的规范 JSON）与 `translations.zh` / `translations.en`（各自的 `status` 与 `fields`，形状同 `DisplayEnvelope.fields`）。业务问题本身（`issues` 等）不加翻译字段；固定错误来自 E3 的双语目录，动态问题按稳定模板与受控安全参数生成；翻译里不放用户输入、堆栈或内部路径。E5 收到错误或确认回复时直接用其中的 `display`，不必为它再请求显示出口；`display` 缺失（旧服务、资源未登记）时显示中文原文。
 - 发布显示覆盖报告：需要展示的字段数、已提供/缺失及 key；用户原文明确不属于翻译覆盖分母。关键路径缺英文不能宣称“完整双语”。
 
 ## 4. 地理显示资源
 
-新增 `GET /api/v1/display/geography?pack_fingerprint=<资料包指纹>`，返回 `GeographyDisplayBundle`。当前能力从 capabilities.meta.data_pack 取身份；历史运行从该运行 source.meta.data_pack 取身份。请求不接受任意路径。用已登记显示包和本人运行对应的历史版本；缺少版本明确不可用，不回退当前六城。
+新增 `GET /api/v1/display/geography?pack_fingerprint=<资料包指纹>[&resource_version=<显示资源版本>]`，返回 `GeographyDisplayBundle`。当前能力从 capabilities.meta.data_pack 取身份；历史运行从该运行 source.meta.data_pack 取身份。请求不接受任意路径。
+
+**历史版本的选择**（实施时补的规则）：省略 `resource_version` 时用这个资料包当前登记的版本；历史对象（以前的结果、运行意图）把它显示读取回来的 `DisplayEnvelope.resource_version`（或字段上的 `resource_version`）原样传进来，读到的是那一版冻结的地理清单。明确请求的版本不存在、资料包没有登记：404 `not_found`，**不回退**到当前版本或当前六城；版本登记了但没有地理资源：200、`status = unavailable`、城市为空（列表仍可访问）。版本名格式不对：422 `invalid_request`。资源版本不可覆盖，旧版本在登记表与冻结目录里一直保留。
 
 清单字段：
 
@@ -108,7 +111,9 @@ sources[]: {source_ref, publisher, dataset, version, public_url, content_sha256}
 - 合成城市 anchor 为 null、not_applicable；真实城市没有可靠锚点为 unknown，仍可从列表访问。显示清单不授予运行资格，能力和规则决定可选城市。
 - E3AB 核对已有 Census Gazetteer 或主城市坐标资料及来源，E3C 只验证和发布；E5 负责底图许可、国家边界、投影、纹理、标签避让及拖转。首版不做住宅、街道、PUMA 多边形。
 
-AB 协调结果（2026-10-24）：六城代表点已经存在于 `data/raw/intake/census_gazetteer_cbsa_2024/8c2916e66c685c88.bin`，为 Census 官方 `2024_Gaz_cbsa_national.zip` 的缓存，文件内按 `GEOID` 关联，`NAME` 为来源名称，`INTPTLAT / INTPTLONG` 为原始坐标。原文件 SHA-256：`0ec21c5d83982467903f1500fbbae87311edc81f09bed8ec1bbded80bce7eec3`。AB 与 C 均已读取这六条记录；应使用 `metro_internal_point`，不是主城市中心。**原始大地基准仍需官方依据核实**；必要时登记转换方法后才能发布 EPSG:4326。未核实前公共 anchor 保持 unknown/null，不能因数值看起来合理而贴 WGS84 标签。这项无需重新抓取六城生活资料。
+AB 协调结果（2026-10-24）：六城代表点已经存在于 `data/raw/intake/census_gazetteer_cbsa_2024/8c2916e66c685c88.bin`，为 Census 官方 `2024_Gaz_cbsa_national.zip` 的缓存，文件内按 `GEOID` 关联，`NAME` 为来源名称，`INTPTLAT / INTPTLONG` 为原始坐标。原文件 SHA-256：`0ec21c5d83982467903f1500fbbae87311edc81f09bed8ec1bbded80bce7eec3`。AB 与 C 均已读取这六条记录；应使用 `metro_internal_point`，不是主城市中心。原始大地基准要有官方依据、并登记转换方法后才能发布 EPSG:4326；没有核实的城市 anchor 保持 unknown/null，不能因数值看起来合理而贴 WGS84 标签。这项无需重新抓取六城生活资料。
+
+**实施结果（2026-10-24）**：Gazetteer 的记录格式没有另写基准；同一批内部点在官方 TIGER/Line 2024 CBSA 文件（`tl_2024_us_cbsa.zip`，SHA-256 `ea2f40fc…`）里也有，六城的 `INTPTLAT / INTPTLON`（七位小数）四舍五入到六位就是 Gazetteer 的值，那份文件的坐标系是 `GCS_North_American_1983`（技术文档 3.3.3 节同样写明 NAD83）。因此原始基准是 NAD83，按 EPSG 登记的 1188 号转换（三个平移量都是 0、精度 4 米）发布为 EPSG:4326，数值不变；六城都是 `available`。2024 Gazetteer 的全部 935 个 CBSA 与资料包登记的 2023 年 7 月划定文件逐条一致才生成清单。生成器 `scripts/product_geography.py`（`build` / `check`），参数目录 PI-61。
 
 ## 5. mean_j 的显示承诺
 

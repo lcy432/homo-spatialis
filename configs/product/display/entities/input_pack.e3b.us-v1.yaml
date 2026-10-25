@@ -1,0 +1,1026 @@
+# 输入侧实体（pack.e3b.us-v1）：资料包里的名称与说明（城市、六维、物质细项、健康问卷、资格、职业与职责、兴趣类别与菜系、硬要求、
+# 属性偏好、现金口径、能力清单的规则与说明）。zh 必须与资料包原文逐字相同（不同就显示为译文过时）；词表别名是匹配用的原文
+# 词语，不在这里。E3B 的 SOC 职业名来自冻结的生活资料（岗位的 soc_title）。其他显示层按同样的 kind/编号引用这些实体。
+pack_id: pack.e3b.us-v1
+entities:
+  ability:
+    edu_at_least_associate:
+      ask_when:
+        en: Asked only when your chosen occupation or a job in a candidate city requires it; the system never grants education, certificates or experience from a job title or free text
+        zh: 只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验
+      label:
+        en: Associate's degree
+        zh: 副学士学位
+    edu_at_least_bachelor:
+      ask_when:
+        en: Asked only when your chosen occupation or a job in a candidate city requires it; the system never grants education, certificates or experience from a job title or free text
+        zh: 只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验
+      label:
+        en: Bachelor's degree
+        zh: 学士学位
+    edu_at_least_doctoral:
+      ask_when:
+        en: Asked only when your chosen occupation or a job in a candidate city requires it; the system never grants education, certificates or experience from a job title or free text
+        zh: 只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验
+      label:
+        en: Doctoral or professional degree
+        zh: 博士或专业学位
+    edu_at_least_hs:
+      ask_when:
+        en: Asked only when your chosen occupation or a job in a candidate city requires it; the system never grants education, certificates or experience from a job title or free text
+        zh: 只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验
+      label:
+        en: High school diploma or equivalent
+        zh: 高中毕业或同等学力
+    edu_at_least_master:
+      ask_when:
+        en: Asked only when your chosen occupation or a job in a candidate city requires it; the system never grants education, certificates or experience from a job title or free text
+        zh: 只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验
+      label:
+        en: Master's degree
+        zh: 硕士学位
+    edu_at_least_some_college:
+      ask_when:
+        en: Asked only when your chosen occupation or a job in a candidate city requires it; the system never grants education, certificates or experience from a job title or free text
+        zh: 只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验
+      label:
+        en: Some college, no degree
+        zh: 读过大学（未取得学位）
+    soc_27_4011_award:
+      ask_when:
+        en: Asked only when your chosen occupation or a job in a candidate city requires it; the system never grants education, certificates or experience from a job title or free text
+        zh: 只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验
+      label:
+        en: Postsecondary nondegree award for Audio and Video Technicians
+        zh: 音视频技术员的中学后证书
+    soc_35_1012_experience:
+      ask_when:
+        en: Asked only when your chosen occupation or a job in a candidate city requires it; the system never grants education, certificates or experience from a job title or free text
+        zh: 只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验
+      label:
+        en: Related work experience for First-Line Supervisors of Food Preparation and Serving Workers
+        zh: 餐饮主管的相关工作经验
+    soc_35_2014_experience:
+      ask_when:
+        en: Asked only when your chosen occupation or a job in a candidate city requires it; the system never grants education, certificates or experience from a job title or free text
+        zh: 只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验
+      label:
+        en: Related work experience for Cooks, Restaurant
+        zh: 餐厅厨师的相关工作经验
+    soc_41_1011_experience:
+      ask_when:
+        en: Asked only when your chosen occupation or a job in a candidate city requires it; the system never grants education, certificates or experience from a job title or free text
+        zh: 只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验
+      label:
+        en: Related work experience for First-Line Supervisors of Retail Sales Workers
+        zh: 零售主管的相关工作经验
+    soc_43_1011_experience:
+      ask_when:
+        en: Asked only when your chosen occupation or a job in a candidate city requires it; the system never grants education, certificates or experience from a job title or free text
+        zh: 只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验
+      label:
+        en: Related work experience for First-Line Supervisors of Office and Administrative Support Workers
+        zh: 办公室行政主管的相关工作经验
+    soc_49_2022_award:
+      ask_when:
+        en: Asked only when your chosen occupation or a job in a candidate city requires it; the system never grants education, certificates or experience from a job title or free text
+        zh: 只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验
+      label:
+        en: Postsecondary nondegree award for Telecommunications Equipment Installers and Repairers, Except Line Installers
+        zh: 通信设备安装维修工的中学后证书
+    soc_49_3023_award:
+      ask_when:
+        en: Asked only when your chosen occupation or a job in a candidate city requires it; the system never grants education, certificates or experience from a job title or free text
+        zh: 只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验
+      label:
+        en: Postsecondary nondegree award for Automotive Service Technicians and Mechanics
+        zh: 汽车维修技师的中学后证书
+  attribute_kind:
+    brand:
+      label:
+        en: Brand
+        zh: 品牌
+      note:
+        en: The text is recorded; this version does not score it or pass it to the clones; it needs like-for-like quotes and matching rules (V2)
+        zh: 已记录原文，本版不评分、不交给分身；需要同规格报价与匹配规则（V2）
+    cuisine:
+      label:
+        en: Cuisine
+        zh: 菜系
+      note:
+        en: Text here is only kept; for taste to count in the food evaluation, describe it under “Taste and cuisines” and choose categories there
+        zh: 这里的原文只留存；想让口味进入饮食评价，请在“口味与菜系”一项里描述并选中类别
+    home_entry_concern:
+      label:
+        en: Concerns about home visits (for example not wanting strangers in your home)
+        zh: 上门顾虑（例如不想让陌生人进家）
+      note:
+        en: 'The text is recorded; this version has no way to check or block in-home services, so clones may choose them: even if you confirm this as non-negotiable, it can only be kept as written'
+        zh: 已记录原文；本版没有能核验或拦截上门服务的机制，分身可能选择上门服务——即使你把它确认为不可妥协，也只能原样留存
+    preparation:
+      label:
+        en: Preparation (cooking / takeout)
+        zh: 制作方式（做饭 / 外卖）
+      note:
+        en: The text is recorded; this version does not score it
+        zh: 已记录原文，本版不评分
+    service_quality:
+      label:
+        en: Service quality
+        zh: 服务质量
+      note:
+        en: The text is recorded; this version does not score it
+        zh: 已记录原文，本版不评分
+    tier:
+      label:
+        en: Tier
+        zh: 档次
+      note:
+        en: The text is recorded; this version does not score it; no tier preference is inferred from prices
+        zh: 已记录原文，本版不评分；不从价格推断档次偏好
+  capability:
+    health_questionnaire:
+      common_prompt:
+        en: Assume your basic living needs are covered, and judge whether each choice below describes you. There are no right answers.
+        zh: 假设基本生活已有保障，判断下面的选择是否符合你。没有正确答案。
+      rules.0:
+        en: No total health score is calculated, and no disease probability, pain weight, treatment effect, willingness to pay or refusal of treatment is inferred
+        zh: 不计算总健康分，不推断患病概率、疼痛权重、疗效、愿付金额或拒绝治疗
+      rules.1:
+        en: Health answers take none of the six areas' 100 points and are not a seventh scoring weight; they only inform the clones' planning and do not change illness rules, γ, H, accounts or satisfaction
+        zh: 健康回答不占六维 100 分，也不是第七个评分权重；只供分身做计划，不改变疾病规则、γ、H、账目或满足感
+      rules.2:
+        en: The questions are provisional wording, not tested in cognitive interviews or validated as a scale
+        zh: 题目是暂定文案，没有经过认知访谈或量表验证
+      unanswered_rule:
+        en: An unanswered question is stored as “not answered”, separately from “not sure yet”; both mean there is no explicit instruction for that item, and no middle value is filled in
+        zh: 没有作答另存为“未答”，与“暂不确定”分开；两者都表示没有这一项的明确指令，不补中间值
+    interests:
+      leisure_states.0:
+        en: 'Not answered: no explicit information on this item, evaluated with neutral rules; it is never treated as choosing the “generic evaluation”'
+        zh: 未答：没有这一项的明确信息，按中性规则评价；不会被当成“通用评价”的选择
+      leisure_states.1:
+        en: 'Not sure yet: evaluated with neutral rules'
+        zh: 暂不确定：按中性规则评价
+      leisure_states.2:
+        en: 'Explicitly no fixed hobby: evaluated with neutral rules'
+        zh: 明确没有固定爱好：按中性规则评价
+      leisure_states.3:
+        en: 'Use the generic leisure evaluation: try whatever suitable the city offers (evaluated with neutral rules)'
+        zh: 采用通用休闲评价：城市有什么合适的就体验什么（按中性规则评价）
+      leisure_states.4:
+        en: 'Describe in words: candidates are first formed from the vocabulary, and only the categories you choose enter the evaluation; unrecognized descriptions are kept as written and not evaluated in this version'
+        zh: 用文字描述：先按词表形成候选，你选中的类别才进入评价；没认出的描述原样保留，本版不评价
+      matching_note:
+        en: 'A confirmed interest only brings moderately higher satisfaction for the same actual time spent (model assumption: 50% more, with a cap); a confirmed cuisine only makes meals to your taste that you actually eat count a little more. These coefficients are publicly registered model assumptions, not measurements of you; they do not change your points, cash or qualifications, and do not make expensive things automatically better'
+        zh: 确认的兴趣只在同样的实际参与时间下带来适度更高的满足（模型假设：多 50%，有上限）；确认的菜系只让实际吃到的合口味餐多计一点。 这些系数是公开登记的模型假设，不是对你个人的测量；不改变你的点数、现金或资格，也不让贵的东西自动更好
+      taste_states.0:
+        en: 'Not answered: evaluated with neutral rules'
+        zh: 未答：按中性规则评价
+      taste_states.1:
+        en: 'Not sure yet: evaluated with neutral rules'
+        zh: 暂不确定：按中性规则评价
+      taste_states.2:
+        en: 'Explicitly no taste preference: evaluated with neutral rules'
+        zh: 明确没有口味偏好：按中性规则评价
+      taste_states.3:
+        en: 'Describe in words: candidates are first formed from the vocabulary, and only the cuisines you choose enter the food evaluation; brands and other requirements are only kept'
+        zh: 用文字描述：先按词表形成候选，你选中的菜系才进入饮食评价；品牌与其他要求只留存
+    limits:
+      item.0:
+        en: 'City data come from public sources and registered model settings; life rules, scoring and evaluation parameters are synthetic exploratory settings: the results do not rank real cities and are not real-world recommendations'
+        zh: 城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定：结果不排序真实城市，也不是现实推荐
+      item.1:
+        en: The safety background is converted from each metro area's 2024 crime statistics (a statistical proxy, not a person's probability of experiencing crime; for New York it covers only the New York State part of the metro area); the leisure background is a setting shared by the six cities; treatment prices are a shared assumption; eating-out, services, device lifetimes and activity prices include registered model settings
+        zh: 安全背景按各都会区 2024 年犯罪统计换算（统计代理，不是个人遭遇犯罪的概率；纽约只覆盖都会区的纽约州部分）；休闲背景是六城共同设定；治疗价格是共同假设；外食、服务、设备寿命与活动价格含登记的模型设定
+      item.2:
+        en: The offline planner is a controllable mock and does not represent a real large language model's ability or understanding of preferences
+        zh: 离线规划器是可控的 mock，不代表真实大语言模型的能力或偏好理解
+      item.3:
+        en: The questionnaire wording and reference improvement ranges are provisional drafts, not tested in cognitive interviews or validated as a scale
+        zh: 问卷文案与参考改善范围是暂定稿，没有做认知访谈与量表验证
+    points:
+      canonical_form:
+        en: A whole number after reducing (30) or numerator/denominator (50/3); calculations and comparisons use it, display rounds to 1 decimal place, and displayed values never feed back into calculations
+        zh: 约分后的整数（30）或 分子/分母（50/3）；计算与比较都用它，显示四舍五入到 1 位小数，显示值不回流计算
+      manual_entry:
+        en: Manual entries are parsed as exact decimals with at most 2 decimal places (the step is not a measurement precision); fractions in lowest terms are also accepted (for example 50/3)
+        zh: 手工输入按精确十进制解析，最多 2 位小数（步长不是测量精度）；也接受规范分数写法（例如 50/3）
+      rules.0:
+        en: The six areas must add up to exactly 100; no values are pre-filled, no personality presets are offered, and other items are never reduced proportionally
+        zh: 六维合计必须精确等于 100；不预填数值、不提供人格套餐，不自动按比例扣减其他项
+      rules.1:
+        en: An equal split is generated only when the user chooses “split equally” (50/3 for each of the six areas, 25 for each material item), so items listed first get no extra points
+        zh: 只有用户主动选择“平均分配”才生成均分（六维每项 50/3、物质每项 25），不让排在前面的项目多拿分
+      rules.2:
+        en: An explicit 0 is a provided value; “not answered”, “explicitly no strong view” and “not sure yet” are never turned into 0 or an equal share automatically
+        zh: 明确 0 是已提供的数值；“未答”“明确无所谓”“暂不确定”都不会被自动换成 0 或均分
+      rules.3:
+        en: When material life is positive, the four material items must also add up to exactly 100; when material life is explicitly 0, the breakdown does not apply and no four answers are invented
+        zh: 物质父项为正时，物质四项也必须精确合计 100；物质父项明确为 0 时细分不适用，不伪造四个回答
+      rules.4:
+        en: 'Since material life went from three items to four and the meaning of food widened, old confirmations cannot be carried over by adding a 0 or redistributing points: please review and confirm again'
+        zh: 物质从三项改成四项、饮食的含义扩大之后，旧的确认不能补 0 或重新分配点数沿用：请重新审阅并确认
+    start_scenario:
+      item.0:
+        en: 'This is a simplified scenario of moving to a candidate city and starting over: it starts in year 1, healthy, with no belongings, no courses in progress and no savings goal'
+        zh: 这是一次搬到候选城市重新开始的简化情景：从第 1 年、健康、没有已有物品、没有在学课程、没有资金目标开始
+      item.1:
+        en: Real old furniture, medical history and ongoing courses are not included yet; this is an assumption of the simulation, not a judgement about your real situation
+        zh: 现实中的旧家具、病史与在学课程暂未纳入；这是模拟的假设，不是对你现实情况的判断
+      item.2:
+        en: The same you has the same age, cash, abilities and base time and energy in every city and every clone; specific jobs in a city are matched against the local catalogue
+        zh: 同一个你在各城市、各个分身里的年龄、现金、能力与基础时间精力都相同；城市里的具体岗位按当地目录匹配
+    unsupported:
+      item.0:
+        en: Multi-person households, non-wage income (interest, dividends, side jobs), shared household assets, buying a home and loans
+        zh: 多人家庭、非工资收入（利息、股息、副业）、家庭共同资产、买房与贷款
+      item.1:
+        en: Tax credits, pre-tax deductions and itemized deductions; residents of the New York metro area outside New York City, the Indiana part of the Chicago metro area, and cross-state combinations
+        zh: 税收抵免、税前扣除与逐项扣除；纽约市以外的纽约都会区居民、芝加哥都会区的印第安纳部分、跨州组合
+      item.2:
+        en: Parking fees and distance-based transit fares; San Francisco transit fares (the official website refused access)
+        zh: 停车费与按距离计的公交票价；旧金山的公交票价（官方网站拒绝访问）
+      item.3:
+        en: Real Chicago Park District activities (they need date windows, whole-session registration and age eligibility, which the engine does not support yet)
+        zh: 芝加哥公园管理局的真实活动（需要日期窗口、整期报名与年龄资格，引擎暂不支持）
+      item.4:
+        en: Scoring of brands, preparation, tier, service quality and home-visit concerns (the text is only recorded)
+        zh: 品牌、制作方式、档次、服务质量与上门顾虑的评分（只记录原文）
+      item.5:
+        en: Interview-style input (only the interfaces for sources and evidence references are kept)
+        zh: 访谈式输入（只保留来源与证据引用接口）
+  city:
+    US:CBSA2023:16980:
+      label:
+        en: Chicago (Illinois part)
+        zh: 芝加哥（伊利诺伊州部分）
+      note:
+        en: Supported places to live and work are limited to the tax scope (tax.us2024.il)
+        zh: 支持的居住与工作地按税务范围裁剪（tax.us2024.il）
+    US:CBSA2023:26420:
+      label:
+        en: Houston
+        zh: 休斯敦
+      note:
+        en: Supported places to live and work are limited to the tax scope (tax.us2024.tx)
+        zh: 支持的居住与工作地按税务范围裁剪（tax.us2024.tx）
+    US:CBSA2023:31080:
+      label:
+        en: Los Angeles
+        zh: 洛杉矶
+      note:
+        en: Supported places to live and work are limited to the tax scope (tax.us2024.ca)
+        zh: 支持的居住与工作地按税务范围裁剪（tax.us2024.ca）
+    US:CBSA2023:35620:
+      label:
+        en: New York (residents of New York City's five boroughs)
+        zh: 纽约（纽约市五区居民）
+      note:
+        en: Supported places to live and work are limited to the tax scope (tax.us2024.nyc)
+        zh: 支持的居住与工作地按税务范围裁剪（tax.us2024.nyc）
+    US:CBSA2023:41860:
+      label:
+        en: San Francisco
+        zh: 旧金山
+      note:
+        en: Supported places to live and work are limited to the tax scope (tax.us2024.ca)
+        zh: 支持的居住与工作地按税务范围裁剪（tax.us2024.ca）
+    US:CBSA2023:42660:
+      label:
+        en: Seattle
+        zh: 西雅图
+      note:
+        en: Supported places to live and work are limited to the tax scope (tax.us2024.wa)
+        zh: 支持的居住与工作地按税务范围裁剪（tax.us2024.wa）
+  cuisine:
+    chinese:
+      label:
+        en: Chinese
+        zh: 中餐
+    home_style:
+      label:
+        en: Home-style cooking
+        zh: 家常菜
+    indian:
+      label:
+        en: Indian
+        zh: 印度菜
+    italian:
+      label:
+        en: Italian
+        zh: 意大利菜
+    japanese:
+      label:
+        en: Japanese
+        zh: 日本料理
+    korean:
+      label:
+        en: Korean
+        zh: 韩国料理
+    mediterranean:
+      label:
+        en: Mediterranean
+        zh: 地中海菜
+    mexican:
+      label:
+        en: Mexican
+        zh: 墨西哥菜
+    thai:
+      label:
+        en: Thai
+        zh: 泰国菜
+    vietnamese:
+      label:
+        en: Vietnamese
+        zh: 越南菜
+  dimension:
+    commute:
+      definition:
+        en: How the round-trip time between home and work and the number of days you actually go to work affect your life
+        zh: 住处到工作地点的往返时间与实际出门上班的次数对生活的影响
+      label:
+        en: Ease of commuting
+        zh: 交通便捷程度
+      reference_improvement:
+        en: 'Reference situation: with 20 days on site a month, the daily round trip shrinking from 70 to 30 minutes'
+        zh: 参考情境：每月到岗 20 次时，每天往返从 70 分钟缩短到 30 分钟
+      support_note:
+        en: Scored on the round-trip minutes from the home you actually live in and the days you actually go to work; non-work trips are not detailed in this version
+        zh: 按实际所住住房的往返分钟与实际到岗次数评分；非工作出行本版没有细化
+    environment:
+      definition:
+        en: Background conditions of air, climate and the urban environment
+        zh: 空气、气候与城市环境的背景条件
+      label:
+        en: Environment
+        zh: 环境
+      reference_improvement:
+        en: 'Reference situation: a synthetic environment index rising from 4 to 8 (0–10, comparable only among this set of synthetic cities)'
+        zh: 参考情境：合成环境指数从 4 提高到 8（0–10，只在本组合成城市之间可比）
+      support_note:
+        en: This version has only the city's background conditions; clones cannot improve it by acting
+        zh: 本版只有城市背景条件，分身不能行动改善它
+    leisure:
+      definition:
+        en: The city's basic leisure conditions, plus exercise, shows and other activities you actually take part in
+        zh: 城市基础休闲条件，加上实际参加的锻炼、演出等活动
+      label:
+        en: Leisure
+        zh: 休闲
+      reference_improvement:
+        en: 'Reference situation: from no activities at all each month to going to the gym 8 times a month'
+        zh: 参考情境：从每月不参加任何活动，到每月去 8 次健身房
+      support_note:
+        en: Only activities that actually happen count; matching specific hobbies to geography is not in this version
+        zh: 只算实际发生的活动；具体爱好与地理的匹配本版没有
+    material:
+      definition:
+        en: 'What you actually get from consumption: the condition of your home, whether food is fresh and to your taste, whether phone, internet and household supplies are convenient, whether daily chores are easy, and clothing and personal care (split into four items inside)'
+        zh: 住的房子条件、吃得是否新鲜合口味、通信联网与日用品是否方便、日常杂务是否省心、衣着与个人护理等实际消费得到的条件（内部再分四项）
+      label:
+        en: Material life
+        zh: 物质生活
+      reference_improvement:
+        en: 'Reference situation: from a one-bedroom far away, eating mostly rice, flour and canned food and doing all the laundry and cleaning yourself, to three fresh-ingredient meals a day and about 18 fewer hours of housework a month (one step of improvement in this version''s synthetic model)'
+        zh: 参考情境：从远处一居室、以米面罐头为主、洗衣打扫全部自己做，改善到每天三顿新鲜食材、每月少做约 18 小时家务（本版合成模型里的一档改善）
+      support_note:
+        en: Housing condition, food, daily support and convenience, and personal consumption and enjoyment are all scored on actual life; other material needs such as storage are not in this version
+        zh: 居住条件、饮食生活、日常支持与便利、个人消费与享受四项都按实际生活评分；储物等其他物质需求本版没有
+    opportunity:
+      definition:
+        en: The career and growth conditions the city offers, plus new abilities you actually learn in your life
+        zh: 城市提供的职业与成长条件，加上你在生活中实际学到的新能力
+      label:
+        en: Opportunity
+        zh: 发展机会
+      reference_improvement:
+        en: 'Reference situation: finishing a 12-month qualification course within a year, or the city''s opportunity conditions rising from a synthetic index of 4 to 8'
+        zh: 参考情境：在一年里学完一门 12 个月的资格课程，或城市发展条件从合成指数 4 提高到 8
+      support_note:
+        en: City background + the learning you actually take part in; certificates themselves, job changes and pay rises earn nothing extra
+        zh: 城市背景 + 实际参加的学习；证书本身、换岗与涨薪不另加分
+    safety:
+      definition:
+        en: Public safety conditions in the city
+        zh: 城市的公共安全条件
+      label:
+        en: Safety
+        zh: 安全
+      reference_improvement:
+        en: 'Reference situation: a synthetic safety index rising from 4 to 8 (0–10, comparable only among this set of synthetic cities)'
+        zh: 参考情境：合成安全指数从 4 提高到 8（0–10，只在本组合成城市之间可比）
+      support_note:
+        en: This version has only the city's background conditions; clones cannot improve it by spending or acting
+        zh: 本版只有城市背景条件，分身不能花钱或行动改善它
+  duty:
+    occ.accountant.0:
+      label:
+        en: Preparing financial statements
+        zh: 编制财务报表
+    occ.accountant.1:
+      label:
+        en: Checking accounts and tax records
+        zh: 核对账目与税务资料
+    occ.bookkeeper.0:
+      label:
+        en: Recording day-to-day income and spending
+        zh: 登记日常收支
+    occ.bookkeeper.1:
+      label:
+        en: Managing cash and receipts
+        zh: 管理现金与票据
+    occ.cashier.0:
+      label:
+        en: Checking out customers and taking payment
+        zh: 为顾客结账收款
+    occ.cashier.1:
+      label:
+        en: Checking cash and receipts
+        zh: 核对现金与票据
+    occ.counter_drinks.0:
+      label:
+        en: Taking orders and payment at the counter
+        zh: 在柜台点单与收款
+    occ.counter_drinks.1:
+      label:
+        en: Making coffee, milk tea and other drinks
+        zh: 制作咖啡、奶茶等饮品
+    occ.office_clerk.0:
+      label:
+        en: Handling documents and spreadsheets
+        zh: 处理文件与表格
+    occ.office_clerk.1:
+      label:
+        en: Entering and organizing information
+        zh: 录入与整理资料
+    occ.office_clerk.2:
+      label:
+        en: Answering phones and arranging schedules
+        zh: 接听电话、安排日程
+    occ.retail_sales.0:
+      label:
+        en: Serving customers in a store and presenting products
+        zh: 在门店接待顾客、介绍商品
+    occ.retail_sales.1:
+      label:
+        en: Tidying shelves and displays
+        zh: 整理货架与陈列
+    occ.soc_13_1071.0:
+      label:
+        en: Human Resources Specialists
+        zh: 人力资源专员
+    occ.soc_13_1082.0:
+      label:
+        en: Project Management Specialists
+        zh: 项目管理专员
+    occ.soc_13_1161.0:
+      label:
+        en: Market Research Analysts and Marketing Specialists
+        zh: 市场研究与营销专员
+    occ.soc_13_2051.0:
+      label:
+        en: Financial and Investment Analysts
+        zh: 金融与投资分析师
+    occ.soc_15_1211.0:
+      label:
+        en: Computer Systems Analysts
+        zh: 计算机系统分析师
+    occ.soc_15_1231.0:
+      label:
+        en: Computer Network Support Specialists
+        zh: 网络支持专员
+    occ.soc_15_1232.0:
+      label:
+        en: Computer User Support Specialists
+        zh: 电脑用户支持专员
+    occ.soc_15_1252.0:
+      label:
+        en: Software Developers
+        zh: 软件开发工程师
+    occ.soc_23_2011.0:
+      label:
+        en: Paralegals and Legal Assistants
+        zh: 律师助理
+    occ.soc_27_1024.0:
+      label:
+        en: Graphic Designers
+        zh: 平面设计师
+    occ.soc_27_4011.0:
+      label:
+        en: Audio and Video Technicians
+        zh: 音视频技术员
+    occ.soc_35_1012.0:
+      label:
+        en: First-Line Supervisors of Food Preparation and Serving Workers
+        zh: 餐饮主管
+    occ.soc_35_2014.0:
+      label:
+        en: Cooks, Restaurant
+        zh: 餐厅厨师
+    occ.soc_35_3031.0:
+      label:
+        en: Waiters and Waitresses
+        zh: 餐厅服务员
+    occ.soc_35_9021.0:
+      label:
+        en: Dishwashers
+        zh: 洗碗工
+    occ.soc_37_2011.0:
+      label:
+        en: Janitors and Cleaners, Except Maids and Housekeeping Cleaners
+        zh: 清洁工（楼宇）
+    occ.soc_37_2012.0:
+      label:
+        en: Maids and Housekeeping Cleaners
+        zh: 家政与客房清洁员
+    occ.soc_37_3011.0:
+      label:
+        en: Landscaping and Groundskeeping Workers
+        zh: 园林绿化工
+    occ.soc_39_9031.0:
+      label:
+        en: Exercise Trainers and Group Fitness Instructors
+        zh: 健身教练与团体课老师
+    occ.soc_41_1011.0:
+      label:
+        en: First-Line Supervisors of Retail Sales Workers
+        zh: 零售主管
+    occ.soc_41_3091.0:
+      label:
+        en: Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel
+        zh: 服务类销售代表
+    occ.soc_43_1011.0:
+      label:
+        en: First-Line Supervisors of Office and Administrative Support Workers
+        zh: 办公室行政主管
+    occ.soc_43_3071.0:
+      label:
+        en: Tellers
+        zh: 银行柜员
+    occ.soc_43_4051.0:
+      label:
+        en: Customer Service Representatives
+        zh: 客服代表
+    occ.soc_43_4171.0:
+      label:
+        en: Receptionists and Information Clerks
+        zh: 前台与咨询员
+    occ.soc_43_5071.0:
+      label:
+        en: Shipping, Receiving, and Inventory Clerks
+        zh: 收发与库存文员
+    occ.soc_43_6014.0:
+      label:
+        en: Secretaries and Administrative Assistants, Except Legal, Medical, and Executive
+        zh: 秘书与行政助理
+    occ.soc_49_2022.0:
+      label:
+        en: Telecommunications Equipment Installers and Repairers, Except Line Installers
+        zh: 通信设备安装维修工
+    occ.soc_49_3023.0:
+      label:
+        en: Automotive Service Technicians and Mechanics
+        zh: 汽车维修技师
+    occ.soc_49_9071.0:
+      label:
+        en: Maintenance and Repair Workers, General
+        zh: 综合维修工
+    occ.soc_51_4121.0:
+      label:
+        en: Welders, Cutters, Solderers, and Brazers
+        zh: 焊工
+    occ.soc_51_6011.0:
+      label:
+        en: Laundry and Dry-Cleaning Workers
+        zh: 洗衣与干洗工
+    occ.soc_53_7062.0:
+      label:
+        en: Laborers and Freight, Stock, and Material Movers, Hand
+        zh: 搬运与装卸工
+    occ.soc_53_7065.0:
+      label:
+        en: Stockers and Order Fillers
+        zh: 理货与拣货员
+  hard_requirement:
+    housing.max_commute_roundtrip:
+      compiles_to:
+        en: 'E1 hard requirement: in the housing category, the longest round-trip minutes in the commute execution record ≤ the given minutes (checked every month; months without days on site count as 0)'
+        zh: E1 硬要求：住房类别、通勤执行记录里最长的往返分钟 ≤ 给定分钟（每个月检查；没有到岗的月份是 0）
+      label:
+        en: Round trip between home and the employment center no longer than (minutes)
+        zh: 住处到就业中心的往返时间不超过（分钟）
+      unit:
+        en: minutes
+        zh: 分钟
+      verification:
+        en: 'The round-trip minutes from the home actually lived in are checked every month: met, not met and cannot be determined are reported separately; this does not enter the score and does not block plans'
+        zh: 每月检查实际所住住房的往返分钟：满足、不满足、无法判断单独报告；不进分数，也不拦截计划
+  health_option:
+    agree:
+      label:
+        en: Describes me
+        zh: 符合我
+      meaning:
+        en: This statement describes the user
+        zh: 这句话符合用户自己
+    disagree:
+      label:
+        en: Does not describe me
+        zh: 不符合我
+      meaning:
+        en: This statement does not describe the user
+        zh: 这句话不符合用户自己
+    no_clear_tendency:
+      label:
+        en: No clear tendency
+        zh: 无明显倾向
+      meaning:
+        en: The user has no clear tendency on this question
+        zh: 用户在这一题上没有明显倾向
+    unsure:
+      label:
+        en: Not sure yet
+        zh: 暂不确定
+      meaning:
+        en: 'The user is not sure yet: there is no explicit instruction for this item'
+        zh: 用户暂不确定——没有这一项的明确指令
+  health_question:
+    hc_more_pay_more_sick_risk:
+      agree_meaning:
+        en: Willing to accept a higher chance of getting sick and needing rest for a little more income
+        zh: 愿意为多一点收入接受更高的生病与休息可能
+      disagree_meaning:
+        en: Not willing to accept a higher chance of getting sick and needing rest for a little more income
+        zh: 不愿意为多一点收入接受更高的生病与休息可能
+      text:
+        en: One arrangement earns a little more money, but also makes it more likely that you get sick and need a few days of rest. I am willing to choose it.
+        zh: 一种安排能多赚一点钱，但生病、需要休息几天的可能也更高。我愿意选择它。
+    hc_reserve_for_health_costs:
+      agree_meaning:
+        en: Willing to postpone non-urgent purchases and set money aside for possible health costs first
+        zh: 愿意推迟不急需的消费，先为可能的健康开支留钱
+      disagree_meaning:
+        en: Not inclined to postpone non-urgent purchases for possible health costs
+        zh: 不倾向为可能的健康开支推迟不急需的消费
+      text:
+        en: To be ready for possible health costs, I am willing to postpone a purchase I want but do not urgently need, and set some money aside first.
+        zh: 为了应对可能发生的健康开支，我愿意推迟一次想要、但并不急需的消费，先留一笔钱。
+    hc_wait_for_clear_risk_info:
+      agree_meaning:
+        en: When health-risk information is unclear, willing to give up a small immediate gain and wait until things are clear
+        zh: 健康风险信息不清楚时，愿意先放弃一点眼前收益、等了解清楚
+      disagree_meaning:
+        en: When health-risk information is unclear, not inclined to give up an immediate gain in order to wait
+        zh: 健康风险信息不清楚时，不倾向为了等待而放弃眼前收益
+      text:
+        en: When information about a health risk is still unclear, I am willing to give up a small immediate gain and decide once things are clear.
+        zh: 健康风险的信息还不清楚时，我愿意先放弃眼前的一点收益，等了解清楚再决定。
+  leaf:
+    daily_convenience:
+      definition:
+        en: Whether phone and internet service and household supplies are easy to get, and whether daily chores are easy.
+        zh: 通信联网、家用日耗品是否方便获得，以及日常杂务是否省心。
+      label:
+        en: Daily support and convenience
+        zh: 日常支持与便利
+      note:
+        en: Chores count by how many hours you actually do less yourself (devices and human services are two ways to get there and are not scored separately); phone, home internet and household supplies count by the months actually bought, and buying two of the same item counts no more; it is relative importance, not a budget or an order to buy; it covers phone service and household supplies beyond the old “daily convenience”, so old confirmations need a new review
+        zh: 杂务看本人实际少做了多少小时（设备与人工服务是两种实现方式，不分别打分）；通信、居家联网与家用日耗品看实际买到的月份，同一项买两份不多算；它是相对重要程度，不是预算或必须购买的指令；含义比旧版“日常生活便利”多了通信与日耗品，旧的确认要重新审阅
+    food_life:
+      definition:
+        en: Whether the complete food plan you actually eat (cooking at home or eating out) is fresh and matches the taste you confirmed
+        zh: 实际吃的完整食品方案（自己做、外食都可以）新鲜不新鲜、合不合你确认的口味
+      label:
+        en: Food
+        zh: 饮食生活
+      note:
+        en: Only fresh meals and the cuisines you confirmed are evaluated; having enough to eat is a basic guarantee and earns nothing extra; price, restaurant tier and how often you eat out do not mean better; preparation time counts in the time budget
+        zh: 只评价新鲜餐与你确认的菜系；吃饱是基本保障，不另加分；价格、餐馆档次与外食次数不等于更好；准备时间算在时间账里
+    housing_condition:
+      definition:
+        en: 'The condition of the home you actually live in: whether there is enough space, and how good it is among homes of its kind'
+        zh: 实际住的那一处房子本身的条件：空间够不够用、同类房子里条件好不好
+      label:
+        en: Housing condition
+        zh: 居住条件
+      note:
+        en: Only the home itself counts; rent, commuting and the area's safety and environment are not in this item (safety and environment are counted separately by the area you live in); the old “living space (floor area only)” meant something different, so old confirmations need a new review
+        zh: 只看房子本身；房租、通勤、地区的安全与环境不在这一项（安全、环境按住处所在片区另算）；旧版的“居住空间（只看面积）”含义不同，旧的确认要重新审阅
+    personal_enjoyment:
+      definition:
+        en: Beyond other living costs, the satisfaction of personal consumption such as clothing and personal care.
+        zh: 在其他生活开支之外，获得衣着、个人护理等个人消费的满足。
+      label:
+        en: Personal consumption and enjoyment
+        zh: 个人消费与享受
+      note:
+        en: Evaluated by the standard personal consumption basket (clothing, shoes and accessories, personal care) you actually get each month, not by how much you spend; the same basket costing more does not change this item, only buying less lowers it; it is an explainable model abstraction and does not measure a real person's happiness; massages and home comfort goods are no longer counted separately; the meaning differs from the old version, so old confirmations need a new review
+        zh: 按每月实际获得的标准个人消费篮子（衣着、鞋履与配饰、个人护理）评价，不按花了多少钱；同样的篮子涨价不改变这一项，买得少才会少；是可解释的模型抽象，没有测量真实人的幸福感；不再单独计算按摩或居家舒适用品；含义与旧版不同，旧的确认要重新审阅
+  leisure_category:
+    arts_culture:
+      label:
+        en: Arts and culture
+        zh: 艺术与文化
+    culinary:
+      label:
+        en: Food and cooking activities
+        zh: 美食活动
+    fitness:
+      label:
+        en: Fitness
+        zh: 健身
+    music:
+      label:
+        en: Music
+        zh: 音乐
+    racket_sports:
+      label:
+        en: Racket sports
+        zh: 球拍运动
+  money_basis:
+    USD.2024:
+      note:
+        en: Liquid funds you can actually spend, entered in 2024 US dollars at local price levels; the same basis as the catalogue, so the conversion is the identity, with no inflation or exchange-rate conversion
+        zh: 按 2024 年美元、当地价格水平填写的可动用流动资金；与目录同一口径，换算是恒等，不做通胀或汇率换算
+  occupation:
+    occ.accountant:
+      basis.0:
+        en: SOC 2018 occupation 13-2011 (within the occupations E3B supports)
+        zh: SOC 2018 职业 13-2011（E3B 支持的职业范围）
+      label:
+        en: Accountant
+        zh: 会计
+    occ.bookkeeper:
+      basis.0:
+        en: SOC 2018 occupation 43-3031 (within the occupations E3B supports)
+        zh: SOC 2018 职业 43-3031（E3B 支持的职业范围）
+      label:
+        en: Bookkeeper or cash clerk
+        zh: 记账员或出纳
+    occ.cashier:
+      basis.0:
+        en: SOC 2018 occupation 41-2011 (within the occupations E3B supports)
+        zh: SOC 2018 职业 41-2011（E3B 支持的职业范围）
+      label:
+        en: Cashier
+        zh: 收银员
+    occ.counter_drinks:
+      basis.0:
+        en: SOC 2018 occupation 35-3023 (within the occupations E3B supports)
+        zh: SOC 2018 职业 35-3023（E3B 支持的职业范围）
+      label:
+        en: Counter service and drink making
+        zh: 柜台点单与饮品制作
+    occ.office_clerk:
+      basis.0:
+        en: SOC 2018 occupation 43-9061 (within the occupations E3B supports)
+        zh: SOC 2018 职业 43-9061（E3B 支持的职业范围）
+      label:
+        en: Office clerk
+        zh: 办公室文员
+    occ.retail_sales:
+      basis.0:
+        en: SOC 2018 occupation 41-2031 (within the occupations E3B supports)
+        zh: SOC 2018 职业 41-2031（E3B 支持的职业范围）
+      label:
+        en: Retail salesperson
+        zh: 门店销售员
+    occ.soc_13_1071:
+      basis.0:
+        en: SOC 2018 occupation 13-1071 (within the occupations E3B supports)
+        zh: SOC 2018 职业 13-1071（E3B 支持的职业范围）
+      label:
+        en: Human Resources Specialists
+        zh: 人力资源专员
+    occ.soc_13_1082:
+      basis.0:
+        en: SOC 2018 occupation 13-1082 (within the occupations E3B supports)
+        zh: SOC 2018 职业 13-1082（E3B 支持的职业范围）
+      label:
+        en: Project Management Specialists
+        zh: 项目管理专员
+    occ.soc_13_1161:
+      basis.0:
+        en: SOC 2018 occupation 13-1161 (within the occupations E3B supports)
+        zh: SOC 2018 职业 13-1161（E3B 支持的职业范围）
+      label:
+        en: Market Research Analysts and Marketing Specialists
+        zh: 市场研究与营销专员
+    occ.soc_13_2051:
+      basis.0:
+        en: SOC 2018 occupation 13-2051 (within the occupations E3B supports)
+        zh: SOC 2018 职业 13-2051（E3B 支持的职业范围）
+      label:
+        en: Financial and Investment Analysts
+        zh: 金融与投资分析师
+    occ.soc_15_1211:
+      basis.0:
+        en: SOC 2018 occupation 15-1211 (within the occupations E3B supports)
+        zh: SOC 2018 职业 15-1211（E3B 支持的职业范围）
+      label:
+        en: Computer Systems Analysts
+        zh: 计算机系统分析师
+    occ.soc_15_1231:
+      basis.0:
+        en: SOC 2018 occupation 15-1231 (within the occupations E3B supports)
+        zh: SOC 2018 职业 15-1231（E3B 支持的职业范围）
+      label:
+        en: Computer Network Support Specialists
+        zh: 网络支持专员
+    occ.soc_15_1232:
+      basis.0:
+        en: SOC 2018 occupation 15-1232 (within the occupations E3B supports)
+        zh: SOC 2018 职业 15-1232（E3B 支持的职业范围）
+      label:
+        en: Computer User Support Specialists
+        zh: 电脑用户支持专员
+    occ.soc_15_1252:
+      basis.0:
+        en: SOC 2018 occupation 15-1252 (within the occupations E3B supports)
+        zh: SOC 2018 职业 15-1252（E3B 支持的职业范围）
+      label:
+        en: Software Developers
+        zh: 软件开发工程师
+    occ.soc_23_2011:
+      basis.0:
+        en: SOC 2018 occupation 23-2011 (within the occupations E3B supports)
+        zh: SOC 2018 职业 23-2011（E3B 支持的职业范围）
+      label:
+        en: Paralegals and Legal Assistants
+        zh: 律师助理
+    occ.soc_27_1024:
+      basis.0:
+        en: SOC 2018 occupation 27-1024 (within the occupations E3B supports)
+        zh: SOC 2018 职业 27-1024（E3B 支持的职业范围）
+      label:
+        en: Graphic Designers
+        zh: 平面设计师
+    occ.soc_27_4011:
+      basis.0:
+        en: SOC 2018 occupation 27-4011 (within the occupations E3B supports)
+        zh: SOC 2018 职业 27-4011（E3B 支持的职业范围）
+      label:
+        en: Audio and Video Technicians
+        zh: 音视频技术员
+    occ.soc_35_1012:
+      basis.0:
+        en: SOC 2018 occupation 35-1012 (within the occupations E3B supports)
+        zh: SOC 2018 职业 35-1012（E3B 支持的职业范围）
+      label:
+        en: First-Line Supervisors of Food Preparation and Serving Workers
+        zh: 餐饮主管
+    occ.soc_35_2014:
+      basis.0:
+        en: SOC 2018 occupation 35-2014 (within the occupations E3B supports)
+        zh: SOC 2018 职业 35-2014（E3B 支持的职业范围）
+      label:
+        en: Cooks, Restaurant
+        zh: 餐厅厨师
+    occ.soc_35_3031:
+      basis.0:
+        en: SOC 2018 occupation 35-3031 (within the occupations E3B supports)
+        zh: SOC 2018 职业 35-3031（E3B 支持的职业范围）
+      label:
+        en: Waiters and Waitresses
+        zh: 餐厅服务员
+    occ.soc_35_9021:
+      basis.0:
+        en: SOC 2018 occupation 35-9021 (within the occupations E3B supports)
+        zh: SOC 2018 职业 35-9021（E3B 支持的职业范围）
+      label:
+        en: Dishwashers
+        zh: 洗碗工
+    occ.soc_37_2011:
+      basis.0:
+        en: SOC 2018 occupation 37-2011 (within the occupations E3B supports)
+        zh: SOC 2018 职业 37-2011（E3B 支持的职业范围）
+      label:
+        en: Janitors and Cleaners, Except Maids and Housekeeping Cleaners
+        zh: 清洁工（楼宇）
+    occ.soc_37_2012:
+      basis.0:
+        en: SOC 2018 occupation 37-2012 (within the occupations E3B supports)
+        zh: SOC 2018 职业 37-2012（E3B 支持的职业范围）
+      label:
+        en: Maids and Housekeeping Cleaners
+        zh: 家政与客房清洁员
+    occ.soc_37_3011:
+      basis.0:
+        en: SOC 2018 occupation 37-3011 (within the occupations E3B supports)
+        zh: SOC 2018 职业 37-3011（E3B 支持的职业范围）
+      label:
+        en: Landscaping and Groundskeeping Workers
+        zh: 园林绿化工
+    occ.soc_39_9031:
+      basis.0:
+        en: SOC 2018 occupation 39-9031 (within the occupations E3B supports)
+        zh: SOC 2018 职业 39-9031（E3B 支持的职业范围）
+      label:
+        en: Exercise Trainers and Group Fitness Instructors
+        zh: 健身教练与团体课老师
+    occ.soc_41_1011:
+      basis.0:
+        en: SOC 2018 occupation 41-1011 (within the occupations E3B supports)
+        zh: SOC 2018 职业 41-1011（E3B 支持的职业范围）
+      label:
+        en: First-Line Supervisors of Retail Sales Workers
+        zh: 零售主管
+    occ.soc_41_3091:
+      basis.0:
+        en: SOC 2018 occupation 41-3091 (within the occupations E3B supports)
+        zh: SOC 2018 职业 41-3091（E3B 支持的职业范围）
+      label:
+        en: Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel
+        zh: 服务类销售代表
+    occ.soc_43_1011:
+      basis.0:
+        en: SOC 2018 occupation 43-1011 (within the occupations E3B supports)
+        zh: SOC 2018 职业 43-1011（E3B 支持的职业范围）
+      label:
+        en: First-Line Supervisors of Office and Administrative Support Workers
+        zh: 办公室行政主管
+    occ.soc_43_3071:
+      basis.0:
+        en: SOC 2018 occupation 43-3071 (within the occupations E3B supports)
+        zh: SOC 2018 职业 43-3071（E3B 支持的职业范围）
+      label:
+        en: Tellers
+        zh: 银行柜员
+    occ.soc_43_4051:
+      basis.0:
+        en: SOC 2018 occupation 43-4051 (within the occupations E3B supports)
+        zh: SOC 2018 职业 43-4051（E3B 支持的职业范围）
+      label:
+        en: Customer Service Representatives
+        zh: 客服代表
+    occ.soc_43_4171:
+      basis.0:
+        en: SOC 2018 occupation 43-4171 (within the occupations E3B supports)
+        zh: SOC 2018 职业 43-4171（E3B 支持的职业范围）
+      label:
+        en: Receptionists and Information Clerks
+        zh: 前台与咨询员
+    occ.soc_43_5071:
+      basis.0:
+        en: SOC 2018 occupation 43-5071 (within the occupations E3B supports)
+        zh: SOC 2018 职业 43-5071（E3B 支持的职业范围）
+      label:
+        en: Shipping, Receiving, and Inventory Clerks
+        zh: 收发与库存文员
+    occ.soc_43_6014:
+      basis.0:
+        en: SOC 2018 occupation 43-6014 (within the occupations E3B supports)
+        zh: SOC 2018 职业 43-6014（E3B 支持的职业范围）
+      label:
+        en: Secretaries and Administrative Assistants, Except Legal, Medical, and Executive
+        zh: 秘书与行政助理
+    occ.soc_49_2022:
+      basis.0:
+        en: SOC 2018 occupation 49-2022 (within the occupations E3B supports)
+        zh: SOC 2018 职业 49-2022（E3B 支持的职业范围）
+      label:
+        en: Telecommunications Equipment Installers and Repairers, Except Line Installers
+        zh: 通信设备安装维修工
+    occ.soc_49_3023:
+      basis.0:
+        en: SOC 2018 occupation 49-3023 (within the occupations E3B supports)
+        zh: SOC 2018 职业 49-3023（E3B 支持的职业范围）
+      label:
+        en: Automotive Service Technicians and Mechanics
+        zh: 汽车维修技师
+    occ.soc_49_9071:
+      basis.0:
+        en: SOC 2018 occupation 49-9071 (within the occupations E3B supports)
+        zh: SOC 2018 职业 49-9071（E3B 支持的职业范围）
+      label:
+        en: Maintenance and Repair Workers, General
+        zh: 综合维修工
+    occ.soc_51_4121:
+      basis.0:
+        en: SOC 2018 occupation 51-4121 (within the occupations E3B supports)
+        zh: SOC 2018 职业 51-4121（E3B 支持的职业范围）
+      label:
+        en: Welders, Cutters, Solderers, and Brazers
+        zh: 焊工
+    occ.soc_51_6011:
+      basis.0:
+        en: SOC 2018 occupation 51-6011 (within the occupations E3B supports)
+        zh: SOC 2018 职业 51-6011（E3B 支持的职业范围）
+      label:
+        en: Laundry and Dry-Cleaning Workers
+        zh: 洗衣与干洗工
+    occ.soc_53_7062:
+      basis.0:
+        en: SOC 2018 occupation 53-7062 (within the occupations E3B supports)
+        zh: SOC 2018 职业 53-7062（E3B 支持的职业范围）
+      label:
+        en: Laborers and Freight, Stock, and Material Movers, Hand
+        zh: 搬运与装卸工
+    occ.soc_53_7065:
+      basis.0:
+        en: SOC 2018 occupation 53-7065 (within the occupations E3B supports)
+        zh: SOC 2018 职业 53-7065（E3B 支持的职业范围）
+      label:
+        en: Stockers and Order Fillers
+        zh: 理货与拣货员

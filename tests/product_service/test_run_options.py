@@ -120,6 +120,7 @@ def test_out_of_range_options_are_refused_before_any_reservation(tmp_path, optio
         "support_ref",
         "retry_after_seconds",
         "field",
+        "display",
         "sample",
     }
     assert svc.store.intents(principal) == [] and svc.store.pending_jobs() == []

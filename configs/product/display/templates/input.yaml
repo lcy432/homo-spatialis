@@ -1,0 +1,679 @@
+# 输入侧的显示模板（能力清单、审阅、确认画像、确认回复的问题）：zh 是代码里中文模板的对齐副本（代码才是唯一来源，
+# scripts/product_display.py check 核对两者一致）；en 是英文模板，占位必须与中文相同。不放 HTML、不放用户内容。
+# 资料包里的名称与说明（城市、维度、职业……）不在这里，在 entities/input_<pack_id>.yaml。
+templates:
+  input.ability.state.indifferent:
+    en: no strong view
+    zh: 无所谓
+  input.ability.state.provided:
+    en: provided
+    zh: 已提供
+  input.ability.state.unanswered:
+    en: not answered
+    zh: 未答
+  input.ability.state.unsure:
+    en: not sure yet
+    zh: 暂不确定
+  input.ability_duplicated.impact:
+    en: This qualification cannot go into the starting state, and the profile cannot be confirmed
+    zh: 这项资格不能进入开局，画像不能确认
+  input.ability_duplicated.message:
+    en: 'Qualification {aid} appears {n} times ({states}): the system will not decide for you whether you hold it'
+    zh: 资格 {aid} 出现了 {n} 次（{states}）：系统不替你判断持不持有
+  input.ability_duplicated.next:
+    en: 'Keep only one entry: choose “provided” if you hold it, or “not sure yet” if you are not sure'
+    zh: 只保留一条：持有就选“已提供”，不确定就选“暂不确定”
+  input.ability_unknown.impact:
+    en: This qualification will not go into the starting state
+    zh: 这项资格不会进入开局
+  input.ability_unknown.message:
+    en: This version has no definition for qualification {aid}
+    zh: 本版没有资格 {aid} 的定义
+  input.ability_unknown.next:
+    en: Only confirm qualifications listed in the capability list
+    zh: 只确认能力清单里列出的资格
+  input.ack.interests_not_personalized:
+    en: Whatever is not personalized by specific interests or taste this time is evaluated with neutral rules (not answered, not sure yet, no fixed hobby and the generic evaluation are each recorded as such); descriptions you wrote that this version does not support are only kept as written
+    zh: 本次不按具体兴趣或口味个性化的部分按中性规则评价（未答、暂不确定、没有固定爱好或通用评价各自记下）；写了但本版不支持的描述只留存原文
+  input.ack.retained:
+    en: Statement {ref} is not scored and not guaranteed in this version; it is only kept as written
+    zh: 陈述 {ref} 本版不评分、不保证执行，只留存原文
+  input.ack.standard_start:
+    en: This is a simplified scenario that starts healthy, with no belongings and no courses in progress (real furniture and medical history are not included yet)
+    zh: 这是一次从健康、没有已有物品、没有在学课程开始的简化情景（现实中的家具与病史暂未纳入）
+  input.ack_missing.impact:
+    en: The profile cannot be confirmed until you acknowledge this explanation
+    zh: 没有知悉这项说明就不能确认画像
+  input.ack_missing.message:
+    en: 'Not acknowledged yet: {what}'
+    zh: 还没有确认：{what}
+  input.ack_missing.next:
+    en: Read the explanation, then tick to acknowledge it
+    zh: 阅读说明后勾选确认
+  input.age_missing.impact:
+    en: The starting state needs an age (the model's illness rules go by age band and are not medically calibrated)
+    zh: 开局状态需要年龄（模型的疾病规则按年龄段，未经医学标定）
+  input.age_missing.message:
+    en: Age is not filled in yet
+    zh: 还没有填写年龄
+  input.age_missing.next:
+    en: Enter your age in whole years at the start of the simulation
+    zh: 填写模拟开始时的整数年龄
+  input.age_out_of_range.impact:
+    en: This version only supports scenarios with a single adult
+    zh: 本版只支持单个成年人的情景
+  input.age_out_of_range.message:
+    en: Age {age} is outside the {low}–{high} years this version supports
+    zh: 年龄 {age} 不在本版支持的 {low}–{high} 岁之间
+  input.age_out_of_range.next:
+    en: Enter an age within the supported range
+    zh: 填写支持范围内的年龄
+  input.allocation.equal_split_with_values.impact:
+    en: It is unclear which split you want
+    zh: 不能确定你要的是哪一种分配
+  input.allocation.equal_split_with_values.message:
+    en: 'You chose “split equally” and also submitted manual values: only one of the two can be used'
+    zh: 选择了“平均分配”，又提交了手工数值：两者只能选一种
+  input.allocation.equal_split_with_values.next:
+    en: Undo the equal split, or clear the manual values
+    zh: 撤销平均分配，或清空手工数值
+  input.allocation.gap.over:
+    en: '{n} points over'
+    zh: 多出 {n} 分
+  input.allocation.gap.short:
+    en: '{n} points short'
+    zh: 还差 {n} 分
+  input.allocation.healthcare.impact:
+    en: The healthcare points here will not be used, and will not be reinterpreted as health answers
+    zh: 这里的医疗点数不会被使用，也不会被改读成健康回答
+  input.allocation.healthcare.message:
+    en: 'Health is not part of the six areas'' 100 points: in the new questionnaire, coping with health risks is a separate questionnaire that takes none of these 100 points'
+    zh: 健康不在六维 100 分里：新问卷的健康风险应对是一份独立问卷，不占这 100 分
+  input.allocation.healthcare.next:
+    en: Remove this entry and answer in the health questionnaire
+    zh: 删掉这一项，在健康问卷里回答
+  input.allocation.laundry.impact:
+    en: This entry will not be used, and will not be reinterpreted as a new question
+    zh: 这一项不会被使用，也不会被改读成新题目
+  input.allocation.laundry.message:
+    en: “Laundry” in the old questionnaire asked whether you have laundry facilities; it cannot be taken automatically as “daily convenience” (willingness to pay to reduce daily chores)
+    zh: 旧问卷的“洗衣”问的是有没有洗衣条件，不能自动当作“日常生活便利”（愿意花钱减少日常杂务）
+  input.allocation.laundry.next:
+    en: Split the four material-life items again under the new questions (living space, food, daily convenience, personal consumption and enjoyment)
+    zh: 按新题目重新分配物质四项（居住空间、饮食生活、日常生活便利、个人消费与享受）
+  input.allocation.material:
+    en: four material-life items
+    zh: 物质四项
+  input.allocation.no_value.impact:
+    en: This item has no usable value
+    zh: 这一项没有可用的数值
+  input.allocation.not_given.impact:
+    en: The split across the {what} is not complete, so it cannot be confirmed
+    zh: '{what}还不完整，不能确认'
+  input.allocation.not_given.message:
+    en: '{name}: {state}; the system will not turn it into 0 points or an equal share automatically'
+    zh: '{name} {state}：系统不会把它自动换成 0 分或平均分'
+  input.allocation.not_given.next:
+    en: Give it an explicit number of points (0 is allowed), or choose to split equally
+    zh: 给它一个明确的分数（可以是 0），或选择平均分配
+  input.allocation.out_of_range.message:
+    en: '{value} points for {name} is more than 100'
+    zh: '{name} 的 {value} 分超过了 100'
+  input.allocation.out_of_range.next:
+    en: Each item must be between 0 and 100
+    zh: 每一项在 0 到 100 之间
+  input.allocation.parse_error.message:
+    en: '{name}: {error}'
+    zh: '{name}：{error}'
+  input.allocation.parse_error.next:
+    en: Use a number with at most two decimal places, or split equally
+    zh: 改成最多两位小数的数，或使用平均分配
+  input.allocation.six:
+    en: six areas
+    zh: 六维
+  input.allocation.state.indifferent:
+    en: you chose “no strong view”
+    zh: 选了“无所谓”
+  input.allocation.state.unanswered:
+    en: not allocated yet
+    zh: 还没有分配
+  input.allocation.state.unsure:
+    en: you chose “not sure yet”
+    zh: 选了“暂不确定”
+  input.allocation.sum_not_100.impact:
+    en: The system will not cut or top up any item proportionally
+    zh: 系统不会按比例自动扣减或补齐任何一项
+  input.allocation.sum_not_100.message:
+    en: 'The {what} add up to {total} (shown as {shown}), not 100: {gap}'
+    zh: '{what}合计是 {total}（显示 {shown}），不是 100：{gap}'
+  input.allocation.sum_not_100.next:
+    en: You decide which item to move points from and to, until the total is exactly 100
+    zh: 由你决定从哪一项挪到哪一项，直到精确合计 100
+  input.allocation.unknown_key.impact:
+    en: This entry will not be used
+    zh: 这一项不会被使用
+  input.allocation.unknown_key.message:
+    en: “{key}” is not one of the {what} in this version
+    zh: “{key}”不是本版{what}的一项
+  input.allocation.unknown_key.next:
+    en: Split only among {names}
+    zh: 只在 {names} 之间分配
+  input.capabilities.money_input_rule:
+    en: 'Amounts are accepted in only two forms: an ungrouped non-negative decimal (for example 3000.50), or thousands grouped strictly in threes (for example 3,000.50); the decimal point must be “.”, with at most two decimal places. Forms such as “3000,50”, “3,,000” or “1,23.45” are rejected; the system does not guess what you meant'
+    zh: 金额只接受两种写法：不分组的非负十进制（例如 3000.50），或严格每三位一组的千分位（例如 3,000.50）；小数点只能用“.”，最多两位小数。“3000,50”“3,,000”“1,23.45”这类写法会被拒绝，系统不猜你的意思
+  input.capabilities.occupation_note:
+    en: 'Describe your work in your own words; the system offers a few readable candidates (name and duties) from the aliases in a controlled vocabulary, and you confirm one. Classification codes are kept internally only: you do not need to enter them and will not be asked to. If nothing matches, the system says why and does not turn it into “ordinary office worker”'
+    zh: 用自然语言描述你的工作；系统按受控词表的别名给出少量可读候选（名称与职责），由你确认。分类代码只在内部保留，不需要、也不会请你填写；匹配不到时说明原因，不自动改成“普通白领”
+  input.cash_missing.impact:
+    en: Starting cash is unknown, so the starting state cannot be generated
+    zh: 开局现金未知，不能生成开局
+  input.cash_missing.message:
+    en: The money you can use for living at the start is not filled in yet (leaving it empty is not 0)
+    zh: 还没有填写开始时可用于生活的钱（没填不是 0）
+  input.cash_missing.next:
+    en: Enter the amount, its currency and the period the amount is in
+    zh: 填写金额、币种与金额时期
+  input.cities_missing.impact:
+    en: Without cities, no clones can be set up
+    zh: 没有城市就不能安排分身
+  input.cities_missing.message:
+    en: No cities to compare have been chosen yet
+    zh: 还没有选择要比较的城市
+  input.cities_missing.next:
+    en: Choose at least one city from the capability list
+    zh: 从能力清单列出的城市里至少选一座
+  input.city_duplicated.impact:
+    en: The same city is not counted twice
+    zh: 同一座城不重复计数
+  input.city_duplicated.message:
+    en: City {ref} was chosen twice
+    zh: 城市 {ref} 选了两次
+  input.city_duplicated.next:
+    en: Remove the duplicate
+    zh: 删掉重复的那一项
+  input.city_not_supported.impact:
+    en: There is no data for this city, so it cannot be run
+    zh: 这座城市没有资料，不能运行
+  input.city_not_supported.message:
+    en: City {ref} is not in this version's capability list
+    zh: 城市 {ref} 不在本版能力清单里
+  input.city_not_supported.next:
+    en: Choose from the cities in the capability list
+    zh: 从能力清单列出的城市里选择
+  input.confirmation_invalidated.impact:
+    en: The changed answers are not confirmed yet, so nothing can be run
+    zh: 改过的答案还没有确认，不能运行
+  input.confirmation_invalidated.message:
+    en: 'The original answers were changed after confirmation: the old confirmation is no longer valid'
+    zh: 原始答案在确认之后改过：旧确认已经失效
+  input.confirmation_invalidated.next:
+    en: Review and confirm again based on the changed answers
+    zh: 按修改后的答案重新审阅并确认
+  input.confirmation_tampered.impact:
+    en: This confirmation cannot be used for a run
+    zh: 不能用这份确认运行
+  input.confirmation_tampered.message:
+    en: The confirmed profile's content does not match the identity it recorded (it may have been altered)
+    zh: 确认画像的内容与它记下的身份不一致（可能被改写过）
+  input.confirmation_tampered.next:
+    en: Review and confirm again
+    zh: 重新审阅并确认
+  input.confirmed.hard_requirement.label:
+    en: '{label} {value} {unit} (checked and reported separately; it does not block plans)'
+    zh: '{label} {value} {unit}（单独核验并报告，不拦截计划）'
+  input.data_pack_changed.field:
+    en: '{where}.meta.data_pack'
+    zh: '{where}.meta.data_pack'
+  input.data_pack_changed.impact:
+    en: Cities, vocabulary or data have changed, so the old interpretation may no longer hold
+    zh: 城市、词表或资料变了，旧的解释不一定还成立
+  input.data_pack_changed.message:
+    en: The data pack the {where} is based on differs in content from the current data pack
+    zh: '{where} 所依据的资料包与现在的资料包内容不同'
+  input.data_pack_changed.next:
+    en: Review and confirm again with the current data pack
+    zh: 用当前资料包重新审阅并确认
+  input.exact.money_negative:
+    en: 'The amount “{text}” is negative: money available at the start cannot be negative (debt is outside what this version supports)'
+    zh: 金额“{text}”是负数：开始时可用的钱不能是负数（欠款不在本版支持范围）
+  input.exact.money_negative.next:
+    en: Enter an amount of 0 or more
+    zh: 填写不小于 0 的金额
+  input.exact.money_not_a_number:
+    en: The amount “{text}” is not a non-negative decimal number
+    zh: 金额“{text}”不是非负十进制数
+  input.exact.money_not_a_number.next:
+    en: Enter an amount like “3000” or “3,000.50”
+    zh: 填写像“3000”或“3,000.50”这样的金额
+  input.exact.money_separator_invalid:
+    en: 'The commas in the amount “{text}” are not used correctly: thousands must be grouped in threes (for example 3,000.50), and the decimal point must be “.”. The system does not guess what you meant: deleting the comma from “3000,50” would turn it into 300,050'
+    zh: 金额“{text}”的逗号用法不对：千分位必须每三位一组（例如 3,000.50），小数点只能用“.”。系统不猜你的意思——“3000,50”删掉逗号会变成 300,050
+  input.exact.money_separator_invalid.next:
+    en: Enter it again in a form like “3000.50” or “3,000.50”
+    zh: 按“3000.50”或“3,000.50”这样的写法重新填写
+  input.exact.money_too_many_decimals:
+    en: The amount “{text}” is more precise than the smallest accounting unit ({digits} decimal places)
+    zh: 金额“{text}”的精度细于最小记账单位（{digits} 位小数）
+  input.exact.money_too_many_decimals.next:
+    en: Write at most {digits} decimal places; it is not rounded automatically
+    zh: 最多写 {digits} 位小数，不自动四舍五入
+  input.exact.money_unparsable:
+    en: The amount “{text}” cannot be parsed
+    zh: 金额“{text}”不能解析
+  input.exact.points_fraction_not_canonical:
+    en: The fraction “{text}” is not in lowest terms; write “{canonical}”
+    zh: 分数“{text}”不是规范写法，应写“{canonical}”
+  input.exact.points_not_a_number:
+    en: “{text}” is not a decimal number or a fraction in lowest terms
+    zh: “{text}”不是十进制数或规范分数
+  input.exact.points_too_many_decimals:
+    en: “{text}” has {decimals} decimal places; manual entry in this version allows at most {max_decimals} (the step is not a measurement precision)
+    zh: “{text}”有 {decimals} 位小数，本版手工输入最多 {max_decimals} 位（步长不是测量精度）
+  input.free_text_too_long.impact:
+    en: The system will not cut it automatically; the extra part cannot be dropped silently
+    zh: 系统不会自动截断，超出部分不能静默丢弃
+  input.free_text_too_long.message:
+    en: The additional text has {n} characters, over the 2,000 limit
+    zh: 补充文字有 {n} 个字符，超过 2,000 的上限
+  input.free_text_too_long.next:
+    en: Shorten it yourself to 2,000 characters or fewer
+    zh: 自己删减到 2,000 字符以内
+  input.hard_requirement.unfilled:
+    en: not filled in
+    zh: 未填
+  input.hard_requirement.value:
+    en: '{value} {unit}'
+    zh: '{value} {unit}'
+  input.hard_requirement_conflict.impact:
+    en: This hard requirement cannot be used yet, and the profile cannot be confirmed
+    zh: 这项硬要求还不能使用，画像不能确认
+  input.hard_requirement_conflict.message:
+    en: '“{label}” was given {n} times ({values}): each requirement can have only one entry; the system does not take the stricter limit automatically, nor does it use the last one'
+    zh: “{label}”收到了 {n} 条（{values}）：同一项要求只能有一条，系统不自动取更严格的上限，也不按最后一条算
+  input.hard_requirement_conflict.next:
+    en: Keep only one entry, with the number you really want
+    zh: 只保留一条，写你真正要的那个数
+  input.hard_requirement_duplicated.impact:
+    en: This hard requirement cannot be used yet, and the profile cannot be confirmed
+    zh: 这条硬要求还不能使用，画像不能确认
+  input.hard_requirement_duplicated.message:
+    en: 'Hard requirement ID {rid} appears {n} times: the system will not decide for you which one to keep'
+    zh: 硬要求编号 {rid} 出现了 {n} 次：系统不替你决定保留哪一条
+  input.hard_requirement_duplicated.next:
+    en: Keep only one
+    zh: 只保留一条
+  input.hard_requirement_not_enforceable.impact:
+    en: The clones may still choose options that conflict with it (for example in-home services); this requirement is only kept, with no guarantee that it is followed
+    zh: 分身仍可能选择与它冲突的方案（例如上门服务）；这条要求只留存，不保证执行
+  input.hard_requirement_not_enforceable.message:
+    en: “{text}” is marked non-negotiable, but this version has no way to check or enforce it
+    zh: “{text}”被标成不可妥协，但本版没有能核验或拦截它的机制
+  input.hard_requirement_not_enforceable.next:
+    en: Acknowledge this and confirm, or change it to an ordinary preference
+    zh: 知悉后确认，或改成普通偏好
+  input.hard_requirement_parameter_invalid.impact:
+    en: This hard requirement cannot be used yet
+    zh: 这条硬要求还不能使用
+  input.hard_requirement_parameter_invalid.message:
+    en: “{label}” needs a whole number from {low} to {high} {unit} in steps of {step}; got {got}
+    zh: “{label}”需要 {low}–{high} {unit}、步长 {step} 的整数，得到 {got}
+  input.hard_requirement_parameter_invalid.next:
+    en: Enter a value within the range
+    zh: 填写范围内的数值
+  input.hard_requirement_unsupported.impact:
+    en: It is only kept as written; it will not block plans and will not be checked
+    zh: 它只原样留存，不会拦截计划，也不会被核验
+  input.hard_requirement_unsupported.message:
+    en: “{text}” is not a hard-requirement option this version can check
+    zh: “{text}”不是本版能核验的硬要求选项
+  input.hard_requirement_unsupported.next:
+    en: Acknowledge this and confirm, or choose from the supported options
+    zh: 知悉后确认，或从受支持的选项里选择
+  input.health.meaning.duplicated:
+    en: 'This question received more than one answer: keep only one before confirming (the system will not choose for you)'
+    zh: 这一题收到了多个答案：确认前请只保留一个（系统不替你选）
+  input.health.meaning.no_clear_tendency:
+    en: The user has no clear tendency on this question
+    zh: 用户在这一题上没有明显倾向
+  input.health.meaning.unanswered:
+    en: The user did not answer this question
+    zh: 用户没有回答这一题
+  input.health.meaning.unsure:
+    en: The user is not sure yet
+    zh: 用户暂不确定
+  input.health.unanswered_short:
+    en: not answered
+    zh: 未答
+  input.health_answer_duplicated.impact:
+    en: The tendency on this question cannot be determined, so the profile cannot be confirmed
+    zh: 这一题的倾向不能确定，画像不能确认
+  input.health_answer_duplicated.message:
+    en: 'Health question {qid} received {n} answers ({choices}): each question can have only one answer; the system will not choose for you, nor use the last one'
+    zh: 健康题 {qid} 收到了 {n} 个答案（{choices}）：同一题只能有一个答案，系统不替你选，也不按最后一个算
+  input.health_answer_duplicated.next:
+    en: Keep only one answer (if you are unsure, you can choose “Not sure yet”)
+    zh: 只保留一个答案（拿不准可以选“暂不确定”）
+  input.health_question_unknown.impact:
+    en: This question will not be used
+    zh: 这一题不会被使用
+  input.health_question_unknown.message:
+    en: The questionnaire has no question {qid}
+    zh: 问卷里没有题目 {qid}
+  input.health_question_unknown.next:
+    en: Answer according to the current questionnaire
+    zh: 按当前问卷回答
+  input.health_version_mismatch.impact:
+    en: Answers to old questions cannot be reinterpreted as answers to new ones
+    zh: 旧题目的答案不能改读成新题目的答案
+  input.health_version_mismatch.message:
+    en: The health answers were given under questionnaire {old}; the current questionnaire is {new}
+    zh: 健康回答按问卷 {old} 填写，现在的问卷是 {new}
+  input.health_version_mismatch.next:
+    en: Answer again under the current questionnaire
+    zh: 按当前问卷重新回答
+  input.interests.adopted.review:
+    en: '{label}: adopting {names}'
+    zh: '{label}：采用 {names}'
+  input.interests.adopted_with_unrecognized.review:
+    en: '{label}: adopting {names}; the unrecognized parts {unrecognized} are kept as written and not scored in this version'
+    zh: '{label}：采用 {names}；没认出的片段 {unrecognized} 原样保留、本版不评分'
+  input.interests.duplicate_selection.impact:
+    en: A repeated category would make the confirmed profile fail when it is compiled; the system will not remove duplicates for you
+    zh: 重复的类别会让确认画像在编译时失败；系统不替你去重
+  input.interests.duplicate_selection.message:
+    en: 'In {label}, the same category was chosen more than once: {keys}'
+    zh: '{label}里同一类别选了不止一次：{keys}'
+  input.interests.duplicate_selection.next:
+    en: Choose each category only once
+    zh: 每个类别只选一次
+  input.interests.duplicate_selection.review:
+    en: '{label}: the same category was chosen more than once: {keys}'
+    zh: '{label}：同一类别选了不止一次 {keys}'
+  input.interests.no_candidates:
+    en: (no recognized categories)
+    zh: （没有认出的类别）
+  input.interests.scope.leisure.described:
+    en: 'Leisure interests: personalized by the interests you confirmed ({names})'
+    zh: 休闲兴趣：按你确认的兴趣（{names}）个性化
+  input.interests.scope.leisure.generic:
+    en: 'Leisure interests: you chose the generic leisure evaluation (try whatever suitable the city offers); this time it is not personalized by specific interests'
+    zh: 休闲兴趣：你选择通用休闲评价（城市有什么合适的就体验什么），本次不按具体兴趣个性化
+  input.interests.scope.leisure.no_fixed_hobby:
+    en: 'Leisure interests: you said you have no fixed hobby; this time it is not personalized by specific interests (evaluated with neutral rules)'
+    zh: 休闲兴趣：你说明没有固定爱好，本次不按具体兴趣个性化（按中性规则评价）
+  input.interests.scope.leisure.unanswered:
+    en: 'Leisure interests: you did not answer; this time it is not personalized by specific interests (evaluated with neutral rules)'
+    zh: 休闲兴趣：你没有回答，本次不按具体兴趣个性化（按中性规则评价）
+  input.interests.scope.leisure.unsure:
+    en: 'Leisure interests: you chose “not sure yet”; this time it is not personalized by specific interests (evaluated with neutral rules)'
+    zh: 休闲兴趣：你选择暂不确定，本次不按具体兴趣个性化（按中性规则评价）
+  input.interests.scope.retained:
+    en: 'Descriptions this version does not support and only keeps as written: {texts} (not scored, and they do not change points, cash, qualifications or hard requirements)'
+    zh: 本版不支持、只留存原文的描述：{texts}（不进评分，也不改点数、现金、资格或硬要求）
+  input.interests.scope.taste.described:
+    en: 'Taste and cuisines: personalized by the cuisines you confirmed ({names})'
+    zh: 口味与菜系：按你确认的菜系（{names}）个性化
+  input.interests.scope.taste.no_preference:
+    en: 'Taste and cuisines: you said you have no taste preference; this time it is not personalized by specific cuisines (only fresh meals count)'
+    zh: 口味与菜系：你说明没有口味偏好，本次不按具体菜系个性化（只看新鲜餐）
+  input.interests.scope.taste.unanswered:
+    en: 'Taste and cuisines: you did not answer; this time it is not personalized by specific cuisines (only fresh meals count)'
+    zh: 口味与菜系：你没有回答，本次不按具体菜系个性化（只看新鲜餐）
+  input.interests.scope.taste.unsure:
+    en: 'Taste and cuisines: you chose “not sure yet”; this time it is not personalized by specific cuisines (only fresh meals count)'
+    zh: 口味与菜系：你选择暂不确定，本次不按具体菜系个性化（只看新鲜餐）
+  input.interests.selection_pending.impact:
+    en: An interpretation you have not checked does not go into scoring; the profile cannot be confirmed for now
+    zh: 没有核对过的解释不会进入评分，画像暂时不能确认
+  input.interests.selection_pending.message:
+    en: The text in {label} has been interpreted as candidates {candidates}, but no category to adopt has been chosen yet
+    zh: '{label}的文字已经解释成候选 {candidates}，还没有选中要采用的类别'
+  input.interests.selection_pending.next:
+    en: Choose the categories to adopt from the candidates or the vocabulary; or switch to “generic evaluation / no fixed hobby (no preference) / not sure yet”
+    zh: 从候选或词表里选中要采用的类别；或改选“通用评价 / 没有固定爱好（没有偏好）/ 暂不确定”
+  input.interests.selection_pending.review:
+    en: '{label}: waiting for a choice; candidates {candidates}, ambiguous {ambiguous}, not recognized {unrecognized}'
+    zh: '{label}：待选中——候选 {candidates}，有歧义 {ambiguous}，没认出 {unrecognized}'
+  input.interests.state.generic:
+    en: 'Generic leisure evaluation chosen: try whatever suitable the city offers (evaluated with neutral rules)'
+    zh: 选择通用休闲评价：城市有什么合适的就体验什么（按中性规则评价）
+  input.interests.state.no_fixed_hobby:
+    en: No fixed hobby, stated explicitly (evaluated with neutral rules)
+    zh: 明确没有固定爱好（按中性规则评价）
+  input.interests.state.no_preference:
+    en: No taste preference, stated explicitly (evaluated with neutral rules)
+    zh: 明确没有口味偏好（按中性规则评价）
+  input.interests.state.review:
+    en: '{label}: {state}'
+    zh: '{label}：{state}'
+  input.interests.state.unanswered:
+    en: Not answered (no explicit information on this item; evaluated with neutral rules; this is not the “generic evaluation” choice)
+    zh: 未答（没有这一项的明确信息，按中性规则评价；不是“通用评价”的选择）
+  input.interests.state.unsure:
+    en: Not sure yet (evaluated with neutral rules)
+    zh: 暂不确定（按中性规则评价）
+  input.interests.state_conflict.impact:
+    en: The two answers contradict each other, and the system will not choose between them for you
+    zh: 两种回答互相矛盾，系统不替你取舍
+  input.interests.state_conflict.message:
+    en: The answer for {label} is “{state}”, yet categories {keys} are also chosen
+    zh: '{label}的作答是“{state}”，却又选中了类别 {keys}'
+  input.interests.state_conflict.next:
+    en: Either switch to describing it in words and choose categories, or clear the chosen categories
+    zh: 要么改成用文字描述并选中类别，要么清空选中的类别
+  input.interests.state_with_text.review:
+    en: '{label}: {state}; the text you wrote is kept as written as a description this version does not support (not adopted as a category, not scored)'
+    zh: '{label}：{state}；你写的原文原样保留为本版未支持的描述（没有采用为类别，不进评分）'
+  input.interests.unknown_category.impact:
+    en: Categories outside the vocabulary cannot go into scoring
+    zh: 词表外的类别不能进入评分
+  input.interests.unknown_category.message:
+    en: 'In {label}, categories outside the vocabulary were chosen: {keys}'
+    zh: '{label}里选中了词表外的类别 {keys}'
+  input.interests.unknown_category.next:
+    en: Choose only from the categories in the capability list
+    zh: 只从能力清单列出的类别里选
+  input.interests.unknown_category.review:
+    en: '{label}: categories outside the vocabulary were chosen: {keys}'
+    zh: '{label}：选中了词表外的类别 {keys}'
+  input.item.abilities.label:
+    en: Confirmed qualifications
+    zh: 已确认的资格
+  input.item.abilities.note:
+    en: Only from facts you confirmed explicitly; never granted automatically from a job title
+    zh: 只来自你明确确认的事实，不从职业称呼自动授予
+  input.item.age.label:
+    en: Age
+    zh: 年龄
+  input.item.age.note:
+    en: Goes into the existing age rules (synthetic settings, not medically calibrated); age is never guessed from occupation
+    zh: 进入已有的年龄规则（合成设定，未经医学标定）；不从职业猜年龄
+  input.item.cash.label:
+    en: Money you can use for living at the start
+    zh: 开始时可用于生活的钱
+  input.item.cash.note:
+    en: Liquid funds you can actually spend, not home value, credit limits or monthly pay; leaving it empty is not 0, and nothing is borrowed silently
+    zh: 可动用的流动资金，不是房产总值、信用额度或月薪；没填不是 0，不静默借贷
+  input.item.cities.label:
+    en: Candidate cities
+    zh: 候选城市
+  input.item.cities.note:
+    en: In each city a clone lives for a fixed three years; a city is identified by its full country / scheme / code
+    zh: 每座城一个分身固定生活三年；城市身份用完整的国家 / 体系 / 代码
+  input.item.free_text.label:
+    en: Optional additional text
+    zh: 可选补充文字
+  input.item.free_text.note:
+    en: Only planning context for the clones; it never changes points, cash, qualifications or hard requirements automatically, and no LLM extracts anything from it in this round
+    zh: 只供分身做计划参考；不会自动改分数、现金、资格或硬要求，本轮不用 LLM 提取
+  input.item.health.label:
+    en: Coping with health risks (separate questionnaire)
+    zh: 健康风险应对（独立问卷）
+  input.item.health.note:
+    en: Takes none of the six areas' 100 points and is not a seventh scoring weight; it only informs the clones' planning and does not change illness rules, accounts or satisfaction; the questions are provisional wording
+    zh: 不占六维 100 分，不是第七个评分权重；只供分身做计划，不改变疾病规则、账目或满足感；题目是暂定文案
+  input.item.leisure_interest.label:
+    en: Leisure interests
+    zh: 休闲兴趣
+  input.item.material.label:
+    en: Four material-life items
+    zh: 物质四项
+  input.item.occupation.label:
+    en: Occupation
+    zh: 职业
+  input.item.occupation.note:
+    en: Used to match local catalogue jobs at the start; grants no qualification, and classification codes are kept internally only
+    zh: 用于匹配开局时的当地目录岗位；不授予任何资格，分类代码只在内部保留
+  input.item.points.note:
+    en: Stated relative importance, not spending shares or a budget; exact points are used in calculations, displayed values are for reading only
+    zh: 陈述的相对重要程度，不是开支比例或预算；精确分数参与计算，显示值只供阅读
+  input.item.six_dimensions.label:
+    en: Six areas
+    zh: 六维
+  input.item.taste.label:
+    en: Taste and cuisines
+    zh: 口味与菜系
+  input.list:
+    en: '[{items}]'
+    zh: '[{items}]'
+  input.list.item:
+    en: '''{v}'''
+    zh: '''{v}'''
+  input.material_parent_zero.impact:
+    en: These breakdown items stay only in the original answers and do not go into the profile
+    zh: 这几项细分只留在原始答案里，不进入画像
+  input.material_parent_zero.message:
+    en: 'Material life got 0 points, so the breakdown inside material life does not apply: the breakdown you filled in will not be used'
+    zh: 物质生活给了 0 分，物质内部的细分不适用：已填写的细分不会被使用
+  input.material_parent_zero.next:
+    en: If material life does matter to you, first change its points to a positive number
+    zh: 如果物质生活其实很重要，先把它的分数改成正数
+  input.money.meaning:
+    en: Liquid funds you can actually spend (not total assets, credit limits or monthly pay)
+    zh: 可动用的流动资金（不是总资产、信用额度或月薪）
+  input.money.meaning.short:
+    en: Liquid funds you can actually spend
+    zh: 可动用的流动资金
+  input.money.no_currency:
+    en: (no currency given)
+    zh: （未写币种）
+  input.money.no_period:
+    en: (no period given)
+    zh: （未写时期）
+  input.money.parse_error.impact:
+    en: 'Starting cash cannot be determined: the system will not guess the amount you meant'
+    zh: 开局现金不能确定：系统不会猜你想填的金额
+  input.money.parse_error.next:
+    en: Enter a non-negative amount with at most two decimal places
+    zh: 填写非负金额，最多两位小数
+  input.money_conversion_missing.impact:
+    en: 'This amount cannot simply be relabelled as 2024 local US dollars: that would change what it means'
+    zh: 不能把这个金额直接改标签成 2024 年当地美元——那会改变它的含义
+  input.money_conversion_missing.message:
+    en: Amounts in {currency} / {period} have no valid conversion basis in this version
+    zh: '{currency} / {period} 的金额在本版没有合法的换算依据'
+  input.money_conversion_missing.next:
+    en: 'Use a currency and period the capability list supports (this version: 2024 US dollars), or wait until real conversion data is connected (E3-B/C)'
+    zh: 改用能力清单支持的币种与时期（本版：2024 年美元），或等待真实换算资料接入（E3-B/C）
+  input.occupation.ambiguous:
+    en: 'This description matches more than one occupation: {labels}. Please choose the one you mainly do'
+    zh: 这段描述对应不止一种职业：{labels}。请选出你主要做的那一种
+  input.occupation.ambiguous_more:
+    en: 'This description matches more than one occupation: {labels}. Please choose the one you mainly do (there are more matches; please be more specific)'
+    zh: 这段描述对应不止一种职业：{labels}。请选出你主要做的那一种（还有更多匹配，请写得更具体）
+  input.occupation.explicit:
+    en: It looks like your work falls under “{label}”; please confirm whether this reading is right
+    zh: 看起来你的工作是“{label}”；请确认这个理解是否正确
+  input.occupation.not_provided:
+    en: You have not described your work yet
+    zh: 还没有描述你的工作
+  input.occupation.unknown:
+    en: 'No occupation in the controlled vocabulary matches this description: describe your main duties in other words, or choose from the job types in the candidate cities; the system will not file it under “ordinary office worker” automatically'
+    zh: 受控词表里没有找到与这段描述对应的职业：请换一种说法描述主要职责，或从候选城市的岗位类型里选择；系统不会自动归成“普通白领”
+  input.occupation_missing.impact:
+    en: Starting jobs are matched against the local catalogue, so without an occupation the starting state cannot be generated
+    zh: 开局岗位要按当地目录匹配，没有职业就不能生成开局
+  input.occupation_missing.message:
+    en: You have not described what your main work is yet
+    zh: 还没有描述你主要做什么工作
+  input.occupation_missing.next:
+    en: Describe your main work in a sentence or two
+    zh: 用一两句话描述你的主要工作内容
+  input.occupation_needs_confirmation.impact:
+    en: The occupation is not confirmed yet, so the starting state cannot be generated
+    zh: 职业还没有确认，不能生成开局
+  input.occupation_needs_confirmation.next:
+    en: Choose, from the candidates, the one you mainly do
+    zh: 在候选里选出你主要做的那一种
+  input.occupation_selection_invalid.impact:
+    en: The occupation is not confirmed yet
+    zh: 职业还没有确认
+  input.occupation_selection_invalid.message:
+    en: The chosen occupation is not among the candidates for this description (after the description changes, choose again)
+    zh: 选中的职业不在这段描述的候选里（描述改过之后要重新选）
+  input.occupation_selection_invalid.next:
+    en: Choose a candidate again based on the current description
+    zh: 按当前描述重新选择候选
+  input.occupation_unknown.impact:
+    en: No starting job can be matched, so the starting state cannot be generated
+    zh: 开局岗位无法匹配，不能生成开局
+  input.occupation_unknown.next:
+    en: Describe your main duties in other words
+    zh: 换一种说法描述主要职责
+  input.schema_version_changed.impact:
+    en: A confirmation in the old structure cannot be reused as it is
+    zh: 旧结构的确认不能直接沿用
+  input.schema_version_changed.message:
+    en: The confirmed profile's structure version differs from the current one
+    zh: 确认画像的结构版本与现在不同
+  input.schema_version_changed.next:
+    en: Confirm again
+    zh: 重新确认
+  input.statement.attribute.message:
+    en: '“{text}”: {note}'
+    zh: “{text}”：{note}
+  input.statement.attribute_hard.message:
+    en: '“{text}”: {note}. You marked it as a non-negotiable requirement, but this version cannot guarantee it: it will not block any plan and is only kept as written'
+    zh: “{text}”：{note}。你把它标成了不可妥协的要求，但本版没有执行保障：它不会拦截任何计划，只原样留存
+  input.statement.attribute_unknown_kind:
+    en: 'This version has no definition for this kind of preference: only the original text is kept'
+    zh: 本版没有这类偏好的定义：只留存原文
+  input.statement.hard_requirement_unsupported:
+    en: 'This version has no definition or data for this hard requirement: only the original text is kept; it is not checked and does not block anything'
+    zh: 本版没有这项硬要求的定义与资料：只留存原文，不核验、不拦截
+  input.summary.confirmable:
+    en: 'The answers can be confirmed: please check the explanations below, and acknowledge the standard start and the statements that are only kept'
+    zh: 答案可以确认：请核对下面的解释，并知悉标准开局与只留存的陈述
+  input.summary.equal_split_six:
+    en: 'You chose an equal split for the six areas: 50/3 points each (shown as 16.7)'
+    zh: 六维选择了平均分配：每项 50/3 分（显示 16.7）
+  input.summary.health_unclear:
+    en: 'Health questions without a clear tendency (not answered or not sure yet): {n}. They are kept as they are, and the clones will be told there is no explicit instruction for them'
+    zh: 健康问卷有 {n} 题没有明确倾向（未答或暂不确定）：照实保留，分身会被告知没有这几项的明确指令
+  input.summary.single_city:
+    en: 'Only one city is chosen: it can run, but there is no comparison between cities'
+    zh: 只选了一座城：可以运行，但没有城市之间的比较
+  input.version_changed.field:
+    en: '{where}.meta.{key}'
+    zh: '{where}.meta.{key}'
+  input.version_changed.impact:
+    en: Answers given under an old version of the questionnaire, vocabulary or conversion rules cannot be reused as they are
+    zh: 按旧版本问卷、词表或转换规则填写的答案不能直接沿用
+  input.version_changed.message:
+    en: The {where} uses {key} {old}; it is now {new}
+    zh: '{where} 用的 {key} 是 {old}，现在是 {new}'
+  input.version_changed.next:
+    en: Fill in or confirm the related answers again under the current version
+    zh: 按当前版本重新填写或重新确认相关答案
+  input.where.confirmed:
+    en: confirmed profile
+    zh: 确认画像
+  input.where.confirmed.field:
+    en: confirmed_profile
+    zh: 确认画像
+  input.where.draft:
+    en: draft
+    zh: 草稿
+  input.where.draft.field:
+    en: draft
+    zh: 草稿

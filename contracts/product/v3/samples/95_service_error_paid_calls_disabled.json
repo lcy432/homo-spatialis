@@ -3,6 +3,77 @@
  "message": "ServiceError",
  "payload": {
   "code": "paid_calls_disabled",
+  "display": {
+   "display_schema_version": "e3-display-v1",
+   "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+   "source_view_fingerprint": "6330575538572348736f80c7eda7939c9e5681e78dea98cb99e53178bf55e0eb",
+   "translations": {
+    "en": {
+     "fields": [
+      {
+       "key": "error.paid_calls_disabled.message",
+       "missing_reason": null,
+       "pointer": "/message_zh",
+       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "The service has not turned on paid model calls"
+      },
+      {
+       "key": "error.paid_calls_disabled.impact",
+       "missing_reason": null,
+       "pointer": "/impact_zh",
+       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "A simulation that needs a real model cannot start, and the system will not quietly switch to the offline planner"
+      },
+      {
+       "key": "error.paid_calls_disabled.next",
+       "missing_reason": null,
+       "pointer": "/next_action_zh",
+       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "Try again after the service turns them on; no run was used"
+      }
+     ],
+     "status": "complete"
+    },
+    "zh": {
+     "fields": [
+      {
+       "key": "error.paid_calls_disabled.message",
+       "missing_reason": null,
+       "pointer": "/message_zh",
+       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "服务现在没有开启付费模型调用"
+      },
+      {
+       "key": "error.paid_calls_disabled.impact",
+       "missing_reason": null,
+       "pointer": "/impact_zh",
+       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "不能开始需要真实模型的模拟，系统不会悄悄换成离线规划器"
+      },
+      {
+       "key": "error.paid_calls_disabled.next",
+       "missing_reason": null,
+       "pointer": "/next_action_zh",
+       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "等服务开启后再试；没有使用次数"
+      }
+     ],
+     "status": "complete"
+    }
+   }
+  },
   "field": null,
   "impact_zh": "不能开始需要真实模型的模拟，系统不会悄悄换成离线规划器",
   "message_zh": "服务现在没有开启付费模型调用",

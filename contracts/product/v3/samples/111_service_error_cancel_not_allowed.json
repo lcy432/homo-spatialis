@@ -1,0 +1,98 @@
+{
+ "description_zh": "恢复排队时直接调用取消：409 cancel_not_allowed——已经开始过、没有取消、次数不退；可以等待或按公开动作删除。display 带中英两种文字",
+ "message": "ServiceError",
+ "payload": {
+  "code": "cancel_not_allowed",
+  "display": {
+   "display_schema_version": "e3-display-v1",
+   "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+   "source_view_fingerprint": "62b4d7c99a22c037c7cc01c5fa429b355b6d055732dbcef1d9d7f7b38278c425",
+   "translations": {
+    "en": {
+     "fields": [
+      {
+       "key": "error.cancel_not_allowed.message",
+       "missing_reason": null,
+       "pointer": "/message_zh",
+       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "This run has already started, so it cannot be withdrawn with “cancel before start”"
+      },
+      {
+       "key": "error.cancel_not_allowed.impact",
+       "missing_reason": null,
+       "pointer": "/impact_zh",
+       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "Nothing was cancelled; the 1 run already used is not refunded, and existing progress and results stay as they are"
+      },
+      {
+       "key": "error.cancel_not_allowed.next",
+       "missing_reason": null,
+       "pointer": "/next_action_zh",
+       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "You can let it continue, or delete this run using the action on the page"
+      }
+     ],
+     "status": "complete"
+    },
+    "zh": {
+     "fields": [
+      {
+       "key": "error.cancel_not_allowed.message",
+       "missing_reason": null,
+       "pointer": "/message_zh",
+       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "这次运行已经开始过，不能按“开始前取消”撤回"
+      },
+      {
+       "key": "error.cancel_not_allowed.impact",
+       "missing_reason": null,
+       "pointer": "/impact_zh",
+       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "没有取消；已经用掉的 1 次机会不退，已有的进度与结果保持不变"
+      },
+      {
+       "key": "error.cancel_not_allowed.next",
+       "missing_reason": null,
+       "pointer": "/next_action_zh",
+       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "可以等它接着运行，或者按页面上的动作删除这次运行"
+      }
+     ],
+     "status": "complete"
+    }
+   }
+  },
+  "field": null,
+  "impact_zh": "没有取消；已经用掉的 1 次机会不退，已有的进度与结果保持不变",
+  "message_zh": "这次运行已经开始过，不能按“开始前取消”撤回",
+  "meta": null,
+  "next_action_zh": "可以等它接着运行，或者按页面上的动作删除这次运行",
+  "retry_after_seconds": null,
+  "sample": {
+   "note": "受控夹具：故障注入或测试传输（离线替身，不是真实模型），零网络、零费用",
+   "origin": "controlled_fixture",
+   "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+   "synthetic": true
+  },
+  "status": 409,
+  "support_ref": null
+ },
+ "sample": {
+  "note": "受控夹具：故障注入或测试传输（离线替身，不是真实模型），零网络、零费用",
+  "origin": "controlled_fixture",
+  "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+  "synthetic": true
+ }
+}

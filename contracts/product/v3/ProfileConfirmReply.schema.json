@@ -548,6 +548,52 @@
    "title": "ConfirmedProfile",
    "type": "object"
   },
+  "ConfirmedProfileSummary": {
+   "additionalProperties": false,
+   "description": "一份确认画像的服务端摘要（E3C 接口补齐）：首次确认时间与可以用来准备新模拟的截止时间都读服务库，重复确认、查询都不续期。\n它不是确认画像本体的一部分，不进入画像的内容身份；画像到期只影响准备新的模拟，已经准备的意图用自己的副本与期限。",
+   "properties": {
+    "confirmed_id": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+     "title": "Confirmed Id",
+     "type": "string"
+    },
+    "content_fingerprint": {
+     "pattern": "^[0-9a-f]{64}$",
+     "title": "Content Fingerprint",
+     "type": "string"
+    },
+    "draft_id": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+     "title": "Draft Id",
+     "type": "string"
+    },
+    "draft_revision": {
+     "minimum": 1,
+     "title": "Draft Revision",
+     "type": "integer"
+    },
+    "expires_at": {
+     "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+     "title": "Expires At",
+     "type": "string"
+    },
+    "first_confirmed_at": {
+     "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+     "title": "First Confirmed At",
+     "type": "string"
+    }
+   },
+   "required": [
+    "confirmed_id",
+    "content_fingerprint",
+    "draft_id",
+    "draft_revision",
+    "first_confirmed_at",
+    "expires_at"
+   ],
+   "title": "ConfirmedProfileSummary",
+   "type": "object"
+  },
   "DataPackRef": {
    "additionalProperties": false,
    "description": "一份资料包的身份：编号、内容指纹与状态（合成测试资料，或冻结的真实资料包）。",
@@ -584,6 +630,171 @@
     "note"
    ],
    "title": "DataPackRef",
+   "type": "object"
+  },
+  "DisplayAttachment": {
+   "additionalProperties": false,
+   "description": "即时回复（错误、确认结果）的显示附层：这类回复可能没有可以再读的对象，所以随回复一起给中英两种文字。\n``source_view_fingerprint`` 是去掉 ``display`` 之后的原回复的规范 JSON 摘要；``pointer`` 都相对那份原回复。",
+   "properties": {
+    "display_schema_version": {
+     "const": "e3-display-v1",
+     "title": "Display Schema Version",
+     "type": "string"
+    },
+    "resource_version": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Resource Version"
+    },
+    "source_view_fingerprint": {
+     "pattern": "^[0-9a-f]{64}$",
+     "title": "Source View Fingerprint",
+     "type": "string"
+    },
+    "translations": {
+     "additionalProperties": {
+      "$ref": "#/$defs/DisplayTranslation"
+     },
+     "propertyNames": {
+      "enum": [
+       "zh",
+       "en"
+      ]
+     },
+     "title": "Translations",
+     "type": "object"
+    }
+   },
+   "required": [
+    "display_schema_version",
+    "source_view_fingerprint",
+    "translations"
+   ],
+   "title": "DisplayAttachment",
+   "type": "object"
+  },
+  "DisplayField": {
+   "additionalProperties": false,
+   "description": "原消息里一个可展示文字位置的显示文字。``pointer`` 是相对原消息（或原回复）的 JSON Pointer，只指向含中文的业务说明文字——\n不指向数值、权重、编号、动作枚举、秘密，也不指向用户原文（用户原文保持原文，不翻译）。``key`` 是稳定的文案 / 实体键。",
+   "properties": {
+    "key": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Key",
+     "type": "string"
+    },
+    "missing_reason": {
+     "anyOf": [
+      {
+       "enum": [
+        "no_binding",
+        "translation_missing",
+        "translation_stale",
+        "source_changed",
+        "ambiguous",
+        "untranslated_param",
+        "resources_unavailable",
+        "binding_stale"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Missing Reason"
+    },
+    "pointer": {
+     "maxLength": 400,
+     "pattern": "^(/[^/]+)+$",
+     "title": "Pointer",
+     "type": "string"
+    },
+    "resource_version": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Resource Version"
+    },
+    "source_locale": {
+     "enum": [
+      "zh",
+      "en"
+     ],
+     "title": "Source Locale",
+     "type": "string"
+    },
+    "status": {
+     "enum": [
+      "provided",
+      "missing"
+     ],
+     "title": "Status",
+     "type": "string"
+    },
+    "text": {
+     "anyOf": [
+      {
+       "maxLength": 6000,
+       "minLength": 1,
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Text"
+    }
+   },
+   "required": [
+    "pointer",
+    "key",
+    "status",
+    "source_locale"
+   ],
+   "title": "DisplayField",
+   "type": "object"
+  },
+  "DisplayTranslation": {
+   "additionalProperties": false,
+   "properties": {
+    "fields": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/DisplayField"
+     },
+     "title": "Fields",
+     "type": "array"
+    },
+    "status": {
+     "enum": [
+      "complete",
+      "partial",
+      "unavailable"
+     ],
+     "title": "Status",
+     "type": "string"
+    }
+   },
+   "required": [
+    "status"
+   ],
+   "title": "DisplayTranslation",
    "type": "object"
   },
   "DraftRef": {
@@ -1006,12 +1217,23 @@
   }
  },
  "additionalProperties": false,
- "description": "确认的结果：成功时是服务端生成的确认画像；被拒时列出原因（草稿改过、知悉项缺失、审阅过时……）。",
+ "description": "确认的结果：成功时是服务端生成的确认画像与它的服务端摘要（首次确认与截止时间）；被拒时列出原因（草稿改过、知悉项缺失、\n审阅过时……），摘要为空。",
  "properties": {
   "confirmed": {
    "anyOf": [
     {
      "$ref": "#/$defs/ConfirmedProfile"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null
+  },
+  "display": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/DisplayAttachment"
     },
     {
      "type": "null"
@@ -1029,6 +1251,17 @@
   },
   "meta": {
    "$ref": "#/$defs/ProductMeta"
+  },
+  "profile_summary": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/ConfirmedProfileSummary"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null
   },
   "status": {
    "enum": [

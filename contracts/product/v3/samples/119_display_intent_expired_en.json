@@ -1,0 +1,90 @@
+{
+ "description_zh": "过期的运行意图（结果从首次结束起 30 天）：阶段 expired、expiry_basis = unavailable，内容不再返回（locale = en）",
+ "message": "DisplayEnvelope",
+ "payload": {
+  "display_schema_version": "e3-display-v1",
+  "fields": [
+   {
+    "key": "pack.note.synthetic",
+    "missing_reason": null,
+    "pointer": "/meta/data_pack/note",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Synthetic data pack: every value is a hand-made model setting or test data, not real city data"
+   },
+   {
+    "key": "stage.expired",
+    "missing_reason": null,
+    "pointer": "/stage_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Expired"
+   }
+  ],
+  "id": "intent-000000000000005c",
+  "kind": "intent",
+  "locale": "en",
+  "metrics": [],
+  "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+  "source": {
+   "allowed_actions": [
+    "create_new_intent"
+   ],
+   "confirm_with": null,
+   "confirmed": {
+    "confirmed_id": "confirmed.draft-000000000000005b.r2",
+    "content_fingerprint": "c5f1c0b8469fbdd5ebc12a19b24b2b4d980ce6dd524b98782d0e01916390119d"
+   },
+   "created_at": "2026-11-23T09:01:02Z",
+   "deletion": {
+    "completed_at": null,
+    "requested_at": null,
+    "state": "none"
+   },
+   "expires_at": null,
+   "expiry_basis": "unavailable",
+   "explanation": null,
+   "intent_id": "intent-000000000000005c",
+   "meta": {
+    "conversion_version": "e3a-conversion-v2",
+    "data_pack": {
+     "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
+     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
+     "pack_id": "pack.e3a.synthetic-v2",
+     "status": "synthetic_fixture_only"
+    },
+    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
+    "questionnaire_version": "e3a-questionnaire-v0.3-draft",
+    "sample": null,
+    "schema_version": "e3a-product-schema-v3.3",
+    "vocabulary_version": "e3a-vocabulary-v4"
+   },
+   "preflight": null,
+   "progress": null,
+   "quota": {
+    "available": 2,
+    "reserved": 0,
+    "total": 3,
+    "used": 1
+   },
+   "result_available": false,
+   "run_id": "run-e3a-4fb3e54f2a30c6c6",
+   "settings": null,
+   "stage": "expired",
+   "stage_zh": "已过期",
+   "support_ref": "sup-000000000000005d",
+   "updated_at": "2026-11-23T09:01:02Z",
+   "waiting_for": "none"
+  },
+  "source_view_fingerprint": "f03dbbc2ad5bc79e6d6517f3c345602e46377c0c562b2ab656472f790a71a89d",
+  "status": "complete"
+ },
+ "sample": {
+  "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+  "origin": "offline_run",
+  "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+  "synthetic": true
+ }
+}

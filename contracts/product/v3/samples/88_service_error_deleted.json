@@ -3,6 +3,77 @@
  "message": "ServiceError",
  "payload": {
   "code": "deleted",
+  "display": {
+   "display_schema_version": "e3-display-v1",
+   "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+   "source_view_fingerprint": "5a18751a95c0cff0f13c9eefd77f50c9bffcd6b1ebf1c15e19f690249f3cc184",
+   "translations": {
+    "en": {
+     "fields": [
+      {
+       "key": "error.deleted.message",
+       "missing_reason": null,
+       "pointer": "/message_zh",
+       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "This content has been deleted"
+      },
+      {
+       "key": "error.deleted.impact",
+       "missing_reason": null,
+       "pointer": "/impact_zh",
+       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "The content can no longer be viewed or restored; deleting does not reset the number of runs used"
+      },
+      {
+       "key": "error.deleted.next",
+       "missing_reason": null,
+       "pointer": "/next_action_zh",
+       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "Create it again if you need it"
+      }
+     ],
+     "status": "complete"
+    },
+    "zh": {
+     "fields": [
+      {
+       "key": "error.deleted.message",
+       "missing_reason": null,
+       "pointer": "/message_zh",
+       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "这项内容已经删除"
+      },
+      {
+       "key": "error.deleted.impact",
+       "missing_reason": null,
+       "pointer": "/impact_zh",
+       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "内容不能再查看或恢复；删除不会重置使用次数"
+      },
+      {
+       "key": "error.deleted.next",
+       "missing_reason": null,
+       "pointer": "/next_action_zh",
+       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "需要的话重新创建"
+      }
+     ],
+     "status": "complete"
+    }
+   }
+  },
   "field": null,
   "impact_zh": "内容不能再查看或恢复；删除不会重置使用次数",
   "message_zh": "这项内容已经删除",

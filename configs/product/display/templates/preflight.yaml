@@ -1,0 +1,517 @@
+# 运行前检查、资料性质与目录编译的显示模板（E3AB → E5，e3-display-v1）：预检查的问题与说明、逐城的资料性质与范围说明、便利候选的
+# 编译原因与选项目录覆盖。zh 是代码里中文模板的对齐副本（代码才是唯一来源，scripts/product_display.py check 核对两者一致）；
+# en 是英文模板，占位必须与中文相同。不放 HTML、不放用户内容；资料里的名称与说明按实体编号绑定（entities/preflight*.yaml）。
+templates:
+  catalog.billing_kind_mismatch.message:
+    en: '{kind} billing should be {want}, but it is {billing}'
+    zh: '{kind}的计费应是 {want}，得到 {billing}'
+  catalog.billing_kind_mismatch.next:
+    en: Check the billing period
+    zh: 核对计费周期
+  catalog.billing_unit_unsupported.message:
+    en: 'The quote is per home visit, but E1 services are bought monthly: with no basis for “visits per month”, a single-visit price cannot be turned into a monthly plan'
+    zh: 报价是按次上门，E1 的服务按月购买：没有“每月几次”的依据，不能把单次价格换成月套餐
+  catalog.billing_unit_unsupported.next:
+    en: Provide a monthly-plan quote, or register data and a conversion for visits per month
+    zh: 提供按月套餐的报价，或登记每月上门次数的资料与换算
+  catalog.compiled.available:
+    en: 'Data complete: compiled as a purchasable opportunity; E1 settles it as usual by the minimum residual, the lifetime and the service months actually paid'
+    zh: 资料齐全：编成可购买的机会；E1 照旧按最小残余、寿命与实际服务月份结算
+  catalog.effect_unknown.message:
+    en: 'Relief-effect data (how many hours a month you still have to spend) is missing: the substitution field cannot be deleted to disguise this as “definitely no effect”'
+    zh: 减负效果（本人每月还要做多少小时）资料缺失：不能删掉替代字段把它伪装成“确定没有效果”
+  catalog.effect_unknown.next:
+    en: Add relief data, or register an explicit effect assumption shared by the whole group
+    zh: 补充减负资料，或登记全组共用的明确效果假设
+  catalog.effective_from_unknown.message:
+    en: It does not say when it starts to take effect (this month / next year)
+    zh: 没有写明从何时开始起作用（当月 / 下一年）
+  catalog.effective_from_unknown.next:
+    en: State when it takes effect
+    zh: 写明生效时点
+  catalog.impact.device_not_compiled:
+    en: This device cannot be compiled into the catalog
+    zh: 这项设备不能编入目录
+  catalog.impact.not_compiled:
+    en: This candidate cannot be compiled into the catalog
+    zh: 这项候选不能编入目录
+  catalog.impact.not_compiled_not_complete:
+    en: This candidate cannot be compiled into the catalog, and it is not marked as having complete data
+    zh: 这项候选不能编入目录，也不标为资料完整
+  catalog.impact.not_compiled_others_ok:
+    en: This candidate cannot be compiled into the catalog (the other candidates compile as usual)
+    zh: 这项候选不能编入目录（其他候选照常编译）
+  catalog.impact.service_not_compiled:
+    en: This service cannot be compiled into the catalog
+    zh: 这项服务不能编入目录
+  catalog.inventory.compiled_available:
+    en: Data complete; compiled and purchasable
+    zh: 资料齐全，已编入、可购买
+  catalog.inventory.excluded:
+    en: Outside the declared survey scope (tasks {tasks} are not in the representative chore set {scope})
+    zh: 不在声明的调查范围（任务 {tasks} 不属于代表性杂务组合 {scope}）
+  catalog.inventory.incomplete:
+    en: 'The data has gaps, so it was not compiled: {reasons}'
+    zh: 资料有缺口，没有编入：{reasons}
+  catalog.inventory.incomplete_supply_unknown:
+    en: 'Supply is unknown and the data has gaps, so it was not compiled: {reasons}'
+    zh: 供给未知，且资料有缺口，没有编入：{reasons}
+  catalog.inventory.not_exhaustive:
+    en: 'This only says whether the candidates surveyed within the declared scope have complete data; it does not claim to cover the whole city market, and having no record does not mean the city has none. Supply status (offered / definitely not offered / unknown), data status and compile status are recorded separately: definitely not offered is a settled survey result, but not a purchasable option. This is a different judgment from whether actual trajectories can be scored or a clone''s C / E / M: catalog gaps do not rewrite the scoring of trajectories that already happened'
+    zh: 这只说明声明范围内调查过的候选资料齐不齐，不保证穷尽整个城市市场；没有记录不等于城市没有。供给状态（有卖 / 确定没有 / 不知道）、资料状态与编译状态分开记：确定没有是已确定的调查结果，但不是可购买的方案。它与实际轨迹能否评分、分身的 C / E / M 是不同的判断：目录缺口不改写已发生轨迹的评分
+  catalog.inventory.not_offered:
+    en: 'Confirmed that this city does not offer this option: the survey result is settled, but it is not a purchasable option'
+    zh: 已证实这座城没有这项方案：调查结果已确定，但它不是可购买的方案
+  catalog.inventory.reason:
+    en: '{code} ({message})'
+    zh: '{code}（{message}）'
+  catalog.lifetime_not_integer.message:
+    en: 'A lifetime of {years} years is not a whole number: E1 accepts only whole years and does not round silently'
+    zh: 寿命 {years} 年不是整数：E1 只接受整数年，不静默取整
+  catalog.lifetime_not_integer.next:
+    en: Provide lifetime data in whole years, or register an explicit conversion rule
+    zh: 提供整数年的寿命资料，或登记明确的换算规则
+  catalog.lifetime_out_of_range.message:
+    en: A lifetime of {years} years is not between 1 and {max} years
+    zh: 寿命 {years} 年不在 1–{max} 年之间
+  catalog.lifetime_out_of_range.next:
+    en: Check the unit (were months written as years?)
+    zh: 核对单位（月写成年了？）
+  catalog.lifetime_unknown.impact:
+    en: This device cannot be compiled into the catalog; its supply status is kept as recorded (on sale is not the same as definitely unavailable)
+    zh: 这项设备不能编入目录；它的供给状态照实保留（有卖不等于确定买不到）
+  catalog.lifetime_unknown.message:
+    en: 'Data on how many years the device lasts is missing: durable goods that E1 can execute need an explicit whole number of years from 1 to 30, and no “typical lifetime” is filled in'
+    zh: 设备能用几年的资料缺失：E1 可执行的耐用品要求明确的 1–30 整数年，不按“常见寿命”补值
+  catalog.lifetime_unknown.next:
+    en: Add lifetime data, or register an explicit assumption shared by the whole group
+    zh: 补充寿命资料，或登记全组共用的明确假设
+  catalog.not_offered.impact:
+    en: This is a settled survey result; it is not a purchasable option, so it is not compiled into the catalog
+    zh: 这是已确定的调查结果；它不是可购买的方案，所以不编入目录
+  catalog.not_offered.message:
+    en: The data shows that this city definitely does not offer this option
+    zh: 资料显示这座城确定没有这项方案
+  catalog.not_offered.next:
+    en: No data is needed; update it if the data changes
+    zh: 无需补资料；资料变了再更新
+  catalog.participation.burden:
+    en: burden per hour
+    zh: 每小时负担
+  catalog.participation.hours:
+    en: hours per month
+    zh: 每月小时
+  catalog.participation_invalid.impact:
+    en: This service cannot be compiled into the catalog (the other candidates compile as usual)
+    zh: 这项服务不能编入目录（其他候选照常编译）
+  catalog.participation_invalid.item:
+    en: '{name} “{text}”'
+    zh: '{name} “{text}”'
+  catalog.participation_invalid.message:
+    en: 'The personal-participation data is not a number ≥ 0 with at most two decimals: {bad}'
+    zh: 本人参与资料不是不小于 0、最多两位小数的数：{bad}
+  catalog.participation_invalid.next:
+    en: Check your monthly participation hours and the burden per hour
+    zh: 核对本人每月参与小时与每小时负担
+  catalog.participation_unknown.message:
+    en: Data on how many hours a month the service needs from you is missing (not treated as 0)
+    zh: 服务需要本人每月参与多少小时的资料缺失（不当 0）
+  catalog.participation_unknown.next:
+    en: Add your participation time and burden
+    zh: 补充本人参与时间与负担
+  catalog.price_basis_mismatch.impact:
+    en: Money on different bases cannot go into the same ledger
+    zh: 不同口径的钱不能进同一本账
+  catalog.price_basis_mismatch.message:
+    en: The quote basis is {quote}; the data pack's catalog basis is {pack}/local base-year price
+    zh: 报价口径是 {quote}，资料包的目录口径是 {pack}/当地基年价
+  catalog.price_basis_mismatch.next:
+    en: Provide a quote on the same basis, or first register an auditable conversion
+    zh: 提供同口径的报价，或先登记可审计的换算
+  catalog.price_field_missing.message:
+    en: 'The price is marked as known but lacks {missing}: the basis of the amount cannot be determined'
+    zh: 报价标为已知，但缺少 {missing}：不能确定金额的口径
+  catalog.price_field_missing.next:
+    en: Fill in the price's amount, currency, base year, local-price basis and billing period
+    zh: 补齐报价的金额、币种、基年、当地价口径与计费周期
+  catalog.price_not_a_number.impact:
+    en: Cannot be compiled
+    zh: 不能编入
+  catalog.price_not_a_number.message:
+    en: The price is not a non-negative number
+    zh: 报价不是非负数
+  catalog.price_not_a_number.next:
+    en: Check the price
+    zh: 核对报价
+  catalog.price_too_precise.message:
+    en: 'The price {amount} cannot be represented exactly in the smallest accounting unit ({digits} decimal places): it is not rounded'
+    zh: 报价 {amount} 不能精确表示为最小记账单位（{digits} 位小数）：不四舍五入
+  catalog.price_too_precise.next:
+    en: Check the price and write it with at most two decimal places
+    zh: 核对报价，写成最多两位小数的金额
+  catalog.price_unit_missing.message:
+    en: 'No pricing unit is given (for example per device set or per service month): the system will not fill in appliance-set or service-month automatically'
+    zh: 没有写计价单位（例如每套设备、每服务月）：系统不会自动补成 appliance-set 或 service-month
+  catalog.price_unit_missing.next:
+    en: Add the pricing unit
+    zh: 补上计价单位
+  catalog.price_unit_unregistered.message:
+    en: 'The pricing unit “{per_unit}” has no registered pricing object (set / machine / service month / visit): cannot check whether the price source prices the same object'
+    zh: 计价单位“{per_unit}”没有登记它对应的计价对象（套 / 台 / 服务月 / 次）：不能核对报价来源是不是按同一对象计价
+  catalog.price_unit_unregistered.next:
+    en: Use a registered pricing unit, or first register the pricing object for this unit
+    zh: 改用已登记的计价单位，或先登记这个计价单位对应的计价对象
+  catalog.residual_invalid.message:
+    en: A residual of {hours} hours/month is not between 0 and the baseline {base} (at most two decimals)
+    zh: 残余 {hours} 小时/月不在 0 到基准 {base} 之间（最多两位小数）
+  catalog.residual_invalid.next:
+    en: 'Check the residual hours: it is the monthly time you still need after handling the whole chore'
+    zh: 核对残余小时：它是本人处理整项家务后仍需的月时间
+  catalog.residual_task_duplicated.message:
+    en: 'Chore {task} appears {times} times in the relief effect ({values} hours/month): a chore can have only one residual, and the system will not choose for you or take the minimum (identical duplicates are rejected too)'
+    zh: 家务 {task} 在减负效果里出现了 {times} 次（{values} 小时/月）：同一项家务只能有一个残余小时，系统不替你选，也不取最小值（内容完全相同的重复也拒绝）
+  catalog.residual_task_duplicated.next:
+    en: Keep only one residual-hours entry per chore
+    zh: 每项家务只保留一条残余小时
+  catalog.source_billing_mismatch:
+    en: 'The {field} source {fact} is a {period} price ({unit}), while the candidate is a {billing} price: there is no explicit conversion basis (for example visits per month), so a price for one period is not treated as another''s'
+    zh: '{field}的来源 {fact} 是{period}的价格（{unit}），候选是{billing}的价格：没有明确的换算依据（例如每月几次），不把一种周期的价格当成另一种'
+  catalog.source_field_mismatch.message:
+    en: '{field} cites fact {fact}, which records {recorded}: it cannot directly support {field} (deriving across fields requires a stated method, and this version registers none)'
+    zh: '{field}引用的事实 {fact} 记录的是 {recorded}：不能直接支持{field}（跨字段推导需要写明方法，本版没有登记任何跨字段推导）'
+  catalog.source_field_mismatch.next:
+    en: Cite a fact that records {field} itself
+    zh: 引用记录{field}本身的事实
+  catalog.source_missing.message:
+    en: '{field} has a value but cites no source fact: it cannot count as complete data, and no source or synthetic note is generated automatically'
+    zh: '{field}有值，但没有引用任何来源事实：不能当作资料齐全，也不会自动生成来源或合成说明'
+  catalog.source_missing.next:
+    en: Add a source fact for {field} (real data gives a locator; synthetic settings state their assumption)
+    zh: 为{field}补上来源事实（真实资料写定位；合成设定写明假设说明）
+  catalog.source_object_mismatch:
+    en: 'The {field} source {fact} prices per “{kind}”, while the candidate''s pricing unit {per_unit} prices per “{want}”: not the same pricing object, and there is no automatic conversion'
+    zh: '{field}的来源 {fact} 按“{kind}”计价，候选的计价单位 {per_unit} 按“{want}”计价：不是同一个计价对象，不自动换算'
+  catalog.source_unit.next:
+    en: Cite a fact with the same pricing basis, period and object, or first register an auditable conversion
+    zh: 引用计价口径、周期与对象都相同的事实，或先登记可审计的换算
+  catalog.source_unit_mismatch.basis:
+    en: '{field} cites fact {fact} with the unit “{unit}”, whose currency, base year or local-price basis differs from the data pack''s {basis} (no automatic conversion)'
+    zh: '{field}引用的事实 {fact} 单位是“{unit}”，币种、基年或当地价口径与资料包的 {basis} 不同（不自动换算）'
+  catalog.source_unit_mismatch.unit:
+    en: '{field} cites fact {fact} with the unit “{unit}”, which does not match the unit that {field} requires (no automatic conversion)'
+    zh: '{field}引用的事实 {fact} 单位是“{unit}”，与{field}要求的单位不一致（不自动换算）'
+  catalog.source_unit_unregistered:
+    en: '{field} cites fact {fact}, priced per “{denom}”, a pricing object that is not registered: cannot tell whether it is a per-visit, monthly or one-time price (no guessing)'
+    zh: '{field}引用的事实 {fact} 按“{denom}”计价，这种计价对象没有登记：不能判断它是按次、按月还是一次性的价格（不猜）'
+  catalog.source_unknown_fact.message:
+    en: '{field} cites source fact {fact}, which does not exist in the data pack'
+    zh: '{field}引用的来源事实 {fact} 在资料包里不存在'
+  catalog.source_unknown_fact.next:
+    en: Cite a fact ID registered in the data pack
+    zh: 引用资料包里登记过的事实编号
+  catalog.source_value_mismatch.message:
+    en: '{field} {value} matches none of the cited source facts'' raw values, and no derived or estimated fact states a conversion method'
+    zh: '{field} {value} 与引用的来源事实的原始值都不一致，也没有写明换算方法的派生或估计事实'
+  catalog.source_value_mismatch.next:
+    en: Cite a fact whose raw value is this number, or register a derived / estimated fact that states its conversion method
+    zh: 引用原始值就是这个数的事实，或登记写明换算方法的派生 / 估计事实
+  catalog.task.unit:
+    en: hours/month
+    zh: 小时/月
+  catalog.task_not_in_common_definition.impact:
+    en: Tasks or baselines cannot be set separately for each city
+    zh: 不能按城市另设任务或基准
+  catalog.task_not_in_common_definition.message:
+    en: Chore {task} is not in the task definitions shared by the group
+    zh: 家务 {task} 不在全组共用的任务定义里
+  catalog.task_not_in_common_definition.next:
+    en: Use only the representative chores declared by the protocol
+    zh: 只用协议声明的代表性杂务
+  catalog.unknown.price_unknown:
+    en: 'On sale but the price is unknown: compiled as “data unknown”; clones can see it but cannot buy it; not treated as free'
+    zh: 有卖但报价未知：编成“资料未知”，分身看得到但不能购买；不当免费
+  catalog.unknown.supply_and_price_unknown:
+    en: 'Both supply and price are unknown: compiled as “data unknown”; clones can see it but cannot buy it; not treated as free'
+    zh: 供给与报价都未知：编成“资料未知”，分身看得到但不能购买；不当免费
+  catalog.unknown.supply_unknown:
+    en: 'Unknown whether this city offers this option (supply unknown): compiled as “data unknown”; clones can see it but cannot buy it'
+    zh: 不知道这座城有没有这项方案（供给未知）：编成“资料未知”，分身看得到但不能购买
+  datanature.commute_gap.impact:
+    en: Clones in this city cannot use this mode to get to work and can only use the modes in the table; a missing mode is not treated as 0 minutes, nor as free
+    zh: 这座城的分身到岗时没有这种方式可用，只能用表里有的方式；缺的方式不当 0 分钟，也不当免费
+  datanature.commute_gap.message:
+    en: '{city}''s commute table has no {mode} (other cities in the comparison group have it)'
+    zh: '{city} 的通勤关系表里没有{mode}（比较组里别的城市有）'
+  datanature.commute_gap.next:
+    en: Acknowledge this limitation (the reason is in the scope notes, under what this version does not support)
+    zh: 知悉这一限制（原因见范围说明里本版不支持的内容）
+  datanature.scope.commute.text:
+    en: 'Commuting follows each city''s area table: home area × the job''s work area × mode → the minutes and cost of one round trip (area-level data or estimates, not route simulation). Each month the available mode with the fewest round-trip minutes is used, with ties going to the cheaper one; driving requires car access in use that month (a separate opportunity paid monthly). Lines or modes not in the table cannot be used and are not treated as 0 minutes; parking and tolls are not modeled'
+    zh: 通勤按每座城的片区关系表执行：住处片区 × 岗位的就业片区 × 方式 → 一次往返的分钟与花费（片区级资料或估计，不是路线模拟）。每个月在可用的方式里取往返最少的一种，分钟相同取花费低的；开车要这个月有在用的用车权（另一项按月付费的机会）。关系表里没有的线或方式不能走，不当 0 分钟；停车与过路费没有建模
+  datanature.scope.commute.title:
+    en: How commuting is computed
+    zh: 通勤怎么算
+  datanature.scope.commute_gap.text:
+    en: '{message}: {impact}'
+    zh: '{message}：{impact}'
+  datanature.scope.commute_gap.title:
+    en: Missing commute modes
+    zh: 缺少的通勤方式
+  datanature.scope.menus.text:
+    en: The {names} shown to clones each year are not the whole catalog but a frozen sampled menu (one per category, year and environment repeat; clones in the same city, year and environment repeat see the same menu, and neither the sampling method nor the seed involves clone IDs). A menu is a chance to apply, not a completed deal or a hire. The current home can be renewed, the current job can continue, and the minimum-living fallback is always available; choices outside the menu are rejected by the plan check
+    zh: 每年给分身看的{names}不是整个目录，而是一份冻结的抽样菜单（每类、每年、每个环境重复一份；同城、同年、同一环境重复的分身看同一份，抽法与种子里没有分身编号）。菜单是接触机会，不是成交或录用。现住的房子可以续租、现在的岗位可以延续，最低生活的保底方案总在；菜单外的选择会被计划检查拒绝
+  datanature.scope.menus.title:
+    en: Annual menus
+    zh: 年度菜单
+  datanature.scope.occupations.text:
+    en: 'This data pack supports {n} occupations (a controlled vocabulary; each maps internally to one occupation classification: {schemes}). Occupations outside the vocabulary are rejected at review with the reason given, and the system does not switch to another occupation; if a city''s catalog has no job for your occupation, that city reports an error instead of switching jobs automatically. Degrees, certificates or experience a job requires count only if you confirm them explicitly in the qualifications section; titles and free text grant no qualification'
+    zh: 这份资料包支持 {n} 种职业（受控词表；每种在内部对应一个职业分类：{schemes}）。词表外的职业在审阅时就会被拒绝并说明原因，系统不换成别的职业；某座城的目录里没有你这一职业的岗位时，那座城报错，不自动换岗。岗位要求的学历、证书或经验只认你在资格一栏明确确认的，职称与自由文字都不授予资格
+  datanature.scope.occupations.title:
+    en: Supported occupations
+    zh: 支持的职业
+  datanature.scope.safety.text:
+    en: Each metro area has one safety background (the same for every home area in the city), derived from the metro's 2024 rates of reported violent and property crime per population; the higher the crime rate, the lower the background. It is a statistical proxy, not a person's probability of experiencing crime or injury; it does not vary with home area or travel mode, and the simulation does not draw crime events. The leisure background is a registered setting shared by the six cities (a small baseline that comes with living in a city); most leisure comes from activities actually attended
+    zh: 每个都会区一个治安背景（城内所有居住片区相同），由这个都会区 2024 年暴力犯罪与财产犯罪的报案人口发生率得到，犯罪率越高背景越低。它是统计代理，不是个人遭遇犯罪或伤亡的概率；不随住处片区或交通方式变化，模拟里也不抽犯罪事件。休闲背景是六城共同的登记设定（住在城里就有的少量基本条件），主要的休闲来自实际参加的活动
+  datanature.scope.safety.title:
+    en: Where the safety background comes from
+    zh: 治安背景怎么来
+  datanature.scope.safety_city.missing:
+    en: '{city}: {missing}'
+    zh: '{city}：{missing}'
+  datanature.scope.safety_city.text:
+    en: '{city}: {scope}. {coverage}. {residence}. 2024 rates per 100,000 people: violent crime {violent}, property crime {property} (reported offenses, not all crime that occurred)'
+    zh: '{city}：{scope}。{coverage}。{residence}。2024 年每 10 万人暴力犯罪 {violent}、财产犯罪 {property}（报案数，不是全部发生的犯罪）'
+  datanature.scope.safety_city.title:
+    en: Coverage of the safety data
+    zh: 治安资料的覆盖
+  datanature.scope.tax.official:
+    en: 'Tax is withheld monthly under the official 2024 rules (on year-to-date wages), and all {years} simulated years use the 2024 rules; only single filers with wage income only and the standard deduction are supported. Supported residence and workplace: {residence}. The {n} items that are not modeled are listed one by one in this city''s data nature (data_nature.tax); they make results differ from a real tax bill'
+    zh: 按官方 2024 年规则逐月预扣（按全年累计工资），模拟的 {years} 年都用 2024 年规则；只支持单身、只有工资收入、按标准扣除。支持的居住与工作地：{residence}。没有建模的 {n} 项逐条列在这座城的资料性质（data_nature.tax）里——它们让结果与真实税单有差别
+  datanature.scope.tax.synthetic:
+    en: This city's tax is a synthetic test double, not real tax
+    zh: 这座城的税是合成测试替身，不是真实税
+  datanature.scope.tax.title:
+    en: 'Tax: {policy}'
+    zh: 税：{policy}
+  datanature.scope.unsupported.title:
+    en: Not supported in this version
+    zh: 本版不支持
+  datanature.summary.real:
+    en: '{city}: of the {n} opportunities in the catalog, {observed} are observed, {derived} derived, {estimated} estimated and {synthetic} synthetic settings. City data comes from public sources and registered model settings; life rules, scoring and evaluation parameters are synthetic exploratory settings, and real cities are not ranked by them'
+    zh: '{city}：目录 {n} 项机会里，观测 {observed}、派生 {derived}、估计 {estimated}、合成设定 {synthetic}。城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定，不据此排序真实城市'
+  datanature.summary.synthetic:
+    en: '{city}: synthetic data pack; all {n} opportunities in the catalog are hand-made synthetic model settings or test data, not real city data'
+    zh: '{city}：合成资料包，目录 {n} 项机会全部是手工合成的模型设定或测试资料，不是真实城市资料'
+  preflight.base_changed.impact:
+    en: Another set of rules cannot be run as if it were the declared base example
+    zh: 不能把另一套规则当成声明的基础样例来运行
+  preflight.base_changed.message:
+    en: The base example {what} declared by the data pack is {want}, but {got} was read
+    zh: 资料包声明采用的基础样例{what}是 {want}，实际读到 {got}
+  preflight.base_changed.next:
+    en: Check the data pack against the E1 configuration and switch to a new data pack version
+    zh: 核对资料包与 E1 配置，换新的资料包版本
+  preflight.base_item.protocol:
+    en: protocol
+    zh: 协议
+  preflight.base_item.scoring_fingerprint:
+    en: scoring content identity
+    zh: 评分内容身份
+  preflight.base_item.scoring_version:
+    en: scoring version
+    zh: 评分版本
+  preflight.blocked.feedback:
+    en: The pre-run check did not pass
+    zh: 运行前检查没有通过
+  preflight.blocked.scorable:
+    en: The pre-run check did not pass, so scorability was not assessed
+    zh: 运行前检查没有通过，没有评估评分能力
+  preflight.call_limit_mismatch.message:
+    en: The run settings' planning-candidate limit {limit} differs from the compiled scale {computed}
+    zh: 正式运行设置的规划候选上限 {limit} 与编译出的规模 {computed} 不同
+  preflight.check_service_config:
+    en: A maintainer needs to check the service configuration
+    zh: 维护者核对服务配置
+  preflight.cities_mismatch.impact:
+    en: The run configuration cannot be compiled (no city is dropped or added)
+    zh: 不能编译运行配置（不删城、不补城）
+  preflight.cities_mismatch.message:
+    en: The confirmed cities differ from the cities this service compares
+    zh: 确认的城市与这次服务固定比较的城市不同
+  preflight.cities_mismatch.next:
+    en: Choose all the cities the service specifies, then confirm again
+    zh: 选择服务规定的全部城市后重新确认
+  preflight.city.executable_yes:
+    en: The standard start passed and the roster is frozen; each year's plan is still checked by the environment, so not every plan is guaranteed to be valid
+    zh: 标准开局通过、名单已冻结；年度计划仍由环境逐次检查，不保证每份计划都合法
+  preflight.city.feedback_off:
+    en: 'The feedback policy is off or α = 0: the allowance stays at its base value'
+    zh: 反馈政策关闭或 α = 0：额度固定为基础值
+  preflight.city.feedback_on:
+    en: Next year's energy allowance is updated only when all 12 months of the previous year were fully scored
+    zh: 上一年 12 个月都完整评分时才更新下一年的精力额度
+  preflight.city.scorable_yes:
+    en: With the current input, the scoring data for positive weights is complete within the declared scope; this does not guarantee that every future month can be fully scored
+    zh: 按当前输入，正权重的评分资料在声明范围内齐全；不保证未来每个月都能完整评分
+  preflight.city_not_in_base.impact:
+    en: This city cannot be run
+    zh: 不能运行这座城
+  preflight.city_not_in_base.message:
+    en: City {city} is not in the base example
+    zh: 城市 {city} 不在基础样例里
+  preflight.city_not_in_base.next:
+    en: Choose from the capabilities list
+    zh: 从能力清单选择
+  preflight.confirmation_tampered.impact:
+    en: Cannot compile
+    zh: 不能编译
+  preflight.confirmation_tampered.message:
+    en: The confirmed profile's content does not match its recorded identity
+    zh: 确认画像的内容与它记下的身份不一致
+  preflight.confirmation_tampered.next:
+    en: Confirm again
+    zh: 重新确认
+  preflight.data_unknown.impact:
+    en: 'This city''s total score will be incomplete in the affected months: no 0 is filled in, and this item is not dropped with the other weights renormalized'
+    zh: 这座城相关月份的总分会不完整：不补 0，也不把这一项删掉再把其余权重重新归一化
+  preflight.data_unknown.message:
+    en: '{city} lacks the data that scoring “{name}” needs (you gave it a positive weight)'
+    zh: '{city} 缺少“{name}”评分要读的资料（你给它的权重为正）'
+  preflight.data_unknown.next:
+    en: Wait for the data to be completed, or acknowledge this limitation
+    zh: 等资料补齐，或知悉这一限制
+  preflight.e1_scope.city_facts:
+    en: 'City background facts {version}: {n} synthetic indices per city; the rules converting them into scoring conditions are internal synthetic settings'
+    zh: 城市背景事实 {version}：每座城 {n} 条合成指数，换算到评分条件的规则是内部合成设定
+  preflight.e1_scope.evaluation:
+    en: 'Evaluation follows E1-6: the complete-clone mean uses only fully evaluated clones; life exits are reported separately as a share, with their event chains; simulation problems go into the missing range (not a confidence interval)'
+    zh: 评价沿用 E1-6：完整者均值只用完整评价的分身；生活出局另报比例与事件链；模拟问题进入缺失范围（不是置信区间）
+  preflight.e1_scope.protocol:
+    en: 'Life protocol {protocol} (status {status}), scoring {spec} (exploratory): city, price, wage, illness, treatment and scoring parameters are all synthetic settings, not real cities; real cities are not ranked'
+    zh: 生活协议 {protocol}（状态 {status}）、评分 {spec}（探索版）：城市、报价、工资、疾病、治疗与评分参数全部是合成设定，不是现实城市，不排序真实城市
+  preflight.executable_yes:
+    en: The standard start and roster checks passed for all candidate cities
+    zh: 全部候选城市的标准开局与名单检查通过
+  preflight.execution_pack.message:
+    en: The data pack's content differs from what the run settings recorded
+    zh: 资料包的内容与正式运行设置记下的不同
+  preflight.execution_pack.next:
+    en: Run the pre-run check again
+    zh: 重新做运行前检查
+  preflight.feedback_overall:
+    en: Next year's allowance is updated only after a fully scored year; when a year is incomplete, this clone's next year is blocked
+    zh: 上一年完整评分才更新下一年额度；不完整时这个分身的下一年会受阻
+  preflight.invalidated:
+    en: The old pre-run check is no longer valid
+    zh: 旧预检查已经失效
+  preflight.no_component.impact:
+    en: This city's total score will be incomplete every month (no 0 is filled in, and the item is not dropped with the rest renormalized)
+    zh: 这座城每个月的总分都会不完整（不补 0、不把它删掉再重新归一化）
+  preflight.no_component.message:
+    en: You gave “{name}” a positive weight, but this version's scoring has no such component
+    zh: 你给“{name}”的权重为正，但本版评分没有这一项
+  preflight.no_component.next:
+    en: Acknowledge this limitation, or change your allocation
+    zh: 知悉这一限制，或调整分配
+  preflight.no_run_config:
+    en: The run configuration cannot be compiled
+    zh: 不能编译运行配置
+  preflight.not_passed.impact:
+    en: The run cannot be submitted
+    zh: 不能提交运行
+  preflight.not_passed.message:
+    en: The pre-run check did not pass
+    zh: 预检查没有通过
+  preflight.not_passed.next:
+    en: First resolve the problems listed by the pre-run check
+    zh: 先解决预检查列出的问题
+  preflight.pack_changed.message:
+    en: The data pack changed after the pre-run check
+    zh: 预检查之后资料包变了
+  preflight.planner.llm:
+    en: 'Real-model planner: {model} ({role} role, rolling version); each clone gets one regular plan a year and at most {revisions} revisions, and each candidate gets at most {retries} more service attempts; it receives only the safe projection shown to clones, and plans are still checked and settled by the environment'
+    zh: 真实模型规划器：{model}（{role} 角色，滚动型号），每个分身每年一次正常规划、最多 {revisions} 次修订，每份候选最多再试 {retries} 次服务请求；只收到给分身看的安全投影，计划仍由环境检查与结算
+  preflight.planner.max_cost:
+    en: '{amount} {currency} (an app-side cap estimated from price list {price}, not a provider billing cap)'
+    zh: '{amount} {currency}（应用侧按报价 {price} 估算的上限，不是供应商账单上限）'
+  preflight.planner.mock:
+    en: 'Controlled, deterministic offline planner (mock): it only tests wiring, state passing and information isolation and does not represent the abilities of a real large language model; no network calls'
+    zh: 可控的确定性离线规划器（mock）：只检验接线、状态传递与信息隔离，不代表真实大语言模型的能力；没有网络调用
+  preflight.planner.mock_free:
+    en: 'Controlled, deterministic offline planner (mock): it only tests wiring, state passing and information isolation and does not represent the abilities of a real large language model; no network calls, cost 0'
+    zh: 可控的确定性离线规划器（mock）：只检验接线、状态传递与信息隔离，不代表真实大语言模型的能力；没有网络调用，费用为 0
+  preflight.planner_unknown.message:
+    en: The planner declared by the data pack, {planner} / {rules}, is not the registered product mock
+    zh: 资料包声明的规划器 {planner} / {rules} 不是已登记的产品 mock
+  preflight.planner_unknown.next:
+    en: Use e3b-product-mock-rules-v2
+    zh: 用 e3b-product-mock-rules-v2
+  preflight.redo:
+    en: Run the pre-run check again
+    zh: 重新预检查
+  preflight.repeats_invalid.message:
+    en: The clone numbers {repeats} in the run settings are invalid
+    zh: 正式运行设置的分身编号 {repeats} 不合法
+  preflight.request_too_large.impact:
+    en: 'This simulation cannot start: the system will not cut options or facts from the request to fit the limit, nor quietly switch to another model; no request was sent and no run was used'
+    zh: 这次模拟不能开始：系统不会删减请求里的选项或事实来塞进上限，也不会悄悄换成别的模型；没有发出请求，没有使用次数
+  preflight.request_too_large.message:
+    en: '{city}: the first-year planning request is estimated at about {estimate} input tokens ({clones} clones over the limit), above this planner''s single-request input limit of {limit}'
+    zh: '{city}的首年规划请求估计约 {estimate} 个输入 token（{clones} 个分身超过），超过本次规划器的单次输入上限 {limit}'
+  preflight.request_too_large.next:
+    en: Prepare and check again after a maintainer adjusts the data or the request format, or choose run settings with a larger input limit
+    zh: 等维护者调整资料或请求格式、或选择输入上限更大的运行设置后，重新准备并检查
+  preflight.scorable_overall:
+    en: See cities for each city; this does not guarantee that every future month can be fully scored
+    zh: 逐城说明见 cities；不保证未来每个月都能完整评分
+  preflight.scripts_need_mock.message:
+    en: Controlled mock behaviors can only be used with the offline planner
+    zh: 受控的 mock 行为只能配离线规划器
+  preflight.scripts_need_mock.next:
+    en: Remove the controlled behaviors
+    zh: 去掉受控行为
+  preflight.stale.message:
+    en: This pre-run check does not belong to this confirmed profile (the answers changed, it was re-confirmed, or the reference is wrong)
+    zh: 预检查对应的不是这份确认画像（答案改过、重新确认过，或引用错了）
+  preflight.stale.next:
+    en: Run the pre-run check again with the current confirmed profile
+    zh: 用当前确认画像重新预检查
+  preflight.start_job_ability.impact:
+    en: The system does not grant qualifications from a job title, so this city cannot generate a start
+    zh: 系统不从职业称呼自动授予资格，这座城不能生成开局
+  preflight.start_job_ability.message:
+    en: In {city}, the jobs matching your occupation require {needed}, which you have not confirmed holding
+    zh: '{city} 与你职业对应的岗位要求 {needed}，你还没有确认持有这项资格'
+  preflight.start_job_ability.next:
+    en: If you do hold it, confirm it explicitly in the qualifications section
+    zh: 如果你确实持有，请在资格一栏明确确认
+  preflight.start_job_unmatched.impact:
+    en: No starting job can be matched, so this city cannot generate a standard start (no automatic switch to another occupation)
+    zh: 开局岗位无法匹配，这座城不能生成标准开局（不自动换成别的职业）
+  preflight.start_job_unmatched.message:
+    en: '{city}''s catalog has no job in the same classification as “{occupation}”'
+    zh: '{city} 的目录里没有与“{occupation}”同一分类的岗位'
+  preflight.start_job_unmatched.next:
+    en: Choose a city that has a matching job, or check your occupation description
+    zh: 换一座有对应岗位的城市，或核对职业描述
+  preflight.tampered.impact:
+    en: Cannot submit
+    zh: 不能提交
+  preflight.tampered.message:
+    en: The pre-run check's content does not match its recorded identity
+    zh: 预检查的内容与它记下的身份不一致
+  preflight.treatment_unknown.impact:
+    en: If a clone plans treatment and hits unknown data, that clone stops in that month and it is recorded as a data gap
+    zh: 分身计划要治而遇到资料未知时，那个分身会停在那个月并记为资料缺口
+  preflight.treatment_unknown.message:
+    en: '{city}: data on {treatment} is unknown (not free, and not absent)'
+    zh: '{city} 的{treatment}资料未知（不是免费，也不是没有）'
+  preflight.treatment_unknown.next:
+    en: Acknowledge this limitation
+    zh: 知悉这一限制
+  preflight.years_unsupported.message:
+    en: These run settings are for {years} years, but the data pack is validated only for {supported} years
+    zh: 这次运行设置是 {years} 年，资料包只配套验证了 {supported} 年
+  preflight.years_unsupported.next:
+    en: Choose a number of years the data pack supports, then prepare again
+    zh: 选择资料包支持的年数后重新准备

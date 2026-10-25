@@ -11,6 +11,8 @@ import re
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from fractions import Fraction
 
+from product.display import Num, Raw, Sub, t
+
 _DECIMAL = re.compile(r"^(0|[1-9][0-9]*)(\.[0-9]+)?$")
 _FRACTION = re.compile(r"^(0|[1-9][0-9]*)/([1-9][0-9]*)$")
 #: 金额的千分位写法：首组 1–3 位（不以 0 开头），之后每组恰好 3 位，小数点只能用 “.”（E3-A 收尾 F3）。
@@ -18,12 +20,19 @@ _MONEY_GROUPED = re.compile(r"^[1-9][0-9]{0,2}(,[0-9]{3})+(\.[0-9]+)?$")
 
 
 class ExactParseError(ValueError):
-    """数值文字不能精确解析（不是十进制或规范分数、小数位过多、为负）。``code`` 给机器读，``next_action`` 是给用户的纠正说明。"""
+    """数值文字不能精确解析（不是十进制或规范分数、小数位过多、为负）。``code`` 给机器读，``next_action`` 是给用户的纠正说明。
 
-    def __init__(self, code: str, message: str, next_action: str | None = None) -> None:
-        super().__init__(message)
+    说明按显示模板生成（``product.display``）：``text`` 是同一段说明的模板与参数，拼进别的句子（“居住条件：……”）时用它。"""
+
+    def __init__(self, code: str, text: Sub, next_action: Sub | None = None) -> None:
+        super().__init__(t(text.key, text.zh, **dict(text.params)))
         self.code = code
-        self.next_action = next_action
+        self.text = text
+        self.next_action = (
+            None
+            if next_action is None
+            else t(next_action.key, next_action.zh, **dict(next_action.params))
+        )
 
 
 def parse_points(text: str, *, max_decimals: int) -> Fraction:
@@ -34,7 +43,15 @@ def parse_points(text: str, *, max_decimals: int) -> Fraction:
         if decimals > max_decimals:
             raise ExactParseError(
                 "points_too_many_decimals",
-                f"“{text}”有 {decimals} 位小数，本版手工输入最多 {max_decimals} 位（步长不是测量精度）",
+                Sub(
+                    "input.exact.points_too_many_decimals",
+                    "“{text}”有 {decimals} 位小数，本版手工输入最多 {max_decimals} 位（步长不是测量精度）",
+                    (
+                        ("text", Raw(text)),
+                        ("decimals", Num(str(decimals))),
+                        ("max_decimals", Num(str(max_decimals))),
+                    ),
+                ),
             )
         return Fraction(Decimal(s))
     m = _FRACTION.match(s)
@@ -42,10 +59,22 @@ def parse_points(text: str, *, max_decimals: int) -> Fraction:
         q = Fraction(int(m.group(1)), int(m.group(2)))
         if canonical(q) != s:
             raise ExactParseError(
-                "points_fraction_not_canonical", f"分数“{text}”不是规范写法，应写“{canonical(q)}”"
+                "points_fraction_not_canonical",
+                Sub(
+                    "input.exact.points_fraction_not_canonical",
+                    "分数“{text}”不是规范写法，应写“{canonical}”",
+                    (("text", Raw(text)), ("canonical", Num(canonical(q)))),
+                ),
             )
         return q
-    raise ExactParseError("points_not_a_number", f"“{text}”不是十进制数或规范分数")
+    raise ExactParseError(
+        "points_not_a_number",
+        Sub(
+            "input.exact.points_not_a_number",
+            "“{text}”不是十进制数或规范分数",
+            (("text", Raw(text)),),
+        ),
+    )
 
 
 def parse_money_text(text: str, *, minor_digits: int) -> int:
@@ -62,31 +91,57 @@ def parse_money_text(text: str, *, minor_digits: int) -> int:
     elif raw.startswith("-"):
         raise ExactParseError(
             "money_negative",
-            f"金额“{text}”是负数：开始时可用的钱不能是负数（欠款不在本版支持范围）",
-            "填写不小于 0 的金额",
+            Sub(
+                "input.exact.money_negative",
+                "金额“{text}”是负数：开始时可用的钱不能是负数（欠款不在本版支持范围）",
+                (("text", Raw(text)),),
+            ),
+            Sub("input.exact.money_negative.next", "填写不小于 0 的金额"),
         )
     elif "," in raw:
         raise ExactParseError(
             "money_separator_invalid",
-            f"金额“{text}”的逗号用法不对：千分位必须每三位一组（例如 3,000.50），小数点只能用“.”。"
-            "系统不猜你的意思——“3000,50”删掉逗号会变成 300,050",
-            "按“3000.50”或“3,000.50”这样的写法重新填写",
+            Sub(
+                "input.exact.money_separator_invalid",
+                "金额“{text}”的逗号用法不对：千分位必须每三位一组（例如 3,000.50），小数点只能用“.”。"
+                "系统不猜你的意思——“3000,50”删掉逗号会变成 300,050",
+                (("text", Raw(text)),),
+            ),
+            Sub(
+                "input.exact.money_separator_invalid.next",
+                "按“3000.50”或“3,000.50”这样的写法重新填写",
+            ),
         )
     else:
         raise ExactParseError(
             "money_not_a_number",
-            f"金额“{text}”不是非负十进制数",
-            "填写像“3000”或“3,000.50”这样的金额",
+            Sub(
+                "input.exact.money_not_a_number",
+                "金额“{text}”不是非负十进制数",
+                (("text", Raw(text)),),
+            ),
+            Sub("input.exact.money_not_a_number.next", "填写像“3000”或“3,000.50”这样的金额"),
         )
     try:
         d = Decimal(s).scaleb(minor_digits)
     except InvalidOperation as exc:  # pragma: no cover - 正则已挡住
-        raise ExactParseError("money_not_a_number", f"金额“{text}”不能解析") from exc
+        raise ExactParseError(
+            "money_not_a_number",
+            Sub("input.exact.money_unparsable", "金额“{text}”不能解析", (("text", Raw(text)),)),
+        ) from exc
     if d != d.to_integral_value():
         raise ExactParseError(
             "money_too_many_decimals",
-            f"金额“{text}”的精度细于最小记账单位（{minor_digits} 位小数）",
-            f"最多写 {minor_digits} 位小数，不自动四舍五入",
+            Sub(
+                "input.exact.money_too_many_decimals",
+                "金额“{text}”的精度细于最小记账单位（{digits} 位小数）",
+                (("text", Raw(text)), ("digits", Num(str(minor_digits)))),
+            ),
+            Sub(
+                "input.exact.money_too_many_decimals.next",
+                "最多写 {digits} 位小数，不自动四舍五入",
+                (("digits", Num(str(minor_digits))),),
+            ),
         )
     return int(d)
 

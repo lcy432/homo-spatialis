@@ -3,6 +3,9 @@
 “可执行 / 可评分 / 可反馈”只描述**当前输入与声明的支持范围**：通过预检查不保证未来每份计划都合法、每个月都能完整评分，年度计划
 仍由 E1 逐次检查，真实发生的出局与模拟问题照实分类。运行前检查不只校验前端字段：名单、标准开局与跨对象检查全部复用 E1 的入口
 （``orchestration.life_runner.preflight``）。
+
+显示附层（``e3-display-v1``）：给人看的文字都经过 ``t()`` 或按实体编号绑定（城市、职业、六维与物质项、治疗、开局岗位、资料包里的
+固定说明），中文与原来逐字相同；从 E1 与确认画像转抄的说明按同一写法再生成一次，逐字相同才用它绑定。
 """
 
 from __future__ import annotations
@@ -43,9 +46,11 @@ from orchestration.life_runner import (
 from product.answers import confirmation_problems, issue
 from product.catalog import inventory_coverage
 from product.compile import CompiledInputs, CompileRefusedError, compile_inputs
+from product.display import Code, Ent, label, t
 from product.exact import canonical, display
+from product.interests import confirmed_scope_lines
 from product.pack import DataPack
-from product.pack_facts import city_data_nature, commute_gaps, scope_notes
+from product.pack_facts import city_data_nature, city_ent, commute_gaps, pack_lines, scope_notes
 from product.public_errors import e1_refusal_issue
 
 if TYPE_CHECKING:
@@ -84,14 +89,17 @@ def _blocked(
         status="blocked",
         executable=no,
         scorable=CapabilityStatus(
-            status="unknown", reasons=("运行前检查没有通过，没有评估评分能力",)
+            status="unknown",
+            reasons=(t("preflight.blocked.scorable", "运行前检查没有通过，没有评估评分能力"),),
         ),
-        feedback=CapabilityStatus(status="unknown", reasons=("运行前检查没有通过",)),
+        feedback=CapabilityStatus(
+            status="unknown", reasons=(t("preflight.blocked.feedback", "运行前检查没有通过"),)
+        ),
         clones_per_city=0,
         years=years,
         planner=_planner(pack, 0, execution),
         issues=tuple(issues),
-        scope_zh=pack.body.limits,
+        scope_zh=pack_lines("limits", pack.body.limits),
         scope_notes=scope_notes(pack),
     )
     unsealed = ProductPreflight.model_construct(**fields, preflight_fingerprint="0" * 64)
@@ -114,16 +122,28 @@ def _oversize_issues(world: RunWorld, oversize: list[InputSizeCheck]) -> list[Pr
     out = []
     for city, checks in by_city.items():
         cat = world.bundle.catalog_for(city)
-        label = cat.label if cat is not None else city
         worst = max(checks, key=lambda c: c.estimate)
         out.append(
             issue(
                 "planning_request_too_large",
                 f"cities.{city}",
-                f"{label}的首年规划请求估计约 {worst.estimate} 个输入 token（{len(checks)} 个分身超过），"
-                f"超过本次规划器的单次输入上限 {worst.limit}",
-                "这次模拟不能开始：系统不会删减请求里的选项或事实来塞进上限，也不会悄悄换成别的模型；没有发出请求，没有使用次数",
-                "等维护者调整资料或请求格式、或选择输入上限更大的运行设置后，重新准备并检查",
+                t(
+                    "preflight.request_too_large.message",
+                    "{city}的首年规划请求估计约 {estimate} 个输入 token（{clones} 个分身超过），"
+                    "超过本次规划器的单次输入上限 {limit}",
+                    city=Code(city) if cat is None else city_ent(city, cat.label),
+                    estimate=worst.estimate,
+                    clones=len(checks),
+                    limit=worst.limit,
+                ),
+                t(
+                    "preflight.request_too_large.impact",
+                    "这次模拟不能开始：系统不会删减请求里的选项或事实来塞进上限，也不会悄悄换成别的模型；没有发出请求，没有使用次数",
+                ),
+                t(
+                    "preflight.request_too_large.next",
+                    "等维护者调整资料或请求格式、或选择输入上限更大的运行设置后，重新准备并检查",
+                ),
             )
         )
     return out
@@ -137,7 +157,10 @@ def _planner(pack: DataPack, calls: int, execution: ExecutionSpec | None = None)
     return PlannerAndCost(
         planner_kind="mock",
         planner_id=p.planner_id,
-        description_zh="可控的确定性离线规划器（mock）：只检验接线、状态传递与信息隔离，不代表真实大语言模型的能力；没有网络调用",
+        description_zh=t(
+            "preflight.planner.mock",
+            "可控的确定性离线规划器（mock）：只检验接线、状态传递与信息隔离，不代表真实大语言模型的能力；没有网络调用",
+        ),
         call_limit=calls,
         paid=False,
         max_cost=None,
@@ -232,8 +255,9 @@ def run_preflight(
     digits = pack.body.points.display_decimals + 2
     effective = protocol.energy_feedback.effective
     inv = {c.city_ref: c for c in inventory.cities}
-    names = {d.key: d.label for d in pack.body.dimensions} | {
-        m.key: m.label for m in pack.body.material_leaves
+    # 六维与物质项的名称（资料包词表）：按 ``dimension`` / ``leaf`` 实体绑定；不认识的键原样（代码）
+    names = {d.key: Ent("dimension", d.key, d.label) for d in pack.body.dimensions} | {
+        m.key: Ent("leaf", m.key, m.label) for m in pack.body.material_leaves
     }
     cities: list[CityPreflight] = []
     for ref in confirmed.cities:
@@ -243,15 +267,22 @@ def run_preflight(
         for leaf in report.leaves:
             if leaf.weight <= 0:
                 continue
-            name = names.get(leaf.leaf, leaf.leaf)
+            name = names.get(leaf.leaf, Code(leaf.leaf))
             if leaf.support == "no_component":
                 gaps.append(
                     issue(
                         "positive_weight_no_component",
                         f"preferences.{leaf.leaf}",
-                        f"你给“{name}”的权重为正，但本版评分没有这一项",
-                        "这座城每个月的总分都会不完整（不补 0、不把它删掉再重新归一化）",
-                        "知悉这一限制，或调整分配",
+                        t(
+                            "preflight.no_component.message",
+                            "你给“{name}”的权重为正，但本版评分没有这一项",
+                            name=name,
+                        ),
+                        t(
+                            "preflight.no_component.impact",
+                            "这座城每个月的总分都会不完整（不补 0、不把它删掉再重新归一化）",
+                        ),
+                        t("preflight.no_component.next", "知悉这一限制，或调整分配"),
                     )
                 )
             elif ref in leaf.cities_unknown:
@@ -259,20 +290,36 @@ def run_preflight(
                     issue(
                         "positive_weight_data_unknown",
                         f"preferences.{leaf.leaf}",
-                        f"{cat.label} 缺少“{name}”评分要读的资料（你给它的权重为正）",
-                        "这座城相关月份的总分会不完整：不补 0，也不把这一项删掉再把其余权重重新归一化",
-                        "等资料补齐，或知悉这一限制",
+                        t(
+                            "preflight.data_unknown.message",
+                            "{city} 缺少“{name}”评分要读的资料（你给它的权重为正）",
+                            city=city_ent(ref, cat.label),
+                            name=name,
+                        ),
+                        t(
+                            "preflight.data_unknown.impact",
+                            "这座城相关月份的总分会不完整：不补 0，也不把这一项删掉再把其余权重重新归一化",
+                        ),
+                        t("preflight.data_unknown.next", "等资料补齐，或知悉这一限制"),
                     )
                 )
-        for t in cat.treatments:
-            if t.availability == "unknown":
+        for tr in cat.treatments:
+            if tr.availability == "unknown":
                 gaps.append(
                     issue(
                         "treatment_data_unknown",
                         f"cities.{ref}.treatments",
-                        f"{cat.label} 的{t.label}资料未知（不是免费，也不是没有）",
-                        "分身计划要治而遇到资料未知时，那个分身会停在那个月并记为资料缺口",
-                        "知悉这一限制",
+                        t(
+                            "preflight.treatment_unknown.message",
+                            "{city} 的{treatment}资料未知（不是免费，也不是没有）",
+                            city=city_ent(ref, cat.label),
+                            treatment=Ent("treatment", tr.treatment_id, tr.label),
+                        ),
+                        t(
+                            "preflight.treatment_unknown.impact",
+                            "分身计划要治而遇到资料未知时，那个分身会停在那个月并记为资料缺口",
+                        ),
+                        t("preflight.treatment_unknown.next", "知悉这一限制"),
                         severity="warning",
                     )
                 )
@@ -282,7 +329,10 @@ def run_preflight(
             CapabilityStatus(
                 status="yes",
                 reasons=(
-                    "按当前输入，正权重的评分资料在声明范围内齐全；不保证未来每个月都能完整评分",
+                    t(
+                        "preflight.city.scorable_yes",
+                        "按当前输入，正权重的评分资料在声明范围内齐全；不保证未来每个月都能完整评分",
+                    ),
                 ),
             )
             if not any(g.code.startswith("positive_weight") for g in gaps)
@@ -290,10 +340,21 @@ def run_preflight(
         )
         feed = (
             CapabilityStatus(
-                status=scor.status, reasons=("上一年 12 个月都完整评分时才更新下一年的精力额度",)
+                status=scor.status,
+                reasons=(
+                    t(
+                        "preflight.city.feedback_on",
+                        "上一年 12 个月都完整评分时才更新下一年的精力额度",
+                    ),
+                ),
             )
             if effective
-            else CapabilityStatus(status="no", reasons=("反馈政策关闭或 α = 0：额度固定为基础值",))
+            else CapabilityStatus(
+                status="no",
+                reasons=(
+                    t("preflight.city.feedback_off", "反馈政策关闭或 α = 0：额度固定为基础值"),
+                ),
+            )
         )
         # E1 的覆盖报告是比较组层面的：共同覆盖与“没有分项”各城相同；“资料未知”要按这座城算（别的城缺资料不算这座城的缺口）
         unknown_here = [x for x in report.leaves if x.weight > 0 and ref in x.cities_unknown]
@@ -302,15 +363,21 @@ def run_preflight(
             for x in report.leaves
             if x.weight > 0 and (x.support == "no_component" or ref in x.cities_unknown)
         ]
+        job = compiled.start_jobs.get(ref)
         cities.append(
             CityPreflight(
                 city_ref=ref,
-                label=cat.label,
-                start_job_label=compiled.start_jobs.get(ref),
+                label=label("city", ref, cat.label),
+                start_job_label=None
+                if job is None
+                else label("opportunity", compiled.start_job_ids[ref], job),
                 executable=CapabilityStatus(
                     status="yes",
                     reasons=(
-                        "标准开局通过、名单已冻结；年度计划仍由环境逐次检查，不保证每份计划都合法",
+                        t(
+                            "preflight.city.executable_yes",
+                            "标准开局通过、名单已冻结；年度计划仍由环境逐次检查，不保证每份计划都合法",
+                        ),
                     ),
                 ),
                 scorable=scor,
@@ -353,22 +420,34 @@ def run_preflight(
             age_years=confirmed.age_years,
             cash=confirmed.money.converted,
             abilities=confirmed.abilities,
-            occupation_label=confirmed.occupation.label,
-            monthly_time_note=s.readable_time_note,
-            monthly_energy_note=s.readable_energy_note,
-            scenario_zh=pack.body.start_scenario,
+            occupation_label=label(
+                "occupation", confirmed.occupation.concept_id, confirmed.occupation.label
+            ),
+            monthly_time_note=label("preflight_text", "start_time_note", s.readable_time_note),
+            monthly_energy_note=label(
+                "preflight_text", "start_energy_note", s.readable_energy_note
+            ),
+            scenario_zh=pack_lines("start_scenario", pack.body.start_scenario),
         ),
         cities=tuple(cities),
         executable=CapabilityStatus(
-            status="yes", reasons=("全部候选城市的标准开局与名单检查通过",)
+            status="yes",
+            reasons=(t("preflight.executable_yes", "全部候选城市的标准开局与名单检查通过"),),
         ),
         scorable=CapabilityStatus(
             status=overall_scor,  # type: ignore[arg-type]
-            reasons=("逐城说明见 cities；不保证未来每个月都能完整评分",),
+            reasons=(
+                t("preflight.scorable_overall", "逐城说明见 cities；不保证未来每个月都能完整评分"),
+            ),
         ),
         feedback=CapabilityStatus(
             status=overall_scor if effective else "no",  # type: ignore[arg-type]
-            reasons=("上一年完整评分才更新下一年额度；不完整时这个分身的下一年会受阻",),
+            reasons=(
+                t(
+                    "preflight.feedback_overall",
+                    "上一年完整评分才更新下一年额度；不完整时这个分身的下一年会受阻",
+                ),
+            ),
         ),
         clones_per_city=len(
             execution.repeat_indexes if execution is not None else pack.body.run.repeat_indexes
@@ -378,12 +457,43 @@ def run_preflight(
         binding=binding,
         issues=tuple(compiled.issues) + tuple(g for c in cities for g in c.data_gaps),
         # 收尾 R7：这次按什么个性化、哪些没有（未答、暂不确定、没有固定爱好、通用评价分开写）
-        scope_zh=tuple(world.scope["数据与参数"]) + pack.body.limits + confirmed.interests.scope_zh,
+        scope_zh=_e1_scope(world)
+        + pack_lines("limits", pack.body.limits)
+        + confirmed_scope_lines(pack, confirmed),
         scope_notes=scope_notes(pack, world, confirmed.cities),
     )
     unsealed = ProductPreflight.model_construct(**fields, preflight_fingerprint="0" * 64)
     pre = ProductPreflight(**fields, preflight_fingerprint=content_fingerprint(unsealed.content()))
     return PreflightRun(pre, compiled=compiled, world=world, inventory=inventory)
+
+
+def _e1_scope(world: RunWorld) -> tuple[str, ...]:
+    """E1 运行前说明里“数据与参数”一节（``orchestration.life_runner`` 生成，不经过显示附层）。用同样的结构化事实按同一写法生成一份
+    可以绑定的文字，与 E1 的原文逐条核对：完全相同才用它（中文不变、可以给英文）；E1 的写法改了就照用 E1 的原文（中文仍不变，
+    英文显示为缺失），不猜。"""
+    p = world.bundle.protocol
+    ours = (
+        t(
+            "preflight.e1_scope.protocol",
+            "生活协议 {protocol}（状态 {status}）、评分 {spec}（探索版）：城市、报价、工资、疾病、治疗与"
+            "评分参数全部是合成设定，不是现实城市，不排序真实城市",
+            protocol=p.protocol_id,
+            status=p.status,
+            spec=world.scoring.spec.spec_id,
+        ),
+        t(
+            "preflight.e1_scope.city_facts",
+            "城市背景事实 {version}：每座城 {n} 条合成指数，换算到评分条件的规则是内部合成设定",
+            version=world.facts.version,
+            n=len(world.facts.sheets[0].facts),
+        ),
+        t(
+            "preflight.e1_scope.evaluation",
+            "评价沿用 E1-6：完整者均值只用完整评价的分身；生活出局另报比例与事件链；模拟问题进入缺失范围（不是置信区间）",
+        ),
+    )
+    theirs = tuple(world.scope["数据与参数"])
+    return ours if ours == theirs else theirs
 
 
 def _num(x: float, digits: int) -> ExactNumber:
@@ -402,9 +512,9 @@ def preflight_problems(
             issue(
                 "preflight_tampered",
                 "preflight_fingerprint",
-                "预检查的内容与它记下的身份不一致",
-                "不能提交",
-                "重新预检查",
+                t("preflight.tampered.message", "预检查的内容与它记下的身份不一致"),
+                t("preflight.tampered.impact", "不能提交"),
+                t("preflight.redo", "重新预检查"),
             )
         )
     if (pre.confirmed.confirmed_id, pre.confirmed.content_fingerprint) != (
@@ -415,9 +525,12 @@ def preflight_problems(
             issue(
                 "preflight_stale",
                 "confirmed",
-                "预检查对应的不是这份确认画像（答案改过、重新确认过，或引用错了）",
-                "旧预检查已经失效",
-                "用当前确认画像重新预检查",
+                t(
+                    "preflight.stale.message",
+                    "预检查对应的不是这份确认画像（答案改过、重新确认过，或引用错了）",
+                ),
+                t("preflight.invalidated", "旧预检查已经失效"),
+                t("preflight.stale.next", "用当前确认画像重新预检查"),
             )
         )
     if pre.status != "ready":
@@ -425,9 +538,9 @@ def preflight_problems(
             issue(
                 "preflight_blocked",
                 "status",
-                "预检查没有通过",
-                "不能提交运行",
-                "先解决预检查列出的问题",
+                t("preflight.not_passed.message", "预检查没有通过"),
+                t("preflight.not_passed.impact", "不能提交运行"),
+                t("preflight.not_passed.next", "先解决预检查列出的问题"),
             )
         )
     if pre.meta.data_pack.content_fingerprint != pack.fingerprint:
@@ -435,9 +548,9 @@ def preflight_problems(
             issue(
                 "data_pack_changed",
                 "meta.data_pack",
-                "预检查之后资料包变了",
-                "旧预检查已经失效",
-                "重新预检查",
+                t("preflight.pack_changed.message", "预检查之后资料包变了"),
+                t("preflight.invalidated", "旧预检查已经失效"),
+                t("preflight.redo", "重新预检查"),
             )
         )
     return out

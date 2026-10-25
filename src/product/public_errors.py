@@ -9,6 +9,9 @@
   审计编号由类别与原文的 SHA-256 前 16 位组成：同一原文得到同一编号，编号本身不泄露原文。
 
 没有列在这里的类别不会出现在公开消息里：E1 新增了状态而这里没有登记时，测试会失败（不静默显示原文）。
+
+表格里的固定文字写成字面的 ``Sub("显示 key", "中文")``（``scripts/product_display.py check`` 能看见 key 与中文），用 ``product.display.say`` 生成：
+中文与原来逐字相同，同时记下显示绑定（``product.display``）。
 """
 
 from __future__ import annotations
@@ -22,70 +25,107 @@ from common.life_aggregation_contracts import EntryRecord
 from common.life_planning_contracts import RunProgress as E1RunProgress
 from common.product_contracts import ProductIssue, PublicExplanation
 from product.answers import issue
+from product.display import Sub, say, t
 
-_NOT_IN_MEAN = "不进完成者平均；城市的模拟缺失范围把它当作未知（0 到 1 之间都保留），不写成生活出局"
+_NOT_IN_MEAN = Sub(
+    "result.clone.not_in_mean",
+    "不进完成者平均；城市的模拟缺失范围把它当作未知（0 到 1 之间都保留），不写成生活出局",
+)
 
 #: 分身类别 / 缺失原因 → （公开类别代码，原因，影响，下一步）。键与 E1 的 C / E / M 与 ``MissingReason`` 一一对应。
-CLONE_TEXT: dict[str, tuple[str, str, str, str]] = {
+CLONE_TEXT: dict[str, tuple[str, Sub, Sub, Sub]] = {
     "C": (
         "complete",
-        "三年生活正常完成，实际评分与期末估值都完整",
-        "计入这座城完成且可评价分身的平均",
-        "看逐年生活事实；这是合成模型下的结果，不是现实预测",
+        Sub("result.clone.complete.reason", "三年生活正常完成，实际评分与期末估值都完整"),
+        Sub("result.clone.complete.impact", "计入这座城完成且可评价分身的平均"),
+        Sub("result.clone.complete.next", "看逐年生活事实；这是合成模型下的结果，不是现实预测"),
     ),
     "E": (
         "life_exit",
-        "确认的生活出局：付不起最低住房与食品",
-        "不进完成者平均，也不进模拟缺失范围；出局比例以原计划人数为分母",
-        "看事件链了解经过（环境记录，不是因果证明）",
+        Sub("result.clone.life_exit.reason", "确认的生活出局：付不起最低住房与食品"),
+        Sub(
+            "result.clone.life_exit.impact",
+            "不进完成者平均，也不进模拟缺失范围；出局比例以原计划人数为分母",
+        ),
+        Sub("result.clone.life_exit.next", "看事件链了解经过（环境记录，不是因果证明）"),
     ),
     "not_run": (
         "not_run",
-        "这个分身没有运行或没有返回结果（例如批次在轮到它之前暂停，或全局调用上限用尽）",
+        Sub(
+            "result.clone.not_run.reason",
+            "这个分身没有运行或没有返回结果（例如批次在轮到它之前暂停，或全局调用上限用尽）",
+        ),
         _NOT_IN_MEAN,
-        "批次的问题处理之后，用新的运行重跑",
+        Sub("result.clone.not_run.next", "批次的问题处理之后，用新的运行重跑"),
     ),
     "plan_or_execution": (
         "plan_or_execution_incomplete",
-        "年度计划没有完成（例如规划修订次数用完、计划始终不合法）",
+        Sub(
+            "result.clone.plan_or_execution_incomplete.reason",
+            "年度计划没有完成（例如规划修订次数用完、计划始终不合法）",
+        ),
         _NOT_IN_MEAN,
-        "这是规划或模拟的问题，不是生活出局；改进规划器或说明之后重跑",
+        Sub(
+            "result.clone.plan_or_execution_incomplete.next",
+            "这是规划或模拟的问题，不是生活出局；改进规划器或说明之后重跑",
+        ),
     ),
     "data_missing": (
         "data_missing",
-        "结算要用的城市资料缺失或不完整",
+        Sub("result.clone.data_missing.reason", "结算要用的城市资料缺失或不完整"),
         _NOT_IN_MEAN,
-        "补齐资料之后重跑",
+        Sub("result.clone.data_missing.next", "补齐资料之后重跑"),
     ),
     "score_incomplete": (
         "score_incomplete",
-        "生活正常结束，但有月份的评分资料未知（有正权重的项目资料缺失）",
+        Sub(
+            "result.clone.score_incomplete.reason",
+            "生活正常结束，但有月份的评分资料未知（有正权重的项目资料缺失）",
+        ),
         _NOT_IN_MEAN,
-        "补齐评分资料之后重算",
+        Sub("result.clone.score_incomplete.next", "补齐评分资料之后重算"),
     ),
     "feedback_blocked": (
         "feedback_blocked",
-        "上一年评分不完整，下一年的精力额度无法确定，生活没有继续",
+        Sub(
+            "result.clone.feedback_blocked.reason",
+            "上一年评分不完整，下一年的精力额度无法确定，生活没有继续",
+        ),
         _NOT_IN_MEAN,
-        "补齐评分资料之后重跑",
+        Sub("result.clone.feedback_blocked.next", "补齐评分资料之后重跑"),
     ),
     "stopped": (
         "stopped",
-        "疾病之后应急安排不足或治疗资料缺口，模拟在那个月停止（模拟的支持边界，不是生活出局）",
+        Sub(
+            "result.clone.stopped.reason",
+            "疾病之后应急安排不足或治疗资料缺口，模拟在那个月停止（模拟的支持边界，不是生活出局）",
+        ),
         _NOT_IN_MEAN,
-        "看事件记录；改进应急安排或补齐治疗资料之后重跑",
+        Sub("result.clone.stopped.next", "看事件记录；改进应急安排或补齐治疗资料之后重跑"),
     ),
     "valuation_incomplete": (
         "valuation_incomplete",
-        "实际生活完整，但期末估值不完整或没有可用的参考分支",
+        Sub(
+            "result.clone.valuation_incomplete.reason",
+            "实际生活完整，但期末估值不完整或没有可用的参考分支",
+        ),
         _NOT_IN_MEAN,
-        "这是评价环节的问题；补齐资料或参考模板之后重算",
+        Sub(
+            "result.clone.valuation_incomplete.next",
+            "这是评价环节的问题；补齐资料或参考模板之后重算",
+        ),
     ),
     "input_config_program_error": (
         "program_error",
-        "模拟程序或配置出错，这个分身没有完成（不是生活出局）",
+        Sub(
+            "result.clone.program_error.reason",
+            "模拟程序或配置出错，这个分身没有完成（不是生活出局）",
+        ),
         _NOT_IN_MEAN,
-        "维护者按审计编号查看内部记录、修复之后用新的运行重跑；这里不显示内部错误内容",
+        Sub(
+            "result.clone.program_error.next",
+            "维护者按审计编号查看内部记录、修复之后用新的运行重跑；这里不显示内部错误内容",
+        ),
     ),
 }
 
@@ -96,18 +136,32 @@ _RECORD_OF = {
     "plan_or_execution": "progress.json",
 }
 
-_HALT_TEXT: dict[str, str] = {
-    "service_unavailable": "模型服务暂时不可用（超时、断连、限流或服务端错误），批次停下",
-    "credentials": "模型服务的凭证不可用，批次停下",
-    "account": "模型服务账户的状态不允许调用，批次停下",
-    "bad_request": "模型服务不支持这次请求的配置，批次停下",
-    "budget": "付费预算不足以发出下一次请求，批次停下",
-    "input_limit": "下一份请求超过了输入长度上限，批次停下（不删减事实）",
-    "uncertain_send": "上一次请求可能已经发出但结果没有可靠落盘，为免重复付费，批次停下",
-    "request_check": "最终请求没有通过信息隔离检查，批次停下",
-    "model_mismatch": "服务返回的模型与设定不同，回复不能用于规划，批次停下",
-    "user_deletion": "你删除了这次运行，系统不再发出新的模型请求，批次停下",
+_HALT_TEXT: dict[str, Sub] = {
+    "service_unavailable": Sub(
+        "progress.halt.service_unavailable",
+        "模型服务暂时不可用（超时、断连、限流或服务端错误），批次停下",
+    ),
+    "credentials": Sub("progress.halt.credentials", "模型服务的凭证不可用，批次停下"),
+    "account": Sub("progress.halt.account", "模型服务账户的状态不允许调用，批次停下"),
+    "bad_request": Sub("progress.halt.bad_request", "模型服务不支持这次请求的配置，批次停下"),
+    "budget": Sub("progress.halt.budget", "付费预算不足以发出下一次请求，批次停下"),
+    "input_limit": Sub(
+        "progress.halt.input_limit", "下一份请求超过了输入长度上限，批次停下（不删减事实）"
+    ),
+    "uncertain_send": Sub(
+        "progress.halt.uncertain_send",
+        "上一次请求可能已经发出但结果没有可靠落盘，为免重复付费，批次停下",
+    ),
+    "request_check": Sub("progress.halt.request_check", "最终请求没有通过信息隔离检查，批次停下"),
+    "model_mismatch": Sub(
+        "progress.halt.model_mismatch", "服务返回的模型与设定不同，回复不能用于规划，批次停下"
+    ),
+    "user_deletion": Sub(
+        "progress.halt.user_deletion", "你删除了这次运行，系统不再发出新的模型请求，批次停下"
+    ),
 }
+_HALT_IMPACT = Sub("progress.halt.impact", "不是生活结果")
+_HALT_NEXT = Sub("progress.halt.next", "维护者处理服务、凭证、预算或请求的问题")
 
 
 def clone_explanation(entry: EntryRecord, run_id: str) -> PublicExplanation:
@@ -123,33 +177,55 @@ def clone_explanation(entry: EntryRecord, run_id: str) -> PublicExplanation:
         record = _RECORD_OF.get(entry.missing_reason or "", "evaluations/")
         ref = f"run:{run_id} clone:{entry.clone_id} record:{record}"
     return PublicExplanation(
-        category=category, reason_zh=reason, impact_zh=impact, next_action_zh=action, audit_ref=ref
+        category=category,
+        reason_zh=say(reason),
+        impact_zh=say(impact),
+        next_action_zh=say(action),
+        audit_ref=ref,
     )
 
 
 #: 未正常完成的运行状态 → （公开类别，原因，这种状态本身的影响，维护者要做的事）。报告有没有生成、能不能恢复两句**不写死在这里**，
 #: 由 ``progress_pause`` 按运行归档的实际情况补上：E1 的程序错误暂停与调用上限用尽会把名单跑完并写出 C / E / M 报告，停下与中断
 #: 不写报告；恢复规则在 E1（``resume_run``），这里只照实转述。
-_PAUSE_TEXT: dict[str, tuple[str, str, str, str]] = {
+_PAUSE_TEXT: dict[str, tuple[str, Sub, Sub, Sub | None]] = {
     "paused": (
         "batch_paused_program_error",
-        "批次因程序或配置问题暂停：出错的分身记为程序错误，还没轮到的分身保留为未运行",
-        "这两类分身都是模拟缺失（不是生活出局），不进完成者平均",
-        "维护者按审计编号查看内部记录并修复",
+        Sub(
+            "progress.pause.batch_paused_program_error.reason",
+            "批次因程序或配置问题暂停：出错的分身记为程序错误，还没轮到的分身保留为未运行",
+        ),
+        Sub(
+            "progress.pause.batch_paused_program_error.impact",
+            "这两类分身都是模拟缺失（不是生活出局），不进完成者平均",
+        ),
+        Sub("progress.pause.batch_paused_program_error.next", "维护者按审计编号查看内部记录并修复"),
     ),
     "budget_exhausted": (
         "call_limit_reached",
-        "全局调用上限用尽，后面的分身没有运行",
-        "没有运行的分身记为未运行（模拟缺失），不写成生活出局",
-        "由所有者决定是否提高上限",
+        Sub("progress.pause.call_limit_reached.reason", "全局调用上限用尽，后面的分身没有运行"),
+        Sub(
+            "progress.pause.call_limit_reached.impact",
+            "没有运行的分身记为未运行（模拟缺失），不写成生活出局",
+        ),
+        Sub("progress.pause.call_limit_reached.next", "由所有者决定是否提高上限"),
     ),
     "interrupted": (
         "interrupted",
-        "运行在两次规划调用之间中断",
-        "已经提交的年份保留在归档里",
-        "",
+        Sub("progress.pause.interrupted.reason", "运行在两次规划调用之间中断"),
+        Sub("progress.pause.interrupted.impact", "已经提交的年份保留在归档里"),
+        None,
     ),
 }
+_REPORT_READY = Sub(
+    "progress.pause.report_ready", "评价与汇总已经生成，可以查看结果（C / E / M 按上面的分类）"
+)
+_REPORT_MISSING = Sub("progress.pause.report_missing", "还没有生成评价与汇总，不擅自给出分类或分数")
+_RESUMABLE = Sub(
+    "progress.pause.resumable",
+    "可以恢复同一次运行（恢复前逐条核对归档，已用的调用次数与预算不清零）；系统不会替分身生成计划",
+)
+_NOT_RESUMABLE = Sub("progress.pause.not_resumable", "这次运行不能恢复，处理之后用新的运行重跑")
 
 
 def progress_pause(
@@ -167,28 +243,24 @@ def progress_pause(
         if kind not in _HALT_TEXT:
             raise KeyError(f"批次停下的原因 {kind!r} 没有登记公开说明")
         category, reason = f"batch_halted_{kind}", _HALT_TEXT[kind]
-        impact, step = "不是生活结果", "维护者处理服务、凭证、预算或请求的问题"
+        impact, step = _HALT_IMPACT, _HALT_NEXT
         audit = ref
     elif p.status in _PAUSE_TEXT:
         category, reason, impact, step = _PAUSE_TEXT[p.status]
         audit = f"{ref}, failures.json" if p.status == "paused" else ref
     else:
         raise KeyError(f"运行状态 {p.status!r} 没有登记公开说明")
-    report = (
-        "评价与汇总已经生成，可以查看结果（C / E / M 按上面的分类）"
-        if report_available
-        else "还没有生成评价与汇总，不擅自给出分类或分数"
-    )
-    resume = (
-        "可以恢复同一次运行（恢复前逐条核对归档，已用的调用次数与预算不清零）；系统不会替分身生成计划"
-        if resumable
-        else "这次运行不能恢复，处理之后用新的运行重跑"
-    )
+    report = _REPORT_READY if report_available else _REPORT_MISSING
+    resume = _RESUMABLE if resumable else _NOT_RESUMABLE
     return PublicExplanation(
         category=category,
-        reason_zh=reason,
-        impact_zh=f"{impact}；{report}",
-        next_action_zh=f"{step}；{resume}" if step else resume,
+        reason_zh=say(reason),
+        impact_zh=t(
+            "progress.pause.impact_line", "{impact}；{report}", impact=impact, report=report
+        ),
+        next_action_zh=t("progress.pause.next_line", "{step}；{resume}", step=step, resume=resume)
+        if step is not None
+        else say(resume),
         audit_ref=audit,
     )
 
@@ -221,9 +293,18 @@ def e1_refusal_issue(directory: Path, detail: str) -> ProductIssue:
     return issue(
         "e1_preflight_refused",
         "run",
-        "运行前的一致性检查没有通过：编译出的输入、资料包或 E1 配置之间有矛盾（这不是你的答案的问题）",
-        "这次比较不能启动；系统不会删掉城市或分身再声称执行了原比较",
-        "请维护者按审计编号查看内部诊断并修复资料或配置，之后重新预检查",
+        t(
+            "issue.e1_preflight_refused.message",
+            "运行前的一致性检查没有通过：编译出的输入、资料包或 E1 配置之间有矛盾（这不是你的答案的问题）",
+        ),
+        t(
+            "issue.e1_preflight_refused.impact",
+            "这次比较不能启动；系统不会删掉城市或分身再声称执行了原比较",
+        ),
+        t(
+            "issue.e1_preflight_refused.next",
+            "请维护者按审计编号查看内部诊断并修复资料或配置，之后重新预检查",
+        ),
         audit_ref=ref,
     )
 
@@ -234,8 +315,14 @@ def profile_contract_issue(directory: Path, detail: str) -> ProductIssue:
     return issue(
         "profile_contract_rejected",
         "confirmed",
-        "确认画像没有通过 E1 画像契约的检查（例如同一项需求有两条硬要求）",
-        "不能编译成 E1 输入，这次比较不能启动",
-        "回到审阅页修正之后重新确认；如果审阅页没有提示，请维护者按审计编号排查",
+        t(
+            "issue.profile_contract_rejected.message",
+            "确认画像没有通过 E1 画像契约的检查（例如同一项需求有两条硬要求）",
+        ),
+        t("issue.profile_contract_rejected.impact", "不能编译成 E1 输入，这次比较不能启动"),
+        t(
+            "issue.profile_contract_rejected.next",
+            "回到审阅页修正之后重新确认；如果审阅页没有提示，请维护者按审计编号排查",
+        ),
         audit_ref=ref,
     )

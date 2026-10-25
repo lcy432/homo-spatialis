@@ -87,6 +87,8 @@ from orchestration.life_runner import (
 from orchestration.life_runner import preflight as e1_preflight
 from product import bridge
 from product.bridge import SubmissionRegistry
+from product.display import recording
+from product.display.document import adopt_copies, binding_document
 from product.execution import ExecutionSpec, service_pack
 from product.fixtures import prepare_workspace
 from product.pack import DataPack, load_pack
@@ -452,17 +454,26 @@ class E3PreflightAdapter:
             claim = {"profile": profile.as_state(), "inputs": inputs.as_state()}
             if owner.is_file() and _read_json(owner) != claim:
                 return ctx.local_block("workspace_conflict", profile, inputs)
-            run = run_preflight(
-                pack,
-                confirmed,
-                Path(f"compiled/{request.label}"),
-                repo_root=Path("."),
-                scripts=request.scripts,
-                illness_events=request.illness_events,
-                execution=request.execution,
-            )
+            with recording() as rec:
+                run = run_preflight(
+                    pack,
+                    confirmed,
+                    Path(f"compiled/{request.label}"),
+                    repo_root=Path("."),
+                    scripts=request.scripts,
+                    illness_events=request.illness_events,
+                    execution=request.execution,
+                )
             pre = run.preflight
             fp = pre.preflight_fingerprint
+            # 显示附层：生成预检查时记下的文字绑定，放在这次运行自己的工作目录里，随运行一起删除（不进预检查的内容身份）。
+            # 文件名只取身份的前 16 位（Windows 的路径长度有上限）；读取时绑定里的原消息摘要还会再核对一次
+            _write_json(
+                Path("workflow/display") / f"preflight-{fp[:16]}.json",
+                binding_document(
+                    pre.model_dump(mode="json"), rec, pack_fingerprint=pack.fingerprint
+                ),
+            )
             _write_json(
                 Path("workflow/preflights") / f"{fp}.json",
                 {
@@ -742,10 +753,23 @@ class E3ProjectionAdapter:
             sent = sum(
                 1 for r in RunStore(run_dir).records("provider_calls") if r.get("event") == "intent"
             )
-            result = project_result(
-                pack, confirmed, pre, world, outcome, inventory, real_model_calls=sent
+            with recording() as texts:
+                result = project_result(
+                    pack, confirmed, pre, world, outcome, inventory, real_model_calls=sent
+                )
+            # 结果照抄确认过的预检查里的文字（规划器说明、费用上限）：借用预检查生成时保存的绑定
+            pre_display = (
+                Path("workflow/display") / f"preflight-{pre.preflight_fingerprint[:16]}.json"
             )
+            if pre_display.is_file():
+                adopt_copies(texts, pre.model_dump(mode="json"), _read_json(pre_display))
             _write_json(cached, result.model_dump(mode="json"))
+            _write_json(
+                Path("workflow/display") / f"result-{run_id}.json",
+                binding_document(
+                    result.model_dump(mode="json"), texts, pack_fingerprint=pack.fingerprint
+                ),
+            )
             return _view(result)
 
 

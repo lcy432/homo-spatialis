@@ -1,0 +1,331 @@
+# 运行前检查、资料性质与目录编译用到的资料包实体（pack.e3a.synthetic-v2）：资料包里的固定说明（preflight_text：目录调查范围与开局的
+# 时间、精力说明；范围、开局情景与本版不支持用能力清单的 capability 实体）、登记的模型
+# 设定（assumption，按带着它的机会或治疗条目编号）、共同先验、通勤方式的条件、家务任务、治安资料、来源事实、税策略与税规则。
+# zh 必须与资料原文逐字相同（不同就显示为译文过时）；城市、职业、六维与机会名称在输入侧与结果侧的实体文件里。
+pack_id: pack.e3a.synthetic-v2
+entities:
+  assumption:
+    k51.care.clinic:
+      note:
+        en: Hand-set treatment price and visit time, not from any real medical provider or price data
+        zh: 手工设定的治疗价格与就医时间，不来自任何真实医疗机构或价格资料
+    k51.durable.convenience_pack:
+      note:
+        en: 'E3-A compilation: per-field sources are in the catalog compilation record; it contains synthetic settings, so the whole item is labeled synthetic by its weakest source — a synthetic lifetime setting shared by the whole group (the same device pack in both cities); a uniform effect assumption shared by the whole group: the same device pack leaves the same personal residual hours in both cities (parameter register SC-18); a hand-set synthetic price (the same as in the E1 convenience example)'
+        zh: E3-A 编译：逐字段来源见目录编译记录；含合成设定，整条按最弱来源标合成——全组共用的合成寿命设定（两城同一款设备包相同）；全组共用的统一效果假设：两城同一款设备包的本人残余小时相同（参数目录 SC-18）；手工设定的合成报价（与 E1 便利版样例相同）
+    k51.durable.dryer:
+      note:
+        en: 'E3-A compilation: per-field sources are in the catalog compilation record; it contains synthetic settings, so the whole item is labeled synthetic by its weakest source — synthetic lifetime setting; synthetic effect setting'
+        zh: E3-A 编译：逐字段来源见目录编译记录；含合成设定，整条按最弱来源标合成——合成寿命设定；合成效果设定
+    k51.housing.near:
+      note:
+        en: Hand-set values, not from any real city, product, service, employer, data source or LLM
+        zh: 手工设定的数值，不来自任何真实城市、商品、服务、雇主、数据源或 LLM
+    k51.service.chores:
+      note:
+        en: 'E3-A compilation: per-field sources are in the catalog compilation record; it contains synthetic settings, so the whole item is labeled synthetic by its weakest source — a uniform effect assumption shared by the whole group: the same chore service leaves the same personal residual hours in both cities (parameter register SC-18); synthetic setting: for home-visit services you do not take part in the service itself (putting away and handover count as residual chores); a hand-set synthetic monthly price (the same as in the E1 convenience example)'
+        zh: E3-A 编译：逐字段来源见目录编译记录；含合成设定，整条按最弱来源标合成——全组共用的统一效果假设：两城同一种杂务服务的本人残余小时相同（参数目录 SC-18）；合成设定：上门服务本人不参与服务本身（收纳与交接算在残余家务里）；手工设定的合成月价（与 E1 便利版样例相同）
+    m52.care.clinic:
+      note:
+        en: Hand-set treatment price and visit time, not from any real medical provider or price data
+        zh: 手工设定的治疗价格与就医时间，不来自任何真实医疗机构或价格资料
+    m52.durable.convenience_pack:
+      note:
+        en: 'E3-A compilation: per-field sources are in the catalog compilation record; it contains synthetic settings, so the whole item is labeled synthetic by its weakest source — a synthetic lifetime setting shared by the whole group (the same device pack in both cities); a uniform effect assumption shared by the whole group: the same device pack leaves the same personal residual hours in both cities (parameter register SC-18); a hand-set synthetic price (the same as in the E1 convenience example)'
+        zh: E3-A 编译：逐字段来源见目录编译记录；含合成设定，整条按最弱来源标合成——全组共用的合成寿命设定（两城同一款设备包相同）；全组共用的统一效果假设：两城同一款设备包的本人残余小时相同（参数目录 SC-18）；手工设定的合成报价（与 E1 便利版样例相同）
+    m52.housing.near:
+      note:
+        en: Hand-set values, not from any real city, product, service, employer, data source or LLM
+        zh: 手工设定的数值，不来自任何真实城市、商品、服务、雇主、数据源或 LLM
+    m52.service.chores:
+      note:
+        en: 'E3-A compilation: per-field sources are in the catalog compilation record; it contains synthetic settings, so the whole item is labeled synthetic by its weakest source — a uniform effect assumption shared by the whole group: the same chore service leaves the same personal residual hours in both cities (parameter register SC-18); synthetic setting: for home-visit services you do not take part in the service itself (putting away and handover count as residual chores); a hand-set synthetic monthly price (the same as in the E1 convenience example)'
+        zh: E3-A 编译：逐字段来源见目录编译记录；含合成设定，整条按最弱来源标合成——全组共用的统一效果假设：两城同一种杂务服务的本人残余小时相同（参数目录 SC-18）；合成设定：上门服务本人不参与服务本身（收纳与交接算在残余家务里）；手工设定的合成月价（与 E1 便利版样例相同）
+  common_prior:
+    development_index:
+      label:
+        en: Development opportunities (synthetic index)
+        zh: 发展机会（合成指数）
+      meaning:
+        en: A synthetic index of the city's career and growth opportunities, 0–10; higher means the city itself offers better conditions for development (not including your own learning progress). Not real employment or education statistics
+        zh: 合成的城市职业与成长机会指数，0–10，越高表示城市本身提供的发展条件越好（不含你自己的学习进度）。不是真实的 就业或教育统计
+    environment_index:
+      label:
+        en: Environmental quality (synthetic index)
+        zh: 环境质量（合成指数）
+      meaning:
+        en: A synthetic index of the city's environmental quality (a synthetic summary of air, green space and noise), 0–10; higher is better. Not real environmental monitoring data
+        zh: 合成的城市环境质量指数（空气、绿地、噪声的合成概括），0–10，越高越好。不是真实的环境监测数据
+    leisure_index:
+      label:
+        en: Leisure conditions (synthetic index)
+        zh: 休闲条件（合成指数）
+      meaning:
+        en: A synthetic index of the city's leisure facilities and public space, 0–10; higher means better leisure you can enjoy without spending money (fitness, experiences and the like are arranged separately). Not real facility statistics
+        zh: 合成的城市休闲设施与公共空间指数，0–10，越高表示不花钱也能享受的休闲条件越好（健身、体验等要另外安排）。不是 真实的设施统计
+    safety_index:
+      label:
+        en: Safety conditions (synthetic index)
+        zh: 安全条件（合成指数）
+      meaning:
+        en: A synthetic index of the city's safety conditions, 0–10; higher is safer. Not the crime rate or statistical definition of any real city; comparable only within this set of synthetic cities
+        zh: 合成的城市安全条件指数，0–10，越高越安全。不是任何真实城市的犯罪率或统计口径，只在这组合成城市之间可比
+  commute_rule:
+    US:SYNTH2026:K51.transit:
+      label:
+        en: 'Public transit in the synthetic city: no conditions of use, no cap'
+        zh: 合成城的公共交通，没有使用条件、不封顶
+    US:SYNTH2026:M52.transit:
+      label:
+        en: 'Public transit in the synthetic city: no conditions of use, no cap'
+        zh: 合成城的公共交通，没有使用条件、不封顶
+  household_task:
+    cleaning:
+      label:
+        en: 'Cleaning: cleaning a one-bedroom home yourself (sweeping, mopping, tidying)'
+        zh: 打扫：自己打扫一居室（扫地、拖地、整理）
+    laundry:
+      label:
+        en: 'Laundry: without a device or service, washing by hand or at a self-service laundromat, including drying, folding and putting away'
+        zh: 洗衣：没有设备或服务时，自己手洗或去自助洗衣店，连同晾晒、叠放与收纳
+  preflight_text:
+    catalog_scope:
+      label:
+        en: 'Devices and paid services for “daily chores” in the two cities of the synthetic data pack: only options that can replace laundry or cleaning (the protocol''s representative chore set) are surveyed; cooking, care, repairs and the like are outside this survey. Things outside the survey scope are not counted in the denominator, and that does not mean the city lacks them.'
+        zh: 合成资料包里两座城的“日常杂务”设备与人工服务：只调查能替代洗衣或打扫（协议的代表性杂务组合）的方案；做饭、照护、维修等不在 本次调查范围。调查范围之外的东西不计入分母，也不代表城市没有。
+    start_energy_note:
+      label:
+        en: Each month you can take on activities worth 250 burden points (a uniform model setting in this version); the more satisfying the previous year, the more the next year allows, up to 10% more
+        zh: 每月可承受 250 个负担点的活动（本版统一的模型设定）；上一年过得越满意，下一年最多多 10%
+    start_time_note:
+      label:
+        en: About 365 hours a month can be scheduled (12 hours a day for sleep and basic rest are already set aside) — a uniform model setting in this version, not a measurement of you
+        zh: 每月可安排约 365 小时（每天 12 小时的睡眠与基本休息已经预留在外）——本版统一的模型设定，不是对你的测量
+  source_fact:
+    f.chores.effect:
+      assumption:
+        en: 'A uniform effect assumption shared by the whole group: the same chore service leaves the same personal residual hours in both cities (parameter register SC-18)'
+        zh: 全组共用的统一效果假设：两城同一种杂务服务的本人残余小时相同（参数目录 SC-18）
+      geography:
+        en: Synthetic comparison group (shared by the whole group)
+        zh: 合成比较组（全组共用）
+      note:
+        en: The residual is your own time for putting away and handover, not the service worker's working time
+        zh: 残余是本人收纳与交接的时间，不是服务人员的工作时间
+      period:
+        en: Constant 2024 prices
+        zh: 2024 年不变价
+      unit:
+        en: hours/month (your residual)
+        zh: 小时/月（本人残余）
+    f.k51.chores.price:
+      assumption:
+        en: A hand-set synthetic monthly price (the same as in the E1 convenience example)
+        zh: 手工设定的合成月价（与 E1 便利版样例相同）
+      geography:
+        en: Synthetic city K51
+        zh: 合成城 K51
+      note:
+        en: Synthetic price, not from any service provider
+        zh: 合成报价，不来自任何服务商
+      period:
+        en: Constant 2024 prices
+        zh: 2024 年不变价
+      unit:
+        en: USD_2024_LOCAL/month
+        zh: USD_2024_LOCAL/月
+    f.k51.cooker.price:
+      assumption:
+        en: A hand-set synthetic price
+        zh: 手工设定的合成报价
+      geography:
+        en: Synthetic city K51
+        zh: 合成城 K51
+      note:
+        en: A cooking device, outside this survey's scope
+        zh: 做饭设备，不在本次调查范围
+      period:
+        en: Constant 2024 prices
+        zh: 2024 年不变价
+      unit:
+        en: USD_2024_LOCAL/machine
+        zh: USD_2024_LOCAL/台
+    f.k51.dryer.effect:
+      assumption:
+        en: Synthetic effect setting
+        zh: 合成效果设定
+      geography:
+        en: Synthetic city K51
+        zh: 合成城 K51
+      note:
+        en: Replaces only the drying part of laundry
+        zh: 只替代洗衣的晾晒部分
+      period:
+        en: Constant 2024 prices
+        zh: 2024 年不变价
+      unit:
+        en: hours/month (your residual)
+        zh: 小时/月（本人残余）
+    f.k51.dryer.life:
+      assumption:
+        en: Synthetic lifetime setting
+        zh: 合成寿命设定
+      geography:
+        en: Synthetic city K51
+        zh: 合成城 K51
+      note:
+        en: Price data missing
+        zh: 报价资料缺失
+      period:
+        en: Constant 2024 prices
+        zh: 2024 年不变价
+      unit:
+        en: years
+        zh: 年
+    f.k51.pack.price:
+      assumption:
+        en: A hand-set synthetic price (the same as in the E1 convenience example)
+        zh: 手工设定的合成报价（与 E1 便利版样例相同）
+      geography:
+        en: Synthetic city K51
+        zh: 合成城 K51
+      note:
+        en: Synthetic price, not from any store
+        zh: 合成报价，不来自任何商店
+      period:
+        en: Constant 2024 prices
+        zh: 2024 年不变价
+      unit:
+        en: USD_2024_LOCAL/set
+        zh: USD_2024_LOCAL/套
+    f.k51.robot.effect:
+      assumption:
+        en: Synthetic effect setting
+        zh: 合成效果设定
+      geography:
+        en: Synthetic city K51
+        zh: 合成城 K51
+      note:
+        en: Replaces only cleaning
+        zh: 只替代打扫
+      period:
+        en: Constant 2024 prices
+        zh: 2024 年不变价
+      unit:
+        en: hours/month (your residual)
+        zh: 小时/月（本人残余）
+    f.k51.robot.price:
+      assumption:
+        en: A hand-set synthetic price
+        zh: 手工设定的合成报价
+      geography:
+        en: Synthetic city K51
+        zh: 合成城 K51
+      note:
+        en: Has a price, but lifetime data is missing
+        zh: 有报价，但寿命资料缺失
+      period:
+        en: Constant 2024 prices
+        zh: 2024 年不变价
+      unit:
+        en: USD_2024_LOCAL/machine
+        zh: USD_2024_LOCAL/台
+    f.m52.chores.price:
+      assumption:
+        en: A hand-set synthetic monthly price (the same as in the E1 convenience example)
+        zh: 手工设定的合成月价（与 E1 便利版样例相同）
+      geography:
+        en: Synthetic city M52
+        zh: 合成城 M52
+      note:
+        en: Synthetic price, not from any service provider
+        zh: 合成报价，不来自任何服务商
+      period:
+        en: Constant 2024 prices
+        zh: 2024 年不变价
+      unit:
+        en: USD_2024_LOCAL/month
+        zh: USD_2024_LOCAL/月
+    f.m52.cleaning.price:
+      assumption:
+        en: A hand-set synthetic monthly price
+        zh: 手工设定的合成月价
+      geography:
+        en: Synthetic city M52
+        zh: 合成城 M52
+      note:
+        en: Has a price, but relief-effect data is missing
+        zh: 有报价，但减负效果资料缺失
+      period:
+        en: Constant 2024 prices
+        zh: 2024 年不变价
+      unit:
+        en: USD_2024_LOCAL/month
+        zh: USD_2024_LOCAL/月
+    f.m52.pack.price:
+      assumption:
+        en: A hand-set synthetic price (the same as in the E1 convenience example)
+        zh: 手工设定的合成报价（与 E1 便利版样例相同）
+      geography:
+        en: Synthetic city M52
+        zh: 合成城 M52
+      note:
+        en: Synthetic price, not from any store
+        zh: 合成报价，不来自任何商店
+      period:
+        en: Constant 2024 prices
+        zh: 2024 年不变价
+      unit:
+        en: USD_2024_LOCAL/set
+        zh: USD_2024_LOCAL/套
+    f.pack.effect:
+      assumption:
+        en: 'A uniform effect assumption shared by the whole group: the same device pack leaves the same personal residual hours in both cities (parameter register SC-18)'
+        zh: 全组共用的统一效果假设：两城同一款设备包的本人残余小时相同（参数目录 SC-18）
+      geography:
+        en: Synthetic comparison group (shared by the whole group)
+        zh: 合成比较组（全组共用）
+      note:
+        en: The residual is the monthly hours you still need after handling the whole chore, not the machine's running time
+        zh: 残余是本人处理整项家务后仍需的月小时，不是机器运行时间
+      period:
+        en: Constant 2024 prices
+        zh: 2024 年不变价
+      unit:
+        en: hours/month (your residual)
+        zh: 小时/月（本人残余）
+    f.pack.life:
+      assumption:
+        en: A synthetic lifetime setting shared by the whole group (the same device pack in both cities)
+        zh: 全组共用的合成寿命设定（两城同一款设备包相同）
+      geography:
+        en: Synthetic comparison group (shared by the whole group)
+        zh: 合成比较组（全组共用）
+      note:
+        en: Synthetic lifetime, not manufacturer data
+        zh: 合成寿命，不是厂商资料
+      period:
+        en: Constant 2024 prices
+        zh: 2024 年不变价
+      unit:
+        en: years
+        zh: 年
+    f.service.participation:
+      assumption:
+        en: 'Synthetic setting: for home-visit services you do not take part in the service itself (putting away and handover count as residual chores)'
+        zh: 合成设定：上门服务本人不参与服务本身（收纳与交接算在残余家务里）
+      geography:
+        en: Synthetic comparison group (shared by the whole group)
+        zh: 合成比较组（全组共用）
+      note:
+        en: Your participation time is not the service worker's working time
+        zh: 本人参与时间不是服务人员的工作时间
+      period:
+        en: Constant 2024 prices
+        zh: 2024 年不变价
+      raw_value:
+        en: 0 hours, burden 0
+        zh: 0 小时、负担 0
+      unit:
+        en: hours/month (your participation)
+        zh: 小时/月（本人参与）

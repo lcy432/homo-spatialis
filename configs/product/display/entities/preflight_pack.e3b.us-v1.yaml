@@ -1,0 +1,431 @@
+# 运行前检查、资料性质与目录编译用到的资料包实体（pack.e3b.us-v1）：资料包里的固定说明（preflight_text：目录调查范围与开局的
+# 时间、精力说明；范围、开局情景与本版不支持用能力清单的 capability 实体）、登记的模型
+# 设定（assumption，按带着它的机会或治疗条目编号）、共同先验、通勤方式的条件、家务任务、治安资料、来源事实、税策略与税规则。
+# zh 必须与资料原文逐字相同（不同就显示为译文过时）；城市、职业、六维与机会名称在输入侧与结果侧的实体文件里。
+pack_id: pack.e3b.us-v1
+entities:
+  assumption:
+    chi.care.minor:
+      note:
+        en: 'No real medical price data: the six cities use the same registered nominal price and visit time, creating no city differences; not a quote from any medical provider (geography: a common assumption for the six cities (no real medical price data))'
+        zh: '没有真实医疗价格资料：六城用同一个登记的名义价与就医时间，不制造城市差异；不是任何医疗机构的报价（geography: 六城共同假设（没有真实医疗价格资料））'
+    chi.durable.tennis_racket:
+      note:
+        en: 'Price and lifetime are registered category settings (equipment_category_v1), not a quote for any product (geography: CBSA2023 16980 Chicago-Naperville-Elgin metro area)'
+        zh: '价格与寿命是登记的类别设定（equipment_category_v1），不是某个商品的报价（geography: CBSA2023 16980 Chicago-Naperville-Elgin 都会区）'
+    chi.durable.washer_top:
+      note:
+        en: 'Price, lifetime and the residual after substitution are registered category settings (device_category_v1), not model quotes; the models come from ENERGY STAR records (geography: CBSA2023 16980 Chicago-Naperville-Elgin metro area)'
+        zh: '价格、寿命与替代后残余是登记的类别设定（device_category_v1），不是型号报价；型号来自 ENERGY STAR 记录（geography: CBSA2023 16980 Chicago-Naperville-Elgin 都会区）'
+    chi.experience.tennis_rental:
+      note:
+        en: 'Instructor hours, group size, venue and equipment are registered model activity settings (activity_template_v1), not a real quote from any venue (geography: CBSA2023 16980 Chicago-Naperville-Elgin metro area)'
+        zh: '老师小时、人数、场地与器材是登记的模型活动设定（activity_template_v1），不是某个场所的真实报价（geography: CBSA2023 16980 Chicago-Naperville-Elgin 都会区）'
+    hou.care.minor:
+      note:
+        en: 'No real medical price data: the six cities use the same registered nominal price and visit time, creating no city differences; not a quote from any medical provider (geography: a common assumption for the six cities (no real medical price data))'
+        zh: '没有真实医疗价格资料：六城用同一个登记的名义价与就医时间，不制造城市差异；不是任何医疗机构的报价（geography: 六城共同假设（没有真实医疗价格资料））'
+    hou.durable.tennis_racket:
+      note:
+        en: 'Price and lifetime are registered category settings (equipment_category_v1), not a quote for any product (geography: CBSA2023 26420 Houston-Pasadena-The Woodlands metro area)'
+        zh: '价格与寿命是登记的类别设定（equipment_category_v1），不是某个商品的报价（geography: CBSA2023 26420 Houston-Pasadena-The Woodlands 都会区）'
+    hou.durable.washer_top:
+      note:
+        en: 'Price, lifetime and the residual after substitution are registered category settings (device_category_v1), not model quotes; the models come from ENERGY STAR records (geography: CBSA2023 26420 Houston-Pasadena-The Woodlands metro area)'
+        zh: '价格、寿命与替代后残余是登记的类别设定（device_category_v1），不是型号报价；型号来自 ENERGY STAR 记录（geography: CBSA2023 26420 Houston-Pasadena-The Woodlands 都会区）'
+    hou.experience.tennis_rental:
+      note:
+        en: 'Instructor hours, group size, venue and equipment are registered model activity settings (activity_template_v1), not a real quote from any venue (geography: CBSA2023 26420 Houston-Pasadena-The Woodlands metro area)'
+        zh: '老师小时、人数、场地与器材是登记的模型活动设定（activity_template_v1），不是某个场所的真实报价（geography: CBSA2023 26420 Houston-Pasadena-The Woodlands 都会区）'
+    la.care.minor:
+      note:
+        en: 'No real medical price data: the six cities use the same registered nominal price and visit time, creating no city differences; not a quote from any medical provider (geography: a common assumption for the six cities (no real medical price data))'
+        zh: '没有真实医疗价格资料：六城用同一个登记的名义价与就医时间，不制造城市差异；不是任何医疗机构的报价（geography: 六城共同假设（没有真实医疗价格资料））'
+    la.durable.tennis_racket:
+      note:
+        en: 'Price and lifetime are registered category settings (equipment_category_v1), not a quote for any product (geography: CBSA2023 31080 Los Angeles-Long Beach-Anaheim metro area)'
+        zh: '价格与寿命是登记的类别设定（equipment_category_v1），不是某个商品的报价（geography: CBSA2023 31080 Los Angeles-Long Beach-Anaheim 都会区）'
+    la.durable.washer_top:
+      note:
+        en: 'Price, lifetime and the residual after substitution are registered category settings (device_category_v1), not model quotes; the models come from ENERGY STAR records (geography: CBSA2023 31080 Los Angeles-Long Beach-Anaheim metro area)'
+        zh: '价格、寿命与替代后残余是登记的类别设定（device_category_v1），不是型号报价；型号来自 ENERGY STAR 记录（geography: CBSA2023 31080 Los Angeles-Long Beach-Anaheim 都会区）'
+    la.experience.tennis_rental:
+      note:
+        en: 'Instructor hours, group size, venue and equipment are registered model activity settings (activity_template_v1), not a real quote from any venue (geography: CBSA2023 31080 Los Angeles-Long Beach-Anaheim metro area)'
+        zh: '老师小时、人数、场地与器材是登记的模型活动设定（activity_template_v1），不是某个场所的真实报价（geography: CBSA2023 31080 Los Angeles-Long Beach-Anaheim 都会区）'
+    nyc.care.minor:
+      note:
+        en: 'No real medical price data: the six cities use the same registered nominal price and visit time, creating no city differences; not a quote from any medical provider (geography: a common assumption for the six cities (no real medical price data))'
+        zh: '没有真实医疗价格资料：六城用同一个登记的名义价与就医时间，不制造城市差异；不是任何医疗机构的报价（geography: 六城共同假设（没有真实医疗价格资料））'
+    nyc.durable.tennis_racket:
+      note:
+        en: 'Price and lifetime are registered category settings (equipment_category_v1), not a quote for any product (geography: CBSA2023 35620 New York-Newark-Jersey City metro area)'
+        zh: '价格与寿命是登记的类别设定（equipment_category_v1），不是某个商品的报价（geography: CBSA2023 35620 New York-Newark-Jersey City 都会区）'
+    nyc.durable.washer_top:
+      note:
+        en: 'Price, lifetime and the residual after substitution are registered category settings (device_category_v1), not model quotes; the models come from ENERGY STAR records (geography: CBSA2023 35620 New York-Newark-Jersey City metro area)'
+        zh: '价格、寿命与替代后残余是登记的类别设定（device_category_v1），不是型号报价；型号来自 ENERGY STAR 记录（geography: CBSA2023 35620 New York-Newark-Jersey City 都会区）'
+    nyc.experience.tennis_rental:
+      note:
+        en: 'Instructor hours, group size, venue and equipment are registered model activity settings (activity_template_v1), not a real quote from any venue (geography: CBSA2023 35620 New York-Newark-Jersey City metro area)'
+        zh: '老师小时、人数、场地与器材是登记的模型活动设定（activity_template_v1），不是某个场所的真实报价（geography: CBSA2023 35620 New York-Newark-Jersey City 都会区）'
+    sea.care.minor:
+      note:
+        en: 'No real medical price data: the six cities use the same registered nominal price and visit time, creating no city differences; not a quote from any medical provider (geography: a common assumption for the six cities (no real medical price data))'
+        zh: '没有真实医疗价格资料：六城用同一个登记的名义价与就医时间，不制造城市差异；不是任何医疗机构的报价（geography: 六城共同假设（没有真实医疗价格资料））'
+    sea.durable.tennis_racket:
+      note:
+        en: 'Price and lifetime are registered category settings (equipment_category_v1), not a quote for any product (geography: CBSA2023 42660 Seattle-Tacoma-Bellevue metro area)'
+        zh: '价格与寿命是登记的类别设定（equipment_category_v1），不是某个商品的报价（geography: CBSA2023 42660 Seattle-Tacoma-Bellevue 都会区）'
+    sea.durable.washer_top:
+      note:
+        en: 'Price, lifetime and the residual after substitution are registered category settings (device_category_v1), not model quotes; the models come from ENERGY STAR records (geography: CBSA2023 42660 Seattle-Tacoma-Bellevue metro area)'
+        zh: '价格、寿命与替代后残余是登记的类别设定（device_category_v1），不是型号报价；型号来自 ENERGY STAR 记录（geography: CBSA2023 42660 Seattle-Tacoma-Bellevue 都会区）'
+    sea.experience.tennis_rental:
+      note:
+        en: 'Instructor hours, group size, venue and equipment are registered model activity settings (activity_template_v1), not a real quote from any venue (geography: CBSA2023 42660 Seattle-Tacoma-Bellevue metro area)'
+        zh: '老师小时、人数、场地与器材是登记的模型活动设定（activity_template_v1），不是某个场所的真实报价（geography: CBSA2023 42660 Seattle-Tacoma-Bellevue 都会区）'
+    sf.care.minor:
+      note:
+        en: 'No real medical price data: the six cities use the same registered nominal price and visit time, creating no city differences; not a quote from any medical provider (geography: a common assumption for the six cities (no real medical price data))'
+        zh: '没有真实医疗价格资料：六城用同一个登记的名义价与就医时间，不制造城市差异；不是任何医疗机构的报价（geography: 六城共同假设（没有真实医疗价格资料））'
+    sf.durable.tennis_racket:
+      note:
+        en: 'Price and lifetime are registered category settings (equipment_category_v1), not a quote for any product (geography: CBSA2023 41860 San Francisco-Oakland-Fremont metro area)'
+        zh: '价格与寿命是登记的类别设定（equipment_category_v1），不是某个商品的报价（geography: CBSA2023 41860 San Francisco-Oakland-Fremont 都会区）'
+    sf.durable.washer_top:
+      note:
+        en: 'Price, lifetime and the residual after substitution are registered category settings (device_category_v1), not model quotes; the models come from ENERGY STAR records (geography: CBSA2023 41860 San Francisco-Oakland-Fremont metro area)'
+        zh: '价格、寿命与替代后残余是登记的类别设定（device_category_v1），不是型号报价；型号来自 ENERGY STAR 记录（geography: CBSA2023 41860 San Francisco-Oakland-Fremont 都会区）'
+    sf.experience.tennis_rental:
+      note:
+        en: 'Instructor hours, group size, venue and equipment are registered model activity settings (activity_template_v1), not a real quote from any venue (geography: CBSA2023 41860 San Francisco-Oakland-Fremont metro area)'
+        zh: '老师小时、人数、场地与器材是登记的模型活动设定（activity_template_v1），不是某个场所的真实报价（geography: CBSA2023 41860 San Francisco-Oakland-Fremont 都会区）'
+  common_prior:
+    leisure_index:
+      label:
+        en: Basic leisure conditions (common prior)
+        zh: 基本休闲条件（共同先验）
+      meaning:
+        en: A small amount of basic leisure that comes with living in a city, 0–10; the six cities have no comparable data, so this is a registered common prior. Most leisure satisfaction comes from activities actually attended (fitness, courses, hobbies and the like are arranged and paid for separately)
+        zh: 住在一座城市就有的少量基本休闲条件，0–10；六城没有可比资料，这里是登记的共同先验。主要的休闲满足来自实际参加的活动（健身、课程、爱好等另外安排、另外付费）
+  commute_rule:
+    US:CBSA2023:16980.drive:
+      label:
+        en: Driving requires car access in use (car_access, an opportunity paid monthly); each round trip also pays for fuel = round-trip minutes / 60 × 25 miles per hour ÷ 23.4 miles per gallon × gasoline at 3.731 dollars per gallon; no cap; parking and tolls are not modeled
+        zh: 开车要有在用的用车权（car_access，一项按月付费的机会）；每次往返另付油费 = 往返分钟 / 60 × 25 英里每小时 ÷ 23.4 英里每加仑 × 汽油 3.731 美元每加仑；不封顶；停车与过路费没有建模
+    US:CBSA2023:16980.transit:
+      label:
+        en: 'Chicago Transit Authority (CTA): single ride 2.5, two single rides per round trip 5.0; the 75 monthly pass is treated as the monthly cap; the fare table in effect since 2023-02-20 (still current when retrieved); the single fare uses the rail (''L'') fare, bus 2.25'
+        zh: 芝加哥交通局（CTA）：单程 2.5，每次往返两次单程 5.0；月票 75 当作每月封顶；2023-02-20 起的票价表（获取时仍是现行表）；单程取轻轨（'L'）票价，公交 2.25
+    US:CBSA2023:16980.walk_bike:
+      label:
+        en: 'Walking or cycling: no conditions of use, no cap; each round trip counts as 0 (bicycles, bike-share and shoes are not costed)'
+        zh: 步行或骑车：没有使用条件、不封顶；每次往返记 0（不计自行车、共享单车与鞋的费用）
+    US:CBSA2023:26420.drive:
+      label:
+        en: Driving requires car access in use (car_access, an opportunity paid monthly); each round trip also pays for fuel = round-trip minutes / 60 × 25 miles per hour ÷ 23.4 miles per gallon × gasoline at 2.858 dollars per gallon; no cap; parking and tolls are not modeled
+        zh: 开车要有在用的用车权（car_access，一项按月付费的机会）；每次往返另付油费 = 往返分钟 / 60 × 25 英里每小时 ÷ 23.4 英里每加仑 × 汽油 2.858 美元每加仑；不封顶；停车与过路费没有建模
+    US:CBSA2023:26420.transit:
+      label:
+        en: 'Metropolitan Transit Authority of Harris County (METRO): single ride 1.25, two single rides per round trip 2.50; no monthly pass, no cap; the fare current when retrieved (2026-10); the page gives no effective date'
+        zh: 哈里斯县都会交通局（METRO）：单程 1.25，每次往返两次单程 2.50；没有月票，不封顶；获取时（2026-10）的现行票价，页面没有写生效日期
+    US:CBSA2023:26420.walk_bike:
+      label:
+        en: 'Walking or cycling: no conditions of use, no cap; each round trip counts as 0 (bicycles, bike-share and shoes are not costed)'
+        zh: 步行或骑车：没有使用条件、不封顶；每次往返记 0（不计自行车、共享单车与鞋的费用）
+    US:CBSA2023:31080.drive:
+      label:
+        en: Driving requires car access in use (car_access, an opportunity paid monthly); each round trip also pays for fuel = round-trip minutes / 60 × 25 miles per hour ÷ 23.4 miles per gallon × gasoline at 4.721 dollars per gallon; no cap; parking and tolls are not modeled
+        zh: 开车要有在用的用车权（car_access，一项按月付费的机会）；每次往返另付油费 = 往返分钟 / 60 × 25 英里每小时 ÷ 23.4 英里每加仑 × 汽油 4.721 美元每加仑；不封顶；停车与过路费没有建模
+    US:CBSA2023:31080.transit:
+      label:
+        en: 'Los Angeles County Metropolitan Transportation Authority (LA Metro): single ride 1.75, two single rides per round trip 3.50; no monthly pass, no cap; the fare policy since 2023-07-01 (monthly passes replaced by daily and 7-day caps)'
+        zh: 洛杉矶县都会交通局（LA Metro）：单程 1.75，每次往返两次单程 3.50；没有月票，不封顶；2023-07-01 起的票价政策（取消月票、改为按日与按 7 天封顶）
+    US:CBSA2023:31080.walk_bike:
+      label:
+        en: 'Walking or cycling: no conditions of use, no cap; each round trip counts as 0 (bicycles, bike-share and shoes are not costed)'
+        zh: 步行或骑车：没有使用条件、不封顶；每次往返记 0（不计自行车、共享单车与鞋的费用）
+    US:CBSA2023:35620.drive:
+      label:
+        en: Driving requires car access in use (car_access, an opportunity paid monthly); each round trip also pays for fuel = round-trip minutes / 60 × 25 miles per hour ÷ 23.4 miles per gallon × gasoline at 3.351 dollars per gallon; no cap; parking and tolls are not modeled
+        zh: 开车要有在用的用车权（car_access，一项按月付费的机会）；每次往返另付油费 = 往返分钟 / 60 × 25 英里每小时 ÷ 23.4 英里每加仑 × 汽油 3.351 美元每加仑；不封顶；停车与过路费没有建模
+    US:CBSA2023:35620.transit:
+      label:
+        en: 'MTA New York City subway and local bus: single ride 2.9, two single rides per round trip 5.8; the 132 monthly pass is treated as the monthly cap; fares since 2023-08-20 (the page is a 2023 press release)'
+        zh: MTA 纽约市地铁与本地公交：单程 2.9，每次往返两次单程 5.8；月票 132 当作每月封顶；2023-08-20 起的票价（页面是 2023 年的新闻稿）
+    US:CBSA2023:35620.walk_bike:
+      label:
+        en: 'Walking or cycling: no conditions of use, no cap; each round trip counts as 0 (bicycles, bike-share and shoes are not costed)'
+        zh: 步行或骑车：没有使用条件、不封顶；每次往返记 0（不计自行车、共享单车与鞋的费用）
+    US:CBSA2023:41860.drive:
+      label:
+        en: Driving requires car access in use (car_access, an opportunity paid monthly); each round trip also pays for fuel = round-trip minutes / 60 × 25 miles per hour ÷ 23.4 miles per gallon × gasoline at 4.864 dollars per gallon; no cap; parking and tolls are not modeled
+        zh: 开车要有在用的用车权（car_access，一项按月付费的机会）；每次往返另付油费 = 往返分钟 / 60 × 25 英里每小时 ÷ 23.4 英里每加仑 × 汽油 4.864 美元每加仑；不封顶；停车与过路费没有建模
+    US:CBSA2023:41860.walk_bike:
+      label:
+        en: 'Walking or cycling: no conditions of use, no cap; each round trip counts as 0 (bicycles, bike-share and shoes are not costed)'
+        zh: 步行或骑车：没有使用条件、不封顶；每次往返记 0（不计自行车、共享单车与鞋的费用）
+    US:CBSA2023:42660.drive:
+      label:
+        en: Driving requires car access in use (car_access, an opportunity paid monthly); each round trip also pays for fuel = round-trip minutes / 60 × 25 miles per hour ÷ 23.4 miles per gallon × gasoline at 4.374 dollars per gallon; no cap; parking and tolls are not modeled
+        zh: 开车要有在用的用车权（car_access，一项按月付费的机会）；每次往返另付油费 = 往返分钟 / 60 × 25 英里每小时 ÷ 23.4 英里每加仑 × 汽油 4.374 美元每加仑；不封顶；停车与过路费没有建模
+    US:CBSA2023:42660.transit:
+      label:
+        en: 'King County Metro: single ride 2.75, two single rides per round trip 5.50; the 99 monthly pass is treated as the monthly cap; the adult fare and monthly pass before the 2025-09-01 fare change (the first change since the 2018 flat fare)'
+        zh: 金县交通局（King County Metro）：单程 2.75，每次往返两次单程 5.50；月票 99 当作每月封顶；2025-09-01 调价前的成人票价与月票（2018 年统一票价以来第一次调价）
+    US:CBSA2023:42660.walk_bike:
+      label:
+        en: 'Walking or cycling: no conditions of use, no cap; each round trip counts as 0 (bicycles, bike-share and shoes are not costed)'
+        zh: 步行或骑车：没有使用条件、不封顶；每次往返记 0（不计自行车、共享单车与鞋的费用）
+  household_task:
+    cleaning:
+      label:
+        en: 'Cleaning: cleaning a one-bedroom home yourself (sweeping, mopping, tidying)'
+        zh: 打扫：自己打扫一居室（扫地、拖地、整理）
+    laundry:
+      label:
+        en: 'Laundry: without a device or service, washing by hand or at a self-service laundromat, including drying, folding and putting away'
+        zh: 洗衣：没有设备或服务时，自己手洗或去自助洗衣店，连同晾晒、叠放与收纳
+  preflight_text:
+    catalog_scope:
+      label:
+        en: Convenience devices and paid services come from the real data pack (ENERGY STAR models and local service-occupation wages); no extra synthetic candidates are made up here
+        zh: 便利设备与人工服务来自真实资料包（ENERGY STAR 型号与本都会区服务职业工资），不在这里另编合成候选
+    start_energy_note:
+      label:
+        en: Each month you can take on activities worth 250 burden points (a uniform model setting in this version); the more satisfying the previous year, the more the next year allows, up to 10% more
+        zh: 每月可承受 250 个负担点的活动（本版统一的模型设定）；上一年过得越满意，下一年最多多 10%
+    start_time_note:
+      label:
+        en: About 365 hours a month can be scheduled (12 hours a day for sleep and basic rest are already set aside) — a uniform model setting in this version, not a measurement of you
+        zh: 每月可安排约 365 小时（每天 12 小时的睡眠与基本休息已经预留在外）——本版统一的模型设定，不是对你的测量
+  safety_input:
+    chi:
+      coverage:
+        en: 'FBI estimated totals: reporting agencies cover 96.7% of the population, and the FBI estimates the rest'
+        zh: FBI 估计总数：实际报告的机构覆盖 96.7% 人口，其余由 FBI 估算
+      residence:
+        en: The simulated residence area (9 counties) is entirely within the data coverage; the data also includes 4 counties outside the simulated residence area (Jasper County, Indiana; Lake County, Indiana; Newton County, Indiana; Porter County, Indiana), and the background value is the combined level of the whole data coverage
+        zh: 模拟居住范围（9 个县）都在资料范围里；资料另含 4 个不在模拟居住范围里的县（Jasper County, Indiana、Lake County, Indiana、Newton County, Indiana、Porter County, Indiana），背景值是整个资料范围的综合水平
+      scope:
+        en: The whole metro area (Chicago-Naperville-Elgin, IL-IN, FBI Table 6)
+        zh: 整个都会区（Chicago-Naperville-Elgin, IL-IN，FBI 表 6）
+    hou:
+      coverage:
+        en: 'FBI estimated totals: reporting agencies cover 99.9% of the population, and the FBI estimates the rest'
+        zh: FBI 估计总数：实际报告的机构覆盖 99.9% 人口，其余由 FBI 估算
+      residence:
+        en: The data coverage is the same as the simulated residence area (the whole metro area)
+        zh: 资料范围与模拟居住范围相同（整个都会区）
+      scope:
+        en: The whole metro area (Houston-Pasadena-The Woodlands, TX, FBI Table 6)
+        zh: 整个都会区（Houston-Pasadena-The Woodlands, TX，FBI 表 6）
+    la:
+      coverage:
+        en: 'FBI estimated totals: reporting agencies cover 99.2% of the population, and the FBI estimates the rest'
+        zh: FBI 估计总数：实际报告的机构覆盖 99.2% 人口，其余由 FBI 估算
+      residence:
+        en: The data coverage is the same as the simulated residence area (the whole metro area)
+        zh: 资料范围与模拟居住范围相同（整个都会区）
+      scope:
+        en: The whole metro area (Los Angeles-Long Beach-Anaheim, CA, FBI Table 6)
+        zh: 整个都会区（Los Angeles-Long Beach-Anaheim, CA，FBI 表 6）
+    nyc:
+      coverage:
+        en: 'FBI Table 6 has no New York metro area: DCJS 2024 county totals are used. Geographic coverage: these counties hold 64.5% of the metro population (this is the counties'' population share, not a reporting completeness rate; the county totals sum what each law-enforcement agency actually reported, and missing reports are not filled in); counties in New Jersey and Pennsylvania have no comparable data available without an API key and are not included'
+        zh: FBI 表 6 没有纽约都会区：用 DCJS 2024 县合计。地理覆盖：这些县的人口占都会区的 64.5%（这是县的人口占比，不是报案完整率；县合计是各执法机构实际报告的汇总，缺报不补）；新泽西与宾州的县没有可比的免密钥资料，不在内
+      residence:
+        en: The simulated residence area (5 counties) is entirely within the data coverage; the data also includes 5 counties outside the simulated residence area (Nassau County, New York; Putnam County, New York; Rockland County, New York; Suffolk County, New York; Westchester County, New York), and the background value is the combined level of the whole data coverage
+        zh: 模拟居住范围（5 个县）都在资料范围里；资料另含 5 个不在模拟居住范围里的县（Nassau County, New York、Putnam County, New York、Rockland County, New York、Suffolk County, New York、Westchester County, New York），背景值是整个资料范围的综合水平
+      scope:
+        en: 'The New York State part of the New York metro area (10 counties: Nassau, Suffolk, Bronx, Kings, New York, Putnam, Queens, Richmond, Rockland, Westchester)'
+        zh: 纽约都会区的纽约州部分（10 个县：Nassau、Suffolk、Bronx、Kings、New York、Putnam、Queens、Richmond、Rockland、Westchester）
+    sea:
+      coverage:
+        en: 'FBI estimated totals: reporting agencies cover 99.8% of the population, and the FBI estimates the rest'
+        zh: FBI 估计总数：实际报告的机构覆盖 99.8% 人口，其余由 FBI 估算
+      residence:
+        en: The data coverage is the same as the simulated residence area (the whole metro area)
+        zh: 资料范围与模拟居住范围相同（整个都会区）
+      scope:
+        en: The whole metro area (Seattle-Tacoma-Bellevue, WA, FBI Table 6)
+        zh: 整个都会区（Seattle-Tacoma-Bellevue, WA，FBI 表 6）
+    sf:
+      coverage:
+        en: All agencies reported (100%); FBI totals of actual reports
+        zh: 全部机构报告（100%），FBI 实际报告合计
+      residence:
+        en: The data coverage is the same as the simulated residence area (the whole metro area)
+        zh: 资料范围与模拟居住范围相同（整个都会区）
+      scope:
+        en: The whole metro area (San Francisco-Oakland-Fremont, CA, FBI Table 6)
+        zh: 整个都会区（San Francisco-Oakland-Fremont, CA，FBI 表 6）
+  tax_policy:
+    tax.us2024.ca:
+      not_modeled.0:
+        en: The federal and state tax tables (in $50 brackets at lower incomes, using the bracket midpoint) are not used; the rate schedules are used throughout, a difference of a few dollars
+        zh: 联邦与州的税表（收入较低时按 50 美元一档、取档中点）没有用，统一用税率表，差几美元
+      not_modeled.1:
+        en: Credits (the earned income tax credit EITC and others), pre-tax deductions (401(k), health insurance premiums) and itemized deductions are not modeled
+        zh: 抵免（劳动所得抵免 EITC 等）、税前扣除（401(k)、医疗保险费）与逐项扣除都没有建模
+      not_modeled.2:
+        en: 'Wage income only: interest, dividends, capital gains and side income are outside the supported scope'
+        zh: 只有工资收入：利息、股息、资本利得与副业收入不在支持范围
+      not_modeled.3:
+        en: Withholding is recomputed monthly on year-to-date wages (less early in the year, more late in the year), so the yearly total equals the tax owed for the year; there is no year-end refund or extra payment
+        zh: 预扣按全年累计工资每月重算（年初少扣、年底多扣），全年合计等于全年应缴；没有年终退税或补税的时点
+      not_modeled.4:
+        en: The California personal exemption credit and its phase-out at high incomes are not modeled
+        zh: 加州个人免税额抵免与它在高收入时的递减没有建模
+      not_modeled.5:
+        en: The California renter's credit, the California EITC and the young child tax credit are not modeled
+        zh: 加州租房者抵免、加州 EITC 与幼儿抵免没有建模
+      residence_scope:
+        en: California residents working in California (the Los Angeles and San Francisco metro areas are entirely in California)
+        zh: 加州居民、工作地在加州（洛杉矶都会区与旧金山都会区全部在加州）
+    tax.us2024.il:
+      not_modeled.0:
+        en: The federal and state tax tables (in $50 brackets at lower incomes, using the bracket midpoint) are not used; the rate schedules are used throughout, a difference of a few dollars
+        zh: 联邦与州的税表（收入较低时按 50 美元一档、取档中点）没有用，统一用税率表，差几美元
+      not_modeled.1:
+        en: Credits (the earned income tax credit EITC and others), pre-tax deductions (401(k), health insurance premiums) and itemized deductions are not modeled
+        zh: 抵免（劳动所得抵免 EITC 等）、税前扣除（401(k)、医疗保险费）与逐项扣除都没有建模
+      not_modeled.2:
+        en: 'Wage income only: interest, dividends, capital gains and side income are outside the supported scope'
+        zh: 只有工资收入：利息、股息、资本利得与副业收入不在支持范围
+      not_modeled.3:
+        en: Withholding is recomputed monthly on year-to-date wages (less early in the year, more late in the year), so the yearly total equals the tax owed for the year; there is no year-end refund or extra payment
+        zh: 预扣按全年累计工资每月重算（年初少扣、年底多扣），全年合计等于全年应缴；没有年终退税或补税的时点
+      not_modeled.4:
+        en: The elimination of the Illinois personal exemption when AGI exceeds 250,000 is not modeled
+        zh: 伊利诺伊州个人免税额在 AGI 超过 250,000 时取消，没有建模
+      not_modeled.5:
+        en: Illinois credits such as the EITC are not modeled
+        zh: 伊利诺伊州 EITC 等抵免没有建模
+      residence_scope:
+        en: The Illinois part of the Chicago metro area; both residence and workplace in Illinois (Indiana counties are not supported)
+        zh: 芝加哥都会区的伊利诺伊州部分；居住地与工作地都在伊利诺伊州（印第安纳州的县不支持）
+    tax.us2024.nyc:
+      not_modeled.0:
+        en: The federal and state tax tables (in $50 brackets at lower incomes, using the bracket midpoint) are not used; the rate schedules are used throughout, a difference of a few dollars
+        zh: 联邦与州的税表（收入较低时按 50 美元一档、取档中点）没有用，统一用税率表，差几美元
+      not_modeled.1:
+        en: Credits (the earned income tax credit EITC and others), pre-tax deductions (401(k), health insurance premiums) and itemized deductions are not modeled
+        zh: 抵免（劳动所得抵免 EITC 等）、税前扣除（401(k)、医疗保险费）与逐项扣除都没有建模
+      not_modeled.2:
+        en: 'Wage income only: interest, dividends, capital gains and side income are outside the supported scope'
+        zh: 只有工资收入：利息、股息、资本利得与副业收入不在支持范围
+      not_modeled.3:
+        en: Withholding is recomputed monthly on year-to-date wages (less early in the year, more late in the year), so the yearly total equals the tax owed for the year; there is no year-end refund or extra payment
+        zh: 预扣按全年累计工资每月重算（年初少扣、年底多扣），全年合计等于全年应缴；没有年终退税或补税的时点
+      not_modeled.4:
+        en: 'The New York State recapture of tax benefits when AGI exceeds 107,650 (the supplemental tax) is not modeled: New York State tax is understated for high earners'
+        zh: 纽约州 AGI 超过 107,650 时的税收优惠回收（supplemental tax）没有建模：高收入的人纽约州税少算
+      not_modeled.5:
+        en: New York State and New York City household credits, the school tax credit and the EITC are not modeled
+        zh: 纽约州与纽约市的家庭抵免、学校税抵免与 EITC 没有建模
+      not_modeled.6:
+        en: New York State short-term disability insurance is handled as a yearly total of 31.20 (in reality at most 60 cents per week)
+        zh: 纽约州短期残障保险按年合计 31.20 处理（真实是每周最多 60 美分）
+      residence_scope:
+        en: Residents of New York City's five boroughs (Bronx, Kings, New York, Queens and Richmond counties); workplace within New York State (work areas in New Jersey and Pennsylvania are not supported)
+        zh: 纽约市五个区（Bronx、Kings、New York、Queens、Richmond 县）的居民；工作地在纽约州境内（新泽西、宾州的就业片区不支持）
+    tax.us2024.tx:
+      absent.0:
+        en: Texas has no state personal income tax
+        zh: 德州没有州个人所得税
+      not_modeled.0:
+        en: The federal and state tax tables (in $50 brackets at lower incomes, using the bracket midpoint) are not used; the rate schedules are used throughout, a difference of a few dollars
+        zh: 联邦与州的税表（收入较低时按 50 美元一档、取档中点）没有用，统一用税率表，差几美元
+      not_modeled.1:
+        en: Credits (the earned income tax credit EITC and others), pre-tax deductions (401(k), health insurance premiums) and itemized deductions are not modeled
+        zh: 抵免（劳动所得抵免 EITC 等）、税前扣除（401(k)、医疗保险费）与逐项扣除都没有建模
+      not_modeled.2:
+        en: 'Wage income only: interest, dividends, capital gains and side income are outside the supported scope'
+        zh: 只有工资收入：利息、股息、资本利得与副业收入不在支持范围
+      not_modeled.3:
+        en: Withholding is recomputed monthly on year-to-date wages (less early in the year, more late in the year), so the yearly total equals the tax owed for the year; there is no year-end refund or extra payment
+        zh: 预扣按全年累计工资每月重算（年初少扣、年底多扣），全年合计等于全年应缴；没有年终退税或补税的时点
+      residence_scope:
+        en: Texas residents working in Texas (the Houston metro area is entirely in Texas)
+        zh: 德州居民、工作地在德州（休斯敦都会区全部在德州）
+    tax.us2024.wa:
+      absent.0:
+        en: Washington State had no personal income tax in 2024
+        zh: 华盛顿州 2024 年没有个人所得税
+      not_modeled.0:
+        en: The federal and state tax tables (in $50 brackets at lower incomes, using the bracket midpoint) are not used; the rate schedules are used throughout, a difference of a few dollars
+        zh: 联邦与州的税表（收入较低时按 50 美元一档、取档中点）没有用，统一用税率表，差几美元
+      not_modeled.1:
+        en: Credits (the earned income tax credit EITC and others), pre-tax deductions (401(k), health insurance premiums) and itemized deductions are not modeled
+        zh: 抵免（劳动所得抵免 EITC 等）、税前扣除（401(k)、医疗保险费）与逐项扣除都没有建模
+      not_modeled.2:
+        en: 'Wage income only: interest, dividends, capital gains and side income are outside the supported scope'
+        zh: 只有工资收入：利息、股息、资本利得与副业收入不在支持范围
+      not_modeled.3:
+        en: Withholding is recomputed monthly on year-to-date wages (less early in the year, more late in the year), so the yearly total equals the tax owed for the year; there is no year-end refund or extra payment
+        zh: 预扣按全年累计工资每月重算（年初少扣、年底多扣），全年合计等于全年应缴；没有年终退税或补税的时点
+      not_modeled.4:
+        en: WA Cares exemptions (for example for people who already have long-term care insurance) are not modeled
+        zh: WA Cares 的豁免（已有长期护理保险等）没有建模
+      residence_scope:
+        en: Washington State residents working in Washington State (the Seattle metro area is entirely in Washington State)
+        zh: 华盛顿州居民、工作地在华盛顿州（西雅图都会区全部在华盛顿州）
+  tax_rule:
+    tax-us-2024-v1.ca-income:
+      label:
+        en: California personal income tax
+        zh: 加州个人所得税
+    tax-us-2024-v1.ca-mental-health:
+      label:
+        en: California Mental Health Services Tax
+        zh: 加州精神健康服务税
+    tax-us-2024-v1.ca-sdi:
+      label:
+        en: California State Disability Insurance (employee contribution)
+        zh: 加州州残障保险（雇员缴费）
+    tax-us-2024-v1.il-income:
+      label:
+        en: Illinois individual income tax
+        zh: 伊利诺伊州个人所得税
+    tax-us-2024-v1.ny-pfl:
+      label:
+        en: New York Paid Family Leave (employee contribution)
+        zh: 纽约州带薪家事假（雇员缴费）
+    tax-us-2024-v1.ny-sdi:
+      label:
+        en: New York short-term disability insurance (employee contribution)
+        zh: 纽约州短期残障保险（雇员缴费）
+    tax-us-2024-v1.ny-state-income:
+      label:
+        en: New York State personal income tax
+        zh: 纽约州个人所得税
+    tax-us-2024-v1.nyc-resident-income:
+      label:
+        en: New York City resident income tax
+        zh: 纽约市居民所得税
+    tax-us-2024-v1.us-additional-medicare:
+      label:
+        en: Federal Additional Medicare Tax
+        zh: 联邦附加医疗保险税
+    tax-us-2024-v1.us-federal-income:
+      label:
+        en: Federal individual income tax
+        zh: 联邦个人所得税
+    tax-us-2024-v1.us-medicare:
+      label:
+        en: Federal Medicare tax (employee share)
+        zh: 联邦医疗保险税（雇员部分）
+    tax-us-2024-v1.us-social-security:
+      label:
+        en: Social Security tax (employee share)
+        zh: 社会保障税（雇员部分）
+    tax-us-2024-v1.wa-cares:
+      label:
+        en: Washington long-term care insurance WA Cares (employee contribution)
+        zh: 华盛顿州长期护理保险 WA Cares（雇员缴费）
+    tax-us-2024-v1.wa-pfml:
+      label:
+        en: Washington Paid Family and Medical Leave (employee contribution)
+        zh: 华盛顿州带薪家事与病假保险（雇员缴费）

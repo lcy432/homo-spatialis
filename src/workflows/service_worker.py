@@ -27,6 +27,7 @@ from typing import Any
 import portalocker
 
 from common.product_contracts import ConfirmedProfile, ProductResult
+from product.display.document import explained
 from product.execution import ExecutionSpec
 from product.service.actions import ServiceContext
 from product.service.explain import service_explanation
@@ -201,7 +202,11 @@ class Worker:
                 waiting_for="user",
                 preflight_fingerprint=view["confirm_with"],
                 preflight_body=json.dumps(public, ensure_ascii=False),
+                preflight_display=RunDir(self.ctx, intent).display_doc(
+                    f"preflight-{public['preflight_fingerprint'][:16]}"
+                ),
                 explanation=None,
+                explanation_display=None,
             )
             return
         if view["stage"] == "blocked":
@@ -211,6 +216,11 @@ class Worker:
                 code,
                 only=("checking",),
                 preflight_body=json.dumps(public, ensure_ascii=False) if product else None,
+                preflight_display=RunDir(self.ctx, intent).display_doc(
+                    f"preflight-{public['preflight_fingerprint'][:16]}"
+                )
+                if product
+                else None,
             )
             return
         self._block(intent, "internal_error", only=("checking",), support=self._error_ref(view))
@@ -288,6 +298,7 @@ class Worker:
                 result_body=result.model_dump_json(),
                 result_fingerprint=result.result_fingerprint,
                 days=self.ctx.config.result_retention_days,
+                result_display=RunDir(self.ctx, intent).display_doc(f"result-{result.run_id}"),
             )
             self._diag("delivered" if published else "delivery_skipped", intent)
             return
@@ -321,6 +332,14 @@ class Worker:
             ok, why = RunDir(self.ctx, intent).resume_state(row["run_id"]) if row else (False, None)
             resumable, code = ok, (code if ok else why or "run_halted")
         self._diag("stopped", intent, code=code, support=ref, started=True, resumable=resumable)
+        explanation, display = explained(
+            service_explanation,
+            pack_fingerprint=self.ctx.pack.fingerprint,
+            code=code,
+            phase="after_start",
+            resumable=resumable,
+            support=ref,
+        )
         self.store.update_intent(
             intent,
             only_stages=("running",),
@@ -328,9 +347,8 @@ class Worker:
             waiting_for="user" if resumable else "maintainer",
             resume_allowed=int(resumable),
             support_ref=ref,
-            explanation=service_explanation(
-                code, phase="after_start", resumable=resumable, support=ref
-            ).model_dump_json(),
+            explanation=explanation,
+            explanation_display=display,
         )
 
     def _block(
@@ -341,8 +359,17 @@ class Worker:
         only: tuple[str, ...],
         support: str | None = None,
         preflight_body: str | None = None,
+        preflight_display: str | None = None,
         released: bool = False,
     ) -> None:
+        explanation, display = explained(
+            service_explanation,
+            pack_fingerprint=self.ctx.pack.fingerprint,
+            code=code,
+            phase="before_start",
+            released=released,
+            support=support,
+        )
         self.store.update_intent(
             intent,
             only_stages=only,
@@ -350,10 +377,10 @@ class Worker:
             waiting_for="user",
             preflight_fingerprint=None,
             preflight_body=preflight_body,
+            preflight_display=preflight_display,
             support_ref=support,
-            explanation=service_explanation(
-                code, phase="before_start", released=released, support=support
-            ).model_dump_json(),
+            explanation=explanation,
+            explanation_display=display,
         )
 
     # ------------------------------------------------------------------ 进度快照（只读）
@@ -369,16 +396,18 @@ class Worker:
         if run_id is None:
             return
         try:
-            snap = RunDir(self.ctx, intent).progress_snapshot(
+            found = RunDir(self.ctx, intent).progress_with_display(
                 run_id, self.store.now(), resumable=resumable, running_now=running_now
             )
         except Exception:  # 进度文件正被替换、账本正被写：这一轮跳过，下一轮再读
             return
-        if snap is not None:
+        if found is not None:
+            snap, display = found
             self.store.update_intent(
                 intent,
                 only_stages=("running", "needs_attention", "finished"),
                 progress_body=snap.model_dump_json(),
+                progress_display=json.dumps(display, ensure_ascii=False),
             )
 
     # ------------------------------------------------------------------ 删除、过期与清理

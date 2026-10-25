@@ -9,6 +9,9 @@
   往返分钟、每月实际的方式 / 往返分钟 / 到岗次数 / 通勤费、用车权有没有用上、坏了什么与替换结果、按哪份税规则预扣。不含故障
   抽签的随机数与月度风险。逐城的资料性质与预检查是同一份投影（``product.pack_facts``）。
 * 不新增排序规则、最低完成比例或现实推荐结论；结果不回灌给仍在生活中的分身（生活已经结束，结果只给用户看）。
+* 显示文字（``product.display``）：这里生成的中文都经 ``t()`` / ``label()`` 生成，逐字与原来相同，同时记下稳定 key 与有类型的参数
+  （机会、片区与城市按编号，月份、数字与代码按类型）；字符串数组在生成处按机会编号与月份绑定，前端不用拆中文。E1 报告里的
+  城市说明与比较说明按报告的结构化字段重新生成、与原文逐字相同才绑定；事件链的环境记录是 E1 原文（英文缺失）。
 """
 
 from __future__ import annotations
@@ -62,31 +65,67 @@ from common.product_contracts import (
     content_fingerprint,
 )
 from orchestration.life_runner import RunOutcome, RunWorld
+from product.display import Code, Ent, Join, Months, Num, Raw, Sub, label, say, t
 from product.exact import canonical, display, money_display
+from product.interests import confirmed_scope_lines
 from product.pack import DataPack
-from product.pack_facts import TAX_STATUS_ZH, city_data_nature
+from product.pack_facts import TAX_STATUS_ZH, city_data_nature, pack_lines, tax_status_label
 from product.public_errors import clone_explanation
 
-CATEGORY_TEXT = {"C": "完成且评价完整", "E": "确认的生活出局", "M": "模拟问题，无法完整评价"}
+CATEGORY_TEXT = {
+    "C": Sub("result.category.C", "完成且评价完整"),
+    "E": Sub("result.category.E", "确认的生活出局"),
+    "M": Sub("result.category.M", "模拟问题，无法完整评价"),
+}
 STAGE_TEXT = {
-    "completed": "已完成",
-    "paused": "批次暂停（程序或配置问题）",
-    "halted": "批次停下（服务、预算或请求检查）",
-    "interrupted": "在两次规划调用之间中断",
-    "budget_exhausted": "全局调用上限用完",
-    "running": "运行中",
+    "completed": Sub("progress.stage.completed", "已完成"),
+    "paused": Sub("progress.stage.paused", "批次暂停（程序或配置问题）"),
+    "halted": Sub("progress.stage.halted", "批次停下（服务、预算或请求检查）"),
+    "interrupted": Sub("progress.stage.interrupted", "在两次规划调用之间中断"),
+    "budget_exhausted": Sub("progress.stage.budget_exhausted", "全局调用上限用完"),
+    "running": Sub("progress.stage.running", "运行中"),
 }
 READING_GUIDE = (
-    "完整者平均 J 的分母是 C（完成且评价完整的分身），不是原计划人数；C = 0 时没有平均值，不显示为 0",
-    "确认的生活出局（E）不进均值，也不进模拟缺失范围；出局与缺失的比例以原计划人数为分母",
-    "模拟缺失范围的分母是 C + M：已知的月份照算，未知部分在 0 到 1 之间都保留。它不是置信区间，也不是现实幸福的概率",
-    "L 是实际几年逐月满足感的平均；V 是从终态出发、在预先冻结的参考生活模板与治疗分支里的估值，不是对未来的预测，也不是全局最优；"
-    "J 按月份权重合成两者",
-    "资料缺失、规划没有完成、停止与程序问题是模拟问题（M），不写成“在这座城活不下去”",
-    "减少日常杂务本身对应便利满足感；没有安排的空闲时间不额外加分",
-    "事件链按核对过的环境记录写成，不是模型的理由，也不是因果证明；硬要求单独报告，不扣分、不删人",
-    "分数是当前合成模型下、按你确认的陈述偏好计算的结果；小数末位的差异不构成可靠的排序",
+    Sub(
+        "result.reading.mean_denominator",
+        "完整者平均 J 的分母是 C（完成且评价完整的分身），不是原计划人数；C = 0 时没有平均值，不显示为 0",
+    ),
+    Sub(
+        "result.reading.exits",
+        "确认的生活出局（E）不进均值，也不进模拟缺失范围；出局与缺失的比例以原计划人数为分母",
+    ),
+    Sub(
+        "result.reading.missing_range",
+        "模拟缺失范围的分母是 C + M：已知的月份照算，未知部分在 0 到 1 之间都保留。它不是置信区间，也不是现实幸福的概率",
+    ),
+    Sub(
+        "result.reading.l_v_j",
+        "L 是实际几年逐月满足感的平均；V 是从终态出发、在预先冻结的参考生活模板与治疗分支里的估值，不是对未来的预测，也不是全局最优；"
+        "J 按月份权重合成两者",
+    ),
+    Sub(
+        "result.reading.simulation_problems",
+        "资料缺失、规划没有完成、停止与程序问题是模拟问题（M），不写成“在这座城活不下去”",
+    ),
+    Sub(
+        "result.reading.chores",
+        "减少日常杂务本身对应便利满足感；没有安排的空闲时间不额外加分",
+    ),
+    Sub(
+        "result.reading.event_chain",
+        "事件链按核对过的环境记录写成，不是模型的理由，也不是因果证明；硬要求单独报告，不扣分、不删人",
+    ),
+    Sub(
+        "result.reading.precision",
+        "分数是当前合成模型下、按你确认的陈述偏好计算的结果；小数末位的差异不构成可靠的排序",
+    ),
 )
+
+
+def stage_text(status: str) -> str:
+    """运行阶段的公开名称（结果与进度共用）；没有登记的状态照写状态代码。"""
+    s = STAGE_TEXT.get(status)
+    return status if s is None else say(s)
 
 
 def _ex(a: ExactAmount | None, digits: int = 4) -> ExactNumber | None:
@@ -106,10 +145,16 @@ def _money(m: Money, digits: int = 2) -> ProductMoney:
     )
 
 
-def _label(world: RunWorld, city: str, oid: str) -> str:
+def _item(world: RunWorld, city: str, oid: str) -> Ent | Code:
+    """一项机会的名称参数：目录里有就按机会编号绑定（英文按编号查资源），没有就写编号本身。"""
     cat = world.bundle.catalog_for(city)
     o = cat.opportunity(oid) if cat is not None else None
-    return o.label if o is not None else oid
+    return Code(oid) if o is None else Ent("opportunity", oid, o.label)
+
+
+def _label(world: RunWorld, city: str, oid: str) -> str:
+    item = _item(world, city, oid)
+    return item.value if isinstance(item, Code) else label("opportunity", oid, item.zh)
 
 
 def year_facts(world: RunWorld, city: str, result: LifeYearResult) -> YearFacts:
@@ -128,8 +173,14 @@ def year_facts(world: RunWorld, city: str, result: LifeYearResult) -> YearFacts:
         rows = []
         for it in out.items:
             if it.role == role and it.covered_months:
-                months = _months_text(it.covered_months)
-                rows.append(f"{_label(world, city, it.opportunity_id)}（{months}）")
+                rows.append(
+                    t(
+                        "fact.item_months",
+                        "{item}（{months}）",
+                        item=_item(world, city, it.opportunity_id),
+                        months=Months(tuple(it.covered_months)),
+                    )
+                )
         return tuple(rows)
 
     devices = tuple(
@@ -182,10 +233,20 @@ def year_facts(world: RunWorld, city: str, result: LifeYearResult) -> YearFacts:
     numeraire = out.money_basis_id
     notes: list[str] = []
     if out.exit is not None:
-        notes.append(f"第 {out.exit.month} 月付不起最低住房与食品而出局（环境记录）")
+        notes.append(
+            t(
+                "fact.note.exit",
+                "第 {month} 月付不起最低住房与食品而出局（环境记录）",
+                month=out.exit.month,
+            )
+        )
     if out.stop is not None:
         notes.append(
-            f"第 {out.stop.month} 月停止（疾病之后应急安排不足或资料缺口；模拟的支持边界，不是生活出局）"
+            t(
+                "fact.note.stop",
+                "第 {month} 月停止（疾病之后应急安排不足或资料缺口；模拟的支持边界，不是生活出局）",
+                month=out.stop.month,
+            )
         )
     return YearFacts(
         year_index=result.year_index,
@@ -213,9 +274,9 @@ def year_facts(world: RunWorld, city: str, result: LifeYearResult) -> YearFacts:
 
 #: 日常支持三项功能的公开名称（E3B 映射修正 §5）
 SUPPORT_LABEL_ZH = {
-    "personal_communication": "个人通信",
-    "home_connectivity": "居家联网",
-    "household_supplies": "家用日耗品",
+    "personal_communication": Sub("fact.support.personal_communication", "个人通信"),
+    "home_connectivity": Sub("fact.support.home_connectivity", "居家联网"),
+    "household_supplies": Sub("fact.support.household_supplies", "家用日耗品"),
 }
 BASKET_FUNCTION = "personal_consumption"
 
@@ -226,7 +287,7 @@ def _support_facts(world: RunWorld, city: str, out: Any) -> dict[str, Any]:
     assert cat is not None
     services = [it for it in out.items if it.role == "periodic_service"]
     support = []
-    for f, label in SUPPORT_LABEL_ZH.items():
+    for f, name in SUPPORT_LABEL_ZH.items():
         mine = [
             it
             for it in services
@@ -239,7 +300,7 @@ def _support_facts(world: RunWorld, city: str, out: Any) -> dict[str, Any]:
         support.append(
             SupportLine(
                 function=f,  # type: ignore[arg-type]
-                label_zh=label,
+                label_zh=say(name),
                 opportunity_ids=tuple(sorted({it.opportunity_id for it in mine})),
                 months_planned=tuple(planned),
                 months_obtained=tuple(got),
@@ -288,12 +349,21 @@ def _support_facts(world: RunWorld, city: str, out: Any) -> dict[str, Any]:
 
 #: 没成交的一次性购买与没能进行的活动：固定的公开说明（不透传结算里的内部原因文字）。
 _NOT_MADE_ZH = {
-    "rejected": "没有买成：那个月付不起或计划不可执行；没有扣款，也没有得到这件东西",
-    "cancelled_when_ill": "按年度应急安排，购买那个月生着病就取消：没有扣款，不顺延、不补购",
-    "paused": "那个月生病暂停：没有购买",
-    "not_reached": "那个月之前已经出局或停止：没有发生",
+    "rejected": Sub(
+        "fact.not_made.rejected",
+        "没有买成：那个月付不起或计划不可执行；没有扣款，也没有得到这件东西",
+    ),
+    "cancelled_when_ill": Sub(
+        "fact.not_made.cancelled_when_ill",
+        "按年度应急安排，购买那个月生着病就取消：没有扣款，不顺延、不补购",
+    ),
+    "paused": Sub("fact.not_made.paused", "那个月生病暂停：没有购买"),
+    "not_reached": Sub("fact.not_made.not_reached", "那个月之前已经出局或停止：没有发生"),
 }
-_NOT_DONE_ZH = "缺少需要的装备能力（家里没有在用的装备，这次也没有套餐提供）：没有进行，也没有收费"
+_NOT_DONE_ZH = Sub(
+    "fact.activity.not_done",
+    "缺少需要的装备能力（家里没有在用的装备，这次也没有套餐提供）：没有进行，也没有收费",
+)
 
 
 def _life_extension_facts(
@@ -330,7 +400,7 @@ def _life_extension_facts(
             label=_label(world, city, it.opportunity_id),
             month=it.requested_months[0] if it.requested_months else None,
             status=it.status,
-            status_zh=_NOT_MADE_ZH[it.status],
+            status_zh=say(_NOT_MADE_ZH[it.status]),
         )
         for it in out.items
         if it.role == "durable_good" and it.status in _NOT_MADE_ZH
@@ -353,7 +423,7 @@ def _life_extension_facts(
                 ),
                 months_paused=tuple(p.month for p in rows if p.status == "paused"),
                 months_not_done=tuple(failed),
-                not_done_zh=_NOT_DONE_ZH if failed else None,
+                not_done_zh=say(_NOT_DONE_ZH) if failed else None,
             )
         )
     return goods, not_made, tuple(activities)
@@ -361,18 +431,37 @@ def _life_extension_facts(
 
 #: 通勤记录的状态（固定的公开说明）。
 _COMMUTE_STATUS_ZH = {
-    "computed": "按通勤关系表执行：实际住处片区到各个到岗岗位的就业片区，取可用方式里往返最少的一种",
-    "no_onsite_work": "这个月没有需要到岗的工作：通勤为零",
-    "unknown_no_housing": "出局当月没有住房：通勤依据缺失，记为未知（不是 0）",
+    "computed": Sub(
+        "fact.commute_status.computed",
+        "按通勤关系表执行：实际住处片区到各个到岗岗位的就业片区，取可用方式里往返最少的一种",
+    ),
+    "no_onsite_work": Sub(
+        "fact.commute_status.no_onsite_work", "这个月没有需要到岗的工作：通勤为零"
+    ),
+    "unknown_no_housing": Sub(
+        "fact.commute_status.unknown_no_housing",
+        "出局当月没有住房：通勤依据缺失，记为未知（不是 0）",
+    ),
 }
 #: 设备故障之后的替换结果（固定的公开说明）。
 _REPLACEMENT_ZH = {
-    "not_declared": "年度计划没有预先声明替换：坏了之后就没有这件东西了",
-    "bought": "按年度计划预先声明的替换，在下个月按普通购买买到",
-    "rejected": "预先声明了替换，但下个月买不起或计划不可执行：没有买成，不顺延",
-    "next_year": "第 12 月坏的：替换留给下一年的计划",
-    "not_reached": "替换那个月之前已经出局或停止：没有发生",
+    "not_declared": Sub(
+        "fact.replacement.not_declared", "年度计划没有预先声明替换：坏了之后就没有这件东西了"
+    ),
+    "bought": Sub("fact.replacement.bought", "按年度计划预先声明的替换，在下个月按普通购买买到"),
+    "rejected": Sub(
+        "fact.replacement.rejected",
+        "预先声明了替换，但下个月买不起或计划不可执行：没有买成，不顺延",
+    ),
+    "next_year": Sub("fact.replacement.next_year", "第 12 月坏的：替换留给下一年的计划"),
+    "not_reached": Sub("fact.replacement.not_reached", "替换那个月之前已经出局或停止：没有发生"),
 }
+
+
+def commute_mode_text(mode: str) -> str:
+    """通勤方式的公开名称（E1 的 ``COMMUTE_MODE_LABEL`` 是中文的唯一来源）：与资料性质里的通勤方式是同一个 ``commute_mode`` 实体，
+    同一份结果里同一段中文只有一种绑定。"""
+    return label("commute_mode", mode, COMMUTE_MODE_LABEL[mode])
 
 
 def _area_facts(world: RunWorld, city: str, out: Any) -> dict[str, Any]:
@@ -383,7 +472,7 @@ def _area_facts(world: RunWorld, city: str, out: Any) -> dict[str, Any]:
 
     def area_label(area_id: str | None) -> str | None:
         a = None if area_id is None else areas.get(area_id)
-        return area_id if a is None else a.label
+        return area_id if a is None else label("area", a.area_id, a.label)
 
     lived: dict[str, list[int]] = {}
     groups: dict[tuple[Any, ...], tuple[Any, list[int]]] = {}
@@ -413,7 +502,7 @@ def _area_facts(world: RunWorld, city: str, out: Any) -> dict[str, Any]:
                 label=_label(world, city, oid),
                 months=tuple(months),
                 area_id=None if o is None else o.area,
-                area_label=None if area is None else area.label,
+                area_label=None if area is None else label("area", area.area_id, area.label),
                 area_typical_roundtrip_minutes=None
                 if area is None
                 else area.typical_roundtrip_minutes,
@@ -423,7 +512,7 @@ def _area_facts(world: RunWorld, city: str, out: Any) -> dict[str, Any]:
         CommuteMonths(
             months=tuple(months),
             status=c.status,
-            status_zh=_COMMUTE_STATUS_ZH[c.status],
+            status_zh=say(_COMMUTE_STATUS_ZH[c.status]),
             home_area_id=c.home_area,
             home_area_label=area_label(c.home_area),
             trips=tuple(
@@ -433,7 +522,7 @@ def _area_facts(world: RunWorld, city: str, out: Any) -> dict[str, Any]:
                     work_area_id=u.work_area,
                     work_area_label=area_label(u.work_area) or u.work_area,
                     mode=u.mode,
-                    mode_zh=COMMUTE_MODE_LABEL[u.mode],
+                    mode_zh=commute_mode_text(u.mode),
                     roundtrip_minutes=u.roundtrip_minutes,
                     onsite_visits=u.onsite_visits,
                 )
@@ -467,10 +556,14 @@ def _area_facts(world: RunWorld, city: str, out: Any) -> dict[str, Any]:
         facts["car_access"] = CarAccessFact(
             status="bought" if bought else "not_bought",
             lines=lines,
-            note_zh=(
-                "开车通勤要这个月有在用的用车权（按月付费）：用上的月份里，到岗时在可用方式里取往返最少的一种"
-                if bought
-                else "今年没有用上用车权：这一年不能开车通勤，到岗只用通勤关系表里不需要用车权的方式"
+            note_zh=t(
+                "fact.car_access.bought",
+                "开车通勤要这个月有在用的用车权（按月付费）：用上的月份里，到岗时在可用方式里取往返最少的一种",
+            )
+            if bought
+            else t(
+                "fact.car_access.not_bought",
+                "今年没有用上用车权：这一年不能开车通勤，到岗只用通勤关系表里不需要用车权的方式",
             ),
         )
     facts["device_failures"] = tuple(
@@ -484,7 +577,7 @@ def _area_facts(world: RunWorld, city: str, out: Any) -> dict[str, Any]:
             if f.replacement_id is None
             else _label(world, city, f.replacement_id),
             replacement_status=f.replacement_status,
-            replacement_status_zh=_REPLACEMENT_ZH[f.replacement_status],
+            replacement_status_zh=say(_REPLACEMENT_ZH[f.replacement_status]),
             replacement_month=f.replacement_month,
         )
         for f in out.device_failures
@@ -493,24 +586,9 @@ def _area_facts(world: RunWorld, city: str, out: Any) -> dict[str, Any]:
         facts["tax"] = TaxFact(
             policy_id=out.tax_policy_id,
             status=out.tax_status,
-            status_zh=TAX_STATUS_ZH[out.tax_status],
+            status_zh=tax_status_label(out.tax_status),
         )
     return facts
-
-
-def _months_text(months: tuple[int, ...]) -> str:
-    if not months:
-        return "无"
-    ranges: list[str] = []
-    start = prev = months[0]
-    for m in months[1:]:
-        if m == prev + 1:
-            prev = m
-            continue
-        ranges.append(f"{start}–{prev} 月" if start != prev else f"{start} 月")
-        start = prev = m
-    ranges.append(f"{start}–{prev} 月" if start != prev else f"{start} 月")
-    return "、".join(ranges)
 
 
 def _valuation_scope(world: RunWorld, city: str, lives: Any) -> tuple[ValuationScopeNote, ...]:
@@ -524,18 +602,23 @@ def _valuation_scope(world: RunWorld, city: str, lives: Any) -> tuple[ValuationS
         return ()
     out: list[ValuationScopeNote] = []
     for s in equipment_valuation_scope(terminal, spec, catalog):
-        label = _label(world, city, s.opportunity_id)
+        item = _item(world, city, s.opportunity_id)
+        name = _label(world, city, s.opportunity_id)
         if s.covered:
             out.append(
                 ValuationScopeNote(
                     kind="equipment_use_valued",
                     opportunity_id=s.opportunity_id,
-                    label=label,
+                    label=name,
                     capabilities=s.covered,
                     months_left=s.months_left,
-                    text_zh=(
-                        f"期末持有的「{label}」还能用 {s.months_left} 个月：期末参考生活按它的能力（{'、'.join(s.covered)}）"
-                        "继续安排相应活动，剩余寿命内照用、不重复购买"
+                    text_zh=t(
+                        "result.valuation.use_valued",
+                        "期末持有的「{item}」还能用 {months} 个月：期末参考生活按它的能力（{capabilities}）"
+                        "继续安排相应活动，剩余寿命内照用、不重复购买",
+                        item=item,
+                        months=s.months_left,
+                        capabilities=Join(tuple(Code(c) for c in s.covered)),
                     ),
                 )
             )
@@ -544,12 +627,16 @@ def _valuation_scope(world: RunWorld, city: str, lives: Any) -> tuple[ValuationS
                 ValuationScopeNote(
                     kind="equipment_use_not_in_templates",
                     opportunity_id=s.opportunity_id,
-                    label=label,
+                    label=name,
                     capabilities=s.uncovered,
                     months_left=s.months_left,
-                    text_zh=(
-                        f"期末持有的「{label}」还能用 {s.months_left} 个月：参考模板没有考虑它的用途（{'、'.join(s.uncovered)}），"
-                        "期末估值没有计入这项用途——这是参考模板的范围限制，不是说这件装备没有价值"
+                    text_zh=t(
+                        "result.valuation.use_not_in_templates",
+                        "期末持有的「{item}」还能用 {months} 个月：参考模板没有考虑它的用途（{capabilities}），"
+                        "期末估值没有计入这项用途——这是参考模板的范围限制，不是说这件装备没有价值",
+                        item=item,
+                        months=s.months_left,
+                        capabilities=Join(tuple(Code(c) for c in s.uncovered)),
                     ),
                 )
             )
@@ -567,11 +654,11 @@ def _clone(
         city_ref=str(entry.city),
         repeat_index=entry.repeat_index,
         category=entry.category,
-        category_zh=CATEGORY_TEXT[entry.category],
+        category_zh=say(CATEGORY_TEXT[entry.category]),
         missing_reason=entry.missing_reason,
         missing_reason_zh=None
         if entry.missing_reason is None
-        else MISSING_REASON_TEXT[entry.missing_reason],
+        else missing_reason_text(entry.missing_reason),
         # E3-A 收尾 F5：说明只由类别与缺失原因生成，不透传 entry.detail（那里可能有异常原文）
         explanation=clone_explanation(entry, run_id),
         l_actual=_ex(entry.l_actual),
@@ -580,8 +667,16 @@ def _clone(
         range_lower=_ex(entry.lower),
         range_upper=_ex(entry.upper),
         reference_plan=entry.selected_plan_id,
+        # 环境记录的文字是 E1 写的中文原文：外层的年月按模板绑定，原文本身没有译文（英文显示为缺失，不猜）
         event_chain=tuple(
-            f"第 {s.year_index} 年第 {s.month} 月：{s.text}" for s in entry.event_chain
+            t(
+                "result.event_chain.step",
+                "第 {year} 年第 {month} 月：{text}",
+                year=s.year_index,
+                month=s.month,
+                text=Raw(s.text),
+            )
+            for s in entry.event_chain
         ),
         hard_requirements=tuple(
             RequirementLine(
@@ -599,27 +694,131 @@ def _clone(
     )
 
 
-def _headline(cr: CityReport, label: str) -> str:
-    head = f"{label}：原计划 {cr.planned} 个分身——{cr.complete} 个完成且可评价、{cr.exits} 个生活出局、{cr.missing} 个模拟问题"
-    if cr.complete == 0:
-        return head + "；没有可用于平均的完整结果"
-    assert cr.mean_j is not None
-    return (
-        head
-        + f"；{cr.complete} 个完成且可评价分身的平均 J 为 {display(cr.mean_j.fraction(), 4)}"
-        + "（分母只数完成且可评价的分身，不是原计划的全部分身）"
+def missing_reason_text(reason: str) -> str:
+    """缺失原因的公开名称（E1 的 ``MISSING_REASON_TEXT`` 是中文的唯一来源；显示 key 按原因代码）。"""
+    return t(f"result.missing_reason.{reason}", MISSING_REASON_TEXT[reason])
+
+
+def _headline(cr: CityReport, city: Ent | Code) -> str:
+    counts = Sub(
+        "result.city.counts",
+        "{city}：原计划 {planned} 个分身——{complete} 个完成且可评价、{exits} 个生活出局、{missing} 个模拟问题",
+        (
+            ("city", city),
+            ("planned", Num(str(cr.planned))),
+            ("complete", Num(str(cr.complete))),
+            ("exits", Num(str(cr.exits))),
+            ("missing", Num(str(cr.missing))),
+        ),
     )
+    if cr.complete == 0:
+        return t(
+            "result.city.headline_no_mean", "{counts}；没有可用于平均的完整结果", counts=counts
+        )
+    assert cr.mean_j is not None
+    return t(
+        "result.city.headline_mean",
+        "{counts}；{complete} 个完成且可评价分身的平均 J 为 {mean_j}"
+        "（分母只数完成且可评价的分身，不是原计划的全部分身）",
+        counts=counts,
+        complete=cr.complete,
+        mean_j=Num(display(cr.mean_j.fraction(), 4)),
+    )
+
+
+def _city_notes(cr: CityReport) -> tuple[str, ...]:
+    """E1-6B 城市报告的说明：按报告里的结构化计数重新生成同样的中文（同时记下显示绑定）。与报告原文逐字相同才用；不同（E1
+    改了写法）就照原文写、不绑定——英文显示为缺失，不猜。"""
+    notes = []
+    if cr.complete == 0 and cr.missing:
+        notes.append(
+            t(
+                "result.city.note.no_complete",
+                "没有完整评价的分身：完整者均值为空（不填 0，不用 L 代替 J），只给缺失范围",
+            )
+        )
+    if cr.complete == 0 and not cr.missing:
+        notes.append(
+            t("result.city.note.all_exit", "全部确认出局：均值与缺失范围都为空；出局比例 100%")
+        )
+    if cr.complete == 1:
+        notes.append(
+            t(
+                "result.city.note.single_complete",
+                "只有 1 个完整评价分身：均值就是它的 J，不是稳定的抽样证据",
+            )
+        )
+    if any(e.unexpected_error for e in cr.entries):
+        notes.append(
+            t(
+                "result.city.note.unexpected_error",
+                "有意外程序错误：不能假定它只影响这一个分身，先查原因再解读这份报告",
+            )
+        )
+    if any(h.violated or h.unknown or h.not_checked for h in cr.hard_requirements):
+        notes.append(
+            t(
+                "result.city.note.hard_requirements",
+                "有分身没有满足、无法判断或尚未核验用户的硬要求（未核验 = 没有可信记录，不是核验过、没问题）：见硬要求一节；"
+                "均值高不代表完全符合用户要求",
+            )
+        )
+    return tuple(notes) if tuple(notes) == tuple(cr.notes) else tuple(cr.notes)
+
+
+_DIRECTION = {
+    "a_higher": Sub(
+        "result.comparison.a_higher",
+        "在这些缺失范围下 A 城始终更高：方向一致；不是显著性检验，也不是总体因果结论",
+    ),
+    "b_higher": Sub(
+        "result.comparison.b_higher",
+        "在这些缺失范围下 B 城始终更高：方向一致；不是显著性检验，也不是总体因果结论",
+    ),
+    "undetermined": Sub(
+        "result.comparison.undetermined", "范围差含 0：在这些缺失范围下不能确定方向"
+    ),
+    "not_available": Sub(
+        "result.comparison.not_available", "有一座城全部确认出局，没有范围可比；看出局比例"
+    ),
+}
+
+
+def _comparison_note(c: Any) -> str:
+    """E1-6B 的比较说明：按比较里的结构化字段（方向、出局比例、有效分身数）重新生成同样的中文（同时记下显示绑定）；与原文
+    不同就照原文写、不绑定。"""
+    head = _DIRECTION.get(c.direction)
+    if head is not None:
+        text = t(
+            "result.comparison.note",
+            "{direction}。出局比例 A {exit_a}、B {exit_b}，有效分身数 A {complete_a}/{planned_a}、B {complete_b}/{planned_b}",
+            direction=head,
+            exit_a=Num(f"{c.exit_share_a.value:.0%}"),
+            exit_b=Num(f"{c.exit_share_b.value:.0%}"),
+            complete_a=c.complete_a,
+            planned_a=c.planned_a,
+            complete_b=c.complete_b,
+            planned_b=c.planned_b,
+        )
+        if text == c.note:
+            return text[:400]
+    return c.note[:400]
 
 
 def _city(world: RunWorld, cr: CityReport) -> CityResult:
     cat = world.bundle.catalog_for(str(cr.city))
-    label = cat.label if cat is not None else str(cr.city)
-    notes = list(cr.notes)
+    city: Ent | Code = Code(str(cr.city)) if cat is None else Ent("city", str(cr.city), cat.label)
+    notes = list(_city_notes(cr))
     if cr.range_lower is None:
-        notes.append("没有完整或可算范围的分身（例如全部生活出局）：模拟缺失范围为空")
+        notes.append(
+            t(
+                "result.city.note.no_range",
+                "没有完整或可算范围的分身（例如全部生活出局）：模拟缺失范围为空",
+            )
+        )
     return CityResult(
         city_ref=str(cr.city),
-        label=label,
+        label=city.value if isinstance(city, Code) else label("city", city.ident, city.zh),
         planned=cr.planned,
         complete=cr.complete,
         exits=cr.exits,
@@ -635,7 +834,7 @@ def _city(world: RunWorld, cr: CityReport) -> CityResult:
         missing_share=_ex(cr.missing_share),  # type: ignore[arg-type]
         missing_reasons=tuple(
             MissingReasonLine(
-                reason=r.reason, reason_zh=MISSING_REASON_TEXT[r.reason], count=r.count
+                reason=r.reason, reason_zh=missing_reason_text(r.reason), count=r.count
             )
             for r in cr.missing_reasons
         ),
@@ -652,7 +851,7 @@ def _city(world: RunWorld, cr: CityReport) -> CityResult:
             )
             for h in cr.hard_requirements
         ),
-        headline_zh=_headline(cr, label),
+        headline_zh=_headline(cr, city),
         notes_zh=tuple(n[:300] for n in notes),
     )
 
@@ -692,7 +891,7 @@ def project_result(
                 direction=c.direction,
                 range_difference_low=_ex(c.range_difference_low),
                 range_difference_high=_ex(c.range_difference_high),
-                note_zh=c.note[:400],
+                note_zh=_comparison_note(c),
             )
             for c in report.comparisons
         ]
@@ -707,7 +906,10 @@ def project_result(
                 resolved=c.resolved,
                 unresolved=c.unresolved,
                 excluded=c.excluded,
-                note_zh="选项目录覆盖：声明范围内调查过的便利设备与服务资料齐不齐；与这座城的轨迹能否评分是两件事",
+                note_zh=t(
+                    "result.option_coverage.note",
+                    "选项目录覆盖：声明范围内调查过的便利设备与服务资料齐不齐；与这座城的轨迹能否评分是两件事",
+                ),
             )
             for c in inventory.cities
             if c.city_ref in confirmed.cities
@@ -735,7 +937,11 @@ def project_result(
         evaluation_status="generated" if generated else "not_generated",
         not_generated_reason=None
         if generated
-        else f"运行状态是“{STAGE_TEXT.get(outcome.status, outcome.status)}”，还没有生成评价与汇总；不擅自生成分类或分数",
+        else t(
+            "result.not_generated",
+            "运行状态是“{stage}”，还没有生成评价与汇总；不擅自生成分类或分数",
+            stage=STAGE_TEXT.get(outcome.status) or Code(outcome.status),
+        ),
         run_stage=outcome.status,
         cities=tuple(cities),
         clones=tuple(clones) if generated else (),
@@ -744,21 +950,45 @@ def project_result(
         data_nature=tuple(city_data_nature(pack, world, ref) for ref in confirmed.cities)
         if generated
         else (),
-        reading_guide_zh=READING_GUIDE,
+        reading_guide_zh=tuple(say(s) for s in READING_GUIDE),
+        # 资料包的限制说明是资料包自己的文字：与预检查的范围说明同一份绑定（``capability/limits/item.<序号>``，资料包各有各的
+        # 资源）。兴趣范围的几句来自确认画像：与预检查一样按保存的作答重新生成、逐条核对（对不上就照用原文）
         limitations_zh=(
-            *pack.body.limits,
-            *confirmed.interests.scope_zh,
-            "选项目录覆盖只说明声明范围内调查过的候选资料齐不齐，不保证穷尽整个城市市场",
-            "结果只给用户看，不回灌给仍在生活中的分身",
+            *pack_lines("limits", pack.body.limits),
+            *confirmed_scope_lines(pack, confirmed),
+            t(
+                "result.limit.option_coverage",
+                "选项目录覆盖只说明声明范围内调查过的候选资料齐不齐，不保证穷尽整个城市市场",
+            ),
+            t("result.limit.not_fed_back", "结果只给用户看，不回灌给仍在生活中的分身"),
         ),
         sources_zh=(
-            "生活事实：E1 结算记录（钱、岗位、住房、食品、服务月份）与月度资源账（本人家务小时）",
-            "片区、通勤、用车权、设备故障与税：E1 月度资源账里每月唯一的通勤记录与结算记录（不含故障抽签）",
-            "评价：E1-6A 单分身跨期评价（L / V / J）；汇总：E1-6B 城市报告（C / E / M、均值、模拟缺失范围、事件链、硬要求）",
-            f"资料：合成资料包 {pack.body.pack_id}（{pack.fingerprint[:12]}…）与产品协议的基础样例；全部是合成设定"
+            t(
+                "result.source.life_facts",
+                "生活事实：E1 结算记录（钱、岗位、住房、食品、服务月份）与月度资源账（本人家务小时）",
+            ),
+            t(
+                "result.source.area_facts",
+                "片区、通勤、用车权、设备故障与税：E1 月度资源账里每月唯一的通勤记录与结算记录（不含故障抽签）",
+            ),
+            t(
+                "result.source.evaluation",
+                "评价：E1-6A 单分身跨期评价（L / V / J）；汇总：E1-6B 城市报告（C / E / M、均值、模拟缺失范围、事件链、硬要求）",
+            ),
+            t(
+                "result.source.pack_synthetic",
+                "资料：合成资料包 {pack_id}（{fingerprint}…）与产品协议的基础样例；全部是合成设定",
+                pack_id=Code(pack.body.pack_id),
+                fingerprint=Code(pack.fingerprint[:12]),
+            )
             if pack.body.status == "synthetic_fixture_only"
-            else f"资料：冻结的真实资料包 {pack.body.pack_id}（{pack.fingerprint[:12]}…）：城市资料来自公开来源与登记的模型"
-            "设定（逐城的来源性质见 data_nature）；生活规则、评分与评价参数是合成探索设定",
+            else t(
+                "result.source.pack_real",
+                "资料：冻结的真实资料包 {pack_id}（{fingerprint}…）：城市资料来自公开来源与登记的模型"
+                "设定（逐城的来源性质见 data_nature）；生活规则、评分与评价参数是合成探索设定",
+                pack_id=Code(pack.body.pack_id),
+                fingerprint=Code(pack.fingerprint[:12]),
+            ),
         ),
         planner=planner,
         real_model_calls=real_model_calls,

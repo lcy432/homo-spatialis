@@ -28,15 +28,17 @@ from common.product_contracts import (
     ServiceRules,
     UserInputDraft,
 )
+from product.display import Code, Join, Num, t
 from product.execution import ExecutionSpec, RunPolicy
 from product.service.config import ServiceConfig
-from product.service.store import Quota
+from product.service.explain import service_explanation
+from product.service.store import Quota, intent_deadline
 
 STAGE_ZH = {
     "checking": "排队检查中：运行前检查由服务按顺序执行，不使用次数",
     "awaiting_confirmation": "等你确认开始",
     "blocked": "运行前检查没有通过",
-    "queued": "已确认，排队等待开始",
+    "queued": "已确认，排队等待首次启动",
     "running": "模拟进行中",
     "needs_attention": "停下了，需要处理",
     "finished": "本次服务流程结束（结果里逐城写明完成、出局与模拟缺失）",
@@ -45,6 +47,12 @@ STAGE_ZH = {
     "deleted": "已删除",
     "expired": "已过期",
 }
+#: 恢复之后又在排队的运行：公开阶段同样是 queued，说明照实写“已经开始过”
+QUEUED_RESUME_ZH = "已经开始过，排队等待恢复（不另扣次数）"
+
+
+def stage_text(stage: str) -> str:
+    return t(f"stage.{stage}", STAGE_ZH[stage])
 
 
 def quota_view(q: Quota) -> QuotaSummary:
@@ -59,12 +67,31 @@ def _money(value: object) -> str:
 def options_view(config: ServiceConfig, policy: RunPolicy) -> RunOptionsPolicy:
     """用户能选什么（默认值与允许范围），网页照着显示控件。"""
     notes = [
-        "城市来自你确认的画像：可以只比较其中几座，但都要在允许的城市里，不会替你删城或补城",
-        f"每城分身 {policy.clones_min}–{policy.clones_max} 个（不选就是 {policy.clones_default} 个）；分身越多，"
-        "同一座城的结果越能看出运气的影响，但规划请求与费用也按比例增加",
-        f"年数只开放资料包配套验证过的 {', '.join(str(y) for y in policy.years_allowed)} 年",
-        f"费用上限 {_money(policy.cost_min)}–{_money(policy.cost_max)} 元（不选就是 {_money(policy.cost_default)} 元）："
-        "这次运行的全部城市、全部分身、全部服务尝试共用；扩大规模不会自动加预算，费用不够发下一次请求时就停下",
+        t(
+            "rules.options.cities",
+            "城市来自你确认的画像：可以只比较其中几座，但都要在允许的城市里，不会替你删城或补城",
+        ),
+        t(
+            "rules.options.clones",
+            "每城分身 {low}–{high} 个（不选就是 {default} 个）；分身越多，"
+            "同一座城的结果越能看出运气的影响，但规划请求与费用也按比例增加",
+            low=Num(str(policy.clones_min)),
+            high=Num(str(policy.clones_max)),
+            default=Num(str(policy.clones_default)),
+        ),
+        t(
+            "rules.options.years",
+            "年数只开放资料包配套验证过的 {years} 年",
+            years=Join(tuple(Num(str(y)) for y in policy.years_allowed), zh_sep=", ", en_sep=", "),
+        ),
+        t(
+            "rules.options.cost",
+            "费用上限 {low}–{high} 元（不选就是 {default} 元）："
+            "这次运行的全部城市、全部分身、全部服务尝试共用；扩大规模不会自动加预算，费用不够发下一次请求时就停下",
+            low=Num(_money(policy.cost_min)),
+            high=Num(_money(policy.cost_max)),
+            default=Num(_money(policy.cost_default)),
+        ),
     ]
     return RunOptionsPolicy(
         cities_allowed=tuple(policy.cities_allowed),
@@ -86,21 +113,49 @@ def options_view(config: ServiceConfig, policy: RunPolicy) -> RunOptionsPolicy:
 def rules_view(config: ServiceConfig, policy: RunPolicy, spec: ExecutionSpec) -> ServiceRules:
     """服务的规则。``spec`` 是按默认选项、全部允许城市算出的设置（只用来显示默认规模与费用上限）。"""
     notes = [
-        f"每个专属空间一共 {config.runs_total} 次启动模拟的机会，不自动重置；无论选多大的规模，真正开始一次就用掉一次机会，"
-        "不保证每次所有分身都完整",
-        f"默认比较 {len(spec.cities)} 个都会区、每城 {len(spec.repeat_indexes)} 个分身、每个分身 {spec.years} 年",
-        f"结果从运行首次结束起保存 {config.result_retention_days} 天，查看不续期；可以随时删除",
-        f"确认画像从首次确认起 {config.profile_retention_days} 天内可以用来准备新的模拟",
+        t(
+            "rules.runs_total",
+            "每个专属空间一共 {runs} 次启动模拟的机会，不自动重置；无论选多大的规模，真正开始一次就用掉一次机会，"
+            "不保证每次所有分身都完整",
+            runs=Num(str(config.runs_total)),
+        ),
+        t(
+            "rules.default_scale",
+            "默认比较 {cities} 个都会区、每城 {clones} 个分身、每个分身 {years} 年",
+            cities=Num(str(len(spec.cities))),
+            clones=Num(str(len(spec.repeat_indexes))),
+            years=Num(str(spec.years)),
+        ),
+        t(
+            "rules.result_retention",
+            "结果从运行首次结束起保存 {days} 天，查看不续期；可以随时删除",
+            days=Num(str(config.result_retention_days)),
+        ),
+        t(
+            "rules.profile_retention",
+            "确认画像从首次确认起 {days} 天内可以用来准备新的模拟",
+            days=Num(str(config.profile_retention_days)),
+        ),
     ]
     if spec.planner_kind == "llm":
         notes.append(
-            f"默认每次运行的费用上限是 {spec.max_cost} {spec.currency}（应用侧按报价预留，不是供应商账单上限），不自动加预算"
+            t(
+                "rules.cost_cap",
+                "默认每次运行的费用上限是 {cost} {currency}（应用侧按报价预留，不是供应商账单上限），不自动加预算",
+                cost=Num(str(spec.max_cost)),
+                currency=Code(str(spec.currency)),
+            )
         )
         if not config.live_calls_enabled:
-            notes.append("付费模型调用现在没有开启：可以填写与检查，但不能开始模拟")
+            notes.append(
+                t("rules.paid_off", "付费模型调用现在没有开启：可以填写与检查，但不能开始模拟")
+            )
     else:
         notes.append(
-            "这个服务实例使用离线规划器（mock）：没有网络调用、费用为 0，不代表真实模型的能力"
+            t(
+                "rules.mock",
+                "这个服务实例使用离线规划器（mock）：没有网络调用、费用为 0，不代表真实模型的能力",
+            )
         )
     return ServiceRules(
         runs_total=config.runs_total,
@@ -154,12 +209,18 @@ def _json(text: str | None) -> Any:
     return None if text is None else json.loads(text)
 
 
-def allowed_actions(row: Mapping[str, Any], quota: Quota) -> tuple[str, ...]:
+def allowed_actions(
+    row: Mapping[str, Any], quota: Quota, *, started: bool, start_allowed: bool
+) -> tuple[str, ...]:
+    """此刻服务允许的动作——与动作接口用同一份规则（读取之后状态变了，动作接口仍可能拒绝）：
+
+    * ``submit``：等确认、还有可用次数，而且这次的规划器现在能开始（真实模型需要服务开启付费调用；离线 mock 不受这个开关影响）；
+    * ``cancel``：还没有开始过（服务库里没有启动记录）的检查中、等确认、检查没通过或排队等首次启动——恢复之后又在排队的不能取消。"""
     stage = row["stage"]
     out: list[str] = []
-    if stage == "awaiting_confirmation" and quota.available >= 1:
+    if stage == "awaiting_confirmation" and quota.available >= 1 and start_allowed:
         out.append("submit")
-    if stage in ("checking", "awaiting_confirmation", "blocked", "queued"):
+    if stage in ("checking", "awaiting_confirmation", "blocked", "queued") and not started:
         out.append("cancel")
     if row["progress_body"] is not None and stage not in ("deleting", "deleted", "expired"):
         out.append("view_progress")
@@ -174,8 +235,10 @@ def allowed_actions(row: Mapping[str, Any], quota: Quota) -> tuple[str, ...]:
     return tuple(out)
 
 
-def waiting_for(row: Mapping[str, Any]) -> str:
+def waiting_for(row: Mapping[str, Any], *, start_allowed: bool = True) -> str:
     stage = row["stage"]
+    if stage == "awaiting_confirmation" and not start_allowed:
+        return "maintainer"  # 付费调用没有开启：要等维护者开启，不是等用户
     if stage in ("awaiting_confirmation", "blocked"):
         return "user"
     if stage == "needs_attention":
@@ -185,11 +248,41 @@ def waiting_for(row: Mapping[str, Any]) -> str:
     return "none"
 
 
-def intent_view(meta: ProductMeta, row: Mapping[str, Any], quota: Quota) -> RunIntentView:
+def needs_live_calls(row: Mapping[str, Any]) -> bool:
+    """这次运行的有效设置用真实模型规划器（需要服务开启付费调用）。"""
+    if row["execution_body"] is None:
+        return False
+    return ExecutionSpec.model_validate_json(row["execution_body"]).planner_kind == "llm"
+
+
+def intent_view(
+    meta: ProductMeta,
+    row: Mapping[str, Any],
+    quota: Quota,
+    *,
+    started: bool,
+    live_calls_enabled: bool,
+    intent_days: int,
+) -> RunIntentView:
+    """``started``：服务库里有这次运行的启动记录（首次启动时预留转为已使用）；``live_calls_enabled`` 是服务现在的付费开关。"""
     gone = row["stage"] in ("deleting", "deleted", "expired")
     pre = _json(row["preflight_body"])
     progress = _json(row["progress_body"])
     explanation = _json(row["explanation"])
+    start_allowed = live_calls_enabled or not needs_live_calls(row)
+    stage_zh = stage_text(row["stage"])
+    if row["stage"] == "queued":
+        # 排队时公开阶段相同，说明按实际的启动记录分开：等首次启动（预留着 1 次、可以取消）或等恢复（已经开始过）
+        if started:
+            stage_zh = t("stage.queued_resume", QUEUED_RESUME_ZH)
+            explanation = service_explanation("queued_resume", phase="after_start").model_dump(
+                mode="json"
+            )
+        else:
+            explanation = service_explanation("queued_first_start").model_dump(mode="json")
+    elif row["stage"] == "awaiting_confirmation" and not start_allowed:
+        explanation = service_explanation("paid_calls_off_waiting").model_dump(mode="json")
+    expires, basis = intent_deadline(row, intent_days)
     if row["stage"] in ("deleted", "deleting"):
         deletion = DeletionState(
             state="deleted" if row["stage"] == "deleted" else "deleting",
@@ -198,14 +291,13 @@ def intent_view(meta: ProductMeta, row: Mapping[str, Any], quota: Quota) -> RunI
         )
     else:
         deletion = DeletionState(state="none")
-    expires = row["result_expires_at"]
     return RunIntentView(
         meta=meta,
         intent_id=row["intent_id"],
         run_id=row["run_id"],
         stage=row["stage"],
-        stage_zh=STAGE_ZH[row["stage"]],
-        waiting_for=waiting_for(row),  # type: ignore[arg-type]
+        stage_zh=stage_zh,
+        waiting_for=waiting_for(row, start_allowed=start_allowed),  # type: ignore[arg-type]
         confirmed=ConfirmedRef(
             confirmed_id=row["confirmed_id"], content_fingerprint=row["confirmed_fingerprint"]
         ),
@@ -215,10 +307,13 @@ def intent_view(meta: ProductMeta, row: Mapping[str, Any], quota: Quota) -> RunI
         else None,
         progress=None if gone or progress is None else RunProgress.model_validate(progress),
         result_available=not gone and row["result_body"] is not None and row["stage"] == "finished",
-        allowed_actions=allowed_actions(row, quota),  # type: ignore[arg-type]
+        allowed_actions=allowed_actions(  # type: ignore[arg-type]
+            row, quota, started=started, start_allowed=start_allowed
+        ),
         created_at=row["created_at"],
         updated_at=row["updated_at"],
         expires_at=expires,
+        expiry_basis=basis,  # type: ignore[arg-type]
         deletion=deletion,
         explanation=None
         if gone or explanation is None
@@ -229,15 +324,19 @@ def intent_view(meta: ProductMeta, row: Mapping[str, Any], quota: Quota) -> RunI
     )
 
 
-def run_summary(row: Mapping[str, Any]) -> RunSummary:
+def run_summary(row: Mapping[str, Any], *, started: bool, intent_days: int) -> RunSummary:
+    expires, basis = intent_deadline(row, intent_days)
     return RunSummary(
         intent_id=row["intent_id"],
         run_id=row["run_id"],
         stage=row["stage"],
-        stage_zh=STAGE_ZH[row["stage"]],
+        stage_zh=t("stage.queued_resume", QUEUED_RESUME_ZH)
+        if row["stage"] == "queued" and started
+        else stage_text(row["stage"]),
         result_available=row["result_body"] is not None and row["stage"] == "finished",
         created_at=row["created_at"],
         finished_at=row["first_finished_at"],
-        expires_at=row["result_expires_at"],
+        expires_at=expires,
+        expiry_basis=basis,  # type: ignore[arg-type]
         settings=None if row["stage"] in ("deleting", "deleted", "expired") else settings_view(row),
     )

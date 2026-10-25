@@ -1377,6 +1377,16 @@
      "default": null,
      "title": "Expires At"
     },
+    "expiry_basis": {
+     "enum": [
+      "intent_activity",
+      "first_finished",
+      "active_execution",
+      "unavailable"
+     ],
+     "title": "Expiry Basis",
+     "type": "string"
+    },
     "explanation": {
      "anyOf": [
       {
@@ -1510,6 +1520,7 @@
     "result_available",
     "created_at",
     "updated_at",
+    "expiry_basis",
     "deletion",
     "quota"
    ],

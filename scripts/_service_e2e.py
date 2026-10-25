@@ -174,8 +174,137 @@ def run_e2e(
         summary.update(_result_summary(result, progress))
     else:
         summary["explanation"] = done.get("explanation")
+    ids = {
+        "draft": draft.draft_id,
+        "review": review["review"]["review_id"],
+        "profile": confirmed["confirmed"]["confirmed_id"],
+        "intent": intent["intent_id"],
+        "progress": receipt["run_id"],
+        "result": receipt["run_id"] if done["result_available"] else None,
+    }
+    summary["display"] = _display_story(client, h, ctx, ids, review)
+    summary["deletion"] = _delete_story(client, h, worker, receipt["run_id"])
     summary["seconds"] = round(time.monotonic() - started, 1)
     return summary
+
+
+#: 每种显示对象对应的业务读取（审阅没有单独的读取接口，与审阅回复比较）
+BUSINESS = {
+    "capabilities": "/capabilities",
+    "session": "/session",
+    "runs": "/runs",
+    "draft": "/drafts/{}",
+    "profile": "/profiles/{}",
+    "intent": "/run-intents/{}",
+    "progress": "/runs/{}/progress",
+    "result": "/runs/{}/result",
+}
+
+
+def _display_story(
+    client: Any, h: dict[str, str], ctx: Any, ids: dict[str, str | None], review: dict[str, Any]
+) -> dict[str, Any]:
+    """每种对象中英各读一次显示出口：中文是否完整、英文提供与缺失（按原因与 JSON Pointer 模式；用户原文不在分母里）、两种语言的
+    ``source`` 与摘要是否相同、``source`` 是否就是业务读取的回复；再读地理清单与一个未登录的错误。"""
+    from product.display.text import pointer_pattern
+
+    kinds: dict[str, Any] = {}
+    for kind in (
+        "capabilities",
+        "session",
+        "draft",
+        "review",
+        "profile",
+        "intent",
+        "progress",
+        "result",
+        "runs",
+    ):
+        ident = ids.get(kind)
+        if kind not in ("capabilities", "session", "runs") and ident is None:
+            continue
+        envs = {}
+        for locale in ("zh", "en"):
+            params = {"kind": kind, "locale": locale, **({"id": ident} if ident else {})}
+            r = client.get(f"{API}/display", params=params, headers=h)
+            if r.status_code != 200:
+                raise RuntimeError(
+                    f"显示读取 {kind}/{locale} → {r.status_code} {r.json().get('code')}"
+                )
+            envs[locale] = r.json()
+        if kind == "review":
+            business_same = envs["zh"]["source"]["review"] == review["review"]
+        else:
+            path = BUSINESS[kind].format(ident)
+            business_same = client.get(API + path, headers=h).json() == envs["zh"]["source"]
+        en = envs["en"]["fields"]
+        by_reason: dict[str, int] = {}
+        by_pattern: dict[str, dict[str, int]] = {}
+        for f in en:
+            if f["status"] == "missing":
+                reason = f["missing_reason"]
+                by_reason[reason] = by_reason.get(reason, 0) + 1
+                slot = by_pattern.setdefault(pointer_pattern(f["pointer"]), {})
+                slot[reason] = slot.get(reason, 0) + 1
+        kinds[kind] = {
+            "zh_status": envs["zh"]["status"],
+            "en_status": envs["en"]["status"],
+            "displayable": len(en),
+            "en_provided": sum(f["status"] == "provided" for f in en),
+            "en_missing_by_reason": dict(sorted(by_reason.items())),
+            "en_missing_by_pattern": dict(sorted(by_pattern.items())),
+            "resource_version": envs["en"]["resource_version"],
+            "same_source_both_locales": envs["zh"]["source"] == envs["en"]["source"]
+            and envs["zh"]["source_view_fingerprint"] == envs["en"]["source_view_fingerprint"],
+            "source_is_business_reply": business_same,
+        }
+    geo = client.get(
+        f"{API}/display/geography", params={"pack_fingerprint": ctx.pack.fingerprint}, headers=h
+    )
+    geography: dict[str, Any] = {"http": geo.status_code}
+    if geo.status_code == 200:
+        body = geo.json()
+        anchors: dict[str, int] = {}
+        for c in body["cities"]:
+            anchors[c["anchor_status"]] = anchors.get(c["anchor_status"], 0) + 1
+        geography.update(
+            status=body["status"],
+            resource_version=body["resource_version"],
+            cities=len(body["cities"]),
+            anchor_status=anchors,
+        )
+    from fastapi.testclient import TestClient
+
+    anonymous = TestClient(client.app, base_url=str(client.base_url))
+    err = anonymous.get(f"{API}/session").json()
+    return {
+        "kinds": kinds,
+        "geography": geography,
+        "unauthenticated_error": {
+            "code": err["code"],
+            "zh_status": err["display"]["translations"]["zh"]["status"],
+            "en_status": err["display"]["translations"]["en"]["status"],
+        },
+    }
+
+
+def _delete_story(client: Any, h: dict[str, str], worker: Any, run_id: str) -> dict[str, Any]:
+    """删除这次运行、再删除全部数据：记下每一步的 HTTP 回答与之后读取的回答。"""
+    out: dict[str, Any] = {}
+    r = client.delete(f"{API}/runs/{run_id}", headers=h)
+    out["delete_run_http"] = r.status_code
+    worker.run_pending()
+    after = client.get(f"{API}/runs/{run_id}/result", headers=h)
+    out["result_after_delete"] = [after.status_code, after.json().get("code")]
+    shown = client.get(
+        f"{API}/display", params={"kind": "result", "id": run_id, "locale": "en"}, headers=h
+    )
+    out["result_display_after_delete"] = [shown.status_code, shown.json().get("code")]
+    r = client.delete(f"{API}/me/data", headers=h)
+    out["delete_all_http"] = r.status_code
+    worker.run_pending()
+    out["runs_after_delete_all"] = len(client.get(f"{API}/runs", headers=h).json().get("runs", []))
+    return out
 
 
 def _identity(ctx: Any) -> dict[str, Any]:

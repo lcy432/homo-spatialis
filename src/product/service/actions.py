@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+import json
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
@@ -25,6 +26,8 @@ from common.product_contracts import (
     CashAnswer,
     CitiesAnswer,
     ConfirmedProfile,
+    ConfirmedProfileSummary,
+    ConfirmedProfileView,
     ConfirmedRef,
     CostStatus,
     DeletionReceipt,
@@ -42,6 +45,7 @@ from common.product_contracts import (
     ProductResult,
     ProfileConfirmReply,
     ProfileConfirmRequest,
+    ProfileList,
     ReviewReply,
     RunIntentCreateRequest,
     RunIntentView,
@@ -64,29 +68,36 @@ from product.answers import (
 )
 from product.bridge import run_id_for, submission_problems
 from product.capabilities import build_capabilities
+from product.display import messages as display_messages
+from product.display import t
+from product.display.document import binding_document, capture
 from product.execution import ExecutionSpec, RunOptions, RunOptionsError, RunPolicy, service_pack
 from product.pack import DataPack, load_pack
 from product.service.clock import Clock, system_clock
 from product.service.config import REPO, ServiceConfig
 from product.service.errors import ServiceFailure
 from product.service.explain import service_explanation
-from product.service.store import INTENT_CONTENT, ServiceStore, intent_due
+from product.service.store import INTENT_CONTENT, ServiceStore, expired_subject, intent_due
 from product.service.tokens import csrf_for, digest, server_key
 from product.service.views import (
-    STAGE_ZH,
     draft_view,
     intent_view,
     quota_view,
     rules_view,
     run_summary,
+    stage_text,
 )
 
-KEPT_AFTER_DELETE = (
-    "不透明的服务身份与运行编号",
-    "使用次数的记录（删除不会重置次数）",
-    "必要的费用摘要（发送不确定的金额照原样保留，不改成 0）",
-    "删除时间与防止旧请求复活的记录",
-)
+KEPT_AFTER_DELETE = {
+    "deletion.kept.identity": "不透明的服务身份与运行编号",
+    "deletion.kept.quota": "使用次数的记录（删除不会重置次数）",
+    "deletion.kept.cost": "必要的费用摘要（发送不确定的金额照原样保留，不改成 0）",
+    "deletion.kept.tombstone": "删除时间与防止旧请求复活的记录",
+}
+
+
+def kept_after_delete() -> tuple[str, ...]:
+    return tuple(t(k, v) for k, v in KEPT_AFTER_DELETE.items())
 
 
 @dataclass
@@ -279,7 +290,13 @@ def review(
     """审阅。写回时服务库在事务里重新核对草稿（还在、没过期、修订号没变）与数据代次：审阅进行中草稿被删或“删除全部”，就不写回。"""
     row = ctx.store.draft(principal_id, draft_id)
     draft = UserInputDraft.model_validate_json(row["body"])
-    result = review_draft(ctx.pack, draft)
+    result, rec = capture(review_draft, ctx.pack, draft)
+    display = binding_document(
+        result.model_dump(mode="json"),
+        rec,
+        pack_fingerprint=ctx.pack.fingerprint,
+        user_text=display_messages.REVIEW,
+    )
     ctx.store.save_review(
         principal_id,
         review_id=result.review_id,
@@ -289,6 +306,7 @@ def review(
         pack_fingerprint=ctx.pack.fingerprint,
         body=result.model_dump_json(),
         generation=generation,
+        display_body=json.dumps(display, ensure_ascii=False),
     )
     return ReviewReply(meta=ctx.meta(), review=result, reviewed_revision=row["revision"])
 
@@ -301,9 +319,12 @@ def _review_stale(ctx: ServiceContext) -> ProfileConfirmReply:
             issue(
                 "review_stale",
                 "review_id",
-                "确认引用的审阅不是当前这一版草稿的审阅（草稿或资料包在审阅之后变了）",
-                "没有确认",
-                "重新审阅当前的草稿后再确认",
+                t(
+                    "issue.review_stale.message",
+                    "确认引用的审阅不是当前这一版草稿的审阅（草稿或资料包在审阅之后变了）",
+                ),
+                t("issue.review_stale.impact", "没有确认"),
+                t("issue.review_stale.next", "重新审阅当前的草稿后再确认"),
             ),
         ),
     )
@@ -332,7 +353,8 @@ def confirm(
     if stale:
         return _review_stale(ctx)
     try:
-        confirmed = confirm_profile(
+        confirmed, rec = capture(
+            confirm_profile,
             ctx.pack,
             draft,
             person_ref=ctx.person_ref(principal_id),
@@ -340,6 +362,12 @@ def confirm(
         )
     except ConfirmationRefusedError as exc:
         return ProfileConfirmReply(meta=ctx.meta(), status="refused", issues=exc.issues)
+    display = binding_document(
+        confirmed.model_dump(mode="json"),
+        rec,
+        pack_fingerprint=ctx.pack.fingerprint,
+        user_text=display_messages.PROFILE,
+    )
     try:
         ctx.store.save_profile(
             principal_id,
@@ -350,19 +378,63 @@ def confirm(
             fingerprint=confirmed.content_fingerprint,
             body=confirmed.model_dump_json(),
             generation=generation,
+            display_body=json.dumps(display, ensure_ascii=False),
         )
     except ServiceFailure as exc:
         if exc.code == "revision_conflict":
             return _review_stale(ctx)  # 确认进行中草稿又被改了
         raise
-    return ProfileConfirmReply(meta=ctx.meta(), status="confirmed", confirmed=confirmed)
+    saved = ctx.store.profile(principal_id, confirmed.confirmed_id)
+    return ProfileConfirmReply(
+        meta=ctx.meta(),
+        status="confirmed",
+        confirmed=confirmed,
+        profile_summary=profile_summary(saved),
+    )
+
+
+def profile_summary(row: Mapping[str, Any]) -> ConfirmedProfileSummary:
+    """服务库里这份确认画像的日期：首次确认时间与可以用来准备新模拟的截止时间（重复确认、查询都不续期）。"""
+    return ConfirmedProfileSummary(
+        confirmed_id=row["confirmed_id"],
+        content_fingerprint=row["content_fingerprint"],
+        draft_id=row["draft_id"],
+        draft_revision=row["draft_revision"],
+        first_confirmed_at=row["created_at"],
+        expires_at=row["expires_at"],
+    )
+
+
+def profiles(ctx: ServiceContext, principal_id: str) -> ProfileList:
+    """本人还能用来准备新模拟的确认画像摘要（刷新、换设备后读回日期）。"""
+    return ProfileList(
+        meta=ctx.meta(),
+        profiles=tuple(profile_summary(r) for r in ctx.store.profiles(principal_id)),
+    )
+
+
+def profile_view(ctx: ServiceContext, principal_id: str, confirmed_id: str) -> ConfirmedProfileView:
+    """本人的一份确认画像与它的日期。别人的、不存在的、已删除的都是 ``not_found``；过期的是 ``expired``（正文不再返回）。"""
+    row = ctx.store.profile(principal_id, confirmed_id)
+    return ConfirmedProfileView(
+        meta=ctx.meta(),
+        summary=profile_summary(row),
+        confirmed=ConfirmedProfile.model_validate_json(row["body"]),
+    )
 
 
 # ---------------------------------------------------------------------- 运行意图
 
 
 def view(ctx: ServiceContext, principal_id: str, row: Mapping[str, Any]) -> RunIntentView:
-    return intent_view(ctx.meta(), _expired_view(ctx, row), ctx.store.quota(principal_id))
+    return intent_view(
+        ctx.meta(),
+        _expired_view(ctx, row),
+        ctx.store.quota(principal_id),
+        started=ctx.store.quota_state(row["intent_id"])["used"],
+        live_calls_enabled=ctx.config.live_calls_enabled,
+        intent_days=ctx.config.intent_retention_days,
+    )
 
 
 def _expired_view(ctx: ServiceContext, row: Mapping[str, Any]) -> Mapping[str, Any]:
@@ -507,7 +579,14 @@ def runs(ctx: ServiceContext, principal_id: str) -> RunList:
     ]
     return RunList(
         meta=ctx.meta(),
-        runs=tuple(run_summary(r) for r in rows),
+        runs=tuple(
+            run_summary(
+                r,
+                started=ctx.store.quota_state(r["intent_id"])["used"],
+                intent_days=ctx.config.intent_retention_days,
+            )
+            for r in rows
+        ),
         quota=quota_view(ctx.store.quota(principal_id)),
     )
 
@@ -519,7 +598,7 @@ def _visible_run(ctx: ServiceContext, principal_id: str, run_id: str) -> Mapping
     if row["stage"] == "deleted":
         raise ServiceFailure("deleted")
     if row["stage"] == "expired":
-        raise ServiceFailure("expired")
+        raise ServiceFailure("expired", subject=expired_subject(row))
     return row
 
 
@@ -537,7 +616,9 @@ def progress(ctx: ServiceContext, principal_id: str, run_id: str) -> RunProgress
         meta=ctx.meta(),
         run_id=run_id,
         stage="queued" if queued else "running",
-        stage_zh=STAGE_ZH["queued"] if queued else "模拟刚开始，第一份进度还没有写下",
+        stage_zh=stage_text("queued")
+        if queued
+        else t("progress.placeholder.started", "模拟刚开始，第一份进度还没有写下"),
         clones=(),
         cost=CostStatus(
             kind="offline_mock_zero_cost"
@@ -546,15 +627,17 @@ def progress(ctx: ServiceContext, principal_id: str, run_id: str) -> RunProgress
             calls_used=0,
             call_limit=spec.global_call_limit,
             estimated_cost=None if spec.planner_kind == "mock" else "0",
-            note="还没有开始：没有发出任何模型请求"
+            note=t("progress.placeholder.cost_queued", "还没有开始：没有发出任何模型请求")
             if queued
-            else "刚开始：费用以下一份进度快照为准",
+            else t("progress.placeholder.cost_started", "刚开始：费用以下一份进度快照为准"),
             currency=spec.currency if spec.planner_kind == "llm" else None,
             price_version=spec.price_version,
             max_cost=spec.max_cost if spec.planner_kind == "llm" else None,
         ),
         resumable=False,
-        resume_note="还没有开始，没有可以恢复的部分" if queued else "运行中，不需要恢复",
+        resume_note=t("progress.placeholder.resume_queued", "还没有开始，没有可以恢复的部分")
+        if queued
+        else t("progress.placeholder.resume_running", "运行中，不需要恢复"),
         report_available=False,
         updated_at=row["updated_at"],
     )
@@ -580,10 +663,11 @@ def delete_run(ctx: ServiceContext, principal_id: str, run_id: str) -> DeletionR
         scope="run",
         target_ref=run_id,
         status="deleted" if row["stage"] == "deleted" else "deleting",
-        note_zh=(
-            "这次运行已经不能查看，正在安全收尾：不再批准新的模型请求，已经发出的请求可能完成并记账（不能撤回），收尾后清掉内容"
+        note_zh=t(
+            "deletion.run.note",
+            "这次运行已经不能查看，正在安全收尾：不再批准新的模型请求，已经发出的请求可能完成并记账（不能撤回），收尾后清掉内容",
         ),
-        kept_zh=KEPT_AFTER_DELETE,
+        kept_zh=kept_after_delete(),
         quota=quota_view(ctx.store.quota(principal_id)),
     )
 
@@ -595,10 +679,11 @@ def delete_all(ctx: ServiceContext, principal_id: str) -> DeletionReceipt:
         scope="all_data",
         target_ref=None,
         status="deleting",
-        note_zh=(
+        note_zh=t(
+            "deletion.all.note",
             "你的草稿、审阅、确认与全部运行都在删除：运行中的模拟不再批准新的模型请求，收尾后清掉内容；之前已经开始、还没有完成的"
-            "审阅或确认不会再写回。专属链接仍然有效"
+            "审阅或确认不会再写回。专属链接仍然有效",
         ),
-        kept_zh=KEPT_AFTER_DELETE,
+        kept_zh=kept_after_delete(),
         quota=quota_view(ctx.store.quota(principal_id)),
     )

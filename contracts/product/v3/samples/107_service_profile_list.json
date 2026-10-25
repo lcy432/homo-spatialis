@@ -1,0 +1,35 @@
+{
+ "description_zh": "本人还在有效期内的确认画像摘要（GET /api/v1/profiles）：首次确认时间与截止时间来自服务库，重复确认不续期，换设备也能读回",
+ "message": "ProfileList",
+ "payload": {
+  "meta": {
+   "conversion_version": "e3a-conversion-v2",
+   "data_pack": {
+    "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
+    "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
+    "pack_id": "pack.e3a.synthetic-v2",
+    "status": "synthetic_fixture_only"
+   },
+   "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.3-draft",
+   "sample": {
+    "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+    "origin": "offline_run",
+    "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+    "synthetic": true
+   },
+   "schema_version": "e3a-product-schema-v3.3",
+   "vocabulary_version": "e3a-vocabulary-v4"
+  },
+  "profiles": [
+   {
+    "confirmed_id": "confirmed.draft-000000000000005b.r2",
+    "content_fingerprint": "c5f1c0b8469fbdd5ebc12a19b24b2b4d980ce6dd524b98782d0e01916390119d",
+    "draft_id": "draft-000000000000005b",
+    "draft_revision": 2,
+    "expires_at": "2026-12-23T09:01:02Z",
+    "first_confirmed_at": "2026-11-23T09:01:02Z"
+   }
+  ]
+ }
+}

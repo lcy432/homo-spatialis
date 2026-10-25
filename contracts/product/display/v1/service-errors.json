@@ -1,0 +1,367 @@
+{
+ "display_schema_version": "e3-display-v1",
+ "errors": {
+  "cancel_not_allowed": {
+   "en": {
+    "impact": "Nothing was cancelled; the 1 run already used is not refunded, and existing progress and results stay as they are",
+    "message": "This run has already started, so it cannot be withdrawn with “cancel before start”",
+    "next": "You can let it continue, or delete this run using the action on the page"
+   },
+   "status": 409,
+   "zh": {
+    "impact": "没有取消；已经用掉的 1 次机会不退，已有的进度与结果保持不变",
+    "message": "这次运行已经开始过，不能按“开始前取消”撤回",
+    "next": "可以等它接着运行，或者按页面上的动作删除这次运行"
+   }
+  },
+  "csrf_failed": {
+   "en": {
+    "impact": "This change was not made",
+    "message": "The request is missing the page check code, or it is wrong",
+    "next": "Refresh the page and try again"
+   },
+   "status": 403,
+   "zh": {
+    "impact": "这次修改没有被执行",
+    "message": "请求缺少或带错了页面校验码",
+    "next": "刷新页面后再试"
+   }
+  },
+  "data_pack_unavailable": {
+   "en": {
+    "impact": "No simulation was started and no run was used",
+    "message": "The city data pack this run needs is unavailable right now, or differs from the recorded version",
+    "next": "Try again later; the maintainer will check the data pack"
+   },
+   "status": 503,
+   "zh": {
+    "impact": "没有开始模拟，也没有使用次数",
+    "message": "运行需要的城市资料包现在不可用或与记录的版本不同",
+    "next": "稍后再试；维护者会核对资料包"
+   }
+  },
+  "deleted": {
+   "en": {
+    "impact": "The content can no longer be viewed or restored; deleting does not reset the number of runs used",
+    "message": "This content has been deleted",
+    "next": "Create it again if you need it"
+   },
+   "status": 410,
+   "zh": {
+    "impact": "内容不能再查看或恢复；删除不会重置使用次数",
+    "message": "这项内容已经删除",
+    "next": "需要的话重新创建"
+   }
+  },
+  "deleting": {
+   "en": {
+    "impact": "The content can no longer be viewed and is being wound down safely",
+    "message": "This run is being deleted",
+    "next": "Refresh later; it cannot be restored once deletion completes"
+   },
+   "status": 409,
+   "zh": {
+    "impact": "内容已经不可查看，正在安全收尾",
+    "message": "这次运行正在删除",
+    "next": "稍后刷新；删除完成后不能恢复"
+   }
+  },
+  "expired": {
+   "en": {
+    "impact": "The content can no longer be viewed or used; viewing or refreshing does not extend it",
+    "message": "This content is past its retention period",
+    "next": "Create it again if you need it"
+   },
+   "status": 410,
+   "zh": {
+    "impact": "内容已经不能查看或使用；查看、刷新都不续期",
+    "message": "这项内容已经超过保存期限",
+    "next": "需要的话重新创建"
+   }
+  },
+  "idempotency_conflict": {
+   "en": {
+    "impact": "This request was not carried out",
+    "message": "This request ID has already been used for a different request",
+    "next": "Generate a new request ID for a new request; when resending the same request, keep its content unchanged"
+   },
+   "status": 409,
+   "zh": {
+    "impact": "这次请求没有被执行",
+    "message": "这个请求编号已经用于另一份不同的请求",
+    "next": "为新的请求生成新的请求编号；重发同一个请求时请保持内容不变"
+   }
+  },
+  "intent_conflict": {
+   "en": {
+    "impact": "No new run intent was created",
+    "message": "You already have a simulation being prepared or in progress, with different conditions",
+    "next": "Finish, cancel or delete that one first, then start with the new conditions"
+   },
+   "status": 409,
+   "zh": {
+    "impact": "没有创建新的运行意图",
+    "message": "你已经有一次正在准备或进行中的模拟，条件与这次不同",
+    "next": "先完成、取消或删除那一次，再用新的条件开始"
+   }
+  },
+  "internal_error": {
+   "en": {
+    "impact": "This request did not complete",
+    "message": "The service hit an internal problem",
+    "next": "Try again later; if it keeps happening, contact the maintainer with the support reference"
+   },
+   "status": 500,
+   "zh": {
+    "impact": "这次请求没有完成",
+    "message": "服务出现了内部问题",
+    "next": "稍后再试；问题一直出现时请联系维护者并提供支持编号"
+   }
+  },
+  "invalid_request": {
+   "en": {
+    "impact": "This request was not carried out",
+    "message": "The request's format or content does not meet the requirements",
+    "next": "Check what you entered on the page; if it keeps happening, contact the maintainer with the support reference"
+   },
+   "status": 422,
+   "zh": {
+    "impact": "这次请求没有被执行",
+    "message": "请求的格式或内容不符合要求",
+    "next": "检查页面上的填写；问题一直出现时请联系维护者并提供支持编号"
+   }
+  },
+  "not_found": {
+   "en": {
+    "impact": "This ID does not exist in your space (it may also have expired or been deleted)",
+    "message": "This content was not found",
+    "next": "Go back to “My runs” or create it again"
+   },
+   "status": 404,
+   "zh": {
+    "impact": "这个编号在你的空间里不存在（也可能已经过期或删除）",
+    "message": "没有找到这项内容",
+    "next": "回到“我的运行”或重新创建"
+   }
+  },
+  "not_resumable": {
+   "en": {
+    "impact": "No new model request was sent and the run was not changed",
+    "message": "You cannot resume this run right now",
+    "next": "If the page says it is waiting for the maintainer, you do not need to fill anything in again; otherwise check the run's status"
+   },
+   "status": 409,
+   "zh": {
+    "impact": "没有发出新的模型请求，也没有改变运行",
+    "message": "这次运行现在不能由你恢复",
+    "next": "如果页面说在等维护者处理，你不需要重新填写；否则查看运行状态"
+   }
+  },
+  "origin_rejected": {
+   "en": {
+    "impact": "This change was not made",
+    "message": "The request was not sent from this site's pages",
+    "next": "Do it again from this site's pages"
+   },
+   "status": 403,
+   "zh": {
+    "impact": "这次修改没有被执行",
+    "message": "请求不是从本站页面发出的",
+    "next": "从本站页面重新操作"
+   }
+  },
+  "paid_calls_disabled": {
+   "en": {
+    "impact": "A simulation that needs a real model cannot start, and the system will not quietly switch to the offline planner",
+    "message": "The service has not turned on paid model calls",
+    "next": "Try again after the service turns them on; no run was used"
+   },
+   "status": 409,
+   "zh": {
+    "impact": "不能开始需要真实模型的模拟，系统不会悄悄换成离线规划器",
+    "message": "服务现在没有开启付费模型调用",
+    "next": "等服务开启后再试；没有使用次数"
+   }
+  },
+  "payload_too_large": {
+   "en": {
+    "impact": "This request was not carried out",
+    "message": "The request is too large",
+    "next": "Shorten what you entered and try again"
+   },
+   "status": 413,
+   "zh": {
+    "impact": "这次请求没有被执行",
+    "message": "请求内容太大",
+    "next": "缩短填写内容后再试"
+   }
+  },
+  "preflight_stale": {
+   "en": {
+    "impact": "No simulation was started and no run was used",
+    "message": "What you confirmed is not the current pre-run summary (the conditions or data changed, or the summary was updated)",
+    "next": "Read the latest pre-run summary, then confirm again"
+   },
+   "status": 409,
+   "zh": {
+    "impact": "没有开始模拟，也没有使用次数",
+    "message": "你确认的不是当前这一份运行前说明（条件或资料变了，或说明已经更新）",
+    "next": "查看最新的运行前说明后再确认"
+   }
+  },
+  "quota_exhausted": {
+   "en": {
+    "impact": "No new simulation can be started",
+    "message": "This space's 3 simulation runs are used up or all in use",
+    "next": "Look at the results you already have; the count does not reset automatically"
+   },
+   "status": 409,
+   "zh": {
+    "impact": "不能再开始新的模拟",
+    "message": "这个空间的 3 次模拟机会已经用完或都在使用中",
+    "next": "查看已有的运行结果；次数不会自动重置"
+   }
+  },
+  "rate_limited": {
+   "en": {
+    "impact": "This request was not carried out",
+    "message": "Too many requests",
+    "next": "Wait a minute and try again"
+   },
+   "status": 429,
+   "zh": {
+    "impact": "这次请求没有被执行",
+    "message": "请求太频繁",
+    "next": "稍等一分钟再试"
+   }
+  },
+  "result_unavailable": {
+   "en": {
+    "impact": "There are no results before the start, after cancelling, while running or when stopped; nothing is made up when there are none",
+    "message": "This run has no progress or results to view right now",
+    "next": "Check this run's status; come back for the results after it ends"
+   },
+   "status": 409,
+   "zh": {
+    "impact": "还没有开始、已经取消、运行中或停下时没有结果；没有就不编一个",
+    "message": "这次运行现在没有可以查看的进度或结果",
+    "next": "查看这次运行的状态；结束后再来看结果"
+   }
+  },
+  "revision_conflict": {
+   "en": {
+    "impact": "This save was not written, and the newer answers were not overwritten",
+    "message": "A newer version of this draft has already been saved elsewhere (for example in another tab)",
+    "next": "Reload the latest draft, make your changes on top of it, then save"
+   },
+   "status": 409,
+   "zh": {
+    "impact": "这次保存没有写入，较新的答案没有被覆盖",
+    "message": "这份草稿已经在别处（例如另一个标签页）保存了更新的版本",
+    "next": "重新读取最新的草稿，在它的基础上修改后再保存"
+   }
+  },
+  "run_options_invalid": {
+   "en": {
+    "impact": "No simulation was prepared and no run was used (field names which option)",
+    "message": "The cities, clones per city, years or cost cap chosen this time are outside what the service allows",
+    "next": "Choose again within the defaults and ranges in the service rules; cities are changed in the draft, followed by a new review and confirmation"
+   },
+   "status": 409,
+   "zh": {
+    "impact": "没有准备模拟，也没有使用次数（field 指出是哪一项）",
+    "message": "这次选的城市、每城分身数、年数或费用上限不在服务允许的范围里",
+    "next": "按服务规则里的默认值与允许范围重新选择；城市要在草稿里改，再重新审阅与确认"
+   }
+  },
+  "run_settings_unavailable": {
+   "en": {
+    "impact": "The system will not continue with the service's current defaults instead; nothing was started and no run was used",
+    "message": "The settings saved for this run, or its copy of the confirmed profile, are missing or damaged",
+    "next": "Cancel this preparation and prepare again; if it keeps happening, contact the maintainer with the support reference"
+   },
+   "status": 409,
+   "zh": {
+    "impact": "系统不会改用服务现在的默认设置继续，没有开始，也没有使用次数",
+    "message": "这次运行保存的设置或确认画像副本缺失、损坏",
+    "next": "取消这次准备后重新准备；问题一直出现时请联系维护者并提供支持编号"
+   }
+  },
+  "unauthenticated": {
+   "en": {
+    "impact": "Nothing in this space can be read or changed",
+    "message": "There is no valid session, or your personal link is no longer valid",
+    "next": "Open your personal link again; if the link was reissued, use the newest one"
+   },
+   "status": 401,
+   "zh": {
+    "impact": "不能读取或修改这个空间里的任何内容",
+    "message": "没有有效的会话，或专属链接已经失效",
+    "next": "重新打开你的专属链接；如果链接被重发过，请使用最新的那一个"
+   }
+  }
+ },
+ "expired_subjects": {
+  "draft": {
+   "en": {
+    "impact": "A draft is kept for the period in the service rules from its last edit, and viewing does not extend it; it can no longer be read, reviewed or confirmed",
+    "message": "This draft is past its retention period",
+    "next": "Start a new draft and fill it in again"
+   },
+   "zh": {
+    "impact": "草稿从最后一次编辑起按服务规则保存，查看不续期；内容已经不能读取、审阅或确认",
+    "message": "这份草稿已经超过保存期限",
+    "next": "新建一份草稿重新填写"
+   }
+  },
+  "intent": {
+   "en": {
+    "impact": "A preparation that is awaiting confirmation, blocked by the pre-run check, paused or queued is kept for the period in the service rules from its last real action, and viewing does not extend it; nothing was started or continued, and no run was used",
+    "message": "This simulation preparation is past its retention period",
+    "next": "Prepare the simulation again if you need it"
+   },
+   "zh": {
+    "impact": "等待确认、检查没通过、暂停或排队的准备从最后一次有效操作起按服务规则保存，查看不续期；没有开始或继续，也没有使用次数",
+    "message": "这次模拟的准备已经超过保存期限",
+    "next": "需要的话重新准备一次模拟"
+   }
+  },
+  "profile": {
+   "en": {
+    "impact": "A confirmed profile can prepare new simulations for the period in the service rules from its first confirmation; confirming again or viewing does not extend it; simulations already prepared use their own copy and deadline and are not affected",
+    "message": "This confirmed profile can no longer be used to prepare new simulations",
+    "next": "Review and confirm a draft that is still within its retention period, or start a new draft"
+   },
+   "zh": {
+    "impact": "确认画像从首次确认起按服务规则可用，重复确认、查看都不续期；已经准备的模拟用自己的副本与期限，不受影响",
+    "message": "这份确认画像已经超过可以准备新模拟的期限",
+    "next": "重新审阅并确认还在保存期内的草稿，或新建草稿"
+   }
+  },
+  "result": {
+   "en": {
+    "impact": "Results are kept for the period in the service rules from the run's first finish, and viewing does not extend it; the content can no longer be viewed",
+    "message": "This run's results are past their retention period",
+    "next": "Prepare a new simulation if you need it"
+   },
+   "zh": {
+    "impact": "结果从运行首次结束起按服务规则保存，查看不续期；内容已经不能查看",
+    "message": "这次运行的结果已经超过保存期限",
+    "next": "需要的话重新准备一次模拟"
+   }
+  },
+  "review": {
+   "en": {
+    "impact": "A review expires together with its draft and can no longer be used to confirm a profile",
+    "message": "The draft this review belongs to is past its retention period",
+    "next": "Start a new draft, fill it in and review it"
+   },
+   "zh": {
+    "impact": "审阅跟着它的草稿一起到期，不能再用来确认画像",
+    "message": "这份审阅所属的草稿已经超过保存期限",
+    "next": "新建一份草稿重新填写并审阅"
+   }
+  }
+ },
+ "note": "固定双语错误目录（E3C 维护业务含义）。动态业务问题以服务回复里的显示附层为准，不要从中文反查"
+}

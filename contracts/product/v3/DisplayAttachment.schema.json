@@ -1,0 +1,167 @@
+{
+ "$defs": {
+  "DisplayField": {
+   "additionalProperties": false,
+   "description": "原消息里一个可展示文字位置的显示文字。``pointer`` 是相对原消息（或原回复）的 JSON Pointer，只指向含中文的业务说明文字——\n不指向数值、权重、编号、动作枚举、秘密，也不指向用户原文（用户原文保持原文，不翻译）。``key`` 是稳定的文案 / 实体键。",
+   "properties": {
+    "key": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Key",
+     "type": "string"
+    },
+    "missing_reason": {
+     "anyOf": [
+      {
+       "enum": [
+        "no_binding",
+        "translation_missing",
+        "translation_stale",
+        "source_changed",
+        "ambiguous",
+        "untranslated_param",
+        "resources_unavailable",
+        "binding_stale"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Missing Reason"
+    },
+    "pointer": {
+     "maxLength": 400,
+     "pattern": "^(/[^/]+)+$",
+     "title": "Pointer",
+     "type": "string"
+    },
+    "resource_version": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Resource Version"
+    },
+    "source_locale": {
+     "enum": [
+      "zh",
+      "en"
+     ],
+     "title": "Source Locale",
+     "type": "string"
+    },
+    "status": {
+     "enum": [
+      "provided",
+      "missing"
+     ],
+     "title": "Status",
+     "type": "string"
+    },
+    "text": {
+     "anyOf": [
+      {
+       "maxLength": 6000,
+       "minLength": 1,
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Text"
+    }
+   },
+   "required": [
+    "pointer",
+    "key",
+    "status",
+    "source_locale"
+   ],
+   "title": "DisplayField",
+   "type": "object"
+  },
+  "DisplayTranslation": {
+   "additionalProperties": false,
+   "properties": {
+    "fields": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/DisplayField"
+     },
+     "title": "Fields",
+     "type": "array"
+    },
+    "status": {
+     "enum": [
+      "complete",
+      "partial",
+      "unavailable"
+     ],
+     "title": "Status",
+     "type": "string"
+    }
+   },
+   "required": [
+    "status"
+   ],
+   "title": "DisplayTranslation",
+   "type": "object"
+  }
+ },
+ "additionalProperties": false,
+ "description": "即时回复（错误、确认结果）的显示附层：这类回复可能没有可以再读的对象，所以随回复一起给中英两种文字。\n``source_view_fingerprint`` 是去掉 ``display`` 之后的原回复的规范 JSON 摘要；``pointer`` 都相对那份原回复。",
+ "properties": {
+  "display_schema_version": {
+   "const": "e3-display-v1",
+   "title": "Display Schema Version",
+   "type": "string"
+  },
+  "resource_version": {
+   "anyOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Resource Version"
+  },
+  "source_view_fingerprint": {
+   "pattern": "^[0-9a-f]{64}$",
+   "title": "Source View Fingerprint",
+   "type": "string"
+  },
+  "translations": {
+   "additionalProperties": {
+    "$ref": "#/$defs/DisplayTranslation"
+   },
+   "propertyNames": {
+    "enum": [
+     "zh",
+     "en"
+    ]
+   },
+   "title": "Translations",
+   "type": "object"
+  }
+ },
+ "required": [
+  "display_schema_version",
+  "source_view_fingerprint",
+  "translations"
+ ],
+ "title": "DisplayAttachment",
+ "type": "object"
+}

@@ -130,7 +130,7 @@ def test_production_cookie_is_host_only_strict_and_docs_are_closed(tmp_path):
     assert cookie.startswith("__Host-hs_session=")
     assert {"httponly", "secure", "path=/", "samesite=strict", "max-age=604800"} <= set(parts)
     assert not any(p.startswith("domain") for p in parts)
-    assert r.headers["cache-control"] == "no-store"
+    assert r.headers["cache-control"] == "private, no-store"  # 私有响应：不进共享缓存
     assert "strict-transport-security" in r.headers
     # 会话秘密不在响应正文里；CSRF token 是另一个值
     body = r.text
@@ -253,9 +253,18 @@ def test_errors_are_safe_and_never_echo_the_input(tmp_path):
         "support_ref",
         "retry_after_seconds",
         "field",
+        "display",
         "meta",
         "sample",
     }
+    # 显示附层也只有固定目录里的三段说明（中英），不带用户输入
+    texts = {
+        f["text"]
+        for tr in body["display"]["translations"].values()
+        for f in tr["fields"]
+        if f["text"]
+    }
+    assert body["message_zh"] in texts and not any("SECRET-MARKER" in x for x in texts)
     r = b.get("/no-such-thing")
     assert r.status_code == 404 and r.json()["code"] == "not_found"
 

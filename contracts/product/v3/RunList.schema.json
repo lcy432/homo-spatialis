@@ -253,6 +253,16 @@
      "default": null,
      "title": "Expires At"
     },
+    "expiry_basis": {
+     "enum": [
+      "intent_activity",
+      "first_finished",
+      "active_execution",
+      "unavailable"
+     ],
+     "title": "Expiry Basis",
+     "type": "string"
+    },
     "finished_at": {
      "anyOf": [
       {
@@ -325,7 +335,8 @@
     "stage",
     "stage_zh",
     "result_available",
-    "created_at"
+    "created_at",
+    "expiry_basis"
    ],
    "title": "RunSummary",
    "type": "object"

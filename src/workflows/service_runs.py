@@ -41,6 +41,7 @@ from orchestration.life_runner import (
     preflight_from_snapshot,
 )
 from product.bridge import cost_status, progress
+from product.display.document import binding_document, capture
 from product.execution import ExecutionSpec, service_pack
 from product.service.actions import ServiceContext
 from product.workspace import prepare_workspace, verify_snapshot
@@ -226,13 +227,23 @@ class RunDir:
     ) -> RunProgress | None:
         """白名单进度快照。``resumable`` 是服务端的恢复许可（``resume_state``），公开进度与按钮用同一个结论；``running_now``
         表示监测线程在运行进行中写（见 ``product.bridge.progress``）。"""
+        found = self.progress_with_display(
+            run_id, updated_at, resumable=resumable, running_now=running_now
+        )
+        return None if found is None else found[0]
+
+    def progress_with_display(
+        self, run_id: str, updated_at: str, *, resumable: bool = False, running_now: bool = False
+    ) -> tuple[RunProgress, dict[str, Any]] | None:
+        """进度快照与它的显示绑定（同一次生成里记下的文字）。"""
         run_dir = self.archive(run_id)
         if not (run_dir / "progress.json").is_file():
             return None
         req = self.saved_request()
         assert req.execution is not None
         pack = service_pack(self.ws_root / req.pack_path, req.execution)
-        return progress(
+        snap, rec = capture(
+            progress,
             pack,
             run_dir,
             execution=req.execution,
@@ -241,6 +252,17 @@ class RunDir:
             resumable=resumable,
             running_now=running_now,
         )
+        return snap, binding_document(
+            snap.model_dump(mode="json"), rec, pack_fingerprint=pack.fingerprint
+        )
+
+    def display_doc(self, name: str) -> str | None:
+        """适配器写下的显示绑定（``preflight-<身份前 16 位>`` / ``result-<运行编号>``）；没有就是 ``None``（显示为缺失，不在读取时补）。"""
+        path = self.ws_root / "workflow" / "display" / f"{name}.json"
+        try:
+            return json.dumps(json.loads(path.read_text(encoding="utf-8")), ensure_ascii=False)
+        except (OSError, ValueError):
+            return None
 
     def resume_state(self, run_id: str) -> tuple[bool, str | None]:
         """这次运行停下之后，用户点“恢复”能不能真的继续（只读：读 E1 的进度、请求明细与这次运行的账本，不调用规划器、不写文件）。

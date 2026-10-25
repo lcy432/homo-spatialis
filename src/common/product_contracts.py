@@ -1772,6 +1772,10 @@ ServiceStage = Literal[
 ]
 #: 现在在等谁：用户（确认、修改条件）、维护者（不确定的发送、身份冲突、需要人工核对）、服务（排队检查、模拟进行中）或谁都不等。
 WaitingFor = Literal["user", "maintainer", "service", "none"]
+#: 公开的保存期限按什么算（E3C 接口补齐）：``intent_activity`` 最后一次有效业务操作起（等待、暂停、排队、检查没通过、取消）；
+#: ``first_finished`` 首次结束起（有结果）；``active_execution`` 正在执行，这个阶段不给固定截止时间（执行中的保护规则不变）；
+#: ``unavailable`` 已删除、删除中或已过期，没有可用期限。查看、轮询、切换语言都不续期。
+ExpiryBasis = Literal["intent_activity", "first_finished", "active_execution", "unavailable"]
 #: 服务端此刻允许的操作。前端只显示这里列出的按钮。
 IntentAction = Literal[
     "submit", "cancel", "resume", "delete", "view_progress", "view_result", "create_new_intent"
@@ -1944,21 +1948,125 @@ class ProfileConfirmRequest(ProductModel):
     acknowledged: tuple[Annotated[str, Field(min_length=1, max_length=160)], ...] = ()
 
 
+# ==========================================================================
+# 显示附层（e3-display-v1）：独立于业务消息的中英显示文字。原消息、内容身份与确认令牌都不变；页面的数字、权限与身份
+# 永远取原消息，显示字段只换文字。
+# ==========================================================================
+
+DISPLAY_SCHEMA_VERSION = "e3-display-v1"
+DisplayLocale = Literal["zh", "en"]
+DisplayStatus = Literal["complete", "partial", "unavailable"]
+#: 一个显示位置为什么没有这种语言的文字（不猜、不拿中文反查英文）
+DisplayMissingReason = Literal[
+    "no_binding",
+    "translation_missing",
+    "translation_stale",
+    "source_changed",
+    "ambiguous",
+    "untranslated_param",
+    "resources_unavailable",
+    "binding_stale",
+]
+
+
+class DisplayField(ProductModel):
+    """原消息里一个可展示文字位置的显示文字。``pointer`` 是相对原消息（或原回复）的 JSON Pointer，只指向含中文的业务说明文字——
+    不指向数值、权重、编号、动作枚举、秘密，也不指向用户原文（用户原文保持原文，不翻译）。``key`` 是稳定的文案 / 实体键。"""
+
+    pointer: Annotated[str, Field(pattern=r"^(/[^/]+)+$", max_length=400)]
+    key: Annotated[str, Field(min_length=1, max_length=300)]
+    status: Literal["provided", "missing"]
+    text: Annotated[str, Field(min_length=1, max_length=6000)] | None = None
+    source_locale: DisplayLocale
+    missing_reason: DisplayMissingReason | None = None
+    #: 这一条用的资源版本与外层不同时写明（例如内嵌的旧预检查）
+    resource_version: str | None = None
+
+    @model_validator(mode="after")
+    def _shape(self) -> DisplayField:
+        if (self.status == "provided") != (self.text is not None):
+            raise ValueError("provided 才有文字")
+        if (self.status == "missing") != (self.missing_reason is not None):
+            raise ValueError("missing 必须写原因")
+        return self
+
+
+class DisplayTranslation(ProductModel):
+    status: DisplayStatus
+    fields: tuple[DisplayField, ...] = ()
+
+
+class DisplayAttachment(ProductModel):
+    """即时回复（错误、确认结果）的显示附层：这类回复可能没有可以再读的对象，所以随回复一起给中英两种文字。
+    ``source_view_fingerprint`` 是去掉 ``display`` 之后的原回复的规范 JSON 摘要；``pointer`` 都相对那份原回复。"""
+
+    display_schema_version: Literal["e3-display-v1"]
+    resource_version: str | None = None
+    source_view_fingerprint: Sha256
+    translations: dict[DisplayLocale, DisplayTranslation]
+
+    @model_validator(mode="after")
+    def _both(self) -> DisplayAttachment:
+        if set(self.translations) != {"zh", "en"}:
+            raise ValueError("中英两种都要给（缺的写明 missing）")
+        return self
+
+
+class LocalizedText(ProductModel):
+    """一段中英对照的显示文字；没有英文时 ``en`` 为空（页面显示中文原文并标明英文缺失）。"""
+
+    zh: str = Field(min_length=1, max_length=2000)
+    en: Annotated[str, Field(min_length=1, max_length=4000)] | None = None
+
+
+class ConfirmedProfileSummary(ProductModel):
+    """一份确认画像的服务端摘要（E3C 接口补齐）：首次确认时间与可以用来准备新模拟的截止时间都读服务库，重复确认、查询都不续期。
+    它不是确认画像本体的一部分，不进入画像的内容身份；画像到期只影响准备新的模拟，已经准备的意图用自己的副本与期限。"""
+
+    confirmed_id: RefStr
+    content_fingerprint: Sha256
+    draft_id: RefStr
+    draft_revision: Annotated[int, Field(ge=1)]
+    first_confirmed_at: UtcTime
+    expires_at: UtcTime
+
+
 class ProfileConfirmReply(ProductModel):
-    """确认的结果：成功时是服务端生成的确认画像；被拒时列出原因（草稿改过、知悉项缺失、审阅过时……）。"""
+    """确认的结果：成功时是服务端生成的确认画像与它的服务端摘要（首次确认与截止时间）；被拒时列出原因（草稿改过、知悉项缺失、
+    审阅过时……），摘要为空。"""
 
     meta: ProductMeta
     status: Literal["confirmed", "refused"]
     confirmed: ConfirmedProfile | None = None
     issues: tuple[ProductIssue, ...] = ()
+    profile_summary: ConfirmedProfileSummary | None = None
+    #: 显示附层（中英文字；确认被拒时可能没有可以再读的对象）
+    display: DisplayAttachment | None = None
 
     @model_validator(mode="after")
     def _shape(self) -> ProfileConfirmReply:
         if (self.status == "confirmed") != (self.confirmed is not None):
             raise ValueError("只有 confirmed 带确认画像")
+        if (self.status == "confirmed") != (self.profile_summary is not None):
+            raise ValueError("只有 confirmed 带画像摘要")
         if self.status == "refused" and not self.issues:
             raise ValueError("被拒时必须写原因")
         return self
+
+
+class ConfirmedProfileView(ProductModel):
+    """读取本人的一份确认画像（``GET /api/v1/profiles/{confirmed_id}``）：服务端摘要（日期）与原确认画像。"""
+
+    meta: ProductMeta
+    summary: ConfirmedProfileSummary
+    confirmed: ConfirmedProfile
+
+
+class ProfileList(ProductModel):
+    """本人还能用来准备新模拟的确认画像摘要（``GET /api/v1/profiles``），新的在前；已删除、已过期的不列出。"""
+
+    meta: ProductMeta
+    profiles: tuple[ConfirmedProfileSummary, ...] = ()
 
 
 class RunIntentCreateRequest(ProductModel):
@@ -1998,7 +2106,9 @@ class RunIntentView(ProductModel):
     allowed_actions: tuple[IntentAction, ...] = ()
     created_at: UtcTime
     updated_at: UtcTime
+    #: 当前阶段实际适用的保存截止时间（与服务端期限判断同一条规则）；``expiry_basis`` 说明按什么算，没有固定截止时间时为空
     expires_at: UtcTime | None = None
+    expiry_basis: ExpiryBasis
     deletion: DeletionState
     explanation: PublicExplanation | None = None
     support_ref: SupportRef | None = None
@@ -2033,6 +2143,7 @@ class RunSummary(ProductModel):
     created_at: UtcTime
     finished_at: UtcTime | None = None
     expires_at: UtcTime | None = None
+    expiry_basis: ExpiryBasis
     settings: RunSettingsView | None = None
 
 
@@ -2066,6 +2177,7 @@ ServiceErrorCode = Literal[
     "idempotency_conflict",
     "intent_conflict",
     "not_resumable",
+    "cancel_not_allowed",
     "result_unavailable",
     "deleting",
     "deleted",
@@ -2097,7 +2209,157 @@ class ServiceError(ProductModel):
     retry_after_seconds: Annotated[int, Field(ge=1)] | None = None
     #: 哪个选项不行（``run_options_invalid`` 时写 ``clones_per_city`` / ``years`` / ``max_cost_cny`` / ``cities``；不回显用户填的值）
     field: Literal["clones_per_city", "years", "max_cost_cny", "cities"] | None = None
+    #: 显示附层：三段说明的中英文（固定双语目录生成；未登录时也有）
+    display: DisplayAttachment | None = None
     sample: SampleLabel | None = None
+
+
+# ---------------------------------------------------------------------- 显示出口（GET /api/v1/display、/display/geography）
+
+DisplayKind = Literal[
+    "capabilities", "session", "draft", "review", "profile", "intent", "progress", "result", "runs"
+]
+#: 每种显示对象对应的原公共消息
+DISPLAY_SOURCES: dict[str, type[ProductModel]] = {
+    "capabilities": ProductCapabilities,
+    "session": SessionView,
+    "draft": DraftView,
+    "review": ReviewReply,
+    "profile": ConfirmedProfileView,
+    "intent": RunIntentView,
+    "progress": RunProgress,
+    "result": ProductResult,
+    "runs": RunList,
+}
+
+
+class MetricDisplaySpec(ProductModel):
+    """结果色阶的显示约定：只声明已有分数的显示域与读法，不计算新分数、不公开评分系数。``mean_j`` 是同一城市“完成且评价完整”
+    分身的 J 的算术平均，当前评价规则下有效值在 [0, 1]；同一结果里所有国家、两种地图共用这一固定尺度，不按国家或城市重新拉伸。"""
+
+    key: Literal["mean_j"]
+    minimum: Literal["0"]
+    maximum: Literal["1"]
+    unit: Literal["model_score"]
+    direction: Literal["higher_model_evaluation"]
+    denominator_field: Literal["mean_denominator"]
+    comparison_scope: Literal["within_result_only"]
+    #: 这份结果绑定的协议、评分与评价（公开引用，不是参数）
+    evaluation_refs: tuple[str, ...] = ()
+    notes: tuple[LocalizedText, ...] = ()
+
+
+DisplaySource = (
+    ProductCapabilities
+    | SessionView
+    | DraftView
+    | ReviewReply
+    | ConfirmedProfileView
+    | RunIntentView
+    | RunProgress
+    | ProductResult
+    | RunList
+)
+
+
+class DisplayEnvelope(ProductModel):
+    """一次显示读取（``GET /api/v1/display``）：原公共消息 ``source`` 与它的显示文字同次返回（避免进度更新后错配旧翻译）。页面把
+    ``source`` 当作原业务消息使用，``fields`` 只用来换文字；数字、权限与身份永远取 ``source``。读取只鉴权、读取与纯函数渲染：
+    不保存答案、不预检查、不恢复、不重放、不调用模型。"""
+
+    display_schema_version: Literal["e3-display-v1"]
+    kind: DisplayKind
+    id: str | None = Field(default=None, max_length=128)
+    source: DisplaySource
+    source_view_fingerprint: Sha256
+    locale: DisplayLocale
+    resource_version: str | None = None
+    status: DisplayStatus
+    fields: tuple[DisplayField, ...] = ()
+    metrics: tuple[MetricDisplaySpec, ...] = ()
+
+    @model_validator(mode="after")
+    def _shape(self) -> DisplayEnvelope:
+        if not isinstance(self.source, DISPLAY_SOURCES[self.kind]):
+            raise ValueError(f"{self.kind} 的原消息必须是 {DISPLAY_SOURCES[self.kind].__name__}")
+        if (self.id is None) != (self.kind in ("capabilities", "session", "runs")):
+            raise ValueError("capabilities / session / runs 不带编号，其他种类必须带")
+        return self
+
+
+class GeographyNames(ProductModel):
+    official: str = Field(min_length=1, max_length=200)
+    short: str = Field(min_length=1, max_length=80)
+
+
+class LocalizedNames(ProductModel):
+    zh: GeographyNames
+    en: GeographyNames | None = None
+
+
+class GeographyAnchor(ProductModel):
+    """城市的显示锚点：都会区的代表点，不是住宅、主城市中心或都会区边界。经纬度是具名字段（度），坐标系写明。"""
+
+    latitude: Annotated[float, Field(ge=-90, le=90)]
+    longitude: Annotated[float, Field(ge=-180, le=180)]
+    crs: Literal["EPSG:4326"]
+    kind: Literal["principal_city_point", "metro_internal_point"]
+    source_refs: tuple[str, ...] = Field(min_length=1)
+
+
+class SupportScope(ProductModel):
+    """模拟实际支持的居住与工作范围（来自资料包），与都会区本身、资料覆盖范围不一定相同。"""
+
+    ref: str = Field(min_length=1, max_length=120)
+    version: str = Field(min_length=1, max_length=80)
+    residence: LocalizedText
+    work: LocalizedText
+    note: LocalizedText
+
+
+class CityGeography(ProductModel):
+    city_ref: RefStr
+    country: Annotated[str, Field(pattern=r"^[A-Z]{2}$")]
+    scheme: str = Field(min_length=1, max_length=40)
+    code: str = Field(min_length=1, max_length=40)
+    geography_version: str = Field(min_length=1, max_length=80)
+    country_names: LocalizedText
+    names: LocalizedNames
+    model_kind: Literal["real", "synthetic"]
+    anchor_status: Literal["available", "unknown", "not_applicable"]
+    anchor: GeographyAnchor | None = None
+    support_scope: SupportScope
+    coverage_note: LocalizedText
+
+    @model_validator(mode="after")
+    def _anchor(self) -> CityGeography:
+        if (self.anchor_status == "available") != (self.anchor is not None):
+            raise ValueError("只有 available 带锚点")
+        if self.model_kind == "synthetic" and self.anchor_status != "not_applicable":
+            raise ValueError("合成城市没有现实位置")
+        return self
+
+
+class GeographySource(ProductModel):
+    source_ref: str = Field(min_length=1, max_length=120)
+    publisher: str = Field(min_length=1, max_length=200)
+    dataset: str = Field(min_length=1, max_length=300)
+    version: str = Field(min_length=1, max_length=80)
+    public_url: str = Field(min_length=1, max_length=400)
+    content_sha256: Sha256 | None = None
+
+
+class GeographyDisplayBundle(ProductModel):
+    """一个资料包、一个显示资源版本的地理显示清单（``GET /api/v1/display/geography``）。地图底图、投影、纹理与标签由页面负责；
+    这份清单不授予运行资格（能选哪些城市仍由能力清单与服务规则决定），缺少可靠坐标的城市锚点为空、仍可从列表访问。"""
+
+    display_schema_version: Literal["e3-display-v1"]
+    resource_version: str
+    pack_fingerprint: Sha256
+    status: DisplayStatus
+    cities: tuple[CityGeography, ...] = ()
+    sources: tuple[GeographySource, ...] = ()
+    notes: tuple[LocalizedText, ...] = ()
 
 
 #: 消息名 → 类。``scripts/product_e3a.py export-schema`` 按这份清单导出，``check-schema`` 按它核对。
@@ -2129,6 +2391,11 @@ PRODUCT_MESSAGES: dict[str, type[ProductModel]] = {
     "RunSubmitRequest": RunSubmitRequest,
     "RunSubmitReply": RunSubmitReply,
     "RunList": RunList,
+    "ConfirmedProfileView": ConfirmedProfileView,
+    "ProfileList": ProfileList,
+    "DisplayEnvelope": DisplayEnvelope,
+    "DisplayAttachment": DisplayAttachment,
+    "GeographyDisplayBundle": GeographyDisplayBundle,
     "DeletionReceipt": DeletionReceipt,
     "ServiceError": ServiceError,
 }

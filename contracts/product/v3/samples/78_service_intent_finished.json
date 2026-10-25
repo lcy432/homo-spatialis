@@ -20,6 +20,7 @@
    "state": "none"
   },
   "expires_at": "2026-11-23T09:00:00Z",
+  "expiry_basis": "first_finished",
   "explanation": null,
   "intent_id": "intent-0000000000000006",
   "meta": {

@@ -1,0 +1,405 @@
+{
+ "description_zh": "缺坐标（受控夹具：这一版地理资源里芝加哥没有可靠的代表点）：anchor_status = unknown、anchor = null，清单 status = partial；城市仍在列表里、照常可选（地理清单不决定运行资格），页面不要用别的点代替，也不要画在地图上",
+ "message": "GeographyDisplayBundle",
+ "payload": {
+  "cities": [
+   {
+    "anchor": {
+     "crs": "EPSG:4326",
+     "kind": "metro_internal_point",
+     "latitude": 40.735425,
+     "longitude": -73.80773,
+     "source_refs": [
+      "census.gazetteer.2024.cbsa",
+      "census.tiger.2024.cbsa",
+      "census.tiger.2024.datum",
+      "epsg.1188"
+     ]
+    },
+    "anchor_status": "available",
+    "city_ref": "US:CBSA2023:35620",
+    "code": "35620",
+    "country": "US",
+    "country_names": {
+     "en": "United States",
+     "zh": "美国"
+    },
+    "coverage_note": {
+     "en": "The map point is computed for the whole New York metro area, including its New Jersey part; it is not the centre of the five boroughs. Individual data sources may cover a different area than the metro area or the supported scope; see each run's data nature and scope notes.",
+     "zh": "地图点按整个纽约都会区计算（含新泽西州部分），不是纽约市五区的中心。各项资料的覆盖范围不一定与都会区或支持范围相同，以每次运行的资料性质与范围说明为准。"
+    },
+    "geography_version": "CBSA2023 / PUMA2020",
+    "model_kind": "real",
+    "names": {
+     "en": {
+      "official": "New York-Newark-Jersey City, NY-NJ Metro Area",
+      "short": "New York"
+     },
+     "zh": {
+      "official": "纽约-纽瓦克-泽西城都会区（纽约州、新泽西州）",
+      "short": "纽约"
+     }
+    },
+    "scheme": "CBSA2023",
+    "support_scope": {
+     "note": {
+      "en": "The scope follows the pack's tax rules (tax.us2024.nyc): multi-state taxes and rules for non-NYC residents are not modelled.",
+      "zh": "范围按资料包的税务规则 tax.us2024.nyc 裁剪：跨州税与非纽约市居民的规则没有建模。"
+     },
+     "ref": "tax.us2024.nyc",
+     "residence": {
+      "en": "Only residents of the five New York City boroughs are supported: Bronx, Kings, New York, Queens and Richmond counties. Residents of the New Jersey part of the metro area or of other New York State counties are not supported. Home areas are 55 PUMAs (2020 definitions) within this scope; they are data units, not neighbourhoods.",
+      "zh": "只支持纽约市五个区的居民：Bronx、Kings、New York、Queens、Richmond 县；都会区的新泽西州部分与纽约州其他县的居民不支持。居住片区是其中的 55 个 2020 年 PUMA（资料的地理单位，不是街区）。"
+     },
+     "version": "pack.e3b.us-v1",
+     "work": {
+      "en": "Places of work must be in New York State; work areas in New Jersey or Pennsylvania are not supported. Work areas: New York County, Kings County, Queens County, Suffolk County, Nassau County, Bronx County, Westchester County, Richmond County, Rockland County.",
+      "zh": "工作地只在纽约州境内，新泽西、宾州的就业片区不支持。就业片区：New York County、Kings County、Queens County、Suffolk County、Nassau County、Bronx County、Westchester County、Richmond County、Rockland County。"
+     }
+    }
+   },
+   {
+    "anchor": {
+     "crs": "EPSG:4326",
+     "kind": "metro_internal_point",
+     "latitude": 34.108703,
+     "longitude": -118.182753,
+     "source_refs": [
+      "census.gazetteer.2024.cbsa",
+      "census.tiger.2024.cbsa",
+      "census.tiger.2024.datum",
+      "epsg.1188"
+     ]
+    },
+    "anchor_status": "available",
+    "city_ref": "US:CBSA2023:31080",
+    "code": "31080",
+    "country": "US",
+    "country_names": {
+     "en": "United States",
+     "zh": "美国"
+    },
+    "coverage_note": {
+     "en": "The map point is computed for the whole Los Angeles metro area; it is not downtown Los Angeles. Individual data sources may cover a different area than the metro area or the supported scope; see each run's data nature and scope notes.",
+     "zh": "地图点按整个洛杉矶都会区计算，不是洛杉矶市中心。各项资料的覆盖范围不一定与都会区或支持范围相同，以每次运行的资料性质与范围说明为准。"
+    },
+    "geography_version": "CBSA2023 / PUMA2020",
+    "model_kind": "real",
+    "names": {
+     "en": {
+      "official": "Los Angeles-Long Beach-Anaheim, CA Metro Area",
+      "short": "Los Angeles"
+     },
+     "zh": {
+      "official": "洛杉矶-长滩-阿纳海姆都会区（加利福尼亚州）",
+      "short": "洛杉矶"
+     }
+    },
+    "scheme": "CBSA2023",
+    "support_scope": {
+     "note": {
+      "en": "The scope follows the pack's tax rules (tax.us2024.ca): California residents working in California.",
+      "zh": "范围按资料包的税务规则 tax.us2024.ca：加州居民、工作地在加州。"
+     },
+     "ref": "tax.us2024.ca",
+     "residence": {
+      "en": "California residents of the metro area are supported (the metro area is entirely in California). Home areas are 91 PUMAs (2020 definitions) within this scope; they are data units, not neighbourhoods.",
+      "zh": "支持都会区内的加州居民（都会区全部在加州）。居住片区是其中的 91 个 2020 年 PUMA（资料的地理单位，不是街区）。"
+     },
+     "version": "pack.e3b.us-v1",
+     "work": {
+      "en": "Places of work are in California. Work areas: Los Angeles County, Orange County.",
+      "zh": "工作地在加州。就业片区：Los Angeles County、Orange County。"
+     }
+    }
+   },
+   {
+    "anchor": {
+     "crs": "EPSG:4326",
+     "kind": "metro_internal_point",
+     "latitude": 37.773718,
+     "longitude": -122.274432,
+     "source_refs": [
+      "census.gazetteer.2024.cbsa",
+      "census.tiger.2024.cbsa",
+      "census.tiger.2024.datum",
+      "epsg.1188"
+     ]
+    },
+    "anchor_status": "available",
+    "city_ref": "US:CBSA2023:41860",
+    "code": "41860",
+    "country": "US",
+    "country_names": {
+     "en": "United States",
+     "zh": "美国"
+    },
+    "coverage_note": {
+     "en": "The map point is computed for the whole San Francisco metro area; it is not downtown San Francisco, and the metro area does not include San Jose. Individual data sources may cover a different area than the metro area or the supported scope; see each run's data nature and scope notes.",
+     "zh": "地图点按整个旧金山都会区计算，不是旧金山市中心；都会区不含圣何塞。各项资料的覆盖范围不一定与都会区或支持范围相同，以每次运行的资料性质与范围说明为准。"
+    },
+    "geography_version": "CBSA2023 / PUMA2020",
+    "model_kind": "real",
+    "names": {
+     "en": {
+      "official": "San Francisco-Oakland-Fremont, CA Metro Area",
+      "short": "San Francisco"
+     },
+     "zh": {
+      "official": "旧金山-奥克兰-弗里蒙特都会区（加利福尼亚州）",
+      "short": "旧金山"
+     }
+    },
+    "scheme": "CBSA2023",
+    "support_scope": {
+     "note": {
+      "en": "The scope follows the pack's tax rules (tax.us2024.ca): California residents working in California. \"San Francisco\" here means this metro area, not the whole Bay Area.",
+      "zh": "范围按资料包的税务规则 tax.us2024.ca：加州居民、工作地在加州。这里的“旧金山”指这个都会区，不是整个湾区。"
+     },
+     "ref": "tax.us2024.ca",
+     "residence": {
+      "en": "California residents of the metro area are supported (its five counties are all in California). San Jose is not in this metro area: it belongs to a separate one (San Jose-Sunnyvale-Santa Clara, CBSA 41940) that is not supported. Home areas are 39 PUMAs (2020 definitions) within this scope; they are data units, not neighbourhoods.",
+      "zh": "支持都会区内的加州居民（都会区的 5 个县全部在加州）。圣何塞不在这个都会区里：它属于另一个都会区（San Jose-Sunnyvale-Santa Clara，CBSA 41940），不支持。居住片区是其中的 39 个 2020 年 PUMA（资料的地理单位，不是街区）。"
+     },
+     "version": "pack.e3b.us-v1",
+     "work": {
+      "en": "Places of work are in California; Santa Clara County, where San Jose is, is not one of the work areas. Work areas: Alameda County, San Francisco County, San Mateo County, Contra Costa County, Marin County.",
+      "zh": "工作地在加州；圣何塞所在的 Santa Clara County 不在就业片区里。就业片区：Alameda County、San Francisco County、San Mateo County、Contra Costa County、Marin County。"
+     }
+    }
+   },
+   {
+    "anchor": null,
+    "anchor_status": "unknown",
+    "city_ref": "US:CBSA2023:16980",
+    "code": "16980",
+    "country": "US",
+    "country_names": {
+     "en": "United States",
+     "zh": "美国"
+    },
+    "coverage_note": {
+     "en": "The map point is computed for the whole Chicago metro area, including its Indiana counties; it is not downtown Chicago. Individual data sources may cover a different area than the metro area or the supported scope; see each run's data nature and scope notes.",
+     "zh": "地图点按整个芝加哥都会区计算（含印第安纳州的县），不是芝加哥市中心。各项资料的覆盖范围不一定与都会区或支持范围相同，以每次运行的资料性质与范围说明为准。"
+    },
+    "geography_version": "CBSA2023 / PUMA2020",
+    "model_kind": "real",
+    "names": {
+     "en": {
+      "official": "Chicago-Naperville-Elgin, IL-IN Metro Area",
+      "short": "Chicago"
+     },
+     "zh": {
+      "official": "芝加哥-内珀维尔-埃尔金都会区（伊利诺伊州、印第安纳州）",
+      "short": "芝加哥"
+     }
+    },
+    "scheme": "CBSA2023",
+    "support_scope": {
+     "note": {
+      "en": "The scope follows the pack's tax rules (tax.us2024.il): home and work are both in Illinois.",
+      "zh": "范围按资料包的税务规则 tax.us2024.il 裁剪：居住地与工作地都在伊利诺伊州。"
+     },
+     "ref": "tax.us2024.il",
+     "residence": {
+      "en": "Only the Illinois part of the metro area is supported; its four Indiana counties are not. Home areas are 60 PUMAs (2020 definitions) within this scope; they are data units, not neighbourhoods.",
+      "zh": "只支持都会区的伊利诺伊州部分；都会区里印第安纳州的 4 个县不支持。居住片区是其中的 60 个 2020 年 PUMA（资料的地理单位，不是街区）。"
+     },
+     "version": "pack.e3b.us-v1",
+     "work": {
+      "en": "Places of work must also be in Illinois. Work areas: Cook County, DuPage County, Lake County, Will County, Kane County, McHenry County, Kendall County.",
+      "zh": "工作地也只在伊利诺伊州。就业片区：Cook County、DuPage County、Lake County、Will County、Kane County、McHenry County、Kendall County。"
+     }
+    }
+   },
+   {
+    "anchor": {
+     "crs": "EPSG:4326",
+     "kind": "metro_internal_point",
+     "latitude": 29.801005,
+     "longitude": -95.34262,
+     "source_refs": [
+      "census.gazetteer.2024.cbsa",
+      "census.tiger.2024.cbsa",
+      "census.tiger.2024.datum",
+      "epsg.1188"
+     ]
+    },
+    "anchor_status": "available",
+    "city_ref": "US:CBSA2023:26420",
+    "code": "26420",
+    "country": "US",
+    "country_names": {
+     "en": "United States",
+     "zh": "美国"
+    },
+    "coverage_note": {
+     "en": "The map point is computed for the whole Houston metro area; it is not downtown Houston. Individual data sources may cover a different area than the metro area or the supported scope; see each run's data nature and scope notes.",
+     "zh": "地图点按整个休斯敦都会区计算，不是休斯敦市中心。各项资料的覆盖范围不一定与都会区或支持范围相同，以每次运行的资料性质与范围说明为准。"
+    },
+    "geography_version": "CBSA2023 / PUMA2020",
+    "model_kind": "real",
+    "names": {
+     "en": {
+      "official": "Houston-Pasadena-The Woodlands, TX Metro Area",
+      "short": "Houston"
+     },
+     "zh": {
+      "official": "休斯敦-帕萨迪纳-伍德兰兹都会区（得克萨斯州）",
+      "short": "休斯敦"
+     }
+    },
+    "scheme": "CBSA2023",
+    "support_scope": {
+     "note": {
+      "en": "The scope follows the pack's tax rules (tax.us2024.tx): Texas residents working in Texas.",
+      "zh": "范围按资料包的税务规则 tax.us2024.tx：德州居民、工作地在德州。"
+     },
+     "ref": "tax.us2024.tx",
+     "residence": {
+      "en": "Texas residents of the metro area are supported (the metro area is entirely in Texas). Home areas are 55 PUMAs (2020 definitions) within this scope; they are data units, not neighbourhoods.",
+      "zh": "支持都会区内的德州居民（都会区全部在德州）。居住片区是其中的 55 个 2020 年 PUMA（资料的地理单位，不是街区）。"
+     },
+     "version": "pack.e3b.us-v1",
+     "work": {
+      "en": "Places of work are in Texas. Work areas: Harris County, Montgomery County, Fort Bend County, Brazoria County, Galveston County, Chambers County, Liberty County.",
+      "zh": "工作地在德州。就业片区：Harris County、Montgomery County、Fort Bend County、Brazoria County、Galveston County、Chambers County、Liberty County。"
+     }
+    }
+   },
+   {
+    "anchor": {
+     "crs": "EPSG:4326",
+     "kind": "metro_internal_point",
+     "latitude": 47.490552,
+     "longitude": -121.833977,
+     "source_refs": [
+      "census.gazetteer.2024.cbsa",
+      "census.tiger.2024.cbsa",
+      "census.tiger.2024.datum",
+      "epsg.1188"
+     ]
+    },
+    "anchor_status": "available",
+    "city_ref": "US:CBSA2023:42660",
+    "code": "42660",
+    "country": "US",
+    "country_names": {
+     "en": "United States",
+     "zh": "美国"
+    },
+    "coverage_note": {
+     "en": "The map point is computed for the whole Seattle metro area; it is not downtown Seattle, and because the metro area is large the point can be far from the city. Individual data sources may cover a different area than the metro area or the supported scope; see each run's data nature and scope notes.",
+     "zh": "地图点按整个西雅图都会区计算，不是西雅图市中心；都会区面积大，点可能离市区较远。各项资料的覆盖范围不一定与都会区或支持范围相同，以每次运行的资料性质与范围说明为准。"
+    },
+    "geography_version": "CBSA2023 / PUMA2020",
+    "model_kind": "real",
+    "names": {
+     "en": {
+      "official": "Seattle-Tacoma-Bellevue, WA Metro Area",
+      "short": "Seattle"
+     },
+     "zh": {
+      "official": "西雅图-塔科马-贝尔维尤都会区（华盛顿州）",
+      "short": "西雅图"
+     }
+    },
+    "scheme": "CBSA2023",
+    "support_scope": {
+     "note": {
+      "en": "The scope follows the pack's tax rules (tax.us2024.wa): Washington State residents working in Washington State.",
+      "zh": "范围按资料包的税务规则 tax.us2024.wa：华盛顿州居民、工作地在华盛顿州。"
+     },
+     "ref": "tax.us2024.wa",
+     "residence": {
+      "en": "Washington State residents of the metro area are supported (the metro area is entirely in Washington State). Home areas are 32 PUMAs (2020 definitions) within this scope; they are data units, not neighbourhoods.",
+      "zh": "支持都会区内的华盛顿州居民（都会区全部在华盛顿州）。居住片区是其中的 32 个 2020 年 PUMA（资料的地理单位，不是街区）。"
+     },
+     "version": "pack.e3b.us-v1",
+     "work": {
+      "en": "Places of work are in Washington State. Work areas: King County, Pierce County, Snohomish County.",
+      "zh": "工作地在华盛顿州。就业片区：King County、Pierce County、Snohomish County。"
+     }
+    }
+   }
+  ],
+  "display_schema_version": "e3-display-v1",
+  "notes": [
+   {
+    "en": "Anchor coordinates are INTPTLAT / INTPTLONG (decimal degrees) from the Census 2024 Gazetteer CBSA file. The Gazetteer record layout does not restate a datum; the same internal points appear in the official 2024 TIGER/Line CBSA file (7 decimals, equal to the Gazetteer values when rounded to 6), whose coordinate system is NAD83 (.prj GCS_North_American_1983, also stated in section 3.3.3 of the TIGER/Line technical documentation), so the original datum is NAD83. They are published as WGS 84 (EPSG:4326) through EPSG transformation 1188, \"NAD83 to WGS 84 (1)\": all three translations are zero and its accuracy is about 4 m, so the numbers are unchanged. An error of that size does not matter for a metro-area representative point.",
+    "zh": "锚点坐标取自 Census 2024 Gazetteer CBSA 文件的 INTPTLAT / INTPTLONG（十进制度）。Gazetteer 的记录格式没有另写基准；同一批内部点在官方 TIGER/Line 2024 CBSA 文件里也有（七位小数，四舍五入到六位与 Gazetteer 相同），那份文件的坐标系是 NAD83（.prj 为 GCS_North_American_1983，技术文档 3.3.3 节也这样写），所以原始基准是 NAD83。发布为 WGS 84（EPSG:4326）时用 EPSG 登记的 1188 号转换“NAD83 to WGS 84 (1)”：三个平移量都是 0，精度约 4 米，所以数值原样不变；这样的误差对都会区代表点没有影响。"
+   },
+   {
+    "en": "City geography follows the CBSA 2023 delineation (OMB, July 2023, Bulletin No. 23-01). All 935 CBSAs in the 2024 Gazetteer CBSA file have the same codes and titles as the July 2023 delineation file used by the pack.",
+    "zh": "城市地理按 CBSA 2023（OMB 2023 年 7 月划定，Bulletin No. 23-01）。2024 Gazetteer CBSA 文件的 935 个 CBSA 与资料包所用的 2023 年 7 月划定文件编号、名称逐条一致。"
+   },
+   {
+    "en": "The anchor is the internal point (a representative point) that Census computes for the whole metro area. It is not a home, the principal city's centre or a boundary, and in a large metro area it can be far from the main city. This version has no home, street or PUMA polygons.",
+    "zh": "锚点是 Census 为整个都会区计算的内部点（代表点），不是住处、主城市中心或都会区边界；都会区范围大，点可能离主城市市区较远。首版不提供住宅、街道或 PUMA 多边形。"
+   },
+   {
+    "en": "This list does not grant run eligibility: the capabilities list and service rules decide which cities can be chosen, and a city without an anchor can still be opened from the city list.",
+    "zh": "这份清单不授予运行资格：能选哪些城市由能力清单与服务规则决定；没有锚点的城市仍可从城市列表访问。"
+   }
+  ],
+  "pack_fingerprint": "48eda959e2eb8254c891d1de88b92f792ccf8ecbaadac8037d548279cd9dd22b",
+  "resource_version": "e3-display-res-v1-57bd9b7e31603fe2",
+  "sources": [
+   {
+    "content_sha256": "0ec21c5d83982467903f1500fbbae87311edc81f09bed8ec1bbded80bce7eec3",
+    "dataset": "2024 Gazetteer Files: Core Based Statistical Areas (2024_Gaz_cbsa_national.zip); fields NAME, CBSA_TYPE, INTPTLAT, INTPTLONG",
+    "public_url": "https://www2.census.gov/geo/docs/maps-data/data/gazetteer/2024_Gazetteer/2024_Gaz_cbsa_national.zip",
+    "publisher": "U.S. Census Bureau",
+    "source_ref": "census.gazetteer.2024.cbsa",
+    "version": "2024"
+   },
+   {
+    "content_sha256": null,
+    "dataset": "2024 Gazetteer Files record layouts: INTPTLAT / INTPTLONG are the latitude and longitude of the internal point in decimal degrees (no datum restated)",
+    "public_url": "https://www.census.gov/programs-surveys/geography/technical-documentation/records-layout/gaz-record-layouts.2024.html",
+    "publisher": "U.S. Census Bureau",
+    "source_ref": "census.gazetteer.2024.layout",
+    "version": "2024"
+   },
+   {
+    "content_sha256": "ea2f40fcd9ecf46663da798e2e524766d37d6a802d760cd50c6629cfb861e54e",
+    "dataset": "2024 TIGER/Line Shapefiles: Core Based Statistical Areas (tl_2024_us_cbsa.zip); INTPTLAT / INTPTLON of the six CBSAs equal the Gazetteer values (rounded to 6 decimals); .prj GCS_North_American_1983",
+    "public_url": "https://www2.census.gov/geo/tiger/TIGER2024/CBSA/tl_2024_us_cbsa.zip",
+    "publisher": "U.S. Census Bureau",
+    "source_ref": "census.tiger.2024.cbsa",
+    "version": "2024"
+   },
+   {
+    "content_sha256": null,
+    "dataset": "2024 TIGER/Line Shapefiles Technical Documentation, chapter 3, section 3.3.3 Datum: all Census Bureau generated TIGER/Line Shapefiles are in GCS NAD83",
+    "public_url": "https://www2.census.gov/geo/pdfs/maps-data/data/tiger/tgrshp2024/TGRSHP2024_TechDoc_Ch3.pdf",
+    "publisher": "U.S. Census Bureau",
+    "source_ref": "census.tiger.2024.datum",
+    "version": "2024"
+   },
+   {
+    "content_sha256": "952c4b1e78acbb54e6ec9412434b7602fedacbf021736351a63c181bdb753629",
+    "dataset": "List 1: Core Based Statistical Areas, Metropolitan Divisions and Combined Statistical Areas, July 2023 (list1_2023.xlsx; based on OMB Bulletin No. 23-01)",
+    "public_url": "https://www2.census.gov/programs-surveys/metro-micro/geographies/reference-files/2023/delineation-files/list1_2023.xlsx",
+    "publisher": "U.S. Census Bureau",
+    "source_ref": "census.cbsa.delineation.2023-07",
+    "version": "July 2023"
+   },
+   {
+    "content_sha256": null,
+    "dataset": "Transformation 1188, NAD83 to WGS 84 (1): NAD83 (EPSG:4269) to WGS 84 (EPSG:4326), geocentric translations 0, 0, 0 m, accuracy 4 m, extent North America - Canada and USA (CONUS, Alaska mainland)",
+    "public_url": "https://epsg.org/transformation_1188/NAD83-to-WGS-84-1.html",
+    "publisher": "IOGP, EPSG Geodetic Parameter Dataset",
+    "source_ref": "epsg.1188",
+    "version": "EPSG Dataset v13.106 (record revised 2020-03-14)"
+   }
+  ],
+  "status": "partial"
+ },
+ "sample": {
+  "note": "受控夹具：故障注入或测试传输（离线替身，不是真实模型），零网络、零费用",
+  "origin": "controlled_fixture",
+  "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+  "synthetic": true
+ }
+}

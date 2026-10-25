@@ -18,6 +18,7 @@
    "state": "none"
   },
   "expires_at": null,
+  "expiry_basis": "active_execution",
   "explanation": null,
   "intent_id": "intent-000000000000002a",
   "meta": {

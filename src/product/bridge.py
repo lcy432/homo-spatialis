@@ -8,6 +8,8 @@
 * **进度**（``progress``）：从运行归档的进度记录投影成产品的 ``RunProgress``（断线后用运行 ID 查询，不重发规划）。费用按这次运行的
   规划器写（E3C）：离线 mock 才是零费用；真实模型按报价估算，从这次运行自己的账本读已核算、用量不确定（保留预留）与在途预留三类
   金额，规划候选数与服务尝试数分开计。只读：不开写事务、不建账本。
+
+给用户看的文字都经 ``product.display.t()`` 生成（中文与原来逐字相同，同时记下显示 key 与有类型的参数）。
 """
 
 from __future__ import annotations
@@ -36,10 +38,11 @@ from orchestration.life_archive import RunArchive
 from orchestration.life_budget import ledger_state, read_ledger
 from orchestration.life_runner import RunOutcome, RunWorld, start_run
 from product.answers import confirmation_problems, issue
+from product.display import Code, t
 from product.pack import DataPack
 from product.preflight import preflight_problems
 from product.public_errors import progress_pause
-from product.results import STAGE_TEXT
+from product.results import stage_text
 
 if TYPE_CHECKING:
     from product.execution import ExecutionSpec
@@ -98,9 +101,12 @@ def submission_problems(
             issue(
                 "submission_confirmed_mismatch",
                 "confirmed",
-                "提交引用的确认画像不是当前这一份",
-                "不能运行",
-                "重新确认后再提交",
+                t(
+                    "issue.submission_confirmed_mismatch.message",
+                    "提交引用的确认画像不是当前这一份",
+                ),
+                t("issue.submission_confirmed_mismatch.impact", "不能运行"),
+                t("issue.submission_confirmed_mismatch.next", "重新确认后再提交"),
             )
         )
     if (submission.preflight.preflight_id, submission.preflight.preflight_fingerprint) != (
@@ -111,9 +117,12 @@ def submission_problems(
             issue(
                 "submission_preflight_mismatch",
                 "preflight",
-                "提交引用的预检查不是当前这一份（输入、配置或城市变了要重新检查）",
-                "不能运行",
-                "重新预检查后再提交",
+                t(
+                    "issue.submission_preflight_mismatch.message",
+                    "提交引用的预检查不是当前这一份（输入、配置或城市变了要重新检查）",
+                ),
+                t("issue.submission_preflight_mismatch.impact", "不能运行"),
+                t("issue.submission_preflight_mismatch.next", "重新预检查后再提交"),
             )
         )
     reasons += confirmation_problems(pack, confirmed)
@@ -143,9 +152,12 @@ def submit(
             issue(
                 "idempotency_key_reused",
                 "idempotency_key",
-                "这个幂等键已经用于另一份预检查：不能用同一个键提交不同的运行",
-                "不能运行",
-                "为新的预检查生成新的幂等键",
+                t(
+                    "issue.idempotency_key_reused.message",
+                    "这个幂等键已经用于另一份预检查：不能用同一个键提交不同的运行",
+                ),
+                t("issue.idempotency_key_reused.impact", "不能运行"),
+                t("issue.idempotency_key_reused.next", "为新的预检查生成新的幂等键"),
             )
         )
     if reasons:
@@ -209,7 +221,10 @@ def cost_status(
             kind="offline_mock_zero_cost",
             calls_used=calls_used,
             call_limit=call_limit,
-            note="离线 mock：没有网络调用，费用为 0（真实模型运行会写“按报价估算”，以供应商账单为准）",
+            note=t(
+                "progress.cost.offline_mock",
+                "离线 mock：没有网络调用，费用为 0（真实模型运行会写“按报价估算”，以供应商账单为准）",
+            ),
         )
     found = None if ledger_dir is None else read_ledger(Path(ledger_dir))
     settled = uncertain = in_flight = Decimal(0)
@@ -232,9 +247,13 @@ def cost_status(
         calls_used=calls_used,
         call_limit=call_limit,
         estimated_cost=_money(settled + uncertain + in_flight),
-        note=(
-            f"应用侧按报价 {execution.price_version} 估算，不是供应商账单（以账单为准）：已核算 + 用量不确定（保留预留，不记 0）"
-            f" + 在途预留；本次运行上限 {execution.max_cost} {execution.currency}"
+        note=t(
+            "progress.cost.estimated",
+            "应用侧按报价 {price_version} 估算，不是供应商账单（以账单为准）：已核算 + 用量不确定（保留预留，不记 0）"
+            " + 在途预留；本次运行上限 {max_cost} {currency}",
+            price_version=Code(str(execution.price_version)),
+            max_cost=Code(str(execution.max_cost)),
+            currency=Code(str(execution.currency)),
         ),
         currency=execution.currency,
         price_version=execution.price_version,
@@ -278,13 +297,13 @@ def progress(
         meta=pack.meta(sample),
         run_id=p.run_id,
         stage=p.status,  # type: ignore[arg-type]
-        stage_zh=STAGE_TEXT.get(p.status, p.status),
+        stage_zh=stage_text(p.status),
         clones=tuple(
             CloneProgress(
                 clone_ref=c.clone_id,
                 city_ref=str(c.city),
                 status=c.status,
-                status_zh=CLONE_RUN_STATUS_TEXT[c.status],
+                status_zh=t(f"progress.clone_status.{c.status}", CLONE_RUN_STATUS_TEXT[c.status]),
                 years_committed=c.years_committed,
             )
             for c in p.clones
@@ -294,13 +313,19 @@ def progress(
         cost=cost_status(execution, ledger_dir, calls_used=p.calls_used, call_limit=p.call_limit),
         resumable=resumable,
         resume_note=(
-            "这次运行正在进行，不需要恢复；结束或暂停之后这里会更新"
+            t("progress.resume.running", "这次运行正在进行，不需要恢复；结束或暂停之后这里会更新")
             if live
-            else "可以从年度边界或两份候选之间恢复（E1 的恢复入口逐条核对归档，尝试次数与调用次数不清零）"
+            else t(
+                "progress.resume.resumable",
+                "可以从年度边界或两份候选之间恢复（E1 的恢复入口逐条核对归档，尝试次数与调用次数不清零）",
+            )
             if resumable
-            else "这次运行停在不能由你恢复的位置：等维护者处理（尝试次数与预算不会被清零来绕过）"
+            else t(
+                "progress.resume.maintainer",
+                "这次运行停在不能由你恢复的位置：等维护者处理（尝试次数与预算不会被清零来绕过）",
+            )
             if stopped
-            else "这次运行已经结束，没有可以恢复的部分"
+            else t("progress.resume.finished", "这次运行已经结束，没有可以恢复的部分")
         ),
         report_available=report,
         updated_at=updated_at,

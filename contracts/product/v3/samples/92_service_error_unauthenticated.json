@@ -3,6 +3,77 @@
  "message": "ServiceError",
  "payload": {
   "code": "unauthenticated",
+  "display": {
+   "display_schema_version": "e3-display-v1",
+   "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+   "source_view_fingerprint": "d94b727bc32d9acb55ce8efdf1c3303870f9aa41f5cbbec80ef5da18e8506e39",
+   "translations": {
+    "en": {
+     "fields": [
+      {
+       "key": "error.unauthenticated.message",
+       "missing_reason": null,
+       "pointer": "/message_zh",
+       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "There is no valid session, or your personal link is no longer valid"
+      },
+      {
+       "key": "error.unauthenticated.impact",
+       "missing_reason": null,
+       "pointer": "/impact_zh",
+       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "Nothing in this space can be read or changed"
+      },
+      {
+       "key": "error.unauthenticated.next",
+       "missing_reason": null,
+       "pointer": "/next_action_zh",
+       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "Open your personal link again; if the link was reissued, use the newest one"
+      }
+     ],
+     "status": "complete"
+    },
+    "zh": {
+     "fields": [
+      {
+       "key": "error.unauthenticated.message",
+       "missing_reason": null,
+       "pointer": "/message_zh",
+       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "没有有效的会话，或专属链接已经失效"
+      },
+      {
+       "key": "error.unauthenticated.impact",
+       "missing_reason": null,
+       "pointer": "/impact_zh",
+       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "不能读取或修改这个空间里的任何内容"
+      },
+      {
+       "key": "error.unauthenticated.next",
+       "missing_reason": null,
+       "pointer": "/next_action_zh",
+       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "重新打开你的专属链接；如果链接被重发过，请使用最新的那一个"
+      }
+     ],
+     "status": "complete"
+    }
+   }
+  },
   "field": null,
   "impact_zh": "不能读取或修改这个空间里的任何内容",
   "message_zh": "没有有效的会话，或专属链接已经失效",

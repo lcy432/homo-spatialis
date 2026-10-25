@@ -3,11 +3,82 @@
  "message": "ServiceError",
  "payload": {
   "code": "expired",
+  "display": {
+   "display_schema_version": "e3-display-v1",
+   "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+   "source_view_fingerprint": "bf5329bc327f19c089ef0f8171e9d913d6db34ca533e73486281711f40a227f2",
+   "translations": {
+    "en": {
+     "fields": [
+      {
+       "key": "error.expired.result.message",
+       "missing_reason": null,
+       "pointer": "/message_zh",
+       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "This run's results are past their retention period"
+      },
+      {
+       "key": "error.expired.result.impact",
+       "missing_reason": null,
+       "pointer": "/impact_zh",
+       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "Results are kept for the period in the service rules from the run's first finish, and viewing does not extend it; the content can no longer be viewed"
+      },
+      {
+       "key": "error.expired.result.next",
+       "missing_reason": null,
+       "pointer": "/next_action_zh",
+       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "Prepare a new simulation if you need it"
+      }
+     ],
+     "status": "complete"
+    },
+    "zh": {
+     "fields": [
+      {
+       "key": "error.expired.result.message",
+       "missing_reason": null,
+       "pointer": "/message_zh",
+       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "这次运行的结果已经超过保存期限"
+      },
+      {
+       "key": "error.expired.result.impact",
+       "missing_reason": null,
+       "pointer": "/impact_zh",
+       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "结果从运行首次结束起按服务规则保存，查看不续期；内容已经不能查看"
+      },
+      {
+       "key": "error.expired.result.next",
+       "missing_reason": null,
+       "pointer": "/next_action_zh",
+       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "需要的话重新准备一次模拟"
+      }
+     ],
+     "status": "complete"
+    }
+   }
+  },
   "field": null,
-  "impact_zh": "内容已经不能查看（保存期从首次结束起 30 天，查看不续期）",
-  "message_zh": "这项内容已经超过保存期限",
+  "impact_zh": "结果从运行首次结束起按服务规则保存，查看不续期；内容已经不能查看",
+  "message_zh": "这次运行的结果已经超过保存期限",
   "meta": null,
-  "next_action_zh": "需要的话重新创建",
+  "next_action_zh": "需要的话重新准备一次模拟",
   "retry_after_seconds": null,
   "sample": {
    "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",

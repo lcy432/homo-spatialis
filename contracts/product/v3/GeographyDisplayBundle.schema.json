@@ -1,0 +1,370 @@
+{
+ "$defs": {
+  "CityGeography": {
+   "additionalProperties": false,
+   "properties": {
+    "anchor": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/GeographyAnchor"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "anchor_status": {
+     "enum": [
+      "available",
+      "unknown",
+      "not_applicable"
+     ],
+     "title": "Anchor Status",
+     "type": "string"
+    },
+    "city_ref": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+     "title": "City Ref",
+     "type": "string"
+    },
+    "code": {
+     "maxLength": 40,
+     "minLength": 1,
+     "title": "Code",
+     "type": "string"
+    },
+    "country": {
+     "pattern": "^[A-Z]{2}$",
+     "title": "Country",
+     "type": "string"
+    },
+    "country_names": {
+     "$ref": "#/$defs/LocalizedText"
+    },
+    "coverage_note": {
+     "$ref": "#/$defs/LocalizedText"
+    },
+    "geography_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Geography Version",
+     "type": "string"
+    },
+    "model_kind": {
+     "enum": [
+      "real",
+      "synthetic"
+     ],
+     "title": "Model Kind",
+     "type": "string"
+    },
+    "names": {
+     "$ref": "#/$defs/LocalizedNames"
+    },
+    "scheme": {
+     "maxLength": 40,
+     "minLength": 1,
+     "title": "Scheme",
+     "type": "string"
+    },
+    "support_scope": {
+     "$ref": "#/$defs/SupportScope"
+    }
+   },
+   "required": [
+    "city_ref",
+    "country",
+    "scheme",
+    "code",
+    "geography_version",
+    "country_names",
+    "names",
+    "model_kind",
+    "anchor_status",
+    "support_scope",
+    "coverage_note"
+   ],
+   "title": "CityGeography",
+   "type": "object"
+  },
+  "GeographyAnchor": {
+   "additionalProperties": false,
+   "description": "城市的显示锚点：都会区的代表点，不是住宅、主城市中心或都会区边界。经纬度是具名字段（度），坐标系写明。",
+   "properties": {
+    "crs": {
+     "const": "EPSG:4326",
+     "title": "Crs",
+     "type": "string"
+    },
+    "kind": {
+     "enum": [
+      "principal_city_point",
+      "metro_internal_point"
+     ],
+     "title": "Kind",
+     "type": "string"
+    },
+    "latitude": {
+     "maximum": 90,
+     "minimum": -90,
+     "title": "Latitude",
+     "type": "number"
+    },
+    "longitude": {
+     "maximum": 180,
+     "minimum": -180,
+     "title": "Longitude",
+     "type": "number"
+    },
+    "source_refs": {
+     "items": {
+      "type": "string"
+     },
+     "minItems": 1,
+     "title": "Source Refs",
+     "type": "array"
+    }
+   },
+   "required": [
+    "latitude",
+    "longitude",
+    "crs",
+    "kind",
+    "source_refs"
+   ],
+   "title": "GeographyAnchor",
+   "type": "object"
+  },
+  "GeographyNames": {
+   "additionalProperties": false,
+   "properties": {
+    "official": {
+     "maxLength": 200,
+     "minLength": 1,
+     "title": "Official",
+     "type": "string"
+    },
+    "short": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Short",
+     "type": "string"
+    }
+   },
+   "required": [
+    "official",
+    "short"
+   ],
+   "title": "GeographyNames",
+   "type": "object"
+  },
+  "GeographySource": {
+   "additionalProperties": false,
+   "properties": {
+    "content_sha256": {
+     "anyOf": [
+      {
+       "pattern": "^[0-9a-f]{64}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Content Sha256"
+    },
+    "dataset": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Dataset",
+     "type": "string"
+    },
+    "public_url": {
+     "maxLength": 400,
+     "minLength": 1,
+     "title": "Public Url",
+     "type": "string"
+    },
+    "publisher": {
+     "maxLength": 200,
+     "minLength": 1,
+     "title": "Publisher",
+     "type": "string"
+    },
+    "source_ref": {
+     "maxLength": 120,
+     "minLength": 1,
+     "title": "Source Ref",
+     "type": "string"
+    },
+    "version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Version",
+     "type": "string"
+    }
+   },
+   "required": [
+    "source_ref",
+    "publisher",
+    "dataset",
+    "version",
+    "public_url"
+   ],
+   "title": "GeographySource",
+   "type": "object"
+  },
+  "LocalizedNames": {
+   "additionalProperties": false,
+   "properties": {
+    "en": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/GeographyNames"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "zh": {
+     "$ref": "#/$defs/GeographyNames"
+    }
+   },
+   "required": [
+    "zh"
+   ],
+   "title": "LocalizedNames",
+   "type": "object"
+  },
+  "LocalizedText": {
+   "additionalProperties": false,
+   "description": "一段中英对照的显示文字；没有英文时 ``en`` 为空（页面显示中文原文并标明英文缺失）。",
+   "properties": {
+    "en": {
+     "anyOf": [
+      {
+       "maxLength": 4000,
+       "minLength": 1,
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "En"
+    },
+    "zh": {
+     "maxLength": 2000,
+     "minLength": 1,
+     "title": "Zh",
+     "type": "string"
+    }
+   },
+   "required": [
+    "zh"
+   ],
+   "title": "LocalizedText",
+   "type": "object"
+  },
+  "SupportScope": {
+   "additionalProperties": false,
+   "description": "模拟实际支持的居住与工作范围（来自资料包），与都会区本身、资料覆盖范围不一定相同。",
+   "properties": {
+    "note": {
+     "$ref": "#/$defs/LocalizedText"
+    },
+    "ref": {
+     "maxLength": 120,
+     "minLength": 1,
+     "title": "Ref",
+     "type": "string"
+    },
+    "residence": {
+     "$ref": "#/$defs/LocalizedText"
+    },
+    "version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Version",
+     "type": "string"
+    },
+    "work": {
+     "$ref": "#/$defs/LocalizedText"
+    }
+   },
+   "required": [
+    "ref",
+    "version",
+    "residence",
+    "work",
+    "note"
+   ],
+   "title": "SupportScope",
+   "type": "object"
+  }
+ },
+ "additionalProperties": false,
+ "description": "一个资料包、一个显示资源版本的地理显示清单（``GET /api/v1/display/geography``）。地图底图、投影、纹理与标签由页面负责；\n这份清单不授予运行资格（能选哪些城市仍由能力清单与服务规则决定），缺少可靠坐标的城市锚点为空、仍可从列表访问。",
+ "properties": {
+  "cities": {
+   "default": [],
+   "items": {
+    "$ref": "#/$defs/CityGeography"
+   },
+   "title": "Cities",
+   "type": "array"
+  },
+  "display_schema_version": {
+   "const": "e3-display-v1",
+   "title": "Display Schema Version",
+   "type": "string"
+  },
+  "notes": {
+   "default": [],
+   "items": {
+    "$ref": "#/$defs/LocalizedText"
+   },
+   "title": "Notes",
+   "type": "array"
+  },
+  "pack_fingerprint": {
+   "pattern": "^[0-9a-f]{64}$",
+   "title": "Pack Fingerprint",
+   "type": "string"
+  },
+  "resource_version": {
+   "title": "Resource Version",
+   "type": "string"
+  },
+  "sources": {
+   "default": [],
+   "items": {
+    "$ref": "#/$defs/GeographySource"
+   },
+   "title": "Sources",
+   "type": "array"
+  },
+  "status": {
+   "enum": [
+    "complete",
+    "partial",
+    "unavailable"
+   ],
+   "title": "Status",
+   "type": "string"
+  }
+ },
+ "required": [
+  "display_schema_version",
+  "resource_version",
+  "pack_fingerprint",
+  "status"
+ ],
+ "title": "GeographyDisplayBundle",
+ "type": "object"
+}

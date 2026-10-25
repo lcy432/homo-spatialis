@@ -1,0 +1,171 @@
+# 运行前检查与资料性质共用的实体（两个资料包都用）：代码里固定的名称——通勤方式、税的状态、构建报告计数、菜单类别、
+# 便利候选的字段、计费周期、计价对象与候选种类。zh 必须与代码里的中文逐字相同（不同就显示为译文过时）。
+entities:
+  billing_period:
+    one_time:
+      label:
+        en: one-time
+        zh: 一次性
+    per_month:
+      label:
+        en: monthly
+        zh: 按月
+    per_visit:
+      label:
+        en: per-visit
+        zh: 按次
+  build_category:
+    areas:
+      label:
+        en: Areas (home and work)
+        zh: 片区（居住与就业）
+    commute_legs:
+      label:
+        en: Lines in the commute table (home area × work area × mode)
+        zh: 通勤关系表的线（住处片区 × 就业片区 × 方式）
+    excluded.housing.no_commute_area:
+      label:
+        en: 'Target cells not in the housing pool: no home area in the commute data'
+        zh: 没有进住房池的目标格：通勤资料里没有居住片区
+    excluded.housing.outside_tax_scope:
+      label:
+        en: 'Target cells not in the housing pool: outside the supported tax scope'
+        zh: 没有进住房池的目标格：在税务支持范围之外
+    excluded.job.employment_unknown:
+      label:
+        en: 'Occupations not in the job pool: employment unknown'
+        zh: 没有进岗位池的职业：就业人数未知
+    excluded.job.no_start_job:
+      label:
+        en: Occupations without a starting job
+        zh: 没有开局岗位的职业
+    housing_candidates:
+      label:
+        en: Candidates in the full executable housing pool (target cell × empirical support point)
+        zh: 完整可执行住房池的候选（目标格 × 经验支持点）
+    housing_in_catalog:
+      label:
+        en: Housing placed in the catalog (those that appeared on a menu, plus minimum housing and reference housing)
+        zh: 放进目录的住房（菜单上出现过的，加最低住房与参考住房）
+    items_by_domain.activity:
+      label:
+        en: 'Life item candidates: activities'
+        zh: 生活物品候选：活动
+    items_by_domain.device:
+      label:
+        en: 'Life item candidates: chore-saving devices'
+        zh: 生活物品候选：省家务设备
+    items_by_domain.enjoyment:
+      label:
+        en: 'Life item candidates: enjoyment goods and services'
+        zh: 生活物品候选：享受型用品与服务
+    items_by_domain.equipment:
+      label:
+        en: 'Life item candidates: hobby equipment'
+        zh: 生活物品候选：爱好装备
+    items_by_domain.food:
+      label:
+        en: 'Life item candidates: food plans'
+        zh: 生活物品候选：食品方案
+    items_by_domain.job:
+      label:
+        en: 'Life item candidates: jobs'
+        zh: 生活物品候选：岗位
+    items_by_domain.service:
+      label:
+        en: 'Life item candidates: services'
+        zh: 生活物品候选：服务
+    items_by_domain.training:
+      label:
+        en: 'Life item candidates: training'
+        zh: 生活物品候选：培训
+    job_candidates:
+      label:
+        en: Candidates in the full executable job pool (occupation × annual-wage support point × hours and work area)
+        zh: 完整可执行岗位池的候选（职业 × 年薪支持点 × 工时与就业片区）
+    jobs_in_catalog:
+      label:
+        en: Jobs placed in the catalog (those that appeared on a menu)
+        zh: 放进目录的岗位（菜单上出现过的）
+    menus:
+      label:
+        en: Annual menus
+        zh: 年度菜单
+    start_jobs:
+      label:
+        en: Starting jobs for each occupation
+        zh: 各职业的开局岗位
+  candidate_field:
+    effect:
+      label:
+        en: relief effect
+        zh: 减负效果
+    lifetime:
+      label:
+        en: lifetime
+        zh: 寿命
+    participation:
+      label:
+        en: personal participation time
+        zh: 本人参与时间
+    price:
+      label:
+        en: price
+        zh: 报价
+  candidate_kind:
+    device:
+      label:
+        en: Device
+        zh: 设备
+    service:
+      label:
+        en: Service
+        zh: 服务
+  commute_mode:
+    drive:
+      label:
+        en: driving
+        zh: 开车
+    transit:
+      label:
+        en: public transit
+        zh: 公共交通
+    walk_bike:
+      label:
+        en: walking or cycling
+        zh: 步行或骑车
+  menu_category:
+    housing:
+      label:
+        en: housing
+        zh: 住房
+    job:
+      label:
+        en: jobs
+        zh: 岗位
+  price_object:
+    machine:
+      label:
+        en: machine
+        zh: 台
+    service_month:
+      label:
+        en: service month
+        zh: 服务月
+    set:
+      label:
+        en: set
+        zh: 套
+    visit:
+      label:
+        en: visit
+        zh: 次
+  tax_status:
+    official_2024_rules:
+      label:
+        en: Official 2024 rules (single filer, wage income only, standard deduction)
+        zh: 官方 2024 年规则（单身、只有工资收入、标准扣除）
+    synthetic_test_double:
+      label:
+        en: Synthetic test double (not real tax)
+        zh: 合成测试替身（不是真实税）

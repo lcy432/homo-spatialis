@@ -1,0 +1,1794 @@
+{
+ "description_zh": "恢复排队：这次运行已经开始过（用掉 1 次机会），停下后点了恢复、正在排队——阶段仍是 queued，但 allowed_actions 没有 cancel，说明分清“首次开始前的排队”与“恢复排队”（locale = zh）",
+ "message": "DisplayEnvelope",
+ "payload": {
+  "display_schema_version": "e3-display-v1",
+  "fields": [
+   {
+    "key": "pack.note.synthetic",
+    "missing_reason": null,
+    "pointer": "/meta/data_pack/note",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料"
+   },
+   {
+    "key": "stage.queued_resume",
+    "missing_reason": null,
+    "pointer": "/stage_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "已经开始过，排队等待恢复（不另扣次数）"
+   },
+   {
+    "key": "pack.note.synthetic",
+    "missing_reason": null,
+    "pointer": "/preflight/meta/data_pack/note",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料"
+   },
+   {
+    "key": "entity.occupation.label:occ.office_clerk",
+    "missing_reason": null,
+    "pointer": "/preflight/start/occupation_label",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "办公室文员"
+   },
+   {
+    "key": "entity.preflight_text.label:start_time_note",
+    "missing_reason": null,
+    "pointer": "/preflight/start/monthly_time_note",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "每月可安排约 365 小时（每天 12 小时的睡眠与基本休息已经预留在外）——本版统一的模型设定，不是对你的测量"
+   },
+   {
+    "key": "entity.preflight_text.label:start_energy_note",
+    "missing_reason": null,
+    "pointer": "/preflight/start/monthly_energy_note",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "每月可承受 250 个负担点的活动（本版统一的模型设定）；上一年过得越满意，下一年最多多 10%"
+   },
+   {
+    "key": "entity.capability.item.0:start_scenario",
+    "missing_reason": null,
+    "pointer": "/preflight/start/scenario_zh/0",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "这是一次搬到候选城市重新开始的简化情景：从第 1 年、健康、没有已有物品、没有在学课程、没有资金目标开始"
+   },
+   {
+    "key": "entity.capability.item.1:start_scenario",
+    "missing_reason": null,
+    "pointer": "/preflight/start/scenario_zh/1",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "现实中的旧家具、病史与在学课程暂未纳入；这是模拟的假设，不是对你现实情况的判断"
+   },
+   {
+    "key": "entity.capability.item.2:start_scenario",
+    "missing_reason": null,
+    "pointer": "/preflight/start/scenario_zh/2",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "同一个你在各城市、各个分身里的年龄、现金、能力与基础时间精力都相同；城市里的具体岗位按当地目录匹配"
+   },
+   {
+    "key": "entity.source_fact.geography:f.k51.pack.price",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/label",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "合成城 K51"
+   },
+   {
+    "key": "entity.opportunity.label:k51.job.clerk",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/start_job_label",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "全职文员（合成写字楼）"
+   },
+   {
+    "key": "preflight.city.executable_yes",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/executable/reasons/0",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "标准开局通过、名单已冻结；年度计划仍由环境逐次检查，不保证每份计划都合法"
+   },
+   {
+    "key": "preflight.city.scorable_yes",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/scorable/reasons/0",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "按当前输入，正权重的评分资料在声明范围内齐全；不保证未来每个月都能完整评分"
+   },
+   {
+    "key": "preflight.city.feedback_on",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/feedback/reasons/0",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "上一年 12 个月都完整评分时才更新下一年的精力额度"
+   },
+   {
+    "key": "entity.source_fact.geography:f.k51.pack.price",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/data_nature/label",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "合成城 K51"
+   },
+   {
+    "key": "datanature.summary.synthetic",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/data_nature/summary_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "合成城 K51：合成资料包，目录 28 项机会全部是手工合成的模型设定或测试资料，不是真实城市资料"
+   },
+   {
+    "key": "entity.assumption.note:k51.housing.near",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/data_nature/named_assumptions/0/note_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "手工设定的数值，不来自任何真实城市、商品、服务、雇主、数据源或 LLM"
+   },
+   {
+    "key": "entity.opportunity.label:k51.housing.near",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/data_nature/named_assumptions/0/examples/0",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "一居室（离工作地近）"
+   },
+   {
+    "key": "entity.opportunity.label:k51.housing.far",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/data_nature/named_assumptions/0/examples/1",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "一居室（离工作地远）"
+   },
+   {
+    "key": "entity.opportunity.label:k51.food.basic",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/data_nature/named_assumptions/0/examples/2",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "基本食品方案（自己做）"
+   },
+   {
+    "key": "entity.assumption.note:k51.durable.convenience_pack",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/data_nature/named_assumptions/1/note_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "E3-A 编译：逐字段来源见目录编译记录；含合成设定，整条按最弱来源标合成——全组共用的合成寿命设定（两城同一款设备包相同）；全组共用的统一效果假设：两城同一款设备包的本人残余小时相同（参数目录 SC-18）；手工设定的合成报价（与 E1 便利版样例相同）"
+   },
+   {
+    "key": "entity.opportunity.label:k51.durable.convenience_pack",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/data_nature/named_assumptions/1/examples/0",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "便利设备包（洗烘一体机＋扫地机器人）"
+   },
+   {
+    "key": "entity.assumption.note:k51.service.chores",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/data_nature/named_assumptions/2/note_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "E3-A 编译：逐字段来源见目录编译记录；含合成设定，整条按最弱来源标合成——全组共用的统一效果假设：两城同一种杂务服务的本人残余小时相同（参数目录 SC-18）；合成设定：上门服务本人不参与服务本身（收纳与交接算在残余家务里）；手工设定的合成月价（与 E1 便利版样例相同）"
+   },
+   {
+    "key": "entity.opportunity.label:k51.service.chores",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/data_nature/named_assumptions/2/examples/0",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "日常杂务服务（每月上门洗衣与打扫）"
+   },
+   {
+    "key": "entity.assumption.note:k51.durable.dryer",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/data_nature/named_assumptions/3/note_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "E3-A 编译：逐字段来源见目录编译记录；含合成设定，整条按最弱来源标合成——合成寿命设定；合成效果设定"
+   },
+   {
+    "key": "entity.opportunity.label:k51.durable.dryer",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/data_nature/named_assumptions/3/examples/0",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "烘干机（单件）"
+   },
+   {
+    "key": "entity.common_prior.label:safety_index",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/data_nature/common_priors/0/label",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "安全条件（合成指数）"
+   },
+   {
+    "key": "entity.common_prior.meaning:safety_index",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/data_nature/common_priors/0/meaning_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "合成的城市安全条件指数，0–10，越高越安全。不是任何真实城市的犯罪率或统计口径，只在这组合成城市之间可比"
+   },
+   {
+    "key": "entity.common_prior.label:development_index",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/data_nature/common_priors/1/label",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "发展机会（合成指数）"
+   },
+   {
+    "key": "entity.common_prior.meaning:development_index",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/data_nature/common_priors/1/meaning_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "合成的城市职业与成长机会指数，0–10，越高表示城市本身提供的发展条件越好（不含你自己的学习进度）。不是真实的 就业或教育统计"
+   },
+   {
+    "key": "entity.common_prior.label:leisure_index",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/data_nature/common_priors/2/label",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "休闲条件（合成指数）"
+   },
+   {
+    "key": "entity.common_prior.meaning:leisure_index",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/data_nature/common_priors/2/meaning_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "合成的城市休闲设施与公共空间指数，0–10，越高表示不花钱也能享受的休闲条件越好（健身、体验等要另外安排）。不是 真实的设施统计"
+   },
+   {
+    "key": "entity.common_prior.label:environment_index",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/data_nature/common_priors/3/label",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "环境质量（合成指数）"
+   },
+   {
+    "key": "entity.common_prior.meaning:environment_index",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/data_nature/common_priors/3/meaning_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "合成的城市环境质量指数（空气、绿地、噪声的合成概括），0–10，越高越好。不是真实的环境监测数据"
+   },
+   {
+    "key": "entity.assumption.note:k51.care.clinic",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/data_nature/treatment_assumptions_zh/0",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "手工设定的治疗价格与就医时间，不来自任何真实医疗机构或价格资料"
+   },
+   {
+    "key": "entity.opportunity.label:k51.experience.concert",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/data_nature/model_plan_activities/0",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "音乐会（一次）"
+   },
+   {
+    "key": "entity.opportunity.label:k51.experience.guitar_practice",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/data_nature/model_plan_activities/1",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "在家练吉他（一次 2 小时）"
+   },
+   {
+    "key": "entity.opportunity.label:k51.experience.tennis_with_rental",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/data_nature/model_plan_activities/2",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "网球场地连球拍租借（一次）"
+   },
+   {
+    "key": "entity.opportunity.label:k51.experience.community_choir",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/data_nature/model_plan_activities/3",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "社区合唱排练（免费，一次）"
+   },
+   {
+    "key": "entity.opportunity.label:k51.experience.gallery_tour",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/data_nature/model_plan_activities/4",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "美术馆导览（一次）"
+   },
+   {
+    "key": "entity.opportunity.label:k51.experience.cooking_class",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/data_nature/model_plan_activities/5",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "烹饪课（一次，不代替正餐）"
+   },
+   {
+    "key": "entity.commute_mode.label:walk_bike",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/data_nature/commute_modes/0/mode_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "步行或骑车"
+   },
+   {
+    "key": "entity.commute_mode.label:transit",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/data_nature/commute_modes/1/mode_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "公共交通"
+   },
+   {
+    "key": "entity.commute_rule.label:US:SYNTH2026:K51.transit",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/data_nature/commute_modes/1/condition_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "合成城的公共交通，没有使用条件、不封顶"
+   },
+   {
+    "key": "entity.commute_mode.label:drive",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/data_nature/commute_modes/2/mode_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "开车"
+   },
+   {
+    "key": "entity.tax_status.label:synthetic_test_double",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/0/data_nature/tax/status_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "合成测试替身（不是真实税）"
+   },
+   {
+    "key": "entity.source_fact.geography:f.m52.pack.price",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/1/label",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "合成城 M52"
+   },
+   {
+    "key": "entity.opportunity.label:k51.job.clerk",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/1/start_job_label",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "全职文员（合成写字楼）"
+   },
+   {
+    "key": "preflight.city.executable_yes",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/1/executable/reasons/0",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "标准开局通过、名单已冻结；年度计划仍由环境逐次检查，不保证每份计划都合法"
+   },
+   {
+    "key": "preflight.city.scorable_yes",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/1/scorable/reasons/0",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "按当前输入，正权重的评分资料在声明范围内齐全；不保证未来每个月都能完整评分"
+   },
+   {
+    "key": "preflight.city.feedback_on",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/1/feedback/reasons/0",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "上一年 12 个月都完整评分时才更新下一年的精力额度"
+   },
+   {
+    "key": "entity.source_fact.geography:f.m52.pack.price",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/1/data_nature/label",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "合成城 M52"
+   },
+   {
+    "key": "datanature.summary.synthetic",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/1/data_nature/summary_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "合成城 M52：合成资料包，目录 27 项机会全部是手工合成的模型设定或测试资料，不是真实城市资料"
+   },
+   {
+    "key": "entity.assumption.note:k51.housing.near",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/1/data_nature/named_assumptions/0/note_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "手工设定的数值，不来自任何真实城市、商品、服务、雇主、数据源或 LLM"
+   },
+   {
+    "key": "entity.opportunity.label:k51.housing.near",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/1/data_nature/named_assumptions/0/examples/0",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "一居室（离工作地近）"
+   },
+   {
+    "key": "entity.opportunity.label:k51.housing.far",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/1/data_nature/named_assumptions/0/examples/1",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "一居室（离工作地远）"
+   },
+   {
+    "key": "entity.opportunity.label:k51.food.basic",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/1/data_nature/named_assumptions/0/examples/2",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "基本食品方案（自己做）"
+   },
+   {
+    "key": "entity.assumption.note:k51.durable.convenience_pack",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/1/data_nature/named_assumptions/1/note_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "E3-A 编译：逐字段来源见目录编译记录；含合成设定，整条按最弱来源标合成——全组共用的合成寿命设定（两城同一款设备包相同）；全组共用的统一效果假设：两城同一款设备包的本人残余小时相同（参数目录 SC-18）；手工设定的合成报价（与 E1 便利版样例相同）"
+   },
+   {
+    "key": "entity.opportunity.label:k51.durable.convenience_pack",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/1/data_nature/named_assumptions/1/examples/0",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "便利设备包（洗烘一体机＋扫地机器人）"
+   },
+   {
+    "key": "entity.assumption.note:k51.service.chores",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/1/data_nature/named_assumptions/2/note_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "E3-A 编译：逐字段来源见目录编译记录；含合成设定，整条按最弱来源标合成——全组共用的统一效果假设：两城同一种杂务服务的本人残余小时相同（参数目录 SC-18）；合成设定：上门服务本人不参与服务本身（收纳与交接算在残余家务里）；手工设定的合成月价（与 E1 便利版样例相同）"
+   },
+   {
+    "key": "entity.opportunity.label:k51.service.chores",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/1/data_nature/named_assumptions/2/examples/0",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "日常杂务服务（每月上门洗衣与打扫）"
+   },
+   {
+    "key": "entity.common_prior.label:safety_index",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/1/data_nature/common_priors/0/label",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "安全条件（合成指数）"
+   },
+   {
+    "key": "entity.common_prior.meaning:safety_index",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/1/data_nature/common_priors/0/meaning_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "合成的城市安全条件指数，0–10，越高越安全。不是任何真实城市的犯罪率或统计口径，只在这组合成城市之间可比"
+   },
+   {
+    "key": "entity.common_prior.label:development_index",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/1/data_nature/common_priors/1/label",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "发展机会（合成指数）"
+   },
+   {
+    "key": "entity.common_prior.meaning:development_index",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/1/data_nature/common_priors/1/meaning_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "合成的城市职业与成长机会指数，0–10，越高表示城市本身提供的发展条件越好（不含你自己的学习进度）。不是真实的 就业或教育统计"
+   },
+   {
+    "key": "entity.common_prior.label:leisure_index",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/1/data_nature/common_priors/2/label",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "休闲条件（合成指数）"
+   },
+   {
+    "key": "entity.common_prior.meaning:leisure_index",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/1/data_nature/common_priors/2/meaning_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "合成的城市休闲设施与公共空间指数，0–10，越高表示不花钱也能享受的休闲条件越好（健身、体验等要另外安排）。不是 真实的设施统计"
+   },
+   {
+    "key": "entity.common_prior.label:environment_index",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/1/data_nature/common_priors/3/label",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "环境质量（合成指数）"
+   },
+   {
+    "key": "entity.common_prior.meaning:environment_index",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/1/data_nature/common_priors/3/meaning_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "合成的城市环境质量指数（空气、绿地、噪声的合成概括），0–10，越高越好。不是真实的环境监测数据"
+   },
+   {
+    "key": "entity.assumption.note:k51.care.clinic",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/1/data_nature/treatment_assumptions_zh/0",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "手工设定的治疗价格与就医时间，不来自任何真实医疗机构或价格资料"
+   },
+   {
+    "key": "entity.opportunity.label:k51.experience.concert",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/1/data_nature/model_plan_activities/0",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "音乐会（一次）"
+   },
+   {
+    "key": "entity.opportunity.label:k51.experience.guitar_practice",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/1/data_nature/model_plan_activities/1",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "在家练吉他（一次 2 小时）"
+   },
+   {
+    "key": "entity.opportunity.label:k51.experience.tennis_with_rental",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/1/data_nature/model_plan_activities/2",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "网球场地连球拍租借（一次）"
+   },
+   {
+    "key": "entity.opportunity.label:k51.experience.community_choir",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/1/data_nature/model_plan_activities/3",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "社区合唱排练（免费，一次）"
+   },
+   {
+    "key": "entity.opportunity.label:k51.experience.gallery_tour",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/1/data_nature/model_plan_activities/4",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "美术馆导览（一次）"
+   },
+   {
+    "key": "entity.opportunity.label:k51.experience.cooking_class",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/1/data_nature/model_plan_activities/5",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "烹饪课（一次，不代替正餐）"
+   },
+   {
+    "key": "entity.commute_mode.label:walk_bike",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/1/data_nature/commute_modes/0/mode_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "步行或骑车"
+   },
+   {
+    "key": "entity.commute_mode.label:transit",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/1/data_nature/commute_modes/1/mode_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "公共交通"
+   },
+   {
+    "key": "entity.commute_rule.label:US:SYNTH2026:K51.transit",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/1/data_nature/commute_modes/1/condition_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "合成城的公共交通，没有使用条件、不封顶"
+   },
+   {
+    "key": "entity.commute_mode.label:drive",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/1/data_nature/commute_modes/2/mode_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "开车"
+   },
+   {
+    "key": "entity.tax_status.label:synthetic_test_double",
+    "missing_reason": null,
+    "pointer": "/preflight/cities/1/data_nature/tax/status_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "合成测试替身（不是真实税）"
+   },
+   {
+    "key": "preflight.executable_yes",
+    "missing_reason": null,
+    "pointer": "/preflight/executable/reasons/0",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "全部候选城市的标准开局与名单检查通过"
+   },
+   {
+    "key": "preflight.scorable_overall",
+    "missing_reason": null,
+    "pointer": "/preflight/scorable/reasons/0",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "逐城说明见 cities；不保证未来每个月都能完整评分"
+   },
+   {
+    "key": "preflight.feedback_overall",
+    "missing_reason": null,
+    "pointer": "/preflight/feedback/reasons/0",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "上一年完整评分才更新下一年额度；不完整时这个分身的下一年会受阻"
+   },
+   {
+    "key": "preflight.planner.mock_free",
+    "missing_reason": null,
+    "pointer": "/preflight/planner/description_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "可控的确定性离线规划器（mock）：只检验接线、状态传递与信息隔离，不代表真实大语言模型的能力；没有网络调用，费用为 0"
+   },
+   {
+    "key": "preflight.e1_scope.protocol",
+    "missing_reason": null,
+    "pointer": "/preflight/scope_zh/0",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "生活协议 life-v1-e3a-product（状态 synthetic_fixture_only）、评分 score.e1-life.explore（探索版）：城市、报价、工资、疾病、治疗与评分参数全部是合成设定，不是现实城市，不排序真实城市"
+   },
+   {
+    "key": "preflight.e1_scope.city_facts",
+    "missing_reason": null,
+    "pointer": "/preflight/scope_zh/1",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "城市背景事实 e1-7a-city-facts-v1：每座城 4 条合成指数，换算到评分条件的规则是内部合成设定"
+   },
+   {
+    "key": "preflight.e1_scope.evaluation",
+    "missing_reason": null,
+    "pointer": "/preflight/scope_zh/2",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "评价沿用 E1-6：完整者均值只用完整评价的分身；生活出局另报比例与事件链；模拟问题进入缺失范围（不是置信区间）"
+   },
+   {
+    "key": "entity.capability.item.0:limits",
+    "missing_reason": null,
+    "pointer": "/preflight/scope_zh/3",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "城市、报价、工资、税、疾病与治疗全部是合成设定；结果不排序真实城市，也不是现实推荐"
+   },
+   {
+    "key": "entity.capability.item.1:limits",
+    "missing_reason": null,
+    "pointer": "/preflight/scope_zh/4",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "离线规划器是可控的 mock，不代表真实大语言模型的能力或偏好理解"
+   },
+   {
+    "key": "entity.capability.item.2:limits",
+    "missing_reason": null,
+    "pointer": "/preflight/scope_zh/5",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "问卷文案与参考改善范围是暂定稿，没有做认知访谈与量表验证"
+   },
+   {
+    "key": "input.interests.scope.leisure.unanswered",
+    "missing_reason": null,
+    "pointer": "/preflight/scope_zh/6",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "休闲兴趣：你没有回答，本次不按具体兴趣个性化（按中性规则评价）"
+   },
+   {
+    "key": "input.interests.scope.taste.unanswered",
+    "missing_reason": null,
+    "pointer": "/preflight/scope_zh/7",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "口味与菜系：你没有回答，本次不按具体菜系个性化（只看新鲜餐）"
+   },
+   {
+    "key": "pack.note.synthetic",
+    "missing_reason": null,
+    "pointer": "/progress/meta/data_pack/note",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料"
+   },
+   {
+    "key": "progress.stage.halted",
+    "missing_reason": null,
+    "pointer": "/progress/stage_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "批次停下（服务、预算或请求检查）"
+   },
+   {
+    "key": "progress.halt.service_unavailable",
+    "missing_reason": null,
+    "pointer": "/progress/pause/reason_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "模型服务暂时不可用（超时、断连、限流或服务端错误），批次停下"
+   },
+   {
+    "key": "progress.pause.impact_line",
+    "missing_reason": null,
+    "pointer": "/progress/pause/impact_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "不是生活结果；还没有生成评价与汇总，不擅自给出分类或分数"
+   },
+   {
+    "key": "progress.pause.next_line",
+    "missing_reason": null,
+    "pointer": "/progress/pause/next_action_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "维护者处理服务、凭证、预算或请求的问题；可以恢复同一次运行（恢复前逐条核对归档，已用的调用次数与预算不清零）；系统不会替分身生成计划"
+   },
+   {
+    "key": "progress.cost.offline_mock",
+    "missing_reason": null,
+    "pointer": "/progress/cost/note",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "离线 mock：没有网络调用，费用为 0（真实模型运行会写“按报价估算”，以供应商账单为准）"
+   },
+   {
+    "key": "progress.resume.resumable",
+    "missing_reason": null,
+    "pointer": "/progress/resume_note",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "可以从年度边界或两份候选之间恢复（E1 的恢复入口逐条核对归档，尝试次数与调用次数不清零）"
+   },
+   {
+    "key": "explain.reason.queued_resume",
+    "missing_reason": null,
+    "pointer": "/explanation/reason_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "这次运行已经开始过，正在排队等待恢复"
+   },
+   {
+    "key": "explain.impact",
+    "missing_reason": null,
+    "pointer": "/explanation/impact_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "模拟已经开始，这次运行已经用掉 1 次机会（开始之后不退）；恢复不另扣次数；已经保存的回复不会重新请求"
+   },
+   {
+    "key": "explain.after_next.queued_resume",
+    "missing_reason": null,
+    "pointer": "/explanation/next_action_zh",
+    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "不需要操作：服务会按顺序接着运行；已经开始过的运行不能按“开始前取消”撤回，需要的话可以删除"
+   }
+  ],
+  "id": "intent-000000000000005c",
+  "kind": "intent",
+  "locale": "zh",
+  "metrics": [],
+  "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+  "source": {
+   "allowed_actions": [
+    "view_progress",
+    "delete"
+   ],
+   "confirm_with": null,
+   "confirmed": {
+    "confirmed_id": "confirmed.draft-000000000000005b.r2",
+    "content_fingerprint": "c5f1c0b8469fbdd5ebc12a19b24b2b4d980ce6dd524b98782d0e01916390119d"
+   },
+   "created_at": "2026-11-23T09:01:02Z",
+   "deletion": {
+    "completed_at": null,
+    "requested_at": null,
+    "state": "none"
+   },
+   "expires_at": "2026-12-23T09:01:02Z",
+   "expiry_basis": "intent_activity",
+   "explanation": {
+    "audit_ref": null,
+    "category": "service_queued_resume",
+    "impact_zh": "模拟已经开始，这次运行已经用掉 1 次机会（开始之后不退）；恢复不另扣次数；已经保存的回复不会重新请求",
+    "next_action_zh": "不需要操作：服务会按顺序接着运行；已经开始过的运行不能按“开始前取消”撤回，需要的话可以删除",
+    "reason_zh": "这次运行已经开始过，正在排队等待恢复"
+   },
+   "intent_id": "intent-000000000000005c",
+   "meta": {
+    "conversion_version": "e3a-conversion-v2",
+    "data_pack": {
+     "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
+     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
+     "pack_id": "pack.e3a.synthetic-v2",
+     "status": "synthetic_fixture_only"
+    },
+    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
+    "questionnaire_version": "e3a-questionnaire-v0.3-draft",
+    "sample": null,
+    "schema_version": "e3a-product-schema-v3.3",
+    "vocabulary_version": "e3a-vocabulary-v4"
+   },
+   "preflight": {
+    "binding": {
+     "compiled_inputs": {
+      "life_input": "686b75af33170029ffa4c085d4d5262fc99458b65a5316eae017127a345bf616",
+      "roster": "92e792f4d1e09874e0e4c88f019e8c8af403f8ded7a14a9677ee6ff089282a38",
+      "run_config": "e3f70cf39e79178efef8ab3277012030db4b2cab186526cc8f5a856ca75acb2e",
+      "scoring_config": "4aa2e0e61f1decdcb624164058effda428ca3456da56bc30c3684910d9996113"
+     },
+     "evaluation_spec_id": "eval.e1-life.main",
+     "identities_fingerprint": "5494b033830d9c39990246404bc3ece49f3ed21b6379b224045a0d708f37287f",
+     "planner_id": "mock.rules.e3a-product",
+     "planner_kind": "mock",
+     "prompt_template": "e3b-product-prompt-v3",
+     "protocol_id": "life-v1-e3a-product",
+     "scoring_content_fingerprint": "c36f768cbb84afd5398b4afedeafbf2aa1a117bf61cfd944a453eb3cdc1e7d75",
+     "scoring_version": "e1-life-v1"
+    },
+    "cities": [
+     {
+      "city_ref": "US:SYNTH2026:K51",
+      "coverage": {
+       "common_weight": {
+        "display": "1.000",
+        "exact": "1"
+       },
+       "label": "synthetic_contract_coverage",
+       "no_component_weight": {
+        "display": "0.000",
+        "exact": "0"
+       },
+       "unknown_weight": {
+        "display": "0.000",
+        "exact": "0"
+       },
+       "unsupported_positive_leaves": []
+      },
+      "data_gaps": [],
+      "data_nature": {
+       "build": [],
+       "build_status": "not_available",
+       "city_ref": "US:SYNTH2026:K51",
+       "common_priors": [
+        {
+         "fact_id": "safety_index",
+         "label": "安全条件（合成指数）",
+         "meaning_zh": "合成的城市安全条件指数，0–10，越高越安全。不是任何真实城市的犯罪率或统计口径，只在这组合成城市之间可比"
+        },
+        {
+         "fact_id": "development_index",
+         "label": "发展机会（合成指数）",
+         "meaning_zh": "合成的城市职业与成长机会指数，0–10，越高表示城市本身提供的发展条件越好（不含你自己的学习进度）。不是真实的 就业或教育统计"
+        },
+        {
+         "fact_id": "leisure_index",
+         "label": "休闲条件（合成指数）",
+         "meaning_zh": "合成的城市休闲设施与公共空间指数，0–10，越高表示不花钱也能享受的休闲条件越好（健身、体验等要另外安排）。不是 真实的设施统计"
+        },
+        {
+         "fact_id": "environment_index",
+         "label": "环境质量（合成指数）",
+         "meaning_zh": "合成的城市环境质量指数（空气、绿地、噪声的合成概括），0–10，越高越好。不是真实的环境监测数据"
+        }
+       ],
+       "commute_modes": [
+        {
+         "condition_zh": null,
+         "in_relation": false,
+         "lines": 0,
+         "mode": "walk_bike",
+         "mode_zh": "步行或骑车"
+        },
+        {
+         "condition_zh": "合成城的公共交通，没有使用条件、不封顶",
+         "in_relation": true,
+         "lines": 2,
+         "mode": "transit",
+         "mode_zh": "公共交通"
+        },
+        {
+         "condition_zh": null,
+         "in_relation": false,
+         "lines": 0,
+         "mode": "drive",
+         "mode_zh": "开车"
+        }
+       ],
+       "home_areas": 2,
+       "label": "合成城 K51",
+       "menus": [],
+       "model_plan_activities": [
+        "音乐会（一次）",
+        "在家练吉他（一次 2 小时）",
+        "网球场地连球拍租借（一次）",
+        "社区合唱排练（免费，一次）",
+        "美术馆导览（一次）",
+        "烹饪课（一次，不代替正餐）"
+       ],
+       "named_assumptions": [
+        {
+         "count": 25,
+         "examples": [
+          "一居室（离工作地近）",
+          "一居室（离工作地远）",
+          "基本食品方案（自己做）"
+         ],
+         "note_zh": "手工设定的数值，不来自任何真实城市、商品、服务、雇主、数据源或 LLM"
+        },
+        {
+         "count": 1,
+         "examples": [
+          "便利设备包（洗烘一体机＋扫地机器人）"
+         ],
+         "note_zh": "E3-A 编译：逐字段来源见目录编译记录；含合成设定，整条按最弱来源标合成——全组共用的合成寿命设定（两城同一款设备包相同）；全组共用的统一效果假设：两城同一款设备包的本人残余小时相同（参数目录 SC-18）；手工设定的合成报价（与 E1 便利版样例相同）"
+        },
+        {
+         "count": 1,
+         "examples": [
+          "日常杂务服务（每月上门洗衣与打扫）"
+         ],
+         "note_zh": "E3-A 编译：逐字段来源见目录编译记录；含合成设定，整条按最弱来源标合成——全组共用的统一效果假设：两城同一种杂务服务的本人残余小时相同（参数目录 SC-18）；合成设定：上门服务本人不参与服务本身（收纳与交接算在残余家务里）；手工设定的合成月价（与 E1 便利版样例相同）"
+        },
+        {
+         "count": 1,
+         "examples": [
+          "烘干机（单件）"
+         ],
+         "note_zh": "E3-A 编译：逐字段来源见目录编译记录；含合成设定，整条按最弱来源标合成——合成寿命设定；合成效果设定"
+        }
+       ],
+       "opportunities": [
+        {
+         "by_kind": [
+          {
+           "count": 0,
+           "kind": "observed"
+          },
+          {
+           "count": 0,
+           "kind": "derived"
+          },
+          {
+           "count": 0,
+           "kind": "estimated"
+          },
+          {
+           "count": 2,
+           "kind": "synthetic"
+          }
+         ],
+         "category": "housing",
+         "total": 2
+        },
+        {
+         "by_kind": [
+          {
+           "count": 0,
+           "kind": "observed"
+          },
+          {
+           "count": 0,
+           "kind": "derived"
+          },
+          {
+           "count": 0,
+           "kind": "estimated"
+          },
+          {
+           "count": 4,
+           "kind": "synthetic"
+          }
+         ],
+         "category": "food",
+         "total": 4
+        },
+        {
+         "by_kind": [
+          {
+           "count": 0,
+           "kind": "observed"
+          },
+          {
+           "count": 0,
+           "kind": "derived"
+          },
+          {
+           "count": 0,
+           "kind": "estimated"
+          },
+          {
+           "count": 8,
+           "kind": "synthetic"
+          }
+         ],
+         "category": "service",
+         "total": 8
+        },
+        {
+         "by_kind": [
+          {
+           "count": 0,
+           "kind": "observed"
+          },
+          {
+           "count": 0,
+           "kind": "derived"
+          },
+          {
+           "count": 0,
+           "kind": "estimated"
+          },
+          {
+           "count": 6,
+           "kind": "synthetic"
+          }
+         ],
+         "category": "experience",
+         "total": 6
+        },
+        {
+         "by_kind": [
+          {
+           "count": 0,
+           "kind": "observed"
+          },
+          {
+           "count": 0,
+           "kind": "derived"
+          },
+          {
+           "count": 0,
+           "kind": "estimated"
+          },
+          {
+           "count": 4,
+           "kind": "synthetic"
+          }
+         ],
+         "category": "durable",
+         "total": 4
+        },
+        {
+         "by_kind": [
+          {
+           "count": 0,
+           "kind": "observed"
+          },
+          {
+           "count": 0,
+           "kind": "derived"
+          },
+          {
+           "count": 0,
+           "kind": "estimated"
+          },
+          {
+           "count": 3,
+           "kind": "synthetic"
+          }
+         ],
+         "category": "job",
+         "total": 3
+        },
+        {
+         "by_kind": [
+          {
+           "count": 0,
+           "kind": "observed"
+          },
+          {
+           "count": 0,
+           "kind": "derived"
+          },
+          {
+           "count": 0,
+           "kind": "estimated"
+          },
+          {
+           "count": 1,
+           "kind": "synthetic"
+          }
+         ],
+         "category": "training",
+         "total": 1
+        }
+       ],
+       "pack_status": "synthetic_fixture_only",
+       "summary_zh": "合成城 K51：合成资料包，目录 28 项机会全部是手工合成的模型设定或测试资料，不是真实城市资料",
+       "tax": {
+        "absent_zh": [],
+        "not_modeled_zh": [],
+        "policy_id": "tax.synth.e1conv",
+        "residence_scope_zh": null,
+        "rules_zh": [],
+        "status": "synthetic_test_double",
+        "status_zh": "合成测试替身（不是真实税）"
+       },
+       "totals": [
+        {
+         "count": 0,
+         "kind": "observed"
+        },
+        {
+         "count": 0,
+         "kind": "derived"
+        },
+        {
+         "count": 0,
+         "kind": "estimated"
+        },
+        {
+         "count": 28,
+         "kind": "synthetic"
+        }
+       ],
+       "treatment_assumptions_zh": [
+        "手工设定的治疗价格与就医时间，不来自任何真实医疗机构或价格资料"
+       ],
+       "work_areas": 1
+      },
+      "executable": {
+       "reasons": [
+        "标准开局通过、名单已冻结；年度计划仍由环境逐次检查，不保证每份计划都合法"
+       ],
+       "status": "yes"
+      },
+      "feedback": {
+       "reasons": [
+        "上一年 12 个月都完整评分时才更新下一年的精力额度"
+       ],
+       "status": "yes"
+      },
+      "label": "合成城 K51",
+      "option_inventory_status": "partial",
+      "scorable": {
+       "reasons": [
+        "按当前输入，正权重的评分资料在声明范围内齐全；不保证未来每个月都能完整评分"
+       ],
+       "status": "yes"
+      },
+      "start_job_label": "全职文员（合成写字楼）"
+     },
+     {
+      "city_ref": "US:SYNTH2026:M52",
+      "coverage": {
+       "common_weight": {
+        "display": "1.000",
+        "exact": "1"
+       },
+       "label": "synthetic_contract_coverage",
+       "no_component_weight": {
+        "display": "0.000",
+        "exact": "0"
+       },
+       "unknown_weight": {
+        "display": "0.000",
+        "exact": "0"
+       },
+       "unsupported_positive_leaves": []
+      },
+      "data_gaps": [],
+      "data_nature": {
+       "build": [],
+       "build_status": "not_available",
+       "city_ref": "US:SYNTH2026:M52",
+       "common_priors": [
+        {
+         "fact_id": "safety_index",
+         "label": "安全条件（合成指数）",
+         "meaning_zh": "合成的城市安全条件指数，0–10，越高越安全。不是任何真实城市的犯罪率或统计口径，只在这组合成城市之间可比"
+        },
+        {
+         "fact_id": "development_index",
+         "label": "发展机会（合成指数）",
+         "meaning_zh": "合成的城市职业与成长机会指数，0–10，越高表示城市本身提供的发展条件越好（不含你自己的学习进度）。不是真实的 就业或教育统计"
+        },
+        {
+         "fact_id": "leisure_index",
+         "label": "休闲条件（合成指数）",
+         "meaning_zh": "合成的城市休闲设施与公共空间指数，0–10，越高表示不花钱也能享受的休闲条件越好（健身、体验等要另外安排）。不是 真实的设施统计"
+        },
+        {
+         "fact_id": "environment_index",
+         "label": "环境质量（合成指数）",
+         "meaning_zh": "合成的城市环境质量指数（空气、绿地、噪声的合成概括），0–10，越高越好。不是真实的环境监测数据"
+        }
+       ],
+       "commute_modes": [
+        {
+         "condition_zh": null,
+         "in_relation": false,
+         "lines": 0,
+         "mode": "walk_bike",
+         "mode_zh": "步行或骑车"
+        },
+        {
+         "condition_zh": "合成城的公共交通，没有使用条件、不封顶",
+         "in_relation": true,
+         "lines": 2,
+         "mode": "transit",
+         "mode_zh": "公共交通"
+        },
+        {
+         "condition_zh": null,
+         "in_relation": false,
+         "lines": 0,
+         "mode": "drive",
+         "mode_zh": "开车"
+        }
+       ],
+       "home_areas": 2,
+       "label": "合成城 M52",
+       "menus": [],
+       "model_plan_activities": [
+        "音乐会（一次）",
+        "在家练吉他（一次 2 小时）",
+        "网球场地连球拍租借（一次）",
+        "社区合唱排练（免费，一次）",
+        "美术馆导览（一次）",
+        "烹饪课（一次，不代替正餐）"
+       ],
+       "named_assumptions": [
+        {
+         "count": 25,
+         "examples": [
+          "一居室（离工作地近）",
+          "一居室（离工作地远）",
+          "基本食品方案（自己做）"
+         ],
+         "note_zh": "手工设定的数值，不来自任何真实城市、商品、服务、雇主、数据源或 LLM"
+        },
+        {
+         "count": 1,
+         "examples": [
+          "便利设备包（洗烘一体机＋扫地机器人）"
+         ],
+         "note_zh": "E3-A 编译：逐字段来源见目录编译记录；含合成设定，整条按最弱来源标合成——全组共用的合成寿命设定（两城同一款设备包相同）；全组共用的统一效果假设：两城同一款设备包的本人残余小时相同（参数目录 SC-18）；手工设定的合成报价（与 E1 便利版样例相同）"
+        },
+        {
+         "count": 1,
+         "examples": [
+          "日常杂务服务（每月上门洗衣与打扫）"
+         ],
+         "note_zh": "E3-A 编译：逐字段来源见目录编译记录；含合成设定，整条按最弱来源标合成——全组共用的统一效果假设：两城同一种杂务服务的本人残余小时相同（参数目录 SC-18）；合成设定：上门服务本人不参与服务本身（收纳与交接算在残余家务里）；手工设定的合成月价（与 E1 便利版样例相同）"
+        }
+       ],
+       "opportunities": [
+        {
+         "by_kind": [
+          {
+           "count": 0,
+           "kind": "observed"
+          },
+          {
+           "count": 0,
+           "kind": "derived"
+          },
+          {
+           "count": 0,
+           "kind": "estimated"
+          },
+          {
+           "count": 2,
+           "kind": "synthetic"
+          }
+         ],
+         "category": "housing",
+         "total": 2
+        },
+        {
+         "by_kind": [
+          {
+           "count": 0,
+           "kind": "observed"
+          },
+          {
+           "count": 0,
+           "kind": "derived"
+          },
+          {
+           "count": 0,
+           "kind": "estimated"
+          },
+          {
+           "count": 4,
+           "kind": "synthetic"
+          }
+         ],
+         "category": "food",
+         "total": 4
+        },
+        {
+         "by_kind": [
+          {
+           "count": 0,
+           "kind": "observed"
+          },
+          {
+           "count": 0,
+           "kind": "derived"
+          },
+          {
+           "count": 0,
+           "kind": "estimated"
+          },
+          {
+           "count": 8,
+           "kind": "synthetic"
+          }
+         ],
+         "category": "service",
+         "total": 8
+        },
+        {
+         "by_kind": [
+          {
+           "count": 0,
+           "kind": "observed"
+          },
+          {
+           "count": 0,
+           "kind": "derived"
+          },
+          {
+           "count": 0,
+           "kind": "estimated"
+          },
+          {
+           "count": 6,
+           "kind": "synthetic"
+          }
+         ],
+         "category": "experience",
+         "total": 6
+        },
+        {
+         "by_kind": [
+          {
+           "count": 0,
+           "kind": "observed"
+          },
+          {
+           "count": 0,
+           "kind": "derived"
+          },
+          {
+           "count": 0,
+           "kind": "estimated"
+          },
+          {
+           "count": 3,
+           "kind": "synthetic"
+          }
+         ],
+         "category": "durable",
+         "total": 3
+        },
+        {
+         "by_kind": [
+          {
+           "count": 0,
+           "kind": "observed"
+          },
+          {
+           "count": 0,
+           "kind": "derived"
+          },
+          {
+           "count": 0,
+           "kind": "estimated"
+          },
+          {
+           "count": 3,
+           "kind": "synthetic"
+          }
+         ],
+         "category": "job",
+         "total": 3
+        },
+        {
+         "by_kind": [
+          {
+           "count": 0,
+           "kind": "observed"
+          },
+          {
+           "count": 0,
+           "kind": "derived"
+          },
+          {
+           "count": 0,
+           "kind": "estimated"
+          },
+          {
+           "count": 1,
+           "kind": "synthetic"
+          }
+         ],
+         "category": "training",
+         "total": 1
+        }
+       ],
+       "pack_status": "synthetic_fixture_only",
+       "summary_zh": "合成城 M52：合成资料包，目录 27 项机会全部是手工合成的模型设定或测试资料，不是真实城市资料",
+       "tax": {
+        "absent_zh": [],
+        "not_modeled_zh": [],
+        "policy_id": "tax.synth.e1conv",
+        "residence_scope_zh": null,
+        "rules_zh": [],
+        "status": "synthetic_test_double",
+        "status_zh": "合成测试替身（不是真实税）"
+       },
+       "totals": [
+        {
+         "count": 0,
+         "kind": "observed"
+        },
+        {
+         "count": 0,
+         "kind": "derived"
+        },
+        {
+         "count": 0,
+         "kind": "estimated"
+        },
+        {
+         "count": 27,
+         "kind": "synthetic"
+        }
+       ],
+       "treatment_assumptions_zh": [
+        "手工设定的治疗价格与就医时间，不来自任何真实医疗机构或价格资料"
+       ],
+       "work_areas": 1
+      },
+      "executable": {
+       "reasons": [
+        "标准开局通过、名单已冻结；年度计划仍由环境逐次检查，不保证每份计划都合法"
+       ],
+       "status": "yes"
+      },
+      "feedback": {
+       "reasons": [
+        "上一年 12 个月都完整评分时才更新下一年的精力额度"
+       ],
+       "status": "yes"
+      },
+      "label": "合成城 M52",
+      "option_inventory_status": "partial",
+      "scorable": {
+       "reasons": [
+        "按当前输入，正权重的评分资料在声明范围内齐全；不保证未来每个月都能完整评分"
+       ],
+       "status": "yes"
+      },
+      "start_job_label": "全职文员（合成写字楼）"
+     }
+    ],
+    "clones_per_city": 1,
+    "confirmed": {
+     "confirmed_id": "confirmed.draft-000000000000005b.r2",
+     "content_fingerprint": "c5f1c0b8469fbdd5ebc12a19b24b2b4d980ce6dd524b98782d0e01916390119d"
+    },
+    "executable": {
+     "reasons": [
+      "全部候选城市的标准开局与名单检查通过"
+     ],
+     "status": "yes"
+    },
+    "feedback": {
+     "reasons": [
+      "上一年完整评分才更新下一年额度；不完整时这个分身的下一年会受阻"
+     ],
+     "status": "yes"
+    },
+    "issues": [],
+    "meta": {
+     "conversion_version": "e3a-conversion-v2",
+     "data_pack": {
+      "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
+      "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
+      "pack_id": "pack.e3a.synthetic-v2",
+      "status": "synthetic_fixture_only"
+     },
+     "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
+     "questionnaire_version": "e3a-questionnaire-v0.3-draft",
+     "sample": null,
+     "schema_version": "e3a-product-schema-v3.3",
+     "vocabulary_version": "e3a-vocabulary-v4"
+    },
+    "planner": {
+     "call_limit": 18,
+     "description_zh": "可控的确定性离线规划器（mock）：只检验接线、状态传递与信息隔离，不代表真实大语言模型的能力；没有网络调用，费用为 0",
+     "max_cost": null,
+     "paid": false,
+     "planner_id": "mock.rules.e3a-product",
+     "planner_kind": "mock"
+    },
+    "preflight_fingerprint": "8cffe3926d8311b07ad3f0654f9477d965a20b3e6c61d10c3253894e2d370d1f",
+    "preflight_id": "preflight.confirmed.draft-000000000000005b.r2",
+    "scope_zh": [
+     "生活协议 life-v1-e3a-product（状态 synthetic_fixture_only）、评分 score.e1-life.explore（探索版）：城市、报价、工资、疾病、治疗与评分参数全部是合成设定，不是现实城市，不排序真实城市",
+     "城市背景事实 e1-7a-city-facts-v1：每座城 4 条合成指数，换算到评分条件的规则是内部合成设定",
+     "评价沿用 E1-6：完整者均值只用完整评价的分身；生活出局另报比例与事件链；模拟问题进入缺失范围（不是置信区间）",
+     "城市、报价、工资、税、疾病与治疗全部是合成设定；结果不排序真实城市，也不是现实推荐",
+     "离线规划器是可控的 mock，不代表真实大语言模型的能力或偏好理解",
+     "问卷文案与参考改善范围是暂定稿，没有做认知访谈与量表验证",
+     "休闲兴趣：你没有回答，本次不按具体兴趣个性化（按中性规则评价）",
+     "口味与菜系：你没有回答，本次不按具体菜系个性化（只看新鲜餐）"
+    ],
+    "scorable": {
+     "reasons": [
+      "逐城说明见 cities；不保证未来每个月都能完整评分"
+     ],
+     "status": "yes"
+    },
+    "start": {
+     "abilities": [],
+     "age_years": 35,
+     "cash": {
+      "amount_minor": 300000,
+      "currency": "USD",
+      "display": "3,000.00",
+      "numeraire_id": "USD_2024_LOCAL"
+     },
+     "monthly_energy_note": "每月可承受 250 个负担点的活动（本版统一的模型设定）；上一年过得越满意，下一年最多多 10%",
+     "monthly_time_note": "每月可安排约 365 小时（每天 12 小时的睡眠与基本休息已经预留在外）——本版统一的模型设定，不是对你的测量",
+     "occupation_label": "办公室文员",
+     "rule": "v1_standard_start_2026_10_12",
+     "scenario_zh": [
+      "这是一次搬到候选城市重新开始的简化情景：从第 1 年、健康、没有已有物品、没有在学课程、没有资金目标开始",
+      "现实中的旧家具、病史与在学课程暂未纳入；这是模拟的假设，不是对你现实情况的判断",
+      "同一个你在各城市、各个分身里的年龄、现金、能力与基础时间精力都相同；城市里的具体岗位按当地目录匹配"
+     ]
+    },
+    "status": "ready",
+    "years": 3
+   },
+   "progress": {
+    "clones": [],
+    "cost": {
+     "call_limit": 18,
+     "calls_used": 2,
+     "estimated_cost": null,
+     "kind": "offline_mock_zero_cost",
+     "note": "离线 mock：没有网络调用，费用为 0（真实模型运行会写“按报价估算”，以供应商账单为准）"
+    },
+    "meta": {
+     "conversion_version": "e3a-conversion-v2",
+     "data_pack": {
+      "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
+      "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
+      "pack_id": "pack.e3a.synthetic-v2",
+      "status": "synthetic_fixture_only"
+     },
+     "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
+     "questionnaire_version": "e3a-questionnaire-v0.3-draft",
+     "sample": null,
+     "schema_version": "e3a-product-schema-v3.3",
+     "vocabulary_version": "e3a-vocabulary-v4"
+    },
+    "pause": {
+     "audit_ref": "run:run-e3a-4fb3e54f2a30c6c6 record:progress.json",
+     "category": "batch_halted_service_unavailable",
+     "impact_zh": "不是生活结果；还没有生成评价与汇总，不擅自给出分类或分数",
+     "next_action_zh": "维护者处理服务、凭证、预算或请求的问题；可以恢复同一次运行（恢复前逐条核对归档，已用的调用次数与预算不清零）；系统不会替分身生成计划",
+     "reason_zh": "模型服务暂时不可用（超时、断连、限流或服务端错误），批次停下"
+    },
+    "report_available": false,
+    "resumable": true,
+    "resume_note": "可以从年度边界或两份候选之间恢复（E1 的恢复入口逐条核对归档，尝试次数与调用次数不清零）",
+    "run_id": "run-e3a-4fb3e54f2a30c6c6",
+    "stage": "halted",
+    "stage_zh": "批次停下（服务、预算或请求检查）",
+    "updated_at": "2026-11-23T09:01:02Z"
+   },
+   "quota": {
+    "available": 2,
+    "reserved": 0,
+    "total": 3,
+    "used": 1
+   },
+   "result_available": false,
+   "run_id": "run-e3a-4fb3e54f2a30c6c6",
+   "settings": {
+    "call_limit": 18,
+    "cities": [
+     "US:SYNTH2026:K51",
+     "US:SYNTH2026:M52"
+    ],
+    "clones_per_city": 1,
+    "clones_total": 2,
+    "currency": "CNY",
+    "max_cost": "20",
+    "planner_kind": "mock",
+    "service_attempt_limit": null,
+    "settings_fingerprint": "abad17408a53d78b458ab17172dc89028fcb59201857cdea81336c0559a52938",
+    "years": 3
+   },
+   "stage": "queued",
+   "stage_zh": "已经开始过，排队等待恢复（不另扣次数）",
+   "support_ref": "sup-000000000000005d",
+   "updated_at": "2026-11-23T09:01:02Z",
+   "waiting_for": "service"
+  },
+  "source_view_fingerprint": "efc556e2b7e00cfb6c509c38c5680009a1636c5820d8f8400ec2538820ee38bf",
+  "status": "complete"
+ },
+ "sample": {
+  "note": "受控夹具：故障注入或测试传输（离线替身，不是真实模型），零网络、零费用",
+  "origin": "controlled_fixture",
+  "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+  "synthetic": true
+ }
+}

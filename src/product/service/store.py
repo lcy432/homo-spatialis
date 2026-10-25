@@ -36,7 +36,7 @@ from product.service.clock import Clock, days_after, iso
 from product.service.errors import ServiceFailure
 from product.service.tokens import digest, new_secret, opaque
 
-STORE_VERSION = "e3c-service-store-v2"
+STORE_VERSION = "e3c-service-store-v3"
 #: 尚未结束的意图（同一身份最多一个）
 OPEN_STAGES = (
     "checking",
@@ -92,7 +92,8 @@ CREATE TABLE IF NOT EXISTS reviews (
     pack_fingerprint TEXT NOT NULL,
     body TEXT,
     created_at TEXT NOT NULL,
-    deleted_at TEXT
+    deleted_at TEXT,
+    display_body TEXT
 );
 CREATE TABLE IF NOT EXISTS profiles (
     confirmed_id TEXT PRIMARY KEY,
@@ -104,7 +105,8 @@ CREATE TABLE IF NOT EXISTS profiles (
     body TEXT,
     created_at TEXT NOT NULL,
     expires_at TEXT NOT NULL,
-    deleted_at TEXT
+    deleted_at TEXT,
+    display_body TEXT
 );
 CREATE TABLE IF NOT EXISTS intents (
     intent_id TEXT PRIMARY KEY,
@@ -136,7 +138,11 @@ CREATE TABLE IF NOT EXISTS intents (
     first_finished_at TEXT,
     result_expires_at TEXT,
     delete_requested_at TEXT,
-    deleted_at TEXT
+    deleted_at TEXT,
+    preflight_display TEXT,
+    progress_display TEXT,
+    result_display TEXT,
+    explanation_display TEXT
 );
 CREATE UNIQUE INDEX IF NOT EXISTS intents_one_open ON intents(principal_id)
     WHERE stage IN ('checking', 'awaiting_confirmation', 'blocked', 'queued', 'running', 'needs_attention');
@@ -175,6 +181,8 @@ CREATE TABLE IF NOT EXISTS send_permits (
 """
 
 #: 删除或过期时从意图上清掉的内容（预检查与结果里有答案与生活故事；运行选项里有用户选的城市）
+#: 显示附层的私有绑定（E3 → E5 接口补齐）：跟着它所属的对象写、跟着它一起清，不是第二份个人资料
+DISPLAY_CONTENT = ("preflight_display", "progress_display", "result_display", "explanation_display")
 INTENT_CONTENT = (
     "preflight_body",
     "progress_body",
@@ -183,21 +191,50 @@ INTENT_CONTENT = (
     "snapshot",
     "execution_body",
     "run_options",
+    *DISPLAY_CONTENT,
 )
 #: 取消时清掉的内容（取消的意图不再需要运行前说明；选的设置照样显示，直到过期或删除）
-_CANCEL_CONTENT = ("preflight_body", "progress_body", "result_body", "explanation", "snapshot")
+_CANCEL_CONTENT = (
+    "preflight_body",
+    "progress_body",
+    "result_body",
+    "explanation",
+    "snapshot",
+    *DISPLAY_CONTENT,
+)
+#: v2 → v3：只加显示绑定的列，原有的用户内容、次数与记录都不动（草稿的显示文字在读取时按草稿当场生成，不保存绑定）
+_MIGRATE_V3 = {
+    "reviews": ("display_body",),
+    "profiles": ("display_body",),
+    "intents": DISPLAY_CONTENT,
+}
+
+
+def intent_deadline(row: Any, intent_days: int, *, running: bool = False) -> tuple[str | None, str]:
+    """一个意图当前适用的保存截止时间与它按什么算（``ExpiryBasis``）——期限判断（``intent_due``）与公开视图共用这一条规则：
+    删除中、已删除、已过期没有可用期限（``unavailable``）；运行中的、有执行者的不给固定截止时间（``active_execution``，调用方确认它
+    没有执行者时传 ``running=True`` 按下面的规则）；有结果的按首次结束起的结果期限（``first_finished``）；其他按最后一次有效业务操作
+    起 ``intent_days`` 天（``intent_activity``）。查看、轮询与心跳都不改这两个时间。"""
+    stage = row["stage"]
+    if stage in ("deleting", "deleted", "expired"):
+        return None, "unavailable"
+    if stage == "running" and not running:
+        return None, "active_execution"
+    if row["result_expires_at"] is not None:
+        return row["result_expires_at"], "first_finished"
+    return days_after(row["last_activity_at"], intent_days), "intent_activity"
 
 
 def intent_due(row: Any, now: str, intent_days: int, *, running: bool = False) -> bool:
-    """一个意图是否已经到期（API 访问、写入事务与 worker 清理用同一条规则）：有结果的按首次结束起 ``result`` 期限，其他按最后一次
-    有效业务操作起 ``intent_days`` 天。查看、轮询与心跳都不改这两个时间。删除中与已经结束的不在这里到期；运行中的只在调用方确认它
-    没有执行者（``running=True``：worker 重启时上一个进程留下的记录，或不是当前正在执行的那一个）时按同样的规则判断。"""
-    stage = row["stage"]
-    if stage in ("deleting", "deleted", "expired") or (stage == "running" and not running):
-        return False
-    if row["result_expires_at"] is not None:
-        return row["result_expires_at"] <= now
-    return days_after(row["last_activity_at"], intent_days) <= now
+    """一个意图是否已经到期（API 访问、写入事务与 worker 清理用同一条规则，见 ``intent_deadline``）。运行中的只在调用方确认它没有
+    执行者（``running=True``：worker 重启时上一个进程留下的记录，或不是当前正在执行的那一个）时按同样的规则判断。"""
+    deadline, _ = intent_deadline(row, intent_days, running=running)
+    return deadline is not None and deadline <= now
+
+
+def expired_subject(row: Any) -> str:
+    """一个已经到期的意图在错误说明里算哪一类：有过结果的是“结果”，否则是“运行意图”。"""
+    return "result" if row["first_finished_at"] is not None else "intent"
 
 
 class _CommitThenRaise(Exception):  # noqa: N818 - 只在 ``ServiceStore.write`` 内部用的控制信号
@@ -228,6 +265,14 @@ class Quota:
         }
 
 
+def _gone(row: Any) -> ServiceFailure:
+    """删除中、已删除、已过期的意图对写操作的统一回答。"""
+    stage = row["stage"]
+    if stage == "expired":
+        return ServiceFailure("expired", subject=expired_subject(row))
+    return ServiceFailure("deleting" if stage == "deleting" else "deleted")
+
+
 class ServiceStore:
     def __init__(
         self,
@@ -252,10 +297,30 @@ class ServiceStore:
                 (STORE_VERSION,),
             )
             got = con.execute("SELECT value FROM meta WHERE key = 'store_version'").fetchone()
+            if got[0] == "e3c-service-store-v2":
+                self._migrate_v3(con)
+                got = (STORE_VERSION,)
             if got[0] != STORE_VERSION:
                 raise RuntimeError(f"服务库版本 {got[0]} 与代码 {STORE_VERSION} 不同")
         finally:
             con.close()
+
+    @staticmethod
+    def _migrate_v3(con: sqlite3.Connection) -> None:
+        """就地把 v2 的服务库升到 v3：在一个事务里加显示绑定的空列、改版本号。用户的草稿、确认、运行、次数事件与会话都保留，
+        不要求删库重建；已有对象没有绑定，显示为 ``no_binding``（不在读取时补写）。"""
+        con.execute("BEGIN IMMEDIATE")
+        try:
+            for table, columns in _MIGRATE_V3.items():
+                have = {r[1] for r in con.execute(f"PRAGMA table_info({table})")}
+                for column in columns:
+                    if column not in have:
+                        con.execute(f"ALTER TABLE {table} ADD COLUMN {column} TEXT")
+            con.execute("UPDATE meta SET value = ? WHERE key = 'store_version'", (STORE_VERSION,))
+            con.execute("COMMIT")
+        except BaseException:
+            con.execute("ROLLBACK")
+            raise
 
     # ------------------------------------------------------------------ 连接与事务
 
@@ -487,6 +552,16 @@ class ServiceStore:
             )
             return True
 
+    def _consumed(self, con: sqlite3.Connection, intent_id: str) -> bool:
+        """这个意图是否已经开始过（服务库里权威的启动记录：预留在首次启动 E1 之前转为已使用）。"""
+        return (
+            con.execute(
+                "SELECT 1 FROM quota_events WHERE intent_id = ? AND kind = 'consume' LIMIT 1",
+                (intent_id,),
+            ).fetchone()
+            is not None
+        )
+
     def _release(self, con: sqlite3.Connection, intent_id: str, note: str) -> bool:
         kinds = {
             r[0]
@@ -571,7 +646,7 @@ class ServiceStore:
         if row["deleted_at"] is not None:
             raise ServiceFailure("not_found")
         if row["expires_at"] <= self.now():
-            raise ServiceFailure("expired")
+            raise ServiceFailure("expired", subject="draft")
         return row
 
     def _draft_in(self, con: sqlite3.Connection, principal_id: str, draft_id: str) -> sqlite3.Row:
@@ -611,7 +686,7 @@ class ServiceStore:
             if cur.rowcount != 1:
                 raise ServiceFailure("revision_conflict")
             con.execute(
-                "UPDATE reviews SET body = NULL, deleted_at = ? WHERE draft_id = ? AND principal_id = ? "
+                "UPDATE reviews SET body = NULL, display_body = NULL, deleted_at = ? WHERE draft_id = ? AND principal_id = ? "
                 "AND draft_revision < ? AND deleted_at IS NULL",
                 (now, draft_id, principal_id, expected + 1),
             )
@@ -630,7 +705,7 @@ class ServiceStore:
                 raise ServiceFailure("not_found")
             for table in ("reviews", "profiles"):
                 con.execute(
-                    f"UPDATE {table} SET body = NULL, deleted_at = COALESCE(deleted_at, ?) "
+                    f"UPDATE {table} SET body = NULL, display_body = NULL, deleted_at = COALESCE(deleted_at, ?) "
                     "WHERE draft_id = ? AND principal_id = ?",
                     (now, draft_id, principal_id),
                 )
@@ -647,6 +722,7 @@ class ServiceStore:
         pack_fingerprint: str,
         body: str,
         generation: int,
+        display_body: str | None = None,
     ) -> None:
         """写回一份审阅。事务里重新核对：没有“删除全部”、草稿还在、没删、没过期、修订号还是审阅的那一版。"""
         with self.write() as con:
@@ -656,10 +732,11 @@ class ServiceStore:
                 raise ServiceFailure("revision_conflict")
             con.execute(
                 "INSERT INTO reviews (review_id, principal_id, draft_id, draft_revision, draft_fingerprint, "
-                "pack_fingerprint, body, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?) "
+                "pack_fingerprint, body, created_at, display_body) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) "
                 "ON CONFLICT(review_id) DO UPDATE SET draft_revision = excluded.draft_revision, "
                 "draft_fingerprint = excluded.draft_fingerprint, pack_fingerprint = excluded.pack_fingerprint, "
-                "body = excluded.body, created_at = excluded.created_at, deleted_at = NULL "
+                "body = excluded.body, created_at = excluded.created_at, deleted_at = NULL, "
+                "display_body = excluded.display_body "
                 "WHERE reviews.principal_id = excluded.principal_id",
                 (
                     review_id,
@@ -670,6 +747,7 @@ class ServiceStore:
                     pack_fingerprint,
                     body,
                     self.now(),
+                    display_body,
                 ),
             )
 
@@ -686,6 +764,15 @@ class ServiceStore:
             raise ServiceFailure("revision_conflict")
         return row
 
+    def review_draft_id(self, principal_id: str, review_id: str) -> str | None:
+        """本人一份审阅所属的草稿编号，审阅作废了也照样给（显示读取用它按草稿的状态回答删除与过期）。"""
+        with self.read() as con:
+            row = con.execute(
+                "SELECT draft_id FROM reviews WHERE review_id = ? AND principal_id = ?",
+                (review_id, principal_id),
+            ).fetchone()
+        return None if row is None else row["draft_id"]
+
     def save_profile(
         self,
         principal_id: str,
@@ -697,6 +784,7 @@ class ServiceStore:
         fingerprint: str,
         body: str,
         generation: int,
+        display_body: str | None = None,
     ) -> sqlite3.Row:
         """写回一份确认画像。事务里重新核对代次、审阅与草稿（都还在、没删、没过期、是同一修订）。同一份画像重复确认原样返回，**不续期**；
         已经过期的不能靠再确认一次复活。返回画像这一行（含到期时间）。"""
@@ -723,14 +811,15 @@ class ServiceStore:
                     raise ServiceFailure("not_found")
                 if old["content_fingerprint"] == fingerprint and old["deleted_at"] is None:
                     if old["expires_at"] <= now:
-                        raise ServiceFailure("expired")
+                        raise ServiceFailure("expired", subject="profile")
                     return old  # 同一份确认重复提交：原样返回，不续期
                 if old["content_fingerprint"] == fingerprint and old["expires_at"] <= now:
-                    raise ServiceFailure("expired")
+                    raise ServiceFailure("expired", subject="profile")
                 con.execute("DELETE FROM profiles WHERE confirmed_id = ?", (confirmed_id,))
             con.execute(
                 "INSERT INTO profiles (confirmed_id, principal_id, draft_id, draft_revision, review_id, "
-                "content_fingerprint, body, created_at, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "content_fingerprint, body, created_at, expires_at, display_body) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (
                     confirmed_id,
                     principal_id,
@@ -741,6 +830,7 @@ class ServiceStore:
                     body,
                     now,
                     days_after(now, self.profile_days),
+                    display_body,
                 ),
             )
             return con.execute(
@@ -757,8 +847,19 @@ class ServiceStore:
         if row is None or row["body"] is None:
             raise ServiceFailure("not_found")
         if row["expires_at"] <= self.now():
-            raise ServiceFailure("expired")
+            raise ServiceFailure("expired", subject="profile")
         return row
+
+    def profiles(self, principal_id: str) -> list[sqlite3.Row]:
+        """本人还能用来准备新模拟的确认画像（在、没删、没过期），新的在前。只读，不续期。"""
+        with self.read() as con:
+            return list(
+                con.execute(
+                    "SELECT * FROM profiles WHERE principal_id = ? AND deleted_at IS NULL AND body IS NOT NULL "
+                    "AND expires_at > ? ORDER BY created_at DESC, confirmed_id",
+                    (principal_id, self.now()),
+                )
+            )
 
     # ------------------------------------------------------------------ 运行意图
 
@@ -790,7 +891,7 @@ class ServiceStore:
             ):
                 raise ServiceFailure("not_found")
             if prof["expires_at"] <= now:
-                raise ServiceFailure("expired")
+                raise ServiceFailure("expired", subject="profile")
             old = con.execute(
                 "SELECT * FROM intents WHERE principal_id = ? AND stage IN ({})".format(
                     ",".join("?" * len(OPEN_STAGES))
@@ -923,7 +1024,7 @@ class ServiceStore:
         now = self.now()
         if intent_due(row, now, self.intent_days):
             self._expire_row(con, row, now)
-            raise _CommitThenRaise(ServiceFailure("expired"))
+            raise _CommitThenRaise(ServiceFailure("expired", subject=expired_subject(row)))
 
     def submit_intent(
         self,
@@ -964,11 +1065,7 @@ class ServiceStore:
             ):
                 raise ServiceFailure("idempotency_conflict")
             if row["stage"] in GONE_STAGES:
-                raise ServiceFailure(
-                    {"deleting": "deleting", "deleted": "deleted", "expired": "expired"}[
-                        row["stage"]
-                    ]
-                )
+                raise _gone(row)
             self._refuse_if_due(con, row)
             if row["run_id"] is not None:
                 # 已经确认过：同一份预检查与设置返回原运行（不管键是不是新的）；换了就是旧确认
@@ -1053,22 +1150,21 @@ class ServiceStore:
             )
 
     def cancel_intent(self, principal_id: str, intent_id: str) -> sqlite3.Row:
-        """开始前取消：检查中、等确认、阻断、排队（还没有启动）的意图可以取消；排队的释放预留。已经开始的不能取消（可以删除）。
-        已经到期的按过期处理后拒绝。"""
+        """开始前取消：检查中、等确认、阻断、排队（还没有启动）的意图可以取消；排队的释放预留。已经开始过的不能取消
+        （``cancel_not_allowed``，包括恢复之后又在排队的；可以删除）。已经到期的按过期处理后拒绝。"""
         now = self.now()
         with self.write() as con:
             row = self._owned(con, principal_id, "intent_id", intent_id)
             if row["stage"] == "cancelled":
                 return row
             if row["stage"] in GONE_STAGES:
-                raise ServiceFailure(
-                    {"deleting": "deleting", "deleted": "deleted", "expired": "expired"}[
-                        row["stage"]
-                    ]
-                )
+                raise _gone(row)
             self._refuse_if_due(con, row)
             if row["stage"] not in ("checking", "awaiting_confirmation", "blocked", "queued"):
-                raise ServiceFailure("not_resumable")
+                raise ServiceFailure("cancel_not_allowed")
+            if self._consumed(con, intent_id):
+                # 恢复排队的运行也是 queued：是否已经开始看次数记录（首次启动时预留转为已使用），不看阶段；不退次数、不清进度
+                raise ServiceFailure("cancel_not_allowed")
             self._release(con, intent_id, "开始前取消")
             con.execute(
                 "UPDATE jobs SET state = 'cancelled', finished_at = ? WHERE intent_id = ? AND state = 'pending'",
@@ -1091,11 +1187,7 @@ class ServiceStore:
         with self.write() as con:
             row = self._owned(con, principal_id, "run_id", run_id)
             if row["stage"] in GONE_STAGES:
-                raise ServiceFailure(
-                    {"deleting": "deleting", "deleted": "deleted", "expired": "expired"}[
-                        row["stage"]
-                    ]
-                )
+                raise _gone(row)
             self._refuse_if_due(con, row)
             if row["stage"] != "needs_attention" or not row["resume_allowed"]:
                 raise ServiceFailure("not_resumable")
@@ -1147,9 +1239,13 @@ class ServiceStore:
                 "UPDATE principals SET data_generation = data_generation + 1 WHERE principal_id = ?",
                 (principal_id,),
             )
-            for table in ("drafts", "reviews", "profiles"):
+            con.execute(
+                "UPDATE drafts SET body = NULL, deleted_at = COALESCE(deleted_at, ?) WHERE principal_id = ?",
+                (now, principal_id),
+            )
+            for table in ("reviews", "profiles"):
                 con.execute(
-                    f"UPDATE {table} SET body = NULL, deleted_at = COALESCE(deleted_at, ?) WHERE principal_id = ?",
+                    f"UPDATE {table} SET body = NULL, display_body = NULL, deleted_at = COALESCE(deleted_at, ?) WHERE principal_id = ?",
                     (now, principal_id),
                 )
             ids = [
@@ -1368,7 +1464,13 @@ class ServiceStore:
             return True
 
     def finish_intent(
-        self, intent_id: str, *, result_body: str, result_fingerprint: str, days: int
+        self,
+        intent_id: str,
+        *,
+        result_body: str,
+        result_fingerprint: str,
+        days: int,
+        result_display: str | None = None,
     ) -> bool:
         """交付结果：只有仍在运行中的意图才发布（删除优先于对外发布）。保存期从首次结束起算，之后再完成也不续期。"""
         now = self.now()
@@ -1386,6 +1488,7 @@ class ServiceStore:
                 waiting_for="none",
                 result_body=result_body,
                 result_fingerprint=result_fingerprint,
+                result_display=result_display,
                 first_finished_at=first,
                 result_expires_at=days_after(first, days),
                 resume_allowed=0,
@@ -1448,12 +1551,12 @@ class ServiceStore:
                     (now, draft_id),
                 )
                 con.execute(
-                    "UPDATE reviews SET body = NULL, deleted_at = ? WHERE draft_id = ? AND principal_id = ? "
+                    "UPDATE reviews SET body = NULL, display_body = NULL, deleted_at = ? WHERE draft_id = ? AND principal_id = ? "
                     "AND deleted_at IS NULL",
                     (now, draft_id, principal_id),
                 )
             con.execute(
-                "UPDATE profiles SET body = NULL, deleted_at = ? WHERE deleted_at IS NULL AND expires_at <= ? "
+                "UPDATE profiles SET body = NULL, display_body = NULL, deleted_at = ? WHERE deleted_at IS NULL AND expires_at <= ? "
                 "AND NOT EXISTS (SELECT 1 FROM intents i WHERE i.confirmed_id = profiles.confirmed_id "
                 "AND i.stage = 'checking')",
                 (now, now),

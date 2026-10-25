@@ -1,0 +1,543 @@
+# 服务层的显示模板（E3C）：错误、说明、阶段、规则、删除与进度占位。zh 是代码里中文模板的对齐副本（代码才是唯一来源，
+# scripts/product_display.py check 核对两者一致）；en 是英文模板，占位必须与中文相同。不放 HTML、不放用户内容。
+templates:
+  deletion.all.note:
+    en: 'Your drafts, reviews, confirmations and all runs are being deleted: running simulations get no new model requests and their content is cleared once they wind down; reviews or confirmations that had started but not finished will not be written back. Your personal link still works'
+    zh: 你的草稿、审阅、确认与全部运行都在删除：运行中的模拟不再批准新的模型请求，收尾后清掉内容；之前已经开始、还没有完成的审阅或确认不会再写回。专属链接仍然有效
+  deletion.kept.cost:
+    en: A minimal cost summary (amounts whose sending is uncertain are kept as they are, not set to 0)
+    zh: 必要的费用摘要（发送不确定的金额照原样保留，不改成 0）
+  deletion.kept.identity:
+    en: An opaque service identity and the run IDs
+    zh: 不透明的服务身份与运行编号
+  deletion.kept.quota:
+    en: The record of runs used (deleting does not reset the count)
+    zh: 使用次数的记录（删除不会重置次数）
+  deletion.kept.tombstone:
+    en: The deletion time and a record that keeps old requests from coming back
+    zh: 删除时间与防止旧请求复活的记录
+  deletion.run.note:
+    en: 'This run can no longer be viewed and is winding down safely: no new model requests are approved; requests already sent may finish and be billed (they cannot be recalled); its content is cleared afterwards'
+    zh: 这次运行已经不能查看，正在安全收尾：不再批准新的模型请求，已经发出的请求可能完成并记账（不能撤回），收尾后清掉内容
+  entity.label:
+    en: '{v}'
+    zh: '{v}'
+  error.cancel_not_allowed.impact:
+    en: Nothing was cancelled; the 1 run already used is not refunded, and existing progress and results stay as they are
+    zh: 没有取消；已经用掉的 1 次机会不退，已有的进度与结果保持不变
+  error.cancel_not_allowed.message:
+    en: This run has already started, so it cannot be withdrawn with “cancel before start”
+    zh: 这次运行已经开始过，不能按“开始前取消”撤回
+  error.cancel_not_allowed.next:
+    en: You can let it continue, or delete this run using the action on the page
+    zh: 可以等它接着运行，或者按页面上的动作删除这次运行
+  error.csrf_failed.impact:
+    en: This change was not made
+    zh: 这次修改没有被执行
+  error.csrf_failed.message:
+    en: The request is missing the page check code, or it is wrong
+    zh: 请求缺少或带错了页面校验码
+  error.csrf_failed.next:
+    en: Refresh the page and try again
+    zh: 刷新页面后再试
+  error.data_pack_unavailable.impact:
+    en: No simulation was started and no run was used
+    zh: 没有开始模拟，也没有使用次数
+  error.data_pack_unavailable.message:
+    en: The city data pack this run needs is unavailable right now, or differs from the recorded version
+    zh: 运行需要的城市资料包现在不可用或与记录的版本不同
+  error.data_pack_unavailable.next:
+    en: Try again later; the maintainer will check the data pack
+    zh: 稍后再试；维护者会核对资料包
+  error.deleted.impact:
+    en: The content can no longer be viewed or restored; deleting does not reset the number of runs used
+    zh: 内容不能再查看或恢复；删除不会重置使用次数
+  error.deleted.message:
+    en: This content has been deleted
+    zh: 这项内容已经删除
+  error.deleted.next:
+    en: Create it again if you need it
+    zh: 需要的话重新创建
+  error.deleting.impact:
+    en: The content can no longer be viewed and is being wound down safely
+    zh: 内容已经不可查看，正在安全收尾
+  error.deleting.message:
+    en: This run is being deleted
+    zh: 这次运行正在删除
+  error.deleting.next:
+    en: Refresh later; it cannot be restored once deletion completes
+    zh: 稍后刷新；删除完成后不能恢复
+  error.expired.draft.impact:
+    en: A draft is kept for the period in the service rules from its last edit, and viewing does not extend it; it can no longer be read, reviewed or confirmed
+    zh: 草稿从最后一次编辑起按服务规则保存，查看不续期；内容已经不能读取、审阅或确认
+  error.expired.draft.message:
+    en: This draft is past its retention period
+    zh: 这份草稿已经超过保存期限
+  error.expired.draft.next:
+    en: Start a new draft and fill it in again
+    zh: 新建一份草稿重新填写
+  error.expired.impact:
+    en: The content can no longer be viewed or used; viewing or refreshing does not extend it
+    zh: 内容已经不能查看或使用；查看、刷新都不续期
+  error.expired.intent.impact:
+    en: A preparation that is awaiting confirmation, blocked by the pre-run check, paused or queued is kept for the period in the service rules from its last real action, and viewing does not extend it; nothing was started or continued, and no run was used
+    zh: 等待确认、检查没通过、暂停或排队的准备从最后一次有效操作起按服务规则保存，查看不续期；没有开始或继续，也没有使用次数
+  error.expired.intent.message:
+    en: This simulation preparation is past its retention period
+    zh: 这次模拟的准备已经超过保存期限
+  error.expired.intent.next:
+    en: Prepare the simulation again if you need it
+    zh: 需要的话重新准备一次模拟
+  error.expired.message:
+    en: This content is past its retention period
+    zh: 这项内容已经超过保存期限
+  error.expired.next:
+    en: Create it again if you need it
+    zh: 需要的话重新创建
+  error.expired.profile.impact:
+    en: A confirmed profile can prepare new simulations for the period in the service rules from its first confirmation; confirming again or viewing does not extend it; simulations already prepared use their own copy and deadline and are not affected
+    zh: 确认画像从首次确认起按服务规则可用，重复确认、查看都不续期；已经准备的模拟用自己的副本与期限，不受影响
+  error.expired.profile.message:
+    en: This confirmed profile can no longer be used to prepare new simulations
+    zh: 这份确认画像已经超过可以准备新模拟的期限
+  error.expired.profile.next:
+    en: Review and confirm a draft that is still within its retention period, or start a new draft
+    zh: 重新审阅并确认还在保存期内的草稿，或新建草稿
+  error.expired.result.impact:
+    en: Results are kept for the period in the service rules from the run's first finish, and viewing does not extend it; the content can no longer be viewed
+    zh: 结果从运行首次结束起按服务规则保存，查看不续期；内容已经不能查看
+  error.expired.result.message:
+    en: This run's results are past their retention period
+    zh: 这次运行的结果已经超过保存期限
+  error.expired.result.next:
+    en: Prepare a new simulation if you need it
+    zh: 需要的话重新准备一次模拟
+  error.expired.review.impact:
+    en: A review expires together with its draft and can no longer be used to confirm a profile
+    zh: 审阅跟着它的草稿一起到期，不能再用来确认画像
+  error.expired.review.message:
+    en: The draft this review belongs to is past its retention period
+    zh: 这份审阅所属的草稿已经超过保存期限
+  error.expired.review.next:
+    en: Start a new draft, fill it in and review it
+    zh: 新建一份草稿重新填写并审阅
+  error.idempotency_conflict.impact:
+    en: This request was not carried out
+    zh: 这次请求没有被执行
+  error.idempotency_conflict.message:
+    en: This request ID has already been used for a different request
+    zh: 这个请求编号已经用于另一份不同的请求
+  error.idempotency_conflict.next:
+    en: Generate a new request ID for a new request; when resending the same request, keep its content unchanged
+    zh: 为新的请求生成新的请求编号；重发同一个请求时请保持内容不变
+  error.intent_conflict.impact:
+    en: No new run intent was created
+    zh: 没有创建新的运行意图
+  error.intent_conflict.message:
+    en: You already have a simulation being prepared or in progress, with different conditions
+    zh: 你已经有一次正在准备或进行中的模拟，条件与这次不同
+  error.intent_conflict.next:
+    en: Finish, cancel or delete that one first, then start with the new conditions
+    zh: 先完成、取消或删除那一次，再用新的条件开始
+  error.internal_error.impact:
+    en: This request did not complete
+    zh: 这次请求没有完成
+  error.internal_error.message:
+    en: The service hit an internal problem
+    zh: 服务出现了内部问题
+  error.internal_error.next:
+    en: Try again later; if it keeps happening, contact the maintainer with the support reference
+    zh: 稍后再试；问题一直出现时请联系维护者并提供支持编号
+  error.invalid_request.impact:
+    en: This request was not carried out
+    zh: 这次请求没有被执行
+  error.invalid_request.message:
+    en: The request's format or content does not meet the requirements
+    zh: 请求的格式或内容不符合要求
+  error.invalid_request.next:
+    en: Check what you entered on the page; if it keeps happening, contact the maintainer with the support reference
+    zh: 检查页面上的填写；问题一直出现时请联系维护者并提供支持编号
+  error.not_found.impact:
+    en: This ID does not exist in your space (it may also have expired or been deleted)
+    zh: 这个编号在你的空间里不存在（也可能已经过期或删除）
+  error.not_found.message:
+    en: This content was not found
+    zh: 没有找到这项内容
+  error.not_found.next:
+    en: Go back to “My runs” or create it again
+    zh: 回到“我的运行”或重新创建
+  error.not_resumable.impact:
+    en: No new model request was sent and the run was not changed
+    zh: 没有发出新的模型请求，也没有改变运行
+  error.not_resumable.message:
+    en: You cannot resume this run right now
+    zh: 这次运行现在不能由你恢复
+  error.not_resumable.next:
+    en: If the page says it is waiting for the maintainer, you do not need to fill anything in again; otherwise check the run's status
+    zh: 如果页面说在等维护者处理，你不需要重新填写；否则查看运行状态
+  error.origin_rejected.impact:
+    en: This change was not made
+    zh: 这次修改没有被执行
+  error.origin_rejected.message:
+    en: The request was not sent from this site's pages
+    zh: 请求不是从本站页面发出的
+  error.origin_rejected.next:
+    en: Do it again from this site's pages
+    zh: 从本站页面重新操作
+  error.paid_calls_disabled.impact:
+    en: A simulation that needs a real model cannot start, and the system will not quietly switch to the offline planner
+    zh: 不能开始需要真实模型的模拟，系统不会悄悄换成离线规划器
+  error.paid_calls_disabled.message:
+    en: The service has not turned on paid model calls
+    zh: 服务现在没有开启付费模型调用
+  error.paid_calls_disabled.next:
+    en: Try again after the service turns them on; no run was used
+    zh: 等服务开启后再试；没有使用次数
+  error.payload_too_large.impact:
+    en: This request was not carried out
+    zh: 这次请求没有被执行
+  error.payload_too_large.message:
+    en: The request is too large
+    zh: 请求内容太大
+  error.payload_too_large.next:
+    en: Shorten what you entered and try again
+    zh: 缩短填写内容后再试
+  error.preflight_stale.impact:
+    en: No simulation was started and no run was used
+    zh: 没有开始模拟，也没有使用次数
+  error.preflight_stale.message:
+    en: What you confirmed is not the current pre-run summary (the conditions or data changed, or the summary was updated)
+    zh: 你确认的不是当前这一份运行前说明（条件或资料变了，或说明已经更新）
+  error.preflight_stale.next:
+    en: Read the latest pre-run summary, then confirm again
+    zh: 查看最新的运行前说明后再确认
+  error.quota_exhausted.impact:
+    en: No new simulation can be started
+    zh: 不能再开始新的模拟
+  error.quota_exhausted.message:
+    en: This space's 3 simulation runs are used up or all in use
+    zh: 这个空间的 3 次模拟机会已经用完或都在使用中
+  error.quota_exhausted.next:
+    en: Look at the results you already have; the count does not reset automatically
+    zh: 查看已有的运行结果；次数不会自动重置
+  error.rate_limited.impact:
+    en: This request was not carried out
+    zh: 这次请求没有被执行
+  error.rate_limited.message:
+    en: Too many requests
+    zh: 请求太频繁
+  error.rate_limited.next:
+    en: Wait a minute and try again
+    zh: 稍等一分钟再试
+  error.result_unavailable.impact:
+    en: There are no results before the start, after cancelling, while running or when stopped; nothing is made up when there are none
+    zh: 还没有开始、已经取消、运行中或停下时没有结果；没有就不编一个
+  error.result_unavailable.message:
+    en: This run has no progress or results to view right now
+    zh: 这次运行现在没有可以查看的进度或结果
+  error.result_unavailable.next:
+    en: Check this run's status; come back for the results after it ends
+    zh: 查看这次运行的状态；结束后再来看结果
+  error.revision_conflict.impact:
+    en: This save was not written, and the newer answers were not overwritten
+    zh: 这次保存没有写入，较新的答案没有被覆盖
+  error.revision_conflict.message:
+    en: A newer version of this draft has already been saved elsewhere (for example in another tab)
+    zh: 这份草稿已经在别处（例如另一个标签页）保存了更新的版本
+  error.revision_conflict.next:
+    en: Reload the latest draft, make your changes on top of it, then save
+    zh: 重新读取最新的草稿，在它的基础上修改后再保存
+  error.run_options_invalid.impact:
+    en: No simulation was prepared and no run was used (field names which option)
+    zh: 没有准备模拟，也没有使用次数（field 指出是哪一项）
+  error.run_options_invalid.message:
+    en: The cities, clones per city, years or cost cap chosen this time are outside what the service allows
+    zh: 这次选的城市、每城分身数、年数或费用上限不在服务允许的范围里
+  error.run_options_invalid.next:
+    en: Choose again within the defaults and ranges in the service rules; cities are changed in the draft, followed by a new review and confirmation
+    zh: 按服务规则里的默认值与允许范围重新选择；城市要在草稿里改，再重新审阅与确认
+  error.run_settings_unavailable.impact:
+    en: The system will not continue with the service's current defaults instead; nothing was started and no run was used
+    zh: 系统不会改用服务现在的默认设置继续，没有开始，也没有使用次数
+  error.run_settings_unavailable.message:
+    en: The settings saved for this run, or its copy of the confirmed profile, are missing or damaged
+    zh: 这次运行保存的设置或确认画像副本缺失、损坏
+  error.run_settings_unavailable.next:
+    en: Cancel this preparation and prepare again; if it keeps happening, contact the maintainer with the support reference
+    zh: 取消这次准备后重新准备；问题一直出现时请联系维护者并提供支持编号
+  error.unauthenticated.impact:
+    en: Nothing in this space can be read or changed
+    zh: 不能读取或修改这个空间里的任何内容
+  error.unauthenticated.message:
+    en: There is no valid session, or your personal link is no longer valid
+    zh: 没有有效的会话，或专属链接已经失效
+  error.unauthenticated.next:
+    en: Open your personal link again; if the link was reissued, use the newest one
+    zh: 重新打开你的专属链接；如果链接被重发过，请使用最新的那一个
+  explain.after_impact.archive_conflict:
+    en: The original records were not changed
+    zh: 原始记录没有被改动
+  explain.after_impact.attempts_exhausted:
+    en: This plan will not send requests again on its own, and attempt counts are not reset nor a new ledger opened
+    zh: 这份规划不会自动再发请求，也不会重置尝试次数或另开账本
+  explain.after_impact.budget_blocked:
+    en: The budget is not topped up automatically; what has already finished is kept
+    zh: 不会自动追加预算；已经完成的部分保留
+  explain.after_impact.credentials_missing:
+    en: No new request was sent, and it will not switch to the offline planner
+    zh: 没有发出新的请求，也不会换成离线规划器
+  explain.after_impact.model_mismatch:
+    en: That reply is not used for planning; the model is not switched automatically
+    zh: 那份回复不用于规划；不自动换模型
+  explain.after_impact.paid_calls_disabled:
+    en: The system will not quietly switch to the offline planner to continue
+    zh: 系统不会悄悄换成离线规划器继续
+  explain.after_impact.queued_resume:
+    en: Resuming does not use another run; replies already saved are not requested again
+    zh: 恢复不另扣次数；已经保存的回复不会重新请求
+  explain.after_impact.service_unavailable:
+    en: Replies already saved will not be requested again
+    zh: 已经保存的回复不会重新请求
+  explain.after_impact.snapshot_broken:
+    en: The system will not use new data in place of the old data to continue
+    zh: 系统不会拿新资料冒充旧资料继续
+  explain.after_impact.uncertain_send:
+    en: To avoid paying twice, it is not resent automatically; this request's reserved cost is kept as it is
+    zh: 为了不重复付费，不自动重发；这次的预留费用照原样保留
+  explain.after_next.maintainer:
+    en: 'You do not need to fill anything in again: wait for the maintainer, or delete this run; no resume button that would not work is offered'
+    zh: 不需要重新填写：等维护者处理，或删除这次运行；不会提供无效的“恢复”
+  explain.after_next.queued_resume:
+    en: 'No action needed: the service will continue it in order; a run that has already started cannot be withdrawn with “cancel before start”, but you can delete it if you need to'
+    zh: 不需要操作：服务会按顺序接着运行；已经开始过的运行不能按“开始前取消”撤回，需要的话可以删除
+  explain.after_next.resumable:
+    en: Click “Resume” later to continue the same run (no extra run is used)
+    zh: 稍后点“恢复”继续同一次运行（不另扣次数）
+  explain.after_start.lead:
+    en: The simulation has started, and this run has used 1 of your runs (not refunded once started)
+    zh: 模拟已经开始，这次运行已经用掉 1 次机会（开始之后不退）
+  explain.before_impact.credentials_missing:
+    en: No request was sent, and it will not switch to the offline planner
+    zh: 没有发出任何请求，也不会换成离线规划器
+  explain.before_impact.model_mismatch:
+    en: No reply was used for planning
+    zh: 没有用任何回复规划
+  explain.before_impact.paid_calls_disabled:
+    en: The system will not quietly switch to the offline planner
+    zh: 系统不会悄悄换成离线规划器
+  explain.before_impact.paid_calls_off_waiting:
+    en: The system will not quietly switch to the offline planner
+    zh: 系统不会悄悄换成离线规划器
+  explain.before_impact.request_too_large:
+    en: No request was sent; the system will not trim options or switch models
+    zh: 没有发出请求；系统不会删减选项或换模型
+  explain.before_impact.snapshot_broken:
+    en: The system will not use new data in place of the old data
+    zh: 系统不会拿新资料冒充旧资料
+  explain.before_lead.queued_first_start:
+    en: The simulation has not started yet; 1 run is reserved and only becomes used at the first start; cancelling before the start returns it
+    zh: 还没有开始模拟；预留了 1 次机会，首次启动时才转为已使用，开始之前取消会退回
+  explain.before_lead.released:
+    en: No simulation was started, and the reserved run has been returned
+    zh: 没有开始模拟，预留的次数已经退回
+  explain.before_lead.unused:
+    en: No simulation was started, and no run was used
+    zh: 没有开始模拟，没有使用次数
+  explain.before_next.credentials_missing:
+    en: After the maintainer fixes it, cancel this preparation and prepare again
+    zh: 等维护者处理后，取消这次准备并重新准备
+  explain.before_next.default:
+    en: Cancel this preparation and prepare again; if it keeps happening, contact the maintainer with the support reference
+    zh: 取消这次准备后重新准备；问题一直出现时请联系维护者并提供支持编号
+  explain.before_next.options_not_allowed:
+    en: Cancel this preparation and prepare again within the ranges the service rules now allow
+    zh: 取消这次准备，按服务规则里现在允许的范围重新准备
+  explain.before_next.paid_calls_disabled:
+    en: After the service turns them on, cancel this preparation and prepare again
+    zh: 等服务开启后，取消这次准备并重新准备
+  explain.before_next.paid_calls_off_waiting:
+    en: Once the maintainer turns them on, the page will show “Confirm start”; you do not need to fill anything in again, and you can also cancel this preparation first
+    zh: 等维护者开启后，页面会出现“确认开始”；不需要重新填写，也可以先取消这次准备
+  explain.before_next.preflight_blocked:
+    en: Change your answers as described, review and confirm the profile again, then prepare again
+    zh: 按说明修改答案，重新审阅、确认画像后再准备一次
+  explain.before_next.queued_first_start:
+    en: 'No action needed: the service will start it in order; you can also cancel before it starts'
+    zh: 不需要操作：服务会按顺序开始；开始之前也可以取消
+  explain.before_next.request_too_large:
+    en: After the maintainer adjusts it, cancel this preparation and prepare again
+    zh: 等维护者调整后，取消这次准备并重新准备
+  explain.impact:
+    en: '{parts}'
+    zh: '{parts}'
+  explain.reason.archive_conflict:
+    en: The run records do not match the inputs they are bound to
+    zh: 运行记录与绑定的输入对不上
+  explain.reason.attempts_exhausted:
+    en: The model service is temporarily unavailable, and the service attempts for this plan are used up
+    zh: 模型服务暂时不可用，这一份规划的服务尝试次数已经用完
+  explain.reason.budget_blocked:
+    en: This run's cost cap or request limit is not enough to send the next request
+    zh: 这次运行的费用上限或请求次数上限不够发出下一次请求
+  explain.reason.credentials_missing:
+    en: The real model's credentials are unavailable right now
+    zh: 真实模型的凭证现在不可用
+  explain.reason.inputs_changed:
+    en: The last check after confirming and before starting found that the run conditions changed
+    zh: 确认开始之后、启动之前的最后核对发现运行条件变了
+  explain.reason.internal_error:
+    en: The service hit an internal problem
+    zh: 服务出现了内部问题
+  explain.reason.model_mismatch:
+    en: The model service's model does not match the setting
+    zh: 模型服务的型号与设定不符
+  explain.reason.options_not_allowed:
+    en: The service's allowed ranges changed, so the scale or cost cap chosen this time can no longer be used
+    zh: 服务的允许范围变了，这次选的规模或费用上限已经不能用
+  explain.reason.paid_calls_disabled:
+    en: The service has not turned on paid model calls
+    zh: 服务现在没有开启付费模型调用
+  explain.reason.paid_calls_off_waiting:
+    en: This simulation needs a real model, and the service has not turned on paid model calls
+    zh: 这次模拟需要真实模型，服务现在没有开启付费模型调用
+  explain.reason.preflight_blocked:
+    en: The pre-run check did not pass (the reasons are listed one by one in the pre-run summary)
+    zh: 运行前检查没有通过（原因逐条写在运行前说明里）
+  explain.reason.queued_first_start:
+    en: Start confirmed; waiting in the queue for the first start
+    zh: 已经确认开始，正在排队等待首次启动
+  explain.reason.queued_resume:
+    en: This run has already started and is waiting in the queue to resume
+    zh: 这次运行已经开始过，正在排队等待恢复
+  explain.reason.reference_stale:
+    en: The confirmed profile or this run's settings did not match during the check
+    zh: 确认的画像或这次的运行设置在检查时对不上
+  explain.reason.request_too_large:
+    en: A first-year planning request is over the planner's single-request input limit
+    zh: 首年规划请求超过规划器的单次输入上限
+  explain.reason.result_unavailable:
+    en: The simulation has ended, but the results cannot be read right now
+    zh: 模拟已结束，但结果暂时无法读取
+  explain.reason.run_binding_conflict:
+    en: The run found does not match the run registered for this confirmation
+    zh: 找到的运行与这次确认登记的运行不一致
+  explain.reason.run_halted:
+    en: The simulation stopped under E1's rules
+    zh: 模拟按 E1 的规则停下
+  explain.reason.run_partially_initialized:
+    en: The run folder was only half created at start (the process was interrupted)
+    zh: 运行目录在启动时只建了一半（进程中断）
+  explain.reason.service_unavailable:
+    en: The model service is temporarily unavailable, so the simulation paused, as the rules allow, at a year boundary or between two candidate plans
+    zh: 模型服务暂时不可用，模拟按规则在年度边界或两份候选之间停下
+  explain.reason.settings_missing:
+    en: The settings saved for this run are missing or damaged
+    zh: 这次运行保存的设置缺失或损坏
+  explain.reason.snapshot_broken:
+    en: The data snapshot this simulation is bound to is missing or was changed
+    zh: 这次模拟绑定的资料快照缺失或被改动
+  explain.reason.start_refused:
+    en: The last check before starting did not pass
+    zh: 启动前的最后核对没有通过
+  explain.reason.uncertain_send:
+    en: Whether one model request was already sent cannot be confirmed
+    zh: 有一次模型请求是否已经发出无法确认
+  issue.review_stale.impact:
+    en: Not confirmed
+    zh: 没有确认
+  issue.review_stale.message:
+    en: The review you referred to is not the review of the current draft version (the draft or the data pack changed after the review)
+    zh: 确认引用的审阅不是当前这一版草稿的审阅（草稿或资料包在审阅之后变了）
+  issue.review_stale.next:
+    en: Review the current draft again, then confirm
+    zh: 重新审阅当前的草稿后再确认
+  pack.note.real:
+    en: 'Frozen real data pack (DECISIONS/0042): city data comes from public sources and registered model settings; life rules and scoring parameters are synthetic exploratory settings'
+    zh: 冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定
+  pack.note.synthetic:
+    en: 'Synthetic data pack: every value is a hand-made model setting or test data, not real city data'
+    zh: 合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料
+  progress.placeholder.cost_queued:
+    en: 'Not started yet: no model request has been sent'
+    zh: 还没有开始：没有发出任何模型请求
+  progress.placeholder.cost_started:
+    en: 'Just started: the cost follows the next progress snapshot'
+    zh: 刚开始：费用以下一份进度快照为准
+  progress.placeholder.resume_queued:
+    en: Not started yet, so there is nothing to resume
+    zh: 还没有开始，没有可以恢复的部分
+  progress.placeholder.resume_running:
+    en: Running; no need to resume
+    zh: 运行中，不需要恢复
+  progress.placeholder.started:
+    en: The simulation has just started; the first progress snapshot has not been written yet
+    zh: 模拟刚开始，第一份进度还没有写下
+  rules.cost_cap:
+    en: By default each run's cost cap is {cost} {currency} (reserved by the app from the price quote; it is not a supplier billing limit), and the budget is not topped up automatically
+    zh: 默认每次运行的费用上限是 {cost} {currency}（应用侧按报价预留，不是供应商账单上限），不自动加预算
+  rules.default_scale:
+    en: 'By default: {cities} metro area(s), {clones} clone(s) per city, {years} year(s) for each clone'
+    zh: 默认比较 {cities} 个都会区、每城 {clones} 个分身、每个分身 {years} 年
+  rules.mock:
+    en: 'This service instance uses the offline planner (mock): no network calls, cost 0, and it does not represent a real model''s ability'
+    zh: 这个服务实例使用离线规划器（mock）：没有网络调用、费用为 0，不代表真实模型的能力
+  rules.options.cities:
+    en: 'Cities come from your confirmed profile: you can compare just some of them, but all must be among the allowed cities; none are removed or added for you'
+    zh: 城市来自你确认的画像：可以只比较其中几座，但都要在允许的城市里，不会替你删城或补城
+  rules.options.clones:
+    en: '{low}–{high} clones per city ({default} if you do not choose); more clones show more of the role of luck within one city, but planning requests and cost grow in proportion'
+    zh: 每城分身 {low}–{high} 个（不选就是 {default} 个）；分身越多，同一座城的结果越能看出运气的影响，但规划请求与费用也按比例增加
+  rules.options.cost:
+    en: 'Cost cap {low}–{high} yuan ({default} yuan if you do not choose): shared by all cities, all clones and all service attempts in this run; a larger scale does not add budget automatically, and the run stops when the cost is not enough for the next request'
+    zh: 费用上限 {low}–{high} 元（不选就是 {default} 元）：这次运行的全部城市、全部分身、全部服务尝试共用；扩大规模不会自动加预算，费用不够发下一次请求时就停下
+  rules.options.years:
+    en: Only {years} years are offered, the length the data pack has been validated for
+    zh: 年数只开放资料包配套验证过的 {years} 年
+  rules.paid_off:
+    en: 'Paid model calls are not turned on right now: you can fill in and check, but cannot start a simulation'
+    zh: 付费模型调用现在没有开启：可以填写与检查，但不能开始模拟
+  rules.profile_retention:
+    en: A confirmed profile can be used to prepare new simulations for {days} days from its first confirmation
+    zh: 确认画像从首次确认起 {days} 天内可以用来准备新的模拟
+  rules.result_retention:
+    en: Results are kept for {days} days from the run's first finish; viewing does not extend this, and you can delete them at any time
+    zh: 结果从运行首次结束起保存 {days} 天，查看不续期；可以随时删除
+  rules.runs_total:
+    en: Each personal space has {runs} simulation run(s) in total, and they do not reset; whatever scale you choose, actually starting once uses one run, and not every clone is guaranteed to complete each time
+    zh: 每个专属空间一共 {runs} 次启动模拟的机会，不自动重置；无论选多大的规模，真正开始一次就用掉一次机会，不保证每次所有分身都完整
+  stage.awaiting_confirmation:
+    en: Waiting for you to confirm the start
+    zh: 等你确认开始
+  stage.blocked:
+    en: The pre-run check did not pass
+    zh: 运行前检查没有通过
+  stage.cancelled:
+    en: Cancelled before the start
+    zh: 开始前已取消
+  stage.checking:
+    en: 'Queued for checking: the service runs pre-run checks in order, and no run is used'
+    zh: 排队检查中：运行前检查由服务按顺序执行，不使用次数
+  stage.deleted:
+    en: Deleted
+    zh: 已删除
+  stage.deleting:
+    en: Deleting
+    zh: 正在删除
+  stage.expired:
+    en: Expired
+    zh: 已过期
+  stage.finished:
+    en: This service flow has ended (the results state, city by city, how many completed, exited or are simulation gaps)
+    zh: 本次服务流程结束（结果里逐城写明完成、出局与模拟缺失）
+  stage.needs_attention:
+    en: Stopped; needs attention
+    zh: 停下了，需要处理
+  stage.queued:
+    en: Confirmed; waiting in the queue for the first start
+    zh: 已确认，排队等待首次启动
+  stage.queued_resume:
+    en: Already started; waiting in the queue to resume (no extra run is used)
+    zh: 已经开始过，排队等待恢复（不另扣次数）
+  stage.running:
+    en: Simulation in progress
+    zh: 模拟进行中

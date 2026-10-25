@@ -18,8 +18,15 @@
     "requested_at": null,
     "state": "none"
    },
-   "expires_at": null,
-   "explanation": null,
+   "expires_at": "2026-11-23T09:00:00Z",
+   "expiry_basis": "intent_activity",
+   "explanation": {
+    "audit_ref": null,
+    "category": "service_queued_first_start",
+    "impact_zh": "还没有开始模拟；预留了 1 次机会，首次启动时才转为已使用，开始之前取消会退回",
+    "next_action_zh": "不需要操作：服务会按顺序开始；开始之前也可以取消",
+    "reason_zh": "已经确认开始，正在排队等待首次启动"
+   },
    "intent_id": "intent-0000000000000006",
    "meta": {
     "conversion_version": "e3a-conversion-v2",
@@ -798,7 +805,7 @@
     "years": 3
    },
    "stage": "queued",
-   "stage_zh": "已确认，排队等待开始",
+   "stage_zh": "已确认，排队等待首次启动",
    "support_ref": null,
    "updated_at": "2026-10-24T09:00:00Z",
    "waiting_for": "service"

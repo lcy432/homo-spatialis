@@ -3,6 +3,77 @@
  "message": "ServiceError",
  "payload": {
   "code": "rate_limited",
+  "display": {
+   "display_schema_version": "e3-display-v1",
+   "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+   "source_view_fingerprint": "3a6ea3633ed6df114cf6b8049fd72039ffff7a42029b3f6bff5aa7f76e8aaf86",
+   "translations": {
+    "en": {
+     "fields": [
+      {
+       "key": "error.rate_limited.message",
+       "missing_reason": null,
+       "pointer": "/message_zh",
+       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "Too many requests"
+      },
+      {
+       "key": "error.rate_limited.impact",
+       "missing_reason": null,
+       "pointer": "/impact_zh",
+       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "This request was not carried out"
+      },
+      {
+       "key": "error.rate_limited.next",
+       "missing_reason": null,
+       "pointer": "/next_action_zh",
+       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "Wait a minute and try again"
+      }
+     ],
+     "status": "complete"
+    },
+    "zh": {
+     "fields": [
+      {
+       "key": "error.rate_limited.message",
+       "missing_reason": null,
+       "pointer": "/message_zh",
+       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "请求太频繁"
+      },
+      {
+       "key": "error.rate_limited.impact",
+       "missing_reason": null,
+       "pointer": "/impact_zh",
+       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "这次请求没有被执行"
+      },
+      {
+       "key": "error.rate_limited.next",
+       "missing_reason": null,
+       "pointer": "/next_action_zh",
+       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "稍等一分钟再试"
+      }
+     ],
+     "status": "complete"
+    }
+   }
+  },
   "field": null,
   "impact_zh": "这次请求没有被执行",
   "message_zh": "请求太频繁",

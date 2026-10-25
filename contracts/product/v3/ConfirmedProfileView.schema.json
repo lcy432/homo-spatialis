@@ -1,0 +1,1007 @@
+{
+ "$defs": {
+  "ConfirmedAllocation": {
+   "additionalProperties": false,
+   "description": "确认的定和分配：规范精确分数（参与计算）与显示文字（只供阅读）。",
+   "properties": {
+    "display": {
+     "additionalProperties": {
+      "type": "string"
+     },
+     "title": "Display",
+     "type": "object"
+    },
+    "mode": {
+     "enum": [
+      "manual",
+      "equal_split"
+     ],
+     "title": "Mode",
+     "type": "string"
+    },
+    "points": {
+     "additionalProperties": {
+      "pattern": "^(0|-?[1-9][0-9]*)(/[1-9][0-9]*)?$",
+      "type": "string"
+     },
+     "title": "Points",
+     "type": "object"
+    }
+   },
+   "required": [
+    "mode",
+    "points",
+    "display"
+   ],
+   "title": "ConfirmedAllocation",
+   "type": "object"
+  },
+  "ConfirmedHardRequirement": {
+   "additionalProperties": false,
+   "description": "一条受支持、已确认的硬要求：编译成 E1 的结构化条件；**只单独报告，环境不拦截计划**。",
+   "properties": {
+    "enforced_by_execution": {
+     "const": false,
+     "default": false,
+     "title": "Enforced By Execution",
+     "type": "boolean"
+    },
+    "label_zh": {
+     "maxLength": 200,
+     "minLength": 1,
+     "title": "Label Zh",
+     "type": "string"
+    },
+    "option_id": {
+     "maxLength": 64,
+     "minLength": 1,
+     "title": "Option Id",
+     "type": "string"
+    },
+    "parameter_value": {
+     "title": "Parameter Value",
+     "type": "integer"
+    },
+    "requirement_id": {
+     "maxLength": 64,
+     "minLength": 1,
+     "title": "Requirement Id",
+     "type": "string"
+    }
+   },
+   "required": [
+    "requirement_id",
+    "option_id",
+    "parameter_value",
+    "label_zh"
+   ],
+   "title": "ConfirmedHardRequirement",
+   "type": "object"
+  },
+  "ConfirmedHealth": {
+   "additionalProperties": false,
+   "properties": {
+    "answers": {
+     "items": {
+      "$ref": "#/$defs/ConfirmedHealthAnswer"
+     },
+     "minItems": 1,
+     "title": "Answers",
+     "type": "array"
+    },
+    "questionnaire_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Questionnaire Version",
+     "type": "string"
+    },
+    "status": {
+     "const": "draft_wording_not_validated",
+     "title": "Status",
+     "type": "string"
+    }
+   },
+   "required": [
+    "questionnaire_version",
+    "status",
+    "answers"
+   ],
+   "title": "ConfirmedHealth",
+   "type": "object"
+  },
+  "ConfirmedHealthAnswer": {
+   "additionalProperties": false,
+   "properties": {
+    "answer_state": {
+     "enum": [
+      "provided",
+      "unsure",
+      "unanswered"
+     ],
+     "title": "Answer State",
+     "type": "string"
+    },
+    "meaning": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Meaning",
+     "type": "string"
+    },
+    "option": {
+     "anyOf": [
+      {
+       "enum": [
+        "agree",
+        "disagree",
+        "no_clear_tendency"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Option"
+    },
+    "option_label": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Option Label"
+    },
+    "question_id": {
+     "maxLength": 48,
+     "minLength": 1,
+     "title": "Question Id",
+     "type": "string"
+    },
+    "question_text": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Question Text",
+     "type": "string"
+    }
+   },
+   "required": [
+    "question_id",
+    "question_text",
+    "answer_state",
+    "meaning"
+   ],
+   "title": "ConfirmedHealthAnswer",
+   "type": "object"
+  },
+  "ConfirmedInterests": {
+   "additionalProperties": false,
+   "description": "确认后的兴趣与口味（DECISIONS/0041）。只有 ``confirmed`` 带类别；其余状态分开保存、都按中性规则评分。\n\n类别只进入共同、有限的匹配规则（系数是公开登记的模型假设，不是对个人效用的测量）；不改变六维点数、现金、资格或硬要求。\n用户写的原文不管选了哪种作答状态都原样保留（``leisure_text`` / ``taste_text``）；没认出的片段另列在 ``unrecognized_text``\n（本版未支持），不交给评分。``scope_zh`` 逐项说明这次按什么个性化、哪些没有个性化（未答、暂不确定、没有固定爱好、通用评价\n分开写，不宣称已经个性化）。",
+   "properties": {
+    "cuisines": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Cuisines",
+     "type": "array"
+    },
+    "leisure_categories": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Leisure Categories",
+     "type": "array"
+    },
+    "leisure_status": {
+     "enum": [
+      "unanswered",
+      "unsure",
+      "no_fixed_hobby",
+      "generic",
+      "confirmed"
+     ],
+     "title": "Leisure Status",
+     "type": "string"
+    },
+    "leisure_text": {
+     "anyOf": [
+      {
+       "maxLength": 300,
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Leisure Text"
+    },
+    "matching_note_zh": {
+     "maxLength": 400,
+     "minLength": 1,
+     "title": "Matching Note Zh",
+     "type": "string"
+    },
+    "scope_zh": {
+     "items": {
+      "type": "string"
+     },
+     "minItems": 2,
+     "title": "Scope Zh",
+     "type": "array"
+    },
+    "taste_status": {
+     "enum": [
+      "unanswered",
+      "unsure",
+      "no_preference",
+      "confirmed"
+     ],
+     "title": "Taste Status",
+     "type": "string"
+    },
+    "taste_text": {
+     "anyOf": [
+      {
+       "maxLength": 300,
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Taste Text"
+    },
+    "unrecognized_text": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Unrecognized Text",
+     "type": "array"
+    }
+   },
+   "required": [
+    "leisure_status",
+    "taste_status",
+    "scope_zh",
+    "matching_note_zh"
+   ],
+   "title": "ConfirmedInterests",
+   "type": "object"
+  },
+  "ConfirmedMaterial": {
+   "additionalProperties": false,
+   "properties": {
+    "allocation": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/ConfirmedAllocation"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "status": {
+     "enum": [
+      "allocated",
+      "not_applicable_parent_zero"
+     ],
+     "title": "Status",
+     "type": "string"
+    }
+   },
+   "required": [
+    "status"
+   ],
+   "title": "ConfirmedMaterial",
+   "type": "object"
+  },
+  "ConfirmedMoney": {
+   "additionalProperties": false,
+   "description": "确认的开局现金：保留原始金额、币种、时期、口径与换算依据，以及换算后的整数最小单位。",
+   "properties": {
+    "amount_text": {
+     "maxLength": 40,
+     "minLength": 1,
+     "title": "Amount Text",
+     "type": "string"
+    },
+    "conversion_rule": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Conversion Rule",
+     "type": "string"
+    },
+    "converted": {
+     "$ref": "#/$defs/ProductMoney"
+    },
+    "currency": {
+     "pattern": "^[A-Z]{3}$",
+     "title": "Currency",
+     "type": "string"
+    },
+    "meaning": {
+     "const": "liquid_funds_v1",
+     "title": "Meaning",
+     "type": "string"
+    },
+    "price_period": {
+     "maxLength": 20,
+     "minLength": 1,
+     "title": "Price Period",
+     "type": "string"
+    }
+   },
+   "required": [
+    "amount_text",
+    "currency",
+    "price_period",
+    "meaning",
+    "conversion_rule",
+    "converted"
+   ],
+   "title": "ConfirmedMoney",
+   "type": "object"
+  },
+  "ConfirmedOccupation": {
+   "additionalProperties": false,
+   "properties": {
+    "concept_id": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Concept Id",
+     "type": "string"
+    },
+    "duties": {
+     "items": {
+      "type": "string"
+     },
+     "minItems": 1,
+     "title": "Duties",
+     "type": "array"
+    },
+    "internal_mappings": {
+     "items": {
+      "$ref": "#/$defs/OccupationMapping"
+     },
+     "minItems": 1,
+     "title": "Internal Mappings",
+     "type": "array"
+    },
+    "label": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Label",
+     "type": "string"
+    },
+    "language": {
+     "maxLength": 10,
+     "minLength": 2,
+     "title": "Language",
+     "type": "string"
+    },
+    "match_status": {
+     "enum": [
+      "explicit",
+      "ambiguous"
+     ],
+     "title": "Match Status",
+     "type": "string"
+    },
+    "raw_text": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Raw Text",
+     "type": "string"
+    }
+   },
+   "required": [
+    "concept_id",
+    "label",
+    "duties",
+    "raw_text",
+    "language",
+    "match_status",
+    "internal_mappings"
+   ],
+   "title": "ConfirmedOccupation",
+   "type": "object"
+  },
+  "ConfirmedProfile": {
+   "additionalProperties": false,
+   "description": "用户确认的画像。``content_fingerprint`` 覆盖除它本身以外的全部内容（含版本与草稿引用）：改了相关答案、词表、问卷或转换\n规则，旧确认就对不上；内容被改写，指纹核对不通过。指纹只核对内容，不代替线上认证与授权。",
+   "properties": {
+    "abilities": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Abilities",
+     "type": "array"
+    },
+    "age_years": {
+     "title": "Age Years",
+     "type": "integer"
+    },
+    "cities": {
+     "items": {
+      "type": "string"
+     },
+     "minItems": 1,
+     "title": "Cities",
+     "type": "array"
+    },
+    "confirmation_source": {
+     "const": "user_form",
+     "title": "Confirmation Source",
+     "type": "string"
+    },
+    "confirmed_id": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+     "title": "Confirmed Id",
+     "type": "string"
+    },
+    "content_fingerprint": {
+     "pattern": "^[0-9a-f]{64}$",
+     "title": "Content Fingerprint",
+     "type": "string"
+    },
+    "draft": {
+     "$ref": "#/$defs/DraftRef"
+    },
+    "free_text": {
+     "anyOf": [
+      {
+       "maxLength": 2000,
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Free Text"
+    },
+    "hard_requirements": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/ConfirmedHardRequirement"
+     },
+     "title": "Hard Requirements",
+     "type": "array"
+    },
+    "health": {
+     "$ref": "#/$defs/ConfirmedHealth"
+    },
+    "interests": {
+     "$ref": "#/$defs/ConfirmedInterests"
+    },
+    "material": {
+     "$ref": "#/$defs/ConfirmedMaterial"
+    },
+    "meta": {
+     "$ref": "#/$defs/ProductMeta"
+    },
+    "money": {
+     "$ref": "#/$defs/ConfirmedMoney"
+    },
+    "occupation": {
+     "$ref": "#/$defs/ConfirmedOccupation"
+    },
+    "person_ref": {
+     "pattern": "^[a-z0-9][a-z0-9_.\\-]{0,63}$",
+     "title": "Person Ref",
+     "type": "string"
+    },
+    "retained": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/RetainedStatement"
+     },
+     "title": "Retained",
+     "type": "array"
+    },
+    "review_id": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+     "title": "Review Id",
+     "type": "string"
+    },
+    "six_dimensions": {
+     "$ref": "#/$defs/ConfirmedAllocation"
+    },
+    "sources": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/FieldSource"
+     },
+     "title": "Sources",
+     "type": "array"
+    }
+   },
+   "required": [
+    "meta",
+    "confirmed_id",
+    "person_ref",
+    "draft",
+    "review_id",
+    "confirmation_source",
+    "cities",
+    "occupation",
+    "age_years",
+    "money",
+    "six_dimensions",
+    "material",
+    "health",
+    "interests",
+    "content_fingerprint"
+   ],
+   "title": "ConfirmedProfile",
+   "type": "object"
+  },
+  "ConfirmedProfileSummary": {
+   "additionalProperties": false,
+   "description": "一份确认画像的服务端摘要（E3C 接口补齐）：首次确认时间与可以用来准备新模拟的截止时间都读服务库，重复确认、查询都不续期。\n它不是确认画像本体的一部分，不进入画像的内容身份；画像到期只影响准备新的模拟，已经准备的意图用自己的副本与期限。",
+   "properties": {
+    "confirmed_id": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+     "title": "Confirmed Id",
+     "type": "string"
+    },
+    "content_fingerprint": {
+     "pattern": "^[0-9a-f]{64}$",
+     "title": "Content Fingerprint",
+     "type": "string"
+    },
+    "draft_id": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+     "title": "Draft Id",
+     "type": "string"
+    },
+    "draft_revision": {
+     "minimum": 1,
+     "title": "Draft Revision",
+     "type": "integer"
+    },
+    "expires_at": {
+     "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+     "title": "Expires At",
+     "type": "string"
+    },
+    "first_confirmed_at": {
+     "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+     "title": "First Confirmed At",
+     "type": "string"
+    }
+   },
+   "required": [
+    "confirmed_id",
+    "content_fingerprint",
+    "draft_id",
+    "draft_revision",
+    "first_confirmed_at",
+    "expires_at"
+   ],
+   "title": "ConfirmedProfileSummary",
+   "type": "object"
+  },
+  "DataPackRef": {
+   "additionalProperties": false,
+   "description": "一份资料包的身份：编号、内容指纹与状态（合成测试资料，或冻结的真实资料包）。",
+   "properties": {
+    "content_fingerprint": {
+     "pattern": "^[0-9a-f]{64}$",
+     "title": "Content Fingerprint",
+     "type": "string"
+    },
+    "note": {
+     "maxLength": 400,
+     "minLength": 1,
+     "title": "Note",
+     "type": "string"
+    },
+    "pack_id": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+     "title": "Pack Id",
+     "type": "string"
+    },
+    "status": {
+     "enum": [
+      "synthetic_fixture_only",
+      "real_data_frozen"
+     ],
+     "title": "Status",
+     "type": "string"
+    }
+   },
+   "required": [
+    "pack_id",
+    "content_fingerprint",
+    "status",
+    "note"
+   ],
+   "title": "DataPackRef",
+   "type": "object"
+  },
+  "DraftRef": {
+   "additionalProperties": false,
+   "description": "引用一份草稿：编号、修订号与内容指纹（草稿改了，指纹就不同）。",
+   "properties": {
+    "draft_fingerprint": {
+     "pattern": "^[0-9a-f]{64}$",
+     "title": "Draft Fingerprint",
+     "type": "string"
+    },
+    "draft_id": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+     "title": "Draft Id",
+     "type": "string"
+    },
+    "revision": {
+     "minimum": 1,
+     "title": "Revision",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "draft_id",
+    "revision",
+    "draft_fingerprint"
+   ],
+   "title": "DraftRef",
+   "type": "object"
+  },
+  "EvidenceRef": {
+   "additionalProperties": false,
+   "description": "答案的来源证据：本轮只有表单字段；未来访谈的记录引用在这里接入（访谈 → 候选解释 → 确认 → 同一编译器）。",
+   "properties": {
+    "kind": {
+     "enum": [
+      "form_field",
+      "interview_turn_reserved"
+     ],
+     "title": "Kind",
+     "type": "string"
+    },
+    "note": {
+     "anyOf": [
+      {
+       "maxLength": 300,
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Note"
+    },
+    "ref": {
+     "maxLength": 160,
+     "minLength": 1,
+     "title": "Ref",
+     "type": "string"
+    }
+   },
+   "required": [
+    "kind",
+    "ref"
+   ],
+   "title": "EvidenceRef",
+   "type": "object"
+  },
+  "FieldSource": {
+   "additionalProperties": false,
+   "description": "一项确认值的来源（表单字段，或未来的访谈证据引用）。",
+   "properties": {
+    "evidence": {
+     "items": {
+      "$ref": "#/$defs/EvidenceRef"
+     },
+     "minItems": 1,
+     "title": "Evidence",
+     "type": "array"
+    },
+    "field": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Field",
+     "type": "string"
+    }
+   },
+   "required": [
+    "field",
+    "evidence"
+   ],
+   "title": "FieldSource",
+   "type": "object"
+  },
+  "OccupationMapping": {
+   "additionalProperties": false,
+   "description": "职业概念在某国分类体系里的映射（内部保留，**不展示给用户**，也不是用户的永久身份）。",
+   "properties": {
+    "basis": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Basis",
+     "type": "string"
+    },
+    "code": {
+     "maxLength": 40,
+     "minLength": 1,
+     "title": "Code",
+     "type": "string"
+    },
+    "country": {
+     "pattern": "^[A-Z]{2}$",
+     "title": "Country",
+     "type": "string"
+    },
+    "scheme": {
+     "maxLength": 40,
+     "minLength": 1,
+     "title": "Scheme",
+     "type": "string"
+    },
+    "version": {
+     "maxLength": 40,
+     "minLength": 1,
+     "title": "Version",
+     "type": "string"
+    }
+   },
+   "required": [
+    "country",
+    "scheme",
+    "version",
+    "code",
+    "basis"
+   ],
+   "title": "OccupationMapping",
+   "type": "object"
+  },
+  "ProductMeta": {
+   "additionalProperties": false,
+   "description": "每条产品消息都带的共同元数据：结构、问卷、词表、健康问卷、转换的版本与资料包身份。",
+   "properties": {
+    "conversion_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Conversion Version",
+     "type": "string"
+    },
+    "data_pack": {
+     "$ref": "#/$defs/DataPackRef"
+    },
+    "health_questionnaire_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Health Questionnaire Version",
+     "type": "string"
+    },
+    "questionnaire_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Questionnaire Version",
+     "type": "string"
+    },
+    "sample": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/SampleLabel"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "schema_version": {
+     "const": "e3a-product-schema-v3.3",
+     "title": "Schema Version",
+     "type": "string"
+    },
+    "vocabulary_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Vocabulary Version",
+     "type": "string"
+    }
+   },
+   "required": [
+    "schema_version",
+    "questionnaire_version",
+    "vocabulary_version",
+    "health_questionnaire_version",
+    "conversion_version",
+    "data_pack"
+   ],
+   "title": "ProductMeta",
+   "type": "object"
+  },
+  "ProductMoney": {
+   "additionalProperties": false,
+   "description": "一笔钱：整数最小单位（美元是分）、币种与计价口径；``display`` 只供显示。",
+   "properties": {
+    "amount_minor": {
+     "title": "Amount Minor",
+     "type": "integer"
+    },
+    "currency": {
+     "pattern": "^[A-Z]{3}$",
+     "title": "Currency",
+     "type": "string"
+    },
+    "display": {
+     "maxLength": 40,
+     "minLength": 1,
+     "title": "Display",
+     "type": "string"
+    },
+    "numeraire_id": {
+     "maxLength": 40,
+     "minLength": 1,
+     "title": "Numeraire Id",
+     "type": "string"
+    }
+   },
+   "required": [
+    "amount_minor",
+    "currency",
+    "numeraire_id",
+    "display"
+   ],
+   "title": "ProductMoney",
+   "type": "object"
+  },
+  "RetainedStatement": {
+   "additionalProperties": false,
+   "description": "只留存的陈述：未支持的属性偏好、未获执行保障的“不可妥协”要求等。保留原文与支持状态，不挪进已有权重。",
+   "properties": {
+    "as_hard_requirement": {
+     "title": "As Hard Requirement",
+     "type": "boolean"
+    },
+    "kind": {
+     "maxLength": 48,
+     "minLength": 1,
+     "title": "Kind",
+     "type": "string"
+    },
+    "message_zh": {
+     "maxLength": 400,
+     "minLength": 1,
+     "title": "Message Zh",
+     "type": "string"
+    },
+    "need": {
+     "anyOf": [
+      {
+       "maxLength": 48,
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Need"
+    },
+    "raw_text": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Raw Text",
+     "type": "string"
+    },
+    "ref": {
+     "maxLength": 64,
+     "minLength": 1,
+     "title": "Ref",
+     "type": "string"
+    },
+    "support": {
+     "enum": [
+      "unsupported",
+      "partially_supported"
+     ],
+     "title": "Support",
+     "type": "string"
+    },
+    "usage": {
+     "items": {
+      "enum": [
+       "planning",
+       "start_state",
+       "qualification",
+       "scoring",
+       "retained_only"
+      ],
+      "type": "string"
+     },
+     "title": "Usage",
+     "type": "array"
+    }
+   },
+   "required": [
+    "ref",
+    "kind",
+    "raw_text",
+    "support",
+    "usage",
+    "as_hard_requirement",
+    "message_zh"
+   ],
+   "title": "RetainedStatement",
+   "type": "object"
+  },
+  "SampleLabel": {
+   "additionalProperties": false,
+   "description": "公共样例的出处标签（只出现在样例里；真实运行的消息不写）。\n\n* ``offline_run``：由离线闭环实际执行产生；\n* ``controlled_fixture``：受控测试夹具（例如写好的计划、注入的事件、构造的资料缺口），标明来源；\n* ``contract_example``：线上服务（幂等提交、查询、断线恢复）尚未实现，这里只是**标明为示例**的契约响应。",
+   "properties": {
+    "note": {
+     "maxLength": 600,
+     "minLength": 1,
+     "title": "Note",
+     "type": "string"
+    },
+    "origin": {
+     "enum": [
+      "offline_run",
+      "controlled_fixture",
+      "contract_example"
+     ],
+     "title": "Origin",
+     "type": "string"
+    },
+    "produced_by": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Produced By",
+     "type": "string"
+    },
+    "synthetic": {
+     "const": true,
+     "default": true,
+     "title": "Synthetic",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "origin",
+    "produced_by",
+    "note"
+   ],
+   "title": "SampleLabel",
+   "type": "object"
+  }
+ },
+ "additionalProperties": false,
+ "description": "读取本人的一份确认画像（``GET /api/v1/profiles/{confirmed_id}``）：服务端摘要（日期）与原确认画像。",
+ "properties": {
+  "confirmed": {
+   "$ref": "#/$defs/ConfirmedProfile"
+  },
+  "meta": {
+   "$ref": "#/$defs/ProductMeta"
+  },
+  "summary": {
+   "$ref": "#/$defs/ConfirmedProfileSummary"
+  }
+ },
+ "required": [
+  "meta",
+  "summary",
+  "confirmed"
+ ],
+ "title": "ConfirmedProfileView",
+ "type": "object"
+}

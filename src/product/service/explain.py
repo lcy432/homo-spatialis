@@ -13,6 +13,7 @@ from __future__ import annotations
 from typing import Literal
 
 from common.product_contracts import PublicExplanation
+from product.display import Join, Sub, t
 
 Phase = Literal["before_start", "after_start"]
 
@@ -39,7 +40,19 @@ REASONS: dict[str, str] = {
     "run_halted": "模拟按 E1 的规则停下",
     "result_unavailable": "模拟已结束，但结果暂时无法读取",
     "internal_error": "服务出现了内部问题",
+    # 不是停下的原因，而是当前在等什么（E3C 接口补齐：公开阶段都叫 queued 或等确认，说明按实际记录分开）
+    "queued_first_start": "已经确认开始，正在排队等待首次启动",
+    "queued_resume": "这次运行已经开始过，正在排队等待恢复",
+    "paid_calls_off_waiting": "这次模拟需要真实模型，服务现在没有开启付费模型调用",
 }
+
+#: 固定的几句（也是显示附层的稳定 key 对应的中文）
+AFTER_LEAD = "模拟已经开始，这次运行已经用掉 1 次机会（开始之后不退）"
+AFTER_NEXT_RESUMABLE = "稍后点“恢复”继续同一次运行（不另扣次数）"
+AFTER_NEXT_MAINTAINER = "不需要重新填写：等维护者处理，或删除这次运行；不会提供无效的“恢复”"
+BEFORE_LEAD_RELEASED = "没有开始模拟，预留的次数已经退回"
+BEFORE_LEAD_UNUSED = "没有开始模拟，没有使用次数"
+BEFORE_NEXT_DEFAULT = "取消这次准备后重新准备；问题一直出现时请联系维护者并提供支持编号"
 
 #: 开始之后的额外影响（在“已经用掉 1 次机会”之后补一句）
 _AFTER_IMPACT: dict[str, str] = {
@@ -61,7 +74,21 @@ _BEFORE_IMPACT: dict[str, str] = {
     "credentials_missing": "没有发出任何请求，也不会换成离线规划器",
     "request_too_large": "没有发出请求；系统不会删减选项或换模型",
     "model_mismatch": "没有用任何回复规划",
+    "paid_calls_off_waiting": "系统不会悄悄换成离线规划器",
 }
+
+#: 开始之前的第一句（默认按是否退回预留写；排队等首次启动的已经预留了 1 次，要照实说）
+_BEFORE_LEAD: dict[str, str] = {
+    "queued_first_start": "还没有开始模拟；预留了 1 次机会，首次启动时才转为已使用，开始之前取消会退回",
+}
+
+#: 开始之后的下一步（默认按能不能由用户恢复写；排队等恢复的不需要操作）
+_AFTER_NEXT: dict[str, str] = {
+    "queued_resume": "不需要操作：服务会按顺序接着运行；已经开始过的运行不能按“开始前取消”撤回，需要的话可以删除",
+}
+
+#: 开始之后的额外影响补充：排队等恢复
+_AFTER_IMPACT["queued_resume"] = "恢复不另扣次数；已经保存的回复不会重新请求"
 
 #: 开始之前停下时的下一步（意图停在“检查没有通过”，可以取消再重新准备）
 _BEFORE_NEXT: dict[str, str] = {
@@ -70,6 +97,8 @@ _BEFORE_NEXT: dict[str, str] = {
     "credentials_missing": "等维护者处理后，取消这次准备并重新准备",
     "request_too_large": "等维护者调整后，取消这次准备并重新准备",
     "options_not_allowed": "取消这次准备，按服务规则里现在允许的范围重新准备",
+    "queued_first_start": "不需要操作：服务会按顺序开始；开始之前也可以取消",
+    "paid_calls_off_waiting": "等维护者开启后，页面会出现“确认开始”；不需要重新填写，也可以先取消这次准备",
 }
 
 
@@ -84,22 +113,33 @@ def service_explanation(
     """按实际记录写说明。``phase`` / ``released`` / ``resumable`` 都来自服务库与 E1 的记录，不由停止原因推断。"""
     known = code in REASONS
     key = code if known else "internal_error"
-    reason = REASONS[key]
+    reason = t(f"explain.reason.{key}", REASONS[key])
     if phase == "after_start":
-        parts = ["模拟已经开始，这次运行已经用掉 1 次机会（开始之后不退）"]
+        parts = [Sub("explain.after_start.lead", AFTER_LEAD)]
         if key in _AFTER_IMPACT:
-            parts.append(_AFTER_IMPACT[key])
-        impact = "；".join(parts)
-        if resumable:
-            step = "稍后点“恢复”继续同一次运行（不另扣次数）"
+            parts.append(Sub(f"explain.after_impact.{key}", _AFTER_IMPACT[key]))
+        impact = t("explain.impact", "{parts}", parts=Join(tuple(parts), zh_sep="；", en_sep="; "))
+        if key in _AFTER_NEXT:
+            step = t(f"explain.after_next.{key}", _AFTER_NEXT[key])
+        elif resumable:
+            step = t("explain.after_next.resumable", AFTER_NEXT_RESUMABLE)
         else:
-            step = "不需要重新填写：等维护者处理，或删除这次运行；不会提供无效的“恢复”"
+            step = t("explain.after_next.maintainer", AFTER_NEXT_MAINTAINER)
     else:
-        lead = "没有开始模拟，预留的次数已经退回" if released else "没有开始模拟，没有使用次数"
-        impact = lead + ("；" + _BEFORE_IMPACT[key] if key in _BEFORE_IMPACT else "")
-        step = _BEFORE_NEXT.get(
-            key, "取消这次准备后重新准备；问题一直出现时请联系维护者并提供支持编号"
-        )
+        if key in _BEFORE_LEAD:
+            lead = Sub(f"explain.before_lead.{key}", _BEFORE_LEAD[key])
+        elif released:
+            lead = Sub("explain.before_lead.released", BEFORE_LEAD_RELEASED)
+        else:
+            lead = Sub("explain.before_lead.unused", BEFORE_LEAD_UNUSED)
+        parts = [lead]
+        if key in _BEFORE_IMPACT:
+            parts.append(Sub(f"explain.before_impact.{key}", _BEFORE_IMPACT[key]))
+        impact = t("explain.impact", "{parts}", parts=Join(tuple(parts), zh_sep="；", en_sep="; "))
+        if key in _BEFORE_NEXT:
+            step = t(f"explain.before_next.{key}", _BEFORE_NEXT[key])
+        else:
+            step = t("explain.before_next.default", BEFORE_NEXT_DEFAULT)
     return PublicExplanation(
         category=f"service_{key}",
         reason_zh=reason,

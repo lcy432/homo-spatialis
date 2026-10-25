@@ -16,7 +16,8 @@
    "requested_at": "2026-10-24T09:00:00Z",
    "state": "deleted"
   },
-  "expires_at": "2026-11-23T09:00:00Z",
+  "expires_at": null,
+  "expiry_basis": "unavailable",
   "explanation": null,
   "intent_id": "intent-0000000000000025",
   "meta": {
