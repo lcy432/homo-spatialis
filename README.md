@@ -1041,6 +1041,49 @@ ESS 反映积分权重集中程度，不等于真实样本量或误差保证。�
 
 这也解释了研究问题为何演变：仅证明模型能扮演一个人，或总体平均看起来合理，还不够；要看它遗漏了谁的偏好，在我们的城市任务上是否优于简单方法。已有文献促成了研究工具扩展，但没有取消产品生活闭环。
 
+**接入层讨论补充：用户输入与偏好。** 下表记录已经用于设计的启发和边界；采用设计思想不表示已经实现论文算法，也不表示当前问卷经过效度验证。
+
+| 工作 | 本项目采纳的信息 | 保留的边界 |
+|---|---|---|
+| [Radlinski 等（2019）：Coached Conversational Preference Elicitation](https://aclanthology.org/W19-5941/) | 具体经历、喜欢或不喜欢的原因，可以作为澄清偏好的材料；保留原始回答与确认画像的区别 | 电影对话不能直接换算成六维生活权重；访谈实施后置 |
+| [Handa 等（2024）：Bayesian Preference Elicitation with Language Models（OPEN）](https://arxiv.org/abs/2403.05534v1) | 问题应帮助减少取舍的不确定性；推断值与用户明确陈述必须区分 | 尚未采用主动提问或贝叶斯估计；不能让模型猜测的权重冒充用户确认值 |
+| [Park 等（2026 修订版）：LLM Agents Grounded in Self-Reports Enable General-Purpose Simulation of Individuals](https://arxiv.org/abs/2411.10109v3) | 结构问卷与访谈是可替换、可比较的信息来源，获取方法与稳定的画像含义分开 | 原题为 Generative Agent Simulations of 1,000 People；问卷和实验回答的表现不证明短访谈能预测三年生活 |
+| [Zhao 等（2025）：Do LLMs Recognize Your Preferences?（PrefEval）](https://arxiv.org/abs/2502.09597) | 分开检查偏好提取、记忆和实际遵循；不能默认长对话中的偏好会被正确使用 | 该基准不是本项目规划器已通过的测试 |
+| [Jain 等（2026）：Decisive](https://aclanthology.org/2026.acl-long.1465/) | 选项事实与用户取舍分开；情境比较提供的是偏好证据，不自动确定唯一权重 | 两两提问算法后置；不照搬其选项评分矩阵作为本项目满足感 |
+| [Yang 等（2022）：Eliciting risk preferences that predict risky health behavior](https://pmc.ncbi.nlm.nih.gov/articles/PMC9305924/) | 提问方式与措辞影响健康风险回答；情境题并不天然比直接陈述更有效 | 暂定健康题只提供规划信息，不据此估计患病概率、痛苦权重或风险厌恶系数 |
+
+**接入层讨论补充：真实资料怎样成为可执行环境。** 当前美国 V1 的设计采用分板块混合 A/B：A 为覆盖合理组合后按本地资料校准，B 为由资料支持的条件关系生成。这里的 A/B 是机会生成方案，不是 §5.5 的历史数据兼容等级。具体实现状态仍以 [项目索引](docs/INDEX.md) 为准。
+
+| 工作 | 本项目采纳的信息 | 保留的边界 |
+|---|---|---|
+| [Xu 等（2025）：Developing an Automated Microscopic Traffic Simulation Scenario Generation Tool（RealTwin）](https://doi.org/10.1177/03611981251349433) | 原始资料、统一口径的事实、场景映射与模拟器适配分层；对象之间的对应关系不能丢 | 交通场景的校准不是生活模型的标定；不能照搬其默认参数 |
+| [Sun、Erath（2015）：A Bayesian network approach for population synthesis](https://doi.org/10.1016/j.trc.2015.10.010) | 用小的条件分布表达相关属性，支持方案 B；可按顺序生成，不必一律使用 MCMC | 生成居民属性的方法不能直接当作房源、招聘供给或录用概率；不要求照搬整套网络 |
+| [Ye 等（2017）：Population Synthesis Based on Joint Distribution Inference Without Disaggregate Samples](https://www.jasss.org/20/4/16.html) | 交叉表与统计约束可以用于重建、校准分布；为方案 A 的加权提供方法参照 | 仅有边缘分布不能唯一恢复联合关系；重新赋权不是自动完成贝叶斯更新 |
+| [Feng 等（2025 版本）：CityBench](https://arxiv.org/abs/2406.13945v3) | 将真实城市资料整理为环境对象，再提供行动接口；区分观测资料与生成的模拟输入 | 城市任务基准不证明本项目住房、食品或生活评价有效 |
+| [Xia 等（2026）：Empirical Grounding Improves the Realism of LLM Agents Simulating Human Behavior During Disruptions](https://arxiv.org/abs/2607.17437) | 资料进入结构化属性与约束；外部行为验证与资料拟合分开 | 人群行为验证不能替代同一个用户的偏好验证；不随机改用户开局 |
+| [Santos 等（2026）：When Plausible Is Not Realistic](https://arxiv.org/abs/2606.13835) | 分项检查空间、时间与行为结果，不能用流畅的生活故事代替现实检验 | 输入统计吻合、程序测试通过和现实有效是不同层次 |
+| [Koaik 等（2026）：LLM Powered Social Digital Twins](https://arxiv.org/abs/2601.06111v2) | 环境资料、代理行为与结果评价分别验证；校准资料与检验资料分开 | 群体输出的校准不能证明个人分身准确，也不能用于擅自改用户权重 |
+| [Xu 等（2026）：Towards Fully Automated City Operations: Integrating Agentic AI with Urban Digital Twins](https://discovery.ucl.ac.uk/id/eprint/10225208/1/Batty_ssrn-5596992.pdf) | 流程组织、数据业务与专业计算工具保持分工，作为现有架构的参照 | 属于概念架构及原型讨论，不要求引入新自主代理或让 LLM 生成环境数值 |
+
+[美国国家科学院等（2024）：Foundational Research Gaps and Future Directions for Digital Twins](https://www.nationalacademies.org/read/26894/chapter/2)用于界定资料更新、模型验证与决策反馈的关系。本项目当前采用真实资料支持的生活模拟定位，不因引用数字孪生文献就宣称已经建立经过现实验证的个人孪生。
+
+**已讨论但算法后置的方向：** [Jutras-Dubé 等（2024 版本）的 Copula 迁移生成](https://arxiv.org/abs/2302.09193v3)用于考虑未来资料稀疏城市及跨国扩展；本地边缘吻合不保证迁移来的关联正确。[Kukic、Bierlaire（2025）的 Adaptive synthetic generation using one-step Gibbs Sampler](https://transp-or.epfl.ch/documents/technicalReports/KukicBier2025.pdf)作为以后资料更新的参考，不等于当前年度机会菜单抽样。[Zhang 等（2026 修订版）的 Agentic Economic Modeling](https://arxiv.org/abs/2510.25743v4)作为后续真人行为校正与独立检验的研究参考，不用于本轮修改用户确认的偏好。
+
+分板块选择、同城分身共享菜单、住房接触机会抽样与普通商品完整目录，是本项目结合接口和目标作出的设计决定；上述论文没有直接验证这套组合。采用人口合成方法时，尤其要区分居民已经作出的选择与新用户能够获得的机会。
+
+**六城生活资料包的收尾设计依据（2026-10-22）。** 下列文献用于约束住房品质、地区条件、职业路径和通勤的映射。这里记录的是已采纳的设计方向，不表示算法已经落地或生活评价已经现实标定；实现状态仍看项目索引。
+
+| 工作 | 本轮采用的启发 | 不据此作出的推断 |
+|---|---|---|
+| [Rosen（1974）：Hedonic Prices and Implicit Markets: Product Differentiation in Pure Competition](https://doi.org/10.1086/260169) | 住房价格共同反映多个属性；房子本身、地区条件与交通分别表达，租金只作为品质推断的证据之一 | 完全竞争不意味着租金就是室内品质或个人幸福度；涨价本身不加分，卧室数与由它推断的面积不重复奖励 |
+| [Albouy（2016）：What Are Cities Worth? Land Rents, Local Productivity, and the Total Value of Amenities](https://www.nber.org/papers/w14981) | 城市间工资与住房成本还反映生产率、区位与税等因素；品质推断需控制市场和地区差异 | 不能把跨城绝对租金排名当作住房好坏，也不能把同一地段优势在住房、安全、环境和交通里反复计分；链接为对应工作论文页 |
+| [Sen 等（2025 初稿、2026 v2）：MoveOD: Synthesizing Origin-Destination Commute Distribution from U.S. Census Data](https://arxiv.org/html/2510.18858v2) | 用 LODES 居住—工作联系、ACS 通勤分布与空间网络约束生成的通勤；本项目先采用片区级关系表 | 论文案例不等于六城已验证；LODES 不直接提供出行方式和耗时，开车时间不能冒充公交时间，不照搬建筑级、分钟级系统 |
+| [Fay、Herriot（1979）：Estimates of Income for Small Places: An Application of James-Stein Procedures to Census Data](https://math.umd.edu/~plahiri/SAE/Papers/FayHerriot1979.pdf) | 小地区资料不足时借用更广样本的信息，同时保留估计误差；原始缺失与补出的模型值分开 | 收入估计模型不能直接套用犯罪计数；推断值不冒充实测，没有资料支撑的共同先验仍是模型假设 |
+| [del Rio-Chanona 等（2021）：Occupational mobility and automation: a data-driven network model](https://pmc.ncbi.nlm.nih.gov/articles/PMC7879770/) | 职业之间存在不同的转移路径与阻力；用明确的既有能力、培训成果和岗位要求表达边界 | 历史职业流动不等于培训的因果效果，不授予未经确认的真实学历或资格，不引入论文中的劳动力市场均衡模拟 |
+| [Waddell（2002）：UrbanSim: Modeling Urban Development for Land Use, Transportation, and Environmental Planning](https://doi.org/10.1080/01944360208976274) | 住房位置、就业位置和交通应保持关联；借鉴模块之间用明确空间对象衔接的思想 | 保留现有生活引擎与 LangGraph，不引入城市开发商、人口竞争或土地市场反馈等整套 UrbanSim 机制 |
+
+**本轮配套的方法与数据文档：** [NIST 可靠性手册](https://www.itl.nist.gov/div898/handbook/apr/section1/apr161.htm)帮助区分使用寿命与随机故障；常数风险只是可选近似，不提供家电或品牌的经验故障率。[O*NET 数据库](https://www.onetcenter.org/database.html)用于职业与技能要求；[BEA 地区价格平价](https://www.bea.gov/data/prices-inflation/regional-price-parities-state-and-metro-area/)用于有基准报价的成本换算，指数不直接当单价；[EPA Smart Location](https://www.epa.gov/smartgrowth/smart-location-mapping)供交通与可达性资料筛选，须核对年份、覆盖与跨地区可比性；[FBI 2024 资料说明](https://www.fbi.gov/news/press-releases/fbi-releases-2024-reported-crimes-in-the-nation-statistics)提示犯罪统计的报告覆盖与口径问题，缺报不当零。这些入口不等于资料已全部下载、获准使用或接入程序。
+
 <a id="code-map"></a>
 ## 14. 现有代码地图：每个文件留在这里做什么
 
