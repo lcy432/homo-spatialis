@@ -43,12 +43,11 @@ def test_every_message_exports_a_schema_and_the_committed_files_match():
         assert path.exists(), f"缺少 {name}：先运行 export-schema"
         assert path.read_text(encoding="utf-8") == text, f"{name} 与权威结构不一致"
     index = json.loads(texts["index.json"])
-    assert (
-        index["schema_version"] == "e3a-product-schema-v3.3"
-    )  # E3B 映射修正：日常支持与消费篮子的年度事实，物质两项的含义（DECISIONS/0044）
-    assert index["questionnaire_version"] == "e3a-questionnaire-v0.3-draft"
-    assert index["vocabulary_version"] == "e3a-vocabulary-v4"
-    assert index["conversion_version"] == "e3a-conversion-v2"  # 收尾 F3：金额写法规则变了
+    # 输入体验收敛（DECISIONS/0046）：输入目录、结构化资格答案、面板多选；新问卷不再收集硬要求与属性偏好
+    assert index["schema_version"] == "e3a-product-schema-v3.4"
+    assert index["questionnaire_version"] == "e3a-questionnaire-v0.4-draft"
+    assert index["vocabulary_version"] == "e3a-vocabulary-v5"
+    assert index["conversion_version"] == "e3a-conversion-v3"
     assert index["health_questionnaire_version"] == "e3a-health-coping-q-v0.1-draft"
 
 
@@ -101,6 +100,19 @@ def test_public_samples_validate_and_cover_the_required_cases():
         "86_service_deletion_receipt",
         "87_service_intent_deleted",
         "90_service_intent_expired",
+        # 新输入流程（v3.4）：输入目录、按目录选职业与资格题、面板多选、定和分配、拒绝与旧草稿迁移
+        "129_service_capabilities_input_catalog_e3b",
+        "131_service_draft_catalog_selection",
+        "132_service_review_catalog_selection",
+        "134_service_confirm_catalog_selection",
+        "142_service_review_allocation_equal_split",
+        "143_service_review_allocation_moved",
+        "145_service_review_allocation_under",
+        "146_service_review_allocation_over",
+        "147_service_review_allocation_parent_zero",
+        "148_service_draft_migration_needed",
+        "151_service_draft_migrate_request",
+        "153_service_draft_migrated",
     ):
         assert required in names, f"缺少公共样例 {required}"
     for p in samples:

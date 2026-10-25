@@ -6,7 +6,7 @@
    "US:SYNTH2026:K51",
    "US:SYNTH2026:M52"
   ],
-  "compilation_fingerprint": "3cb103c0e20120d80b2071f61961c4a2a48fe309d6a1e57c80f9e33228acb8a2",
+  "compilation_fingerprint": "cdbd746bd651e38e9a65e1305d36197251dcb7a6ce27eb25bfb0ed035c7e7ff5",
   "compilation_id": "catalog.pack.e3a.synthetic-v2",
   "compiled": [
    {
@@ -293,7 +293,7 @@
    }
   ],
   "meta": {
-   "conversion_version": "e3a-conversion-v2",
+   "conversion_version": "e3a-conversion-v3",
    "data_pack": {
     "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
@@ -301,15 +301,15 @@
     "status": "synthetic_fixture_only"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.3-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.4-draft",
    "sample": {
     "note": "正常闭环编译的便利目录与它的选项目录覆盖",
     "origin": "offline_run",
     "produced_by": "product.catalog.compile_catalog / inventory_coverage",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.3",
-   "vocabulary_version": "e3a-vocabulary-v4"
+   "schema_version": "e3a-product-schema-v3.4",
+   "vocabulary_version": "e3a-vocabulary-v5"
   },
   "scope_zh": "合成资料包里两座城的“日常杂务”设备与人工服务：只调查能替代洗衣或打扫（协议的代表性杂务组合）的方案；做饭、照护、维修等不在 本次调查范围。调查范围之外的东西不计入分母，也不代表城市没有。",
   "tasks": [

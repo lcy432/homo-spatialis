@@ -1,5 +1,5 @@
 {
- "description_zh": "E3B 真实资料包：旧金山没有公交资料。一个分身住在能步行或骑车到岗的地方，不买车；另一个分身的菜单上没有不用车就能到岗的住房，那两年买用车权开车上班（月费不含油费，油费按每次往返付），第三年换到不用车的住处就不再买——两个分身都完整，往返 60 分钟的硬要求每个月都满足；参考生活是用车的那一组（旧金山没有不用车就能到达全部参考岗位的住房）",
+ "description_zh": "E3B 真实资料包：旧金山没有公交资料。一个分身住在能步行或骑车到岗的地方，不买车；另一个分身的菜单上没有不用车就能到岗的住房，那两年买用车权开车上班（月费不含油费，油费按每次往返付），第三年换到不用车的住处就不再买——两个分身都完整，往返 60 分钟的硬要求每个月都满足（这个上限来自旧问卷的历史画像，受控夹具；新问卷不再收集硬要求）；参考生活是用车的那一组（旧金山没有不用车就能到达全部参考岗位的住房）",
  "message": "ProductResult",
  "payload": {
   "cities": [
@@ -2078,7 +2078,7 @@
   "comparisons": [],
   "confirmed": {
    "confirmed_id": "confirmed.draft.u501.r1",
-   "content_fingerprint": "e0cbfa2e6484d79efc5f6fd6450381d1e3cd3fa12c17d211bab0159c0bc4c098"
+   "content_fingerprint": "fb7ac19a99caab9f2badd460bbc03bf8913d9be41b1d26cada794c20cef1bd5f"
   },
   "data_nature": [
    {
@@ -2462,7 +2462,7 @@
    "结果只给用户看，不回灌给仍在生活中的分身"
   ],
   "meta": {
-   "conversion_version": "e3a-conversion-v2",
+   "conversion_version": "e3a-conversion-v3",
    "data_pack": {
     "content_fingerprint": "51ea50b0bde90ace59bad07ea263bb6359c3bec8329bba81725592a0976e7da8",
     "note": "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定",
@@ -2470,15 +2470,15 @@
     "status": "real_data_frozen"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.3-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.4-draft",
    "sample": {
-    "note": "离线闭环实际执行的结果（mock 规划器，零网络）；旧金山没有公交资料，不用车到不了岗位的年份买用车权开车上班",
-    "origin": "offline_run",
+    "note": "受控夹具：画像带着旧问卷的往返 60 分钟上限（新问卷不再收集硬要求）；离线闭环实际执行的结果（mock 规划器，零网络）；旧金山没有公交资料，不用车到不了岗位的年份买用车权开车上班",
+    "origin": "controlled_fixture",
     "produced_by": "product.scenarios.closed_loop(e3b_sf_car)",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.3",
-   "vocabulary_version": "e3a-vocabulary-v4"
+   "schema_version": "e3a-product-schema-v3.4",
+   "vocabulary_version": "e3a-vocabulary-v5"
   },
   "not_generated_reason": null,
   "option_coverage": [
@@ -2501,7 +2501,7 @@
    "planner_kind": "mock"
   },
   "preflight": {
-   "preflight_fingerprint": "e7a214b022cda366d30ee72a1b768ef746144800de6af157a16711b43c045134",
+   "preflight_fingerprint": "6babf641d6f5f00840c110c8cdad0f5a2c752c1716605e6b8c1ea81db143d36b",
    "preflight_id": "preflight.confirmed.draft.u501.r1"
   },
   "reading_guide_zh": [
@@ -2515,9 +2515,9 @@
    "分数是当前合成模型下、按你确认的陈述偏好计算的结果；小数末位的差异不构成可靠的排序"
   ],
   "real_model_calls": 0,
-  "result_fingerprint": "f5a6c94143818199c303043b422333ecfc2a09b12fe2be255707cfc16da30fa1",
-  "result_id": "result.run-e3a-ac8b009033dc3118",
-  "run_id": "run-e3a-ac8b009033dc3118",
+  "result_fingerprint": "c59f51245f20201310f52ba4f0adaefdc8ab5e55c08605e630e21b21960517e0",
+  "result_id": "result.run-e3a-0e79aabd0781d0d8",
+  "run_id": "run-e3a-0e79aabd0781d0d8",
   "run_stage": "completed",
   "sources_zh": [
    "生活事实：E1 结算记录（钱、岗位、住房、食品、服务月份）与月度资源账（本人家务小时）",

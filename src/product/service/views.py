@@ -30,6 +30,8 @@ from common.product_contracts import (
 )
 from product.display import Code, Join, Num, t
 from product.execution import ExecutionSpec, RunPolicy
+from product.migration import migration_for
+from product.pack import DataPack
 from product.service.config import ServiceConfig
 from product.service.explain import service_explanation
 from product.service.store import Quota, intent_deadline
@@ -196,12 +198,17 @@ def settings_view(row: Mapping[str, Any]) -> RunSettingsView | None:
     )
 
 
-def draft_view(meta: ProductMeta, row: Mapping[str, Any]) -> DraftView:
+def draft_view(
+    meta: ProductMeta, row: Mapping[str, Any], pack: DataPack | None = None
+) -> DraftView:
+    """一份草稿；给了资料包时附上它进入新问卷要做的迁移（``product.migration``，读取不改写草稿）。"""
+    draft = UserInputDraft.model_validate_json(row["body"])
     return DraftView(
         meta=meta,
-        draft=UserInputDraft.model_validate_json(row["body"]),
+        draft=draft,
         updated_at=row["updated_at"],
         expires_at=row["expires_at"],
+        migration=None if pack is None else migration_for(pack, draft),
     )
 
 

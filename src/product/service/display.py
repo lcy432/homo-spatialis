@@ -54,7 +54,7 @@ KINDS_WITHOUT_ID = ("capabilities", "session", "runs")
 #: 每种显示对象里照原文、不翻译的位置（用户原文与识别别名，相对 ``source``）
 USER_TEXT: dict[str, tuple[str, ...]] = {
     "capabilities": messages.CAPABILITIES,
-    "draft": messages.under("/draft", messages.DRAFT),
+    "draft": (*messages.under("/draft", messages.DRAFT), *messages.DRAFT_VIEW),
     "review": messages.under("/review", messages.REVIEW),
     "profile": messages.under("/confirmed", messages.PROFILE),
 }

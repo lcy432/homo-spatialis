@@ -24,6 +24,7 @@ from common.life_contracts import YearAction
 from common.life_planning_contracts import MockScript
 from common.product_contracts import (
     CatalogCompilation,
+    ConfirmedHardRequirement,
     ConfirmedProfile,
     ConfirmedRef,
     OptionInventoryCoverage,
@@ -47,6 +48,7 @@ from product.answers import confirm_profile, review_draft
 from product.bridge import progress, run_offline, submit
 from product.capabilities import build_capabilities
 from product.catalog import compile_catalog, inventory_coverage
+from product.display import Ent, Num, t
 from product.fixtures import K51, M52, make_draft, prepare_workspace
 from product.pack import DataPack, load_pack
 from product.preflight import PreflightRun, run_preflight
@@ -131,8 +133,12 @@ def closed_loop(
     repeat_indexes: tuple[int, ...] | None = None,
     stop_after_calls: int | None = None,
     acknowledged: tuple[str, ...] | None = None,
+    legacy_hard_requirements: tuple[tuple[str, int], ...] = (),
 ) -> Scenario:
-    """原始答案 → 审阅 → 确认 → 编译 → E1 预检查 → 提交 → 离线三年 → E1 评价与汇总 → 产品结果。"""
+    """原始答案 → 审阅 → 确认 → 编译 → E1 预检查 → 提交 → 离线三年 → E1 评价与汇总 → 产品结果。
+
+    ``legacy_hard_requirements``（受控夹具）：确认之后给画像加上旧问卷收集过的硬要求（（选项，参数）），见
+    ``with_legacy_hard_requirements``。新问卷不再收集硬要求；这只用来核验 E1 内部的硬要求机制与历史结果的报告。"""
     work = workspace(work)
     sample = label(origin, f"product.scenarios.closed_loop({name})", note)
     with contextlib.chdir(work):
@@ -150,6 +156,8 @@ def closed_loop(
             acknowledged=review.pending_confirmations if acknowledged is None else acknowledged,
             sample=sample,
         )
+        if legacy_hard_requirements:
+            confirmed = with_legacy_hard_requirements(pack, confirmed, legacy_hard_requirements)
         pre = run_preflight(
             pack,
             confirmed,
@@ -211,6 +219,42 @@ def review_only(work: Path, name: str, *, person: str = "u501", **draft_kwargs: 
                 sample=sample,
             )
         return s
+
+
+def with_legacy_hard_requirements(
+    pack: DataPack, confirmed: ConfirmedProfile, requirements: tuple[tuple[str, int], ...]
+) -> ConfirmedProfile:
+    """受控夹具：一份带着旧问卷硬要求的画像（（选项编号，参数），按旧确认的写法生成，重新计算内容身份）。
+
+    新问卷（v0.4）不再收集硬要求，确认画像里永远是空的（DECISIONS/0046）；E1 内部的硬要求机制、已有的运行与历史结果照旧保留。这个
+    夹具只用来核验那套机制与结果里的硬要求报告还成立，不代表新流程会产生这样的画像。"""
+    options = {h.option_id: h for h in pack.body.hard_requirement_options}
+    hard = tuple(
+        ConfirmedHardRequirement(
+            requirement_id=f"hr.legacy.{i}",
+            option_id=option_id,
+            parameter_value=value,
+            label_zh=t(
+                "input.confirmed.hard_requirement.label",
+                "{label} {value} {unit}（单独核验并报告，不拦截计划）",
+                label=Ent("hard_requirement", option_id, options[option_id].label),
+                value=Num(str(value)),
+                unit=Ent("hard_requirement", option_id, options[option_id].unit, "unit"),
+            ),
+        )
+        for i, (option_id, value) in enumerate(requirements)
+    )
+    unsealed = confirmed.model_copy(update={"hard_requirements": hard})
+    return ConfirmedProfile.model_validate(
+        {
+            **unsealed.model_dump(mode="json"),
+            "content_fingerprint": unsealed.expected_fingerprint(),
+        }
+    )
+
+
+#: 旧问卷的通勤上限：往返 60 分钟（只给 ``legacy_hard_requirements`` 用）
+LEGACY_COMMUTE_60 = (("housing.max_commute_roundtrip", 60),)
 
 
 def preflight_only(
@@ -735,8 +779,8 @@ def catalog_statuses(work: Path) -> tuple[CatalogCompilation, OptionInventoryCov
 
 
 def duplicate_answers(work: Path) -> Scenario:
-    """受控夹具（E3-A 收尾 F4）：同一健康题两个答案、同一资格两条（状态冲突）、两条通勤上限（60 与 45）。只走审阅：
-    确认前必须被拒绝，不按最后一个算、不取更严格的上限。"""
+    """受控夹具（E3-A 收尾 F4）：同一健康题两个答案、同一资格两条（状态冲突）。只走审阅：确认前必须被拒绝，不按最后一个算。
+    （新问卷不再收集硬要求，原来的“两条通勤上限”随板块一起去掉。）"""
     work = workspace(work)
     sample = label(
         "controlled_fixture",
@@ -757,14 +801,6 @@ def duplicate_answers(work: Path) -> Scenario:
         raw["abilities"] = [
             {"ability_id": "accounting_cert", "state": "provided"},
             {"ability_id": "accounting_cert", "state": "unsure"},
-        ]
-        raw["hard_requirements"] = [
-            {
-                "requirement_id": rid,
-                "option_id": "housing.max_commute_roundtrip",
-                "parameter_value": v,
-            }
-            for rid, v in (("hr.commute", 60), ("hr.commute2", 45))
         ]
         draft = UserInputDraft.model_validate(raw)
         review = review_draft(pack, draft, sample=sample)

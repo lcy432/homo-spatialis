@@ -355,7 +355,34 @@
   },
   "ConfirmedOccupation": {
    "additionalProperties": false,
+   "description": "确认的职业。``catalog_selected``：从输入目录直接选中，没有原文，记下目录的版本与内容身份；``explicit`` / ``ambiguous``：\n兼容的文字匹配，保留原文。",
    "properties": {
+    "catalog_fingerprint": {
+     "anyOf": [
+      {
+       "pattern": "^[0-9a-f]{64}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Catalog Fingerprint"
+    },
+    "catalog_version": {
+     "anyOf": [
+      {
+       "maxLength": 80,
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Catalog Version"
+    },
     "concept_id": {
      "maxLength": 80,
      "minLength": 1,
@@ -393,28 +420,120 @@
     "match_status": {
      "enum": [
       "explicit",
-      "ambiguous"
+      "ambiguous",
+      "catalog_selected"
      ],
      "title": "Match Status",
      "type": "string"
     },
     "raw_text": {
-     "maxLength": 300,
-     "minLength": 1,
-     "title": "Raw Text",
-     "type": "string"
+     "anyOf": [
+      {
+       "maxLength": 300,
+       "minLength": 1,
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Raw Text"
     }
    },
    "required": [
     "concept_id",
     "label",
     "duties",
-    "raw_text",
     "language",
     "match_status",
     "internal_mappings"
    ],
    "title": "ConfirmedOccupation",
+   "type": "object"
+  },
+  "ConfirmedQualifications": {
+   "additionalProperties": false,
+   "description": "确认的学历、证书与相关经验答案（v3.4）。``ConfirmedProfile.abilities`` 由它按 ``rule`` 换算；``source = ability_claims``\n表示用的是兼容的逐项资格确认，``none`` 表示什么都没答（不授予任何资格）。",
+   "properties": {
+    "certificates": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Certificates",
+     "type": "array"
+    },
+    "certificates_state": {
+     "enum": [
+      "unanswered",
+      "provided",
+      "unsure"
+     ],
+     "title": "Certificates State",
+     "type": "string"
+    },
+    "education_option": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Education Option"
+    },
+    "education_state": {
+     "enum": [
+      "unanswered",
+      "provided",
+      "unsure"
+     ],
+     "title": "Education State",
+     "type": "string"
+    },
+    "experience": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/ExperienceEntry"
+     },
+     "title": "Experience",
+     "type": "array"
+    },
+    "experience_state": {
+     "enum": [
+      "unanswered",
+      "provided",
+      "unsure"
+     ],
+     "title": "Experience State",
+     "type": "string"
+    },
+    "rule": {
+     "const": "confirmed_experience_mapping_v1",
+     "default": "confirmed_experience_mapping_v1",
+     "title": "Rule",
+     "type": "string"
+    },
+    "source": {
+     "enum": [
+      "structured_answers",
+      "ability_claims",
+      "none"
+     ],
+     "title": "Source",
+     "type": "string"
+    }
+   },
+   "required": [
+    "source",
+    "education_state",
+    "certificates_state",
+    "experience_state"
+   ],
+   "title": "ConfirmedQualifications",
    "type": "object"
   },
   "DataPackRef": {
@@ -520,6 +639,29 @@
     "ref"
    ],
    "title": "EvidenceRef",
+   "type": "object"
+  },
+  "ExperienceEntry": {
+   "additionalProperties": false,
+   "description": "一段相关工作经历：职业概念（输入目录里经验问题列出的相关职业）与整年数。",
+   "properties": {
+    "concept_id": {
+     "pattern": "^[a-z][a-z0-9_.]{1,79}$",
+     "title": "Concept Id",
+     "type": "string"
+    },
+    "years": {
+     "maximum": 60,
+     "minimum": 0,
+     "title": "Years",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "concept_id",
+    "years"
+   ],
+   "title": "ExperienceEntry",
    "type": "object"
   },
   "FieldSource": {
@@ -629,7 +771,10 @@
      "default": null
     },
     "schema_version": {
-     "const": "e3a-product-schema-v3.3",
+     "enum": [
+      "e3a-product-schema-v3.3",
+      "e3a-product-schema-v3.4"
+     ],
      "title": "Schema Version",
      "type": "string"
     },
@@ -891,6 +1036,17 @@
    "pattern": "^[a-z0-9][a-z0-9_.\\-]{0,63}$",
    "title": "Person Ref",
    "type": "string"
+  },
+  "qualifications": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/ConfirmedQualifications"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null
   },
   "retained": {
    "default": [],

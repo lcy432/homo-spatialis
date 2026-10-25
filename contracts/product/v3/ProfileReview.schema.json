@@ -224,6 +224,29 @@
    "title": "ExactNumber",
    "type": "object"
   },
+  "ExperienceEntry": {
+   "additionalProperties": false,
+   "description": "一段相关工作经历：职业概念（输入目录里经验问题列出的相关职业）与整年数。",
+   "properties": {
+    "concept_id": {
+     "pattern": "^[a-z][a-z0-9_.]{1,79}$",
+     "title": "Concept Id",
+     "type": "string"
+    },
+    "years": {
+     "maximum": 60,
+     "minimum": 0,
+     "title": "Years",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "concept_id",
+    "years"
+   ],
+   "title": "ExperienceEntry",
+   "type": "object"
+  },
   "HealthReviewItem": {
    "additionalProperties": false,
    "properties": {
@@ -578,6 +601,7 @@
   },
   "OccupationReview": {
    "additionalProperties": false,
+   "description": "``catalog_selected``：从输入目录直接选中（候选就是那一个职业，名称与职责供核对）；其余是兼容的文字匹配。",
    "properties": {
     "candidates": {
      "default": [],
@@ -591,6 +615,15 @@
      "maxLength": 400,
      "minLength": 1,
      "title": "Message Zh",
+     "type": "string"
+    },
+    "mode": {
+     "default": "text",
+     "enum": [
+      "text",
+      "catalog"
+     ],
+     "title": "Mode",
      "type": "string"
     },
     "raw_text": {
@@ -622,7 +655,8 @@
       "explicit",
       "ambiguous",
       "unknown",
-      "not_provided"
+      "not_provided",
+      "catalog_selected"
      ],
      "title": "Status",
      "type": "string"
@@ -739,7 +773,10 @@
      "default": null
     },
     "schema_version": {
-     "const": "e3a-product-schema-v3.3",
+     "enum": [
+      "e3a-product-schema-v3.3",
+      "e3a-product-schema-v3.4"
+     ],
      "title": "Schema Version",
      "type": "string"
     },
@@ -794,6 +831,175 @@
     "display"
    ],
    "title": "ProductMoney",
+   "type": "object"
+  },
+  "QualificationGrant": {
+   "additionalProperties": false,
+   "description": "一项按答案得到的资格与理由（例如“最高学历：本科 → 满足‘学士学位’及以下的学历门槛”）。",
+   "properties": {
+    "ability_id": {
+     "maxLength": 48,
+     "minLength": 1,
+     "title": "Ability Id",
+     "type": "string"
+    },
+    "because": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Because",
+     "type": "string"
+    },
+    "label": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Label",
+     "type": "string"
+    }
+   },
+   "required": [
+    "ability_id",
+    "label",
+    "because"
+   ],
+   "title": "QualificationGrant",
+   "type": "object"
+  },
+  "QualificationRequirement": {
+   "additionalProperties": false,
+   "description": "选中职业的开局岗位要求的一项资格，以及按现在的答案是否满足（不满足时各城的开局会照实挡下，不自动补）。",
+   "properties": {
+    "ability_id": {
+     "maxLength": 48,
+     "minLength": 1,
+     "title": "Ability Id",
+     "type": "string"
+    },
+    "label": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Label",
+     "type": "string"
+    },
+    "met": {
+     "title": "Met",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "ability_id",
+    "label",
+    "met"
+   ],
+   "title": "QualificationRequirement",
+   "type": "object"
+  },
+  "QualificationReview": {
+   "additionalProperties": false,
+   "description": "学历、证书与相关经验的审阅：E3 按资料包已有的规则换成资格（学历“至少达到”、证书只授予选中的那张、经验按相关职业与年数，\n规则 ``confirmed_experience_mapping_v1``）。职业、职称、自由文字与搜索词都不授予资格。``source``：结构化答案、兼容的逐项资格\n确认，或都没有。",
+   "properties": {
+    "ask_experience": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Ask Experience",
+     "type": "array"
+    },
+    "certificates": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Certificates",
+     "type": "array"
+    },
+    "certificates_state": {
+     "enum": [
+      "unanswered",
+      "provided",
+      "unsure"
+     ],
+     "title": "Certificates State",
+     "type": "string"
+    },
+    "education_option": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Education Option"
+    },
+    "education_state": {
+     "enum": [
+      "unanswered",
+      "provided",
+      "unsure"
+     ],
+     "title": "Education State",
+     "type": "string"
+    },
+    "experience": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/ExperienceEntry"
+     },
+     "title": "Experience",
+     "type": "array"
+    },
+    "experience_state": {
+     "enum": [
+      "unanswered",
+      "provided",
+      "unsure"
+     ],
+     "title": "Experience State",
+     "type": "string"
+    },
+    "granted": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/QualificationGrant"
+     },
+     "title": "Granted",
+     "type": "array"
+    },
+    "message_zh": {
+     "maxLength": 400,
+     "minLength": 1,
+     "title": "Message Zh",
+     "type": "string"
+    },
+    "requirements": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/QualificationRequirement"
+     },
+     "title": "Requirements",
+     "type": "array"
+    },
+    "source": {
+     "enum": [
+      "structured_answers",
+      "ability_claims",
+      "none"
+     ],
+     "title": "Source",
+     "type": "string"
+    }
+   },
+   "required": [
+    "source",
+    "education_state",
+    "certificates_state",
+    "experience_state",
+    "message_zh"
+   ],
+   "title": "QualificationReview",
    "type": "object"
   },
   "SampleLabel": {
@@ -990,6 +1196,17 @@
    },
    "title": "Pending Confirmations",
    "type": "array"
+  },
+  "qualifications": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/QualificationReview"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null
   },
   "review_id": {
    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",

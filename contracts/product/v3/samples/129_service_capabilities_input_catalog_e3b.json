@@ -1,0 +1,2065 @@
+{
+ "description_zh": "E3B 能力清单里的输入目录（input_catalog）：9 个分组、40 个职业（每个职业恰好一个主分组）、每个职业的名称、职责、搜索词（名称、资料包别名与目录补充的叫法，例如“程序员”，照原文）与开局岗位要求的资格；最高学历 7 个选项、3 张职业证书、4 个相关经验问题（只在选中的职业需要时问）；兴趣与菜系面板的分组与搜索说明（“川菜”只对应“中餐”，“徒步”“游戏”本版没有）；sections 说明新流程启用哪些板块。content_fingerprint 是目录的内容身份，按目录选职业的草稿要带上它",
+ "message": "ProductCapabilities",
+ "payload": {
+  "abilities": [
+   {
+    "ability_id": "edu_at_least_hs",
+    "ask_when": "只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验",
+    "label": "高中毕业或同等学力"
+   },
+   {
+    "ability_id": "edu_at_least_some_college",
+    "ask_when": "只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验",
+    "label": "读过大学（未取得学位）"
+   },
+   {
+    "ability_id": "edu_at_least_associate",
+    "ask_when": "只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验",
+    "label": "副学士学位"
+   },
+   {
+    "ability_id": "edu_at_least_bachelor",
+    "ask_when": "只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验",
+    "label": "学士学位"
+   },
+   {
+    "ability_id": "edu_at_least_master",
+    "ask_when": "只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验",
+    "label": "硕士学位"
+   },
+   {
+    "ability_id": "edu_at_least_doctoral",
+    "ask_when": "只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验",
+    "label": "博士或专业学位"
+   },
+   {
+    "ability_id": "soc_27_4011_award",
+    "ask_when": "只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验",
+    "label": "音视频技术员的中学后证书"
+   },
+   {
+    "ability_id": "soc_35_1012_experience",
+    "ask_when": "只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验",
+    "label": "餐饮主管的相关工作经验"
+   },
+   {
+    "ability_id": "soc_35_2014_experience",
+    "ask_when": "只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验",
+    "label": "餐厅厨师的相关工作经验"
+   },
+   {
+    "ability_id": "soc_41_1011_experience",
+    "ask_when": "只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验",
+    "label": "零售主管的相关工作经验"
+   },
+   {
+    "ability_id": "soc_43_1011_experience",
+    "ask_when": "只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验",
+    "label": "办公室行政主管的相关工作经验"
+   },
+   {
+    "ability_id": "soc_49_2022_award",
+    "ask_when": "只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验",
+    "label": "通信设备安装维修工的中学后证书"
+   },
+   {
+    "ability_id": "soc_49_3023_award",
+    "ask_when": "只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验",
+    "label": "汽车维修技师的中学后证书"
+   }
+  ],
+  "age_max": 100,
+  "age_min": 18,
+  "attribute_kinds": [
+   {
+    "kind": "brand",
+    "label": "品牌",
+    "note": "已记录原文，本版不评分、不交给分身；需要同规格报价与匹配规则（V2）",
+    "support": "unsupported",
+    "usage": [
+     "retained_only"
+    ]
+   },
+   {
+    "kind": "cuisine",
+    "label": "菜系",
+    "note": "这里的原文只留存；想让口味进入饮食评价，请在“口味与菜系”一项里描述并选中类别",
+    "support": "unsupported",
+    "usage": [
+     "retained_only"
+    ]
+   },
+   {
+    "kind": "preparation",
+    "label": "制作方式（做饭 / 外卖）",
+    "note": "已记录原文，本版不评分",
+    "support": "unsupported",
+    "usage": [
+     "retained_only"
+    ]
+   },
+   {
+    "kind": "tier",
+    "label": "档次",
+    "note": "已记录原文，本版不评分；不从价格推断档次偏好",
+    "support": "unsupported",
+    "usage": [
+     "retained_only"
+    ]
+   },
+   {
+    "kind": "service_quality",
+    "label": "服务质量",
+    "note": "已记录原文，本版不评分",
+    "support": "unsupported",
+    "usage": [
+     "retained_only"
+    ]
+   },
+   {
+    "kind": "home_entry_concern",
+    "label": "上门顾虑（例如不想让陌生人进家）",
+    "note": "已记录原文；本版没有能核验或拦截上门服务的机制，分身可能选择上门服务——即使你把它确认为不可妥协，也只能原样留存",
+    "support": "unsupported",
+    "usage": [
+     "retained_only"
+    ]
+   }
+  ],
+  "capabilities_id": "caps.pack.e3b.us-v1",
+  "cities": [
+   {
+    "city_ref": "US:CBSA2023:35620",
+    "code": "35620",
+    "country": "US",
+    "data_status": "real_data",
+    "geography_version": "CBSA2023 / PUMA2020",
+    "label": "纽约（纽约市五区居民）",
+    "note": "支持的居住与工作地按税务范围裁剪（tax.us2024.nyc）",
+    "scheme": "CBSA2023",
+    "selectable": true
+   },
+   {
+    "city_ref": "US:CBSA2023:31080",
+    "code": "31080",
+    "country": "US",
+    "data_status": "real_data",
+    "geography_version": "CBSA2023 / PUMA2020",
+    "label": "洛杉矶",
+    "note": "支持的居住与工作地按税务范围裁剪（tax.us2024.ca）",
+    "scheme": "CBSA2023",
+    "selectable": true
+   },
+   {
+    "city_ref": "US:CBSA2023:41860",
+    "code": "41860",
+    "country": "US",
+    "data_status": "real_data",
+    "geography_version": "CBSA2023 / PUMA2020",
+    "label": "旧金山",
+    "note": "支持的居住与工作地按税务范围裁剪（tax.us2024.ca）",
+    "scheme": "CBSA2023",
+    "selectable": true
+   },
+   {
+    "city_ref": "US:CBSA2023:16980",
+    "code": "16980",
+    "country": "US",
+    "data_status": "real_data",
+    "geography_version": "CBSA2023 / PUMA2020",
+    "label": "芝加哥（伊利诺伊州部分）",
+    "note": "支持的居住与工作地按税务范围裁剪（tax.us2024.il）",
+    "scheme": "CBSA2023",
+    "selectable": true
+   },
+   {
+    "city_ref": "US:CBSA2023:26420",
+    "code": "26420",
+    "country": "US",
+    "data_status": "real_data",
+    "geography_version": "CBSA2023 / PUMA2020",
+    "label": "休斯敦",
+    "note": "支持的居住与工作地按税务范围裁剪（tax.us2024.tx）",
+    "scheme": "CBSA2023",
+    "selectable": true
+   },
+   {
+    "city_ref": "US:CBSA2023:42660",
+    "code": "42660",
+    "country": "US",
+    "data_status": "real_data",
+    "geography_version": "CBSA2023 / PUMA2020",
+    "label": "西雅图",
+    "note": "支持的居住与工作地按税务范围裁剪（tax.us2024.wa）",
+    "scheme": "CBSA2023",
+    "selectable": true
+   }
+  ],
+  "dimensions": [
+   {
+    "definition": "住的房子条件、吃得是否新鲜合口味、通信联网与日用品是否方便、日常杂务是否省心、衣着与个人护理等实际消费得到的条件（内部再分四项）",
+    "key": "material",
+    "label": "物质生活",
+    "reference_improvement": "参考情境：从远处一居室、以米面罐头为主、洗衣打扫全部自己做，改善到每天三顿新鲜食材、每月少做约 18 小时家务（本版合成模型里的一档改善）",
+    "support": "supported",
+    "support_note": "居住条件、饮食生活、日常支持与便利、个人消费与享受四项都按实际生活评分；储物等其他物质需求本版没有"
+   },
+   {
+    "definition": "城市的公共安全条件",
+    "key": "safety",
+    "label": "安全",
+    "reference_improvement": "参考情境：合成安全指数从 4 提高到 8（0–10，只在本组合成城市之间可比）",
+    "support": "partially_supported",
+    "support_note": "本版只有城市背景条件，分身不能花钱或行动改善它"
+   },
+   {
+    "definition": "城市提供的职业与成长条件，加上你在生活中实际学到的新能力",
+    "key": "opportunity",
+    "label": "发展机会",
+    "reference_improvement": "参考情境：在一年里学完一门 12 个月的资格课程，或城市发展条件从合成指数 4 提高到 8",
+    "support": "supported",
+    "support_note": "城市背景 + 实际参加的学习；证书本身、换岗与涨薪不另加分"
+   },
+   {
+    "definition": "城市基础休闲条件，加上实际参加的锻炼、演出等活动",
+    "key": "leisure",
+    "label": "休闲",
+    "reference_improvement": "参考情境：从每月不参加任何活动，到每月去 8 次健身房",
+    "support": "supported",
+    "support_note": "只算实际发生的活动；具体爱好与地理的匹配本版没有"
+   },
+   {
+    "definition": "空气、气候与城市环境的背景条件",
+    "key": "environment",
+    "label": "环境",
+    "reference_improvement": "参考情境：合成环境指数从 4 提高到 8（0–10，只在本组合成城市之间可比）",
+    "support": "partially_supported",
+    "support_note": "本版只有城市背景条件，分身不能行动改善它"
+   },
+   {
+    "definition": "住处到工作地点的往返时间与实际出门上班的次数对生活的影响",
+    "key": "commute",
+    "label": "交通便捷程度",
+    "reference_improvement": "参考情境：每月到岗 20 次时，每天往返从 70 分钟缩短到 30 分钟",
+    "support": "supported",
+    "support_note": "按实际所住住房的往返分钟与实际到岗次数评分；非工作出行本版没有细化"
+   }
+  ],
+  "free_text_max_chars": 2000,
+  "hard_requirement_options": [
+   {
+    "compiles_to": "E1 硬要求：住房类别、通勤执行记录里最长的往返分钟 ≤ 给定分钟（每个月检查；没有到岗的月份是 0）",
+    "enforced_by_execution": false,
+    "label": "住处到就业中心的往返时间不超过（分钟）",
+    "maximum": 180,
+    "minimum": 20,
+    "option_id": "housing.max_commute_roundtrip",
+    "parameter": "max_commute_roundtrip_minutes",
+    "step": 5,
+    "unit": "分钟",
+    "verification": "每月检查实际所住住房的往返分钟：满足、不满足、无法判断单独报告；不进分数，也不拦截计划"
+   }
+  ],
+  "health_questionnaire": {
+   "common_prompt": "假设基本生活已有保障，判断下面的选择是否符合你。没有正确答案。",
+   "options": [
+    {
+     "label": "符合我",
+     "meaning": "这句话符合用户自己",
+     "option_id": "agree"
+    },
+    {
+     "label": "不符合我",
+     "meaning": "这句话不符合用户自己",
+     "option_id": "disagree"
+    },
+    {
+     "label": "无明显倾向",
+     "meaning": "用户在这一题上没有明显倾向",
+     "option_id": "no_clear_tendency"
+    },
+    {
+     "label": "暂不确定",
+     "meaning": "用户暂不确定——没有这一项的明确指令",
+     "option_id": "unsure"
+    }
+   ],
+   "questions": [
+    {
+     "question_id": "hc_more_pay_more_sick_risk",
+     "text": "一种安排能多赚一点钱，但生病、需要休息几天的可能也更高。我愿意选择它。"
+    },
+    {
+     "question_id": "hc_reserve_for_health_costs",
+     "text": "为了应对可能发生的健康开支，我愿意推迟一次想要、但并不急需的消费，先留一笔钱。"
+    },
+    {
+     "question_id": "hc_wait_for_clear_risk_info",
+     "text": "健康风险的信息还不清楚时，我愿意先放弃眼前的一点收益，等了解清楚再决定。"
+    }
+   ],
+   "rules": [
+    "不计算总健康分，不推断患病概率、疼痛权重、疗效、愿付金额或拒绝治疗",
+    "健康回答不占六维 100 分，也不是第七个评分权重；只供分身做计划，不改变疾病规则、γ、H、账目或满足感",
+    "题目是暂定文案，没有经过认知访谈或量表验证"
+   ],
+   "status": "draft_wording_not_validated",
+   "unanswered_rule": "没有作答另存为“未答”，与“暂不确定”分开；两者都表示没有这一项的明确指令，不补中间值",
+   "version": "e3a-health-coping-q-v0.1-draft"
+  },
+  "input_catalog": {
+   "catalog_id": "input-catalog.e3b.us-v1",
+   "catalog_version": "e3-input-catalog-v1",
+   "certificates": [
+    {
+     "ability_id": "soc_27_4011_award",
+     "label": "音视频技术员的中学后证书",
+     "occupations": [
+      "occ.soc_27_4011"
+     ]
+    },
+    {
+     "ability_id": "soc_49_2022_award",
+     "label": "通信设备安装维修工的中学后证书",
+     "occupations": [
+      "occ.soc_49_2022"
+     ]
+    },
+    {
+     "ability_id": "soc_49_3023_award",
+     "label": "汽车维修技师的中学后证书",
+     "occupations": [
+      "occ.soc_49_3023"
+     ]
+    }
+   ],
+   "content_fingerprint": "d55d76971830b638d6bed01907a54ff25b3a0397b7d84adb51608b7d41378da0",
+   "education": [
+    {
+     "label": "高中以下",
+     "option_id": "below_high_school",
+     "order": 1
+    },
+    {
+     "label": "高中",
+     "option_id": "high_school",
+     "order": 2
+    },
+    {
+     "label": "读过大学但未取得学位",
+     "option_id": "some_college",
+     "order": 3
+    },
+    {
+     "label": "副学士",
+     "option_id": "associate",
+     "order": 4
+    },
+    {
+     "label": "本科",
+     "option_id": "bachelor",
+     "order": 5
+    },
+    {
+     "label": "硕士",
+     "option_id": "master",
+     "order": 6
+    },
+    {
+     "label": "博士或专业学位",
+     "option_id": "doctoral",
+     "order": 7
+    }
+   ],
+   "experience": [
+    {
+     "ability_id": "soc_35_2014_experience",
+     "applies_to": [
+      "occ.soc_35_2014"
+     ],
+     "prompt": "餐厅厨师的开局岗位要求相关工作经验：在柜台点单与饮品制作、餐厅服务员、洗碗工里至少做过 1 年。请填你在这些职业里各做过几年；没有就回答“没有相关经验”",
+     "question_id": "exp.soc_35_2014",
+     "related": [
+      "occ.counter_drinks",
+      "occ.soc_35_3031",
+      "occ.soc_35_9021"
+     ]
+    },
+    {
+     "ability_id": "soc_35_1012_experience",
+     "applies_to": [
+      "occ.soc_35_1012"
+     ],
+     "prompt": "餐饮主管的开局岗位要求相关工作经验：在柜台点单与饮品制作、餐厅服务员、洗碗工、餐厅厨师里至少做过 1 年。请填你在这些职业里各做过几年；没有就回答“没有相关经验”",
+     "question_id": "exp.soc_35_1012",
+     "related": [
+      "occ.counter_drinks",
+      "occ.soc_35_3031",
+      "occ.soc_35_9021",
+      "occ.soc_35_2014"
+     ]
+    },
+    {
+     "ability_id": "soc_41_1011_experience",
+     "applies_to": [
+      "occ.soc_41_1011"
+     ],
+     "prompt": "零售主管的开局岗位要求相关工作经验：在收银员、门店销售员里至少做过 1 年。请填你在这些职业里各做过几年；没有就回答“没有相关经验”",
+     "question_id": "exp.soc_41_1011",
+     "related": [
+      "occ.cashier",
+      "occ.retail_sales"
+     ]
+    },
+    {
+     "ability_id": "soc_43_1011_experience",
+     "applies_to": [
+      "occ.soc_43_1011"
+     ],
+     "prompt": "办公室行政主管的开局岗位要求相关工作经验：在办公室文员、客服代表、秘书与行政助理、前台与咨询员、收发与库存文员、银行柜员、记账员或出纳里至少做过 1 年。请填你在这些职业里各做过几年；没有就回答“没有相关经验”",
+     "question_id": "exp.soc_43_1011",
+     "related": [
+      "occ.office_clerk",
+      "occ.soc_43_4051",
+      "occ.soc_43_6014",
+      "occ.soc_43_4171",
+      "occ.soc_43_5071",
+      "occ.soc_43_3071",
+      "occ.bookkeeper"
+     ]
+    }
+   ],
+   "groups": [
+    {
+     "group_id": "food_retail",
+     "label": "餐饮零售",
+     "order": 1
+    },
+    {
+     "group_id": "office_service",
+     "label": "办公客服",
+     "order": 2
+    },
+    {
+     "group_id": "it_tech",
+     "label": "IT 技术",
+     "order": 3
+    },
+    {
+     "group_id": "professional_business",
+     "label": "专业商务",
+     "order": 4
+    },
+    {
+     "group_id": "repair_manufacturing",
+     "label": "维修制造",
+     "order": 5
+    },
+    {
+     "group_id": "logistics_warehouse",
+     "label": "物流仓储",
+     "order": 6
+    },
+    {
+     "group_id": "cleaning_gardening",
+     "label": "清洁园艺",
+     "order": 7
+    },
+    {
+     "group_id": "culture_sports",
+     "label": "文化运动",
+     "order": 8
+    },
+    {
+     "group_id": "management",
+     "label": "管理协调",
+     "order": 9
+    }
+   ],
+   "leisure": {
+    "entries": [
+     {
+      "group_id": "sports_fitness",
+      "key": "fitness",
+      "label": "健身",
+      "order": 1,
+      "search_terms": [
+       "健身",
+       "跑步",
+       "撸铁",
+       "gym",
+       "running",
+       "Fitness",
+       "健身房",
+       "workout"
+      ]
+     },
+     {
+      "group_id": "sports_fitness",
+      "key": "racket_sports",
+      "label": "球拍运动",
+      "order": 2,
+      "search_terms": [
+       "球拍运动",
+       "网球",
+       "羽毛球",
+       "乒乓球",
+       "球拍",
+       "tennis",
+       "badminton",
+       "Racket sports"
+      ]
+     },
+     {
+      "group_id": "arts_music",
+      "key": "music",
+      "label": "音乐",
+      "order": 3,
+      "search_terms": [
+       "音乐",
+       "吉他",
+       "唱歌",
+       "合唱",
+       "乐器",
+       "music",
+       "guitar",
+       "choir",
+       "Music"
+      ]
+     },
+     {
+      "group_id": "arts_music",
+      "key": "arts_culture",
+      "label": "艺术与文化",
+      "order": 4,
+      "search_terms": [
+       "艺术与文化",
+       "美术馆",
+       "博物馆",
+       "展览",
+       "音乐会",
+       "看演出",
+       "museum",
+       "gallery",
+       "Arts and culture",
+       "艺术",
+       "文化"
+      ]
+     },
+     {
+      "group_id": "food_cooking",
+      "key": "culinary",
+      "label": "美食活动",
+      "order": 5,
+      "search_terms": [
+       "美食活动",
+       "烹饪",
+       "做菜",
+       "品鉴",
+       "cooking",
+       "Food and cooking activities",
+       "美食"
+      ]
+     }
+    ],
+    "groups": [
+     {
+      "group_id": "sports_fitness",
+      "label": "运动健身",
+      "order": 1
+     },
+     {
+      "group_id": "arts_music",
+      "label": "文化艺术",
+      "order": 2
+     },
+     {
+      "group_id": "food_cooking",
+      "label": "美食烹饪",
+      "order": 3
+     }
+    ],
+    "kind": "leisure",
+    "note": "可以多选，也可以跳过（跳过就是未答）；选中的类别直接用于评价，不需要写文字。没有固定爱好、随当地体验（通用休闲评价）和暂不确定可以单独选",
+    "search_notes": [
+     {
+      "note": "本版还没有徒步与户外活动这一类，暂时不能选，也不会算成健身；可以先跳过或选“暂不确定”，在补充文字里写下只留存、不评分",
+      "note_id": "leisure.outdoor_not_supported",
+      "points_to": [],
+      "terms": [
+       "徒步",
+       "爬山",
+       "登山",
+       "郊游",
+       "露营",
+       "远足",
+       "hiking",
+       "camping",
+       "trekking"
+      ]
+     },
+     {
+      "note": "本版还没有电子游戏这一类，暂时不能选，也不会算成别的类别；可以先跳过或选“暂不确定”，在补充文字里写下只留存、不评分",
+      "note_id": "leisure.games_not_supported",
+      "points_to": [],
+      "terms": [
+       "游戏",
+       "打游戏",
+       "电子游戏",
+       "电竞",
+       "手游",
+       "gaming",
+       "video games",
+       "esports"
+      ]
+     }
+    ]
+   },
+   "notes": [
+    "职业分组只用于浏览，不改变职业的含义；每个职业只在一个分组里",
+    "选职业不会授予学历、证书或经验；这些按你在资格题里的回答换算（规则由 E3 统一执行）",
+    "补充文字仍可以写，只供分身做计划参考：它不改变点数、现金、资格或兴趣类别，也不会变成硬要求"
+   ],
+   "occupations": [
+    {
+     "concept_id": "occ.counter_drinks",
+     "duties": [
+      "在柜台点单与收款",
+      "制作咖啡、奶茶等饮品"
+     ],
+     "experience_question": null,
+     "group_id": "food_retail",
+     "label": "柜台点单与饮品制作",
+     "order": 1,
+     "qualification_refs": [],
+     "search_terms": [
+      "柜台点单与饮品制作",
+      "做饮品",
+      "饮品制作",
+      "咖啡师",
+      "奶茶",
+      "barista",
+      "Counter service and drink making",
+      "快餐店员",
+      "柜台服务员",
+      "点单员",
+      "饮品师",
+      "fast food worker",
+      "counter worker"
+     ]
+    },
+    {
+     "concept_id": "occ.soc_35_3031",
+     "duties": [
+      "餐厅服务员"
+     ],
+     "experience_question": null,
+     "group_id": "food_retail",
+     "label": "餐厅服务员",
+     "order": 2,
+     "qualification_refs": [],
+     "search_terms": [
+      "餐厅服务员",
+      "Waiters and Waitresses",
+      "服务员",
+      "跑堂",
+      "waiter",
+      "waitress",
+      "server"
+     ]
+    },
+    {
+     "concept_id": "occ.soc_35_9021",
+     "duties": [
+      "洗碗工"
+     ],
+     "experience_question": null,
+     "group_id": "food_retail",
+     "label": "洗碗工",
+     "order": 3,
+     "qualification_refs": [],
+     "search_terms": [
+      "洗碗工",
+      "Dishwashers",
+      "洗碗员",
+      "刷碗工",
+      "dishwasher"
+     ]
+    },
+    {
+     "concept_id": "occ.soc_35_2014",
+     "duties": [
+      "餐厅厨师"
+     ],
+     "experience_question": "exp.soc_35_2014",
+     "group_id": "food_retail",
+     "label": "餐厅厨师",
+     "order": 4,
+     "qualification_refs": [
+      "soc_35_2014_experience"
+     ],
+     "search_terms": [
+      "餐厅厨师",
+      "Cooks, Restaurant",
+      "厨师",
+      "炒锅师傅",
+      "后厨",
+      "cook",
+      "chef",
+      "line cook"
+     ]
+    },
+    {
+     "concept_id": "occ.cashier",
+     "duties": [
+      "为顾客结账收款",
+      "核对现金与票据"
+     ],
+     "experience_question": null,
+     "group_id": "food_retail",
+     "label": "收银员",
+     "order": 5,
+     "qualification_refs": [],
+     "search_terms": [
+      "收银员",
+      "收银",
+      "cashier",
+      "Cashier",
+      "收款员",
+      "checkout"
+     ]
+    },
+    {
+     "concept_id": "occ.retail_sales",
+     "duties": [
+      "在门店接待顾客、介绍商品",
+      "整理货架与陈列"
+     ],
+     "experience_question": null,
+     "group_id": "food_retail",
+     "label": "门店销售员",
+     "order": 6,
+     "qualification_refs": [],
+     "search_terms": [
+      "门店销售员",
+      "店员",
+      "售货员",
+      "门店销售",
+      "导购",
+      "retail sales",
+      "Retail salesperson",
+      "销售员",
+      "营业员",
+      "sales associate",
+      "salesperson"
+     ]
+    },
+    {
+     "concept_id": "occ.office_clerk",
+     "duties": [
+      "处理文件与表格",
+      "录入与整理资料",
+      "接听电话、安排日程"
+     ],
+     "experience_question": null,
+     "group_id": "office_service",
+     "label": "办公室文员",
+     "order": 7,
+     "qualification_refs": [
+      "edu_at_least_hs"
+     ],
+     "search_terms": [
+      "办公室文员",
+      "文员",
+      "行政助理",
+      "办公室职员",
+      "office clerk",
+      "admin assistant",
+      "Office clerk",
+      "职员",
+      "办事员",
+      "office assistant",
+      "clerk"
+     ]
+    },
+    {
+     "concept_id": "occ.soc_43_4051",
+     "duties": [
+      "客服代表"
+     ],
+     "experience_question": null,
+     "group_id": "office_service",
+     "label": "客服代表",
+     "order": 8,
+     "qualification_refs": [
+      "edu_at_least_hs"
+     ],
+     "search_terms": [
+      "客服代表",
+      "Customer Service Representatives",
+      "客服",
+      "客户服务",
+      "话务员",
+      "电话客服",
+      "customer service",
+      "call center"
+     ]
+    },
+    {
+     "concept_id": "occ.soc_43_6014",
+     "duties": [
+      "秘书与行政助理"
+     ],
+     "experience_question": null,
+     "group_id": "office_service",
+     "label": "秘书与行政助理",
+     "order": 9,
+     "qualification_refs": [
+      "edu_at_least_hs"
+     ],
+     "search_terms": [
+      "秘书与行政助理",
+      "Secretaries and Administrative Assistants, Except Legal, Medical, and Executive",
+      "秘书",
+      "助理",
+      "secretary",
+      "administrative assistant"
+     ]
+    },
+    {
+     "concept_id": "occ.soc_43_4171",
+     "duties": [
+      "前台与咨询员"
+     ],
+     "experience_question": null,
+     "group_id": "office_service",
+     "label": "前台与咨询员",
+     "order": 10,
+     "qualification_refs": [
+      "edu_at_least_hs"
+     ],
+     "search_terms": [
+      "前台与咨询员",
+      "Receptionists and Information Clerks",
+      "前台",
+      "接待员",
+      "咨询员",
+      "receptionist"
+     ]
+    },
+    {
+     "concept_id": "occ.soc_43_3071",
+     "duties": [
+      "银行柜员"
+     ],
+     "experience_question": null,
+     "group_id": "office_service",
+     "label": "银行柜员",
+     "order": 11,
+     "qualification_refs": [
+      "edu_at_least_hs"
+     ],
+     "search_terms": [
+      "银行柜员",
+      "Tellers",
+      "柜员",
+      "银行职员",
+      "bank teller",
+      "teller"
+     ]
+    },
+    {
+     "concept_id": "occ.bookkeeper",
+     "duties": [
+      "登记日常收支",
+      "管理现金与票据"
+     ],
+     "experience_question": null,
+     "group_id": "office_service",
+     "label": "记账员或出纳",
+     "order": 12,
+     "qualification_refs": [
+      "edu_at_least_some_college"
+     ],
+     "search_terms": [
+      "记账员或出纳",
+      "记账",
+      "出纳",
+      "做账",
+      "bookkeeper",
+      "Bookkeeper or cash clerk",
+      "记账员",
+      "出纳员",
+      "簿记",
+      "bookkeeping clerk",
+      "accounting clerk"
+     ]
+    },
+    {
+     "concept_id": "occ.soc_15_1232",
+     "duties": [
+      "电脑用户支持专员"
+     ],
+     "experience_question": null,
+     "group_id": "it_tech",
+     "label": "电脑用户支持专员",
+     "order": 13,
+     "qualification_refs": [
+      "edu_at_least_some_college"
+     ],
+     "search_terms": [
+      "电脑用户支持专员",
+      "Computer User Support Specialists",
+      "IT 支持",
+      "技术支持",
+      "桌面支持",
+      "电脑维护",
+      "help desk",
+      "IT support",
+      "tech support"
+     ]
+    },
+    {
+     "concept_id": "occ.soc_15_1231",
+     "duties": [
+      "网络支持专员"
+     ],
+     "experience_question": null,
+     "group_id": "it_tech",
+     "label": "网络支持专员",
+     "order": 14,
+     "qualification_refs": [
+      "edu_at_least_associate"
+     ],
+     "search_terms": [
+      "网络支持专员",
+      "Computer Network Support Specialists",
+      "网管",
+      "网络管理员",
+      "网络运维",
+      "network support",
+      "network technician"
+     ]
+    },
+    {
+     "concept_id": "occ.soc_15_1252",
+     "duties": [
+      "软件开发工程师"
+     ],
+     "experience_question": null,
+     "group_id": "it_tech",
+     "label": "软件开发工程师",
+     "order": 15,
+     "qualification_refs": [
+      "edu_at_least_bachelor"
+     ],
+     "search_terms": [
+      "软件开发工程师",
+      "Software Developers",
+      "程序员",
+      "软件工程师",
+      "开发工程师",
+      "码农",
+      "前端开发",
+      "后端开发",
+      "programmer",
+      "software engineer",
+      "software developer",
+      "developer",
+      "coder"
+     ]
+    },
+    {
+     "concept_id": "occ.soc_15_1211",
+     "duties": [
+      "计算机系统分析师"
+     ],
+     "experience_question": null,
+     "group_id": "it_tech",
+     "label": "计算机系统分析师",
+     "order": 16,
+     "qualification_refs": [
+      "edu_at_least_bachelor"
+     ],
+     "search_terms": [
+      "计算机系统分析师",
+      "Computer Systems Analysts",
+      "系统分析师",
+      "IT 分析师",
+      "systems analyst"
+     ]
+    },
+    {
+     "concept_id": "occ.accountant",
+     "duties": [
+      "编制财务报表",
+      "核对账目与税务资料"
+     ],
+     "experience_question": null,
+     "group_id": "professional_business",
+     "label": "会计",
+     "order": 17,
+     "qualification_refs": [
+      "edu_at_least_bachelor"
+     ],
+     "search_terms": [
+      "会计",
+      "审计",
+      "accountant",
+      "Accountant",
+      "会计师",
+      "审计师",
+      "auditor"
+     ]
+    },
+    {
+     "concept_id": "occ.soc_13_2051",
+     "duties": [
+      "金融与投资分析师"
+     ],
+     "experience_question": null,
+     "group_id": "professional_business",
+     "label": "金融与投资分析师",
+     "order": 18,
+     "qualification_refs": [
+      "edu_at_least_bachelor"
+     ],
+     "search_terms": [
+      "金融与投资分析师",
+      "Financial and Investment Analysts",
+      "金融分析师",
+      "投资分析师",
+      "financial analyst",
+      "investment analyst"
+     ]
+    },
+    {
+     "concept_id": "occ.soc_13_1161",
+     "duties": [
+      "市场研究与营销专员"
+     ],
+     "experience_question": null,
+     "group_id": "professional_business",
+     "label": "市场研究与营销专员",
+     "order": 19,
+     "qualification_refs": [
+      "edu_at_least_bachelor"
+     ],
+     "search_terms": [
+      "市场研究与营销专员",
+      "Market Research Analysts and Marketing Specialists",
+      "市场营销",
+      "市场专员",
+      "营销",
+      "市场调研",
+      "marketing",
+      "market research"
+     ]
+    },
+    {
+     "concept_id": "occ.soc_13_1071",
+     "duties": [
+      "人力资源专员"
+     ],
+     "experience_question": null,
+     "group_id": "professional_business",
+     "label": "人力资源专员",
+     "order": 20,
+     "qualification_refs": [
+      "edu_at_least_bachelor"
+     ],
+     "search_terms": [
+      "人力资源专员",
+      "Human Resources Specialists",
+      "人事",
+      "人力资源",
+      "HR",
+      "招聘专员",
+      "recruiter",
+      "human resources"
+     ]
+    },
+    {
+     "concept_id": "occ.soc_23_2011",
+     "duties": [
+      "律师助理"
+     ],
+     "experience_question": null,
+     "group_id": "professional_business",
+     "label": "律师助理",
+     "order": 21,
+     "qualification_refs": [
+      "edu_at_least_associate"
+     ],
+     "search_terms": [
+      "律师助理",
+      "Paralegals and Legal Assistants",
+      "法务助理",
+      "律所助理",
+      "paralegal",
+      "legal assistant"
+     ]
+    },
+    {
+     "concept_id": "occ.soc_41_3091",
+     "duties": [
+      "服务类销售代表"
+     ],
+     "experience_question": null,
+     "group_id": "professional_business",
+     "label": "服务类销售代表",
+     "order": 22,
+     "qualification_refs": [
+      "edu_at_least_hs"
+     ],
+     "search_terms": [
+      "服务类销售代表",
+      "Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel",
+      "销售代表",
+      "业务员",
+      "sales representative",
+      "sales rep"
+     ]
+    },
+    {
+     "concept_id": "occ.soc_49_9071",
+     "duties": [
+      "综合维修工"
+     ],
+     "experience_question": null,
+     "group_id": "repair_manufacturing",
+     "label": "综合维修工",
+     "order": 23,
+     "qualification_refs": [
+      "edu_at_least_hs"
+     ],
+     "search_terms": [
+      "综合维修工",
+      "Maintenance and Repair Workers, General",
+      "维修工",
+      "物业维修",
+      "修理工",
+      "maintenance worker",
+      "handyman"
+     ]
+    },
+    {
+     "concept_id": "occ.soc_49_3023",
+     "duties": [
+      "汽车维修技师"
+     ],
+     "experience_question": null,
+     "group_id": "repair_manufacturing",
+     "label": "汽车维修技师",
+     "order": 24,
+     "qualification_refs": [
+      "soc_49_3023_award"
+     ],
+     "search_terms": [
+      "汽车维修技师",
+      "Automotive Service Technicians and Mechanics",
+      "汽修",
+      "汽车修理工",
+      "修车师傅",
+      "auto mechanic",
+      "mechanic"
+     ]
+    },
+    {
+     "concept_id": "occ.soc_49_2022",
+     "duties": [
+      "通信设备安装维修工"
+     ],
+     "experience_question": null,
+     "group_id": "repair_manufacturing",
+     "label": "通信设备安装维修工",
+     "order": 25,
+     "qualification_refs": [
+      "soc_49_2022_award"
+     ],
+     "search_terms": [
+      "通信设备安装维修工",
+      "Telecommunications Equipment Installers and Repairers, Except Line Installers",
+      "通信维修",
+      "通信设备",
+      "宽带安装",
+      "telecom technician"
+     ]
+    },
+    {
+     "concept_id": "occ.soc_51_4121",
+     "duties": [
+      "焊工"
+     ],
+     "experience_question": null,
+     "group_id": "repair_manufacturing",
+     "label": "焊工",
+     "order": 26,
+     "qualification_refs": [
+      "edu_at_least_hs"
+     ],
+     "search_terms": [
+      "焊工",
+      "Welders, Cutters, Solderers, and Brazers",
+      "电焊工",
+      "焊接工",
+      "welder"
+     ]
+    },
+    {
+     "concept_id": "occ.soc_53_7062",
+     "duties": [
+      "搬运与装卸工"
+     ],
+     "experience_question": null,
+     "group_id": "logistics_warehouse",
+     "label": "搬运与装卸工",
+     "order": 27,
+     "qualification_refs": [],
+     "search_terms": [
+      "搬运与装卸工",
+      "Laborers and Freight, Stock, and Material Movers, Hand",
+      "搬运工",
+      "装卸工",
+      "mover",
+      "laborer"
+     ]
+    },
+    {
+     "concept_id": "occ.soc_53_7065",
+     "duties": [
+      "理货与拣货员"
+     ],
+     "experience_question": null,
+     "group_id": "logistics_warehouse",
+     "label": "理货与拣货员",
+     "order": 28,
+     "qualification_refs": [],
+     "search_terms": [
+      "理货与拣货员",
+      "Stockers and Order Fillers",
+      "理货员",
+      "拣货员",
+      "仓库员工",
+      "stocker",
+      "order picker"
+     ]
+    },
+    {
+     "concept_id": "occ.soc_43_5071",
+     "duties": [
+      "收发与库存文员"
+     ],
+     "experience_question": null,
+     "group_id": "logistics_warehouse",
+     "label": "收发与库存文员",
+     "order": 29,
+     "qualification_refs": [
+      "edu_at_least_hs"
+     ],
+     "search_terms": [
+      "收发与库存文员",
+      "Shipping, Receiving, and Inventory Clerks",
+      "库管",
+      "仓管",
+      "收发员",
+      "库存管理",
+      "inventory clerk",
+      "shipping clerk"
+     ]
+    },
+    {
+     "concept_id": "occ.soc_37_2011",
+     "duties": [
+      "清洁工（楼宇）"
+     ],
+     "experience_question": null,
+     "group_id": "cleaning_gardening",
+     "label": "清洁工（楼宇）",
+     "order": 30,
+     "qualification_refs": [],
+     "search_terms": [
+      "清洁工（楼宇）",
+      "Janitors and Cleaners, Except Maids and Housekeeping Cleaners",
+      "保洁",
+      "保洁员",
+      "清洁工",
+      "janitor",
+      "cleaner"
+     ]
+    },
+    {
+     "concept_id": "occ.soc_37_2012",
+     "duties": [
+      "家政与客房清洁员"
+     ],
+     "experience_question": null,
+     "group_id": "cleaning_gardening",
+     "label": "家政与客房清洁员",
+     "order": 31,
+     "qualification_refs": [],
+     "search_terms": [
+      "家政与客房清洁员",
+      "Maids and Housekeeping Cleaners",
+      "家政",
+      "客房清洁",
+      "酒店保洁",
+      "housekeeper",
+      "maid"
+     ]
+    },
+    {
+     "concept_id": "occ.soc_37_3011",
+     "duties": [
+      "园林绿化工"
+     ],
+     "experience_question": null,
+     "group_id": "cleaning_gardening",
+     "label": "园林绿化工",
+     "order": 32,
+     "qualification_refs": [],
+     "search_terms": [
+      "园林绿化工",
+      "Landscaping and Groundskeeping Workers",
+      "园丁",
+      "绿化工",
+      "园艺工",
+      "gardener",
+      "landscaper"
+     ]
+    },
+    {
+     "concept_id": "occ.soc_51_6011",
+     "duties": [
+      "洗衣与干洗工"
+     ],
+     "experience_question": null,
+     "group_id": "cleaning_gardening",
+     "label": "洗衣与干洗工",
+     "order": 33,
+     "qualification_refs": [],
+     "search_terms": [
+      "洗衣与干洗工",
+      "Laundry and Dry-Cleaning Workers",
+      "洗衣工",
+      "干洗",
+      "洗衣店",
+      "laundry worker"
+     ]
+    },
+    {
+     "concept_id": "occ.soc_27_1024",
+     "duties": [
+      "平面设计师"
+     ],
+     "experience_question": null,
+     "group_id": "culture_sports",
+     "label": "平面设计师",
+     "order": 34,
+     "qualification_refs": [
+      "edu_at_least_bachelor"
+     ],
+     "search_terms": [
+      "平面设计师",
+      "Graphic Designers",
+      "设计师",
+      "美工",
+      "视觉设计",
+      "graphic designer",
+      "designer"
+     ]
+    },
+    {
+     "concept_id": "occ.soc_27_4011",
+     "duties": [
+      "音视频技术员"
+     ],
+     "experience_question": null,
+     "group_id": "culture_sports",
+     "label": "音视频技术员",
+     "order": 35,
+     "qualification_refs": [
+      "soc_27_4011_award"
+     ],
+     "search_terms": [
+      "音视频技术员",
+      "Audio and Video Technicians",
+      "音响师",
+      "音视频",
+      "视频技术员",
+      "AV technician",
+      "audio technician"
+     ]
+    },
+    {
+     "concept_id": "occ.soc_39_9031",
+     "duties": [
+      "健身教练与团体课老师"
+     ],
+     "experience_question": null,
+     "group_id": "culture_sports",
+     "label": "健身教练与团体课老师",
+     "order": 36,
+     "qualification_refs": [
+      "edu_at_least_hs"
+     ],
+     "search_terms": [
+      "健身教练与团体课老师",
+      "Exercise Trainers and Group Fitness Instructors",
+      "健身教练",
+      "私教",
+      "瑜伽老师",
+      "团课老师",
+      "personal trainer",
+      "fitness instructor"
+     ]
+    },
+    {
+     "concept_id": "occ.soc_13_1082",
+     "duties": [
+      "项目管理专员"
+     ],
+     "experience_question": null,
+     "group_id": "management",
+     "label": "项目管理专员",
+     "order": 37,
+     "qualification_refs": [
+      "edu_at_least_bachelor"
+     ],
+     "search_terms": [
+      "项目管理专员",
+      "Project Management Specialists",
+      "项目经理",
+      "项目管理",
+      "project manager"
+     ]
+    },
+    {
+     "concept_id": "occ.soc_35_1012",
+     "duties": [
+      "餐饮主管"
+     ],
+     "experience_question": "exp.soc_35_1012",
+     "group_id": "management",
+     "label": "餐饮主管",
+     "order": 38,
+     "qualification_refs": [
+      "edu_at_least_hs",
+      "soc_35_1012_experience"
+     ],
+     "search_terms": [
+      "餐饮主管",
+      "First-Line Supervisors of Food Preparation and Serving Workers",
+      "餐厅经理",
+      "餐厅主管",
+      "领班",
+      "food service manager",
+      "restaurant manager"
+     ]
+    },
+    {
+     "concept_id": "occ.soc_41_1011",
+     "duties": [
+      "零售主管"
+     ],
+     "experience_question": "exp.soc_41_1011",
+     "group_id": "management",
+     "label": "零售主管",
+     "order": 39,
+     "qualification_refs": [
+      "edu_at_least_hs",
+      "soc_41_1011_experience"
+     ],
+     "search_terms": [
+      "零售主管",
+      "First-Line Supervisors of Retail Sales Workers",
+      "门店主管",
+      "店长",
+      "零售店长",
+      "store manager",
+      "retail supervisor"
+     ]
+    },
+    {
+     "concept_id": "occ.soc_43_1011",
+     "duties": [
+      "办公室行政主管"
+     ],
+     "experience_question": "exp.soc_43_1011",
+     "group_id": "management",
+     "label": "办公室行政主管",
+     "order": 40,
+     "qualification_refs": [
+      "edu_at_least_hs",
+      "soc_43_1011_experience"
+     ],
+     "search_terms": [
+      "办公室行政主管",
+      "First-Line Supervisors of Office and Administrative Support Workers",
+      "行政主管",
+      "办公室主任",
+      "行政经理",
+      "office manager",
+      "admin supervisor"
+     ]
+    }
+   ],
+   "pack_id": "pack.e3b.us-v1",
+   "qualification_states": [
+    {
+     "meaning": "不授予任何学历门槛",
+     "name": "未答",
+     "section": "education",
+     "state": "unanswered"
+    },
+    {
+     "meaning": "按没有确认学历处理：不授予学历门槛",
+     "name": "暂不确定",
+     "section": "education",
+     "state": "unsure"
+    },
+    {
+     "meaning": "授予这一级和它以下各级的学历门槛；不授予职业证书",
+     "name": "已选择最高学历",
+     "section": "education",
+     "state": "provided"
+    },
+    {
+     "meaning": "不授予任何证书",
+     "name": "未答",
+     "section": "certificates",
+     "state": "unanswered"
+    },
+    {
+     "meaning": "不授予证书",
+     "name": "暂不确定",
+     "section": "certificates",
+     "state": "unsure"
+    },
+    {
+     "meaning": "授予选中的证书；一张都不选表示没有这些证书",
+     "name": "已回答",
+     "section": "certificates",
+     "state": "provided"
+    },
+    {
+     "meaning": "不授予相关经验",
+     "name": "未答",
+     "section": "experience",
+     "state": "unanswered"
+    },
+    {
+     "meaning": "不授予相关经验",
+     "name": "暂不确定",
+     "section": "experience",
+     "state": "unsure"
+    },
+    {
+     "meaning": "按填写的职业与年数判断是否满足；不填任何经历表示没有相关经验",
+     "name": "已回答",
+     "section": "experience",
+     "state": "provided"
+    }
+   ],
+   "search": {
+    "method": "catalog_search_nfkc_casefold_all_terms_v1",
+    "no_match": "目录里没有找到匹配的职业。本版只支持目录里的 40 种职业（教师、护士、医生等暂不在范围内）；请按分类浏览，或换一个常用叫法。系统不会替你换成别的职业",
+    "rules": [
+     "全角与半角统一、英文不分大小写、首尾空白忽略",
+     "用空格分开的几个词要全部命中：每个词出现在这个条目的任意一个搜索词里就算命中",
+     "只在目录已经发布的条目里筛选，不生成新条目；搜索框里的字不保存，也不进入画像",
+     "搜索为空时显示当前分组的全部条目，顺序固定",
+     "提交的是选中条目的编号；服务端核对编号与目录版本，不认搜索词"
+    ]
+   },
+   "sections": {
+    "attribute_preferences": false,
+    "certificates": true,
+    "education": true,
+    "experience": true,
+    "hard_requirements": false,
+    "interest_text": false,
+    "leisure": "panel_select",
+    "occupation": "catalog_select",
+    "occupation_text": "compatibility_only",
+    "taste": "panel_select"
+   },
+   "taste": {
+    "entries": [
+     {
+      "group_id": "chinese_home",
+      "key": "chinese",
+      "label": "中餐",
+      "order": 1,
+      "search_terms": [
+       "中餐",
+       "中国菜",
+       "川菜",
+       "粤菜",
+       "chinese",
+       "Chinese"
+      ]
+     },
+     {
+      "group_id": "chinese_home",
+      "key": "home_style",
+      "label": "家常菜",
+      "order": 2,
+      "search_terms": [
+       "家常菜",
+       "家常",
+       "Home-style cooking"
+      ]
+     },
+     {
+      "group_id": "asian",
+      "key": "japanese",
+      "label": "日本料理",
+      "order": 3,
+      "search_terms": [
+       "日本料理",
+       "日料",
+       "日本菜",
+       "寿司",
+       "拉面",
+       "japanese",
+       "sushi",
+       "Japanese"
+      ]
+     },
+     {
+      "group_id": "asian",
+      "key": "korean",
+      "label": "韩国料理",
+      "order": 4,
+      "search_terms": [
+       "韩国料理",
+       "韩国",
+       "韩餐",
+       "korean",
+       "Korean"
+      ]
+     },
+     {
+      "group_id": "asian",
+      "key": "thai",
+      "label": "泰国菜",
+      "order": 5,
+      "search_terms": [
+       "泰国菜",
+       "泰国",
+       "泰餐",
+       "thai",
+       "Thai"
+      ]
+     },
+     {
+      "group_id": "asian",
+      "key": "vietnamese",
+      "label": "越南菜",
+      "order": 6,
+      "search_terms": [
+       "越南菜",
+       "越南",
+       "河粉",
+       "vietnamese",
+       "pho",
+       "Vietnamese"
+      ]
+     },
+     {
+      "group_id": "asian",
+      "key": "indian",
+      "label": "印度菜",
+      "order": 7,
+      "search_terms": [
+       "印度菜",
+       "印度",
+       "咖喱",
+       "indian",
+       "curry",
+       "Indian"
+      ]
+     },
+     {
+      "group_id": "western_other",
+      "key": "italian",
+      "label": "意大利菜",
+      "order": 8,
+      "search_terms": [
+       "意大利菜",
+       "意大利",
+       "意式",
+       "披萨",
+       "意面",
+       "italian",
+       "pasta",
+       "Italian"
+      ]
+     },
+     {
+      "group_id": "western_other",
+      "key": "mexican",
+      "label": "墨西哥菜",
+      "order": 9,
+      "search_terms": [
+       "墨西哥菜",
+       "墨西哥",
+       "塔可",
+       "mexican",
+       "taco",
+       "Mexican"
+      ]
+     },
+     {
+      "group_id": "western_other",
+      "key": "mediterranean",
+      "label": "地中海菜",
+      "order": 10,
+      "search_terms": [
+       "地中海菜",
+       "地中海",
+       "希腊菜",
+       "mediterranean",
+       "greek",
+       "Mediterranean"
+      ]
+     }
+    ],
+    "groups": [
+     {
+      "group_id": "chinese_home",
+      "label": "中式与家常",
+      "order": 1
+     },
+     {
+      "group_id": "asian",
+      "label": "亚洲菜",
+      "order": 2
+     },
+     {
+      "group_id": "western_other",
+      "label": "西式与其他",
+      "order": 3
+     }
+    ],
+    "kind": "taste",
+    "note": "可以多选，也可以跳过（跳过就是未答）；选中的菜系直接用于饮食评价，不需要写文字。没有口味偏好和暂不确定可以单独选",
+    "search_notes": [
+     {
+      "note": "本版不区分中国各地的菜系（川菜、粤菜等），都按“中餐”计；选“中餐”即可，不会单独记成川菜偏好",
+      "note_id": "taste.chinese_regional",
+      "points_to": [
+       "chinese"
+      ],
+      "terms": [
+       "川菜",
+       "粤菜",
+       "湘菜",
+       "鲁菜",
+       "苏菜",
+       "浙菜",
+       "闽菜",
+       "徽菜",
+       "东北菜",
+       "上海菜",
+       "北京菜",
+       "sichuan",
+       "cantonese",
+       "hunan"
+      ]
+     }
+    ]
+   }
+  },
+  "interests": {
+   "cuisines": [
+    {
+     "aliases": [
+      "家常"
+     ],
+     "key": "home_style",
+     "label": "家常菜"
+    },
+    {
+     "aliases": [
+      "中餐",
+      "中国菜",
+      "川菜",
+      "粤菜",
+      "chinese"
+     ],
+     "key": "chinese",
+     "label": "中餐"
+    },
+    {
+     "aliases": [
+      "意大利",
+      "意式",
+      "披萨",
+      "意面",
+      "italian",
+      "pasta"
+     ],
+     "key": "italian",
+     "label": "意大利菜"
+    },
+    {
+     "aliases": [
+      "墨西哥",
+      "塔可",
+      "mexican",
+      "taco"
+     ],
+     "key": "mexican",
+     "label": "墨西哥菜"
+    },
+    {
+     "aliases": [
+      "日料",
+      "日本菜",
+      "寿司",
+      "拉面",
+      "japanese",
+      "sushi"
+     ],
+     "key": "japanese",
+     "label": "日本料理"
+    },
+    {
+     "aliases": [
+      "印度",
+      "咖喱",
+      "indian",
+      "curry"
+     ],
+     "key": "indian",
+     "label": "印度菜"
+    },
+    {
+     "aliases": [
+      "泰国",
+      "泰餐",
+      "thai"
+     ],
+     "key": "thai",
+     "label": "泰国菜"
+    },
+    {
+     "aliases": [
+      "韩国",
+      "韩餐",
+      "korean"
+     ],
+     "key": "korean",
+     "label": "韩国料理"
+    },
+    {
+     "aliases": [
+      "越南",
+      "河粉",
+      "vietnamese",
+      "pho"
+     ],
+     "key": "vietnamese",
+     "label": "越南菜"
+    },
+    {
+     "aliases": [
+      "地中海",
+      "希腊菜",
+      "mediterranean",
+      "greek"
+     ],
+     "key": "mediterranean",
+     "label": "地中海菜"
+    }
+   ],
+   "leisure_categories": [
+    {
+     "aliases": [
+      "音乐",
+      "吉他",
+      "唱歌",
+      "合唱",
+      "乐器",
+      "music",
+      "guitar",
+      "choir"
+     ],
+     "key": "music",
+     "label": "音乐"
+    },
+    {
+     "aliases": [
+      "网球",
+      "羽毛球",
+      "乒乓球",
+      "球拍",
+      "tennis",
+      "badminton"
+     ],
+     "key": "racket_sports",
+     "label": "球拍运动"
+    },
+    {
+     "aliases": [
+      "美术馆",
+      "博物馆",
+      "展览",
+      "音乐会",
+      "看演出",
+      "museum",
+      "gallery"
+     ],
+     "key": "arts_culture",
+     "label": "艺术与文化"
+    },
+    {
+     "aliases": [
+      "烹饪",
+      "做菜",
+      "品鉴",
+      "cooking"
+     ],
+     "key": "culinary",
+     "label": "美食活动"
+    },
+    {
+     "aliases": [
+      "健身",
+      "跑步",
+      "撸铁",
+      "gym",
+      "running"
+     ],
+     "key": "fitness",
+     "label": "健身"
+    }
+   ],
+   "leisure_states_zh": [
+    "未答：没有这一项的明确信息，按中性规则评价；不会被当成“通用评价”的选择",
+    "暂不确定：按中性规则评价",
+    "明确没有固定爱好：按中性规则评价",
+    "采用通用休闲评价：城市有什么合适的就体验什么（按中性规则评价）",
+    "用文字描述：先按词表形成候选，你选中的类别才进入评价；没认出的描述原样保留，本版不评价"
+   ],
+   "matching_note_zh": "确认的兴趣只在同样的实际参与时间下带来适度更高的满足（模型假设：多 50%，有上限）；确认的菜系只让实际吃到的合口味餐多计一点。 这些系数是公开登记的模型假设，不是对你个人的测量；不改变你的点数、现金或资格，也不让贵的东西自动更好",
+   "taste_states_zh": [
+    "未答：按中性规则评价",
+    "暂不确定：按中性规则评价",
+    "明确没有口味偏好：按中性规则评价",
+    "用文字描述：先按词表形成候选，你选中的菜系才进入饮食评价；品牌与其他要求只留存"
+   ]
+  },
+  "interview": "reserved_not_implemented",
+  "limits": [
+   "城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定：结果不排序真实城市，也不是现实推荐",
+   "安全背景按各都会区 2024 年犯罪统计换算（统计代理，不是个人遭遇犯罪的概率；纽约只覆盖都会区的纽约州部分）；休闲背景是六城共同设定；治疗价格是共同假设；外食、服务、设备寿命与活动价格含登记的模型设定",
+   "离线规划器是可控的 mock，不代表真实大语言模型的能力或偏好理解",
+   "问卷文案与参考改善范围是暂定稿，没有做认知访谈与量表验证"
+  ],
+  "material_leaves": [
+   {
+    "definition": "实际住的那一处房子本身的条件：空间够不够用、同类房子里条件好不好",
+    "key": "housing_condition",
+    "label": "居住条件",
+    "note": "只看房子本身；房租、通勤、地区的安全与环境不在这一项（安全、环境按住处所在片区另算）；旧版的“居住空间（只看面积）”含义不同，旧的确认要重新审阅",
+    "support": "supported"
+   },
+   {
+    "definition": "实际吃的完整食品方案（自己做、外食都可以）新鲜不新鲜、合不合你确认的口味",
+    "key": "food_life",
+    "label": "饮食生活",
+    "note": "只评价新鲜餐与你确认的菜系；吃饱是基本保障，不另加分；价格、餐馆档次与外食次数不等于更好；准备时间算在时间账里",
+    "support": "partially_supported"
+   },
+   {
+    "definition": "通信联网、家用日耗品是否方便获得，以及日常杂务是否省心。",
+    "key": "daily_convenience",
+    "label": "日常支持与便利",
+    "note": "杂务看本人实际少做了多少小时（设备与人工服务是两种实现方式，不分别打分）；通信、居家联网与家用日耗品看实际买到的月份，同一项买两份不多算；它是相对重要程度，不是预算或必须购买的指令；含义比旧版“日常生活便利”多了通信与日耗品，旧的确认要重新审阅",
+    "support": "supported"
+   },
+   {
+    "definition": "在其他生活开支之外，获得衣着、个人护理等个人消费的满足。",
+    "key": "personal_enjoyment",
+    "label": "个人消费与享受",
+    "note": "按每月实际获得的标准个人消费篮子（衣着、鞋履与配饰、个人护理）评价，不按花了多少钱；同样的篮子涨价不改变这一项，买得少才会少；是可解释的模型抽象，没有测量真实人的幸福感；不再单独计算按摩或居家舒适用品；含义与旧版不同，旧的确认要重新审阅",
+    "support": "partially_supported"
+   }
+  ],
+  "meta": {
+   "conversion_version": "e3a-conversion-v3",
+   "data_pack": {
+    "content_fingerprint": "48eda959e2eb8254c891d1de88b92f792ccf8ecbaadac8037d548279cd9dd22b",
+    "note": "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定",
+    "pack_id": "pack.e3b.us-v1",
+    "status": "real_data_frozen"
+   },
+   "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.4-draft",
+   "sample": {
+    "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+    "origin": "offline_run",
+    "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+    "synthetic": true
+   },
+   "schema_version": "e3a-product-schema-v3.4",
+   "vocabulary_version": "e3a-vocabulary-v5"
+  },
+  "money_bases": [
+   {
+    "conversion_rule": "identity_same_basis_v1",
+    "currency": "USD",
+    "meaning": "liquid_funds_v1",
+    "note": "按 2024 年美元、当地价格水平填写的可动用流动资金；与目录同一口径，换算是恒等，不做通胀或汇率换算",
+    "numeraire_id": "USD_2024_LOCAL",
+    "price_period": "2024"
+   }
+  ],
+  "money_input_rule_zh": "金额只接受两种写法：不分组的非负十进制（例如 3000.50），或严格每三位一组的千分位（例如 3,000.50）；小数点只能用“.”，最多两位小数。“3000,50”“3,,000”“1,23.45”这类写法会被拒绝，系统不猜你的意思",
+  "occupation": {
+   "concept_count": 40,
+   "languages": [
+    "en",
+    "zh"
+   ],
+   "max_candidates": 4,
+   "method": "controlled_vocabulary_alias_match_v1",
+   "note": "新流程从职业目录按分类浏览或搜索后直接选（见 input_catalog，不需要写文字）。文字描述只为兼容保留：系统按受控词表的别名给出少量可读候选（名称与职责），由你确认。分类代码只在内部保留，不需要、也不会请你填写；匹配不到时说明原因，不自动改成“普通白领”",
+   "users_enter_codes": false,
+   "vocabulary_version": "e3a-vocabulary-v5"
+  },
+  "points": {
+   "canonical_form": "约分后的整数（30）或 分子/分母（50/3）；计算与比较都用它，显示四舍五入到 1 位小数，显示值不回流计算",
+   "display_decimals": 1,
+   "equal_split_material": "25",
+   "equal_split_six": "50/3",
+   "manual_entry": "手工输入按精确十进制解析，最多 2 位小数（步长不是测量精度）；也接受规范分数写法（例如 50/3）",
+   "manual_max_decimals": 2,
+   "rules": [
+    "六维合计必须精确等于 100；不预填数值、不提供人格套餐，不自动按比例扣减其他项",
+    "只有用户主动选择“平均分配”才生成均分（六维每项 50/3、物质每项 25），不让排在前面的项目多拿分",
+    "明确 0 是已提供的数值；“未答”“明确无所谓”“暂不确定”都不会被自动换成 0 或均分",
+    "物质父项为正时，物质四项也必须精确合计 100；物质父项明确为 0 时细分不适用，不伪造四个回答",
+    "物质从三项改成四项、饮食的含义扩大之后，旧的确认不能补 0 或重新分配点数沿用：请重新审阅并确认"
+   ],
+   "total": 100
+  },
+  "start_scenario": [
+   "这是一次搬到候选城市重新开始的简化情景：从第 1 年、健康、没有已有物品、没有在学课程、没有资金目标开始",
+   "现实中的旧家具、病史与在学课程暂未纳入；这是模拟的假设，不是对你现实情况的判断",
+   "同一个你在各城市、各个分身里的年龄、现金、能力与基础时间精力都相同；城市里的具体岗位按当地目录匹配"
+  ],
+  "unsupported": [
+   "多人家庭、非工资收入（利息、股息、副业）、家庭共同资产、买房与贷款",
+   "税收抵免、税前扣除与逐项扣除；纽约市以外的纽约都会区居民、芝加哥都会区的印第安纳部分、跨州组合",
+   "停车费与按距离计的公交票价；旧金山的公交票价（官方网站拒绝访问）",
+   "芝加哥公园管理局的真实活动（需要日期窗口、整期报名与年龄资格，引擎暂不支持）",
+   "品牌、制作方式、档次、服务质量与上门顾虑的评分（只记录原文）",
+   "访谈式输入（只保留来源与证据引用接口）"
+  ]
+ }
+}

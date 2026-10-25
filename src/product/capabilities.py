@@ -11,6 +11,7 @@ from common.product_contracts import (
     HealthOptionDef,
     HealthQuestion,
     HealthQuestionnaire,
+    InputCatalog,
     InterestCapability,
     MaterialLeafDefinition,
     MoneyBasisOption,
@@ -82,9 +83,10 @@ def build_capabilities(pack: DataPack, *, sample: SampleLabel | None = None) -> 
             concept_count=len(b.occupations),
             max_candidates=MAX_OCCUPATION_CANDIDATES,
             note=t(
-                "input.capabilities.occupation_note",
-                "用自然语言描述你的工作；系统按受控词表的别名给出少量可读候选（名称与职责），由你确认。分类代码只在内部保留，"
-                "不需要、也不会请你填写；匹配不到时说明原因，不自动改成“普通白领”",
+                "input.capabilities.occupation_note.v2",
+                "新流程从职业目录按分类浏览或搜索后直接选（见 input_catalog，不需要写文字）。文字描述只为兼容保留：系统按受控词表的"
+                "别名给出少量可读候选（名称与职责），由你确认。分类代码只在内部保留，不需要、也不会请你填写；匹配不到时说明原因，"
+                "不自动改成“普通白领”",
             ),
         ),
         dimensions=tuple(
@@ -223,4 +225,14 @@ def build_capabilities(pack: DataPack, *, sample: SampleLabel | None = None) -> 
             ),
             matching_note_zh=matching_note(pack),
         ),
+        input_catalog=_input_catalog(pack),
     )
+
+
+def _input_catalog(pack: DataPack) -> InputCatalog | None:
+    from product.input_catalog import (
+        input_catalog,
+    )  # input_catalog 经 product.occupation 引用本模块
+
+    loaded = input_catalog(pack)
+    return None if loaded is None else loaded.public()

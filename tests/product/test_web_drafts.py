@@ -15,9 +15,14 @@ from pathlib import Path
 
 import pytest
 
-from common.product_contracts import PRODUCT_SCHEMA_VERSION, UserInputDraft
+from common.product_contracts import (
+    PRODUCT_SCHEMA_VERSION,
+    READABLE_SCHEMA_VERSIONS,
+    UserInputDraft,
+)
 from product.answers import review_draft
 from product.fixtures import prepare_workspace
+from product.migration import migrate, migration_for
 from product.pack import DataPack, load_pack
 
 REPO = Path(__file__).resolve().parents[2]
@@ -34,16 +39,23 @@ def pack(tmp_path_factory) -> DataPack:
 
 def reviewed(pack: DataPack, name: str):
     raw = json.loads((FIXTURES / name).read_text(encoding="utf-8"))
-    if raw.get("meta", {}).get("schema_version") != PRODUCT_SCHEMA_VERSION:
-        # 草稿样本由界面（E5）生成；公共结构升到新版本后要由界面一侧重新生成。这里明确跳过并说出原因，不改界面文件、
-        # 也不把旧版本草稿改读成新结构（DECISIONS/0041，交接见 docs/handoffs/e3-to-e5-life-extension.md）
+    version = raw.get("meta", {}).get("schema_version")
+    if version not in READABLE_SCHEMA_VERSIONS:
+        # 草稿样本由界面（E5）生成；读不回的旧结构要由界面一侧重新生成。这里明确跳过并说出原因，不改界面文件
         pytest.skip(
-            f"{name} 是按 {raw.get('meta', {}).get('schema_version')} 生成的，当前公共结构是 {PRODUCT_SCHEMA_VERSION}：{REGENERATE}"
+            f"{name} 是按 {version} 生成的，当前公共结构是 {PRODUCT_SCHEMA_VERSION}：{REGENERATE}"
         )
     draft = UserInputDraft.model_validate(raw)
     assert draft.meta.data_pack.content_fingerprint == pack.meta().data_pack.content_fingerprint, (
         f"{name} 是按另一版资料包生成的：{REGENERATE}"
     )
+    if version != PRODUCT_SCHEMA_VERSION:
+        # 旧版本问卷的草稿：走与页面上“迁移”同一条显式迁移（DECISIONS/0046）。只换版本；要清空旧答案的草稿不替用户同意
+        migration = migration_for(pack, draft)
+        assert migration is not None and not migration.consent_required, (
+            f"{name} 里有新问卷不再收集的答案：{REGENERATE}"
+        )
+        draft = migrate(pack, draft, clear_removed=False)
     return review_draft(pack, draft)
 
 

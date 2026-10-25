@@ -40,15 +40,22 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 #: v3.3（E3B 映射修正，DECISIONS/0044）：年度事实新增日常支持（``support``）与个人消费篮子（``consumption``）；物质四项里
 #: ``daily_convenience`` 改为“日常支持与便利”、``personal_enjoyment`` 改为抽象消费篮子——含义变了，问卷与词表一起升版本，旧的确认
 #: 画像要重新审阅确认。
-PRODUCT_SCHEMA_VERSION = "e3a-product-schema-v3.3"
+#: v3.4（E3 输入体验收敛，DECISIONS/0046）：能力清单新增输入目录（``input_catalog``）；草稿新增按目录直接选职业、最高学历 / 证书 /
+#: 相关经验、兴趣与口味的面板多选（``selected``）；新问卷不再收集硬要求与属性偏好（字段留着，只为读回历史对象）。v3.3 的对象仍能
+#: 读回（``ProductMeta.schema_version`` 两个都接受），新的审阅与确认必须是 v3.4；目录仍是 contracts/product/v3。
+PRODUCT_SCHEMA_VERSION = "e3a-product-schema-v3.4"
 #: 问卷 / 题干语义版本：六维与物质的题干、定义、参考改善范围与控件规则。题干一变，旧确认失效、需要重新确认。
-QUESTIONNAIRE_VERSION = "e3a-questionnaire-v0.3-draft"
-#: 词表版本：六维键、物质键、职业受控词表、硬要求选项与属性偏好种类。
-VOCABULARY_VERSION = "e3a-vocabulary-v4"
+#: v0.4：职业按目录选、学历 / 证书 / 经验分开问、兴趣与口味面板多选；不再问硬要求与属性偏好。
+QUESTIONNAIRE_VERSION = "e3a-questionnaire-v0.4-draft"
+#: 词表版本：六维键、物质键、职业受控词表、硬要求选项与属性偏好种类。v5：职业目录的分组与搜索词、学历选项（输入目录）。
+VOCABULARY_VERSION = "e3a-vocabulary-v5"
 #: 独立健康问卷版本（暂定文案，未经量表验证）。
 HEALTH_QUESTIONNAIRE_VERSION = "e3a-health-coping-q-v0.1-draft"
-#: 转换版本：原始答案 → 确认画像 → E1 输入的规则（精确分数、规范写法、金额换算、标准开局编译）。
-CONVERSION_VERSION = "e3a-conversion-v2"
+#: 转换版本：原始答案 → 确认画像 → E1 输入的规则（精确分数、规范写法、金额换算、标准开局编译）。v3：学历 / 证书 / 相关经验的
+#: 结构化答案按资料包已有的规则换成资格（``confirmed_experience_mapping_v1``）；面板选中的兴趣与口味直接是确认的类别。
+CONVERSION_VERSION = "e3a-conversion-v3"
+#: 读回历史对象时仍接受的结构版本（v3.3 的草稿、审阅、画像与结果；新对象一律是 ``PRODUCT_SCHEMA_VERSION``）
+READABLE_SCHEMA_VERSIONS = ("e3a-product-schema-v3.3", "e3a-product-schema-v3.4")
 #: 自由文字的上限（沿用 E1 画像的 2,000 字符；超限明确报错，不静默截断）。
 FREE_TEXT_MAX_CHARS = 2000
 
@@ -121,7 +128,8 @@ class SampleLabel(ProductModel):
 class ProductMeta(ProductModel):
     """每条产品消息都带的共同元数据：结构、问卷、词表、健康问卷、转换的版本与资料包身份。"""
 
-    schema_version: Literal["e3a-product-schema-v3.3"]
+    #: v3.3 只为读回历史对象（旧草稿、画像、运行与结果）；新对象都是 v3.4，审阅与确认按当前版本核对
+    schema_version: Literal["e3a-product-schema-v3.3", "e3a-product-schema-v3.4"]
     questionnaire_version: str = Field(min_length=1, max_length=80)
     vocabulary_version: str = Field(min_length=1, max_length=80)
     health_questionnaire_version: str = Field(min_length=1, max_length=80)
@@ -334,6 +342,162 @@ class InterestCapability(ProductModel):
     matching_note_zh: str = Field(min_length=1, max_length=400)
 
 
+_KEY = r"^[a-z][a-z0-9_]{0,47}$"
+_CONCEPT = r"^[a-z][a-z0-9_.]{1,79}$"
+#: 学历、证书与相关经验三种答案共用的作答状态：未答、已回答、暂不确定（都不授予资格，除了已回答里明确选中的）。
+QualificationAnswerState = Literal["unanswered", "provided", "unsure"]
+
+
+class CatalogGroup(ProductModel):
+    """职业目录的一个浏览分组。分组只用于浏览，不改变职业映射，也不进确认画像。"""
+
+    group_id: Annotated[str, Field(pattern=_KEY)]
+    label: str = Field(min_length=1, max_length=40)
+    order: Annotated[int, Field(ge=1)]
+
+
+class CatalogOccupation(ProductModel):
+    """目录里的一个职业：概念编号（与文字匹配、确认画像用的是同一个概念）、唯一的主分组、名称、职责、搜索词与相关资格。
+
+    ``search_terms`` 是明确登记的中英文搜索词（名称、资料包别名与目录补充的叫法，例如“程序员”），照原文给出、不翻译，只用来筛选；
+    搜索框里的文字不保存、不进画像。``qualification_refs`` 是这个职业的开局岗位要求的资格（能力清单 ``abilities`` 里的编号），只供
+    显示；学历包含关系、证书授予与经验年数的判断都在 E3。分类代码只在内部保留，不在这里。"""
+
+    concept_id: Annotated[str, Field(pattern=_CONCEPT)]
+    group_id: Annotated[str, Field(pattern=_KEY)]
+    order: Annotated[int, Field(ge=1)]
+    label: str = Field(min_length=1, max_length=80)
+    duties: tuple[str, ...] = Field(min_length=1)
+    search_terms: tuple[Annotated[str, Field(min_length=1, max_length=120)], ...] = Field(
+        min_length=1
+    )
+    qualification_refs: tuple[str, ...] = ()
+    experience_question: str | None = Field(default=None, max_length=80)
+
+
+class EducationOption(ProductModel):
+    """最高学历的一个选项（单选，按从低到高的顺序）。职业证书不在这里，另有证书多选。"""
+
+    option_id: Annotated[str, Field(pattern=_KEY)]
+    label: str = Field(min_length=1, max_length=40)
+    order: Annotated[int, Field(ge=1)]
+
+
+class CertificateOption(ProductModel):
+    """一张可以多选的职业证书（中学后非学位证书）：资格编号、名称，以及要求它的职业。学历不会授予它。"""
+
+    ability_id: Annotated[str, Field(pattern=r"^[a-z][a-z0-9_]{1,47}$")]
+    label: str = Field(min_length=1, max_length=80)
+    occupations: tuple[Annotated[str, Field(pattern=_CONCEPT)], ...] = Field(min_length=1)
+
+
+class ExperienceQuestion(ProductModel):
+    """一个相关工作经验问题：只在选中的职业属于 ``applies_to`` 时问；用户在 ``related`` 列出的职业里填做过几年。年数门槛只写在
+    ``prompt`` 的说明里，由 E3 判断（E5 不判断）。"""
+
+    question_id: Annotated[str, Field(pattern=r"^[a-z][a-z0-9_.]{1,79}$")]
+    ability_id: Annotated[str, Field(pattern=r"^[a-z][a-z0-9_]{1,47}$")]
+    applies_to: tuple[Annotated[str, Field(pattern=_CONCEPT)], ...] = Field(min_length=1)
+    related: tuple[Annotated[str, Field(pattern=_CONCEPT)], ...] = Field(min_length=1)
+    prompt: str = Field(min_length=1, max_length=300)
+
+
+class QualificationStateText(ProductModel):
+    """学历、证书或经验的一种作答状态的名称与含义。"""
+
+    section: Literal["education", "certificates", "experience"]
+    state: QualificationAnswerState
+    name: str = Field(min_length=1, max_length=60)
+    meaning: str = Field(min_length=1, max_length=300)
+
+
+class SearchNote(ProductModel):
+    """一组搜索词的说明：它们对应哪些已支持的键（可以为空：本版不支持），以及要告诉用户的话。搜索词照原文，不翻译。
+    例如“川菜”只找到已支持的“中餐”，并说明本版不区分地方菜；“徒步”找不到任何类别，并说明本版还没有、不会算成健身。"""
+
+    note_id: Annotated[str, Field(pattern=r"^[a-z][a-z0-9_.]{1,79}$")]
+    terms: tuple[Annotated[str, Field(min_length=1, max_length=40)], ...] = Field(min_length=1)
+    points_to: tuple[Annotated[str, Field(pattern=_KEY)], ...] = ()
+    note: str = Field(min_length=1, max_length=300)
+
+
+class InterestGroup(ProductModel):
+    """兴趣或菜系面板的一个浏览分组。"""
+
+    group_id: Annotated[str, Field(pattern=_KEY)]
+    label: str = Field(min_length=1, max_length=40)
+    order: Annotated[int, Field(ge=1)]
+
+
+class InterestEntry(ProductModel):
+    """面板里的一个类别：能力清单词表里已有的键（不新增类别）、唯一的分组、名称与搜索词（类别名、词表别名与目录补充的叫法，照原文）。"""
+
+    key: Annotated[str, Field(pattern=_KEY)]
+    group_id: Annotated[str, Field(pattern=_KEY)]
+    order: Annotated[int, Field(ge=1)]
+    label: str = Field(min_length=1, max_length=40)
+    search_terms: tuple[Annotated[str, Field(min_length=1, max_length=60)], ...] = Field(
+        min_length=1
+    )
+
+
+class InterestPanel(ProductModel):
+    """兴趣（``leisure``）或口味（``taste``）的多选面板。可以跳过（未答）；选了类别就直接是确认画像里的类别，不需要写文字。"""
+
+    kind: Literal["leisure", "taste"]
+    groups: tuple[InterestGroup, ...] = Field(min_length=1)
+    entries: tuple[InterestEntry, ...] = Field(min_length=1)
+    search_notes: tuple[SearchNote, ...] = ()
+    note: str = Field(min_length=1, max_length=300)
+
+
+class CatalogSearchRules(ProductModel):
+    """目录搜索的规则（E5 在完整的小目录里筛选显示；服务端只认提交的编号，不认搜索词）。"""
+
+    method: Literal["catalog_search_nfkc_casefold_all_terms_v1"]
+    rules: tuple[str, ...] = Field(min_length=1)
+    no_match: str = Field(min_length=1, max_length=300)
+
+
+class InputSections(ProductModel):
+    """新输入流程启用哪些板块。职业按目录直接选（文字描述只为兼容保留，不是必经入口）；兴趣与口味用面板多选；硬要求、属性偏好
+    与兴趣的文字解释不在新流程里。"""
+
+    occupation: Literal["catalog_select"] = "catalog_select"
+    occupation_text: Literal["compatibility_only"] = "compatibility_only"
+    education: bool
+    certificates: bool
+    experience: bool
+    leisure: Literal["panel_select"] = "panel_select"
+    taste: Literal["panel_select"] = "panel_select"
+    interest_text: Literal[False] = False
+    hard_requirements: Literal[False] = False
+    attribute_preferences: Literal[False] = False
+
+
+class InputCatalog(ProductModel):
+    """输入目录（v3.4）：职业的分类索引与搜索词、学历 / 证书 / 相关经验问题、兴趣与菜系的分组，以及新流程启用的板块。
+
+    它是一份独立的小配置，引用资料包里已有的职业、资格与兴趣键，不新增职业、资格、活动或评分系数。``content_fingerprint`` 是这份
+    配置与所引用资料包的内容身份：按目录选职业的草稿要带上它，目录换了就要重新选（服务端拒绝过期的目录）。"""
+
+    catalog_id: RefStr
+    catalog_version: str = Field(min_length=1, max_length=80)
+    content_fingerprint: Sha256
+    pack_id: str = Field(min_length=1, max_length=80)
+    sections: InputSections
+    search: CatalogSearchRules
+    groups: tuple[CatalogGroup, ...] = Field(min_length=1)
+    occupations: tuple[CatalogOccupation, ...] = Field(min_length=1)
+    education: tuple[EducationOption, ...] = ()
+    certificates: tuple[CertificateOption, ...] = ()
+    experience: tuple[ExperienceQuestion, ...] = ()
+    qualification_states: tuple[QualificationStateText, ...] = ()
+    leisure: InterestPanel
+    taste: InterestPanel
+    notes: tuple[str, ...] = ()
+
+
 class ProductCapabilities(ProductModel):
     """E3 发布的能力清单（E5 只能呈现这里有的选择）。"""
 
@@ -359,6 +523,8 @@ class ProductCapabilities(ProductModel):
     limits: tuple[str, ...] = ()
     interview: Literal["reserved_not_implemented"] = "reserved_not_implemented"
     interests: InterestCapability
+    #: 新输入流程的目录（v3.4）；资料包没有配目录时为空（只有兼容的文字匹配）
+    input_catalog: InputCatalog | None = None
 
 
 # ==========================================================================
@@ -387,12 +553,26 @@ class AllocationAnswer(ProductModel):
 
 
 class OccupationAnswer(ProductModel):
-    """职业：原文与语言；用户在候选里选中的概念（不透明 ID，不是职业代码）。"""
+    """职业。``mode = catalog``（新流程）：从输入目录直接选中的概念编号与那份目录的版本、内容身份，不需要也不保存任何文字（搜索框
+    里的字只是查找条件）。``mode = text``（兼容）：原文与语言，再在少量候选里选中一个。概念编号不透明，不是职业代码。"""
 
     state: AnswerState
+    mode: Literal["text", "catalog"] = "text"
     raw_text: str | None = Field(default=None, max_length=300)
     language: str = Field(default="zh", min_length=2, max_length=10)
     selected_candidate: str | None = Field(default=None, max_length=80)
+    catalog_version: str | None = Field(default=None, max_length=80)
+    catalog_fingerprint: Sha256 | None = None
+
+    @model_validator(mode="after")
+    def _mode(self) -> OccupationAnswer:
+        if self.mode == "catalog" and self.raw_text is not None:
+            raise ValueError("按目录选职业时不带文字：搜索框里的字不保存")
+        if self.mode == "text" and (
+            self.catalog_version is not None or self.catalog_fingerprint is not None
+        ):
+            raise ValueError("文字描述的职业不带目录版本")
+        return self
 
 
 class AgeAnswer(ProductModel):
@@ -434,8 +614,16 @@ class FreeTextAnswer(ProductModel):
     text: str | None = None
 
 
-LeisureAnswerState = Literal["unanswered", "unsure", "no_fixed_hobby", "generic", "described"]
-TasteAnswerState = Literal["unanswered", "unsure", "no_preference", "described"]
+#: ``selected``（v3.4）：从面板里直接选中了类别（不写文字）；``described`` 是兼容的文字描述
+LeisureAnswerState = Literal[
+    "unanswered", "unsure", "no_fixed_hobby", "generic", "described", "selected"
+]
+TasteAnswerState = Literal["unanswered", "unsure", "no_preference", "described", "selected"]
+
+
+def _panel_shape(state: str, text: str | None, selected: tuple[str, ...]) -> None:
+    if state == "selected" and (text is not None or not selected):
+        raise ValueError("面板选择至少选一个类别，而且不带文字（一个都不选就是未答）")
 
 
 class LeisureInterestAnswer(ProductModel):
@@ -448,13 +636,69 @@ class LeisureInterestAnswer(ProductModel):
     text: str | None = Field(default=None, max_length=300)
     selected: tuple[str, ...] = ()
 
+    @model_validator(mode="after")
+    def _shape(self) -> LeisureInterestAnswer:
+        _panel_shape(self.state, self.text, self.selected)
+        return self
+
 
 class TasteAnswer(ProductModel):
-    """口味与菜系：未答、暂不确定、明确没有偏好，或用文字描述（同样先解释、再由用户选中确认）。"""
+    """口味与菜系：未答、暂不确定、明确没有偏好、从面板选中菜系，或用文字描述（兼容：先解释、再由用户选中确认）。"""
 
     state: TasteAnswerState = "unanswered"
     text: str | None = Field(default=None, max_length=300)
     selected: tuple[str, ...] = ()
+
+    @model_validator(mode="after")
+    def _shape(self) -> TasteAnswer:
+        _panel_shape(self.state, self.text, self.selected)
+        return self
+
+
+class EducationAnswer(ProductModel):
+    """最高学历（单选）：未答、暂不确定，或选了输入目录里的一个选项。只有选了才授予学历门槛。"""
+
+    state: QualificationAnswerState = "unanswered"
+    option_id: str | None = Field(default=None, max_length=48)
+
+    @model_validator(mode="after")
+    def _shape(self) -> EducationAnswer:
+        if (self.state == "provided") != (self.option_id is not None):
+            raise ValueError("只有已回答写 option_id，已回答必须写")
+        return self
+
+
+class CertificatesAnswer(ProductModel):
+    """职业证书（多选）：``provided`` 加选中的资格编号；**明确提交空列表表示“没有”**，与未答分开保存。"""
+
+    state: QualificationAnswerState = "unanswered"
+    selected: tuple[str, ...] = ()
+
+    @model_validator(mode="after")
+    def _shape(self) -> CertificatesAnswer:
+        if self.selected and self.state != "provided":
+            raise ValueError("只有已回答才带选中的证书")
+        return self
+
+
+class ExperienceEntry(ProductModel):
+    """一段相关工作经历：职业概念（输入目录里经验问题列出的相关职业）与整年数。"""
+
+    concept_id: Annotated[str, Field(pattern=_CONCEPT)]
+    years: Annotated[int, Field(ge=0, le=60)]
+
+
+class ExperienceAnswer(ProductModel):
+    """相关工作经验（只在选中的职业需要时问）：``provided`` 加经历；明确提交空列表表示“没有相关经验”，与未答分开保存。"""
+
+    state: QualificationAnswerState = "unanswered"
+    entries: tuple[ExperienceEntry, ...] = ()
+
+    @model_validator(mode="after")
+    def _shape(self) -> ExperienceAnswer:
+        if self.entries and self.state != "provided":
+            raise ValueError("只有已回答才带经历")
+        return self
 
 
 class AttributePreferenceAnswer(ProductModel):
@@ -518,6 +762,10 @@ class UserInputDraft(ProductModel):
     evidence: tuple[EvidenceRef, ...] = ()
     leisure_interest: LeisureInterestAnswer = Field(default_factory=LeisureInterestAnswer)
     taste: TasteAnswer = Field(default_factory=TasteAnswer)
+    #: v3.4：最高学历、职业证书与相关经验（结构化答案；未答不授予任何资格）
+    education: EducationAnswer = Field(default_factory=EducationAnswer)
+    certificates: CertificatesAnswer = Field(default_factory=CertificatesAnswer)
+    experience: ExperienceAnswer = Field(default_factory=ExperienceAnswer)
 
 
 # ==========================================================================
@@ -543,7 +791,10 @@ class OccupationCandidate(ProductModel):
 
 
 class OccupationReview(ProductModel):
-    status: Literal["explicit", "ambiguous", "unknown", "not_provided"]
+    """``catalog_selected``：从输入目录直接选中（候选就是那一个职业，名称与职责供核对）；其余是兼容的文字匹配。"""
+
+    status: Literal["explicit", "ambiguous", "unknown", "not_provided", "catalog_selected"]
+    mode: Literal["text", "catalog"] = "text"
     raw_text: str | None = None
     candidates: tuple[OccupationCandidate, ...] = ()
     selected: str | None = None
@@ -630,6 +881,40 @@ class InterestReview(ProductModel):
     message_zh: str = Field(min_length=1, max_length=400)
 
 
+class QualificationGrant(ProductModel):
+    """一项按答案得到的资格与理由（例如“最高学历：本科 → 满足‘学士学位’及以下的学历门槛”）。"""
+
+    ability_id: str = Field(min_length=1, max_length=48)
+    label: str = Field(min_length=1, max_length=80)
+    because: str = Field(min_length=1, max_length=300)
+
+
+class QualificationRequirement(ProductModel):
+    """选中职业的开局岗位要求的一项资格，以及按现在的答案是否满足（不满足时各城的开局会照实挡下，不自动补）。"""
+
+    ability_id: str = Field(min_length=1, max_length=48)
+    label: str = Field(min_length=1, max_length=80)
+    met: bool
+
+
+class QualificationReview(ProductModel):
+    """学历、证书与相关经验的审阅：E3 按资料包已有的规则换成资格（学历“至少达到”、证书只授予选中的那张、经验按相关职业与年数，
+    规则 ``confirmed_experience_mapping_v1``）。职业、职称、自由文字与搜索词都不授予资格。``source``：结构化答案、兼容的逐项资格
+    确认，或都没有。"""
+
+    source: Literal["structured_answers", "ability_claims", "none"]
+    education_state: QualificationAnswerState
+    education_option: str | None = None
+    certificates_state: QualificationAnswerState
+    certificates: tuple[str, ...] = ()
+    experience_state: QualificationAnswerState
+    experience: tuple[ExperienceEntry, ...] = ()
+    ask_experience: tuple[str, ...] = ()
+    granted: tuple[QualificationGrant, ...] = ()
+    requirements: tuple[QualificationRequirement, ...] = ()
+    message_zh: str = Field(min_length=1, max_length=400)
+
+
 class ProfileReview(ProductModel):
     """一份草稿的审阅：E3 给出的可读解释与全部问题。``confirmable`` 为假时，``issues`` 里有阻断项。"""
 
@@ -653,6 +938,8 @@ class ProfileReview(ProductModel):
     summary_zh: tuple[str, ...] = ()
     leisure_interest: InterestReview
     taste: InterestReview
+    #: v3.4：学历、证书与相关经验的审阅（旧审阅没有）
+    qualifications: QualificationReview | None = None
 
 
 # ==========================================================================
@@ -671,13 +958,27 @@ class OccupationMapping(ProductModel):
 
 
 class ConfirmedOccupation(ProductModel):
+    """确认的职业。``catalog_selected``：从输入目录直接选中，没有原文，记下目录的版本与内容身份；``explicit`` / ``ambiguous``：
+    兼容的文字匹配，保留原文。"""
+
     concept_id: str = Field(min_length=1, max_length=80)
     label: str = Field(min_length=1, max_length=80)
     duties: tuple[str, ...] = Field(min_length=1)
-    raw_text: str = Field(min_length=1, max_length=300)
+    raw_text: str | None = Field(default=None, min_length=1, max_length=300)
     language: str = Field(min_length=2, max_length=10)
-    match_status: Literal["explicit", "ambiguous"]
+    match_status: Literal["explicit", "ambiguous", "catalog_selected"]
     internal_mappings: tuple[OccupationMapping, ...] = Field(min_length=1)
+    catalog_version: str | None = Field(default=None, max_length=80)
+    catalog_fingerprint: Sha256 | None = None
+
+    @model_validator(mode="after")
+    def _source(self) -> ConfirmedOccupation:
+        catalog = self.match_status == "catalog_selected"
+        if catalog != (self.raw_text is None) or catalog != (self.catalog_fingerprint is not None):
+            raise ValueError(
+                "目录选中的职业没有原文、带目录身份；文字匹配的职业有原文、不带目录身份"
+            )
+        return self
 
 
 class ConfirmedMoney(ProductModel):
@@ -784,6 +1085,20 @@ class ConfirmedInterests(ProductModel):
         return self
 
 
+class ConfirmedQualifications(ProductModel):
+    """确认的学历、证书与相关经验答案（v3.4）。``ConfirmedProfile.abilities`` 由它按 ``rule`` 换算；``source = ability_claims``
+    表示用的是兼容的逐项资格确认，``none`` 表示什么都没答（不授予任何资格）。"""
+
+    source: Literal["structured_answers", "ability_claims", "none"]
+    education_state: QualificationAnswerState
+    education_option: str | None = None
+    certificates_state: QualificationAnswerState
+    certificates: tuple[str, ...] = ()
+    experience_state: QualificationAnswerState
+    experience: tuple[ExperienceEntry, ...] = ()
+    rule: Literal["confirmed_experience_mapping_v1"] = "confirmed_experience_mapping_v1"
+
+
 class FieldSource(ProductModel):
     """一项确认值的来源（表单字段，或未来的访谈证据引用）。"""
 
@@ -814,6 +1129,8 @@ class ConfirmedProfile(ProductModel):
     retained: tuple[RetainedStatement, ...] = ()
     sources: tuple[FieldSource, ...] = ()
     interests: ConfirmedInterests
+    #: v3.4：学历、证书与相关经验的答案（旧画像没有）
+    qualifications: ConfirmedQualifications | None = None
     content_fingerprint: Sha256
 
     def content(self) -> dict[str, Any]:
@@ -1914,6 +2231,31 @@ class SessionView(ProductModel):
     open_intent_id: RefStr | None = None
 
 
+class RemovedAnswer(ProductModel):
+    """旧草稿里新问卷不再收集的一条答案（迁移说明里逐条列出，不悄悄丢掉）。``summary`` 是 E3 生成的可读写法（受支持的硬要求写成
+    选项与数值）；``raw_text`` 是用户自己写的原文（照原样，不翻译；受支持的选项没有原文）。"""
+
+    section: Literal["hard_requirements", "attribute_preferences"]
+    ref: str = Field(min_length=1, max_length=64)
+    summary: str = Field(min_length=1, max_length=300)
+    raw_text: str | None = Field(default=None, max_length=300)
+
+
+class DraftMigration(ProductModel):
+    """这份草稿进入新问卷要做的迁移（``GET`` 草稿时一起给出；没有要迁移的就没有这一项）。
+
+    迁移把草稿的版本换成当前版本、清空新问卷不再收集的硬要求与属性偏好（``removed`` 逐条列出），其他答案原样保留；之后要重新审阅
+    和确认。有要清空的答案时必须用户明确同意（``consent_required``）；只差版本时也要用户点一次。已经确认或已经开始的运行不受影响。"""
+
+    from_questionnaire_version: str = Field(min_length=1, max_length=80)
+    to_questionnaire_version: str = Field(min_length=1, max_length=80)
+    version_changed: bool
+    removed: tuple[RemovedAnswer, ...] = ()
+    consent_required: bool
+    message_zh: str = Field(min_length=1, max_length=400)
+    effects_zh: tuple[str, ...] = Field(min_length=1)
+
+
 class DraftView(ProductModel):
     """服务端保存的一份草稿：草稿编号与修订号由服务器分配；``expires_at`` 是最后一次编辑后 30 天。"""
 
@@ -1921,6 +2263,16 @@ class DraftView(ProductModel):
     draft: UserInputDraft
     updated_at: UtcTime
     expires_at: UtcTime
+    #: v3.4：这份草稿进入新问卷要做的迁移（不需要时为空）
+    migration: DraftMigration | None = None
+
+
+class DraftMigrateRequest(ProductModel):
+    """迁移草稿（``POST /api/v1/drafts/{id}/migrate``）：``expected_revision`` 必须等于当前修订号；有要清空的旧答案时
+    ``clear_removed`` 必须为真（用户看过迁移说明并同意），否则拒绝、草稿不变。"""
+
+    expected_revision: Annotated[int, Field(ge=1)]
+    clear_removed: bool = False
 
 
 class DraftSaveRequest(ProductModel):
@@ -2235,6 +2587,8 @@ ServiceErrorCode = Literal[
     "paid_calls_disabled",
     "run_options_invalid",
     "run_settings_unavailable",
+    "migration_consent_required",
+    "migration_not_needed",
     "rate_limited",
     "csrf_failed",
     "origin_rejected",
@@ -2449,6 +2803,8 @@ PRODUCT_MESSAGES: dict[str, type[ProductModel]] = {
     "SessionView": SessionView,
     "DraftView": DraftView,
     "DraftSaveRequest": DraftSaveRequest,
+    # v3.4：旧草稿的显式迁移
+    "DraftMigrateRequest": DraftMigrateRequest,
     "ReviewReply": ReviewReply,
     "ProfileConfirmRequest": ProfileConfirmRequest,
     "ProfileConfirmReply": ProfileConfirmReply,

@@ -5,7 +5,7 @@
   "code": "not_found",
   "display": {
    "display_schema_version": "e3-display-v2",
-   "resource_version": "e3-display-res-v1-fa1019a773907f94",
+   "resource_version": "e3-display-res-v1-210af34323703870",
    "source_view_fingerprint": "88e46650dd62536465cc95b63f6dfd80713994e1eee1b2006ead2a35f1863ab8",
    "translations": {
     "en": {
@@ -14,7 +14,7 @@
        "key": "error.not_found.message",
        "missing_reason": null,
        "pointer": "/message_zh",
-       "resource_version": "e3-display-res-v1-fa1019a773907f94",
+       "resource_version": "e3-display-res-v1-210af34323703870",
        "source_locale": "zh",
        "status": "provided",
        "text": "This content was not found"
@@ -23,7 +23,7 @@
        "key": "error.not_found.impact",
        "missing_reason": null,
        "pointer": "/impact_zh",
-       "resource_version": "e3-display-res-v1-fa1019a773907f94",
+       "resource_version": "e3-display-res-v1-210af34323703870",
        "source_locale": "zh",
        "status": "provided",
        "text": "This ID does not exist in your space (it may also have expired or been deleted)"
@@ -32,7 +32,7 @@
        "key": "error.not_found.next",
        "missing_reason": null,
        "pointer": "/next_action_zh",
-       "resource_version": "e3-display-res-v1-fa1019a773907f94",
+       "resource_version": "e3-display-res-v1-210af34323703870",
        "source_locale": "zh",
        "status": "provided",
        "text": "Go back to “My runs” or create it again"
@@ -46,7 +46,7 @@
        "key": "error.not_found.message",
        "missing_reason": null,
        "pointer": "/message_zh",
-       "resource_version": "e3-display-res-v1-fa1019a773907f94",
+       "resource_version": "e3-display-res-v1-210af34323703870",
        "source_locale": "zh",
        "status": "provided",
        "text": "没有找到这项内容"
@@ -55,7 +55,7 @@
        "key": "error.not_found.impact",
        "missing_reason": null,
        "pointer": "/impact_zh",
-       "resource_version": "e3-display-res-v1-fa1019a773907f94",
+       "resource_version": "e3-display-res-v1-210af34323703870",
        "source_locale": "zh",
        "status": "provided",
        "text": "这个编号在你的空间里不存在（也可能已经过期或删除）"
@@ -64,7 +64,7 @@
        "key": "error.not_found.next",
        "missing_reason": null,
        "pointer": "/next_action_zh",
-       "resource_version": "e3-display-res-v1-fa1019a773907f94",
+       "resource_version": "e3-display-res-v1-210af34323703870",
        "source_locale": "zh",
        "status": "provided",
        "text": "回到“我的运行”或重新创建"

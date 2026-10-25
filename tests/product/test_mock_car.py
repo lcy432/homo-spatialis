@@ -206,7 +206,8 @@ def test_without_a_public_car_offer_nothing_is_invented():
 
 
 def test_a_san_francisco_clone_lives_legally_with_a_car(tmp_path, monkeypatch):
-    """真实资料包：旧金山没有公交资料。mock 开车上班，三年都满足往返 60 分钟的硬要求，评分与估值完整。"""
+    """真实资料包：旧金山没有公交资料。mock 开车上班，三年都满足往返 60 分钟的硬要求，评分与估值完整。新问卷不再收集硬要求：
+    这里的通勤上限来自带旧硬要求的历史画像（受控夹具），核验的是 E1 内部的硬要求机制。"""
     from product import scenarios as sc
 
     sf = "US:CBSA2023:41860"
@@ -216,6 +217,7 @@ def test_a_san_francisco_clone_lives_legally_with_a_car(tmp_path, monkeypatch):
         "sf_car",
         draft_kwargs={"abilities": ("edu_at_least_hs",), "cities": (sf,)},
         repeat_indexes=(0, 1),
+        legacy_hard_requirements=sc.LEGACY_COMMUTE_60,
     )
     assert s.result is not None
     for clone in s.result.clones:

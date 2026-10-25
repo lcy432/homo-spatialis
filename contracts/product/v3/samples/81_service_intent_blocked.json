@@ -8,7 +8,7 @@
   "confirm_with": null,
   "confirmed": {
    "confirmed_id": "confirmed.draft-000000000000000a.r2",
-   "content_fingerprint": "1286228e6ee209a444b8c8b4a8adc7e47f48a2a8bde9a4f3338508cda2be857a"
+   "content_fingerprint": "115a58f01ef2f9d1914f63c6e495ec13e8e469d0a15b04694d87d6e1bb7608f0"
   },
   "created_at": "2026-10-24T09:00:00Z",
   "deletion": {
@@ -27,7 +27,7 @@
   },
   "intent_id": "intent-000000000000000b",
   "meta": {
-   "conversion_version": "e3a-conversion-v2",
+   "conversion_version": "e3a-conversion-v3",
    "data_pack": {
     "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
@@ -35,15 +35,15 @@
     "status": "synthetic_fixture_only"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.3-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.4-draft",
    "sample": {
     "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
     "origin": "offline_run",
     "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.3",
-   "vocabulary_version": "e3a-vocabulary-v4"
+   "schema_version": "e3a-product-schema-v3.4",
+   "vocabulary_version": "e3a-vocabulary-v5"
   },
   "preflight": {
    "binding": null,
@@ -51,7 +51,7 @@
    "clones_per_city": 0,
    "confirmed": {
     "confirmed_id": "confirmed.draft-000000000000000a.r2",
-    "content_fingerprint": "1286228e6ee209a444b8c8b4a8adc7e47f48a2a8bde9a4f3338508cda2be857a"
+    "content_fingerprint": "115a58f01ef2f9d1914f63c6e495ec13e8e469d0a15b04694d87d6e1bb7608f0"
    },
    "executable": {
     "reasons": [
@@ -87,7 +87,7 @@
     }
    ],
    "meta": {
-    "conversion_version": "e3a-conversion-v2",
+    "conversion_version": "e3a-conversion-v3",
     "data_pack": {
      "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
      "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
@@ -95,10 +95,10 @@
      "status": "synthetic_fixture_only"
     },
     "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-    "questionnaire_version": "e3a-questionnaire-v0.3-draft",
+    "questionnaire_version": "e3a-questionnaire-v0.4-draft",
     "sample": null,
-    "schema_version": "e3a-product-schema-v3.3",
-    "vocabulary_version": "e3a-vocabulary-v4"
+    "schema_version": "e3a-product-schema-v3.4",
+    "vocabulary_version": "e3a-vocabulary-v5"
    },
    "planner": {
     "call_limit": 0,
@@ -108,7 +108,7 @@
     "planner_id": "mock.rules.e3a-product",
     "planner_kind": "mock"
    },
-   "preflight_fingerprint": "6a4e22cedeec238b1b10f4ae0c8fba7ed5a355db4a6970a4db6dd3fe1fea6f41",
+   "preflight_fingerprint": "6f20170fa95caf9e08c7652eede180e274fb50c1fc917ee4d266d235be63dcc9",
    "preflight_id": "preflight.confirmed.draft-000000000000000a.r2",
    "scope_zh": [
     "城市、报价、工资、税、疾病与治疗全部是合成设定；结果不排序真实城市，也不是现实推荐",

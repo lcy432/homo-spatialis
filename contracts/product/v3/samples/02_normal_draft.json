@@ -1,5 +1,5 @@
 {
- "description_zh": "正常填写：全职文员、六维 30/20/20/10/10/10、物质四项 25/25/30/20、健康问卷一题暂不确定、通勤上限 60 分钟",
+ "description_zh": "正常填写：全职文员（兼容的文字描述）、六维 30/20/20/10/10/10、物质四项 25/25/30/20、健康问卷一题暂不确定；新问卷不再收集硬要求与属性偏好，两者都为空",
  "message": "UserInputDraft",
  "payload": {
   "abilities": [],
@@ -15,6 +15,10 @@
    "price_period": "2024",
    "state": "provided"
   },
+  "certificates": {
+   "selected": [],
+   "state": "unanswered"
+  },
   "cities": {
    "city_refs": [
     "US:SYNTH2026:K51",
@@ -23,19 +27,20 @@
    "state": "provided"
   },
   "draft_id": "draft.u501",
+  "education": {
+   "option_id": null,
+   "state": "unanswered"
+  },
   "evidence": [],
+  "experience": {
+   "entries": [],
+   "state": "unanswered"
+  },
   "free_text": {
    "state": "provided",
    "text": "我在写字楼做全职文员。下班以后不想再把很多时间花在洗衣服、打扫屋子上，愿意为省事花一些钱；但也不想因为花钱让自己手头太紧。"
   },
-  "hard_requirements": [
-   {
-    "option_id": "housing.max_commute_roundtrip",
-    "parameter_value": 60,
-    "raw_text": null,
-    "requirement_id": "hr.commute"
-   }
-  ],
+  "hard_requirements": [],
   "health": {
    "items": [
     {
@@ -81,7 +86,7 @@
    "mode": "manual"
   },
   "meta": {
-   "conversion_version": "e3a-conversion-v2",
+   "conversion_version": "e3a-conversion-v3",
    "data_pack": {
     "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
@@ -89,18 +94,21 @@
     "status": "synthetic_fixture_only"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.3-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.4-draft",
    "sample": {
     "note": "离线闭环实际执行的结果（mock 规划器，零网络）",
     "origin": "offline_run",
     "produced_by": "product.scenarios.closed_loop(normal)",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.3",
-   "vocabulary_version": "e3a-vocabulary-v4"
+   "schema_version": "e3a-product-schema-v3.4",
+   "vocabulary_version": "e3a-vocabulary-v5"
   },
   "occupation": {
+   "catalog_fingerprint": null,
+   "catalog_version": null,
    "language": "zh",
+   "mode": "text",
    "raw_text": "我在写字楼做全职文员，平时处理文件和表格",
    "selected_candidate": "occ.office_clerk",
    "state": "provided"

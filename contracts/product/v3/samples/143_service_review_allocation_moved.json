@@ -1,0 +1,477 @@
+{
+ "description_zh": "均分之后移动点数：物质 +5、安全 −5，其他维度不动（不按比例自动调整），写成规范分数 65/3、35/3，合计精确 100",
+ "message": "ReviewReply",
+ "payload": {
+  "meta": {
+   "conversion_version": "e3a-conversion-v3",
+   "data_pack": {
+    "content_fingerprint": "48eda959e2eb8254c891d1de88b92f792ccf8ecbaadac8037d548279cd9dd22b",
+    "note": "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定",
+    "pack_id": "pack.e3b.us-v1",
+    "status": "real_data_frozen"
+   },
+   "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.4-draft",
+   "sample": {
+    "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+    "origin": "offline_run",
+    "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+    "synthetic": true
+   },
+   "schema_version": "e3a-product-schema-v3.4",
+   "vocabulary_version": "e3a-vocabulary-v5"
+  },
+  "review": {
+   "abilities": [
+    "edu_at_least_hs",
+    "edu_at_least_some_college",
+    "edu_at_least_associate",
+    "edu_at_least_bachelor"
+   ],
+   "age": 35,
+   "cities": [
+    "US:CBSA2023:35620",
+    "US:CBSA2023:31080",
+    "US:CBSA2023:41860",
+    "US:CBSA2023:16980",
+    "US:CBSA2023:26420",
+    "US:CBSA2023:42660"
+   ],
+   "confirmable": true,
+   "draft": {
+    "draft_fingerprint": "108ed22094f950cc728c5366861f3d49bf9c9dd61c27c8dbb40172f1a6369545",
+    "draft_id": "draft-0000000000000084",
+    "revision": 2
+   },
+   "free_text_chars": 0,
+   "health": [
+    {
+     "answer_state": "provided",
+     "meaning": "不愿意为多一点收入接受更高的生病与休息可能",
+     "option": "disagree",
+     "option_label": "不符合我",
+     "question_id": "hc_more_pay_more_sick_risk",
+     "text": "一种安排能多赚一点钱，但生病、需要休息几天的可能也更高。我愿意选择它。"
+    },
+    {
+     "answer_state": "provided",
+     "meaning": "愿意推迟不急需的消费，先为可能的健康开支留钱",
+     "option": "agree",
+     "option_label": "符合我",
+     "question_id": "hc_reserve_for_health_costs",
+     "text": "为了应对可能发生的健康开支，我愿意推迟一次想要、但并不急需的消费，先留一笔钱。"
+    },
+    {
+     "answer_state": "unsure",
+     "meaning": "用户暂不确定",
+     "option": null,
+     "option_label": null,
+     "question_id": "hc_wait_for_clear_risk_info",
+     "text": "健康风险的信息还不清楚时，我愿意先放弃眼前的一点收益，等了解清楚再决定。"
+    }
+   ],
+   "issues": [],
+   "items": [
+    {
+     "answer_state": "provided",
+     "confirmation": "pending",
+     "execution_guaranteed": null,
+     "item": "cities",
+     "label": "候选城市",
+     "note": "每座城一个分身固定生活三年；城市身份用完整的国家 / 体系 / 代码",
+     "support": "supported",
+     "usage": [
+      "start_state"
+     ]
+    },
+    {
+     "answer_state": "provided",
+     "confirmation": "pending",
+     "execution_guaranteed": null,
+     "item": "occupation",
+     "label": "职业",
+     "note": "用于匹配开局时的当地目录岗位；不授予任何资格，分类代码只在内部保留",
+     "support": "supported",
+     "usage": [
+      "start_state",
+      "planning"
+     ]
+    },
+    {
+     "answer_state": "provided",
+     "confirmation": "pending",
+     "execution_guaranteed": null,
+     "item": "age",
+     "label": "年龄",
+     "note": "进入已有的年龄规则（合成设定，未经医学标定）；不从职业猜年龄",
+     "support": "supported",
+     "usage": [
+      "start_state"
+     ]
+    },
+    {
+     "answer_state": "provided",
+     "confirmation": "pending",
+     "execution_guaranteed": null,
+     "item": "cash",
+     "label": "开始时可用于生活的钱",
+     "note": "可动用的流动资金，不是房产总值、信用额度或月薪；没填不是 0，不静默借贷",
+     "support": "supported",
+     "usage": [
+      "start_state",
+      "planning"
+     ]
+    },
+    {
+     "answer_state": "provided",
+     "confirmation": "pending",
+     "execution_guaranteed": null,
+     "item": "six_dimensions",
+     "label": "六维",
+     "note": "陈述的相对重要程度，不是开支比例或预算；精确分数参与计算，显示值只供阅读",
+     "support": "supported",
+     "usage": [
+      "scoring",
+      "planning"
+     ]
+    },
+    {
+     "answer_state": "provided",
+     "confirmation": "pending",
+     "execution_guaranteed": null,
+     "item": "material",
+     "label": "物质四项",
+     "note": "陈述的相对重要程度，不是开支比例或预算；精确分数参与计算，显示值只供阅读",
+     "support": "supported",
+     "usage": [
+      "scoring",
+      "planning"
+     ]
+    },
+    {
+     "answer_state": "provided",
+     "confirmation": "pending",
+     "execution_guaranteed": null,
+     "item": "health",
+     "label": "健康风险应对（独立问卷）",
+     "note": "不占六维 100 分，不是第七个评分权重；只供分身做计划，不改变疾病规则、账目或满足感；题目是暂定文案",
+     "support": "partially_supported",
+     "usage": [
+      "planning"
+     ]
+    },
+    {
+     "answer_state": "unanswered",
+     "confirmation": "pending",
+     "execution_guaranteed": null,
+     "item": "free_text",
+     "label": "可选补充文字",
+     "note": "只供分身做计划参考；不会自动改分数、现金、资格或硬要求，本轮不用 LLM 提取",
+     "support": "partially_supported",
+     "usage": [
+      "planning"
+     ]
+    },
+    {
+     "answer_state": "provided",
+     "confirmation": "pending",
+     "execution_guaranteed": null,
+     "item": "abilities",
+     "label": "已确认的资格",
+     "note": "只来自你回答的最高学历、职业证书与相关经验（或兼容的逐项资格确认），不从职业称呼、自由文字或搜索词自动授予",
+     "support": "supported",
+     "usage": [
+      "qualification",
+      "start_state"
+     ]
+    },
+    {
+     "answer_state": "provided",
+     "confirmation": "pending",
+     "execution_guaranteed": null,
+     "item": "leisure_interest",
+     "label": "休闲兴趣",
+     "note": "休闲兴趣：从面板选中 健身、音乐",
+     "support": "partially_supported",
+     "usage": [
+      "planning",
+      "scoring"
+     ]
+    },
+    {
+     "answer_state": "provided",
+     "confirmation": "pending",
+     "execution_guaranteed": null,
+     "item": "taste",
+     "label": "口味与菜系",
+     "note": "口味与菜系：从面板选中 中餐",
+     "support": "partially_supported",
+     "usage": [
+      "planning",
+      "scoring"
+     ]
+    }
+   ],
+   "leisure_interest": {
+    "ambiguous": [],
+    "candidates": [],
+    "message_zh": "休闲兴趣：从面板选中 健身、音乐",
+    "selected": [
+     "fitness",
+     "music"
+    ],
+    "state": "selected",
+    "status": "confirmable",
+    "text": null,
+    "unrecognized": []
+   },
+   "material": {
+    "lines": [
+     {
+      "display": "25.0",
+      "exact": "25",
+      "key": "housing_condition",
+      "label": "居住条件",
+      "state": "provided",
+      "support": "supported",
+      "usage": [
+       "scoring",
+       "planning"
+      ]
+     },
+     {
+      "display": "25.0",
+      "exact": "25",
+      "key": "food_life",
+      "label": "饮食生活",
+      "state": "provided",
+      "support": "partially_supported",
+      "usage": [
+       "scoring",
+       "planning"
+      ]
+     },
+     {
+      "display": "30.0",
+      "exact": "30",
+      "key": "daily_convenience",
+      "label": "日常支持与便利",
+      "state": "provided",
+      "support": "supported",
+      "usage": [
+       "scoring",
+       "planning"
+      ]
+     },
+     {
+      "display": "20.0",
+      "exact": "20",
+      "key": "personal_enjoyment",
+      "label": "个人消费与享受",
+      "state": "provided",
+      "support": "partially_supported",
+      "usage": [
+       "scoring",
+       "planning"
+      ]
+     }
+    ],
+    "mode": "manual",
+    "status": "complete",
+    "total": {
+     "display": "100.0",
+     "exact": "100"
+    }
+   },
+   "meta": {
+    "conversion_version": "e3a-conversion-v3",
+    "data_pack": {
+     "content_fingerprint": "48eda959e2eb8254c891d1de88b92f792ccf8ecbaadac8037d548279cd9dd22b",
+     "note": "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定",
+     "pack_id": "pack.e3b.us-v1",
+     "status": "real_data_frozen"
+    },
+    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
+    "questionnaire_version": "e3a-questionnaire-v0.4-draft",
+    "sample": null,
+    "schema_version": "e3a-product-schema-v3.4",
+    "vocabulary_version": "e3a-vocabulary-v5"
+   },
+   "money": {
+    "amount_text": "3000",
+    "conversion_rule": "identity_same_basis_v1",
+    "converted": {
+     "amount_minor": 300000,
+     "currency": "USD",
+     "display": "3,000.00",
+     "numeraire_id": "USD_2024_LOCAL"
+    },
+    "currency": "USD",
+    "meaning": "可动用的流动资金（不是总资产、信用额度或月薪）",
+    "price_period": "2024",
+    "status": "convertible"
+   },
+   "occupation": {
+    "candidates": [
+     {
+      "candidate_id": "occ.soc_15_1252",
+      "duties": [
+       "软件开发工程师"
+      ],
+      "label": "软件开发工程师",
+      "matched_terms": []
+     }
+    ],
+    "message_zh": "你从职业目录选了“软件开发工程师”：请核对下面的职责是不是你主要做的工作",
+    "mode": "catalog",
+    "raw_text": null,
+    "selected": "occ.soc_15_1252",
+    "status": "catalog_selected"
+   },
+   "pending_confirmations": [
+    "ack:standard_start"
+   ],
+   "qualifications": {
+    "ask_experience": [],
+    "certificates": [],
+    "certificates_state": "provided",
+    "education_option": "bachelor",
+    "education_state": "provided",
+    "experience": [],
+    "experience_state": "unanswered",
+    "granted": [
+     {
+      "ability_id": "edu_at_least_hs",
+      "because": "最高学历“本科”：至少达到这一级（更高的学历也满足较低的学历门槛）",
+      "label": "高中毕业或同等学力"
+     },
+     {
+      "ability_id": "edu_at_least_some_college",
+      "because": "最高学历“本科”：至少达到这一级（更高的学历也满足较低的学历门槛）",
+      "label": "读过大学（未取得学位）"
+     },
+     {
+      "ability_id": "edu_at_least_associate",
+      "because": "最高学历“本科”：至少达到这一级（更高的学历也满足较低的学历门槛）",
+      "label": "副学士学位"
+     },
+     {
+      "ability_id": "edu_at_least_bachelor",
+      "because": "最高学历“本科”：至少达到这一级（更高的学历也满足较低的学历门槛）",
+      "label": "学士学位"
+     }
+    ],
+    "message_zh": "资格按你的回答换算：高中毕业或同等学力、读过大学（未取得学位）、副学士学位、学士学位",
+    "requirements": [
+     {
+      "ability_id": "edu_at_least_bachelor",
+      "label": "学士学位",
+      "met": true
+     }
+    ],
+    "source": "structured_answers"
+   },
+   "review_id": "review.draft-0000000000000084.r2",
+   "six_dimensions": {
+    "lines": [
+     {
+      "display": "21.7",
+      "exact": "65/3",
+      "key": "material",
+      "label": "物质生活",
+      "state": "provided",
+      "support": "supported",
+      "usage": [
+       "scoring",
+       "planning"
+      ]
+     },
+     {
+      "display": "11.7",
+      "exact": "35/3",
+      "key": "safety",
+      "label": "安全",
+      "state": "provided",
+      "support": "partially_supported",
+      "usage": [
+       "scoring",
+       "planning"
+      ]
+     },
+     {
+      "display": "16.7",
+      "exact": "50/3",
+      "key": "opportunity",
+      "label": "发展机会",
+      "state": "provided",
+      "support": "supported",
+      "usage": [
+       "scoring",
+       "planning"
+      ]
+     },
+     {
+      "display": "16.7",
+      "exact": "50/3",
+      "key": "leisure",
+      "label": "休闲",
+      "state": "provided",
+      "support": "supported",
+      "usage": [
+       "scoring",
+       "planning"
+      ]
+     },
+     {
+      "display": "16.7",
+      "exact": "50/3",
+      "key": "environment",
+      "label": "环境",
+      "state": "provided",
+      "support": "partially_supported",
+      "usage": [
+       "scoring",
+       "planning"
+      ]
+     },
+     {
+      "display": "16.7",
+      "exact": "50/3",
+      "key": "commute",
+      "label": "交通便捷程度",
+      "state": "provided",
+      "support": "supported",
+      "usage": [
+       "scoring",
+       "planning"
+      ]
+     }
+    ],
+    "mode": "manual",
+    "status": "complete",
+    "total": {
+     "display": "100.0",
+     "exact": "100"
+    }
+   },
+   "statements": [],
+   "summary_zh": [
+    "答案可以确认：请核对下面的解释，并知悉标准开局与只留存的陈述",
+    "健康问卷有 1 题没有明确倾向（未答或暂不确定）：照实保留，分身会被告知没有这几项的明确指令"
+   ],
+   "taste": {
+    "ambiguous": [],
+    "candidates": [],
+    "message_zh": "口味与菜系：从面板选中 中餐",
+    "selected": [
+     "chinese"
+    ],
+    "state": "selected",
+    "status": "confirmable",
+    "text": null,
+    "unrecognized": []
+   }
+  },
+  "reviewed_revision": 2
+ }
+}

@@ -1,0 +1,98 @@
+{
+ "description_zh": "没有同意清空就迁移（clear_removed 省略或为 false）：409 migration_consent_required，草稿不变",
+ "message": "ServiceError",
+ "payload": {
+  "code": "migration_consent_required",
+  "display": {
+   "display_schema_version": "e3-display-v2",
+   "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+   "source_view_fingerprint": "c6f7755081ca5b42e628ca7b7957431d97500d3750a8fb5dddf603ab06f7203f",
+   "translations": {
+    "en": {
+     "fields": [
+      {
+       "key": "error.migration_consent_required.message",
+       "missing_reason": null,
+       "pointer": "/message_zh",
+       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "This old draft has answers the new questionnaire no longer collects; migrating clears them, and you have not agreed to that yet"
+      },
+      {
+       "key": "error.migration_consent_required.impact",
+       "missing_reason": null,
+       "pointer": "/impact_zh",
+       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "The draft was not changed, and the new questionnaire cannot use it yet"
+      },
+      {
+       "key": "error.migration_consent_required.next",
+       "missing_reason": null,
+       "pointer": "/next_action_zh",
+       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "Read the draft's migration notes first; migrate after you agree to clear those old answers"
+      }
+     ],
+     "status": "complete"
+    },
+    "zh": {
+     "fields": [
+      {
+       "key": "error.migration_consent_required.message",
+       "missing_reason": null,
+       "pointer": "/message_zh",
+       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "这份旧草稿里有新问卷不再收集的答案，迁移会清空它们，还没有得到你的同意"
+      },
+      {
+       "key": "error.migration_consent_required.impact",
+       "missing_reason": null,
+       "pointer": "/impact_zh",
+       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "草稿没有改动，新问卷还不能用它"
+      },
+      {
+       "key": "error.migration_consent_required.next",
+       "missing_reason": null,
+       "pointer": "/next_action_zh",
+       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "先看草稿的迁移说明；同意清空那些旧答案后再迁移"
+      }
+     ],
+     "status": "complete"
+    }
+   }
+  },
+  "field": null,
+  "impact_zh": "草稿没有改动，新问卷还不能用它",
+  "message_zh": "这份旧草稿里有新问卷不再收集的答案，迁移会清空它们，还没有得到你的同意",
+  "meta": null,
+  "next_action_zh": "先看草稿的迁移说明；同意清空那些旧答案后再迁移",
+  "retry_after_seconds": null,
+  "sample": {
+   "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+   "origin": "offline_run",
+   "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+   "synthetic": true
+  },
+  "status": 409,
+  "support_ref": null
+ },
+ "sample": {
+  "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+  "origin": "offline_run",
+  "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+  "synthetic": true
+ }
+}

@@ -11,18 +11,7 @@
      "exact": "0"
     },
     "exits": 0,
-    "hard_requirements": [
-     {
-      "checked": 0,
-      "need": "commute_limit",
-      "not_checked": 1,
-      "planned": 1,
-      "satisfied_every_month": 0,
-      "satisfied_in_lived_months": 0,
-      "unknown": 0,
-      "violated": 0
-     }
-    ],
+    "hard_requirements": [],
     "headline_zh": "合成城 K51：原计划 1 个分身——0 个完成且可评价、0 个生活出局、1 个模拟问题；没有可用于平均的完整结果",
     "label": "合成城 K51",
     "mean_denominator": 0,
@@ -43,8 +32,7 @@
     },
     "notes_zh": [
      "没有完整评价的分身：完整者均值为空（不填 0，不用 L 代替 J），只给缺失范围",
-     "有意外程序错误：不能假定它只影响这一个分身，先查原因再解读这份报告",
-     "有分身没有满足、无法判断或尚未核验用户的硬要求（未核验 = 没有可信记录，不是核验过、没问题）：见硬要求一节；均值高不代表完全符合用户要求"
+     "有意外程序错误：不能假定它只影响这一个分身，先查原因再解读这份报告"
     ],
     "planned": 1,
     "range_denominator": 1,
@@ -65,18 +53,7 @@
      "exact": "0"
     },
     "exits": 0,
-    "hard_requirements": [
-     {
-      "checked": 0,
-      "need": "commute_limit",
-      "not_checked": 1,
-      "planned": 1,
-      "satisfied_every_month": 0,
-      "satisfied_in_lived_months": 0,
-      "unknown": 0,
-      "violated": 0
-     }
-    ],
+    "hard_requirements": [],
     "headline_zh": "合成城 M52：原计划 1 个分身——0 个完成且可评价、0 个生活出局、1 个模拟问题；没有可用于平均的完整结果",
     "label": "合成城 M52",
     "mean_denominator": 0,
@@ -96,8 +73,7 @@
      "exact": "1"
     },
     "notes_zh": [
-     "没有完整评价的分身：完整者均值为空（不填 0，不用 L 代替 J），只给缺失范围",
-     "有分身没有满足、无法判断或尚未核验用户的硬要求（未核验 = 没有可信记录，不是核验过、没问题）：见硬要求一节；均值高不代表完全符合用户要求"
+     "没有完整评价的分身：完整者均值为空（不填 0，不用 L 代替 J），只给缺失范围"
     ],
     "planned": 1,
     "range_denominator": 1,
@@ -119,7 +95,7 @@
     "clone_ref": "u507.k51.r0",
     "event_chain": [],
     "explanation": {
-     "audit_ref": "run:run-e3a-289853fd2dfcad94 clone:u507.k51.r0 record:failures.json",
+     "audit_ref": "run:run-e3a-1d7ae2409ec08c79 clone:u507.k51.r0 record:failures.json",
      "category": "program_error",
      "impact_zh": "不进完成者平均；城市的模拟缺失范围把它当作未知（0 到 1 之间都保留），不写成生活出局",
      "next_action_zh": "维护者按审计编号查看内部记录、修复之后用新的运行重跑；这里不显示内部错误内容",
@@ -150,7 +126,7 @@
     "clone_ref": "u507.m52.r0",
     "event_chain": [],
     "explanation": {
-     "audit_ref": "run:run-e3a-289853fd2dfcad94 clone:u507.m52.r0 record:progress.json",
+     "audit_ref": "run:run-e3a-1d7ae2409ec08c79 clone:u507.m52.r0 record:progress.json",
      "category": "not_run",
      "impact_zh": "不进完成者平均；城市的模拟缺失范围把它当作未知（0 到 1 之间都保留），不写成生活出局",
      "next_action_zh": "批次的问题处理之后，用新的运行重跑",
@@ -193,7 +169,7 @@
   ],
   "confirmed": {
    "confirmed_id": "confirmed.draft.u507.r1",
-   "content_fingerprint": "02b4738ab5565e2228fb1ee74f14bbbbb146824d80a7a5509c5b1dfe549dcfe4"
+   "content_fingerprint": "72be5f86b36f4e2f1db30df52d54f393aafe46b8dce500c1ed0b064a211f3a02"
   },
   "data_nature": [
    {
@@ -765,7 +741,7 @@
    "结果只给用户看，不回灌给仍在生活中的分身"
   ],
   "meta": {
-   "conversion_version": "e3a-conversion-v2",
+   "conversion_version": "e3a-conversion-v3",
    "data_pack": {
     "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
@@ -773,15 +749,15 @@
     "status": "synthetic_fixture_only"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.3-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.4-draft",
    "sample": {
     "note": "受控夹具：mock 在第 1 个分身第 1 年抛出意外异常",
     "origin": "controlled_fixture",
     "produced_by": "product.scenarios.closed_loop(paused)",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.3",
-   "vocabulary_version": "e3a-vocabulary-v4"
+   "schema_version": "e3a-product-schema-v3.4",
+   "vocabulary_version": "e3a-vocabulary-v5"
   },
   "not_generated_reason": null,
   "option_coverage": [
@@ -813,7 +789,7 @@
    "planner_kind": "mock"
   },
   "preflight": {
-   "preflight_fingerprint": "01b90ff4e8fbaae681fc7a309b6e0ca323b5347a694667417cc9c2d97470a20d",
+   "preflight_fingerprint": "d56b23baf7ead2ad5b133d3d0614a85302cdf15fc580a6e8a18fb1608d3e047f",
    "preflight_id": "preflight.confirmed.draft.u507.r1"
   },
   "reading_guide_zh": [
@@ -827,9 +803,9 @@
    "分数是当前合成模型下、按你确认的陈述偏好计算的结果；小数末位的差异不构成可靠的排序"
   ],
   "real_model_calls": 0,
-  "result_fingerprint": "de1c656603b0e719b7c64f0805a78c37a657bbac7fc8e6a649a5f9ec29033582",
-  "result_id": "result.run-e3a-289853fd2dfcad94",
-  "run_id": "run-e3a-289853fd2dfcad94",
+  "result_fingerprint": "d5d1a14ba3476089b5acf3ad54f82c7a32ea6b40bee29833c759e3ea34ca12ae",
+  "result_id": "result.run-e3a-1d7ae2409ec08c79",
+  "run_id": "run-e3a-1d7ae2409ec08c79",
   "run_stage": "paused",
   "sources_zh": [
    "生活事实：E1 结算记录（钱、岗位、住房、食品、服务月份）与月度资源账（本人家务小时）",

@@ -86,6 +86,176 @@
    "title": "AttributeKindDef",
    "type": "object"
   },
+  "CatalogGroup": {
+   "additionalProperties": false,
+   "description": "职业目录的一个浏览分组。分组只用于浏览，不改变职业映射，也不进确认画像。",
+   "properties": {
+    "group_id": {
+     "pattern": "^[a-z][a-z0-9_]{0,47}$",
+     "title": "Group Id",
+     "type": "string"
+    },
+    "label": {
+     "maxLength": 40,
+     "minLength": 1,
+     "title": "Label",
+     "type": "string"
+    },
+    "order": {
+     "minimum": 1,
+     "title": "Order",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "group_id",
+    "label",
+    "order"
+   ],
+   "title": "CatalogGroup",
+   "type": "object"
+  },
+  "CatalogOccupation": {
+   "additionalProperties": false,
+   "description": "目录里的一个职业：概念编号（与文字匹配、确认画像用的是同一个概念）、唯一的主分组、名称、职责、搜索词与相关资格。\n\n``search_terms`` 是明确登记的中英文搜索词（名称、资料包别名与目录补充的叫法，例如“程序员”），照原文给出、不翻译，只用来筛选；\n搜索框里的文字不保存、不进画像。``qualification_refs`` 是这个职业的开局岗位要求的资格（能力清单 ``abilities`` 里的编号），只供\n显示；学历包含关系、证书授予与经验年数的判断都在 E3。分类代码只在内部保留，不在这里。",
+   "properties": {
+    "concept_id": {
+     "pattern": "^[a-z][a-z0-9_.]{1,79}$",
+     "title": "Concept Id",
+     "type": "string"
+    },
+    "duties": {
+     "items": {
+      "type": "string"
+     },
+     "minItems": 1,
+     "title": "Duties",
+     "type": "array"
+    },
+    "experience_question": {
+     "anyOf": [
+      {
+       "maxLength": 80,
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Experience Question"
+    },
+    "group_id": {
+     "pattern": "^[a-z][a-z0-9_]{0,47}$",
+     "title": "Group Id",
+     "type": "string"
+    },
+    "label": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Label",
+     "type": "string"
+    },
+    "order": {
+     "minimum": 1,
+     "title": "Order",
+     "type": "integer"
+    },
+    "qualification_refs": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Qualification Refs",
+     "type": "array"
+    },
+    "search_terms": {
+     "items": {
+      "maxLength": 120,
+      "minLength": 1,
+      "type": "string"
+     },
+     "minItems": 1,
+     "title": "Search Terms",
+     "type": "array"
+    }
+   },
+   "required": [
+    "concept_id",
+    "group_id",
+    "order",
+    "label",
+    "duties",
+    "search_terms"
+   ],
+   "title": "CatalogOccupation",
+   "type": "object"
+  },
+  "CatalogSearchRules": {
+   "additionalProperties": false,
+   "description": "目录搜索的规则（E5 在完整的小目录里筛选显示；服务端只认提交的编号，不认搜索词）。",
+   "properties": {
+    "method": {
+     "const": "catalog_search_nfkc_casefold_all_terms_v1",
+     "title": "Method",
+     "type": "string"
+    },
+    "no_match": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "No Match",
+     "type": "string"
+    },
+    "rules": {
+     "items": {
+      "type": "string"
+     },
+     "minItems": 1,
+     "title": "Rules",
+     "type": "array"
+    }
+   },
+   "required": [
+    "method",
+    "rules",
+    "no_match"
+   ],
+   "title": "CatalogSearchRules",
+   "type": "object"
+  },
+  "CertificateOption": {
+   "additionalProperties": false,
+   "description": "一张可以多选的职业证书（中学后非学位证书）：资格编号、名称，以及要求它的职业。学历不会授予它。",
+   "properties": {
+    "ability_id": {
+     "pattern": "^[a-z][a-z0-9_]{1,47}$",
+     "title": "Ability Id",
+     "type": "string"
+    },
+    "label": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Label",
+     "type": "string"
+    },
+    "occupations": {
+     "items": {
+      "pattern": "^[a-z][a-z0-9_.]{1,79}$",
+      "type": "string"
+     },
+     "minItems": 1,
+     "title": "Occupations",
+     "type": "array"
+    }
+   },
+   "required": [
+    "ability_id",
+    "label",
+    "occupations"
+   ],
+   "title": "CertificateOption",
+   "type": "object"
+  },
   "CityOption": {
    "additionalProperties": false,
    "description": "一个候选城市：完整身份（国家 / 地理体系 / 代码）与地理边界版本；不用中文名拼接资料。",
@@ -254,6 +424,84 @@
     "support_note"
    ],
    "title": "DimensionDefinition",
+   "type": "object"
+  },
+  "EducationOption": {
+   "additionalProperties": false,
+   "description": "最高学历的一个选项（单选，按从低到高的顺序）。职业证书不在这里，另有证书多选。",
+   "properties": {
+    "label": {
+     "maxLength": 40,
+     "minLength": 1,
+     "title": "Label",
+     "type": "string"
+    },
+    "option_id": {
+     "pattern": "^[a-z][a-z0-9_]{0,47}$",
+     "title": "Option Id",
+     "type": "string"
+    },
+    "order": {
+     "minimum": 1,
+     "title": "Order",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "option_id",
+    "label",
+    "order"
+   ],
+   "title": "EducationOption",
+   "type": "object"
+  },
+  "ExperienceQuestion": {
+   "additionalProperties": false,
+   "description": "一个相关工作经验问题：只在选中的职业属于 ``applies_to`` 时问；用户在 ``related`` 列出的职业里填做过几年。年数门槛只写在\n``prompt`` 的说明里，由 E3 判断（E5 不判断）。",
+   "properties": {
+    "ability_id": {
+     "pattern": "^[a-z][a-z0-9_]{1,47}$",
+     "title": "Ability Id",
+     "type": "string"
+    },
+    "applies_to": {
+     "items": {
+      "pattern": "^[a-z][a-z0-9_.]{1,79}$",
+      "type": "string"
+     },
+     "minItems": 1,
+     "title": "Applies To",
+     "type": "array"
+    },
+    "prompt": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Prompt",
+     "type": "string"
+    },
+    "question_id": {
+     "pattern": "^[a-z][a-z0-9_.]{1,79}$",
+     "title": "Question Id",
+     "type": "string"
+    },
+    "related": {
+     "items": {
+      "pattern": "^[a-z][a-z0-9_.]{1,79}$",
+      "type": "string"
+     },
+     "minItems": 1,
+     "title": "Related",
+     "type": "array"
+    }
+   },
+   "required": [
+    "question_id",
+    "ability_id",
+    "applies_to",
+    "related",
+    "prompt"
+   ],
+   "title": "ExperienceQuestion",
    "type": "object"
   },
   "HardRequirementOption": {
@@ -449,6 +697,183 @@
    "title": "HealthQuestionnaire",
    "type": "object"
   },
+  "InputCatalog": {
+   "additionalProperties": false,
+   "description": "输入目录（v3.4）：职业的分类索引与搜索词、学历 / 证书 / 相关经验问题、兴趣与菜系的分组，以及新流程启用的板块。\n\n它是一份独立的小配置，引用资料包里已有的职业、资格与兴趣键，不新增职业、资格、活动或评分系数。``content_fingerprint`` 是这份\n配置与所引用资料包的内容身份：按目录选职业的草稿要带上它，目录换了就要重新选（服务端拒绝过期的目录）。",
+   "properties": {
+    "catalog_id": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+     "title": "Catalog Id",
+     "type": "string"
+    },
+    "catalog_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Catalog Version",
+     "type": "string"
+    },
+    "certificates": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/CertificateOption"
+     },
+     "title": "Certificates",
+     "type": "array"
+    },
+    "content_fingerprint": {
+     "pattern": "^[0-9a-f]{64}$",
+     "title": "Content Fingerprint",
+     "type": "string"
+    },
+    "education": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/EducationOption"
+     },
+     "title": "Education",
+     "type": "array"
+    },
+    "experience": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/ExperienceQuestion"
+     },
+     "title": "Experience",
+     "type": "array"
+    },
+    "groups": {
+     "items": {
+      "$ref": "#/$defs/CatalogGroup"
+     },
+     "minItems": 1,
+     "title": "Groups",
+     "type": "array"
+    },
+    "leisure": {
+     "$ref": "#/$defs/InterestPanel"
+    },
+    "notes": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Notes",
+     "type": "array"
+    },
+    "occupations": {
+     "items": {
+      "$ref": "#/$defs/CatalogOccupation"
+     },
+     "minItems": 1,
+     "title": "Occupations",
+     "type": "array"
+    },
+    "pack_id": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Pack Id",
+     "type": "string"
+    },
+    "qualification_states": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/QualificationStateText"
+     },
+     "title": "Qualification States",
+     "type": "array"
+    },
+    "search": {
+     "$ref": "#/$defs/CatalogSearchRules"
+    },
+    "sections": {
+     "$ref": "#/$defs/InputSections"
+    },
+    "taste": {
+     "$ref": "#/$defs/InterestPanel"
+    }
+   },
+   "required": [
+    "catalog_id",
+    "catalog_version",
+    "content_fingerprint",
+    "pack_id",
+    "sections",
+    "search",
+    "groups",
+    "occupations",
+    "leisure",
+    "taste"
+   ],
+   "title": "InputCatalog",
+   "type": "object"
+  },
+  "InputSections": {
+   "additionalProperties": false,
+   "description": "新输入流程启用哪些板块。职业按目录直接选（文字描述只为兼容保留，不是必经入口）；兴趣与口味用面板多选；硬要求、属性偏好\n与兴趣的文字解释不在新流程里。",
+   "properties": {
+    "attribute_preferences": {
+     "const": false,
+     "default": false,
+     "title": "Attribute Preferences",
+     "type": "boolean"
+    },
+    "certificates": {
+     "title": "Certificates",
+     "type": "boolean"
+    },
+    "education": {
+     "title": "Education",
+     "type": "boolean"
+    },
+    "experience": {
+     "title": "Experience",
+     "type": "boolean"
+    },
+    "hard_requirements": {
+     "const": false,
+     "default": false,
+     "title": "Hard Requirements",
+     "type": "boolean"
+    },
+    "interest_text": {
+     "const": false,
+     "default": false,
+     "title": "Interest Text",
+     "type": "boolean"
+    },
+    "leisure": {
+     "const": "panel_select",
+     "default": "panel_select",
+     "title": "Leisure",
+     "type": "string"
+    },
+    "occupation": {
+     "const": "catalog_select",
+     "default": "catalog_select",
+     "title": "Occupation",
+     "type": "string"
+    },
+    "occupation_text": {
+     "const": "compatibility_only",
+     "default": "compatibility_only",
+     "title": "Occupation Text",
+     "type": "string"
+    },
+    "taste": {
+     "const": "panel_select",
+     "default": "panel_select",
+     "title": "Taste",
+     "type": "string"
+    }
+   },
+   "required": [
+    "education",
+    "certificates",
+    "experience"
+   ],
+   "title": "InputSections",
+   "type": "object"
+  },
   "InterestCapability": {
    "additionalProperties": false,
    "description": "兴趣与口味（DECISIONS/0041）：可选的文字描述先形成待确认的解释；用户确认后的类别才进入共同、有限的匹配规则。",
@@ -500,6 +925,133 @@
     "matching_note_zh"
    ],
    "title": "InterestCapability",
+   "type": "object"
+  },
+  "InterestEntry": {
+   "additionalProperties": false,
+   "description": "面板里的一个类别：能力清单词表里已有的键（不新增类别）、唯一的分组、名称与搜索词（类别名、词表别名与目录补充的叫法，照原文）。",
+   "properties": {
+    "group_id": {
+     "pattern": "^[a-z][a-z0-9_]{0,47}$",
+     "title": "Group Id",
+     "type": "string"
+    },
+    "key": {
+     "pattern": "^[a-z][a-z0-9_]{0,47}$",
+     "title": "Key",
+     "type": "string"
+    },
+    "label": {
+     "maxLength": 40,
+     "minLength": 1,
+     "title": "Label",
+     "type": "string"
+    },
+    "order": {
+     "minimum": 1,
+     "title": "Order",
+     "type": "integer"
+    },
+    "search_terms": {
+     "items": {
+      "maxLength": 60,
+      "minLength": 1,
+      "type": "string"
+     },
+     "minItems": 1,
+     "title": "Search Terms",
+     "type": "array"
+    }
+   },
+   "required": [
+    "key",
+    "group_id",
+    "order",
+    "label",
+    "search_terms"
+   ],
+   "title": "InterestEntry",
+   "type": "object"
+  },
+  "InterestGroup": {
+   "additionalProperties": false,
+   "description": "兴趣或菜系面板的一个浏览分组。",
+   "properties": {
+    "group_id": {
+     "pattern": "^[a-z][a-z0-9_]{0,47}$",
+     "title": "Group Id",
+     "type": "string"
+    },
+    "label": {
+     "maxLength": 40,
+     "minLength": 1,
+     "title": "Label",
+     "type": "string"
+    },
+    "order": {
+     "minimum": 1,
+     "title": "Order",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "group_id",
+    "label",
+    "order"
+   ],
+   "title": "InterestGroup",
+   "type": "object"
+  },
+  "InterestPanel": {
+   "additionalProperties": false,
+   "description": "兴趣（``leisure``）或口味（``taste``）的多选面板。可以跳过（未答）；选了类别就直接是确认画像里的类别，不需要写文字。",
+   "properties": {
+    "entries": {
+     "items": {
+      "$ref": "#/$defs/InterestEntry"
+     },
+     "minItems": 1,
+     "title": "Entries",
+     "type": "array"
+    },
+    "groups": {
+     "items": {
+      "$ref": "#/$defs/InterestGroup"
+     },
+     "minItems": 1,
+     "title": "Groups",
+     "type": "array"
+    },
+    "kind": {
+     "enum": [
+      "leisure",
+      "taste"
+     ],
+     "title": "Kind",
+     "type": "string"
+    },
+    "note": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Note",
+     "type": "string"
+    },
+    "search_notes": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/SearchNote"
+     },
+     "title": "Search Notes",
+     "type": "array"
+    }
+   },
+   "required": [
+    "kind",
+    "groups",
+    "entries",
+    "note"
+   ],
+   "title": "InterestPanel",
    "type": "object"
   },
   "MaterialLeafDefinition": {
@@ -759,7 +1311,10 @@
      "default": null
     },
     "schema_version": {
-     "const": "e3a-product-schema-v3.3",
+     "enum": [
+      "e3a-product-schema-v3.3",
+      "e3a-product-schema-v3.4"
+     ],
      "title": "Schema Version",
      "type": "string"
     },
@@ -779,6 +1334,50 @@
     "data_pack"
    ],
    "title": "ProductMeta",
+   "type": "object"
+  },
+  "QualificationStateText": {
+   "additionalProperties": false,
+   "description": "学历、证书或经验的一种作答状态的名称与含义。",
+   "properties": {
+    "meaning": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Meaning",
+     "type": "string"
+    },
+    "name": {
+     "maxLength": 60,
+     "minLength": 1,
+     "title": "Name",
+     "type": "string"
+    },
+    "section": {
+     "enum": [
+      "education",
+      "certificates",
+      "experience"
+     ],
+     "title": "Section",
+     "type": "string"
+    },
+    "state": {
+     "enum": [
+      "unanswered",
+      "provided",
+      "unsure"
+     ],
+     "title": "State",
+     "type": "string"
+    }
+   },
+   "required": [
+    "section",
+    "state",
+    "name",
+    "meaning"
+   ],
+   "title": "QualificationStateText",
    "type": "object"
   },
   "SampleLabel": {
@@ -819,6 +1418,49 @@
     "note"
    ],
    "title": "SampleLabel",
+   "type": "object"
+  },
+  "SearchNote": {
+   "additionalProperties": false,
+   "description": "一组搜索词的说明：它们对应哪些已支持的键（可以为空：本版不支持），以及要告诉用户的话。搜索词照原文，不翻译。\n例如“川菜”只找到已支持的“中餐”，并说明本版不区分地方菜；“徒步”找不到任何类别，并说明本版还没有、不会算成健身。",
+   "properties": {
+    "note": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Note",
+     "type": "string"
+    },
+    "note_id": {
+     "pattern": "^[a-z][a-z0-9_.]{1,79}$",
+     "title": "Note Id",
+     "type": "string"
+    },
+    "points_to": {
+     "default": [],
+     "items": {
+      "pattern": "^[a-z][a-z0-9_]{0,47}$",
+      "type": "string"
+     },
+     "title": "Points To",
+     "type": "array"
+    },
+    "terms": {
+     "items": {
+      "maxLength": 40,
+      "minLength": 1,
+      "type": "string"
+     },
+     "minItems": 1,
+     "title": "Terms",
+     "type": "array"
+    }
+   },
+   "required": [
+    "note_id",
+    "terms",
+    "note"
+   ],
+   "title": "SearchNote",
    "type": "object"
   },
   "VocabularyTerm": {
@@ -922,6 +1564,17 @@
   },
   "health_questionnaire": {
    "$ref": "#/$defs/HealthQuestionnaire"
+  },
+  "input_catalog": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/InputCatalog"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null
   },
   "interests": {
    "$ref": "#/$defs/InterestCapability"

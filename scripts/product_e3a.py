@@ -177,7 +177,8 @@ def generate_samples(out: Path, work: Path) -> None:
         out,
         "01_capabilities",
         "ProductCapabilities",
-        "合成资料包发布的能力清单：城市、职业匹配、六维与物质题干、健康问卷、硬要求与属性偏好的支持状态",
+        "合成资料包发布的能力清单：城市、职业匹配与输入目录（分组、搜索词、证书问题、兴趣与菜系面板、新流程启用的板块）、六维与物质"
+        "题干、健康问卷",
         dump(caps),
     )
 
@@ -187,7 +188,8 @@ def generate_samples(out: Path, work: Path) -> None:
         out,
         "02_normal_draft",
         "UserInputDraft",
-        "正常填写：全职文员、六维 30/20/20/10/10/10、物质四项 25/25/30/20、健康问卷一题暂不确定、通勤上限 60 分钟",
+        "正常填写：全职文员（兼容的文字描述）、六维 30/20/20/10/10/10、物质四项 25/25/30/20、健康问卷一题暂不确定；新问卷不再"
+        "收集硬要求与属性偏好，两者都为空",
         dump(n.draft),
     )
     _sample_file(
@@ -359,7 +361,8 @@ def generate_samples(out: Path, work: Path) -> None:
         out,
         "17_attributes_and_home_entry_review",
         "ProfileReview",
-        "品牌、菜系未评分（只留存）；“不让陌生人进家”被标为不可妥协，但本版没有执行保障，明确报告不支持",
+        "新问卷不再收集品牌、菜系等属性偏好：草稿里还有这类旧答案（含标成不可妥协的“不让陌生人进家”）时审阅阻断并逐条列出，"
+        "按迁移说明清空后再审阅——不悄悄沿用，也不悄悄丢掉",
         dump(attrs.review),
     )
 
@@ -459,13 +462,15 @@ def generate_samples(out: Path, work: Path) -> None:
         repeat_indexes=(0, 1),
         illness_events=mixed_events,
         scripts=(_script("u503.m52.r0", "malformed_output", (1,)),),
+        legacy_hard_requirements=sc.LEGACY_COMMUTE_60,
     )
     _sample_file(
         out,
         "23_mixed_cem_result",
         "ProductResult",
         "C / E / M 混合：K51 一个完整、一个出局；M52 一个模拟问题（规划修订耗尽，不是出局）、一个出局，所以 M52 的 C = 0、均值为空；"
-        "通勤硬要求在 M52 只有 1 人可核验、1 人没有可信记录（未核验，不当作满足）",
+        "通勤硬要求在 M52 只有 1 人可核验、1 人没有可信记录（未核验，不当作满足）。这份画像的往返 60 分钟上限来自旧问卷（受控夹具："
+        "新问卷不再收集硬要求，这里只展示历史结果里的硬要求报告）",
         dump(mixed.result),
     )
     allx_events = copy.deepcopy(major)
@@ -696,18 +701,10 @@ def generate_samples(out: Path, work: Path) -> None:
         out,
         "38_duplicate_answers_rejected_review",
         "ProfileReview",
-        "受控夹具：同一健康题两个答案、同一资格两条、两条通勤上限——确认前全部拒绝，不按最后一个算，也不自动取更严格的上限",
+        "受控夹具：同一健康题两个答案、同一资格两条——确认前全部拒绝，不按最后一个算",
         dump(dup.review),
     )
     # 生活扩展（DECISIONS/0041）：兴趣与口味的作答状态
-    brand = (
-        {
-            "preference_id": "pref.brand",
-            "need": "personal_enjoyment",
-            "kind": "brand",
-            "raw_text": "吉他想要某个牌子的",
-        },
-    )
     interest_cases = (
         (
             "39_interest_confirmed_review",
@@ -719,10 +716,9 @@ def generate_samples(out: Path, work: Path) -> None:
                     "selected": ["music"],
                 },
                 "taste": {"state": "described", "text": "川菜，偶尔意面", "selected": ["sichuan"]},
-                "attributes": brand,
             },
-            "兴趣用文字描述并选中“音乐”、口味选中“川菜”：可以确认；“冲浪”没认出（原样保留、本版不评分），“听音乐会”有歧义（列出、"
-            "不替用户选），品牌只留存",
+            "兴趣用文字描述并选中“音乐”、口味选中“川菜”（兼容的文字解释）：可以确认；“冲浪”没认出（原样保留、本版不评分），"
+            "“听音乐会”有歧义（列出、不替用户选）",
         ),
         (
             "40_interest_unanswered_review",
@@ -858,7 +854,10 @@ def _e3b_samples(out: Path, work: Path) -> None:
             "e3b_sf_car",
             draft_kwargs={"abilities": ("edu_at_least_hs",), "cities": (SF,)},
             repeat_indexes=(0, 1),
-            note="离线闭环实际执行的结果（mock 规划器，零网络）；旧金山没有公交资料，不用车到不了岗位的年份买用车权开车上班",
+            origin="controlled_fixture",
+            note="受控夹具：画像带着旧问卷的往返 60 分钟上限（新问卷不再收集硬要求）；离线闭环实际执行的结果（mock 规划器，零网络）；"
+            "旧金山没有公交资料，不用车到不了岗位的年份买用车权开车上班",
+            legacy_hard_requirements=sc.LEGACY_COMMUTE_60,
         )
         assert sf_car.result is not None
         nohs = sc.preflight_only(work / "e3b_nohs", "e3b_nohs", cities=(HOU,))
@@ -895,7 +894,8 @@ def _e3b_samples(out: Path, work: Path) -> None:
         "ProductResult",
         "E3B 真实资料包：旧金山没有公交资料。一个分身住在能步行或骑车到岗的地方，不买车；另一个分身的菜单上没有不用车就能到岗"
         "的住房，那两年买用车权开车上班（月费不含油费，油费按每次往返付），第三年换到不用车的住处就不再买——两个分身都完整，"
-        "往返 60 分钟的硬要求每个月都满足；参考生活是用车的那一组（旧金山没有不用车就能到达全部参考岗位的住房）",
+        "往返 60 分钟的硬要求每个月都满足（这个上限来自旧问卷的历史画像，受控夹具；新问卷不再收集硬要求）；参考生活是用车的那一组"
+        "（旧金山没有不用车就能到达全部参考岗位的住房）",
         dump(sf_car.result),
     )
     _sample_file(

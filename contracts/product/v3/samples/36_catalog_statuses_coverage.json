@@ -143,7 +143,7 @@
   "coverage_id": "inventory.pack.e3a.synthetic-v2",
   "declared_scope_zh": "合成资料包里两座城的“日常杂务”设备与人工服务：只调查能替代洗衣或打扫（协议的代表性杂务组合）的方案；做饭、照护、维修等不在 本次调查范围。调查范围之外的东西不计入分母，也不代表城市没有。",
   "meta": {
-   "conversion_version": "e3a-conversion-v2",
+   "conversion_version": "e3a-conversion-v3",
    "data_pack": {
     "content_fingerprint": "e112a8e1d900f2849b50aeda1444f2ce140df4375112470ba5eab3357bb39412",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
@@ -151,15 +151,15 @@
     "status": "synthetic_fixture_only"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.3-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.4-draft",
    "sample": {
     "note": "资料包副本里加了确定没有、供给未知、参与小时为负、缺计价单位、只有报价有来源、来源字段不对的候选（受控夹具）",
     "origin": "controlled_fixture",
     "produced_by": "product.scenarios.catalog_statuses",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.3",
-   "vocabulary_version": "e3a-vocabulary-v4"
+   "schema_version": "e3a-product-schema-v3.4",
+   "vocabulary_version": "e3a-vocabulary-v5"
   },
   "not_exhaustive_zh": "这只说明声明范围内调查过的候选资料齐不齐，不保证穷尽整个城市市场；没有记录不等于城市没有。供给状态（有卖 / 确定没有 / 不知道）、资料状态与编译状态分开记：确定没有是已确定的调查结果，但不是可购买的方案。它与实际轨迹能否评分、分身的 C / E / M 是不同的判断：目录缺口不改写已发生轨迹的评分",
   "scope_version": "e3a-convenience-inventory-scope-v1"

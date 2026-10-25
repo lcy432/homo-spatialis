@@ -6,10 +6,10 @@
    "submit",
    "cancel"
   ],
-  "confirm_with": "ba64a8ee591ecfd9824845c8a87c592229ad66f15c42b88d6708bbed78627e44",
+  "confirm_with": "e32c1e670cd672a8bbdc466e8638af289f2e4bf43973742e1c4ce4b90beef43d",
   "confirmed": {
    "confirmed_id": "confirmed.draft-000000000000002e.r2",
-   "content_fingerprint": "078bf2984275638b6576908bda03629a2c550c0040d6841d2284ccc60a63dcbf"
+   "content_fingerprint": "e1eb0b4258d8163f2d5db0709f66395dfb0a82a5d3e6dfa42600f794f216a756"
   },
   "created_at": "2026-10-24T09:00:00Z",
   "deletion": {
@@ -22,7 +22,7 @@
   "explanation": null,
   "intent_id": "intent-000000000000002f",
   "meta": {
-   "conversion_version": "e3a-conversion-v2",
+   "conversion_version": "e3a-conversion-v3",
    "data_pack": {
     "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
@@ -30,26 +30,26 @@
     "status": "synthetic_fixture_only"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.3-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.4-draft",
    "sample": {
     "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
     "origin": "offline_run",
     "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.3",
-   "vocabulary_version": "e3a-vocabulary-v4"
+   "schema_version": "e3a-product-schema-v3.4",
+   "vocabulary_version": "e3a-vocabulary-v5"
   },
   "preflight": {
    "binding": {
     "compiled_inputs": {
-     "life_input": "5f81d967da41990c9ae2332a1d6b82d639edfd1564732b41ae5111484964a971",
+     "life_input": "7d0d783e4c4acb701715426003280b155b44f635f569348eaf613d46c269acd4",
      "roster": "9cc34ad1b50d30fde747191b7fb4b6daf3628bb7a4cdfa5db25bbe2b98eff94d",
      "run_config": "d15622f144c895c6be8d28646da3480706d5d3db761ffebeaab7823277efe6a9",
      "scoring_config": "081da2ab193004880cbb2a82be9b2356e4a4e78d96f85ecfea47f43ecc4e76ef"
     },
     "evaluation_spec_id": "eval.e1-life.main",
-    "identities_fingerprint": "60da73b992ea325b3b2251c56582c590516daeba8c71ac33d0535286f9af2586",
+    "identities_fingerprint": "c94a109638b1e8b8dcfe400ea011bcdac68e881fb1a5bf26a73aba93a0c2b050",
     "planner_id": "mock.rules.e3a-product",
     "planner_kind": "mock",
     "prompt_template": "e3b-product-prompt-v3",
@@ -385,7 +385,7 @@
    "clones_per_city": 2,
    "confirmed": {
     "confirmed_id": "confirmed.draft-000000000000002e.r2",
-    "content_fingerprint": "078bf2984275638b6576908bda03629a2c550c0040d6841d2284ccc60a63dcbf"
+    "content_fingerprint": "e1eb0b4258d8163f2d5db0709f66395dfb0a82a5d3e6dfa42600f794f216a756"
    },
    "executable": {
     "reasons": [
@@ -401,7 +401,7 @@
    },
    "issues": [],
    "meta": {
-    "conversion_version": "e3a-conversion-v2",
+    "conversion_version": "e3a-conversion-v3",
     "data_pack": {
      "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
      "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
@@ -409,10 +409,10 @@
      "status": "synthetic_fixture_only"
     },
     "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-    "questionnaire_version": "e3a-questionnaire-v0.3-draft",
+    "questionnaire_version": "e3a-questionnaire-v0.4-draft",
     "sample": null,
-    "schema_version": "e3a-product-schema-v3.3",
-    "vocabulary_version": "e3a-vocabulary-v4"
+    "schema_version": "e3a-product-schema-v3.4",
+    "vocabulary_version": "e3a-vocabulary-v5"
    },
    "planner": {
     "call_limit": 18,
@@ -422,7 +422,7 @@
     "planner_id": "mock.rules.e3a-product",
     "planner_kind": "mock"
    },
-   "preflight_fingerprint": "ba64a8ee591ecfd9824845c8a87c592229ad66f15c42b88d6708bbed78627e44",
+   "preflight_fingerprint": "e32c1e670cd672a8bbdc466e8638af289f2e4bf43973742e1c4ce4b90beef43d",
    "preflight_id": "preflight.confirmed.draft-000000000000002e.r2",
    "scope_zh": [
     "生活协议 life-v1-e3a-product（状态 synthetic_fixture_only）、评分 score.e1-life.explore（探索版）：城市、报价、工资、疾病、治疗与评分参数全部是合成设定，不是现实城市，不排序真实城市",

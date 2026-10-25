@@ -15,7 +15,11 @@ from common.product_contracts import (
     AllocationAnswer,
     AttributePreferenceAnswer,
     CashAnswer,
+    CertificatesAnswer,
     CitiesAnswer,
+    EducationAnswer,
+    ExperienceAnswer,
+    ExperienceEntry,
     FreeTextAnswer,
     HardRequirementAnswer,
     HealthAnswers,
@@ -100,31 +104,47 @@ def make_draft(
     free_text: str | None = NORMAL_TEXT,
     attributes: tuple[dict[str, Any], ...] = (),
     abilities: tuple[str, ...] = (),
-    hard_requirements: tuple[dict[str, Any], ...] = (
-        {
-            "requirement_id": "hr.commute",
-            "option_id": "housing.max_commute_roundtrip",
-            "parameter_value": 60,
-        },
-    ),
+    hard_requirements: tuple[dict[str, Any], ...] = (),
     sample: SampleLabel | None = None,
     leisure: dict[str, Any] | None = None,
     taste: dict[str, Any] | None = None,
+    occupation_mode: str = "text",
+    education: str | None = None,
+    certificates: tuple[str, ...] | None = None,
+    experience: tuple[tuple[str, int], ...] | None = None,
 ) -> UserInputDraft:
-    """一份合成草稿；默认就是主故事里的 u501（全职文员、看重省事、健康问卷一题暂不确定、通勤上限 60 分钟）。"""
+    """一份合成草稿；默认就是主故事里的 u501（全职文员、看重省事、健康问卷一题暂不确定）。
+
+    v3.4：新问卷不再收集硬要求与属性偏好，默认两者都为空（``hard_requirements`` / ``attributes`` 只给“旧草稿”的测试用）。
+    ``occupation_mode = "catalog"`` 时按资料包的输入目录选 ``selected``（不带文字）；``education`` 是学历选项编号（或
+    ``"unsure"``），``certificates`` / ``experience`` 不给就是未答，给空元组就是明确的“没有”。"""
     amount, currency, period = cash
     if cities is None:  # 默认：资料包里的全部城市（合成资料包就是 K51、M52）
         cities = tuple(c.city_ref for c in pack.body.cities)
+    if occupation_mode == "catalog":
+        from product.input_catalog import input_catalog
+
+        catalog = input_catalog(pack)
+        assert catalog is not None, "这个资料包没有输入目录"
+        occupation = OccupationAnswer(
+            state="provided" if selected else "unanswered",
+            mode="catalog",
+            selected_candidate=selected,
+            catalog_version=catalog.decl.catalog_version,
+            catalog_fingerprint=catalog.fingerprint,
+        )
+    else:
+        occupation = OccupationAnswer(
+            state="provided" if occupation_text else "unanswered",
+            raw_text=occupation_text,
+            selected_candidate=selected,
+        )
     return UserInputDraft(
         meta=pack.meta(sample),
         draft_id=draft_id,
         revision=revision,
         cities=CitiesAnswer(state="provided" if cities else "unanswered", city_refs=cities),
-        occupation=OccupationAnswer(
-            state="provided" if occupation_text else "unanswered",
-            raw_text=occupation_text,
-            selected_candidate=selected,
-        ),
+        occupation=occupation,
         age=AgeAnswer(state="provided" if age is not None else "unanswered", value=age),
         cash=CashAnswer(
             state="provided" if amount is not None else "unanswered",
@@ -149,6 +169,20 @@ def make_draft(
         hard_requirements=tuple(HardRequirementAnswer(**h) for h in hard_requirements),
         leisure_interest=LeisureInterestAnswer(**(leisure or {})),
         taste=TasteAnswer(**(taste or {})),
+        education=EducationAnswer()
+        if education is None
+        else EducationAnswer(state="unsure")
+        if education == "unsure"
+        else EducationAnswer(state="provided", option_id=education),
+        certificates=CertificatesAnswer()
+        if certificates is None
+        else CertificatesAnswer(state="provided", selected=certificates),
+        experience=ExperienceAnswer()
+        if experience is None
+        else ExperienceAnswer(
+            state="provided",
+            entries=tuple(ExperienceEntry(concept_id=c, years=y) for c, y in experience),
+        ),
     )
 
 

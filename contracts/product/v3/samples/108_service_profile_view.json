@@ -11,22 +11,14 @@
    ],
    "confirmation_source": "user_form",
    "confirmed_id": "confirmed.draft-000000000000005b.r2",
-   "content_fingerprint": "c5f1c0b8469fbdd5ebc12a19b24b2b4d980ce6dd524b98782d0e01916390119d",
+   "content_fingerprint": "3a4d4078e02ec5279839599794ae8e531142c045d7220e832c4a77db7504a257",
    "draft": {
-    "draft_fingerprint": "b6ba05f5ea4439d68ffb8fb5b5420c24c4ef0670b3494d1301edba432f062d06",
+    "draft_fingerprint": "6e4556099aa30bbca20cae508fd2a7539a0224cc3424779e923af88d0842d766",
     "draft_id": "draft-000000000000005b",
     "revision": 2
    },
    "free_text": "我在写字楼做全职文员。下班以后不想再把很多时间花在洗衣服、打扫屋子上，愿意为省事花一些钱；但也不想因为花钱让自己手头太紧。",
-   "hard_requirements": [
-    {
-     "enforced_by_execution": false,
-     "label_zh": "住处到就业中心的往返时间不超过（分钟） 60 分钟（单独核验并报告，不拦截计划）",
-     "option_id": "housing.max_commute_roundtrip",
-     "parameter_value": 60,
-     "requirement_id": "hr.commute"
-    }
-   ],
+   "hard_requirements": [],
    "health": {
     "answers": [
      {
@@ -90,7 +82,7 @@
     "status": "allocated"
    },
    "meta": {
-    "conversion_version": "e3a-conversion-v2",
+    "conversion_version": "e3a-conversion-v3",
     "data_pack": {
      "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
      "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
@@ -98,10 +90,10 @@
      "status": "synthetic_fixture_only"
     },
     "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-    "questionnaire_version": "e3a-questionnaire-v0.3-draft",
+    "questionnaire_version": "e3a-questionnaire-v0.4-draft",
     "sample": null,
-    "schema_version": "e3a-product-schema-v3.3",
-    "vocabulary_version": "e3a-vocabulary-v4"
+    "schema_version": "e3a-product-schema-v3.4",
+    "vocabulary_version": "e3a-vocabulary-v5"
    },
    "money": {
     "amount_text": "3000",
@@ -117,6 +109,8 @@
     "price_period": "2024"
    },
    "occupation": {
+    "catalog_fingerprint": null,
+    "catalog_version": null,
     "concept_id": "occ.office_clerk",
     "duties": [
      "处理文件与表格",
@@ -138,6 +132,16 @@
     "raw_text": "我在写字楼做全职文员，平时处理文件和表格"
    },
    "person_ref": "p191cd45fe7",
+   "qualifications": {
+    "certificates": [],
+    "certificates_state": "unanswered",
+    "education_option": null,
+    "education_state": "unanswered",
+    "experience": [],
+    "experience_state": "unanswered",
+    "rule": "confirmed_experience_mapping_v1",
+    "source": "none"
+   },
    "retained": [],
    "review_id": "review.draft-000000000000005b.r2",
    "six_dimensions": {
@@ -245,30 +249,40 @@
       {
        "kind": "form_field",
        "note": null,
+       "ref": "draft:draft-000000000000005b#education"
+      }
+     ],
+     "field": "education"
+    },
+    {
+     "evidence": [
+      {
+       "kind": "form_field",
+       "note": null,
+       "ref": "draft:draft-000000000000005b#certificates"
+      }
+     ],
+     "field": "certificates"
+    },
+    {
+     "evidence": [
+      {
+       "kind": "form_field",
+       "note": null,
+       "ref": "draft:draft-000000000000005b#experience"
+      }
+     ],
+     "field": "experience"
+    },
+    {
+     "evidence": [
+      {
+       "kind": "form_field",
+       "note": null,
        "ref": "draft:draft-000000000000005b#abilities"
       }
      ],
      "field": "abilities"
-    },
-    {
-     "evidence": [
-      {
-       "kind": "form_field",
-       "note": null,
-       "ref": "draft:draft-000000000000005b#hard_requirements"
-      }
-     ],
-     "field": "hard_requirements"
-    },
-    {
-     "evidence": [
-      {
-       "kind": "form_field",
-       "note": null,
-       "ref": "draft:draft-000000000000005b#attribute_preferences"
-      }
-     ],
-     "field": "attribute_preferences"
     },
     {
      "evidence": [
@@ -293,7 +307,7 @@
    ]
   },
   "meta": {
-   "conversion_version": "e3a-conversion-v2",
+   "conversion_version": "e3a-conversion-v3",
    "data_pack": {
     "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
@@ -301,19 +315,19 @@
     "status": "synthetic_fixture_only"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.3-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.4-draft",
    "sample": {
     "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
     "origin": "offline_run",
     "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.3",
-   "vocabulary_version": "e3a-vocabulary-v4"
+   "schema_version": "e3a-product-schema-v3.4",
+   "vocabulary_version": "e3a-vocabulary-v5"
   },
   "summary": {
    "confirmed_id": "confirmed.draft-000000000000005b.r2",
-   "content_fingerprint": "c5f1c0b8469fbdd5ebc12a19b24b2b4d980ce6dd524b98782d0e01916390119d",
+   "content_fingerprint": "3a4d4078e02ec5279839599794ae8e531142c045d7220e832c4a77db7504a257",
    "draft_id": "draft-000000000000005b",
    "draft_revision": 2,
    "expires_at": "2026-12-23T09:01:02Z",

@@ -277,68 +277,6 @@ def test_health_answers_keep_unanswered_and_unsure_apart_and_compute_no_total(pa
     )
 
 
-def test_attribute_preferences_are_retained_and_an_unenforceable_hard_requirement_is_reported(pack):
-    draft = make_draft(
-        pack,
-        attributes=(
-            {
-                "preference_id": "pref.brand",
-                "need": "daily_convenience",
-                "kind": "brand",
-                "raw_text": "家电更喜欢国产品牌",
-            },
-            {
-                "preference_id": "pref.no_strangers",
-                "need": "daily_convenience",
-                "kind": "home_entry_concern",
-                "raw_text": "不让陌生人进家",
-                "as_hard_requirement": True,
-            },
-        ),
-    )
-    review = review_draft(pack, draft)
-    assert "hard_requirement_not_enforceable" in codes(review)
-    stmt = {s.ref: s for s in review.statements}
-    assert (
-        stmt["pref.no_strangers"].support == "unsupported"
-        and stmt["pref.no_strangers"].execution_guaranteed is False
-    )
-    assert {"ack:retained:pref.brand", "ack:retained:pref.no_strangers"} <= set(
-        review.pending_confirmations
-    )
-    with pytest.raises(ConfirmationRefusedError):  # 没有知悉就不能确认
-        confirm_profile(pack, draft, person_ref="u1", acknowledged=ACKS)
-    confirmed = confirm_profile(
-        pack, draft, person_ref="u1", acknowledged=review.pending_confirmations
-    )
-    retained = {r.ref: r for r in confirmed.retained}
-    assert retained["pref.no_strangers"].as_hard_requirement and retained[
-        "pref.no_strangers"
-    ].usage == ("retained_only",)
-    assert [h.option_id for h in confirmed.hard_requirements] == [
-        "housing.max_commute_roundtrip"
-    ]  # 上门顾虑没有被编成硬要求
-    # 六维与物质权重没有因为属性偏好而改变（不偷偷挪进已有权重）
-    assert (
-        confirmed.six_dimensions.points
-        == confirm_profile(
-            pack, make_draft(pack), person_ref="u1", acknowledged=ACKS
-        ).six_dimensions.points
-    )
-
-
-def test_unsupported_hard_requirement_text_is_retained(pack):
-    draft = make_draft(
-        pack, hard_requirements=({"requirement_id": "hr.quiet", "raw_text": "必须很安静"},)
-    )
-    review = review_draft(pack, draft)
-    assert "hard_requirement_unsupported" in codes(review) and review.confirmable
-    confirmed = confirm_profile(
-        pack, draft, person_ref="u1", acknowledged=review.pending_confirmations
-    )
-    assert confirmed.hard_requirements == () and confirmed.retained[0].raw_text == "必须很安静"
-
-
 def test_editing_an_answer_invalidates_the_confirmation_and_tampering_is_detected(pack):
     draft = make_draft(pack)
     confirmed = confirm_profile(pack, draft, person_ref="u1", acknowledged=ACKS)

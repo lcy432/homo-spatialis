@@ -199,6 +199,32 @@
    "title": "CashAnswer",
    "type": "object"
   },
+  "CertificatesAnswer": {
+   "additionalProperties": false,
+   "description": "职业证书（多选）：``provided`` 加选中的资格编号；**明确提交空列表表示“没有”**，与未答分开保存。",
+   "properties": {
+    "selected": {
+     "default": [],
+     "items": {
+      "type": "string"
+     },
+     "title": "Selected",
+     "type": "array"
+    },
+    "state": {
+     "default": "unanswered",
+     "enum": [
+      "unanswered",
+      "provided",
+      "unsure"
+     ],
+     "title": "State",
+     "type": "string"
+    }
+   },
+   "title": "CertificatesAnswer",
+   "type": "object"
+  },
   "CitiesAnswer": {
    "additionalProperties": false,
    "properties": {
@@ -265,6 +291,37 @@
    "title": "DataPackRef",
    "type": "object"
   },
+  "EducationAnswer": {
+   "additionalProperties": false,
+   "description": "最高学历（单选）：未答、暂不确定，或选了输入目录里的一个选项。只有选了才授予学历门槛。",
+   "properties": {
+    "option_id": {
+     "anyOf": [
+      {
+       "maxLength": 48,
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Option Id"
+    },
+    "state": {
+     "default": "unanswered",
+     "enum": [
+      "unanswered",
+      "provided",
+      "unsure"
+     ],
+     "title": "State",
+     "type": "string"
+    }
+   },
+   "title": "EducationAnswer",
+   "type": "object"
+  },
   "EvidenceRef": {
    "additionalProperties": false,
    "description": "答案的来源证据：本轮只有表单字段；未来访谈的记录引用在这里接入（访谈 → 候选解释 → 确认 → 同一编译器）。",
@@ -302,6 +359,55 @@
     "ref"
    ],
    "title": "EvidenceRef",
+   "type": "object"
+  },
+  "ExperienceAnswer": {
+   "additionalProperties": false,
+   "description": "相关工作经验（只在选中的职业需要时问）：``provided`` 加经历；明确提交空列表表示“没有相关经验”，与未答分开保存。",
+   "properties": {
+    "entries": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/ExperienceEntry"
+     },
+     "title": "Entries",
+     "type": "array"
+    },
+    "state": {
+     "default": "unanswered",
+     "enum": [
+      "unanswered",
+      "provided",
+      "unsure"
+     ],
+     "title": "State",
+     "type": "string"
+    }
+   },
+   "title": "ExperienceAnswer",
+   "type": "object"
+  },
+  "ExperienceEntry": {
+   "additionalProperties": false,
+   "description": "一段相关工作经历：职业概念（输入目录里经验问题列出的相关职业）与整年数。",
+   "properties": {
+    "concept_id": {
+     "pattern": "^[a-z][a-z0-9_.]{1,79}$",
+     "title": "Concept Id",
+     "type": "string"
+    },
+    "years": {
+     "maximum": 60,
+     "minimum": 0,
+     "title": "Years",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "concept_id",
+    "years"
+   ],
+   "title": "ExperienceEntry",
    "type": "object"
   },
   "FreeTextAnswer": {
@@ -469,7 +575,8 @@
       "unsure",
       "no_fixed_hobby",
       "generic",
-      "described"
+      "described",
+      "selected"
      ],
      "title": "State",
      "type": "string"
@@ -493,13 +600,48 @@
   },
   "OccupationAnswer": {
    "additionalProperties": false,
-   "description": "职业：原文与语言；用户在候选里选中的概念（不透明 ID，不是职业代码）。",
+   "description": "职业。``mode = catalog``（新流程）：从输入目录直接选中的概念编号与那份目录的版本、内容身份，不需要也不保存任何文字（搜索框\n里的字只是查找条件）。``mode = text``（兼容）：原文与语言，再在少量候选里选中一个。概念编号不透明，不是职业代码。",
    "properties": {
+    "catalog_fingerprint": {
+     "anyOf": [
+      {
+       "pattern": "^[0-9a-f]{64}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Catalog Fingerprint"
+    },
+    "catalog_version": {
+     "anyOf": [
+      {
+       "maxLength": 80,
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Catalog Version"
+    },
     "language": {
      "default": "zh",
      "maxLength": 10,
      "minLength": 2,
      "title": "Language",
+     "type": "string"
+    },
+    "mode": {
+     "default": "text",
+     "enum": [
+      "text",
+      "catalog"
+     ],
+     "title": "Mode",
      "type": "string"
     },
     "raw_text": {
@@ -616,7 +758,10 @@
      "default": null
     },
     "schema_version": {
-     "const": "e3a-product-schema-v3.3",
+     "enum": [
+      "e3a-product-schema-v3.3",
+      "e3a-product-schema-v3.4"
+     ],
      "title": "Schema Version",
      "type": "string"
     },
@@ -680,7 +825,7 @@
   },
   "TasteAnswer": {
    "additionalProperties": false,
-   "description": "口味与菜系：未答、暂不确定、明确没有偏好，或用文字描述（同样先解释、再由用户选中确认）。",
+   "description": "口味与菜系：未答、暂不确定、明确没有偏好、从面板选中菜系，或用文字描述（兼容：先解释、再由用户选中确认）。",
    "properties": {
     "selected": {
      "default": [],
@@ -696,7 +841,8 @@
       "unanswered",
       "unsure",
       "no_preference",
-      "described"
+      "described",
+      "selected"
      ],
      "title": "State",
      "type": "string"
@@ -744,6 +890,9 @@
   "cash": {
    "$ref": "#/$defs/CashAnswer"
   },
+  "certificates": {
+   "$ref": "#/$defs/CertificatesAnswer"
+  },
   "cities": {
    "$ref": "#/$defs/CitiesAnswer"
   },
@@ -752,6 +901,9 @@
    "title": "Draft Id",
    "type": "string"
   },
+  "education": {
+   "$ref": "#/$defs/EducationAnswer"
+  },
   "evidence": {
    "default": [],
    "items": {
@@ -759,6 +911,9 @@
    },
    "title": "Evidence",
    "type": "array"
+  },
+  "experience": {
+   "$ref": "#/$defs/ExperienceAnswer"
   },
   "free_text": {
    "$ref": "#/$defs/FreeTextAnswer"

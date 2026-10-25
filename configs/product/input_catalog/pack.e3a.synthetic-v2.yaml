@@ -1,0 +1,66 @@
+# 输入目录（E3 输入体验收敛，DECISIONS/0046）：合成资料包 configs/product/e3a_synthetic_pack.yaml 的职业分类索引与搜索词、证书问题、
+# 兴趣与菜系的分组。只引用资料包里已有的职业概念、资格编号与兴趣 / 菜系的键（全部是合成测试资料）；写法与 E3B 的目录相同，见
+# configs/product/input_catalog/pack.e3b.us-v1.yaml 的说明。
+#
+# 合成资料包没有学历门槛的资格，也没有要求相关经验的岗位：这两个板块不开（sections）。会计岗位要求“会计从业资格（合成）”
+# （configs/life/synthetic_product.yaml 里 k51 / m52 的 job.accountant），在证书里问。
+catalog:
+  catalog_id: input-catalog.e3a.synthetic-v2
+  catalog_version: e3-input-catalog-v1
+  pack_id: pack.e3a.synthetic-v2
+  sections:
+    education: false
+    certificates: true
+    experience: false
+  groups:
+    - {group_id: food_retail, label: 餐饮零售}
+    - {group_id: office_service, label: 办公客服}
+    - {group_id: professional_business, label: 专业商务}
+  occupations:
+    - concept_id: occ.counter_drinks
+      group: food_retail
+      search: [Counter service and drink making, 快餐店员, 柜台服务员, 点单员, 饮品师, fast food worker, counter worker]
+    - concept_id: occ.cashier
+      group: food_retail
+      search: [Cashier, 收款员, checkout]
+    - concept_id: occ.retail_sales
+      group: food_retail
+      search: [Retail salesperson, 销售员, 营业员, sales associate, salesperson]
+    - concept_id: occ.office_clerk
+      group: office_service
+      search: [Office clerk, 职员, 办事员, office assistant, clerk]
+    - concept_id: occ.bookkeeper
+      group: office_service
+      search: [Bookkeeper or cash clerk, 记账员, 出纳员, 簿记, bookkeeping clerk, accounting clerk]
+    - concept_id: occ.accountant
+      group: professional_business
+      requires: [accounting_cert]
+      search: [Accountant, 会计师, 审计师, auditor]
+  certificates:
+    - {ability_id: accounting_cert, occupations: [occ.accountant]}
+  leisure:
+    groups:
+      - {group_id: sports_fitness, label: 运动健身, members: [fitness, racket_sports]}
+      - {group_id: arts_music, label: 文化艺术, members: [music, arts_culture]}
+      - {group_id: food_cooking, label: 美食烹饪, members: [culinary]}
+    search:
+      fitness: [Fitness, 健身房, workout]
+      racket_sports: [Racket sports]
+      music: [Music]
+      arts_culture: [Arts and culture, 艺术, 文化]
+      culinary: [Food and cooking activities, 美食]
+    search_notes:
+      - note_id: leisure.outdoor_not_supported
+        terms: [徒步, 爬山, 登山, 郊游, 露营, 远足, hiking, camping, trekking]
+        note: 本版还没有徒步与户外活动这一类，暂时不能选，也不会算成健身；可以先跳过或选“暂不确定”，在补充文字里写下只留存、不评分
+      - note_id: leisure.games_not_supported
+        terms: [游戏, 打游戏, 电子游戏, 电竞, 手游, gaming, video games, esports]
+        note: 本版还没有电子游戏这一类，暂时不能选，也不会算成别的类别；可以先跳过或选“暂不确定”，在补充文字里写下只留存、不评分
+  taste:
+    groups:
+      - {group_id: chinese_home, label: 中式与家常, members: [sichuan, home_style]}
+      - {group_id: western_other, label: 西式与其他, members: [italian]}
+    search:
+      sichuan: [Sichuan cuisine]
+      home_style: [Home-style cooking]
+      italian: [Italian]

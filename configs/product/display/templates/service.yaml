@@ -541,3 +541,21 @@ templates:
   stage.running:
     en: Simulation in progress
     zh: 模拟进行中
+  error.migration_consent_required.impact:
+    en: The draft was not changed, and the new questionnaire cannot use it yet
+    zh: 草稿没有改动，新问卷还不能用它
+  error.migration_consent_required.message:
+    en: This old draft has answers the new questionnaire no longer collects; migrating clears them, and you have not agreed to that yet
+    zh: 这份旧草稿里有新问卷不再收集的答案，迁移会清空它们，还没有得到你的同意
+  error.migration_consent_required.next:
+    en: Read the draft's migration notes first; migrate after you agree to clear those old answers
+    zh: 先看草稿的迁移说明；同意清空那些旧答案后再迁移
+  error.migration_not_needed.impact:
+    en: The draft was not changed
+    zh: 草稿没有改动
+  error.migration_not_needed.message:
+    en: This draft already uses the current questionnaire version; there is nothing to migrate
+    zh: 这份草稿已经是当前的问卷版本，没有要迁移的内容
+  error.migration_not_needed.next:
+    en: Review this draft directly
+    zh: 直接审阅这份草稿

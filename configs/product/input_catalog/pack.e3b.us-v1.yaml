@@ -1,0 +1,263 @@
+# 输入目录（E3 输入体验收敛，DECISIONS/0046）：E3B 六城资料包的职业分类索引与搜索词、学历 / 证书 / 相关经验问题、兴趣与菜系的分组。
+#
+# 这份小配置只引用资料包 configs/product/e3b_us_v1_pack.yaml 里已有的职业概念、资格编号与兴趣 / 菜系的键，不新增职业、资格、活动、
+# 评分类别或系数，也不改住房、工资、税或活动资料（资料包与它的内容身份不变）。代码在 src/product/input_catalog.py（加载、核对与
+# 搜索）与 src/product/qualifications.py（资格换算）。
+#
+# * 分组只用于浏览：每个职业恰好一个主分组，不改变职业映射。搜索词是明确维护的数据（不靠在线翻译）：目录发布的搜索词 = 资料包里的
+#   名称与别名 + 这里的 search（英文显示名、常见叫法，例如“程序员”）。
+# * requires：这个职业的开局岗位要求的资格（BLS EP 表 5.4 的典型入职教育与相关经验 → 资格，与 product.realdata.occupations.Scope
+#   的 required 一致，测试按冻结资料逐个核对）。只供显示与审阅提示；职业本身不授予任何资格。
+# * 学历按“至少达到”换算（education_at_least_v1，与 Scope.from_confirmed 同一条规则）：选了一项就授予它和它以下各项的 ability；
+#   “中学后非学位证书”是职业专属的，单独在证书里问，学历不授予它。level 是 configs/intake/occupations_us_v1.yaml 教育表里的等级。
+# * 相关经验（related_experience_v1）：只在选中的职业属于 applies_to 时问；在 related 列出的职业里做满 min_years 年就授予 ability
+#   （与 Scope.from_confirmed 一致：EP “Less than 5 years” → 至少 1 年，related 来自 occupations_us_v1.yaml）。
+catalog:
+  catalog_id: input-catalog.e3b.us-v1
+  catalog_version: e3-input-catalog-v1
+  pack_id: pack.e3b.us-v1
+  sections:
+    education: true
+    certificates: true
+    experience: true
+  groups:
+    - {group_id: food_retail, label: 餐饮零售}
+    - {group_id: office_service, label: 办公客服}
+    - {group_id: it_tech, label: IT 技术}
+    - {group_id: professional_business, label: 专业商务}
+    - {group_id: repair_manufacturing, label: 维修制造}
+    - {group_id: logistics_warehouse, label: 物流仓储}
+    - {group_id: cleaning_gardening, label: 清洁园艺}
+    - {group_id: culture_sports, label: 文化运动}
+    - {group_id: management, label: 管理协调}
+  occupations:
+    # 餐饮零售
+    - concept_id: occ.counter_drinks
+      group: food_retail
+      search: [Counter service and drink making, 快餐店员, 柜台服务员, 点单员, 饮品师, fast food worker, counter worker]
+    - concept_id: occ.soc_35_3031
+      group: food_retail
+      search: [Waiters and Waitresses, 服务员, 跑堂, waiter, waitress, server]
+    - concept_id: occ.soc_35_9021
+      group: food_retail
+      search: [Dishwashers, 洗碗员, 刷碗工, dishwasher]
+    - concept_id: occ.soc_35_2014
+      group: food_retail
+      requires: [soc_35_2014_experience]
+      search: ["Cooks, Restaurant", 厨师, 炒锅师傅, 后厨, cook, chef, line cook]
+    - concept_id: occ.cashier
+      group: food_retail
+      search: [Cashier, 收款员, checkout]
+    - concept_id: occ.retail_sales
+      group: food_retail
+      search: [Retail salesperson, 销售员, 营业员, sales associate, salesperson]
+    # 办公客服
+    - concept_id: occ.office_clerk
+      group: office_service
+      requires: [edu_at_least_hs]
+      search: [Office clerk, 职员, 办事员, office assistant, clerk]
+    - concept_id: occ.soc_43_4051
+      group: office_service
+      requires: [edu_at_least_hs]
+      search: [Customer Service Representatives, 客服, 客户服务, 话务员, 电话客服, customer service, call center]
+    - concept_id: occ.soc_43_6014
+      group: office_service
+      requires: [edu_at_least_hs]
+      search: ["Secretaries and Administrative Assistants, Except Legal, Medical, and Executive", 秘书, 助理, secretary, administrative assistant]
+    - concept_id: occ.soc_43_4171
+      group: office_service
+      requires: [edu_at_least_hs]
+      search: [Receptionists and Information Clerks, 前台, 接待员, 咨询员, receptionist]
+    - concept_id: occ.soc_43_3071
+      group: office_service
+      requires: [edu_at_least_hs]
+      search: [Tellers, 柜员, 银行职员, bank teller, teller]
+    - concept_id: occ.bookkeeper
+      group: office_service
+      requires: [edu_at_least_some_college]
+      search: [Bookkeeper or cash clerk, 记账员, 出纳员, 簿记, bookkeeping clerk, accounting clerk]
+    # IT 技术
+    - concept_id: occ.soc_15_1232
+      group: it_tech
+      requires: [edu_at_least_some_college]
+      search: [Computer User Support Specialists, IT 支持, 技术支持, 桌面支持, 电脑维护, help desk, IT support, tech support]
+    - concept_id: occ.soc_15_1231
+      group: it_tech
+      requires: [edu_at_least_associate]
+      search: [Computer Network Support Specialists, 网管, 网络管理员, 网络运维, network support, network technician]
+    - concept_id: occ.soc_15_1252
+      group: it_tech
+      requires: [edu_at_least_bachelor]
+      search: [Software Developers, 程序员, 软件工程师, 开发工程师, 码农, 前端开发, 后端开发, programmer, software engineer, software developer, developer, coder]
+    - concept_id: occ.soc_15_1211
+      group: it_tech
+      requires: [edu_at_least_bachelor]
+      search: [Computer Systems Analysts, 系统分析师, IT 分析师, systems analyst]
+    # 专业商务
+    - concept_id: occ.accountant
+      group: professional_business
+      requires: [edu_at_least_bachelor]
+      search: [Accountant, 会计师, 审计师, auditor]
+    - concept_id: occ.soc_13_2051
+      group: professional_business
+      requires: [edu_at_least_bachelor]
+      search: [Financial and Investment Analysts, 金融分析师, 投资分析师, financial analyst, investment analyst]
+    - concept_id: occ.soc_13_1161
+      group: professional_business
+      requires: [edu_at_least_bachelor]
+      search: [Market Research Analysts and Marketing Specialists, 市场营销, 市场专员, 营销, 市场调研, marketing, market research]
+    - concept_id: occ.soc_13_1071
+      group: professional_business
+      requires: [edu_at_least_bachelor]
+      search: [Human Resources Specialists, 人事, 人力资源, HR, 招聘专员, recruiter, human resources]
+    - concept_id: occ.soc_23_2011
+      group: professional_business
+      requires: [edu_at_least_associate]
+      search: [Paralegals and Legal Assistants, 法务助理, 律所助理, paralegal, legal assistant]
+    - concept_id: occ.soc_41_3091
+      group: professional_business
+      requires: [edu_at_least_hs]
+      search: ["Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel", 销售代表, 业务员, sales representative, sales rep]
+    # 维修制造
+    - concept_id: occ.soc_49_9071
+      group: repair_manufacturing
+      requires: [edu_at_least_hs]
+      search: ["Maintenance and Repair Workers, General", 维修工, 物业维修, 修理工, maintenance worker, handyman]
+    - concept_id: occ.soc_49_3023
+      group: repair_manufacturing
+      requires: [soc_49_3023_award]
+      search: [Automotive Service Technicians and Mechanics, 汽修, 汽车修理工, 修车师傅, auto mechanic, mechanic]
+    - concept_id: occ.soc_49_2022
+      group: repair_manufacturing
+      requires: [soc_49_2022_award]
+      search: ["Telecommunications Equipment Installers and Repairers, Except Line Installers", 通信维修, 通信设备, 宽带安装, telecom technician]
+    - concept_id: occ.soc_51_4121
+      group: repair_manufacturing
+      requires: [edu_at_least_hs]
+      search: ["Welders, Cutters, Solderers, and Brazers", 电焊工, 焊接工, welder]
+    # 物流仓储
+    - concept_id: occ.soc_53_7062
+      group: logistics_warehouse
+      search: ["Laborers and Freight, Stock, and Material Movers, Hand", 搬运工, 装卸工, mover, laborer]
+    - concept_id: occ.soc_53_7065
+      group: logistics_warehouse
+      search: [Stockers and Order Fillers, 理货员, 拣货员, 仓库员工, stocker, order picker]
+    - concept_id: occ.soc_43_5071
+      group: logistics_warehouse
+      requires: [edu_at_least_hs]
+      search: ["Shipping, Receiving, and Inventory Clerks", 库管, 仓管, 收发员, 库存管理, inventory clerk, shipping clerk]
+    # 清洁园艺
+    - concept_id: occ.soc_37_2011
+      group: cleaning_gardening
+      search: ["Janitors and Cleaners, Except Maids and Housekeeping Cleaners", 保洁, 保洁员, 清洁工, janitor, cleaner]
+    - concept_id: occ.soc_37_2012
+      group: cleaning_gardening
+      search: [Maids and Housekeeping Cleaners, 家政, 客房清洁, 酒店保洁, housekeeper, maid]
+    - concept_id: occ.soc_37_3011
+      group: cleaning_gardening
+      search: [Landscaping and Groundskeeping Workers, 园丁, 绿化工, 园艺工, gardener, landscaper]
+    - concept_id: occ.soc_51_6011
+      group: cleaning_gardening
+      search: [Laundry and Dry-Cleaning Workers, 洗衣工, 干洗, 洗衣店, laundry worker]
+    # 文化运动
+    - concept_id: occ.soc_27_1024
+      group: culture_sports
+      requires: [edu_at_least_bachelor]
+      search: [Graphic Designers, 设计师, 美工, 视觉设计, graphic designer, designer]
+    - concept_id: occ.soc_27_4011
+      group: culture_sports
+      requires: [soc_27_4011_award]
+      search: [Audio and Video Technicians, 音响师, 音视频, 视频技术员, AV technician, audio technician]
+    - concept_id: occ.soc_39_9031
+      group: culture_sports
+      requires: [edu_at_least_hs]
+      search: [Exercise Trainers and Group Fitness Instructors, 健身教练, 私教, 瑜伽老师, 团课老师, personal trainer, fitness instructor]
+    # 管理协调
+    - concept_id: occ.soc_13_1082
+      group: management
+      requires: [edu_at_least_bachelor]
+      search: [Project Management Specialists, 项目经理, 项目管理, project manager]
+    - concept_id: occ.soc_35_1012
+      group: management
+      requires: [edu_at_least_hs, soc_35_1012_experience]
+      search: [First-Line Supervisors of Food Preparation and Serving Workers, 餐厅经理, 餐厅主管, 领班, food service manager, restaurant manager]
+    - concept_id: occ.soc_41_1011
+      group: management
+      requires: [edu_at_least_hs, soc_41_1011_experience]
+      search: [First-Line Supervisors of Retail Sales Workers, 门店主管, 店长, 零售店长, store manager, retail supervisor]
+    - concept_id: occ.soc_43_1011
+      group: management
+      requires: [edu_at_least_hs, soc_43_1011_experience]
+      search: [First-Line Supervisors of Office and Administrative Support Workers, 行政主管, 办公室主任, 行政经理, office manager, admin supervisor]
+  education:
+    - {option_id: below_high_school, level: none, label: 高中以下}
+    - {option_id: high_school, level: hs, label: 高中, ability: edu_at_least_hs}
+    - {option_id: some_college, level: some_college, label: 读过大学但未取得学位, ability: edu_at_least_some_college}
+    - {option_id: associate, level: associate, label: 副学士, ability: edu_at_least_associate}
+    - {option_id: bachelor, level: bachelor, label: 本科, ability: edu_at_least_bachelor}
+    - {option_id: master, level: master, label: 硕士, ability: edu_at_least_master}
+    - {option_id: doctoral, level: doctoral, label: 博士或专业学位, ability: edu_at_least_doctoral}
+  certificates:
+    - {ability_id: soc_27_4011_award, occupations: [occ.soc_27_4011]}
+    - {ability_id: soc_49_2022_award, occupations: [occ.soc_49_2022]}
+    - {ability_id: soc_49_3023_award, occupations: [occ.soc_49_3023]}
+  experience:
+    - question_id: exp.soc_35_2014
+      ability_id: soc_35_2014_experience
+      applies_to: [occ.soc_35_2014]
+      related: [occ.counter_drinks, occ.soc_35_3031, occ.soc_35_9021]
+      min_years: 1
+    - question_id: exp.soc_35_1012
+      ability_id: soc_35_1012_experience
+      applies_to: [occ.soc_35_1012]
+      related: [occ.counter_drinks, occ.soc_35_3031, occ.soc_35_9021, occ.soc_35_2014]
+      min_years: 1
+    - question_id: exp.soc_41_1011
+      ability_id: soc_41_1011_experience
+      applies_to: [occ.soc_41_1011]
+      related: [occ.cashier, occ.retail_sales]
+      min_years: 1
+    - question_id: exp.soc_43_1011
+      ability_id: soc_43_1011_experience
+      applies_to: [occ.soc_43_1011]
+      related: [occ.office_clerk, occ.soc_43_4051, occ.soc_43_6014, occ.soc_43_4171, occ.soc_43_5071, occ.soc_43_3071, occ.bookkeeper]
+      min_years: 1
+  leisure:
+    groups:
+      - {group_id: sports_fitness, label: 运动健身, members: [fitness, racket_sports]}
+      - {group_id: arts_music, label: 文化艺术, members: [music, arts_culture]}
+      - {group_id: food_cooking, label: 美食烹饪, members: [culinary]}
+    search:
+      fitness: [Fitness, 健身房, workout]
+      racket_sports: [Racket sports]
+      music: [Music]
+      arts_culture: [Arts and culture, 艺术, 文化]
+      culinary: [Food and cooking activities, 美食]
+    search_notes:
+      - note_id: leisure.outdoor_not_supported
+        terms: [徒步, 爬山, 登山, 郊游, 露营, 远足, hiking, camping, trekking]
+        note: 本版还没有徒步与户外活动这一类，暂时不能选，也不会算成健身；可以先跳过或选“暂不确定”，在补充文字里写下只留存、不评分
+      - note_id: leisure.games_not_supported
+        terms: [游戏, 打游戏, 电子游戏, 电竞, 手游, gaming, video games, esports]
+        note: 本版还没有电子游戏这一类，暂时不能选，也不会算成别的类别；可以先跳过或选“暂不确定”，在补充文字里写下只留存、不评分
+  taste:
+    groups:
+      - {group_id: chinese_home, label: 中式与家常, members: [chinese, home_style]}
+      - {group_id: asian, label: 亚洲菜, members: [japanese, korean, thai, vietnamese, indian]}
+      - {group_id: western_other, label: 西式与其他, members: [italian, mexican, mediterranean]}
+    search:
+      chinese: [Chinese]
+      home_style: [Home-style cooking]
+      japanese: [Japanese]
+      korean: [Korean]
+      thai: [Thai]
+      vietnamese: [Vietnamese]
+      indian: [Indian]
+      italian: [Italian]
+      mexican: [Mexican]
+      mediterranean: [Mediterranean]
+    search_notes:
+      - note_id: taste.chinese_regional
+        terms: [川菜, 粤菜, 湘菜, 鲁菜, 苏菜, 浙菜, 闽菜, 徽菜, 东北菜, 上海菜, 北京菜, sichuan, cantonese, hunan]
+        points_to: [chinese]
+        note: 本版不区分中国各地的菜系（川菜、粤菜等），都按“中餐”计；选“中餐”即可，不会单独记成川菜偏好

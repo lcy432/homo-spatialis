@@ -10,7 +10,7 @@
   ],
   "confirmable": false,
   "draft": {
-   "draft_fingerprint": "354dc47304492e65ee54e2896f9f966c986613a2657b95caa1afb4b70a88196b",
+   "draft_fingerprint": "4bdca33d1437aeda9eee57754f5e8091b27548b52578b1e046860d72742de047",
    "draft_id": "draft.u501.interest_unknown",
    "revision": 1
   },
@@ -159,7 +159,7 @@
     "execution_guaranteed": null,
     "item": "abilities",
     "label": "已确认的资格",
-    "note": "只来自你明确确认的事实，不从职业称呼自动授予",
+    "note": "只来自你回答的最高学历、职业证书与相关经验（或兼容的逐项资格确认），不从职业称呼、自由文字或搜索词自动授予",
     "support": "supported",
     "usage": [
      "qualification",
@@ -263,7 +263,7 @@
    }
   },
   "meta": {
-   "conversion_version": "e3a-conversion-v2",
+   "conversion_version": "e3a-conversion-v3",
    "data_pack": {
     "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
@@ -271,15 +271,15 @@
     "status": "synthetic_fixture_only"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.3-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.4-draft",
    "sample": {
     "note": "审阅与确认的实际输出（没有运行生活）",
     "origin": "offline_run",
     "produced_by": "product.scenarios.review_only(interest_unknown)",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.3",
-   "vocabulary_version": "e3a-vocabulary-v4"
+   "schema_version": "e3a-product-schema-v3.4",
+   "vocabulary_version": "e3a-vocabulary-v5"
   },
   "money": {
    "amount_text": "3000",
@@ -311,6 +311,7 @@
     }
    ],
    "message_zh": "看起来你的工作是“办公室文员”；请确认这个理解是否正确",
+   "mode": "text",
    "raw_text": "我在写字楼做全职文员，平时处理文件和表格",
    "selected": "occ.office_clerk",
    "status": "explicit"
@@ -319,6 +320,19 @@
    "ack:interests_not_personalized",
    "ack:standard_start"
   ],
+  "qualifications": {
+   "ask_experience": [],
+   "certificates": [],
+   "certificates_state": "unanswered",
+   "education_option": null,
+   "education_state": "unanswered",
+   "experience": [],
+   "experience_state": "unanswered",
+   "granted": [],
+   "message_zh": "还没有回答最高学历、职业证书或相关经验：不授予任何资格",
+   "requirements": [],
+   "source": "none"
+  },
   "review_id": "review.draft.u501.interest_unknown.r1",
   "six_dimensions": {
    "lines": [
@@ -402,21 +416,7 @@
     "exact": "100"
    }
   },
-  "statements": [
-   {
-    "as_hard_requirement": true,
-    "execution_guaranteed": false,
-    "kind": "hard_requirement",
-    "message_zh": "每月检查实际所住住房的往返分钟：满足、不满足、无法判断单独报告；不进分数，也不拦截计划",
-    "raw_text": "住处到就业中心的往返时间不超过（分钟） 60 分钟",
-    "ref": "hr.commute",
-    "support": "supported",
-    "usage": [
-     "planning",
-     "scoring"
-    ]
-   }
-  ],
+  "statements": [],
   "summary_zh": [
    "健康问卷有 1 题没有明确倾向（未答或暂不确定）：照实保留，分身会被告知没有这几项的明确指令"
   ],

@@ -376,9 +376,11 @@ def test_the_committed_openapi_is_what_the_app_serves(tmp_path):
     saved = json.loads((REPO / "contracts/product/v3/openapi.json").read_text(encoding="utf-8"))
     assert saved == actual
     version = actual["components"]["schemas"]["ProductMeta"]["properties"]["schema_version"]
-    from common.product_contracts import PRODUCT_SCHEMA_VERSION
+    from common.product_contracts import PRODUCT_SCHEMA_VERSION, READABLE_SCHEMA_VERSIONS
 
-    assert version.get("const") == PRODUCT_SCHEMA_VERSION
+    # v3.4 起同时接受 v3.3（只为读回历史对象；新对象都是当前版本，DECISIONS/0046）
+    assert tuple(version.get("enum", ())) == READABLE_SCHEMA_VERSIONS
+    assert READABLE_SCHEMA_VERSIONS[-1] == PRODUCT_SCHEMA_VERSION
 
 
 # ---------------------------------------------------------------------- R6

@@ -570,6 +570,142 @@
     "title": "CashAnswer",
     "type": "object"
    },
+   "CatalogGroup": {
+    "additionalProperties": false,
+    "description": "职业目录的一个浏览分组。分组只用于浏览，不改变职业映射，也不进确认画像。",
+    "properties": {
+     "group_id": {
+      "pattern": "^[a-z][a-z0-9_]{0,47}$",
+      "title": "Group Id",
+      "type": "string"
+     },
+     "label": {
+      "maxLength": 40,
+      "minLength": 1,
+      "title": "Label",
+      "type": "string"
+     },
+     "order": {
+      "minimum": 1.0,
+      "title": "Order",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "group_id",
+     "label",
+     "order"
+    ],
+    "title": "CatalogGroup",
+    "type": "object"
+   },
+   "CatalogOccupation": {
+    "additionalProperties": false,
+    "description": "目录里的一个职业：概念编号（与文字匹配、确认画像用的是同一个概念）、唯一的主分组、名称、职责、搜索词与相关资格。\n\n``search_terms`` 是明确登记的中英文搜索词（名称、资料包别名与目录补充的叫法，例如“程序员”），照原文给出、不翻译，只用来筛选；\n搜索框里的文字不保存、不进画像。``qualification_refs`` 是这个职业的开局岗位要求的资格（能力清单 ``abilities`` 里的编号），只供\n显示；学历包含关系、证书授予与经验年数的判断都在 E3。分类代码只在内部保留，不在这里。",
+    "properties": {
+     "concept_id": {
+      "pattern": "^[a-z][a-z0-9_.]{1,79}$",
+      "title": "Concept Id",
+      "type": "string"
+     },
+     "duties": {
+      "items": {
+       "type": "string"
+      },
+      "minItems": 1,
+      "title": "Duties",
+      "type": "array"
+     },
+     "experience_question": {
+      "anyOf": [
+       {
+        "maxLength": 80,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Experience Question"
+     },
+     "group_id": {
+      "pattern": "^[a-z][a-z0-9_]{0,47}$",
+      "title": "Group Id",
+      "type": "string"
+     },
+     "label": {
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "Label",
+      "type": "string"
+     },
+     "order": {
+      "minimum": 1.0,
+      "title": "Order",
+      "type": "integer"
+     },
+     "qualification_refs": {
+      "default": [],
+      "items": {
+       "type": "string"
+      },
+      "title": "Qualification Refs",
+      "type": "array"
+     },
+     "search_terms": {
+      "items": {
+       "maxLength": 120,
+       "minLength": 1,
+       "type": "string"
+      },
+      "minItems": 1,
+      "title": "Search Terms",
+      "type": "array"
+     }
+    },
+    "required": [
+     "concept_id",
+     "group_id",
+     "order",
+     "label",
+     "duties",
+     "search_terms"
+    ],
+    "title": "CatalogOccupation",
+    "type": "object"
+   },
+   "CatalogSearchRules": {
+    "additionalProperties": false,
+    "description": "目录搜索的规则（E5 在完整的小目录里筛选显示；服务端只认提交的编号，不认搜索词）。",
+    "properties": {
+     "method": {
+      "const": "catalog_search_nfkc_casefold_all_terms_v1",
+      "title": "Method",
+      "type": "string"
+     },
+     "no_match": {
+      "maxLength": 300,
+      "minLength": 1,
+      "title": "No Match",
+      "type": "string"
+     },
+     "rules": {
+      "items": {
+       "type": "string"
+      },
+      "minItems": 1,
+      "title": "Rules",
+      "type": "array"
+     }
+    },
+    "required": [
+     "method",
+     "rules",
+     "no_match"
+    ],
+    "title": "CatalogSearchRules",
+    "type": "object"
+   },
    "CategorySources": {
     "additionalProperties": false,
     "description": "目录里一类机会（住房、岗位、食品、服务……）的条数，按来源性质分开数（四种性质都列，没有的写 0）。",
@@ -601,6 +737,65 @@
      "by_kind"
     ],
     "title": "CategorySources",
+    "type": "object"
+   },
+   "CertificateOption": {
+    "additionalProperties": false,
+    "description": "一张可以多选的职业证书（中学后非学位证书）：资格编号、名称，以及要求它的职业。学历不会授予它。",
+    "properties": {
+     "ability_id": {
+      "pattern": "^[a-z][a-z0-9_]{1,47}$",
+      "title": "Ability Id",
+      "type": "string"
+     },
+     "label": {
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "Label",
+      "type": "string"
+     },
+     "occupations": {
+      "items": {
+       "pattern": "^[a-z][a-z0-9_.]{1,79}$",
+       "type": "string"
+      },
+      "minItems": 1,
+      "title": "Occupations",
+      "type": "array"
+     }
+    },
+    "required": [
+     "ability_id",
+     "label",
+     "occupations"
+    ],
+    "title": "CertificateOption",
+    "type": "object"
+   },
+   "CertificatesAnswer": {
+    "additionalProperties": false,
+    "description": "职业证书（多选）：``provided`` 加选中的资格编号；**明确提交空列表表示“没有”**，与未答分开保存。",
+    "properties": {
+     "selected": {
+      "default": [],
+      "items": {
+       "type": "string"
+      },
+      "title": "Selected",
+      "type": "array"
+     },
+     "state": {
+      "default": "unanswered",
+      "enum": [
+       "unanswered",
+       "provided",
+       "unsure"
+      ],
+      "title": "State",
+      "type": "string"
+     }
+    },
+    "title": "CertificatesAnswer",
     "type": "object"
    },
    "CitiesAnswer": {
@@ -2000,7 +2195,32 @@
    },
    "ConfirmedOccupation": {
     "additionalProperties": false,
+    "description": "确认的职业。``catalog_selected``：从输入目录直接选中，没有原文，记下目录的版本与内容身份；``explicit`` / ``ambiguous``：\n兼容的文字匹配，保留原文。",
     "properties": {
+     "catalog_fingerprint": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-f]{64}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Catalog Fingerprint"
+     },
+     "catalog_version": {
+      "anyOf": [
+       {
+        "maxLength": 80,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Catalog Version"
+     },
      "concept_id": {
       "maxLength": 80,
       "minLength": 1,
@@ -2038,23 +2258,30 @@
      "match_status": {
       "enum": [
        "explicit",
-       "ambiguous"
+       "ambiguous",
+       "catalog_selected"
       ],
       "title": "Match Status",
       "type": "string"
      },
      "raw_text": {
-      "maxLength": 300,
-      "minLength": 1,
-      "title": "Raw Text",
-      "type": "string"
+      "anyOf": [
+       {
+        "maxLength": 300,
+        "minLength": 1,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Raw Text"
      }
     },
     "required": [
      "concept_id",
      "label",
      "duties",
-     "raw_text",
      "language",
      "match_status",
      "internal_mappings"
@@ -2146,6 +2373,16 @@
       "pattern": "^[a-z0-9][a-z0-9_.\\-]{0,63}$",
       "title": "Person Ref",
       "type": "string"
+     },
+     "qualifications": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/ConfirmedQualifications"
+       },
+       {
+        "type": "null"
+       }
+      ]
      },
      "retained": {
       "default": [],
@@ -2258,6 +2495,89 @@
      "confirmed"
     ],
     "title": "ConfirmedProfileView",
+    "type": "object"
+   },
+   "ConfirmedQualifications": {
+    "additionalProperties": false,
+    "description": "确认的学历、证书与相关经验答案（v3.4）。``ConfirmedProfile.abilities`` 由它按 ``rule`` 换算；``source = ability_claims``\n表示用的是兼容的逐项资格确认，``none`` 表示什么都没答（不授予任何资格）。",
+    "properties": {
+     "certificates": {
+      "default": [],
+      "items": {
+       "type": "string"
+      },
+      "title": "Certificates",
+      "type": "array"
+     },
+     "certificates_state": {
+      "enum": [
+       "unanswered",
+       "provided",
+       "unsure"
+      ],
+      "title": "Certificates State",
+      "type": "string"
+     },
+     "education_option": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Education Option"
+     },
+     "education_state": {
+      "enum": [
+       "unanswered",
+       "provided",
+       "unsure"
+      ],
+      "title": "Education State",
+      "type": "string"
+     },
+     "experience": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/ExperienceEntry"
+      },
+      "title": "Experience",
+      "type": "array"
+     },
+     "experience_state": {
+      "enum": [
+       "unanswered",
+       "provided",
+       "unsure"
+      ],
+      "title": "Experience State",
+      "type": "string"
+     },
+     "rule": {
+      "const": "confirmed_experience_mapping_v1",
+      "default": "confirmed_experience_mapping_v1",
+      "title": "Rule",
+      "type": "string"
+     },
+     "source": {
+      "enum": [
+       "structured_answers",
+       "ability_claims",
+       "none"
+      ],
+      "title": "Source",
+      "type": "string"
+     }
+    },
+    "required": [
+     "source",
+     "education_state",
+     "certificates_state",
+     "experience_state"
+    ],
+    "title": "ConfirmedQualifications",
     "type": "object"
    },
    "ConfirmedRef": {
@@ -2892,7 +3212,8 @@
          "unsure",
          "no_fixed_hobby",
          "generic",
-         "described"
+         "described",
+         "selected"
         ],
         "type": "string"
        },
@@ -2901,7 +3222,8 @@
          "unanswered",
          "unsure",
          "no_preference",
-         "described"
+         "described",
+         "selected"
         ],
         "type": "string"
        }
@@ -3312,6 +3634,85 @@
     "title": "DisplayTranslation",
     "type": "object"
    },
+   "DraftMigrateRequest": {
+    "additionalProperties": false,
+    "description": "迁移草稿（``POST /api/v1/drafts/{id}/migrate``）：``expected_revision`` 必须等于当前修订号；有要清空的旧答案时\n``clear_removed`` 必须为真（用户看过迁移说明并同意），否则拒绝、草稿不变。",
+    "properties": {
+     "clear_removed": {
+      "default": false,
+      "title": "Clear Removed",
+      "type": "boolean"
+     },
+     "expected_revision": {
+      "minimum": 1.0,
+      "title": "Expected Revision",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "expected_revision"
+    ],
+    "title": "DraftMigrateRequest",
+    "type": "object"
+   },
+   "DraftMigration": {
+    "additionalProperties": false,
+    "description": "这份草稿进入新问卷要做的迁移（``GET`` 草稿时一起给出；没有要迁移的就没有这一项）。\n\n迁移把草稿的版本换成当前版本、清空新问卷不再收集的硬要求与属性偏好（``removed`` 逐条列出），其他答案原样保留；之后要重新审阅\n和确认。有要清空的答案时必须用户明确同意（``consent_required``）；只差版本时也要用户点一次。已经确认或已经开始的运行不受影响。",
+    "properties": {
+     "consent_required": {
+      "title": "Consent Required",
+      "type": "boolean"
+     },
+     "effects_zh": {
+      "items": {
+       "type": "string"
+      },
+      "minItems": 1,
+      "title": "Effects Zh",
+      "type": "array"
+     },
+     "from_questionnaire_version": {
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "From Questionnaire Version",
+      "type": "string"
+     },
+     "message_zh": {
+      "maxLength": 400,
+      "minLength": 1,
+      "title": "Message Zh",
+      "type": "string"
+     },
+     "removed": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/RemovedAnswer"
+      },
+      "title": "Removed",
+      "type": "array"
+     },
+     "to_questionnaire_version": {
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "To Questionnaire Version",
+      "type": "string"
+     },
+     "version_changed": {
+      "title": "Version Changed",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "from_questionnaire_version",
+     "to_questionnaire_version",
+     "version_changed",
+     "consent_required",
+     "message_zh",
+     "effects_zh"
+    ],
+    "title": "DraftMigration",
+    "type": "object"
+   },
    "DraftRef": {
     "additionalProperties": false,
     "description": "引用一份草稿：编号、修订号与内容指纹（草稿改了，指纹就不同）。",
@@ -3408,6 +3809,16 @@
      "meta": {
       "$ref": "#/components/schemas/ProductMeta"
      },
+     "migration": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/DraftMigration"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
      "updated_at": {
       "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
       "title": "Updated At",
@@ -3421,6 +3832,65 @@
      "expires_at"
     ],
     "title": "DraftView",
+    "type": "object"
+   },
+   "EducationAnswer": {
+    "additionalProperties": false,
+    "description": "最高学历（单选）：未答、暂不确定，或选了输入目录里的一个选项。只有选了才授予学历门槛。",
+    "properties": {
+     "option_id": {
+      "anyOf": [
+       {
+        "maxLength": 48,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Option Id"
+     },
+     "state": {
+      "default": "unanswered",
+      "enum": [
+       "unanswered",
+       "provided",
+       "unsure"
+      ],
+      "title": "State",
+      "type": "string"
+     }
+    },
+    "title": "EducationAnswer",
+    "type": "object"
+   },
+   "EducationOption": {
+    "additionalProperties": false,
+    "description": "最高学历的一个选项（单选，按从低到高的顺序）。职业证书不在这里，另有证书多选。",
+    "properties": {
+     "label": {
+      "maxLength": 40,
+      "minLength": 1,
+      "title": "Label",
+      "type": "string"
+     },
+     "option_id": {
+      "pattern": "^[a-z][a-z0-9_]{0,47}$",
+      "title": "Option Id",
+      "type": "string"
+     },
+     "order": {
+      "minimum": 1.0,
+      "title": "Order",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "option_id",
+     "label",
+     "order"
+    ],
+    "title": "EducationOption",
     "type": "object"
    },
    "EvidenceRef": {
@@ -3482,6 +3952,104 @@
      "display"
     ],
     "title": "ExactNumber",
+    "type": "object"
+   },
+   "ExperienceAnswer": {
+    "additionalProperties": false,
+    "description": "相关工作经验（只在选中的职业需要时问）：``provided`` 加经历；明确提交空列表表示“没有相关经验”，与未答分开保存。",
+    "properties": {
+     "entries": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/ExperienceEntry"
+      },
+      "title": "Entries",
+      "type": "array"
+     },
+     "state": {
+      "default": "unanswered",
+      "enum": [
+       "unanswered",
+       "provided",
+       "unsure"
+      ],
+      "title": "State",
+      "type": "string"
+     }
+    },
+    "title": "ExperienceAnswer",
+    "type": "object"
+   },
+   "ExperienceEntry": {
+    "additionalProperties": false,
+    "description": "一段相关工作经历：职业概念（输入目录里经验问题列出的相关职业）与整年数。",
+    "properties": {
+     "concept_id": {
+      "pattern": "^[a-z][a-z0-9_.]{1,79}$",
+      "title": "Concept Id",
+      "type": "string"
+     },
+     "years": {
+      "maximum": 60.0,
+      "minimum": 0.0,
+      "title": "Years",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "concept_id",
+     "years"
+    ],
+    "title": "ExperienceEntry",
+    "type": "object"
+   },
+   "ExperienceQuestion": {
+    "additionalProperties": false,
+    "description": "一个相关工作经验问题：只在选中的职业属于 ``applies_to`` 时问；用户在 ``related`` 列出的职业里填做过几年。年数门槛只写在\n``prompt`` 的说明里，由 E3 判断（E5 不判断）。",
+    "properties": {
+     "ability_id": {
+      "pattern": "^[a-z][a-z0-9_]{1,47}$",
+      "title": "Ability Id",
+      "type": "string"
+     },
+     "applies_to": {
+      "items": {
+       "pattern": "^[a-z][a-z0-9_.]{1,79}$",
+       "type": "string"
+      },
+      "minItems": 1,
+      "title": "Applies To",
+      "type": "array"
+     },
+     "prompt": {
+      "maxLength": 300,
+      "minLength": 1,
+      "title": "Prompt",
+      "type": "string"
+     },
+     "question_id": {
+      "pattern": "^[a-z][a-z0-9_.]{1,79}$",
+      "title": "Question Id",
+      "type": "string"
+     },
+     "related": {
+      "items": {
+       "pattern": "^[a-z][a-z0-9_.]{1,79}$",
+       "type": "string"
+      },
+      "minItems": 1,
+      "title": "Related",
+      "type": "array"
+     }
+    },
+    "required": [
+     "question_id",
+     "ability_id",
+     "applies_to",
+     "related",
+     "prompt"
+    ],
+    "title": "ExperienceQuestion",
     "type": "object"
    },
    "FieldSource": {
@@ -4228,6 +4796,183 @@
     "title": "HouseholdHours",
     "type": "object"
    },
+   "InputCatalog": {
+    "additionalProperties": false,
+    "description": "输入目录（v3.4）：职业的分类索引与搜索词、学历 / 证书 / 相关经验问题、兴趣与菜系的分组，以及新流程启用的板块。\n\n它是一份独立的小配置，引用资料包里已有的职业、资格与兴趣键，不新增职业、资格、活动或评分系数。``content_fingerprint`` 是这份\n配置与所引用资料包的内容身份：按目录选职业的草稿要带上它，目录换了就要重新选（服务端拒绝过期的目录）。",
+    "properties": {
+     "catalog_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+      "title": "Catalog Id",
+      "type": "string"
+     },
+     "catalog_version": {
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "Catalog Version",
+      "type": "string"
+     },
+     "certificates": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/CertificateOption"
+      },
+      "title": "Certificates",
+      "type": "array"
+     },
+     "content_fingerprint": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Content Fingerprint",
+      "type": "string"
+     },
+     "education": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/EducationOption"
+      },
+      "title": "Education",
+      "type": "array"
+     },
+     "experience": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/ExperienceQuestion"
+      },
+      "title": "Experience",
+      "type": "array"
+     },
+     "groups": {
+      "items": {
+       "$ref": "#/components/schemas/CatalogGroup"
+      },
+      "minItems": 1,
+      "title": "Groups",
+      "type": "array"
+     },
+     "leisure": {
+      "$ref": "#/components/schemas/InterestPanel"
+     },
+     "notes": {
+      "default": [],
+      "items": {
+       "type": "string"
+      },
+      "title": "Notes",
+      "type": "array"
+     },
+     "occupations": {
+      "items": {
+       "$ref": "#/components/schemas/CatalogOccupation"
+      },
+      "minItems": 1,
+      "title": "Occupations",
+      "type": "array"
+     },
+     "pack_id": {
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "Pack Id",
+      "type": "string"
+     },
+     "qualification_states": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/QualificationStateText"
+      },
+      "title": "Qualification States",
+      "type": "array"
+     },
+     "search": {
+      "$ref": "#/components/schemas/CatalogSearchRules"
+     },
+     "sections": {
+      "$ref": "#/components/schemas/InputSections"
+     },
+     "taste": {
+      "$ref": "#/components/schemas/InterestPanel"
+     }
+    },
+    "required": [
+     "catalog_id",
+     "catalog_version",
+     "content_fingerprint",
+     "pack_id",
+     "sections",
+     "search",
+     "groups",
+     "occupations",
+     "leisure",
+     "taste"
+    ],
+    "title": "InputCatalog",
+    "type": "object"
+   },
+   "InputSections": {
+    "additionalProperties": false,
+    "description": "新输入流程启用哪些板块。职业按目录直接选（文字描述只为兼容保留，不是必经入口）；兴趣与口味用面板多选；硬要求、属性偏好\n与兴趣的文字解释不在新流程里。",
+    "properties": {
+     "attribute_preferences": {
+      "const": false,
+      "default": false,
+      "title": "Attribute Preferences",
+      "type": "boolean"
+     },
+     "certificates": {
+      "title": "Certificates",
+      "type": "boolean"
+     },
+     "education": {
+      "title": "Education",
+      "type": "boolean"
+     },
+     "experience": {
+      "title": "Experience",
+      "type": "boolean"
+     },
+     "hard_requirements": {
+      "const": false,
+      "default": false,
+      "title": "Hard Requirements",
+      "type": "boolean"
+     },
+     "interest_text": {
+      "const": false,
+      "default": false,
+      "title": "Interest Text",
+      "type": "boolean"
+     },
+     "leisure": {
+      "const": "panel_select",
+      "default": "panel_select",
+      "title": "Leisure",
+      "type": "string"
+     },
+     "occupation": {
+      "const": "catalog_select",
+      "default": "catalog_select",
+      "title": "Occupation",
+      "type": "string"
+     },
+     "occupation_text": {
+      "const": "compatibility_only",
+      "default": "compatibility_only",
+      "title": "Occupation Text",
+      "type": "string"
+     },
+     "taste": {
+      "const": "panel_select",
+      "default": "panel_select",
+      "title": "Taste",
+      "type": "string"
+     }
+    },
+    "required": [
+     "education",
+     "certificates",
+     "experience"
+    ],
+    "title": "InputSections",
+    "type": "object"
+   },
    "IntRange": {
     "additionalProperties": false,
     "description": "一个整数选项：不选时用 ``default``；允许 ``minimum``–``maximum``（含两端）。",
@@ -4307,6 +5052,133 @@
      "matching_note_zh"
     ],
     "title": "InterestCapability",
+    "type": "object"
+   },
+   "InterestEntry": {
+    "additionalProperties": false,
+    "description": "面板里的一个类别：能力清单词表里已有的键（不新增类别）、唯一的分组、名称与搜索词（类别名、词表别名与目录补充的叫法，照原文）。",
+    "properties": {
+     "group_id": {
+      "pattern": "^[a-z][a-z0-9_]{0,47}$",
+      "title": "Group Id",
+      "type": "string"
+     },
+     "key": {
+      "pattern": "^[a-z][a-z0-9_]{0,47}$",
+      "title": "Key",
+      "type": "string"
+     },
+     "label": {
+      "maxLength": 40,
+      "minLength": 1,
+      "title": "Label",
+      "type": "string"
+     },
+     "order": {
+      "minimum": 1.0,
+      "title": "Order",
+      "type": "integer"
+     },
+     "search_terms": {
+      "items": {
+       "maxLength": 60,
+       "minLength": 1,
+       "type": "string"
+      },
+      "minItems": 1,
+      "title": "Search Terms",
+      "type": "array"
+     }
+    },
+    "required": [
+     "key",
+     "group_id",
+     "order",
+     "label",
+     "search_terms"
+    ],
+    "title": "InterestEntry",
+    "type": "object"
+   },
+   "InterestGroup": {
+    "additionalProperties": false,
+    "description": "兴趣或菜系面板的一个浏览分组。",
+    "properties": {
+     "group_id": {
+      "pattern": "^[a-z][a-z0-9_]{0,47}$",
+      "title": "Group Id",
+      "type": "string"
+     },
+     "label": {
+      "maxLength": 40,
+      "minLength": 1,
+      "title": "Label",
+      "type": "string"
+     },
+     "order": {
+      "minimum": 1.0,
+      "title": "Order",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "group_id",
+     "label",
+     "order"
+    ],
+    "title": "InterestGroup",
+    "type": "object"
+   },
+   "InterestPanel": {
+    "additionalProperties": false,
+    "description": "兴趣（``leisure``）或口味（``taste``）的多选面板。可以跳过（未答）；选了类别就直接是确认画像里的类别，不需要写文字。",
+    "properties": {
+     "entries": {
+      "items": {
+       "$ref": "#/components/schemas/InterestEntry"
+      },
+      "minItems": 1,
+      "title": "Entries",
+      "type": "array"
+     },
+     "groups": {
+      "items": {
+       "$ref": "#/components/schemas/InterestGroup"
+      },
+      "minItems": 1,
+      "title": "Groups",
+      "type": "array"
+     },
+     "kind": {
+      "enum": [
+       "leisure",
+       "taste"
+      ],
+      "title": "Kind",
+      "type": "string"
+     },
+     "note": {
+      "maxLength": 300,
+      "minLength": 1,
+      "title": "Note",
+      "type": "string"
+     },
+     "search_notes": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/SearchNote"
+      },
+      "title": "Search Notes",
+      "type": "array"
+     }
+    },
+    "required": [
+     "kind",
+     "groups",
+     "entries",
+     "note"
+    ],
+    "title": "InterestPanel",
     "type": "object"
    },
    "InterestReview": {
@@ -4491,7 +5363,8 @@
        "unsure",
        "no_fixed_hobby",
        "generic",
-       "described"
+       "described",
+       "selected"
       ],
       "title": "State",
       "type": "string"
@@ -4946,13 +5819,46 @@
    },
    "OccupationAnswer": {
     "additionalProperties": false,
-    "description": "职业：原文与语言；用户在候选里选中的概念（不透明 ID，不是职业代码）。",
+    "description": "职业。``mode = catalog``（新流程）：从输入目录直接选中的概念编号与那份目录的版本、内容身份，不需要也不保存任何文字（搜索框\n里的字只是查找条件）。``mode = text``（兼容）：原文与语言，再在少量候选里选中一个。概念编号不透明，不是职业代码。",
     "properties": {
+     "catalog_fingerprint": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-f]{64}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Catalog Fingerprint"
+     },
+     "catalog_version": {
+      "anyOf": [
+       {
+        "maxLength": 80,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Catalog Version"
+     },
      "language": {
       "default": "zh",
       "maxLength": 10,
       "minLength": 2,
       "title": "Language",
+      "type": "string"
+     },
+     "mode": {
+      "default": "text",
+      "enum": [
+       "text",
+       "catalog"
+      ],
+      "title": "Mode",
       "type": "string"
      },
      "raw_text": {
@@ -5141,6 +6047,7 @@
    },
    "OccupationReview": {
     "additionalProperties": false,
+    "description": "``catalog_selected``：从输入目录直接选中（候选就是那一个职业，名称与职责供核对）；其余是兼容的文字匹配。",
     "properties": {
      "candidates": {
       "default": [],
@@ -5154,6 +6061,15 @@
       "maxLength": 400,
       "minLength": 1,
       "title": "Message Zh",
+      "type": "string"
+     },
+     "mode": {
+      "default": "text",
+      "enum": [
+       "text",
+       "catalog"
+      ],
+      "title": "Mode",
       "type": "string"
      },
      "raw_text": {
@@ -5183,7 +6099,8 @@
        "explicit",
        "ambiguous",
        "unknown",
-       "not_provided"
+       "not_provided",
+       "catalog_selected"
       ],
       "title": "Status",
       "type": "string"
@@ -5481,6 +6398,16 @@
      "health_questionnaire": {
       "$ref": "#/components/schemas/HealthQuestionnaire"
      },
+     "input_catalog": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/InputCatalog"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
      "interests": {
       "$ref": "#/components/schemas/InterestCapability"
      },
@@ -5668,7 +6595,10 @@
       ]
      },
      "schema_version": {
-      "const": "e3a-product-schema-v3.3",
+      "enum": [
+       "e3a-product-schema-v3.3",
+       "e3a-product-schema-v3.4"
+      ],
       "title": "Schema Version",
       "type": "string"
      },
@@ -6192,6 +7122,16 @@
       "title": "Pending Confirmations",
       "type": "array"
      },
+     "qualifications": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/QualificationReview"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
      "review_id": {
       "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
       "title": "Review Id",
@@ -6333,6 +7273,218 @@
     "title": "PurchaseNotMade",
     "type": "object"
    },
+   "QualificationGrant": {
+    "additionalProperties": false,
+    "description": "一项按答案得到的资格与理由（例如“最高学历：本科 → 满足‘学士学位’及以下的学历门槛”）。",
+    "properties": {
+     "ability_id": {
+      "maxLength": 48,
+      "minLength": 1,
+      "title": "Ability Id",
+      "type": "string"
+     },
+     "because": {
+      "maxLength": 300,
+      "minLength": 1,
+      "title": "Because",
+      "type": "string"
+     },
+     "label": {
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "Label",
+      "type": "string"
+     }
+    },
+    "required": [
+     "ability_id",
+     "label",
+     "because"
+    ],
+    "title": "QualificationGrant",
+    "type": "object"
+   },
+   "QualificationRequirement": {
+    "additionalProperties": false,
+    "description": "选中职业的开局岗位要求的一项资格，以及按现在的答案是否满足（不满足时各城的开局会照实挡下，不自动补）。",
+    "properties": {
+     "ability_id": {
+      "maxLength": 48,
+      "minLength": 1,
+      "title": "Ability Id",
+      "type": "string"
+     },
+     "label": {
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "Label",
+      "type": "string"
+     },
+     "met": {
+      "title": "Met",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "ability_id",
+     "label",
+     "met"
+    ],
+    "title": "QualificationRequirement",
+    "type": "object"
+   },
+   "QualificationReview": {
+    "additionalProperties": false,
+    "description": "学历、证书与相关经验的审阅：E3 按资料包已有的规则换成资格（学历“至少达到”、证书只授予选中的那张、经验按相关职业与年数，\n规则 ``confirmed_experience_mapping_v1``）。职业、职称、自由文字与搜索词都不授予资格。``source``：结构化答案、兼容的逐项资格\n确认，或都没有。",
+    "properties": {
+     "ask_experience": {
+      "default": [],
+      "items": {
+       "type": "string"
+      },
+      "title": "Ask Experience",
+      "type": "array"
+     },
+     "certificates": {
+      "default": [],
+      "items": {
+       "type": "string"
+      },
+      "title": "Certificates",
+      "type": "array"
+     },
+     "certificates_state": {
+      "enum": [
+       "unanswered",
+       "provided",
+       "unsure"
+      ],
+      "title": "Certificates State",
+      "type": "string"
+     },
+     "education_option": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Education Option"
+     },
+     "education_state": {
+      "enum": [
+       "unanswered",
+       "provided",
+       "unsure"
+      ],
+      "title": "Education State",
+      "type": "string"
+     },
+     "experience": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/ExperienceEntry"
+      },
+      "title": "Experience",
+      "type": "array"
+     },
+     "experience_state": {
+      "enum": [
+       "unanswered",
+       "provided",
+       "unsure"
+      ],
+      "title": "Experience State",
+      "type": "string"
+     },
+     "granted": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/QualificationGrant"
+      },
+      "title": "Granted",
+      "type": "array"
+     },
+     "message_zh": {
+      "maxLength": 400,
+      "minLength": 1,
+      "title": "Message Zh",
+      "type": "string"
+     },
+     "requirements": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/QualificationRequirement"
+      },
+      "title": "Requirements",
+      "type": "array"
+     },
+     "source": {
+      "enum": [
+       "structured_answers",
+       "ability_claims",
+       "none"
+      ],
+      "title": "Source",
+      "type": "string"
+     }
+    },
+    "required": [
+     "source",
+     "education_state",
+     "certificates_state",
+     "experience_state",
+     "message_zh"
+    ],
+    "title": "QualificationReview",
+    "type": "object"
+   },
+   "QualificationStateText": {
+    "additionalProperties": false,
+    "description": "学历、证书或经验的一种作答状态的名称与含义。",
+    "properties": {
+     "meaning": {
+      "maxLength": 300,
+      "minLength": 1,
+      "title": "Meaning",
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 60,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+     },
+     "section": {
+      "enum": [
+       "education",
+       "certificates",
+       "experience"
+      ],
+      "title": "Section",
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "unanswered",
+       "provided",
+       "unsure"
+      ],
+      "title": "State",
+      "type": "string"
+     }
+    },
+    "required": [
+     "section",
+     "state",
+     "name",
+     "meaning"
+    ],
+    "title": "QualificationStateText",
+    "type": "object"
+   },
    "QuotaSummary": {
     "additionalProperties": false,
     "description": "这个专属空间的使用次数：一共 ``total`` 次启动模拟的机会；``used`` 已开始的、``reserved`` 已确认开始但还没有启动的、\n``available`` 还能用的。次数不自动重置；删除结果、换设备、重发链接都不改变它。3 次是启动模拟的机会，不保证每次所有分身都完整。",
@@ -6365,6 +7517,51 @@
      "available"
     ],
     "title": "QuotaSummary",
+    "type": "object"
+   },
+   "RemovedAnswer": {
+    "additionalProperties": false,
+    "description": "旧草稿里新问卷不再收集的一条答案（迁移说明里逐条列出，不悄悄丢掉）。``summary`` 是 E3 生成的可读写法（受支持的硬要求写成\n选项与数值）；``raw_text`` 是用户自己写的原文（照原样，不翻译；受支持的选项没有原文）。",
+    "properties": {
+     "raw_text": {
+      "anyOf": [
+       {
+        "maxLength": 300,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Raw Text"
+     },
+     "ref": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Ref",
+      "type": "string"
+     },
+     "section": {
+      "enum": [
+       "hard_requirements",
+       "attribute_preferences"
+      ],
+      "title": "Section",
+      "type": "string"
+     },
+     "summary": {
+      "maxLength": 300,
+      "minLength": 1,
+      "title": "Summary",
+      "type": "string"
+     }
+    },
+    "required": [
+     "section",
+     "ref",
+     "summary"
+    ],
+    "title": "RemovedAnswer",
     "type": "object"
    },
    "RequirementLine": {
@@ -7439,6 +8636,49 @@
     "title": "ScopeNote",
     "type": "object"
    },
+   "SearchNote": {
+    "additionalProperties": false,
+    "description": "一组搜索词的说明：它们对应哪些已支持的键（可以为空：本版不支持），以及要告诉用户的话。搜索词照原文，不翻译。\n例如“川菜”只找到已支持的“中餐”，并说明本版不区分地方菜；“徒步”找不到任何类别，并说明本版还没有、不会算成健身。",
+    "properties": {
+     "note": {
+      "maxLength": 300,
+      "minLength": 1,
+      "title": "Note",
+      "type": "string"
+     },
+     "note_id": {
+      "pattern": "^[a-z][a-z0-9_.]{1,79}$",
+      "title": "Note Id",
+      "type": "string"
+     },
+     "points_to": {
+      "default": [],
+      "items": {
+       "pattern": "^[a-z][a-z0-9_]{0,47}$",
+       "type": "string"
+      },
+      "title": "Points To",
+      "type": "array"
+     },
+     "terms": {
+      "items": {
+       "maxLength": 40,
+       "minLength": 1,
+       "type": "string"
+      },
+      "minItems": 1,
+      "title": "Terms",
+      "type": "array"
+     }
+    },
+    "required": [
+     "note_id",
+     "terms",
+     "note"
+    ],
+    "title": "SearchNote",
+    "type": "object"
+   },
    "ServiceError": {
     "additionalProperties": false,
     "description": "统一的安全错误：机器代码、HTTP 状态与“发生了什么—影响是什么—下一步怎么做”的中文，加一个支持编号。不含用户输入、内部路径、\n堆栈、原始校验异常或秘密。",
@@ -7462,6 +8702,8 @@
        "paid_calls_disabled",
        "run_options_invalid",
        "run_settings_unavailable",
+       "migration_consent_required",
+       "migration_not_needed",
        "rate_limited",
        "csrf_failed",
        "origin_rejected",
@@ -8001,7 +9243,7 @@
    },
    "TasteAnswer": {
     "additionalProperties": false,
-    "description": "口味与菜系：未答、暂不确定、明确没有偏好，或用文字描述（同样先解释、再由用户选中确认）。",
+    "description": "口味与菜系：未答、暂不确定、明确没有偏好、从面板选中菜系，或用文字描述（兼容：先解释、再由用户选中确认）。",
     "properties": {
      "selected": {
       "default": [],
@@ -8017,7 +9259,8 @@
        "unanswered",
        "unsure",
        "no_preference",
-       "described"
+       "described",
+       "selected"
       ],
       "title": "State",
       "type": "string"
@@ -8162,6 +9405,9 @@
      "cash": {
       "$ref": "#/components/schemas/CashAnswer"
      },
+     "certificates": {
+      "$ref": "#/components/schemas/CertificatesAnswer"
+     },
      "cities": {
       "$ref": "#/components/schemas/CitiesAnswer"
      },
@@ -8170,6 +9416,9 @@
       "title": "Draft Id",
       "type": "string"
      },
+     "education": {
+      "$ref": "#/components/schemas/EducationAnswer"
+     },
      "evidence": {
       "default": [],
       "items": {
@@ -8177,6 +9426,9 @@
       },
       "title": "Evidence",
       "type": "array"
+     },
+     "experience": {
+      "$ref": "#/components/schemas/ExperienceAnswer"
      },
      "free_text": {
       "$ref": "#/components/schemas/FreeTextAnswer"
@@ -8531,7 +9783,7 @@
  "info": {
   "description": "E3C 托管服务的公开接口（同源 HTTPS；会话 Cookie + CSRF；长任务由后台 worker 执行，网页轮询）。",
   "title": "Homo Spatialis 产品服务",
-  "version": "e3c-service-api-v1.2"
+  "version": "e3c-service-api-v1.3"
  },
  "openapi": "3.1.0",
  "paths": {
@@ -9480,6 +10732,145 @@
      }
     },
     "summary": "带版本保存草稿（旧版本返回冲突，不覆盖）"
+   }
+  },
+  "/api/v1/drafts/{draft_id}/migrate": {
+   "post": {
+    "operationId": "migrate_draft_api_v1_drafts__draft_id__migrate_post",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "draft_id",
+      "required": true,
+      "schema": {
+       "title": "Draft Id",
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DraftMigrateRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DraftView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "403": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "409": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "410": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "413": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "429": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "503": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     }
+    },
+    "summary": "把旧草稿迁移到新问卷（有要清空的旧答案时必须明确同意；之后重新审阅）"
    }
   },
   "/api/v1/drafts/{draft_id}/review": {

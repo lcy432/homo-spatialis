@@ -26,7 +26,7 @@
    "note": "离线 mock：没有网络调用，费用为 0（真实模型运行会写“按报价估算”，以供应商账单为准）"
   },
   "meta": {
-   "conversion_version": "e3a-conversion-v2",
+   "conversion_version": "e3a-conversion-v3",
    "data_pack": {
     "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
@@ -34,27 +34,27 @@
     "status": "synthetic_fixture_only"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.3-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.4-draft",
    "sample": {
     "note": "断线后按运行 ID 查询同一运行：不重发付费规划、不生成新的一批分身。HTTP 层是示例，未实现",
     "origin": "contract_example",
     "produced_by": "product.bridge.progress",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.3",
-   "vocabulary_version": "e3a-vocabulary-v4"
+   "schema_version": "e3a-product-schema-v3.4",
+   "vocabulary_version": "e3a-vocabulary-v5"
   },
   "pause": null,
   "report_available": true,
   "resumable": false,
   "resume_note": "这次运行已经结束，没有可以恢复的部分",
-  "run_id": "run-e3a-ef320f59899c09a0",
+  "run_id": "run-e3a-c5b3de57a8f9f09f",
   "stage": "completed",
   "stage_zh": "已完成"
  },
  "request_example": {
   "method": "GET",
   "note": "示例：线上查询接口尚未实现（E3-C/E5-B）；离线等价物是 product.bridge.progress(运行归档)",
-  "path": "/runs/run-e3a-ef320f59899c09a0/progress"
+  "path": "/runs/run-e3a-c5b3de57a8f9f09f/progress"
  }
 }

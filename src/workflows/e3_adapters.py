@@ -467,13 +467,16 @@ class E3PreflightAdapter:
             pre = run.preflight
             fp = pre.preflight_fingerprint
             # 显示附层：生成预检查时记下的文字绑定，放在这次运行自己的工作目录里，随运行一起删除（不进预检查的内容身份）。
-            # 文件名只取身份的前 16 位（Windows 的路径长度有上限）；读取时绑定里的原消息摘要还会再核对一次。写不下来只让显示缺失
-            _write_display(
-                Path("workflow/display") / f"preflight-{fp[:16]}.json",
-                lambda: binding_document(
-                    pre.model_dump(mode="json"), rec, pack_fingerprint=pack.fingerprint
-                ),
-            )
+            # 文件名只取身份的前 16 位（Windows 的路径长度有上限）；读取时绑定里的原消息摘要还会再核对一次。写不下来只让显示缺失。
+            # 只在这份预检查身份第一次检查时写：之后再查（确认开始之前的核对、恢复）不重绑——这次运行已经确认的解释版本不变，
+            # 进度、结果与历史地图都继承它；那时绑定缺了或坏了就照实缺失，不拿当前资源补。业务输入真的变了，预检查身份就不同
+            if not (Path("workflow/preflights") / f"{fp}.json").is_file():
+                _write_display(
+                    Path("workflow/display") / f"preflight-{fp[:16]}.json",
+                    lambda: binding_document(
+                        pre.model_dump(mode="json"), rec, pack_fingerprint=pack.fingerprint
+                    ),
+                )
             _write_json(
                 Path("workflow/preflights") / f"{fp}.json",
                 {

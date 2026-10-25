@@ -242,7 +242,10 @@
      "default": null
     },
     "schema_version": {
-     "const": "e3a-product-schema-v3.3",
+     "enum": [
+      "e3a-product-schema-v3.3",
+      "e3a-product-schema-v3.4"
+     ],
      "title": "Schema Version",
      "type": "string"
     },
@@ -327,6 +330,8 @@
     "paid_calls_disabled",
     "run_options_invalid",
     "run_settings_unavailable",
+    "migration_consent_required",
+    "migration_not_needed",
     "rate_limited",
     "csrf_failed",
     "origin_rejected",

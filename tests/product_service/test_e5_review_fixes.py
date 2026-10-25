@@ -252,34 +252,20 @@ def test_acknowledgements_match_the_pending_ids_and_do_not_replace_them(tmp_path
     svc = start(tmp_path)
     publish(svc.ctx.pack)
     _, b = svc.person()
-    filled = b.fill(
-        b.new_draft(),
-        attributes=(
-            {
-                "preference_id": "pref.brand",
-                "need": "daily_convenience",
-                "kind": "brand",
-                "raw_text": "家电更喜欢国产品牌",
-            },
-        ),
-    )
+    # 新问卷不再收集属性偏好（没有“只留存的陈述”）：待确认的是标准开局与“本次不按兴趣或口味个性化”
+    filled = b.fill(b.new_draft())
     did = filled["draft"]["draft_id"]
     review = b.post(f"/drafts/{did}/review").json()
     pending = review["review"]["pending_confirmations"]
-    assert "ack:retained:pref.brand" in pending
+    assert pending == ["ack:interests_not_personalized", "ack:standard_start"]
     for locale in ("zh", "en"):
         env = display(b, "review", review["review"]["review_id"], locale).json()
         acks = env["acknowledgements"]
         assert [a["ack_id"] for a in acks] == pending
         for a in acks:
             assert a["text"]["zh"] == ack_display(a["ack_id"])
-        retained = next(a for a in acks if a["ack_id"] == "ack:retained:pref.brand")
-        statement = retained["statement_pointer"]
-        assert statement is not None
-        idx = int(statement.rsplit("/", 1)[1])
-        assert env["source"]["review"]["statements"][idx]["ref"] == "pref.brand"
-        standard = next(a for a in acks if a["ack_id"] == "ack:standard_start")
-        assert standard["text"]["status"] == "provided" and standard["text"]["en"]
+            assert a["statement_pointer"] is None  # 没有留存的陈述
+            assert a["text"]["status"] == "provided" and a["text"]["en"]
     # 确认照旧提交原来的编号；显示条目不勾选、不替用户确认
     r = b.post("/profiles/confirm", json=_confirm_body(review))
     assert r.json()["status"] == "confirmed"
@@ -358,7 +344,10 @@ def test_answer_state_texts_agree_with_the_pack(pack_path):
         ("taste", pack.body.interests.taste_states_zh),
     ):
         table = ANSWER_STATES[answer]
-        assert [f"{n.zh}：{m.zh}" for n, m in table.values()] == list(listed)
+        # 资料包的说明写于面板选择之前：前面几种逐条一致；v3.4 新增的“从面板选择”由 E3 的状态表定义（资料包不改，内容身份不变）
+        states = [s for s in table if s != "selected"]
+        assert [f"{table[s][0].zh}：{table[s][1].zh}" for s in states] == list(listed)
+        assert list(table)[-1] == "selected"
 
 
 # ---------------------------------------------------------------------- 审阅说明是人能读的文字

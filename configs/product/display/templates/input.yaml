@@ -740,3 +740,309 @@ templates:
   input.answer_state.taste.described.meaning:
     en: Candidates are first formed from the vocabulary; only the cuisines you choose enter the food evaluation, and brands and other requirements are only kept as written
     zh: 先按词表形成候选，你选中的菜系才进入饮食评价；品牌与其他要求只留存
+  input.answer_state.leisure.selected.meaning:
+    en: The categories you pick are used for the evaluation directly; no text is needed
+    zh: 你选中的类别直接用于评价，不需要写文字
+  input.answer_state.leisure.selected.name:
+    en: Picked from the panel
+    zh: 从面板选择
+  input.answer_state.taste.selected.meaning:
+    en: The cuisines you pick are used for the food evaluation directly; no text is needed
+    zh: 你选中的菜系直接用于饮食评价，不需要写文字
+  input.answer_state.taste.selected.name:
+    en: Picked from the panel
+    zh: 从面板选择
+  input.capabilities.occupation_note.v2:
+    en: 'The new flow lets you browse the occupation catalog by group or search it and pick one directly (see input_catalog; no text needed). Describing your work in words is kept only for compatibility: the system offers a few readable candidates (name and duties) from the aliases of a controlled vocabulary, and you confirm one. Classification codes stay internal; you never need to enter one. When nothing matches, the system says why and never turns you into a “generic office worker”'
+    zh: 新流程从职业目录按分类浏览或搜索后直接选（见 input_catalog，不需要写文字）。文字描述只为兼容保留：系统按受控词表的别名给出少量可读候选（名称与职责），由你确认。分类代码只在内部保留，不需要、也不会请你填写；匹配不到时说明原因，不自动改成“普通白领”
+  input.catalog.experience.prompt:
+    en: 'The starting job for {occupation} requires related work experience: at least {years} years in {related}. Enter how many years you worked in each of these occupations; if none, answer “no related experience”'
+    zh: '{occupation}的开局岗位要求相关工作经验：在{related}里至少做过 {years} 年。请填你在这些职业里各做过几年；没有就回答“没有相关经验”'
+  input.catalog.leisure.note:
+    en: Pick as many as you like, or skip (skipping means not answered); the categories you pick are used for the evaluation directly, no text needed. “No fixed hobby”, “whatever the city offers” (generic leisure evaluation) and “not sure yet” can be chosen on their own
+    zh: 可以多选，也可以跳过（跳过就是未答）；选中的类别直接用于评价，不需要写文字。没有固定爱好、随当地体验（通用休闲评价）和暂不确定可以单独选
+  input.catalog.note.free_text:
+    en: 'You can still add notes; they are only for the clones'' planning: they do not change points, cash, qualifications or interest categories, and they never become hard requirements'
+    zh: 补充文字仍可以写，只供分身做计划参考：它不改变点数、现金、资格或兴趣类别，也不会变成硬要求
+  input.catalog.note.groups:
+    en: Occupation groups are only for browsing and do not change what an occupation means; each occupation is in exactly one group
+    zh: 职业分组只用于浏览，不改变职业的含义；每个职业只在一个分组里
+  input.catalog.note.no_grant:
+    en: Choosing an occupation never grants education, certificates or experience; those come from your answers to the qualification questions (the rules are applied by E3)
+    zh: 选职业不会授予学历、证书或经验；这些按你在资格题里的回答换算（规则由 E3 统一执行）
+  input.catalog.search.no_match:
+    en: No occupation in the catalog matches. This version supports only the {count} occupations in the catalog (teachers, nurses, doctors and others are not yet included); browse by group, or try a more common name. The system will not switch you to a different occupation
+    zh: 目录里没有找到匹配的职业。本版只支持目录里的 {count} 种职业（教师、护士、医生等暂不在范围内）；请按分类浏览，或换一个常用叫法。系统不会替你换成别的职业
+  input.catalog.search.rule.all_terms:
+    en: 'Several words separated by spaces must all match: a word matches when it appears in any of the entry''s search terms'
+    zh: 用空格分开的几个词要全部命中：每个词出现在这个条目的任意一个搜索词里就算命中
+  input.catalog.search.rule.empty:
+    en: With an empty search, all entries of the current group are shown in a fixed order
+    zh: 搜索为空时显示当前分组的全部条目，顺序固定
+  input.catalog.search.rule.normalize:
+    en: Full-width and half-width characters are treated alike, English is case-insensitive, and leading or trailing spaces are ignored
+    zh: 全角与半角统一、英文不分大小写、首尾空白忽略
+  input.catalog.search.rule.scope:
+    en: Only entries already published in the catalog are filtered; no new entries are created. What you type in the search box is not saved and never enters your profile
+    zh: 只在目录已经发布的条目里筛选，不生成新条目；搜索框里的字不保存，也不进入画像
+  input.catalog.search.rule.server:
+    en: What is submitted is the ID of the selected entry; the server checks the ID and the catalog version, never the search words
+    zh: 提交的是选中条目的编号；服务端核对编号与目录版本，不认搜索词
+  input.catalog.state.certificates.provided.meaning:
+    en: Grants the certificates you selected; selecting none means you have none of these certificates
+    zh: 授予选中的证书；一张都不选表示没有这些证书
+  input.catalog.state.certificates.provided.name:
+    en: Answered
+    zh: 已回答
+  input.catalog.state.certificates.unanswered.meaning:
+    en: Grants no certificate
+    zh: 不授予任何证书
+  input.catalog.state.certificates.unanswered.name:
+    en: Not answered
+    zh: 未答
+  input.catalog.state.certificates.unsure.meaning:
+    en: Grants no certificate
+    zh: 不授予证书
+  input.catalog.state.certificates.unsure.name:
+    en: Not sure yet
+    zh: 暂不确定
+  input.catalog.state.education.provided.meaning:
+    en: Grants this level and every education threshold below it; does not grant occupational certificates
+    zh: 授予这一级和它以下各级的学历门槛；不授予职业证书
+  input.catalog.state.education.provided.name:
+    en: Highest education chosen
+    zh: 已选择最高学历
+  input.catalog.state.education.unanswered.meaning:
+    en: Grants no education threshold
+    zh: 不授予任何学历门槛
+  input.catalog.state.education.unanswered.name:
+    en: Not answered
+    zh: 未答
+  input.catalog.state.education.unsure.meaning:
+    en: 'Treated as no confirmed education: grants no education threshold'
+    zh: 按没有确认学历处理：不授予学历门槛
+  input.catalog.state.education.unsure.name:
+    en: Not sure yet
+    zh: 暂不确定
+  input.catalog.state.experience.provided.meaning:
+    en: Whether a requirement is met is judged from the occupations and years you enter; entering no experience means you have no related experience
+    zh: 按填写的职业与年数判断是否满足；不填任何经历表示没有相关经验
+  input.catalog.state.experience.provided.name:
+    en: Answered
+    zh: 已回答
+  input.catalog.state.experience.unanswered.meaning:
+    en: Grants no related experience
+    zh: 不授予相关经验
+  input.catalog.state.experience.unanswered.name:
+    en: Not answered
+    zh: 未答
+  input.catalog.state.experience.unsure.meaning:
+    en: Grants no related experience
+    zh: 不授予相关经验
+  input.catalog.state.experience.unsure.name:
+    en: Not sure yet
+    zh: 暂不确定
+  input.catalog.taste.note:
+    en: Pick as many as you like, or skip (skipping means not answered); the cuisines you pick are used for the food evaluation directly, no text needed. “No taste preference” and “not sure yet” can be chosen on their own
+    zh: 可以多选，也可以跳过（跳过就是未答）；选中的菜系直接用于饮食评价，不需要写文字。没有口味偏好和暂不确定可以单独选
+  input.interests.selected.review:
+    en: '{label}: picked from the panel {names}'
+    zh: '{label}：从面板选中 {names}'
+  input.item.abilities.note.v2:
+    en: Comes only from your answers about highest education, occupational certificates and related experience (or the compatible item-by-item qualification answers); never granted automatically from a job title, free text or search words
+    zh: 只来自你回答的最高学历、职业证书与相关经验（或兼容的逐项资格确认），不从职业称呼、自由文字或搜索词自动授予
+  input.migration.effect.clear:
+    en: Clears {n} answers the new questionnaire no longer collects (hard requirements, attribute preferences such as brands and cuisines); later simulations no longer use them
+    zh: 清空 {n} 条新问卷不再收集的答案（硬要求、品牌与菜系等属性偏好）；之后的模拟不再用它们
+  input.migration.effect.history:
+    en: Profiles already confirmed, simulations already started and past results are not affected (they use their own saved copies)
+    zh: 已经确认的画像、已经开始的模拟与历史结果不受影响（它们用自己保存的副本）
+  input.migration.effect.keep:
+    en: Cities, occupation, age, cash, six-dimension and material points, the health questionnaire, interests and taste, qualifications and your notes are kept as they are
+    zh: 城市、职业、年龄、现金、六维与物质点数、健康问卷、兴趣与口味、资格与补充文字原样保留
+  input.migration.effect.review:
+    en: After migrating, review and confirm again before preparing a new simulation
+    zh: 迁移后要重新审阅并确认，才能准备新的模拟
+  input.migration.effect.version:
+    en: The draft moves to the current questionnaire, vocabulary and conversion versions
+    zh: 草稿换成当前的问卷、词表与转换版本
+  input.migration.message.removed:
+    en: This draft was filled in with an older questionnaire and has {n} answers the new questionnaire no longer collects. Read the notes below and agree to clear them before continuing
+    zh: 这份草稿是按旧版问卷填的，里面有 {n} 条新问卷不再收集的答案。看过下面的说明、同意清空之后才能继续
+  input.migration.message.version:
+    en: 'This draft was filled in with an older questionnaire: move it to the current version, then review it (your answers are kept)'
+    zh: 这份草稿是按旧版问卷填的：换成当前版本之后再审阅（答案原样保留）
+  input.occupation.catalog_expired.impact:
+    en: A choice made in the old catalog cannot be reused as is; the occupation is not confirmed yet
+    zh: 旧目录里的选择不能直接沿用，职业还没有确认
+  input.occupation.catalog_expired.message:
+    en: This occupation was chosen from a different version of the occupation catalog, and the catalog has since been updated
+    zh: 这个职业是按另一版职业目录选的，目录已经更新
+  input.occupation.catalog_expired.next:
+    en: Choose the occupation again from the current catalog
+    zh: 按现在的目录重新选一次职业
+  input.occupation.catalog_missing.message:
+    en: You have not yet chosen your main work from the occupation catalog
+    zh: 还没有从职业目录里选你主要做的工作
+  input.occupation.catalog_missing.next:
+    en: Browse the occupation catalog by group or search it, and choose one
+    zh: 按分类浏览或搜索职业目录，选中一个
+  input.occupation.catalog_selected:
+    en: 'You chose “{label}” from the occupation catalog: please check that the duties below are what you mainly do'
+    zh: 你从职业目录选了“{label}”：请核对下面的职责是不是你主要做的工作
+  input.occupation.catalog_unavailable.impact:
+    en: The occupation is not confirmed yet, so no starting state can be generated
+    zh: 职业还没有确认，不能生成开局
+  input.occupation.catalog_unavailable.message:
+    en: This data pack has no occupation catalog, so an occupation cannot be chosen from a catalog
+    zh: 这个资料包没有职业目录，不能按目录选职业
+  input.occupation.catalog_unavailable.next:
+    en: Describe your work in words instead
+    zh: 改用文字描述你的工作
+  input.occupation.catalog_unknown.message:
+    en: 'Occupation ID {ref} is not in the occupation catalog: the system will not replace it with another occupation'
+    zh: 职业编号 {ref} 不在职业目录里：系统不替换成别的职业
+  input.occupation.catalog_unknown.next:
+    en: Choose one of the occupations listed in the catalog
+    zh: 从目录列出的职业里选
+  input.qualification.because.certificate:
+    en: You answered that you hold this certificate
+    zh: 你回答持有这张证书
+  input.qualification.because.claim:
+    en: You chose “provided” in the item-by-item qualification answers
+    zh: 你在逐项资格确认里选了“已提供”
+  input.qualification.because.education:
+    en: 'Highest education “{option}”: at least this level (a higher degree also meets lower education thresholds)'
+    zh: 最高学历“{option}”：至少达到这一级（更高的学历也满足较低的学历门槛）
+  input.qualification.because.experience:
+    en: Worked {years} years as “{occupation}” (this requires at least {min} years in related occupations)
+    zh: 在“{occupation}”做过 {years} 年（这一项要求在相关职业里至少做过 {min} 年）
+  input.qualification.catalog_unavailable.impact:
+    en: These answers grant no qualification, and the profile cannot be confirmed
+    zh: 这些回答不会授予任何资格，画像不能确认
+  input.qualification.catalog_unavailable.message:
+    en: This data pack has no input catalog, so qualifications cannot be derived from the education, certificate or experience questions
+    zh: 这个资料包没有输入目录，不能按学历、证书或经验题换算资格
+  input.qualification.catalog_unavailable.next:
+    en: Clear these answers, or switch to a data pack that has a catalog
+    zh: 清空这几题的回答，或换成配了目录的资料包
+  input.qualification.certificate_duplicated.impact:
+    en: The profile cannot be confirmed
+    zh: 画像不能确认
+  input.qualification.certificate_duplicated.message:
+    en: 'Certificate {aid} was selected more than once: the system will not remove the duplicate for you'
+    zh: 证书 {aid} 选了不止一次：系统不替你去重
+  input.qualification.certificate_duplicated.next:
+    en: Select each certificate only once
+    zh: 每张证书只选一次
+  input.qualification.certificate_unknown.impact:
+    en: It grants no qualification (an education threshold cannot be chosen as a certificate), and the profile cannot be confirmed
+    zh: 它不会授予任何资格（学历门槛不能当证书选），画像不能确认
+  input.qualification.certificate_unknown.message:
+    en: '{aid} is not an occupational certificate in the input catalog'
+    zh: '{aid} 不是输入目录里的职业证书'
+  input.qualification.certificate_unknown.next:
+    en: Select only the certificates listed in the catalog; answer education under “highest education”
+    zh: 只选目录列出的证书；学历在“最高学历”里回答
+  input.qualification.conflict.impact:
+    en: The system does not merge the two or choose between them, so the profile cannot be confirmed
+    zh: 系统不合并两边、也不替你取舍，画像不能确认
+  input.qualification.conflict.message:
+    en: 'Qualifications came both from the new education / certificate / experience answers and from the old item-by-item qualification answers, and they differ (new answers: {new}; old answers: {old})'
+    zh: 资格同时用了新的学历 / 证书 / 经验回答和旧的逐项资格确认，两边给出的资格不一样（新回答：{new}；旧确认：{old}）
+  input.qualification.conflict.next:
+    en: 'Keep only one: answer the new education, certificate and experience questions, and clear the old item-by-item answers'
+    zh: 只保留一种：按新的学历、证书与经验题回答，并清空旧的逐项资格确认
+  input.qualification.education_unknown.impact:
+    en: Education grants no threshold, and the profile cannot be confirmed
+    zh: 学历不会授予任何门槛，画像不能确认
+  input.qualification.education_unknown.message:
+    en: Highest-education option {option} is not in the input catalog
+    zh: 最高学历选项 {option} 不在输入目录里
+  input.qualification.education_unknown.next:
+    en: Choose one of the education options listed in the catalog
+    zh: 从目录列出的学历选项里选一项
+  input.qualification.experience_duplicated.impact:
+    en: The profile cannot be confirmed
+    zh: 画像不能确认
+  input.qualification.experience_duplicated.message:
+    en: 'Experience as “{occupation}” was entered more than once: the system will not add the years up for you'
+    zh: “{occupation}”的经历写了不止一条：系统不替你合并年数
+  input.qualification.experience_duplicated.next:
+    en: Enter each occupation once, with the total years you worked in it
+    zh: 每个职业只写一条，填一共做过几年
+  input.qualification.experience_not_related.impact:
+    en: This experience grants no qualification, and the profile cannot be confirmed
+    zh: 这段经历不会授予任何资格，画像不能确认
+  input.qualification.experience_not_related.message:
+    en: “{occupation}” is not among the occupations listed by any related-experience question
+    zh: “{occupation}”不在任何相关经验问题列出的职业里
+  input.qualification.experience_not_related.next:
+    en: Enter only the related occupations listed in the question
+    zh: 只填问题里列出的相关职业
+  input.qualification.none:
+    en: none
+    zh: 无
+  input.qualification.requirement_unmet.impact:
+    en: 'The starting job will then be blocked in each city: the system does not fill in qualifications for you or switch you to another occupation'
+    zh: 这样各城的开局岗位会被挡下：系统不替你补资格，也不换成别的职业
+  input.qualification.requirement_unmet.message:
+    en: The starting job for {occupation} requires {missing}; your current answers do not meet it yet
+    zh: '{occupation}的开局岗位要求：{missing}；按你现在的回答还不满足'
+  input.qualification.requirement_unmet.next:
+    en: If you have it, answer the highest education, certificate or related experience questions truthfully; if not, choose the occupation you actually work in
+    zh: 如果你有，就在最高学历、证书或相关经验里如实回答；没有就选你实际在做的职业
+  input.qualification.review.claims:
+    en: 'Qualifications come from the item-by-item qualification answers (the compatible form): {granted}'
+    zh: 资格来自逐项资格确认（兼容的写法）：{granted}
+  input.qualification.review.none:
+    en: 'Highest education, occupational certificates and related experience are not answered yet: no qualification is granted'
+    zh: 还没有回答最高学历、职业证书或相关经验：不授予任何资格
+  input.qualification.review.structured:
+    en: 'Qualifications derived from your answers: {granted}'
+    zh: 资格按你的回答换算：{granted}
+  input.qualification.review.structured_none:
+    en: Your answers grant no qualification threshold (not answered and not sure yet grant nothing)
+    zh: 按你的回答，没有得到任何资格门槛（未答与暂不确定都不授予）
+  input.qualification.section.certificates:
+    en: occupational certificates
+    zh: 职业证书
+  input.qualification.section.education:
+    en: highest education
+    zh: 最高学历
+  input.qualification.section.experience:
+    en: related work experience
+    zh: 相关工作经验
+  input.qualification.section_not_offered.impact:
+    en: This answer grants no qualification, and the profile cannot be confirmed
+    zh: 这个回答不会授予任何资格，画像不能确认
+  input.qualification.section_not_offered.message:
+    en: This data pack does not ask about “{section}”, but an answer was received
+    zh: 这一版的资料包不问“{section}”，却收到了回答
+  input.qualification.section_not_offered.next:
+    en: Set this question back to not answered
+    zh: 把这一题改回未答
+  input.removed.attribute_hard:
+    en: “{v}” (marked as non-negotiable)
+    zh: “{v}”（标成了不可妥协）
+  input.removed.hard_requirement:
+    en: '{label} {value} {unit}'
+    zh: '{label} {value} {unit}'
+  input.removed.quoted:
+    en: “{v}”
+    zh: “{v}”
+  input.removed_section.attribute_preferences:
+    en: attribute preferences such as brands and cuisines
+    zh: 品牌、菜系等属性偏好
+  input.removed_section.hard_requirements:
+    en: hard requirements
+    zh: 硬要求
+  input.removed_section.impact:
+    en: They would change the simulation, so the system neither keeps using them silently nor drops them silently; the profile cannot be confirmed for now
+    zh: 它们会改变模拟，系统不悄悄沿用、也不悄悄丢掉；画像暂时不能确认
+  input.removed_section.message:
+    en: 'This version of the questionnaire no longer collects “{section}”, but the draft still has {n}: {items}'
+    zh: 这一版问卷不再收集“{section}”，草稿里还有 {n} 条：{items}
+  input.removed_section.next:
+    en: After reading the draft's migration notes, agree to clear these old answers, then review again
+    zh: 看过草稿的迁移说明后同意清空这些旧答案，再重新审阅

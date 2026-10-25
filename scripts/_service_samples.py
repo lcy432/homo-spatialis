@@ -1,4 +1,4 @@
-"""托管服务（E3C，``e3a-product-schema-v3.3``）的公共样例：全部由服务端的真实代码路径产生（HTTP → 业务函数 → worker →
+"""托管服务（E3C，``e3a-product-schema-v3.4``）的公共样例：全部由服务端的真实代码路径产生（HTTP → 业务函数 → worker →
 LangGraph → E1），由 ``scripts/product_e3a.py samples`` 调用。
 
 * 人物是合成的；资料是合成资料包；规划器是离线 mock，零网络、零费用；
@@ -239,6 +239,7 @@ class _Samples:
         self.e3b_result()
         self.expiry_and_errors(box)
         display_samples(self)  # 最后跑：前面的样例时间与编号都不受影响
+        input_samples(self)  # v3.4 的新输入流程：放在最后，前面样例的编号与身份都不变
 
     # ---- 运行选项：较小规模、越界（E3C 收尾第二步）
     def options(self, box: _Box) -> None:
@@ -950,31 +951,22 @@ def display_samples(s: _Samples) -> None:
     # 知悉项说明与作答状态（显示附层 v2；放在最后，前面样例的编号不受影响）：审阅里的知悉项与 pending_confirmations 一一对应；作答状态按正式状态给名称与含义
     box.person("合成人物 u545")
     view = box.post("/drafts").json()
-    attrs = (
-        {
-            "preference_id": "pref.brand",
-            "need": "daily_convenience",
-            "kind": "brand",
-            "raw_text": "家电更喜欢国产品牌",
-        },
-    )
-    saved = box.put(
-        f"/drafts/{view['draft']['draft_id']}", box.draft_body(view, attributes=attrs)
-    ).json()
+    saved = box.put(f"/drafts/{view['draft']['draft_id']}", box.draft_body(view)).json()
     review = box.post(f"/drafts/{saved['draft']['draft_id']}/review").json()
     w(
         "126_display_review_acknowledgements_en",
         "DisplayEnvelope",
         "审阅的显示（kind = review）：acknowledgements 与 source.review.pending_confirmations 一一对应、同样的顺序，每项给中英说明、"
-        "所用资源版本与缺失状态；留存的陈述带 statement_pointer 指向原审阅里的那条陈述。确认时照旧提交原来的编号，显示条目不勾选、"
+        "所用资源版本与缺失状态（新问卷没有只留存的陈述，statement_pointer 都是空的）。确认时照旧提交原来的编号，显示条目不勾选、"
         "不新增也不删除任何事项；answer_states 是这份审阅绑定的那一版资源下的作答状态",
         _display(box, "review", review["review"]["review_id"], "en").json(),
     )
     w(
         "127_display_capabilities_answer_states_en",
         "DisplayEnvelope",
-        "能力清单的显示：answer_states 按正式状态（leisure 的 unanswered / unsure / no_fixed_hobby / generic / described，taste 的 "
-        "unanswered / unsure / no_preference / described）给中英名称与含义，不靠 leisure_states_zh 的顺序或冒号；识别别名照原文、不翻译",
+        "能力清单的显示：answer_states 按正式状态（leisure 的 unanswered / unsure / no_fixed_hobby / generic / described / selected，"
+        "taste 的 unanswered / unsure / no_preference / described / selected）给中英名称与含义，不靠 leisure_states_zh 的顺序或冒号；"
+        "识别别名与输入目录的搜索词照原文、不翻译",
         _display(box, "capabilities", None, "en").json(),
     )
 
@@ -1063,3 +1055,271 @@ def _fixture_resources(s: _Samples, e3b: Any) -> None:
             box.get(f"/display/geography?pack_fingerprint={e3b.fingerprint}").json(),
             s.fixture,
         )
+
+
+# ---------------------------------------------------------------------- v3.4 的新输入流程（DECISIONS/0046）
+
+
+OLD_META = {
+    "schema_version": "e3a-product-schema-v3.3",
+    "questionnaire_version": "e3a-questionnaire-v0.3-draft",
+    "vocabulary_version": "e3a-vocabulary-v4",
+    "conversion_version": "e3a-conversion-v2",
+}
+_SIX = ("material", "safety", "opportunity", "leisure", "environment", "commute")
+_SIX_NORMAL = {
+    "material": "30",
+    "safety": "20",
+    "opportunity": "20",
+    "leisure": "10",
+    "environment": "10",
+    "commute": "10",
+}
+
+
+def _new_flow(**kw: Any) -> dict[str, Any]:
+    """新流程的答案：按目录选软件开发工程师、本科、证书明确“没有”、兴趣与口味面板多选、不写任何文字。"""
+    return {
+        "occupation_mode": "catalog",
+        "occupation_text": None,
+        "selected": "occ.soc_15_1252",
+        "education": "bachelor",
+        "certificates": (),
+        "free_text": None,
+        "leisure": {"state": "selected", "selected": ("fitness", "music")},
+        "taste": {"state": "selected", "selected": ("chinese",)},
+    } | kw
+
+
+def input_samples(s: _Samples) -> None:
+    """新输入流程的样例（129 起，E3B 资料包）：输入目录、按目录选职业与资格题、面板多选、定和分配的各种情形、拒绝与旧草稿迁移。"""
+    from common.product_contracts import UserInputDraft
+
+    w = s.w
+    box = _Box(s.work / "input", s.clock, pack_path="configs/product/e3b_us_v1_pack.yaml")
+    box.person("合成人物 u550")
+    w(
+        "129_service_capabilities_input_catalog_e3b",
+        "ProductCapabilities",
+        "E3B 能力清单里的输入目录（input_catalog）：9 个分组、40 个职业（每个职业恰好一个主分组）、每个职业的名称、职责、搜索词"
+        "（名称、资料包别名与目录补充的叫法，例如“程序员”，照原文）与开局岗位要求的资格；最高学历 7 个选项、3 张职业证书、4 个相关经验"
+        "问题（只在选中的职业需要时问）；兴趣与菜系面板的分组与搜索说明（“川菜”只对应“中餐”，“徒步”“游戏”本版没有）；sections 说明新"
+        "流程启用哪些板块。content_fingerprint 是目录的内容身份，按目录选职业的草稿要带上它",
+        box.get("/capabilities").json(),
+    )
+    w(
+        "130_display_capabilities_input_catalog_e3b_en",
+        "DisplayEnvelope",
+        "能力清单（E3B）的英文显示：输入目录的分组、职业名称与职责、学历选项、证书、经验问题、作答状态、面板分组与搜索说明都有英文；"
+        "搜索词照原文、不翻译（不算进显示文字）",
+        _display(box, "capabilities", None, "en").json(),
+    )
+
+    def draft(fingerprint: str | None = None, **kw: Any) -> tuple[str, dict[str, Any]]:
+        view = box.post("/drafts").json()
+        body = box.draft_body(view, **_new_flow(**kw))
+        if fingerprint is not None:  # 按另一版目录选的（演示过期的目录）
+            body["draft"]["occupation"]["catalog_fingerprint"] = fingerprint
+        saved = box.put(f"/drafts/{view['draft']['draft_id']}", body).json()
+        return saved["draft"]["draft_id"], saved
+
+    did, saved = draft()
+    w(
+        "131_service_draft_catalog_selection",
+        "DraftView",
+        "新流程的草稿：职业从目录直接选中（mode = catalog，带目录版本与内容身份，没有文字；搜索框里输入的“程序员”只是查找条件，不保存）、"
+        "最高学历“本科”、职业证书明确“没有”（provided + 空列表）、相关经验未答（软件开发不要求）、兴趣面板选了健身与音乐、口味选了"
+        "中餐、没有补充文字；硬要求与属性偏好都是空的",
+        saved,
+    )
+    review = box.post(f"/drafts/{did}/review").json()
+    w(
+        "132_service_review_catalog_selection",
+        "ReviewReply",
+        "新流程的审阅：职业是 catalog_selected（候选就是选中的那个职业，名称与职责供核对）；qualifications 写明按回答换算出的资格"
+        "（本科 → 高中、读过大学、副学士、学士四级门槛，不授予证书）与开局岗位的要求是否满足；兴趣与口味直接采用面板选中的类别；"
+        "可以确认，只需知悉标准开局",
+        review,
+    )
+    w(
+        "133_display_review_catalog_selection_en",
+        "DisplayEnvelope",
+        "同一份审阅的英文显示：source 与中文完全相同（换语言不改答案）；职业、资格换算的理由、兴趣与口味的说明都有英文",
+        _display(box, "review", review["review"]["review_id"], "en").json(),
+    )
+    req = {
+        "review_id": review["review"]["review_id"],
+        "draft_id": did,
+        "draft_revision": review["reviewed_revision"],
+        "acknowledged": list(review["review"]["pending_confirmations"]),
+    }
+    w(
+        "134_service_confirm_catalog_selection",
+        "ProfileConfirmReply",
+        "确认：职业 match_status = catalog_selected、没有原文、记下目录版本与内容身份；abilities 由学历换算；qualifications 记下原始回答"
+        "与规则 confirmed_experience_mapping_v1；兴趣 confirmed；没有硬要求与留存的陈述",
+        box.post("/profiles/confirm", req).json(),
+    )
+    cases: tuple[tuple[str, dict[str, Any], str], ...] = (
+        (
+            "135_service_review_requirement_unmet",
+            {"education": "high_school"},
+            "软件开发工程师的开局岗位要求学士学位，回答的最高学历是高中：warning qualification_requirement_unmet（各城的开局会照实挡下，"
+            "系统不替你补资格、也不换职业）；仍可确认",
+        ),
+        (
+            "136_service_review_experience_cook",
+            {
+                "selected": "occ.soc_35_2014",
+                "education": None,
+                "certificates": None,
+                "experience": (("occ.soc_35_3031", 2),),
+            },
+            "餐厅厨师：ask_experience 指出要问的经验问题；在“餐厅服务员”做过 2 年 → 满足餐厅厨师的相关经验（至少 1 年）；同一段经历也满足"
+            "餐饮主管的相关经验（规则按相关职业名单）",
+        ),
+        (
+            "137_service_review_qualification_conflict",
+            {"education": "high_school", "abilities": ("edu_at_least_bachelor",)},
+            "新的学历回答（高中）与旧的逐项资格确认（学士）同时存在、给出的资格不同：error qualification_conflict，不合并两边、不取并集",
+        ),
+        (
+            "138_service_review_unknown_occupation_id",
+            {"selected": "occ.teacher"},
+            "提交的职业编号不在目录里（例如页面自己造的“教师”）：error occupation_selection_invalid，不替换成别的职业",
+        ),
+        (
+            "139_service_review_catalog_expired",
+            {"fingerprint": "0" * 64},
+            "职业是按另一版目录选的（目录内容身份对不上）：error occupation_catalog_expired，要按现在的目录重新选",
+        ),
+        (
+            "141_service_review_interest_panel_conflict",
+            {"taste": {"state": "no_preference", "selected": ("chinese",)}},
+            "口味既说“没有口味偏好”又选了中餐：error interest_state_conflict，系统不替你取舍",
+        ),
+        (
+            "142_service_review_allocation_equal_split",
+            {"six_mode": "equal_split", "material_mode": "equal_split"},
+            "主动选择平均分配：六维每项精确 50/3（显示 16.7，只供阅读）、物质四项每项 25",
+        ),
+        (
+            "143_service_review_allocation_moved",
+            {"six": {**dict.fromkeys(_SIX, "50/3"), "material": "65/3", "safety": "35/3"}},
+            "均分之后移动点数：物质 +5、安全 −5，其他维度不动（不按比例自动调整），写成规范分数 65/3、35/3，合计精确 100",
+        ),
+        (
+            "144_service_review_allocation_zero_values",
+            {
+                "six": _SIX_NORMAL
+                | {"material": "40", "safety": "0", "leisure": "0", "environment": "20"}
+            },
+            "明确给 0 分的维度（安全、休闲）是“已提供 0”，与未答、无所谓、暂不确定分开；合计 100 可以确认",
+        ),
+        (
+            "145_service_review_allocation_under",
+            {"six": _SIX_NORMAL | {"material": "29"}},
+            "六维合计 99：报“还差 1 分”，由用户自己改，不按比例补",
+        ),
+        (
+            "146_service_review_allocation_over",
+            {"six": _SIX_NORMAL | {"material": "31"}},
+            "六维合计 101：报“多出 1 分”，由用户自己改，不按比例扣",
+        ),
+        (
+            "147_service_review_allocation_parent_zero",
+            {"six": _SIX_NORMAL | {"material": "0", "safety": "40"}, "material_mode": None},
+            "物质父项明确为 0：四项细分不适用（status = not_applicable），不需要也不伪造细分",
+        ),
+    )
+    for name, kw, text in cases:
+        did, _ = draft(**kw)
+        w(name, "ReviewReply", text, box.post(f"/drafts/{did}/review").json())
+    view = box.post("/drafts").json()
+    body = box.draft_body(view, **_new_flow())
+    body["draft"]["occupation"]["raw_text"] = "我是程序员"
+    w(
+        "140_service_error_catalog_mode_with_text",
+        "ServiceError",
+        "按目录选职业却带着文字（例如把搜索框里的字一起提交）：保存时 422 invalid_request，草稿不变；目录模式不收文字",
+        box.put(f"/drafts/{view['draft']['draft_id']}", body).json(),
+    )
+    # 旧草稿的显式迁移
+    view = box.post("/drafts").json()
+    body = box.draft_body(
+        view,
+        abilities=("edu_at_least_hs",),
+        hard_requirements=(
+            {
+                "requirement_id": "hr.commute",
+                "option_id": "housing.max_commute_roundtrip",
+                "parameter_value": 60,
+            },
+        ),
+        attributes=(
+            {
+                "preference_id": "pref.brand",
+                "need": "daily_convenience",
+                "kind": "brand",
+                "raw_text": "家电更喜欢国产品牌",
+            },
+        ),
+    )
+    body["draft"]["meta"].update(OLD_META)
+    UserInputDraft.model_validate(body["draft"])
+    did = view["draft"]["draft_id"]
+    box.put(f"/drafts/{did}", body)
+    old = box.get(f"/drafts/{did}").json()
+    w(
+        "148_service_draft_migration_needed",
+        "DraftView",
+        "按旧版问卷（v0.3）填的草稿：migration 写明版本从哪到哪、要清空的旧答案（往返 60 分钟的硬要求、品牌偏好，逐条列出，原文照原样）、"
+        "迁移会做什么；consent_required = true。读取不改写草稿",
+        old,
+    )
+    w(
+        "149_display_draft_migration_en",
+        "DisplayEnvelope",
+        "同一份草稿的英文显示：迁移说明（版本、要清空的条目的可读写法、迁移的影响）都有英文；用户写的原文照原样、不翻译",
+        _display(box, "draft", did, "en").json(),
+    )
+    w(
+        "150_service_review_removed_sections",
+        "ReviewReply",
+        "旧草稿迁移之前的审阅：version_changed（问卷、词表、转换、结构版本）与 removed_section_present（硬要求、属性偏好各一条）都阻断；"
+        "旧值会改变模拟，不悄悄沿用、也不悄悄丢掉",
+        box.post(f"/drafts/{did}/review").json(),
+    )
+    w(
+        "151_service_draft_migrate_request",
+        "DraftMigrateRequest",
+        "迁移请求（POST /api/v1/drafts/{id}/migrate）：expected_revision 是当前修订号；clear_removed = true 表示用户看过迁移说明、"
+        "同意清空那些旧答案（省略或为 false 时，有要清空的答案就拒绝）",
+        {"expected_revision": old["draft"]["revision"], "clear_removed": True},
+    )
+    w(
+        "152_service_error_migration_consent_required",
+        "ServiceError",
+        "没有同意清空就迁移（clear_removed 省略或为 false）：409 migration_consent_required，草稿不变",
+        box.post(f"/drafts/{did}/migrate", {"expected_revision": old["draft"]["revision"]}).json(),
+    )
+    moved = box.post(
+        f"/drafts/{did}/migrate",
+        {"expected_revision": old["draft"]["revision"], "clear_removed": True},
+    ).json()
+    w(
+        "153_service_draft_migrated",
+        "DraftView",
+        "同意之后迁移（POST /api/v1/drafts/{id}/migrate，clear_removed = true）：版本换成 v0.4、硬要求与属性偏好清空、其他答案原样保留，"
+        "修订号加一；migration 为空。之后要重新审阅与确认；已经确认的画像与已经开始的运行不受影响",
+        moved,
+    )
+    w(
+        "154_service_error_migration_not_needed",
+        "ServiceError",
+        "已经是当前版本、没有要清空的答案时再迁移：409 migration_not_needed，草稿不变",
+        box.post(
+            f"/drafts/{did}/migrate",
+            {"expected_revision": moved["draft"]["revision"], "clear_removed": True},
+        ).json(),
+    )

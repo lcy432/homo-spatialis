@@ -1,5 +1,5 @@
 {
- "description_zh": "受控夹具：同一健康题两个答案、同一资格两条、两条通勤上限——确认前全部拒绝，不按最后一个算，也不自动取更严格的上限",
+ "description_zh": "受控夹具：同一健康题两个答案、同一资格两条——确认前全部拒绝，不按最后一个算",
  "message": "ProfileReview",
  "payload": {
   "abilities": [],
@@ -10,7 +10,7 @@
   ],
   "confirmable": false,
   "draft": {
-   "draft_fingerprint": "dc658b2f622cb973d96e702068e9786eb84c2c3a85b8416f81938195b677837f",
+   "draft_fingerprint": "c06b721f942765447feb8c585a8d809c797193132f60872dac362ca10db1e9cc",
    "draft_id": "draft.u511.duplicates",
    "revision": 1
   },
@@ -53,21 +53,21 @@
    },
    {
     "audit_ref": null,
-    "code": "hard_requirement_conflict",
-    "field": "hard_requirements.need.commute_limit",
-    "impact_zh": "这项硬要求还不能使用，画像不能确认",
-    "message_zh": "“住处到就业中心的往返时间不超过（分钟）”收到了 2 条（45 分钟、60 分钟）：同一项要求只能有一条，系统不自动取更严格的上限，也不按最后一条算",
-    "next_action_zh": "只保留一条，写你真正要的那个数",
-    "severity": "error"
-   },
-   {
-    "audit_ref": null,
     "code": "ability_duplicated",
     "field": "abilities.accounting_cert",
     "impact_zh": "这项资格不能进入开局，画像不能确认",
     "message_zh": "资格 accounting_cert 出现了 2 次（已提供、暂不确定）：系统不替你判断持不持有",
     "next_action_zh": "只保留一条：持有就选“已提供”，不确定就选“暂不确定”",
     "severity": "error"
+   },
+   {
+    "audit_ref": null,
+    "code": "qualification_requirement_unmet",
+    "field": "occupation",
+    "impact_zh": "这样各城的开局岗位会被挡下：系统不替你补资格，也不换成别的职业",
+    "message_zh": "会计的开局岗位要求：会计从业资格（合成）；按你现在的回答还不满足",
+    "next_action_zh": "如果你有，就在最高学历、证书或相关经验里如实回答；没有就选你实际在做的职业",
+    "severity": "warning"
    }
   ],
   "items": [
@@ -177,7 +177,7 @@
     "execution_guaranteed": null,
     "item": "abilities",
     "label": "已确认的资格",
-    "note": "只来自你明确确认的事实，不从职业称呼自动授予",
+    "note": "只来自你回答的最高学历、职业证书与相关经验（或兼容的逐项资格确认），不从职业称呼、自由文字或搜索词自动授予",
     "support": "supported",
     "usage": [
      "qualification",
@@ -278,7 +278,7 @@
    }
   },
   "meta": {
-   "conversion_version": "e3a-conversion-v2",
+   "conversion_version": "e3a-conversion-v3",
    "data_pack": {
     "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
@@ -286,15 +286,15 @@
     "status": "synthetic_fixture_only"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.3-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.4-draft",
    "sample": {
     "note": "草稿里故意写了重复与冲突的答案（受控夹具）；审阅的实际输出",
     "origin": "controlled_fixture",
     "produced_by": "product.scenarios.duplicate_answers",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.3",
-   "vocabulary_version": "e3a-vocabulary-v4"
+   "schema_version": "e3a-product-schema-v3.4",
+   "vocabulary_version": "e3a-vocabulary-v5"
   },
   "money": {
    "amount_text": "3000",
@@ -325,6 +325,7 @@
     }
    ],
    "message_zh": "看起来你的工作是“会计”；请确认这个理解是否正确",
+   "mode": "text",
    "raw_text": "我在事务所做会计",
    "selected": "occ.accountant",
    "status": "explicit"
@@ -333,6 +334,25 @@
    "ack:interests_not_personalized",
    "ack:standard_start"
   ],
+  "qualifications": {
+   "ask_experience": [],
+   "certificates": [],
+   "certificates_state": "unanswered",
+   "education_option": null,
+   "education_state": "unanswered",
+   "experience": [],
+   "experience_state": "unanswered",
+   "granted": [],
+   "message_zh": "还没有回答最高学历、职业证书或相关经验：不授予任何资格",
+   "requirements": [
+    {
+     "ability_id": "accounting_cert",
+     "label": "会计从业资格（合成）",
+     "met": false
+    }
+   ],
+   "source": "none"
+  },
   "review_id": "review.draft.u511.duplicates.r1",
   "six_dimensions": {
    "lines": [
@@ -416,34 +436,7 @@
     "exact": "100"
    }
   },
-  "statements": [
-   {
-    "as_hard_requirement": true,
-    "execution_guaranteed": false,
-    "kind": "hard_requirement",
-    "message_zh": "每月检查实际所住住房的往返分钟：满足、不满足、无法判断单独报告；不进分数，也不拦截计划",
-    "raw_text": "住处到就业中心的往返时间不超过（分钟） 60 分钟",
-    "ref": "hr.commute",
-    "support": "supported",
-    "usage": [
-     "planning",
-     "scoring"
-    ]
-   },
-   {
-    "as_hard_requirement": true,
-    "execution_guaranteed": false,
-    "kind": "hard_requirement",
-    "message_zh": "每月检查实际所住住房的往返分钟：满足、不满足、无法判断单独报告；不进分数，也不拦截计划",
-    "raw_text": "住处到就业中心的往返时间不超过（分钟） 45 分钟",
-    "ref": "hr.commute2",
-    "support": "supported",
-    "usage": [
-     "planning",
-     "scoring"
-    ]
-   }
-  ],
+  "statements": [],
   "summary_zh": [
    "健康问卷有 2 题没有明确倾向（未答或暂不确定）：照实保留，分身会被告知没有这几项的明确指令"
   ],

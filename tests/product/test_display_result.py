@@ -156,6 +156,7 @@ def synthetic(
             repeat_indexes=(0, 1),
             illness_events=_illness("u503", 1, "受控夹具：重复序号 1 第 1 年第 1 月大病"),
             scripts=(cli._script("u503.m52.r0", "malformed_output", (1,)),),
+            legacy_hard_requirements=sc.LEGACY_COMMUTE_60,
         )
         out["23_mixed_cem_result"] = _result(seen, mixed)
         allx = sc.closed_loop(
@@ -206,7 +207,14 @@ def synthetic(
     return out
 
 
-def _e3b(cli: Any, work: Path, name: str, cities: tuple[str, ...], repeats: tuple[int, ...]) -> Any:
+def _e3b(
+    cli: Any,
+    work: Path,
+    name: str,
+    cities: tuple[str, ...],
+    repeats: tuple[int, ...],
+    legacy: tuple[tuple[str, int], ...] = (),
+) -> Any:
     with _recorded() as seen, pytest.MonkeyPatch.context() as mp:
         mp.setattr(sc, "PACK_PATH", cli.E3B_PACK)
         s = sc.closed_loop(
@@ -214,6 +222,7 @@ def _e3b(cli: Any, work: Path, name: str, cities: tuple[str, ...], repeats: tupl
             name,
             draft_kwargs={"abilities": ("edu_at_least_hs",), "cities": cities},
             repeat_indexes=repeats,
+            legacy_hard_requirements=legacy,
         )
         return _result(seen, s)
 
@@ -226,9 +235,9 @@ def e3b_two_cities(tmp_path_factory: pytest.TempPathFactory, cli: Any) -> Any:
 
 @pytest.fixture(scope="module")
 def e3b_sf_car(tmp_path_factory: pytest.TempPathFactory, cli: Any) -> Any:
-    """55：旧金山两个分身（没有公交资料，一个分身那两年买用车权开车上班）。"""
+    """55：旧金山两个分身（没有公交资料，一个分身那两年买用车权开车上班；历史画像的通勤上限，受控夹具）。"""
     work = tmp_path_factory.mktemp("display_e3b_car")
-    return _e3b(cli, work, "e3b_sf_car", (cli.SF,), (0, 1))
+    return _e3b(cli, work, "e3b_sf_car", (cli.SF,), (0, 1), sc.LEGACY_COMMUTE_60)
 
 
 SYNTHETIC_SAMPLES = (

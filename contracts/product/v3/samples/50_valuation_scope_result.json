@@ -11,28 +11,17 @@
      "exact": "0"
     },
     "exits": 0,
-    "hard_requirements": [
-     {
-      "checked": 1,
-      "need": "commute_limit",
-      "not_checked": 0,
-      "planned": 1,
-      "satisfied_every_month": 1,
-      "satisfied_in_lived_months": 0,
-      "unknown": 0,
-      "violated": 0
-     }
-    ],
-    "headline_zh": "合成城 K51：原计划 1 个分身——1 个完成且可评价、0 个生活出局、0 个模拟问题；1 个完成且可评价分身的平均 J 为 0.6204（分母只数完成且可评价的分身，不是原计划的全部分身）",
+    "hard_requirements": [],
+    "headline_zh": "合成城 K51：原计划 1 个分身——1 个完成且可评价、0 个生活出局、0 个模拟问题；1 个完成且可评价分身的平均 J 为 0.6081（分母只数完成且可评价的分身，不是原计划的全部分身）",
     "label": "合成城 K51",
     "mean_denominator": 1,
     "mean_j": {
-     "display": "0.6204",
-     "exact": "24816564102564103/40000000000000000"
+     "display": "0.6081",
+     "exact": "24324256410256409/40000000000000000"
     },
     "mean_l": {
-     "display": "0.6047",
-     "exact": "6046666666666667/10000000000000000"
+     "display": "0.5883",
+     "exact": "17647692307692307/30000000000000000"
     },
     "mean_v": {
      "display": "0.6677",
@@ -50,12 +39,12 @@
     "planned": 1,
     "range_denominator": 1,
     "range_lower": {
-     "display": "0.6204",
-     "exact": "24816564102564103/40000000000000000"
+     "display": "0.6081",
+     "exact": "24324256410256409/40000000000000000"
     },
     "range_upper": {
-     "display": "0.6204",
-     "exact": "24816564102564103/40000000000000000"
+     "display": "0.6081",
+     "exact": "24324256410256409/40000000000000000"
     }
    },
    {
@@ -66,28 +55,17 @@
      "exact": "0"
     },
     "exits": 0,
-    "hard_requirements": [
-     {
-      "checked": 1,
-      "need": "commute_limit",
-      "not_checked": 0,
-      "planned": 1,
-      "satisfied_every_month": 1,
-      "satisfied_in_lived_months": 0,
-      "unknown": 0,
-      "violated": 0
-     }
-    ],
-    "headline_zh": "合成城 M52：原计划 1 个分身——1 个完成且可评价、0 个生活出局、0 个模拟问题；1 个完成且可评价分身的平均 J 为 0.6204（分母只数完成且可评价的分身，不是原计划的全部分身）",
+    "hard_requirements": [],
+    "headline_zh": "合成城 M52：原计划 1 个分身——1 个完成且可评价、0 个生活出局、0 个模拟问题；1 个完成且可评价分身的平均 J 为 0.6081（分母只数完成且可评价的分身，不是原计划的全部分身）",
     "label": "合成城 M52",
     "mean_denominator": 1,
     "mean_j": {
-     "display": "0.6204",
-     "exact": "24816256410256411/40000000000000000"
+     "display": "0.6081",
+     "exact": "24323948717948719/40000000000000000"
     },
     "mean_l": {
-     "display": "0.6080",
-     "exact": "18239692307692309/30000000000000000"
+     "display": "0.5916",
+     "exact": "17747384615384617/30000000000000000"
     },
     "mean_v": {
      "display": "0.6577",
@@ -105,12 +83,12 @@
     "planned": 1,
     "range_denominator": 1,
     "range_lower": {
-     "display": "0.6204",
-     "exact": "24816256410256411/40000000000000000"
+     "display": "0.6081",
+     "exact": "24323948717948719/40000000000000000"
     },
     "range_upper": {
-     "display": "0.6204",
-     "exact": "24816256410256411/40000000000000000"
+     "display": "0.6081",
+     "exact": "24323948717948719/40000000000000000"
     }
    }
   ],
@@ -128,33 +106,24 @@
      "next_action_zh": "看逐年生活事实；这是合成模型下的结果，不是现实预测",
      "reason_zh": "三年生活正常完成，实际评分与期末估值都完整"
     },
-    "hard_requirements": [
-     {
-      "months_not_lived": 0,
-      "months_not_satisfied": 0,
-      "months_satisfied": 36,
-      "months_unknown": 0,
-      "need": "commute_limit",
-      "summary": "satisfied_every_month"
-     }
-    ],
+    "hard_requirements": [],
     "j": {
-     "display": "0.6204",
-     "exact": "24816564102564103/40000000000000000"
+     "display": "0.6081",
+     "exact": "24324256410256409/40000000000000000"
     },
     "l_actual": {
-     "display": "0.6047",
-     "exact": "6046666666666667/10000000000000000"
+     "display": "0.5883",
+     "exact": "17647692307692307/30000000000000000"
     },
     "missing_reason": null,
     "missing_reason_zh": null,
     "range_lower": {
-     "display": "0.6204",
-     "exact": "24816564102564103/40000000000000000"
+     "display": "0.6081",
+     "exact": "24324256410256409/40000000000000000"
     },
     "range_upper": {
-     "display": "0.6204",
-     "exact": "24816564102564103/40000000000000000"
+     "display": "0.6081",
+     "exact": "24324256410256409/40000000000000000"
     },
     "reference_plan": "p3_current_service",
     "repeat_index": 0,
@@ -187,9 +156,9 @@
     "years": [
      {
       "cash_end": {
-       "amount_minor": 368232,
+       "amount_minor": 848232,
        "currency": "USD",
-       "display": "3,682.32",
+       "display": "8,482.32",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
@@ -200,8 +169,8 @@
       },
       "commute": [
        {
-        "home_area_id": "k51.area.near",
-        "home_area_label": "近处居住片区",
+        "home_area_id": "k51.area.far",
+        "home_area_label": "远处居住片区",
         "monthly_paid": {
          "amount_minor": 0,
          "currency": "USD",
@@ -231,7 +200,7 @@
           "mode": "transit",
           "mode_zh": "公共交通",
           "onsite_visits": 20,
-          "roundtrip_minutes": 30,
+          "roundtrip_minutes": 70,
           "work_area_id": "k51.area.center",
           "work_area_label": "就业中心"
          }
@@ -297,10 +266,10 @@
       ],
       "homes": [
        {
-        "area_id": "k51.area.near",
-        "area_label": "近处居住片区",
-        "area_typical_roundtrip_minutes": 30,
-        "label": "一居室（离工作地近）",
+        "area_id": "k51.area.far",
+        "area_label": "远处居住片区",
+        "area_typical_roundtrip_minutes": 70,
+        "label": "一居室（离工作地远）",
         "months": [
          1,
          2,
@@ -315,7 +284,7 @@
          11,
          12
         ],
-        "opportunity_id": "k51.housing.near"
+        "opportunity_id": "k51.housing.far"
        }
       ],
       "household": [
@@ -355,7 +324,7 @@
        }
       ],
       "housing": [
-       "一居室（离工作地近）（1–12 月）"
+       "一居室（离工作地远）（1–12 月）"
       ],
       "jobs": [
        "全职文员（合成写字楼）（1–12 月）"
@@ -363,9 +332,9 @@
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 2751768,
+       "amount_minor": 2271768,
        "currency": "USD",
-       "display": "27,517.68",
+       "display": "22,717.68",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [],
@@ -492,21 +461,21 @@
      },
      {
       "cash_end": {
-       "amount_minor": 1180464,
+       "amount_minor": 2140464,
        "currency": "USD",
-       "display": "11,804.64",
+       "display": "21,404.64",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
-       "amount_minor": 368232,
+       "amount_minor": 848232,
        "currency": "USD",
-       "display": "3,682.32",
+       "display": "8,482.32",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "commute": [
        {
-        "home_area_id": "k51.area.near",
-        "home_area_label": "近处居住片区",
+        "home_area_id": "k51.area.far",
+        "home_area_label": "远处居住片区",
         "monthly_paid": {
          "amount_minor": 0,
          "currency": "USD",
@@ -536,7 +505,7 @@
           "mode": "transit",
           "mode_zh": "公共交通",
           "onsite_visits": 20,
-          "roundtrip_minutes": 30,
+          "roundtrip_minutes": 70,
           "work_area_id": "k51.area.center",
           "work_area_label": "就业中心"
          }
@@ -602,10 +571,10 @@
       ],
       "homes": [
        {
-        "area_id": "k51.area.near",
-        "area_label": "近处居住片区",
-        "area_typical_roundtrip_minutes": 30,
-        "label": "一居室（离工作地近）",
+        "area_id": "k51.area.far",
+        "area_label": "远处居住片区",
+        "area_typical_roundtrip_minutes": 70,
+        "label": "一居室（离工作地远）",
         "months": [
          1,
          2,
@@ -620,7 +589,7 @@
          11,
          12
         ],
-        "opportunity_id": "k51.housing.near"
+        "opportunity_id": "k51.housing.far"
        }
       ],
       "household": [
@@ -660,7 +629,7 @@
        }
       ],
       "housing": [
-       "一居室（离工作地近）（1–12 月）"
+       "一居室（离工作地远）（1–12 月）"
       ],
       "jobs": [
        "会计（合成会计事务所）（1–12 月）"
@@ -668,9 +637,9 @@
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 2487768,
+       "amount_minor": 2007768,
        "currency": "USD",
-       "display": "24,877.68",
+       "display": "20,077.68",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [],
@@ -795,21 +764,21 @@
      },
      {
       "cash_end": {
-       "amount_minor": 1959696,
+       "amount_minor": 3399696,
        "currency": "USD",
-       "display": "19,596.96",
+       "display": "33,996.96",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
-       "amount_minor": 1180464,
+       "amount_minor": 2140464,
        "currency": "USD",
-       "display": "11,804.64",
+       "display": "21,404.64",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "commute": [
        {
-        "home_area_id": "k51.area.near",
-        "home_area_label": "近处居住片区",
+        "home_area_id": "k51.area.far",
+        "home_area_label": "远处居住片区",
         "monthly_paid": {
          "amount_minor": 0,
          "currency": "USD",
@@ -839,7 +808,7 @@
           "mode": "transit",
           "mode_zh": "公共交通",
           "onsite_visits": 20,
-          "roundtrip_minutes": 30,
+          "roundtrip_minutes": 70,
           "work_area_id": "k51.area.center",
           "work_area_label": "就业中心"
          }
@@ -949,10 +918,10 @@
       ],
       "homes": [
        {
-        "area_id": "k51.area.near",
-        "area_label": "近处居住片区",
-        "area_typical_roundtrip_minutes": 30,
-        "label": "一居室（离工作地近）",
+        "area_id": "k51.area.far",
+        "area_label": "远处居住片区",
+        "area_typical_roundtrip_minutes": 70,
+        "label": "一居室（离工作地远）",
         "months": [
          1,
          2,
@@ -967,7 +936,7 @@
          11,
          12
         ],
-        "opportunity_id": "k51.housing.near"
+        "opportunity_id": "k51.housing.far"
        }
       ],
       "household": [
@@ -1007,7 +976,7 @@
        }
       ],
       "housing": [
-       "一居室（离工作地近）（1–12 月）"
+       "一居室（离工作地远）（1–12 月）"
       ],
       "jobs": [
        "会计（合成会计事务所）（1–12 月）"
@@ -1015,9 +984,9 @@
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 2520768,
+       "amount_minor": 2040768,
        "currency": "USD",
-       "display": "25,207.68",
+       "display": "20,407.68",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [],
@@ -1155,33 +1124,24 @@
      "next_action_zh": "看逐年生活事实；这是合成模型下的结果，不是现实预测",
      "reason_zh": "三年生活正常完成，实际评分与期末估值都完整"
     },
-    "hard_requirements": [
-     {
-      "months_not_lived": 0,
-      "months_not_satisfied": 0,
-      "months_satisfied": 36,
-      "months_unknown": 0,
-      "need": "commute_limit",
-      "summary": "satisfied_every_month"
-     }
-    ],
+    "hard_requirements": [],
     "j": {
-     "display": "0.6204",
-     "exact": "24816256410256411/40000000000000000"
+     "display": "0.6081",
+     "exact": "24323948717948719/40000000000000000"
     },
     "l_actual": {
-     "display": "0.6080",
-     "exact": "18239692307692309/30000000000000000"
+     "display": "0.5916",
+     "exact": "17747384615384617/30000000000000000"
     },
     "missing_reason": null,
     "missing_reason_zh": null,
     "range_lower": {
-     "display": "0.6204",
-     "exact": "24816256410256411/40000000000000000"
+     "display": "0.6081",
+     "exact": "24323948717948719/40000000000000000"
     },
     "range_upper": {
-     "display": "0.6204",
-     "exact": "24816256410256411/40000000000000000"
+     "display": "0.6081",
+     "exact": "24323948717948719/40000000000000000"
     },
     "reference_plan": "p3_current_service",
     "repeat_index": 0,
@@ -1192,9 +1152,9 @@
     "years": [
      {
       "cash_end": {
-       "amount_minor": 382632,
+       "amount_minor": 862632,
        "currency": "USD",
-       "display": "3,826.32",
+       "display": "8,626.32",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
@@ -1205,8 +1165,8 @@
       },
       "commute": [
        {
-        "home_area_id": "m52.area.near",
-        "home_area_label": "近处居住片区",
+        "home_area_id": "m52.area.far",
+        "home_area_label": "远处居住片区",
         "monthly_paid": {
          "amount_minor": 0,
          "currency": "USD",
@@ -1236,7 +1196,7 @@
           "mode": "transit",
           "mode_zh": "公共交通",
           "onsite_visits": 20,
-          "roundtrip_minutes": 30,
+          "roundtrip_minutes": 70,
           "work_area_id": "m52.area.center",
           "work_area_label": "就业中心"
          }
@@ -1283,10 +1243,10 @@
       ],
       "homes": [
        {
-        "area_id": "m52.area.near",
-        "area_label": "近处居住片区",
-        "area_typical_roundtrip_minutes": 30,
-        "label": "一居室（离工作地近）",
+        "area_id": "m52.area.far",
+        "area_label": "远处居住片区",
+        "area_typical_roundtrip_minutes": 70,
+        "label": "一居室（离工作地远）",
         "months": [
          1,
          2,
@@ -1301,7 +1261,7 @@
          11,
          12
         ],
-        "opportunity_id": "m52.housing.near"
+        "opportunity_id": "m52.housing.far"
        }
       ],
       "household": [
@@ -1341,7 +1301,7 @@
        }
       ],
       "housing": [
-       "一居室（离工作地近）（1–12 月）"
+       "一居室（离工作地远）（1–12 月）"
       ],
       "jobs": [
        "全职文员（合成写字楼）（1–12 月）"
@@ -1349,9 +1309,9 @@
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 2737368,
+       "amount_minor": 2257368,
        "currency": "USD",
-       "display": "27,373.68",
+       "display": "22,573.68",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [
@@ -1512,21 +1472,21 @@
      },
      {
       "cash_end": {
-       "amount_minor": 1065264,
+       "amount_minor": 2025264,
        "currency": "USD",
-       "display": "10,652.64",
+       "display": "20,252.64",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
-       "amount_minor": 382632,
+       "amount_minor": 862632,
        "currency": "USD",
-       "display": "3,826.32",
+       "display": "8,626.32",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "commute": [
        {
-        "home_area_id": "m52.area.near",
-        "home_area_label": "近处居住片区",
+        "home_area_id": "m52.area.far",
+        "home_area_label": "远处居住片区",
         "monthly_paid": {
          "amount_minor": 0,
          "currency": "USD",
@@ -1556,7 +1516,7 @@
           "mode": "transit",
           "mode_zh": "公共交通",
           "onsite_visits": 20,
-          "roundtrip_minutes": 30,
+          "roundtrip_minutes": 70,
           "work_area_id": "m52.area.center",
           "work_area_label": "就业中心"
          }
@@ -1603,10 +1563,10 @@
       ],
       "homes": [
        {
-        "area_id": "m52.area.near",
-        "area_label": "近处居住片区",
-        "area_typical_roundtrip_minutes": 30,
-        "label": "一居室（离工作地近）",
+        "area_id": "m52.area.far",
+        "area_label": "远处居住片区",
+        "area_typical_roundtrip_minutes": 70,
+        "label": "一居室（离工作地远）",
         "months": [
          1,
          2,
@@ -1621,7 +1581,7 @@
          11,
          12
         ],
-        "opportunity_id": "m52.housing.near"
+        "opportunity_id": "m52.housing.far"
        }
       ],
       "household": [
@@ -1661,7 +1621,7 @@
        }
       ],
       "housing": [
-       "一居室（离工作地近）（1–12 月）"
+       "一居室（离工作地远）（1–12 月）"
       ],
       "jobs": [
        "会计（合成会计事务所）（1–12 月）"
@@ -1669,9 +1629,9 @@
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 2617368,
+       "amount_minor": 2137368,
        "currency": "USD",
-       "display": "26,173.68",
+       "display": "21,373.68",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [
@@ -1830,21 +1790,21 @@
      },
      {
       "cash_end": {
-       "amount_minor": 1747896,
+       "amount_minor": 3187896,
        "currency": "USD",
-       "display": "17,478.96",
+       "display": "31,878.96",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
-       "amount_minor": 1065264,
+       "amount_minor": 2025264,
        "currency": "USD",
-       "display": "10,652.64",
+       "display": "20,252.64",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "commute": [
        {
-        "home_area_id": "m52.area.near",
-        "home_area_label": "近处居住片区",
+        "home_area_id": "m52.area.far",
+        "home_area_label": "远处居住片区",
         "monthly_paid": {
          "amount_minor": 0,
          "currency": "USD",
@@ -1874,7 +1834,7 @@
           "mode": "transit",
           "mode_zh": "公共交通",
           "onsite_visits": 20,
-          "roundtrip_minutes": 30,
+          "roundtrip_minutes": 70,
           "work_area_id": "m52.area.center",
           "work_area_label": "就业中心"
          }
@@ -1921,10 +1881,10 @@
       ],
       "homes": [
        {
-        "area_id": "m52.area.near",
-        "area_label": "近处居住片区",
-        "area_typical_roundtrip_minutes": 30,
-        "label": "一居室（离工作地近）",
+        "area_id": "m52.area.far",
+        "area_label": "远处居住片区",
+        "area_typical_roundtrip_minutes": 70,
+        "label": "一居室（离工作地远）",
         "months": [
          1,
          2,
@@ -1939,7 +1899,7 @@
          11,
          12
         ],
-        "opportunity_id": "m52.housing.near"
+        "opportunity_id": "m52.housing.far"
        }
       ],
       "household": [
@@ -1979,7 +1939,7 @@
        }
       ],
       "housing": [
-       "一居室（离工作地近）（1–12 月）"
+       "一居室（离工作地远）（1–12 月）"
       ],
       "jobs": [
        "会计（合成会计事务所）（1–12 月）"
@@ -1987,9 +1947,9 @@
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 2617368,
+       "amount_minor": 2137368,
        "currency": "USD",
-       "display": "26,173.68",
+       "display": "21,373.68",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [
@@ -2157,17 +2117,17 @@
     "note_zh": "在这些缺失范围下 A 城始终更高：方向一致；不是显著性检验，也不是总体因果结论。出局比例 A 0%、B 0%，有效分身数 A 1/1、B 1/1",
     "range_difference_high": {
      "display": "0.0000",
-     "exact": "76923076923/10000000000000000"
+     "exact": "30769230769/4000000000000000"
     },
     "range_difference_low": {
      "display": "0.0000",
-     "exact": "76923076923/10000000000000000"
+     "exact": "30769230769/4000000000000000"
     }
    }
   ],
   "confirmed": {
    "confirmed_id": "confirmed.draft.u512.r1",
-   "content_fingerprint": "1249d0f78aa6a1dda6d867feeef976ec83c9485e3f0f89b2cb322d6ad9725d41"
+   "content_fingerprint": "c84435ec6b2cb4a52416bc6899bf20a90c81f764c0adf20402f25a1c5a6739b0"
   },
   "data_nature": [
    {
@@ -2739,7 +2699,7 @@
    "结果只给用户看，不回灌给仍在生活中的分身"
   ],
   "meta": {
-   "conversion_version": "e3a-conversion-v2",
+   "conversion_version": "e3a-conversion-v3",
    "data_pack": {
     "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
@@ -2747,15 +2707,15 @@
     "status": "synthetic_fixture_only"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.3-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.4-draft",
    "sample": {
     "note": "受控夹具：mock 在 K51 分身第 3 年第 1 月买下目录里的爱好装备（吉他、网球拍）",
     "origin": "controlled_fixture",
     "produced_by": "product.scenarios.closed_loop(hobby_gear)",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.3",
-   "vocabulary_version": "e3a-vocabulary-v4"
+   "schema_version": "e3a-product-schema-v3.4",
+   "vocabulary_version": "e3a-vocabulary-v5"
   },
   "not_generated_reason": null,
   "option_coverage": [
@@ -2787,7 +2747,7 @@
    "planner_kind": "mock"
   },
   "preflight": {
-   "preflight_fingerprint": "be83da7e5eed97a7cd5b410f85c666a6e3d2ec397bc1f8aaf4dded69357cac1e",
+   "preflight_fingerprint": "e27b3a77bb2da409d7e43f6f99696efbb24bed31cf29d51df0dde8acc90618e6",
    "preflight_id": "preflight.confirmed.draft.u512.r1"
   },
   "reading_guide_zh": [
@@ -2801,9 +2761,9 @@
    "分数是当前合成模型下、按你确认的陈述偏好计算的结果；小数末位的差异不构成可靠的排序"
   ],
   "real_model_calls": 0,
-  "result_fingerprint": "dbec1fd87a433c816bc891ed87e995e62fe3932c4b8d34bd9dee5db439494bb3",
-  "result_id": "result.run-e3a-627b006e0c564dac",
-  "run_id": "run-e3a-627b006e0c564dac",
+  "result_fingerprint": "1e4fdacfb2f4b30bdb774aef9873867c06cfda3cd88f3a2fa522129a7606f143",
+  "result_id": "result.run-e3a-176793b86994f9c2",
+  "run_id": "run-e3a-176793b86994f9c2",
   "run_stage": "completed",
   "sources_zh": [
    "生活事实：E1 结算记录（钱、岗位、住房、食品、服务月份）与月度资源账（本人家务小时）",

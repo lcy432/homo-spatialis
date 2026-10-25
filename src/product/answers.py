@@ -8,8 +8,11 @@
   不预填、不按比例自动扣减；合计不对就报“还差 / 多出几分”，由用户自己改。
 * 物质父项为正时四项细分必须精确合计 100；父项明确为 0 时细分不适用，不伪造回答。旧问卷的 ``laundry`` 不能自动当作
   ``daily_convenience``；``healthcare`` 不在六维里（健康回答另有独立问卷）。
-* 职业由用户在少量可读候选里确认，不填职业代码，不从职称授予资格；金额保留原始金额、币种、时期与口径，没有合法换算就阻断。
-* 自由文字超过 2,000 字符报错，不截断；属性偏好与未获执行保障的“不可妥协”要求只留存原文与支持状态，确认时要显式知悉。
+* 职业（v3.4）从输入目录直接选中（不需要文字；目录过期、编号不在目录里都拒绝），或用兼容的文字描述在少量可读候选里确认；
+  不填职业代码，不从职称授予资格。金额保留原始金额、币种、时期与口径，没有合法换算就阻断。
+* 资格（v3.4）按最高学历、职业证书与相关经验的回答换算（``product.qualifications``）；与旧的逐项资格确认冲突就拒绝，不取并集。
+* 自由文字超过 2,000 字符报错，不截断。新问卷不再收集硬要求与属性偏好：草稿里还有这两类答案就阻断，按迁移说明清空后再审阅
+  （``product.migration``），不在旧值仍会影响模拟时把它藏起来。
 
 确认画像的内容身份覆盖版本、资料包与草稿引用：改了相关答案、词表、问卷或转换规则，旧确认就失效；内容被改写，指纹核对不通过。
 """
@@ -26,7 +29,6 @@ from common.product_contracts import (
     AllocationLine,
     AllocationReview,
     ConfirmedAllocation,
-    ConfirmedHardRequirement,
     ConfirmedHealth,
     ConfirmedHealthAnswer,
     ConfirmedMaterial,
@@ -37,18 +39,16 @@ from common.product_contracts import (
     EvidenceRef,
     ExactNumber,
     FieldSource,
-    HardRequirementAnswer,
     HealthReviewItem,
     ItemStatus,
     MoneyReview,
+    OccupationCandidate,
     OccupationMapping,
     OccupationReview,
     ProductIssue,
     ProductMoney,
     ProfileReview,
-    RetainedStatement,
     SampleLabel,
-    StatementReview,
     UserInputDraft,
     content_fingerprint,
 )
@@ -62,8 +62,10 @@ from product.exact import (
     parse_money_text,
     parse_points,
 )
+from product.input_catalog import LoadedCatalog, input_catalog
 from product.occupation import duties, match_occupation
-from product.pack import AttributeKindDecl, DataPack
+from product.pack import DataPack
+from product.qualifications import confirmed as confirmed_qualifications
 
 TOTAL = Fraction(100)
 SIX = ("material", "safety", "opportunity", "leisure", "environment", "commute")
@@ -515,63 +517,11 @@ def review_draft(
     )
 
     # 职业
-    match = match_occupation(
-        pack, draft.occupation.raw_text if draft.occupation.state == "provided" else None
-    )
-    selected = draft.occupation.selected_candidate
-    if match.status == "not_provided":
-        issues.append(
-            issue(
-                "occupation_missing",
-                "occupation.raw_text",
-                t("input.occupation_missing.message", "还没有描述你主要做什么工作"),
-                t(
-                    "input.occupation_missing.impact",
-                    "开局岗位要按当地目录匹配，没有职业就不能生成开局",
-                ),
-                t("input.occupation_missing.next", "用一两句话描述你的主要工作内容"),
-            )
-        )
-    elif match.status == "unknown":
-        issues.append(
-            issue(
-                "occupation_unknown",
-                "occupation.raw_text",
-                match.message_zh,
-                t("input.occupation_unknown.impact", "开局岗位无法匹配，不能生成开局"),
-                t("input.occupation_unknown.next", "换一种说法描述主要职责"),
-            )
-        )
-    elif selected is None:
-        issues.append(
-            issue(
-                "occupation_needs_confirmation",
-                "occupation.selected_candidate",
-                match.message_zh,
-                t("input.occupation_needs_confirmation.impact", "职业还没有确认，不能生成开局"),
-                t("input.occupation_needs_confirmation.next", "在候选里选出你主要做的那一种"),
-            )
-        )
-    elif selected not in {c.candidate_id for c in match.candidates}:
-        issues.append(
-            issue(
-                "occupation_selection_invalid",
-                "occupation.selected_candidate",
-                t(
-                    "input.occupation_selection_invalid.message",
-                    "选中的职业不在这段描述的候选里（描述改过之后要重新选）",
-                ),
-                t("input.occupation_selection_invalid.impact", "职业还没有确认"),
-                t("input.occupation_selection_invalid.next", "按当前描述重新选择候选"),
-            )
-        )
-    occupation_review = OccupationReview(
-        status=match.status,  # type: ignore[arg-type]
-        raw_text=draft.occupation.raw_text,
-        candidates=match.candidates,
-        selected=selected if selected in {c.candidate_id for c in match.candidates} else None,
-        message_zh=match.message_zh,
-    )
+    catalog = input_catalog(pack)
+    if draft.occupation.mode == "catalog":
+        occupation_review = _catalog_occupation(pack, catalog, draft, issues)
+    else:
+        occupation_review = _text_occupation(pack, draft, issues)
     items.append(
         ItemStatus(
             item="occupation",
@@ -586,6 +536,7 @@ def review_draft(
             ),
         )
     )
+    concept_id = occupation_review.selected
 
     # 年龄
     age = draft.age.value if draft.age.state == "provided" else None
@@ -892,193 +843,31 @@ def review_draft(
         )
     )
 
-    # 属性偏好与硬要求
-    statements: list[StatementReview] = []
-    kinds = {a.kind: a for a in b.attribute_kinds}
-    for a in draft.attribute_preferences:
-        decl = kinds.get(a.kind)
-        support = decl.support if decl is not None else "unsupported"
-        usage = decl.usage if decl is not None else ("retained_only",)
-        note = _attribute_note(decl)
-        if a.as_hard_requirement:
-            msg = t(
-                "input.statement.attribute_hard.message",
-                "“{text}”：{note}。你把它标成了不可妥协的要求，但本版没有执行保障：它不会拦截任何计划，只原样留存",
-                text=Raw(a.raw_text),
-                note=note,
-            )
-            issues.append(
-                issue(
-                    "hard_requirement_not_enforceable",
-                    f"attribute_preferences.{a.preference_id}",
-                    t(
-                        "input.hard_requirement_not_enforceable.message",
-                        "“{text}”被标成不可妥协，但本版没有能核验或拦截它的机制",
-                        text=Raw(a.raw_text),
-                    ),
-                    t(
-                        "input.hard_requirement_not_enforceable.impact",
-                        "分身仍可能选择与它冲突的方案（例如上门服务）；这条要求只留存，不保证执行",
-                    ),
-                    t("input.hard_requirement_not_enforceable.next", "知悉后确认，或改成普通偏好"),
-                    severity="warning",
-                )
-            )
-        else:
-            msg = t(
-                "input.statement.attribute.message",
-                "“{text}”：{note}",
-                text=Raw(a.raw_text),
-                note=note,
-            )
-        pending.append(f"ack:retained:{a.preference_id}")
-        statements.append(
-            StatementReview(
-                ref=a.preference_id,
-                kind=a.kind,
-                raw_text=a.raw_text,
-                support=support,  # type: ignore[arg-type]
-                usage=usage,  # type: ignore[arg-type]
-                as_hard_requirement=a.as_hard_requirement,
-                execution_guaranteed=False,
-                message_zh=msg[:400],
-            )
-        )
-    options = {h.option_id: h for h in b.hard_requirement_options}
-    # E3-A 收尾 F4：同一编号、或同一项 E1 需求（例如两条通勤上限）出现不止一次，一律拒绝——不按最后一条算，也不自动取更严格的
-    # 那一条；两条完全相同也拒绝（V1 不做合并规则）。按需求比较，不只比较编号字符串。
-    id_count: dict[str, int] = {}
-    by_need: dict[str, list[HardRequirementAnswer]] = {}
-    for h in draft.hard_requirements:
-        id_count[h.requirement_id] = id_count.get(h.requirement_id, 0) + 1
-        opt = options.get(h.option_id or "")
-        if opt is not None:
-            by_need.setdefault(opt.need, []).append(h)
-    for rid, n in sorted(id_count.items()):
-        if n > 1:
-            issues.append(
-                issue(
-                    "hard_requirement_duplicated",
-                    f"hard_requirements.{rid}",
-                    t(
-                        "input.hard_requirement_duplicated.message",
-                        "硬要求编号 {rid} 出现了 {n} 次：系统不替你决定保留哪一条",
-                        rid=Raw(rid),
-                        n=n,
-                    ),
-                    t(
-                        "input.hard_requirement_duplicated.impact",
-                        "这条硬要求还不能使用，画像不能确认",
-                    ),
-                    t("input.hard_requirement_duplicated.next", "只保留一条"),
-                )
-            )
-    for need, group in sorted(by_need.items()):
-        if len(group) > 1:
-            opt = options[group[0].option_id or ""]
-            unit = Ent("hard_requirement", opt.option_id, opt.unit, "unit")
-            values = sorted(
-                (
-                    ("未填", Sub("input.hard_requirement.unfilled", "未填"))
-                    if h.parameter_value is None
-                    else (
-                        f"{h.parameter_value} {opt.unit}",
-                        Sub(
-                            "input.hard_requirement.value",
-                            "{value} {unit}",
-                            (("value", Num(str(h.parameter_value))), ("unit", unit)),
-                        ),
-                    )
-                    for h in group
-                ),
-                key=lambda x: x[0],
-            )
-            issues.append(
-                issue(
-                    "hard_requirement_conflict",
-                    f"hard_requirements.need.{need}",
-                    t(
-                        "input.hard_requirement_conflict.message",
-                        "“{label}”收到了 {n} 条（{values}）：同一项要求只能有一条，系统不自动取更严格的上限，也不按最后一条算",
-                        label=Ent("hard_requirement", opt.option_id, opt.label),
-                        n=len(group),
-                        values=Join(tuple(p for _zh, p in values)),
-                    ),
-                    t(
-                        "input.hard_requirement_conflict.impact",
-                        "这项硬要求还不能使用，画像不能确认",
-                    ),
-                    t("input.hard_requirement_conflict.next", "只保留一条，写你真正要的那个数"),
-                )
-            )
-    for h in draft.hard_requirements:
-        opt = options.get(h.option_id or "")
-        if opt is None:
-            pending.append(f"ack:retained:{h.requirement_id}")
-            issues.append(
-                issue(
-                    "hard_requirement_unsupported",
-                    f"hard_requirements.{h.requirement_id}",
-                    t(
-                        "input.hard_requirement_unsupported.message",
-                        "“{text}”不是本版能核验的硬要求选项",
-                        text=Raw(str(h.raw_text or h.option_id)),
-                    ),
-                    t(
-                        "input.hard_requirement_unsupported.impact",
-                        "它只原样留存，不会拦截计划，也不会被核验",
-                    ),
-                    t(
-                        "input.hard_requirement_unsupported.next",
-                        "知悉后确认，或从受支持的选项里选择",
-                    ),
-                    severity="warning",
-                )
-            )
-            statements.append(
-                StatementReview(
-                    ref=h.requirement_id,
-                    kind="hard_requirement",
-                    raw_text=(h.raw_text or h.option_id or "")[:300],
-                    support="unsupported",
-                    usage=("retained_only",),
-                    as_hard_requirement=True,
-                    execution_guaranteed=False,
-                    message_zh=_unsupported_hard_requirement(),
-                )
-            )
+    # 新问卷不再收集硬要求与属性偏好：还有就阻断（旧值仍会影响模拟，不能藏起来），按迁移说明清空后重新审阅
+    from product.migration import removed_params
+
+    for section in ("hard_requirements", "attribute_preferences"):
+        rows = removed_params(pack, draft, section)
+        if not rows:
             continue
-        v = h.parameter_value
-        if v is None or not opt.minimum <= v <= opt.maximum or (v - opt.minimum) % opt.step:
-            issues.append(
-                issue(
-                    "hard_requirement_parameter_invalid",
-                    f"hard_requirements.{h.requirement_id}.parameter_value",
-                    t(
-                        "input.hard_requirement_parameter_invalid.message",
-                        "“{label}”需要 {low}–{high} {unit}、步长 {step} 的整数，得到 {got}",
-                        label=Ent("hard_requirement", opt.option_id, opt.label),
-                        low=opt.minimum,
-                        high=opt.maximum,
-                        unit=Ent("hard_requirement", opt.option_id, opt.unit, "unit"),
-                        step=opt.step,
-                        got=Raw(str(v)),
-                    ),
-                    t("input.hard_requirement_parameter_invalid.impact", "这条硬要求还不能使用"),
-                    t("input.hard_requirement_parameter_invalid.next", "填写范围内的数值"),
-                )
-            )
-        statements.append(
-            StatementReview(
-                ref=h.requirement_id,
-                kind="hard_requirement",
-                raw_text=f"{opt.label} {v} {opt.unit}",
-                support="supported",
-                usage=("planning", "scoring"),
-                as_hard_requirement=True,
-                execution_guaranteed=False,
-                message_zh=label(
-                    "hard_requirement", opt.option_id, opt.verification, "verification"
+        issues.append(
+            issue(
+                "removed_section_present",
+                section,
+                t(
+                    "input.removed_section.message",
+                    "这一版问卷不再收集“{section}”，草稿里还有 {n} 条：{items}",
+                    section=REMOVED_SECTION[section],
+                    n=len(rows),
+                    items=Join(rows),
+                ),
+                t(
+                    "input.removed_section.impact",
+                    "它们会改变模拟，系统不悄悄沿用、也不悄悄丢掉；画像暂时不能确认",
+                ),
+                t(
+                    "input.removed_section.next",
+                    "看过草稿的迁移说明后同意清空这些旧答案，再重新审阅",
                 ),
             )
         )
@@ -1137,6 +926,13 @@ def review_draft(
             )
         elif c.state == "provided":
             abilities.append(c.ability_id)
+    from product.qualifications import review_qualifications
+
+    qualification_review, more, held = review_qualifications(
+        pack, catalog, draft, claimed=tuple(abilities), concept_id=concept_id
+    )
+    issues += more
+    abilities = list(held)
     items.append(
         ItemStatus(
             item="abilities",
@@ -1145,7 +941,10 @@ def review_draft(
             support="supported",
             confirmation="pending",
             usage=("qualification", "start_state"),
-            note=t("input.item.abilities.note", "只来自你明确确认的事实，不从职业称呼自动授予"),
+            note=t(
+                "input.item.abilities.note.v2",
+                "只来自你回答的最高学历、职业证书与相关经验（或兼容的逐项资格确认），不从职业称呼、自由文字或搜索词自动授予",
+            ),
         )
     )
     from product.interests import Term, review_one
@@ -1177,7 +976,7 @@ def review_draft(
                 item=key,
                 label=_say(KIND_LABEL[kind]),
                 answer_state="provided"
-                if r.state == "described"
+                if r.state in ("described", "selected")
                 else (
                     "unsure"
                     if r.state == "unsure"
@@ -1218,7 +1017,6 @@ def review_draft(
         material=material_review,
         health=tuple(health_items),
         free_text_chars=chars,
-        statements=tuple(statements),
         abilities=tuple(abilities),
         items=tuple(items),
         pending_confirmations=tuple(dict.fromkeys(pending)),
@@ -1226,8 +1024,164 @@ def review_draft(
         summary_zh=tuple(summary),
         leisure_interest=leisure_review,
         taste=taste_review,
+        qualifications=qualification_review,
     )
     return review
+
+
+#: 新问卷不再收集的两类答案的名称
+REMOVED_SECTION = {
+    "hard_requirements": Sub("input.removed_section.hard_requirements", "硬要求"),
+    "attribute_preferences": Sub(
+        "input.removed_section.attribute_preferences", "品牌、菜系等属性偏好"
+    ),
+}
+
+
+def _text_occupation(
+    pack: DataPack, draft: UserInputDraft, issues: list[ProductIssue]
+) -> OccupationReview:
+    """兼容的文字描述：受控词表的别名匹配，再在少量候选里选中一个。"""
+    match = match_occupation(
+        pack, draft.occupation.raw_text if draft.occupation.state == "provided" else None
+    )
+    selected = draft.occupation.selected_candidate
+    if match.status == "not_provided":
+        issues.append(
+            issue(
+                "occupation_missing",
+                "occupation.raw_text",
+                t("input.occupation_missing.message", "还没有描述你主要做什么工作"),
+                t(
+                    "input.occupation_missing.impact",
+                    "开局岗位要按当地目录匹配，没有职业就不能生成开局",
+                ),
+                t("input.occupation_missing.next", "用一两句话描述你的主要工作内容"),
+            )
+        )
+    elif match.status == "unknown":
+        issues.append(
+            issue(
+                "occupation_unknown",
+                "occupation.raw_text",
+                match.message_zh,
+                t("input.occupation_unknown.impact", "开局岗位无法匹配，不能生成开局"),
+                t("input.occupation_unknown.next", "换一种说法描述主要职责"),
+            )
+        )
+    elif selected is None:
+        issues.append(
+            issue(
+                "occupation_needs_confirmation",
+                "occupation.selected_candidate",
+                match.message_zh,
+                t("input.occupation_needs_confirmation.impact", "职业还没有确认，不能生成开局"),
+                t("input.occupation_needs_confirmation.next", "在候选里选出你主要做的那一种"),
+            )
+        )
+    elif selected not in {c.candidate_id for c in match.candidates}:
+        issues.append(
+            issue(
+                "occupation_selection_invalid",
+                "occupation.selected_candidate",
+                t(
+                    "input.occupation_selection_invalid.message",
+                    "选中的职业不在这段描述的候选里（描述改过之后要重新选）",
+                ),
+                t("input.occupation_selection_invalid.impact", "职业还没有确认"),
+                t("input.occupation_selection_invalid.next", "按当前描述重新选择候选"),
+            )
+        )
+    return OccupationReview(
+        status=match.status,  # type: ignore[arg-type]
+        raw_text=draft.occupation.raw_text,
+        candidates=match.candidates,
+        selected=selected if selected in {c.candidate_id for c in match.candidates} else None,
+        message_zh=match.message_zh,
+    )
+
+
+def _catalog_occupation(
+    pack: DataPack, catalog: LoadedCatalog | None, draft: UserInputDraft, issues: list[ProductIssue]
+) -> OccupationReview:
+    """从输入目录直接选中的职业：只认目录里的编号与这一版目录的身份；不需要、也不保存任何文字。"""
+    o = draft.occupation
+
+    def refused(code: str, field: str, message: str, impact: str, action: str) -> OccupationReview:
+        issues.append(issue(code, field, message, impact, action))
+        return OccupationReview(status="not_provided", mode="catalog", message_zh=message[:400])
+
+    if catalog is None:
+        return refused(
+            "occupation_catalog_unavailable",
+            "occupation.mode",
+            t(
+                "input.occupation.catalog_unavailable.message",
+                "这个资料包没有职业目录，不能按目录选职业",
+            ),
+            t("input.occupation.catalog_unavailable.impact", "职业还没有确认，不能生成开局"),
+            t("input.occupation.catalog_unavailable.next", "改用文字描述你的工作"),
+        )
+    if o.state != "provided" or o.selected_candidate is None:
+        return refused(
+            "occupation_missing",
+            "occupation.selected_candidate",
+            t("input.occupation.catalog_missing.message", "还没有从职业目录里选你主要做的工作"),
+            t(
+                "input.occupation_missing.impact",
+                "开局岗位要按当地目录匹配，没有职业就不能生成开局",
+            ),
+            t(
+                "input.occupation.catalog_missing.next",
+                "按分类浏览或搜索职业目录，选中一个",
+            ),
+        )
+    if (
+        o.catalog_fingerprint != catalog.fingerprint
+        or o.catalog_version != catalog.decl.catalog_version
+    ):
+        return refused(
+            "occupation_catalog_expired",
+            "occupation.catalog_fingerprint",
+            t(
+                "input.occupation.catalog_expired.message",
+                "这个职业是按另一版职业目录选的，目录已经更新",
+            ),
+            t(
+                "input.occupation.catalog_expired.impact",
+                "旧目录里的选择不能直接沿用，职业还没有确认",
+            ),
+            t("input.occupation.catalog_expired.next", "按现在的目录重新选一次职业"),
+        )
+    concept = pack.occupation(o.selected_candidate)
+    if concept is None or o.selected_candidate not in catalog.occupations:
+        return refused(
+            "occupation_selection_invalid",
+            "occupation.selected_candidate",
+            t(
+                "input.occupation.catalog_unknown.message",
+                "职业编号 {ref} 不在职业目录里：系统不替换成别的职业",
+                ref=Raw(o.selected_candidate),
+            ),
+            t("input.occupation_selection_invalid.impact", "职业还没有确认"),
+            t("input.occupation.catalog_unknown.next", "从目录列出的职业里选"),
+        )
+    name = label("occupation", concept.concept_id, concept.label)
+    return OccupationReview(
+        status="catalog_selected",
+        mode="catalog",
+        candidates=(
+            OccupationCandidate(
+                candidate_id=concept.concept_id, label=name, duties=duties(concept)
+            ),
+        ),
+        selected=concept.concept_id,
+        message_zh=t(
+            "input.occupation.catalog_selected",
+            "你从职业目录选了“{label}”：请核对下面的职责是不是你主要做的工作",
+            label=Ent("occupation", concept.concept_id, concept.label),
+        ),
+    )
 
 
 def _money(pack: DataPack, draft: UserInputDraft) -> tuple[MoneyReview, list[ProductIssue]]:
@@ -1347,7 +1301,8 @@ def confirm_profile(
     six = {ln.key: Fraction(ln.exact) for ln in review.six_dimensions.lines if ln.exact is not None}
     concept = pack.occupation(review.occupation.selected or "")
     assert concept is not None and review.money.converted is not None and review.age is not None
-    assert draft.occupation.raw_text is not None
+    catalog_mode = review.occupation.status == "catalog_selected"
+    assert catalog_mode or draft.occupation.raw_text is not None
     material = (
         ConfirmedMaterial(status="not_applicable_parent_zero")
         if review.material.status == "not_applicable"
@@ -1379,60 +1334,6 @@ def confirm_profile(
             for h in review.health
         ),
     )
-    options = {h.option_id: h for h in b.hard_requirement_options}
-    hard: list[ConfirmedHardRequirement] = []
-    retained: list[RetainedStatement] = []
-    for h in draft.hard_requirements:
-        opt = options.get(h.option_id or "")
-        if opt is None:
-            retained.append(
-                RetainedStatement(
-                    ref=h.requirement_id,
-                    kind="hard_requirement",
-                    raw_text=(h.raw_text or h.option_id or "")[:300],
-                    support="unsupported",
-                    usage=("retained_only",),
-                    as_hard_requirement=True,
-                    message_zh=_unsupported_hard_requirement(),
-                )
-            )
-            continue
-        assert h.parameter_value is not None
-        hard.append(
-            ConfirmedHardRequirement(
-                requirement_id=h.requirement_id,
-                option_id=opt.option_id,
-                parameter_value=h.parameter_value,
-                label_zh=t(
-                    "input.confirmed.hard_requirement.label",
-                    "{label} {value} {unit}（单独核验并报告，不拦截计划）",
-                    label=Ent("hard_requirement", opt.option_id, opt.label),
-                    value=Num(str(h.parameter_value)),
-                    unit=Ent("hard_requirement", opt.option_id, opt.unit, "unit"),
-                ),
-            )
-        )
-    kinds = {a.kind: a for a in b.attribute_kinds}
-    for a in draft.attribute_preferences:
-        decl = kinds.get(a.kind)
-        retained.append(
-            RetainedStatement(
-                ref=a.preference_id,
-                kind=a.kind,
-                need=a.need,
-                raw_text=a.raw_text,
-                support="unsupported"
-                if decl is None or decl.support == "unsupported"
-                else "partially_supported",
-                usage=decl.usage if decl is not None else ("retained_only",),  # type: ignore[arg-type]
-                as_hard_requirement=a.as_hard_requirement,
-                message_zh=(
-                    _say(_ATTRIBUTE_UNKNOWN)
-                    if decl is None
-                    else label("attribute_kind", decl.kind, decl.note, "note")
-                )[:400],
-            )
-        )
     sources = tuple(
         FieldSource(
             field=f,
@@ -1450,9 +1351,10 @@ def confirm_profile(
             "material",
             "health",
             "free_text",
+            "education",
+            "certificates",
+            "experience",
             "abilities",
-            "hard_requirements",
-            "attribute_preferences",
             "leisure_interest",
             "taste",
         )
@@ -1471,9 +1373,11 @@ def confirm_profile(
             concept_id=concept.concept_id,
             label=label("occupation", concept.concept_id, concept.label),
             duties=duties(concept),
-            raw_text=draft.occupation.raw_text,
+            raw_text=None if catalog_mode else draft.occupation.raw_text,
             language=draft.occupation.language,
             match_status=review.occupation.status,  # type: ignore[arg-type]
+            catalog_version=draft.occupation.catalog_version if catalog_mode else None,
+            catalog_fingerprint=draft.occupation.catalog_fingerprint if catalog_mode else None,
             internal_mappings=tuple(
                 OccupationMapping(
                     country=m.country,
@@ -1503,8 +1407,6 @@ def confirm_profile(
         health=health,
         free_text=draft.free_text.text if draft.free_text.state == "provided" else None,
         abilities=review.abilities,
-        hard_requirements=tuple(hard),
-        retained=tuple(retained),
         sources=sources,
         interests=confirmed_interests(
             review.leisure_interest,
@@ -1517,6 +1419,9 @@ def confirm_profile(
                 "taste": {term.key: term.label for term in pack.body.interests.cuisines},
             },
         ),
+        qualifications=None
+        if review.qualifications is None
+        else confirmed_qualifications(review.qualifications),
     )
     unsealed = ConfirmedProfile.model_construct(**fields, content_fingerprint="0" * 64)
     return ConfirmedProfile(**fields, content_fingerprint=unsealed.expected_fingerprint())
@@ -1554,25 +1459,6 @@ def ack_display(key: str) -> str:
     认不出的编号只给编号本身（没有显示绑定，英文照实缺失）。"""
     s = _ack_text(key)
     return _say(s) if isinstance(s, Sub) else key
-
-
-_ATTRIBUTE_UNKNOWN = Sub(
-    "input.statement.attribute_unknown_kind", "本版没有这类偏好的定义：只留存原文"
-)
-
-
-def _attribute_note(decl: AttributeKindDecl | None) -> Ent | Sub:
-    """一类属性偏好的支持说明（显示参数）；本版没有这类偏好时是统一的说明。"""
-    if decl is None:
-        return _ATTRIBUTE_UNKNOWN
-    return Ent("attribute_kind", decl.kind, decl.note, "note")
-
-
-def _unsupported_hard_requirement() -> str:
-    return t(
-        "input.statement.hard_requirement_unsupported",
-        "本版没有这项硬要求的定义与资料：只留存原文，不核验、不拦截",
-    )
 
 
 def confirmation_problems(

@@ -5,7 +5,7 @@
   "code": "deleted",
   "display": {
    "display_schema_version": "e3-display-v2",
-   "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+   "resource_version": "e3-display-res-v1-10a01abc4052089a",
    "source_view_fingerprint": "5a18751a95c0cff0f13c9eefd77f50c9bffcd6b1ebf1c15e19f690249f3cc184",
    "translations": {
     "en": {
@@ -14,7 +14,7 @@
        "key": "error.deleted.message",
        "missing_reason": null,
        "pointer": "/message_zh",
-       "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+       "resource_version": "e3-display-res-v1-10a01abc4052089a",
        "source_locale": "zh",
        "status": "provided",
        "text": "This content has been deleted"
@@ -23,7 +23,7 @@
        "key": "error.deleted.impact",
        "missing_reason": null,
        "pointer": "/impact_zh",
-       "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+       "resource_version": "e3-display-res-v1-10a01abc4052089a",
        "source_locale": "zh",
        "status": "provided",
        "text": "The content can no longer be viewed or restored; deleting does not reset the number of runs used"
@@ -32,7 +32,7 @@
        "key": "error.deleted.next",
        "missing_reason": null,
        "pointer": "/next_action_zh",
-       "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+       "resource_version": "e3-display-res-v1-10a01abc4052089a",
        "source_locale": "zh",
        "status": "provided",
        "text": "Create it again if you need it"
@@ -46,7 +46,7 @@
        "key": "error.deleted.message",
        "missing_reason": null,
        "pointer": "/message_zh",
-       "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+       "resource_version": "e3-display-res-v1-10a01abc4052089a",
        "source_locale": "zh",
        "status": "provided",
        "text": "这项内容已经删除"
@@ -55,7 +55,7 @@
        "key": "error.deleted.impact",
        "missing_reason": null,
        "pointer": "/impact_zh",
-       "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+       "resource_version": "e3-display-res-v1-10a01abc4052089a",
        "source_locale": "zh",
        "status": "provided",
        "text": "内容不能再查看或恢复；删除不会重置使用次数"
@@ -64,7 +64,7 @@
        "key": "error.deleted.next",
        "missing_reason": null,
        "pointer": "/next_action_zh",
-       "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+       "resource_version": "e3-display-res-v1-10a01abc4052089a",
        "source_locale": "zh",
        "status": "provided",
        "text": "需要的话重新创建"

@@ -11,7 +11,7 @@
    "note": "离线 mock：没有网络调用，费用为 0（真实模型运行会写“按报价估算”，以供应商账单为准）"
   },
   "meta": {
-   "conversion_version": "e3a-conversion-v2",
+   "conversion_version": "e3a-conversion-v3",
    "data_pack": {
     "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
@@ -19,18 +19,18 @@
     "status": "synthetic_fixture_only"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.3-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.4-draft",
    "sample": {
     "note": "受控夹具：故障注入或测试传输（离线替身，不是真实模型），零网络、零费用",
     "origin": "controlled_fixture",
     "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.3",
-   "vocabulary_version": "e3a-vocabulary-v4"
+   "schema_version": "e3a-product-schema-v3.4",
+   "vocabulary_version": "e3a-vocabulary-v5"
   },
   "pause": {
-   "audit_ref": "run:run-e3a-a1efed5232c22ea9 record:progress.json",
+   "audit_ref": "run:run-e3a-233ae103f91d4082 record:progress.json",
    "category": "batch_halted_service_unavailable",
    "impact_zh": "不是生活结果；还没有生成评价与汇总，不擅自给出分类或分数",
    "next_action_zh": "维护者处理服务、凭证、预算或请求的问题；可以恢复同一次运行（恢复前逐条核对归档，已用的调用次数与预算不清零）；系统不会替分身生成计划",
@@ -39,7 +39,7 @@
   "report_available": false,
   "resumable": true,
   "resume_note": "可以从年度边界或两份候选之间恢复（E1 的恢复入口逐条核对归档，尝试次数与调用次数不清零）",
-  "run_id": "run-e3a-a1efed5232c22ea9",
+  "run_id": "run-e3a-233ae103f91d4082",
   "stage": "halted",
   "stage_zh": "批次停下（服务、预算或请求检查）",
   "updated_at": "2026-10-24T09:00:00Z"

@@ -11,18 +11,7 @@
      "exact": "0"
     },
     "exits": 0,
-    "hard_requirements": [
-     {
-      "checked": 1,
-      "need": "commute_limit",
-      "not_checked": 0,
-      "planned": 1,
-      "satisfied_every_month": 1,
-      "satisfied_in_lived_months": 0,
-      "unknown": 0,
-      "violated": 0
-     }
-    ],
+    "hard_requirements": [],
     "headline_zh": "纽约（纽约市五区居民）：原计划 1 个分身——1 个完成且可评价、0 个生活出局、0 个模拟问题；1 个完成且可评价分身的平均 J 为 0.5683（分母只数完成且可评价的分身，不是原计划的全部分身）",
     "label": "纽约（纽约市五区居民）",
     "mean_denominator": 1,
@@ -66,28 +55,17 @@
      "exact": "0"
     },
     "exits": 0,
-    "hard_requirements": [
-     {
-      "checked": 1,
-      "need": "commute_limit",
-      "not_checked": 0,
-      "planned": 1,
-      "satisfied_every_month": 1,
-      "satisfied_in_lived_months": 0,
-      "unknown": 0,
-      "violated": 0
-     }
-    ],
-    "headline_zh": "洛杉矶：原计划 1 个分身——1 个完成且可评价、0 个生活出局、0 个模拟问题；1 个完成且可评价分身的平均 J 为 0.5672（分母只数完成且可评价的分身，不是原计划的全部分身）",
+    "hard_requirements": [],
+    "headline_zh": "洛杉矶：原计划 1 个分身——1 个完成且可评价、0 个生活出局、0 个模拟问题；1 个完成且可评价分身的平均 J 为 0.5447（分母只数完成且可评价的分身，不是原计划的全部分身）",
     "label": "洛杉矶",
     "mean_denominator": 1,
     "mean_j": {
-     "display": "0.5672",
-     "exact": "22689484873187433/40000000000000000"
+     "display": "0.5447",
+     "exact": "5446866913382871/10000000000000000"
     },
     "mean_l": {
-     "display": "0.5510",
-     "exact": "1102003572595937/2000000000000000"
+     "display": "0.5209",
+     "exact": "2604672728213851/5000000000000000"
     },
     "mean_v": {
      "display": "0.6159",
@@ -105,12 +83,12 @@
     "planned": 1,
     "range_denominator": 1,
     "range_lower": {
-     "display": "0.5672",
-     "exact": "22689484873187433/40000000000000000"
+     "display": "0.5447",
+     "exact": "5446866913382871/10000000000000000"
     },
     "range_upper": {
-     "display": "0.5672",
-     "exact": "22689484873187433/40000000000000000"
+     "display": "0.5447",
+     "exact": "5446866913382871/10000000000000000"
     }
    },
    {
@@ -121,18 +99,7 @@
      "exact": "0"
     },
     "exits": 0,
-    "hard_requirements": [
-     {
-      "checked": 1,
-      "need": "commute_limit",
-      "not_checked": 0,
-      "planned": 1,
-      "satisfied_every_month": 1,
-      "satisfied_in_lived_months": 0,
-      "unknown": 0,
-      "violated": 0
-     }
-    ],
+    "hard_requirements": [],
     "headline_zh": "旧金山：原计划 1 个分身——1 个完成且可评价、0 个生活出局、0 个模拟问题；1 个完成且可评价分身的平均 J 为 0.5656（分母只数完成且可评价的分身，不是原计划的全部分身）",
     "label": "旧金山",
     "mean_denominator": 1,
@@ -176,28 +143,17 @@
      "exact": "0"
     },
     "exits": 0,
-    "hard_requirements": [
-     {
-      "checked": 1,
-      "need": "commute_limit",
-      "not_checked": 0,
-      "planned": 1,
-      "satisfied_every_month": 1,
-      "satisfied_in_lived_months": 0,
-      "unknown": 0,
-      "violated": 0
-     }
-    ],
-    "headline_zh": "芝加哥（伊利诺伊州部分）：原计划 1 个分身——1 个完成且可评价、0 个生活出局、0 个模拟问题；1 个完成且可评价分身的平均 J 为 0.5881（分母只数完成且可评价的分身，不是原计划的全部分身）",
+    "hard_requirements": [],
+    "headline_zh": "芝加哥（伊利诺伊州部分）：原计划 1 个分身——1 个完成且可评价、0 个生活出局、0 个模拟问题；1 个完成且可评价分身的平均 J 为 0.5747（分母只数完成且可评价的分身，不是原计划的全部分身）",
     "label": "芝加哥（伊利诺伊州部分）",
     "mean_denominator": 1,
     "mean_j": {
-     "display": "0.5881",
-     "exact": "23523416383189337/40000000000000000"
+     "display": "0.5747",
+     "exact": "287347189471113/500000000000000"
     },
     "mean_l": {
-     "display": "0.5672",
-     "exact": "17014580446059713/30000000000000000"
+     "display": "0.5493",
+     "exact": "686622467523309/1250000000000000"
     },
     "mean_v": {
      "display": "0.6509",
@@ -215,12 +171,12 @@
     "planned": 1,
     "range_denominator": 1,
     "range_lower": {
-     "display": "0.5881",
-     "exact": "23523416383189337/40000000000000000"
+     "display": "0.5747",
+     "exact": "287347189471113/500000000000000"
     },
     "range_upper": {
-     "display": "0.5881",
-     "exact": "23523416383189337/40000000000000000"
+     "display": "0.5747",
+     "exact": "287347189471113/500000000000000"
     }
    },
    {
@@ -231,18 +187,7 @@
      "exact": "0"
     },
     "exits": 0,
-    "hard_requirements": [
-     {
-      "checked": 1,
-      "need": "commute_limit",
-      "not_checked": 0,
-      "planned": 1,
-      "satisfied_every_month": 1,
-      "satisfied_in_lived_months": 0,
-      "unknown": 0,
-      "violated": 0
-     }
-    ],
+    "hard_requirements": [],
     "headline_zh": "休斯敦：原计划 1 个分身——1 个完成且可评价、0 个生活出局、0 个模拟问题；1 个完成且可评价分身的平均 J 为 0.5141（分母只数完成且可评价的分身，不是原计划的全部分身）",
     "label": "休斯敦",
     "mean_denominator": 1,
@@ -286,28 +231,17 @@
      "exact": "0"
     },
     "exits": 0,
-    "hard_requirements": [
-     {
-      "checked": 1,
-      "need": "commute_limit",
-      "not_checked": 0,
-      "planned": 1,
-      "satisfied_every_month": 1,
-      "satisfied_in_lived_months": 0,
-      "unknown": 0,
-      "violated": 0
-     }
-    ],
-    "headline_zh": "西雅图：原计划 1 个分身——1 个完成且可评价、0 个生活出局、0 个模拟问题；1 个完成且可评价分身的平均 J 为 0.5746（分母只数完成且可评价的分身，不是原计划的全部分身）",
+    "hard_requirements": [],
+    "headline_zh": "西雅图：原计划 1 个分身——1 个完成且可评价、0 个生活出局、0 个模拟问题；1 个完成且可评价分身的平均 J 为 0.5559（分母只数完成且可评价的分身，不是原计划的全部分身）",
     "label": "西雅图",
     "mean_denominator": 1,
     "mean_j": {
-     "display": "0.5746",
-     "exact": "22982155462388093/40000000000000000"
+     "display": "0.5559",
+     "exact": "11118695200156531/20000000000000000"
     },
     "mean_l": {
-     "display": "0.5542",
-     "exact": "5542234693343317/10000000000000000"
+     "display": "0.5294",
+     "exact": "132349491816291/250000000000000"
     },
     "mean_v": {
      "display": "0.6355",
@@ -325,12 +259,12 @@
     "planned": 1,
     "range_denominator": 1,
     "range_lower": {
-     "display": "0.5746",
-     "exact": "22982155462388093/40000000000000000"
+     "display": "0.5559",
+     "exact": "11118695200156531/20000000000000000"
     },
     "range_upper": {
-     "display": "0.5746",
-     "exact": "22982155462388093/40000000000000000"
+     "display": "0.5559",
+     "exact": "11118695200156531/20000000000000000"
     }
    }
   ],
@@ -348,16 +282,7 @@
      "next_action_zh": "看逐年生活事实；这是合成模型下的结果，不是现实预测",
      "reason_zh": "三年生活正常完成，实际评分与期末估值都完整"
     },
-    "hard_requirements": [
-     {
-      "months_not_lived": 0,
-      "months_not_satisfied": 0,
-      "months_satisfied": 36,
-      "months_unknown": 0,
-      "need": "commute_limit",
-      "summary": "satisfied_every_month"
-     }
-    ],
+    "hard_requirements": [],
     "j": {
      "display": "0.5683",
      "exact": "11365686247228193/20000000000000000"
@@ -1303,33 +1228,24 @@
      "next_action_zh": "看逐年生活事实；这是合成模型下的结果，不是现实预测",
      "reason_zh": "三年生活正常完成，实际评分与期末估值都完整"
     },
-    "hard_requirements": [
-     {
-      "months_not_lived": 0,
-      "months_not_satisfied": 0,
-      "months_satisfied": 36,
-      "months_unknown": 0,
-      "need": "commute_limit",
-      "summary": "satisfied_every_month"
-     }
-    ],
+    "hard_requirements": [],
     "j": {
-     "display": "0.5672",
-     "exact": "22689484873187433/40000000000000000"
+     "display": "0.5447",
+     "exact": "5446866913382871/10000000000000000"
     },
     "l_actual": {
-     "display": "0.5510",
-     "exact": "1102003572595937/2000000000000000"
+     "display": "0.5209",
+     "exact": "2604672728213851/5000000000000000"
     },
     "missing_reason": null,
     "missing_reason_zh": null,
     "range_lower": {
-     "display": "0.5672",
-     "exact": "22689484873187433/40000000000000000"
+     "display": "0.5447",
+     "exact": "5446866913382871/10000000000000000"
     },
     "range_upper": {
-     "display": "0.5672",
-     "exact": "22689484873187433/40000000000000000"
+     "display": "0.5447",
+     "exact": "5446866913382871/10000000000000000"
     },
     "reference_plan": "p3_service",
     "repeat_index": 0,
@@ -1345,9 +1261,9 @@
        "status": "not_bought"
       },
       "cash_end": {
-       "amount_minor": 4145837,
+       "amount_minor": 4631237,
        "currency": "USD",
-       "display": "41,458.37",
+       "display": "46,312.37",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
@@ -1358,12 +1274,12 @@
       },
       "commute": [
        {
-        "home_area_id": "la.area.h.0603744",
-        "home_area_label": "居住片区·Los Angeles County (Central)--LA City (East Central/Central City & Boyle Heights) PUMA（PUMA 0603744）",
+        "home_area_id": "la.area.h.0603704",
+        "home_area_label": "居住片区·Los Angeles County (North Central)--Palmdale City PUMA（PUMA 0603704）",
         "monthly_paid": {
-         "amount_minor": 0,
+         "amount_minor": 4550,
          "currency": "USD",
-         "display": "0.00",
+         "display": "45.50",
          "numeraire_id": "USD_2024_LOCAL"
         },
         "months": [
@@ -1386,10 +1302,10 @@
          {
           "job_label": "服务类销售代表·工资约在本职业 56 分位",
           "job_opportunity_id": "la.job.41-3091.w11.h40.w.0603700",
-          "mode": "walk_bike",
-          "mode_zh": "步行或骑车",
+          "mode": "transit",
+          "mode_zh": "公共交通",
           "onsite_visits": 13,
-          "roundtrip_minutes": 20,
+          "roundtrip_minutes": 90,
           "work_area_id": "la.area.w.0603700",
           "work_area_label": "就业片区·Los Angeles County"
          }
@@ -1455,10 +1371,10 @@
       ],
       "homes": [
        {
-        "area_id": "la.area.h.0603744",
-        "area_label": "居住片区·Los Angeles County (Central)--LA City (East Central/Central City & Boyle Heights) PUMA（PUMA 0603744）",
-        "area_typical_roundtrip_minutes": 50,
-        "label": "1 卧整套租住（Los Angeles County (Central)--LA City (East Central/Central ，低档）",
+        "area_id": "la.area.h.0603704",
+        "area_label": "居住片区·Los Angeles County (North Central)--Palmdale City PUMA（PUMA 0603704）",
+        "area_typical_roundtrip_minutes": 60,
+        "label": "开间整套租住（Los Angeles County (North Central)--Palmdale City，低档）",
         "months": [
          1,
          2,
@@ -1473,7 +1389,7 @@
          11,
          12
         ],
-        "opportunity_id": "la.housing.0603744.1.s0006"
+        "opportunity_id": "la.housing.0603704.0.s0021"
        }
       ],
       "household": [
@@ -1513,7 +1429,7 @@
        }
       ],
       "housing": [
-       "1 卧整套租住（Los Angeles County (Central)--LA City (East Central/Central ，低档）（1–12 月）"
+       "开间整套租住（Los Angeles County (North Central)--Palmdale City，低档）（1–12 月）"
       ],
       "jobs": [
        "服务类销售代表·工资约在本职业 56 分位（1–12 月）"
@@ -1521,9 +1437,9 @@
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 2425917,
+       "amount_minor": 1940517,
        "currency": "USD",
-       "display": "24,259.17",
+       "display": "19,405.17",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [],
@@ -1653,25 +1569,25 @@
        "status": "not_bought"
       },
       "cash_end": {
-       "amount_minor": 8066635,
+       "amount_minor": 9037435,
        "currency": "USD",
-       "display": "80,666.35",
+       "display": "90,374.35",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
-       "amount_minor": 4145837,
+       "amount_minor": 4631237,
        "currency": "USD",
-       "display": "41,458.37",
+       "display": "46,312.37",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "commute": [
        {
-        "home_area_id": "la.area.h.0603744",
-        "home_area_label": "居住片区·Los Angeles County (Central)--LA City (East Central/Central City & Boyle Heights) PUMA（PUMA 0603744）",
+        "home_area_id": "la.area.h.0603704",
+        "home_area_label": "居住片区·Los Angeles County (North Central)--Palmdale City PUMA（PUMA 0603704）",
         "monthly_paid": {
-         "amount_minor": 0,
+         "amount_minor": 4550,
          "currency": "USD",
-         "display": "0.00",
+         "display": "45.50",
          "numeraire_id": "USD_2024_LOCAL"
         },
         "months": [
@@ -1694,10 +1610,10 @@
          {
           "job_label": "服务类销售代表·工资约在本职业 56 分位",
           "job_opportunity_id": "la.job.41-3091.w11.h40.w.0603700",
-          "mode": "walk_bike",
-          "mode_zh": "步行或骑车",
+          "mode": "transit",
+          "mode_zh": "公共交通",
           "onsite_visits": 13,
-          "roundtrip_minutes": 20,
+          "roundtrip_minutes": 90,
           "work_area_id": "la.area.w.0603700",
           "work_area_label": "就业片区·Los Angeles County"
          }
@@ -1763,10 +1679,10 @@
       ],
       "homes": [
        {
-        "area_id": "la.area.h.0603744",
-        "area_label": "居住片区·Los Angeles County (Central)--LA City (East Central/Central City & Boyle Heights) PUMA（PUMA 0603744）",
-        "area_typical_roundtrip_minutes": 50,
-        "label": "1 卧整套租住（Los Angeles County (Central)--LA City (East Central/Central ，低档）",
+        "area_id": "la.area.h.0603704",
+        "area_label": "居住片区·Los Angeles County (North Central)--Palmdale City PUMA（PUMA 0603704）",
+        "area_typical_roundtrip_minutes": 60,
+        "label": "开间整套租住（Los Angeles County (North Central)--Palmdale City，低档）",
         "months": [
          1,
          2,
@@ -1781,7 +1697,7 @@
          11,
          12
         ],
-        "opportunity_id": "la.housing.0603744.1.s0006"
+        "opportunity_id": "la.housing.0603704.0.s0021"
        }
       ],
       "household": [
@@ -1821,7 +1737,7 @@
        }
       ],
       "housing": [
-       "1 卧整套租住（Los Angeles County (Central)--LA City (East Central/Central ，低档）（1–12 月）"
+       "开间整套租住（Los Angeles County (North Central)--Palmdale City，低档）（1–12 月）"
       ],
       "jobs": [
        "服务类销售代表·工资约在本职业 56 分位（1–12 月）"
@@ -1829,9 +1745,9 @@
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 2350956,
+       "amount_minor": 1865556,
        "currency": "USD",
-       "display": "23,509.56",
+       "display": "18,655.56",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [],
@@ -1961,25 +1877,25 @@
        "status": "not_bought"
       },
       "cash_end": {
-       "amount_minor": 12442745,
+       "amount_minor": 14214545,
        "currency": "USD",
-       "display": "124,427.45",
+       "display": "142,145.45",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
-       "amount_minor": 8066635,
+       "amount_minor": 9037435,
        "currency": "USD",
-       "display": "80,666.35",
+       "display": "90,374.35",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "commute": [
        {
-        "home_area_id": "la.area.h.0605924",
-        "home_area_label": "居住片区·Orange County (Central)--Irvine City (South) PUMA（PUMA 0605924）",
+        "home_area_id": "la.area.h.0603733",
+        "home_area_label": "居住片区·Los Angeles County (Central)--LA City (Central/Koreatown) PUMA（PUMA 0603733）",
         "monthly_paid": {
-         "amount_minor": 0,
+         "amount_minor": 4550,
          "currency": "USD",
-         "display": "0.00",
+         "display": "45.50",
          "numeraire_id": "USD_2024_LOCAL"
         },
         "months": [
@@ -2002,10 +1918,10 @@
          {
           "job_label": "服务类销售代表·工资约在本职业 76 分位",
           "job_opportunity_id": "la.job.41-3091.w16.h40.w.0605900",
-          "mode": "walk_bike",
-          "mode_zh": "步行或骑车",
+          "mode": "transit",
+          "mode_zh": "公共交通",
           "onsite_visits": 13,
-          "roundtrip_minutes": 30,
+          "roundtrip_minutes": 90,
           "work_area_id": "la.area.w.0605900",
           "work_area_label": "就业片区·Orange County"
          }
@@ -2071,10 +1987,10 @@
       ],
       "homes": [
        {
-        "area_id": "la.area.h.0605924",
-        "area_label": "居住片区·Orange County (Central)--Irvine City (South) PUMA（PUMA 0605924）",
-        "area_typical_roundtrip_minutes": 40,
-        "label": "1 卧整套租住（Orange County (Central)--Irvine City (South)，中档）",
+        "area_id": "la.area.h.0603733",
+        "area_label": "居住片区·Los Angeles County (Central)--LA City (Central/Koreatown) PUMA（PUMA 0603733）",
+        "area_typical_roundtrip_minutes": 60,
+        "label": "1 卧整套租住（Los Angeles County (Central)--LA City (Central/Koreatown)，低档）",
         "months": [
          1,
          2,
@@ -2089,7 +2005,7 @@
          11,
          12
         ],
-        "opportunity_id": "la.housing.0605924.1.s0146"
+        "opportunity_id": "la.housing.0603733.1.s0027"
        }
       ],
       "household": [
@@ -2129,7 +2045,7 @@
        }
       ],
       "housing": [
-       "1 卧整套租住（Orange County (Central)--Irvine City (South)，中档）（1–12 月）"
+       "1 卧整套租住（Los Angeles County (Central)--LA City (Central/Koreatown)，低档）（1–12 月）"
       ],
       "jobs": [
        "服务类销售代表·工资约在本职业 76 分位（1–12 月）"
@@ -2137,9 +2053,9 @@
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 3130956,
+       "amount_minor": 2329956,
        "currency": "USD",
-       "display": "31,309.56",
+       "display": "23,299.56",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [],
@@ -2277,16 +2193,7 @@
      "next_action_zh": "看逐年生活事实；这是合成模型下的结果，不是现实预测",
      "reason_zh": "三年生活正常完成，实际评分与期末估值都完整"
     },
-    "hard_requirements": [
-     {
-      "months_not_lived": 0,
-      "months_not_satisfied": 0,
-      "months_satisfied": 36,
-      "months_unknown": 0,
-      "need": "commute_limit",
-      "summary": "satisfied_every_month"
-     }
-    ],
+    "hard_requirements": [],
     "j": {
      "display": "0.5656",
      "exact": "22623843626747079/40000000000000000"
@@ -3285,33 +3192,24 @@
      "next_action_zh": "看逐年生活事实；这是合成模型下的结果，不是现实预测",
      "reason_zh": "三年生活正常完成，实际评分与期末估值都完整"
     },
-    "hard_requirements": [
-     {
-      "months_not_lived": 0,
-      "months_not_satisfied": 0,
-      "months_satisfied": 36,
-      "months_unknown": 0,
-      "need": "commute_limit",
-      "summary": "satisfied_every_month"
-     }
-    ],
+    "hard_requirements": [],
     "j": {
-     "display": "0.5881",
-     "exact": "23523416383189337/40000000000000000"
+     "display": "0.5747",
+     "exact": "287347189471113/500000000000000"
     },
     "l_actual": {
-     "display": "0.5672",
-     "exact": "17014580446059713/30000000000000000"
+     "display": "0.5493",
+     "exact": "686622467523309/1250000000000000"
     },
     "missing_reason": null,
     "missing_reason_zh": null,
     "range_lower": {
-     "display": "0.5881",
-     "exact": "23523416383189337/40000000000000000"
+     "display": "0.5747",
+     "exact": "287347189471113/500000000000000"
     },
     "range_upper": {
-     "display": "0.5881",
-     "exact": "23523416383189337/40000000000000000"
+     "display": "0.5747",
+     "exact": "287347189471113/500000000000000"
     },
     "reference_plan": "p3_service",
     "repeat_index": 0,
@@ -3322,48 +3220,14 @@
     "years": [
      {
       "car_access": {
-       "lines": [
-        {
-         "label": "用车权（一辆小型轿车，按月）",
-         "months_covered": [
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9,
-          10,
-          11,
-          12
-         ],
-         "months_not_obtained": [],
-         "months_planned": [
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9,
-          10,
-          11,
-          12
-         ],
-         "opportunity_id": "chi.service.car_access"
-        }
-       ],
-       "note_zh": "开车通勤要这个月有在用的用车权（按月付费）：用上的月份里，到岗时在可用方式里取往返最少的一种",
-       "status": "bought"
+       "lines": [],
+       "note_zh": "今年没有用上用车权：这一年不能开车通勤，到岗只用通勤关系表里不需要用车权的方式",
+       "status": "not_bought"
       },
       "cash_end": {
-       "amount_minor": 4877142,
+       "amount_minor": 5403186,
        "currency": "USD",
-       "display": "48,771.42",
+       "display": "54,031.86",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
@@ -3374,12 +3238,12 @@
       },
       "commute": [
        {
-        "home_area_id": "chi.area.h.1703109",
-        "home_area_label": "居住片区·Cook County (West)--Leyden & Norwood Park Townships PUMA（PUMA 1703109）",
+        "home_area_id": "chi.area.h.1703159",
+        "home_area_label": "居住片区·Chicago City (West)--West Town & Near West Side PUMA（PUMA 1703159）",
         "monthly_paid": {
-         "amount_minor": 5187,
+         "amount_minor": 6500,
          "currency": "USD",
-         "display": "51.87",
+         "display": "65.00",
          "numeraire_id": "USD_2024_LOCAL"
         },
         "months": [
@@ -3402,10 +3266,10 @@
          {
           "job_label": "服务类销售代表·工资约在本职业 72 分位",
           "job_opportunity_id": "chi.job.41-3091.w15.h40.w.1704300",
-          "mode": "drive",
-          "mode_zh": "开车",
+          "mode": "transit",
+          "mode_zh": "公共交通",
           "onsite_visits": 13,
-          "roundtrip_minutes": 60,
+          "roundtrip_minutes": 120,
           "work_area_id": "chi.area.w.1704300",
           "work_area_label": "就业片区·DuPage County"
          }
@@ -3471,10 +3335,10 @@
       ],
       "homes": [
        {
-        "area_id": "chi.area.h.1703109",
-        "area_label": "居住片区·Cook County (West)--Leyden & Norwood Park Townships PUMA（PUMA 1703109）",
-        "area_typical_roundtrip_minutes": 60,
-        "label": "1 卧整套租住（Cook County (West)--Leyden & Norwood Park Townships，低档）",
+        "area_id": "chi.area.h.1703159",
+        "area_label": "居住片区·Chicago City (West)--West Town & Near West Side PUMA（PUMA 1703159）",
+        "area_typical_roundtrip_minutes": 50,
+        "label": "1 卧整套租住（Chicago City (West)--West Town & Near West Side，低档）",
         "months": [
          1,
          2,
@@ -3489,7 +3353,7 @@
          11,
          12
         ],
-        "opportunity_id": "chi.housing.1703109.1.s0018"
+        "opportunity_id": "chi.housing.1703159.1.s0029"
        }
       ],
       "household": [
@@ -3529,7 +3393,7 @@
        }
       ],
       "housing": [
-       "1 卧整套租住（Cook County (West)--Leyden & Norwood Park Townships，低档）（1–12 月）"
+       "1 卧整套租住（Chicago City (West)--West Town & Near West Side，低档）（1–12 月）"
       ],
       "jobs": [
        "服务类销售代表·工资约在本职业 72 分位（1–12 月）"
@@ -3537,9 +3401,9 @@
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 2437127,
+       "amount_minor": 1911083,
        "currency": "USD",
-       "display": "24,371.27",
+       "display": "19,110.83",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [],
@@ -3664,64 +3528,30 @@
      },
      {
       "car_access": {
-       "lines": [
-        {
-         "label": "用车权（一辆小型轿车，按月）",
-         "months_covered": [
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9,
-          10,
-          11,
-          12
-         ],
-         "months_not_obtained": [],
-         "months_planned": [
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9,
-          10,
-          11,
-          12
-         ],
-         "opportunity_id": "chi.service.car_access"
-        }
-       ],
-       "note_zh": "开车通勤要这个月有在用的用车权（按月付费）：用上的月份里，到岗时在可用方式里取往返最少的一种",
-       "status": "bought"
+       "lines": [],
+       "note_zh": "今年没有用上用车权：这一年不能开车通勤，到岗只用通勤关系表里不需要用车权的方式",
+       "status": "not_bought"
       },
       "cash_end": {
-       "amount_minor": 9529691,
+       "amount_minor": 10665779,
        "currency": "USD",
-       "display": "95,296.91",
+       "display": "106,657.79",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
-       "amount_minor": 4877142,
+       "amount_minor": 5403186,
        "currency": "USD",
-       "display": "48,771.42",
+       "display": "54,031.86",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "commute": [
        {
-        "home_area_id": "chi.area.h.1703109",
-        "home_area_label": "居住片区·Cook County (West)--Leyden & Norwood Park Townships PUMA（PUMA 1703109）",
+        "home_area_id": "chi.area.h.1703159",
+        "home_area_label": "居住片区·Chicago City (West)--West Town & Near West Side PUMA（PUMA 1703159）",
         "monthly_paid": {
-         "amount_minor": 5187,
+         "amount_minor": 6500,
          "currency": "USD",
-         "display": "51.87",
+         "display": "65.00",
          "numeraire_id": "USD_2024_LOCAL"
         },
         "months": [
@@ -3744,10 +3574,10 @@
          {
           "job_label": "服务类销售代表·工资约在本职业 72 分位",
           "job_opportunity_id": "chi.job.41-3091.w15.h40.w.1704300",
-          "mode": "drive",
-          "mode_zh": "开车",
+          "mode": "transit",
+          "mode_zh": "公共交通",
           "onsite_visits": 13,
-          "roundtrip_minutes": 60,
+          "roundtrip_minutes": 120,
           "work_area_id": "chi.area.w.1704300",
           "work_area_label": "就业片区·DuPage County"
          }
@@ -3813,10 +3643,10 @@
       ],
       "homes": [
        {
-        "area_id": "chi.area.h.1703109",
-        "area_label": "居住片区·Cook County (West)--Leyden & Norwood Park Townships PUMA（PUMA 1703109）",
-        "area_typical_roundtrip_minutes": 60,
-        "label": "1 卧整套租住（Cook County (West)--Leyden & Norwood Park Townships，低档）",
+        "area_id": "chi.area.h.1703159",
+        "area_label": "居住片区·Chicago City (West)--West Town & Near West Side PUMA（PUMA 1703159）",
+        "area_typical_roundtrip_minutes": 50,
+        "label": "1 卧整套租住（Chicago City (West)--West Town & Near West Side，低档）",
         "months": [
          1,
          2,
@@ -3831,7 +3661,7 @@
          11,
          12
         ],
-        "opportunity_id": "chi.housing.1703109.1.s0018"
+        "opportunity_id": "chi.housing.1703159.1.s0025"
        }
       ],
       "household": [
@@ -3871,7 +3701,7 @@
        }
       ],
       "housing": [
-       "1 卧整套租住（Cook County (West)--Leyden & Norwood Park Townships，低档）（1–12 月）"
+       "1 卧整套租住（Chicago City (West)--West Town & Near West Side，低档）（1–12 月）"
       ],
       "jobs": [
        "服务类销售代表·工资约在本职业 72 分位（1–12 月）"
@@ -3879,9 +3709,9 @@
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 2361720,
+       "amount_minor": 1751676,
        "currency": "USD",
-       "display": "23,617.20",
+       "display": "17,516.76",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [],
@@ -4011,25 +3841,25 @@
        "status": "not_bought"
       },
       "cash_end": {
-       "amount_minor": 16310401,
+       "amount_minor": 17536489,
        "currency": "USD",
-       "display": "163,104.01",
+       "display": "175,364.89",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
-       "amount_minor": 9529691,
+       "amount_minor": 10665779,
        "currency": "USD",
-       "display": "95,296.91",
+       "display": "106,657.79",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "commute": [
        {
-        "home_area_id": "chi.area.h.1703159",
-        "home_area_label": "居住片区·Chicago City (West)--West Town & Near West Side PUMA（PUMA 1703159）",
+        "home_area_id": "chi.area.h.1703109",
+        "home_area_label": "居住片区·Cook County (West)--Leyden & Norwood Park Townships PUMA（PUMA 1703109）",
         "monthly_paid": {
-         "amount_minor": 0,
+         "amount_minor": 6500,
          "currency": "USD",
-         "display": "0.00",
+         "display": "65.00",
          "numeraire_id": "USD_2024_LOCAL"
         },
         "months": [
@@ -4052,10 +3882,10 @@
          {
           "job_label": "服务类销售代表·工资约在本职业 88 分位",
           "job_opportunity_id": "chi.job.41-3091.w19.h36.w.1703100",
-          "mode": "walk_bike",
-          "mode_zh": "步行或骑车",
+          "mode": "transit",
+          "mode_zh": "公共交通",
           "onsite_visits": 13,
-          "roundtrip_minutes": 30,
+          "roundtrip_minutes": 120,
           "work_area_id": "chi.area.w.1703100",
           "work_area_label": "就业片区·Cook County"
          }
@@ -4121,10 +3951,10 @@
       ],
       "homes": [
        {
-        "area_id": "chi.area.h.1703159",
-        "area_label": "居住片区·Chicago City (West)--West Town & Near West Side PUMA（PUMA 1703159）",
-        "area_typical_roundtrip_minutes": 50,
-        "label": "1 卧整套租住（Chicago City (West)--West Town & Near West Side，低档）",
+        "area_id": "chi.area.h.1703109",
+        "area_label": "居住片区·Cook County (West)--Leyden & Norwood Park Townships PUMA（PUMA 1703109）",
+        "area_typical_roundtrip_minutes": 60,
+        "label": "1 卧整套租住（Cook County (West)--Leyden & Norwood Park Townships，低档）",
         "months": [
          1,
          2,
@@ -4139,7 +3969,7 @@
          11,
          12
         ],
-        "opportunity_id": "chi.housing.1703159.1.s0028"
+        "opportunity_id": "chi.housing.1703109.1.s0018"
        }
       ],
       "household": [
@@ -4179,7 +4009,7 @@
        }
       ],
       "housing": [
-       "1 卧整套租住（Chicago City (West)--West Town & Near West Side，低档）（1–12 月）"
+       "1 卧整套租住（Cook County (West)--Leyden & Norwood Park Townships，低档）（1–12 月）"
       ],
       "jobs": [
        "服务类销售代表·工资约在本职业 88 分位（1–12 月）"
@@ -4187,9 +4017,9 @@
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 1745676,
+       "amount_minor": 1655676,
        "currency": "USD",
-       "display": "17,456.76",
+       "display": "16,556.76",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [],
@@ -4327,16 +4157,7 @@
      "next_action_zh": "看逐年生活事实；这是合成模型下的结果，不是现实预测",
      "reason_zh": "三年生活正常完成，实际评分与期末估值都完整"
     },
-    "hard_requirements": [
-     {
-      "months_not_lived": 0,
-      "months_not_satisfied": 0,
-      "months_satisfied": 36,
-      "months_unknown": 0,
-      "need": "commute_limit",
-      "summary": "satisfied_every_month"
-     }
-    ],
+    "hard_requirements": [],
     "j": {
      "display": "0.5141",
      "exact": "1028154786161723/2000000000000000"
@@ -5301,33 +5122,24 @@
      "next_action_zh": "看逐年生活事实；这是合成模型下的结果，不是现实预测",
      "reason_zh": "三年生活正常完成，实际评分与期末估值都完整"
     },
-    "hard_requirements": [
-     {
-      "months_not_lived": 0,
-      "months_not_satisfied": 0,
-      "months_satisfied": 36,
-      "months_unknown": 0,
-      "need": "commute_limit",
-      "summary": "satisfied_every_month"
-     }
-    ],
+    "hard_requirements": [],
     "j": {
-     "display": "0.5746",
-     "exact": "22982155462388093/40000000000000000"
+     "display": "0.5559",
+     "exact": "11118695200156531/20000000000000000"
     },
     "l_actual": {
-     "display": "0.5542",
-     "exact": "5542234693343317/10000000000000000"
+     "display": "0.5294",
+     "exact": "132349491816291/250000000000000"
     },
     "missing_reason": null,
     "missing_reason_zh": null,
     "range_lower": {
-     "display": "0.5746",
-     "exact": "22982155462388093/40000000000000000"
+     "display": "0.5559",
+     "exact": "11118695200156531/20000000000000000"
     },
     "range_upper": {
-     "display": "0.5746",
-     "exact": "22982155462388093/40000000000000000"
+     "display": "0.5559",
+     "exact": "11118695200156531/20000000000000000"
     },
     "reference_plan": "p3_service",
     "repeat_index": 0,
@@ -5338,48 +5150,14 @@
     "years": [
      {
       "car_access": {
-       "lines": [
-        {
-         "label": "用车权（一辆小型轿车，按月）",
-         "months_covered": [
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9,
-          10,
-          11,
-          12
-         ],
-         "months_not_obtained": [],
-         "months_planned": [
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9,
-          10,
-          11,
-          12
-         ],
-         "opportunity_id": "sea.service.car_access"
-        }
-       ],
-       "note_zh": "开车通勤要这个月有在用的用车权（按月付费）：用上的月份里，到岗时在可用方式里取往返最少的一种",
-       "status": "bought"
+       "lines": [],
+       "note_zh": "今年没有用上用车权：这一年不能开车通勤，到岗只用通勤关系表里不需要用车权的方式",
+       "status": "not_bought"
       },
       "cash_end": {
-       "amount_minor": 2002454,
+       "amount_minor": 2252222,
        "currency": "USD",
-       "display": "20,024.54",
+       "display": "22,522.22",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
@@ -5390,12 +5168,12 @@
       },
       "commute": [
        {
-        "home_area_id": "sea.area.h.5323303",
-        "home_area_label": "居住片区·King County (Northwest)--Redmond, Kirkland Cities, Ingelwood & Finn Hill PUMA（PUMA 5323303）",
+        "home_area_id": "sea.area.h.5326105",
+        "home_area_label": "居住片区·Snohomish County (West Central)--Mukilteo & Martha Lake PUMA（PUMA 5326105）",
         "monthly_paid": {
-         "amount_minor": 6864,
+         "amount_minor": 9900,
          "currency": "USD",
-         "display": "68.64",
+         "display": "99.00",
          "numeraire_id": "USD_2024_LOCAL"
         },
         "months": [
@@ -5418,10 +5196,10 @@
          {
           "job_label": "办公室文员·p50",
           "job_opportunity_id": "sea.job.43-9061.start",
-          "mode": "drive",
-          "mode_zh": "开车",
+          "mode": "transit",
+          "mode_zh": "公共交通",
           "onsite_visits": 22,
-          "roundtrip_minutes": 40,
+          "roundtrip_minutes": 120,
           "work_area_id": "sea.area.w.5323300",
           "work_area_label": "就业片区·King County"
          }
@@ -5487,10 +5265,10 @@
       ],
       "homes": [
        {
-        "area_id": "sea.area.h.5323303",
-        "area_label": "居住片区·King County (Northwest)--Redmond, Kirkland Cities, Ingelwood & Finn Hill PUMA（PUMA 5323303）",
-        "area_typical_roundtrip_minutes": 40,
-        "label": "开间整套租住（King County (Northwest)--Redmond, Kirkland Cities, Ingelwood，低档）",
+        "area_id": "sea.area.h.5326105",
+        "area_label": "居住片区·Snohomish County (West Central)--Mukilteo & Martha Lake PUMA（PUMA 5326105）",
+        "area_typical_roundtrip_minutes": 50,
+        "label": "开间整套租住（Snohomish County (West Central)--Mukilteo & Martha Lake，低档）",
         "months": [
          1,
          2,
@@ -5505,7 +5283,7 @@
          11,
          12
         ],
-        "opportunity_id": "sea.housing.5323303.0.s0008"
+        "opportunity_id": "sea.housing.5326105.0.s0014"
        }
       ],
       "household": [
@@ -5545,7 +5323,7 @@
        }
       ],
       "housing": [
-       "开间整套租住（King County (Northwest)--Redmond, Kirkland Cities, Ingelwood，低档）（1–12 月）"
+       "开间整套租住（Snohomish County (West Central)--Mukilteo & Martha Lake，低档）（1–12 月）"
       ],
       "jobs": [
        "办公室文员·p50（1–12 月）"
@@ -5553,9 +5331,9 @@
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 2741237,
+       "amount_minor": 2491469,
        "currency": "USD",
-       "display": "27,412.37",
+       "display": "24,914.69",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [],
@@ -5685,25 +5463,25 @@
        "status": "not_bought"
       },
       "cash_end": {
-       "amount_minor": 7373462,
+       "amount_minor": 7504430,
        "currency": "USD",
-       "display": "73,734.62",
+       "display": "75,044.30",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
-       "amount_minor": 2002454,
+       "amount_minor": 2252222,
        "currency": "USD",
-       "display": "20,024.54",
+       "display": "22,522.22",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "commute": [
        {
-        "home_area_id": "sea.area.h.5323314",
-        "home_area_label": "居住片区·Seattle City (Central) PUMA（PUMA 5323314）",
+        "home_area_id": "sea.area.h.5323303",
+        "home_area_label": "居住片区·King County (Northwest)--Redmond, Kirkland Cities, Ingelwood & Finn Hill PUMA（PUMA 5323303）",
         "monthly_paid": {
-         "amount_minor": 0,
+         "amount_minor": 9900,
          "currency": "USD",
-         "display": "0.00",
+         "display": "99.00",
          "numeraire_id": "USD_2024_LOCAL"
         },
         "months": [
@@ -5726,10 +5504,10 @@
          {
           "job_label": "健身教练与团体课老师·工资约在本职业 80 分位",
           "job_opportunity_id": "sea.job.39-9031.w17.h40.w.5323300",
-          "mode": "walk_bike",
-          "mode_zh": "步行或骑车",
+          "mode": "transit",
+          "mode_zh": "公共交通",
           "onsite_visits": 22,
-          "roundtrip_minutes": 30,
+          "roundtrip_minutes": 120,
           "work_area_id": "sea.area.w.5323300",
           "work_area_label": "就业片区·King County"
          }
@@ -5795,10 +5573,10 @@
       ],
       "homes": [
        {
-        "area_id": "sea.area.h.5323314",
-        "area_label": "居住片区·Seattle City (Central) PUMA（PUMA 5323314）",
+        "area_id": "sea.area.h.5323303",
+        "area_label": "居住片区·King County (Northwest)--Redmond, Kirkland Cities, Ingelwood & Finn Hill PUMA（PUMA 5323303）",
         "area_typical_roundtrip_minutes": 40,
-        "label": "开间整套租住（Seattle City (Central)，低档）",
+        "label": "开间整套租住（King County (Northwest)--Redmond, Kirkland Cities, Ingelwood，低档）",
         "months": [
          1,
          2,
@@ -5813,7 +5591,7 @@
          11,
          12
         ],
-        "opportunity_id": "sea.housing.5323314.0.s0004"
+        "opportunity_id": "sea.housing.5323303.0.s0008"
        }
       ],
       "household": [
@@ -5853,7 +5631,7 @@
        }
       ],
       "housing": [
-       "开间整套租住（Seattle City (Central)，低档）（1–12 月）"
+       "开间整套租住（King County (Northwest)--Redmond, Kirkland Cities, Ingelwood，低档）（1–12 月）"
       ],
       "jobs": [
        "健身教练与团体课老师·工资约在本职业 80 分位（1–12 月）"
@@ -5861,9 +5639,9 @@
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 1863972,
+       "amount_minor": 1982772,
        "currency": "USD",
-       "display": "18,639.72",
+       "display": "19,827.72",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [],
@@ -5993,25 +5771,25 @@
        "status": "not_bought"
       },
       "cash_end": {
-       "amount_minor": 12744470,
+       "amount_minor": 12756638,
        "currency": "USD",
-       "display": "127,444.70",
+       "display": "127,566.38",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "cash_start": {
-       "amount_minor": 7373462,
+       "amount_minor": 7504430,
        "currency": "USD",
-       "display": "73,734.62",
+       "display": "75,044.30",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "commute": [
        {
-        "home_area_id": "sea.area.h.5323314",
-        "home_area_label": "居住片区·Seattle City (Central) PUMA（PUMA 5323314）",
+        "home_area_id": "sea.area.h.5323303",
+        "home_area_label": "居住片区·King County (Northwest)--Redmond, Kirkland Cities, Ingelwood & Finn Hill PUMA（PUMA 5323303）",
         "monthly_paid": {
-         "amount_minor": 0,
+         "amount_minor": 9900,
          "currency": "USD",
-         "display": "0.00",
+         "display": "99.00",
          "numeraire_id": "USD_2024_LOCAL"
         },
         "months": [
@@ -6034,10 +5812,10 @@
          {
           "job_label": "健身教练与团体课老师·工资约在本职业 80 分位",
           "job_opportunity_id": "sea.job.39-9031.w17.h40.w.5323300",
-          "mode": "walk_bike",
-          "mode_zh": "步行或骑车",
+          "mode": "transit",
+          "mode_zh": "公共交通",
           "onsite_visits": 22,
-          "roundtrip_minutes": 30,
+          "roundtrip_minutes": 120,
           "work_area_id": "sea.area.w.5323300",
           "work_area_label": "就业片区·King County"
          }
@@ -6103,10 +5881,10 @@
       ],
       "homes": [
        {
-        "area_id": "sea.area.h.5323314",
-        "area_label": "居住片区·Seattle City (Central) PUMA（PUMA 5323314）",
+        "area_id": "sea.area.h.5323303",
+        "area_label": "居住片区·King County (Northwest)--Redmond, Kirkland Cities, Ingelwood & Finn Hill PUMA（PUMA 5323303）",
         "area_typical_roundtrip_minutes": 40,
-        "label": "开间整套租住（Seattle City (Central)，低档）",
+        "label": "开间整套租住（King County (Northwest)--Redmond, Kirkland Cities, Ingelwood，低档）",
         "months": [
          1,
          2,
@@ -6121,7 +5899,7 @@
          11,
          12
         ],
-        "opportunity_id": "sea.housing.5323314.0.s0004"
+        "opportunity_id": "sea.housing.5323303.0.s0008"
        }
       ],
       "household": [
@@ -6161,7 +5939,7 @@
        }
       ],
       "housing": [
-       "开间整套租住（Seattle City (Central)，低档）（1–12 月）"
+       "开间整套租住（King County (Northwest)--Redmond, Kirkland Cities, Ingelwood，低档）（1–12 月）"
       ],
       "jobs": [
        "健身教练与团体课老师·工资约在本职业 80 分位（1–12 月）"
@@ -6169,9 +5947,9 @@
       "months_lived": 12,
       "notes": [],
       "paid_total": {
-       "amount_minor": 1863972,
+       "amount_minor": 1982772,
        "currency": "USD",
-       "display": "18,639.72",
+       "display": "19,827.72",
        "numeraire_id": "USD_2024_LOCAL"
       },
       "services": [],
@@ -6304,12 +6082,12 @@
     "direction": "a_higher",
     "note_zh": "在这些缺失范围下 A 城始终更高：方向一致；不是显著性检验，也不是总体因果结论。出局比例 A 0%、B 0%，有效分身数 A 1/1、B 1/1",
     "range_difference_high": {
-     "display": "0.0010",
-     "exact": "41887621268953/40000000000000000"
+     "display": "0.0236",
+     "exact": "471952420462451/20000000000000000"
     },
     "range_difference_low": {
-     "display": "0.0010",
-     "exact": "41887621268953/40000000000000000"
+     "display": "0.0236",
+     "exact": "471952420462451/20000000000000000"
     }
    },
    {
@@ -6332,12 +6110,12 @@
     "direction": "b_higher",
     "note_zh": "在这些缺失范围下 B 城始终更高：方向一致；不是显著性检验，也不是总体因果结论。出局比例 A 0%、B 0%，有效分身数 A 1/1、B 1/1",
     "range_difference_high": {
-     "display": "-0.0198",
-     "exact": "-792043888732951/40000000000000000"
+     "display": "-0.0064",
+     "exact": "-128201331616327/20000000000000000"
     },
     "range_difference_low": {
-     "display": "-0.0198",
-     "exact": "-792043888732951/40000000000000000"
+     "display": "-0.0064",
+     "exact": "-128201331616327/20000000000000000"
     }
    },
    {
@@ -6357,29 +6135,29 @@
    {
     "city_a": "US:CBSA2023:35620",
     "city_b": "US:CBSA2023:42660",
-    "direction": "b_higher",
-    "note_zh": "在这些缺失范围下 B 城始终更高：方向一致；不是显著性检验，也不是总体因果结论。出局比例 A 0%、B 0%，有效分身数 A 1/1、B 1/1",
+    "direction": "a_higher",
+    "note_zh": "在这些缺失范围下 A 城始终更高：方向一致；不是显著性检验，也不是总体因果结论。出局比例 A 0%、B 0%，有效分身数 A 1/1、B 1/1",
     "range_difference_high": {
-     "display": "-0.0063",
-     "exact": "-250782967931707/40000000000000000"
+     "display": "0.0123",
+     "exact": "123495523535831/10000000000000000"
     },
     "range_difference_low": {
-     "display": "-0.0063",
-     "exact": "-250782967931707/40000000000000000"
+     "display": "0.0123",
+     "exact": "123495523535831/10000000000000000"
     }
    },
    {
     "city_a": "US:CBSA2023:31080",
     "city_b": "US:CBSA2023:41860",
-    "direction": "a_higher",
-    "note_zh": "在这些缺失范围下 A 城始终更高：方向一致；不是显著性检验，也不是总体因果结论。出局比例 A 0%、B 0%，有效分身数 A 1/1、B 1/1",
+    "direction": "b_higher",
+    "note_zh": "在这些缺失范围下 B 城始终更高：方向一致；不是显著性检验，也不是总体因果结论。出局比例 A 0%、B 0%，有效分身数 A 1/1、B 1/1",
     "range_difference_high": {
-     "display": "0.0016",
-     "exact": "32820623220177/20000000000000000"
+     "display": "-0.0209",
+     "exact": "-167275194643119/8000000000000000"
     },
     "range_difference_low": {
-     "display": "0.0016",
-     "exact": "32820623220177/20000000000000000"
+     "display": "-0.0209",
+     "exact": "-167275194643119/8000000000000000"
     }
    },
    {
@@ -6388,12 +6166,12 @@
     "direction": "b_higher",
     "note_zh": "在这些缺失范围下 B 城始终更高：方向一致；不是显著性检验，也不是总体因果结论。出局比例 A 0%、B 0%，有效分身数 A 1/1、B 1/1",
     "range_difference_high": {
-     "display": "-0.0208",
-     "exact": "-52120719375119/2500000000000000"
+     "display": "-0.0300",
+     "exact": "-300076876039389/10000000000000000"
     },
     "range_difference_low": {
-     "display": "-0.0208",
-     "exact": "-52120719375119/2500000000000000"
+     "display": "-0.0300",
+     "exact": "-300076876039389/10000000000000000"
     }
    },
    {
@@ -6402,12 +6180,12 @@
     "direction": "a_higher",
     "note_zh": "在这些缺失范围下 A 城始终更高：方向一致；不是显著性检验，也不是总体因果结论。出局比例 A 0%、B 0%，有效分身数 A 1/1、B 1/1",
     "range_difference_high": {
-     "display": "0.0532",
-     "exact": "2126389149952973/40000000000000000"
+     "display": "0.0306",
+     "exact": "19130811410891/625000000000000"
     },
     "range_difference_low": {
-     "display": "0.0532",
-     "exact": "2126389149952973/40000000000000000"
+     "display": "0.0306",
+     "exact": "19130811410891/625000000000000"
     }
    },
    {
@@ -6416,12 +6194,12 @@
     "direction": "b_higher",
     "note_zh": "在这些缺失范围下 B 城始终更高：方向一致；不是显著性检验，也不是总体因果结论。出局比例 A 0%、B 0%，有效分身数 A 1/1、B 1/1",
     "range_difference_high": {
-     "display": "-0.0073",
-     "exact": "-14633529460033/2000000000000000"
+     "display": "-0.0112",
+     "exact": "-224961373390789/20000000000000000"
     },
     "range_difference_low": {
-     "display": "-0.0073",
-     "exact": "-14633529460033/2000000000000000"
+     "display": "-0.0112",
+     "exact": "-224961373390789/20000000000000000"
     }
    },
    {
@@ -6430,12 +6208,12 @@
     "direction": "b_higher",
     "note_zh": "在这些缺失范围下 B 城始终更高：方向一致；不是显著性检验，也不是总体因果结论。出局比例 A 0%、B 0%，有效分身数 A 1/1、B 1/1",
     "range_difference_high": {
-     "display": "-0.0225",
-     "exact": "-449786378221129/20000000000000000"
+     "display": "-0.0091",
+     "exact": "-363931530941961/40000000000000000"
     },
     "range_difference_low": {
-     "display": "-0.0225",
-     "exact": "-449786378221129/20000000000000000"
+     "display": "-0.0091",
+     "exact": "-363931530941961/40000000000000000"
     }
    },
    {
@@ -6455,15 +6233,15 @@
    {
     "city_a": "US:CBSA2023:41860",
     "city_b": "US:CBSA2023:42660",
-    "direction": "b_higher",
-    "note_zh": "在这些缺失范围下 B 城始终更高：方向一致；不是显著性检验，也不是总体因果结论。出局比例 A 0%、B 0%，有效分身数 A 1/1、B 1/1",
+    "direction": "a_higher",
+    "note_zh": "在这些缺失范围下 A 城始终更高：方向一致；不是显著性检验，也不是总体因果结论。出局比例 A 0%、B 0%，有效分身数 A 1/1、B 1/1",
     "range_difference_high": {
-     "display": "-0.0090",
-     "exact": "-179155917820507/20000000000000000"
+     "display": "0.0097",
+     "exact": "386453226434017/40000000000000000"
     },
     "range_difference_low": {
-     "display": "-0.0090",
-     "exact": "-179155917820507/20000000000000000"
+     "display": "0.0097",
+     "exact": "386453226434017/40000000000000000"
     }
    },
    {
@@ -6472,12 +6250,12 @@
     "direction": "a_higher",
     "note_zh": "在这些缺失范围下 A 城始终更高：方向一致；不是显著性检验，也不是总体因果结论。出局比例 A 0%、B 0%，有效分身数 A 1/1、B 1/1",
     "range_difference_high": {
-     "display": "0.0740",
-     "exact": "2960320659954877/40000000000000000"
+     "display": "0.0606",
+     "exact": "121233971722729/2000000000000000"
     },
     "range_difference_low": {
-     "display": "0.0740",
-     "exact": "2960320659954877/40000000000000000"
+     "display": "0.0606",
+     "exact": "121233971722729/2000000000000000"
     }
    },
    {
@@ -6486,12 +6264,12 @@
     "direction": "a_higher",
     "note_zh": "在这些缺失范围下 A 城始终更高：方向一致；不是显著性检验，也不是总体因果结论。出局比例 A 0%、B 0%，有效分身数 A 1/1、B 1/1",
     "range_difference_high": {
-     "display": "0.0135",
-     "exact": "135315230200311/10000000000000000"
+     "display": "0.0188",
+     "exact": "375192378687989/20000000000000000"
     },
     "range_difference_low": {
-     "display": "0.0135",
-     "exact": "135315230200311/10000000000000000"
+     "display": "0.0188",
+     "exact": "375192378687989/20000000000000000"
     }
    },
    {
@@ -6500,18 +6278,18 @@
     "direction": "b_higher",
     "note_zh": "在这些缺失范围下 B 城始终更高：方向一致；不是显著性检验，也不是总体因果结论。出局比例 A 0%、B 0%，有效分身数 A 1/1、B 1/1",
     "range_difference_high": {
-     "display": "-0.0605",
-     "exact": "-2419059739153633/40000000000000000"
+     "display": "-0.0419",
+     "exact": "-837147338539301/20000000000000000"
     },
     "range_difference_low": {
-     "display": "-0.0605",
-     "exact": "-2419059739153633/40000000000000000"
+     "display": "-0.0419",
+     "exact": "-837147338539301/20000000000000000"
     }
    }
   ],
   "confirmed": {
    "confirmed_id": "confirmed.draft-0000000000000046.r2",
-   "content_fingerprint": "077a1d54c75b12b911ce407c4d77ba10ff262d4df9b93ac51d0f7cc1af87367b"
+   "content_fingerprint": "31fe22e9624e0d46af82213545551a1f61da9954eb27ce06450b035b7bd7f5e0"
   },
   "data_nature": [
    {
@@ -8752,7 +8530,7 @@
    "结果只给用户看，不回灌给仍在生活中的分身"
   ],
   "meta": {
-   "conversion_version": "e3a-conversion-v2",
+   "conversion_version": "e3a-conversion-v3",
    "data_pack": {
     "content_fingerprint": "48eda959e2eb8254c891d1de88b92f792ccf8ecbaadac8037d548279cd9dd22b",
     "note": "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定",
@@ -8760,15 +8538,15 @@
     "status": "real_data_frozen"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.3-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.4-draft",
    "sample": {
     "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
     "origin": "offline_run",
     "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.3",
-   "vocabulary_version": "e3a-vocabulary-v4"
+   "schema_version": "e3a-product-schema-v3.4",
+   "vocabulary_version": "e3a-vocabulary-v5"
   },
   "not_generated_reason": null,
   "option_coverage": [
@@ -8836,7 +8614,7 @@
    "planner_kind": "mock"
   },
   "preflight": {
-   "preflight_fingerprint": "0c8f02f722253e9cbc9c230a74a0fc8b55c9028774b847c1808682901b230d00",
+   "preflight_fingerprint": "ea0b51e0069903bc275a522c5cd50b9b8d65a2793f87bff300aa6b6ba1ebf5ee",
    "preflight_id": "preflight.confirmed.draft-0000000000000046.r2"
   },
   "reading_guide_zh": [
@@ -8850,9 +8628,9 @@
    "分数是当前合成模型下、按你确认的陈述偏好计算的结果；小数末位的差异不构成可靠的排序"
   ],
   "real_model_calls": 0,
-  "result_fingerprint": "b320529a86b6e1125fa6bd8acc9479c9e8b6cfca234fed81907b06938c86cd6c",
-  "result_id": "result.run-e3a-92b261206572b7e1",
-  "run_id": "run-e3a-92b261206572b7e1",
+  "result_fingerprint": "efa0b56835bcc544233a858cb1cd55f0a2b952cdd2bfba39d6cf396d44366c6c",
+  "result_id": "result.run-e3a-a6475dedbbf505dc",
+  "run_id": "run-e3a-a6475dedbbf505dc",
   "run_stage": "completed",
   "sources_zh": [
    "生活事实：E1 结算记录（钱、岗位、住房、食品、服务月份）与月度资源账（本人家务小时）",

@@ -598,7 +598,7 @@
   ],
   "confirmed": {
    "confirmed_id": "confirmed.draft.u504.r1",
-   "content_fingerprint": "b3ef76053539995efa45bb32735276102336314237d1fc69b69bee0ca66c3389"
+   "content_fingerprint": "16da773f7d3ec7babea0da5b0d30751cc7b47a93a7e08bf2cc853825c134226b"
   },
   "data_nature": [
    {
@@ -1170,7 +1170,7 @@
    "结果只给用户看，不回灌给仍在生活中的分身"
   ],
   "meta": {
-   "conversion_version": "e3a-conversion-v2",
+   "conversion_version": "e3a-conversion-v3",
    "data_pack": {
     "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
@@ -1178,15 +1178,15 @@
     "status": "synthetic_fixture_only"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.3-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.4-draft",
    "sample": {
     "note": "受控夹具：重复序号 0 注入大病（两城配对）",
     "origin": "controlled_fixture",
     "produced_by": "product.scenarios.closed_loop(all_exit)",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.3",
-   "vocabulary_version": "e3a-vocabulary-v4"
+   "schema_version": "e3a-product-schema-v3.4",
+   "vocabulary_version": "e3a-vocabulary-v5"
   },
   "not_generated_reason": null,
   "option_coverage": [
@@ -1218,7 +1218,7 @@
    "planner_kind": "mock"
   },
   "preflight": {
-   "preflight_fingerprint": "3bab69778b330e6573f707b3af7cd120f0c0a37723fb12e8af1113182a45e5bb",
+   "preflight_fingerprint": "114ee938f2216ddae633849d69c4f601776aaa6c5a4198f8980cdba06920598f",
    "preflight_id": "preflight.confirmed.draft.u504.r1"
   },
   "reading_guide_zh": [
@@ -1232,9 +1232,9 @@
    "分数是当前合成模型下、按你确认的陈述偏好计算的结果；小数末位的差异不构成可靠的排序"
   ],
   "real_model_calls": 0,
-  "result_fingerprint": "d33046b451ad8b955c0c7ea93fd7e9b06a5036f58883f49ac3b7b0322f5715ef",
-  "result_id": "result.run-e3a-54167a02f1908c9c",
-  "run_id": "run-e3a-54167a02f1908c9c",
+  "result_fingerprint": "2afdb08fbd9b154b5747434ca5f2497d871f333b241f79251d903da47c952768",
+  "result_id": "result.run-e3a-ea1e3dff2d3256a5",
+  "run_id": "run-e3a-ea1e3dff2d3256a5",
   "run_stage": "completed",
   "sources_zh": [
    "生活事实：E1 结算记录（钱、岗位、住房、食品、服务月份）与月度资源账（本人家务小时）",

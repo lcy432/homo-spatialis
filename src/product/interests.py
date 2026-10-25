@@ -6,6 +6,9 @@
 * 命中两个以上 → 有歧义（列出，不替用户选）；
 * 一个都没命中 → 没认出（原样保留为“本版未支持”，不进评分）。
 
+v3.4 的新流程不写文字：用户在面板里直接选中类别（作答状态 ``selected``），审阅直接采用这些类别，不需要解释。下面的文字解释
+只为兼容旧草稿保留（作答状态 ``described``）。
+
 候选只是待确认的解释：用户必须在 ``selected`` 里明确选中，类别才进入有评分作用的确认画像。只有文字、没有选中时审阅不能确认
 （免得没核对的解释或空白悄悄进入评分）；用户也可以改选“通用休闲评价”“明确没有固定爱好”“暂不确定”。同一类别选了两次在审阅
 阶段就拒绝（不等到编译才失败）。不管选了哪种作答状态，用户写的原文都原样保留：改选通用评价时，“喜欢冲浪”照样留存为本版未支持
@@ -73,6 +76,8 @@ def interpret(text: str | None, terms: tuple[Term, ...]) -> Interpretation:
     return Interpretation(tuple(candidates), tuple(ambiguous), tuple(unrecognized))
 
 
+#: 采用了类别的作答状态：面板直接选中，或文字解释之后选中（兼容）。确认画像里都是 ``confirmed``。
+_ADOPTED = {"selected", "described"}
 #: 不需要类别的作答状态（审阅可以直接确认）。
 _NO_CATEGORY = {
     "leisure": {"unanswered", "unsure", "no_fixed_hobby", "generic"},
@@ -168,6 +173,13 @@ ANSWER_STATES: dict[str, dict[str, tuple[Sub, Sub]]] = {
                 "先按词表形成候选，你选中的类别才进入评价；没认出的描述原样保留，本版不评价",
             ),
         ),
+        "selected": (
+            Sub("input.answer_state.leisure.selected.name", "从面板选择"),
+            Sub(
+                "input.answer_state.leisure.selected.meaning",
+                "你选中的类别直接用于评价，不需要写文字",
+            ),
+        ),
     },
     "taste": {
         "unanswered": (
@@ -187,6 +199,13 @@ ANSWER_STATES: dict[str, dict[str, tuple[Sub, Sub]]] = {
             Sub(
                 "input.answer_state.taste.described.meaning",
                 "先按词表形成候选，你选中的菜系才进入饮食评价；品牌与其他要求只留存",
+            ),
+        ),
+        "selected": (
+            Sub("input.answer_state.taste.selected.name", "从面板选择"),
+            Sub(
+                "input.answer_state.taste.selected.meaning",
+                "你选中的菜系直接用于饮食评价，不需要写文字",
             ),
         ),
     },
@@ -301,6 +320,23 @@ def review_one(
             ),
             issues,
             found.unrecognized,
+        )
+    if state == "selected":
+        # 面板直接选中（不写文字）：选中的类别就是采用的类别，不需要再解释
+        return (
+            InterestReview(
+                state=state,
+                selected=selected,
+                status="confirmable",
+                message_zh=t(
+                    "input.interests.selected.review",
+                    "{label}：从面板选中 {names}",
+                    label=label,
+                    names=names(selected),
+                )[:400],
+            ),
+            issues,
+            (),
         )
     if state in _NO_CATEGORY[kind]:
         if selected:
@@ -460,7 +496,7 @@ def scope_lines(
     """确认画像与预检查、结果里共用的范围说明：按什么个性化、哪些没有个性化、哪些原文本版不支持。"""
     out = []
     for kind, r in (("leisure", leisure), ("taste", taste)):
-        if r.state == "described":
+        if r.state in _ADOPTED:
             names = Join(
                 tuple(
                     Ent(ENTITY[kind], k, labels[kind][k]) if k in labels[kind] else Raw(k)
@@ -526,7 +562,7 @@ def confirmed_scope_lines(pack: DataPack, confirmed: ConfirmedProfile) -> tuple[
 
 
 def needs_not_personalized_ack(leisure: InterestReview, taste: InterestReview) -> bool:
-    return leisure.state != "described" or taste.state != "described"
+    return leisure.state not in _ADOPTED or taste.state not in _ADOPTED
 
 
 def confirmed(
@@ -538,13 +574,13 @@ def confirmed(
     """审阅（已经可确认）→ 确认画像里的兴趣与口味。原文在任何作答状态下都保留。"""
 
     def status_of(r: InterestReview) -> str:
-        return "confirmed" if r.state == "described" else r.state
+        return "confirmed" if r.state in _ADOPTED else r.state
 
     return ConfirmedInterests(
         leisure_status=status_of(leisure),  # type: ignore[arg-type]
-        leisure_categories=leisure.selected if leisure.state == "described" else (),
+        leisure_categories=leisure.selected if leisure.state in _ADOPTED else (),
         taste_status=status_of(taste),  # type: ignore[arg-type]
-        cuisines=taste.selected if taste.state == "described" else (),
+        cuisines=taste.selected if taste.state in _ADOPTED else (),
         leisure_text=leisure.text,
         taste_text=taste.text,
         unrecognized_text=tuple(dict.fromkeys((*leisure.unrecognized, *taste.unrecognized))),

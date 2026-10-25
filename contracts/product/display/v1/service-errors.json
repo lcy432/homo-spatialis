@@ -131,6 +131,32 @@
     "next": "检查页面上的填写；问题一直出现时请联系维护者并提供支持编号"
    }
   },
+  "migration_consent_required": {
+   "en": {
+    "impact": "The draft was not changed, and the new questionnaire cannot use it yet",
+    "message": "This old draft has answers the new questionnaire no longer collects; migrating clears them, and you have not agreed to that yet",
+    "next": "Read the draft's migration notes first; migrate after you agree to clear those old answers"
+   },
+   "status": 409,
+   "zh": {
+    "impact": "草稿没有改动，新问卷还不能用它",
+    "message": "这份旧草稿里有新问卷不再收集的答案，迁移会清空它们，还没有得到你的同意",
+    "next": "先看草稿的迁移说明；同意清空那些旧答案后再迁移"
+   }
+  },
+  "migration_not_needed": {
+   "en": {
+    "impact": "The draft was not changed",
+    "message": "This draft already uses the current questionnaire version; there is nothing to migrate",
+    "next": "Review this draft directly"
+   },
+   "status": 409,
+   "zh": {
+    "impact": "草稿没有改动",
+    "message": "这份草稿已经是当前的问卷版本，没有要迁移的内容",
+    "next": "直接审阅这份草稿"
+   }
+  },
   "not_found": {
    "en": {
     "impact": "This ID does not exist in your space (it may also have expired or been deleted)",

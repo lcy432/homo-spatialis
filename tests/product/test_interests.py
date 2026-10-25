@@ -110,15 +110,8 @@ def test_out_of_vocabulary_or_conflicting_selections_are_refused(pack):
     assert taste.taste.status == "invalid"
 
 
-def test_interests_and_brands_do_not_change_points_cash_or_eligibility(pack):
-    brand = (
-        {
-            "preference_id": "pref.brand",
-            "need": "personal_enjoyment",
-            "kind": "brand",
-            "raw_text": "吉他想要某个牌子的",
-        },
-    )
+def test_interests_do_not_change_points_cash_or_eligibility(pack):
+    """兴趣与口味只进入共同、有限的匹配规则（品牌等属性偏好新问卷不再收集）。"""
     _, plain = confirm(pack, with_interests(pack))
     _, fan = confirm(
         pack,
@@ -126,7 +119,6 @@ def test_interests_and_brands_do_not_change_points_cash_or_eligibility(pack):
             pack,
             LeisureInterestAnswer(state="described", text="吉他", selected=("music",)),
             TasteAnswer(state="described", text="川菜", selected=("sichuan",)),
-            attributes=brand,
         ),
     )
     assert fan.six_dimensions == plain.six_dimensions and fan.material == plain.material
@@ -135,7 +127,6 @@ def test_interests_and_brands_do_not_change_points_cash_or_eligibility(pack):
     )  # 兴趣是确认内容的一部分：改了要重新确认
     assert fan.money == plain.money and fan.hard_requirements == plain.hard_requirements
     p0, p1 = product_profile(pack, plain, []), product_profile(pack, fan, [])
-    assert any("吉他想要某个牌子的" in r for r in p1.unsupported_requests)
     a, b = preference_from_confirmed_profile(p0), preference_from_confirmed_profile(p1)
     assert a.dimension_weights == b.dimension_weights and a.material_weights == b.material_weights
     assert (b.leisure_interests, b.cuisines) == (("music",), ("sichuan",))  # 品牌没有进入评分偏好

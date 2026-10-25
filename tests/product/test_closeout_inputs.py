@@ -143,38 +143,18 @@ def test_a_repeated_or_conflicting_ability_is_refused_and_not_granted(pack, stat
     assert "accounting_cert" not in review.abilities  # 不按“出现一次已提供就算持有”
 
 
-@pytest.mark.parametrize(
-    ("ids", "values"),
-    [
-        (("hr.commute", "hr.commute2"), (60, 45)),
-        (("hr.commute2", "hr.commute"), (45, 60)),
-        (("hr.commute", "hr.commute"), (60, 45)),
-        (("hr.commute", "hr.commute2"), (60, 60)),
-    ],
-)
-def test_two_requirements_for_the_same_e1_need_are_refused_not_merged(pack, ids, values):
-    raw = _raw(pack)
-    raw["hard_requirements"] = [
-        {"requirement_id": rid, "option_id": "housing.max_commute_roundtrip", "parameter_value": v}
-        for rid, v in zip(ids, values, strict=True)
-    ]
-    issues, refused = _refused(pack, raw)
-    assert "hard_requirement_conflict" in refused  # 按 E1 需求比较，不只比较编号
-    if ids[0] == ids[1]:
-        assert "hard_requirement_duplicated" in refused
-    conflict = next(i for i in issues if i.code == "hard_requirement_conflict")
-    assert "不自动取更严格的上限" in conflict.message_zh
-
-
 def test_a_profile_contract_failure_at_compile_is_a_structured_refusal(pack, ws, tmp_path):
     """审阅之外的入口（例如别处构造的、身份照样封好的确认画像）带着同一需求两条硬要求进来：预检查返回可展示的拒绝与审计编号，
-    原文进编译目录的内部诊断，不抛出 ValidationError。"""
+    原文进编译目录的内部诊断，不抛出 ValidationError。新问卷不再收集硬要求，这里用带旧硬要求的历史画像（受控夹具）。"""
+    from product.scenarios import LEGACY_COMMUTE_60, with_legacy_hard_requirements
+
     with contextlib.chdir(ws):
         draft = make_draft(pack)
         review = review_draft(pack, draft)
         confirmed = confirm_profile(
             pack, draft, person_ref="u1", acknowledged=review.pending_confirmations
         )
+        confirmed = with_legacy_hard_requirements(pack, confirmed, LEGACY_COMMUTE_60)
         twice = confirmed.hard_requirements * 2
         forged = confirmed.model_copy(update={"hard_requirements": twice})
         forged = forged.model_copy(update={"content_fingerprint": forged.expected_fingerprint()})

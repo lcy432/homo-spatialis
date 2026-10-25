@@ -2,6 +2,8 @@
 草稿、审阅、确认、运行意图、确认开始）→ 业务函数 → worker → LangGraph → E1 → 产品结果。
 
 * 规划器默认是离线 mock（零网络、零费用，不代表真实模型）；人物是合成的 u501（文员）；资料包按参数（默认生产用的 E3B 六城包）；
+  资料包配了输入目录时按新流程填写（v3.4：职业从目录直接选、最高学历“高中”、证书明确“没有”、没有硬要求与属性偏好），没有目录时
+  用兼容的文字描述；
 * ``planner="llm"``：生产配置的形态（真实规划器的调用设定与报价、付费开关**关闭**）——只走到运行前检查（含首年请求大小检查）与
   确认开始，确认开始应当被 ``paid_calls_disabled`` 明确拒绝、不扣次数；不建传输、不发任何请求；
 * 数据目录在 ``--out`` 下（新目录，不碰真实的服务数据）；不写任何仓库文件；
@@ -89,7 +91,7 @@ def run_e2e(
         draft_id=view["draft"]["draft_id"],
         revision=view["draft"]["revision"],
         cities=chosen,
-        **({"abilities": ("edu_at_least_hs",)} if real else {}),
+        **_answers(ctx.pack, real),
     )
     call(
         "PUT",
@@ -121,6 +123,15 @@ def run_e2e(
     ready = call("GET", f"/run-intents/{intent['intent_id']}")
     summary: dict[str, Any] = {
         "data_identity": _identity(ctx),
+        "input": {
+            "occupation_mode": draft.occupation.mode,
+            "occupation": draft.occupation.selected_candidate,
+            "education": draft.education.option_id,
+            "ability_claims": [c.ability_id for c in draft.abilities],
+            "hard_requirements": len(draft.hard_requirements),
+            "attribute_preferences": len(draft.attribute_preferences),
+            "abilities_confirmed": list(confirmed["confirmed"]["abilities"]),
+        },
         "service_profile": profile,
         "settings": ready["settings"],
         "preflight_status": (ready.get("preflight") or {}).get("status"),
@@ -358,3 +369,21 @@ def _result_summary(result: dict[str, Any], progress: dict[str, Any]) -> dict[st
         "planning_calls": {"used": cost["calls_used"], "limit": cost["call_limit"]},
         "real_model_calls": result["real_model_calls"],
     }
+
+
+def _answers(pack: Any, real: bool) -> dict[str, Any]:
+    """草稿的答案（合成文员 u501）：资料包配了输入目录就按新流程（目录选职业、学历题、证书题）；没有就用兼容的文字描述。"""
+    from product.input_catalog import input_catalog
+
+    catalog = input_catalog(pack)
+    if catalog is None:
+        return {"abilities": ("edu_at_least_hs",)} if real else {}
+    answers: dict[str, Any] = {
+        "occupation_mode": "catalog",
+        "occupation_text": None,
+        "selected": "occ.office_clerk",
+        "certificates": (),
+    }
+    if catalog.decl.sections.education:
+        answers["education"] = "high_school"
+    return answers

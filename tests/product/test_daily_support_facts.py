@@ -57,9 +57,9 @@ def test_the_material_texts_say_what_the_two_changed_items_mean():
 def test_an_old_confirmation_must_be_reviewed_again():
     pack = load_pack()
     assert (PRODUCT_SCHEMA_VERSION, QUESTIONNAIRE_VERSION, VOCABULARY_VERSION) == (
-        "e3a-product-schema-v3.3",
-        "e3a-questionnaire-v0.3-draft",
-        "e3a-vocabulary-v4",
+        "e3a-product-schema-v3.4",
+        "e3a-questionnaire-v0.4-draft",
+        "e3a-vocabulary-v5",
     )
     old = pack.meta().model_dump(mode="json") | {
         "schema_version": "e3a-product-schema-v3.2",

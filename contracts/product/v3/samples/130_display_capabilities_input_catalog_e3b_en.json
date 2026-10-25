@@ -1,0 +1,5163 @@
+{
+ "description_zh": "能力清单（E3B）的英文显示：输入目录的分组、职业名称与职责、学历选项、证书、经验问题、作答状态、面板分组与搜索说明都有英文；搜索词照原文、不翻译（不算进显示文字）",
+ "message": "DisplayEnvelope",
+ "payload": {
+  "acknowledgements": [],
+  "answer_states": [
+   {
+    "answer": "leisure",
+    "meaning": {
+     "en": "No clear information for this item: evaluated with the neutral rule, and not treated as choosing the “general evaluation”",
+     "key": "input.answer_state.leisure.unanswered.meaning",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+     "status": "provided",
+     "zh": "没有这一项的明确信息，按中性规则评价；不会被当成“通用评价”的选择"
+    },
+    "name": {
+     "en": "Not answered",
+     "key": "input.answer_state.leisure.unanswered.name",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+     "status": "provided",
+     "zh": "未答"
+    },
+    "state": "unanswered"
+   },
+   {
+    "answer": "leisure",
+    "meaning": {
+     "en": "Evaluated with the neutral rule",
+     "key": "input.answer_state.leisure.unsure.meaning",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+     "status": "provided",
+     "zh": "按中性规则评价"
+    },
+    "name": {
+     "en": "Not sure yet",
+     "key": "input.answer_state.leisure.unsure.name",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+     "status": "provided",
+     "zh": "暂不确定"
+    },
+    "state": "unsure"
+   },
+   {
+    "answer": "leisure",
+    "meaning": {
+     "en": "Evaluated with the neutral rule",
+     "key": "input.answer_state.leisure.no_fixed_hobby.meaning",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+     "status": "provided",
+     "zh": "按中性规则评价"
+    },
+    "name": {
+     "en": "No fixed hobby (stated)",
+     "key": "input.answer_state.leisure.no_fixed_hobby.name",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+     "status": "provided",
+     "zh": "明确没有固定爱好"
+    },
+    "state": "no_fixed_hobby"
+   },
+   {
+    "answer": "leisure",
+    "meaning": {
+     "en": "Experience whatever suitable activities the city offers (evaluated with the neutral rule)",
+     "key": "input.answer_state.leisure.generic.meaning",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+     "status": "provided",
+     "zh": "城市有什么合适的就体验什么（按中性规则评价）"
+    },
+    "name": {
+     "en": "General leisure evaluation",
+     "key": "input.answer_state.leisure.generic.name",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+     "status": "provided",
+     "zh": "采用通用休闲评价"
+    },
+    "state": "generic"
+   },
+   {
+    "answer": "leisure",
+    "meaning": {
+     "en": "Candidates are first formed from the vocabulary; only the categories you choose enter the evaluation, and unrecognized descriptions are kept as written and not evaluated in this version",
+     "key": "input.answer_state.leisure.described.meaning",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+     "status": "provided",
+     "zh": "先按词表形成候选，你选中的类别才进入评价；没认出的描述原样保留，本版不评价"
+    },
+    "name": {
+     "en": "Described in words",
+     "key": "input.answer_state.leisure.described.name",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+     "status": "provided",
+     "zh": "用文字描述"
+    },
+    "state": "described"
+   },
+   {
+    "answer": "leisure",
+    "meaning": {
+     "en": "The categories you pick are used for the evaluation directly; no text is needed",
+     "key": "input.answer_state.leisure.selected.meaning",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+     "status": "provided",
+     "zh": "你选中的类别直接用于评价，不需要写文字"
+    },
+    "name": {
+     "en": "Picked from the panel",
+     "key": "input.answer_state.leisure.selected.name",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+     "status": "provided",
+     "zh": "从面板选择"
+    },
+    "state": "selected"
+   },
+   {
+    "answer": "taste",
+    "meaning": {
+     "en": "Evaluated with the neutral rule",
+     "key": "input.answer_state.taste.unanswered.meaning",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+     "status": "provided",
+     "zh": "按中性规则评价"
+    },
+    "name": {
+     "en": "Not answered",
+     "key": "input.answer_state.taste.unanswered.name",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+     "status": "provided",
+     "zh": "未答"
+    },
+    "state": "unanswered"
+   },
+   {
+    "answer": "taste",
+    "meaning": {
+     "en": "Evaluated with the neutral rule",
+     "key": "input.answer_state.taste.unsure.meaning",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+     "status": "provided",
+     "zh": "按中性规则评价"
+    },
+    "name": {
+     "en": "Not sure yet",
+     "key": "input.answer_state.taste.unsure.name",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+     "status": "provided",
+     "zh": "暂不确定"
+    },
+    "state": "unsure"
+   },
+   {
+    "answer": "taste",
+    "meaning": {
+     "en": "Evaluated with the neutral rule",
+     "key": "input.answer_state.taste.no_preference.meaning",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+     "status": "provided",
+     "zh": "按中性规则评价"
+    },
+    "name": {
+     "en": "No taste preference (stated)",
+     "key": "input.answer_state.taste.no_preference.name",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+     "status": "provided",
+     "zh": "明确没有口味偏好"
+    },
+    "state": "no_preference"
+   },
+   {
+    "answer": "taste",
+    "meaning": {
+     "en": "Candidates are first formed from the vocabulary; only the cuisines you choose enter the food evaluation, and brands and other requirements are only kept as written",
+     "key": "input.answer_state.taste.described.meaning",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+     "status": "provided",
+     "zh": "先按词表形成候选，你选中的菜系才进入饮食评价；品牌与其他要求只留存"
+    },
+    "name": {
+     "en": "Described in words",
+     "key": "input.answer_state.taste.described.name",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+     "status": "provided",
+     "zh": "用文字描述"
+    },
+    "state": "described"
+   },
+   {
+    "answer": "taste",
+    "meaning": {
+     "en": "The cuisines you pick are used for the food evaluation directly; no text is needed",
+     "key": "input.answer_state.taste.selected.meaning",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+     "status": "provided",
+     "zh": "你选中的菜系直接用于饮食评价，不需要写文字"
+    },
+    "name": {
+     "en": "Picked from the panel",
+     "key": "input.answer_state.taste.selected.name",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+     "status": "provided",
+     "zh": "从面板选择"
+    },
+    "state": "selected"
+   }
+  ],
+  "display_schema_version": "e3-display-v2",
+  "fields": [
+   {
+    "key": "pack.note.real",
+    "missing_reason": null,
+    "pointer": "/meta/data_pack/note",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Frozen real data pack (DECISIONS/0042): city data comes from public sources and registered model settings; life rules and scoring parameters are synthetic exploratory settings"
+   },
+   {
+    "key": "entity.city.label:US:CBSA2023:35620",
+    "missing_reason": null,
+    "pointer": "/cities/0/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "New York (residents of New York City's five boroughs)"
+   },
+   {
+    "key": "entity.city.note:US:CBSA2023:35620",
+    "missing_reason": null,
+    "pointer": "/cities/0/note",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Supported places to live and work are limited to the tax scope (tax.us2024.nyc)"
+   },
+   {
+    "key": "entity.city.label:US:CBSA2023:31080",
+    "missing_reason": null,
+    "pointer": "/cities/1/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Los Angeles"
+   },
+   {
+    "key": "entity.city.note:US:CBSA2023:31080",
+    "missing_reason": null,
+    "pointer": "/cities/1/note",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Supported places to live and work are limited to the tax scope (tax.us2024.ca)"
+   },
+   {
+    "key": "entity.city.label:US:CBSA2023:41860",
+    "missing_reason": null,
+    "pointer": "/cities/2/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "San Francisco"
+   },
+   {
+    "key": "entity.city.note:US:CBSA2023:41860",
+    "missing_reason": null,
+    "pointer": "/cities/2/note",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Supported places to live and work are limited to the tax scope (tax.us2024.ca)"
+   },
+   {
+    "key": "entity.city.label:US:CBSA2023:16980",
+    "missing_reason": null,
+    "pointer": "/cities/3/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Chicago (Illinois part)"
+   },
+   {
+    "key": "entity.city.note:US:CBSA2023:16980",
+    "missing_reason": null,
+    "pointer": "/cities/3/note",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Supported places to live and work are limited to the tax scope (tax.us2024.il)"
+   },
+   {
+    "key": "entity.city.label:US:CBSA2023:26420",
+    "missing_reason": null,
+    "pointer": "/cities/4/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Houston"
+   },
+   {
+    "key": "entity.city.note:US:CBSA2023:26420",
+    "missing_reason": null,
+    "pointer": "/cities/4/note",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Supported places to live and work are limited to the tax scope (tax.us2024.tx)"
+   },
+   {
+    "key": "entity.city.label:US:CBSA2023:42660",
+    "missing_reason": null,
+    "pointer": "/cities/5/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Seattle"
+   },
+   {
+    "key": "entity.city.note:US:CBSA2023:42660",
+    "missing_reason": null,
+    "pointer": "/cities/5/note",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Supported places to live and work are limited to the tax scope (tax.us2024.wa)"
+   },
+   {
+    "key": "input.capabilities.occupation_note.v2",
+    "missing_reason": null,
+    "pointer": "/occupation/note",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "The new flow lets you browse the occupation catalog by group or search it and pick one directly (see input_catalog; no text needed). Describing your work in words is kept only for compatibility: the system offers a few readable candidates (name and duties) from the aliases of a controlled vocabulary, and you confirm one. Classification codes stay internal; you never need to enter one. When nothing matches, the system says why and never turns you into a “generic office worker”"
+   },
+   {
+    "key": "entity.dimension.label:material",
+    "missing_reason": null,
+    "pointer": "/dimensions/0/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Material life"
+   },
+   {
+    "key": "entity.dimension.definition:material",
+    "missing_reason": null,
+    "pointer": "/dimensions/0/definition",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "What you actually get from consumption: the condition of your home, whether food is fresh and to your taste, whether phone, internet and household supplies are convenient, whether daily chores are easy, and clothing and personal care (split into four items inside)"
+   },
+   {
+    "key": "entity.dimension.reference_improvement:material",
+    "missing_reason": null,
+    "pointer": "/dimensions/0/reference_improvement",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Reference situation: from a one-bedroom far away, eating mostly rice, flour and canned food and doing all the laundry and cleaning yourself, to three fresh-ingredient meals a day and about 18 fewer hours of housework a month (one step of improvement in this version's synthetic model)"
+   },
+   {
+    "key": "entity.dimension.support_note:material",
+    "missing_reason": null,
+    "pointer": "/dimensions/0/support_note",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Housing condition, food, daily support and convenience, and personal consumption and enjoyment are all scored on actual life; other material needs such as storage are not in this version"
+   },
+   {
+    "key": "entity.dimension.label:safety",
+    "missing_reason": null,
+    "pointer": "/dimensions/1/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Safety"
+   },
+   {
+    "key": "entity.dimension.definition:safety",
+    "missing_reason": null,
+    "pointer": "/dimensions/1/definition",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Public safety conditions in the city"
+   },
+   {
+    "key": "entity.dimension.reference_improvement:safety",
+    "missing_reason": null,
+    "pointer": "/dimensions/1/reference_improvement",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Reference situation: a synthetic safety index rising from 4 to 8 (0–10, comparable only among this set of synthetic cities)"
+   },
+   {
+    "key": "entity.dimension.support_note:safety",
+    "missing_reason": null,
+    "pointer": "/dimensions/1/support_note",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "This version has only the city's background conditions; clones cannot improve it by spending or acting"
+   },
+   {
+    "key": "entity.dimension.label:opportunity",
+    "missing_reason": null,
+    "pointer": "/dimensions/2/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Opportunity"
+   },
+   {
+    "key": "entity.dimension.definition:opportunity",
+    "missing_reason": null,
+    "pointer": "/dimensions/2/definition",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "The career and growth conditions the city offers, plus new abilities you actually learn in your life"
+   },
+   {
+    "key": "entity.dimension.reference_improvement:opportunity",
+    "missing_reason": null,
+    "pointer": "/dimensions/2/reference_improvement",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Reference situation: finishing a 12-month qualification course within a year, or the city's opportunity conditions rising from a synthetic index of 4 to 8"
+   },
+   {
+    "key": "entity.dimension.support_note:opportunity",
+    "missing_reason": null,
+    "pointer": "/dimensions/2/support_note",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "City background + the learning you actually take part in; certificates themselves, job changes and pay rises earn nothing extra"
+   },
+   {
+    "key": "entity.dimension.label:leisure",
+    "missing_reason": null,
+    "pointer": "/dimensions/3/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Leisure"
+   },
+   {
+    "key": "entity.dimension.definition:leisure",
+    "missing_reason": null,
+    "pointer": "/dimensions/3/definition",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "The city's basic leisure conditions, plus exercise, shows and other activities you actually take part in"
+   },
+   {
+    "key": "entity.dimension.reference_improvement:leisure",
+    "missing_reason": null,
+    "pointer": "/dimensions/3/reference_improvement",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Reference situation: from no activities at all each month to going to the gym 8 times a month"
+   },
+   {
+    "key": "entity.dimension.support_note:leisure",
+    "missing_reason": null,
+    "pointer": "/dimensions/3/support_note",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Only activities that actually happen count; matching specific hobbies to geography is not in this version"
+   },
+   {
+    "key": "entity.dimension.label:environment",
+    "missing_reason": null,
+    "pointer": "/dimensions/4/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Environment"
+   },
+   {
+    "key": "entity.dimension.definition:environment",
+    "missing_reason": null,
+    "pointer": "/dimensions/4/definition",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Background conditions of air, climate and the urban environment"
+   },
+   {
+    "key": "entity.dimension.reference_improvement:environment",
+    "missing_reason": null,
+    "pointer": "/dimensions/4/reference_improvement",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Reference situation: a synthetic environment index rising from 4 to 8 (0–10, comparable only among this set of synthetic cities)"
+   },
+   {
+    "key": "entity.dimension.support_note:environment",
+    "missing_reason": null,
+    "pointer": "/dimensions/4/support_note",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "This version has only the city's background conditions; clones cannot improve it by acting"
+   },
+   {
+    "key": "entity.dimension.label:commute",
+    "missing_reason": null,
+    "pointer": "/dimensions/5/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Ease of commuting"
+   },
+   {
+    "key": "entity.dimension.definition:commute",
+    "missing_reason": null,
+    "pointer": "/dimensions/5/definition",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "How the round-trip time between home and work and the number of days you actually go to work affect your life"
+   },
+   {
+    "key": "entity.dimension.reference_improvement:commute",
+    "missing_reason": null,
+    "pointer": "/dimensions/5/reference_improvement",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Reference situation: with 20 days on site a month, the daily round trip shrinking from 70 to 30 minutes"
+   },
+   {
+    "key": "entity.dimension.support_note:commute",
+    "missing_reason": null,
+    "pointer": "/dimensions/5/support_note",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Scored on the round-trip minutes from the home you actually live in and the days you actually go to work; non-work trips are not detailed in this version"
+   },
+   {
+    "key": "entity.leaf.label:housing_condition",
+    "missing_reason": null,
+    "pointer": "/material_leaves/0/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Housing condition"
+   },
+   {
+    "key": "entity.leaf.definition:housing_condition",
+    "missing_reason": null,
+    "pointer": "/material_leaves/0/definition",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "The condition of the home you actually live in: whether there is enough space, and how good it is among homes of its kind"
+   },
+   {
+    "key": "entity.leaf.note:housing_condition",
+    "missing_reason": null,
+    "pointer": "/material_leaves/0/note",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Only the home itself counts; rent, commuting and the area's safety and environment are not in this item (safety and environment are counted separately by the area you live in); the old “living space (floor area only)” meant something different, so old confirmations need a new review"
+   },
+   {
+    "key": "entity.leaf.label:food_life",
+    "missing_reason": null,
+    "pointer": "/material_leaves/1/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Food"
+   },
+   {
+    "key": "entity.leaf.definition:food_life",
+    "missing_reason": null,
+    "pointer": "/material_leaves/1/definition",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Whether the complete food plan you actually eat (cooking at home or eating out) is fresh and matches the taste you confirmed"
+   },
+   {
+    "key": "entity.leaf.note:food_life",
+    "missing_reason": null,
+    "pointer": "/material_leaves/1/note",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Only fresh meals and the cuisines you confirmed are evaluated; having enough to eat is a basic guarantee and earns nothing extra; price, restaurant tier and how often you eat out do not mean better; preparation time counts in the time budget"
+   },
+   {
+    "key": "entity.leaf.label:daily_convenience",
+    "missing_reason": null,
+    "pointer": "/material_leaves/2/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Daily support and convenience"
+   },
+   {
+    "key": "entity.leaf.definition:daily_convenience",
+    "missing_reason": null,
+    "pointer": "/material_leaves/2/definition",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Whether phone and internet service and household supplies are easy to get, and whether daily chores are easy."
+   },
+   {
+    "key": "entity.leaf.note:daily_convenience",
+    "missing_reason": null,
+    "pointer": "/material_leaves/2/note",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Chores count by how many hours you actually do less yourself (devices and human services are two ways to get there and are not scored separately); phone, home internet and household supplies count by the months actually bought, and buying two of the same item counts no more; it is relative importance, not a budget or an order to buy; it covers phone service and household supplies beyond the old “daily convenience”, so old confirmations need a new review"
+   },
+   {
+    "key": "entity.leaf.label:personal_enjoyment",
+    "missing_reason": null,
+    "pointer": "/material_leaves/3/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Personal consumption and enjoyment"
+   },
+   {
+    "key": "entity.leaf.definition:personal_enjoyment",
+    "missing_reason": null,
+    "pointer": "/material_leaves/3/definition",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Beyond other living costs, the satisfaction of personal consumption such as clothing and personal care."
+   },
+   {
+    "key": "entity.leaf.note:personal_enjoyment",
+    "missing_reason": null,
+    "pointer": "/material_leaves/3/note",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Evaluated by the standard personal consumption basket (clothing, shoes and accessories, personal care) you actually get each month, not by how much you spend; the same basket costing more does not change this item, only buying less lowers it; it is an explainable model abstraction and does not measure a real person's happiness; massages and home comfort goods are no longer counted separately; the meaning differs from the old version, so old confirmations need a new review"
+   },
+   {
+    "key": "entity.capability.manual_entry:points",
+    "missing_reason": null,
+    "pointer": "/points/manual_entry",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Manual entries are parsed as exact decimals with at most 2 decimal places (the step is not a measurement precision); fractions in lowest terms are also accepted (for example 50/3)"
+   },
+   {
+    "key": "entity.capability.canonical_form:points",
+    "missing_reason": null,
+    "pointer": "/points/canonical_form",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "A whole number after reducing (30) or numerator/denominator (50/3); calculations and comparisons use it, display rounds to 1 decimal place, and displayed values never feed back into calculations"
+   },
+   {
+    "key": "entity.capability.rules.0:points",
+    "missing_reason": null,
+    "pointer": "/points/rules/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "The six areas must add up to exactly 100; no values are pre-filled, no personality presets are offered, and other items are never reduced proportionally"
+   },
+   {
+    "key": "entity.capability.rules.1:points",
+    "missing_reason": null,
+    "pointer": "/points/rules/1",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "An equal split is generated only when the user chooses “split equally” (50/3 for each of the six areas, 25 for each material item), so items listed first get no extra points"
+   },
+   {
+    "key": "entity.capability.rules.2:points",
+    "missing_reason": null,
+    "pointer": "/points/rules/2",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "An explicit 0 is a provided value; “not answered”, “explicitly no strong view” and “not sure yet” are never turned into 0 or an equal share automatically"
+   },
+   {
+    "key": "entity.capability.rules.3:points",
+    "missing_reason": null,
+    "pointer": "/points/rules/3",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "When material life is positive, the four material items must also add up to exactly 100; when material life is explicitly 0, the breakdown does not apply and no four answers are invented"
+   },
+   {
+    "key": "entity.capability.rules.4:points",
+    "missing_reason": null,
+    "pointer": "/points/rules/4",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Since material life went from three items to four and the meaning of food widened, old confirmations cannot be carried over by adding a 0 or redistributing points: please review and confirm again"
+   },
+   {
+    "key": "entity.capability.common_prompt:health_questionnaire",
+    "missing_reason": null,
+    "pointer": "/health_questionnaire/common_prompt",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Assume your basic living needs are covered, and judge whether each choice below describes you. There are no right answers."
+   },
+   {
+    "key": "entity.health_question.text:hc_more_pay_more_sick_risk",
+    "missing_reason": null,
+    "pointer": "/health_questionnaire/questions/0/text",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "One arrangement earns a little more money, but also makes it more likely that you get sick and need a few days of rest. I am willing to choose it."
+   },
+   {
+    "key": "entity.health_question.text:hc_reserve_for_health_costs",
+    "missing_reason": null,
+    "pointer": "/health_questionnaire/questions/1/text",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "To be ready for possible health costs, I am willing to postpone a purchase I want but do not urgently need, and set some money aside first."
+   },
+   {
+    "key": "entity.health_question.text:hc_wait_for_clear_risk_info",
+    "missing_reason": null,
+    "pointer": "/health_questionnaire/questions/2/text",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "When information about a health risk is still unclear, I am willing to give up a small immediate gain and decide once things are clear."
+   },
+   {
+    "key": "entity.health_option.label:agree",
+    "missing_reason": null,
+    "pointer": "/health_questionnaire/options/0/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Describes me"
+   },
+   {
+    "key": "entity.health_option.meaning:agree",
+    "missing_reason": null,
+    "pointer": "/health_questionnaire/options/0/meaning",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "This statement describes the user"
+   },
+   {
+    "key": "entity.health_option.label:disagree",
+    "missing_reason": null,
+    "pointer": "/health_questionnaire/options/1/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Does not describe me"
+   },
+   {
+    "key": "entity.health_option.meaning:disagree",
+    "missing_reason": null,
+    "pointer": "/health_questionnaire/options/1/meaning",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "This statement does not describe the user"
+   },
+   {
+    "key": "entity.health_option.label:no_clear_tendency",
+    "missing_reason": null,
+    "pointer": "/health_questionnaire/options/2/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "No clear tendency"
+   },
+   {
+    "key": "entity.health_option.meaning:no_clear_tendency",
+    "missing_reason": null,
+    "pointer": "/health_questionnaire/options/2/meaning",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "The user has no clear tendency on this question"
+   },
+   {
+    "key": "entity.health_option.label:unsure",
+    "missing_reason": null,
+    "pointer": "/health_questionnaire/options/3/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Not sure yet"
+   },
+   {
+    "key": "entity.health_option.meaning:unsure",
+    "missing_reason": null,
+    "pointer": "/health_questionnaire/options/3/meaning",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "The user is not sure yet: there is no explicit instruction for this item"
+   },
+   {
+    "key": "entity.capability.unanswered_rule:health_questionnaire",
+    "missing_reason": null,
+    "pointer": "/health_questionnaire/unanswered_rule",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "An unanswered question is stored as “not answered”, separately from “not sure yet”; both mean there is no explicit instruction for that item, and no middle value is filled in"
+   },
+   {
+    "key": "entity.capability.rules.0:health_questionnaire",
+    "missing_reason": null,
+    "pointer": "/health_questionnaire/rules/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "No total health score is calculated, and no disease probability, pain weight, treatment effect, willingness to pay or refusal of treatment is inferred"
+   },
+   {
+    "key": "entity.capability.rules.1:health_questionnaire",
+    "missing_reason": null,
+    "pointer": "/health_questionnaire/rules/1",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Health answers take none of the six areas' 100 points and are not a seventh scoring weight; they only inform the clones' planning and do not change illness rules, γ, H, accounts or satisfaction"
+   },
+   {
+    "key": "entity.capability.rules.2:health_questionnaire",
+    "missing_reason": null,
+    "pointer": "/health_questionnaire/rules/2",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "The questions are provisional wording, not tested in cognitive interviews or validated as a scale"
+   },
+   {
+    "key": "entity.hard_requirement.label:housing.max_commute_roundtrip",
+    "missing_reason": null,
+    "pointer": "/hard_requirement_options/0/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Round trip between home and the employment center no longer than (minutes)"
+   },
+   {
+    "key": "entity.hard_requirement.unit:housing.max_commute_roundtrip",
+    "missing_reason": null,
+    "pointer": "/hard_requirement_options/0/unit",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "minutes"
+   },
+   {
+    "key": "entity.hard_requirement.compiles_to:housing.max_commute_roundtrip",
+    "missing_reason": null,
+    "pointer": "/hard_requirement_options/0/compiles_to",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "E1 hard requirement: in the housing category, the longest round-trip minutes in the commute execution record ≤ the given minutes (checked every month; months without days on site count as 0)"
+   },
+   {
+    "key": "entity.hard_requirement.verification:housing.max_commute_roundtrip",
+    "missing_reason": null,
+    "pointer": "/hard_requirement_options/0/verification",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "The round-trip minutes from the home actually lived in are checked every month: met, not met and cannot be determined are reported separately; this does not enter the score and does not block plans"
+   },
+   {
+    "key": "entity.attribute_kind.label:brand",
+    "missing_reason": null,
+    "pointer": "/attribute_kinds/0/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Brand"
+   },
+   {
+    "key": "entity.attribute_kind.note:brand",
+    "missing_reason": null,
+    "pointer": "/attribute_kinds/0/note",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "The text is recorded; this version does not score it or pass it to the clones; it needs like-for-like quotes and matching rules (V2)"
+   },
+   {
+    "key": "entity.attribute_kind.label:cuisine",
+    "missing_reason": null,
+    "pointer": "/attribute_kinds/1/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Cuisine"
+   },
+   {
+    "key": "entity.attribute_kind.note:cuisine",
+    "missing_reason": null,
+    "pointer": "/attribute_kinds/1/note",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Text here is only kept; for taste to count in the food evaluation, describe it under “Taste and cuisines” and choose categories there"
+   },
+   {
+    "key": "entity.attribute_kind.label:preparation",
+    "missing_reason": null,
+    "pointer": "/attribute_kinds/2/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Preparation (cooking / takeout)"
+   },
+   {
+    "key": "entity.attribute_kind.note:preparation",
+    "missing_reason": null,
+    "pointer": "/attribute_kinds/2/note",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "The text is recorded; this version does not score it"
+   },
+   {
+    "key": "entity.attribute_kind.label:tier",
+    "missing_reason": null,
+    "pointer": "/attribute_kinds/3/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Tier"
+   },
+   {
+    "key": "entity.attribute_kind.note:tier",
+    "missing_reason": null,
+    "pointer": "/attribute_kinds/3/note",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "The text is recorded; this version does not score it; no tier preference is inferred from prices"
+   },
+   {
+    "key": "entity.attribute_kind.label:service_quality",
+    "missing_reason": null,
+    "pointer": "/attribute_kinds/4/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Service quality"
+   },
+   {
+    "key": "entity.attribute_kind.note:service_quality",
+    "missing_reason": null,
+    "pointer": "/attribute_kinds/4/note",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "The text is recorded; this version does not score it"
+   },
+   {
+    "key": "entity.attribute_kind.label:home_entry_concern",
+    "missing_reason": null,
+    "pointer": "/attribute_kinds/5/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Concerns about home visits (for example not wanting strangers in your home)"
+   },
+   {
+    "key": "entity.attribute_kind.note:home_entry_concern",
+    "missing_reason": null,
+    "pointer": "/attribute_kinds/5/note",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "The text is recorded; this version has no way to check or block in-home services, so clones may choose them: even if you confirm this as non-negotiable, it can only be kept as written"
+   },
+   {
+    "key": "entity.ability.label:edu_at_least_hs",
+    "missing_reason": null,
+    "pointer": "/abilities/0/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "High school diploma or equivalent"
+   },
+   {
+    "key": "entity.ability.ask_when:edu_at_least_hs",
+    "missing_reason": null,
+    "pointer": "/abilities/0/ask_when",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Asked only when your chosen occupation or a job in a candidate city requires it; the system never grants education, certificates or experience from a job title or free text"
+   },
+   {
+    "key": "entity.ability.label:edu_at_least_some_college",
+    "missing_reason": null,
+    "pointer": "/abilities/1/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Some college, no degree"
+   },
+   {
+    "key": "entity.ability.ask_when:edu_at_least_some_college",
+    "missing_reason": null,
+    "pointer": "/abilities/1/ask_when",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Asked only when your chosen occupation or a job in a candidate city requires it; the system never grants education, certificates or experience from a job title or free text"
+   },
+   {
+    "key": "entity.ability.label:edu_at_least_associate",
+    "missing_reason": null,
+    "pointer": "/abilities/2/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Associate's degree"
+   },
+   {
+    "key": "entity.ability.ask_when:edu_at_least_associate",
+    "missing_reason": null,
+    "pointer": "/abilities/2/ask_when",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Asked only when your chosen occupation or a job in a candidate city requires it; the system never grants education, certificates or experience from a job title or free text"
+   },
+   {
+    "key": "entity.ability.label:edu_at_least_bachelor",
+    "missing_reason": null,
+    "pointer": "/abilities/3/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Bachelor's degree"
+   },
+   {
+    "key": "entity.ability.ask_when:edu_at_least_bachelor",
+    "missing_reason": null,
+    "pointer": "/abilities/3/ask_when",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Asked only when your chosen occupation or a job in a candidate city requires it; the system never grants education, certificates or experience from a job title or free text"
+   },
+   {
+    "key": "entity.ability.label:edu_at_least_master",
+    "missing_reason": null,
+    "pointer": "/abilities/4/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Master's degree"
+   },
+   {
+    "key": "entity.ability.ask_when:edu_at_least_master",
+    "missing_reason": null,
+    "pointer": "/abilities/4/ask_when",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Asked only when your chosen occupation or a job in a candidate city requires it; the system never grants education, certificates or experience from a job title or free text"
+   },
+   {
+    "key": "entity.ability.label:edu_at_least_doctoral",
+    "missing_reason": null,
+    "pointer": "/abilities/5/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Doctoral or professional degree"
+   },
+   {
+    "key": "entity.ability.ask_when:edu_at_least_doctoral",
+    "missing_reason": null,
+    "pointer": "/abilities/5/ask_when",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Asked only when your chosen occupation or a job in a candidate city requires it; the system never grants education, certificates or experience from a job title or free text"
+   },
+   {
+    "key": "entity.ability.label:soc_27_4011_award",
+    "missing_reason": null,
+    "pointer": "/abilities/6/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Postsecondary nondegree award for Audio and Video Technicians"
+   },
+   {
+    "key": "entity.ability.ask_when:soc_27_4011_award",
+    "missing_reason": null,
+    "pointer": "/abilities/6/ask_when",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Asked only when your chosen occupation or a job in a candidate city requires it; the system never grants education, certificates or experience from a job title or free text"
+   },
+   {
+    "key": "entity.ability.label:soc_35_1012_experience",
+    "missing_reason": null,
+    "pointer": "/abilities/7/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Related work experience for First-Line Supervisors of Food Preparation and Serving Workers"
+   },
+   {
+    "key": "entity.ability.ask_when:soc_35_1012_experience",
+    "missing_reason": null,
+    "pointer": "/abilities/7/ask_when",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Asked only when your chosen occupation or a job in a candidate city requires it; the system never grants education, certificates or experience from a job title or free text"
+   },
+   {
+    "key": "entity.ability.label:soc_35_2014_experience",
+    "missing_reason": null,
+    "pointer": "/abilities/8/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Related work experience for Cooks, Restaurant"
+   },
+   {
+    "key": "entity.ability.ask_when:soc_35_2014_experience",
+    "missing_reason": null,
+    "pointer": "/abilities/8/ask_when",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Asked only when your chosen occupation or a job in a candidate city requires it; the system never grants education, certificates or experience from a job title or free text"
+   },
+   {
+    "key": "entity.ability.label:soc_41_1011_experience",
+    "missing_reason": null,
+    "pointer": "/abilities/9/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Related work experience for First-Line Supervisors of Retail Sales Workers"
+   },
+   {
+    "key": "entity.ability.ask_when:soc_41_1011_experience",
+    "missing_reason": null,
+    "pointer": "/abilities/9/ask_when",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Asked only when your chosen occupation or a job in a candidate city requires it; the system never grants education, certificates or experience from a job title or free text"
+   },
+   {
+    "key": "entity.ability.label:soc_43_1011_experience",
+    "missing_reason": null,
+    "pointer": "/abilities/10/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Related work experience for First-Line Supervisors of Office and Administrative Support Workers"
+   },
+   {
+    "key": "entity.ability.ask_when:soc_43_1011_experience",
+    "missing_reason": null,
+    "pointer": "/abilities/10/ask_when",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Asked only when your chosen occupation or a job in a candidate city requires it; the system never grants education, certificates or experience from a job title or free text"
+   },
+   {
+    "key": "entity.ability.label:soc_49_2022_award",
+    "missing_reason": null,
+    "pointer": "/abilities/11/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Postsecondary nondegree award for Telecommunications Equipment Installers and Repairers, Except Line Installers"
+   },
+   {
+    "key": "entity.ability.ask_when:soc_49_2022_award",
+    "missing_reason": null,
+    "pointer": "/abilities/11/ask_when",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Asked only when your chosen occupation or a job in a candidate city requires it; the system never grants education, certificates or experience from a job title or free text"
+   },
+   {
+    "key": "entity.ability.label:soc_49_3023_award",
+    "missing_reason": null,
+    "pointer": "/abilities/12/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Postsecondary nondegree award for Automotive Service Technicians and Mechanics"
+   },
+   {
+    "key": "entity.ability.ask_when:soc_49_3023_award",
+    "missing_reason": null,
+    "pointer": "/abilities/12/ask_when",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Asked only when your chosen occupation or a job in a candidate city requires it; the system never grants education, certificates or experience from a job title or free text"
+   },
+   {
+    "key": "entity.money_basis.note:USD.2024",
+    "missing_reason": null,
+    "pointer": "/money_bases/0/note",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Liquid funds you can actually spend, entered in 2024 US dollars at local price levels; the same basis as the catalogue, so the conversion is the identity, with no inflation or exchange-rate conversion"
+   },
+   {
+    "key": "input.capabilities.money_input_rule",
+    "missing_reason": null,
+    "pointer": "/money_input_rule_zh",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Amounts are accepted in only two forms: an ungrouped non-negative decimal (for example 3000.50), or thousands grouped strictly in threes (for example 3,000.50); the decimal point must be “.”, with at most two decimal places. Forms such as “3000,50”, “3,,000” or “1,23.45” are rejected; the system does not guess what you meant"
+   },
+   {
+    "key": "entity.capability.item.0:start_scenario",
+    "missing_reason": null,
+    "pointer": "/start_scenario/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "This is a simplified scenario of moving to a candidate city and starting over: it starts in year 1, healthy, with no belongings, no courses in progress and no savings goal"
+   },
+   {
+    "key": "entity.capability.item.1:start_scenario",
+    "missing_reason": null,
+    "pointer": "/start_scenario/1",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Real old furniture, medical history and ongoing courses are not included yet; this is an assumption of the simulation, not a judgement about your real situation"
+   },
+   {
+    "key": "entity.capability.item.2:start_scenario",
+    "missing_reason": null,
+    "pointer": "/start_scenario/2",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "The same you has the same age, cash, abilities and base time and energy in every city and every clone; specific jobs in a city are matched against the local catalogue"
+   },
+   {
+    "key": "entity.capability.item.0:unsupported",
+    "missing_reason": null,
+    "pointer": "/unsupported/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Multi-person households, non-wage income (interest, dividends, side jobs), shared household assets, buying a home and loans"
+   },
+   {
+    "key": "entity.capability.item.1:unsupported",
+    "missing_reason": null,
+    "pointer": "/unsupported/1",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Tax credits, pre-tax deductions and itemized deductions; residents of the New York metro area outside New York City, the Indiana part of the Chicago metro area, and cross-state combinations"
+   },
+   {
+    "key": "entity.capability.item.2:unsupported",
+    "missing_reason": null,
+    "pointer": "/unsupported/2",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Parking fees and distance-based transit fares; San Francisco transit fares (the official website refused access)"
+   },
+   {
+    "key": "entity.capability.item.3:unsupported",
+    "missing_reason": null,
+    "pointer": "/unsupported/3",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Real Chicago Park District activities (they need date windows, whole-session registration and age eligibility, which the engine does not support yet)"
+   },
+   {
+    "key": "entity.capability.item.4:unsupported",
+    "missing_reason": null,
+    "pointer": "/unsupported/4",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Scoring of brands, preparation, tier, service quality and home-visit concerns (the text is only recorded)"
+   },
+   {
+    "key": "entity.capability.item.5:unsupported",
+    "missing_reason": null,
+    "pointer": "/unsupported/5",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Interview-style input (only the interfaces for sources and evidence references are kept)"
+   },
+   {
+    "key": "entity.capability.item.0:limits",
+    "missing_reason": null,
+    "pointer": "/limits/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "City data come from public sources and registered model settings; life rules, scoring and evaluation parameters are synthetic exploratory settings: the results do not rank real cities and are not real-world recommendations"
+   },
+   {
+    "key": "entity.capability.item.1:limits",
+    "missing_reason": null,
+    "pointer": "/limits/1",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "The safety background is converted from each metro area's 2024 crime statistics (a statistical proxy, not a person's probability of experiencing crime; for New York it covers only the New York State part of the metro area); the leisure background is a setting shared by the six cities; treatment prices are a shared assumption; eating-out, services, device lifetimes and activity prices include registered model settings"
+   },
+   {
+    "key": "entity.capability.item.2:limits",
+    "missing_reason": null,
+    "pointer": "/limits/2",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "The offline planner is a controllable mock and does not represent a real large language model's ability or understanding of preferences"
+   },
+   {
+    "key": "entity.capability.item.3:limits",
+    "missing_reason": null,
+    "pointer": "/limits/3",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "The questionnaire wording and reference improvement ranges are provisional drafts, not tested in cognitive interviews or validated as a scale"
+   },
+   {
+    "key": "entity.leisure_category.label:music",
+    "missing_reason": null,
+    "pointer": "/interests/leisure_categories/0/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Music"
+   },
+   {
+    "key": "entity.leisure_category.label:racket_sports",
+    "missing_reason": null,
+    "pointer": "/interests/leisure_categories/1/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Racket sports"
+   },
+   {
+    "key": "entity.leisure_category.label:arts_culture",
+    "missing_reason": null,
+    "pointer": "/interests/leisure_categories/2/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Arts and culture"
+   },
+   {
+    "key": "entity.leisure_category.label:culinary",
+    "missing_reason": null,
+    "pointer": "/interests/leisure_categories/3/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Food and cooking activities"
+   },
+   {
+    "key": "entity.leisure_category.label:fitness",
+    "missing_reason": null,
+    "pointer": "/interests/leisure_categories/4/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Fitness"
+   },
+   {
+    "key": "entity.cuisine.label:home_style",
+    "missing_reason": null,
+    "pointer": "/interests/cuisines/0/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Home-style cooking"
+   },
+   {
+    "key": "entity.cuisine.label:chinese",
+    "missing_reason": null,
+    "pointer": "/interests/cuisines/1/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Chinese"
+   },
+   {
+    "key": "entity.cuisine.label:italian",
+    "missing_reason": null,
+    "pointer": "/interests/cuisines/2/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Italian"
+   },
+   {
+    "key": "entity.cuisine.label:mexican",
+    "missing_reason": null,
+    "pointer": "/interests/cuisines/3/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Mexican"
+   },
+   {
+    "key": "entity.cuisine.label:japanese",
+    "missing_reason": null,
+    "pointer": "/interests/cuisines/4/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Japanese"
+   },
+   {
+    "key": "entity.cuisine.label:indian",
+    "missing_reason": null,
+    "pointer": "/interests/cuisines/5/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Indian"
+   },
+   {
+    "key": "entity.cuisine.label:thai",
+    "missing_reason": null,
+    "pointer": "/interests/cuisines/6/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Thai"
+   },
+   {
+    "key": "entity.cuisine.label:korean",
+    "missing_reason": null,
+    "pointer": "/interests/cuisines/7/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Korean"
+   },
+   {
+    "key": "entity.cuisine.label:vietnamese",
+    "missing_reason": null,
+    "pointer": "/interests/cuisines/8/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Vietnamese"
+   },
+   {
+    "key": "entity.cuisine.label:mediterranean",
+    "missing_reason": null,
+    "pointer": "/interests/cuisines/9/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Mediterranean"
+   },
+   {
+    "key": "entity.capability.leisure_states.0:interests",
+    "missing_reason": null,
+    "pointer": "/interests/leisure_states_zh/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Not answered: no explicit information on this item, evaluated with neutral rules; it is never treated as choosing the “generic evaluation”"
+   },
+   {
+    "key": "entity.capability.leisure_states.1:interests",
+    "missing_reason": null,
+    "pointer": "/interests/leisure_states_zh/1",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Not sure yet: evaluated with neutral rules"
+   },
+   {
+    "key": "entity.capability.leisure_states.2:interests",
+    "missing_reason": null,
+    "pointer": "/interests/leisure_states_zh/2",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Explicitly no fixed hobby: evaluated with neutral rules"
+   },
+   {
+    "key": "entity.capability.leisure_states.3:interests",
+    "missing_reason": null,
+    "pointer": "/interests/leisure_states_zh/3",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Use the generic leisure evaluation: try whatever suitable the city offers (evaluated with neutral rules)"
+   },
+   {
+    "key": "entity.capability.leisure_states.4:interests",
+    "missing_reason": null,
+    "pointer": "/interests/leisure_states_zh/4",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Describe in words: candidates are first formed from the vocabulary, and only the categories you choose enter the evaluation; unrecognized descriptions are kept as written and not evaluated in this version"
+   },
+   {
+    "key": "entity.capability.taste_states.0:interests",
+    "missing_reason": null,
+    "pointer": "/interests/taste_states_zh/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Not answered: evaluated with neutral rules"
+   },
+   {
+    "key": "entity.capability.taste_states.1:interests",
+    "missing_reason": null,
+    "pointer": "/interests/taste_states_zh/1",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Not sure yet: evaluated with neutral rules"
+   },
+   {
+    "key": "entity.capability.taste_states.2:interests",
+    "missing_reason": null,
+    "pointer": "/interests/taste_states_zh/2",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Explicitly no taste preference: evaluated with neutral rules"
+   },
+   {
+    "key": "entity.capability.taste_states.3:interests",
+    "missing_reason": null,
+    "pointer": "/interests/taste_states_zh/3",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Describe in words: candidates are first formed from the vocabulary, and only the cuisines you choose enter the food evaluation; brands and other requirements are only kept"
+   },
+   {
+    "key": "entity.capability.matching_note:interests",
+    "missing_reason": null,
+    "pointer": "/interests/matching_note_zh",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "A confirmed interest only brings moderately higher satisfaction for the same actual time spent (model assumption: 50% more, with a cap); a confirmed cuisine only makes meals to your taste that you actually eat count a little more. These coefficients are publicly registered model assumptions, not measurements of you; they do not change your points, cash or qualifications, and do not make expensive things automatically better"
+   },
+   {
+    "key": "input.catalog.search.rule.normalize",
+    "missing_reason": null,
+    "pointer": "/input_catalog/search/rules/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Full-width and half-width characters are treated alike, English is case-insensitive, and leading or trailing spaces are ignored"
+   },
+   {
+    "key": "input.catalog.search.rule.all_terms",
+    "missing_reason": null,
+    "pointer": "/input_catalog/search/rules/1",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Several words separated by spaces must all match: a word matches when it appears in any of the entry's search terms"
+   },
+   {
+    "key": "input.catalog.search.rule.scope",
+    "missing_reason": null,
+    "pointer": "/input_catalog/search/rules/2",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Only entries already published in the catalog are filtered; no new entries are created. What you type in the search box is not saved and never enters your profile"
+   },
+   {
+    "key": "input.catalog.search.rule.empty",
+    "missing_reason": null,
+    "pointer": "/input_catalog/search/rules/3",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "With an empty search, all entries of the current group are shown in a fixed order"
+   },
+   {
+    "key": "input.catalog.search.rule.server",
+    "missing_reason": null,
+    "pointer": "/input_catalog/search/rules/4",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "What is submitted is the ID of the selected entry; the server checks the ID and the catalog version, never the search words"
+   },
+   {
+    "key": "input.catalog.search.no_match",
+    "missing_reason": null,
+    "pointer": "/input_catalog/search/no_match",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "No occupation in the catalog matches. This version supports only the 40 occupations in the catalog (teachers, nurses, doctors and others are not yet included); browse by group, or try a more common name. The system will not switch you to a different occupation"
+   },
+   {
+    "key": "entity.catalog_group.label:food_retail",
+    "missing_reason": null,
+    "pointer": "/input_catalog/groups/0/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Food service and retail"
+   },
+   {
+    "key": "entity.catalog_group.label:office_service",
+    "missing_reason": null,
+    "pointer": "/input_catalog/groups/1/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Office and customer service"
+   },
+   {
+    "key": "entity.catalog_group.label:it_tech",
+    "missing_reason": null,
+    "pointer": "/input_catalog/groups/2/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "IT and technology"
+   },
+   {
+    "key": "entity.catalog_group.label:professional_business",
+    "missing_reason": null,
+    "pointer": "/input_catalog/groups/3/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Professional and business services"
+   },
+   {
+    "key": "entity.catalog_group.label:repair_manufacturing",
+    "missing_reason": null,
+    "pointer": "/input_catalog/groups/4/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Repair and manufacturing"
+   },
+   {
+    "key": "entity.catalog_group.label:logistics_warehouse",
+    "missing_reason": null,
+    "pointer": "/input_catalog/groups/5/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Logistics and warehousing"
+   },
+   {
+    "key": "entity.catalog_group.label:cleaning_gardening",
+    "missing_reason": null,
+    "pointer": "/input_catalog/groups/6/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Cleaning and gardening"
+   },
+   {
+    "key": "entity.catalog_group.label:culture_sports",
+    "missing_reason": null,
+    "pointer": "/input_catalog/groups/7/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Culture and sports"
+   },
+   {
+    "key": "entity.catalog_group.label:management",
+    "missing_reason": null,
+    "pointer": "/input_catalog/groups/8/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Management and coordination"
+   },
+   {
+    "key": "entity.occupation.label:occ.counter_drinks",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/0/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Counter service and drink making"
+   },
+   {
+    "key": "entity.duty.label:occ.counter_drinks.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/0/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Taking orders and payment at the counter"
+   },
+   {
+    "key": "entity.duty.label:occ.counter_drinks.1",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/0/duties/1",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Making coffee, milk tea and other drinks"
+   },
+   {
+    "key": "entity.occupation.label:occ.soc_35_3031",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/1/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Waiters and Waitresses"
+   },
+   {
+    "key": "entity.duty.label:occ.soc_35_3031.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/1/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Waiters and Waitresses"
+   },
+   {
+    "key": "entity.occupation.label:occ.soc_35_9021",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/2/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Dishwashers"
+   },
+   {
+    "key": "entity.duty.label:occ.soc_35_9021.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/2/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Dishwashers"
+   },
+   {
+    "key": "entity.occupation.label:occ.soc_35_2014",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/3/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Cooks, Restaurant"
+   },
+   {
+    "key": "entity.duty.label:occ.soc_35_2014.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/3/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Cooks, Restaurant"
+   },
+   {
+    "key": "entity.occupation.label:occ.cashier",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/4/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Cashier"
+   },
+   {
+    "key": "entity.duty.label:occ.cashier.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/4/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Checking out customers and taking payment"
+   },
+   {
+    "key": "entity.duty.label:occ.cashier.1",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/4/duties/1",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Checking cash and receipts"
+   },
+   {
+    "key": "entity.occupation.label:occ.retail_sales",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/5/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Retail salesperson"
+   },
+   {
+    "key": "entity.duty.label:occ.retail_sales.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/5/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Serving customers in a store and presenting products"
+   },
+   {
+    "key": "entity.duty.label:occ.retail_sales.1",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/5/duties/1",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Tidying shelves and displays"
+   },
+   {
+    "key": "entity.occupation.label:occ.office_clerk",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/6/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Office clerk"
+   },
+   {
+    "key": "entity.duty.label:occ.office_clerk.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/6/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Handling documents and spreadsheets"
+   },
+   {
+    "key": "entity.duty.label:occ.office_clerk.1",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/6/duties/1",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Entering and organizing information"
+   },
+   {
+    "key": "entity.duty.label:occ.office_clerk.2",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/6/duties/2",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Answering phones and arranging schedules"
+   },
+   {
+    "key": "entity.occupation.label:occ.soc_43_4051",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/7/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Customer Service Representatives"
+   },
+   {
+    "key": "entity.duty.label:occ.soc_43_4051.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/7/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Customer Service Representatives"
+   },
+   {
+    "key": "entity.occupation.label:occ.soc_43_6014",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/8/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Secretaries and Administrative Assistants, Except Legal, Medical, and Executive"
+   },
+   {
+    "key": "entity.duty.label:occ.soc_43_6014.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/8/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Secretaries and Administrative Assistants, Except Legal, Medical, and Executive"
+   },
+   {
+    "key": "entity.occupation.label:occ.soc_43_4171",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/9/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Receptionists and Information Clerks"
+   },
+   {
+    "key": "entity.duty.label:occ.soc_43_4171.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/9/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Receptionists and Information Clerks"
+   },
+   {
+    "key": "entity.occupation.label:occ.soc_43_3071",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/10/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Tellers"
+   },
+   {
+    "key": "entity.duty.label:occ.soc_43_3071.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/10/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Tellers"
+   },
+   {
+    "key": "entity.occupation.label:occ.bookkeeper",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/11/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Bookkeeper or cash clerk"
+   },
+   {
+    "key": "entity.duty.label:occ.bookkeeper.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/11/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Recording day-to-day income and spending"
+   },
+   {
+    "key": "entity.duty.label:occ.bookkeeper.1",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/11/duties/1",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Managing cash and receipts"
+   },
+   {
+    "key": "entity.occupation.label:occ.soc_15_1232",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/12/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Computer User Support Specialists"
+   },
+   {
+    "key": "entity.duty.label:occ.soc_15_1232.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/12/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Computer User Support Specialists"
+   },
+   {
+    "key": "entity.occupation.label:occ.soc_15_1231",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/13/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Computer Network Support Specialists"
+   },
+   {
+    "key": "entity.duty.label:occ.soc_15_1231.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/13/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Computer Network Support Specialists"
+   },
+   {
+    "key": "entity.occupation.label:occ.soc_15_1252",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/14/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Software Developers"
+   },
+   {
+    "key": "entity.duty.label:occ.soc_15_1252.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/14/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Software Developers"
+   },
+   {
+    "key": "entity.occupation.label:occ.soc_15_1211",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/15/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Computer Systems Analysts"
+   },
+   {
+    "key": "entity.duty.label:occ.soc_15_1211.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/15/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Computer Systems Analysts"
+   },
+   {
+    "key": "entity.occupation.label:occ.accountant",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/16/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Accountant"
+   },
+   {
+    "key": "entity.duty.label:occ.accountant.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/16/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Preparing financial statements"
+   },
+   {
+    "key": "entity.duty.label:occ.accountant.1",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/16/duties/1",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Checking accounts and tax records"
+   },
+   {
+    "key": "entity.occupation.label:occ.soc_13_2051",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/17/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Financial and Investment Analysts"
+   },
+   {
+    "key": "entity.duty.label:occ.soc_13_2051.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/17/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Financial and Investment Analysts"
+   },
+   {
+    "key": "entity.occupation.label:occ.soc_13_1161",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/18/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Market Research Analysts and Marketing Specialists"
+   },
+   {
+    "key": "entity.duty.label:occ.soc_13_1161.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/18/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Market Research Analysts and Marketing Specialists"
+   },
+   {
+    "key": "entity.occupation.label:occ.soc_13_1071",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/19/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Human Resources Specialists"
+   },
+   {
+    "key": "entity.duty.label:occ.soc_13_1071.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/19/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Human Resources Specialists"
+   },
+   {
+    "key": "entity.occupation.label:occ.soc_23_2011",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/20/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Paralegals and Legal Assistants"
+   },
+   {
+    "key": "entity.duty.label:occ.soc_23_2011.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/20/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Paralegals and Legal Assistants"
+   },
+   {
+    "key": "entity.occupation.label:occ.soc_41_3091",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/21/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel"
+   },
+   {
+    "key": "entity.duty.label:occ.soc_41_3091.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/21/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel"
+   },
+   {
+    "key": "entity.occupation.label:occ.soc_49_9071",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/22/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Maintenance and Repair Workers, General"
+   },
+   {
+    "key": "entity.duty.label:occ.soc_49_9071.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/22/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Maintenance and Repair Workers, General"
+   },
+   {
+    "key": "entity.occupation.label:occ.soc_49_3023",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/23/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Automotive Service Technicians and Mechanics"
+   },
+   {
+    "key": "entity.duty.label:occ.soc_49_3023.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/23/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Automotive Service Technicians and Mechanics"
+   },
+   {
+    "key": "entity.occupation.label:occ.soc_49_2022",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/24/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Telecommunications Equipment Installers and Repairers, Except Line Installers"
+   },
+   {
+    "key": "entity.duty.label:occ.soc_49_2022.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/24/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Telecommunications Equipment Installers and Repairers, Except Line Installers"
+   },
+   {
+    "key": "entity.occupation.label:occ.soc_51_4121",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/25/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Welders, Cutters, Solderers, and Brazers"
+   },
+   {
+    "key": "entity.duty.label:occ.soc_51_4121.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/25/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Welders, Cutters, Solderers, and Brazers"
+   },
+   {
+    "key": "entity.occupation.label:occ.soc_53_7062",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/26/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Laborers and Freight, Stock, and Material Movers, Hand"
+   },
+   {
+    "key": "entity.duty.label:occ.soc_53_7062.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/26/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Laborers and Freight, Stock, and Material Movers, Hand"
+   },
+   {
+    "key": "entity.occupation.label:occ.soc_53_7065",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/27/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Stockers and Order Fillers"
+   },
+   {
+    "key": "entity.duty.label:occ.soc_53_7065.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/27/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Stockers and Order Fillers"
+   },
+   {
+    "key": "entity.occupation.label:occ.soc_43_5071",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/28/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Shipping, Receiving, and Inventory Clerks"
+   },
+   {
+    "key": "entity.duty.label:occ.soc_43_5071.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/28/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Shipping, Receiving, and Inventory Clerks"
+   },
+   {
+    "key": "entity.occupation.label:occ.soc_37_2011",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/29/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Janitors and Cleaners, Except Maids and Housekeeping Cleaners"
+   },
+   {
+    "key": "entity.duty.label:occ.soc_37_2011.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/29/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Janitors and Cleaners, Except Maids and Housekeeping Cleaners"
+   },
+   {
+    "key": "entity.occupation.label:occ.soc_37_2012",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/30/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Maids and Housekeeping Cleaners"
+   },
+   {
+    "key": "entity.duty.label:occ.soc_37_2012.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/30/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Maids and Housekeeping Cleaners"
+   },
+   {
+    "key": "entity.occupation.label:occ.soc_37_3011",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/31/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Landscaping and Groundskeeping Workers"
+   },
+   {
+    "key": "entity.duty.label:occ.soc_37_3011.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/31/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Landscaping and Groundskeeping Workers"
+   },
+   {
+    "key": "entity.occupation.label:occ.soc_51_6011",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/32/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Laundry and Dry-Cleaning Workers"
+   },
+   {
+    "key": "entity.duty.label:occ.soc_51_6011.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/32/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Laundry and Dry-Cleaning Workers"
+   },
+   {
+    "key": "entity.occupation.label:occ.soc_27_1024",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/33/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Graphic Designers"
+   },
+   {
+    "key": "entity.duty.label:occ.soc_27_1024.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/33/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Graphic Designers"
+   },
+   {
+    "key": "entity.occupation.label:occ.soc_27_4011",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/34/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Audio and Video Technicians"
+   },
+   {
+    "key": "entity.duty.label:occ.soc_27_4011.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/34/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Audio and Video Technicians"
+   },
+   {
+    "key": "entity.occupation.label:occ.soc_39_9031",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/35/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Exercise Trainers and Group Fitness Instructors"
+   },
+   {
+    "key": "entity.duty.label:occ.soc_39_9031.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/35/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Exercise Trainers and Group Fitness Instructors"
+   },
+   {
+    "key": "entity.occupation.label:occ.soc_13_1082",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/36/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Project Management Specialists"
+   },
+   {
+    "key": "entity.duty.label:occ.soc_13_1082.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/36/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Project Management Specialists"
+   },
+   {
+    "key": "entity.occupation.label:occ.soc_35_1012",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/37/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "First-Line Supervisors of Food Preparation and Serving Workers"
+   },
+   {
+    "key": "entity.duty.label:occ.soc_35_1012.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/37/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "First-Line Supervisors of Food Preparation and Serving Workers"
+   },
+   {
+    "key": "entity.occupation.label:occ.soc_41_1011",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/38/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "First-Line Supervisors of Retail Sales Workers"
+   },
+   {
+    "key": "entity.duty.label:occ.soc_41_1011.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/38/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "First-Line Supervisors of Retail Sales Workers"
+   },
+   {
+    "key": "entity.occupation.label:occ.soc_43_1011",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/39/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "First-Line Supervisors of Office and Administrative Support Workers"
+   },
+   {
+    "key": "entity.duty.label:occ.soc_43_1011.0",
+    "missing_reason": null,
+    "pointer": "/input_catalog/occupations/39/duties/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "First-Line Supervisors of Office and Administrative Support Workers"
+   },
+   {
+    "key": "entity.education_option.label:below_high_school",
+    "missing_reason": null,
+    "pointer": "/input_catalog/education/0/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Below high school"
+   },
+   {
+    "key": "entity.education_option.label:high_school",
+    "missing_reason": null,
+    "pointer": "/input_catalog/education/1/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "High school"
+   },
+   {
+    "key": "entity.education_option.label:some_college",
+    "missing_reason": null,
+    "pointer": "/input_catalog/education/2/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Some college, no degree"
+   },
+   {
+    "key": "entity.education_option.label:associate",
+    "missing_reason": null,
+    "pointer": "/input_catalog/education/3/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Associate's degree"
+   },
+   {
+    "key": "entity.education_option.label:bachelor",
+    "missing_reason": null,
+    "pointer": "/input_catalog/education/4/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Bachelor's degree"
+   },
+   {
+    "key": "entity.education_option.label:master",
+    "missing_reason": null,
+    "pointer": "/input_catalog/education/5/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Master's degree"
+   },
+   {
+    "key": "entity.education_option.label:doctoral",
+    "missing_reason": null,
+    "pointer": "/input_catalog/education/6/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Doctoral or professional degree"
+   },
+   {
+    "key": "entity.ability.label:soc_27_4011_award",
+    "missing_reason": null,
+    "pointer": "/input_catalog/certificates/0/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Postsecondary nondegree award for Audio and Video Technicians"
+   },
+   {
+    "key": "entity.ability.label:soc_49_2022_award",
+    "missing_reason": null,
+    "pointer": "/input_catalog/certificates/1/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Postsecondary nondegree award for Telecommunications Equipment Installers and Repairers, Except Line Installers"
+   },
+   {
+    "key": "entity.ability.label:soc_49_3023_award",
+    "missing_reason": null,
+    "pointer": "/input_catalog/certificates/2/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Postsecondary nondegree award for Automotive Service Technicians and Mechanics"
+   },
+   {
+    "key": "input.catalog.experience.prompt",
+    "missing_reason": null,
+    "pointer": "/input_catalog/experience/0/prompt",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "The starting job for Cooks, Restaurant requires related work experience: at least 1 years in Counter service and drink making, Waiters and Waitresses, Dishwashers. Enter how many years you worked in each of these occupations; if none, answer “no related experience”"
+   },
+   {
+    "key": "input.catalog.experience.prompt",
+    "missing_reason": null,
+    "pointer": "/input_catalog/experience/1/prompt",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "The starting job for First-Line Supervisors of Food Preparation and Serving Workers requires related work experience: at least 1 years in Counter service and drink making, Waiters and Waitresses, Dishwashers, Cooks, Restaurant. Enter how many years you worked in each of these occupations; if none, answer “no related experience”"
+   },
+   {
+    "key": "input.catalog.experience.prompt",
+    "missing_reason": null,
+    "pointer": "/input_catalog/experience/2/prompt",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "The starting job for First-Line Supervisors of Retail Sales Workers requires related work experience: at least 1 years in Cashier, Retail salesperson. Enter how many years you worked in each of these occupations; if none, answer “no related experience”"
+   },
+   {
+    "key": "input.catalog.experience.prompt",
+    "missing_reason": null,
+    "pointer": "/input_catalog/experience/3/prompt",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "The starting job for First-Line Supervisors of Office and Administrative Support Workers requires related work experience: at least 1 years in Office clerk, Customer Service Representatives, Secretaries and Administrative Assistants, Except Legal, Medical, and Executive, Receptionists and Information Clerks, Shipping, Receiving, and Inventory Clerks, Tellers, Bookkeeper or cash clerk. Enter how many years you worked in each of these occupations; if none, answer “no related experience”"
+   },
+   {
+    "key": "input.catalog.state.education.unanswered.name",
+    "missing_reason": null,
+    "pointer": "/input_catalog/qualification_states/0/name",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Not answered"
+   },
+   {
+    "key": "input.catalog.state.education.unanswered.meaning",
+    "missing_reason": null,
+    "pointer": "/input_catalog/qualification_states/0/meaning",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Grants no education threshold"
+   },
+   {
+    "key": "input.catalog.state.education.unsure.name",
+    "missing_reason": null,
+    "pointer": "/input_catalog/qualification_states/1/name",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Not sure yet"
+   },
+   {
+    "key": "input.catalog.state.education.unsure.meaning",
+    "missing_reason": null,
+    "pointer": "/input_catalog/qualification_states/1/meaning",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Treated as no confirmed education: grants no education threshold"
+   },
+   {
+    "key": "input.catalog.state.education.provided.name",
+    "missing_reason": null,
+    "pointer": "/input_catalog/qualification_states/2/name",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Highest education chosen"
+   },
+   {
+    "key": "input.catalog.state.education.provided.meaning",
+    "missing_reason": null,
+    "pointer": "/input_catalog/qualification_states/2/meaning",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Grants this level and every education threshold below it; does not grant occupational certificates"
+   },
+   {
+    "key": "input.catalog.state.certificates.unanswered.name",
+    "missing_reason": null,
+    "pointer": "/input_catalog/qualification_states/3/name",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Not answered"
+   },
+   {
+    "key": "input.catalog.state.certificates.unanswered.meaning",
+    "missing_reason": null,
+    "pointer": "/input_catalog/qualification_states/3/meaning",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Grants no certificate"
+   },
+   {
+    "key": "input.catalog.state.certificates.unsure.name",
+    "missing_reason": null,
+    "pointer": "/input_catalog/qualification_states/4/name",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Not sure yet"
+   },
+   {
+    "key": "input.catalog.state.certificates.unsure.meaning",
+    "missing_reason": null,
+    "pointer": "/input_catalog/qualification_states/4/meaning",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Grants no certificate"
+   },
+   {
+    "key": "input.catalog.state.certificates.provided.name",
+    "missing_reason": null,
+    "pointer": "/input_catalog/qualification_states/5/name",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Answered"
+   },
+   {
+    "key": "input.catalog.state.certificates.provided.meaning",
+    "missing_reason": null,
+    "pointer": "/input_catalog/qualification_states/5/meaning",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Grants the certificates you selected; selecting none means you have none of these certificates"
+   },
+   {
+    "key": "input.catalog.state.experience.unanswered.name",
+    "missing_reason": null,
+    "pointer": "/input_catalog/qualification_states/6/name",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Not answered"
+   },
+   {
+    "key": "input.catalog.state.experience.unanswered.meaning",
+    "missing_reason": null,
+    "pointer": "/input_catalog/qualification_states/6/meaning",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Grants no related experience"
+   },
+   {
+    "key": "input.catalog.state.experience.unsure.name",
+    "missing_reason": null,
+    "pointer": "/input_catalog/qualification_states/7/name",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Not sure yet"
+   },
+   {
+    "key": "input.catalog.state.experience.unsure.meaning",
+    "missing_reason": null,
+    "pointer": "/input_catalog/qualification_states/7/meaning",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Grants no related experience"
+   },
+   {
+    "key": "input.catalog.state.experience.provided.name",
+    "missing_reason": null,
+    "pointer": "/input_catalog/qualification_states/8/name",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Answered"
+   },
+   {
+    "key": "input.catalog.state.experience.provided.meaning",
+    "missing_reason": null,
+    "pointer": "/input_catalog/qualification_states/8/meaning",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Whether a requirement is met is judged from the occupations and years you enter; entering no experience means you have no related experience"
+   },
+   {
+    "key": "entity.leisure_group.label:sports_fitness",
+    "missing_reason": null,
+    "pointer": "/input_catalog/leisure/groups/0/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Sports and fitness"
+   },
+   {
+    "key": "entity.leisure_group.label:arts_music",
+    "missing_reason": null,
+    "pointer": "/input_catalog/leisure/groups/1/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Arts and music"
+   },
+   {
+    "key": "entity.leisure_group.label:food_cooking",
+    "missing_reason": null,
+    "pointer": "/input_catalog/leisure/groups/2/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Food and cooking"
+   },
+   {
+    "key": "entity.leisure_category.label:fitness",
+    "missing_reason": null,
+    "pointer": "/input_catalog/leisure/entries/0/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Fitness"
+   },
+   {
+    "key": "entity.leisure_category.label:racket_sports",
+    "missing_reason": null,
+    "pointer": "/input_catalog/leisure/entries/1/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Racket sports"
+   },
+   {
+    "key": "entity.leisure_category.label:music",
+    "missing_reason": null,
+    "pointer": "/input_catalog/leisure/entries/2/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Music"
+   },
+   {
+    "key": "entity.leisure_category.label:arts_culture",
+    "missing_reason": null,
+    "pointer": "/input_catalog/leisure/entries/3/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Arts and culture"
+   },
+   {
+    "key": "entity.leisure_category.label:culinary",
+    "missing_reason": null,
+    "pointer": "/input_catalog/leisure/entries/4/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Food and cooking activities"
+   },
+   {
+    "key": "entity.search_note.note:leisure.outdoor_not_supported",
+    "missing_reason": null,
+    "pointer": "/input_catalog/leisure/search_notes/0/note",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "This version has no hiking or outdoor category yet, so it cannot be chosen and is not counted as fitness; you can skip or choose “not sure yet”, and anything you write in your notes is only kept, not scored"
+   },
+   {
+    "key": "entity.search_note.note:leisure.games_not_supported",
+    "missing_reason": null,
+    "pointer": "/input_catalog/leisure/search_notes/1/note",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "This version has no video-game category yet, so it cannot be chosen and is not counted as any other category; you can skip or choose “not sure yet”, and anything you write in your notes is only kept, not scored"
+   },
+   {
+    "key": "input.catalog.leisure.note",
+    "missing_reason": null,
+    "pointer": "/input_catalog/leisure/note",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Pick as many as you like, or skip (skipping means not answered); the categories you pick are used for the evaluation directly, no text needed. “No fixed hobby”, “whatever the city offers” (generic leisure evaluation) and “not sure yet” can be chosen on their own"
+   },
+   {
+    "key": "entity.taste_group.label:chinese_home",
+    "missing_reason": null,
+    "pointer": "/input_catalog/taste/groups/0/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Chinese and home-style"
+   },
+   {
+    "key": "entity.taste_group.label:asian",
+    "missing_reason": null,
+    "pointer": "/input_catalog/taste/groups/1/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Asian cuisines"
+   },
+   {
+    "key": "entity.taste_group.label:western_other",
+    "missing_reason": null,
+    "pointer": "/input_catalog/taste/groups/2/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Western and other cuisines"
+   },
+   {
+    "key": "entity.cuisine.label:chinese",
+    "missing_reason": null,
+    "pointer": "/input_catalog/taste/entries/0/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Chinese"
+   },
+   {
+    "key": "entity.cuisine.label:home_style",
+    "missing_reason": null,
+    "pointer": "/input_catalog/taste/entries/1/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Home-style cooking"
+   },
+   {
+    "key": "entity.cuisine.label:japanese",
+    "missing_reason": null,
+    "pointer": "/input_catalog/taste/entries/2/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Japanese"
+   },
+   {
+    "key": "entity.cuisine.label:korean",
+    "missing_reason": null,
+    "pointer": "/input_catalog/taste/entries/3/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Korean"
+   },
+   {
+    "key": "entity.cuisine.label:thai",
+    "missing_reason": null,
+    "pointer": "/input_catalog/taste/entries/4/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Thai"
+   },
+   {
+    "key": "entity.cuisine.label:vietnamese",
+    "missing_reason": null,
+    "pointer": "/input_catalog/taste/entries/5/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Vietnamese"
+   },
+   {
+    "key": "entity.cuisine.label:indian",
+    "missing_reason": null,
+    "pointer": "/input_catalog/taste/entries/6/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Indian"
+   },
+   {
+    "key": "entity.cuisine.label:italian",
+    "missing_reason": null,
+    "pointer": "/input_catalog/taste/entries/7/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Italian"
+   },
+   {
+    "key": "entity.cuisine.label:mexican",
+    "missing_reason": null,
+    "pointer": "/input_catalog/taste/entries/8/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Mexican"
+   },
+   {
+    "key": "entity.cuisine.label:mediterranean",
+    "missing_reason": null,
+    "pointer": "/input_catalog/taste/entries/9/label",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Mediterranean"
+   },
+   {
+    "key": "entity.search_note.note:taste.chinese_regional",
+    "missing_reason": null,
+    "pointer": "/input_catalog/taste/search_notes/0/note",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "This version does not distinguish China's regional cuisines (Sichuan, Cantonese and so on); they all count as “Chinese”. Choose “Chinese”; no separate Sichuan preference is recorded"
+   },
+   {
+    "key": "input.catalog.taste.note",
+    "missing_reason": null,
+    "pointer": "/input_catalog/taste/note",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Pick as many as you like, or skip (skipping means not answered); the cuisines you pick are used for the food evaluation directly, no text needed. “No taste preference” and “not sure yet” can be chosen on their own"
+   },
+   {
+    "key": "input.catalog.note.groups",
+    "missing_reason": null,
+    "pointer": "/input_catalog/notes/0",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Occupation groups are only for browsing and do not change what an occupation means; each occupation is in exactly one group"
+   },
+   {
+    "key": "input.catalog.note.no_grant",
+    "missing_reason": null,
+    "pointer": "/input_catalog/notes/1",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Choosing an occupation never grants education, certificates or experience; those come from your answers to the qualification questions (the rules are applied by E3)"
+   },
+   {
+    "key": "input.catalog.note.free_text",
+    "missing_reason": null,
+    "pointer": "/input_catalog/notes/2",
+    "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "You can still add notes; they are only for the clones' planning: they do not change points, cash, qualifications or interest categories, and they never become hard requirements"
+   }
+  ],
+  "id": null,
+  "kind": "capabilities",
+  "locale": "en",
+  "metrics": [],
+  "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+  "source": {
+   "abilities": [
+    {
+     "ability_id": "edu_at_least_hs",
+     "ask_when": "只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验",
+     "label": "高中毕业或同等学力"
+    },
+    {
+     "ability_id": "edu_at_least_some_college",
+     "ask_when": "只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验",
+     "label": "读过大学（未取得学位）"
+    },
+    {
+     "ability_id": "edu_at_least_associate",
+     "ask_when": "只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验",
+     "label": "副学士学位"
+    },
+    {
+     "ability_id": "edu_at_least_bachelor",
+     "ask_when": "只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验",
+     "label": "学士学位"
+    },
+    {
+     "ability_id": "edu_at_least_master",
+     "ask_when": "只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验",
+     "label": "硕士学位"
+    },
+    {
+     "ability_id": "edu_at_least_doctoral",
+     "ask_when": "只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验",
+     "label": "博士或专业学位"
+    },
+    {
+     "ability_id": "soc_27_4011_award",
+     "ask_when": "只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验",
+     "label": "音视频技术员的中学后证书"
+    },
+    {
+     "ability_id": "soc_35_1012_experience",
+     "ask_when": "只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验",
+     "label": "餐饮主管的相关工作经验"
+    },
+    {
+     "ability_id": "soc_35_2014_experience",
+     "ask_when": "只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验",
+     "label": "餐厅厨师的相关工作经验"
+    },
+    {
+     "ability_id": "soc_41_1011_experience",
+     "ask_when": "只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验",
+     "label": "零售主管的相关工作经验"
+    },
+    {
+     "ability_id": "soc_43_1011_experience",
+     "ask_when": "只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验",
+     "label": "办公室行政主管的相关工作经验"
+    },
+    {
+     "ability_id": "soc_49_2022_award",
+     "ask_when": "只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验",
+     "label": "通信设备安装维修工的中学后证书"
+    },
+    {
+     "ability_id": "soc_49_3023_award",
+     "ask_when": "只有你选的职业或候选城市里的岗位要求它时才问；系统不从职称或自由文字授予学历、证书或经验",
+     "label": "汽车维修技师的中学后证书"
+    }
+   ],
+   "age_max": 100,
+   "age_min": 18,
+   "attribute_kinds": [
+    {
+     "kind": "brand",
+     "label": "品牌",
+     "note": "已记录原文，本版不评分、不交给分身；需要同规格报价与匹配规则（V2）",
+     "support": "unsupported",
+     "usage": [
+      "retained_only"
+     ]
+    },
+    {
+     "kind": "cuisine",
+     "label": "菜系",
+     "note": "这里的原文只留存；想让口味进入饮食评价，请在“口味与菜系”一项里描述并选中类别",
+     "support": "unsupported",
+     "usage": [
+      "retained_only"
+     ]
+    },
+    {
+     "kind": "preparation",
+     "label": "制作方式（做饭 / 外卖）",
+     "note": "已记录原文，本版不评分",
+     "support": "unsupported",
+     "usage": [
+      "retained_only"
+     ]
+    },
+    {
+     "kind": "tier",
+     "label": "档次",
+     "note": "已记录原文，本版不评分；不从价格推断档次偏好",
+     "support": "unsupported",
+     "usage": [
+      "retained_only"
+     ]
+    },
+    {
+     "kind": "service_quality",
+     "label": "服务质量",
+     "note": "已记录原文，本版不评分",
+     "support": "unsupported",
+     "usage": [
+      "retained_only"
+     ]
+    },
+    {
+     "kind": "home_entry_concern",
+     "label": "上门顾虑（例如不想让陌生人进家）",
+     "note": "已记录原文；本版没有能核验或拦截上门服务的机制，分身可能选择上门服务——即使你把它确认为不可妥协，也只能原样留存",
+     "support": "unsupported",
+     "usage": [
+      "retained_only"
+     ]
+    }
+   ],
+   "capabilities_id": "caps.pack.e3b.us-v1",
+   "cities": [
+    {
+     "city_ref": "US:CBSA2023:35620",
+     "code": "35620",
+     "country": "US",
+     "data_status": "real_data",
+     "geography_version": "CBSA2023 / PUMA2020",
+     "label": "纽约（纽约市五区居民）",
+     "note": "支持的居住与工作地按税务范围裁剪（tax.us2024.nyc）",
+     "scheme": "CBSA2023",
+     "selectable": true
+    },
+    {
+     "city_ref": "US:CBSA2023:31080",
+     "code": "31080",
+     "country": "US",
+     "data_status": "real_data",
+     "geography_version": "CBSA2023 / PUMA2020",
+     "label": "洛杉矶",
+     "note": "支持的居住与工作地按税务范围裁剪（tax.us2024.ca）",
+     "scheme": "CBSA2023",
+     "selectable": true
+    },
+    {
+     "city_ref": "US:CBSA2023:41860",
+     "code": "41860",
+     "country": "US",
+     "data_status": "real_data",
+     "geography_version": "CBSA2023 / PUMA2020",
+     "label": "旧金山",
+     "note": "支持的居住与工作地按税务范围裁剪（tax.us2024.ca）",
+     "scheme": "CBSA2023",
+     "selectable": true
+    },
+    {
+     "city_ref": "US:CBSA2023:16980",
+     "code": "16980",
+     "country": "US",
+     "data_status": "real_data",
+     "geography_version": "CBSA2023 / PUMA2020",
+     "label": "芝加哥（伊利诺伊州部分）",
+     "note": "支持的居住与工作地按税务范围裁剪（tax.us2024.il）",
+     "scheme": "CBSA2023",
+     "selectable": true
+    },
+    {
+     "city_ref": "US:CBSA2023:26420",
+     "code": "26420",
+     "country": "US",
+     "data_status": "real_data",
+     "geography_version": "CBSA2023 / PUMA2020",
+     "label": "休斯敦",
+     "note": "支持的居住与工作地按税务范围裁剪（tax.us2024.tx）",
+     "scheme": "CBSA2023",
+     "selectable": true
+    },
+    {
+     "city_ref": "US:CBSA2023:42660",
+     "code": "42660",
+     "country": "US",
+     "data_status": "real_data",
+     "geography_version": "CBSA2023 / PUMA2020",
+     "label": "西雅图",
+     "note": "支持的居住与工作地按税务范围裁剪（tax.us2024.wa）",
+     "scheme": "CBSA2023",
+     "selectable": true
+    }
+   ],
+   "dimensions": [
+    {
+     "definition": "住的房子条件、吃得是否新鲜合口味、通信联网与日用品是否方便、日常杂务是否省心、衣着与个人护理等实际消费得到的条件（内部再分四项）",
+     "key": "material",
+     "label": "物质生活",
+     "reference_improvement": "参考情境：从远处一居室、以米面罐头为主、洗衣打扫全部自己做，改善到每天三顿新鲜食材、每月少做约 18 小时家务（本版合成模型里的一档改善）",
+     "support": "supported",
+     "support_note": "居住条件、饮食生活、日常支持与便利、个人消费与享受四项都按实际生活评分；储物等其他物质需求本版没有"
+    },
+    {
+     "definition": "城市的公共安全条件",
+     "key": "safety",
+     "label": "安全",
+     "reference_improvement": "参考情境：合成安全指数从 4 提高到 8（0–10，只在本组合成城市之间可比）",
+     "support": "partially_supported",
+     "support_note": "本版只有城市背景条件，分身不能花钱或行动改善它"
+    },
+    {
+     "definition": "城市提供的职业与成长条件，加上你在生活中实际学到的新能力",
+     "key": "opportunity",
+     "label": "发展机会",
+     "reference_improvement": "参考情境：在一年里学完一门 12 个月的资格课程，或城市发展条件从合成指数 4 提高到 8",
+     "support": "supported",
+     "support_note": "城市背景 + 实际参加的学习；证书本身、换岗与涨薪不另加分"
+    },
+    {
+     "definition": "城市基础休闲条件，加上实际参加的锻炼、演出等活动",
+     "key": "leisure",
+     "label": "休闲",
+     "reference_improvement": "参考情境：从每月不参加任何活动，到每月去 8 次健身房",
+     "support": "supported",
+     "support_note": "只算实际发生的活动；具体爱好与地理的匹配本版没有"
+    },
+    {
+     "definition": "空气、气候与城市环境的背景条件",
+     "key": "environment",
+     "label": "环境",
+     "reference_improvement": "参考情境：合成环境指数从 4 提高到 8（0–10，只在本组合成城市之间可比）",
+     "support": "partially_supported",
+     "support_note": "本版只有城市背景条件，分身不能行动改善它"
+    },
+    {
+     "definition": "住处到工作地点的往返时间与实际出门上班的次数对生活的影响",
+     "key": "commute",
+     "label": "交通便捷程度",
+     "reference_improvement": "参考情境：每月到岗 20 次时，每天往返从 70 分钟缩短到 30 分钟",
+     "support": "supported",
+     "support_note": "按实际所住住房的往返分钟与实际到岗次数评分；非工作出行本版没有细化"
+    }
+   ],
+   "free_text_max_chars": 2000,
+   "hard_requirement_options": [
+    {
+     "compiles_to": "E1 硬要求：住房类别、通勤执行记录里最长的往返分钟 ≤ 给定分钟（每个月检查；没有到岗的月份是 0）",
+     "enforced_by_execution": false,
+     "label": "住处到就业中心的往返时间不超过（分钟）",
+     "maximum": 180,
+     "minimum": 20,
+     "option_id": "housing.max_commute_roundtrip",
+     "parameter": "max_commute_roundtrip_minutes",
+     "step": 5,
+     "unit": "分钟",
+     "verification": "每月检查实际所住住房的往返分钟：满足、不满足、无法判断单独报告；不进分数，也不拦截计划"
+    }
+   ],
+   "health_questionnaire": {
+    "common_prompt": "假设基本生活已有保障，判断下面的选择是否符合你。没有正确答案。",
+    "options": [
+     {
+      "label": "符合我",
+      "meaning": "这句话符合用户自己",
+      "option_id": "agree"
+     },
+     {
+      "label": "不符合我",
+      "meaning": "这句话不符合用户自己",
+      "option_id": "disagree"
+     },
+     {
+      "label": "无明显倾向",
+      "meaning": "用户在这一题上没有明显倾向",
+      "option_id": "no_clear_tendency"
+     },
+     {
+      "label": "暂不确定",
+      "meaning": "用户暂不确定——没有这一项的明确指令",
+      "option_id": "unsure"
+     }
+    ],
+    "questions": [
+     {
+      "question_id": "hc_more_pay_more_sick_risk",
+      "text": "一种安排能多赚一点钱，但生病、需要休息几天的可能也更高。我愿意选择它。"
+     },
+     {
+      "question_id": "hc_reserve_for_health_costs",
+      "text": "为了应对可能发生的健康开支，我愿意推迟一次想要、但并不急需的消费，先留一笔钱。"
+     },
+     {
+      "question_id": "hc_wait_for_clear_risk_info",
+      "text": "健康风险的信息还不清楚时，我愿意先放弃眼前的一点收益，等了解清楚再决定。"
+     }
+    ],
+    "rules": [
+     "不计算总健康分，不推断患病概率、疼痛权重、疗效、愿付金额或拒绝治疗",
+     "健康回答不占六维 100 分，也不是第七个评分权重；只供分身做计划，不改变疾病规则、γ、H、账目或满足感",
+     "题目是暂定文案，没有经过认知访谈或量表验证"
+    ],
+    "status": "draft_wording_not_validated",
+    "unanswered_rule": "没有作答另存为“未答”，与“暂不确定”分开；两者都表示没有这一项的明确指令，不补中间值",
+    "version": "e3a-health-coping-q-v0.1-draft"
+   },
+   "input_catalog": {
+    "catalog_id": "input-catalog.e3b.us-v1",
+    "catalog_version": "e3-input-catalog-v1",
+    "certificates": [
+     {
+      "ability_id": "soc_27_4011_award",
+      "label": "音视频技术员的中学后证书",
+      "occupations": [
+       "occ.soc_27_4011"
+      ]
+     },
+     {
+      "ability_id": "soc_49_2022_award",
+      "label": "通信设备安装维修工的中学后证书",
+      "occupations": [
+       "occ.soc_49_2022"
+      ]
+     },
+     {
+      "ability_id": "soc_49_3023_award",
+      "label": "汽车维修技师的中学后证书",
+      "occupations": [
+       "occ.soc_49_3023"
+      ]
+     }
+    ],
+    "content_fingerprint": "d55d76971830b638d6bed01907a54ff25b3a0397b7d84adb51608b7d41378da0",
+    "education": [
+     {
+      "label": "高中以下",
+      "option_id": "below_high_school",
+      "order": 1
+     },
+     {
+      "label": "高中",
+      "option_id": "high_school",
+      "order": 2
+     },
+     {
+      "label": "读过大学但未取得学位",
+      "option_id": "some_college",
+      "order": 3
+     },
+     {
+      "label": "副学士",
+      "option_id": "associate",
+      "order": 4
+     },
+     {
+      "label": "本科",
+      "option_id": "bachelor",
+      "order": 5
+     },
+     {
+      "label": "硕士",
+      "option_id": "master",
+      "order": 6
+     },
+     {
+      "label": "博士或专业学位",
+      "option_id": "doctoral",
+      "order": 7
+     }
+    ],
+    "experience": [
+     {
+      "ability_id": "soc_35_2014_experience",
+      "applies_to": [
+       "occ.soc_35_2014"
+      ],
+      "prompt": "餐厅厨师的开局岗位要求相关工作经验：在柜台点单与饮品制作、餐厅服务员、洗碗工里至少做过 1 年。请填你在这些职业里各做过几年；没有就回答“没有相关经验”",
+      "question_id": "exp.soc_35_2014",
+      "related": [
+       "occ.counter_drinks",
+       "occ.soc_35_3031",
+       "occ.soc_35_9021"
+      ]
+     },
+     {
+      "ability_id": "soc_35_1012_experience",
+      "applies_to": [
+       "occ.soc_35_1012"
+      ],
+      "prompt": "餐饮主管的开局岗位要求相关工作经验：在柜台点单与饮品制作、餐厅服务员、洗碗工、餐厅厨师里至少做过 1 年。请填你在这些职业里各做过几年；没有就回答“没有相关经验”",
+      "question_id": "exp.soc_35_1012",
+      "related": [
+       "occ.counter_drinks",
+       "occ.soc_35_3031",
+       "occ.soc_35_9021",
+       "occ.soc_35_2014"
+      ]
+     },
+     {
+      "ability_id": "soc_41_1011_experience",
+      "applies_to": [
+       "occ.soc_41_1011"
+      ],
+      "prompt": "零售主管的开局岗位要求相关工作经验：在收银员、门店销售员里至少做过 1 年。请填你在这些职业里各做过几年；没有就回答“没有相关经验”",
+      "question_id": "exp.soc_41_1011",
+      "related": [
+       "occ.cashier",
+       "occ.retail_sales"
+      ]
+     },
+     {
+      "ability_id": "soc_43_1011_experience",
+      "applies_to": [
+       "occ.soc_43_1011"
+      ],
+      "prompt": "办公室行政主管的开局岗位要求相关工作经验：在办公室文员、客服代表、秘书与行政助理、前台与咨询员、收发与库存文员、银行柜员、记账员或出纳里至少做过 1 年。请填你在这些职业里各做过几年；没有就回答“没有相关经验”",
+      "question_id": "exp.soc_43_1011",
+      "related": [
+       "occ.office_clerk",
+       "occ.soc_43_4051",
+       "occ.soc_43_6014",
+       "occ.soc_43_4171",
+       "occ.soc_43_5071",
+       "occ.soc_43_3071",
+       "occ.bookkeeper"
+      ]
+     }
+    ],
+    "groups": [
+     {
+      "group_id": "food_retail",
+      "label": "餐饮零售",
+      "order": 1
+     },
+     {
+      "group_id": "office_service",
+      "label": "办公客服",
+      "order": 2
+     },
+     {
+      "group_id": "it_tech",
+      "label": "IT 技术",
+      "order": 3
+     },
+     {
+      "group_id": "professional_business",
+      "label": "专业商务",
+      "order": 4
+     },
+     {
+      "group_id": "repair_manufacturing",
+      "label": "维修制造",
+      "order": 5
+     },
+     {
+      "group_id": "logistics_warehouse",
+      "label": "物流仓储",
+      "order": 6
+     },
+     {
+      "group_id": "cleaning_gardening",
+      "label": "清洁园艺",
+      "order": 7
+     },
+     {
+      "group_id": "culture_sports",
+      "label": "文化运动",
+      "order": 8
+     },
+     {
+      "group_id": "management",
+      "label": "管理协调",
+      "order": 9
+     }
+    ],
+    "leisure": {
+     "entries": [
+      {
+       "group_id": "sports_fitness",
+       "key": "fitness",
+       "label": "健身",
+       "order": 1,
+       "search_terms": [
+        "健身",
+        "跑步",
+        "撸铁",
+        "gym",
+        "running",
+        "Fitness",
+        "健身房",
+        "workout"
+       ]
+      },
+      {
+       "group_id": "sports_fitness",
+       "key": "racket_sports",
+       "label": "球拍运动",
+       "order": 2,
+       "search_terms": [
+        "球拍运动",
+        "网球",
+        "羽毛球",
+        "乒乓球",
+        "球拍",
+        "tennis",
+        "badminton",
+        "Racket sports"
+       ]
+      },
+      {
+       "group_id": "arts_music",
+       "key": "music",
+       "label": "音乐",
+       "order": 3,
+       "search_terms": [
+        "音乐",
+        "吉他",
+        "唱歌",
+        "合唱",
+        "乐器",
+        "music",
+        "guitar",
+        "choir",
+        "Music"
+       ]
+      },
+      {
+       "group_id": "arts_music",
+       "key": "arts_culture",
+       "label": "艺术与文化",
+       "order": 4,
+       "search_terms": [
+        "艺术与文化",
+        "美术馆",
+        "博物馆",
+        "展览",
+        "音乐会",
+        "看演出",
+        "museum",
+        "gallery",
+        "Arts and culture",
+        "艺术",
+        "文化"
+       ]
+      },
+      {
+       "group_id": "food_cooking",
+       "key": "culinary",
+       "label": "美食活动",
+       "order": 5,
+       "search_terms": [
+        "美食活动",
+        "烹饪",
+        "做菜",
+        "品鉴",
+        "cooking",
+        "Food and cooking activities",
+        "美食"
+       ]
+      }
+     ],
+     "groups": [
+      {
+       "group_id": "sports_fitness",
+       "label": "运动健身",
+       "order": 1
+      },
+      {
+       "group_id": "arts_music",
+       "label": "文化艺术",
+       "order": 2
+      },
+      {
+       "group_id": "food_cooking",
+       "label": "美食烹饪",
+       "order": 3
+      }
+     ],
+     "kind": "leisure",
+     "note": "可以多选，也可以跳过（跳过就是未答）；选中的类别直接用于评价，不需要写文字。没有固定爱好、随当地体验（通用休闲评价）和暂不确定可以单独选",
+     "search_notes": [
+      {
+       "note": "本版还没有徒步与户外活动这一类，暂时不能选，也不会算成健身；可以先跳过或选“暂不确定”，在补充文字里写下只留存、不评分",
+       "note_id": "leisure.outdoor_not_supported",
+       "points_to": [],
+       "terms": [
+        "徒步",
+        "爬山",
+        "登山",
+        "郊游",
+        "露营",
+        "远足",
+        "hiking",
+        "camping",
+        "trekking"
+       ]
+      },
+      {
+       "note": "本版还没有电子游戏这一类，暂时不能选，也不会算成别的类别；可以先跳过或选“暂不确定”，在补充文字里写下只留存、不评分",
+       "note_id": "leisure.games_not_supported",
+       "points_to": [],
+       "terms": [
+        "游戏",
+        "打游戏",
+        "电子游戏",
+        "电竞",
+        "手游",
+        "gaming",
+        "video games",
+        "esports"
+       ]
+      }
+     ]
+    },
+    "notes": [
+     "职业分组只用于浏览，不改变职业的含义；每个职业只在一个分组里",
+     "选职业不会授予学历、证书或经验；这些按你在资格题里的回答换算（规则由 E3 统一执行）",
+     "补充文字仍可以写，只供分身做计划参考：它不改变点数、现金、资格或兴趣类别，也不会变成硬要求"
+    ],
+    "occupations": [
+     {
+      "concept_id": "occ.counter_drinks",
+      "duties": [
+       "在柜台点单与收款",
+       "制作咖啡、奶茶等饮品"
+      ],
+      "experience_question": null,
+      "group_id": "food_retail",
+      "label": "柜台点单与饮品制作",
+      "order": 1,
+      "qualification_refs": [],
+      "search_terms": [
+       "柜台点单与饮品制作",
+       "做饮品",
+       "饮品制作",
+       "咖啡师",
+       "奶茶",
+       "barista",
+       "Counter service and drink making",
+       "快餐店员",
+       "柜台服务员",
+       "点单员",
+       "饮品师",
+       "fast food worker",
+       "counter worker"
+      ]
+     },
+     {
+      "concept_id": "occ.soc_35_3031",
+      "duties": [
+       "餐厅服务员"
+      ],
+      "experience_question": null,
+      "group_id": "food_retail",
+      "label": "餐厅服务员",
+      "order": 2,
+      "qualification_refs": [],
+      "search_terms": [
+       "餐厅服务员",
+       "Waiters and Waitresses",
+       "服务员",
+       "跑堂",
+       "waiter",
+       "waitress",
+       "server"
+      ]
+     },
+     {
+      "concept_id": "occ.soc_35_9021",
+      "duties": [
+       "洗碗工"
+      ],
+      "experience_question": null,
+      "group_id": "food_retail",
+      "label": "洗碗工",
+      "order": 3,
+      "qualification_refs": [],
+      "search_terms": [
+       "洗碗工",
+       "Dishwashers",
+       "洗碗员",
+       "刷碗工",
+       "dishwasher"
+      ]
+     },
+     {
+      "concept_id": "occ.soc_35_2014",
+      "duties": [
+       "餐厅厨师"
+      ],
+      "experience_question": "exp.soc_35_2014",
+      "group_id": "food_retail",
+      "label": "餐厅厨师",
+      "order": 4,
+      "qualification_refs": [
+       "soc_35_2014_experience"
+      ],
+      "search_terms": [
+       "餐厅厨师",
+       "Cooks, Restaurant",
+       "厨师",
+       "炒锅师傅",
+       "后厨",
+       "cook",
+       "chef",
+       "line cook"
+      ]
+     },
+     {
+      "concept_id": "occ.cashier",
+      "duties": [
+       "为顾客结账收款",
+       "核对现金与票据"
+      ],
+      "experience_question": null,
+      "group_id": "food_retail",
+      "label": "收银员",
+      "order": 5,
+      "qualification_refs": [],
+      "search_terms": [
+       "收银员",
+       "收银",
+       "cashier",
+       "Cashier",
+       "收款员",
+       "checkout"
+      ]
+     },
+     {
+      "concept_id": "occ.retail_sales",
+      "duties": [
+       "在门店接待顾客、介绍商品",
+       "整理货架与陈列"
+      ],
+      "experience_question": null,
+      "group_id": "food_retail",
+      "label": "门店销售员",
+      "order": 6,
+      "qualification_refs": [],
+      "search_terms": [
+       "门店销售员",
+       "店员",
+       "售货员",
+       "门店销售",
+       "导购",
+       "retail sales",
+       "Retail salesperson",
+       "销售员",
+       "营业员",
+       "sales associate",
+       "salesperson"
+      ]
+     },
+     {
+      "concept_id": "occ.office_clerk",
+      "duties": [
+       "处理文件与表格",
+       "录入与整理资料",
+       "接听电话、安排日程"
+      ],
+      "experience_question": null,
+      "group_id": "office_service",
+      "label": "办公室文员",
+      "order": 7,
+      "qualification_refs": [
+       "edu_at_least_hs"
+      ],
+      "search_terms": [
+       "办公室文员",
+       "文员",
+       "行政助理",
+       "办公室职员",
+       "office clerk",
+       "admin assistant",
+       "Office clerk",
+       "职员",
+       "办事员",
+       "office assistant",
+       "clerk"
+      ]
+     },
+     {
+      "concept_id": "occ.soc_43_4051",
+      "duties": [
+       "客服代表"
+      ],
+      "experience_question": null,
+      "group_id": "office_service",
+      "label": "客服代表",
+      "order": 8,
+      "qualification_refs": [
+       "edu_at_least_hs"
+      ],
+      "search_terms": [
+       "客服代表",
+       "Customer Service Representatives",
+       "客服",
+       "客户服务",
+       "话务员",
+       "电话客服",
+       "customer service",
+       "call center"
+      ]
+     },
+     {
+      "concept_id": "occ.soc_43_6014",
+      "duties": [
+       "秘书与行政助理"
+      ],
+      "experience_question": null,
+      "group_id": "office_service",
+      "label": "秘书与行政助理",
+      "order": 9,
+      "qualification_refs": [
+       "edu_at_least_hs"
+      ],
+      "search_terms": [
+       "秘书与行政助理",
+       "Secretaries and Administrative Assistants, Except Legal, Medical, and Executive",
+       "秘书",
+       "助理",
+       "secretary",
+       "administrative assistant"
+      ]
+     },
+     {
+      "concept_id": "occ.soc_43_4171",
+      "duties": [
+       "前台与咨询员"
+      ],
+      "experience_question": null,
+      "group_id": "office_service",
+      "label": "前台与咨询员",
+      "order": 10,
+      "qualification_refs": [
+       "edu_at_least_hs"
+      ],
+      "search_terms": [
+       "前台与咨询员",
+       "Receptionists and Information Clerks",
+       "前台",
+       "接待员",
+       "咨询员",
+       "receptionist"
+      ]
+     },
+     {
+      "concept_id": "occ.soc_43_3071",
+      "duties": [
+       "银行柜员"
+      ],
+      "experience_question": null,
+      "group_id": "office_service",
+      "label": "银行柜员",
+      "order": 11,
+      "qualification_refs": [
+       "edu_at_least_hs"
+      ],
+      "search_terms": [
+       "银行柜员",
+       "Tellers",
+       "柜员",
+       "银行职员",
+       "bank teller",
+       "teller"
+      ]
+     },
+     {
+      "concept_id": "occ.bookkeeper",
+      "duties": [
+       "登记日常收支",
+       "管理现金与票据"
+      ],
+      "experience_question": null,
+      "group_id": "office_service",
+      "label": "记账员或出纳",
+      "order": 12,
+      "qualification_refs": [
+       "edu_at_least_some_college"
+      ],
+      "search_terms": [
+       "记账员或出纳",
+       "记账",
+       "出纳",
+       "做账",
+       "bookkeeper",
+       "Bookkeeper or cash clerk",
+       "记账员",
+       "出纳员",
+       "簿记",
+       "bookkeeping clerk",
+       "accounting clerk"
+      ]
+     },
+     {
+      "concept_id": "occ.soc_15_1232",
+      "duties": [
+       "电脑用户支持专员"
+      ],
+      "experience_question": null,
+      "group_id": "it_tech",
+      "label": "电脑用户支持专员",
+      "order": 13,
+      "qualification_refs": [
+       "edu_at_least_some_college"
+      ],
+      "search_terms": [
+       "电脑用户支持专员",
+       "Computer User Support Specialists",
+       "IT 支持",
+       "技术支持",
+       "桌面支持",
+       "电脑维护",
+       "help desk",
+       "IT support",
+       "tech support"
+      ]
+     },
+     {
+      "concept_id": "occ.soc_15_1231",
+      "duties": [
+       "网络支持专员"
+      ],
+      "experience_question": null,
+      "group_id": "it_tech",
+      "label": "网络支持专员",
+      "order": 14,
+      "qualification_refs": [
+       "edu_at_least_associate"
+      ],
+      "search_terms": [
+       "网络支持专员",
+       "Computer Network Support Specialists",
+       "网管",
+       "网络管理员",
+       "网络运维",
+       "network support",
+       "network technician"
+      ]
+     },
+     {
+      "concept_id": "occ.soc_15_1252",
+      "duties": [
+       "软件开发工程师"
+      ],
+      "experience_question": null,
+      "group_id": "it_tech",
+      "label": "软件开发工程师",
+      "order": 15,
+      "qualification_refs": [
+       "edu_at_least_bachelor"
+      ],
+      "search_terms": [
+       "软件开发工程师",
+       "Software Developers",
+       "程序员",
+       "软件工程师",
+       "开发工程师",
+       "码农",
+       "前端开发",
+       "后端开发",
+       "programmer",
+       "software engineer",
+       "software developer",
+       "developer",
+       "coder"
+      ]
+     },
+     {
+      "concept_id": "occ.soc_15_1211",
+      "duties": [
+       "计算机系统分析师"
+      ],
+      "experience_question": null,
+      "group_id": "it_tech",
+      "label": "计算机系统分析师",
+      "order": 16,
+      "qualification_refs": [
+       "edu_at_least_bachelor"
+      ],
+      "search_terms": [
+       "计算机系统分析师",
+       "Computer Systems Analysts",
+       "系统分析师",
+       "IT 分析师",
+       "systems analyst"
+      ]
+     },
+     {
+      "concept_id": "occ.accountant",
+      "duties": [
+       "编制财务报表",
+       "核对账目与税务资料"
+      ],
+      "experience_question": null,
+      "group_id": "professional_business",
+      "label": "会计",
+      "order": 17,
+      "qualification_refs": [
+       "edu_at_least_bachelor"
+      ],
+      "search_terms": [
+       "会计",
+       "审计",
+       "accountant",
+       "Accountant",
+       "会计师",
+       "审计师",
+       "auditor"
+      ]
+     },
+     {
+      "concept_id": "occ.soc_13_2051",
+      "duties": [
+       "金融与投资分析师"
+      ],
+      "experience_question": null,
+      "group_id": "professional_business",
+      "label": "金融与投资分析师",
+      "order": 18,
+      "qualification_refs": [
+       "edu_at_least_bachelor"
+      ],
+      "search_terms": [
+       "金融与投资分析师",
+       "Financial and Investment Analysts",
+       "金融分析师",
+       "投资分析师",
+       "financial analyst",
+       "investment analyst"
+      ]
+     },
+     {
+      "concept_id": "occ.soc_13_1161",
+      "duties": [
+       "市场研究与营销专员"
+      ],
+      "experience_question": null,
+      "group_id": "professional_business",
+      "label": "市场研究与营销专员",
+      "order": 19,
+      "qualification_refs": [
+       "edu_at_least_bachelor"
+      ],
+      "search_terms": [
+       "市场研究与营销专员",
+       "Market Research Analysts and Marketing Specialists",
+       "市场营销",
+       "市场专员",
+       "营销",
+       "市场调研",
+       "marketing",
+       "market research"
+      ]
+     },
+     {
+      "concept_id": "occ.soc_13_1071",
+      "duties": [
+       "人力资源专员"
+      ],
+      "experience_question": null,
+      "group_id": "professional_business",
+      "label": "人力资源专员",
+      "order": 20,
+      "qualification_refs": [
+       "edu_at_least_bachelor"
+      ],
+      "search_terms": [
+       "人力资源专员",
+       "Human Resources Specialists",
+       "人事",
+       "人力资源",
+       "HR",
+       "招聘专员",
+       "recruiter",
+       "human resources"
+      ]
+     },
+     {
+      "concept_id": "occ.soc_23_2011",
+      "duties": [
+       "律师助理"
+      ],
+      "experience_question": null,
+      "group_id": "professional_business",
+      "label": "律师助理",
+      "order": 21,
+      "qualification_refs": [
+       "edu_at_least_associate"
+      ],
+      "search_terms": [
+       "律师助理",
+       "Paralegals and Legal Assistants",
+       "法务助理",
+       "律所助理",
+       "paralegal",
+       "legal assistant"
+      ]
+     },
+     {
+      "concept_id": "occ.soc_41_3091",
+      "duties": [
+       "服务类销售代表"
+      ],
+      "experience_question": null,
+      "group_id": "professional_business",
+      "label": "服务类销售代表",
+      "order": 22,
+      "qualification_refs": [
+       "edu_at_least_hs"
+      ],
+      "search_terms": [
+       "服务类销售代表",
+       "Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel",
+       "销售代表",
+       "业务员",
+       "sales representative",
+       "sales rep"
+      ]
+     },
+     {
+      "concept_id": "occ.soc_49_9071",
+      "duties": [
+       "综合维修工"
+      ],
+      "experience_question": null,
+      "group_id": "repair_manufacturing",
+      "label": "综合维修工",
+      "order": 23,
+      "qualification_refs": [
+       "edu_at_least_hs"
+      ],
+      "search_terms": [
+       "综合维修工",
+       "Maintenance and Repair Workers, General",
+       "维修工",
+       "物业维修",
+       "修理工",
+       "maintenance worker",
+       "handyman"
+      ]
+     },
+     {
+      "concept_id": "occ.soc_49_3023",
+      "duties": [
+       "汽车维修技师"
+      ],
+      "experience_question": null,
+      "group_id": "repair_manufacturing",
+      "label": "汽车维修技师",
+      "order": 24,
+      "qualification_refs": [
+       "soc_49_3023_award"
+      ],
+      "search_terms": [
+       "汽车维修技师",
+       "Automotive Service Technicians and Mechanics",
+       "汽修",
+       "汽车修理工",
+       "修车师傅",
+       "auto mechanic",
+       "mechanic"
+      ]
+     },
+     {
+      "concept_id": "occ.soc_49_2022",
+      "duties": [
+       "通信设备安装维修工"
+      ],
+      "experience_question": null,
+      "group_id": "repair_manufacturing",
+      "label": "通信设备安装维修工",
+      "order": 25,
+      "qualification_refs": [
+       "soc_49_2022_award"
+      ],
+      "search_terms": [
+       "通信设备安装维修工",
+       "Telecommunications Equipment Installers and Repairers, Except Line Installers",
+       "通信维修",
+       "通信设备",
+       "宽带安装",
+       "telecom technician"
+      ]
+     },
+     {
+      "concept_id": "occ.soc_51_4121",
+      "duties": [
+       "焊工"
+      ],
+      "experience_question": null,
+      "group_id": "repair_manufacturing",
+      "label": "焊工",
+      "order": 26,
+      "qualification_refs": [
+       "edu_at_least_hs"
+      ],
+      "search_terms": [
+       "焊工",
+       "Welders, Cutters, Solderers, and Brazers",
+       "电焊工",
+       "焊接工",
+       "welder"
+      ]
+     },
+     {
+      "concept_id": "occ.soc_53_7062",
+      "duties": [
+       "搬运与装卸工"
+      ],
+      "experience_question": null,
+      "group_id": "logistics_warehouse",
+      "label": "搬运与装卸工",
+      "order": 27,
+      "qualification_refs": [],
+      "search_terms": [
+       "搬运与装卸工",
+       "Laborers and Freight, Stock, and Material Movers, Hand",
+       "搬运工",
+       "装卸工",
+       "mover",
+       "laborer"
+      ]
+     },
+     {
+      "concept_id": "occ.soc_53_7065",
+      "duties": [
+       "理货与拣货员"
+      ],
+      "experience_question": null,
+      "group_id": "logistics_warehouse",
+      "label": "理货与拣货员",
+      "order": 28,
+      "qualification_refs": [],
+      "search_terms": [
+       "理货与拣货员",
+       "Stockers and Order Fillers",
+       "理货员",
+       "拣货员",
+       "仓库员工",
+       "stocker",
+       "order picker"
+      ]
+     },
+     {
+      "concept_id": "occ.soc_43_5071",
+      "duties": [
+       "收发与库存文员"
+      ],
+      "experience_question": null,
+      "group_id": "logistics_warehouse",
+      "label": "收发与库存文员",
+      "order": 29,
+      "qualification_refs": [
+       "edu_at_least_hs"
+      ],
+      "search_terms": [
+       "收发与库存文员",
+       "Shipping, Receiving, and Inventory Clerks",
+       "库管",
+       "仓管",
+       "收发员",
+       "库存管理",
+       "inventory clerk",
+       "shipping clerk"
+      ]
+     },
+     {
+      "concept_id": "occ.soc_37_2011",
+      "duties": [
+       "清洁工（楼宇）"
+      ],
+      "experience_question": null,
+      "group_id": "cleaning_gardening",
+      "label": "清洁工（楼宇）",
+      "order": 30,
+      "qualification_refs": [],
+      "search_terms": [
+       "清洁工（楼宇）",
+       "Janitors and Cleaners, Except Maids and Housekeeping Cleaners",
+       "保洁",
+       "保洁员",
+       "清洁工",
+       "janitor",
+       "cleaner"
+      ]
+     },
+     {
+      "concept_id": "occ.soc_37_2012",
+      "duties": [
+       "家政与客房清洁员"
+      ],
+      "experience_question": null,
+      "group_id": "cleaning_gardening",
+      "label": "家政与客房清洁员",
+      "order": 31,
+      "qualification_refs": [],
+      "search_terms": [
+       "家政与客房清洁员",
+       "Maids and Housekeeping Cleaners",
+       "家政",
+       "客房清洁",
+       "酒店保洁",
+       "housekeeper",
+       "maid"
+      ]
+     },
+     {
+      "concept_id": "occ.soc_37_3011",
+      "duties": [
+       "园林绿化工"
+      ],
+      "experience_question": null,
+      "group_id": "cleaning_gardening",
+      "label": "园林绿化工",
+      "order": 32,
+      "qualification_refs": [],
+      "search_terms": [
+       "园林绿化工",
+       "Landscaping and Groundskeeping Workers",
+       "园丁",
+       "绿化工",
+       "园艺工",
+       "gardener",
+       "landscaper"
+      ]
+     },
+     {
+      "concept_id": "occ.soc_51_6011",
+      "duties": [
+       "洗衣与干洗工"
+      ],
+      "experience_question": null,
+      "group_id": "cleaning_gardening",
+      "label": "洗衣与干洗工",
+      "order": 33,
+      "qualification_refs": [],
+      "search_terms": [
+       "洗衣与干洗工",
+       "Laundry and Dry-Cleaning Workers",
+       "洗衣工",
+       "干洗",
+       "洗衣店",
+       "laundry worker"
+      ]
+     },
+     {
+      "concept_id": "occ.soc_27_1024",
+      "duties": [
+       "平面设计师"
+      ],
+      "experience_question": null,
+      "group_id": "culture_sports",
+      "label": "平面设计师",
+      "order": 34,
+      "qualification_refs": [
+       "edu_at_least_bachelor"
+      ],
+      "search_terms": [
+       "平面设计师",
+       "Graphic Designers",
+       "设计师",
+       "美工",
+       "视觉设计",
+       "graphic designer",
+       "designer"
+      ]
+     },
+     {
+      "concept_id": "occ.soc_27_4011",
+      "duties": [
+       "音视频技术员"
+      ],
+      "experience_question": null,
+      "group_id": "culture_sports",
+      "label": "音视频技术员",
+      "order": 35,
+      "qualification_refs": [
+       "soc_27_4011_award"
+      ],
+      "search_terms": [
+       "音视频技术员",
+       "Audio and Video Technicians",
+       "音响师",
+       "音视频",
+       "视频技术员",
+       "AV technician",
+       "audio technician"
+      ]
+     },
+     {
+      "concept_id": "occ.soc_39_9031",
+      "duties": [
+       "健身教练与团体课老师"
+      ],
+      "experience_question": null,
+      "group_id": "culture_sports",
+      "label": "健身教练与团体课老师",
+      "order": 36,
+      "qualification_refs": [
+       "edu_at_least_hs"
+      ],
+      "search_terms": [
+       "健身教练与团体课老师",
+       "Exercise Trainers and Group Fitness Instructors",
+       "健身教练",
+       "私教",
+       "瑜伽老师",
+       "团课老师",
+       "personal trainer",
+       "fitness instructor"
+      ]
+     },
+     {
+      "concept_id": "occ.soc_13_1082",
+      "duties": [
+       "项目管理专员"
+      ],
+      "experience_question": null,
+      "group_id": "management",
+      "label": "项目管理专员",
+      "order": 37,
+      "qualification_refs": [
+       "edu_at_least_bachelor"
+      ],
+      "search_terms": [
+       "项目管理专员",
+       "Project Management Specialists",
+       "项目经理",
+       "项目管理",
+       "project manager"
+      ]
+     },
+     {
+      "concept_id": "occ.soc_35_1012",
+      "duties": [
+       "餐饮主管"
+      ],
+      "experience_question": "exp.soc_35_1012",
+      "group_id": "management",
+      "label": "餐饮主管",
+      "order": 38,
+      "qualification_refs": [
+       "edu_at_least_hs",
+       "soc_35_1012_experience"
+      ],
+      "search_terms": [
+       "餐饮主管",
+       "First-Line Supervisors of Food Preparation and Serving Workers",
+       "餐厅经理",
+       "餐厅主管",
+       "领班",
+       "food service manager",
+       "restaurant manager"
+      ]
+     },
+     {
+      "concept_id": "occ.soc_41_1011",
+      "duties": [
+       "零售主管"
+      ],
+      "experience_question": "exp.soc_41_1011",
+      "group_id": "management",
+      "label": "零售主管",
+      "order": 39,
+      "qualification_refs": [
+       "edu_at_least_hs",
+       "soc_41_1011_experience"
+      ],
+      "search_terms": [
+       "零售主管",
+       "First-Line Supervisors of Retail Sales Workers",
+       "门店主管",
+       "店长",
+       "零售店长",
+       "store manager",
+       "retail supervisor"
+      ]
+     },
+     {
+      "concept_id": "occ.soc_43_1011",
+      "duties": [
+       "办公室行政主管"
+      ],
+      "experience_question": "exp.soc_43_1011",
+      "group_id": "management",
+      "label": "办公室行政主管",
+      "order": 40,
+      "qualification_refs": [
+       "edu_at_least_hs",
+       "soc_43_1011_experience"
+      ],
+      "search_terms": [
+       "办公室行政主管",
+       "First-Line Supervisors of Office and Administrative Support Workers",
+       "行政主管",
+       "办公室主任",
+       "行政经理",
+       "office manager",
+       "admin supervisor"
+      ]
+     }
+    ],
+    "pack_id": "pack.e3b.us-v1",
+    "qualification_states": [
+     {
+      "meaning": "不授予任何学历门槛",
+      "name": "未答",
+      "section": "education",
+      "state": "unanswered"
+     },
+     {
+      "meaning": "按没有确认学历处理：不授予学历门槛",
+      "name": "暂不确定",
+      "section": "education",
+      "state": "unsure"
+     },
+     {
+      "meaning": "授予这一级和它以下各级的学历门槛；不授予职业证书",
+      "name": "已选择最高学历",
+      "section": "education",
+      "state": "provided"
+     },
+     {
+      "meaning": "不授予任何证书",
+      "name": "未答",
+      "section": "certificates",
+      "state": "unanswered"
+     },
+     {
+      "meaning": "不授予证书",
+      "name": "暂不确定",
+      "section": "certificates",
+      "state": "unsure"
+     },
+     {
+      "meaning": "授予选中的证书；一张都不选表示没有这些证书",
+      "name": "已回答",
+      "section": "certificates",
+      "state": "provided"
+     },
+     {
+      "meaning": "不授予相关经验",
+      "name": "未答",
+      "section": "experience",
+      "state": "unanswered"
+     },
+     {
+      "meaning": "不授予相关经验",
+      "name": "暂不确定",
+      "section": "experience",
+      "state": "unsure"
+     },
+     {
+      "meaning": "按填写的职业与年数判断是否满足；不填任何经历表示没有相关经验",
+      "name": "已回答",
+      "section": "experience",
+      "state": "provided"
+     }
+    ],
+    "search": {
+     "method": "catalog_search_nfkc_casefold_all_terms_v1",
+     "no_match": "目录里没有找到匹配的职业。本版只支持目录里的 40 种职业（教师、护士、医生等暂不在范围内）；请按分类浏览，或换一个常用叫法。系统不会替你换成别的职业",
+     "rules": [
+      "全角与半角统一、英文不分大小写、首尾空白忽略",
+      "用空格分开的几个词要全部命中：每个词出现在这个条目的任意一个搜索词里就算命中",
+      "只在目录已经发布的条目里筛选，不生成新条目；搜索框里的字不保存，也不进入画像",
+      "搜索为空时显示当前分组的全部条目，顺序固定",
+      "提交的是选中条目的编号；服务端核对编号与目录版本，不认搜索词"
+     ]
+    },
+    "sections": {
+     "attribute_preferences": false,
+     "certificates": true,
+     "education": true,
+     "experience": true,
+     "hard_requirements": false,
+     "interest_text": false,
+     "leisure": "panel_select",
+     "occupation": "catalog_select",
+     "occupation_text": "compatibility_only",
+     "taste": "panel_select"
+    },
+    "taste": {
+     "entries": [
+      {
+       "group_id": "chinese_home",
+       "key": "chinese",
+       "label": "中餐",
+       "order": 1,
+       "search_terms": [
+        "中餐",
+        "中国菜",
+        "川菜",
+        "粤菜",
+        "chinese",
+        "Chinese"
+       ]
+      },
+      {
+       "group_id": "chinese_home",
+       "key": "home_style",
+       "label": "家常菜",
+       "order": 2,
+       "search_terms": [
+        "家常菜",
+        "家常",
+        "Home-style cooking"
+       ]
+      },
+      {
+       "group_id": "asian",
+       "key": "japanese",
+       "label": "日本料理",
+       "order": 3,
+       "search_terms": [
+        "日本料理",
+        "日料",
+        "日本菜",
+        "寿司",
+        "拉面",
+        "japanese",
+        "sushi",
+        "Japanese"
+       ]
+      },
+      {
+       "group_id": "asian",
+       "key": "korean",
+       "label": "韩国料理",
+       "order": 4,
+       "search_terms": [
+        "韩国料理",
+        "韩国",
+        "韩餐",
+        "korean",
+        "Korean"
+       ]
+      },
+      {
+       "group_id": "asian",
+       "key": "thai",
+       "label": "泰国菜",
+       "order": 5,
+       "search_terms": [
+        "泰国菜",
+        "泰国",
+        "泰餐",
+        "thai",
+        "Thai"
+       ]
+      },
+      {
+       "group_id": "asian",
+       "key": "vietnamese",
+       "label": "越南菜",
+       "order": 6,
+       "search_terms": [
+        "越南菜",
+        "越南",
+        "河粉",
+        "vietnamese",
+        "pho",
+        "Vietnamese"
+       ]
+      },
+      {
+       "group_id": "asian",
+       "key": "indian",
+       "label": "印度菜",
+       "order": 7,
+       "search_terms": [
+        "印度菜",
+        "印度",
+        "咖喱",
+        "indian",
+        "curry",
+        "Indian"
+       ]
+      },
+      {
+       "group_id": "western_other",
+       "key": "italian",
+       "label": "意大利菜",
+       "order": 8,
+       "search_terms": [
+        "意大利菜",
+        "意大利",
+        "意式",
+        "披萨",
+        "意面",
+        "italian",
+        "pasta",
+        "Italian"
+       ]
+      },
+      {
+       "group_id": "western_other",
+       "key": "mexican",
+       "label": "墨西哥菜",
+       "order": 9,
+       "search_terms": [
+        "墨西哥菜",
+        "墨西哥",
+        "塔可",
+        "mexican",
+        "taco",
+        "Mexican"
+       ]
+      },
+      {
+       "group_id": "western_other",
+       "key": "mediterranean",
+       "label": "地中海菜",
+       "order": 10,
+       "search_terms": [
+        "地中海菜",
+        "地中海",
+        "希腊菜",
+        "mediterranean",
+        "greek",
+        "Mediterranean"
+       ]
+      }
+     ],
+     "groups": [
+      {
+       "group_id": "chinese_home",
+       "label": "中式与家常",
+       "order": 1
+      },
+      {
+       "group_id": "asian",
+       "label": "亚洲菜",
+       "order": 2
+      },
+      {
+       "group_id": "western_other",
+       "label": "西式与其他",
+       "order": 3
+      }
+     ],
+     "kind": "taste",
+     "note": "可以多选，也可以跳过（跳过就是未答）；选中的菜系直接用于饮食评价，不需要写文字。没有口味偏好和暂不确定可以单独选",
+     "search_notes": [
+      {
+       "note": "本版不区分中国各地的菜系（川菜、粤菜等），都按“中餐”计；选“中餐”即可，不会单独记成川菜偏好",
+       "note_id": "taste.chinese_regional",
+       "points_to": [
+        "chinese"
+       ],
+       "terms": [
+        "川菜",
+        "粤菜",
+        "湘菜",
+        "鲁菜",
+        "苏菜",
+        "浙菜",
+        "闽菜",
+        "徽菜",
+        "东北菜",
+        "上海菜",
+        "北京菜",
+        "sichuan",
+        "cantonese",
+        "hunan"
+       ]
+      }
+     ]
+    }
+   },
+   "interests": {
+    "cuisines": [
+     {
+      "aliases": [
+       "家常"
+      ],
+      "key": "home_style",
+      "label": "家常菜"
+     },
+     {
+      "aliases": [
+       "中餐",
+       "中国菜",
+       "川菜",
+       "粤菜",
+       "chinese"
+      ],
+      "key": "chinese",
+      "label": "中餐"
+     },
+     {
+      "aliases": [
+       "意大利",
+       "意式",
+       "披萨",
+       "意面",
+       "italian",
+       "pasta"
+      ],
+      "key": "italian",
+      "label": "意大利菜"
+     },
+     {
+      "aliases": [
+       "墨西哥",
+       "塔可",
+       "mexican",
+       "taco"
+      ],
+      "key": "mexican",
+      "label": "墨西哥菜"
+     },
+     {
+      "aliases": [
+       "日料",
+       "日本菜",
+       "寿司",
+       "拉面",
+       "japanese",
+       "sushi"
+      ],
+      "key": "japanese",
+      "label": "日本料理"
+     },
+     {
+      "aliases": [
+       "印度",
+       "咖喱",
+       "indian",
+       "curry"
+      ],
+      "key": "indian",
+      "label": "印度菜"
+     },
+     {
+      "aliases": [
+       "泰国",
+       "泰餐",
+       "thai"
+      ],
+      "key": "thai",
+      "label": "泰国菜"
+     },
+     {
+      "aliases": [
+       "韩国",
+       "韩餐",
+       "korean"
+      ],
+      "key": "korean",
+      "label": "韩国料理"
+     },
+     {
+      "aliases": [
+       "越南",
+       "河粉",
+       "vietnamese",
+       "pho"
+      ],
+      "key": "vietnamese",
+      "label": "越南菜"
+     },
+     {
+      "aliases": [
+       "地中海",
+       "希腊菜",
+       "mediterranean",
+       "greek"
+      ],
+      "key": "mediterranean",
+      "label": "地中海菜"
+     }
+    ],
+    "leisure_categories": [
+     {
+      "aliases": [
+       "音乐",
+       "吉他",
+       "唱歌",
+       "合唱",
+       "乐器",
+       "music",
+       "guitar",
+       "choir"
+      ],
+      "key": "music",
+      "label": "音乐"
+     },
+     {
+      "aliases": [
+       "网球",
+       "羽毛球",
+       "乒乓球",
+       "球拍",
+       "tennis",
+       "badminton"
+      ],
+      "key": "racket_sports",
+      "label": "球拍运动"
+     },
+     {
+      "aliases": [
+       "美术馆",
+       "博物馆",
+       "展览",
+       "音乐会",
+       "看演出",
+       "museum",
+       "gallery"
+      ],
+      "key": "arts_culture",
+      "label": "艺术与文化"
+     },
+     {
+      "aliases": [
+       "烹饪",
+       "做菜",
+       "品鉴",
+       "cooking"
+      ],
+      "key": "culinary",
+      "label": "美食活动"
+     },
+     {
+      "aliases": [
+       "健身",
+       "跑步",
+       "撸铁",
+       "gym",
+       "running"
+      ],
+      "key": "fitness",
+      "label": "健身"
+     }
+    ],
+    "leisure_states_zh": [
+     "未答：没有这一项的明确信息，按中性规则评价；不会被当成“通用评价”的选择",
+     "暂不确定：按中性规则评价",
+     "明确没有固定爱好：按中性规则评价",
+     "采用通用休闲评价：城市有什么合适的就体验什么（按中性规则评价）",
+     "用文字描述：先按词表形成候选，你选中的类别才进入评价；没认出的描述原样保留，本版不评价"
+    ],
+    "matching_note_zh": "确认的兴趣只在同样的实际参与时间下带来适度更高的满足（模型假设：多 50%，有上限）；确认的菜系只让实际吃到的合口味餐多计一点。 这些系数是公开登记的模型假设，不是对你个人的测量；不改变你的点数、现金或资格，也不让贵的东西自动更好",
+    "taste_states_zh": [
+     "未答：按中性规则评价",
+     "暂不确定：按中性规则评价",
+     "明确没有口味偏好：按中性规则评价",
+     "用文字描述：先按词表形成候选，你选中的菜系才进入饮食评价；品牌与其他要求只留存"
+    ]
+   },
+   "interview": "reserved_not_implemented",
+   "limits": [
+    "城市资料来自公开来源与登记的模型设定；生活规则、评分与评价参数是合成探索设定：结果不排序真实城市，也不是现实推荐",
+    "安全背景按各都会区 2024 年犯罪统计换算（统计代理，不是个人遭遇犯罪的概率；纽约只覆盖都会区的纽约州部分）；休闲背景是六城共同设定；治疗价格是共同假设；外食、服务、设备寿命与活动价格含登记的模型设定",
+    "离线规划器是可控的 mock，不代表真实大语言模型的能力或偏好理解",
+    "问卷文案与参考改善范围是暂定稿，没有做认知访谈与量表验证"
+   ],
+   "material_leaves": [
+    {
+     "definition": "实际住的那一处房子本身的条件：空间够不够用、同类房子里条件好不好",
+     "key": "housing_condition",
+     "label": "居住条件",
+     "note": "只看房子本身；房租、通勤、地区的安全与环境不在这一项（安全、环境按住处所在片区另算）；旧版的“居住空间（只看面积）”含义不同，旧的确认要重新审阅",
+     "support": "supported"
+    },
+    {
+     "definition": "实际吃的完整食品方案（自己做、外食都可以）新鲜不新鲜、合不合你确认的口味",
+     "key": "food_life",
+     "label": "饮食生活",
+     "note": "只评价新鲜餐与你确认的菜系；吃饱是基本保障，不另加分；价格、餐馆档次与外食次数不等于更好；准备时间算在时间账里",
+     "support": "partially_supported"
+    },
+    {
+     "definition": "通信联网、家用日耗品是否方便获得，以及日常杂务是否省心。",
+     "key": "daily_convenience",
+     "label": "日常支持与便利",
+     "note": "杂务看本人实际少做了多少小时（设备与人工服务是两种实现方式，不分别打分）；通信、居家联网与家用日耗品看实际买到的月份，同一项买两份不多算；它是相对重要程度，不是预算或必须购买的指令；含义比旧版“日常生活便利”多了通信与日耗品，旧的确认要重新审阅",
+     "support": "supported"
+    },
+    {
+     "definition": "在其他生活开支之外，获得衣着、个人护理等个人消费的满足。",
+     "key": "personal_enjoyment",
+     "label": "个人消费与享受",
+     "note": "按每月实际获得的标准个人消费篮子（衣着、鞋履与配饰、个人护理）评价，不按花了多少钱；同样的篮子涨价不改变这一项，买得少才会少；是可解释的模型抽象，没有测量真实人的幸福感；不再单独计算按摩或居家舒适用品；含义与旧版不同，旧的确认要重新审阅",
+     "support": "partially_supported"
+    }
+   ],
+   "meta": {
+    "conversion_version": "e3a-conversion-v3",
+    "data_pack": {
+     "content_fingerprint": "48eda959e2eb8254c891d1de88b92f792ccf8ecbaadac8037d548279cd9dd22b",
+     "note": "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定",
+     "pack_id": "pack.e3b.us-v1",
+     "status": "real_data_frozen"
+    },
+    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
+    "questionnaire_version": "e3a-questionnaire-v0.4-draft",
+    "sample": null,
+    "schema_version": "e3a-product-schema-v3.4",
+    "vocabulary_version": "e3a-vocabulary-v5"
+   },
+   "money_bases": [
+    {
+     "conversion_rule": "identity_same_basis_v1",
+     "currency": "USD",
+     "meaning": "liquid_funds_v1",
+     "note": "按 2024 年美元、当地价格水平填写的可动用流动资金；与目录同一口径，换算是恒等，不做通胀或汇率换算",
+     "numeraire_id": "USD_2024_LOCAL",
+     "price_period": "2024"
+    }
+   ],
+   "money_input_rule_zh": "金额只接受两种写法：不分组的非负十进制（例如 3000.50），或严格每三位一组的千分位（例如 3,000.50）；小数点只能用“.”，最多两位小数。“3000,50”“3,,000”“1,23.45”这类写法会被拒绝，系统不猜你的意思",
+   "occupation": {
+    "concept_count": 40,
+    "languages": [
+     "en",
+     "zh"
+    ],
+    "max_candidates": 4,
+    "method": "controlled_vocabulary_alias_match_v1",
+    "note": "新流程从职业目录按分类浏览或搜索后直接选（见 input_catalog，不需要写文字）。文字描述只为兼容保留：系统按受控词表的别名给出少量可读候选（名称与职责），由你确认。分类代码只在内部保留，不需要、也不会请你填写；匹配不到时说明原因，不自动改成“普通白领”",
+    "users_enter_codes": false,
+    "vocabulary_version": "e3a-vocabulary-v5"
+   },
+   "points": {
+    "canonical_form": "约分后的整数（30）或 分子/分母（50/3）；计算与比较都用它，显示四舍五入到 1 位小数，显示值不回流计算",
+    "display_decimals": 1,
+    "equal_split_material": "25",
+    "equal_split_six": "50/3",
+    "manual_entry": "手工输入按精确十进制解析，最多 2 位小数（步长不是测量精度）；也接受规范分数写法（例如 50/3）",
+    "manual_max_decimals": 2,
+    "rules": [
+     "六维合计必须精确等于 100；不预填数值、不提供人格套餐，不自动按比例扣减其他项",
+     "只有用户主动选择“平均分配”才生成均分（六维每项 50/3、物质每项 25），不让排在前面的项目多拿分",
+     "明确 0 是已提供的数值；“未答”“明确无所谓”“暂不确定”都不会被自动换成 0 或均分",
+     "物质父项为正时，物质四项也必须精确合计 100；物质父项明确为 0 时细分不适用，不伪造四个回答",
+     "物质从三项改成四项、饮食的含义扩大之后，旧的确认不能补 0 或重新分配点数沿用：请重新审阅并确认"
+    ],
+    "total": 100
+   },
+   "start_scenario": [
+    "这是一次搬到候选城市重新开始的简化情景：从第 1 年、健康、没有已有物品、没有在学课程、没有资金目标开始",
+    "现实中的旧家具、病史与在学课程暂未纳入；这是模拟的假设，不是对你现实情况的判断",
+    "同一个你在各城市、各个分身里的年龄、现金、能力与基础时间精力都相同；城市里的具体岗位按当地目录匹配"
+   ],
+   "unsupported": [
+    "多人家庭、非工资收入（利息、股息、副业）、家庭共同资产、买房与贷款",
+    "税收抵免、税前扣除与逐项扣除；纽约市以外的纽约都会区居民、芝加哥都会区的印第安纳部分、跨州组合",
+    "停车费与按距离计的公交票价；旧金山的公交票价（官方网站拒绝访问）",
+    "芝加哥公园管理局的真实活动（需要日期窗口、整期报名与年龄资格，引擎暂不支持）",
+    "品牌、制作方式、档次、服务质量与上门顾虑的评分（只记录原文）",
+    "访谈式输入（只保留来源与证据引用接口）"
+   ]
+  },
+  "source_view_fingerprint": "f5adad69bb98f268f6660bf4720fe5401c5e7873e4431c837139ab417f109976",
+  "status": "complete"
+ },
+ "sample": {
+  "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+  "origin": "offline_run",
+  "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+  "synthetic": true
+ }
+}

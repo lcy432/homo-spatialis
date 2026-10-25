@@ -9,7 +9,7 @@
   "confirm_with": null,
   "confirmed": {
    "confirmed_id": "confirmed.draft-0000000000000029.r2",
-   "content_fingerprint": "6b664bef9bf837be8bc710762a016d18c7c1e044b57a51fd314c1a0302ad1eb4"
+   "content_fingerprint": "20926f6ecb68b9c974e89afdb0e5b58b508d85cdce54ad84588f9d818dedd199"
   },
   "created_at": "2026-10-24T09:00:00Z",
   "deletion": {
@@ -22,7 +22,7 @@
   "explanation": null,
   "intent_id": "intent-000000000000002a",
   "meta": {
-   "conversion_version": "e3a-conversion-v2",
+   "conversion_version": "e3a-conversion-v3",
    "data_pack": {
     "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
@@ -30,26 +30,26 @@
     "status": "synthetic_fixture_only"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.3-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.4-draft",
    "sample": {
     "note": "受控夹具：故障注入或测试传输（离线替身，不是真实模型），零网络、零费用",
     "origin": "controlled_fixture",
     "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.3",
-   "vocabulary_version": "e3a-vocabulary-v4"
+   "schema_version": "e3a-product-schema-v3.4",
+   "vocabulary_version": "e3a-vocabulary-v5"
   },
   "preflight": {
    "binding": {
     "compiled_inputs": {
-     "life_input": "0768c0f22abaf27970ebe07d8f73f2e82cb2cbcdc64bbaacc3578110b5aaadc4",
+     "life_input": "e1a468f46a9c76043233a9ccadde2ffe74f159291e0071d5132b0d814e655b41",
      "roster": "94ddea158a90a8d2ab924ea5a5751e1521e1fb721839dcc8afa4470396645a8e",
      "run_config": "b12fa205efaeba170bafb2b4eb27d9bcf35c6e8155e43e7deb09fc3994a1bed2",
      "scoring_config": "9dbae9d435ab74cc64beac6604352033194e6f024ae45304a4ab06ca86ac2947"
     },
     "evaluation_spec_id": "eval.e1-life.main",
-    "identities_fingerprint": "952cd72eab93373d9178604c421d3a26a02a74e55c76845f4a42a1e251c68a68",
+    "identities_fingerprint": "82f2b527b1a906248f1eafd539ea01536d8d79230dec39529db57791d7c838c2",
     "planner_id": "llm.qwen.product_planner",
     "planner_kind": "llm",
     "prompt_template": "e3b-product-prompt-v3",
@@ -701,7 +701,7 @@
    "clones_per_city": 1,
    "confirmed": {
     "confirmed_id": "confirmed.draft-0000000000000029.r2",
-    "content_fingerprint": "6b664bef9bf837be8bc710762a016d18c7c1e044b57a51fd314c1a0302ad1eb4"
+    "content_fingerprint": "20926f6ecb68b9c974e89afdb0e5b58b508d85cdce54ad84588f9d818dedd199"
    },
    "executable": {
     "reasons": [
@@ -717,7 +717,7 @@
    },
    "issues": [],
    "meta": {
-    "conversion_version": "e3a-conversion-v2",
+    "conversion_version": "e3a-conversion-v3",
     "data_pack": {
      "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
      "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
@@ -725,10 +725,10 @@
      "status": "synthetic_fixture_only"
     },
     "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-    "questionnaire_version": "e3a-questionnaire-v0.3-draft",
+    "questionnaire_version": "e3a-questionnaire-v0.4-draft",
     "sample": null,
-    "schema_version": "e3a-product-schema-v3.3",
-    "vocabulary_version": "e3a-vocabulary-v4"
+    "schema_version": "e3a-product-schema-v3.4",
+    "vocabulary_version": "e3a-vocabulary-v5"
    },
    "planner": {
     "call_limit": 18,
@@ -738,7 +738,7 @@
     "planner_id": "llm.qwen.product_planner",
     "planner_kind": "llm"
    },
-   "preflight_fingerprint": "9424b2079beb04a03e3a6f7050db1169a15dd1067184f87c8caa73042f7f4702",
+   "preflight_fingerprint": "b2aa872b42230de3081f35f41df7286225a35926bbd8a9094cd25bcc14011938",
    "preflight_id": "preflight.confirmed.draft-0000000000000029.r2",
    "scope_zh": [
     "生活协议 life-v1-e3a-product（状态 synthetic_fixture_only）、评分 score.e1-life.explore（探索版）：城市、报价、工资、疾病、治疗与评分参数全部是合成设定，不是现实城市，不排序真实城市",
@@ -792,20 +792,20 @@
     "call_limit": 18,
     "calls_used": 3,
     "currency": "CNY",
-    "estimated_cost": "0.084626",
-    "in_flight_cost": "0.043107",
+    "estimated_cost": "0.084349",
+    "in_flight_cost": "0.042990",
     "kind": "estimated_from_quote",
     "max_cost": "20",
     "note": "应用侧按报价 qwen3.8-flash@beijing@2026-10-09 估算，不是供应商账单（以账单为准）：已核算 + 用量不确定（保留预留，不记 0） + 在途预留；本次运行上限 20 CNY",
     "price_version": "qwen3.8-flash@beijing@2026-10-09",
     "service_attempt_limit": 36,
     "service_attempts": 4,
-    "settled_cost": "0.041519",
+    "settled_cost": "0.041359",
     "uncertain_attempts": 0,
     "uncertain_cost": "0.000000"
    },
    "meta": {
-    "conversion_version": "e3a-conversion-v2",
+    "conversion_version": "e3a-conversion-v3",
     "data_pack": {
      "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
      "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
@@ -813,16 +813,16 @@
      "status": "synthetic_fixture_only"
     },
     "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-    "questionnaire_version": "e3a-questionnaire-v0.3-draft",
+    "questionnaire_version": "e3a-questionnaire-v0.4-draft",
     "sample": null,
-    "schema_version": "e3a-product-schema-v3.3",
-    "vocabulary_version": "e3a-vocabulary-v4"
+    "schema_version": "e3a-product-schema-v3.4",
+    "vocabulary_version": "e3a-vocabulary-v5"
    },
    "pause": null,
    "report_available": false,
    "resumable": false,
    "resume_note": "这次运行正在进行，不需要恢复；结束或暂停之后这里会更新",
-   "run_id": "run-e3a-1a77490b2307bdf6",
+   "run_id": "run-e3a-9e3ccb4fa7dded21",
    "stage": "running",
    "stage_zh": "运行中",
    "updated_at": "2026-10-24T09:00:00Z"
@@ -834,7 +834,7 @@
    "used": 1
   },
   "result_available": false,
-  "run_id": "run-e3a-1a77490b2307bdf6",
+  "run_id": "run-e3a-9e3ccb4fa7dded21",
   "settings": {
    "call_limit": 18,
    "cities": [

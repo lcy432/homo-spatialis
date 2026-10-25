@@ -91,13 +91,32 @@ def _canon(exact: str) -> str:
     return str(q.numerator) if q.denominator == 1 else f"{q.numerator}/{q.denominator}"
 
 
-def test_hard_requirements_are_reported_separately_with_checked_counts(normal):
-    report = _report(normal)
-    for cr, r in zip(report.city_reports, normal.result.cities, strict=True):
+def test_new_profiles_carry_no_hard_requirement_into_results(normal):
+    """新问卷不再收集硬要求：正常闭环的确认画像、E1 汇总与产品结果里都没有硬要求。"""
+    assert normal.confirmed.hard_requirements == ()
+    assert all(cr.hard_requirements == () for cr in _report(normal).city_reports)
+    assert all(c.hard_requirements == () for c in normal.result.clones)
+
+
+@pytest.fixture(scope="module")
+def legacy(tmp_path_factory):
+    """带旧硬要求（往返 60 分钟）的历史画像（受控夹具）：E1 内部的硬要求机制与结果里的报告照旧成立。"""
+    return sc.closed_loop(
+        tmp_path_factory.mktemp("legacy"),
+        "legacy",
+        origin="controlled_fixture",
+        legacy_hard_requirements=sc.LEGACY_COMMUTE_60,
+    )
+
+
+def test_hard_requirements_are_reported_separately_with_checked_counts(legacy):
+    report = _report(legacy)
+    for cr, r in zip(report.city_reports, legacy.result.cities, strict=True):
         assert [(h.need, h.checked, h.not_checked, h.violated) for h in cr.hard_requirements] == [
             (h.need, h.checked, h.not_checked, h.violated) for h in r.hard_requirements
         ]
-    lines = {c.clone_ref: c.hard_requirements for c in normal.result.clones}
+    lines = {c.clone_ref: c.hard_requirements for c in legacy.result.clones}
+    assert lines and all(hs for hs in lines.values())
     assert all(h.need == "commute_limit" for hs in lines.values() for h in hs)
 
 
@@ -201,6 +220,7 @@ def mixed(tmp_path_factory):
         repeat_indexes=(0, 1),
         illness_events=events,
         scripts=(MockScript(clone_id="u603.m52.r0", behavior="malformed_output", years=(1,)),),
+        legacy_hard_requirements=sc.LEGACY_COMMUTE_60,  # 历史画像的通勤上限：核验硬要求的单独报告
     )
 
 

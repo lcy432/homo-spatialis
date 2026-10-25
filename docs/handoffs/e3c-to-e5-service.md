@@ -1,6 +1,6 @@
 # E3C 托管服务交给界面层（E3 → E5）
 
-日期：2026-10-23；2026-10-24 E3C 收尾（运行选项、独立审核 R1–R6 的修复，第 11 节是本轮的改动清单）；2026-10-24 E3 → E5 接口补齐（按钮与期限、双语显示附层、地理清单、结果色阶，第 12 节）；2026-10-25 独立复核 F1–F3 的收尾修复与四项小接口问题（第 13 节）。规则见 [ADR0043](../../DECISIONS/0043-e3c-hosted-service.md)，机制见 [E3C 托管服务](../design/e3c-service.md)。本轮只提供服务、接口与样例，**没有改 E5 页面**。
+日期：2026-10-23；2026-10-24 E3C 收尾（运行选项、独立审核 R1–R6 的修复，第 11 节是本轮的改动清单）；2026-10-24 E3 → E5 接口补齐（按钮与期限、双语显示附层、地理清单、结果色阶，第 12 节）；2026-10-25 独立复核 F1–F3 的收尾修复与四项小接口问题（第 13 节）；2026-10-25 输入体验收敛（输入目录、结构化资格答案、面板多选、去掉硬要求与属性偏好、旧草稿迁移）与 F3 遗留（第 14 节）。规则见 [ADR0043](../../DECISIONS/0043-e3c-hosted-service.md)，机制见 [E3C 托管服务](../design/e3c-service.md)。本轮只提供服务、接口与样例，**没有改 E5 页面**。
 
 ## 1. 现在能做什么、不能做什么
 
@@ -13,8 +13,8 @@
 | 文件 | 用途 |
 |---|---|
 | [`contracts/product/v3/openapi.json`](../../contracts/product/v3/openapi.json) | 全部 HTTP 接口（路径、请求与回复的结构、错误码）。生产不在线公开 `/docs`；本地 mock 服务在 `http://127.0.0.1:8765/api/v1/docs` 有交互式文档 |
-| `contracts/product/v3/*.schema.json`、`index.json` | 公共结构 `e3a-product-schema-v3.3`（33 份消息，含显示附层的 5 份）。唯一权威是 `src/common/product_contracts.py` |
-| `contracts/product/v3/samples/60_…–128_…` | 服务的样例（第 8 节；105–128 是显示附层，第 12.6、13.6 节），全部由服务端真实代码路径产生，凭证是明确无效的测试值 |
+| `contracts/product/v3/*.schema.json`、`index.json` | 公共结构 `e3a-product-schema-v3.4`（34 份消息，含显示附层的 5 份；第 14 节）。唯一权威是 `src/common/product_contracts.py` |
+| `contracts/product/v3/samples/60_…–154_…` | 服务的样例（第 8 节；105–128 是显示附层，第 12.6、13.6 节；129–154 是新输入流程，第 14.8 节），全部由服务端真实代码路径产生，凭证是明确无效的测试值 |
 | `contracts/product/display/v1/service-errors.json` | 固定双语错误目录（未登录、服务不可达时随页面携带；第 12.3 节） |
 | `configs/product/service_local_mock.yaml` | 本地联调配置（`site_origin = http://localhost:5173`） |
 
@@ -75,6 +75,7 @@ fetch(url, { method, headers: { "Content-Type": "application/json", "X-CSRF-Toke
 |---|---|---|
 | 新建草稿 | `POST /api/v1/drafts` | 201 `DraftView`（编号与修订号由服务器分配，城市已按规则选好） |
 | 读 / 存 / 删草稿 | `GET` / `PUT`（`DraftSaveRequest`：`expected_revision` + 草稿）/ `DELETE /api/v1/drafts/{id}` | `DraftView` / `DraftView`（修订号 +1）/ `DeletionReceipt`；旧修订号 409 `revision_conflict` |
+| 迁移旧草稿 | `POST /api/v1/drafts/{id}/migrate`（`DraftMigrateRequest`：`expected_revision`、`clear_removed`） | `DraftView`（修订号 +1）；没有同意清空 409 `migration_consent_required`，不需要迁移 409 `migration_not_needed`（第 14.6 节） |
 | 审阅 | `POST /api/v1/drafts/{id}/review` | `ReviewReply`（审阅服务端保存的那一版） |
 | 确认画像 | `POST /api/v1/profiles/confirm`（`ProfileConfirmRequest`：审阅编号、草稿编号、修订号、知悉项） | `ProfileConfirmReply`：`confirmed` 带确认画像，`refused` 带原因（草稿改过、知悉项缺失、审阅过时） |
 | 准备模拟 | `POST /api/v1/run-intents`（`RunIntentCreateRequest`：`confirmed_id`，可选 `clones_per_city`、`years`、`max_cost_cny`） | 202 `RunIntentView`（`checking`，排队检查；`settings` 是这次保存的有效设置）；同一份画像、同样的设置再点一次 200 返回原意图；选项越界 409 `run_options_invalid` |
@@ -349,3 +350,139 @@ answer_states[j] = {
 * 已实现并离线自测：离线全量测试 1271 条通过、0 失败、0 跳过（干净工作树：`32d7c21` 加本轮文件，`uv run pytest -n auto`）；ruff check / format、`check-schema`（33 份 schema、125 份样例）、`check-openapi`、`scripts/product_display.py check`（0 处不一致、0 个 key 缺英文）、`scripts/product_geography.py check` 都通过；独立复核的 5 条原反例与 R3/R4 原探针共 10 条通过；新的定向测试 `tests/product_service/test_e5_review_fixes.py`（18 条）与改写后的 `tests/product/test_display_framework.py`。六城本地 mock 服务闭环（同一冻结资料包、6 城 × 每城 4 个分身 × 3 年、20 元）：24 人完成三年，22 C / 0 E / 2 M，两个 M 都是芝加哥已登记的期末估值缺失（与基线相同），规划 104 / 216，次数 3 / 1 / 0 / 2，真实模型调用 0；九种显示对象中英完整，删除运行 202 → 结果 410，删除全部后没有运行。本机证据 `runs/e3-e5-review-fixes-20261025/`
 * 待独立复核：本节全部内容。
 * 还没有做：模型输入 / 输出语言（新功能，等所有者排期）；分身事件链里 E1 自己写成中文句子的记录（要 E3AB 给结构化事实绑定）；E5 接上新的 `acknowledgements` / `answer_states` 与历史版本规则；部署与真实模型试跑。
+
+## 14. E3 输入体验收敛与 F3 遗留（2026-10-25）
+
+状态：**实现及离线自测完成，待独立复核**。基线 `a851db3`，本轮改动是它之上的一个提交（只有本轮的文件，没有推送）；本机证据 `runs/e3-input-closeout-20261025/`。规则见
+[ADR0046](../../DECISIONS/0046-e3-input-catalog-and-structured-answers.md)。主链不变：原始答案 → 审阅 → 用户确认画像 → 运行前说明 →
+确认开始 → LangGraph → E1 → 产品结果。E3 定义目录、换算与语义；E5 只读接口、做页面，不自己做业务换算。
+
+### 14.1 版本
+
+| 项 | 现在 | 说明 |
+|---|---|---|
+| 共享结构 | `e3a-product-schema-v3.4` | 仍导出到 `contracts/product/v3/`（34 份 schema，新增 `DraftMigrateRequest`）。`ProductMeta.schema_version` 同时接受 v3.3：只为读回旧草稿、旧画像、已有运行与历史结果 |
+| 问卷 / 词表 / 转换 | `e3a-questionnaire-v0.4-draft` / `e3a-vocabulary-v5` / `e3a-conversion-v3` | 新的审阅与确认必须用这一版；旧草稿先迁移（第 14.6 节） |
+| 服务 API | `e3c-service-api-v1.3` | URL 前缀不变；新增 `POST /api/v1/drafts/{id}/migrate` |
+| 显示附层 | `e3-display-v2`（不变） | 冻结了新的资源版本：合成 `e3-display-res-v1-10a01abc4052089a`、E3B `e3-display-res-v1-ea5466ac2d62ebec`；旧版本保留，历史对象照旧按它们绑定的版本读 |
+| 健康问卷、E1 协议、评分 | 不变 | 没有改 E1 生活数学，没有重建六城资料包（资料包内容身份 `48eda959…` 不变） |
+
+### 14.2 用户怎么填（新页面读 `capabilities.input_catalog`）
+
+1. **职业**：按 `groups`（`order`）浏览 `occupations`（`order`），或在完整目录里按 `search` 的规则筛选（第 14.4 节）；用户点一个职业就提交
+   `occupation = {state: "provided", mode: "catalog", selected_candidate: <concept_id>, catalog_version, catalog_fingerprint: <input_catalog.content_fingerprint>}`。
+   **不带文字**：`raw_text` 必须为空（带了保存就 422），搜索框里的字不保存。审阅页显示 `review.occupation.candidates[0]` 的名称与职责供核对。
+   文字描述（`mode: "text"`）只为兼容保留，不是新页面的必经入口。
+2. **最高学历（单选）**：`education = {state: "provided", option_id}`，选项 `input_catalog.education`（高中以下、高中、读过大学但未取得学位、
+   副学士、本科、硕士、博士或专业学位）；也可以 `unanswered` / `unsure`。职业证书不在这里。
+3. **职业证书（多选）**：`certificates = {state: "provided", selected: [ability_id…]}`，选项 `input_catalog.certificates`（E3B 三张；每张写了
+   要求它的职业）；**`selected: []` 表示明确“没有”**，与 `unanswered` 分开。
+4. **相关经验（只在需要时问）**：选中职业的 `experience_question` 不为空时，显示 `input_catalog.experience` 里那一题的 `prompt` 与 `related`
+   职业，提交 `experience = {state: "provided", entries: [{concept_id, years}]}`（整年数）；`entries: []` = 没有相关经验。年数门槛只写在
+   `prompt` 里，判断在 E3。
+5. **六维与物质**：照旧 `AllocationAnswer` / `PointEntry`。主动均分提交 `mode: "equal_split"`（服务端生成六维每项 50/3、物质每项 25）；
+   滑块提交精确值：十进制或规范分数（均分后移动 5 点就是 `65/3`、`35/3`），显示的四舍五入不回写；合计由服务端重新核对，不按比例
+   调整别的维度；物质父项为 0 时不用填四项。
+6. **兴趣与口味（可跳过）**：面板 `input_catalog.leisure` / `taste`（`groups` + `entries`，成员都是能力清单词表里已有的键）。多选提交
+   `{state: "selected", selected: [key…]}`（至少一个、不带文字）；一个都不选就是未答（`unanswered`）；“暂不确定”“没有固定爱好 / 没有口味
+   偏好”“随当地体验”（`generic`）单独选，与选中的类别同时提交会被拒绝。`search_notes` 是搜索说明：“川菜”只找到“中餐”并说明本版不区分
+   地方菜，“徒步”“游戏”找不到类别（本版没有，不会算成健身）。
+7. **不再出现**：硬要求、“品牌、菜系等属性偏好”、兴趣与口味的文字解释（`sections.hard_requirements / attribute_preferences / interest_text`
+   都是 `false`）。补充文字照旧，只供分身做计划参考，不改点数、现金、资格、兴趣类别，也不会变成硬要求。
+
+### 14.3 系统怎么换算（全部在服务端）
+
+* 审阅：`review.occupation.status = "catalog_selected"`；`review.qualifications` 给出来源（`structured_answers` / 兼容的 `ability_claims` /
+  `none`）、按回答换算出的资格与理由（`granted[].because`）、选中职业的开局岗位要求与是否满足（`requirements[].met`）、要问的经验题
+  （`ask_experience`）；`review.abilities` 是开局持有的资格。
+* 规则（`confirmed_experience_mapping_v1`，与 E3B 编译时的 `Scope.from_confirmed` 相同，测试按冻结资料逐项核对）：学历“至少达到”——本科
+  满足高中、读过大学、副学士、学士四级门槛，但不授予职业证书；证书只授予选中的那张；经验看相关职业与年数（例如在“餐厅服务员”做过 2 年
+  满足餐厅厨师的“至少 1 年”）。职业、职称、自由文字与搜索词都不授予资格；未答、暂不确定不授予。
+* 新的学历 / 证书 / 经验回答与旧的逐项资格确认（`abilities`）同时存在、结果不同：`qualification_conflict`，不取并集。
+* 开局岗位要求不满足：`qualification_requirement_unmet`（warning，仍可确认；各城的开局会照实挡下，不补资格、不换职业）。
+* 确认画像：`occupation.match_status = "catalog_selected"`、`raw_text = null`、带目录版本与内容身份；`qualifications` 记下原始回答与规则；
+  兴趣 `confirmed`；`hard_requirements` 与 `retained` 都是空的。
+
+### 14.4 目录字段与搜索规则
+
+`InputCatalog`：`catalog_id`、`catalog_version`、`content_fingerprint`、`pack_id`、`sections`、`search`（`method`、`rules`、`no_match`）、
+`groups`（`group_id`、`label`、`order`）、`occupations`（`concept_id`、`group_id`、`order`、`label`、`duties`、`search_terms`、
+`qualification_refs`、`experience_question`）、`education`、`certificates`、`experience`（`question_id`、`ability_id`、`applies_to`、`related`、
+`prompt`）、`qualification_states`、`leisure` / `taste`（`groups`、`entries`（`key`、`group_id`、`order`、`label`、`search_terms`）、
+`search_notes`（`note_id`、`terms`、`points_to`、`note`）、`note`）、`notes`。名称、职责、分组与说明有中英文显示（显示附层），搜索词照原文、
+不翻译，也不在显示文字里；职业代码不在目录里。
+
+搜索（`catalog_search_nfkc_casefold_all_terms_v1`，参考实现 `product.input_catalog.search_occupations` / `search_panel`）：
+
+1. 查询与搜索词都做 Unicode NFKC（全角半角统一，全角空格也算空格）、`casefold`（英文不分大小写）、去首尾空白；
+2. 按空白切成几个词，**每个词都要命中**：一个词出现在这个条目的任意一个搜索词里就算命中；
+3. 只筛已发布的条目，不生成新条目；结果按目录顺序；空查询给出（当前分组的）全部条目；
+4. 找不到就显示 `search.no_match`（说明支持范围：本版只有目录里的 40 种职业，教师、护士、医生等不在范围），不自动换职业；
+5. 兴趣与菜系同样筛 `entries[].search_terms`，另外把命中的 `search_notes` 的说明显示出来。
+
+| 查询 | 结果（E3B） |
+|---|---|
+| `程序员`、`ＰＲＯＧＲＡＭＭＥＲ`、`Software Developers` | 软件开发工程师 |
+| `软件 工程师` | 软件开发工程师（两个词都命中） |
+| `软件 厨师`、`教师`、`护士` | 没有（显示 `no_match`） |
+| 空查询 + 分组 `it_tech` | 电脑用户支持专员、网络支持专员、软件开发工程师、计算机系统分析师（固定顺序） |
+| 菜系 `川菜` | 中餐 + 说明 `taste.chinese_regional`（不单独记成川菜偏好） |
+| 兴趣 `徒步` / `打游戏` | 没有类别 + 说明（本版没有，不算成健身） |
+| 兴趣 `跑步` | 健身 |
+
+服务端只认提交的编号与目录身份：未知编号 `occupation_selection_invalid`，目录换了 `occupation_catalog_expired`，资料包没有目录
+`occupation_catalog_unavailable`，目录模式带文字 422 `invalid_request`。
+
+### 14.5 错误与缺失
+
+| 代码 | 在哪 | 意思 |
+|---|---|---|
+| `occupation_selection_invalid` / `occupation_catalog_expired` / `occupation_catalog_unavailable` / `occupation_missing` | 审阅（error） | 编号不在目录、目录过期、资料包没有目录、还没选 |
+| `education_option_unknown`、`certificate_unknown`、`certificate_duplicated`、`experience_occupation_not_related`、`experience_duplicated`、`qualification_section_not_offered`、`input_catalog_unavailable` | 审阅（error） | 资格回答不合法（学历门槛不能当证书选；合成资料包不问学历） |
+| `qualification_conflict` | 审阅（error） | 新回答与旧的逐项资格确认结果不同 |
+| `qualification_requirement_unmet` | 审阅（warning） | 选中职业的开局岗位要求还不满足 |
+| `interest_state_conflict`、`interest_unknown_category`、`interest_duplicate_selection` | 审阅（error） | 选了类别又选“不确定 / 没有偏好”；词表外的类别；重复 |
+| `removed_section_present` | 审阅（error） | 草稿里还有新问卷不再收集的硬要求或属性偏好（逐条列出） |
+| `version_changed` | 审阅（error） | 旧版本的草稿：先迁移 |
+| `migration_consent_required` / `migration_not_needed` | 服务错误 409 | 迁移没有同意 / 不需要迁移 |
+| `invalid_request` | 服务错误 422 | 目录模式带文字、`selected` 状态没有类别或带文字等形状错误 |
+
+英文缺失照旧按显示附层的原因报（`translation_missing`、`resources_unavailable`……）；新的目录文字在两个资料包的当前资源里都有英文。
+
+### 14.6 旧草稿迁移（`DraftMigration`）
+
+* `GET /api/v1/drafts/{id}` 的 `migration`：草稿的版本不是当前的、或里面还有硬要求 / 属性偏好时给出——`from_ / to_questionnaire_version`、
+  `version_changed`、`removed`（逐条：`section`、`ref`、可读的 `summary`、用户原文 `raw_text`，原文不翻译）、`consent_required`、`message_zh`、
+  `effects_zh`。读取不改写草稿。
+* 用户看过之后点“迁移”：`POST /api/v1/drafts/{id}/migrate`，`DraftMigrateRequest {expected_revision, clear_removed}`。有要清空的答案时
+  `clear_removed` 必须为 `true`，否则 409 `migration_consent_required`、草稿不变；修订号不是当前的 409 `revision_conflict`；已经是当前版本
+  409 `migration_not_needed`。成功：版本换成当前、清空硬要求与属性偏好、其他答案原样保留、修订号 +1；之后重新审阅与确认。
+* 不改写已经确认的画像、已经开始的运行与历史结果（它们用自己保存的副本；历史结果里的硬要求报告照旧显示）。旧版本的画像能读回，但不能
+  直接准备新模拟（`preflight_stale`），要用新问卷重新确认。
+
+### 14.7 F3：一次运行一版解释
+
+同一份运行前说明身份的显示绑定只在第一次检查时写；确认开始前的再次核对、停下后的恢复都不重绑，进度、结果与运行意图（运行前说明部分）
+继承这次运行已经确认的版本，之后发布的新资源不接管。绑定缺了或坏了：结果显示照实缺失（`unavailable`），不拿当前资源补；它记下的旧资源
+被删或被改：`resources_unavailable` / `resources_invalid`，不回退到当前版本。业务输入真的变了，运行前说明身份就不同，照旧要重新检查与确认。
+
+### 14.8 样例（`contracts/product/v3/samples/`，129–154 新增）
+
+| 情形 | 样例 |
+|---|---|
+| E3B 输入目录（能力清单）/ 英文显示 | 129 / 130 |
+| 新流程：草稿 → 审阅 → 英文显示 → 确认 | 131 → 132 → 133 → 134 |
+| 资格：开局要求不满足（warning）/ 餐厅厨师的经验 / 与旧逐项确认冲突 | 135 / 136 / 137 |
+| 职业：目录里没有的编号 / 目录过期 / 目录模式带文字（422） | 138 / 139 / 140 |
+| 口味：没有偏好又选了中餐 | 141 |
+| 定和分配：均分 / 均分后移动点数 / 零值 / 未分配满 / 超额 / 父项为 0 | 142 / 143 / 144 / 145 / 146 / 147 |
+| 旧草稿：迁移说明 / 英文显示 / 迁移前审阅 / 迁移请求 / 没有同意 / 迁移后 / 不需要迁移 | 148 / 149 / 150 / 151 / 152 / 153 / 154 |
+| 其余样例的变化 | 26 份新增（129–154）；01–128 里 7 份只有版本字段变化，其余是版本、内容身份与编号、新字段（输入目录、资格审阅、目录模式）、新的显示资源版本，以及去掉默认的 60 分钟通勤硬要求（新流程的结果因此变化：合成正常样例 10 的 J 从 0.6179 / 0.6204 变成 0.6056 / 0.6081，E3B 样例 104 里洛杉矶、芝加哥、西雅图变低；C / E / M 不变）。17、38、39、126、127 改了输入或说明（不再有属性偏好与两条通勤上限）；23 与 55 改用“历史画像”的受控夹具（画像带着旧问卷的往返 60 分钟上限），结果与原来相同 |
+
+### 14.9 自测与没有验证的
+
+* 离线自测：离线全量测试 1361 条通过、0 失败、0 跳过（干净工作树：`a851db3` 加本轮文件，`uv run pytest -n 8`，12 分 35 秒）；ruff check / format、`check-schema`（34 份 schema、151 份样例）、`check-openapi`、`scripts/product_display.py check`（0 处不一致、0 个 key 缺英文）、`scripts/product_geography.py check` 都通过；复核的原探针原样重跑 11 条通过（显示 5 条、R3/R4 5 条、F3 遗留 1 条）；新的定向测试 `tests/product/test_input_catalog.py`（目录结构、搜索规则，以及与 `Scope.from_confirmed` 逐项相同）、`test_structured_answers.py`、`test_draft_migration.py`、`tests/product_service/test_input_closeout.py`、`test_bound_display_version.py`（F3：修复前 5 条失败）。只有 F3 修复的六城 mock 闭环（旧输入）与复核基线逐项相同：22 C / 0 E / 2 M（两个 M 是芝加哥估值缺失）、规划 104 / 216、真实模型调用 0；新流程的六城 mock 闭环（按目录选办公室文员、最高学历高中、证书“没有”、没有硬要求）：24 人完成三年，22 C / 0 E / 2 M，规划 104 / 216，真实模型调用 0，九种显示对象 2,530 段英文全部提供，删除运行 202 → 410。生活数学、冻结资料与资料包没有改动。本机证据 `runs/e3-input-closeout-20261025/`
+* 待独立复核：本节全部内容。
+* 还没有做 / 本版限制：E5 页面没有接这些字段（目录浏览与搜索、资格题、面板、迁移对话框都要 E5 做）；目录的分组、搜索词与经验问题是人工
+  维护的数据，没有做用户访谈或可用性测试；只支持资料包里已有的 40 种职业（E3B）、5 类兴趣与 10 种菜系，徒步、游戏等是待办；学历门槛是
+  BLS EP 的全国典型入职要求，不是具体雇主的招聘条件；mock 通过不代表真实用户或真实模型的效果；没有部署、没有真实模型试跑。

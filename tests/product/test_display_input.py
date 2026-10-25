@@ -31,14 +31,6 @@ SAMPLES = REPO / "contracts/product/v3/samples"
 E3A = "configs/product/e3a_synthetic_pack.yaml"
 E3B = "configs/product/e3b_us_v1_pack.yaml"
 
-BRAND = (
-    {
-        "preference_id": "pref.brand",
-        "need": "personal_enjoyment",
-        "kind": "brand",
-        "raw_text": "吉他想要某个牌子的",
-    },
-)
 #: 只走审阅（能确认时也确认）的样例：与 scripts/product_e3a.py 生成样例时的参数相同
 REVIEW_ONLY: dict[str, dict[str, Any]] = {
     "ambiguous": {"occupation_text": "我在餐厅做店员，有时收银，有时做饮品", "selected": None},
@@ -99,7 +91,6 @@ REVIEW_ONLY: dict[str, dict[str, Any]] = {
             "selected": ["music"],
         },
         "taste": {"state": "described", "text": "川菜，偶尔意面", "selected": ["sichuan"]},
-        "attributes": BRAND,
     },
     "interest_unanswered": {},
     "interest_generic": {
@@ -134,7 +125,16 @@ SAMPLE_CASES = {
 }
 USER_TEXT = {"review": messages.REVIEW, "confirmed": messages.PROFILE, "capabilities": ()}
 #: 英文可以缺失的位置与原因（其余位置必须给出英文）
-ALIASES = ("/interests/leisure_categories/*/aliases/*", "/interests/cuisines/*/aliases/*")
+ALIASES = (
+    "/interests/leisure_categories/*/aliases/*",
+    "/interests/cuisines/*/aliases/*",
+    # 输入目录的搜索词（v3.4）：同样是用户要输入的原文词语
+    "/input_catalog/occupations/*/search_terms/*",
+    "/input_catalog/leisure/entries/*/search_terms/*",
+    "/input_catalog/taste/entries/*/search_terms/*",
+    "/input_catalog/leisure/search_notes/*/terms/*",
+    "/input_catalog/taste/search_notes/*/terms/*",
+)
 USER_FRAGMENT = (
     "/statements/*/message_zh",
     "/issues/*/message_zh",
@@ -302,9 +302,17 @@ def test_english_is_provided_or_missing_only_for_stated_reasons(pack_path: str) 
 def test_capabilities_are_fully_translated_except_vocabulary_aliases(pack_path: str) -> None:
     """词表别名不生成显示文字；与某个类别名称同字的别名（例如“音乐”）也不借那个名称的绑定（绑定按生成的对象与位置，不按中文）。"""
     pack = load_pack(REPO / pack_path)
+    caps = build_capabilities(pack)
     cov = _coverage(pack, lambda: build_capabilities(pack), "capabilities")
     terms = (*pack.body.interests.leisure_categories, *pack.body.interests.cuisines)
-    unbound = sum(1 for term in terms for a in term.aliases if any("一" <= ch <= "鿿" for ch in a))
+    words = [a for term in terms for a in term.aliases]
+    cat = caps.input_catalog
+    if cat is not None:
+        words += [s for o in cat.occupations for s in o.search_terms]
+        for panel in (cat.leisure, cat.taste):
+            words += [s for e in panel.entries for s in e.search_terms]
+            words += [s for n in panel.search_notes for s in n.terms]
+    unbound = sum(1 for a in words if any("一" <= ch <= "鿿" for ch in a))
     assert cov["missing"] == ({"no_binding": unbound} if unbound else {})
     assert set(cov["missing_patterns"]) <= set(ALIASES)
     assert cov["provided"] == cov["displayable"] - unbound
@@ -421,13 +429,12 @@ def test_user_text_is_never_bound_or_counted() -> None:
     res = source_resources(pack.fingerprint, pack.body.pack_id)
     cov = coverage(body, rec, res, user_text=messages.REVIEW)
     assert cov["status"] == "complete", cov
-    # 不排除用户原文时，这几处就成了没有绑定的位置（陈述的 raw_text 整列都按原文处理，包括受支持的硬要求）
+    # 不排除用户原文时，这几处就成了没有绑定的位置（新问卷没有硬要求与属性偏好，所以没有陈述）
     counted = coverage(body, rec, res)
-    assert counted["displayable"] == cov["displayable"] + 3
+    assert counted["displayable"] == cov["displayable"] + 2
     assert counted["missing_patterns"] == {
         "/occupation/raw_text": {"no_binding": 1},
         "/occupation/candidates/*/matched_terms/*": {"no_binding": 1},
-        "/statements/*/raw_text": {"no_binding": 1},
     }
     en = _english(review, rec, pack, messages.REVIEW)
     assert en["/occupation/message_zh"] == (

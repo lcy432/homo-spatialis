@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import dataclasses
 import json
+import re
 import shutil
 from decimal import Decimal
 from pathlib import Path
@@ -109,7 +110,8 @@ def test_out_of_range_options_are_refused_before_any_reservation(tmp_path, optio
     assert r.json()["field"] == field
     shown = str(options[field])
     if len(shown) >= 3:  # 不回显用户填的值（一两个数字会和状态码等撞上，只查长一些的）
-        assert shown not in r.text
+        # 内容身份与资源版本名是十六进制摘要，可能碰巧含有“abc”这样的字母：先去掉它们再查
+        assert shown not in re.sub(r"[0-9a-f]{16,}", "", r.text)
     assert set(r.json()) == {
         "meta",
         "status",

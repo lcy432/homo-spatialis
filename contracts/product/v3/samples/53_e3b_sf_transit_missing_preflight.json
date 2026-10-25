@@ -4,13 +4,13 @@
  "payload": {
   "binding": {
    "compiled_inputs": {
-    "life_input": "71b29b3d23110a6cce6224365243c0c935a9235ed9379f6c4dc7b64047949246",
+    "life_input": "6ed36ecad341a894b97c2caf666907697f383b15b912fd3d58fc1e1327107ee8",
     "roster": "fe27d033d8e815602223784c92f75aefcf7f25ffe0887293c3b114d72283c688",
     "run_config": "0571a819b3fbaca2755ae190c2380066ae04164a9465b39d4536252f9676f8d7",
     "scoring_config": "0a476a4b1fb8676a8330c3100f0e57e7fb577b4122516f73c4b8b087764d8985"
    },
    "evaluation_spec_id": "eval.e3b-us.main",
-   "identities_fingerprint": "033a1cd8976d236ff207c52328a54b587e8d219efd1f8e815564641f648f2665",
+   "identities_fingerprint": "a0b3b638dd7e591c31d7215d68031506191358ce71c46e6cac93d81705657924",
    "planner_id": "mock.rules.e3a-product",
    "planner_kind": "mock",
    "prompt_template": "e3b-product-prompt-v3",
@@ -853,7 +853,7 @@
   "clones_per_city": 4,
   "confirmed": {
    "confirmed_id": "confirmed.draft.u501.e3b_sf.r1",
-   "content_fingerprint": "90fd3eff01982ef46e3fef69d90e07cbfca871882669c9cb96f4dc64ffecf508"
+   "content_fingerprint": "f7290561c5e11ea6b63b79b836d33ef5f6a1da7e9846c1251085e3be055848f1"
   },
   "executable": {
    "reasons": [
@@ -879,7 +879,7 @@
    }
   ],
   "meta": {
-   "conversion_version": "e3a-conversion-v2",
+   "conversion_version": "e3a-conversion-v3",
    "data_pack": {
     "content_fingerprint": "48eda959e2eb8254c891d1de88b92f792ccf8ecbaadac8037d548279cd9dd22b",
     "note": "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定",
@@ -887,15 +887,15 @@
     "status": "real_data_frozen"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.3-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.4-draft",
    "sample": {
     "note": "预检查的实际输出（没有运行生活）",
     "origin": "offline_run",
     "produced_by": "product.scenarios.preflight_only(e3b_sf)",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.3",
-   "vocabulary_version": "e3a-vocabulary-v4"
+   "schema_version": "e3a-product-schema-v3.4",
+   "vocabulary_version": "e3a-vocabulary-v5"
   },
   "planner": {
    "call_limit": 72,
@@ -905,7 +905,7 @@
    "planner_id": "mock.rules.e3a-product",
    "planner_kind": "mock"
   },
-  "preflight_fingerprint": "b72ba9f714d970cdb79366110e9a7ac6ce087462c0cad4841d01cef22c169801",
+  "preflight_fingerprint": "03f238b90410893c03711533a96311bab3aee6dbff60c97a6de1fbd21ebd6888",
   "preflight_id": "preflight.confirmed.draft.u501.e3b_sf.r1",
   "scope_notes": [
    {

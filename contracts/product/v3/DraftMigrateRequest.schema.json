@@ -1,0 +1,21 @@
+{
+ "additionalProperties": false,
+ "description": "迁移草稿（``POST /api/v1/drafts/{id}/migrate``）：``expected_revision`` 必须等于当前修订号；有要清空的旧答案时\n``clear_removed`` 必须为真（用户看过迁移说明并同意），否则拒绝、草稿不变。",
+ "properties": {
+  "clear_removed": {
+   "default": false,
+   "title": "Clear Removed",
+   "type": "boolean"
+  },
+  "expected_revision": {
+   "minimum": 1,
+   "title": "Expected Revision",
+   "type": "integer"
+  }
+ },
+ "required": [
+  "expected_revision"
+ ],
+ "title": "DraftMigrateRequest",
+ "type": "object"
+}

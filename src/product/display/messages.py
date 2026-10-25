@@ -16,10 +16,17 @@ DRAFT = (
     "/attribute_preferences/*/raw_text",
     "/hard_requirements/*/raw_text",
 )
-#: ``ProductCapabilities`` 里（识别别名）
+#: ``DraftView`` 里（草稿本身之外：迁移说明里用户写的原文）
+DRAFT_VIEW = ("/migration/removed/*/raw_text",)
+#: ``ProductCapabilities`` 里（识别别名与输入目录的搜索词：都是用户要输入的词，照原文）
 CAPABILITIES = (
     "/interests/leisure_categories/*/aliases",
     "/interests/cuisines/*/aliases",
+    "/input_catalog/occupations/*/search_terms",
+    "/input_catalog/leisure/entries/*/search_terms",
+    "/input_catalog/taste/entries/*/search_terms",
+    "/input_catalog/leisure/search_notes/*/terms",
+    "/input_catalog/taste/search_notes/*/terms",
 )
 #: ``ProfileReview`` 里
 REVIEW = (
