@@ -1,4 +1,58 @@
 {
+  "abilities": [],
+  "age": {
+    "state": "unanswered",
+    "value": null
+  },
+  "attribute_preferences": [],
+  "cash": {
+    "amount_text": null,
+    "currency": null,
+    "meaning": "liquid_funds_v1",
+    "price_period": null,
+    "state": "unanswered"
+  },
+  "cities": {
+    "city_refs": [
+      "US:SYNTH2026:K51",
+      "US:SYNTH2026:M52"
+    ],
+    "state": "provided"
+  },
+  "draft_id": "draft-0000000000000004",
+  "evidence": [],
+  "free_text": {
+    "state": "unanswered",
+    "text": null
+  },
+  "hard_requirements": [],
+  "health": {
+    "items": [
+      {
+        "choice": null,
+        "question_id": "hc_more_pay_more_sick_risk"
+      },
+      {
+        "choice": null,
+        "question_id": "hc_reserve_for_health_costs"
+      },
+      {
+        "choice": null,
+        "question_id": "hc_wait_for_clear_risk_info"
+      }
+    ],
+    "questionnaire_version": "e3a-health-coping-q-v0.1-draft"
+  },
+  "input_channel": "form",
+  "leisure_interest": {
+    "selected": [],
+    "state": "unanswered",
+    "text": null
+  },
+  "material": {
+    "entries": {},
+    "mode": null
+  },
   "meta": {
     "conversion_version": "e3a-conversion-v2",
     "data_pack": {
@@ -12,30 +66,13 @@
     "schema_version": "e3a-product-schema-v3.3",
     "vocabulary_version": "e3a-vocabulary-v4"
   },
-  "draft_id": "draft.web.fixture",
-  "revision": 5,
-  "input_channel": "form",
-  "cities": {
-    "state": "unanswered",
-    "city_refs": []
-  },
   "occupation": {
-    "state": "unanswered",
-    "raw_text": null,
     "language": "zh",
-    "selected_candidate": null
+    "raw_text": null,
+    "selected_candidate": null,
+    "state": "unanswered"
   },
-  "age": {
-    "state": "unanswered",
-    "value": null
-  },
-  "cash": {
-    "state": "unanswered",
-    "amount_text": null,
-    "currency": null,
-    "price_period": null,
-    "meaning": "liquid_funds_v1"
-  },
+  "revision": 1,
   "six_dimensions": {
     "mode": "manual",
     "entries": {
@@ -65,20 +102,9 @@
       }
     }
   },
-  "material": {
-    "mode": null,
-    "entries": {}
-  },
-  "health": {
-    "questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-    "items": []
-  },
-  "free_text": {
+  "taste": {
+    "selected": [],
     "state": "unanswered",
     "text": null
-  },
-  "attribute_preferences": [],
-  "abilities": [],
-  "hard_requirements": [],
-  "evidence": []
+  }
 }

@@ -1,24 +1,39 @@
 /* eslint-disable */
 /**
- * 由 web/scripts/contract-gen.mjs 从 contracts/product/v2/*.schema.json 生成（结构版本 e3a-product-schema-v2）。
+ * 由 web/scripts/contract-gen.mjs 从 contracts/product/v3/*.schema.json 生成（结构版本 e3a-product-schema-v3.3）。
  * 不要手改：共享结构由 E3 维护（src/common/product_contracts.py），结构变了就重新运行 npm run contract:gen。
  */
 
 /**
- * 全部 13 份共享消息（只为生成类型而合成的根，不是一份真实消息）
+ * 全部 28 份共享消息（只为生成类型而合成的根，不是一份真实消息）
  */
 export interface ProductContracts {
   CatalogCompilation: CatalogCompilation;
   ConfirmedProfile: ConfirmedProfile;
+  DeletionReceipt: DeletionReceipt;
+  DraftSaveRequest: DraftSaveRequest;
+  DraftView: DraftView;
+  LifeItemCompilation: LifeItemCompilation;
   OpportunityCandidate: OpportunityCandidate;
   OptionInventoryCoverage: OptionInventoryCoverage;
   ProductCapabilities: ProductCapabilities;
   ProductPreflight: ProductPreflight;
   ProductResult: ProductResult;
+  ProfileConfirmReply: ProfileConfirmReply;
+  ProfileConfirmRequest: ProfileConfirmRequest;
   ProfileReview: ProfileReview;
+  ReviewReply: ReviewReply;
+  RunIntentCreateRequest: RunIntentCreateRequest;
+  RunIntentView: RunIntentView;
+  RunList: RunList;
   RunProgress: RunProgress;
   RunReceipt: RunReceipt;
   RunSubmission: RunSubmission;
+  RunSubmitReply: RunSubmitReply;
+  RunSubmitRequest: RunSubmitRequest;
+  ServiceError: ServiceError;
+  SessionExchangeRequest: SessionExchangeRequest;
+  SessionView: SessionView;
   SourceFact: SourceFact;
   UserInputDraft: UserInputDraft;
 }
@@ -89,11 +104,11 @@ export interface ProductMeta {
   health_questionnaire_version: string;
   questionnaire_version: string;
   sample?: SampleLabel | null;
-  schema_version: "e3a-product-schema-v2";
+  schema_version: "e3a-product-schema-v3.3";
   vocabulary_version: string;
 }
 /**
- * 一份资料包的身份：编号与内容指纹。本轮只有合成资料包（``synthetic_fixture_only``）。
+ * 一份资料包的身份：编号、内容指纹与状态（合成测试资料，或冻结的真实资料包）。
  *
  * This interface was referenced by `ProductContracts`'s JSON-Schema
  * via the `definition` "DataPackRef".
@@ -183,6 +198,7 @@ export interface ConfirmedProfile {
   free_text?: string | null;
   hard_requirements?: ConfirmedHardRequirement[];
   health: ConfirmedHealth;
+  interests: ConfirmedInterests;
   material: ConfirmedMaterial;
   meta: ProductMeta;
   money: ConfirmedMoney;
@@ -240,6 +256,31 @@ export interface ConfirmedHealthAnswer {
   option_label?: string | null;
   question_id: string;
   question_text: string;
+}
+/**
+ * 确认后的兴趣与口味（DECISIONS/0041）。只有 ``confirmed`` 带类别；其余状态分开保存、都按中性规则评分。
+ *
+ * 类别只进入共同、有限的匹配规则（系数是公开登记的模型假设，不是对个人效用的测量）；不改变六维点数、现金、资格或硬要求。
+ * 用户写的原文不管选了哪种作答状态都原样保留（``leisure_text`` / ``taste_text``）；没认出的片段另列在 ``unrecognized_text``
+ * （本版未支持），不交给评分。``scope_zh`` 逐项说明这次按什么个性化、哪些没有个性化（未答、暂不确定、没有固定爱好、通用评价
+ * 分开写，不宣称已经个性化）。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "ConfirmedInterests".
+ */
+export interface ConfirmedInterests {
+  cuisines?: string[];
+  leisure_categories?: string[];
+  leisure_status: "unanswered" | "unsure" | "no_fixed_hobby" | "generic" | "confirmed";
+  leisure_text?: string | null;
+  matching_note_zh: string;
+  /**
+   * @minItems 2
+   */
+  scope_zh: [string, string, ...string[]];
+  taste_status: "unanswered" | "unsure" | "no_preference" | "confirmed";
+  taste_text?: string | null;
+  unrecognized_text?: string[];
 }
 /**
  * This interface was referenced by `ProductContracts`'s JSON-Schema
@@ -361,6 +402,268 @@ export interface EvidenceRef {
   kind: "form_field" | "interview_turn_reserved";
   note?: string | null;
   ref: string;
+}
+/**
+ * 删除回执。运行中删除：立即不可查询、标为删除中、不再批准新的模型请求；已经发出的请求可能完成并记账，不能撤回。收尾之后清掉
+ * 内容，标为已删除。保留的最小记录只有不透明身份、次数事件、必要的费用摘要、删除时间与防重记录，不含答案、模型正文或生活故事。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "DeletionReceipt".
+ */
+export interface DeletionReceipt {
+  kept_zh?: string[];
+  meta: ProductMeta;
+  note_zh: string;
+  quota: QuotaSummary;
+  scope: "run" | "draft" | "all_data";
+  status: "deleting" | "deleted";
+  target_ref?: string | null;
+}
+/**
+ * 这个专属空间的使用次数：一共 ``total`` 次启动模拟的机会；``used`` 已开始的、``reserved`` 已确认开始但还没有启动的、
+ * ``available`` 还能用的。次数不自动重置；删除结果、换设备、重发链接都不改变它。3 次是启动模拟的机会，不保证每次所有分身都完整。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "QuotaSummary".
+ */
+export interface QuotaSummary {
+  available: number;
+  reserved: number;
+  total: number;
+  used: number;
+}
+/**
+ * 保存草稿（``PUT /api/v1/drafts/{id}``）：``expected_revision`` 必须等于服务端当前的修订号，否则返回冲突，不覆盖新答案。
+ * ``draft.draft_id`` 必须是路径里的编号；服务端写入时修订号加一。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "DraftSaveRequest".
+ */
+export interface DraftSaveRequest {
+  draft: UserInputDraft;
+  expected_revision: number;
+}
+/**
+ * 一份原始答案草稿（逐项保存状态）。原始答案、候选解释与确认画像分层保存：这里只有原始答案。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "UserInputDraft".
+ */
+export interface UserInputDraft {
+  abilities?: AbilityClaim[];
+  age: AgeAnswer;
+  attribute_preferences?: AttributePreferenceAnswer[];
+  cash: CashAnswer;
+  cities: CitiesAnswer;
+  draft_id: string;
+  evidence?: EvidenceRef[];
+  free_text: FreeTextAnswer;
+  hard_requirements?: HardRequirementAnswer[];
+  health: HealthAnswers;
+  input_channel?: "form";
+  leisure_interest?: LeisureInterestAnswer;
+  material: AllocationAnswer;
+  meta: ProductMeta;
+  occupation: OccupationAnswer;
+  revision: number;
+  six_dimensions: AllocationAnswer;
+  taste?: TasteAnswer;
+}
+/**
+ * 用户自己确认的一项资格事实（只在相关岗位需要时追问；不从职称推断）。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "AbilityClaim".
+ */
+export interface AbilityClaim {
+  ability_id: string;
+  state: "unanswered" | "provided" | "indifferent" | "unsure";
+}
+/**
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "AgeAnswer".
+ */
+export interface AgeAnswer {
+  state: "unanswered" | "provided" | "indifferent" | "unsure";
+  value?: number | null;
+}
+/**
+ * 一条属性偏好（品牌、菜系、上门顾虑……）：原文与它挂在哪项需求下；``as_hard_requirement`` 表示用户想把它当不可妥协的要求。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "AttributePreferenceAnswer".
+ */
+export interface AttributePreferenceAnswer {
+  as_hard_requirement?: boolean;
+  kind: string;
+  need: string;
+  preference_id: string;
+  raw_text: string;
+}
+/**
+ * 开始时可用于生活的流动资金：金额文字、币种、金额时期与口径（不是总资产、信用额度或月薪）。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "CashAnswer".
+ */
+export interface CashAnswer {
+  amount_text?: string | null;
+  currency?: string | null;
+  meaning?: "liquid_funds_v1";
+  price_period?: string | null;
+  state: "unanswered" | "provided" | "indifferent" | "unsure";
+}
+/**
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "CitiesAnswer".
+ */
+export interface CitiesAnswer {
+  city_refs?: string[];
+  state: "unanswered" | "provided" | "indifferent" | "unsure";
+}
+/**
+ * 可选文字。超过 2,000 字符**不截断**：校验时报错，由用户自己删减。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "FreeTextAnswer".
+ */
+export interface FreeTextAnswer {
+  state: "unanswered" | "provided" | "indifferent" | "unsure";
+  text?: string | null;
+}
+/**
+ * 一条硬要求：选了受支持的选项（带参数），或只写了原文（本版未支持，只留存）。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "HardRequirementAnswer".
+ */
+export interface HardRequirementAnswer {
+  option_id?: string | null;
+  parameter_value?: number | null;
+  raw_text?: string | null;
+  requirement_id: string;
+}
+/**
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "HealthAnswers".
+ */
+export interface HealthAnswers {
+  items?: HealthItemAnswer[];
+  questionnaire_version: string;
+}
+/**
+ * 一题的作答：四个选项之一；``None`` = 未答（与“暂不确定”分开保存）。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "HealthItemAnswer".
+ */
+export interface HealthItemAnswer {
+  choice?: ("agree" | "disagree" | "no_clear_tendency" | "unsure") | null;
+  question_id: string;
+}
+/**
+ * 休闲兴趣：未答、暂不确定、明确没有固定爱好、选择通用休闲评价（“城市有什么合适的就体验什么”），或用文字描述。
+ *
+ * 文字描述先由 E3 按词表形成待确认的解释；``selected`` 是用户从解释或词表里**明确选中**的类别——只有选了才进入有评分作用的类别。
+ * 空白不会被当成“通用评价”的选择。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "LeisureInterestAnswer".
+ */
+export interface LeisureInterestAnswer {
+  selected?: string[];
+  state?: "unanswered" | "unsure" | "no_fixed_hobby" | "generic" | "described";
+  text?: string | null;
+}
+/**
+ * 一组定和分配的作答。``mode = equal_split`` 表示用户**主动**选择了平均分配（不预选、不默认）；``None`` 表示还没开始分配。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "AllocationAnswer".
+ */
+export interface AllocationAnswer {
+  entries?: {
+    [k: string]: PointEntry;
+  };
+  mode?: ("manual" | "equal_split") | null;
+}
+/**
+ * 一个维度或细项的作答：已提供时写数值文字（精确十进制或规范分数），其余状态不写数值。明确 0 写 ``"0"``。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "PointEntry".
+ */
+export interface PointEntry {
+  state: "unanswered" | "provided" | "indifferent" | "unsure";
+  value_text?: string | null;
+}
+/**
+ * 职业：原文与语言；用户在候选里选中的概念（不透明 ID，不是职业代码）。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "OccupationAnswer".
+ */
+export interface OccupationAnswer {
+  language?: string;
+  raw_text?: string | null;
+  selected_candidate?: string | null;
+  state: "unanswered" | "provided" | "indifferent" | "unsure";
+}
+/**
+ * 口味与菜系：未答、暂不确定、明确没有偏好，或用文字描述（同样先解释、再由用户选中确认）。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "TasteAnswer".
+ */
+export interface TasteAnswer {
+  selected?: string[];
+  state?: "unanswered" | "unsure" | "no_preference" | "described";
+  text?: string | null;
+}
+/**
+ * 服务端保存的一份草稿：草稿编号与修订号由服务器分配；``expires_at`` 是最后一次编辑后 30 天。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "DraftView".
+ */
+export interface DraftView {
+  draft: UserInputDraft;
+  expires_at: string;
+  meta: ProductMeta;
+  updated_at: string;
+}
+/**
+ * 生活扩展候选的编译检查（编译器 ``e3-life-item-compiler-v1``）。编译产物有自己的内容身份 ``compilation_fingerprint``。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "LifeItemCompilation".
+ */
+export interface LifeItemCompilation {
+  city_ref: string;
+  compilation_fingerprint: string;
+  compilation_id: string;
+  compiler_version: string;
+  meta: ProductMeta;
+  scope_zh: string;
+  verdicts: LifeItemVerdict[];
+}
+/**
+ * 一项生活扩展候选（完整食品方案、休闲活动、装备、享受型用品或服务）能不能交给 E1 执行（DECISIONS/0041）。
+ *
+ * ``executable``：放进这座城目录的副本之后，E1 的契约、目录、跨对象与可结算检查都接受，种类与 E1 的执行角色一致；
+ * ``rejected``：缺必需的事实或违反规则（例如没有做饭时间、种类与事实对不上、带日期或年龄限制、代替正餐的套餐、寿命不明、
+ * 金额口径不对、类别没有声明）；``unavailable``：确定不可得（保留记录，不能执行）；``unsupported``：用了本版词表没有的类别或
+ * 功能；``data_unknown``：报价或评分要读的事实未知（不当零价，也不当已知）。原因是固定写法或 E1 的拒绝说明，不含本机路径。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "LifeItemVerdict".
+ */
+export interface LifeItemVerdict {
+  candidate_id: string;
+  kind: "food_plan" | "activity" | "equipment" | "enjoyment";
+  label: string;
+  reasons_zh?: string[];
+  status: "executable" | "rejected" | "unavailable" | "unsupported" | "data_unknown";
 }
 /**
  * 一个可能不完整的设备 / 服务候选，逐字段带状态。``market_status`` 是真实供给状态，与能否编译分开记。
@@ -522,6 +825,7 @@ export interface ProductCapabilities {
   free_text_max_chars: 2000;
   hard_requirement_options?: HardRequirementOption[];
   health_questionnaire: HealthQuestionnaire;
+  interests: InterestCapability;
   interview?: "reserved_not_implemented";
   limits?: string[];
   /**
@@ -661,6 +965,45 @@ export interface HealthQuestion {
   text: string;
 }
 /**
+ * 兴趣与口味（DECISIONS/0041）：可选的文字描述先形成待确认的解释；用户确认后的类别才进入共同、有限的匹配规则。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "InterestCapability".
+ */
+export interface InterestCapability {
+  /**
+   * @minItems 1
+   */
+  cuisines: [VocabularyTerm, ...VocabularyTerm[]];
+  /**
+   * @minItems 1
+   */
+  leisure_categories: [VocabularyTerm, ...VocabularyTerm[]];
+  /**
+   * @minItems 1
+   */
+  leisure_states_zh: [string, ...string[]];
+  matching_note_zh: string;
+  /**
+   * @minItems 1
+   */
+  taste_states_zh: [string, ...string[]];
+}
+/**
+ * 有限词表里的一项（休闲活动类别或菜系）：键、显示名与用来解释文字的别名（明确映射，不调用模型猜）。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "VocabularyTerm".
+ */
+export interface VocabularyTerm {
+  /**
+   * @minItems 1
+   */
+  aliases: [string, ...string[]];
+  key: string;
+  label: string;
+}
+/**
  * 物质细项之一：含义、支持状态与说明。细分是父项内部的相对重要性，不是开支比例。
  *
  * This interface was referenced by `ProductContracts`'s JSON-Schema
@@ -739,6 +1082,7 @@ export interface ProductPreflight {
   planner: PlannerAndCost;
   preflight_fingerprint: string;
   preflight_id: string;
+  scope_notes?: ScopeNote[];
   scope_zh?: string[];
   scorable: CapabilityStatus;
   start?: StartSummary | null;
@@ -772,6 +1116,7 @@ export interface CityPreflight {
   city_ref: string;
   coverage?: CityCoverageSummary | null;
   data_gaps?: ProductIssue[];
+  data_nature?: CityDataNature | null;
   executable: CapabilityStatus;
   feedback: CapabilityStatus;
   label: string;
@@ -808,6 +1153,145 @@ export interface ExactNumber {
   exact: string;
 }
 /**
+ * 一座城的资料是怎么来的（DECISIONS/0042）：目录各类机会按来源性质的条数、登记的模型设定、共同先验、治疗的共同假设、
+ * 模型活动设定、片区、通勤方式、菜单、税的范围，以及资料包构建报告的计数。
+ *
+ * 只有公开的来源性质与说明：没有评分参数（η、τ、c、背景量）、抽签或内部状态。``build_status = not_available`` 表示构建报告
+ * 不在这份资料包里或与目录对不上——计数未知，不是 0。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "CityDataNature".
+ */
+export interface CityDataNature {
+  build?: BuildCount[];
+  build_status: "from_pack_report" | "not_available";
+  city_ref: string;
+  common_priors?: CommonPrior[];
+  commute_modes?: CommuteModeAvailability[];
+  home_areas?: number;
+  label: string;
+  menus?: MenuSummary[];
+  model_plan_activities?: string[];
+  named_assumptions?: NamedAssumption[];
+  opportunities?: CategorySources[];
+  pack_status: "synthetic_fixture_only" | "real_data_frozen";
+  summary_zh: string;
+  tax?: TaxScope | null;
+  /**
+   * @minItems 4
+   * @maxItems 4
+   */
+  totals: [SourceKindCount, SourceKindCount, SourceKindCount, SourceKindCount];
+  treatment_assumptions_zh?: string[];
+  work_areas?: number;
+}
+/**
+ * 资料包构建报告里的一个计数（片区、通勤线、住房候选与排除的原因、放进目录的岗位、菜单……）。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "BuildCount".
+ */
+export interface BuildCount {
+  count: number;
+  key: string;
+  label_zh: string;
+}
+/**
+ * 一项比较组各城共用的背景设定（没有可比资料时登记的共同先验，例如休闲；安全按各都会区的犯罪资料换算，不在这里）：事实的
+ * 名称与含义。不制造城市差异；
+ * 这里不写它换算成评分输入的规则与参数。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "CommonPrior".
+ */
+export interface CommonPrior {
+  fact_id: string;
+  label: string;
+  meaning_zh: string;
+}
+/**
+ * 这座城的通勤关系表里有没有一种方式：有几条片区之间的线、使用条件与封顶的说明（与给分身看的同一份公开说明）。
+ *
+ * ``in_relation = False``：关系表里没有这种方式（资料缺失或本城不建模），到岗时不能用它——不当 0 分钟，也不当免费。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "CommuteModeAvailability".
+ */
+export interface CommuteModeAvailability {
+  condition_zh?: string | null;
+  in_relation: boolean;
+  lines: number;
+  mode: "walk_bike" | "transit" | "drive";
+  mode_zh: string;
+}
+/**
+ * 一类机会的年度菜单（DECISIONS/0042）：每年、每个环境重复给分身看的一份抽样。菜单是接触机会，不是成交或录用。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "MenuSummary".
+ */
+export interface MenuSummary {
+  category: string;
+  env_repeats: number;
+  items_max: number;
+  items_min: number;
+  years: number;
+}
+/**
+ * 一条登记的模型设定（来源性质是合成）：设定说明的原文、用到它的机会条数与几个例子。不是资料，也不是某个商品或场所的报价。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "NamedAssumption".
+ */
+export interface NamedAssumption {
+  count: number;
+  /**
+   * @minItems 1
+   * @maxItems 3
+   */
+  examples: [string] | [string, string] | [string, string, string];
+  note_zh: string;
+}
+/**
+ * 目录里一类机会（住房、岗位、食品、服务……）的条数，按来源性质分开数（四种性质都列，没有的写 0）。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "CategorySources".
+ */
+export interface CategorySources {
+  /**
+   * @minItems 4
+   * @maxItems 4
+   */
+  by_kind: [SourceKindCount, SourceKindCount, SourceKindCount, SourceKindCount];
+  category: string;
+  total: number;
+}
+/**
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "SourceKindCount".
+ */
+export interface SourceKindCount {
+  count: number;
+  kind: "observed" | "derived" | "estimated" | "synthetic";
+}
+/**
+ * 这座城适用的税（DECISIONS/0042）：官方 2024 年规则（单身、只有工资收入、标准扣除）或合成测试替身；支持的居住与工作地、
+ * 规则名称、官方说明没有的税，以及没有建模的部分（照实写，不当作已经覆盖）。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "TaxScope".
+ */
+export interface TaxScope {
+  absent_zh?: string[];
+  not_modeled_zh?: string[];
+  policy_id: string;
+  residence_scope_zh?: string | null;
+  rules_zh?: string[];
+  status: "official_2024_rules" | "synthetic_test_double";
+  status_zh: string;
+}
+/**
  * 一种能力在当前输入与声明范围内的状态。**不保证**未来每份计划都合法、每个月都能完整评分。
  *
  * This interface was referenced by `ProductContracts`'s JSON-Schema
@@ -836,6 +1320,19 @@ export interface PlannerAndCost {
   paid: boolean;
   planner_id: string;
   planner_kind: "mock" | "llm";
+}
+/**
+ * 预检查的一条范围说明（DECISIONS/0042）：这版支持什么、不支持什么、为什么。``cities`` 为空表示对全部候选城市都适用。
+ * E5 原样展示中文，不另写解释。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "ScopeNote".
+ */
+export interface ScopeNote {
+  cities?: string[];
+  text_zh: string;
+  title_zh: string;
+  topic: "occupations" | "tax" | "commute" | "menus" | "unsupported" | "data";
 }
 /**
  * 标准开局摘要：同一用户跨城、跨重复序号相同的个人条件。
@@ -867,6 +1364,7 @@ export interface ProductResult {
   clones?: CloneResult[];
   comparisons?: ComparisonLine[];
   confirmed: ConfirmedRef;
+  data_nature?: CityDataNature[];
   evaluation_status: "generated" | "not_generated";
   limitations_zh?: string[];
   meta: ProductMeta;
@@ -957,6 +1455,7 @@ export interface CloneResult {
   reference_plan?: string | null;
   repeat_index: number;
   v_reference?: ExactNumber | null;
+  valuation_scope?: ValuationScopeNote[];
   years?: YearFacts[];
 }
 /**
@@ -987,27 +1486,162 @@ export interface RequirementLine {
   summary: string;
 }
 /**
+ * 期末估值的范围说明（DECISIONS/0041 R8）：期末持有的一件装备，参考模板有没有考虑它的用途。公开的安全投影：只有物品、
+ * 能力键、剩余月数与固定写法的说明，没有参数、方案比较或未来事件。“模板没有考虑”不是“装备没有价值”。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "ValuationScopeNote".
+ */
+export interface ValuationScopeNote {
+  /**
+   * @minItems 1
+   */
+  capabilities: [string, ...string[]];
+  kind: "equipment_use_valued" | "equipment_use_not_in_templates";
+  label: string;
+  months_left: number;
+  opportunity_id: string;
+  text_zh: string;
+}
+/**
  * 一个分身一年的生活事实（取自 E1 的结算记录与资源账；不含模型理由与内部评分对象）。
  *
  * This interface was referenced by `ProductContracts`'s JSON-Schema
  * via the `definition` "YearFacts".
  */
 export interface YearFacts {
+  activities?: ActivityLine[];
+  car_access?: CarAccessFact | null;
   cash_end?: ProductMoney | null;
   cash_start: ProductMoney;
+  commute?: CommuteMonths[];
+  consumption?: ConsumptionLine | null;
+  device_failures?: DeviceFailureFact[];
   devices?: ConvenienceDevice[];
   food?: string[];
+  goods?: GoodsLine[];
   health_months?: string[];
+  homes?: HomeFact[];
   household?: HouseholdHours[];
   housing?: string[];
   jobs?: string[];
   months_lived: number;
   notes?: string[];
   paid_total: ProductMoney;
+  purchases_not_made?: PurchaseNotMade[];
   services?: ConvenienceService[];
   status: string;
+  support?: SupportLine[];
+  tax?: TaxFact | null;
   training?: string[];
   year_index: number;
+}
+/**
+ * 一项休闲活动这一年的实际参与（DECISIONS/0041）：参加的月份、次数与参与小时（不含往返与准备），生病暂停的月份，
+ * 没能进行的月份（缺少需要的装备能力：没有收费）。次数与小时是精确写法（整数或“分子/分母”）。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "ActivityLine".
+ */
+export interface ActivityLine {
+  label: string;
+  months_done?: number[];
+  months_not_done?: number[];
+  months_paused?: number[];
+  not_done_zh?: string | null;
+  opportunity_id: string;
+  participation_hours: string;
+  sessions: string;
+}
+/**
+ * 用车权（DECISIONS/0042）：开车通勤要这个月有在用的用车权——一项按月付费的普通机会，不买就不能开车。只在这座城的通勤
+ * 关系里有需要它的方式时出现。``bought`` = 今年至少有一个月用上了。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "CarAccessFact".
+ */
+export interface CarAccessFact {
+  lines?: ConvenienceService[];
+  note_zh: string;
+  status: "bought" | "not_bought";
+}
+/**
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "ConvenienceService".
+ */
+export interface ConvenienceService {
+  label: string;
+  months_covered: number[];
+  months_not_obtained: number[];
+  months_planned: number[];
+  opportunity_id: string;
+}
+/**
+ * 几个月相同的通勤执行事实（DECISIONS/0042）：E1 每个月唯一的通勤记录，内容完全相同的月份合成一行。
+ *
+ * ``monthly_paid`` 是这几个月里**每个月**付的通勤费（各方式按月封顶之后的合计）。没有需要到岗的工作、出局当月没有住房时
+ * 不写行程与付款（后者是未知，不是 0）；出局或停止之后没有发生的月份不列。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "CommuteMonths".
+ */
+export interface CommuteMonths {
+  home_area_id?: string | null;
+  home_area_label?: string | null;
+  monthly_paid?: ProductMoney | null;
+  /**
+   * @minItems 1
+   */
+  months: [number, ...number[]];
+  status: "computed" | "no_onsite_work" | "unknown_no_housing";
+  status_zh: string;
+  trips?: CommuteTrip[];
+}
+/**
+ * 一个到岗岗位一个月实际执行的通勤（取自 E1 的月度通勤记录）：岗位、就业片区、方式、一次往返的分钟与这个月的到岗次数。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "CommuteTrip".
+ */
+export interface CommuteTrip {
+  job_label: string;
+  job_opportunity_id: string;
+  mode: "walk_bike" | "transit" | "drive";
+  mode_zh: string;
+  onsite_visits: number;
+  roundtrip_minutes: number;
+  work_area_id: string;
+  work_area_label: string;
+}
+/**
+ * 个人消费篮子这一年的事实（E3B 映射修正 §6）：每月实际获得的标准篮子数（精确写法，“0” = 没有，“—” = 那个月没有生活），
+ * 计划买却没获得的月份。它是当月的消费服务流，不是可以转卖的资产。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "ConsumptionLine".
+ */
+export interface ConsumptionLine {
+  baskets_by_month: string[];
+  months_not_obtained?: number[];
+  opportunity_ids: string[];
+}
+/**
+ * 一次设备故障与替换结果（DECISIONS/0042）：第几个月月末坏了（下个月起不能用，剩余寿命作废）、坏了几件，预先声明的替换
+ * 有没有在下个月按普通购买买到。不含抽签的随机数、月度风险与键。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "DeviceFailureFact".
+ */
+export interface DeviceFailureFact {
+  label: string;
+  month: number;
+  opportunity_id: string;
+  replacement_id?: string | null;
+  replacement_label?: string | null;
+  replacement_month?: number | null;
+  replacement_status: "not_declared" | "bought" | "rejected" | "next_year" | "not_reached";
+  replacement_status_zh: string;
+  units_failed: number;
 }
 /**
  * This interface was referenced by `ProductContracts`'s JSON-Schema
@@ -1016,6 +1650,39 @@ export interface YearFacts {
 export interface ConvenienceDevice {
   label: string;
   months_in_service: number[];
+  opportunity_id: string;
+}
+/**
+ * 一件不是省家务设备的耐用品（舒适用品、爱好装备）这一年的事实（DECISIONS/0041）：今年买到的月份、在用的月份、年末是否
+ * 到期与之后还剩几个月。买到、在用与实际用它参加活动是三件事：装备放在家里不等于参加了活动（见 ``ActivityLine``）。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "GoodsLine".
+ */
+export interface GoodsLine {
+  bought_month?: number | null;
+  expired: boolean;
+  label: string;
+  months_in_service?: number[];
+  months_left_after_year: number;
+  opportunity_id: string;
+}
+/**
+ * 这一年实际住过的一处住房（DECISIONS/0042）：住了哪几个月、在哪个片区，以及这个片区的居民平时上班往返多少分钟（资料或
+ * 估计；没有就为空，不当 0）。片区是资料的地理单位（例如 PUMA），不是街区或楼栋，本身不加分。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "HomeFact".
+ */
+export interface HomeFact {
+  area_id?: string | null;
+  area_label?: string | null;
+  area_typical_roundtrip_minutes?: number | null;
+  label: string;
+  /**
+   * @minItems 1
+   */
+  months: [number, ...number[]];
   opportunity_id: string;
 }
 /**
@@ -1029,15 +1696,43 @@ export interface HouseholdHours {
   task: string;
 }
 /**
+ * 计划里的一次性购买没有成交（DECISIONS/0041）：没有扣款，也没有生成持有物。文字是固定的公开说明，不透传内部原因。
+ *
  * This interface was referenced by `ProductContracts`'s JSON-Schema
- * via the `definition` "ConvenienceService".
+ * via the `definition` "PurchaseNotMade".
  */
-export interface ConvenienceService {
+export interface PurchaseNotMade {
   label: string;
-  months_covered: number[];
-  months_not_obtained: number[];
-  months_planned: number[];
+  month?: number | null;
   opportunity_id: string;
+  status: "rejected" | "cancelled_when_ill" | "paused" | "not_reached";
+  status_zh: string;
+}
+/**
+ * 一项日常支持功能这一年的事实（E3B 映射修正 §5）：计划买的月份、实际获得的月份（付了钱、服务在用）与没获得的月份，由哪项
+ * 服务提供。同功能买两份不多算；没获得的月份这项功能就是没有（不会因此出局、生病或少拿工资，也不节省小时）。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "SupportLine".
+ */
+export interface SupportLine {
+  function: "personal_communication" | "home_connectivity" | "household_supplies";
+  label_zh: string;
+  months_not_obtained?: number[];
+  months_obtained?: number[];
+  months_planned?: number[];
+  opportunity_ids?: string[];
+}
+/**
+ * 这一年的工资按哪一份税规则预扣（DECISIONS/0042）：官方 2024 年规则，或合成测试替身。范围与没有建模的部分见资料性质。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "TaxFact".
+ */
+export interface TaxFact {
+  policy_id: string;
+  status: "official_2024_rules" | "synthetic_test_double";
+  status_zh: string;
 }
 /**
  * This interface was referenced by `ProductContracts`'s JSON-Schema
@@ -1075,6 +1770,30 @@ export interface PreflightRef {
   preflight_id: string;
 }
 /**
+ * 确认的结果：成功时是服务端生成的确认画像；被拒时列出原因（草稿改过、知悉项缺失、审阅过时……）。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "ProfileConfirmReply".
+ */
+export interface ProfileConfirmReply {
+  confirmed?: ConfirmedProfile | null;
+  issues?: ProductIssue[];
+  meta: ProductMeta;
+  status: "confirmed" | "refused";
+}
+/**
+ * 确认画像（``POST /api/v1/profiles/confirm``）：只带服务端审阅的引用与知悉项；服务端重新校验并生成确认画像。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "ProfileConfirmRequest".
+ */
+export interface ProfileConfirmRequest {
+  acknowledged?: string[];
+  draft_id: string;
+  draft_revision: number;
+  review_id: string;
+}
+/**
  * 一份草稿的审阅：E3 给出的可读解释与全部问题。``confirmable`` 为假时，``issues`` 里有阻断项。
  *
  * This interface was referenced by `ProductContracts`'s JSON-Schema
@@ -1090,6 +1809,7 @@ export interface ProfileReview {
   health: HealthReviewItem[];
   issues?: ProductIssue[];
   items: ItemStatus[];
+  leisure_interest: InterestReview;
   material: AllocationReview;
   meta: ProductMeta;
   money: MoneyReview;
@@ -1099,6 +1819,7 @@ export interface ProfileReview {
   six_dimensions: AllocationReview;
   statements?: StatementReview[];
   summary_zh?: string[];
+  taste: InterestReview;
 }
 /**
  * This interface was referenced by `ProductContracts`'s JSON-Schema
@@ -1127,6 +1848,25 @@ export interface ItemStatus {
   note: string;
   support: "supported" | "partially_supported" | "unsupported";
   usage: ("planning" | "start_state" | "qualification" | "scoring" | "retained_only")[];
+}
+/**
+ * 一段兴趣或口味的审阅：作答状态、原文、按词表得到的候选、有歧义与没认出的片段、用户已选中的类别与可读说明。
+ *
+ * ``status``：``confirmable``（有选中的类别，或选择了不需要类别的状态）、``pending_selection``（只有文字、还没选中类别——不能
+ * 确认，免得空白或没核对的解释悄悄进入评分）、``invalid``（选中了词表外的类别）。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "InterestReview".
+ */
+export interface InterestReview {
+  ambiguous?: string[];
+  candidates?: string[];
+  message_zh: string;
+  selected?: string[];
+  state: string;
+  status: "confirmable" | "pending_selection" | "invalid";
+  text?: string | null;
+  unrecognized?: string[];
 }
 /**
  * This interface was referenced by `ProductContracts`'s JSON-Schema
@@ -1209,6 +1949,84 @@ export interface StatementReview {
   usage: ("planning" | "start_state" | "qualification" | "scoring" | "retained_only")[];
 }
 /**
+ * 审阅已保存的那一版草稿（``POST /api/v1/drafts/{id}/review``）。审阅绑定草稿编号、修订号、内容与所用资料包。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "ReviewReply".
+ */
+export interface ReviewReply {
+  meta: ProductMeta;
+  review: ProfileReview;
+  reviewed_revision: number;
+}
+/**
+ * 准备一次模拟（``POST /api/v1/run-intents``）：引用一份确认画像，可以选每城分身数、年数与这次的费用上限（省略就用服务默认值，
+ * 能选什么见 ``ServiceRules.options``）。城市来自确认画像。服务端校验后保存这次的有效设置，再排队做运行前检查（不扣次数）。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "RunIntentCreateRequest".
+ */
+export interface RunIntentCreateRequest {
+  clones_per_city?: number | null;
+  confirmed_id: string;
+  max_cost_cny?: string | null;
+  years?: number | null;
+}
+/**
+ * 一次运行意图的公开视图（网页流程）：阶段与中文说明、当前预检查与确认身份、进度、是否有结果、此刻允许的操作、在等谁、
+ * 时间与删除状态、安全解释与支持编号。不含流程内部编号、checkpoint、文件路径、堆栈或内部诊断正文。
+ *
+ * ``stage = finished`` 只表示本次服务流程结束：结果里的 C / E / M、未知与部分结果照 E1 原样显示；没有结果时 ``result_available``
+ * 为假，不编一个。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "RunIntentView".
+ */
+export interface RunIntentView {
+  allowed_actions?: (
+    "submit" | "cancel" | "resume" | "delete" | "view_progress" | "view_result" | "create_new_intent"
+  )[];
+  confirm_with?: string | null;
+  confirmed: ConfirmedRef;
+  created_at: string;
+  deletion: DeletionState;
+  expires_at?: string | null;
+  explanation?: PublicExplanation | null;
+  intent_id: string;
+  meta: ProductMeta;
+  preflight?: ProductPreflight | null;
+  progress?: RunProgress | null;
+  quota: QuotaSummary;
+  result_available: boolean;
+  run_id?: string | null;
+  settings?: RunSettingsView | null;
+  stage:
+    | "checking"
+    | "awaiting_confirmation"
+    | "blocked"
+    | "queued"
+    | "running"
+    | "needs_attention"
+    | "finished"
+    | "cancelled"
+    | "deleting"
+    | "deleted"
+    | "expired";
+  stage_zh: string;
+  support_ref?: string | null;
+  updated_at: string;
+  waiting_for: "user" | "maintainer" | "service" | "none";
+}
+/**
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "DeletionState".
+ */
+export interface DeletionState {
+  completed_at?: string | null;
+  requested_at?: string | null;
+  state: "none" | "deleting" | "deleted";
+}
+/**
  * 一次运行的进度（断线后用运行 ID 查询；不重发付费规划）。请求成功、计划可执行、生活完成、评分完整分别记录。
  *
  * This interface was referenced by `ProductContracts`'s JSON-Schema
@@ -1225,6 +2043,7 @@ export interface RunProgress {
   run_id: string;
   stage: "queued" | "running" | "completed" | "paused" | "halted" | "interrupted" | "budget_exhausted";
   stage_zh: string;
+  updated_at?: string | null;
 }
 /**
  * This interface was referenced by `ProductContracts`'s JSON-Schema
@@ -1240,15 +2059,89 @@ export interface CloneProgress {
 /**
  * 费用状态：离线 mock 为零；真实模型只能写“按报价估算”，以供应商账单为准。
  *
+ * ``calls_used`` / ``call_limit`` 数的是**规划候选**（每个分身每年一次正常规划、最多两次修订）；``service_attempts`` 数的是实际发给
+ * 服务的尝试（每份候选最多再试一次服务请求），两者不是同一个计数。金额都是应用侧按已记录报价估算（E3C）：``settled_cost`` 是返回了
+ * 用量、已核算的；``uncertain_cost`` 是请求可能已经发出、用量不确定、按预留保留的（不改成 0）；``in_flight_cost`` 是已经预留、还没有
+ * 结果的；``estimated_cost`` 是三者之和。``max_cost`` 是这次运行的应用侧上限，不是供应商的账单上限。
+ *
  * This interface was referenced by `ProductContracts`'s JSON-Schema
  * via the `definition` "CostStatus".
  */
 export interface CostStatus {
   call_limit: number;
   calls_used: number;
+  currency?: ("CNY" | "USD") | null;
   estimated_cost?: string | null;
+  in_flight_cost?: string | null;
   kind: "offline_mock_zero_cost" | "estimated_from_quote";
+  max_cost?: string | null;
   note: string;
+  price_version?: string | null;
+  service_attempt_limit?: number | null;
+  service_attempts?: number | null;
+  settled_cost?: string | null;
+  uncertain_attempts?: number | null;
+  uncertain_cost?: string | null;
+}
+/**
+ * 一次运行意图的有效设置：创建时由服务端校验并保存，之后的检查、确认、执行、进度、结果与恢复都用这一份（改服务默认值不影响它）。
+ * 规划候选上限与服务尝试上限按这次的规模与修订、重试规则算出。离线 mock 不花钱：费用上限照样写用户这次的选择（它进入设置的
+ * 身份），服务尝试上限不出现。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "RunSettingsView".
+ */
+export interface RunSettingsView {
+  call_limit: number;
+  /**
+   * @minItems 1
+   */
+  cities: [string, ...string[]];
+  clones_per_city: number;
+  clones_total: number;
+  currency?: ("CNY" | "USD") | null;
+  max_cost?: string | null;
+  planner_kind: "mock" | "llm";
+  service_attempt_limit?: number | null;
+  settings_fingerprint: string;
+  years: number;
+}
+/**
+ * 本人的运行列表（``GET /api/v1/runs``），新的在前；已删除的只剩不含内容的条目时不列出。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "RunList".
+ */
+export interface RunList {
+  meta: ProductMeta;
+  quota: QuotaSummary;
+  runs?: RunSummary[];
+}
+/**
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "RunSummary".
+ */
+export interface RunSummary {
+  created_at: string;
+  expires_at?: string | null;
+  finished_at?: string | null;
+  intent_id: string;
+  result_available: boolean;
+  run_id?: string | null;
+  settings?: RunSettingsView | null;
+  stage:
+    | "checking"
+    | "awaiting_confirmation"
+    | "blocked"
+    | "queued"
+    | "running"
+    | "needs_attention"
+    | "finished"
+    | "cancelled"
+    | "deleting"
+    | "deleted"
+    | "expired";
+  stage_zh: string;
 }
 /**
  * 提交回执：接受、重复提交（返回原运行 ID，不再生成新的一批分身）或拒绝（附原因）。
@@ -1261,7 +2154,7 @@ export interface RunReceipt {
   meta: ProductMeta;
   reasons?: ProductIssue[];
   run_id?: string | null;
-  service: "offline_bridge" | "contract_example_only";
+  service: "offline_bridge" | "hosted_service" | "contract_example_only";
   status: "accepted" | "duplicate_same_run" | "rejected";
 }
 /**
@@ -1277,154 +2170,174 @@ export interface RunSubmission {
   preflight: PreflightRef;
 }
 /**
- * 一份原始答案草稿（逐项保存状态）。原始答案、候选解释与确认画像分层保存：这里只有原始答案。
- *
  * This interface was referenced by `ProductContracts`'s JSON-Schema
- * via the `definition` "UserInputDraft".
+ * via the `definition` "RunSubmitReply".
  */
-export interface UserInputDraft {
-  abilities?: AbilityClaim[];
-  age: AgeAnswer;
-  attribute_preferences?: AttributePreferenceAnswer[];
-  cash: CashAnswer;
-  cities: CitiesAnswer;
-  draft_id: string;
-  evidence?: EvidenceRef[];
-  free_text: FreeTextAnswer;
-  hard_requirements?: HardRequirementAnswer[];
-  health: HealthAnswers;
-  input_channel?: "form";
-  material: AllocationAnswer;
+export interface RunSubmitReply {
+  intent: RunIntentView;
   meta: ProductMeta;
-  occupation: OccupationAnswer;
+  receipt: RunReceipt;
+}
+/**
+ * 确认开始（``POST /api/v1/run-intents/{id}/submit``）：``confirm_with`` 是用户看到的那份预检查的身份；``accept_scope`` 表示“我知道
+ * 这次范围、限制和费用保护，使用一次机会开始”。同一意图重复确认只对应一个运行，即使换了幂等键；同一个键配不同内容返回冲突。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "RunSubmitRequest".
+ */
+export interface RunSubmitRequest {
+  accept_scope: true;
+  confirm_with: string;
+  idempotency_key: string;
+}
+/**
+ * 统一的安全错误：机器代码、HTTP 状态与“发生了什么—影响是什么—下一步怎么做”的中文，加一个支持编号。不含用户输入、内部路径、
+ * 堆栈、原始校验异常或秘密。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "ServiceError".
+ */
+export interface ServiceError {
+  code:
+    | "unauthenticated"
+    | "not_found"
+    | "revision_conflict"
+    | "preflight_stale"
+    | "quota_exhausted"
+    | "idempotency_conflict"
+    | "intent_conflict"
+    | "not_resumable"
+    | "result_unavailable"
+    | "deleting"
+    | "deleted"
+    | "expired"
+    | "data_pack_unavailable"
+    | "paid_calls_disabled"
+    | "run_options_invalid"
+    | "run_settings_unavailable"
+    | "rate_limited"
+    | "csrf_failed"
+    | "origin_rejected"
+    | "payload_too_large"
+    | "invalid_request"
+    | "internal_error";
+  field?: ("clones_per_city" | "years" | "max_cost_cny" | "cities") | null;
+  impact_zh: string;
+  message_zh: string;
+  meta?: ProductMeta | null;
+  next_action_zh: string;
+  retry_after_seconds?: number | null;
+  sample?: SampleLabel | null;
+  status: number;
+  support_ref?: string | null;
+}
+/**
+ * 用专属链接换会话（``POST /api/v1/session``，同源 JSON）。``invite_token`` 是链接 ``#token=`` 后面的随机秘密：网页从地址的
+ * 片段里读出、交换后立即从地址栏移除；它不进查询串、路径、localStorage 或任何模型请求，服务端只存它的摘要。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "SessionExchangeRequest".
+ */
+export interface SessionExchangeRequest {
+  invite_token: string;
+}
+/**
+ * 当前会话（``POST /api/v1/session`` 交换邀请之后、``GET /api/v1/session``）：到期时间、本会话的 CSRF token、次数与服务规则。
+ * 会话由 HttpOnly Cookie 携带，这里不返回会话秘密；``csrf_token`` 只在修改请求的 ``X-CSRF-Token`` 头里带回。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "SessionView".
+ */
+export interface SessionView {
+  csrf_token: string;
+  drafts?: DraftSummary[];
+  meta: ProductMeta;
+  open_intent_id?: string | null;
+  quota: QuotaSummary;
+  rules: ServiceRules;
+  session_expires_at: string;
+}
+/**
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "DraftSummary".
+ */
+export interface DraftSummary {
+  draft_id: string;
+  expires_at: string;
   revision: number;
-  six_dimensions: AllocationAnswer;
+  updated_at: string;
 }
 /**
- * 用户自己确认的一项资格事实（只在相关岗位需要时追问；不从职称推断）。
+ * 服务的规则（服务端配置产生，网页只显示，不能修改）。``cities``、``clones_per_city``、``years``、``max_cost`` 是不选时的默认
+ * 规模与费用上限；能选什么见 ``options``。
  *
  * This interface was referenced by `ProductContracts`'s JSON-Schema
- * via the `definition` "AbilityClaim".
+ * via the `definition` "ServiceRules".
  */
-export interface AbilityClaim {
-  ability_id: string;
-  state: "unanswered" | "provided" | "indifferent" | "unsure";
+export interface ServiceRules {
+  cities: number;
+  clones_per_city: number;
+  currency: "CNY" | "USD";
+  draft_retention_days: number;
+  intent_retention_days: number;
+  live_calls_enabled: boolean;
+  max_cost: string;
+  notes_zh?: string[];
+  options: RunOptionsPolicy;
+  planner_kind: "mock" | "llm";
+  profile_retention_days: number;
+  result_retention_days: number;
+  runs_total: number;
+  session_days: number;
+  years: number;
 }
 /**
- * This interface was referenced by `ProductContracts`'s JSON-Schema
- * via the `definition` "AgeAnswer".
- */
-export interface AgeAnswer {
-  state: "unanswered" | "provided" | "indifferent" | "unsure";
-  value?: number | null;
-}
-/**
- * 一条属性偏好（品牌、菜系、上门顾虑……）：原文与它挂在哪项需求下；``as_hard_requirement`` 表示用户想把它当不可妥协的要求。
+ * 服务允许用户为一次模拟选择什么（维护者在服务配置里定，网页只照着显示控件，不另做判断）。
+ *
+ * * 城市：来自用户确认的画像（不另交一份城市列表），必须是 ``cities_allowed`` 里不重复的非空子集；不会替用户删城或补城；
+ * * 每城分身数、年数、这次运行的费用上限：创建运行意图时可以选，省略就用默认值；
+ * * 年数取服务允许与资料包支持的交集（``years_allowed``）：资料包没有验证过的年数不开放，不为此生成更多年份的菜单。
+ * 规划模型、报价、并发、修订与重试、请求长度上限由维护者控制，不是用户选项。
  *
  * This interface was referenced by `ProductContracts`'s JSON-Schema
- * via the `definition` "AttributePreferenceAnswer".
+ * via the `definition` "RunOptionsPolicy".
  */
-export interface AttributePreferenceAnswer {
-  as_hard_requirement?: boolean;
-  kind: string;
-  need: string;
-  preference_id: string;
-  raw_text: string;
+export interface RunOptionsPolicy {
+  /**
+   * @minItems 1
+   */
+  cities_allowed: [string, ...string[]];
+  clones_per_city: IntRange;
+  max_cost: MoneyRange;
+  notes_zh?: string[];
+  /**
+   * @minItems 1
+   */
+  years_allowed: [number, ...number[]];
+  years_default: number;
 }
 /**
- * 开始时可用于生活的流动资金：金额文字、币种、金额时期与口径（不是总资产、信用额度或月薪）。
+ * 一个整数选项：不选时用 ``default``；允许 ``minimum``–``maximum``（含两端）。
  *
  * This interface was referenced by `ProductContracts`'s JSON-Schema
- * via the `definition` "CashAnswer".
+ * via the `definition` "IntRange".
  */
-export interface CashAnswer {
-  amount_text?: string | null;
-  currency?: string | null;
-  meaning?: "liquid_funds_v1";
-  price_period?: string | null;
-  state: "unanswered" | "provided" | "indifferent" | "unsure";
+export interface IntRange {
+  default: number;
+  maximum: number;
+  minimum: number;
 }
 /**
- * This interface was referenced by `ProductContracts`'s JSON-Schema
- * via the `definition` "CitiesAnswer".
- */
-export interface CitiesAnswer {
-  city_refs?: string[];
-  state: "unanswered" | "provided" | "indifferent" | "unsure";
-}
-/**
- * 可选文字。超过 2,000 字符**不截断**：校验时报错，由用户自己删减。
+ * 一次运行的费用上限选项（应用侧按报价估算，不是供应商账单上限）。
  *
  * This interface was referenced by `ProductContracts`'s JSON-Schema
- * via the `definition` "FreeTextAnswer".
+ * via the `definition` "MoneyRange".
  */
-export interface FreeTextAnswer {
-  state: "unanswered" | "provided" | "indifferent" | "unsure";
-  text?: string | null;
-}
-/**
- * 一条硬要求：选了受支持的选项（带参数），或只写了原文（本版未支持，只留存）。
- *
- * This interface was referenced by `ProductContracts`'s JSON-Schema
- * via the `definition` "HardRequirementAnswer".
- */
-export interface HardRequirementAnswer {
-  option_id?: string | null;
-  parameter_value?: number | null;
-  raw_text?: string | null;
-  requirement_id: string;
-}
-/**
- * This interface was referenced by `ProductContracts`'s JSON-Schema
- * via the `definition` "HealthAnswers".
- */
-export interface HealthAnswers {
-  items?: HealthItemAnswer[];
-  questionnaire_version: string;
-}
-/**
- * 一题的作答：四个选项之一；``None`` = 未答（与“暂不确定”分开保存）。
- *
- * This interface was referenced by `ProductContracts`'s JSON-Schema
- * via the `definition` "HealthItemAnswer".
- */
-export interface HealthItemAnswer {
-  choice?: ("agree" | "disagree" | "no_clear_tendency" | "unsure") | null;
-  question_id: string;
-}
-/**
- * 一组定和分配的作答。``mode = equal_split`` 表示用户**主动**选择了平均分配（不预选、不默认）；``None`` 表示还没开始分配。
- *
- * This interface was referenced by `ProductContracts`'s JSON-Schema
- * via the `definition` "AllocationAnswer".
- */
-export interface AllocationAnswer {
-  entries?: {
-    [k: string]: PointEntry;
-  };
-  mode?: ("manual" | "equal_split") | null;
-}
-/**
- * 一个维度或细项的作答：已提供时写数值文字（精确十进制或规范分数），其余状态不写数值。明确 0 写 ``"0"``。
- *
- * This interface was referenced by `ProductContracts`'s JSON-Schema
- * via the `definition` "PointEntry".
- */
-export interface PointEntry {
-  state: "unanswered" | "provided" | "indifferent" | "unsure";
-  value_text?: string | null;
-}
-/**
- * 职业：原文与语言；用户在候选里选中的概念（不透明 ID，不是职业代码）。
- *
- * This interface was referenced by `ProductContracts`'s JSON-Schema
- * via the `definition` "OccupationAnswer".
- */
-export interface OccupationAnswer {
-  language?: string;
-  raw_text?: string | null;
-  selected_candidate?: string | null;
-  state: "unanswered" | "provided" | "indifferent" | "unsure";
+export interface MoneyRange {
+  currency: "CNY" | "USD";
+  default: string;
+  maximum: string;
+  minimum: string;
 }
 /**
  * 服务需要本人每月花多少小时参与（不是服务人员的工作时间）。设备不适用；服务未知时不能编入（不当成 0）。

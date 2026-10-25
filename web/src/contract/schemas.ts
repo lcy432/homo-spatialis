@@ -1,12 +1,13 @@
-// 运行时读取 E3 导出的 13 份 schema 与 index.json（仓库根目录的 contracts/product/v2/，构建时打进包里；不复制、不手改）。
+// 运行时读取 E3 导出的 schema 与 index.json（别名 @contracts，默认是仓库的 contracts/product/v3/；构建时打进包里，不复制、不手改）。
+// 换目录（例如 v4）时改 vite.config.ts 的默认值与 scripts/contract-lib.mjs 的 CONTRACT_SUBDIR。
 import type { MessageName } from "./types";
 
-const files = import.meta.glob<Record<string, unknown>>("../../../contracts/product/v2/*.schema.json", {
+const files = import.meta.glob<Record<string, unknown>>("@contracts/*.schema.json", {
   eager: true,
   import: "default",
 });
 
-const indexFiles = import.meta.glob<ContractIndex>("../../../contracts/product/v2/index.json", {
+const indexFiles = import.meta.glob<ContractIndex>("@contracts/index.json", {
   eager: true,
   import: "default",
 });
@@ -26,7 +27,7 @@ for (const [p, schema] of Object.entries(files)) {
 }
 
 const index = Object.values(indexFiles)[0];
-if (!index) throw new Error("找不到 contracts/product/v2/index.json");
+if (!index) throw new Error("找不到共享结构的 index.json（@contracts）");
 export const CONTRACT_INDEX: ContractIndex = index;
 
 export function schemaFor(name: MessageName): Record<string, unknown> {

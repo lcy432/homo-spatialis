@@ -1,23 +1,22 @@
-// 定和分配器（六维 / 物质内部）。规则见所有者确认的设计（docs/design/prompts/2026-10-18-e5-a-offline-ui.md 模块 D）：
+// 定和分配器（六维 / 物质内部）：
 // 不预填；超过 100 不拦输入、不自动扣减，由用户点选从哪一项减；平均分配要用户主动点；均分之后改一项，先问要不要改成手动分配
 // （其余各项保留精确的 50/3）；写法不对的项原样保留、不计入合计；−/＋ 每次 5 分只是方便。合计是填写辅助，正式结论以 E3 审阅为准。
+// 维度与细项的名称、定义与说明是 E3 能力清单的原话。
 import { useId, useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { AllocationGroup, DimensionDefinition, MaterialLeafDefinition, PointEntry } from "../contract/types";
-import { T } from "../copy/zh";
-import { useDraft } from "../draft/DraftContext";
+import { useDraftEditor } from "../draft/DraftEditor";
 import { equalValue, groupKeys, groupLabels } from "../draft/draft";
-import { Fraction, canonical, displayFixed, parsePoints, remainingOf, sumProvided } from "../draft/exact";
+import { Fraction, type PointsParse, canonical, displayFixed, parsePoints, remainingOf, sumProvided } from "../draft/exact";
 import type { ContentAction } from "../draft/reducer";
+import { Zh } from "../i18n/biz";
 import { Dialog } from "./Dialog";
 import { SupportChip } from "./common";
 import styles from "./Allocator.module.css";
 
 const STEP = 5;
 
-type Picker =
-  | { kind: "reduce"; amount: string }
-  | { kind: "transfer"; to: string; amount: string; over: boolean }
-  | null;
+type Picker = { kind: "reduce"; amount: string } | { kind: "transfer"; to: string; amount: string; over: boolean } | null;
 
 /** 能精确写成 decimals 位以内的小数就直接写（“5”“16.5”），否则写四舍五入后的显示值，另附精确值。 */
 function friendly(q: Fraction, decimals: number): { text: string; exact: string | null } {
@@ -39,7 +38,8 @@ function definitionOf(d: DimensionDefinition | MaterialLeafDefinition) {
 }
 
 export function Allocator({ group, title, help }: { group: AllocationGroup; title: string; help: string }) {
-  const { caps, state, dispatch } = useDraft();
+  const { t } = useTranslation();
+  const { caps, state, dispatch } = useDraftEditor();
   const uid = useId();
   const keys = groupKeys(caps, group);
   const labels = groupLabels(caps, group);
@@ -50,19 +50,22 @@ export function Allocator({ group, title, help }: { group: AllocationGroup; titl
   const entries: Record<string, PointEntry> = answer.entries ?? {};
   const isEqual = answer.mode === "equal_split";
   const eqExact = equalValue(caps, group);
-  const eqDisplay = displayFixed(new Fraction(eqExact), dispDec);
+  const eqDisplay = friendly(new Fraction(eqExact), dispDec).text;
 
   const [equalDialog, setEqualDialog] = useState(false);
   const [pendingManual, setPendingManual] = useState<ContentAction | null>(null);
   const [picker, setPicker] = useState<Picker>(null);
 
-  const counted = isEqual
-    ? Object.fromEntries(keys.map((k) => [k, { state: "provided", value_text: eqExact }]))
-    : entries;
+  const counted = isEqual ? Object.fromEntries(keys.map((k) => [k, { state: "provided", value_text: eqExact }])) : entries;
   const totals = sumProvided(counted, keys, maxDec);
   const rem = remainingOf(totals.total);
   const amount = friendly(rem.amount, dispDec);
-  const statusText = rem.kind === "full" ? T.full : rem.kind === "over" ? T.over(amount.text) : T.remaining(amount.text);
+  const statusText =
+    rem.kind === "full"
+      ? t("priorities.full")
+      : rem.kind === "over"
+        ? t("priorities.over", { x: amount.text })
+        : t("priorities.remaining", { x: amount.text });
 
   /** 均分状态下的任何修改，先问要不要改成手动分配。 */
   const act = (a: ContentAction) => {
@@ -91,40 +94,50 @@ export function Allocator({ group, title, help }: { group: AllocationGroup; titl
     }
   };
 
-  const candidates = (exclude: string | null) =>
-    keys.filter((k) => k !== exclude && (valueOf(k)?.compare(0) ?? 0) > 0);
+  const candidates = (exclude: string | null) => keys.filter((k) => k !== exclude && (valueOf(k)?.compare(0) ?? 0) > 0);
+
+  const hintOf = (p: Extract<PointsParse, { ok: false }>) =>
+    p.reason === "too_many_decimals"
+      ? t("priorities.hintDecimals", { n: maxDec })
+      : p.reason === "fraction_not_canonical"
+        ? t("priorities.hintFraction", { canonical: p.canonical })
+        : t("priorities.hintNumber");
 
   return (
-    <div className={styles.wrap}>
+    <div className={styles.wrap} data-allocator={group}>
       <h2>{title}</h2>
       <p className="muted">{help}</p>
 
       <div className={`${styles.status} ${rem.kind === "over" ? styles.over : rem.kind === "full" ? styles.full : ""}`}>
         <p className={styles.statusText} role="status" aria-live="polite" id={`${uid}-status`}>
           {statusText}
-          {amount.exact ? <span className="small muted">（{T.exactValue} {amount.exact}）</span> : null}
+          {amount.exact ? (
+            <span className="small muted">
+              （{t("common.exact")} {amount.exact}）
+            </span>
+          ) : null}
         </p>
         {rem.kind === "over" && !isEqual ? (
           <button type="button" onClick={() => setPicker({ kind: "reduce", amount: canonical(rem.amount) })}>
-            {T.reduceFrom(amount.text)}
+            {t("priorities.reduceFrom", { x: amount.text })}
           </button>
         ) : null}
-        {totals.invalid.length ? <span className="small">{T.notCounted(totals.invalid.length)}</span> : null}
+        {totals.invalid.length ? <span className="small">{t("priorities.notCounted", { n: totals.invalid.length })}</span> : null}
       </div>
 
       <div className={styles.toolbar}>
         <button type="button" onClick={() => setEqualDialog(true)} disabled={isEqual}>
-          {T.equalSplit}
+          {t("priorities.equalSplit")}
         </button>
         <button type="button" onClick={() => dispatch({ type: "history/undo" })} disabled={!state.past.length}>
-          {T.undo}
+          {t("common.undo")}
         </button>
         <button type="button" onClick={() => dispatch({ type: "history/redo" })} disabled={!state.future.length}>
-          {T.redo}
+          {t("common.redo")}
         </button>
       </div>
-      {isEqual ? <p className="note">{T.equalSplitOn(eqDisplay, eqExact)}</p> : null}
-      <p className="small muted">{T.stepHint}</p>
+      {isEqual ? <p className="box note">{t("priorities.equalSplitOn", { each: eqDisplay, exact: eqExact })}</p> : null}
+      <p className="small muted">{t("priorities.stepHint")}</p>
 
       <ol className={styles.rows}>
         {defs.map((d) => {
@@ -137,31 +150,37 @@ export function Allocator({ group, title, help }: { group: AllocationGroup; titl
           const shown = isEqual ? eqDisplay : e?.state === "provided" ? (e.value_text ?? "") : "";
           const parsed = !isEqual && e?.state === "provided" && e.value_text != null ? parsePoints(e.value_text, maxDec) : null;
           const stateSel = !isEqual && (e?.state === "indifferent" || e?.state === "unsure") ? e.state : "";
-          const describedBy = [descId, parsed && !parsed.ok ? errId : null, stateSel ? `${errId}-state` : null]
-            .filter(Boolean)
-            .join(" ");
+          const describedBy = [descId, parsed && !parsed.ok ? errId : null, stateSel ? `${errId}-state` : null].filter(Boolean).join(" ");
           return (
             <li key={k} className={styles.row} data-key={k}>
               <div className={styles.rowHead}>
                 <label htmlFor={inputId} className={styles.rowLabel}>
-                  {labels[k]}
+                  <Zh>{labels[k]}</Zh>
                 </label>
                 {d.support !== "supported" ? <SupportChip support={d.support} /> : null}
-                {!isEqual && !e ? <span className="chip">{T.stateUnanswered}</span> : null}
+                {!isEqual && !e ? <span className="chip">{t("states.unanswered")}</span> : null}
               </div>
               <details className={styles.what}>
-                <summary>{T.whatIsThis}</summary>
+                <summary>{t("priorities.whatIsThis")}</summary>
                 <div id={descId}>
-                  <p>{info.definition}</p>
-                  {info.reference ? <p className="small">{info.reference}</p> : null}
-                  {info.note ? <p className="small muted">{info.note}</p> : null}
+                  <Zh as="p">{info.definition}</Zh>
+                  {info.reference ? (
+                    <p className="small">
+                      <Zh>{info.reference}</Zh>
+                    </p>
+                  ) : null}
+                  {info.note ? (
+                    <p className="small muted">
+                      <Zh>{info.note}</Zh>
+                    </p>
+                  ) : null}
                 </div>
               </details>
               <div className={styles.controls}>
                 <button
                   type="button"
                   className={styles.stepButton}
-                  aria-label={`${labels[k]}减 ${STEP} 分`}
+                  aria-label={t("priorities.minus", { label: labels[k], n: STEP })}
                   onClick={() => act({ type: "points/step", group, key: k, delta: -STEP, maxDecimals: maxDec })}
                 >
                   −
@@ -179,36 +198,36 @@ export function Allocator({ group, title, help }: { group: AllocationGroup; titl
                   onChange={(ev) => act({ type: "points/text", group, key: k, text: ev.target.value })}
                   onBlur={() => dispatch({ type: "history/break" })}
                 />
-                <button type="button" className={styles.stepButton} aria-label={`${labels[k]}加 ${STEP} 分`} onClick={() => plus(k)}>
+                <button
+                  type="button"
+                  className={styles.stepButton}
+                  aria-label={t("priorities.plus", { label: labels[k], n: STEP })}
+                  onClick={() => plus(k)}
+                >
                   ＋
                 </button>
                 <select
-                  aria-label={`${labels[k]}：${T.unsureMenu}`}
+                  aria-label={`${labels[k]}：${t("priorities.unsureMenu")}`}
                   value={stateSel}
                   onChange={(ev) => {
                     const v = ev.target.value;
-                    act({
-                      type: "points/state",
-                      group,
-                      key: k,
-                      state: v === "indifferent" || v === "unsure" ? v : "unanswered",
-                    });
+                    act({ type: "points/state", group, key: k, state: v === "indifferent" || v === "unsure" ? v : "unanswered" });
                   }}
                 >
-                  <option value="">{T.unsureMenu}</option>
-                  <option value="indifferent">{T.stateIndifferent}</option>
-                  <option value="unsure">{T.stateUnsure}</option>
+                  <option value="">{t("priorities.unsureMenu")}</option>
+                  <option value="indifferent">{t("states.indifferent")}</option>
+                  <option value="unsure">{t("states.unsure")}</option>
                 </select>
               </div>
               {parsed && !parsed.ok ? (
                 <p id={errId} className="small" style={{ color: "var(--error-line)" }}>
-                  {T.pointsInvalid}
-                  {parsed.hint}
+                  {t("priorities.invalid")}
+                  {hintOf(parsed)}
                 </p>
               ) : null}
               {stateSel ? (
                 <p id={`${errId}-state`} className="small">
-                  {stateSel === "indifferent" ? T.stateIndifferent : T.stateUnsure}：{T.stateUnsetNote}
+                  {stateSel === "indifferent" ? t("states.indifferent") : t("states.unsure")}：{t("priorities.unsetNote")}
                 </p>
               ) : null}
             </li>
@@ -216,8 +235,8 @@ export function Allocator({ group, title, help }: { group: AllocationGroup; titl
         })}
       </ol>
 
-      <Dialog open={equalDialog} onClose={() => setEqualDialog(false)} title={T.equalSplit}>
-        <p>{T.equalSplitConfirm(eqDisplay, eqExact)}</p>
+      <Dialog open={equalDialog} onClose={() => setEqualDialog(false)} title={t("priorities.equalSplit")}>
+        <p>{t("priorities.equalSplitConfirm", { each: eqDisplay, exact: eqExact })}</p>
         <div className="row">
           <button
             type="button"
@@ -227,16 +246,16 @@ export function Allocator({ group, title, help }: { group: AllocationGroup; titl
               setEqualDialog(false);
             }}
           >
-            {T.equalSplit}
+            {t("priorities.equalSplit")}
           </button>
           <button type="button" onClick={() => setEqualDialog(false)}>
-            {T.cancel}
+            {t("common.cancel")}
           </button>
         </div>
       </Dialog>
 
-      <Dialog open={pendingManual !== null} onClose={() => setPendingManual(null)} title={T.toManual}>
-        <p>{T.toManualConfirm(eqDisplay, eqExact)}</p>
+      <Dialog open={pendingManual !== null} onClose={() => setPendingManual(null)} title={t("priorities.toManual")}>
+        <p>{t("priorities.toManualConfirm", { each: eqDisplay, exact: eqExact })}</p>
         <div className="row">
           <button
             type="button"
@@ -247,10 +266,10 @@ export function Allocator({ group, title, help }: { group: AllocationGroup; titl
               setPendingManual(null);
             }}
           >
-            {T.toManual}
+            {t("priorities.toManual")}
           </button>
           <button type="button" onClick={() => setPendingManual(null)}>
-            {T.cancel}
+            {t("common.cancel")}
           </button>
         </div>
       </Dialog>
@@ -259,13 +278,13 @@ export function Allocator({ group, title, help }: { group: AllocationGroup; titl
         open={picker !== null}
         onClose={() => setPicker(null)}
         title={
-          picker?.kind === "transfer" ? T.moveFrom(picker.amount, labels[picker.to] ?? "", picker.over) : T.reduceFrom(amount.text)
+          picker?.kind === "transfer"
+            ? t(picker.over ? "priorities.moveFromOver" : "priorities.moveFromFull", { x: picker.amount, to: labels[picker.to] ?? "" })
+            : t("priorities.reduceFrom", { x: amount.text })
         }
       >
-        <p className="small">{T.moveNote}</p>
-        {picker && candidates(picker.kind === "transfer" ? picker.to : null).length === 0 ? (
-          <p>没有可以挪分的项（其他项都还没有分数）。可以直接改数字。</p>
-        ) : null}
+        <p className="small">{t("priorities.moveNote")}</p>
+        {picker && candidates(picker.kind === "transfer" ? picker.to : null).length === 0 ? <p>{t("priorities.nothingToMove")}</p> : null}
         <ul className={styles.pickList}>
           {picker
             ? candidates(picker.kind === "transfer" ? picker.to : null).map((k) => {
@@ -283,7 +302,7 @@ export function Allocator({ group, title, help }: { group: AllocationGroup; titl
                         setPicker(null);
                       }}
                     >
-                      {labels[k]}（{v ? friendly(v, dispDec).text : "0"} 分）
+                      {t("priorities.pointsOf", { label: labels[k], v: v ? friendly(v, dispDec).text : "0" })}
                     </button>
                   </li>
                 );
@@ -291,7 +310,7 @@ export function Allocator({ group, title, help }: { group: AllocationGroup; titl
             : null}
         </ul>
         <button type="button" onClick={() => setPicker(null)}>
-          {T.cancel}
+          {t("common.cancel")}
         </button>
       </Dialog>
     </div>

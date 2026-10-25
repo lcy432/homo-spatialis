@@ -1,0 +1,18 @@
+# 浏览器端测试专用的隔离服务（E3C 本地 mock 模式）：只绑定 127.0.0.1:8775，数据目录 runs/web-e2e/service（只在本机、每次测试前清空；
+# serve-service.mjs 把它换成本仓库下的绝对路径，服务代码来自别的工作树时也一样——路径要短，Windows 没开长路径时上限 260 个字符），
+# 来源与 Playwright 打开的页面完全一致（http://localhost:5180）。Origin、CSRF、Cookie、请求体上限与限流都用服务的默认值——
+# 不关闭、不放宽（测试本身不频繁换身份）。规划器是离线 mock：零网络、零费用，不代表模型能力。
+service:
+  version: e3c-service-config-v1
+  profile: local_mock
+  data_dir: runs/web-e2e/service
+  site_origin: http://localhost:5180
+  bind_host: 127.0.0.1
+  bind_port: 8775
+  pack_path: configs/product/e3b_us_v1_pack.yaml
+  planner: mock
+  live_calls_enabled: false
+  workers: 16
+  progress_poll_seconds: 2
+  worker_poll_seconds: 1
+  expose_docs: false

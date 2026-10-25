@@ -1,7 +1,9 @@
-// 待 E3 提供正式中文的临时显示文字（需求 A1，docs/handoffs/e5-to-e3-interface-requests.md）。
+// 待 E3 提供正式显示文字的临时转写（需求 A1，docs/handoffs/e5-to-e3-interface-requests.md；双语见
+// docs/handoffs/e5-bilingual-map-service-requests.md 第 2 节）。
 //
-// 结果里有一些字段只有英文键。在 E3 给出正式文字之前，界面用这里的转写：每条注明来源，只转写来源里写明的含义，不新增解释。
-// 没有登记的键显示“未登记的状态（代码：xxx）”，不隐藏。E3 提供正式文字后删除这份文件，改读消息里的中文。
+// 结果里有一些字段只有代码。在 E3 给出正式文字之前，界面用这里的中文转写：每条注明来源，只转写来源里写明的含义，不新增解释。
+// 只有中文：英文界面同样显示这些中文原文并标明（界面不自己翻译业务含义）。
+// 没有登记的键显示“未登记的状态（代码：xxx）”，不隐藏。E3 提供正式文字后删除这份文件，改读消息里的文字。
 
 export interface PendingLabel {
   text: string;
@@ -45,7 +47,8 @@ export const REQUIREMENT_NEED: Table = {
   },
 };
 
-const PLAN_SOURCE = "configs/life/evaluation_product.yaml 里各模板的 label";
+const PLAN_SOURCE = "configs/life/evaluation_product.yaml 里各模板的 label（合成资料包）";
+const E3B_PLAN_SOURCE = "data/frozen/life/us-v1/pack/evaluation.json 的 spec.life_templates[].label（E3B 六城资料包）";
 /** 期末估值选中的参考方案（CloneResult.reference_plan）。 */
 export const REFERENCE_PLAN: Table = {
   p1_current_basic: { text: "现职 + 基本生活", source: PLAN_SOURCE },
@@ -54,6 +57,18 @@ export const REFERENCE_PLAN: Table = {
   p4_qualified_basic: { text: "改做已具资格的岗位 + 基本生活", source: PLAN_SOURCE },
   p5_qualified_device: { text: "改做已具资格的岗位 + 较舒适的生活 + 便利设备", source: PLAN_SOURCE },
   p6_qualified_service: { text: "改做已具资格的岗位 + 较舒适的生活 + 人工杂务服务", source: PLAN_SOURCE },
+  p1_basic: { text: "现职 + 基本生活", source: E3B_PLAN_SOURCE },
+  p2_device: { text: "现职 + 较舒适的生活 + 洗衣设备", source: E3B_PLAN_SOURCE },
+  p3_service: { text: "现职 + 较舒适的生活 + 人工杂务服务", source: E3B_PLAN_SOURCE },
+  p1_basic_car: { text: "现职 + 基本生活（用车）", source: E3B_PLAN_SOURCE },
+  p2_device_car: { text: "现职 + 较舒适的生活 + 洗衣设备（用车）", source: E3B_PLAN_SOURCE },
+  p3_service_car: { text: "现职 + 较舒适的生活 + 人工杂务服务（用车）", source: E3B_PLAN_SOURCE },
+  q1_basic: { text: "改做已具资格的岗位 + 基本生活", source: E3B_PLAN_SOURCE },
+  q2_device: { text: "改做已具资格的岗位 + 较舒适的生活 + 洗衣设备", source: E3B_PLAN_SOURCE },
+  q3_service: { text: "改做已具资格的岗位 + 较舒适的生活 + 人工杂务服务", source: E3B_PLAN_SOURCE },
+  q1_basic_car: { text: "改做已具资格的岗位 + 基本生活（用车）", source: E3B_PLAN_SOURCE },
+  q2_device_car: { text: "改做已具资格的岗位 + 较舒适的生活 + 洗衣设备（用车）", source: E3B_PLAN_SOURCE },
+  q3_service_car: { text: "改做已具资格的岗位 + 较舒适的生活 + 人工杂务服务（用车）", source: E3B_PLAN_SOURCE },
 };
 
 const TASK_SOURCE = "configs/life/synthetic_product.yaml 的 household_tasks[].description（冒号前的部分）";
@@ -72,7 +87,7 @@ export interface ResolvedLabel {
 
 /** 查一个键的临时显示文字；查不到就如实显示代码。 */
 export function pendingLabel(table: Table, key: string | null | undefined): ResolvedLabel {
-  if (key == null) return { text: "（没有）", pending: false, known: false };
+  if (key == null) return { text: "—", pending: false, known: false };
   const hit = table[key];
   if (hit) return { text: hit.text, pending: true, known: true, source: hit.source };
   return { text: `未登记的状态（代码：${key}）`, pending: false, known: false };

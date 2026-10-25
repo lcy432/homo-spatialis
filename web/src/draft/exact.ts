@@ -7,28 +7,25 @@ import Fraction from "fraction.js";
 const DECIMAL = /^(0|[1-9][0-9]*)(\.[0-9]+)?$/;
 const FRACTION = /^(0|[1-9][0-9]*)\/([1-9][0-9]*)$/;
 
+/** 解析失败只给原因代码（提示文字在界面字典里）；分数没约分时附上约分后的写法。 */
 export type PointsParse =
   | { ok: true; value: Fraction }
-  | { ok: false; reason: "not_a_number" | "too_many_decimals" | "fraction_not_canonical"; hint: string };
+  | { ok: false; reason: "not_a_number" | "too_many_decimals" | "fraction_not_canonical"; canonical: string };
 
 export function parsePoints(text: string, maxDecimals: number): PointsParse {
   const s = text.trim();
   if (DECIMAL.test(s)) {
     const decimals = s.includes(".") ? (s.split(".")[1] ?? "").length : 0;
-    if (decimals > maxDecimals) {
-      return { ok: false, reason: "too_many_decimals", hint: `最多 ${maxDecimals} 位小数（步长不是测量精度）` };
-    }
+    if (decimals > maxDecimals) return { ok: false, reason: "too_many_decimals", canonical: "" };
     return { ok: true, value: new Fraction(s) };
   }
   const m = FRACTION.exec(s);
   if (m) {
     const q = new Fraction(BigInt(m[1] as string), BigInt(m[2] as string));
-    if (canonical(q) !== s) {
-      return { ok: false, reason: "fraction_not_canonical", hint: `分数要写成约分后的样子，例如 ${canonical(q)}` };
-    }
+    if (canonical(q) !== s) return { ok: false, reason: "fraction_not_canonical", canonical: canonical(q) };
     return { ok: true, value: q };
   }
-  return { ok: false, reason: "not_a_number", hint: "写成数字（例如 30、16.5）或约分后的分数（例如 50/3）" };
+  return { ok: false, reason: "not_a_number", canonical: "" };
 }
 
 /** 规范写法：约分后的整数（"30"）或 分子/分母（"50/3"）。 */

@@ -1,0 +1,215 @@
+.chart {
+  margin: 0.5em 0 1em;
+}
+
+.chartLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2em;
+  font-size: 0.85rem;
+  margin: 0.4em 0;
+}
+
+.legendDot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--ink);
+  vertical-align: -1px;
+}
+
+.legendBand {
+  display: inline-block;
+  width: 28px;
+  height: 10px;
+  vertical-align: 0;
+  border: 1.5px solid var(--line-strong);
+  background: repeating-linear-gradient(135deg, transparent 0 3px, var(--line) 3px 5px);
+}
+
+.chartRows {
+  display: grid;
+  gap: 0.25em;
+}
+
+.axisRow,
+.chartRow {
+  display: grid;
+  grid-template-columns: minmax(6.5em, 32%) 1fr;
+  gap: 0.6em;
+  align-items: center;
+}
+
+.axis {
+  position: relative;
+  height: 1.4em;
+  border-bottom: 1.5px solid var(--line-strong);
+}
+
+.tick {
+  position: absolute;
+  bottom: 0.15em;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.rowLabel {
+  font-size: 0.9rem;
+  line-height: 1.3;
+}
+
+.track {
+  position: relative;
+  height: 30px;
+}
+
+.grid {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-left: 1px dashed var(--line);
+}
+
+.band {
+  position: absolute;
+  top: 9px;
+  height: 12px;
+  border: 1.5px solid var(--line-strong);
+  background: repeating-linear-gradient(135deg, transparent 0 3px, var(--line) 3px 5px);
+  border-radius: 2px;
+}
+
+.dot {
+  position: absolute;
+  top: 7px;
+  width: 16px;
+  height: 16px;
+  margin-left: -8px;
+  border-radius: 50%;
+  border: 2px solid var(--ink);
+  background: var(--accent);
+}
+
+.noMean {
+  position: absolute;
+  top: 5px;
+  left: 0;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+.legend {
+  margin: 0.5em 0;
+}
+
+.ramp {
+  height: 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 2px;
+}
+
+.rampLabels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.cem {
+  display: flex;
+  height: 26px;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 3px;
+  overflow: hidden;
+  font-size: 0.78rem;
+  margin: 0.3em 0;
+}
+
+.cem span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  overflow: hidden;
+  color: var(--ink);
+}
+
+.cemC {
+  background: color-mix(in oklab, var(--c-color) 30%, transparent);
+}
+
+.cemE {
+  background: repeating-linear-gradient(135deg, color-mix(in oklab, var(--e-color) 35%, transparent) 0 4px, transparent 4px 8px);
+}
+
+.cemM {
+  background: radial-gradient(color-mix(in oklab, var(--m-color) 60%, transparent) 1.2px, transparent 1.4px) 0 0 / 6px 6px;
+}
+
+.cityCards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.8em;
+}
+
+@media (min-width: 768px) {
+  .cityCards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink);
+  vertical-align: -2px;
+  margin-right: 0.3em;
+}
+
+.swatchNone {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 1.5px dashed var(--ink-soft);
+  vertical-align: -2px;
+  margin-right: 0.3em;
+}
+
+.months {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 2px;
+  max-width: 28rem;
+}
+
+.month {
+  height: 22px;
+  border: 1px solid var(--line);
+  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.monthOn {
+  background: color-mix(in oklab, var(--accent) 35%, transparent);
+  border-color: var(--accent);
+}
+
+.monthOff {
+  background: repeating-linear-gradient(135deg, transparent 0 3px, var(--line) 3px 4px);
+}
+
+.monthNone {
+  background: transparent;
+  color: var(--ink-soft);
+  border-style: dashed;
+}

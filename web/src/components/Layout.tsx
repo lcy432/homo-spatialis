@@ -1,17 +1,20 @@
+// 外框：顶部的标题、导航、语言与外观切换；正文；底部的会话说明。换页之后把焦点放到页面标题（从问题卡“去修改”过来时，
+// 放到对应的字段）。语言与外观的切换只改显示，不保存、不提交任何东西。
 import { type ReactNode, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, NavLink, Outlet, useLocation } from "react-router";
-import { useApiContext } from "../api/context";
-import { T } from "../copy/zh";
-import { useDraft } from "../draft/DraftContext";
-import { useFlow } from "../flow/FlowContext";
+import { useSession } from "../api/session";
+import { formatTime } from "../i18n/format";
+import { changeLocale, useLocale } from "../i18n/index";
+import { useMode } from "../ui/mode";
+import { STEP_SLUGS, type StepSlug } from "../draft/fieldSteps";
 import styles from "./Layout.module.css";
 
-/** 换页之后把焦点放到页面标题；从问题卡“去修改”过来时，把焦点放到对应的字段。 */
 function useFocusOnNavigate() {
   const location = useLocation();
   useEffect(() => {
     const field = (location.state as { focusField?: string } | null)?.focusField;
-    const t = window.setTimeout(() => {
+    const timer = window.setTimeout(() => {
       if (field) {
         const name = field.replace(".entries.", ".");
         const el =
@@ -24,111 +27,106 @@ function useFocusOnNavigate() {
       }
       document.getElementById("page-title")?.focus();
     }, 0);
-    return () => window.clearTimeout(t);
+    return () => window.clearTimeout(timer);
   }, [location.pathname, location.state]);
 }
 
+function Toggle<T extends string>({
+  label,
+  value,
+  options,
+  onChange,
+  name,
+}: {
+  label: string;
+  value: T;
+  options: { value: T; text: string; lang?: string }[];
+  onChange(v: T): void;
+  name: string;
+}) {
+  return (
+    <div className={styles.toggle} role="group" aria-label={label}>
+      <span className={styles.toggleLabel} aria-hidden="true">
+        {label}
+      </span>
+      {options.map((o) => (
+        <button
+          key={o.value}
+          type="button"
+          lang={o.lang}
+          data-toggle={`${name}-${o.value}`}
+          aria-pressed={value === o.value}
+          className={value === o.value ? styles.toggleOn : undefined}
+          onClick={() => onChange(o.value)}
+        >
+          {o.text}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function AppShell() {
-  const { scenario } = useApiContext();
-  const { caps, versionMismatch, clearDraft } = useDraft();
-  const { resetFlow } = useFlow();
+  const { t } = useTranslation();
+  const locale = useLocale();
+  const { mode, setMode } = useMode();
+  const { status, view } = useSession();
   useFocusOnNavigate();
-  const synthetic =
-    caps.meta.data_pack.status === "synthetic_fixture_only" || caps.cities.some((c) => c.data_status === "synthetic_fixture");
   return (
     <>
+      <a className="skip-link" href="#main">
+        {t("app.skip")}
+      </a>
       <header className={styles.header}>
         <div className={styles.headerInner}>
-          <div>
-            <p className={styles.brand}>{T.appTitle}</p>
-            <p className={styles.brandSub}>{T.appSubtitle}</p>
-          </div>
-          <p className={styles.scenario}>
-            样例：{scenario.title}
-            {import.meta.env.DEV ? (
-              <>
-                {" · "}
-                <Link className="tap" to="/dev/samples">{T.devLink}</Link>
-              </>
-            ) : null}
+          <p className={styles.brand}>
+            <Link to="/">{t("app.title")}</Link>
           </p>
+          {status === "active" ? (
+            <nav aria-label={t("app.nav.home")} className={styles.nav}>
+              <NavLink to="/" end>
+                {t("app.nav.home")}
+              </NavLink>
+              <NavLink to="/runs">{t("app.nav.runs")}</NavLink>
+              <NavLink to="/settings">{t("app.nav.settings")}</NavLink>
+            </nav>
+          ) : null}
+          <div className={styles.switches}>
+            <Toggle
+              name="lang"
+              label={t("app.lang.label")}
+              value={locale}
+              onChange={changeLocale}
+              options={[
+                { value: "zh", text: "中文", lang: "zh-CN" },
+                { value: "en", text: "English", lang: "en" },
+              ]}
+            />
+            <Toggle
+              name="mode"
+              label={t("app.mode.label")}
+              value={mode}
+              onChange={setMode}
+              options={[
+                { value: "paper", text: t("app.mode.paper") },
+                { value: "globe", text: t("app.mode.globe") },
+              ]}
+            />
+          </div>
         </div>
-        {synthetic ? (
-          <div className={styles.banner} role="note">
-            <div className={styles.bannerInner}>{T.sampleBanner}</div>
-          </div>
-        ) : null}
       </header>
-      <main className={styles.main}>
-        {versionMismatch ? (
-          <div className="warn" role="alert">
-            <p>{T.versionMismatch}</p>
-            <button
-              type="button"
-              onClick={() => {
-                clearDraft();
-                resetFlow();
-              }}
-            >
-              {T.versionMismatchAction}
-            </button>
-          </div>
-        ) : null}
+      <main id="main" className={styles.main}>
         <Outlet />
       </main>
       <footer className={styles.footer}>
         <div className={styles.footerInner}>
-          <p className="small muted">{T.tabOnly}</p>
-          <button
-            type="button"
-            onClick={() => {
-              if (window.confirm(T.clearConfirm)) {
-                clearDraft();
-                resetFlow();
-              }
-            }}
-          >
-            {T.clearAnswers}
-          </button>
+          <p className="small muted">{t("app.synthetic")}</p>
+          {status === "active" && view ? (
+            <p className="small muted">{t("session.expiresAt", { time: formatTime(view.session_expires_at, locale) })}</p>
+          ) : null}
         </div>
       </footer>
     </>
-  );
-}
-
-export function Stepper({ current }: { current: number }) {
-  return (
-    <nav aria-label={T.stepNav}>
-      <ol className={styles.stepper}>
-        {T.steps.map((s, i) => (
-          <li key={s}>
-            <NavLink to={`/fill/${i + 1}`} aria-current={current === i + 1 ? "step" : undefined}>
-              {i + 1} · {s}
-            </NavLink>
-          </li>
-        ))}
-      </ol>
-    </nav>
-  );
-}
-
-export function StepNav({ prev, next, extra }: { prev?: string; next?: string; extra?: ReactNode }) {
-  return (
-    <div className={styles.nav}>
-      {prev ? (
-        <Link className="button" to={prev}>
-          {T.prev}
-        </Link>
-      ) : (
-        <span />
-      )}
-      {extra}
-      {next ? (
-        <Link className="button primary" to={next}>
-          {T.next}
-        </Link>
-      ) : null}
-    </div>
   );
 }
 
@@ -137,5 +135,44 @@ export function PageTitle({ children }: { children: ReactNode }) {
     <h1 id="page-title" tabIndex={-1}>
       {children}
     </h1>
+  );
+}
+
+export function Stepper({ draftId, current }: { draftId: string; current: StepSlug }) {
+  const { t } = useTranslation();
+  return (
+    <nav aria-label={t("steps.nav")}>
+      <ol className={styles.stepper}>
+        {STEP_SLUGS.map((s, i) => (
+          <li key={s}>
+            <NavLink to={`/draft/${encodeURIComponent(draftId)}/${s}`} aria-current={current === s ? "step" : undefined}>
+              <span className={styles.stepNo}>{i + 1}</span> {t(`steps.${s}`)}
+            </NavLink>
+          </li>
+        ))}
+      </ol>
+    </nav>
+  );
+}
+
+export function StepNav({ draftId, prev, next, extra }: { draftId: string; prev?: StepSlug; next?: StepSlug; extra?: ReactNode }) {
+  const { t } = useTranslation();
+  const href = (s: StepSlug) => `/draft/${encodeURIComponent(draftId)}/${s}`;
+  return (
+    <div className={styles.stepNav}>
+      {prev ? (
+        <Link className="button" to={href(prev)}>
+          {t("common.prev")}
+        </Link>
+      ) : (
+        <span />
+      )}
+      {extra}
+      {next ? (
+        <Link className="button primary" to={href(next)}>
+          {t("common.next")}
+        </Link>
+      ) : null}
+    </div>
   );
 }

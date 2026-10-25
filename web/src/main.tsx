@@ -1,17 +1,25 @@
+import "@fontsource/patrick-hand/latin-400.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router";
 import { App } from "./App";
-import { ApiProvider } from "./api/context";
-import { DraftProvider } from "./draft/DraftContext";
-import { FlowProvider } from "./flow/FlowContext";
+import { SessionProvider, captureInviteFromLocation } from "./api/session";
+import { setupI18n } from "./i18n/index";
+import { dropLegacyTabStorage } from "./prefs";
+import { ModeProvider } from "./ui/mode";
 import "./styles/global.css";
 
-// 查询可以重试；提交从不自动重试（启动模拟必须走明确的提交操作和原幂等键）。
+// 专属链接的秘密：在任何渲染之前读进内存，立刻从地址栏与历史里抹掉。
+captureInviteFromLocation();
+// E5-A 离线原型的标签页存储（v2 样例答案）不并入服务身份。
+dropLegacyTabStorage();
+setupI18n();
+
+// 查询的重试由各查询自己决定（断线退避、429 按服务的等待秒数）；修改从不自动重试：提交、恢复、取消、删除都走明确的操作。
 const queryClient = new QueryClient({
   defaultOptions: {
-    queries: { refetchOnWindowFocus: false, retry: 2 },
+    queries: { refetchOnWindowFocus: false, retry: false },
     mutations: { retry: 0 },
   },
 });
@@ -22,15 +30,13 @@ if (!root) throw new Error("页面里没有 #root");
 createRoot(root).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <ApiProvider>
-        <DraftProvider>
-          <FlowProvider>
-            <BrowserRouter>
-              <App />
-            </BrowserRouter>
-          </FlowProvider>
-        </DraftProvider>
-      </ApiProvider>
+      <SessionProvider>
+        <ModeProvider>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </ModeProvider>
+      </SessionProvider>
     </QueryClientProvider>
   </StrictMode>,
 );

@@ -1,0 +1,126 @@
+.paperMap {
+  margin: 0.5em 0;
+}
+
+.svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  background: transparent;
+}
+
+.sphere {
+  fill: none;
+  stroke: var(--line-strong);
+  stroke-width: 1.2;
+}
+
+.graticule {
+  fill: none;
+  stroke: var(--grid-major);
+  stroke-width: 0.6;
+}
+
+/* 不支持的国家：只有轮廓（铅笔细线） */
+.country {
+  fill: none;
+  stroke: var(--line-strong);
+  stroke-width: 0.6;
+  stroke-linejoin: round;
+}
+
+.hatchLine {
+  stroke: var(--accent);
+  stroke-width: 1.4;
+  opacity: 0.35;
+}
+
+.supportedGroup {
+  cursor: pointer;
+  outline: none;
+}
+
+.supportedFill {
+  fill: url(#pencil-hatch);
+  stroke: none;
+}
+
+/* 双层描边：一层实线、一层半透明虚线，模仿铅笔重描；只是描边样式，不移动顶点 */
+.supportedLine {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.3;
+  stroke-linejoin: round;
+}
+
+.supportedLine2 {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 0.7;
+  stroke-dasharray: 7 3 2 3;
+  opacity: 0.45;
+}
+
+.supportedGroup[aria-pressed="true"] .supportedFill,
+.supportedGroup:hover .supportedFill {
+  fill: color-mix(in oklab, var(--accent) 22%, transparent);
+}
+
+.supportedGroup:focus-visible .supportedLine {
+  stroke: var(--focus-color);
+  stroke-width: 3;
+}
+
+.anchor,
+.anchorSelected {
+  fill: var(--surface-solid);
+  stroke: var(--ink);
+  stroke-width: 2;
+  cursor: pointer;
+}
+
+.anchorSelected {
+  fill: var(--accent);
+}
+
+.leader {
+  stroke: var(--ink-soft);
+  stroke-width: 1;
+}
+
+.label {
+  font-size: 15px;
+  fill: var(--ink);
+  paint-order: stroke;
+  stroke: var(--bg);
+  stroke-width: 3px;
+}
+
+.mapRow {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1em;
+}
+
+@media (min-width: 900px) {
+  .mapRow.multi {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.globeWrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  max-height: 70vh;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: #070b10;
+}
+
+.globeToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4em;
+  margin: 0.4em 0;
+}

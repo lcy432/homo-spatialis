@@ -1,4 +1,4 @@
-// npm run contract:gen —— 从 contracts/product/v2/*.schema.json 生成 web/src/contract/generated/contracts.ts。
+// npm run contract:gen —— 从 contracts/product/v3/*.schema.json 生成 web/src/contract/generated/contracts.ts。
 // 先核对 index.json 的哈希：哈希对不上说明 schema 被改过却没有重新导出，先找 E3，不生成。
 import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";

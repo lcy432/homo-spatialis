@@ -1,6 +1,6 @@
-// 契约层的共用函数：读取 E3 导出的共享结构（contracts/product/v2/），核对 index.json 里的哈希，生成 TypeScript 类型。
+// 契约层的共用函数：读取 E3 导出的共享结构（contracts/product/v3/），核对 index.json 里的哈希，生成 TypeScript 类型。
 //
-// 共享结构由 E3 唯一维护（src/common/product_contracts.py → contracts/product/v2/）。这里只读、不改；前端的类型全部由这里生成，
+// 共享结构由 E3 唯一维护（src/common/product_contracts.py → contracts/product/v3/）。这里只读、不改；前端的类型全部由这里生成，
 // 不手写第二套。导出的 schema 没写 $schema、引用是 #/$defs/…（pydantic 按 JSON Schema 2020-12 生成）。
 import { createHash } from "node:crypto";
 import { readdirSync, readFileSync } from "node:fs";
@@ -9,7 +9,12 @@ import { fileURLToPath } from "node:url";
 import { compile } from "json-schema-to-typescript";
 
 export const WEB_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-export const DEFAULT_CONTRACT_DIR = path.resolve(WEB_ROOT, "..", "contracts", "product", "v2");
+/** 界面读的共享结构目录。E3 换目录（例如 v4）时只改这一处与 src/contract/ 的两处 import.meta.glob。 */
+export const CONTRACT_SUBDIR = "v3";
+/** E5_CONTRACTS_DIR 指向另一份共享结构时（例如干净工作树），核对与生成都读它（与 vite.config.ts 的别名一致）。 */
+export const DEFAULT_CONTRACT_DIR = process.env.E5_CONTRACTS_DIR
+  ? path.resolve(process.env.E5_CONTRACTS_DIR)
+  : path.resolve(WEB_ROOT, "..", "contracts", "product", CONTRACT_SUBDIR);
 export const GENERATED_FILE = path.join(WEB_ROOT, "src", "contract", "generated", "contracts.ts");
 
 export function contractDirFromArgs(argv = process.argv.slice(2)) {
@@ -85,7 +90,7 @@ function stripNestedTitles(node, isDefRoot) {
   return out;
 }
 
-/** 把 13 份 schema 合成一份：同名的 $defs 必须逐字相同（它们来自同一个 pydantic 类），否则报错，不挑一个用。 */
+/** 把全部 schema 合成一份：同名的 $defs 必须逐字相同（它们来自同一个 pydantic 类），否则报错，不挑一个用。 */
 export function combinedSchema(dir) {
   const index = readIndex(dir);
   const defs = {};
@@ -108,7 +113,7 @@ export function combinedSchema(dir) {
   );
   const root = {
     title: "ProductContracts",
-    description: "全部 13 份共享消息（只为生成类型而合成的根，不是一份真实消息）",
+    description: `全部 ${names.length} 份共享消息（只为生成类型而合成的根，不是一份真实消息）`,
     type: "object",
     additionalProperties: false,
     properties: Object.fromEntries(names.map((n) => [n, { $ref: `#/$defs/${n}` }])),
@@ -126,7 +131,7 @@ export async function generateSource(dir) {
   const banner = [
     "/* eslint-disable */",
     "/**",
-    ` * 由 web/scripts/contract-gen.mjs 从 contracts/product/v2/*.schema.json 生成（结构版本 ${index.schema_version}）。`,
+    ` * 由 web/scripts/contract-gen.mjs 从 contracts/product/${CONTRACT_SUBDIR}/*.schema.json 生成（结构版本 ${index.schema_version}）。`,
     " * 不要手改：共享结构由 E3 维护（src/common/product_contracts.py），结构变了就重新运行 npm run contract:gen。",
     " */",
   ].join("\n");

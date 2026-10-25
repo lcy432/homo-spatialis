@@ -9,7 +9,8 @@ import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, it } from "vitest";
 
 const web = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const source = path.resolve(web, "..", "contracts", "product", "v2");
+// 与 scripts/contract-lib.mjs 的默认目录一致（E5_CONTRACTS_DIR 指向另一份共享结构时用它）
+const source = process.env.E5_CONTRACTS_DIR ? path.resolve(process.env.E5_CONTRACTS_DIR) : path.resolve(web, "..", "contracts", "product", "v3");
 let dir = "";
 
 function runCheck(contracts: string): void {

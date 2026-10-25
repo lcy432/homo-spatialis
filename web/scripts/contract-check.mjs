@@ -4,7 +4,7 @@
 // 可以用 --contracts <目录> 指向一份临时副本（验收“改一个字节就失败”时用，不改仓库里的 schema）。
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { GENERATED_FILE, contractDirFromArgs, generateSource, hashProblems } from "./contract-lib.mjs";
+import { GENERATED_FILE, contractDirFromArgs, generateSource, hashProblems, readIndex } from "./contract-lib.mjs";
 
 const dir = contractDirFromArgs();
 const problems = hashProblems(dir);
@@ -25,4 +25,5 @@ if (problems.length) {
   for (const p of problems) console.error(`  - ${p}`);
   process.exit(1);
 }
-console.log(`共享结构核对通过：${path.relative(process.cwd(), dir) || dir}（13 份 schema 的哈希与 index.json 一致，生成的类型是最新的）`);
+const count = Object.keys(readIndex(dir).messages).length;
+console.log(`共享结构核对通过：${path.relative(process.cwd(), dir) || dir}（${count} 份 schema 的哈希与 index.json 一致，生成的类型是最新的）`);

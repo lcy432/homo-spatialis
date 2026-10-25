@@ -6,7 +6,7 @@
   position: sticky;
   top: 0;
   z-index: 2;
-  background: var(--surface);
+  background: var(--surface-solid);
   border: 2px solid var(--accent);
   border-radius: var(--radius);
   padding: 0.5em 0.8em;

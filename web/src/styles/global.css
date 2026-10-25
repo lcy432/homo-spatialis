@@ -1,38 +1,95 @@
-/* 全局样式：系统字体、16px 起步的字号、看得见的焦点、44px 的触控目标。颜色只做辅助，含义一律另有文字。 */
-:root {
-  --bg: #f7f7f5;
-  --surface: #ffffff;
-  --text: #1d1f23;
-  --muted: #555a63;
-  --line: #d7d9de;
-  --accent: #1d5bb8;
-  --accent-soft: #e7eefb;
-  --warn-bg: #fff6df;
-  --warn-line: #d7a21f;
-  --error-bg: #fdecec;
-  --error-line: #c43c3c;
-  --info-bg: #eef3f8;
-  --c-color: #2f7d4f;
-  --e-color: #b4492f;
-  --m-color: #8a6a00;
-  --radius: 10px;
-  --focus: 3px solid #f0a500;
-  font-family: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC",
-    sans-serif;
-  font-size: 16px;
-  line-height: 1.6;
-  color: var(--text);
-  background: var(--bg);
+/*
+ * 全局样式。两套外观共用同一套组件与版面，只换颜色变量与标题字体：
+ * - 稿纸（默认，html[data-mode="paper"]）：暖白旧式算术稿纸、很淡的方格、石墨色主线、少量彩铅强调色；手写感只给标题与注释。
+ * - 地球（html[data-mode="globe"]）：深蓝灰的现代技术面板，克制的青色强调。
+ * 纸纹只是页面背景，绝不加在地图、图表、数据点上（不改变面积、位置、坐标、柱长或月历标记）。
+ * 系统字体、16px 起步、看得见的焦点、44px 的触控目标；颜色只做辅助，含义一律另有文字。
+ */
+:root,
+html[data-mode="paper"] {
+  --bg: #f5f0e2;
+  --grid: rgba(110, 120, 140, 0.11);
+  --grid-major: rgba(110, 120, 140, 0.16);
+  --surface: rgba(255, 252, 243, 0.94);
+  --surface-solid: #fffcf3;
+  --ink: #26241f;
+  --ink-soft: #5b564c;
+  --line: #b9b19e;
+  --line-strong: #6f685a;
+  --accent: #2c5d8c;
+  --accent-ink: #ffffff;
+  --accent-soft: #e2ebf3;
+  --accent-2: #a2522b;
+  --warn-bg: #fbefd2;
+  --warn-line: #b88324;
+  --error-bg: #f9e1d9;
+  --error-line: #a3361f;
+  --note-bg: #e9eff3;
+  --note-line: #5b7c99;
+  --chip-bg: #efe9da;
+  --c-color: #2f6b45;
+  --e-color: #a2522b;
+  --m-color: #7a6a1c;
+  --focus-color: #c2410c;
+  --radius: 6px;
+  --font-body: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC",
+    "Noto Sans CJK SC", sans-serif;
+  --font-hand: "Patrick Hand", "Kaiti SC", "STKaiti", "KaiTi", "楷体", "Kaiti", serif;
+  --font-num: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --page-bg: linear-gradient(var(--grid-major) 1px, transparent 1px) 0 0 / 120px 120px,
+    linear-gradient(90deg, var(--grid-major) 1px, transparent 1px) 0 0 / 120px 120px,
+    linear-gradient(var(--grid) 1px, transparent 1px) 0 0 / 24px 24px,
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0 / 24px 24px, var(--bg);
+  color-scheme: light;
+}
+
+html[data-mode="globe"] {
+  --bg: #0d151e;
+  --grid: transparent;
+  --grid-major: transparent;
+  --surface: rgba(19, 30, 42, 0.94);
+  --surface-solid: #13202d;
+  --ink: #e4eaf0;
+  --ink-soft: #a8b5c2;
+  --line: #34465a;
+  --line-strong: #6f859b;
+  --accent: #62bfd6;
+  --accent-ink: #0d151e;
+  --accent-soft: #173445;
+  --accent-2: #e0a15e;
+  --warn-bg: #3a2f17;
+  --warn-line: #d9a441;
+  --error-bg: #3d1f1b;
+  --error-line: #f08a6e;
+  --note-bg: #16283a;
+  --note-line: #6aa3c8;
+  --chip-bg: #1c2d3d;
+  --c-color: #7fcf9a;
+  --e-color: #f0a37a;
+  --m-color: #e2cc6a;
+  --focus-color: #ffd166;
+  --font-hand: var(--font-body);
+  --page-bg: radial-gradient(ellipse at 50% -20%, #1b2a3a 0%, var(--bg) 60%) fixed, var(--bg);
+  color-scheme: dark;
 }
 
 * {
   box-sizing: border-box;
 }
 
+html {
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ink);
+  background: var(--bg);
+}
+
 body {
   margin: 0;
-  background: var(--bg);
-  color: var(--text);
+  min-height: 100vh;
+  color: var(--ink);
+  background: var(--page-bg);
   overflow-wrap: anywhere;
 }
 
@@ -45,13 +102,22 @@ h4 {
 }
 
 h1 {
-  font-size: 1.5rem;
+  font-family: var(--font-hand);
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
 }
+
 h2 {
-  font-size: 1.25rem;
+  font-size: 1.22rem;
 }
+
 h3 {
-  font-size: 1.08rem;
+  font-size: 1.06rem;
+}
+
+.hand {
+  font-family: var(--font-hand);
 }
 
 p {
@@ -63,7 +129,7 @@ a {
 }
 
 :focus-visible {
-  outline: var(--focus);
+  outline: 3px solid var(--focus-color);
   outline-offset: 2px;
 }
 
@@ -72,15 +138,29 @@ h1[tabindex="-1"]:focus {
   outline: none;
 }
 
+.skip-link {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  z-index: 10;
+  background: var(--surface-solid);
+  padding: 0.6em 1em;
+}
+
+.skip-link:focus {
+  left: 0.5rem;
+  top: 0.5rem;
+}
+
 button,
 .button {
   font: inherit;
   min-height: 44px;
   min-width: 44px;
   padding: 0.45em 1em;
-  border-radius: 8px;
-  border: 1px solid var(--accent);
-  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1.5px solid var(--accent);
+  background: var(--surface-solid);
   color: var(--accent);
   cursor: pointer;
   text-decoration: none;
@@ -93,13 +173,24 @@ button,
 button.primary,
 .button.primary {
   background: var(--accent);
-  color: #fff;
+  color: var(--accent-ink);
 }
 
-button:disabled {
+button.danger {
+  border-color: var(--error-line);
+  color: var(--error-line);
+}
+
+button.danger.primary {
+  background: var(--error-line);
+  color: var(--surface-solid);
+}
+
+button:disabled,
+button[aria-disabled="true"] {
   border-color: var(--line);
-  background: #eceef1;
-  color: #8a8f97;
+  background: var(--chip-bg);
+  color: var(--ink-soft);
   cursor: not-allowed;
 }
 
@@ -121,16 +212,16 @@ select {
   font-size: 16px;
   min-height: 44px;
   padding: 0.4em 0.6em;
-  border: 1px solid #9aa0a8;
-  border-radius: 8px;
-  background: #fff;
-  color: var(--text);
+  border: 1.5px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface-solid);
+  color: var(--ink);
   max-width: 100%;
 }
 
 textarea {
   width: 100%;
-  min-height: 7em;
+  min-height: 6em;
 }
 
 label {
@@ -159,7 +250,7 @@ legend {
   min-height: 44px;
   padding: 0.25em 0.5em;
   margin: 0.15em 0;
-  border-radius: 8px;
+  border-radius: var(--radius);
   font-weight: 400;
   cursor: pointer;
 }
@@ -174,6 +265,7 @@ legend {
   height: 22px;
   margin: 0;
   flex: none;
+  accent-color: var(--accent);
 }
 
 .choice.top {
@@ -187,14 +279,13 @@ legend {
   margin-top: 0.15em;
 }
 
-/* 折叠区的标题也是要点的东西：至少 44 像素高。 */
 summary {
   min-height: 44px;
   padding-block: 0.55em;
   cursor: pointer;
 }
 
-/* 单独成行的文字链接（“修改”“看这段生活”“返回……”）：点击区域至少 44 像素高。段落里的行内链接不受影响。 */
+/* 单独成行的文字链接：点击区域至少 44 像素高。段落里的行内链接不受影响。 */
 .tap {
   display: inline-flex;
   align-items: center;
@@ -202,50 +293,63 @@ summary {
   padding: 0 0.15em;
 }
 
-.page-status {
-  max-width: 48rem;
-  margin: 2rem auto;
-  padding: 0 1rem;
-}
-
 .card {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  padding: 1em;
+  padding: 1em 1.1em;
   margin: 1em 0;
 }
 
+html[data-mode="paper"] .card {
+  box-shadow: 1px 2px 0 rgba(80, 70, 50, 0.08);
+}
+
+html[data-mode="globe"] .card {
+  box-shadow: 0 0 0 1px rgba(98, 191, 214, 0.06), 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.card-title {
+  margin-top: 0;
+}
+
 .muted {
-  color: var(--muted);
+  color: var(--ink-soft);
 }
 
 .small {
-  font-size: 0.92rem;
+  font-size: 0.9rem;
 }
 
-.note {
-  background: var(--info-bg);
-  border-left: 4px solid var(--accent);
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+.box {
   padding: 0.6em 0.9em;
-  border-radius: 6px;
+  border-radius: var(--radius);
   margin: 0.8em 0;
+  border-left: 4px solid;
 }
 
-.warn {
+.box.note {
+  background: var(--note-bg);
+  border-color: var(--note-line);
+}
+
+.box.warn {
   background: var(--warn-bg);
-  border-left: 4px solid var(--warn-line);
-  padding: 0.6em 0.9em;
-  border-radius: 6px;
-  margin: 0.8em 0;
+  border-color: var(--warn-line);
 }
 
-.error-box {
+.box.error {
   background: var(--error-bg);
-  border-left: 4px solid var(--error-line);
-  padding: 0.6em 0.9em;
-  border-radius: 6px;
-  margin: 0.8em 0;
+  border-color: var(--error-line);
+}
+
+.box.ok {
+  background: var(--accent-soft);
+  border-color: var(--c-color);
 }
 
 .chips {
@@ -263,19 +367,35 @@ summary {
   border: 1px solid var(--line);
   border-radius: 999px;
   padding: 0.05em 0.6em;
-  background: #f2f4f7;
+  background: var(--chip-bg);
 }
 
 .chip.accent {
   background: var(--accent-soft);
-  border-color: #b8cbee;
+  border-color: var(--accent);
 }
 
 .chip.warn {
   background: var(--warn-bg);
   border-color: var(--warn-line);
-  margin: 0;
-  padding: 0.05em 0.6em;
+}
+
+/* 英文界面里的中文原文（E3 的业务文字）：按中文读，左边一道细线提示“这是原文”。 */
+.biz-zh {
+  font-family: var(--font-body);
+}
+
+p.biz-zh,
+li.biz-zh,
+div.biz-zh {
+  border-left: 2px dotted var(--line-strong);
+  padding-left: 0.5em;
+}
+
+.biz-notice {
+  color: var(--ink-soft);
+  font-style: italic;
+  margin-top: 0;
 }
 
 .visually-hidden {
@@ -301,6 +421,18 @@ summary {
   margin-top: 0.6em;
 }
 
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1em;
+}
+
+@media (min-width: 768px) {
+  .two-col {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 dl.facts {
   display: grid;
   grid-template-columns: minmax(7em, max-content) 1fr;
@@ -309,7 +441,7 @@ dl.facts {
 }
 
 dl.facts dt {
-  color: var(--muted);
+  color: var(--ink-soft);
 }
 
 dl.facts dd {
@@ -325,26 +457,56 @@ table {
   max-width: 100%;
 }
 
+/* 正文为了长英文不撑破页面允许“任意位置断行”；表格里不这样做，否则窄屏上 0.5602 会被拆成一字一行。
+   数字不断行；放不下的表格在外框里横向滚动（外框可以用键盘聚焦）。 */
 th,
 td {
   border: 1px solid var(--line);
-  padding: 0.25em 0.5em;
-  text-align: center;
-  font-size: 0.92rem;
+  padding: 0.3em 0.55em;
+  text-align: left;
+  font-size: 0.9rem;
+  vertical-align: top;
+  overflow-wrap: normal;
+}
+
+th {
+  background: var(--chip-bg);
+}
+
+td.num,
+th.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+td.num {
+  white-space: nowrap;
+}
+
+table[data-table="cities"] {
+  min-width: 40rem;
 }
 
 dialog {
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-strong);
   border-radius: var(--radius);
   padding: 1.2em;
-  max-width: min(32rem, calc(100vw - 2rem));
+  background: var(--surface-solid);
+  color: var(--ink);
+  max-width: min(34rem, calc(100vw - 2rem));
   /* 放大到 200% 或屏幕很矮时，对话框里的内容可以滚动，不会被截掉 */
   max-height: calc(100vh - 2rem);
   overflow: auto;
 }
 
 dialog::backdrop {
-  background: rgba(20, 24, 30, 0.45);
+  background: rgba(20, 24, 30, 0.5);
+}
+
+ul.plain {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {

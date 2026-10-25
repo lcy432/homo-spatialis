@@ -1,12 +1,12 @@
 .header {
   background: var(--surface);
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1.5px solid var(--line-strong);
 }
 
 .headerInner,
 .main,
 .footerInner {
-  max-width: 60rem;
+  max-width: 72rem;
   margin: 0 auto;
   padding: 0 1rem;
 }
@@ -16,37 +16,74 @@
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  gap: 0.4em 1em;
-  padding-top: 0.6rem;
-  padding-bottom: 0.6rem;
+  gap: 0.4em 1.2em;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
 }
 
 .brand {
   margin: 0;
-  font-size: 1.05rem;
+  font-family: var(--font-hand);
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.brand a {
+  color: var(--ink);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2em 0.8em;
+}
+
+.nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 0.3em;
+  color: var(--ink);
+}
+
+.nav a[aria-current="page"] {
   font-weight: 700;
+  text-decoration-thickness: 2px;
 }
 
-.brandSub {
-  margin: 0;
+.switches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4em 1em;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25em;
+}
+
+.toggleLabel {
   font-size: 0.85rem;
-  color: var(--muted);
+  color: var(--ink-soft);
+  margin-right: 0.2em;
 }
 
-.banner {
-  background: #fff1c9;
-  border-bottom: 2px solid var(--warn-line);
-  padding: 0.5rem 1rem;
-  font-size: 0.95rem;
+.toggle button {
+  min-height: 44px;
+  padding: 0.2em 0.7em;
+  border-color: var(--line-strong);
+  color: var(--ink);
 }
 
-.bannerInner {
-  max-width: 60rem;
-  margin: 0 auto;
-}
-
-.scenario {
-  font-size: 0.85rem;
+.toggle button.toggleOn {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
 }
 
 .main {
@@ -56,7 +93,7 @@
 .footer {
   border-top: 1px solid var(--line);
   background: var(--surface);
-  padding: 0.8rem 0;
+  padding: 0.6rem 0;
 }
 
 .stepper {
@@ -72,11 +109,12 @@
   display: inline-flex;
   min-height: 44px;
   align-items: center;
-  padding: 0.2em 0.7em;
+  gap: 0.35em;
+  padding: 0.2em 0.75em;
   border-radius: 999px;
   border: 1px solid var(--line);
   text-decoration: none;
-  color: var(--text);
+  color: var(--ink);
   background: var(--surface);
   font-size: 0.92rem;
 }
@@ -87,7 +125,12 @@
   font-weight: 700;
 }
 
-.nav {
+.stepNo {
+  font-family: var(--font-hand);
+  font-weight: 700;
+}
+
+.stepNav {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;

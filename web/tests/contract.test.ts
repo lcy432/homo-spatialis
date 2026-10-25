@@ -4,13 +4,17 @@ import { CONTRACT_INDEX, MESSAGE_NAMES } from "../src/contract/schemas";
 import { checkMessage } from "../src/contract/validate";
 
 describe("共享结构与公共样例", () => {
-  it("读到的是 v2 结构的 13 份消息", () => {
-    expect(CONTRACT_INDEX.schema_version).toBe("e3a-product-schema-v2");
-    expect(MESSAGE_NAMES).toHaveLength(13);
+  it("读到的是当前的共享结构（contracts/product/v3）", () => {
+    expect(CONTRACT_INDEX.schema_version).toMatch(/^e3a-product-schema-v3/);
+    expect(MESSAGE_NAMES).toEqual(Object.keys(CONTRACT_INDEX.messages).sort());
+    expect(MESSAGE_NAMES).toContain("SessionView");
+    expect(MESSAGE_NAMES).toContain("RunIntentView");
   });
 
-  it("39 份样例都在", () => {
-    expect(SAMPLE_IDS).toHaveLength(39);
+  it("样例都读到了（含托管服务的样例）", () => {
+    expect(SAMPLE_IDS.length).toBeGreaterThan(50);
+    expect(SAMPLE_IDS).toContain("62");
+    expect(SAMPLE_IDS).toContain("104");
   });
 
   it.each(SAMPLE_IDS)("样例 %s 按它声明的消息类型校验通过", (id) => {

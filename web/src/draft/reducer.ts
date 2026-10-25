@@ -1,14 +1,14 @@
-// 草稿的状态更新函数。草稿本身就是 UserInputDraft；另外只多记三样共享结构装不下的东西：年龄输入框里的原文（契约里年龄是整数）、
-// 下一个属性偏好编号、撤销记录。
+// 草稿的状态更新函数。草稿本身就是共享结构里的 UserInputDraft；另外只多记三样共享结构装不下的东西：年龄输入框里的原文
+// （契约里年龄是整数）、下一个属性偏好编号、撤销记录。
 //
 // 规则：
 // * 四种答案状态严格分开：未答 = 没有这一项；明确 0 = provided "0"；无所谓 = indifferent；暂不确定 = unsure。
 // * 用户亲手输入的文字原样保存；按钮与挪分算出来的值才由这里写（能写成最多两位小数就写小数，否则写规范分数）。
 // * 超过 100 不拦、不自动扣；挪分只按用户点选的那一项。
 // * 撤销以“用户的一次操作”为一步：连续在同一个输入框里打字合成一步。
-// * revision 只增不减（撤销也换新编号），同一份草稿编号下不会出现两份内容不同、编号相同的草稿。
-import { Fraction, formatComputed, parsePoints } from "./exact";
+// * 草稿编号、修订号与 meta 归服务器：这里从不改它们（保存时由自动保存写上当时的服务器修订号）。
 import type { AllocationGroup, AttributePreferenceAnswer, PointEntry, UserInputDraft } from "../contract/types";
+import { Fraction, formatComputed, parsePoints } from "./exact";
 
 export interface DraftSnapshot {
   draft: UserInputDraft;
@@ -21,19 +21,17 @@ export interface DraftState extends DraftSnapshot {
   past: DraftSnapshot[];
   future: DraftSnapshot[];
   coalesceKey: string | null;
-  revisionCounter: number;
-  /** 本标签页自己的草稿编号：改动载入的样例答案之后，草稿换成这个编号（它已经不是样例了）。 */
-  ownDraftId: string;
-  /** 载入的是哪份样例草稿（没有载入就是 null）。 */
-  sampleId: string | null;
-  /** 载入样例之后还没有改过。 */
-  pristineSample: boolean;
 }
 
 export type HealthChoice = "agree" | "disagree" | "no_clear_tendency" | "unsure";
+export type LeisureState = NonNullable<NonNullable<UserInputDraft["leisure_interest"]>["state"]>;
+export type TasteState = NonNullable<NonNullable<UserInputDraft["taste"]>["state"]>;
+type InterestField = "leisure_interest" | "taste";
 
 export type ContentAction =
   | { type: "cities/toggle"; cityRef: string; selected: boolean }
+  | { type: "cities/set"; cityRefs: string[] }
+  | { type: "language/set"; language: string }
   | { type: "occupation/text"; text: string }
   | { type: "occupation/select"; candidateId: string | null }
   | { type: "age/text"; text: string }
@@ -46,34 +44,52 @@ export type ContentAction =
   | { type: "points/equalSplit"; group: AllocationGroup }
   | { type: "points/toManual"; group: AllocationGroup; keys: string[]; value: string }
   | { type: "health/choice"; questionId: string; choice: HealthChoice | null }
+  | { type: "interest/state"; field: InterestField; state: LeisureState | TasteState }
+  | { type: "interest/text"; field: InterestField; text: string }
+  | { type: "interest/select"; field: InterestField; key: string; selected: boolean }
   | { type: "freeText/text"; text: string }
   | { type: "ability/set"; abilityId: string; state: "provided" | "unsure" | null }
   | { type: "hard/set"; optionId: string; enabled: boolean; value: number | null }
   | { type: "attr/add"; kind: string; need: string; rawText: string; asHardRequirement: boolean }
-  | { type: "attr/update"; preferenceId: string; patch: Partial<Pick<AttributePreferenceAnswer, "kind" | "need" | "raw_text" | "as_hard_requirement">> }
-  | { type: "attr/remove"; preferenceId: string };
+  | {
+      type: "attr/update";
+      preferenceId: string;
+      patch: Partial<Pick<AttributePreferenceAnswer, "kind" | "need" | "raw_text" | "as_hard_requirement">>;
+    }
+  | { type: "attr/remove"; preferenceId: string }
+  /**
+   * 问卷或词表换了版本：用户读过新说明、明确勾选“已按新说明重新确认”之后，才把草稿的版本信息换成当前能力清单的版本。
+   * 只有这一个动作会改 meta（其余动作都不碰）；答案本身不变，之后照常重新审阅、重新确认。
+   */
+  | { type: "meta/adopt"; meta: UserInputDraft["meta"] };
 
 export type DraftAction =
   | ContentAction
   | { type: "history/undo" }
   | { type: "history/redo" }
   | { type: "history/break" }
-  | { type: "draft/load"; draft: UserInputDraft; sampleId: string | null; ageText?: string; ownDraftId?: string };
+  /** 载入服务器上的一版（打开草稿、冲突时改用服务器版本）：清空撤销记录。 */
+  | { type: "draft/load"; draft: UserInputDraft };
 
 const HISTORY_LIMIT = 200;
 
-export function initialDraftState(draft: UserInputDraft, ownDraftId: string): DraftState {
+function nextPrefIdOf(d: UserInputDraft): number {
+  let max = 0;
+  for (const p of d.attribute_preferences ?? []) {
+    const m = /^pref\.([0-9]+)$/.exec(p.preference_id);
+    if (m) max = Math.max(max, Number(m[1]));
+  }
+  return max + 1;
+}
+
+export function initialDraftState(draft: UserInputDraft): DraftState {
   return {
     draft,
     ageText: draft.age.value != null ? String(draft.age.value) : "",
-    nextPrefId: 1,
+    nextPrefId: nextPrefIdOf(draft),
     past: [],
     future: [],
     coalesceKey: null,
-    revisionCounter: draft.revision,
-    ownDraftId,
-    sampleId: null,
-    pristineSample: false,
   };
 }
 
@@ -91,6 +107,8 @@ function coalesceOf(a: ContentAction): string | null {
       return "cash";
     case "points/text":
       return `points.${a.group}.${a.key}`;
+    case "interest/text":
+      return `${a.field}.text`;
     case "freeText/text":
       return "free_text";
     case "hard/set":
@@ -106,7 +124,12 @@ function entriesOf(d: UserInputDraft, g: AllocationGroup): Record<string, PointE
   return { ...(d[g].entries ?? {}) };
 }
 
-function withGroup(d: UserInputDraft, g: AllocationGroup, mode: "manual" | "equal_split" | null, entries: Record<string, PointEntry>): UserInputDraft {
+function withGroup(
+  d: UserInputDraft,
+  g: AllocationGroup,
+  mode: "manual" | "equal_split" | null,
+  entries: Record<string, PointEntry>,
+): UserInputDraft {
   return { ...d, [g]: { mode, entries } };
 }
 
@@ -116,10 +139,15 @@ function providedValue(e: PointEntry | undefined, maxDecimals: number): Fraction
   return p.ok ? p.value : null;
 }
 
-/** 按钮与挪分的起点：没有数字的项（未答、无所谓、暂不确定）从 0 开始——这是用户在这一行上的直接操作；写法不对的项返回 null，不替用户改。 */
+/** 按钮与挪分的起点：没有数字的项（未答、无所谓、暂不确定）从 0 开始；写法不对的项返回 null，不替用户改。 */
 function startingValue(e: PointEntry | undefined, maxDecimals: number): Fraction | null {
   if (!e || e.state !== "provided") return new Fraction(0);
   return providedValue(e, maxDecimals);
+}
+
+function interestOf(d: UserInputDraft, field: InterestField): { state: string; text: string | null; selected: string[] } {
+  const cur = d[field];
+  return { state: cur?.state ?? "unanswered", text: cur?.text ?? null, selected: [...(cur?.selected ?? [])] };
 }
 
 const AGE_INT = /^[0-9]{1,3}$/;
@@ -130,9 +158,19 @@ function applyContent(s: DraftSnapshot, a: ContentAction): DraftSnapshot | null 
   switch (a.type) {
     case "cities/toggle": {
       const refs = d.cities.city_refs ?? [];
-      const next = a.selected ? (refs.includes(a.cityRef) ? refs : [...refs, a.cityRef]) : refs.filter((r) => r !== a.cityRef);
+      const next = a.selected
+        ? refs.includes(a.cityRef)
+          ? refs
+          : [...refs, a.cityRef]
+        : refs.filter((r) => r !== a.cityRef);
       return { ...s, draft: { ...d, cities: { state: next.length ? "provided" : "unanswered", city_refs: next } } };
     }
+    case "cities/set": {
+      const next = [...new Set(a.cityRefs)];
+      return { ...s, draft: { ...d, cities: { state: next.length ? "provided" : "unanswered", city_refs: next } } };
+    }
+    case "language/set":
+      return { ...s, draft: { ...d, occupation: { ...d.occupation, language: a.language } } };
     case "occupation/text": {
       const text = a.text;
       const changed = text !== (d.occupation.raw_text ?? "");
@@ -191,7 +229,7 @@ function applyContent(s: DraftSnapshot, a: ContentAction): DraftSnapshot | null 
       if (d[a.group].mode === "equal_split") return null;
       const entries = entriesOf(d, a.group);
       const cur = startingValue(entries[a.key], a.maxDecimals);
-      if (cur === null) return null; // 写法不对的项，不替用户改
+      if (cur === null) return null;
       let next = cur.add(a.delta);
       if (next.s < 0n) next = new Fraction(0);
       entries[a.key] = { state: "provided", value_text: formatComputed(next, a.maxDecimals) };
@@ -237,6 +275,26 @@ function applyContent(s: DraftSnapshot, a: ContentAction): DraftSnapshot | null 
       else items.push(item);
       return { ...s, draft: { ...d, health: { ...d.health, items } } };
     }
+    case "interest/state": {
+      const cur = interestOf(d, a.field);
+      // 原文在任何作答状态下都保留；离开“用文字描述”时不再带选中的类别（撤销可以找回）
+      const selected = a.state === "described" ? cur.selected : [];
+      return { ...s, draft: { ...d, [a.field]: { state: a.state, text: cur.text, selected } } };
+    }
+    case "interest/text": {
+      const cur = interestOf(d, a.field);
+      const text = a.text === "" ? null : a.text;
+      // 写了文字就是“用文字描述”；空白不会被当成“通用评价”
+      const state = text && cur.state === "unanswered" ? "described" : cur.state;
+      return { ...s, draft: { ...d, [a.field]: { state, text, selected: cur.selected } } };
+    }
+    case "interest/select": {
+      const cur = interestOf(d, a.field);
+      const has = cur.selected.includes(a.key);
+      if (has === a.selected) return null;
+      const selected = a.selected ? [...cur.selected, a.key] : cur.selected.filter((k) => k !== a.key);
+      return { ...s, draft: { ...d, [a.field]: { state: "described", text: cur.text, selected } } };
+    }
     case "freeText/text":
       return {
         ...s,
@@ -275,8 +333,24 @@ function applyContent(s: DraftSnapshot, a: ContentAction): DraftSnapshot | null 
       return { ...s, draft: { ...d, attribute_preferences: list } };
     }
     case "attr/remove":
-      return { ...s, draft: { ...d, attribute_preferences: (d.attribute_preferences ?? []).filter((p) => p.preference_id !== a.preferenceId) } };
+      return {
+        ...s,
+        draft: { ...d, attribute_preferences: (d.attribute_preferences ?? []).filter((p) => p.preference_id !== a.preferenceId) },
+      };
+    case "meta/adopt": {
+      const { sample: _s, ...meta } = a.meta;
+      void _s;
+      return { ...s, draft: { ...d, meta } };
+    }
   }
+}
+
+/** 撤销 / 重做恢复的是内容：编号、修订号与 meta 保持当前（服务器的）值。 */
+function keepIdentity(target: DraftSnapshot, current: UserInputDraft): DraftSnapshot {
+  return {
+    ...target,
+    draft: { ...target.draft, draft_id: current.draft_id, revision: current.revision, meta: current.meta },
+  };
 }
 
 export function draftReducer(state: DraftState, action: DraftAction): DraftState {
@@ -286,63 +360,38 @@ export function draftReducer(state: DraftState, action: DraftAction): DraftState
     case "history/undo": {
       const prev = state.past[state.past.length - 1];
       if (!prev) return state;
-      const counter = state.revisionCounter + 1;
       return {
         ...state,
-        ...prev,
-        draft: { ...prev.draft, draft_id: state.ownDraftId, revision: counter },
+        ...keepIdentity(prev, state.draft),
         past: state.past.slice(0, -1),
         future: [snapshotOf(state), ...state.future],
         coalesceKey: null,
-        revisionCounter: counter,
-        pristineSample: false,
       };
     }
     case "history/redo": {
       const next = state.future[0];
       if (!next) return state;
-      const counter = state.revisionCounter + 1;
       return {
         ...state,
-        ...next,
-        draft: { ...next.draft, draft_id: state.ownDraftId, revision: counter },
+        ...keepIdentity(next, state.draft),
         past: [...state.past, snapshotOf(state)],
         future: state.future.slice(1),
         coalesceKey: null,
-        revisionCounter: counter,
-        pristineSample: false,
       };
     }
     case "draft/load":
-      return {
-        ...state,
-        draft: action.draft,
-        ageText: action.ageText ?? (action.draft.age.value != null ? String(action.draft.age.value) : ""),
-        nextPrefId: 1 + (action.draft.attribute_preferences ?? []).length,
-        past: [],
-        future: [],
-        coalesceKey: null,
-        revisionCounter: Math.max(state.revisionCounter, action.draft.revision),
-        ownDraftId: action.ownDraftId ?? state.ownDraftId,
-        sampleId: action.sampleId,
-        pristineSample: action.sampleId !== null,
-      };
+      return initialDraftState(action.draft);
     default: {
       const next = applyContent(snapshotOf(state), action);
       if (next === null) return state;
       const key = coalesceOf(action);
       const merge = key !== null && key === state.coalesceKey;
-      const counter = state.revisionCounter + 1;
-      // 改过之后它就不再是样例答案：换成本标签页自己的草稿编号
       return {
         ...state,
         ...next,
-        draft: { ...next.draft, draft_id: state.ownDraftId, revision: counter },
         past: merge ? state.past : [...state.past, snapshotOf(state)].slice(-HISTORY_LIMIT),
         future: [],
         coalesceKey: key,
-        revisionCounter: counter,
-        pristineSample: false,
       };
     }
   }
