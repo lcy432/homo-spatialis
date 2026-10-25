@@ -1,12 +1,21 @@
 .header {
   background: var(--surface);
-  border-bottom: 1.5px solid var(--line-strong);
+  border-bottom: 3px double var(--line-strong);
+}
+
+html[data-mode="globe"] .header {
+  background: rgba(10, 16, 23, 0.55);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: var(--panel-blur);
+  position: sticky;
+  top: 0;
+  z-index: 5;
 }
 
 .headerInner,
 .main,
 .footerInner {
-  max-width: 72rem;
+  max-width: 74rem;
   margin: 0 auto;
   padding: 0 1rem;
 }
@@ -17,15 +26,23 @@
   justify-content: space-between;
   align-items: center;
   gap: 0.4em 1.2em;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
 }
 
 .brand {
   margin: 0;
   font-family: var(--font-hand);
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   font-weight: 600;
+}
+
+html[data-mode="globe"] .brand {
+  font-family: var(--font-label);
+  font-size: 0.95rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 400;
 }
 
 .brand a {
@@ -39,20 +56,33 @@
 .nav {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.2em 0.8em;
+  gap: 0.2em 0.9em;
+  font-family: var(--font-label);
+  letter-spacing: 0.03em;
 }
 
 .nav a {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  padding: 0 0.3em;
+  padding: 0 0.2em;
   color: var(--ink);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
 }
 
 .nav a[aria-current="page"] {
-  font-weight: 700;
-  text-decoration-thickness: 2px;
+  border-bottom-color: var(--seal);
+}
+
+html[data-mode="globe"] .nav a {
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+}
+
+html[data-mode="globe"] .nav a[aria-current="page"] {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
 }
 
 .switches {
@@ -64,26 +94,46 @@
 .toggle {
   display: inline-flex;
   align-items: center;
-  gap: 0.25em;
+  gap: 0;
 }
 
 .toggleLabel {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--ink-soft);
-  margin-right: 0.2em;
+  margin-right: 0.5em;
+  font-family: var(--font-label);
+  letter-spacing: 0.04em;
 }
 
 .toggle button {
-  min-height: 44px;
-  padding: 0.2em 0.7em;
+  min-height: 40px;
+  min-width: 44px;
+  padding: 0.1em 0.7em;
   border-color: var(--line-strong);
-  color: var(--ink);
+  color: var(--ink-soft);
+  border-radius: 0;
+  margin-left: -1px;
+}
+
+.toggle button:first-of-type {
+  border-radius: var(--radius) 0 0 var(--radius);
+  margin-left: 0;
+}
+
+.toggle button:last-of-type {
+  border-radius: 0 var(--radius) var(--radius) 0;
 }
 
 .toggle button.toggleOn {
-  background: var(--accent);
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--surface-solid);
+}
+
+html[data-mode="globe"] .toggle button.toggleOn {
+  background: var(--accent-soft);
   border-color: var(--accent);
-  color: var(--accent-ink);
+  color: var(--accent);
 }
 
 .main {
@@ -96,38 +146,69 @@
   padding: 0.6rem 0;
 }
 
+html[data-mode="globe"] .footer {
+  background: rgba(10, 16, 23, 0.5);
+  backdrop-filter: var(--panel-blur);
+}
+
+/* 步骤条：印刷表格的分节编号 */
 .stepper {
   list-style: none;
   padding: 0;
-  margin: 1rem 0 0.5rem;
+  margin: 1rem 0 0.4rem;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4em;
+  gap: 0.2em 1.1em;
 }
 
 .stepper a {
   display: inline-flex;
   min-height: 44px;
   align-items: center;
-  gap: 0.35em;
-  padding: 0.2em 0.75em;
-  border-radius: 999px;
-  border: 1px solid var(--line);
+  gap: 0.45em;
+  padding: 0.2em 0.1em;
   text-decoration: none;
-  color: var(--ink);
-  background: var(--surface);
+  color: var(--ink-soft);
   font-size: 0.92rem;
+  font-family: var(--font-label);
+  letter-spacing: 0.02em;
+  border-bottom: 2px solid transparent;
 }
 
 .stepper a[aria-current="step"] {
-  border-color: var(--accent);
-  background: var(--accent-soft);
+  color: var(--ink);
   font-weight: 700;
+  border-bottom-color: var(--seal);
+}
+
+html[data-mode="globe"] .stepper a[aria-current="step"] {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
 }
 
 .stepNo {
   font-family: var(--font-hand);
   font-weight: 700;
+  width: 1.6em;
+  height: 1.6em;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  display: inline-grid;
+  place-items: center;
+  font-size: 0.9em;
+  line-height: 1;
+}
+
+.stepper a[aria-current="step"] .stepNo {
+  background: var(--seal);
+  border-color: var(--seal);
+  color: var(--surface-solid);
+}
+
+html[data-mode="globe"] .stepper a[aria-current="step"] .stepNo {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
 }
 
 .stepNav {

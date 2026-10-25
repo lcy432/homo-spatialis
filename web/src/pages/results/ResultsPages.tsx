@@ -17,6 +17,7 @@ import type {
   ScopeNote,
 } from "../../contract/types";
 import { CityMapSlot } from "../../components/CityMapSlot";
+import { MapStage } from "../../components/MapStage";
 import { PageTitle } from "../../components/Layout";
 import { cityLabelOf } from "../../components/RunViews";
 import { ApiErrorView, ExplanationView, Loading, Num, PendingText, Section, TableWrap } from "../../components/common";
@@ -225,10 +226,28 @@ export function ResultsOverview({
   const label = (ref: string) => res.cities?.find((c) => c.city_ref === ref)?.label ?? cityLabelOf(caps, ref);
   const groups = groupByCountry(rows.filter((r) => country === null || r.country === country));
   const generated = res.evaluation_status === "generated";
-  return (
-    <div data-results={res.evaluation_status}>
+  const mapSlot = generated ? (
+    <CityMapSlot
+      purpose="output"
+      fill
+      cities={caps?.cities ?? []}
+      cityRefs={rows.map((r) => r.cityRef)}
+      geography={geography}
+      countries={[...new Set(rows.map((r) => r.country).filter((c): c is string => !!c))]}
+      colors={colors}
+      country={country}
+      onCountry={setCountry}
+      onOpenCity={(ref) => navigate(`${base}/city/${encodeURIComponent(ref)}`)}
+    />
+  ) : null;
+  const head = (
+    <>
       <PageTitle>{t("results.title")}</PageTitle>
       <BizNotice />
+    </>
+  );
+  const body = (
+    <>
       <Section title={t("results.status")}>
         <p className={generated ? "box ok" : "box warn"}>{generated ? t("results.generated") : t("results.notGenerated")}</p>
         {!generated && res.not_generated_reason ? <Zh as="p">{res.not_generated_reason}</Zh> : null}
@@ -247,17 +266,7 @@ export function ResultsOverview({
       {generated ? (
         <>
           <Section title={t("results.mapTitle")}>
-            <CityMapSlot
-              purpose="output"
-              cities={caps?.cities ?? []}
-              cityRefs={rows.map((r) => r.cityRef)}
-              geography={geography}
-              countries={[...new Set(rows.map((r) => r.country).filter((c): c is string => !!c))]}
-              colors={colors}
-              country={country}
-              onCountry={setCountry}
-              onOpenCity={(ref) => navigate(`${base}/city/${encodeURIComponent(ref)}`)}
-            />
+            {mode === "globe" ? null : mapSlot}
             <ColorLegend window={w} />
           </Section>
           <Section title={t("results.chartTitle")}>
@@ -307,6 +316,21 @@ export function ResultsOverview({
         <Zh as="p">{res.planner.description_zh}</Zh>
         <ZhList items={res.sources_zh} />
       </Section>
+    </>
+  );
+  if (!generated || !mapSlot) {
+    return (
+      <div data-results={res.evaluation_status}>
+        {head}
+        {body}
+      </div>
+    );
+  }
+  return (
+    <div data-results={res.evaluation_status}>
+      <MapStage head={head} map={mapSlot} panelLabel={t("results.title")}>
+        {body}
+      </MapStage>
     </div>
   );
 }

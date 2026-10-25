@@ -1,12 +1,13 @@
 // 第 1–4 步：地区与城市、生活事实、偏好与取舍、健康兴趣与补充。题目、选项、标签与说明都是 E3 能力清单的原话；
 // 候选（职业、兴趣、口味）来自服务对已保存草稿的审阅，用户主动选中才算数，不预勾。
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { InterestReview, ProductCapabilities } from "../../contract/types";
 import { Allocator } from "../../components/Allocator";
 import { CityList } from "../../components/CityList";
 import { useGeography } from "../../api/queries";
 import { CityMapSlot } from "../../components/CityMapSlot";
+import { MapStage } from "../../components/MapStage";
 import { Section } from "../../components/common";
 import { PageTitle, StepNav } from "../../components/Layout";
 import { useDraftEditor } from "../../draft/DraftEditor";
@@ -27,30 +28,46 @@ export function PlaceStep() {
   const selected = state.draft.cities.city_refs ?? [];
   // 城市在地图上的位置：E3 的地理显示清单，按当前资料包的指纹读（读不到就不画点，列表照常）
   const geo = useGeography(caps.meta.data_pack.content_fingerprint);
+  // 平面地图默认放大到唯一能选的国家（只有一个国家时世界图大半是空白）；用户随时能回到世界图
+  const supportedCountries = useMemo(() => [...new Set(caps.cities.filter((c) => c.selectable).map((c) => c.country))], [caps.cities]);
+  const [zoom, setZoom] = useState<string | null>(() => (supportedCountries.length === 1 ? (supportedCountries[0] ?? null) : null));
   return (
     <div>
-      <PageTitle>{t("place.title")}</PageTitle>
-      <p>{t("place.help")}</p>
-      <BizNotice />
-      <CityMapSlot
-        purpose="input"
-        cities={caps.cities}
-        geography={geo.data ?? (geo.isError ? null : undefined)}
-        selected={selected}
-        onToggle={(ref, on) => dispatch({ type: "cities/toggle", cityRef: ref, selected: on })}
-        onCountry={setCountry}
-        country={country}
-      />
-      <CityList
-        cities={caps.cities}
-        selected={selected}
-        onToggle={(ref, on) => dispatch({ type: "cities/toggle", cityRef: ref, selected: on })}
-        onSetAll={(refs) => dispatch({ type: "cities/set", cityRefs: refs })}
-        country={country}
-        onCountry={setCountry}
-      />
-      {selected.length === 0 ? <p className="box warn">{t("place.needOne")}</p> : null}
-      <StepNav draftId={draftId} next="facts" />
+      <MapStage
+        panelLabel={t("place.title")}
+        head={
+          <>
+            <PageTitle>{t("place.title")}</PageTitle>
+            <p>{t("place.help")}</p>
+            <BizNotice />
+          </>
+        }
+        map={
+          <CityMapSlot
+            purpose="input"
+            fill
+            cities={caps.cities}
+            geography={geo.data ?? (geo.isError ? null : undefined)}
+            selected={selected}
+            onToggle={(ref, on) => dispatch({ type: "cities/toggle", cityRef: ref, selected: on })}
+            onCountry={setCountry}
+            country={country}
+            focus={zoom}
+            onFocus={setZoom}
+          />
+        }
+      >
+        <CityList
+          cities={caps.cities}
+          selected={selected}
+          onToggle={(ref, on) => dispatch({ type: "cities/toggle", cityRef: ref, selected: on })}
+          onSetAll={(refs) => dispatch({ type: "cities/set", cityRefs: refs })}
+          country={country}
+          onCountry={setCountry}
+        />
+        {selected.length === 0 ? <p className="box warn">{t("place.needOne")}</p> : null}
+        <StepNav draftId={draftId} next="facts" />
+      </MapStage>
     </div>
   );
 }

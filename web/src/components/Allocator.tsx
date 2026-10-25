@@ -118,6 +118,10 @@ export function Allocator({ group, title, help }: { group: AllocationGroup; titl
         <button type="button" onClick={() => dispatch({ type: "history/redo" })} disabled={!state.future.length}>
           {t("common.redo")}
         </button>
+        {/* 边改边看的小合计：与下面的合计行同一句话，读屏只读下面那一句 */}
+        <span className={styles.liveTotal} aria-hidden="true">
+          {statusText}
+        </span>
       </div>
       {isEqual ? <p className="box note">{t("priorities.equalSplitOn", { each: eqDisplay, exact: eqExact })}</p> : null}
       <p className="small muted">{t("priorities.stepHint")}</p>
@@ -221,7 +225,7 @@ export function Allocator({ group, title, help }: { group: AllocationGroup; titl
       {/* 合计条放在各项之后，像账本最后一行；滚动时贴在视口底边，到了它自己的位置就停下，不会盖住任何一题的控件 */}
       <div className={`${styles.status} ${rem.kind === "over" ? styles.over : rem.kind === "full" ? styles.full : ""}`}>
         <p className={styles.statusText} role="status" aria-live="polite" id={`${uid}-status`}>
-          {statusText}
+          {rem.kind === "full" ? <span className="stamp">{statusText}</span> : statusText}
           {amount.exact ? (
             <span className="small muted">
               （{t("common.exact")} {amount.exact}）

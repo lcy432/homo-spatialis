@@ -2,14 +2,14 @@
   margin: 1em 0;
 }
 
+/* 合计行：像账本最后一行，固定在各项之后；不浮动、不盖住任何一题（遮挡问题的根治办法）。
+   编辑上面几项时看得到的是工具条里的小合计（.liveTotal）。 */
 .status {
-  position: sticky;
-  bottom: 0.5rem;
-  z-index: 2;
   background: var(--surface-solid);
-  border: 2px solid var(--accent);
-  border-radius: var(--radius);
-  padding: 0.5em 0.8em;
+  border-top: 2px solid var(--accent);
+  border-bottom: 1px solid var(--accent);
+  border-radius: 0;
+  padding: 0.5em 0.3em;
   margin: 0.8em 0;
   display: flex;
   flex-wrap: wrap;
@@ -17,16 +17,18 @@
   align-items: center;
 }
 
-/* 聚焦某一项的输入框时浏览器把它滚进视口：留出合计条的高度，不让它正好停在合计条下面 */
-.row {
-  scroll-margin-bottom: 5.5rem;
+html[data-mode="globe"] .status {
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 0.5em 0.8em;
 }
 
-/* 放大到 200% 或横屏手机（可见高度很矮）时，合计条不再固定，免得挡住大半个屏幕。 */
-@media (max-height: 520px) {
-  .status {
-    position: static;
-  }
+.liveTotal {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-soft);
+  margin-left: auto;
+  font-size: 0.95rem;
 }
 
 .statusText {
@@ -35,7 +37,8 @@
   margin: 0;
 }
 
-.over {
+.over,
+.over .liveTotal {
   border-color: var(--error-line);
 }
 

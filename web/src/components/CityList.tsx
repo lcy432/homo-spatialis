@@ -1,5 +1,6 @@
 // 城市列表：完整的等价操作入口（地图与地球只是另一种入口，消费同一份选择）。国家筛选只改显示的范围，不改已选集合；
 // “选择全部可用城市 / 清除”是明确的按钮。城市名称、说明与资料性质都是 E3 能力清单的原话。
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { CityOption } from "../contract/types";
 import { Zh } from "../i18n/biz";
@@ -26,6 +27,8 @@ export function CityList({
   focusedCity?: string | null;
 }) {
   const { t } = useTranslation();
+  // 刚改过的那一行划一道淡笔痕（每次改动换一个 key 让动画重放）；不改任何选择
+  const [pulse, setPulse] = useState<Record<string, number>>({});
   const countries = countriesOf(cities);
   const shown = cities.filter((c) => country === null || c.country === country);
   const selectable = cities.filter((c) => c.selectable).map((c) => c.city_ref);
@@ -52,7 +55,9 @@ export function CityList({
           {t("place.clear")}
         </button>
         <span className="small" role="status" aria-live="polite">
-          {t("place.selected", { n: selected.length })}
+          <span key={selected.length} className="tick">
+            {t("place.selected", { n: selected.length })}
+          </span>
         </span>
       </div>
       <fieldset>
@@ -69,8 +74,12 @@ export function CityList({
               aria-describedby={`city-note-${c.city_ref}`}
               disabled={!c.selectable}
               checked={selected.includes(c.city_ref)}
-              onChange={(e) => onToggle(c.city_ref, e.target.checked)}
+              onChange={(e) => {
+                onToggle(c.city_ref, e.target.checked);
+                setPulse((p) => ({ ...p, [c.city_ref]: (p[c.city_ref] ?? 0) + 1 }));
+              }}
             />
+            {pulse[c.city_ref] ? <span key={pulse[c.city_ref]} className="choice-pulse" aria-hidden="true" /> : null}
             <span>
               <strong>
                 <Zh>{c.label}</Zh>

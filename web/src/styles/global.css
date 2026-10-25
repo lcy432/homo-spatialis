@@ -1,75 +1,91 @@
 /*
- * 全局样式。两套外观共用同一套组件与版面，只换颜色变量与标题字体：
- * - 稿纸（默认，html[data-mode="paper"]）：暖白旧式算术稿纸、很淡的方格、石墨色主线、少量彩铅强调色；手写感只给标题与注释。
- * - 地球（html[data-mode="globe"]）：深蓝灰的现代技术面板，克制的青色强调。
- * 纸纹只是页面背景，绝不加在地图、图表、数据点上（不改变面积、位置、坐标、柱长或月历标记）。
- * 系统字体、16px 起步、看得见的焦点、44px 的触控目标；颜色只做辅助，含义一律另有文字。
+ * 全局样式。两套外观共用同一套组件与版面，只换变量与少量规则：
+ *
+ * 稿纸（默认，html[data-mode="paper"]）——不去模仿纸的“材质”，而是照搬印刷表格与旧式统计报告的排版习惯：
+ *   衬线正文、章节编号、细横线与双横线分段、booktabs 式表格（只有横线）、小号带字距的标签、朱砂色只用来盖章与标记当前项；
+ *   用户填进去的答案用手写体（中文楷体、英文 Patrick Hand），填写框只是一道横线，像用笔在表格上填字。
+ * 地球（html[data-mode="globe"]）——地球与星空是重的，界面要轻：半透明薄面板、发丝线、角标、等宽小字、克制的青色。
+ *
+ * 纸纹与格线只在页面背景；地图、图表、数据点上不加任何纹理，不改变面积、位置、坐标、柱长或月历标记。
+ * 16px 起步、看得见的焦点、44px 的触控目标；颜色只做辅助，含义一律另有文字。
  */
 :root,
 html[data-mode="paper"] {
-  --bg: #f5f0e2;
-  --grid: rgba(110, 120, 140, 0.11);
-  --grid-major: rgba(110, 120, 140, 0.16);
-  --surface: rgba(255, 252, 243, 0.94);
-  --surface-solid: #fffcf3;
-  --ink: #26241f;
-  --ink-soft: #5b564c;
-  --line: #b9b19e;
-  --line-strong: #6f685a;
-  --accent: #2c5d8c;
-  --accent-ink: #ffffff;
-  --accent-soft: #e2ebf3;
-  --accent-2: #a2522b;
-  --warn-bg: #fbefd2;
-  --warn-line: #b88324;
-  --error-bg: #f9e1d9;
-  --error-line: #a3361f;
-  --note-bg: #e9eff3;
-  --note-line: #5b7c99;
-  --chip-bg: #efe9da;
+  --bg: #f3eddb;
+  --grid: rgba(96, 104, 120, 0.1);
+  --grid-major: rgba(96, 104, 120, 0.16);
+  --surface: transparent;
+  --surface-solid: #f6f1e2;
+  --ink: #262320;
+  --ink-soft: #655e52;
+  --pen: #233458;
+  --line: #c9bfa6;
+  --line-strong: #4e473b;
+  --accent: #34506c;
+  --accent-ink: #f6f1e2;
+  --accent-soft: rgba(52, 80, 108, 0.1);
+  --accent-2: #b4382a;
+  --seal: #b4382a;
+  --warn-bg: transparent;
+  --warn-line: #a56a12;
+  --error-bg: transparent;
+  --error-line: #b4382a;
+  --note-bg: transparent;
+  --note-line: #4e473b;
+  --chip-bg: rgba(78, 71, 59, 0.07);
   --c-color: #2f6b45;
-  --e-color: #a2522b;
-  --m-color: #7a6a1c;
-  --focus-color: #c2410c;
-  --radius: 6px;
-  --font-body: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC",
-    "Noto Sans CJK SC", sans-serif;
-  --font-hand: "Patrick Hand", "Kaiti SC", "STKaiti", "KaiTi", "楷体", "Kaiti", serif;
-  --font-num: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --e-color: #b4382a;
+  --m-color: #8a6f12;
+  --focus-color: #b4382a;
+  --radius: 2px;
+  --font-body: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, "Songti SC", "STSong", "Noto Serif CJK SC",
+    "Source Han Serif SC", "SimSun", serif;
+  --font-hand: "Patrick Hand", "Kaiti SC", "STKaiti", "KaiTi", "楷体", "Kaiti", cursive;
+  --font-label: var(--font-body);
+  --font-num: "Iowan Old Style", Georgia, "Songti SC", serif;
   --page-bg: linear-gradient(var(--grid-major) 1px, transparent 1px) 0 0 / 120px 120px,
     linear-gradient(90deg, var(--grid-major) 1px, transparent 1px) 0 0 / 120px 120px,
     linear-gradient(var(--grid) 1px, transparent 1px) 0 0 / 24px 24px,
     linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0 / 24px 24px, var(--bg);
+  --panel-blur: none;
   color-scheme: light;
 }
 
 html[data-mode="globe"] {
-  --bg: #0d151e;
+  --bg: #0a1017;
   --grid: transparent;
   --grid-major: transparent;
-  --surface: rgba(19, 30, 42, 0.94);
-  --surface-solid: #13202d;
-  --ink: #e4eaf0;
-  --ink-soft: #a8b5c2;
-  --line: #34465a;
-  --line-strong: #6f859b;
-  --accent: #62bfd6;
-  --accent-ink: #0d151e;
-  --accent-soft: #173445;
-  --accent-2: #e0a15e;
-  --warn-bg: #3a2f17;
-  --warn-line: #d9a441;
-  --error-bg: #3d1f1b;
+  --surface: rgba(16, 27, 40, 0.58);
+  --surface-solid: #101b28;
+  --ink: #dfe8f0;
+  --ink-soft: #9fb0c0;
+  --pen: #e9f4fb;
+  --line: rgba(140, 190, 215, 0.22);
+  --line-strong: rgba(160, 205, 228, 0.55);
+  --accent: #7fd6ea;
+  --accent-ink: #061018;
+  --accent-soft: rgba(127, 214, 234, 0.12);
+  --accent-2: #f0b86a;
+  --seal: #f0b86a;
+  --warn-bg: rgba(240, 184, 106, 0.1);
+  --warn-line: #f0b86a;
+  --error-bg: rgba(240, 138, 110, 0.12);
   --error-line: #f08a6e;
-  --note-bg: #16283a;
-  --note-line: #6aa3c8;
-  --chip-bg: #1c2d3d;
+  --note-bg: rgba(127, 214, 234, 0.08);
+  --note-line: #7fd6ea;
+  --chip-bg: rgba(127, 214, 234, 0.1);
   --c-color: #7fcf9a;
   --e-color: #f0a37a;
   --m-color: #e2cc6a;
   --focus-color: #ffd166;
+  --radius: 3px;
+  --font-body: "Segoe UI", system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC",
+    "Noto Sans CJK SC", sans-serif;
   --font-hand: var(--font-body);
-  --page-bg: radial-gradient(ellipse at 50% -20%, #1b2a3a 0%, var(--bg) 60%) fixed, var(--bg);
+  --font-label: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --font-num: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --page-bg: radial-gradient(ellipse at 50% -10%, #182a3d 0%, var(--bg) 55%) fixed, var(--bg);
+  --panel-blur: blur(14px) saturate(1.1);
   color-scheme: dark;
 }
 
@@ -80,7 +96,7 @@ html[data-mode="globe"] {
 html {
   font-family: var(--font-body);
   font-size: 16px;
-  line-height: 1.6;
+  line-height: 1.65;
   color: var(--ink);
   background: var(--bg);
 }
@@ -93,6 +109,10 @@ body {
   overflow-wrap: anywhere;
 }
 
+html[data-mode="globe"] body {
+  font-weight: 300;
+}
+
 h1,
 h2,
 h3,
@@ -103,17 +123,41 @@ h4 {
 
 h1 {
   font-family: var(--font-hand);
-  font-size: 1.75rem;
+  font-size: 2rem;
   font-weight: 600;
   letter-spacing: 0.01em;
 }
 
+/* 报告标题：下面一道双横线 */
+html[data-mode="paper"] h1 {
+  padding-bottom: 0.25em;
+  border-bottom: 3px double var(--line-strong);
+}
+
+html[data-mode="globe"] h1 {
+  font-weight: 300;
+  letter-spacing: 0.04em;
+}
+
 h2 {
-  font-size: 1.22rem;
+  font-size: 1.2rem;
+  font-weight: 700;
 }
 
 h3 {
-  font-size: 1.06rem;
+  font-size: 1.04rem;
+  font-weight: 700;
+}
+
+html[data-mode="paper"] h3,
+html[data-mode="paper"] h4 {
+  letter-spacing: 0.02em;
+}
+
+html[data-mode="globe"] h2,
+html[data-mode="globe"] h3 {
+  font-weight: 500;
+  letter-spacing: 0.03em;
 }
 
 .hand {
@@ -126,6 +170,8 @@ p {
 
 a {
   color: var(--accent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.15em;
 }
 
 :focus-visible {
@@ -152,28 +198,67 @@ h1[tabindex="-1"]:focus {
   top: 0.5rem;
 }
 
+/* ---- 按钮：印刷表格里的方框文字；主要动作是一块实心墨色 ---- */
 button,
 .button {
   font: inherit;
+  font-family: var(--font-label);
   min-height: 44px;
   min-width: 44px;
-  padding: 0.45em 1em;
+  padding: 0.4em 1em;
   border-radius: var(--radius);
-  border: 1.5px solid var(--accent);
-  background: var(--surface-solid);
-  color: var(--accent);
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  color: var(--ink);
   cursor: pointer;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.35em;
+  letter-spacing: 0.03em;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.12s ease;
+}
+
+button:hover,
+.button:hover {
+  background: var(--chip-bg);
+}
+
+button:active,
+.button:active {
+  transform: translateY(1px);
 }
 
 button.primary,
 .button.primary {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--surface-solid);
+}
+
+html[data-mode="globe"] button.primary,
+html[data-mode="globe"] .button.primary {
   background: var(--accent);
+  border-color: var(--accent);
   color: var(--accent-ink);
+  font-weight: 500;
+  box-shadow: 0 0 18px rgba(127, 214, 234, 0.25);
+}
+
+button.primary:hover,
+.button.primary:hover {
+  background: var(--ink);
+  opacity: 0.92;
+}
+
+html[data-mode="globe"] button.primary:hover,
+html[data-mode="globe"] .button.primary:hover {
+  background: var(--accent);
 }
 
 button.danger {
@@ -183,15 +268,18 @@ button.danger {
 
 button.danger.primary {
   background: var(--error-line);
+  border-color: var(--error-line);
   color: var(--surface-solid);
 }
 
 button:disabled,
 button[aria-disabled="true"] {
+  border-style: dashed;
   border-color: var(--line);
-  background: var(--chip-bg);
+  background: transparent;
   color: var(--ink-soft);
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 button.link {
@@ -201,8 +289,17 @@ button.link {
   min-height: 44px;
   color: var(--accent);
   text-decoration: underline;
+  font-family: var(--font-body);
 }
 
+html[data-mode="globe"] button,
+html[data-mode="globe"] .button {
+  border-color: var(--line-strong);
+  color: var(--accent);
+  font-size: 0.95rem;
+}
+
+/* ---- 填写框：表格上的一道横线；填进去的字是手写体 ---- */
 input[type="text"],
 input[type="number"],
 input:not([type]),
@@ -211,38 +308,107 @@ select {
   font: inherit;
   font-size: 16px;
   min-height: 44px;
-  padding: 0.4em 0.6em;
-  border: 1.5px solid var(--line-strong);
-  border-radius: var(--radius);
-  background: var(--surface-solid);
-  color: var(--ink);
+  padding: 0.4em 0.5em;
+  border: 0;
+  border-bottom: 1.5px solid var(--line-strong);
+  border-radius: 0;
+  background: transparent;
+  color: var(--pen);
   max-width: 100%;
+  transition: border-color 0.15s ease;
 }
 
+input[type="text"],
+input[type="number"],
+input:not([type]),
+textarea {
+  font-family: var(--font-hand);
+  font-size: 1.12rem;
+}
+
+input[type="text"]:focus-visible,
+input[type="number"]:focus-visible,
+input:not([type]):focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
+  border-bottom-color: var(--pen);
+  border-bottom-width: 2.5px;
+  box-shadow: 0 2px 0 0 var(--accent-soft);
+}
+
+/* 多行填写：横格纸 */
 textarea {
   width: 100%;
   min-height: 6em;
+  line-height: 1.8em;
+  padding: 0.2em 0.4em;
+  background-image: repeating-linear-gradient(transparent 0 calc(1.8em - 1px), var(--line) calc(1.8em - 1px) 1.8em);
+  background-attachment: local;
+}
+
+html[data-mode="globe"] textarea {
+  background-image: none;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+html[data-mode="globe"] input[type="text"],
+html[data-mode="globe"] input[type="number"],
+html[data-mode="globe"] input:not([type]),
+html[data-mode="globe"] select {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.4em 0.6em;
+}
+
+html[data-mode="globe"] input:focus-visible,
+html[data-mode="globe"] textarea:focus-visible,
+html[data-mode="globe"] select:focus-visible {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+select {
+  font-family: var(--font-body);
 }
 
 label {
   font-weight: 600;
 }
 
+html[data-mode="globe"] label {
+  font-weight: 500;
+}
+
 fieldset {
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 0.75em 1em 1em;
+  border: 0;
+  border-top: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  padding: 0.6em 0 0.8em;
   margin: 1em 0;
   background: var(--surface);
   min-width: 0;
 }
 
-legend {
-  font-weight: 700;
-  padding: 0 0.3em;
+html[data-mode="globe"] fieldset {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.6em 1em 0.9em;
+  backdrop-filter: var(--panel-blur);
 }
 
-/* 复选框与单选框：框本身 22 像素，但整行（含文字）都能点，这一行至少 44 像素高（触控目标）。 */
+legend {
+  font-weight: 700;
+  padding: 0 0.3em 0 0;
+  font-family: var(--font-label);
+  letter-spacing: 0.04em;
+}
+
+/* ---- 勾选与单选：印好的方框 / 圆圈，勾与点是笔迹 ---- */
 .choice {
   display: flex;
   align-items: center;
@@ -253,6 +419,7 @@ legend {
   border-radius: var(--radius);
   font-weight: 400;
   cursor: pointer;
+  position: relative;
 }
 
 .choice:hover {
@@ -261,11 +428,65 @@ legend {
 
 .choice input[type="checkbox"],
 .choice input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
   width: 22px;
   height: 22px;
   margin: 0;
   flex: none;
-  accent-color: var(--accent);
+  border: 1.5px solid var(--line-strong);
+  background: transparent;
+  border-radius: 2px;
+  position: relative;
+  cursor: pointer;
+  display: inline-grid;
+  place-items: center;
+}
+
+.choice input[type="radio"] {
+  border-radius: 50%;
+}
+
+.choice input[type="checkbox"]:checked::after {
+  content: "✓";
+  font-family: var(--font-hand);
+  font-size: 24px;
+  line-height: 1;
+  color: var(--pen);
+  transform: translate(2px, -3px) rotate(-6deg);
+  animation: pen-mark 0.22s ease-out;
+}
+
+.choice input[type="radio"]:checked::after {
+  content: "";
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--pen);
+  animation: pen-mark 0.22s ease-out;
+}
+
+html[data-mode="globe"] .choice input[type="checkbox"]:checked,
+html[data-mode="globe"] .choice input[type="radio"]:checked {
+  border-color: var(--accent);
+  box-shadow: 0 0 10px rgba(127, 214, 234, 0.3);
+}
+
+html[data-mode="globe"] .choice input[type="checkbox"]:checked::after {
+  font-family: var(--font-body);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--accent);
+  transform: none;
+}
+
+html[data-mode="globe"] .choice input[type="radio"]:checked::after {
+  background: var(--accent);
+}
+
+.choice input:disabled {
+  border-style: dashed;
+  cursor: not-allowed;
 }
 
 .choice.top {
@@ -277,6 +498,16 @@ legend {
 .choice.top input[type="checkbox"],
 .choice.top input[type="radio"] {
   margin-top: 0.15em;
+}
+
+/* 刚改过的一项：横线上划一道淡淡的笔痕，随即褪去 */
+.choice-pulse {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: var(--radius);
+  background: var(--accent-soft);
+  animation: fade-out 0.6s ease-out forwards;
 }
 
 summary {
@@ -293,24 +524,69 @@ summary {
   padding: 0 0.15em;
 }
 
+/* ---- 分段：报告的章节——上粗线、下细线、编号标题；地球模式是薄面板 ---- */
+main {
+  counter-reset: sec;
+}
+
 .card {
   background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 1em 1.1em;
-  margin: 1em 0;
-}
-
-html[data-mode="paper"] .card {
-  box-shadow: 1px 2px 0 rgba(80, 70, 50, 0.08);
-}
-
-html[data-mode="globe"] .card {
-  box-shadow: 0 0 0 1px rgba(98, 191, 214, 0.06), 0 8px 24px rgba(0, 0, 0, 0.25);
+  border: 0;
+  border-top: 1.5px solid var(--line-strong);
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  padding: 0.7em 0 1em;
+  margin: 1.4em 0;
 }
 
 .card-title {
   margin-top: 0;
+  font-family: var(--font-label);
+  letter-spacing: 0.04em;
+}
+
+html[data-mode="paper"] .card > .card-title::before {
+  counter-increment: sec;
+  content: counter(sec) ".";
+  display: inline-block;
+  min-width: 1.6em;
+  color: var(--ink-soft);
+  font-family: var(--font-hand);
+  font-weight: 400;
+}
+
+html[data-mode="globe"] .card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1em 1.1em;
+  backdrop-filter: var(--panel-blur);
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+/* 面板四角的小角标：只是细线，不是边框 */
+html[data-mode="globe"] .card::before,
+html[data-mode="globe"] .card::after {
+  content: "";
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: var(--accent);
+  border-style: solid;
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+html[data-mode="globe"] .card::before {
+  top: -1px;
+  left: -1px;
+  border-width: 1px 0 0 1px;
+}
+
+html[data-mode="globe"] .card::after {
+  bottom: -1px;
+  right: -1px;
+  border-width: 0 1px 1px 0;
 }
 
 .muted {
@@ -321,15 +597,21 @@ html[data-mode="globe"] .card {
   font-size: 0.9rem;
 }
 
+html[data-mode="globe"] .small {
+  font-size: 0.88rem;
+}
+
 .num {
+  font-family: var(--font-num);
   font-variant-numeric: tabular-nums;
 }
 
+/* ---- 提示框：左边一道竖线，不加底色（稿纸）；地球模式有淡底 ---- */
 .box {
-  padding: 0.6em 0.9em;
+  padding: 0.5em 0.9em;
   border-radius: var(--radius);
   margin: 0.8em 0;
-  border-left: 4px solid;
+  border-left: 3px solid;
 }
 
 .box.note {
@@ -342,9 +624,18 @@ html[data-mode="globe"] .card {
   border-color: var(--warn-line);
 }
 
+html[data-mode="paper"] .box.warn {
+  border-left-width: 4px;
+}
+
 .box.error {
   background: var(--error-bg);
   border-color: var(--error-line);
+}
+
+html[data-mode="paper"] .box.error {
+  border: 1.5px solid var(--error-line);
+  border-left-width: 5px;
 }
 
 .box.ok {
@@ -352,6 +643,7 @@ html[data-mode="globe"] .card {
   border-color: var(--c-color);
 }
 
+/* ---- 标签：小号带字距的方括号式文字 ---- */
 .chips {
   display: flex;
   flex-wrap: wrap;
@@ -363,24 +655,34 @@ html[data-mode="globe"] .card {
 
 .chip {
   display: inline-block;
-  font-size: 0.85rem;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 0.05em 0.6em;
-  background: var(--chip-bg);
+  font-family: var(--font-label);
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  padding: 0 0.45em;
+  line-height: 1.6;
+  background: transparent;
+  color: var(--ink-soft);
+  vertical-align: 0.1em;
 }
 
 .chip.accent {
-  background: var(--accent-soft);
   border-color: var(--accent);
+  color: var(--accent);
 }
 
 .chip.warn {
-  background: var(--warn-bg);
   border-color: var(--warn-line);
+  color: var(--warn-line);
 }
 
-/* 英文界面里的中文原文（E3 的业务文字）：按中文读，左边一道细线提示“这是原文”。 */
+html[data-mode="globe"] .chip {
+  border-radius: 999px;
+  background: var(--chip-bg);
+}
+
+/* 英文界面里的中文原文（E3 的业务文字）：按中文读，左边一道细点线提示“这是原文”。 */
 .biz-zh {
   font-family: var(--font-body);
 }
@@ -433,23 +735,31 @@ div.biz-zh {
   }
 }
 
+/* ---- 事实清单：名称一列、数值一列 ---- */
 dl.facts {
   display: grid;
   grid-template-columns: minmax(7em, max-content) 1fr;
-  gap: 0.3em 1em;
+  gap: 0.25em 1em;
   margin: 0.5em 0;
 }
 
 dl.facts dt {
   color: var(--ink-soft);
+  font-family: var(--font-label);
+  font-size: 0.92em;
+  letter-spacing: 0.03em;
 }
 
 dl.facts dd {
   margin: 0;
+  font-family: var(--font-num);
 }
 
+/* ---- 表格：只有横线（booktabs）；数字不断行，放不下横向滚动 ---- */
 table {
   border-collapse: collapse;
+  border-top: 2px solid var(--line-strong);
+  border-bottom: 2px solid var(--line-strong);
 }
 
 .table-wrap {
@@ -457,25 +767,38 @@ table {
   max-width: 100%;
 }
 
-/* 正文为了长英文不撑破页面允许“任意位置断行”；表格里不这样做，否则窄屏上 0.5602 会被拆成一字一行。
-   数字不断行；放不下的表格在外框里横向滚动（外框可以用键盘聚焦）。 */
 th,
 td {
-  border: 1px solid var(--line);
-  padding: 0.3em 0.55em;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  padding: 0.35em 0.6em;
   text-align: left;
   font-size: 0.9rem;
   vertical-align: top;
   overflow-wrap: normal;
 }
 
-th {
-  background: var(--chip-bg);
+thead th {
+  border-bottom: 1.5px solid var(--line-strong);
+  font-family: var(--font-label);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  background: transparent;
+}
+
+th[scope="row"] {
+  font-weight: 600;
+}
+
+tbody tr:last-child td,
+tbody tr:last-child th {
+  border-bottom: 0;
 }
 
 td.num,
 th.num {
   text-align: right;
+  font-family: var(--font-num);
   font-variant-numeric: tabular-nums;
 }
 
@@ -504,14 +827,142 @@ dialog {
   overflow: auto;
 }
 
+html[data-mode="paper"] dialog {
+  border: 1.5px solid var(--line-strong);
+  box-shadow: 4px 4px 0 rgba(78, 71, 59, 0.18);
+}
+
+html[data-mode="globe"] dialog {
+  background: rgba(16, 27, 40, 0.92);
+  backdrop-filter: var(--panel-blur);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
 dialog::backdrop {
-  background: rgba(20, 24, 30, 0.5);
+  background: rgba(20, 24, 30, 0.45);
+}
+
+html[data-mode="globe"] dialog::backdrop {
+  background: rgba(4, 8, 12, 0.6);
 }
 
 ul.plain {
   list-style: none;
   padding: 0;
   margin: 0;
+}
+
+/* ---- 盖章：稿纸上的状态印记（分配“已分完”、画像“已确认”） ---- */
+.stamp {
+  display: inline-block;
+  font-family: var(--font-label);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  padding: 0.1em 0.5em;
+  border: 2px solid var(--seal);
+  color: var(--seal);
+  border-radius: 3px;
+  transform: rotate(-1.5deg);
+  animation: stamp-in 0.3s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+html[data-mode="globe"] .stamp {
+  transform: none;
+  border-width: 1px;
+}
+
+/* ---- 小动画：翻页、笔迹、图表长出来；系统要求减少动态效果时全部关掉 ---- */
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes pen-mark {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes stamp-in {
+  from {
+    opacity: 0;
+    transform: rotate(-1.5deg) scale(1.35);
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes grow-x {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.page-enter {
+  animation: page-in 0.28s ease-out;
+}
+
+/* 地球铺满舞台：高度一路传到地球容器（舞台 → 地图位 → 地球根 → 画布外框） */
+.city-map-fill {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.city-map-fill > [data-map="globe"] {
+  flex: 1;
+  min-height: 0;
+}
+
+/* 数字跳一下（例如“已选 5 座”变成 6 座） */
+.tick {
+  display: inline-block;
+  animation: pop-in 0.25s ease-out;
 }
 
 @media (prefers-reduced-motion: reduce) {

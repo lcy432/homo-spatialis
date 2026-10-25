@@ -39,10 +39,19 @@ export function createInvite(label: string): string {
 
 /** 用这个浏览器上下文的接口请求换会话（与页面共用 Cookie），再打开 path。 */
 export async function signIn(page: Page, token: string, to = "/"): Promise<void> {
-  const r = await page.request.post(`${ORIGIN}/api/v1/session`, {
+  // 换会话按地址限流（每分钟 10 次）。整套测试连着换十几个身份会撞上 429：按服务给的秒数等一下再换，像用户那样，不放宽服务的限制。
+  let r = await page.request.post(`${ORIGIN}/api/v1/session`, {
     data: { invite_token: token },
     headers: { Origin: ORIGIN, "Content-Type": "application/json" },
   });
+  for (let attempt = 0; r.status() === 429 && attempt < 2; attempt += 1) {
+    const body = (await r.json()) as { retry_after_seconds?: number | null };
+    await page.waitForTimeout(((body.retry_after_seconds ?? 30) + 1) * 1000);
+    r = await page.request.post(`${ORIGIN}/api/v1/session`, {
+      data: { invite_token: token },
+      headers: { Origin: ORIGIN, "Content-Type": "application/json" },
+    });
+  }
   expect(r.status(), "换会话").toBe(200);
   await page.goto(to);
 }

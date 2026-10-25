@@ -1,0 +1,86 @@
+/* 稿纸：地图是版面的视觉重心——占满正文宽度，上下各一道细线像插图 */
+.paperMap {
+  margin: 1rem 0 1.2rem;
+  padding: 0.4rem 0 0.2rem;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+/* 地球：整块舞台出血到窗口两边，高度几乎占满视口 */
+.stage {
+  position: relative;
+  height: calc(100vh - 8rem);
+  min-height: 460px;
+  /* 抵消正文的左右内边距，占满整栏；不用 vw（竖滚动条会让 100vw 多出一条横向滚动） */
+  margin: 0.4rem -1rem 1rem;
+  overflow: hidden;
+}
+
+.globe {
+  position: absolute;
+  inset: 0;
+}
+
+.panelToggle {
+  position: absolute;
+  top: 0.8rem;
+  right: 0.8rem;
+  z-index: 4;
+  background: rgba(10, 16, 23, 0.6);
+  backdrop-filter: var(--panel-blur);
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+}
+
+.panel {
+  position: absolute;
+  top: 3.9rem;
+  right: 0.8rem;
+  bottom: 0.8rem;
+  width: min(28rem, calc(100vw - 1.6rem));
+  overflow: auto;
+  overscroll-behavior: contain;
+  background: rgba(12, 20, 30, 0.55);
+  backdrop-filter: var(--panel-blur);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  z-index: 3;
+  transition:
+    transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 0.3s ease;
+}
+
+.panelInner {
+  padding: 0 1rem 1rem;
+}
+
+.panelInner h1 {
+  font-size: 1.4rem;
+  margin-top: 0.8rem;
+}
+
+.stage[data-panel="closed"] .panel {
+  transform: translateX(calc(100% + 1.2rem));
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (max-width: 767px) {
+  .stage {
+    height: calc(100vh - 7rem);
+    min-height: 420px;
+  }
+
+  .panel {
+    top: auto;
+    left: 0.5rem;
+    right: 0.5rem;
+    bottom: 0.5rem;
+    width: auto;
+    max-height: 58vh;
+  }
+
+  .stage[data-panel="closed"] .panel {
+    transform: translateY(calc(100% + 1rem));
+  }
+}

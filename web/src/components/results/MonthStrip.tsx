@@ -66,7 +66,13 @@ export function MonthStrip({
           const v = values?.[i];
           const text = v ?? (s ? word(s) : "");
           return (
-            <li key={i} className={`${styles.month} ${s ? CLASS[s] : ""}`} data-month-state={s} title={`${i + 1} · ${text}`}>
+            <li
+              key={i}
+              className={`${styles.month} ${s ? CLASS[s] : ""}`}
+              data-month-state={s}
+              title={`${i + 1} · ${text}`}
+              style={{ animationDelay: `${i * 25}ms` }}
+            >
               <span className="visually-hidden">
                 {i + 1}：{text}
               </span>

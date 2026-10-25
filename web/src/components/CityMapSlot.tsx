@@ -32,6 +32,9 @@ export interface CityMapProps {
   onCountry(country: string | null): void;
   /** 地球模式下是否把地图撑满（页面另有侧栏时）。 */
   fill?: boolean;
+  /** 稿纸平面地图放大到哪个国家（null = 世界）；给了 onFocus 就显示“放大到 / 回到世界”的按钮。 */
+  focus?: string | null;
+  onFocus?(country: string | null): void;
 }
 
 export function webglAvailable(): boolean {
@@ -66,19 +69,20 @@ function AnchorNotes({ res, geography, cities }: { res: AnchorResolution; geogra
       </p>
     );
   }
-  const note = geography.notes?.[0];
+  const notes = geography.notes ?? [];
   return (
     <div className="small muted" data-anchors={res.anchors.length ? "available" : "none"}>
-      {res.anchors.length ? (
-        <p>
-          {t("maps.anchorNote", { version: res.resourceVersion ?? "" })}
-          {note ? (
-            <>
-              {" "}
-              {locale === "en" && note.en ? note.en : <Zh>{note.zh}</Zh>}
-            </>
-          ) : null}
-        </p>
+      {res.anchors.length ? <p>{t("maps.anchorNote", { version: res.resourceVersion ?? "" })}</p> : null}
+      {notes.length ? (
+        // 清单自带的来源与基准说明（E3 原文）：收起来，想核对的人再展开
+        <details>
+          <summary>{t("maps.anchorSources")}</summary>
+          <ul>
+            {notes.map((n, i) => (
+              <li key={`${i}.${n.zh.slice(0, 20)}`}>{locale === "en" && n.en ? n.en : <Zh>{n.zh}</Zh>}</li>
+            ))}
+          </ul>
+        </details>
       ) : null}
       {res.missing.length ? (
         <p>
@@ -115,6 +119,23 @@ export function CityMapSlot(props: CityMapProps) {
     if (props.purpose === "output") props.onOpenCity?.(ref);
     else props.onToggle?.(ref, !selected.has(ref));
   };
+  const countryLabel = (code: string) => {
+    const g = props.geography?.cities?.find((c) => c.country === code);
+    return (locale === "en" ? g?.country_names.en : null) ?? g?.country_names.zh ?? code;
+  };
+  const tools =
+    props.onFocus && mode !== "globe" ? (
+      <div className={styles.mapTools} role="group" aria-label={t("maps.zoomGroup")}>
+        <button type="button" aria-pressed={props.focus == null} onClick={() => props.onFocus?.(null)}>
+          {t("maps.world")}
+        </button>
+        {[...supported].map((c) => (
+          <button key={c} type="button" aria-pressed={props.focus === c} onClick={() => props.onFocus?.(c)}>
+            {t("maps.zoomTo", { country: countryLabel(c) })}
+          </button>
+        ))}
+      </div>
+    ) : null;
   const paper = (focus: string | null | undefined) => (
     <PaperMap
       supported={supported}
@@ -134,7 +155,7 @@ export function CityMapSlot(props: CityMapProps) {
     ) : props.purpose === "output" ? (
       paper([...supported][0] ?? null)
     ) : (
-      paper(undefined)
+      paper(props.onFocus ? (props.focus ?? null) : undefined)
     );
 
   let body: ReactNode = flat;
@@ -167,10 +188,23 @@ export function CityMapSlot(props: CityMapProps) {
       fallback
     );
   }
+  const notes = <AnchorNotes res={resolution} geography={props.geography} cities={props.cities} />;
+  const filling = props.fill && mode === "globe" && hasGl;
   return (
-    <div className={`city-map ${props.fill ? "city-map-fill" : ""}`} data-purpose={props.purpose} data-anchor-count={anchors.length}>
+    <div className={`city-map ${filling ? "city-map-fill" : ""}`} data-purpose={props.purpose} data-anchor-count={anchors.length}>
+      {tools}
       {body}
-      <AnchorNotes res={resolution} geography={props.geography} cities={props.cities} />
+      {filling ? (
+        <details className={styles.stageNotes}>
+          <summary>{t("maps.aboutMap")}</summary>
+          <p className="small muted">
+            {t("maps.globeHint")} {t("maps.textureCredit")}
+          </p>
+          {notes}
+        </details>
+      ) : (
+        notes
+      )}
     </div>
   );
 }

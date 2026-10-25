@@ -43,6 +43,7 @@
 .supportedFill {
   fill: url(#pencil-hatch);
   stroke: none;
+  transition: fill 0.2s ease;
 }
 
 /* 双层描边：一层实线、一层半透明虚线，模仿铅笔重描；只是描边样式，不移动顶点 */
@@ -71,16 +72,56 @@
   stroke-width: 3;
 }
 
+/* 城市点：描边的圆，选中时填墨；刚选中的点弹一下 */
+.anchorGroup {
+  transform-box: fill-box;
+}
+
 .anchor,
 .anchorSelected {
   fill: var(--surface-solid);
   stroke: var(--ink);
   stroke-width: 2;
   cursor: pointer;
+  transition:
+    fill 0.2s ease,
+    r 0.2s ease;
 }
 
 .anchorSelected {
-  fill: var(--accent);
+  fill: var(--seal);
+  animation: anchor-pop 0.3s cubic-bezier(0.2, 1.4, 0.4, 1);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.anchor:hover,
+.anchorSelected:hover {
+  stroke-width: 3;
+}
+
+.anchor:focus,
+.anchorSelected:focus {
+  outline: none;
+}
+
+.anchor:focus-visible,
+.anchorSelected:focus-visible {
+  outline: none;
+  stroke: var(--focus-color);
+  stroke-width: 4;
+}
+
+@keyframes anchor-pop {
+  from {
+    transform: scale(0.4);
+  }
+  60% {
+    transform: scale(1.3);
+  }
+  to {
+    transform: scale(1);
+  }
 }
 
 .leader {
@@ -90,10 +131,12 @@
 
 .label {
   font-size: 15px;
+  font-family: var(--font-body);
   fill: var(--ink);
   paint-order: stroke;
   stroke: var(--bg);
   stroke-width: 3px;
+  pointer-events: none;
 }
 
 .mapRow {
@@ -108,6 +151,30 @@
   }
 }
 
+/* 地图上方的小工具条：放大到某国 / 回到世界（稿纸） */
+.mapTools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4em;
+  margin: 0.2em 0 0.4em;
+}
+
+.mapTools button {
+  min-height: 36px;
+  font-size: 0.85rem;
+}
+
+/* ---- 地球 ---- */
+.globeRoot {
+  position: relative;
+}
+
+.globeRootFill {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
 .globeWrap {
   position: relative;
   width: 100%;
@@ -118,9 +185,62 @@
   background: #070b10;
 }
 
+.globeWrapFill {
+  flex: 1;
+  min-height: 0;
+  aspect-ratio: auto;
+  max-height: none;
+  border-radius: 0;
+}
+
 .globeToolbar {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4em;
   margin: 0.4em 0;
+}
+
+/* 铺满时工具条与说明都浮在地球上，不占高度 */
+.globeToolbarFill {
+  position: absolute;
+  top: 0.8rem;
+  left: 0.8rem;
+  z-index: 2;
+  margin: 0;
+}
+
+.globeToolbarFill button {
+  background: rgba(10, 16, 23, 0.6);
+  backdrop-filter: var(--panel-blur);
+  font-size: 0.85rem;
+}
+
+.globeHint {
+  margin: 0.4em 0;
+}
+
+.stageNotes {
+  position: absolute;
+  left: 0.8rem;
+  bottom: 0.8rem;
+  z-index: 2;
+  max-width: min(30rem, calc(100vw - 1.6rem));
+  background: rgba(10, 16, 23, 0.6);
+  backdrop-filter: var(--panel-blur);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0 0.9rem;
+  font-size: 0.85rem;
+}
+
+.stageNotes summary {
+  font-family: var(--font-label);
+  letter-spacing: 0.06em;
+  color: var(--accent);
+}
+
+@media (max-width: 767px) {
+  .stageNotes {
+    display: none;
+  }
 }

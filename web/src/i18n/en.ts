@@ -647,6 +647,7 @@ export const en: Dict = {
     anchorUnavailable: "The city position manifest cannot be read: no city points are drawn and no position is guessed; use the list to choose and open cities.",
     anchorNote: "City points come from the service's geography manifest (version {{version}}).",
     anchorMissing: "Cities without a point: ",
+    anchorSources: "Coordinate sources and notes",
     anchorStatus: { unknown: "no trusted coordinates", not_applicable: "synthetic city, no coordinates", not_in_bundle: "not in the manifest" },
     globeLoading: "Loading the globe…",
     globeUnavailable:
@@ -655,6 +656,12 @@ export const en: Dict = {
     globeFocus: "Turn to the selected country",
     globeHint: "Drag to turn the globe, scroll or pinch to zoom; highlighted countries can be clicked. Keyboard users can do everything with the list below.",
     textureCredit: "Globe texture: NASA Blue Marble (public domain).",
+    panelHide: "Hide panel",
+    panelShow: "Show panel",
+    aboutMap: "About this map",
+    zoomGroup: "Map extent",
+    world: "World",
+    zoomTo: "Zoom to {{country}}",
   },
   dev: {
     gallery: "Sample gallery (development)",

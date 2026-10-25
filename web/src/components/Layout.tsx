@@ -71,6 +71,7 @@ export function AppShell() {
   const locale = useLocale();
   const { mode, setMode } = useMode();
   const { status, view } = useSession();
+  const location = useLocation();
   useFocusOnNavigate();
   return (
     <>
@@ -116,7 +117,9 @@ export function AppShell() {
         </div>
       </header>
       <main id="main" className={styles.main}>
-        <Outlet />
+        <div key={location.pathname} className="page-enter">
+          <Outlet />
+        </div>
       </main>
       <footer className={styles.footer}>
         <div className={styles.footerInner}>

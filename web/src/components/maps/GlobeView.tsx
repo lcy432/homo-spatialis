@@ -82,11 +82,13 @@ export default function GlobeView(props: GlobeViewProps) {
     const ro = new ResizeObserver(([entry]) => {
       if (!entry) return;
       const w = Math.round(entry.contentRect.width);
-      setSize({ w, h: Math.round(Math.min(entry.contentRect.height || w * 0.62, window.innerHeight * 0.7)) });
+      // 铺满舞台时高度就是容器的高度；普通版面按宽高比，最高不超过视口的七成
+      const h = props.fill ? Math.round(entry.contentRect.height) : Math.round(Math.min(entry.contentRect.height || w * 0.62, window.innerHeight * 0.7));
+      setSize({ w, h: Math.max(h, 120) });
     });
     ro.observe(el);
     return () => ro.disconnect();
-  }, []);
+  }, [props.fill]);
 
   const motionMs = reducedMotion() ? 0 : 700;
   const home = useMemo(() => homeFor(features, props.supported), [features, props.supported]);
@@ -127,8 +129,8 @@ export default function GlobeView(props: GlobeViewProps) {
   };
 
   return (
-    <div data-map="globe">
-      <div className={styles.globeToolbar} role="toolbar" aria-label={t("app.mode.globe")}>
+    <div data-map="globe" className={props.fill ? styles.globeRootFill : styles.globeRoot}>
+      <div className={`${styles.globeToolbar} ${props.fill ? styles.globeToolbarFill : ""}`} role="toolbar" aria-label={t("app.mode.globe")}>
         <button type="button" onClick={() => ref.current?.pointOfView(home, motionMs)}>
           {t("maps.globeReset")}
         </button>
@@ -136,7 +138,7 @@ export default function GlobeView(props: GlobeViewProps) {
           {t("maps.globeFocus")}
         </button>
       </div>
-      <div ref={wrap} className={styles.globeWrap} aria-label={t("maps.globeHint")} role="img">
+      <div ref={wrap} className={`${styles.globeWrap} ${props.fill ? styles.globeWrapFill : ""}`} aria-label={t("maps.globeHint")} role="img">
         {features ? (
           <Globe
             ref={ref}
@@ -168,6 +170,17 @@ export default function GlobeView(props: GlobeViewProps) {
             pointRadius={0.35}
             pointLabel={(p: object) => (p as MapAnchor).label}
             onPointClick={(p: object) => props.onCity?.((p as MapAnchor).cityRef)}
+            labelsData={[...props.anchors]}
+            labelLat={(p: object) => (p as MapAnchor).latitude}
+            labelLng={(p: object) => (p as MapAnchor).longitude}
+            labelText={(p: object) => (p as MapAnchor).label}
+            labelSize={0.9}
+            labelDotRadius={0}
+            labelAltitude={0.025}
+            labelColor={() => "rgba(233, 244, 251, 0.92)"}
+            labelResolution={2}
+            labelsTransitionDuration={0}
+            onLabelClick={(p: object) => props.onCity?.((p as MapAnchor).cityRef)}
             onGlobeReady={() => ref.current?.pointOfView(focusPov ?? home, 0)}
           />
         ) : (
@@ -176,9 +189,11 @@ export default function GlobeView(props: GlobeViewProps) {
           </p>
         )}
       </div>
-      <p className="small muted">
-        {t("maps.globeHint")} {t("maps.textureCredit")}
-      </p>
+      {props.fill ? null : (
+        <p className={`small muted ${styles.globeHint}`}>
+          {t("maps.globeHint")} {t("maps.textureCredit")}
+        </p>
+      )}
     </div>
   );
 }
