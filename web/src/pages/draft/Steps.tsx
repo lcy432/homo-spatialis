@@ -1,20 +1,25 @@
-// 第 1–4 步：地区与城市、生活事实、偏好与取舍、健康兴趣与补充。题目、选项、标签与说明都是 E3 能力清单的原话；
-// 候选（职业、兴趣、口味）来自服务对已保存草稿的审阅，用户主动选中才算数，不预勾。
+// 第 1–4 步：地区与城市、生活事实（职业目录、年龄、现金、资格）、偏好与取舍、健康与兴趣。
+// 题目、选项、标签、分组与说明都是 E3 能力清单与输入目录的原话；页面只收集回答，不换算资格、不推断职业、不改点数。
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { InterestReview, ProductCapabilities } from "../../contract/types";
+import type { CatalogOccupation, InputCatalog, InterestPanel, ProductCapabilities } from "../../contract/types";
 import { Allocator } from "../../components/Allocator";
+import { CatalogPicker } from "../../components/CatalogPicker";
+import { ChoicePanel, type PanelGroupDef, type PanelItem } from "../../components/ChoicePanel";
 import { CityList } from "../../components/CityList";
 import { useGeography } from "../../api/queries";
 import { CityMapSlot } from "../../components/CityMapSlot";
+import { Dialog } from "../../components/Dialog";
 import { MapStage } from "../../components/MapStage";
 import { Section } from "../../components/common";
 import { PageTitle, StepNav } from "../../components/Layout";
+import { occupationById } from "../../draft/catalog";
 import { useDraftEditor } from "../../draft/DraftEditor";
 import { parsePoints } from "../../draft/exact";
-import type { HealthChoice, LeisureState, TasteState } from "../../draft/reducer";
+import type { HealthChoice, InterestField, InterestSpecialState } from "../../draft/reducer";
 import { useDraftReview } from "../../draft/review";
-import { BizNotice, Zh, ZhList } from "../../i18n/biz";
+import { BizNotice, DText, Zh, ZhList } from "../../i18n/biz";
+import { useAnswerState } from "../../display/scope";
 import { ModelLanguageChoice } from "../StartPage";
 
 // 与 E3 的金额写法规则一致（src/product/exact.py）：不分组的非负十进制，或严格每三位一组的千分位。只用来提前提醒，正式检查在 E3。
@@ -72,52 +77,281 @@ export function PlaceStep() {
   );
 }
 
-function OccupationCandidates() {
+/** 兼容：没有输入目录的资料包（合成包）仍按文字描述 + 服务给的候选。 */
+function OccupationTextCompat() {
   const { t } = useTranslation();
   const { state, dispatch, save } = useDraftEditor();
   const d = state.draft;
+  const lang = d.occupation.language ?? "zh";
   const { review, current, query } = useDraftReview(!!d.occupation.raw_text?.trim());
-  if (!d.occupation.raw_text?.trim()) return null;
-  if (!review) {
-    return <p className="small muted">{save.kind === "saved" && query.isFetching ? t("facts.candidatesChecking") : t("facts.candidatesWait")}</p>;
-  }
-  const occ = review.occupation;
+  const occ = review?.occupation ?? null;
   return (
-    <div className="stack" aria-busy={!current || undefined}>
-      <h3>{t("facts.candidatesTitle")}</h3>
-      {!current ? <p className="small muted">{t("facts.candidatesChecking")}</p> : null}
-      <p>
-        <Zh>{occ.message_zh}</Zh>
+    <fieldset data-field="occupation">
+      <legend>{t("facts.occupation")}</legend>
+      <p className="small muted" id="occupation-help">
+        {t("facts.noCatalog")}
       </p>
-      <ul className="plain stack">
-        {(occ.candidates ?? []).map((c) => {
-          const picked = d.occupation.selected_candidate === c.candidate_id;
-          return (
-            <li key={c.candidate_id} className="card" data-candidate={c.candidate_id}>
-              <strong>
-                <Zh>{c.label}</Zh>
-              </strong>{" "}
-              {picked ? <span className="chip accent">{t("facts.picked")}</span> : null}
-              <ul className="small">
-                {c.duties.map((x) => (
-                  <Zh as="li" key={x}>
-                    {x}
-                  </Zh>
-                ))}
-              </ul>
-              <button
-                type="button"
-                className={picked ? undefined : "primary"}
-                aria-pressed={picked}
-                onClick={() => dispatch({ type: "occupation/select", candidateId: picked ? null : c.candidate_id })}
-              >
-                {picked ? t("facts.unpick") : t("facts.pick")}
+      <label htmlFor="occupation-text" className="visually-hidden">
+        {t("facts.occupation")}
+      </label>
+      <textarea
+        id="occupation-text"
+        name="occupation.raw_text"
+        lang={lang === "en" ? "en" : "zh-CN"}
+        aria-describedby="occupation-help"
+        value={d.occupation.raw_text ?? ""}
+        maxLength={300}
+        onChange={(e) => dispatch({ type: "occupation/text", text: e.target.value })}
+        onBlur={() => dispatch({ type: "history/break" })}
+        style={{ minHeight: "4em" }}
+      />
+      {d.occupation.raw_text?.trim() ? (
+        !occ ? (
+          <p className="small muted">{save.kind === "saved" && query.isFetching ? t("facts.candidatesChecking") : t("facts.candidatesWait")}</p>
+        ) : (
+          <div className="stack" aria-busy={!current || undefined}>
+            <h3>{t("facts.candidatesTitle")}</h3>
+            <p>
+              <Zh>{occ.message_zh}</Zh>
+            </p>
+            <ul className="plain stack">
+              {(occ.candidates ?? []).map((c) => {
+                const picked = d.occupation.selected_candidate === c.candidate_id;
+                return (
+                  <li key={c.candidate_id} className="card" data-candidate={c.candidate_id}>
+                    <strong>
+                      <Zh>{c.label}</Zh>
+                    </strong>{" "}
+                    {picked ? <span className="chip accent">{t("facts.picked")}</span> : null}
+                    <ul className="small">
+                      {c.duties.map((x) => (
+                        <Zh as="li" key={x}>
+                          {x}
+                        </Zh>
+                      ))}
+                    </ul>
+                    <button
+                      type="button"
+                      className={picked ? undefined : "primary"}
+                      aria-pressed={picked}
+                      onClick={() => dispatch({ type: "occupation/select", candidateId: picked ? null : c.candidate_id })}
+                    >
+                      {picked ? t("facts.unpick") : t("facts.pick")}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )
+      ) : null}
+    </fieldset>
+  );
+}
+
+export function ExperienceQuestion({ catalog, occupation }: { catalog: InputCatalog; occupation: CatalogOccupation }) {
+  const { t } = useTranslation();
+  const { state, dispatch } = useDraftEditor();
+  const d = state.draft;
+  const q = occupation.experience_question ? (catalog.experience ?? []).find((x) => x.question_id === occupation.experience_question) : null;
+  const exp = d.experience;
+  const entries = exp?.state === "provided" ? (exp.entries ?? []) : [];
+  const stale = entries.filter((e) => !q || !q.related.includes(e.concept_id));
+  // “有相关经验”但还没填年数时，草稿里与“没有相关经验”一样是空表（契约没有这个中间态）：这里只记用户点了哪个单选
+  const [wantsEntries, setWantsEntries] = useState(false);
+  if (!q) {
+    // 这个职业没有经验题：旧条目（为别的职业填的）照实列出，由用户决定去留，不悄悄删
+    if (!stale.length) return null;
+    return (
+      <fieldset data-field="experience">
+        <legend>{t("facts.experience")}</legend>
+        <p className="small box warn">{t("facts.expStale")}</p>
+        <StaleEntries entries={stale} catalog={catalog} />
+      </fieldset>
+    );
+  }
+  const mode: "unanswered" | "unsure" | "none" | "has" =
+    exp?.state === "unsure" ? "unsure" : exp?.state === "provided" ? (entries.length || wantsEntries ? "has" : "none") : "unanswered";
+  return (
+    <fieldset data-field="experience">
+      <legend>{t("facts.experience")}</legend>
+      <Zh as="p">{q.prompt}</Zh>
+      <p className="small muted">{t("facts.expNote")}</p>
+      {(
+        [
+          ["has", t("facts.expHas")],
+          ["none", t("facts.expNone")],
+          ["unsure", t("facts.expUnsure")],
+          ["unanswered", t("facts.expUnanswered")],
+        ] as const
+      ).map(([v, label]) => (
+        <label key={v} className="choice">
+          <input
+            type="radio"
+            name="experience.state"
+            value={v}
+            checked={mode === v}
+            onChange={() => {
+              setWantsEntries(v === "has");
+              // “有相关经验”先成为空表，由下面填年数；其他状态照原样
+              if (v === "has") {
+                if (exp?.state !== "provided") dispatch({ type: "experience/state", state: "none" });
+              } else dispatch({ type: "experience/state", state: v });
+            }}
+          />
+          {label}
+        </label>
+      ))}
+      {mode === "has" ? (
+        <div className="stack">
+          {q.related.map((cid) => {
+            const o = occupationById(catalog, cid);
+            const cur = entries.find((e) => e.concept_id === cid);
+            const id = `exp-${cid}`;
+            return (
+              <p key={cid}>
+                <label htmlFor={id}>{t("facts.expYears", { label: o?.label ?? cid })}</label>{" "}
+                <input
+                  id={id}
+                  name={`experience.${cid}`}
+                  type="number"
+                  min={0}
+                  max={60}
+                  step={1}
+                  inputMode="numeric"
+                  value={cur ? String(cur.years) : ""}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    const n = v === "" ? null : Number(v);
+                    dispatch({ type: "experience/set", conceptId: cid, years: n === null || !Number.isInteger(n) || n < 0 ? null : n });
+                  }}
+                  onBlur={() => dispatch({ type: "history/break" })}
+                  style={{ width: "6em" }}
+                />
+              </p>
+            );
+          })}
+          {stale.length ? (
+            <>
+              <p className="small box warn">{t("facts.expStale")}</p>
+              <StaleEntries entries={stale} catalog={catalog} />
+            </>
+          ) : null}
+        </div>
+      ) : null}
+    </fieldset>
+  );
+}
+
+function StaleEntries({ entries, catalog }: { entries: readonly { concept_id: string; years: number }[]; catalog: InputCatalog }) {
+  const { t } = useTranslation();
+  const { dispatch } = useDraftEditor();
+  return (
+    <ul className="small">
+      {entries.map((e) => (
+        <li key={e.concept_id}>
+          <Zh>{occupationById(catalog, e.concept_id)?.label ?? e.concept_id}</Zh>：{e.years}{" "}
+          <button type="button" className="link" onClick={() => dispatch({ type: "experience/set", conceptId: e.concept_id, years: null })}>
+            {t("common.remove")}
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function Qualifications({ catalog }: { catalog: InputCatalog }) {
+  const { t } = useTranslation();
+  const { state, dispatch } = useDraftEditor();
+  const d = state.draft;
+  const s = catalog.sections;
+  const edu = d.education;
+  const eduMode = edu?.state === "provided" ? (edu.option_id ?? "") : (edu?.state ?? "unanswered");
+  const cert = d.certificates;
+  const certSelected = cert?.state === "provided" ? (cert.selected ?? []) : [];
+  const certMode: "has" | "none" | "unsure" | "unanswered" =
+    cert?.state === "provided" ? (certSelected.length ? "has" : "none") : cert?.state === "unsure" ? "unsure" : "unanswered";
+  const selectedOcc = d.occupation.mode === "catalog" ? occupationById(catalog, d.occupation.selected_candidate) : null;
+  const certItems: PanelItem[] = (catalog.certificates ?? []).map((c) => ({
+    key: c.ability_id,
+    label: c.label,
+    groupId: "all",
+    searchTerms: [c.label],
+    note: t("facts.certFor", { list: c.occupations.map((id) => occupationById(catalog, id)?.label ?? id).join("、") }),
+  }));
+  const certGroups: PanelGroupDef[] = [{ id: "all", label: t("facts.certificates") }];
+  return (
+    <Section title={t("facts.qualTitle")}>
+      <p className="small muted">{t("facts.qualNote")}</p>
+      {(d.abilities ?? []).length ? (
+        <div className="box warn" data-legacy-abilities>
+          <p>{t("facts.legacyAbilities", { n: (d.abilities ?? []).length })}</p>
+          <button type="button" onClick={() => dispatch({ type: "abilities/clear" })}>
+            {t("facts.legacyAbilitiesClear")}
+          </button>
+        </div>
+      ) : null}
+      {s.education && catalog.education?.length ? (
+        <fieldset data-field="education">
+          <legend>{t("facts.education")}</legend>
+          {[...catalog.education]
+            .sort((a, b) => a.order - b.order)
+            .map((o) => (
+              <label key={o.option_id} className="choice">
+                <input
+                  type="radio"
+                  name="education"
+                  value={o.option_id}
+                  checked={eduMode === o.option_id}
+                  onChange={() => dispatch({ type: "education/set", state: "provided", optionId: o.option_id })}
+                />
+                <Zh>{o.label}</Zh>
+              </label>
+            ))}
+          <label className="choice">
+            <input type="radio" name="education" value="unsure" checked={eduMode === "unsure"} onChange={() => dispatch({ type: "education/set", state: "unsure" })} />
+            {t("facts.eduUnsure")}
+          </label>
+          <label className="choice">
+            <input
+              type="radio"
+              name="education"
+              value="unanswered"
+              checked={eduMode === "unanswered"}
+              onChange={() => dispatch({ type: "education/set", state: "unanswered" })}
+            />
+            {t("facts.eduUnanswered")}
+          </label>
+        </fieldset>
+      ) : null}
+      {s.certificates && catalog.certificates?.length ? (
+        <fieldset data-field="certificates" data-certificates={certMode}>
+          <legend>{t("facts.certificates")}</legend>
+          <div className="row">
+            {(
+              [
+                ["none", t("facts.certNone")],
+                ["unsure", t("facts.certUnsure")],
+                ["unanswered", t("facts.certUnanswered")],
+              ] as const
+            ).map(([v, label]) => (
+              <button key={v} type="button" aria-pressed={certMode === v} data-certificates-state={v} onClick={() => dispatch({ type: "certificates/state", state: v })}>
+                {label}
               </button>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
+            ))}
+          </div>
+          <p className="small muted">{t("facts.certHas")}</p>
+          <ChoicePanel
+            name="certificates"
+            items={certItems}
+            groups={certGroups}
+            selected={certSelected}
+            onToggle={(k, on) => dispatch({ type: "certificates/toggle", abilityId: k, selected: on })}
+          />
+        </fieldset>
+      ) : null}
+      {s.experience && selectedOcc ? <ExperienceQuestion catalog={catalog} occupation={selectedOcc} /> : null}
+    </Section>
   );
 }
 
@@ -125,11 +359,13 @@ export function FactsStep() {
   const { t } = useTranslation();
   const { caps, state, dispatch, draftId } = useDraftEditor();
   const d = state.draft;
+  const catalog = caps.input_catalog ?? null;
   const basis = caps.money_bases[0];
   const cashText = d.cash.amount_text ?? "";
   const cashLooksWrong = cashText !== "" && !MONEY_PLAIN.test(cashText.trim()) && !MONEY_GROUPED.test(cashText.trim());
   const ageOk = state.ageText.trim() === "" || d.age.state === "provided";
   const lang = d.occupation.language ?? "zh";
+  const selectedConcept = d.occupation.mode === "catalog" ? (d.occupation.selected_candidate ?? null) : null;
   return (
     <div>
       <PageTitle>{t("steps.facts")}</PageTitle>
@@ -141,27 +377,29 @@ export function FactsStep() {
         name="occupation.language"
       />
 
-      <fieldset data-field="occupation">
-        <legend>{t("facts.occupation")}</legend>
-        <p className="small muted" id="occupation-help">
-          {t("facts.occupationHelp")} {t("facts.occupationLang", { lang: lang === "en" ? t("facts.langEn") : t("facts.langZh") })}
-        </p>
-        <label htmlFor="occupation-text" className="visually-hidden">
-          {t("facts.occupation")}
-        </label>
-        <textarea
-          id="occupation-text"
-          name="occupation.raw_text"
-          lang={lang === "en" ? "en" : "zh-CN"}
-          aria-describedby="occupation-help"
-          value={d.occupation.raw_text ?? ""}
-          maxLength={300}
-          onChange={(e) => dispatch({ type: "occupation/text", text: e.target.value })}
-          onBlur={() => dispatch({ type: "history/break" })}
-          style={{ minHeight: "4em" }}
-        />
-        <OccupationCandidates />
-      </fieldset>
+      {catalog && catalog.sections.occupation === "catalog_select" ? (
+        <Section title={t("facts.occupation")}>
+          <p className="small muted">{t("facts.occupationHelp")}</p>
+          {d.occupation.mode !== "catalog" && d.occupation.raw_text ? (
+            <div className="box warn" data-legacy-occupation-text>
+              <p>{t("facts.legacyText", { text: d.occupation.raw_text })}</p>
+              <button type="button" onClick={() => dispatch({ type: "occupation/clear" })}>
+                {t("facts.clearOccupation")}
+              </button>
+            </div>
+          ) : null}
+          <CatalogPicker
+            catalog={catalog}
+            selected={selectedConcept}
+            onSelect={(o) =>
+              dispatch({ type: "occupation/catalog", conceptId: o.concept_id, catalogVersion: catalog.catalog_version, catalogFingerprint: catalog.content_fingerprint })
+            }
+            onClear={() => dispatch({ type: "occupation/clear" })}
+          />
+        </Section>
+      ) : (
+        <OccupationTextCompat />
+      )}
 
       <fieldset data-field="age">
         <legend>
@@ -227,42 +465,10 @@ export function FactsStep() {
         ) : null}
       </fieldset>
 
-      {(caps.abilities ?? []).length ? (
-        <fieldset data-field="abilities">
-          <legend>{t("facts.abilities")}</legend>
-          <p className="small muted">{t("facts.abilitiesNote")}</p>
-          {(caps.abilities ?? []).map((a) => {
-            const cur = d.abilities?.find((x) => x.ability_id === a.ability_id)?.state ?? "";
-            return (
-              <fieldset key={a.ability_id}>
-                <legend>
-                  <Zh>{a.label}</Zh>
-                </legend>
-                <p className="small muted">
-                  <Zh>{a.ask_when}</Zh>
-                </p>
-                {(
-                  [
-                    ["provided", t("facts.abilityHeld")],
-                    ["unsure", t("facts.abilityUnsure")],
-                    ["", t("facts.abilityNone")],
-                  ] as const
-                ).map(([v, label]) => (
-                  <label key={v || "none"} className="choice">
-                    <input
-                      type="radio"
-                      name={`abilities.${a.ability_id}`}
-                      value={v || "none"}
-                      checked={cur === v}
-                      onChange={() => dispatch({ type: "ability/set", abilityId: a.ability_id, state: v === "" ? null : v })}
-                    />
-                    {label}
-                  </label>
-                ))}
-              </fieldset>
-            );
-          })}
-        </fieldset>
+      {catalog && (catalog.sections.education || catalog.sections.certificates || catalog.sections.experience) ? (
+        <Qualifications catalog={catalog} />
+      ) : (caps.abilities ?? []).length ? (
+        <LegacyAbilities caps={caps} />
       ) : null}
 
       <Section title={t("facts.startTitle")}>
@@ -271,6 +477,50 @@ export function FactsStep() {
 
       <StepNav draftId={draftId} prev="place" next="priorities" />
     </div>
+  );
+}
+
+/** 兼容：没有输入目录时的逐项资格确认（合成资料包）。 */
+function LegacyAbilities({ caps }: { caps: ProductCapabilities }) {
+  const { t } = useTranslation();
+  const { state, dispatch } = useDraftEditor();
+  const d = state.draft;
+  return (
+    <fieldset data-field="abilities">
+      <legend>{t("facts.abilities")}</legend>
+      <p className="small muted">{t("facts.abilitiesNote")}</p>
+      {(caps.abilities ?? []).map((a) => {
+        const cur = d.abilities?.find((x) => x.ability_id === a.ability_id)?.state ?? "";
+        return (
+          <fieldset key={a.ability_id}>
+            <legend>
+              <Zh>{a.label}</Zh>
+            </legend>
+            <p className="small muted">
+              <Zh>{a.ask_when}</Zh>
+            </p>
+            {(
+              [
+                ["provided", t("facts.abilityHeld")],
+                ["unsure", t("facts.abilityUnsure")],
+                ["", t("facts.abilityNone")],
+              ] as const
+            ).map(([v, label]) => (
+              <label key={v || "none"} className="choice">
+                <input
+                  type="radio"
+                  name={`abilities.${a.ability_id}`}
+                  value={v || "none"}
+                  checked={cur === v}
+                  onChange={() => dispatch({ type: "ability/set", abilityId: a.ability_id, state: v === "" ? null : v })}
+                />
+                {label}
+              </label>
+            ))}
+          </fieldset>
+        );
+      })}
+    </fieldset>
   );
 }
 
@@ -291,7 +541,7 @@ export function PrioritiesStep() {
       <PageTitle>{t("steps.priorities")}</PageTitle>
       <BizNotice />
       <Allocator group="six_dimensions" title={t("priorities.sixTitle")} help={t("priorities.sixHelp")} />
-      <section aria-label={t("priorities.materialTitle")}>
+      <section aria-label={t("priorities.materialTitle")} data-material={materialStatus}>
         {materialStatus === "open" ? (
           <Allocator group="material" title={t("priorities.materialTitle")} help={t("priorities.materialHelp")} />
         ) : (
@@ -306,139 +556,117 @@ export function PrioritiesStep() {
   );
 }
 
-const LEISURE_STATES: LeisureState[] = ["unanswered", "unsure", "no_fixed_hobby", "generic", "described"];
-const TASTE_STATES: TasteState[] = ["unanswered", "unsure", "no_preference", "described"];
-
-/** E3 给的作答说明按状态顺序排列，每句冒号前是名称、冒号后是含义；长度对不上就不硬配，原样列出。 */
-function stateTexts(states: readonly string[], texts: readonly string[]): { label: string; meaning: string }[] | null {
-  if (texts.length !== states.length) return null;
-  return texts.map((s) => {
-    const i = s.indexOf("：");
-    return i > 0 ? { label: s.slice(0, i), meaning: s.slice(i + 1) } : { label: s, meaning: "" };
-  });
+/** 面板的条目与分组：有输入目录就用目录；没有（合成包）就用能力清单的词表（一个分组，别名当搜索词）。 */
+function panelOf(field: InterestField, caps: ProductCapabilities, t: (k: "more.leisureTitle" | "more.tasteTitle") => string): { items: PanelItem[]; groups: PanelGroupDef[]; panel: InterestPanel | null } {
+  const panel = field === "leisure_interest" ? (caps.input_catalog?.leisure ?? null) : (caps.input_catalog?.taste ?? null);
+  if (panel) {
+    const groups = [...panel.groups].sort((a, b) => a.order - b.order).map((g) => ({ id: g.group_id, label: g.label }));
+    const items = [...panel.entries].sort((a, b) => a.order - b.order).map((e) => ({ key: e.key, label: e.label, groupId: e.group_id, searchTerms: e.search_terms }));
+    return { items, groups, panel };
+  }
+  const vocab = field === "leisure_interest" ? caps.interests.leisure_categories : caps.interests.cuisines;
+  const gid = "all";
+  return {
+    items: vocab.map((v) => ({ key: v.key, label: v.label, groupId: gid, searchTerms: [v.label, ...v.aliases] })),
+    groups: [{ id: gid, label: t(field === "leisure_interest" ? "more.leisureTitle" : "more.tasteTitle") }],
+    panel: null,
+  };
 }
 
-function InterestSection({
-  field,
-  title,
-  states,
-  texts,
-  vocabulary,
-  placeholder,
-  review,
-}: {
-  field: "leisure_interest" | "taste";
-  title: string;
-  states: readonly (LeisureState | TasteState)[];
-  texts: readonly string[];
-  vocabulary: ProductCapabilities["interests"]["cuisines"];
-  placeholder: string;
-  review: InterestReview | null;
-}) {
+const SPECIALS: Record<InterestField, InterestSpecialState[]> = {
+  leisure_interest: ["unsure", "no_fixed_hobby", "generic"],
+  taste: ["unsure", "no_preference"],
+};
+
+/** 特殊作答状态的名称与含义：按 (answer, state) 从能力清单的显示信封取（交接单第 13.3 节）；没有信封时用界面字典的名称。 */
+export function SpecialStateText({ field, state }: { field: InterestField; state: string }) {
   const { t } = useTranslation();
-  const { state, dispatch } = useDraftEditor();
+  const a = useAnswerState(field === "taste" ? "taste" : "leisure", state);
+  if (!a) return <>{t(`more.special_${state}` as "more.special_unsure")}</>;
+  return (
+    <>
+      <strong>
+        <DText text={a.name} />
+      </strong>
+      ：<DText text={a.meaning} />
+    </>
+  );
+}
+
+function InterestSection({ field, title }: { field: InterestField; title: string }) {
+  const { t } = useTranslation();
+  const { caps, state, dispatch } = useDraftEditor();
   const cur = state.draft[field];
   const curState = cur?.state ?? "unanswered";
-  const selected = cur?.selected ?? [];
-  const labelOf = (key: string) => vocabulary.find((v) => v.key === key)?.label ?? key;
-  const described = stateTexts(states, texts);
-  const candidates = review?.candidates ?? [];
+  const selected = curState === "selected" ? (cur?.selected ?? []) : [];
+  const { items, groups, panel } = panelOf(field, caps, t);
+  const [pendingSpecial, setPendingSpecial] = useState<InterestSpecialState | "unanswered" | null>(null);
+  const labelOf = (k: string) => items.find((i) => i.key === k)?.label ?? k;
+  const isSpecial = curState !== "unanswered" && curState !== "selected";
+  const setSpecial = (s: InterestSpecialState | "unanswered") => {
+    if (selected.length) setPendingSpecial(s);
+    else dispatch({ type: "interest/state", field, state: s });
+  };
   return (
     <Section title={title}>
-      <fieldset data-field={field}>
-        <legend>{t("more.stateList")}</legend>
-        {described ? (
-          states.map((s, i) => (
-            <label key={s} className="choice top">
-              <input
-                type="radio"
-                name={`${field}.state`}
-                value={s}
-                checked={curState === s}
-                onChange={() => dispatch({ type: "interest/state", field, state: s })}
-              />
-              <span>
-                <Zh>{described[i]?.label}</Zh>
-                {described[i]?.meaning ? (
-                  <span className="small muted" style={{ display: "block" }}>
-                    <Zh>{described[i]?.meaning}</Zh>
-                  </span>
-                ) : null}
-              </span>
-            </label>
-          ))
-        ) : (
-          <>
-            <p className="small box warn">{t("more.statesMismatch")}</p>
-            <ZhList items={texts} />
-          </>
-        )}
-      </fieldset>
-      {curState === "described" ? (
-        <div className="stack">
-          <label htmlFor={`${field}-text`}>{t("more.describe")}</label>
-          <textarea
-            id={`${field}-text`}
-            name={`${field}.text`}
-            placeholder={placeholder}
-            value={cur?.text ?? ""}
-            maxLength={500}
-            onChange={(e) => dispatch({ type: "interest/text", field, text: e.target.value })}
-            onBlur={() => dispatch({ type: "history/break" })}
-          />
-          {review ? (
-            <div className="stack">
-              <p className="small">
-                <Zh>{review.message_zh}</Zh>
-              </p>
-              {candidates.length ? (
-                <fieldset>
-                  <legend>{t("more.candidates")}</legend>
-                  {candidates.map((k) => (
-                    <label key={k} className="choice">
-                      <input
-                        type="checkbox"
-                        name={`${field}.selected.${k}`}
-                        checked={selected.includes(k)}
-                        onChange={(e) => dispatch({ type: "interest/select", field, key: k, selected: e.target.checked })}
-                      />
-                      <Zh>{labelOf(k)}</Zh>
-                    </label>
-                  ))}
-                </fieldset>
-              ) : null}
-              {review.ambiguous?.length ? (
-                <div>
-                  <p className="small">{t("more.ambiguous")}</p>
-                  <ZhList items={review.ambiguous} />
-                </div>
-              ) : null}
-              {review.unrecognized?.length ? (
-                <div>
-                  <p className="small">{t("more.unrecognized")}</p>
-                  <ZhList items={review.unrecognized} />
-                </div>
-              ) : null}
-            </div>
-          ) : (
-            <p className="small muted">{t("more.reviewPending")}</p>
-          )}
-          <details>
-            <summary>{t("more.fromVocabulary")}</summary>
-            {vocabulary.map((v) => (
-              <label key={v.key} className="choice">
-                <input
-                  type="checkbox"
-                  checked={selected.includes(v.key)}
-                  onChange={(e) => dispatch({ type: "interest/select", field, key: v.key, selected: e.target.checked })}
-                />
-                <Zh>{v.label}</Zh>
-              </label>
-            ))}
-          </details>
-          {!selected.length ? <p className="small muted">{t("more.selectedNone")}</p> : null}
+      {panel ? <Zh as="p">{panel.note}</Zh> : null}
+      <p className="small muted">{t(field === "leisure_interest" ? "more.leisureHelp" : "more.tasteHelp")}</p>
+      {curState === "described" && cur?.text ? (
+        <div className="box warn" data-legacy-interest-text>
+          <p>{t("more.legacyText", { text: cur.text })}</p>
+          <button type="button" onClick={() => dispatch({ type: "interest/clear", field })}>
+            {t("more.legacyClear")}
+          </button>
         </div>
       ) : null}
+      {isSpecial ? (
+        <p className="box note" data-interest-state={curState}>
+          <SpecialStateText field={field} state={curState} />{" "}
+          <button type="button" className="link" onClick={() => dispatch({ type: "interest/state", field, state: "unanswered" })}>
+            {t("more.backToPanel")}
+          </button>
+        </p>
+      ) : (
+        <ChoicePanel
+          name={field}
+          items={items}
+          groups={groups}
+          selected={selected}
+          notes={panel?.search_notes ?? []}
+          onToggle={(k, on) => dispatch({ type: "interest/toggle", field, key: k, selected: on })}
+        />
+      )}
+      <details data-field={field}>
+        <summary>{t("more.otherCases")}</summary>
+        {SPECIALS[field].map((s) => (
+          <label key={s} className="choice">
+            <input type="radio" name={`${field}.state`} value={s} checked={curState === s} onChange={() => setSpecial(s)} />
+            {t(`more.special_${s}` as "more.special_unsure")}
+          </label>
+        ))}
+        <label className="choice">
+          <input type="radio" name={`${field}.state`} value="unanswered" checked={curState === "unanswered"} onChange={() => setSpecial("unanswered")} />
+          {t("states.unanswered")}
+        </label>
+      </details>
+      <Dialog open={pendingSpecial !== null} onClose={() => setPendingSpecial(null)} title={t("more.otherCases")}>
+        <p>{t("more.specialClears", { n: selected.length, list: selected.map(labelOf).join("、") })}</p>
+        <div className="row">
+          <button
+            type="button"
+            className="primary"
+            onClick={() => {
+              if (pendingSpecial) dispatch({ type: "interest/state", field, state: pendingSpecial });
+              setPendingSpecial(null);
+            }}
+          >
+            {t("more.specialClearConfirm")}
+          </button>
+          <button type="button" onClick={() => setPendingSpecial(null)}>
+            {t("common.cancel")}
+          </button>
+        </div>
+      </Dialog>
     </Section>
   );
 }
@@ -450,13 +678,6 @@ export function MoreStep() {
   const hq = caps.health_questionnaire;
   const freeText = d.free_text.text ?? "";
   const freeLen = [...freeText].length;
-  const [newKind, setNewKind] = useState((caps.attribute_kinds ?? [])[0]?.kind ?? "");
-  const [newNeed, setNewNeed] = useState(caps.material_leaves[0]?.key ?? "");
-  const [newText, setNewText] = useState("");
-  const [newHard, setNewHard] = useState(false);
-  const interestText = (d.leisure_interest?.state === "described" && !!d.leisure_interest.text) || (d.taste?.state === "described" && !!d.taste.text);
-  const { review } = useDraftReview(interestText);
-
   return (
     <div>
       <PageTitle>{t("steps.more")}</PageTitle>
@@ -503,24 +724,8 @@ export function MoreStep() {
         </p>
       </Section>
 
-      <InterestSection
-        field="leisure_interest"
-        title={t("more.leisureTitle")}
-        states={LEISURE_STATES}
-        texts={caps.interests.leisure_states_zh}
-        vocabulary={caps.interests.leisure_categories}
-        placeholder={t("more.describePlaceholderLeisure")}
-        review={review?.leisure_interest ?? null}
-      />
-      <InterestSection
-        field="taste"
-        title={t("more.tasteTitle")}
-        states={TASTE_STATES}
-        texts={caps.interests.taste_states_zh}
-        vocabulary={caps.interests.cuisines}
-        placeholder={t("more.describePlaceholderTaste")}
-        review={review?.taste ?? null}
-      />
+      <InterestSection field="leisure_interest" title={t("more.leisureTitle")} />
+      <InterestSection field="taste" title={t("more.tasteTitle")} />
       <p className="small muted">
         <Zh>{caps.interests.matching_note_zh}</Zh>
       </p>
@@ -543,126 +748,6 @@ export function MoreStep() {
           {freeLen > caps.free_text_max_chars ? `　${t("more.freeOver", { max: caps.free_text_max_chars })}` : null}
         </p>
       </Section>
-
-      {(caps.hard_requirement_options ?? []).length ? (
-        <Section title={t("more.hardTitle")}>
-          <p className="small">{t("more.hardNote")}</p>
-          {(caps.hard_requirement_options ?? []).map((o) => {
-            const cur = d.hard_requirements?.find((h) => h.option_id === o.option_id);
-            const inputId = `hard-${o.option_id}`;
-            return (
-              <fieldset key={o.option_id} data-field="hard_requirements">
-                <legend>
-                  <Zh>{o.label}</Zh>
-                </legend>
-                <label className="choice">
-                  <input
-                    type="checkbox"
-                    checked={!!cur}
-                    onChange={(e) => dispatch({ type: "hard/set", optionId: o.option_id, enabled: e.target.checked, value: null })}
-                  />
-                  {t("more.hardOn")}
-                </label>
-                {cur ? (
-                  <p>
-                    <label htmlFor={inputId}>{t("more.hardValue", { unit: o.unit, min: o.minimum, max: o.maximum, step: o.step })}</label>{" "}
-                    <input
-                      id={inputId}
-                      name={`hard_requirements.${o.option_id}`}
-                      type="number"
-                      min={o.minimum}
-                      max={o.maximum}
-                      step={o.step}
-                      value={cur.parameter_value ?? ""}
-                      onChange={(e) =>
-                        dispatch({
-                          type: "hard/set",
-                          optionId: o.option_id,
-                          enabled: true,
-                          value: e.target.value === "" || !Number.isInteger(Number(e.target.value)) ? null : Number(e.target.value),
-                        })
-                      }
-                      onBlur={() => dispatch({ type: "history/break" })}
-                      style={{ width: "7em" }}
-                    />
-                  </p>
-                ) : null}
-                <p className="small muted">
-                  <Zh>{o.verification}</Zh>
-                </p>
-              </fieldset>
-            );
-          })}
-        </Section>
-      ) : null}
-
-      {(caps.attribute_kinds ?? []).length ? (
-        <Section title={t("more.attrTitle")}>
-          <p className="small">{t("more.attrNote")}</p>
-          {(d.attribute_preferences ?? []).length ? (
-            <ul>
-              {(d.attribute_preferences ?? []).map((p) => {
-                const kind = (caps.attribute_kinds ?? []).find((k) => k.kind === p.kind);
-                const need = caps.material_leaves.find((m) => m.key === p.need);
-                return (
-                  <li key={p.preference_id}>
-                    <Zh>{kind?.label ?? p.kind}</Zh>（<Zh>{need?.label ?? p.need}</Zh>）：“{p.raw_text}”
-                    {p.as_hard_requirement ? <span className="chip warn">{t("more.attrHard")}</span> : null}{" "}
-                    <span className="small muted">
-                      <Zh>{kind?.note}</Zh>
-                    </span>{" "}
-                    <button type="button" className="link" onClick={() => dispatch({ type: "attr/remove", preferenceId: p.preference_id })}>
-                      {t("more.attrRemove")}
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : null}
-          <div className="stack">
-            <p>
-              <label htmlFor="attr-kind">{t("more.attrKind")}</label>{" "}
-              <select id="attr-kind" value={newKind} onChange={(e) => setNewKind(e.target.value)}>
-                {(caps.attribute_kinds ?? []).map((k) => (
-                  <option key={k.kind} value={k.kind}>
-                    {k.label}
-                  </option>
-                ))}
-              </select>
-            </p>
-            <p>
-              <label htmlFor="attr-need">{t("more.attrNeed")}</label>{" "}
-              <select id="attr-need" value={newNeed} onChange={(e) => setNewNeed(e.target.value)}>
-                {caps.material_leaves.map((m) => (
-                  <option key={m.key} value={m.key}>
-                    {m.label}
-                  </option>
-                ))}
-              </select>
-            </p>
-            <p>
-              <label htmlFor="attr-text">{t("more.attrText")}</label>
-              <input id="attr-text" type="text" maxLength={300} value={newText} onChange={(e) => setNewText(e.target.value)} style={{ width: "100%" }} />
-            </p>
-            <label className="choice">
-              <input type="checkbox" checked={newHard} onChange={(e) => setNewHard(e.target.checked)} />
-              {t("more.attrHard")}
-            </label>
-            {newHard ? <p className="small box warn">{t("more.attrHardNote")}</p> : null}
-            <button
-              type="button"
-              disabled={!newText.trim()}
-              onClick={() => {
-                dispatch({ type: "attr/add", kind: newKind, need: newNeed, rawText: newText, asHardRequirement: newHard });
-                setNewText("");
-                setNewHard(false);
-              }}
-            >
-              {t("more.attrAdd")}
-            </button>
-          </div>
-        </Section>
-      ) : null}
 
       <StepNav draftId={draftId} prev="priorities" next="review" />
     </div>

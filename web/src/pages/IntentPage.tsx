@@ -9,7 +9,8 @@ import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams } from "react-router";
 import { hasCode, isApiError } from "../api/errors";
-import { useCapabilities, useIntent, useKeys } from "../api/queries";
+import { useCapabilities, useDisplay, useIntent, useKeys } from "../api/queries";
+import { DisplayScope } from "../display/scope";
 import { useSession } from "../api/session";
 import type { RunIntentView, RunReceipt } from "../contract/types";
 import { Dialog } from "../components/Dialog";
@@ -33,6 +34,8 @@ export function IntentPage() {
   const navigate = useNavigate();
   const intent = useIntent(intentId);
   const caps = useCapabilities();
+  // 显示信封：运行意图与进度的文字用这次运行预检查时绑定的版本（还没绑定时服务给空）；只读，不续期
+  const display = useDisplay("intent", intentId, locale, intent.data?.updated_at ?? "", !!intent.data);
   const [accept, setAccept] = useState(false);
   const [sending, setSending] = useState(false);
   const inFlight = useRef(false);
@@ -110,7 +113,8 @@ export function IntentPage() {
   };
 
   return (
-    <div data-stage={v.stage}>
+    <DisplayScope envelope={display.data}>
+    <div data-stage={v.stage} data-display-version={display.data ? (display.data.resource_version ?? "unbound") : undefined}>
       <PageTitle>{t("intent.title")}</PageTitle>
       <BizNotice />
       <Section title={t("intent.stage")}>
@@ -226,5 +230,6 @@ export function IntentPage() {
         </div>
       </Dialog>
     </div>
+    </DisplayScope>
   );
 }

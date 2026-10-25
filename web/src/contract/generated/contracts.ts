@@ -1,11 +1,11 @@
 /* eslint-disable */
 /**
- * 由 web/scripts/contract-gen.mjs 从 contracts/product/v3/*.schema.json 生成（结构版本 e3a-product-schema-v3.3）。
+ * 由 web/scripts/contract-gen.mjs 从 contracts/product/v3/*.schema.json 生成（结构版本 e3a-product-schema-v3.4）。
  * 不要手改：共享结构由 E3 维护（src/common/product_contracts.py），结构变了就重新运行 npm run contract:gen。
  */
 
 /**
- * 全部 33 份共享消息（只为生成类型而合成的根，不是一份真实消息）
+ * 全部 34 份共享消息（只为生成类型而合成的根，不是一份真实消息）
  */
 export interface ProductContracts {
   CatalogCompilation: CatalogCompilation;
@@ -14,6 +14,7 @@ export interface ProductContracts {
   DeletionReceipt: DeletionReceipt;
   DisplayAttachment: DisplayAttachment;
   DisplayEnvelope: DisplayEnvelope;
+  DraftMigrateRequest: DraftMigrateRequest;
   DraftSaveRequest: DraftSaveRequest;
   DraftView: DraftView;
   GeographyDisplayBundle: GeographyDisplayBundle;
@@ -109,7 +110,7 @@ export interface ProductMeta {
   health_questionnaire_version: string;
   questionnaire_version: string;
   sample?: SampleLabel | null;
-  schema_version: "e3a-product-schema-v3.3";
+  schema_version: "e3a-product-schema-v3.3" | "e3a-product-schema-v3.4";
   vocabulary_version: string;
 }
 /**
@@ -209,6 +210,7 @@ export interface ConfirmedProfile {
   money: ConfirmedMoney;
   occupation: ConfirmedOccupation;
   person_ref: string;
+  qualifications?: ConfirmedQualifications | null;
   retained?: RetainedStatement[];
   review_id: string;
   six_dimensions: ConfirmedAllocation;
@@ -337,10 +339,15 @@ export interface ProductMoney {
   numeraire_id: string;
 }
 /**
+ * 确认的职业。``catalog_selected``：从输入目录直接选中，没有原文，记下目录的版本与内容身份；``explicit`` / ``ambiguous``：
+ * 兼容的文字匹配，保留原文。
+ *
  * This interface was referenced by `ProductContracts`'s JSON-Schema
  * via the `definition` "ConfirmedOccupation".
  */
 export interface ConfirmedOccupation {
+  catalog_fingerprint?: string | null;
+  catalog_version?: string | null;
   concept_id: string;
   /**
    * @minItems 1
@@ -352,8 +359,8 @@ export interface ConfirmedOccupation {
   internal_mappings: [OccupationMapping, ...OccupationMapping[]];
   label: string;
   language: string;
-  match_status: "explicit" | "ambiguous";
-  raw_text: string;
+  match_status: "explicit" | "ambiguous" | "catalog_selected";
+  raw_text?: string | null;
 }
 /**
  * 职业概念在某国分类体系里的映射（内部保留，**不展示给用户**，也不是用户的永久身份）。
@@ -367,6 +374,33 @@ export interface OccupationMapping {
   country: string;
   scheme: string;
   version: string;
+}
+/**
+ * 确认的学历、证书与相关经验答案（v3.4）。``ConfirmedProfile.abilities`` 由它按 ``rule`` 换算；``source = ability_claims``
+ * 表示用的是兼容的逐项资格确认，``none`` 表示什么都没答（不授予任何资格）。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "ConfirmedQualifications".
+ */
+export interface ConfirmedQualifications {
+  certificates?: string[];
+  certificates_state: "unanswered" | "provided" | "unsure";
+  education_option?: string | null;
+  education_state: "unanswered" | "provided" | "unsure";
+  experience?: ExperienceEntry[];
+  experience_state: "unanswered" | "provided" | "unsure";
+  rule?: "confirmed_experience_mapping_v1";
+  source: "structured_answers" | "ability_claims" | "none";
+}
+/**
+ * 一段相关工作经历：职业概念（输入目录里经验问题列出的相关职业）与整年数。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "ExperienceEntry".
+ */
+export interface ExperienceEntry {
+  concept_id: string;
+  years: number;
 }
 /**
  * 只留存的陈述：未支持的属性偏好、未获执行保障的“不可妥协”要求等。保留原文与支持状态，不挪进已有权重。
@@ -471,7 +505,7 @@ export interface QuotaSummary {
  * via the `definition` "DisplayAttachment".
  */
 export interface DisplayAttachment {
-  display_schema_version: "e3-display-v1";
+  display_schema_version: "e3-display-v2";
   resource_version?: string | null;
   source_view_fingerprint: string;
   translations: {
@@ -504,7 +538,9 @@ export interface DisplayField {
         | "ambiguous"
         | "untranslated_param"
         | "resources_unavailable"
+        | "resources_invalid"
         | "binding_stale"
+        | "binding_unverified"
       )
     | null;
   pointer: string;
@@ -522,7 +558,9 @@ export interface DisplayField {
  * via the `definition` "DisplayEnvelope".
  */
 export interface DisplayEnvelope {
-  display_schema_version: "e3-display-v1";
+  acknowledgements?: DisplayAcknowledgement[];
+  answer_states?: DisplayAnswerState[];
+  display_schema_version: "e3-display-v2";
   fields?: DisplayField[];
   id?: string | null;
   kind: "capabilities" | "session" | "draft" | "review" | "profile" | "intent" | "progress" | "result" | "runs";
@@ -543,8 +581,65 @@ export interface DisplayEnvelope {
   status: "complete" | "partial" | "unavailable";
 }
 /**
- * 结果色阶的显示约定：只声明已有分数的显示域与读法，不计算新分数、不公开评分系数。``mean_j`` 是同一城市“完成且评价完整”
- * 分身的 J 的算术平均，当前评价规则下有效值在 [0, 1]；同一结果里所有国家、两种地图共用这一固定尺度，不按国家或城市重新拉伸。
+ * 审阅里一项必须知悉的事项的说明（只是显示）。``ack_id`` 就是原审阅 ``pending_confirmations`` 里的编号，确认时照旧提交这个编号；
+ * 这里不新增、不删除、不代替任何必须知悉的事项，也不表示已经勾选。``statement_pointer`` 指向原审阅里相关的那条陈述（只对
+ * “留存的陈述”这一类，相对 ``source``）。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "DisplayAcknowledgement".
+ */
+export interface DisplayAcknowledgement {
+  ack_id: string;
+  statement_pointer?: string | null;
+  text: DisplayText;
+}
+/**
+ * 一段同时给出中英两种的显示文字（知悉项、作答状态用）。``zh`` 是中文原文（旧对象没有保存时为空）；``en`` 有译文才给，``status``
+ * 与 ``missing_reason`` 说英文有没有、为什么没有。``key`` 是稳定的模板 / 实体键，``resource_version`` 是渲染用的资源版本。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "DisplayText".
+ */
+export interface DisplayText {
+  en?: string | null;
+  key: string;
+  missing_reason?:
+    | (
+        | "no_binding"
+        | "translation_missing"
+        | "translation_stale"
+        | "source_changed"
+        | "ambiguous"
+        | "untranslated_param"
+        | "resources_unavailable"
+        | "resources_invalid"
+        | "binding_stale"
+        | "binding_unverified"
+      )
+    | null;
+  resource_version?: string | null;
+  status: "provided" | "missing";
+  zh?: string | null;
+}
+/**
+ * 兴趣（``leisure``）或口味（``taste``）的一种作答状态的名称与含义，按正式状态 ``state`` 给出（不靠列表顺序、不拆冒号）。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "DisplayAnswerState".
+ */
+export interface DisplayAnswerState {
+  answer: "leisure" | "taste";
+  meaning: DisplayText;
+  name: DisplayText;
+  state:
+    | ("unanswered" | "unsure" | "no_fixed_hobby" | "generic" | "described" | "selected")
+    | ("unanswered" | "unsure" | "no_preference" | "described" | "selected");
+}
+/**
+ * 结果色阶的显示约定：只声明已有分数的合法数值域与读法，不计算新分数、不公开评分系数。``mean_j`` 是同一城市“完成且评价完整”
+ * 分身的 J 的算术平均，当前评价规则下有效值在 [0, 1]（``minimum`` / ``maximum`` 是这个数值域，不是图例窗口）。图例窗口由页面按
+ * ADR 0045 第 4 条在同一份结果之内适度放大：同一结果的所有国家、两种地图共用一个窗口，图例写明窗口两端，不暗示最低的城市是零分、
+ * 最高的是满分；分数、分母与比较结论都不变。
  *
  * This interface was referenced by `ProductContracts`'s JSON-Schema
  * via the `definition` "MetricDisplaySpec".
@@ -601,6 +696,7 @@ export interface ProductCapabilities {
   free_text_max_chars: 2000;
   hard_requirement_options?: HardRequirementOption[];
   health_questionnaire: HealthQuestionnaire;
+  input_catalog?: InputCatalog | null;
   interests: InterestCapability;
   interview?: "reserved_not_implemented";
   limits?: string[];
@@ -739,6 +835,227 @@ export interface HealthOptionDef {
 export interface HealthQuestion {
   question_id: string;
   text: string;
+}
+/**
+ * 输入目录（v3.4）：职业的分类索引与搜索词、学历 / 证书 / 相关经验问题、兴趣与菜系的分组，以及新流程启用的板块。
+ *
+ * 它是一份独立的小配置，引用资料包里已有的职业、资格与兴趣键，不新增职业、资格、活动或评分系数。``content_fingerprint`` 是这份
+ * 配置与所引用资料包的内容身份：按目录选职业的草稿要带上它，目录换了就要重新选（服务端拒绝过期的目录）。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "InputCatalog".
+ */
+export interface InputCatalog {
+  catalog_id: string;
+  catalog_version: string;
+  certificates?: CertificateOption[];
+  content_fingerprint: string;
+  education?: EducationOption[];
+  experience?: ExperienceQuestion[];
+  /**
+   * @minItems 1
+   */
+  groups: [CatalogGroup, ...CatalogGroup[]];
+  leisure: InterestPanel;
+  notes?: string[];
+  /**
+   * @minItems 1
+   */
+  occupations: [CatalogOccupation, ...CatalogOccupation[]];
+  pack_id: string;
+  qualification_states?: QualificationStateText[];
+  search: CatalogSearchRules;
+  sections: InputSections;
+  taste: InterestPanel;
+}
+/**
+ * 一张可以多选的职业证书（中学后非学位证书）：资格编号、名称，以及要求它的职业。学历不会授予它。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "CertificateOption".
+ */
+export interface CertificateOption {
+  ability_id: string;
+  label: string;
+  /**
+   * @minItems 1
+   */
+  occupations: [string, ...string[]];
+}
+/**
+ * 最高学历的一个选项（单选，按从低到高的顺序）。职业证书不在这里，另有证书多选。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "EducationOption".
+ */
+export interface EducationOption {
+  label: string;
+  option_id: string;
+  order: number;
+}
+/**
+ * 一个相关工作经验问题：只在选中的职业属于 ``applies_to`` 时问；用户在 ``related`` 列出的职业里填做过几年。年数门槛只写在
+ * ``prompt`` 的说明里，由 E3 判断（E5 不判断）。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "ExperienceQuestion".
+ */
+export interface ExperienceQuestion {
+  ability_id: string;
+  /**
+   * @minItems 1
+   */
+  applies_to: [string, ...string[]];
+  prompt: string;
+  question_id: string;
+  /**
+   * @minItems 1
+   */
+  related: [string, ...string[]];
+}
+/**
+ * 职业目录的一个浏览分组。分组只用于浏览，不改变职业映射，也不进确认画像。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "CatalogGroup".
+ */
+export interface CatalogGroup {
+  group_id: string;
+  label: string;
+  order: number;
+}
+/**
+ * 兴趣（``leisure``）或口味（``taste``）的多选面板。可以跳过（未答）；选了类别就直接是确认画像里的类别，不需要写文字。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "InterestPanel".
+ */
+export interface InterestPanel {
+  /**
+   * @minItems 1
+   */
+  entries: [InterestEntry, ...InterestEntry[]];
+  /**
+   * @minItems 1
+   */
+  groups: [InterestGroup, ...InterestGroup[]];
+  kind: "leisure" | "taste";
+  note: string;
+  search_notes?: SearchNote[];
+}
+/**
+ * 面板里的一个类别：能力清单词表里已有的键（不新增类别）、唯一的分组、名称与搜索词（类别名、词表别名与目录补充的叫法，照原文）。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "InterestEntry".
+ */
+export interface InterestEntry {
+  group_id: string;
+  key: string;
+  label: string;
+  order: number;
+  /**
+   * @minItems 1
+   */
+  search_terms: [string, ...string[]];
+}
+/**
+ * 兴趣或菜系面板的一个浏览分组。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "InterestGroup".
+ */
+export interface InterestGroup {
+  group_id: string;
+  label: string;
+  order: number;
+}
+/**
+ * 一组搜索词的说明：它们对应哪些已支持的键（可以为空：本版不支持），以及要告诉用户的话。搜索词照原文，不翻译。
+ * 例如“川菜”只找到已支持的“中餐”，并说明本版不区分地方菜；“徒步”找不到任何类别，并说明本版还没有、不会算成健身。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "SearchNote".
+ */
+export interface SearchNote {
+  note: string;
+  note_id: string;
+  points_to?: string[];
+  /**
+   * @minItems 1
+   */
+  terms: [string, ...string[]];
+}
+/**
+ * 目录里的一个职业：概念编号（与文字匹配、确认画像用的是同一个概念）、唯一的主分组、名称、职责、搜索词与相关资格。
+ *
+ * ``search_terms`` 是明确登记的中英文搜索词（名称、资料包别名与目录补充的叫法，例如“程序员”），照原文给出、不翻译，只用来筛选；
+ * 搜索框里的文字不保存、不进画像。``qualification_refs`` 是这个职业的开局岗位要求的资格（能力清单 ``abilities`` 里的编号），只供
+ * 显示；学历包含关系、证书授予与经验年数的判断都在 E3。分类代码只在内部保留，不在这里。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "CatalogOccupation".
+ */
+export interface CatalogOccupation {
+  concept_id: string;
+  /**
+   * @minItems 1
+   */
+  duties: [string, ...string[]];
+  experience_question?: string | null;
+  group_id: string;
+  label: string;
+  order: number;
+  qualification_refs?: string[];
+  /**
+   * @minItems 1
+   */
+  search_terms: [string, ...string[]];
+}
+/**
+ * 学历、证书或经验的一种作答状态的名称与含义。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "QualificationStateText".
+ */
+export interface QualificationStateText {
+  meaning: string;
+  name: string;
+  section: "education" | "certificates" | "experience";
+  state: "unanswered" | "provided" | "unsure";
+}
+/**
+ * 目录搜索的规则（E5 在完整的小目录里筛选显示；服务端只认提交的编号，不认搜索词）。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "CatalogSearchRules".
+ */
+export interface CatalogSearchRules {
+  method: "catalog_search_nfkc_casefold_all_terms_v1";
+  no_match: string;
+  /**
+   * @minItems 1
+   */
+  rules: [string, ...string[]];
+}
+/**
+ * 新输入流程启用哪些板块。职业按目录直接选（文字描述只为兼容保留，不是必经入口）；兴趣与口味用面板多选；硬要求、属性偏好
+ * 与兴趣的文字解释不在新流程里。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "InputSections".
+ */
+export interface InputSections {
+  attribute_preferences?: false;
+  certificates: boolean;
+  education: boolean;
+  experience: boolean;
+  hard_requirements?: false;
+  interest_text?: false;
+  leisure?: "panel_select";
+  occupation?: "catalog_select";
+  occupation_text?: "compatibility_only";
+  taste?: "panel_select";
 }
 /**
  * 兴趣与口味（DECISIONS/0041）：可选的文字描述先形成待确认的解释；用户确认后的类别才进入共同、有限的匹配规则。
@@ -948,6 +1265,7 @@ export interface DraftView {
   draft: UserInputDraft;
   expires_at: string;
   meta: ProductMeta;
+  migration?: DraftMigration | null;
   updated_at: string;
 }
 /**
@@ -961,9 +1279,12 @@ export interface UserInputDraft {
   age: AgeAnswer;
   attribute_preferences?: AttributePreferenceAnswer[];
   cash: CashAnswer;
+  certificates?: CertificatesAnswer;
   cities: CitiesAnswer;
   draft_id: string;
+  education?: EducationAnswer;
   evidence?: EvidenceRef[];
+  experience?: ExperienceAnswer;
   free_text: FreeTextAnswer;
   hard_requirements?: HardRequirementAnswer[];
   health: HealthAnswers;
@@ -1021,12 +1342,42 @@ export interface CashAnswer {
   state: "unanswered" | "provided" | "indifferent" | "unsure";
 }
 /**
+ * 职业证书（多选）：``provided`` 加选中的资格编号；**明确提交空列表表示“没有”**，与未答分开保存。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "CertificatesAnswer".
+ */
+export interface CertificatesAnswer {
+  selected?: string[];
+  state?: "unanswered" | "provided" | "unsure";
+}
+/**
  * This interface was referenced by `ProductContracts`'s JSON-Schema
  * via the `definition` "CitiesAnswer".
  */
 export interface CitiesAnswer {
   city_refs?: string[];
   state: "unanswered" | "provided" | "indifferent" | "unsure";
+}
+/**
+ * 最高学历（单选）：未答、暂不确定，或选了输入目录里的一个选项。只有选了才授予学历门槛。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "EducationAnswer".
+ */
+export interface EducationAnswer {
+  option_id?: string | null;
+  state?: "unanswered" | "provided" | "unsure";
+}
+/**
+ * 相关工作经验（只在选中的职业需要时问）：``provided`` 加经历；明确提交空列表表示“没有相关经验”，与未答分开保存。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "ExperienceAnswer".
+ */
+export interface ExperienceAnswer {
+  entries?: ExperienceEntry[];
+  state?: "unanswered" | "provided" | "unsure";
 }
 /**
  * 可选文字。超过 2,000 字符**不截断**：校验时报错，由用户自己删减。
@@ -1079,7 +1430,7 @@ export interface HealthItemAnswer {
  */
 export interface LeisureInterestAnswer {
   selected?: string[];
-  state?: "unanswered" | "unsure" | "no_fixed_hobby" | "generic" | "described";
+  state?: "unanswered" | "unsure" | "no_fixed_hobby" | "generic" | "described" | "selected";
   text?: string | null;
 }
 /**
@@ -1105,27 +1456,65 @@ export interface PointEntry {
   value_text?: string | null;
 }
 /**
- * 职业：原文与语言；用户在候选里选中的概念（不透明 ID，不是职业代码）。
+ * 职业。``mode = catalog``（新流程）：从输入目录直接选中的概念编号与那份目录的版本、内容身份，不需要也不保存任何文字（搜索框
+ * 里的字只是查找条件）。``mode = text``（兼容）：原文与语言，再在少量候选里选中一个。概念编号不透明，不是职业代码。
  *
  * This interface was referenced by `ProductContracts`'s JSON-Schema
  * via the `definition` "OccupationAnswer".
  */
 export interface OccupationAnswer {
+  catalog_fingerprint?: string | null;
+  catalog_version?: string | null;
   language?: string;
+  mode?: "text" | "catalog";
   raw_text?: string | null;
   selected_candidate?: string | null;
   state: "unanswered" | "provided" | "indifferent" | "unsure";
 }
 /**
- * 口味与菜系：未答、暂不确定、明确没有偏好，或用文字描述（同样先解释、再由用户选中确认）。
+ * 口味与菜系：未答、暂不确定、明确没有偏好、从面板选中菜系，或用文字描述（兼容：先解释、再由用户选中确认）。
  *
  * This interface was referenced by `ProductContracts`'s JSON-Schema
  * via the `definition` "TasteAnswer".
  */
 export interface TasteAnswer {
   selected?: string[];
-  state?: "unanswered" | "unsure" | "no_preference" | "described";
+  state?: "unanswered" | "unsure" | "no_preference" | "described" | "selected";
   text?: string | null;
+}
+/**
+ * 这份草稿进入新问卷要做的迁移（``GET`` 草稿时一起给出；没有要迁移的就没有这一项）。
+ *
+ * 迁移把草稿的版本换成当前版本、清空新问卷不再收集的硬要求与属性偏好（``removed`` 逐条列出），其他答案原样保留；之后要重新审阅
+ * 和确认。有要清空的答案时必须用户明确同意（``consent_required``）；只差版本时也要用户点一次。已经确认或已经开始的运行不受影响。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "DraftMigration".
+ */
+export interface DraftMigration {
+  consent_required: boolean;
+  /**
+   * @minItems 1
+   */
+  effects_zh: [string, ...string[]];
+  from_questionnaire_version: string;
+  message_zh: string;
+  removed?: RemovedAnswer[];
+  to_questionnaire_version: string;
+  version_changed: boolean;
+}
+/**
+ * 旧草稿里新问卷不再收集的一条答案（迁移说明里逐条列出，不悄悄丢掉）。``summary`` 是 E3 生成的可读写法（受支持的硬要求写成
+ * 选项与数值）；``raw_text`` 是用户自己写的原文（照原样，不翻译；受支持的选项没有原文）。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "RemovedAnswer".
+ */
+export interface RemovedAnswer {
+  raw_text?: string | null;
+  ref: string;
+  section: "hard_requirements" | "attribute_preferences";
+  summary: string;
 }
 /**
  * 审阅已保存的那一版草稿（``POST /api/v1/drafts/{id}/review``）。审阅绑定草稿编号、修订号、内容与所用资料包。
@@ -1160,6 +1549,7 @@ export interface ProfileReview {
   money: MoneyReview;
   occupation: OccupationReview;
   pending_confirmations?: string[];
+  qualifications?: QualificationReview | null;
   review_id: string;
   six_dimensions: AllocationReview;
   statements?: StatementReview[];
@@ -1262,15 +1652,18 @@ export interface MoneyReview {
   status: "convertible" | "blocked" | "missing";
 }
 /**
+ * ``catalog_selected``：从输入目录直接选中（候选就是那一个职业，名称与职责供核对）；其余是兼容的文字匹配。
+ *
  * This interface was referenced by `ProductContracts`'s JSON-Schema
  * via the `definition` "OccupationReview".
  */
 export interface OccupationReview {
   candidates?: OccupationCandidate[];
   message_zh: string;
+  mode?: "text" | "catalog";
   raw_text?: string | null;
   selected?: string | null;
-  status: "explicit" | "ambiguous" | "unknown" | "not_provided";
+  status: "explicit" | "ambiguous" | "unknown" | "not_provided" | "catalog_selected";
 }
 /**
  * 一个可读的职业候选：概念 ID（不透明）、名称、职责说明与匹配到的词。不展示分类代码。
@@ -1286,6 +1679,49 @@ export interface OccupationCandidate {
   duties: [string, ...string[]];
   label: string;
   matched_terms?: string[];
+}
+/**
+ * 学历、证书与相关经验的审阅：E3 按资料包已有的规则换成资格（学历“至少达到”、证书只授予选中的那张、经验按相关职业与年数，
+ * 规则 ``confirmed_experience_mapping_v1``）。职业、职称、自由文字与搜索词都不授予资格。``source``：结构化答案、兼容的逐项资格
+ * 确认，或都没有。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "QualificationReview".
+ */
+export interface QualificationReview {
+  ask_experience?: string[];
+  certificates?: string[];
+  certificates_state: "unanswered" | "provided" | "unsure";
+  education_option?: string | null;
+  education_state: "unanswered" | "provided" | "unsure";
+  experience?: ExperienceEntry[];
+  experience_state: "unanswered" | "provided" | "unsure";
+  granted?: QualificationGrant[];
+  message_zh: string;
+  requirements?: QualificationRequirement[];
+  source: "structured_answers" | "ability_claims" | "none";
+}
+/**
+ * 一项按答案得到的资格与理由（例如“最高学历：本科 → 满足‘学士学位’及以下的学历门槛”）。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "QualificationGrant".
+ */
+export interface QualificationGrant {
+  ability_id: string;
+  because: string;
+  label: string;
+}
+/**
+ * 选中职业的开局岗位要求的一项资格，以及按现在的答案是否满足（不满足时各城的开局会照实挡下，不自动补）。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "QualificationRequirement".
+ */
+export interface QualificationRequirement {
+  ability_id: string;
+  label: string;
+  met: boolean;
 }
 /**
  * 一条属性偏好或硬要求的审阅结果：原文、支持状态、用途与说明（未支持的不挪进已有权重）。
@@ -2172,6 +2608,17 @@ export interface RunSummary {
   stage_zh: string;
 }
 /**
+ * 迁移草稿（``POST /api/v1/drafts/{id}/migrate``）：``expected_revision`` 必须等于当前修订号；有要清空的旧答案时
+ * ``clear_removed`` 必须为真（用户看过迁移说明并同意），否则拒绝、草稿不变。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "DraftMigrateRequest".
+ */
+export interface DraftMigrateRequest {
+  clear_removed?: boolean;
+  expected_revision: number;
+}
+/**
  * 保存草稿（``PUT /api/v1/drafts/{id}``）：``expected_revision`` 必须等于服务端当前的修订号，否则返回冲突，不覆盖新答案。
  * ``draft.draft_id`` 必须是路径里的编号；服务端写入时修订号加一。
  *
@@ -2191,7 +2638,7 @@ export interface DraftSaveRequest {
  */
 export interface GeographyDisplayBundle {
   cities?: CityGeography[];
-  display_schema_version: "e3-display-v1";
+  display_schema_version: "e3-display-v2";
   notes?: LocalizedText[];
   pack_fingerprint: string;
   resource_version: string;
@@ -2558,6 +3005,8 @@ export interface ServiceError {
     | "paid_calls_disabled"
     | "run_options_invalid"
     | "run_settings_unavailable"
+    | "migration_consent_required"
+    | "migration_not_needed"
     | "rate_limited"
     | "csrf_failed"
     | "origin_rejected"

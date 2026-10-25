@@ -29,6 +29,7 @@ import { useMode } from "../../ui/mode";
 import { colorWindow, positionIn, rampColor } from "../../view/colorScale";
 import { type CityRow, cityRows, groupByCountry } from "../../view/results";
 import { useGeography } from "../../api/queries";
+import { DisplayScope } from "../../display/scope";
 import { useRunResult } from "./useRunResult";
 
 function useLoaded(intentId: string) {
@@ -181,20 +182,25 @@ function CityTable({ rows }: { rows: readonly CityRow[] }) {
 export function ResultsPage() {
   const { intentId = "" } = useParams();
   const loaded = useLoaded(intentId);
-  // 城市点：按这次结果自己的资料包指纹读地理清单（不是当前能力清单的资料包）。清单里每座城的 city_ref 自带地理版本，
-  // 只配给同一个 city_ref。E3C 把历史对象绑定的资源版本修好之前，不传“当前碰巧登记”的版本；读不到就不画点。
+  // 城市点：按这次结果自己的资料包指纹读地理清单（不是当前能力清单的资料包），并传这份结果显示信封里绑定的资源版本
+  // （交接单第 13.2 节）。信封还没读到就先不读清单；版本为空就不传版本、不拿当前版本冒充，页面写明。清单里每座城的 city_ref
+  // 自带地理版本，只配给同一个 city_ref。读不到就不画点。
   const pack = loaded.kind === "data" ? loaded.data.res.meta.data_pack.content_fingerprint : null;
-  const geo = useGeography(pack);
+  const boundVersion = loaded.kind === "data" ? loaded.data.boundVersion : undefined;
+  const geo = useGeography(boundVersion === undefined ? null : pack, boundVersion ?? null);
   if (loaded.kind === "node") return <div>{loaded.node}</div>;
-  const { res, intentView: v, caps } = loaded.data;
+  const { res, intentView: v, caps, display } = loaded.data;
   return (
-    <ResultsOverview
-      res={res}
-      caps={caps.data ?? null}
-      settings={v.settings ?? null}
-      geography={geo.data ?? (geo.isError ? null : undefined)}
-      base={`/results/${encodeURIComponent(intentId)}`}
-    />
+    <DisplayScope envelope={display.data}>
+      <ResultsOverview
+        res={res}
+        caps={caps.data ?? null}
+        settings={v.settings ?? null}
+        geography={geo.data ?? (geo.isError ? null : undefined)}
+        boundVersion={boundVersion}
+        base={`/results/${encodeURIComponent(intentId)}`}
+      />
+    </DisplayScope>
   );
 }
 
@@ -204,6 +210,7 @@ export function ResultsOverview({
   caps,
   settings,
   geography = null,
+  boundVersion,
   base,
 }: {
   res: ProductResult;
@@ -211,6 +218,8 @@ export function ResultsOverview({
   settings: RunSettingsView | null;
   /** 地理显示清单（undefined = 还在读，null = 没有）。 */
   geography?: GeographyDisplayBundle | null;
+  /** 这份结果绑定的显示资源版本（undefined = 还没读到；null = 没有绑定的历史版本）。不传就不说明。 */
+  boundVersion?: string | null;
   base: string;
 }) {
   const { t } = useTranslation();
@@ -240,10 +249,17 @@ export function ResultsOverview({
       onOpenCity={(ref) => navigate(`${base}/city/${encodeURIComponent(ref)}`)}
     />
   ) : null;
+  const versionNote =
+    boundVersion === undefined ? null : (
+      <p className="small muted" data-geo-version={boundVersion ?? "unbound"}>
+        {boundVersion ? t("maps.boundVersion", { version: boundVersion }) : t("maps.unboundVersion")}
+      </p>
+    );
   const mapWithLegend = mapSlot ? (
     <>
       {mapSlot}
       {mode === "globe" ? null : <ColorLegend window={w} />}
+      {mode === "globe" ? null : versionNote}
     </>
   ) : null;
   const head = (
@@ -274,6 +290,7 @@ export function ResultsOverview({
           {mode === "globe" ? (
             <Section title={t("results.mapTitle")}>
               <ColorLegend window={w} />
+              {versionNote}
             </Section>
           ) : null}
           <Section title={t("results.chartTitle")}>
@@ -552,9 +569,11 @@ export function CityPage() {
   const { intentId = "", cityRef = "" } = useParams();
   const loaded = useLoaded(intentId);
   if (loaded.kind === "node") return <div>{loaded.node}</div>;
-  const { res, boundPreflight, caps } = loaded.data;
+  const { res, boundPreflight, caps, display } = loaded.data;
   return (
-    <CityDetail res={res} caps={caps.data ?? null} cityRef={cityRef} boundPreflight={boundPreflight} base={`/results/${encodeURIComponent(intentId)}`} />
+    <DisplayScope envelope={display.data}>
+      <CityDetail res={res} caps={caps.data ?? null} cityRef={cityRef} boundPreflight={boundPreflight} base={`/results/${encodeURIComponent(intentId)}`} />
+    </DisplayScope>
   );
 }
 
@@ -700,7 +719,11 @@ export function ClonePage() {
   const { intentId = "", cloneRef = "" } = useParams();
   const loaded = useLoaded(intentId);
   if (loaded.kind === "node") return <div>{loaded.node}</div>;
-  return <CloneDetail res={loaded.data.res} cloneRef={cloneRef} base={`/results/${encodeURIComponent(intentId)}`} />;
+  return (
+    <DisplayScope envelope={loaded.data.display.data}>
+      <CloneDetail res={loaded.data.res} cloneRef={cloneRef} base={`/results/${encodeURIComponent(intentId)}`} />
+    </DisplayScope>
+  );
 }
 
 /** 第三层：一个分身逐年的生活记录。 */

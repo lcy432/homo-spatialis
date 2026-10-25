@@ -3,7 +3,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
-import { useCapabilities, useKeys, useRuns } from "../api/queries";
+import { useCapabilities, useDisplay, useKeys, useRuns } from "../api/queries";
+import { DisplayScope } from "../display/scope";
 import { useSession } from "../api/session";
 import type { DeletionReceipt, RunSummary } from "../contract/types";
 import { Dialog } from "../components/Dialog";
@@ -19,6 +20,7 @@ export function RunsPage() {
   const locale = useLocale();
   const runs = useRuns();
   const caps = useCapabilities();
+  const display = useDisplay("runs", null, locale, (runs.data?.runs ?? []).map((r) => `${r.intent_id}:${r.stage}`).join(","), !!runs.data);
   const { api, refresh } = useSession();
   const keys = useKeys();
   const queryClient = useQueryClient();
@@ -52,6 +54,7 @@ export function RunsPage() {
   };
 
   return (
+    <DisplayScope envelope={display.data}>
     <div>
       <PageTitle>{t("runs.title")}</PageTitle>
       <BizNotice />
@@ -131,5 +134,6 @@ export function RunsPage() {
         </div>
       </Dialog>
     </div>
+    </DisplayScope>
   );
 }

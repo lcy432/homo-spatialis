@@ -12,6 +12,10 @@
     "price_period": null,
     "state": "unanswered"
   },
+  "certificates": {
+    "selected": [],
+    "state": "unanswered"
+  },
   "cities": {
     "city_refs": [
       "US:SYNTH2026:K51",
@@ -20,7 +24,15 @@
     "state": "provided"
   },
   "draft_id": "draft-0000000000000004",
+  "education": {
+    "option_id": null,
+    "state": "unanswered"
+  },
   "evidence": [],
+  "experience": {
+    "entries": [],
+    "state": "unanswered"
+  },
   "free_text": {
     "state": "unanswered",
     "text": null
@@ -54,7 +66,7 @@
     "mode": null
   },
   "meta": {
-    "conversion_version": "e3a-conversion-v2",
+    "conversion_version": "e3a-conversion-v3",
     "data_pack": {
       "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
       "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
@@ -62,12 +74,15 @@
       "status": "synthetic_fixture_only"
     },
     "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-    "questionnaire_version": "e3a-questionnaire-v0.3-draft",
-    "schema_version": "e3a-product-schema-v3.3",
-    "vocabulary_version": "e3a-vocabulary-v4"
+    "questionnaire_version": "e3a-questionnaire-v0.4-draft",
+    "schema_version": "e3a-product-schema-v3.4",
+    "vocabulary_version": "e3a-vocabulary-v5"
   },
   "occupation": {
+    "catalog_fingerprint": null,
+    "catalog_version": null,
     "language": "zh",
+    "mode": "text",
     "raw_text": null,
     "selected_candidate": null,
     "state": "unanswered"

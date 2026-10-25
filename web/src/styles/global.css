@@ -48,6 +48,13 @@ html[data-mode="paper"] {
     linear-gradient(var(--grid) 1px, transparent 1px) 0 0 / 24px 24px,
     linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0 / 24px 24px, var(--bg);
   --panel-blur: none;
+  /* 饼图的六种彩铅色（只区分扇区，不表示好坏） */
+  --pie-1: #7a93b4;
+  --pie-2: #c9a86a;
+  --pie-3: #8fb08a;
+  --pie-4: #c58b7c;
+  --pie-5: #9d8fb8;
+  --pie-6: #b7b08a;
   color-scheme: light;
 }
 
@@ -86,6 +93,12 @@ html[data-mode="globe"] {
   --font-num: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   --page-bg: radial-gradient(ellipse at 50% -10%, #182a3d 0%, var(--bg) 55%) fixed, var(--bg);
   --panel-blur: blur(14px) saturate(1.1);
+  --pie-1: #4fa8c4;
+  --pie-2: #d9b25c;
+  --pie-3: #6fbf8e;
+  --pie-4: #d98a7a;
+  --pie-5: #9c8fe0;
+  --pie-6: #b9c27c;
   color-scheme: dark;
 }
 
@@ -698,6 +711,12 @@ div.biz-zh {
   color: var(--ink-soft);
   font-style: italic;
   margin-top: 0;
+}
+
+.biz-missing {
+  color: var(--ink-soft);
+  font-size: 0.8em;
+  font-style: italic;
 }
 
 .visually-hidden {

@@ -1,20 +1,22 @@
-// 草稿的状态更新函数。草稿本身就是共享结构里的 UserInputDraft；另外只多记三样共享结构装不下的东西：年龄输入框里的原文
-// （契约里年龄是整数）、下一个属性偏好编号、撤销记录。
+// 草稿的状态更新函数。草稿本身就是共享结构里的 UserInputDraft；另外只多记两样共享结构装不下的东西：年龄输入框里的原文
+// （契约里年龄是整数）、撤销记录。
 //
 // 规则：
 // * 四种答案状态严格分开：未答 = 没有这一项；明确 0 = provided "0"；无所谓 = indifferent；暂不确定 = unsure。
-// * 用户亲手输入的文字原样保存；按钮与挪分算出来的值才由这里写（能写成最多两位小数就写小数，否则写规范分数）。
-// * 超过 100 不拦、不自动扣；挪分只按用户点选的那一项。
-// * 撤销以“用户的一次操作”为一步：连续在同一个输入框里打字合成一步。
+// * 职业按目录选（mode = catalog，带目录版本与内容身份，不带文字）；学历单选、证书多选（selected: [] 是明确“没有”）、经验按相关职业填整年数。
+// * 兴趣与口味按面板多选（state = selected）；“暂不确定”“没有固定爱好 / 没有口味偏好”“随当地体验”是单独的状态，与选中的类别互斥。
+// * 点数：用户亲手输入的文字原样保存；滑块与挪分算出来的值由这里写（能写成最多两位小数就写小数，否则写规范分数）。
+//   滑块的一次拖动只产生一条记录（points/move：目标的精确新值 + 来源：未分配池或某一项）；不自动补零、不按比例扣别的项。
+// * 不再收集硬要求与属性偏好（新问卷没有这两块；旧草稿由服务端迁移清空）。
+// * 撤销以“用户的一次操作”为一步：连续在同一个输入框里打字、连续按方向键合成一步。
 // * 草稿编号、修订号与 meta 归服务器：这里从不改它们（保存时由自动保存写上当时的服务器修订号）。
-import type { AllocationGroup, AttributePreferenceAnswer, PointEntry, UserInputDraft } from "../contract/types";
+import type { AllocationGroup, PointEntry, UserInputDraft } from "../contract/types";
 import { Fraction, formatComputed, parsePoints } from "./exact";
 
 export interface DraftSnapshot {
   draft: UserInputDraft;
   /** 年龄输入框里的原文（契约里年龄是整数；写不成整数时草稿里年龄记为未答，原文留在这里给用户看）。 */
   ageText: string;
-  nextPrefId: number;
 }
 
 export interface DraftState extends DraftSnapshot {
@@ -26,14 +28,30 @@ export interface DraftState extends DraftSnapshot {
 export type HealthChoice = "agree" | "disagree" | "no_clear_tendency" | "unsure";
 export type LeisureState = NonNullable<NonNullable<UserInputDraft["leisure_interest"]>["state"]>;
 export type TasteState = NonNullable<NonNullable<UserInputDraft["taste"]>["state"]>;
-type InterestField = "leisure_interest" | "taste";
+export type InterestField = "leisure_interest" | "taste";
+/** 面板之外的单独状态（与选中的类别互斥）。 */
+export type InterestSpecialState = "unsure" | "no_fixed_hobby" | "no_preference" | "generic";
 
 export type ContentAction =
   | { type: "cities/toggle"; cityRef: string; selected: boolean }
   | { type: "cities/set"; cityRefs: string[] }
   | { type: "language/set"; language: string }
+  /** 兼容：没有输入目录的资料包仍按文字描述 + 服务候选。 */
   | { type: "occupation/text"; text: string }
   | { type: "occupation/select"; candidateId: string | null }
+  /** 新流程：从目录里点一个职业（不带文字；目录版本与内容身份随答案提交）。 */
+  | { type: "occupation/catalog"; conceptId: string; catalogVersion: string; catalogFingerprint: string }
+  | { type: "occupation/clear" }
+  | { type: "education/set"; state: "provided"; optionId: string }
+  | { type: "education/set"; state: "unanswered" | "unsure" }
+  | { type: "certificates/toggle"; abilityId: string; selected: boolean }
+  /** none = 明确没有证书（provided + []）。 */
+  | { type: "certificates/state"; state: "none" | "unanswered" | "unsure" }
+  | { type: "experience/set"; conceptId: string; years: number | null }
+  | { type: "experience/state"; state: "none" | "unanswered" | "unsure" }
+  | { type: "abilities/clear" }
+  /** 兼容：没有输入目录时的逐项资格确认。 */
+  | { type: "ability/set"; abilityId: string; state: "provided" | "unsure" | null }
   | { type: "age/text"; text: string }
   | { type: "cash/text"; text: string; currency: string; pricePeriod: string }
   | { type: "points/text"; group: AllocationGroup; key: string; text: string }
@@ -41,22 +59,30 @@ export type ContentAction =
   | { type: "points/step"; group: AllocationGroup; key: string; delta: number; maxDecimals: number }
   | { type: "points/reduce"; group: AllocationGroup; key: string; amount: string; maxDecimals: number }
   | { type: "points/transfer"; group: AllocationGroup; from: string; to: string; amount: string; maxDecimals: number }
+  /**
+   * 滑块的一次拖动：目标项的精确新值（规范写法）。source 为 null 时差额进出“未分配”池（不改任何别的项）；
+   * source 是某一项时只在这两项之间转移，来源不够就不做。
+   */
+  | {
+      type: "points/move";
+      group: AllocationGroup;
+      key: string;
+      value: string;
+      source: string | null;
+      maxDecimals: number;
+      /** 均分状态下拖动：先把每项换成精确的均分值（同一条记录），再移动。 */
+      fromEqual?: { keys: string[]; value: string };
+    }
+  /** 合计已满而还有未答项时，用户明确点“将其余项目设为 0”才写入这些零值。 */
+  | { type: "points/setRestZero"; group: AllocationGroup; keys: string[] }
   | { type: "points/equalSplit"; group: AllocationGroup }
   | { type: "points/toManual"; group: AllocationGroup; keys: string[]; value: string }
   | { type: "health/choice"; questionId: string; choice: HealthChoice | null }
-  | { type: "interest/state"; field: InterestField; state: LeisureState | TasteState }
-  | { type: "interest/text"; field: InterestField; text: string }
-  | { type: "interest/select"; field: InterestField; key: string; selected: boolean }
+  /** 面板之外的单独状态，或回到未答：都清空选中的类别（撤销可以找回）。 */
+  | { type: "interest/state"; field: InterestField; state: InterestSpecialState | "unanswered" }
+  | { type: "interest/toggle"; field: InterestField; key: string; selected: boolean }
+  | { type: "interest/clear"; field: InterestField }
   | { type: "freeText/text"; text: string }
-  | { type: "ability/set"; abilityId: string; state: "provided" | "unsure" | null }
-  | { type: "hard/set"; optionId: string; enabled: boolean; value: number | null }
-  | { type: "attr/add"; kind: string; need: string; rawText: string; asHardRequirement: boolean }
-  | {
-      type: "attr/update";
-      preferenceId: string;
-      patch: Partial<Pick<AttributePreferenceAnswer, "kind" | "need" | "raw_text" | "as_hard_requirement">>;
-    }
-  | { type: "attr/remove"; preferenceId: string }
   /**
    * 问卷或词表换了版本：用户读过新说明、明确勾选“已按新说明重新确认”之后，才把草稿的版本信息换成当前能力清单的版本。
    * 只有这一个动作会改 meta（其余动作都不碰）；答案本身不变，之后照常重新审阅、重新确认。
@@ -68,25 +94,15 @@ export type DraftAction =
   | { type: "history/undo" }
   | { type: "history/redo" }
   | { type: "history/break" }
-  /** 载入服务器上的一版（打开草稿、冲突时改用服务器版本）：清空撤销记录。 */
+  /** 载入服务器上的一版（打开草稿、冲突时改用服务器版本、迁移之后）：清空撤销记录。 */
   | { type: "draft/load"; draft: UserInputDraft };
 
 const HISTORY_LIMIT = 200;
-
-function nextPrefIdOf(d: UserInputDraft): number {
-  let max = 0;
-  for (const p of d.attribute_preferences ?? []) {
-    const m = /^pref\.([0-9]+)$/.exec(p.preference_id);
-    if (m) max = Math.max(max, Number(m[1]));
-  }
-  return max + 1;
-}
 
 export function initialDraftState(draft: UserInputDraft): DraftState {
   return {
     draft,
     ageText: draft.age.value != null ? String(draft.age.value) : "",
-    nextPrefId: nextPrefIdOf(draft),
     past: [],
     future: [],
     coalesceKey: null,
@@ -94,7 +110,7 @@ export function initialDraftState(draft: UserInputDraft): DraftState {
 }
 
 function snapshotOf(s: DraftState): DraftSnapshot {
-  return { draft: s.draft, ageText: s.ageText, nextPrefId: s.nextPrefId };
+  return { draft: s.draft, ageText: s.ageText };
 }
 
 function coalesceOf(a: ContentAction): string | null {
@@ -107,14 +123,12 @@ function coalesceOf(a: ContentAction): string | null {
       return "cash";
     case "points/text":
       return `points.${a.group}.${a.key}`;
-    case "interest/text":
-      return `${a.field}.text`;
+    case "points/move":
+      return `points.move.${a.group}.${a.key}.${a.source ?? ""}`;
+    case "experience/set":
+      return `experience.${a.conceptId}`;
     case "freeText/text":
       return "free_text";
-    case "hard/set":
-      return `hard.${a.optionId}`;
-    case "attr/update":
-      return a.patch.raw_text !== undefined ? `attr.${a.preferenceId}.raw_text` : null;
     default:
       return null;
   }
@@ -139,15 +153,15 @@ function providedValue(e: PointEntry | undefined, maxDecimals: number): Fraction
   return p.ok ? p.value : null;
 }
 
-/** 按钮与挪分的起点：没有数字的项（未答、无所谓、暂不确定）从 0 开始；写法不对的项返回 null，不替用户改。 */
+/** 按钮、滑块与挪分的起点：没有数字的项（未答、无所谓、暂不确定）从 0 开始；写法不对的项返回 null，不替用户改。 */
 function startingValue(e: PointEntry | undefined, maxDecimals: number): Fraction | null {
   if (!e || e.state !== "provided") return new Fraction(0);
   return providedValue(e, maxDecimals);
 }
 
-function interestOf(d: UserInputDraft, field: InterestField): { state: string; text: string | null; selected: string[] } {
+function interestOf(d: UserInputDraft, field: InterestField): { state: string; selected: string[] } {
   const cur = d[field];
-  return { state: cur?.state ?? "unanswered", text: cur?.text ?? null, selected: [...(cur?.selected ?? [])] };
+  return { state: cur?.state ?? "unanswered", selected: [...(cur?.selected ?? [])] };
 }
 
 const AGE_INT = /^[0-9]{1,3}$/;
@@ -179,7 +193,8 @@ function applyContent(s: DraftSnapshot, a: ContentAction): DraftSnapshot | null 
         draft: {
           ...d,
           occupation: {
-            ...d.occupation,
+            language: d.occupation.language,
+            mode: "text",
             state: text.trim() ? "provided" : "unanswered",
             raw_text: text === "" ? null : text,
             // 描述改了，原来选的候选不一定还对：清掉，由用户按新描述重新选（E3 也会这样提示）
@@ -190,6 +205,62 @@ function applyContent(s: DraftSnapshot, a: ContentAction): DraftSnapshot | null 
     }
     case "occupation/select":
       return { ...s, draft: { ...d, occupation: { ...d.occupation, selected_candidate: a.candidateId } } };
+    case "occupation/catalog":
+      return {
+        ...s,
+        draft: {
+          ...d,
+          occupation: {
+            language: d.occupation.language,
+            state: "provided",
+            mode: "catalog",
+            raw_text: null,
+            selected_candidate: a.conceptId,
+            catalog_version: a.catalogVersion,
+            catalog_fingerprint: a.catalogFingerprint,
+          },
+        },
+      };
+    case "occupation/clear":
+      return {
+        ...s,
+        draft: { ...d, occupation: { language: d.occupation.language, state: "unanswered", mode: "catalog", raw_text: null, selected_candidate: null } },
+      };
+    case "education/set":
+      return {
+        ...s,
+        draft: { ...d, education: a.state === "provided" ? { state: "provided", option_id: a.optionId } : { state: a.state, option_id: null } },
+      };
+    case "certificates/toggle": {
+      const cur = d.certificates?.state === "provided" ? [...(d.certificates.selected ?? [])] : [];
+      const has = cur.includes(a.abilityId);
+      if (has === a.selected) return null;
+      const selected = a.selected ? [...cur, a.abilityId] : cur.filter((k) => k !== a.abilityId);
+      return { ...s, draft: { ...d, certificates: { state: "provided", selected } } };
+    }
+    case "certificates/state":
+      return {
+        ...s,
+        draft: { ...d, certificates: a.state === "none" ? { state: "provided", selected: [] } : { state: a.state, selected: [] } },
+      };
+    case "experience/set": {
+      const cur = d.experience?.state === "provided" ? [...(d.experience.entries ?? [])] : [];
+      const rest = cur.filter((e) => e.concept_id !== a.conceptId);
+      const entries = a.years === null ? rest : [...rest, { concept_id: a.conceptId, years: a.years }];
+      return { ...s, draft: { ...d, experience: { state: "provided", entries } } };
+    }
+    case "experience/state":
+      return {
+        ...s,
+        draft: { ...d, experience: a.state === "none" ? { state: "provided", entries: [] } : { state: a.state, entries: [] } },
+      };
+    case "abilities/clear":
+      return { ...s, draft: { ...d, abilities: [] } };
+    case "ability/set": {
+      const list = (d.abilities ?? []).filter((x) => x.ability_id !== a.abilityId);
+      if (a.state) list.push({ ability_id: a.abilityId, state: a.state });
+      return { ...s, draft: { ...d, abilities: list } };
+    }
     case "age/text": {
       const t = a.text.trim();
       const age = AGE_INT.test(t) ? { state: "provided" as const, value: Number(t) } : { state: "unanswered" as const, value: null };
@@ -258,6 +329,42 @@ function applyContent(s: DraftSnapshot, a: ContentAction): DraftSnapshot | null 
       entries[a.to] = { state: "provided", value_text: formatComputed(toCur.add(moved), a.maxDecimals) };
       return { ...s, draft: withGroup(d, a.group, "manual", entries) };
     }
+    case "points/move": {
+      if (a.source === a.key) return null;
+      let entries = entriesOf(d, a.group);
+      if (d[a.group].mode === "equal_split") {
+        if (!a.fromEqual) return null;
+        entries = {};
+        for (const k of a.fromEqual.keys) entries[k] = { state: "provided", value_text: a.fromEqual.value };
+      }
+      const cur = startingValue(entries[a.key], a.maxDecimals);
+      if (cur === null) return null;
+      const parsed = parsePoints(a.value, a.maxDecimals);
+      if (!parsed.ok || parsed.value.s < 0n) return null;
+      const next = parsed.value;
+      const delta = next.sub(cur);
+      if (a.source !== null) {
+        const src = startingValue(entries[a.source], a.maxDecimals);
+        if (src === null) return null;
+        const srcNext = src.sub(delta);
+        if (srcNext.s < 0n) return null;
+        entries[a.source] = { state: "provided", value_text: formatComputed(srcNext, a.maxDecimals) };
+      }
+      entries[a.key] = { state: "provided", value_text: formatComputed(next, a.maxDecimals) };
+      return { ...s, draft: withGroup(d, a.group, "manual", entries) };
+    }
+    case "points/setRestZero": {
+      if (d[a.group].mode === "equal_split") return null;
+      const entries = entriesOf(d, a.group);
+      let changed = false;
+      for (const k of a.keys) {
+        if (!entries[k]) {
+          entries[k] = { state: "provided", value_text: "0" };
+          changed = true;
+        }
+      }
+      return changed ? { ...s, draft: withGroup(d, a.group, "manual", entries) } : null;
+    }
     case "points/equalSplit":
       // E3 规定：选了平均分配就不能同时带手工数值
       return { ...s, draft: withGroup(d, a.group, "equal_split", {}) };
@@ -275,67 +382,23 @@ function applyContent(s: DraftSnapshot, a: ContentAction): DraftSnapshot | null 
       else items.push(item);
       return { ...s, draft: { ...d, health: { ...d.health, items } } };
     }
-    case "interest/state": {
+    case "interest/state":
+      // 单独状态与选中的类别互斥；回到未答也清空（旧版本的文字描述一并去掉）
+      return { ...s, draft: { ...d, [a.field]: { state: a.state, text: null, selected: [] } } };
+    case "interest/toggle": {
       const cur = interestOf(d, a.field);
-      // 原文在任何作答状态下都保留；离开“用文字描述”时不再带选中的类别（撤销可以找回）
-      const selected = a.state === "described" ? cur.selected : [];
-      return { ...s, draft: { ...d, [a.field]: { state: a.state, text: cur.text, selected } } };
-    }
-    case "interest/text": {
-      const cur = interestOf(d, a.field);
-      const text = a.text === "" ? null : a.text;
-      // 写了文字就是“用文字描述”；空白不会被当成“通用评价”
-      const state = text && cur.state === "unanswered" ? "described" : cur.state;
-      return { ...s, draft: { ...d, [a.field]: { state, text, selected: cur.selected } } };
-    }
-    case "interest/select": {
-      const cur = interestOf(d, a.field);
-      const has = cur.selected.includes(a.key);
+      const base = cur.state === "selected" ? cur.selected : [];
+      const has = base.includes(a.key);
       if (has === a.selected) return null;
-      const selected = a.selected ? [...cur.selected, a.key] : cur.selected.filter((k) => k !== a.key);
-      return { ...s, draft: { ...d, [a.field]: { state: "described", text: cur.text, selected } } };
+      const selected = a.selected ? [...base, a.key] : base.filter((k) => k !== a.key);
+      return { ...s, draft: { ...d, [a.field]: selected.length ? { state: "selected", text: null, selected } : { state: "unanswered", text: null, selected: [] } } };
     }
+    case "interest/clear":
+      return { ...s, draft: { ...d, [a.field]: { state: "unanswered", text: null, selected: [] } } };
     case "freeText/text":
       return {
         ...s,
         draft: { ...d, free_text: a.text === "" ? { state: "unanswered", text: null } : { state: "provided", text: a.text } },
-      };
-    case "ability/set": {
-      const list = (d.abilities ?? []).filter((x) => x.ability_id !== a.abilityId);
-      if (a.state) list.push({ ability_id: a.abilityId, state: a.state });
-      return { ...s, draft: { ...d, abilities: list } };
-    }
-    case "hard/set": {
-      const requirementId = `hr.${a.optionId}`;
-      const list = (d.hard_requirements ?? []).filter((x) => x.option_id !== a.optionId);
-      // 打开这项要求时不替用户填数字：数值留空，审阅会提示要写一个数
-      if (a.enabled) list.push({ requirement_id: requirementId, option_id: a.optionId, parameter_value: a.value, raw_text: null });
-      return { ...s, draft: { ...d, hard_requirements: list } };
-    }
-    case "attr/add": {
-      if (!a.rawText.trim()) return null;
-      const pref: AttributePreferenceAnswer = {
-        preference_id: `pref.${s.nextPrefId}`,
-        need: a.need,
-        kind: a.kind,
-        raw_text: a.rawText,
-        as_hard_requirement: a.asHardRequirement,
-      };
-      return { ...s, nextPrefId: s.nextPrefId + 1, draft: { ...d, attribute_preferences: [...(d.attribute_preferences ?? []), pref] } };
-    }
-    case "attr/update": {
-      const list = (d.attribute_preferences ?? []).flatMap((p) => {
-        if (p.preference_id !== a.preferenceId) return [p];
-        const next = { ...p, ...a.patch };
-        // 原文清空就等于删掉这一条（schema 要求原文至少 1 个字；撤销可以找回）
-        return next.raw_text.trim() ? [next] : [];
-      });
-      return { ...s, draft: { ...d, attribute_preferences: list } };
-    }
-    case "attr/remove":
-      return {
-        ...s,
-        draft: { ...d, attribute_preferences: (d.attribute_preferences ?? []).filter((p) => p.preference_id !== a.preferenceId) },
       };
     case "meta/adopt": {
       const { sample: _s, ...meta } = a.meta;

@@ -3,6 +3,7 @@ import type {
   ConfirmedProfileView,
   DeletionReceipt,
   DisplayEnvelope,
+  DraftMigrateRequest,
   GeographyDisplayBundle,
   DraftSaveRequest,
   DraftView,
@@ -49,6 +50,11 @@ export function makeApi(ctx: HttpContext, fetchImpl: typeof fetch = (...a) => fe
     saveDraft: (id: string, req: DraftSaveRequest) =>
       data(
         call<DraftView>({ method: "PUT", path: `/drafts/${seg(id)}`, body: req, bodyMessage: "DraftSaveRequest", response: "DraftView" }),
+      ),
+    /** 旧问卷的草稿迁移到当前版本（清掉新问卷不再收集的硬要求与属性偏好，其他答案原样保留；需要用户同意）。 */
+    migrateDraft: (id: string, req: DraftMigrateRequest) =>
+      data(
+        call<DraftView>({ method: "POST", path: `/drafts/${seg(id)}/migrate`, body: req, bodyMessage: "DraftMigrateRequest", response: "DraftView" }),
       ),
     deleteDraft: (id: string) =>
       data(call<DeletionReceipt>({ method: "DELETE", path: `/drafts/${seg(id)}`, response: "DeletionReceipt" })),

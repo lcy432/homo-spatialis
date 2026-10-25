@@ -131,8 +131,9 @@ export function useProfiles() {
 }
 
 /**
- * 显示附层：某个对象在某种语言下的文字。键里带对象的版本（updated_at / revision），对象一变就重新读；
- * 中文界面不读（中文原文就在业务对象里）。
+ * 显示附层：某个对象在某种语言下的文字。键里带对象的版本（updated_at / revision），对象一变就重新读。
+ * 中文界面也读：知悉项说明、作答状态的名称与含义、历史对象绑定的资源版本只在信封里有（中文译文等于原文，页面仍只按 source 读状态）。
+ * 只读、不续期：切换语言、刷新或查看都不会开始、恢复、计费或延长任何东西。
  */
 export function useDisplay(kind: DisplayEnvelope["kind"], id: string | null | undefined, locale: "zh" | "en", version: string, enabled = true) {
   const { api, status } = useSession();
@@ -140,7 +141,7 @@ export function useDisplay(kind: DisplayEnvelope["kind"], id: string | null | un
   return useQuery({
     queryKey: keys.display(kind, id ?? "", locale, version),
     queryFn: () => api.display(kind, id ?? null, locale),
-    enabled: status === "active" && enabled && locale === "en",
+    enabled: status === "active" && enabled,
     staleTime: 5 * 60_000,
     retry: queryRetry,
     retryDelay: queryRetryDelay,

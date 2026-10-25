@@ -1,29 +1,39 @@
 // 第 5 步：系统怎样理解我 → 知悉 → 确认画像 → 这次模拟的规模 → 准备模拟。
 // * 审阅的永远是服务器上已保存的那一版；进入这一步先把改动存完。改过答案，旧审阅与旧确认都失效。
-// * 知悉项的说明用公开内容拼：标准开局取能力清单的 start_scenario，留存陈述取审阅里的原文与说明，兴趣与口味取审阅的说明。
+// * 知悉项的说明按 ack_id 从这份审阅的显示信封取（acknowledgements，交接单第 13.3 节）；信封没有时用公开内容拼：标准开局取
+//   能力清单的 start_scenario，留存陈述取审阅里的原文与说明。确认时照旧提交 pending_confirmations 的编号；页面不自动勾选。
+// * 职业、资格、兴趣的“我填的”按目录与面板的名称显示（不显示搜索词）；“系统将采用的理解”只读审阅对象。
+// * 旧版本草稿（version_changed / removed_section_present）：提示先在草稿页完成服务端迁移，不在前端改写版本字段。
 // * 运行选项的范围只读 SessionView.rules.options（不写死）；省略就用服务默认值；城市来自确认画像，不另传。
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { isApiError } from "../../api/errors";
+import { useDisplay } from "../../api/queries";
 import { useSession } from "../../api/session";
 import type {
   ConfirmedProfile,
   ConfirmedProfileSummary,
+  InputCatalog,
   ProductCapabilities,
   ProductIssue,
   ProfileReview,
+  QualificationReview,
   RunIntentCreateRequest,
   ServiceRules,
+  UserInputDraft,
 } from "../../contract/types";
 import { ApiErrorView, IssueList, Loading, Section, SupportChip, TableWrap, UsageChips } from "../../components/common";
 import { PageTitle, StepNav } from "../../components/Layout";
+import { DisplayScope, useAcknowledgement } from "../../display/scope";
+import { occupationById } from "../../draft/catalog";
 import { useDraftEditor } from "../../draft/DraftEditor";
 import { Fraction } from "../../draft/exact";
 import { useDraftReview } from "../../draft/review";
-import { BizNotice, Zh, ZhList } from "../../i18n/biz";
+import { BizNotice, DText, Zh, ZhList } from "../../i18n/biz";
 import { formatTime } from "../../i18n/format";
 import { useLocale } from "../../i18n/index";
+import { SpecialStateText } from "./Steps";
 
 const CENTS = /^(0|[1-9][0-9]*)(\.[0-9]{1,2})?$/;
 
@@ -32,6 +42,24 @@ function cityLabel(caps: ProductCapabilities, ref: string): string {
 }
 
 function AckContent({ ackKey, review, caps }: { ackKey: string; review: ProfileReview; caps: ProductCapabilities }) {
+  const { t } = useTranslation();
+  const fromService = useAcknowledgement(ackKey);
+  const serviceText = fromService?.text.zh || fromService?.text.en ? <DText text={fromService.text} as="p" /> : null;
+  return (
+    <div>
+      {serviceText ? (
+        <div data-ack-source="service">
+          <p className="small muted">{t("review.ackFromService")}</p>
+          {serviceText}
+        </div>
+      ) : null}
+      <AckPublicContent ackKey={ackKey} review={review} caps={caps} brief={!!serviceText} />
+    </div>
+  );
+}
+
+/** 公开内容拼出的说明（信封没有说明时是唯一内容；有时只补充原文与开局清单）。 */
+function AckPublicContent({ ackKey, review, caps, brief }: { ackKey: string; review: ProfileReview; caps: ProductCapabilities; brief: boolean }) {
   const { t } = useTranslation();
   if (ackKey === "ack:standard_start") {
     return (
@@ -68,7 +96,113 @@ function AckContent({ ackKey, review, caps }: { ackKey: string; review: ProfileR
       </div>
     );
   }
+  if (brief) return null;
   return <p className="small muted">{t("review.ackUnknown", { key: ackKey })}</p>;
+}
+
+/** 资格的“我填的”：学历、证书、经验按目录名称显示（没有目录时只显示状态）。 */
+function MyQualifications({ d, catalog }: { d: UserInputDraft; catalog: InputCatalog | null }) {
+  const { t } = useTranslation();
+  const stateText = (st: string | undefined) => t(`states.${st ?? "unanswered"}` as "states.unanswered");
+  const edu = d.education;
+  const eduLabel = edu?.state === "provided" ? (catalog?.education?.find((o) => o.option_id === edu.option_id)?.label ?? edu.option_id ?? "") : null;
+  const cert = d.certificates;
+  const certLabels = cert?.state === "provided" ? (cert.selected ?? []).map((id) => catalog?.certificates?.find((c) => c.ability_id === id)?.label ?? id) : null;
+  const exp = d.experience;
+  const expItems = exp?.state === "provided" ? (exp.entries ?? []) : null;
+  return (
+    <ul data-my-qualifications>
+      <li>{eduLabel !== null ? <>{t("review.eduOf", { label: "" })}<Zh>{eduLabel}</Zh></> : t("review.eduOf", { label: stateText(edu?.state) })}</li>
+      <li>
+        {certLabels === null ? (
+          t("review.certsOf", { list: stateText(cert?.state) })
+        ) : certLabels.length === 0 ? (
+          t("review.certsNone")
+        ) : (
+          <>
+            {t("review.certsOf", { list: "" })}
+            {certLabels.map((l, i) => (
+              <span key={`${i}.${l}`}>
+                {i ? "、" : ""}
+                <Zh>{l}</Zh>
+              </span>
+            ))}
+          </>
+        )}
+      </li>
+      <li>
+        {expItems === null ? (
+          t("review.expOf", { list: stateText(exp?.state) })
+        ) : expItems.length === 0 ? (
+          t("review.expNone")
+        ) : (
+          <>
+            {t("review.expOf", { list: "" })}
+            {expItems.map((e, i) => (
+              <span key={e.concept_id}>
+                {i ? "、" : ""}
+                <Zh>{occupationById(catalog, e.concept_id)?.label ?? e.concept_id}</Zh> {t("review.expYears", { years: e.years })}
+              </span>
+            ))}
+          </>
+        )}
+      </li>
+      {(d.abilities ?? []).length ? <li className="muted">{t("facts.legacyAbilities", { n: (d.abilities ?? []).length })}</li> : null}
+    </ul>
+  );
+}
+
+/** 资格的“系统将采用的理解”：来源、换算出的资格与理由、选中职业的开局要求是否满足、还要问的经验题。 */
+function SystemQualifications({ q, catalog }: { q: QualificationReview; catalog: InputCatalog | null }) {
+  const { t } = useTranslation();
+  return (
+    <div data-qualifications-source={q.source}>
+      <p>
+        <Zh>{q.message_zh}</Zh>
+      </p>
+      <p className="small muted">{t(`review.qualSource_${q.source}` as "review.qualSource_none")}</p>
+      {q.granted?.length ? (
+        <>
+          <p className="small">{t("review.qualGranted")}</p>
+          <ul>
+            {q.granted.map((g) => (
+              <li key={g.ability_id} data-granted={g.ability_id}>
+                <Zh>{g.label}</Zh>
+                <span className="small muted">
+                  {" "}
+                  — <Zh>{g.because}</Zh>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : null}
+      {q.requirements?.length ? (
+        <>
+          <p className="small">{t("review.qualRequirements")}</p>
+          <ul>
+            {q.requirements.map((r) => (
+              <li key={r.ability_id} data-requirement={r.ability_id} data-met={r.met}>
+                <Zh>{r.label}</Zh>：<span className={r.met ? "chip accent" : "chip warn"}>{r.met ? t("review.qualMet") : t("review.qualUnmet")}</span>
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : null}
+      {q.ask_experience?.length ? (
+        <p className="box note" data-ask-experience>
+          {t("review.qualAsk")}
+          <ul>
+            {q.ask_experience.map((id) => (
+              <Zh as="li" key={id}>
+                {catalog?.experience?.find((x) => x.question_id === id)?.prompt ?? id}
+              </Zh>
+            ))}
+          </ul>
+        </p>
+      ) : null}
+    </div>
+  );
 }
 
 function Compare({ title, mine, system, id }: { title: string; mine: ReactNode; system: ReactNode; id: string }) {
@@ -93,12 +227,12 @@ function Compare({ title, mine, system, id }: { title: string; mine: ReactNode; 
 }
 
 function versionIssues(issues: readonly ProductIssue[] | undefined): ProductIssue[] {
-  return (issues ?? []).filter((i) => i.field.startsWith("meta.") || i.code === "version_changed");
+  return (issues ?? []).filter((i) => i.code === "version_changed" || i.code === "removed_section_present");
 }
 
 export function ReviewStep() {
   const { t } = useTranslation();
-  const { caps, state, dispatch, draftId, save, flush } = useDraftEditor();
+  const { caps, state, draftId, save, flush } = useDraftEditor();
   const { api, view: session, refresh } = useSession();
   const navigate = useNavigate();
   const locale = useLocale();
@@ -110,7 +244,9 @@ export function ReviewStep() {
   const [refused, setRefused] = useState<ProductIssue[] | null>(null);
   const [confirmed, setConfirmed] = useState<ConfirmedProfile | null>(null);
   const [summary, setSummary] = useState<ConfirmedProfileSummary | null>(null);
-  const [versionAccepted, setVersionAccepted] = useState(false);
+  // 这份审阅的显示信封：知悉项说明、作答状态、英文文字都用它绑定的版本（同一 review_id 不变，长时间缓存）
+  const reviewDisplay = useDisplay("review", review?.review_id, locale, review?.review_id ?? "", !!review);
+  const catalog = caps.input_catalog ?? null;
 
   // 进这一步先把改动存完：审阅只针对已保存的那一版
   useEffect(() => {
@@ -155,7 +291,8 @@ export function ReviewStep() {
   };
 
   return (
-    <div>
+    <DisplayScope envelope={reviewDisplay.data}>
+    <div data-review-display={reviewDisplay.data ? (reviewDisplay.data.resource_version ?? "unbound") : undefined}>
       <PageTitle>{t("review.title")}</PageTitle>
       <p>{t("review.intro")}</p>
       <BizNotice />
@@ -172,16 +309,12 @@ export function ReviewStep() {
           <p className="small muted">{t("review.reviewedRevision", { rev: reply?.reviewed_revision })}</p>
 
           {vIssues.length ? (
-            <div className="box warn">
-              <p>{t("review.versionChanged")}</p>
+            <div className="box warn" data-migration-hint>
+              <p>{t("review.migrateHint")}</p>
               <IssueList issues={vIssues} draftId={draftId} />
-              <label className="choice">
-                <input type="checkbox" checked={versionAccepted} onChange={(e) => setVersionAccepted(e.target.checked)} />
-                {t("review.versionAccept")}
-              </label>
-              <button type="button" disabled={!versionAccepted} onClick={() => dispatch({ type: "meta/adopt", meta: caps.meta })}>
-                {t("review.versionAccept")}
-              </button>
+              <a className="button" href={`/draft/${encodeURIComponent(draftId)}/place`}>
+                {t("review.migrateLink")}
+              </a>
             </div>
           ) : null}
 
@@ -205,22 +338,68 @@ export function ReviewStep() {
           <Compare
             id="cmp-occupation"
             title={t("review.occupation")}
-            mine={<p lang={d.occupation.language === "en" ? "en" : "zh-CN"}>{d.occupation.raw_text ?? t("states.unanswered")}</p>}
+            mine={
+              d.occupation.mode === "catalog" && d.occupation.selected_candidate ? (
+                <div data-my-occupation={d.occupation.selected_candidate}>
+                  <p>
+                    <strong>
+                      <Zh>{occupationById(catalog, d.occupation.selected_candidate)?.label ?? d.occupation.selected_candidate}</Zh>
+                    </strong>
+                  </p>
+                  <ul className="small">
+                    {(occupationById(catalog, d.occupation.selected_candidate)?.duties ?? []).map((x) => (
+                      <Zh as="li" key={x}>
+                        {x}
+                      </Zh>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <p lang={d.occupation.language === "en" ? "en" : "zh-CN"}>{d.occupation.raw_text ?? t("states.unanswered")}</p>
+              )
+            }
             system={
-              <div>
+              <div data-occupation-status={review.occupation.status}>
                 <p>
                   <Zh>{review.occupation.message_zh}</Zh>
                 </p>
-                {review.occupation.selected ? (
-                  <p>
-                    <strong>
-                      <Zh>{review.occupation.candidates?.find((c) => c.candidate_id === review.occupation.selected)?.label ?? review.occupation.selected}</Zh>
-                    </strong>
-                  </p>
-                ) : null}
+                {review.occupation.selected
+                  ? (() => {
+                      const c = review.occupation.candidates?.find((x) => x.candidate_id === review.occupation.selected);
+                      return (
+                        <div>
+                          <p>
+                            <strong>
+                              <Zh>{c?.label ?? review.occupation.selected}</Zh>
+                            </strong>
+                          </p>
+                          {c?.duties?.length ? (
+                            <>
+                              <p className="small muted">{t("review.occupationDuties")}</p>
+                              <ul className="small">
+                                {c.duties.map((x) => (
+                                  <Zh as="li" key={x}>
+                                    {x}
+                                  </Zh>
+                                ))}
+                              </ul>
+                            </>
+                          ) : null}
+                        </div>
+                      );
+                    })()
+                  : null}
               </div>
             }
           />
+          {review.qualifications || catalog ? (
+            <Compare
+              id="cmp-qualifications"
+              title={t("review.qualifications")}
+              mine={<MyQualifications d={d} catalog={catalog} />}
+              system={review.qualifications ? <SystemQualifications q={review.qualifications} catalog={catalog} /> : <p>{t("common.none")}</p>}
+            />
+          ) : null}
           <Compare id="cmp-age" title={t("review.age")} mine={<p>{state.ageText || t("states.unanswered")}</p>} system={<p>{review.age ?? t("common.none")}</p>} />
           <Compare
             id="cmp-cash"
@@ -312,17 +491,18 @@ export function ReviewStep() {
           {(["leisure_interest", "taste"] as const).map((f) => {
             const mine = d[f];
             const r = review[f];
+            const panel = f === "taste" ? catalog?.taste : catalog?.leisure;
             const vocab = f === "taste" ? caps.interests.cuisines : caps.interests.leisure_categories;
-            const label = (k: string) => vocab.find((v) => v.key === k)?.label ?? k;
+            const label = (k: string) => panel?.entries.find((e) => e.key === k)?.label ?? vocab.find((v) => v.key === k)?.label ?? k;
+            const st = mine?.state ?? "unanswered";
             return (
               <Compare
                 key={f}
                 id={`cmp-${f}`}
                 title={f === "taste" ? t("review.taste") : t("review.leisure")}
                 mine={
-                  <div>
-                    <p>{mine?.text ?? t("states.unanswered")}</p>
-                    {mine?.selected?.length ? (
+                  <div data-my-interest-state={st}>
+                    {st === "selected" && mine?.selected?.length ? (
                       <ul>
                         {mine.selected.map((k) => (
                           <Zh as="li" key={k}>
@@ -330,7 +510,15 @@ export function ReviewStep() {
                           </Zh>
                         ))}
                       </ul>
-                    ) : null}
+                    ) : st === "described" ? (
+                      <p>{mine?.text ?? ""}</p>
+                    ) : st === "unanswered" ? (
+                      <p>{t("states.unanswered")}</p>
+                    ) : (
+                      <p>
+                        <SpecialStateText field={f} state={st} />
+                      </p>
+                    )}
                   </div>
                 }
                 system={
@@ -435,6 +623,7 @@ export function ReviewStep() {
       )}
       <StepNav draftId={draftId} prev="more" />
     </div>
+    </DisplayScope>
   );
 }
 

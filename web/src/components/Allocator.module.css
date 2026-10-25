@@ -2,62 +2,109 @@
   margin: 1em 0;
 }
 
-/* 合计行：像账本最后一行，固定在各项之后；不浮动、不盖住任何一题（遮挡问题的根治办法）。
-   编辑上面几项时看得到的是工具条里的小合计（.liveTotal）。 */
-.status {
-  background: var(--surface-solid);
-  border-top: 2px solid var(--accent);
-  border-bottom: 1px solid var(--accent);
-  border-radius: 0;
-  padding: 0.5em 0.3em;
-  margin: 0.8em 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5em 1em;
-  align-items: center;
+.layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.8em 1.5em;
+  align-items: start;
 }
 
-html[data-mode="globe"] .status {
-  border: 1px solid var(--accent);
-  border-radius: var(--radius);
-  padding: 0.5em 0.8em;
+@media (min-width: 720px) {
+  .layout {
+    grid-template-columns: minmax(12rem, 16rem) 1fr;
+  }
 }
 
-.liveTotal {
-  font-family: var(--font-num);
-  font-variant-numeric: tabular-nums;
-  color: var(--ink-soft);
-  margin-left: auto;
-  font-size: 0.95rem;
-}
-
-.statusText {
-  font-size: 1.1rem;
-  font-weight: 700;
+.pie {
   margin: 0;
 }
 
-.over,
-.over .liveTotal {
-  border-color: var(--error-line);
+.pie svg {
+  width: 100%;
+  max-width: 16rem;
+  height: auto;
+  display: block;
 }
 
-.full {
-  border-color: var(--c-color);
+.pieSlice {
+  stroke: var(--bg);
+  stroke-width: 1.2;
+}
+
+.piePool {
+  stroke: var(--line-strong);
+  stroke-width: 1;
+}
+
+.pieHatchLine {
+  stroke: var(--line-strong);
+  stroke-width: 1;
+  opacity: 0.45;
+}
+
+.pieEmpty {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.pieOver {
+  fill: none;
+  stroke: var(--error-line);
+  stroke-width: 2;
+}
+
+.pieCaption {
+  margin-top: 0.4em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2em;
+}
+
+.statusText {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.poolNote {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+}
+
+.swatchPool {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--line-strong);
+  background: repeating-linear-gradient(45deg, transparent 0 2px, var(--line-strong) 2px 3px);
+}
+
+.controlsCol {
+  min-width: 0;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+  margin: 0.4em 0;
+}
+
+.sourceRow {
+  margin: 0.6em 0 0.2em;
 }
 
 .rows {
   list-style: none;
   padding: 0;
-  margin: 0;
+  margin: 0.8em 0 0;
 }
 
 .row {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 0.7em 0.9em;
-  margin: 0.6em 0;
+  border-top: 1px solid var(--line);
+  padding: 0.6em 0 0.7em;
 }
 
 .rowHead {
@@ -67,26 +114,61 @@ html[data-mode="globe"] .status {
   align-items: center;
 }
 
+.swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--line-strong);
+  flex: none;
+}
+
 .rowLabel {
   font-size: 1.05rem;
+}
+
+.rowValue {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+.sliderRow {
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+  margin: 0.3em 0;
+}
+
+.slider {
+  flex: 1;
+  min-width: 8rem;
+  min-height: 44px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.slider:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.transfer {
+  white-space: nowrap;
+  color: var(--accent-2);
+  font-weight: 600;
 }
 
 .controls {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4em;
+  gap: 0.4em 0.6em;
   align-items: center;
-  margin-top: 0.4em;
+  margin-top: 0.2em;
 }
 
 .input {
   width: 6.5em;
   text-align: center;
-}
-
-.stepButton {
-  font-size: 1.2rem;
-  padding: 0.2em 0.6em;
 }
 
 .what summary {
@@ -97,11 +179,31 @@ html[data-mode="globe"] .status {
   align-items: center;
 }
 
-.toolbar {
+/* 合计行：像账本最后一行，固定在各项之后；不浮动、不盖住任何一题 */
+.status {
+  border-top: 2px solid var(--accent);
+  border-bottom: 1px solid var(--accent);
+  padding: 0.5em 0.3em;
+  margin: 0.8em 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5em;
-  margin: 0.6em 0;
+  gap: 0.5em 1em;
+  align-items: center;
+  font-weight: 700;
+}
+
+html[data-mode="globe"] .status {
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 0.5em 0.8em;
+}
+
+.over {
+  border-color: var(--error-line);
+}
+
+.full {
+  border-color: var(--c-color);
 }
 
 .pickList {

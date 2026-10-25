@@ -3,7 +3,9 @@
 import { type ReactNode, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, NavLink, Outlet, useLocation } from "react-router";
+import { useCapabilities, useDisplay } from "../api/queries";
 import { useSession } from "../api/session";
+import { DisplayScope } from "../display/scope";
 import { formatTime } from "../i18n/format";
 import { changeLocale, useLocale } from "../i18n/index";
 import { useMode } from "../ui/mode";
@@ -72,6 +74,9 @@ export function AppShell() {
   const { mode, setMode } = useMode();
   const { status, view } = useSession();
   const location = useLocation();
+  // 能力清单的显示信封（当前登记的资源版本）：城市、维度、目录、面板的名称与说明在英文界面里按它显示
+  const caps = useCapabilities();
+  const capsDisplay = useDisplay("capabilities", null, locale, caps.data?.capabilities_id ?? "", !!caps.data);
   useFocusOnNavigate();
   return (
     <>
@@ -118,7 +123,9 @@ export function AppShell() {
       </header>
       <main id="main" className={styles.main}>
         <div key={location.pathname} className="page-enter">
-          <Outlet />
+          <DisplayScope envelope={capsDisplay.data}>
+            <Outlet />
+          </DisplayScope>
         </div>
       </main>
       <footer className={styles.footer}>

@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { type ReactNode, useReducer } from "react";
 import { MemoryRouter } from "react-router";
@@ -207,45 +207,81 @@ describe("分身的年度生活记录", () => {
   });
 });
 
-describe("分配器", () => {
-  it("均分（精确 50/3、显示 16.7）→ 安全改成 20 先问改手动 → 精确多出 10/3 → 用户亲手从物质减 → 已分完", async () => {
+describe("分配器（饼图 + 滑块）", () => {
+  const slider = (key: string) => document.querySelector<HTMLInputElement>(`[data-slider="${key}"]`) as HTMLInputElement;
+  const shown = (key: string) => document.querySelector<HTMLElement>(`[data-key="${key}"] [data-value]`)?.dataset.value;
+  const drag = (key: string, to: number) => {
+    const el = slider(key);
+    fireEvent.input(el, { target: { value: String(to) } });
+    fireEvent.pointerUp(el);
+  };
+
+  it("初始不预填：六项都是“未答”，饼图没有扇区，池里 100 分", () => {
+    render(
+      <EditorHarness>
+        <Allocator group="six_dimensions" title="六个方面" help="" />
+      </EditorHarness>,
+    );
+    expect(document.querySelectorAll('[data-allocator="six_dimensions"] [data-state="unanswered"]')).toHaveLength(6);
+    // 饼图只有一个“未分配”扇区（整圆），没有任何偏好扇区
+    expect([...document.querySelectorAll("[data-slice]")].map((e) => e.getAttribute("data-slice"))).toEqual(["unallocated"]);
+    expect(screen.getByRole("status")).toHaveTextContent("还剩 100 分未分配");
+  });
+
+  it("主动均分保存 50/3；再把休闲的 5 点拖给安全：35/3 与 65/3，合计严格 100；拖动中只改这两项", async () => {
     const user = userEvent.setup();
     render(
       <EditorHarness>
-        <Allocator group="six_dimensions" title="六维" help="" />
+        <Allocator group="six_dimensions" title="六个方面" help="" />
       </EditorHarness>,
     );
-    await user.click(screen.getByRole("button", { name: "平均分配" }));
-    const dialog = screen.getByRole("dialog");
-    await user.click(within(dialog).getByRole("button", { name: "平均分配" }));
-    expect(screen.getByText(/你选了平均分配：每项 16.7 分（精确值 50\/3）/)).toBeInTheDocument();
-
-    const safety = screen.getByLabelText("安全");
-    await user.clear(safety);
-    await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "改成手动分配" }));
-    await user.clear(screen.getByLabelText("安全"));
-    await user.type(screen.getByLabelText("安全"), "20");
-    expect(screen.getByRole("status")).toHaveTextContent("多出 3.3 分");
-    expect(screen.getByRole("status")).toHaveTextContent("10/3");
-
-    await user.click(screen.getByRole("button", { name: /从哪一项减/ }));
-    await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: /物质生活/ }));
+    await user.click(screen.getByRole("button", { name: "各项均分" }));
+    await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "各项均分" }));
     expect(screen.getByRole("status")).toHaveTextContent("已分完");
-    expect((screen.getByLabelText("物质生活") as HTMLInputElement).value).toBe("40/3");
+    expect(document.querySelectorAll("[data-slice]")).toHaveLength(6); // 六个扇区、没有未分配
+    expect(shown("safety")).toBe("50/3");
+    // 池是空的：先选来源“休闲”，再拖安全（17 → 22 = +5 点）
+    await user.selectOptions(document.querySelector("[data-source-select]") as HTMLSelectElement, "leisure");
+    expect(screen.getAllByText("休闲 → 安全").length).toBeGreaterThan(0);
+    drag("safety", 22);
+    expect(shown("safety")).toBe("65/3");
+    expect(shown("leisure")).toBe("35/3");
+    for (const k of ["material", "opportunity", "environment", "commute"]) expect(shown(k)).toBe("50/3");
+    expect(screen.getByRole("status")).toHaveTextContent("已分完");
+  });
+
+  it("从未分配池取：安全拖到 20 只改安全，池剩 80，饼图有安全扇区与未分配扇区；拖到 100 后可以把其余项设为 0", async () => {
+    const user = userEvent.setup();
+    render(
+      <EditorHarness>
+        <Allocator group="six_dimensions" title="六个方面" help="" />
+      </EditorHarness>,
+    );
+    drag("safety", 20);
+    expect(shown("safety")).toBe("20");
+    expect(screen.getByRole("status")).toHaveTextContent("还剩 80 分未分配");
+    expect(document.querySelector('[data-slice="safety"]')).not.toBeNull();
+    expect(document.querySelector('[data-slice="unallocated"]')).not.toBeNull();
+    expect(document.querySelectorAll('[data-state="unanswered"]')).toHaveLength(5);
+    drag("safety", 100);
+    expect(shown("safety")).toBe("100");
+    expect(document.querySelectorAll('[data-state="unanswered"]')).toHaveLength(5); // 不偷偷补零
+    await user.click(screen.getByRole("button", { name: "将其余 5 项设为 0" }));
+    expect(document.querySelectorAll('[data-state="unanswered"]')).toHaveLength(0);
+    expect(shown("leisure")).toBe("0");
   });
 
   it("切换到英文：精确值与已填的数不变（只换界面文字）", async () => {
-    const user = userEvent.setup();
     render(
       <EditorHarness>
         <Allocator group="six_dimensions" title="six" help="" />
       </EditorHarness>,
     );
-    await user.type(screen.getByLabelText("安全"), "30");
+    drag("safety", 30);
     await i18n.changeLanguage("en");
     expect(await screen.findByRole("button", { name: "Split equally" })).toBeInTheDocument();
-    expect((screen.getByLabelText("安全") as HTMLInputElement).value).toBe("30");
-    expect(screen.getByRole("status")).toHaveTextContent("Points left: 70");
+    expect(shown("safety")).toBe("30");
+    expect(screen.getByRole("status")).toHaveTextContent("Unallocated: 70 points");
   });
 });
 
