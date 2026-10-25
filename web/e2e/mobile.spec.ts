@@ -30,6 +30,8 @@ test.describe("手机 @mobile-only", () => {
     await signIn(page, token, "/start");
     await page.getByRole("button", { name: "开始填写" }).click();
     await expect(page).toHaveURL(/\/place$/);
+    // 等底图画出来再截（截图是给人看的；页面本身不等它）
+    await expect(page.locator('[data-map="paper"] [data-country]').first()).toBeVisible({ timeout: 30_000 });
     await shot(page, info, "place");
     await expectNoHorizontalScroll(page);
     await expectAccessible(page, info, "place");
