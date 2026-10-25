@@ -240,6 +240,12 @@ export function ResultsOverview({
       onOpenCity={(ref) => navigate(`${base}/city/${encodeURIComponent(ref)}`)}
     />
   ) : null;
+  const mapWithLegend = mapSlot ? (
+    <>
+      {mapSlot}
+      {mode === "globe" ? null : <ColorLegend window={w} />}
+    </>
+  ) : null;
   const head = (
     <>
       <PageTitle>{t("results.title")}</PageTitle>
@@ -265,10 +271,11 @@ export function ResultsOverview({
 
       {generated ? (
         <>
-          <Section title={t("results.mapTitle")}>
-            {mode === "globe" ? null : mapSlot}
-            <ColorLegend window={w} />
-          </Section>
+          {mode === "globe" ? (
+            <Section title={t("results.mapTitle")}>
+              <ColorLegend window={w} />
+            </Section>
+          ) : null}
           <Section title={t("results.chartTitle")}>
             <CompareChart rows={rows} window={w} />
           </Section>
@@ -328,7 +335,7 @@ export function ResultsOverview({
   }
   return (
     <div data-results={res.evaluation_status}>
-      <MapStage head={head} map={mapSlot} panelLabel={t("results.title")}>
+      <MapStage head={head} map={mapWithLegend} panelLabel={t("results.title")}>
         {body}
       </MapStage>
     </div>
