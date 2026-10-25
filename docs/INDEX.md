@@ -2,7 +2,7 @@
 
 **层与命名、轮次与状态、默认入口都只在这里写一次。** 其他文档不再各写一遍状态，只链接过来。改了状态、默认配置或命名，只改这一份。
 
-更新：2026-10-23。
+更新：2026-10-24。
 
 ## 0. 现在怎么工作（开发期）
 
@@ -28,7 +28,7 @@
 | **生活引擎** engine | 分身按月过日子：结算、评分、时间精力、职业、储蓄、疾病、跨期评价、城市汇总 | E1-1 – E1-6、E1 补充；E2 已并入 | M2 的生活部分 | `src/econ/life_*`、`src/common/life_*`、`src/ledger/life_*` | [e1-3](design/e1-3-life-model.md)、[e1-4](design/e1-4-time-energy.md)、[e1-5](design/e1-5-career-savings-risk.md)、[e1-6](design/e1-6-evaluation.md)、[生活扩展](design/e1-8-life-extension.md) |
 | **代理层** agent | 规划接口、事实记忆、mock 与真实模型、传输层、预算、归档与重放 | E1-7A / E1-7B | M4 | `src/agentlayer/`、`src/orchestration/` | [e1-7](design/e1-7-agent-loop.md) |
 | **接入层** intake | 用户输入、职业匹配、标准初态、真实资料、共享消息结构 | E3（含 E3-A） | M1、M1.5 | `src/product/`、`src/common/product_contracts.py`、`src/common/intake_contracts.py`、`contracts/product/` | [共享约定](design/e3-e5-product-contract.md)、[E3-A](design/e3a-product-input.md)、[intake-02 真实资料](design/intake-02-real-data.md) |
-| **界面层** ui | 表单、进度、结果展示、网页入口 | E5 | M6 | `web/`（`src/ui/` 未使用） | [E5 交接](handoffs/e5-product-handoff.md)、[E5-A](design/e5-a-offline-ui.md) |
+| **界面层** ui | 表单、进度、结果展示、网页入口 | E5 | M6 | `web/`（`src/ui/` 未使用） | [E5 网页](design/e5-web-ui.md)、[E5 → E3 交接单](handoffs/e5-bilingual-map-service-requests.md)、[E5-A（存档）](design/e5-a-offline-ui.md) |
 | **研究线** research | 大模型偏好理解评估（P8/P9/P10、三个门）、合成世界与人设、信息条件实验 | R、E4 | M3、M5 | `src/eval/`、`src/worlds/` | [README](../README.md) 第 3、7、10、11 章 |
 
 旧的福利模型核心（`src/econ/core.py`、`kernel.py`、`utility.py` 等，M2）属于研究线的真值标尺；跨国扩展（M7）是 V2，暂不归层。
@@ -84,8 +84,8 @@
 
 | 编号 | 旧编号 | 内容 | 状态 | 备注 | ADR |
 |---|---|---|---|---|---|
-| ui-01 | E5-A | 离线界面原型（React + TypeScript + Vite，`web/`；读共享结构 v2 的公共样例） | 已实现 | 说明见 [e5-a](design/e5-a-offline-ui.md) | [0036](../DECISIONS/0036-e5a-offline-ui.md) |
-| ui-02 | E5-B / E5-C | 网页接 E3C 托管服务：专属链接换会话、草稿与确认、运行意图、轮询进度与结果、删除（[E3C 交接](handoffs/e3c-to-e5-service.md)）。次数、排队、预算、后台调度与删除过期由 E3C 负责，界面不另做 | 计划中 | | |
+| ui-01 | E5-A | 离线界面原型（React + TypeScript + Vite，`web/`；读共享结构 v2 的公共样例） | 已实现（已被 ui-02 取代，存档） | 说明见 [e5-a](design/e5-a-offline-ui.md)（存档） | [0036](../DECISIONS/0036-e5a-offline-ui.md) |
+| ui-02 | E5-B / E5-C | 网页接 E3C 托管服务（共享结构 v3.3）：专属链接换会话、服务器草稿（自动保存、冲突由用户选）、审阅与确认、运行选项与意图、确认开始（幂等）、只读轮询、恢复 / 取消 / 删除、我的运行；结果三层（城市比较 → 单城详情 → 分身年度记录）；中英界面字典（E3 业务文字暂显示中文原文并标明）；默认稿纸 + 平面地图，可切换的写实地球（react-globe.gl，可拖动）；显示语言与模型语言是开局选项。次数、排队、预算、后台调度与删除过期由 E3C 负责，界面不另做 | 进行中 | 本地 mock 主闭环（浏览器 → E3C → worker → LangGraph → E1）由 Playwright 自动验收；待 E3：双语显示附层、地理显示清单（城市锚点）、动作与期限补齐、模型语言字段，见 [交接单](handoffs/e5-bilingual-map-service-requests.md) 第 10、12 节；说明见 [e5-web-ui](design/e5-web-ui.md) | [0045](../DECISIONS/0045-e5-web-dual-mode-bilingual.md) |
 
 ### 研究线
 
