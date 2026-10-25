@@ -45,7 +45,27 @@ export function InvitePage() {
 
 function NeedLink() {
   const { t } = useTranslation();
-  const { status, retryBoot } = useSession();
+  const { status, retryBoot, signOut, signOutError } = useSession();
+  if (status === "sign_out_unconfirmed") {
+    // 退出没有得到服务确认：说清楚这台设备上的会话可能还有效，给再试与重新检查；不显示任何私有内容
+    return (
+      <div data-session={status}>
+        <PageTitle>{t("session.signOutUnconfirmedTitle")}</PageTitle>
+        <div className="box warn" role="alert">
+          <p>{t("session.signOutUnconfirmedBody")}</p>
+          <div className="row">
+            <button type="button" className="primary" onClick={() => void signOut()}>
+              {t("session.signOutRetry")}
+            </button>
+            <button type="button" onClick={retryBoot}>
+              {t("session.signOutCheck")}
+            </button>
+          </div>
+        </div>
+        <ApiErrorView error={signOutError} />
+      </div>
+    );
+  }
   if (status === "unreachable") {
     return (
       <div>

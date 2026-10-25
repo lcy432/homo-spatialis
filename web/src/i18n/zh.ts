@@ -84,6 +84,11 @@ export const zh = {
     noToken: "这个地址里没有专属链接的凭证。请直接打开维护者发给你的完整链接。",
     exchangeFailed: "这条链接没有打开你的空间。",
     signedOut: "已经退出这个设备。再次使用时请重新打开你的专属链接。",
+    signOutUnconfirmedTitle: "退出还没有得到确认",
+    signOutUnconfirmedBody:
+      "退出请求没有得到服务的确认：这台设备上的会话可能仍然有效。你的内容已经先藏起来，但还不能说已经退出。网络恢复后请再试一次退出，或重新检查会话状态。",
+    signOutRetry: "再试一次退出",
+    signOutCheck: "重新检查",
     expiresAt: "这台设备的会话到 {{time}} 失效（查询不会延长）。",
   },
   home: {
@@ -563,9 +568,15 @@ export const zh = {
     tax: "税",
     notes: "说明",
     monthStrip: "{{label}}：逐月",
-    legendDone: "有",
-    legendNo: "没有",
-    legendNotLived: "没有生活",
+    month: {
+      obtained: "已获得",
+      plannedMissing: "已安排、没获得",
+      notPlanned: "没有安排",
+      inUse: "在用",
+      notInUse: "不在用",
+      notLived: "没有生活",
+      unknown: "记录不足",
+    },
     noYears: "没有逐年记录。",
   },
   runs: {

@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import { Allocator } from "../src/components/Allocator";
 import { PreflightView } from "../src/components/RunViews";
 import { CemBar, CompareChart } from "../src/components/results/CompareChart";
+import { monthStates } from "../src/components/results/MonthStrip";
 import { YearReport } from "../src/components/results/YearReport";
 import { samplePayload } from "../src/contract/samples";
 import type { CityResult, DraftView, ProductCapabilities, ProductPreflight, ProductResult, YearFacts } from "../src/contract/types";
@@ -72,6 +73,40 @@ describe("城市比较图", () => {
     expect(band?.dataset.band).toBe("0.45..0.55");
   });
 
+  it("零宽范围（上下界都是 0.5）：画在 0.5 的位置上，是一道竖线，不向右伪造宽度（独立核查 F4）", () => {
+    const city = {
+      city_ref: "X:TEST:2",
+      label: "零宽范围城",
+      planned: 1,
+      complete: 1,
+      exits: 0,
+      missing: 0,
+      mean_denominator: 1,
+      range_denominator: 1,
+      mean_j: exact(0.5),
+      range_lower: exact(0.5),
+      range_upper: exact(0.5),
+    } as unknown as CityResult;
+    const wide = { ...city, city_ref: "X:TEST:3", label: "普通范围城", mean_j: exact(0.52), range_lower: exact(0.5), range_upper: exact(0.56) } as unknown as CityResult;
+    const rows: CityRow[] = [
+      { cityRef: city.city_ref, label: city.label, country: null, city, mean: 0.5, low: 0.5, high: 0.5 },
+      { cityRef: wide.city_ref, label: wide.label, country: null, city: wide, mean: 0.52, low: 0.5, high: 0.56 },
+    ];
+    const { container } = render(
+      <ModeProvider initial="paper">
+        <CompareChart rows={rows} window={colorWindow([0.5, 0.52])} />
+      </ModeProvider>,
+    );
+    const [point, band] = [...container.querySelectorAll<HTMLElement>("[data-band]")] as [HTMLElement, HTMLElement];
+    const dot = container.querySelector<HTMLElement>('[data-city="X:TEST:2"] [data-mean]');
+    expect(point.dataset.band).toBe("0.5..0.5");
+    expect(point.style.width).toBe(""); // 没有宽度：不是一段
+    expect(point.style.left).toBe(dot?.style.left); // 与均值 0.5 在同一个位置
+    // 普通范围：左端在 0.5，宽度正好是 0.5→0.56 的距离（与零宽范围的左端相同）
+    expect(band.style.left).toBe(point.style.left);
+    expect(Number.parseFloat(band.style.width)).toBeGreaterThan(0);
+  });
+
   it("C = 0 的城市没有圆点、不上最低分的颜色；含 M 但有均值的城市照样有均值颜色", () => {
     const res = samplePayload<ProductResult>("23");
     const rows = cityRows(res, null);
@@ -115,6 +150,53 @@ describe("分身的年度生活记录", () => {
     const cells = within(strip).getAllByRole("listitem");
     expect(cells[2]).toHaveAttribute("title", "3 · 0");
     expect(cells[10]).toHaveAttribute("title", "11 · —");
+  });
+
+  it("服务月份：全年都生活、只在 7–12 月安排清洁，7 月安排了没获得——1–6 月是“没有安排”，不是“没有生活”（独立核查 F3）", () => {
+    const year: YearFacts = {
+      ...base,
+      months_lived: 12,
+      services: [
+        {
+          opportunity_id: "svc.clean",
+          label: "上门清洁",
+          months_planned: [7, 8, 9, 10, 11, 12],
+          months_covered: [8, 9, 10, 11, 12],
+          months_not_obtained: [7],
+        },
+      ],
+    };
+    render(<YearReport year={year} />);
+    const strip = screen.getByRole("list", { name: /上门清洁/ });
+    const cells = within(strip).getAllByRole("listitem");
+    expect(cells[0]).toHaveAttribute("title", "1 · 没有安排");
+    expect(cells[5]).toHaveAttribute("title", "6 · 没有安排");
+    expect(cells[6]).toHaveAttribute("title", "7 · 已安排、没获得");
+    expect(cells[7]).toHaveAttribute("title", "8 · 已获得");
+    expect(cells[11]).toHaveAttribute("title", "12 · 已获得");
+    expect(within(strip).queryByTitle(/没有生活/)).toBeNull();
+  });
+
+  it("服务月份：年中（第 8 个月）结束生活——9–12 月是“没有生活”；设备条带说“在用 / 不在用”，不说安排", () => {
+    const year: YearFacts = {
+      ...base,
+      months_lived: 8,
+      services: [{ opportunity_id: "svc.net", label: "测试用联网服务", months_planned: [1, 2, 3, 4, 5, 6, 7, 8], months_covered: [1, 2, 3, 4, 5, 6, 7, 8], months_not_obtained: [] }],
+      devices: [{ opportunity_id: "dev.washer", label: "测试用洗衣机", months_in_service: [3, 4, 5, 6, 7, 8] }],
+    };
+    render(<YearReport year={year} />);
+    const svc = within(screen.getByRole("list", { name: /测试用联网服务/ })).getAllByRole("listitem");
+    expect(svc[7]).toHaveAttribute("title", "8 · 已获得");
+    expect(svc[8]).toHaveAttribute("title", "9 · 没有生活");
+    const dev = within(screen.getByRole("list", { name: /测试用洗衣机/ })).getAllByRole("listitem");
+    expect(dev[0]).toHaveAttribute("title", "1 · 不在用");
+    expect(dev[2]).toHaveAttribute("title", "3 · 在用");
+    expect(dev[8]).toHaveAttribute("title", "9 · 没有生活");
+  });
+
+  it("月份状态的纯函数：公开资料里既没有获得也没有安排列表时是“记录不足”，不补零", () => {
+    expect(monthStates(null, 12, null)).toEqual(Array(12).fill("unknown"));
+    expect(monthStates([2], 3, undefined)).toEqual(["off", "on", "off", ...Array(9).fill("none")]);
   });
 
   it("片区居民的典型通勤与这个分身的实际通勤分开写；年度已支付总额写明不是月度流水", () => {

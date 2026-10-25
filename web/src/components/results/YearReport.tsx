@@ -27,7 +27,7 @@ function ServiceLines({ lines, monthsLived }: { lines: readonly ConvenienceServi
             {formatMonths(s.months_covered, locale) || t("common.monthsNone")} · {t("clone.notObtained")}：
             {formatMonths(s.months_not_obtained, locale) || t("common.monthsNone")}
           </p>
-          <MonthStrip label={s.label} states={monthStates(s.months_covered, monthsLived, s.months_planned)} />
+          <MonthStrip label={s.label} kind="service" states={monthStates(s.months_covered, monthsLived, s.months_planned)} />
         </li>
       ))}
     </ul>
@@ -184,7 +184,7 @@ export function YearReport({ year }: { year: YearFacts }) {
         <>
           <h4>{t("clone.devices")}</h4>
           {y.devices.map((dv) => (
-            <MonthStrip key={dv.opportunity_id} label={dv.label} states={monthStates(dv.months_in_service, lived)} />
+            <MonthStrip key={dv.opportunity_id} label={dv.label} kind="device" states={monthStates(dv.months_in_service, lived)} />
           ))}
         </>
       ) : null}
@@ -210,7 +210,7 @@ export function YearReport({ year }: { year: YearFacts }) {
                   {formatMonths(s.months_obtained, locale) || t("common.monthsNone")} · {t("clone.notObtained")}：
                   {formatMonths(s.months_not_obtained, locale) || t("common.monthsNone")}
                 </p>
-                <MonthStrip label={s.label_zh} states={monthStates(s.months_obtained, lived, s.months_planned)} />
+                <MonthStrip label={s.label_zh} kind="service" states={monthStates(s.months_obtained, lived, s.months_planned)} />
               </li>
             ))}
           </ul>

@@ -11,7 +11,9 @@ import type { SessionView } from "../contract/types";
 import { type ServiceApi, makeApi } from "./endpoints";
 import { ApiError, isApiError } from "./errors";
 
-export type SessionStatus = "loading" | "none" | "active" | "expired" | "signed_out" | "unreachable";
+// sign_out_unconfirmed：点了退出，但服务没有确认（请求没送到，或回执丢了）。私有页面先藏起来，不承诺会话已失效，
+// 给“再试一次退出”与“重新检查”（独立核查 F1）。
+export type SessionStatus = "loading" | "none" | "active" | "expired" | "signed_out" | "sign_out_unconfirmed" | "unreachable";
 
 const pendingInvite: { token: string | null } = { token: null };
 
@@ -41,6 +43,8 @@ interface SessionContextValue {
   view: SessionView | null;
   /** 最近一次换会话失败的错误（显示用）。 */
   exchangeError: ApiError | null;
+  /** 最近一次退出没有得到服务确认的错误（显示用）。 */
+  signOutError: ApiError | null;
   exchange(token: string): Promise<boolean>;
   refresh(): Promise<void>;
   signOut(): Promise<void>;
@@ -60,6 +64,8 @@ export function SessionProvider({ children, api: injected }: { children: ReactNo
   const [epoch, setEpoch] = useState(0);
   const [view, setView] = useState<SessionView | null>(null);
   const [exchangeError, setExchangeError] = useState<ApiError | null>(null);
+  const [signOutError, setSignOutError] = useState<ApiError | null>(null);
+  const signingOut = useRef(false);
   const [bootTick, setBootTick] = useState(0);
 
   const setStatus = useCallback((s: SessionStatus) => {
@@ -84,7 +90,9 @@ export function SessionProvider({ children, api: injected }: { children: ReactNo
   const onUnauthenticated = useCallback(
     (epochAtRequest: number) => {
       if (epochAtRequest !== epochRef.current) return;
-      if (statusRef.current === "active") dropIdentity("expired");
+      // 退出过程中的 401 = 服务那边已经没有这个会话了：就是退出成功（上一次的回执可能丢了）
+      if (signingOut.current) dropIdentity("signed_out");
+      else if (statusRef.current === "active" || statusRef.current === "sign_out_unconfirmed") dropIdentity("expired");
     },
     [dropIdentity],
   );
@@ -159,12 +167,23 @@ export function SessionProvider({ children, api: injected }: { children: ReactNo
   }, [api, adopt]);
 
   const signOut = useCallback(async () => {
+    const at = epochRef.current;
+    signingOut.current = true;
+    setSignOutError(null);
     try {
       await api.signOut();
+      if (at === epochRef.current) dropIdentity("signed_out");
+    } catch (e) {
+      if (at !== epochRef.current) return; // 401 已经由 HTTP 层处理成“已退出”
+      if (isApiError(e) && e.kind === "stale") return;
+      // 服务没有确认：请求可能没送到，也可能处理了但回执丢了。先藏起私有页面，但不说“已经退出”。
+      setSignOutError(isApiError(e) ? e : new ApiError("network"));
+      void queryClient.cancelQueries();
+      setStatus("sign_out_unconfirmed");
     } finally {
-      dropIdentity("signed_out");
+      signingOut.current = false;
     }
-  }, [api, dropIdentity]);
+  }, [api, dropIdentity, queryClient, setStatus]);
 
   const resetAfterDeleteAll = useCallback(async () => {
     // 会话本身还在：换代次、清缓存，但不切到“加载中”（页面上的删除回执要留着）
@@ -183,8 +202,8 @@ export function SessionProvider({ children, api: injected }: { children: ReactNo
   }, [setStatus]);
 
   const value = useMemo<SessionContextValue>(
-    () => ({ status, epoch, api, view, exchangeError, exchange, refresh, signOut, resetAfterDeleteAll, retryBoot }),
-    [status, epoch, api, view, exchangeError, exchange, refresh, signOut, resetAfterDeleteAll, retryBoot],
+    () => ({ status, epoch, api, view, exchangeError, signOutError, exchange, refresh, signOut, resetAfterDeleteAll, retryBoot }),
+    [status, epoch, api, view, exchangeError, signOutError, exchange, refresh, signOut, resetAfterDeleteAll, retryBoot],
   );
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }

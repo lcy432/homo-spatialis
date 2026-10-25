@@ -84,6 +84,22 @@
   border-radius: 2px;
 }
 
+/* 零宽范围：一道竖线在精确位置上；::after 只扩大鼠标悬停的区域，不改变数据形状 */
+.bandPoint {
+  position: absolute;
+  top: 5px;
+  height: 20px;
+  width: 0;
+  border-left: 2px solid var(--line-strong);
+  margin-left: -1px;
+}
+
+.bandPoint::after {
+  content: "";
+  position: absolute;
+  inset: 0 -6px;
+}
+
 .dot {
   position: absolute;
   top: 7px;
@@ -208,8 +224,20 @@
   background: repeating-linear-gradient(135deg, transparent 0 3px, var(--line) 3px 4px);
 }
 
+.monthPlannedOff {
+  background: transparent;
+  border: 1.5px dashed var(--accent);
+  color: var(--accent);
+}
+
 .monthNone {
   background: transparent;
   color: var(--ink-soft);
   border-style: dashed;
+}
+
+.monthUnknown {
+  background: var(--chip-bg);
+  color: var(--ink-soft);
+  font-style: italic;
 }

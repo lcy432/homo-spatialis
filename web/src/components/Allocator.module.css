@@ -4,7 +4,7 @@
 
 .status {
   position: sticky;
-  top: 0;
+  bottom: 0.5rem;
   z-index: 2;
   background: var(--surface-solid);
   border: 2px solid var(--accent);
@@ -17,7 +17,12 @@
   align-items: center;
 }
 
-/* 放大到 200% 或横屏手机（可见高度很矮）时，状态条不再固定在顶部，免得挡住大半个屏幕。 */
+/* 聚焦某一项的输入框时浏览器把它滚进视口：留出合计条的高度，不让它正好停在合计条下面 */
+.row {
+  scroll-margin-bottom: 5.5rem;
+}
+
+/* 放大到 200% 或横屏手机（可见高度很矮）时，合计条不再固定，免得挡住大半个屏幕。 */
 @media (max-height: 520px) {
   .status {
     position: static;

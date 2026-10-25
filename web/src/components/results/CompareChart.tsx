@@ -51,10 +51,11 @@ export function CompareChart({ rows, window: w }: { rows: readonly CityRow[]; wi
                 <span key={v} className={styles.grid} style={{ left: `${x(v)}%` }} />
               ))}
               {r.low !== null && r.high !== null ? (
+                // 两端严格按公共值定位，没有最小宽度（独立核查 F4）：上下界相等就画一道竖线，不把零宽范围画成一段
                 <span
-                  className={styles.band}
+                  className={r.high > r.low ? styles.band : styles.bandPoint}
                   data-band={`${r.city.range_lower?.exact}..${r.city.range_upper?.exact}`}
-                  style={{ left: `${x(r.low)}%`, width: `${Math.max(0.6, x(r.high) - x(r.low))}%` }}
+                  style={r.high > r.low ? { left: `${x(r.low)}%`, width: `${x(r.high) - x(r.low)}%` } : { left: `${x(r.low)}%` }}
                   title={`${t("results.rangeBar")} ${r.city.range_lower?.display}–${r.city.range_upper?.display}`}
                 />
               ) : null}

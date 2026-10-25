@@ -45,7 +45,7 @@ export function StartPage() {
   const { t } = useTranslation();
   const locale = useLocale();
   const { mode, setMode } = useMode();
-  const { api } = useSession();
+  const { api, refresh } = useSession();
   const caps = useCapabilities();
   const navigate = useNavigate();
   const [modelLang, setModelLang] = useState<string>(locale);
@@ -66,6 +66,8 @@ export function StartPage() {
         const draft = { ...view.draft, occupation: { ...view.draft.occupation, language: modelLang } };
         view = await api.saveDraft(view.draft.draft_id, { draft, expected_revision: view.draft.revision });
       }
+      // 会话视图里的草稿列表要立刻包含这一份（站内回首页不用整页刷新）
+      await refresh();
       navigate(`/draft/${encodeURIComponent(view.draft.draft_id)}/place`);
     } catch (e) {
       setError(e);

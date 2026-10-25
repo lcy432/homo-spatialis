@@ -1,4 +1,5 @@
 // 首页：次数、未结束的模拟、草稿列表与服务规则。数字全部照服务的会话视图显示，浏览器不推算账本。
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { useSession } from "../api/session";
@@ -11,7 +12,11 @@ import { useLocale } from "../i18n/index";
 export function HomePage() {
   const { t } = useTranslation();
   const locale = useLocale();
-  const { view } = useSession();
+  const { view, refresh } = useSession();
+  // 回到首页时重新读服务的会话视图：站内新建、保存或删除过草稿之后，列表与次数照服务现在的事实显示（独立核查 F2）
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
   if (!view) return null;
   const q = view.quota;
   const r = view.rules;

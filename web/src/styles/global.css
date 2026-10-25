@@ -487,6 +487,11 @@ table[data-table="cities"] {
   min-width: 40rem;
 }
 
+/* 行标题（城市名）：窄屏上给它一个像样的宽度，长地名按标点折行，不一字一行 */
+table[data-table="cities"] th[scope="row"] {
+  min-width: 9em;
+}
+
 dialog {
   border: 1px solid var(--line-strong);
   border-radius: var(--radius);

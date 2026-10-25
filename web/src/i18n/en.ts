@@ -86,6 +86,11 @@ export const en: Dict = {
     noToken: "This address does not contain the link's credential. Open the full link the maintainer sent you.",
     exchangeFailed: "This link did not open your space.",
     signedOut: "Signed out on this device. Open your personal link again to continue.",
+    signOutUnconfirmedTitle: "Sign-out not confirmed yet",
+    signOutUnconfirmedBody:
+      "The service has not confirmed the sign-out: the session on this device may still be valid. Your content is hidden for now, but it cannot be called signed out yet. When the network is back, retry the sign-out or check the session again.",
+    signOutRetry: "Retry sign-out",
+    signOutCheck: "Check again",
     expiresAt: "The session on this device ends at {{time}} (browsing does not extend it).",
   },
   home: {
@@ -576,9 +581,15 @@ export const en: Dict = {
     tax: "Tax",
     notes: "Notes",
     monthStrip: "{{label}}: by month",
-    legendDone: "yes",
-    legendNo: "no",
-    legendNotLived: "not lived",
+    month: {
+      obtained: "obtained",
+      plannedMissing: "planned, not obtained",
+      notPlanned: "not planned",
+      inUse: "in use",
+      notInUse: "not in use",
+      notLived: "not lived",
+      unknown: "no record",
+    },
     noYears: "No yearly records.",
   },
   runs: {

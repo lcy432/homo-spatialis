@@ -108,23 +108,6 @@ export function Allocator({ group, title, help }: { group: AllocationGroup; titl
       <h2>{title}</h2>
       <p className="muted">{help}</p>
 
-      <div className={`${styles.status} ${rem.kind === "over" ? styles.over : rem.kind === "full" ? styles.full : ""}`}>
-        <p className={styles.statusText} role="status" aria-live="polite" id={`${uid}-status`}>
-          {statusText}
-          {amount.exact ? (
-            <span className="small muted">
-              （{t("common.exact")} {amount.exact}）
-            </span>
-          ) : null}
-        </p>
-        {rem.kind === "over" && !isEqual ? (
-          <button type="button" onClick={() => setPicker({ kind: "reduce", amount: canonical(rem.amount) })}>
-            {t("priorities.reduceFrom", { x: amount.text })}
-          </button>
-        ) : null}
-        {totals.invalid.length ? <span className="small">{t("priorities.notCounted", { n: totals.invalid.length })}</span> : null}
-      </div>
-
       <div className={styles.toolbar}>
         <button type="button" onClick={() => setEqualDialog(true)} disabled={isEqual}>
           {t("priorities.equalSplit")}
@@ -234,6 +217,24 @@ export function Allocator({ group, title, help }: { group: AllocationGroup; titl
           );
         })}
       </ol>
+
+      {/* 合计条放在各项之后，像账本最后一行；滚动时贴在视口底边，到了它自己的位置就停下，不会盖住任何一题的控件 */}
+      <div className={`${styles.status} ${rem.kind === "over" ? styles.over : rem.kind === "full" ? styles.full : ""}`}>
+        <p className={styles.statusText} role="status" aria-live="polite" id={`${uid}-status`}>
+          {statusText}
+          {amount.exact ? (
+            <span className="small muted">
+              （{t("common.exact")} {amount.exact}）
+            </span>
+          ) : null}
+        </p>
+        {rem.kind === "over" && !isEqual ? (
+          <button type="button" onClick={() => setPicker({ kind: "reduce", amount: canonical(rem.amount) })}>
+            {t("priorities.reduceFrom", { x: amount.text })}
+          </button>
+        ) : null}
+        {totals.invalid.length ? <span className="small">{t("priorities.notCounted", { n: totals.invalid.length })}</span> : null}
+      </div>
 
       <Dialog open={equalDialog} onClose={() => setEqualDialog(false)} title={t("priorities.equalSplit")}>
         <p>{t("priorities.equalSplitConfirm", { each: eqDisplay, exact: eqExact })}</p>
