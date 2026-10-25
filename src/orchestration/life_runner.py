@@ -286,6 +286,109 @@ def first_year_input_checks(world: RunWorld, run_id: str) -> tuple[InputSizeChec
     return tuple(out)
 
 
+def pending_input_checks(world: RunWorld, run_dir: Path) -> dict[str, InputSizeCheck]:
+    """只读：恢复之后各个正在规划的分身首先要发的那份请求（进度里的候选，它还没有调用记录）的输入估计，按请求编号。托管服务用它
+    判断“恢复”之后的下一次预留够不够——还没有发送历史的候选，输入照样要算钱，不能当作 0（E3C 收尾复核 R4）。
+
+    与 ``LifeRunner._plan_year`` 同一份构造（``year_request``）、与发送前护栏同一条渲染与估计（``request_input_check``）：从同一个
+    初态按归档里已接受的行动重放到那一年（``replay_run`` 的执行路径，绑定逐年核对），记忆与上一年反馈按 ``_commit`` 的写法，修订
+    按上一份候选的原始回复与它的诊断（``revision_block``）。不调用规划器、不写文件、不预留。离线 mock 没有输入上限，返回空；
+    归档与重放对不上就拒绝（``RunRefusedError``），不猜。"""
+    llm = world.config.planner.llm
+    if world.config.planner.identity.kind != "llm" or llm is None:
+        return {}
+    archive = RunArchive(run_dir, create=False)
+    manifest = _check_manifest(world, archive)
+    progress = RunProgress.model_validate(archive.read_json("progress.json"))
+    records = load_archive_records(world, archive, manifest.run_id, pending_ok=True)
+    entries = {e.clone_id: e for e in world.roster.entries}
+    allowed = world.config.planning.attempts_per_year
+    out: dict[str, InputSizeCheck] = {}
+    for item in progress.pending:
+        attempt = item.attempts_used + 1
+        if (item.clone_id, item.year_index, attempt) in records.calls:
+            continue  # 回复已经落盘：恢复时复用，不再预留
+        entry = entries.get(item.clone_id)
+        if entry is None:
+            raise RunRefusedError(f"进度里的 {item.clone_id} 不在名单里")
+        city = str(entry.city)
+        catalog = world.bundle.catalog_for(city)
+        profile = world.bundle.profile_for(entry.person_id)
+        conditions = world.scoring.conditions_for(city)
+        state = world.bundle.initial_state(item.clone_id)
+        assert catalog is not None and profile is not None and conditions is not None
+        assert state is not None
+        inputs = ScoringInputs(
+            spec=world.scoring.spec,
+            conditions=conditions,
+            preference_input=profile,
+            hard_requirements=profile.hard_requirements,
+        )
+        tax = _tax(world.bundle, city)
+        memory: list[MemoryYear] = []
+        feedback: VisibleFeedback | None = None
+        for year in range(1, item.year_index):
+            acc = records.accepted.get((item.clone_id, year))
+            if acc is None:
+                raise RunRefusedError(
+                    f"{item.clone_id} 正在规划第 {item.year_index} 年，却没有第 {year} 年的已接受行动"
+                )
+            result = run_life_year(
+                protocol=world.bundle.protocol,
+                state=state,
+                action=acc.action,
+                catalog=catalog,
+                tax=tax,
+                scoring=inputs,
+            )
+            if (
+                result.binding_fingerprint != acc.binding_fingerprint
+                or result.handoff != "next_year_ready"
+                or result.next_state is None
+            ):
+                raise RunRefusedError(
+                    f"重放 {item.clone_id} 第 {year} 年得到的绑定与归档不同：不能据此估计恢复之后的请求"
+                )
+            feedback = visible_feedback(result.settlement)
+            memory.append(
+                MemoryYear(
+                    clone_id=item.clone_id,
+                    city=city,
+                    year_index=year,
+                    feedback=feedback,
+                    need_summary=acc.need_summary,
+                    rationale=acc.action.rationale or "",
+                )
+            )
+            state = result.next_state
+        revision = None
+        if item.attempts_used:
+            key = (item.clone_id, item.year_index, item.attempts_used)
+            if key not in records.calls or key not in records.attempts:
+                raise RunRefusedError(f"{_where(key)}：要修订的上一份候选没有调用或检查记录")
+            revision = revision_block(
+                attempt=attempt,
+                attempts_allowed=allowed,
+                previous_output=records.calls[key]["response_text"],
+                diagnostics=AttemptRecord.model_validate(records.attempts[key]).diagnostics,
+            )
+        request = year_request(
+            world,
+            request_id=request_id_for(manifest.run_id, item.clone_id, item.year_index, attempt),
+            clone_id=item.clone_id,
+            person_id=entry.person_id,
+            city=city,
+            state=state,
+            year=item.year_index,
+            attempt=attempt,
+            memory_years=memory,
+            last_feedback=feedback,
+            revision=revision,
+        )
+        out[request.request_id] = request_input_check(llm, request_payload(request))
+    return out
+
+
 def _input_files(
     config_path: Path, config: LifeRunConfig, roster_config: RosterConfig
 ) -> dict[str, tuple[str, str]]:

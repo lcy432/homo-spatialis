@@ -34,7 +34,12 @@ from common.product_contracts import ConfirmedProfile, RunProgress
 from common.run_store import RunStore
 from common.runlog import ProviderCallRecord
 from orchestration.life_budget import RoundBudget, ledger_state, read_ledger
-from orchestration.life_runner import RunWorld
+from orchestration.life_runner import (
+    RunRefusedError,
+    RunWorld,
+    pending_input_checks,
+    preflight_from_snapshot,
+)
 from product.bridge import cost_status, progress
 from product.execution import ExecutionSpec, service_pack
 from product.service.actions import ServiceContext
@@ -241,7 +246,9 @@ class RunDir:
         """这次运行停下之后，用户点“恢复”能不能真的继续（只读：读 E1 的进度、请求明细与这次运行的账本，不调用规划器、不写文件）。
         判断与 E1 恢复时 ``LlmPlanner`` 的做法一致：每个正在规划的候选按 E1 的 ``service_history`` 看——回复已经可靠落盘就复用（能继续）；
         有一次可能已经发出、结果没落盘 → 发送不确定；返回型号不符 → 型号不符；这份候选的服务尝试（``1 + service_retries``）已经
-        用完 → 尝试用完（E1 不会再发，也不清零计数）；账本不够再预留一次 → 预算不够。返回（能否继续，不能继续时的公开代码）。"""
+        用完 → 尝试用完（E1 不会再发，也不清零计数）；账本不够再预留一次 → 预算不够。下一次预留的输入估计：有服务尝试的候选用它
+        上一次尝试记下的估计；还没有任何服务尝试的候选（例如并行时别的分身停下、它停在发送之前）按 E1 恢复后要发的那份请求重建并
+        估计（``pending_input_checks``，只读）——没有发送历史不等于没有输入（E3C 收尾复核 R4）。返回（能否继续，不能继续时的公开代码）。"""
         run_dir = self.archive(run_id)
         try:
             p = E1RunProgress.model_validate_json(
@@ -267,6 +274,7 @@ class RunDir:
         ]
         allowed = 1 + settings.service_retries
         estimates: list[int] = []
+        fresh: list[str] = []
         for pending in p.pending:
             request_id = (
                 f"{p.run_id}/{pending.clone_id}/y{pending.year_index}/a{pending.attempts_used + 1}"
@@ -288,10 +296,44 @@ class RunDir:
                 continue
             if len(hist.attempts) >= allowed:
                 return False, "attempts_exhausted"
-            estimates += [a.intent.input_tokens_estimate or 0 for a in hist.attempts[-1:]]
+            if hist.attempts:
+                estimates += [a.intent.input_tokens_estimate or 0 for a in hist.attempts[-1:]]
+            else:
+                fresh.append(request_id)
+        if fresh or not p.pending:
+            found = self._next_request_estimates(run_dir, settings, fresh)
+            if isinstance(found, str):
+                return False, found
+            estimates += found
         if not self._budget_fits(spec, settings, max(estimates, default=0)):
             return False, "budget_blocked"
         return True, None
+
+    def _next_request_estimates(
+        self, run_dir: Path, settings: LlmSettings, request_ids: list[str]
+    ) -> list[int] | str:
+        """还没有发送历史、恢复之后要发的请求的输入估计（E1 的同一份构造与估计，只读）。进度里没有正在规划的候选（下一份请求还没有
+        构造出来），或者重建失败但不是归档冲突时，按单次输入上限估计——E1 对任何一份请求的预留都不会超过它（超过就在发送前拒绝）——
+        保守，不当作 0。归档冲突 → ``archive_conflict``；那份请求超过单次输入上限 → ``run_halted``（恢复之后 E1 也会在发送前停下）。"""
+        cap = settings.max_input_tokens
+        if not request_ids:
+            return [cap]
+        try:
+            checks = pending_input_checks(preflight_from_snapshot(run_dir), run_dir)
+        except RunRefusedError:
+            return "archive_conflict"
+        except Exception:  # 估计不出来就按上限，不放行一个可能马上停下的“恢复”
+            return [cap] * len(request_ids)
+        out: list[int] = []
+        for request_id in request_ids:
+            check = checks.get(request_id)
+            if check is None:
+                out.append(cap)
+            elif not check.fits:
+                return "run_halted"
+            else:
+                out.append(check.estimate)
+        return out
 
     def _budget_fits(self, spec: ExecutionSpec, settings: LlmSettings, estimate: int) -> bool:
         """这本账还够不够再预留一次（按 E1 的预留写法：输入估计 × 输入单价 + 输出上限 × 输出单价，向上取到 0.000001 元）。"""

@@ -200,6 +200,15 @@ def intent_due(row: Any, now: str, intent_days: int, *, running: bool = False) -
     return days_after(row["last_activity_at"], intent_days) <= now
 
 
+class _CommitThenRaise(Exception):  # noqa: N818 - 只在 ``ServiceStore.write`` 内部用的控制信号
+    """写事务里发现意图已经到期：这个事务里已经做的过期处理（退回没用的预留、取消待执行的任务、清掉正文）要先提交，再把
+    ``error`` 交给调用方——拒绝本身不能把过期处理一起回滚（E3C 收尾复核 R3）。调用方要在任何其他写入之前抛它。"""
+
+    def __init__(self, error: Exception) -> None:
+        super().__init__(str(error))
+        self.error = error
+
+
 @dataclass(frozen=True)
 class Quota:
     total: int
@@ -269,18 +278,27 @@ class ServiceStore:
 
     @contextmanager
     def write(self) -> Iterator[sqlite3.Connection]:
-        """短写事务（``BEGIN IMMEDIATE``）：开头就拿写锁，并发提交排队，不会读到一半被别人改。事务里不做网络或文件操作。"""
+        """短写事务（``BEGIN IMMEDIATE``）：开头就拿写锁，并发提交排队，不会读到一半被别人改。事务里不做网络或文件操作。
+        出错就回滚；只有 ``_CommitThenRaise``（到期的过期处理）先提交、做一次 WAL 检查点（清掉的正文不留在 WAL 里），再抛出它带的错误。"""
         con = self._connect()
+        refused: _CommitThenRaise | None = None
         try:
             con.execute("BEGIN IMMEDIATE")
             try:
                 yield con
+            except _CommitThenRaise as stop:
+                con.execute("COMMIT")
+                refused = stop
             except BaseException:
                 con.execute("ROLLBACK")
                 raise
-            con.execute("COMMIT")
+            else:
+                con.execute("COMMIT")
         finally:
             con.close()
+        if refused is not None:
+            self.checkpoint()
+            raise refused.error from None
 
     def now(self) -> str:
         return iso(self.clock())
@@ -441,7 +459,11 @@ class ServiceStore:
             return count(c)
 
     def consume(self, intent_id: str, note: str = "") -> bool:
-        """预留转为已使用（准备首次启动 E1 时）。重复调用不重复扣；没有预留或已经释放就拒绝。"""
+        """预留转为已使用（准备首次启动 E1 时）。重复调用不重复扣；没有预留或已经释放就拒绝。
+
+        首次转为已使用之前，在同一个事务里核对期限（E3C 收尾复核 R3）：已经到期就按过期处理并提交（预留只退一次、取消待执行的
+        任务），然后拒绝——过期的运行不进入 E1、不扣次数、不发请求。这时意图虽然已标为运行中，E1 还没有启动，所以按“没有执行者”
+        的同一条期限规则判断；已经转为已使用的（恢复、重复调用）照旧，正常执行中的运行不受影响。"""
         with self.write() as con:
             kinds = {
                 r[0]
@@ -453,9 +475,12 @@ class ServiceStore:
                 return False
             if "reserve" not in kinds or "release" in kinds:
                 raise RuntimeError(f"{intent_id} 没有有效的预留，不能开始")
-            principal = con.execute(
-                "SELECT principal_id FROM intents WHERE intent_id = ?", (intent_id,)
-            ).fetchone()[0]
+            row = con.execute("SELECT * FROM intents WHERE intent_id = ?", (intent_id,)).fetchone()
+            now = self.now()
+            if intent_due(row, now, self.intent_days, running=True):
+                self._expire_row(con, row, now)
+                raise _CommitThenRaise(RuntimeError(f"{intent_id} 已经过期，不能开始"))
+            principal = row["principal_id"]
             con.execute(
                 "INSERT INTO quota_events (principal_id, intent_id, kind, at, note) VALUES (?, ?, 'consume', ?, ?)",
                 (principal, intent_id, self.now(), note[:200]),
@@ -892,11 +917,13 @@ class ServiceStore:
             self._refuse_if_due(con, row)
 
     def _refuse_if_due(self, con: sqlite3.Connection, row: sqlite3.Row) -> None:
-        """写入之前先核对截止时间：已经到期就在这个事务里按过期处理（退回没用的预留、清掉内容），然后拒绝。"""
+        """写入之前先核对截止时间：已经到期就在这个事务里按过期处理（退回没用的预留、取消待执行的任务、清掉内容），**提交**之后
+        再拒绝（``expired``）——不能让拒绝把过期处理回滚，留下一个页面显示过期、库里仍在排队的运行（E3C 收尾复核 R3）。调用方都在
+        任何其他写入之前调用它。"""
         now = self.now()
         if intent_due(row, now, self.intent_days):
             self._expire_row(con, row, now)
-            raise ServiceFailure("expired")
+            raise _CommitThenRaise(ServiceFailure("expired"))
 
     def submit_intent(
         self,
@@ -1193,18 +1220,38 @@ class ServiceStore:
             self._enqueue(con, kind, intent_id)
 
     def take_job(self) -> sqlite3.Row | None:
-        """最早的待办任务，标为进行中。删除任务优先（让删除尽快收尾）。"""
+        """最早的待办任务，标为进行中。删除任务优先（让删除尽快收尾）。
+
+        领取时在同一个事务里核对期限（E3C 收尾复核 R3）：任务的意图已经到期，就按过期处理（预留只退一次、取消它的任务、清掉正文）
+        并提交，不交给 worker，接着看下一个——不靠定时维护刚好先跑。领取的那一刻没有人在执行它，所以按“没有执行者”的规则判断。"""
+        now = self.now()
+        expired = False
         with self.write() as con:
-            row = con.execute(
-                "SELECT * FROM jobs WHERE state = 'pending' ORDER BY kind != 'delete', job_id LIMIT 1"
-            ).fetchone()
-            if row is None:
-                return None
-            con.execute(
-                "UPDATE jobs SET state = 'active', started_at = ? WHERE job_id = ?",
-                (self.now(), row["job_id"]),
-            )
-            return con.execute("SELECT * FROM jobs WHERE job_id = ?", (row["job_id"],)).fetchone()
+            while True:
+                row = con.execute(
+                    "SELECT * FROM jobs WHERE state = 'pending' ORDER BY kind != 'delete', job_id LIMIT 1"
+                ).fetchone()
+                if row is None:
+                    job = None
+                    break
+                intent = con.execute(
+                    "SELECT * FROM intents WHERE intent_id = ?", (row["intent_id"],)
+                ).fetchone()
+                if intent is not None and intent_due(intent, now, self.intent_days, running=True):
+                    self._expire_row(con, intent, now)  # 也取消了这个任务
+                    expired = True
+                    continue
+                con.execute(
+                    "UPDATE jobs SET state = 'active', started_at = ? WHERE job_id = ?",
+                    (now, row["job_id"]),
+                )
+                job = con.execute(
+                    "SELECT * FROM jobs WHERE job_id = ?", (row["job_id"],)
+                ).fetchone()
+                break
+        if expired:
+            self.checkpoint()
+        return job
 
     def finish_job(self, job_id: int, note: str = "") -> None:
         with self.write() as con:
@@ -1291,10 +1338,21 @@ class ServiceStore:
             return True
 
     def mark_started(self, intent_id: str) -> bool:
-        """worker 开始执行运行任务：排队 → 运行中。已经取消、删除、过期的不开始。"""
-        return self.update_intent(
-            intent_id, only_stages=("queued",), stage="running", waiting_for="service"
-        )
+        """worker 开始执行运行任务：排队 → 运行中。已经取消、删除、过期的不开始。期限与状态转换在同一个事务里：已经到期就按过期
+        处理（预留只退一次、取消任务）并提交，不开始（E3C 收尾复核 R3）。"""
+        now = self.now()
+        with self.write() as con:
+            row = con.execute("SELECT * FROM intents WHERE intent_id = ?", (intent_id,)).fetchone()
+            if row is None or row["stage"] != "queued":
+                return False
+            due = intent_due(row, now, self.intent_days)
+            if due:
+                self._expire_row(con, row, now)
+            else:
+                self.touch(con, intent_id, stage="running", waiting_for="service")
+        if due:
+            self.checkpoint()
+        return not due
 
     # ------------------------------------------------------------------ worker 写回的公开状态
 
