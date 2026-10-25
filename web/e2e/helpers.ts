@@ -82,6 +82,13 @@ export async function expectNoHorizontalScroll(page: Page): Promise<void> {
 
 /** axe：严重、致命、中等的问题都要是 0；报告写进 runs/web-e2e/a11y/。 */
 export async function expectAccessible(page: Page, info: TestInfo, name: string): Promise<void> {
+  // 翻页淡入等动画结束后再测（动画中途的透明度会让对比度检查误报）；循环动画永远不会结束，最多等 2 秒
+  await page.evaluate(() =>
+    Promise.race([
+      Promise.all(document.getAnimations().map((a) => a.finished.catch(() => undefined))),
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+    ]),
+  );
   const result = await new AxeBuilder({ page }).analyze();
   const bad = result.violations.filter((v) => ["critical", "serious", "moderate"].includes(v.impact ?? ""));
   writeFileSync(

@@ -59,7 +59,7 @@ test("两个标签页改同一份草稿：后保存的一方看到冲突，可�
   await waitSaved(p2);
 });
 
-test("只用键盘：勾选城市、主动均分（对话框 Enter 确认）、Esc 关闭对话框后焦点回到按钮", async ({ page }) => {
+test("只用键盘：勾选城市、各项均分（对话框 Enter 确认）、Esc 关闭对话框后焦点回到按钮", async ({ page }) => {
   const base = await newDraft(page, "e2e 键盘");
   await page.getByRole("button", { name: "清除选择" }).focus();
   await page.keyboard.press("Enter");
@@ -70,7 +70,7 @@ test("只用键盘：勾选城市、主动均分（对话框 Enter 确认）、E
   await expect(first).toBeChecked();
 
   await page.goto(`${base}/priorities`);
-  const split = page.locator('[data-allocator="six_dimensions"]').getByRole("button", { name: "平均分配" });
+  const split = page.locator('[data-allocator="six_dimensions"]').getByRole("button", { name: "各项均分" });
   await split.focus();
   await page.keyboard.press("Enter");
   await expect(page.getByRole("dialog")).toBeVisible();
@@ -78,7 +78,7 @@ test("只用键盘：勾选城市、主动均分（对话框 Enter 确认）、E
   await expect(page.getByRole("dialog")).toBeHidden();
   await expect(split).toBeFocused();
   await page.keyboard.press("Enter");
-  await page.getByRole("dialog").getByRole("button", { name: "平均分配" }).focus();
+  await page.getByRole("dialog").getByRole("button", { name: "各项均分" }).focus();
   await page.keyboard.press("Enter");
   await expect(page.locator('[data-allocator="six_dimensions"]').getByText(/每项 16.7 分（精确值 50\/3）/)).toBeVisible();
 });

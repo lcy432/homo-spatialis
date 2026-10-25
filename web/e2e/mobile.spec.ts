@@ -35,9 +35,29 @@ test.describe("手机 @mobile-only", () => {
     await shot(page, info, "place");
     await expectNoHorizontalScroll(page);
     await expectAccessible(page, info, "place");
-    await page.goto(page.url().replace(/\/place$/, "/priorities"));
+    // 第 2 步：目录在手机上用下拉选分类 + 搜索；选中后目录收起
+    await page.goto(page.url().replace(/\/place$/, "/facts"));
+    await page.getByRole("combobox", { name: "分类" }).selectOption("office_service");
+    await expect(page.locator("[data-occupation]").first()).toBeVisible();
+    await shot(page, info, "facts-catalog");
+    await expectNoHorizontalScroll(page);
+    await expectAccessible(page, info, "facts");
+    await page.locator("[data-occupation-search]").fill("文员");
+    await page.locator('[data-occupation="occ.office_clerk"] button').click();
+    await expect(page.locator('[data-selected-occupation="occ.office_clerk"]')).toBeVisible();
+    await shot(page, info, "facts");
+    await expectNoHorizontalScroll(page);
+    // 第 3 步：饼图与滑块（触屏尺寸）
+    await page.goto(page.url().replace(/\/facts$/, "/priorities"));
+    await expect(page.locator('[data-allocator="six_dimensions"] [data-slider="safety"]')).toBeVisible();
     await shot(page, info, "priorities");
     await expectNoHorizontalScroll(page);
     await expectAccessible(page, info, "priorities");
+    // 第 4 步：面板
+    await page.goto(page.url().replace(/\/priorities$/, "/more"));
+    await expect(page.locator('[data-panel="taste"] [data-panel-search]')).toBeVisible();
+    await shot(page, info, "more");
+    await expectNoHorizontalScroll(page);
+    await expectAccessible(page, info, "more");
   });
 });

@@ -29,6 +29,7 @@ test("四种语言 × 外观组合的关键页面截图 @mobile", async ({ page 
     await page.goto(`/results/${encodeURIComponent(intentId)}`);
     await expect(page.locator("[data-results]")).toBeVisible({ timeout: 60_000 });
     // 截整页之前等地图画完（底图是另取的文件；没等到就截，会截到布局正在变化的一刻）
+    await expect(page.locator("[data-geo-version]")).toHaveAttribute("data-geo-version", /^e3-display-res-/, { timeout: 30_000 });
     if (mode === "paper") await expect(page.locator('[data-map="paper"] [data-country]').first()).toBeVisible({ timeout: 30_000 });
     if (mode === "globe") {
       await expect(page.locator('[data-map="globe"] canvas')).toBeVisible({ timeout: 60_000 });
