@@ -162,7 +162,7 @@
     "execution_guaranteed": null,
     "item": "leisure_interest",
     "label": "休闲兴趣",
-    "note": "休闲兴趣：采用 ['音乐']；没认出的片段 ['还有冲浪'] 原样保留、本版不评分",
+    "note": "休闲兴趣：采用 音乐；没认出的片段（“还有冲浪”）原样保留、本版不评分",
     "support": "partially_supported",
     "usage": [
      "planning",
@@ -175,7 +175,7 @@
     "execution_guaranteed": null,
     "item": "taste",
     "label": "口味与菜系",
-    "note": "口味与菜系：采用 ['川菜']",
+    "note": "口味与菜系：采用 川菜",
     "support": "partially_supported",
     "usage": [
      "planning",
@@ -190,7 +190,7 @@
    "candidates": [
     "music"
    ],
-   "message_zh": "休闲兴趣：采用 ['音乐']；没认出的片段 ['还有冲浪'] 原样保留、本版不评分",
+   "message_zh": "休闲兴趣：采用 音乐；没认出的片段（“还有冲浪”）原样保留、本版不评分",
    "selected": [
     "music"
    ],
@@ -436,7 +436,7 @@
     "sichuan",
     "italian"
    ],
-   "message_zh": "口味与菜系：采用 ['川菜']",
+   "message_zh": "口味与菜系：采用 川菜",
    "selected": [
     "sichuan"
    ],

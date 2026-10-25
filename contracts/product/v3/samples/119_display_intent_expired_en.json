@@ -2,13 +2,15 @@
  "description_zh": "过期的运行意图（结果从首次结束起 30 天）：阶段 expired、expiry_basis = unavailable，内容不再返回（locale = en）",
  "message": "DisplayEnvelope",
  "payload": {
-  "display_schema_version": "e3-display-v1",
+  "acknowledgements": [],
+  "answer_states": [],
+  "display_schema_version": "e3-display-v2",
   "fields": [
    {
     "key": "pack.note.synthetic",
     "missing_reason": null,
     "pointer": "/meta/data_pack/note",
-    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
     "source_locale": "zh",
     "status": "provided",
     "text": "Synthetic data pack: every value is a hand-made model setting or test data, not real city data"
@@ -17,7 +19,7 @@
     "key": "stage.expired",
     "missing_reason": null,
     "pointer": "/stage_zh",
-    "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
     "source_locale": "zh",
     "status": "provided",
     "text": "Expired"
@@ -27,7 +29,7 @@
   "kind": "intent",
   "locale": "en",
   "metrics": [],
-  "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+  "resource_version": null,
   "source": {
    "allowed_actions": [
     "create_new_intent"

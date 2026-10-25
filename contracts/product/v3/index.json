@@ -20,11 +20,11 @@
   },
   "DisplayAttachment": {
    "file": "DisplayAttachment.schema.json",
-   "sha256": "26aa9381d918ecdc4312077cebee748245235ab14bfe918215ff6efce55a4f52"
+   "sha256": "7722e137e8e54dd1763e5f295cd871a39dbedd01577a31c59b5647a111b70884"
   },
   "DisplayEnvelope": {
    "file": "DisplayEnvelope.schema.json",
-   "sha256": "6ccb4f2fa8b91f76e8dc022bdb1761451784fd3953888457ffb8e57de7bd6a2c"
+   "sha256": "19b21dde7de86464f60be6faf1eb188862be66b229840b1f7f5a0d21598b7765"
   },
   "DraftSaveRequest": {
    "file": "DraftSaveRequest.schema.json",
@@ -36,7 +36,7 @@
   },
   "GeographyDisplayBundle": {
    "file": "GeographyDisplayBundle.schema.json",
-   "sha256": "7ac9b45a92cafe25a0aae05ae37d3bba8f60050342ab1540939516f02ad4c50a"
+   "sha256": "4ee30b7bc9d878310b8e47d42d4f2482bf22e3e0d732f43a4b5987e275a92acc"
   },
   "LifeItemCompilation": {
    "file": "LifeItemCompilation.schema.json",
@@ -64,7 +64,7 @@
   },
   "ProfileConfirmReply": {
    "file": "ProfileConfirmReply.schema.json",
-   "sha256": "6c24c6cabb5631a526d31fe0a5adfa858da8e0b4625f8eba040fa2aa9a9720c7"
+   "sha256": "177f909982e490001698b4eba7aa7aa3c19e70636ed2416fcaf0b2e8e459f135"
   },
   "ProfileConfirmRequest": {
    "file": "ProfileConfirmRequest.schema.json",
@@ -116,7 +116,7 @@
   },
   "ServiceError": {
    "file": "ServiceError.schema.json",
-   "sha256": "baf2573d0a54d2a686dd1803543bdc79df75bfabc4b2c3b318d83d87d9f05db0"
+   "sha256": "a06c3c2292477d1d8dc45064d62efb0c5013761aea28389963376c4713432ee1"
   },
   "SessionExchangeRequest": {
    "file": "SessionExchangeRequest.schema.json",

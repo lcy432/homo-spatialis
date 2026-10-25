@@ -2736,6 +2736,93 @@
    "title": "DimensionDefinition",
    "type": "object"
   },
+  "DisplayAcknowledgement": {
+   "additionalProperties": false,
+   "description": "审阅里一项必须知悉的事项的说明（只是显示）。``ack_id`` 就是原审阅 ``pending_confirmations`` 里的编号，确认时照旧提交这个编号；\n这里不新增、不删除、不代替任何必须知悉的事项，也不表示已经勾选。``statement_pointer`` 指向原审阅里相关的那条陈述（只对\n“留存的陈述”这一类，相对 ``source``）。",
+   "properties": {
+    "ack_id": {
+     "maxLength": 200,
+     "minLength": 1,
+     "title": "Ack Id",
+     "type": "string"
+    },
+    "statement_pointer": {
+     "anyOf": [
+      {
+       "maxLength": 200,
+       "pattern": "^(/[^/]+)+$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Statement Pointer"
+    },
+    "text": {
+     "$ref": "#/$defs/DisplayText"
+    }
+   },
+   "required": [
+    "ack_id",
+    "text"
+   ],
+   "title": "DisplayAcknowledgement",
+   "type": "object"
+  },
+  "DisplayAnswerState": {
+   "additionalProperties": false,
+   "description": "兴趣（``leisure``）或口味（``taste``）的一种作答状态的名称与含义，按正式状态 ``state`` 给出（不靠列表顺序、不拆冒号）。",
+   "properties": {
+    "answer": {
+     "enum": [
+      "leisure",
+      "taste"
+     ],
+     "title": "Answer",
+     "type": "string"
+    },
+    "meaning": {
+     "$ref": "#/$defs/DisplayText"
+    },
+    "name": {
+     "$ref": "#/$defs/DisplayText"
+    },
+    "state": {
+     "anyOf": [
+      {
+       "enum": [
+        "unanswered",
+        "unsure",
+        "no_fixed_hobby",
+        "generic",
+        "described"
+       ],
+       "type": "string"
+      },
+      {
+       "enum": [
+        "unanswered",
+        "unsure",
+        "no_preference",
+        "described"
+       ],
+       "type": "string"
+      }
+     ],
+     "title": "State"
+    }
+   },
+   "required": [
+    "answer",
+    "state",
+    "name",
+    "meaning"
+   ],
+   "title": "DisplayAnswerState",
+   "type": "object"
+  },
   "DisplayField": {
    "additionalProperties": false,
    "description": "原消息里一个可展示文字位置的显示文字。``pointer`` 是相对原消息（或原回复）的 JSON Pointer，只指向含中文的业务说明文字——\n不指向数值、权重、编号、动作枚举、秘密，也不指向用户原文（用户原文保持原文，不翻译）。``key`` 是稳定的文案 / 实体键。",
@@ -2757,7 +2844,9 @@
         "ambiguous",
         "untranslated_param",
         "resources_unavailable",
-        "binding_stale"
+        "resources_invalid",
+        "binding_stale",
+        "binding_unverified"
        ],
        "type": "string"
       },
@@ -2824,6 +2913,96 @@
     "source_locale"
    ],
    "title": "DisplayField",
+   "type": "object"
+  },
+  "DisplayText": {
+   "additionalProperties": false,
+   "description": "一段同时给出中英两种的显示文字（知悉项、作答状态用）。``zh`` 是中文原文（旧对象没有保存时为空）；``en`` 有译文才给，``status``\n与 ``missing_reason`` 说英文有没有、为什么没有。``key`` 是稳定的模板 / 实体键，``resource_version`` 是渲染用的资源版本。",
+   "properties": {
+    "en": {
+     "anyOf": [
+      {
+       "maxLength": 4000,
+       "minLength": 1,
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "En"
+    },
+    "key": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Key",
+     "type": "string"
+    },
+    "missing_reason": {
+     "anyOf": [
+      {
+       "enum": [
+        "no_binding",
+        "translation_missing",
+        "translation_stale",
+        "source_changed",
+        "ambiguous",
+        "untranslated_param",
+        "resources_unavailable",
+        "resources_invalid",
+        "binding_stale",
+        "binding_unverified"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Missing Reason"
+    },
+    "resource_version": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Resource Version"
+    },
+    "status": {
+     "enum": [
+      "provided",
+      "missing"
+     ],
+     "title": "Status",
+     "type": "string"
+    },
+    "zh": {
+     "anyOf": [
+      {
+       "maxLength": 2000,
+       "minLength": 1,
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Zh"
+    }
+   },
+   "required": [
+    "key",
+    "status"
+   ],
+   "title": "DisplayText",
    "type": "object"
   },
   "DraftRef": {
@@ -3955,7 +4134,7 @@
   },
   "MetricDisplaySpec": {
    "additionalProperties": false,
-   "description": "结果色阶的显示约定：只声明已有分数的显示域与读法，不计算新分数、不公开评分系数。``mean_j`` 是同一城市“完成且评价完整”\n分身的 J 的算术平均，当前评价规则下有效值在 [0, 1]；同一结果里所有国家、两种地图共用这一固定尺度，不按国家或城市重新拉伸。",
+   "description": "结果色阶的显示约定：只声明已有分数的合法数值域与读法，不计算新分数、不公开评分系数。``mean_j`` 是同一城市“完成且评价完整”\n分身的 J 的算术平均，当前评价规则下有效值在 [0, 1]（``minimum`` / ``maximum`` 是这个数值域，不是图例窗口）。图例窗口由页面按\nADR 0045 第 4 条在同一份结果之内适度放大：同一结果的所有国家、两种地图共用一个窗口，图例写明窗口两端，不暗示最低的城市是零分、\n最高的是满分；分数、分母与比较结论都不变。",
    "properties": {
     "comparison_scope": {
      "const": "within_result_only",
@@ -7396,8 +7575,24 @@
  "additionalProperties": false,
  "description": "一次显示读取（``GET /api/v1/display``）：原公共消息 ``source`` 与它的显示文字同次返回（避免进度更新后错配旧翻译）。页面把\n``source`` 当作原业务消息使用，``fields`` 只用来换文字；数字、权限与身份永远取 ``source``。读取只鉴权、读取与纯函数渲染：\n不保存答案、不预检查、不恢复、不重放、不调用模型。",
  "properties": {
+  "acknowledgements": {
+   "default": [],
+   "items": {
+    "$ref": "#/$defs/DisplayAcknowledgement"
+   },
+   "title": "Acknowledgements",
+   "type": "array"
+  },
+  "answer_states": {
+   "default": [],
+   "items": {
+    "$ref": "#/$defs/DisplayAnswerState"
+   },
+   "title": "Answer States",
+   "type": "array"
+  },
   "display_schema_version": {
-   "const": "e3-display-v1",
+   "const": "e3-display-v2",
    "title": "Display Schema Version",
    "type": "string"
   },

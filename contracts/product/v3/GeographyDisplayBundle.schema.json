@@ -320,7 +320,7 @@
    "type": "array"
   },
   "display_schema_version": {
-   "const": "e3-display-v1",
+   "const": "e3-display-v2",
    "title": "Display Schema Version",
    "type": "string"
   },

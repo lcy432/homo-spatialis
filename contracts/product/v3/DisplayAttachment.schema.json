@@ -21,7 +21,9 @@
         "ambiguous",
         "untranslated_param",
         "resources_unavailable",
-        "binding_stale"
+        "resources_invalid",
+        "binding_stale",
+        "binding_unverified"
        ],
        "type": "string"
       },
@@ -122,7 +124,7 @@
  "description": "即时回复（错误、确认结果）的显示附层：这类回复可能没有可以再读的对象，所以随回复一起给中英两种文字。\n``source_view_fingerprint`` 是去掉 ``display`` 之后的原回复的规范 JSON 摘要；``pointer`` 都相对那份原回复。",
  "properties": {
   "display_schema_version": {
-   "const": "e3-display-v1",
+   "const": "e3-display-v2",
    "title": "Display Schema Version",
    "type": "string"
   },

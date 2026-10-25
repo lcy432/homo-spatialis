@@ -56,7 +56,7 @@ from product.service.errors import ERRORS, ServiceFailure, error_body
 from product.service.tokens import same, support_ref
 
 API = "/api/v1"
-API_VERSION = "e3c-service-api-v1.1"
+API_VERSION = "e3c-service-api-v1.2"
 log = logging.getLogger("product.service.api")
 
 Scope = MutableMapping[str, Any]

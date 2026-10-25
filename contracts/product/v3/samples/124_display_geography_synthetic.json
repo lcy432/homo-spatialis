@@ -92,7 +92,7 @@
     }
    }
   ],
-  "display_schema_version": "e3-display-v1",
+  "display_schema_version": "e3-display-v2",
   "notes": [
    {
     "en": "Synthetic cities are not real places and have no map position (anchor null, not_applicable); open them from the city list.",
@@ -104,7 +104,7 @@
    }
   ],
   "pack_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
-  "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+  "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
   "sources": [],
   "status": "complete"
  },

@@ -1,4 +1,4 @@
-"""显示附层的资源工具（``product.display``，``e3-display-v1``）。
+"""显示附层的资源工具（``product.display``）。
 
 用法（仓库根目录）::
 
@@ -150,6 +150,7 @@ def export_errors() -> None:
 
 def error_catalog_text() -> str:
     """固定、不含私人内容的错误说明（中英），E5 可以随包携带，在未登录或会话失效时显示。"""
+    from common.product_contracts import DISPLAY_SCHEMA_VERSION
     from product.display.catalog import load_templates
     from product.service.errors import ERRORS, EXPIRED_SUBJECTS
 
@@ -160,7 +161,7 @@ def error_catalog_text() -> str:
         return {loc: {p: parts[p].get(loc) for p in parts} for loc in ("zh", "en")}
 
     body = {
-        "display_schema_version": "e3-display-v1",
+        "display_schema_version": DISPLAY_SCHEMA_VERSION,
         "note": "固定双语错误目录（E3C 维护业务含义）。动态业务问题以服务回复里的显示附层为准，不要从中文反查",
         "errors": {
             code: {"status": ERRORS[code][0], **entry(f"error.{code}")} for code in sorted(ERRORS)
@@ -171,8 +172,10 @@ def error_catalog_text() -> str:
 
 
 def cmd_coverage(args: argparse.Namespace) -> int:
+    from common.product_contracts import DISPLAY_SCHEMA_VERSION
+
     lines = [
-        "# 显示覆盖报告（e3-display-v1）",
+        f"# 显示覆盖报告（{DISPLAY_SCHEMA_VERSION}）",
         "",
         "由 `scripts/product_display.py coverage` 从离线联调的 `summary.json` 生成。应展示 = 回复里含中文、不是用户原文的文字位置"
         "（用户原文不翻译，不在分母里）；中文逐字照原文，全部提供。缺失原因见 `product.display.render`。",

@@ -1,0 +1,1171 @@
+{
+ "description_zh": "审阅的显示（kind = review）：acknowledgements 与 source.review.pending_confirmations 一一对应、同样的顺序，每项给中英说明、所用资源版本与缺失状态；留存的陈述带 statement_pointer 指向原审阅里的那条陈述。确认时照旧提交原来的编号，显示条目不勾选、不新增也不删除任何事项；answer_states 是这份审阅绑定的那一版资源下的作答状态",
+ "message": "DisplayEnvelope",
+ "payload": {
+  "acknowledgements": [
+   {
+    "ack_id": "ack:retained:pref.brand",
+    "statement_pointer": "/review/statements/0",
+    "text": {
+     "en": "Statement pref.brand is not scored and not guaranteed in this version; it is only kept as written",
+     "key": "input.ack.retained",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+     "status": "provided",
+     "zh": "陈述 pref.brand 本版不评分、不保证执行，只留存原文"
+    }
+   },
+   {
+    "ack_id": "ack:interests_not_personalized",
+    "statement_pointer": null,
+    "text": {
+     "en": "Whatever is not personalized by specific interests or taste this time is evaluated with neutral rules (not answered, not sure yet, no fixed hobby and the generic evaluation are each recorded as such); descriptions you wrote that this version does not support are only kept as written",
+     "key": "input.ack.interests_not_personalized",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+     "status": "provided",
+     "zh": "本次不按具体兴趣或口味个性化的部分按中性规则评价（未答、暂不确定、没有固定爱好或通用评价各自记下）；写了但本版不支持的描述只留存原文"
+    }
+   },
+   {
+    "ack_id": "ack:standard_start",
+    "statement_pointer": null,
+    "text": {
+     "en": "This is a simplified scenario that starts healthy, with no belongings and no courses in progress (real furniture and medical history are not included yet)",
+     "key": "input.ack.standard_start",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+     "status": "provided",
+     "zh": "这是一次从健康、没有已有物品、没有在学课程开始的简化情景（现实中的家具与病史暂未纳入）"
+    }
+   }
+  ],
+  "answer_states": [
+   {
+    "answer": "leisure",
+    "meaning": {
+     "en": "No clear information for this item: evaluated with the neutral rule, and not treated as choosing the “general evaluation”",
+     "key": "input.answer_state.leisure.unanswered.meaning",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+     "status": "provided",
+     "zh": "没有这一项的明确信息，按中性规则评价；不会被当成“通用评价”的选择"
+    },
+    "name": {
+     "en": "Not answered",
+     "key": "input.answer_state.leisure.unanswered.name",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+     "status": "provided",
+     "zh": "未答"
+    },
+    "state": "unanswered"
+   },
+   {
+    "answer": "leisure",
+    "meaning": {
+     "en": "Evaluated with the neutral rule",
+     "key": "input.answer_state.leisure.unsure.meaning",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+     "status": "provided",
+     "zh": "按中性规则评价"
+    },
+    "name": {
+     "en": "Not sure yet",
+     "key": "input.answer_state.leisure.unsure.name",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+     "status": "provided",
+     "zh": "暂不确定"
+    },
+    "state": "unsure"
+   },
+   {
+    "answer": "leisure",
+    "meaning": {
+     "en": "Evaluated with the neutral rule",
+     "key": "input.answer_state.leisure.no_fixed_hobby.meaning",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+     "status": "provided",
+     "zh": "按中性规则评价"
+    },
+    "name": {
+     "en": "No fixed hobby (stated)",
+     "key": "input.answer_state.leisure.no_fixed_hobby.name",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+     "status": "provided",
+     "zh": "明确没有固定爱好"
+    },
+    "state": "no_fixed_hobby"
+   },
+   {
+    "answer": "leisure",
+    "meaning": {
+     "en": "Experience whatever suitable activities the city offers (evaluated with the neutral rule)",
+     "key": "input.answer_state.leisure.generic.meaning",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+     "status": "provided",
+     "zh": "城市有什么合适的就体验什么（按中性规则评价）"
+    },
+    "name": {
+     "en": "General leisure evaluation",
+     "key": "input.answer_state.leisure.generic.name",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+     "status": "provided",
+     "zh": "采用通用休闲评价"
+    },
+    "state": "generic"
+   },
+   {
+    "answer": "leisure",
+    "meaning": {
+     "en": "Candidates are first formed from the vocabulary; only the categories you choose enter the evaluation, and unrecognized descriptions are kept as written and not evaluated in this version",
+     "key": "input.answer_state.leisure.described.meaning",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+     "status": "provided",
+     "zh": "先按词表形成候选，你选中的类别才进入评价；没认出的描述原样保留，本版不评价"
+    },
+    "name": {
+     "en": "Described in words",
+     "key": "input.answer_state.leisure.described.name",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+     "status": "provided",
+     "zh": "用文字描述"
+    },
+    "state": "described"
+   },
+   {
+    "answer": "taste",
+    "meaning": {
+     "en": "Evaluated with the neutral rule",
+     "key": "input.answer_state.taste.unanswered.meaning",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+     "status": "provided",
+     "zh": "按中性规则评价"
+    },
+    "name": {
+     "en": "Not answered",
+     "key": "input.answer_state.taste.unanswered.name",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+     "status": "provided",
+     "zh": "未答"
+    },
+    "state": "unanswered"
+   },
+   {
+    "answer": "taste",
+    "meaning": {
+     "en": "Evaluated with the neutral rule",
+     "key": "input.answer_state.taste.unsure.meaning",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+     "status": "provided",
+     "zh": "按中性规则评价"
+    },
+    "name": {
+     "en": "Not sure yet",
+     "key": "input.answer_state.taste.unsure.name",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+     "status": "provided",
+     "zh": "暂不确定"
+    },
+    "state": "unsure"
+   },
+   {
+    "answer": "taste",
+    "meaning": {
+     "en": "Evaluated with the neutral rule",
+     "key": "input.answer_state.taste.no_preference.meaning",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+     "status": "provided",
+     "zh": "按中性规则评价"
+    },
+    "name": {
+     "en": "No taste preference (stated)",
+     "key": "input.answer_state.taste.no_preference.name",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+     "status": "provided",
+     "zh": "明确没有口味偏好"
+    },
+    "state": "no_preference"
+   },
+   {
+    "answer": "taste",
+    "meaning": {
+     "en": "Candidates are first formed from the vocabulary; only the cuisines you choose enter the food evaluation, and brands and other requirements are only kept as written",
+     "key": "input.answer_state.taste.described.meaning",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+     "status": "provided",
+     "zh": "先按词表形成候选，你选中的菜系才进入饮食评价；品牌与其他要求只留存"
+    },
+    "name": {
+     "en": "Described in words",
+     "key": "input.answer_state.taste.described.name",
+     "missing_reason": null,
+     "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+     "status": "provided",
+     "zh": "用文字描述"
+    },
+    "state": "described"
+   }
+  ],
+  "display_schema_version": "e3-display-v2",
+  "fields": [
+   {
+    "key": "pack.note.synthetic",
+    "missing_reason": null,
+    "pointer": "/meta/data_pack/note",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Synthetic data pack: every value is a hand-made model setting or test data, not real city data"
+   },
+   {
+    "key": "pack.note.synthetic",
+    "missing_reason": null,
+    "pointer": "/review/meta/data_pack/note",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Synthetic data pack: every value is a hand-made model setting or test data, not real city data"
+   },
+   {
+    "key": "entity.occupation.label:occ.office_clerk",
+    "missing_reason": null,
+    "pointer": "/review/occupation/candidates/0/label",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Office clerk"
+   },
+   {
+    "key": "entity.duty.label:occ.office_clerk.0",
+    "missing_reason": null,
+    "pointer": "/review/occupation/candidates/0/duties/0",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Handling documents and spreadsheets"
+   },
+   {
+    "key": "entity.duty.label:occ.office_clerk.1",
+    "missing_reason": null,
+    "pointer": "/review/occupation/candidates/0/duties/1",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Entering and organizing information"
+   },
+   {
+    "key": "entity.duty.label:occ.office_clerk.2",
+    "missing_reason": null,
+    "pointer": "/review/occupation/candidates/0/duties/2",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Answering phones and arranging schedules"
+   },
+   {
+    "key": "input.occupation.explicit",
+    "missing_reason": null,
+    "pointer": "/review/occupation/message_zh",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "It looks like your work falls under “Office clerk”; please confirm whether this reading is right"
+   },
+   {
+    "key": "input.money.meaning",
+    "missing_reason": null,
+    "pointer": "/review/money/meaning",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Liquid funds you can actually spend (not total assets, credit limits or monthly pay)"
+   },
+   {
+    "key": "entity.dimension.label:material",
+    "missing_reason": null,
+    "pointer": "/review/six_dimensions/lines/0/label",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Material life"
+   },
+   {
+    "key": "entity.dimension.label:safety",
+    "missing_reason": null,
+    "pointer": "/review/six_dimensions/lines/1/label",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Safety"
+   },
+   {
+    "key": "entity.dimension.label:opportunity",
+    "missing_reason": null,
+    "pointer": "/review/six_dimensions/lines/2/label",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Opportunity"
+   },
+   {
+    "key": "entity.dimension.label:leisure",
+    "missing_reason": null,
+    "pointer": "/review/six_dimensions/lines/3/label",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Leisure"
+   },
+   {
+    "key": "entity.dimension.label:environment",
+    "missing_reason": null,
+    "pointer": "/review/six_dimensions/lines/4/label",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Environment"
+   },
+   {
+    "key": "entity.dimension.label:commute",
+    "missing_reason": null,
+    "pointer": "/review/six_dimensions/lines/5/label",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Ease of commuting"
+   },
+   {
+    "key": "entity.leaf.label:housing_condition",
+    "missing_reason": null,
+    "pointer": "/review/material/lines/0/label",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Housing condition"
+   },
+   {
+    "key": "entity.leaf.label:food_life",
+    "missing_reason": null,
+    "pointer": "/review/material/lines/1/label",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Food"
+   },
+   {
+    "key": "entity.leaf.label:daily_convenience",
+    "missing_reason": null,
+    "pointer": "/review/material/lines/2/label",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Daily support and convenience"
+   },
+   {
+    "key": "entity.leaf.label:personal_enjoyment",
+    "missing_reason": null,
+    "pointer": "/review/material/lines/3/label",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Personal consumption and enjoyment"
+   },
+   {
+    "key": "entity.health_question.text:hc_more_pay_more_sick_risk",
+    "missing_reason": null,
+    "pointer": "/review/health/0/text",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "One arrangement earns a little more money, but also makes it more likely that you get sick and need a few days of rest. I am willing to choose it."
+   },
+   {
+    "key": "entity.health_option.label:disagree",
+    "missing_reason": null,
+    "pointer": "/review/health/0/option_label",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Does not describe me"
+   },
+   {
+    "key": "entity.health_question.disagree_meaning:hc_more_pay_more_sick_risk",
+    "missing_reason": null,
+    "pointer": "/review/health/0/meaning",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Not willing to accept a higher chance of getting sick and needing rest for a little more income"
+   },
+   {
+    "key": "entity.health_question.text:hc_reserve_for_health_costs",
+    "missing_reason": null,
+    "pointer": "/review/health/1/text",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "To be ready for possible health costs, I am willing to postpone a purchase I want but do not urgently need, and set some money aside first."
+   },
+   {
+    "key": "entity.health_option.label:agree",
+    "missing_reason": null,
+    "pointer": "/review/health/1/option_label",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Describes me"
+   },
+   {
+    "key": "entity.health_question.agree_meaning:hc_reserve_for_health_costs",
+    "missing_reason": null,
+    "pointer": "/review/health/1/meaning",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Willing to postpone non-urgent purchases and set money aside for possible health costs first"
+   },
+   {
+    "key": "entity.health_question.text:hc_wait_for_clear_risk_info",
+    "missing_reason": null,
+    "pointer": "/review/health/2/text",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "When information about a health risk is still unclear, I am willing to give up a small immediate gain and decide once things are clear."
+   },
+   {
+    "key": "input.health.meaning.unsure",
+    "missing_reason": null,
+    "pointer": "/review/health/2/meaning",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "The user is not sure yet"
+   },
+   {
+    "key": "input.statement.attribute.message",
+    "missing_reason": "untranslated_param",
+    "pointer": "/review/statements/0/message_zh",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "missing",
+    "text": null
+   },
+   {
+    "key": "entity.hard_requirement.verification:housing.max_commute_roundtrip",
+    "missing_reason": null,
+    "pointer": "/review/statements/1/message_zh",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "The round-trip minutes from the home actually lived in are checked every month: met, not met and cannot be determined are reported separately; this does not enter the score and does not block plans"
+   },
+   {
+    "key": "input.item.cities.label",
+    "missing_reason": null,
+    "pointer": "/review/items/0/label",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Candidate cities"
+   },
+   {
+    "key": "input.item.cities.note",
+    "missing_reason": null,
+    "pointer": "/review/items/0/note",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "In each city a clone lives for a fixed three years; a city is identified by its full country / scheme / code"
+   },
+   {
+    "key": "input.item.occupation.label",
+    "missing_reason": null,
+    "pointer": "/review/items/1/label",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Occupation"
+   },
+   {
+    "key": "input.item.occupation.note",
+    "missing_reason": null,
+    "pointer": "/review/items/1/note",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Used to match local catalogue jobs at the start; grants no qualification, and classification codes are kept internally only"
+   },
+   {
+    "key": "input.item.age.label",
+    "missing_reason": null,
+    "pointer": "/review/items/2/label",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Age"
+   },
+   {
+    "key": "input.item.age.note",
+    "missing_reason": null,
+    "pointer": "/review/items/2/note",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Goes into the existing age rules (synthetic settings, not medically calibrated); age is never guessed from occupation"
+   },
+   {
+    "key": "input.item.cash.label",
+    "missing_reason": null,
+    "pointer": "/review/items/3/label",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Money you can use for living at the start"
+   },
+   {
+    "key": "input.item.cash.note",
+    "missing_reason": null,
+    "pointer": "/review/items/3/note",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Liquid funds you can actually spend, not home value, credit limits or monthly pay; leaving it empty is not 0, and nothing is borrowed silently"
+   },
+   {
+    "key": "input.item.six_dimensions.label",
+    "missing_reason": null,
+    "pointer": "/review/items/4/label",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Six areas"
+   },
+   {
+    "key": "input.item.points.note",
+    "missing_reason": null,
+    "pointer": "/review/items/4/note",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Stated relative importance, not spending shares or a budget; exact points are used in calculations, displayed values are for reading only"
+   },
+   {
+    "key": "input.item.material.label",
+    "missing_reason": null,
+    "pointer": "/review/items/5/label",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Four material-life items"
+   },
+   {
+    "key": "input.item.points.note",
+    "missing_reason": null,
+    "pointer": "/review/items/5/note",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Stated relative importance, not spending shares or a budget; exact points are used in calculations, displayed values are for reading only"
+   },
+   {
+    "key": "input.item.health.label",
+    "missing_reason": null,
+    "pointer": "/review/items/6/label",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Coping with health risks (separate questionnaire)"
+   },
+   {
+    "key": "input.item.health.note",
+    "missing_reason": null,
+    "pointer": "/review/items/6/note",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Takes none of the six areas' 100 points and is not a seventh scoring weight; it only informs the clones' planning and does not change illness rules, accounts or satisfaction; the questions are provisional wording"
+   },
+   {
+    "key": "input.item.free_text.label",
+    "missing_reason": null,
+    "pointer": "/review/items/7/label",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Optional additional text"
+   },
+   {
+    "key": "input.item.free_text.note",
+    "missing_reason": null,
+    "pointer": "/review/items/7/note",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Only planning context for the clones; it never changes points, cash, qualifications or hard requirements automatically, and no LLM extracts anything from it in this round"
+   },
+   {
+    "key": "input.item.abilities.label",
+    "missing_reason": null,
+    "pointer": "/review/items/8/label",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Confirmed qualifications"
+   },
+   {
+    "key": "input.item.abilities.note",
+    "missing_reason": null,
+    "pointer": "/review/items/8/note",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Only from facts you confirmed explicitly; never granted automatically from a job title"
+   },
+   {
+    "key": "input.item.leisure_interest.label",
+    "missing_reason": null,
+    "pointer": "/review/items/9/label",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Leisure interests"
+   },
+   {
+    "key": "input.interests.state.review",
+    "missing_reason": null,
+    "pointer": "/review/items/9/note",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Leisure interests: Not answered (no explicit information on this item; evaluated with neutral rules; this is not the “generic evaluation” choice)"
+   },
+   {
+    "key": "input.item.taste.label",
+    "missing_reason": null,
+    "pointer": "/review/items/10/label",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Taste and cuisines"
+   },
+   {
+    "key": "input.interests.state.review",
+    "missing_reason": null,
+    "pointer": "/review/items/10/note",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Taste and cuisines: Not answered (no explicit information on this item; evaluated with neutral rules; this is not the “generic evaluation” choice)"
+   },
+   {
+    "key": "input.summary.confirmable",
+    "missing_reason": null,
+    "pointer": "/review/summary_zh/0",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "The answers can be confirmed: please check the explanations below, and acknowledge the standard start and the statements that are only kept"
+   },
+   {
+    "key": "input.summary.health_unclear",
+    "missing_reason": null,
+    "pointer": "/review/summary_zh/1",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Health questions without a clear tendency (not answered or not sure yet): 1. They are kept as they are, and the clones will be told there is no explicit instruction for them"
+   },
+   {
+    "key": "input.interests.state.review",
+    "missing_reason": null,
+    "pointer": "/review/leisure_interest/message_zh",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Leisure interests: Not answered (no explicit information on this item; evaluated with neutral rules; this is not the “generic evaluation” choice)"
+   },
+   {
+    "key": "input.interests.state.review",
+    "missing_reason": null,
+    "pointer": "/review/taste/message_zh",
+    "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Taste and cuisines: Not answered (no explicit information on this item; evaluated with neutral rules; this is not the “generic evaluation” choice)"
+   }
+  ],
+  "id": "review.draft-0000000000000078.r2",
+  "kind": "review",
+  "locale": "en",
+  "metrics": [],
+  "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+  "source": {
+   "meta": {
+    "conversion_version": "e3a-conversion-v2",
+    "data_pack": {
+     "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
+     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
+     "pack_id": "pack.e3a.synthetic-v2",
+     "status": "synthetic_fixture_only"
+    },
+    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
+    "questionnaire_version": "e3a-questionnaire-v0.3-draft",
+    "sample": null,
+    "schema_version": "e3a-product-schema-v3.3",
+    "vocabulary_version": "e3a-vocabulary-v4"
+   },
+   "review": {
+    "abilities": [],
+    "age": 35,
+    "cities": [
+     "US:SYNTH2026:K51",
+     "US:SYNTH2026:M52"
+    ],
+    "confirmable": true,
+    "draft": {
+     "draft_fingerprint": "75c06f52233db862661a3be355b453f4d586e7e44cecd31fa33d82d5f66a892c",
+     "draft_id": "draft-0000000000000078",
+     "revision": 2
+    },
+    "free_text_chars": 61,
+    "health": [
+     {
+      "answer_state": "provided",
+      "meaning": "不愿意为多一点收入接受更高的生病与休息可能",
+      "option": "disagree",
+      "option_label": "不符合我",
+      "question_id": "hc_more_pay_more_sick_risk",
+      "text": "一种安排能多赚一点钱，但生病、需要休息几天的可能也更高。我愿意选择它。"
+     },
+     {
+      "answer_state": "provided",
+      "meaning": "愿意推迟不急需的消费，先为可能的健康开支留钱",
+      "option": "agree",
+      "option_label": "符合我",
+      "question_id": "hc_reserve_for_health_costs",
+      "text": "为了应对可能发生的健康开支，我愿意推迟一次想要、但并不急需的消费，先留一笔钱。"
+     },
+     {
+      "answer_state": "unsure",
+      "meaning": "用户暂不确定",
+      "option": null,
+      "option_label": null,
+      "question_id": "hc_wait_for_clear_risk_info",
+      "text": "健康风险的信息还不清楚时，我愿意先放弃眼前的一点收益，等了解清楚再决定。"
+     }
+    ],
+    "issues": [],
+    "items": [
+     {
+      "answer_state": "provided",
+      "confirmation": "pending",
+      "execution_guaranteed": null,
+      "item": "cities",
+      "label": "候选城市",
+      "note": "每座城一个分身固定生活三年；城市身份用完整的国家 / 体系 / 代码",
+      "support": "supported",
+      "usage": [
+       "start_state"
+      ]
+     },
+     {
+      "answer_state": "provided",
+      "confirmation": "pending",
+      "execution_guaranteed": null,
+      "item": "occupation",
+      "label": "职业",
+      "note": "用于匹配开局时的当地目录岗位；不授予任何资格，分类代码只在内部保留",
+      "support": "supported",
+      "usage": [
+       "start_state",
+       "planning"
+      ]
+     },
+     {
+      "answer_state": "provided",
+      "confirmation": "pending",
+      "execution_guaranteed": null,
+      "item": "age",
+      "label": "年龄",
+      "note": "进入已有的年龄规则（合成设定，未经医学标定）；不从职业猜年龄",
+      "support": "supported",
+      "usage": [
+       "start_state"
+      ]
+     },
+     {
+      "answer_state": "provided",
+      "confirmation": "pending",
+      "execution_guaranteed": null,
+      "item": "cash",
+      "label": "开始时可用于生活的钱",
+      "note": "可动用的流动资金，不是房产总值、信用额度或月薪；没填不是 0，不静默借贷",
+      "support": "supported",
+      "usage": [
+       "start_state",
+       "planning"
+      ]
+     },
+     {
+      "answer_state": "provided",
+      "confirmation": "pending",
+      "execution_guaranteed": null,
+      "item": "six_dimensions",
+      "label": "六维",
+      "note": "陈述的相对重要程度，不是开支比例或预算；精确分数参与计算，显示值只供阅读",
+      "support": "supported",
+      "usage": [
+       "scoring",
+       "planning"
+      ]
+     },
+     {
+      "answer_state": "provided",
+      "confirmation": "pending",
+      "execution_guaranteed": null,
+      "item": "material",
+      "label": "物质四项",
+      "note": "陈述的相对重要程度，不是开支比例或预算；精确分数参与计算，显示值只供阅读",
+      "support": "supported",
+      "usage": [
+       "scoring",
+       "planning"
+      ]
+     },
+     {
+      "answer_state": "provided",
+      "confirmation": "pending",
+      "execution_guaranteed": null,
+      "item": "health",
+      "label": "健康风险应对（独立问卷）",
+      "note": "不占六维 100 分，不是第七个评分权重；只供分身做计划，不改变疾病规则、账目或满足感；题目是暂定文案",
+      "support": "partially_supported",
+      "usage": [
+       "planning"
+      ]
+     },
+     {
+      "answer_state": "provided",
+      "confirmation": "pending",
+      "execution_guaranteed": null,
+      "item": "free_text",
+      "label": "可选补充文字",
+      "note": "只供分身做计划参考；不会自动改分数、现金、资格或硬要求，本轮不用 LLM 提取",
+      "support": "partially_supported",
+      "usage": [
+       "planning"
+      ]
+     },
+     {
+      "answer_state": "unanswered",
+      "confirmation": "pending",
+      "execution_guaranteed": null,
+      "item": "abilities",
+      "label": "已确认的资格",
+      "note": "只来自你明确确认的事实，不从职业称呼自动授予",
+      "support": "supported",
+      "usage": [
+       "qualification",
+       "start_state"
+      ]
+     },
+     {
+      "answer_state": "unanswered",
+      "confirmation": "pending",
+      "execution_guaranteed": null,
+      "item": "leisure_interest",
+      "label": "休闲兴趣",
+      "note": "休闲兴趣：未答（没有这一项的明确信息，按中性规则评价；不是“通用评价”的选择）",
+      "support": "partially_supported",
+      "usage": [
+       "planning"
+      ]
+     },
+     {
+      "answer_state": "unanswered",
+      "confirmation": "pending",
+      "execution_guaranteed": null,
+      "item": "taste",
+      "label": "口味与菜系",
+      "note": "口味与菜系：未答（没有这一项的明确信息，按中性规则评价；不是“通用评价”的选择）",
+      "support": "partially_supported",
+      "usage": [
+       "planning"
+      ]
+     }
+    ],
+    "leisure_interest": {
+     "ambiguous": [],
+     "candidates": [],
+     "message_zh": "休闲兴趣：未答（没有这一项的明确信息，按中性规则评价；不是“通用评价”的选择）",
+     "selected": [],
+     "state": "unanswered",
+     "status": "confirmable",
+     "text": null,
+     "unrecognized": []
+    },
+    "material": {
+     "lines": [
+      {
+       "display": "25.0",
+       "exact": "25",
+       "key": "housing_condition",
+       "label": "居住条件",
+       "state": "provided",
+       "support": "supported",
+       "usage": [
+        "scoring",
+        "planning"
+       ]
+      },
+      {
+       "display": "25.0",
+       "exact": "25",
+       "key": "food_life",
+       "label": "饮食生活",
+       "state": "provided",
+       "support": "partially_supported",
+       "usage": [
+        "scoring",
+        "planning"
+       ]
+      },
+      {
+       "display": "30.0",
+       "exact": "30",
+       "key": "daily_convenience",
+       "label": "日常支持与便利",
+       "state": "provided",
+       "support": "supported",
+       "usage": [
+        "scoring",
+        "planning"
+       ]
+      },
+      {
+       "display": "20.0",
+       "exact": "20",
+       "key": "personal_enjoyment",
+       "label": "个人消费与享受",
+       "state": "provided",
+       "support": "partially_supported",
+       "usage": [
+        "scoring",
+        "planning"
+       ]
+      }
+     ],
+     "mode": "manual",
+     "status": "complete",
+     "total": {
+      "display": "100.0",
+      "exact": "100"
+     }
+    },
+    "meta": {
+     "conversion_version": "e3a-conversion-v2",
+     "data_pack": {
+      "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
+      "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
+      "pack_id": "pack.e3a.synthetic-v2",
+      "status": "synthetic_fixture_only"
+     },
+     "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
+     "questionnaire_version": "e3a-questionnaire-v0.3-draft",
+     "sample": null,
+     "schema_version": "e3a-product-schema-v3.3",
+     "vocabulary_version": "e3a-vocabulary-v4"
+    },
+    "money": {
+     "amount_text": "3000",
+     "conversion_rule": "identity_same_basis_v1",
+     "converted": {
+      "amount_minor": 300000,
+      "currency": "USD",
+      "display": "3,000.00",
+      "numeraire_id": "USD_2024_LOCAL"
+     },
+     "currency": "USD",
+     "meaning": "可动用的流动资金（不是总资产、信用额度或月薪）",
+     "price_period": "2024",
+     "status": "convertible"
+    },
+    "occupation": {
+     "candidates": [
+      {
+       "candidate_id": "occ.office_clerk",
+       "duties": [
+        "处理文件与表格",
+        "录入与整理资料",
+        "接听电话、安排日程"
+       ],
+       "label": "办公室文员",
+       "matched_terms": [
+        "文员"
+       ]
+      }
+     ],
+     "message_zh": "看起来你的工作是“办公室文员”；请确认这个理解是否正确",
+     "raw_text": "我在写字楼做全职文员，平时处理文件和表格",
+     "selected": "occ.office_clerk",
+     "status": "explicit"
+    },
+    "pending_confirmations": [
+     "ack:retained:pref.brand",
+     "ack:interests_not_personalized",
+     "ack:standard_start"
+    ],
+    "review_id": "review.draft-0000000000000078.r2",
+    "six_dimensions": {
+     "lines": [
+      {
+       "display": "30.0",
+       "exact": "30",
+       "key": "material",
+       "label": "物质生活",
+       "state": "provided",
+       "support": "supported",
+       "usage": [
+        "scoring",
+        "planning"
+       ]
+      },
+      {
+       "display": "20.0",
+       "exact": "20",
+       "key": "safety",
+       "label": "安全",
+       "state": "provided",
+       "support": "partially_supported",
+       "usage": [
+        "scoring",
+        "planning"
+       ]
+      },
+      {
+       "display": "20.0",
+       "exact": "20",
+       "key": "opportunity",
+       "label": "发展机会",
+       "state": "provided",
+       "support": "supported",
+       "usage": [
+        "scoring",
+        "planning"
+       ]
+      },
+      {
+       "display": "10.0",
+       "exact": "10",
+       "key": "leisure",
+       "label": "休闲",
+       "state": "provided",
+       "support": "supported",
+       "usage": [
+        "scoring",
+        "planning"
+       ]
+      },
+      {
+       "display": "10.0",
+       "exact": "10",
+       "key": "environment",
+       "label": "环境",
+       "state": "provided",
+       "support": "partially_supported",
+       "usage": [
+        "scoring",
+        "planning"
+       ]
+      },
+      {
+       "display": "10.0",
+       "exact": "10",
+       "key": "commute",
+       "label": "交通便捷程度",
+       "state": "provided",
+       "support": "supported",
+       "usage": [
+        "scoring",
+        "planning"
+       ]
+      }
+     ],
+     "mode": "manual",
+     "status": "complete",
+     "total": {
+      "display": "100.0",
+      "exact": "100"
+     }
+    },
+    "statements": [
+     {
+      "as_hard_requirement": false,
+      "execution_guaranteed": false,
+      "kind": "brand",
+      "message_zh": "“家电更喜欢国产品牌”：已记录原文，本版不评分、不交给分身；需要同规格报价与匹配规则（V2）",
+      "raw_text": "家电更喜欢国产品牌",
+      "ref": "pref.brand",
+      "support": "unsupported",
+      "usage": [
+       "retained_only"
+      ]
+     },
+     {
+      "as_hard_requirement": true,
+      "execution_guaranteed": false,
+      "kind": "hard_requirement",
+      "message_zh": "每月检查实际所住住房的往返分钟：满足、不满足、无法判断单独报告；不进分数，也不拦截计划",
+      "raw_text": "住处到就业中心的往返时间不超过（分钟） 60 分钟",
+      "ref": "hr.commute",
+      "support": "supported",
+      "usage": [
+       "planning",
+       "scoring"
+      ]
+     }
+    ],
+    "summary_zh": [
+     "答案可以确认：请核对下面的解释，并知悉标准开局与只留存的陈述",
+     "健康问卷有 1 题没有明确倾向（未答或暂不确定）：照实保留，分身会被告知没有这几项的明确指令"
+    ],
+    "taste": {
+     "ambiguous": [],
+     "candidates": [],
+     "message_zh": "口味与菜系：未答（没有这一项的明确信息，按中性规则评价；不是“通用评价”的选择）",
+     "selected": [],
+     "state": "unanswered",
+     "status": "confirmable",
+     "text": null,
+     "unrecognized": []
+    }
+   },
+   "reviewed_revision": 2
+  },
+  "source_view_fingerprint": "0ce28fcb911375e6e62b52d1623e9246648e4d8d7c7f4b6036b28a808f10e36d",
+  "status": "partial"
+ },
+ "sample": {
+  "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+  "origin": "offline_run",
+  "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+  "synthetic": true
+ }
+}

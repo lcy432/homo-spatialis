@@ -1549,6 +1549,13 @@ def _say(s: Sub) -> str:
     return t(s.key, s.zh, **dict(s.params))
 
 
+def ack_display(key: str) -> str:
+    """一项待确认事项的整段说明（显示附层的知悉项说明）。与确认被拒时“还没有确认：……”用的是同一个来源 ``_ack_text``，不另写一套；
+    认不出的编号只给编号本身（没有显示绑定，英文照实缺失）。"""
+    s = _ack_text(key)
+    return _say(s) if isinstance(s, Sub) else key
+
+
 _ATTRIBUTE_UNKNOWN = Sub(
     "input.statement.attribute_unknown_kind", "本版没有这类偏好的定义：只留存原文"
 )

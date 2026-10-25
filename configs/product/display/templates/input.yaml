@@ -375,8 +375,8 @@ templates:
     en: '{label}: adopting {names}'
     zh: '{label}：采用 {names}'
   input.interests.adopted_with_unrecognized.review:
-    en: '{label}: adopting {names}; the unrecognized parts {unrecognized} are kept as written and not scored in this version'
-    zh: '{label}：采用 {names}；没认出的片段 {unrecognized} 原样保留、本版不评分'
+    en: '{label}: adopting {names}; the unrecognized parts ({unrecognized}) are kept as written and not scored in this version'
+    zh: '{label}：采用 {names}；没认出的片段（{unrecognized}）原样保留、本版不评分'
   input.interests.duplicate_selection.impact:
     en: A repeated category would make the confirmed profile fail when it is compiled; the system will not remove duplicates for you
     zh: 重复的类别会让确认画像在编译时失败；系统不替你去重
@@ -387,8 +387,8 @@ templates:
     en: Choose each category only once
     zh: 每个类别只选一次
   input.interests.duplicate_selection.review:
-    en: '{label}: the same category was chosen more than once: {keys}'
-    zh: '{label}：同一类别选了不止一次 {keys}'
+    en: '{label}: the same category was chosen more than once ({keys})'
+    zh: '{label}：同一类别选了不止一次（{keys}）'
   input.interests.no_candidates:
     en: (no recognized categories)
     zh: （没有认出的类别）
@@ -426,14 +426,14 @@ templates:
     en: An interpretation you have not checked does not go into scoring; the profile cannot be confirmed for now
     zh: 没有核对过的解释不会进入评分，画像暂时不能确认
   input.interests.selection_pending.message:
-    en: The text in {label} has been interpreted as candidates {candidates}, but no category to adopt has been chosen yet
-    zh: '{label}的文字已经解释成候选 {candidates}，还没有选中要采用的类别'
+    en: The text in {label} has been interpreted as candidates ({candidates}), but no category to adopt has been chosen yet
+    zh: '{label}的文字已经解释成候选（{candidates}），还没有选中要采用的类别'
   input.interests.selection_pending.next:
     en: Choose the categories to adopt from the candidates or the vocabulary; or switch to “generic evaluation / no fixed hobby (no preference) / not sure yet”
     zh: 从候选或词表里选中要采用的类别；或改选“通用评价 / 没有固定爱好（没有偏好）/ 暂不确定”
   input.interests.selection_pending.review:
-    en: '{label}: waiting for a choice; candidates {candidates}, ambiguous {ambiguous}, not recognized {unrecognized}'
-    zh: '{label}：待选中——候选 {candidates}，有歧义 {ambiguous}，没认出 {unrecognized}'
+    en: '{label}: waiting for a choice. Candidates: {candidates}; ambiguous: {ambiguous}; not recognized: {unrecognized}'
+    zh: '{label}：待选中——候选：{candidates}；有歧义：{ambiguous}；没认出：{unrecognized}'
   input.interests.state.generic:
     en: 'Generic leisure evaluation chosen: try whatever suitable the city offers (evaluated with neutral rules)'
     zh: 选择通用休闲评价：城市有什么合适的就体验什么（按中性规则评价）
@@ -456,8 +456,8 @@ templates:
     en: The two answers contradict each other, and the system will not choose between them for you
     zh: 两种回答互相矛盾，系统不替你取舍
   input.interests.state_conflict.message:
-    en: The answer for {label} is “{state}”, yet categories {keys} are also chosen
-    zh: '{label}的作答是“{state}”，却又选中了类别 {keys}'
+    en: The answer for {label} is “{state}”, yet categories are also chosen ({keys})
+    zh: '{label}的作答是“{state}”，却又选中了类别（{keys}）'
   input.interests.state_conflict.next:
     en: Either switch to describing it in words and choose categories, or clear the chosen categories
     zh: 要么改成用文字描述并选中类别，要么清空选中的类别
@@ -468,14 +468,14 @@ templates:
     en: Categories outside the vocabulary cannot go into scoring
     zh: 词表外的类别不能进入评分
   input.interests.unknown_category.message:
-    en: 'In {label}, categories outside the vocabulary were chosen: {keys}'
-    zh: '{label}里选中了词表外的类别 {keys}'
+    en: In {label}, categories outside the vocabulary were chosen ({keys})
+    zh: '{label}里选中了词表外的类别（{keys}）'
   input.interests.unknown_category.next:
     en: Choose only from the categories in the capability list
     zh: 只从能力清单列出的类别里选
   input.interests.unknown_category.review:
-    en: '{label}: categories outside the vocabulary were chosen: {keys}'
-    zh: '{label}：选中了词表外的类别 {keys}'
+    en: '{label}: categories outside the vocabulary were chosen ({keys})'
+    zh: '{label}：选中了词表外的类别（{keys}）'
   input.item.abilities.label:
     en: Confirmed qualifications
     zh: 已确认的资格
@@ -677,3 +677,66 @@ templates:
   input.where.draft.field:
     en: draft
     zh: 草稿
+  input.interests.none:
+    en: none
+    zh: 无
+  input.interests.fragment:
+    en: “{v}”
+    zh: “{v}”
+  input.interests.unknown_key:
+    en: “{v}”
+    zh: “{v}”
+  input.answer_state.leisure.unanswered.name:
+    en: Not answered
+    zh: 未答
+  input.answer_state.leisure.unanswered.meaning:
+    en: 'No clear information for this item: evaluated with the neutral rule, and not treated as choosing the “general evaluation”'
+    zh: 没有这一项的明确信息，按中性规则评价；不会被当成“通用评价”的选择
+  input.answer_state.leisure.unsure.name:
+    en: Not sure yet
+    zh: 暂不确定
+  input.answer_state.leisure.unsure.meaning:
+    en: Evaluated with the neutral rule
+    zh: 按中性规则评价
+  input.answer_state.leisure.no_fixed_hobby.name:
+    en: No fixed hobby (stated)
+    zh: 明确没有固定爱好
+  input.answer_state.leisure.no_fixed_hobby.meaning:
+    en: Evaluated with the neutral rule
+    zh: 按中性规则评价
+  input.answer_state.leisure.generic.name:
+    en: General leisure evaluation
+    zh: 采用通用休闲评价
+  input.answer_state.leisure.generic.meaning:
+    en: Experience whatever suitable activities the city offers (evaluated with the neutral rule)
+    zh: 城市有什么合适的就体验什么（按中性规则评价）
+  input.answer_state.leisure.described.name:
+    en: Described in words
+    zh: 用文字描述
+  input.answer_state.leisure.described.meaning:
+    en: Candidates are first formed from the vocabulary; only the categories you choose enter the evaluation, and unrecognized descriptions are kept as written and not evaluated in this version
+    zh: 先按词表形成候选，你选中的类别才进入评价；没认出的描述原样保留，本版不评价
+  input.answer_state.taste.unanswered.name:
+    en: Not answered
+    zh: 未答
+  input.answer_state.taste.unanswered.meaning:
+    en: Evaluated with the neutral rule
+    zh: 按中性规则评价
+  input.answer_state.taste.unsure.name:
+    en: Not sure yet
+    zh: 暂不确定
+  input.answer_state.taste.unsure.meaning:
+    en: Evaluated with the neutral rule
+    zh: 按中性规则评价
+  input.answer_state.taste.no_preference.name:
+    en: No taste preference (stated)
+    zh: 明确没有口味偏好
+  input.answer_state.taste.no_preference.meaning:
+    en: Evaluated with the neutral rule
+    zh: 按中性规则评价
+  input.answer_state.taste.described.name:
+    en: Described in words
+    zh: 用文字描述
+  input.answer_state.taste.described.meaning:
+    en: Candidates are first formed from the vocabulary; only the cuisines you choose enter the food evaluation, and brands and other requirements are only kept as written
+    zh: 先按词表形成候选，你选中的菜系才进入饮食评价；品牌与其他要求只留存

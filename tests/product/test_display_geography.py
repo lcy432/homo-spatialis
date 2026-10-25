@@ -20,7 +20,7 @@ from pathlib import Path
 
 import pytest
 
-from common.product_contracts import GeographyDisplayBundle
+from common.product_contracts import DISPLAY_SCHEMA_VERSION, GeographyDisplayBundle
 from product.display.catalog import DisplayResourceError
 from product.display.geography import (
     DELINEATION_SHA256,
@@ -76,7 +76,7 @@ def _bundle(pack) -> GeographyDisplayBundle:
     return GeographyDisplayBundle.model_validate(
         {
             **body,
-            "display_schema_version": "e3-display-v1",
+            "display_schema_version": DISPLAY_SCHEMA_VERSION,
             "resource_version": "e3-display-res-v1-" + "0" * 16,
             "pack_fingerprint": pack.fingerprint,
         }

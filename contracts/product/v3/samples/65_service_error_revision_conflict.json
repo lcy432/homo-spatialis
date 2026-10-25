@@ -4,8 +4,8 @@
  "payload": {
   "code": "revision_conflict",
   "display": {
-   "display_schema_version": "e3-display-v1",
-   "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+   "display_schema_version": "e3-display-v2",
+   "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
    "source_view_fingerprint": "f50e788c62d96b43b8337b6b0e1de47a9215883035646b91766ee2f4bf3cee65",
    "translations": {
     "en": {
@@ -14,7 +14,7 @@
        "key": "error.revision_conflict.message",
        "missing_reason": null,
        "pointer": "/message_zh",
-       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
        "source_locale": "zh",
        "status": "provided",
        "text": "A newer version of this draft has already been saved elsewhere (for example in another tab)"
@@ -23,7 +23,7 @@
        "key": "error.revision_conflict.impact",
        "missing_reason": null,
        "pointer": "/impact_zh",
-       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
        "source_locale": "zh",
        "status": "provided",
        "text": "This save was not written, and the newer answers were not overwritten"
@@ -32,7 +32,7 @@
        "key": "error.revision_conflict.next",
        "missing_reason": null,
        "pointer": "/next_action_zh",
-       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
        "source_locale": "zh",
        "status": "provided",
        "text": "Reload the latest draft, make your changes on top of it, then save"
@@ -46,7 +46,7 @@
        "key": "error.revision_conflict.message",
        "missing_reason": null,
        "pointer": "/message_zh",
-       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
        "source_locale": "zh",
        "status": "provided",
        "text": "这份草稿已经在别处（例如另一个标签页）保存了更新的版本"
@@ -55,7 +55,7 @@
        "key": "error.revision_conflict.impact",
        "missing_reason": null,
        "pointer": "/impact_zh",
-       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
        "source_locale": "zh",
        "status": "provided",
        "text": "这次保存没有写入，较新的答案没有被覆盖"
@@ -64,7 +64,7 @@
        "key": "error.revision_conflict.next",
        "missing_reason": null,
        "pointer": "/next_action_zh",
-       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
        "source_locale": "zh",
        "status": "provided",
        "text": "重新读取最新的草稿，在它的基础上修改后再保存"

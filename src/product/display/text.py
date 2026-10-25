@@ -1,5 +1,10 @@
 """显示文字的生成与绑定：``t()`` 生成原来的中文并记下稳定 key 与安全参数；``bind_json`` 把记录对到消息里的 JSON Pointer。
 
+绑定按**生成出来的那个文字对象**走，不按中文：``t()`` 每次返回一个新的字符串对象，记录器记下“这个对象 = 哪个 key + 哪些参数（含实体
+编号）”；消息生成完之后，逐个位置看放在那里的是不是记下的某个对象。两个城市的岗位中文都叫“文员”，也是两个不同的对象，各自带着
+自己的实体编号；重新算一遍中文只用来核对，不用来认是谁。字符串在公共消息的构造、校验、复制与 ``model_dump`` 里都保持同一个对象
+（pydantic 不复制字符串）；经过 JSON 读回、拼接或改写的文字不再是记下的对象，就没有绑定——照实报缺失，不按中文猜。
+
 参数都有类型（不接受任意对象或表达式）：
 
 * ``Ent(kind, ident, zh)``：一个有稳定编号的实体（城市、职业、机会、片区……）的名称；中文是生成时的原文，英文按 ``kind/ident`` 查冻结资源，
@@ -13,7 +18,6 @@
 from __future__ import annotations
 
 import hashlib
-import json
 import re
 from collections.abc import Iterator, Mapping
 from contextlib import contextmanager
@@ -172,13 +176,27 @@ def to_json(p: Any) -> dict[str, Any]:
 
 @dataclass
 class Recorder:
-    """一次生成里记下的文字：中文 → {规范写法: 候选绑定}。"""
+    """一次生成里记下的文字：``t()`` 返回的每一个文字对象（按对象身份）→ 它的绑定（key、中文模板摘要、有类型的参数）。记录器持有
+    对象本身，记录期间对象不会被回收、身份编号不会被别的文字复用。"""
 
-    by_text: dict[str, dict[str, dict[str, Any]]] = field(default_factory=dict)
+    by_id: dict[int, tuple[str, dict[str, Any]]] = field(default_factory=dict)
 
-    def add(self, zh: str, candidate: dict[str, Any]) -> None:
-        key = json.dumps(candidate, sort_keys=True, ensure_ascii=False)
-        self.by_text.setdefault(zh, {})[key] = candidate
+    def add(self, text: str, candidate: dict[str, Any]) -> None:
+        self.by_id[id(text)] = (text, candidate)
+
+    def get(self, text: str) -> dict[str, Any] | None:
+        """``text`` 正是记下的那个对象时给出它的绑定；内容相同的另一个对象不算。"""
+        hit = self.by_id.get(id(text))
+        return hit[1] if hit is not None and hit[0] is text else None
+
+    def __len__(self) -> int:
+        return len(self.by_id)
+
+
+def _fresh(text: str) -> str:
+    """同样内容的一个新字符串对象（每次 ``t()`` 的结果各是各的对象）。只含拉丁字母的单个字符可能是解释器共用的对象，那种文字不含中文、
+    不绑定。"""
+    return text.encode("utf-8").decode("utf-8")
 
 
 _ACTIVE: ContextVar[tuple[Recorder, ...]] = ContextVar("display_recorders", default=())
@@ -205,6 +223,7 @@ def t(key: str, zh_template: str, /, **params: Any) -> str:
     zh = fill(zh_template, {k: render_param_zh(v) for k, v in typed.items()})
     recorders = _ACTIVE.get()
     if recorders:
+        zh = _fresh(zh)
         candidate = {
             "key": key,
             "zh_sha": zh_sha(zh_template),
@@ -257,16 +276,38 @@ def is_user_text(pointer: str, patterns: tuple[str, ...]) -> bool:
     return any(pat == p or pat.startswith(p + "/") for p in patterns)
 
 
+def constant_candidate(s: Sub) -> dict[str, Any]:
+    """一个写成 ``Sub`` 的固定文字的绑定（与 ``t()`` 记下的同一种写法）。"""
+    typed = dict(s.params)
+    return {
+        "key": s.key,
+        "zh_sha": zh_sha(s.zh),
+        "params": {k: to_json(v) for k, v in sorted(typed.items())},
+    }
+
+
 def bind_json(
-    source: Any, rec: Recorder, *, user_text: tuple[str, ...] = (), base: str = ""
+    source: Any,
+    rec: Recorder,
+    *,
+    user_text: tuple[str, ...] = (),
+    base: str = "",
+    constants: Mapping[str, Sub] | None = None,
 ) -> list[dict[str, Any]]:
-    """把同一次生成里记下的文字对到 ``source`` 的 JSON Pointer（相对 ``source``，前面加 ``base``）。只对含中文的文字、不对用户原文。
-    同一段中文对应几种不同的绑定时全部留下，渲染时只有它们给出相同的英文才算提供。"""
+    """``source`` 里每个位置放的如果正是这次生成里 ``t()`` 返回的那个文字对象，就记下（JSON Pointer → 它自己的绑定）。按位置与对象
+    身份，不按中文：同样的中文放在两个位置、来自两个实体，各自是各自的绑定。只对含中文的文字、不对用户原文；``source`` 必须是
+    生成出来的消息本身或它的 ``model_dump``（不能先转成 JSON 文字再读回）。``constants`` 是结构里写死成常量的字段
+    （JSON Pointer 模式 → 固定文字），只在那个位置、文字完全相同时按位置绑定。"""
     out: list[dict[str, Any]] = []
     for pointer, text in iter_text(source):
         if not has_cjk(text) or is_user_text(pointer, user_text):
             continue
-        cands = rec.by_text.get(text)
-        if cands:
-            out.append({"pointer": base + pointer, "candidates": list(cands.values())})
+        cand = rec.get(text)
+        if cand is None and constants:
+            # 结构里写死的常量字段（``Literal``）：校验时换成了类型里的那个常量，不是生成的对象——按位置绑定，中文仍要相同
+            fixed = constants.get(pointer_pattern(pointer))
+            if fixed is not None and not fixed.params and text == fixed.zh:
+                cand = constant_candidate(fixed)
+        if cand is not None:
+            out.append({"pointer": base + pointer, "candidates": [cand]})
     return out

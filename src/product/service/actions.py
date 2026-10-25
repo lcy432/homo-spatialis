@@ -46,6 +46,7 @@ from common.product_contracts import (
     ProfileConfirmReply,
     ProfileConfirmRequest,
     ProfileList,
+    ProfileReview,
     ReviewReply,
     RunIntentCreateRequest,
     RunIntentView,
@@ -60,6 +61,7 @@ from common.product_contracts import (
 )
 from product.answers import (
     ConfirmationRefusedError,
+    ack_display,
     confirm_profile,
     confirmation_problems,
     draft_fingerprint,
@@ -74,7 +76,7 @@ from product.display.document import binding_document, capture
 from product.execution import ExecutionSpec, RunOptions, RunOptionsError, RunPolicy, service_pack
 from product.pack import DataPack, load_pack
 from product.service.clock import Clock, system_clock
-from product.service.config import REPO, ServiceConfig
+from product.service.config import REPO, ServiceConfig, check_data_dir
 from product.service.errors import ServiceFailure
 from product.service.explain import service_explanation
 from product.service.store import INTENT_CONTENT, ServiceStore, expired_subject, intent_due
@@ -120,6 +122,7 @@ class ServiceContext:
         cls, config: ServiceConfig, *, clock: Clock = system_clock, repo: Path = REPO
     ) -> ServiceContext:
         data_root = config.data_root(repo)
+        check_data_dir(data_root)  # 先查路径长度，再建服务库与密钥：放不下运行归档就不启动
         store = ServiceStore(
             data_root / "service.sqlite",
             clock,
@@ -290,12 +293,21 @@ def review(
     """审阅。写回时服务库在事务里重新核对草稿（还在、没过期、修订号没变）与数据代次：审阅进行中草稿被删或“删除全部”，就不写回。"""
     row = ctx.store.draft(principal_id, draft_id)
     draft = UserInputDraft.model_validate_json(row["body"])
-    result, rec = capture(review_draft, ctx.pack, draft)
+
+    def reviewed() -> tuple[ProfileReview, list[tuple[str, str]]]:
+        # 知悉项说明与审阅在同一次生成里：每一项的文字与它的绑定跟着审阅一起保存（显示附层的 acknowledgements）
+        r = review_draft(ctx.pack, draft)
+        return r, [(k, ack_display(k)) for k in r.pending_confirmations]
+
+    (result, acks), rec = capture(reviewed)
     display = binding_document(
         result.model_dump(mode="json"),
         rec,
         pack_fingerprint=ctx.pack.fingerprint,
         user_text=display_messages.REVIEW,
+        acknowledgements=[
+            {"ack_id": k, "zh": text, "candidate": rec.get(text)} for k, text in acks
+        ],
     )
     ctx.store.save_review(
         principal_id,

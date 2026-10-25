@@ -2,8 +2,9 @@
 
 缺失原因：``no_binding``（这段文字生成时没有记下 key，或者是旧对象）、``translation_missing``（资源里没有这条英文）、
 ``translation_stale``（代码里的中文改了，资源里的英文还是旧的那一版）、``source_changed``（用绑定重算的中文与消息里的不同）、
-``ambiguous``（同一段中文对应几种绑定，英文不一致）、``untranslated_param``（参数是没有译文的原文片段）、``resources_unavailable``
-（这个对象记下的资源版本不存在）、``binding_stale``（绑定是为另一版消息生成的）。
+``ambiguous``（一个位置有不止一个绑定，不知道是谁——不挑第一个）、``untranslated_param``（参数是没有译文的原文片段）、
+``resources_unavailable``（这个对象记下的资源版本不存在）、``resources_invalid``（那一版资源校验没通过或读不出来，一段也不用）、
+``binding_stale``（绑定是为另一版消息生成的）、``binding_unverified``（旧方法按中文相等配上的绑定，身份不可靠）。
 """
 
 from __future__ import annotations
@@ -26,12 +27,15 @@ from product.display.text import (
 
 @dataclass(frozen=True)
 class BindingSet:
-    """一组绑定与它要用的资源（``None`` 表示记下的资源版本不存在）。``valid=False``：绑定是为另一版消息生成的。"""
+    """一组绑定与它要用的资源（``None`` 表示记下的资源版本不存在或不能用）。``valid=False``：绑定是为另一版消息生成的；
+    ``verified=False``：旧方法按中文配上的绑定；``invalid=True``：资源校验没通过或登记表读不出来。"""
 
     bindings: tuple[dict[str, Any], ...]
     resources: DisplayResources | None
     resource_version: str | None
     valid: bool = True
+    verified: bool = True
+    invalid: bool = False
 
 
 class _Missing(Exception):  # noqa: N818 - 渲染里的控制信号
@@ -112,23 +116,30 @@ def _resolve(
     key = field_key(cands[0])
     if not bset.valid:
         return key, None, "binding_stale"
+    if not bset.verified:
+        return key, None, "binding_unverified"
+    if bset.invalid:
+        return key, None, "resources_invalid"
     if bset.resources is None:
         return key, None, "resources_unavailable"
-    outputs: set[str] = set()
-    reasons: list[str] = []
-    for cand in cands:
-        try:
-            if render_candidate(cand, bset.resources, "zh") != text:
-                reasons.append("source_changed")
-                continue
-            outputs.add(render_candidate(cand, bset.resources, locale, raw))
-        except _Missing as exc:
-            reasons.append(exc.reason)
-    if len(outputs) == 1:
-        return key, outputs.pop(), None
-    if len(outputs) > 1:
-        return key, None, "ambiguous"
-    return key, None, reasons[0] if reasons else "no_binding"
+    if len(cands) != 1:
+        return key, None, "ambiguous"  # 不知道这个位置是谁：不挑第一个
+    try:
+        # 按绑定重算中文只是核对：对不上就不给英文
+        if render_candidate(cands[0], bset.resources, "zh", raw) != text:
+            return key, None, "source_changed"
+        return key, render_candidate(cands[0], bset.resources, locale, raw), None
+    except _Missing as exc:
+        return key, None, exc.reason
+
+
+def resolve_text(
+    text: str, candidate: Mapping[str, Any] | None, bset: BindingSet, locale: str
+) -> tuple[str | None, str | None, str | None]:
+    """不在消息位置上的一段显示文字（知悉项、作答状态）：（key，这种语言的文字，缺失原因）。没有绑定是 ``no_binding``。"""
+    if candidate is None:
+        return None, None, "no_binding"
+    return _resolve(text, {"candidates": [candidate]}, bset, locale)
 
 
 def display_fields(
@@ -206,11 +217,16 @@ def coverage(
     res: DisplayResources,
     *,
     user_text: tuple[str, ...] = (),
+    constants: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """开发与测试用：一份刚生成的消息在 ``res`` 下的英文覆盖——应展示、已提供、缺失（按原因与 JSON Pointer 模式）。"""
     from product.display.text import bind_json
 
-    bset = BindingSet(tuple(bind_json(source, rec, user_text=user_text)), res, res.resource_version)
+    bset = BindingSet(
+        tuple(bind_json(source, rec, user_text=user_text, constants=constants)),
+        res,
+        res.resource_version,
+    )
     fields, status, stats = display_fields(source, [bset], "en", user_text=user_text)
     patterns: dict[str, dict[str, int]] = {}
     for f in fields:

@@ -47,7 +47,7 @@
     "code": "interest_duplicate_selection",
     "field": "leisure_interest.selected",
     "impact_zh": "重复的类别会让确认画像在编译时失败；系统不替你去重",
-    "message_zh": "休闲兴趣里同一类别选了不止一次：['music']",
+    "message_zh": "休闲兴趣里同一类别选了不止一次：音乐",
     "next_action_zh": "每个类别只选一次",
     "severity": "error"
    }
@@ -172,7 +172,7 @@
     "execution_guaranteed": null,
     "item": "leisure_interest",
     "label": "休闲兴趣",
-    "note": "休闲兴趣：同一类别选了不止一次 ['music']",
+    "note": "休闲兴趣：同一类别选了不止一次（音乐）",
     "support": "partially_supported",
     "usage": [
      "planning",
@@ -197,7 +197,7 @@
    "candidates": [
     "music"
    ],
-   "message_zh": "休闲兴趣：同一类别选了不止一次 ['music']",
+   "message_zh": "休闲兴趣：同一类别选了不止一次（音乐）",
    "selected": [
     "music",
     "music"

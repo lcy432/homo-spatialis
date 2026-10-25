@@ -47,7 +47,7 @@
     "code": "interest_selection_pending",
     "field": "leisure_interest.selected",
     "impact_zh": "没有核对过的解释不会进入评分，画像暂时不能确认",
-    "message_zh": "休闲兴趣的文字已经解释成候选 （没有认出的类别），还没有选中要采用的类别",
+    "message_zh": "休闲兴趣的文字已经解释成候选（（没有认出的类别）），还没有选中要采用的类别",
     "next_action_zh": "从候选或词表里选中要采用的类别；或改选“通用评价 / 没有固定爱好（没有偏好）/ 暂不确定”",
     "severity": "error"
    }
@@ -172,7 +172,7 @@
     "execution_guaranteed": null,
     "item": "leisure_interest",
     "label": "休闲兴趣",
-    "note": "休闲兴趣：待选中——候选 []，有歧义 []，没认出 ['冲浪', '攀岩']",
+    "note": "休闲兴趣：待选中——候选：无；有歧义：无；没认出：“冲浪”、“攀岩”",
     "support": "partially_supported",
     "usage": [
      "planning"
@@ -194,7 +194,7 @@
   "leisure_interest": {
    "ambiguous": [],
    "candidates": [],
-   "message_zh": "休闲兴趣：待选中——候选 []，有歧义 []，没认出 ['冲浪', '攀岩']",
+   "message_zh": "休闲兴趣：待选中——候选：无；有歧义：无；没认出：“冲浪”、“攀岩”",
    "selected": [],
    "state": "described",
    "status": "pending_selection",

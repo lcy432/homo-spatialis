@@ -323,7 +323,7 @@
     }
    }
   ],
-  "display_schema_version": "e3-display-v1",
+  "display_schema_version": "e3-display-v2",
   "notes": [
    {
     "en": "Anchor coordinates are INTPTLAT / INTPTLONG (decimal degrees) from the Census 2024 Gazetteer CBSA file. The Gazetteer record layout does not restate a datum; the same internal points appear in the official 2024 TIGER/Line CBSA file (7 decimals, equal to the Gazetteer values when rounded to 6), whose coordinate system is NAD83 (.prj GCS_North_American_1983, also stated in section 3.3.3 of the TIGER/Line technical documentation), so the original datum is NAD83. They are published as WGS 84 (EPSG:4326) through EPSG transformation 1188, \"NAD83 to WGS 84 (1)\": all three translations are zero and its accuracy is about 4 m, so the numbers are unchanged. An error of that size does not matter for a metro-area representative point.",
@@ -343,7 +343,7 @@
    }
   ],
   "pack_fingerprint": "48eda959e2eb8254c891d1de88b92f792ccf8ecbaadac8037d548279cd9dd22b",
-  "resource_version": "e3-display-res-v1-57bd9b7e31603fe2",
+  "resource_version": "e3-display-res-v1-569bfef7c2479734",
   "sources": [
    {
     "content_sha256": "0ec21c5d83982467903f1500fbbae87311edc81f09bed8ec1bbded80bce7eec3",

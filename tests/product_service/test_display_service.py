@@ -16,6 +16,7 @@ import sqlite3
 
 import pytest
 
+from common.product_contracts import DISPLAY_SCHEMA_VERSION
 from product.display import catalog
 from product.display.document import json_fingerprint
 from product.display.text import has_cjk, is_user_text
@@ -143,7 +144,7 @@ def test_every_kind_returns_its_business_source_in_both_languages(tmp_path, publ
             assert r.headers["cache-control"] == "private, no-store"
             env = envs[locale] = r.json()
             assert (env["kind"], env["id"], env["locale"]) == (kind, ident, locale)
-            assert env["display_schema_version"] == "e3-display-v1"
+            assert env["display_schema_version"] == DISPLAY_SCHEMA_VERSION
             assert env["source_view_fingerprint"] == json_fingerprint(env["source"])
             if kind == "review":  # 审阅没有单独的读取接口：与审阅回复的内容相同
                 assert env["source"]["review"] == business["review"]

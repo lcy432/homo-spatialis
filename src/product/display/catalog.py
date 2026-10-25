@@ -20,13 +20,13 @@ from typing import Any
 
 import yaml
 
+from common.product_contracts import DISPLAY_SCHEMA_VERSION
 from product.display.text import has_cjk, slots, zh_sha
 
 REPO = Path(__file__).resolve().parents[3]
 SOURCE = REPO / "configs/product/display"
 FROZEN = REPO / "data/display"
 REGISTRY = SOURCE / "registry.yaml"
-DISPLAY_SCHEMA_VERSION = "e3-display-v1"
 RESOURCE_PREFIX = "e3-display-res-v1-"
 
 

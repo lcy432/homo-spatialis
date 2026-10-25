@@ -11,6 +11,7 @@
 
 from __future__ import annotations
 
+import os
 from decimal import Decimal
 from pathlib import Path
 from typing import Literal
@@ -128,3 +129,51 @@ class ServiceConfig(BaseModel):
 def load_service_config(path: Path | str = SERVICE_CONFIG) -> ServiceConfig:
     raw = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
     return ServiceConfig.model_validate(raw["service"])
+
+
+# ---------------------------------------------------------------------- 数据目录的路径长度（启动前检查）
+
+#: 运行归档里最长的相对路径：``runs/intent-<16 位>/ws/workflow/preflights/<64 位>.json``，写入时还有 ``.tmp``。
+#: ``tests/product_service/test_e5_followups.py`` 核对一次真实的服务运行写下的路径都不超过它
+RUN_PATH_RELATIVE = len(
+    "runs/intent-0000000000000000/ws/workflow/preflights/" + "0" * 64 + ".json.tmp"
+)
+#: Windows 没有开启长路径支持时，一个文件路径最多 259 个字符（MAX_PATH 260 含结尾的空字符）
+WINDOWS_MAX_PATH = 259
+
+
+class DataDirTooLongError(ValueError):
+    """数据目录太深：运行归档写不下来。只在确实超过限制时报，磁盘满、没有权限等错误照它们自己的样子报。"""
+
+
+def windows_long_paths_enabled() -> bool:
+    """只读注册表里 Windows 的长路径开关（``LongPathsEnabled``）；读不到按没有开启处理。不修改任何设置。"""
+    try:
+        import winreg
+
+        with winreg.OpenKey(
+            winreg.HKEY_LOCAL_MACHINE, r"SYSTEM\CurrentControlSet\Control\FileSystem"
+        ) as key:
+            value, _ = winreg.QueryValueEx(key, "LongPathsEnabled")
+        return int(value) == 1
+    except (ImportError, OSError, ValueError):
+        return False
+
+
+def check_data_dir(
+    data_root: Path, *, windows: bool | None = None, long_paths: bool | None = None
+) -> None:
+    """启动前（建服务库与密钥之前）检查数据目录能不能放下运行归档。不是 Windows、或开启了长路径支持就不限制；不创建、不搬迁任何东西。
+    错误信息只给长度，不写本机的完整路径。"""
+    windows = os.name == "nt" if windows is None else windows
+    if not windows:
+        return
+    if windows_long_paths_enabled() if long_paths is None else long_paths:
+        return
+    length = len(os.path.abspath(data_root))
+    limit = WINDOWS_MAX_PATH - 1 - RUN_PATH_RELATIVE
+    if length > limit:
+        raise DataDirTooLongError(
+            f"数据目录路径过长，请改用较短目录：现在是 {length} 个字符；这台机器没有开启 Windows 长路径支持，"
+            f"运行归档要求数据目录不超过 {limit} 个字符（配置项 data_dir）"
+        )

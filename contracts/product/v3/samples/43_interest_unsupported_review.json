@@ -47,7 +47,7 @@
     "code": "interest_unknown_category",
     "field": "leisure_interest.selected",
     "impact_zh": "词表外的类别不能进入评分",
-    "message_zh": "休闲兴趣里选中了词表外的类别 ['surfing']",
+    "message_zh": "休闲兴趣里选中了词表外的类别（“surfing”）",
     "next_action_zh": "只从能力清单列出的类别里选",
     "severity": "error"
    }
@@ -172,7 +172,7 @@
     "execution_guaranteed": null,
     "item": "leisure_interest",
     "label": "休闲兴趣",
-    "note": "休闲兴趣：选中了词表外的类别 ['surfing']",
+    "note": "休闲兴趣：选中了词表外的类别（“surfing”）",
     "support": "partially_supported",
     "usage": [
      "planning",
@@ -195,7 +195,7 @@
   "leisure_interest": {
    "ambiguous": [],
    "candidates": [],
-   "message_zh": "休闲兴趣：选中了词表外的类别 ['surfing']",
+   "message_zh": "休闲兴趣：选中了词表外的类别（“surfing”）",
    "selected": [
     "surfing"
    ],

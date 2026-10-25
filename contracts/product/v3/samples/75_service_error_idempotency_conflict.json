@@ -4,8 +4,8 @@
  "payload": {
   "code": "idempotency_conflict",
   "display": {
-   "display_schema_version": "e3-display-v1",
-   "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+   "display_schema_version": "e3-display-v2",
+   "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
    "source_view_fingerprint": "dee27c4ae9c990bf3449e63489ddef682f512a4f6badebbeedfe019aa0247784",
    "translations": {
     "en": {
@@ -14,7 +14,7 @@
        "key": "error.idempotency_conflict.message",
        "missing_reason": null,
        "pointer": "/message_zh",
-       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
        "source_locale": "zh",
        "status": "provided",
        "text": "This request ID has already been used for a different request"
@@ -23,7 +23,7 @@
        "key": "error.idempotency_conflict.impact",
        "missing_reason": null,
        "pointer": "/impact_zh",
-       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
        "source_locale": "zh",
        "status": "provided",
        "text": "This request was not carried out"
@@ -32,7 +32,7 @@
        "key": "error.idempotency_conflict.next",
        "missing_reason": null,
        "pointer": "/next_action_zh",
-       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
        "source_locale": "zh",
        "status": "provided",
        "text": "Generate a new request ID for a new request; when resending the same request, keep its content unchanged"
@@ -46,7 +46,7 @@
        "key": "error.idempotency_conflict.message",
        "missing_reason": null,
        "pointer": "/message_zh",
-       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
        "source_locale": "zh",
        "status": "provided",
        "text": "这个请求编号已经用于另一份不同的请求"
@@ -55,7 +55,7 @@
        "key": "error.idempotency_conflict.impact",
        "missing_reason": null,
        "pointer": "/impact_zh",
-       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
        "source_locale": "zh",
        "status": "provided",
        "text": "这次请求没有被执行"
@@ -64,7 +64,7 @@
        "key": "error.idempotency_conflict.next",
        "missing_reason": null,
        "pointer": "/next_action_zh",
-       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
        "source_locale": "zh",
        "status": "provided",
        "text": "为新的请求生成新的请求编号；重发同一个请求时请保持内容不变"

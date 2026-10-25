@@ -88,7 +88,7 @@ from orchestration.life_runner import preflight as e1_preflight
 from product import bridge
 from product.bridge import SubmissionRegistry
 from product.display import recording
-from product.display.document import adopt_copies, binding_document
+from product.display.document import binding_document, carry_bindings, doc_version
 from product.execution import ExecutionSpec, service_pack
 from product.fixtures import prepare_workspace
 from product.pack import DataPack, load_pack
@@ -467,10 +467,10 @@ class E3PreflightAdapter:
             pre = run.preflight
             fp = pre.preflight_fingerprint
             # 显示附层：生成预检查时记下的文字绑定，放在这次运行自己的工作目录里，随运行一起删除（不进预检查的内容身份）。
-            # 文件名只取身份的前 16 位（Windows 的路径长度有上限）；读取时绑定里的原消息摘要还会再核对一次
-            _write_json(
+            # 文件名只取身份的前 16 位（Windows 的路径长度有上限）；读取时绑定里的原消息摘要还会再核对一次。写不下来只让显示缺失
+            _write_display(
                 Path("workflow/display") / f"preflight-{fp[:16]}.json",
-                binding_document(
+                lambda: binding_document(
                     pre.model_dump(mode="json"), rec, pack_fingerprint=pack.fingerprint
                 ),
             )
@@ -757,20 +757,41 @@ class E3ProjectionAdapter:
                 result = project_result(
                     pack, confirmed, pre, world, outcome, inventory, real_model_calls=sent
                 )
-            # 结果照抄确认过的预检查里的文字（规划器说明、费用上限）：借用预检查生成时保存的绑定
-            pre_display = (
-                Path("workflow/display") / f"preflight-{pre.preflight_fingerprint[:16]}.json"
-            )
-            if pre_display.is_file():
-                adopt_copies(texts, pre.model_dump(mode="json"), _read_json(pre_display))
             _write_json(cached, result.model_dump(mode="json"))
-            _write_json(
+            _write_display(
                 Path("workflow/display") / f"result-{run_id}.json",
-                binding_document(
-                    result.model_dump(mode="json"), texts, pack_fingerprint=pack.fingerprint
-                ),
+                lambda: _result_display(pack, pre, result, texts),
             )
             return _view(result)
+
+
+#: 结果原样照抄确认过的预检查的文字：（预检查里的位置，结果里的位置）
+_COPIED_FROM_PREFLIGHT = (
+    ("/planner/description_zh", "/planner/description_zh"),
+    ("/planner/max_cost", "/planner/max_cost"),
+)
+
+
+def _result_display(pack: Any, pre: Any, result: ProductResult, texts: Any) -> dict[str, Any]:
+    """结果的显示绑定：用这次运行预检查时绑定的资源版本（同一次运行同一版解释）；照抄预检查的那几段按明确的位置对带过来。"""
+    path = Path("workflow/display") / f"preflight-{pre.preflight_fingerprint[:16]}.json"
+    pre_doc = _read_json(path) if path.is_file() else None
+    body = result.model_dump(mode="json")
+    return binding_document(
+        body,
+        texts,
+        pack_fingerprint=pack.fingerprint,
+        resource_version=doc_version(pre_doc),
+        extra=carry_bindings(pre_doc, pre.model_dump(mode="json"), body, _COPIED_FROM_PREFLIGHT),
+    )
+
+
+def _write_display(path: Path, make: Any) -> None:
+    """写一份显示绑定。生成或写入失败（磁盘满、资源登记表坏了……）只让这份显示缺失，不让预检查或结果失败。"""
+    try:
+        _write_json(path, make())
+    except Exception:
+        return
 
 
 def _view(result: ProductResult) -> ResultView:

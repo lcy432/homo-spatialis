@@ -29,7 +29,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from typing import Annotated, Any, Literal
+from typing import Annotated, Any, Literal, get_args
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -1949,11 +1949,12 @@ class ProfileConfirmRequest(ProductModel):
 
 
 # ==========================================================================
-# 显示附层（e3-display-v1）：独立于业务消息的中英显示文字。原消息、内容身份与确认令牌都不变；页面的数字、权限与身份
-# 永远取原消息，显示字段只换文字。
+# 显示附层（e3-display-v2）：独立于业务消息的中英显示文字。原消息、内容身份与确认令牌都不变；页面的数字、权限与身份
+# 永远取原消息，显示字段只换文字。v2（E3 → E5 收尾修复）：绑定按生成位置与实体身份、不按中文；历史对象用它自己保存的绑定与
+# 资源版本；资源校验失败只让显示缺失；新增审阅的知悉项说明与按键的作答状态。
 # ==========================================================================
 
-DISPLAY_SCHEMA_VERSION = "e3-display-v1"
+DISPLAY_SCHEMA_VERSION = "e3-display-v2"
 DisplayLocale = Literal["zh", "en"]
 DisplayStatus = Literal["complete", "partial", "unavailable"]
 #: 一个显示位置为什么没有这种语言的文字（不猜、不拿中文反查英文）
@@ -1965,7 +1966,9 @@ DisplayMissingReason = Literal[
     "ambiguous",
     "untranslated_param",
     "resources_unavailable",
+    "resources_invalid",
     "binding_stale",
+    "binding_unverified",
 ]
 
 
@@ -2000,7 +2003,7 @@ class DisplayAttachment(ProductModel):
     """即时回复（错误、确认结果）的显示附层：这类回复可能没有可以再读的对象，所以随回复一起给中英两种文字。
     ``source_view_fingerprint`` 是去掉 ``display`` 之后的原回复的规范 JSON 摘要；``pointer`` 都相对那份原回复。"""
 
-    display_schema_version: Literal["e3-display-v1"]
+    display_schema_version: Literal["e3-display-v2"]
     resource_version: str | None = None
     source_view_fingerprint: Sha256
     translations: dict[DisplayLocale, DisplayTranslation]
@@ -2009,6 +2012,52 @@ class DisplayAttachment(ProductModel):
     def _both(self) -> DisplayAttachment:
         if set(self.translations) != {"zh", "en"}:
             raise ValueError("中英两种都要给（缺的写明 missing）")
+        return self
+
+
+class DisplayText(ProductModel):
+    """一段同时给出中英两种的显示文字（知悉项、作答状态用）。``zh`` 是中文原文（旧对象没有保存时为空）；``en`` 有译文才给，``status``
+    与 ``missing_reason`` 说英文有没有、为什么没有。``key`` 是稳定的模板 / 实体键，``resource_version`` 是渲染用的资源版本。"""
+
+    key: Annotated[str, Field(min_length=1, max_length=300)]
+    zh: Annotated[str, Field(min_length=1, max_length=2000)] | None = None
+    en: Annotated[str, Field(min_length=1, max_length=4000)] | None = None
+    status: Literal["provided", "missing"]
+    missing_reason: DisplayMissingReason | None = None
+    resource_version: str | None = None
+
+    @model_validator(mode="after")
+    def _shape(self) -> DisplayText:
+        if (self.status == "provided") != (self.en is not None and self.zh is not None):
+            raise ValueError("provided 才有中英两种文字")
+        if (self.status == "missing") != (self.missing_reason is not None):
+            raise ValueError("missing 必须写原因")
+        return self
+
+
+class DisplayAcknowledgement(ProductModel):
+    """审阅里一项必须知悉的事项的说明（只是显示）。``ack_id`` 就是原审阅 ``pending_confirmations`` 里的编号，确认时照旧提交这个编号；
+    这里不新增、不删除、不代替任何必须知悉的事项，也不表示已经勾选。``statement_pointer`` 指向原审阅里相关的那条陈述（只对
+    “留存的陈述”这一类，相对 ``source``）。"""
+
+    ack_id: Annotated[str, Field(min_length=1, max_length=200)]
+    text: DisplayText
+    statement_pointer: Annotated[str, Field(pattern=r"^(/[^/]+)+$", max_length=200)] | None = None
+
+
+class DisplayAnswerState(ProductModel):
+    """兴趣（``leisure``）或口味（``taste``）的一种作答状态的名称与含义，按正式状态 ``state`` 给出（不靠列表顺序、不拆冒号）。"""
+
+    answer: Literal["leisure", "taste"]
+    state: LeisureAnswerState | TasteAnswerState
+    name: DisplayText
+    meaning: DisplayText
+
+    @model_validator(mode="after")
+    def _state(self) -> DisplayAnswerState:
+        allowed = get_args(LeisureAnswerState if self.answer == "leisure" else TasteAnswerState)
+        if self.state not in allowed:
+            raise ValueError(f"{self.answer} 没有作答状态 {self.state}")
         return self
 
 
@@ -2234,8 +2283,10 @@ DISPLAY_SOURCES: dict[str, type[ProductModel]] = {
 
 
 class MetricDisplaySpec(ProductModel):
-    """结果色阶的显示约定：只声明已有分数的显示域与读法，不计算新分数、不公开评分系数。``mean_j`` 是同一城市“完成且评价完整”
-    分身的 J 的算术平均，当前评价规则下有效值在 [0, 1]；同一结果里所有国家、两种地图共用这一固定尺度，不按国家或城市重新拉伸。"""
+    """结果色阶的显示约定：只声明已有分数的合法数值域与读法，不计算新分数、不公开评分系数。``mean_j`` 是同一城市“完成且评价完整”
+    分身的 J 的算术平均，当前评价规则下有效值在 [0, 1]（``minimum`` / ``maximum`` 是这个数值域，不是图例窗口）。图例窗口由页面按
+    ADR 0045 第 4 条在同一份结果之内适度放大：同一结果的所有国家、两种地图共用一个窗口，图例写明窗口两端，不暗示最低的城市是零分、
+    最高的是满分；分数、分母与比较结论都不变。"""
 
     key: Literal["mean_j"]
     minimum: Literal["0"]
@@ -2267,7 +2318,7 @@ class DisplayEnvelope(ProductModel):
     ``source`` 当作原业务消息使用，``fields`` 只用来换文字；数字、权限与身份永远取 ``source``。读取只鉴权、读取与纯函数渲染：
     不保存答案、不预检查、不恢复、不重放、不调用模型。"""
 
-    display_schema_version: Literal["e3-display-v1"]
+    display_schema_version: Literal["e3-display-v2"]
     kind: DisplayKind
     id: str | None = Field(default=None, max_length=128)
     source: DisplaySource
@@ -2277,6 +2328,10 @@ class DisplayEnvelope(ProductModel):
     status: DisplayStatus
     fields: tuple[DisplayField, ...] = ()
     metrics: tuple[MetricDisplaySpec, ...] = ()
+    #: 审阅（``kind = review``）的知悉项说明：与 ``source.review.pending_confirmations`` 一一对应、同样的顺序
+    acknowledgements: tuple[DisplayAcknowledgement, ...] = ()
+    #: 能力清单、草稿与审阅里兴趣与口味的作答状态（按正式状态给名称与含义）
+    answer_states: tuple[DisplayAnswerState, ...] = ()
 
     @model_validator(mode="after")
     def _shape(self) -> DisplayEnvelope:
@@ -2284,6 +2339,17 @@ class DisplayEnvelope(ProductModel):
             raise ValueError(f"{self.kind} 的原消息必须是 {DISPLAY_SOURCES[self.kind].__name__}")
         if (self.id is None) != (self.kind in ("capabilities", "session", "runs")):
             raise ValueError("capabilities / session / runs 不带编号，其他种类必须带")
+        if self.kind == "review":
+            pending = list(self.source.review.pending_confirmations)  # type: ignore[union-attr]
+            if [a.ack_id for a in self.acknowledgements] != pending:
+                raise ValueError("知悉项说明必须与审阅的 pending_confirmations 一一对应")
+        elif self.acknowledgements:
+            raise ValueError("只有审阅带知悉项说明")
+        pairs = [(s.answer, s.state) for s in self.answer_states]
+        if len(pairs) != len(set(pairs)):
+            raise ValueError("同一种作答状态只能出现一次")
+        if self.answer_states and self.kind not in ("capabilities", "draft", "review"):
+            raise ValueError("只有能力清单、草稿与审阅带作答状态")
         return self
 
 
@@ -2353,7 +2419,7 @@ class GeographyDisplayBundle(ProductModel):
     """一个资料包、一个显示资源版本的地理显示清单（``GET /api/v1/display/geography``）。地图底图、投影、纹理与标签由页面负责；
     这份清单不授予运行资格（能选哪些城市仍由能力清单与服务规则决定），缺少可靠坐标的城市锚点为空、仍可从列表访问。"""
 
-    display_schema_version: Literal["e3-display-v1"]
+    display_schema_version: Literal["e3-display-v2"]
     resource_version: str
     pack_fingerprint: Sha256
     status: DisplayStatus

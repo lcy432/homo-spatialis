@@ -233,9 +233,16 @@ class RunDir:
         return None if found is None else found[0]
 
     def progress_with_display(
-        self, run_id: str, updated_at: str, *, resumable: bool = False, running_now: bool = False
+        self,
+        run_id: str,
+        updated_at: str,
+        *,
+        resumable: bool = False,
+        running_now: bool = False,
+        resource_version: str | None = None,
     ) -> tuple[RunProgress, dict[str, Any]] | None:
-        """进度快照与它的显示绑定（同一次生成里记下的文字）。"""
+        """进度快照与它的显示绑定（同一次生成里记下的文字）。``resource_version`` 是这次运行预检查时绑定的显示资源版本：同一次运行的
+        进度用同一版解释（预检查没有绑定就是空，显示照实报缺失）。"""
         run_dir = self.archive(run_id)
         if not (run_dir / "progress.json").is_file():
             return None
@@ -253,7 +260,10 @@ class RunDir:
             running_now=running_now,
         )
         return snap, binding_document(
-            snap.model_dump(mode="json"), rec, pack_fingerprint=pack.fingerprint
+            snap.model_dump(mode="json"),
+            rec,
+            pack_fingerprint=pack.fingerprint,
+            resource_version=resource_version,
         )
 
     def display_doc(self, name: str) -> str | None:

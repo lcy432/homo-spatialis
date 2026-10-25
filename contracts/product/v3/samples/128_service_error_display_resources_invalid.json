@@ -1,0 +1,98 @@
+{
+ "description_zh": "显示资源坏了（受控夹具：这一版冻结资源被改动过、校验没通过）：未登录的读取照样是 401 unauthenticated 的安全 JSON，中文三句照常；display 的英文照实标 resources_invalid（坏资源一段也不用），不会变成 500",
+ "message": "ServiceError",
+ "payload": {
+  "code": "unauthenticated",
+  "display": {
+   "display_schema_version": "e3-display-v2",
+   "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+   "source_view_fingerprint": "d94b727bc32d9acb55ce8efdf1c3303870f9aa41f5cbbec80ef5da18e8506e39",
+   "translations": {
+    "en": {
+     "fields": [
+      {
+       "key": "error.unauthenticated.message",
+       "missing_reason": "resources_invalid",
+       "pointer": "/message_zh",
+       "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+       "source_locale": "zh",
+       "status": "missing",
+       "text": null
+      },
+      {
+       "key": "error.unauthenticated.impact",
+       "missing_reason": "resources_invalid",
+       "pointer": "/impact_zh",
+       "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+       "source_locale": "zh",
+       "status": "missing",
+       "text": null
+      },
+      {
+       "key": "error.unauthenticated.next",
+       "missing_reason": "resources_invalid",
+       "pointer": "/next_action_zh",
+       "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+       "source_locale": "zh",
+       "status": "missing",
+       "text": null
+      }
+     ],
+     "status": "unavailable"
+    },
+    "zh": {
+     "fields": [
+      {
+       "key": "error.unauthenticated.message",
+       "missing_reason": null,
+       "pointer": "/message_zh",
+       "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "没有有效的会话，或专属链接已经失效"
+      },
+      {
+       "key": "error.unauthenticated.impact",
+       "missing_reason": null,
+       "pointer": "/impact_zh",
+       "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "不能读取或修改这个空间里的任何内容"
+      },
+      {
+       "key": "error.unauthenticated.next",
+       "missing_reason": null,
+       "pointer": "/next_action_zh",
+       "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "重新打开你的专属链接；如果链接被重发过，请使用最新的那一个"
+      }
+     ],
+     "status": "complete"
+    }
+   }
+  },
+  "field": null,
+  "impact_zh": "不能读取或修改这个空间里的任何内容",
+  "message_zh": "没有有效的会话，或专属链接已经失效",
+  "meta": null,
+  "next_action_zh": "重新打开你的专属链接；如果链接被重发过，请使用最新的那一个",
+  "retry_after_seconds": null,
+  "sample": {
+   "note": "受控夹具：故障注入或测试传输（离线替身，不是真实模型），零网络、零费用",
+   "origin": "controlled_fixture",
+   "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+   "synthetic": true
+  },
+  "status": 401,
+  "support_ref": null
+ },
+ "sample": {
+  "note": "受控夹具：故障注入或测试传输（离线替身，不是真实模型），零网络、零费用",
+  "origin": "controlled_fixture",
+  "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+  "synthetic": true
+ }
+}

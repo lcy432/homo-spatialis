@@ -4,8 +4,8 @@
  "payload": {
   "code": "expired",
   "display": {
-   "display_schema_version": "e3-display-v1",
-   "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+   "display_schema_version": "e3-display-v2",
+   "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
    "source_view_fingerprint": "bf5329bc327f19c089ef0f8171e9d913d6db34ca533e73486281711f40a227f2",
    "translations": {
     "en": {
@@ -14,7 +14,7 @@
        "key": "error.expired.result.message",
        "missing_reason": null,
        "pointer": "/message_zh",
-       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
        "source_locale": "zh",
        "status": "provided",
        "text": "This run's results are past their retention period"
@@ -23,7 +23,7 @@
        "key": "error.expired.result.impact",
        "missing_reason": null,
        "pointer": "/impact_zh",
-       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
        "source_locale": "zh",
        "status": "provided",
        "text": "Results are kept for the period in the service rules from the run's first finish, and viewing does not extend it; the content can no longer be viewed"
@@ -32,7 +32,7 @@
        "key": "error.expired.result.next",
        "missing_reason": null,
        "pointer": "/next_action_zh",
-       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
        "source_locale": "zh",
        "status": "provided",
        "text": "Prepare a new simulation if you need it"
@@ -46,7 +46,7 @@
        "key": "error.expired.result.message",
        "missing_reason": null,
        "pointer": "/message_zh",
-       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
        "source_locale": "zh",
        "status": "provided",
        "text": "这次运行的结果已经超过保存期限"
@@ -55,7 +55,7 @@
        "key": "error.expired.result.impact",
        "missing_reason": null,
        "pointer": "/impact_zh",
-       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
        "source_locale": "zh",
        "status": "provided",
        "text": "结果从运行首次结束起按服务规则保存，查看不续期；内容已经不能查看"
@@ -64,7 +64,7 @@
        "key": "error.expired.result.next",
        "missing_reason": null,
        "pointer": "/next_action_zh",
-       "resource_version": "e3-display-res-v1-0c6e23d0ce146d9a",
+       "resource_version": "e3-display-res-v1-a7813e49b0e3fbdc",
        "source_locale": "zh",
        "status": "provided",
        "text": "需要的话重新准备一次模拟"

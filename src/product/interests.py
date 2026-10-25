@@ -120,6 +120,88 @@ def _listed(texts: Sequence[str], params: Sequence[Any] | None = None) -> Any:
     return Sub("input.list", "[{items}]", (("items", Join(quoted, ", ", ", ")),))
 
 
+_NONE = Sub("input.interests.none", "无")
+
+
+def _readable(params: Sequence[Any]) -> Any:
+    """审阅说明里的一组名称或片段：“音乐、川菜”；一个都没有写“无”。不用程序的列表写法（``['音乐']``、``[]``）。"""
+    return Join(tuple(params), "、", ", ") if params else _NONE
+
+
+def _quoted(fragments: Sequence[str]) -> Any:
+    """用户原文片段：各加引号，原样不翻译。"""
+    return _readable(
+        [Sub("input.interests.fragment", "“{v}”", (("v", Raw(f)),)) for f in fragments]
+    )
+
+
+#: 作答状态的名称与含义，按正式状态写（显示附层的 ``answer_states``）。与资料包 ``leisure_states_zh`` / ``taste_states_zh`` 的说法
+#: 一致（测试逐条核对），但不靠那两个列表的顺序或冒号来解释
+ANSWER_STATES: dict[str, dict[str, tuple[Sub, Sub]]] = {
+    "leisure": {
+        "unanswered": (
+            Sub("input.answer_state.leisure.unanswered.name", "未答"),
+            Sub(
+                "input.answer_state.leisure.unanswered.meaning",
+                "没有这一项的明确信息，按中性规则评价；不会被当成“通用评价”的选择",
+            ),
+        ),
+        "unsure": (
+            Sub("input.answer_state.leisure.unsure.name", "暂不确定"),
+            Sub("input.answer_state.leisure.unsure.meaning", "按中性规则评价"),
+        ),
+        "no_fixed_hobby": (
+            Sub("input.answer_state.leisure.no_fixed_hobby.name", "明确没有固定爱好"),
+            Sub("input.answer_state.leisure.no_fixed_hobby.meaning", "按中性规则评价"),
+        ),
+        "generic": (
+            Sub("input.answer_state.leisure.generic.name", "采用通用休闲评价"),
+            Sub(
+                "input.answer_state.leisure.generic.meaning",
+                "城市有什么合适的就体验什么（按中性规则评价）",
+            ),
+        ),
+        "described": (
+            Sub("input.answer_state.leisure.described.name", "用文字描述"),
+            Sub(
+                "input.answer_state.leisure.described.meaning",
+                "先按词表形成候选，你选中的类别才进入评价；没认出的描述原样保留，本版不评价",
+            ),
+        ),
+    },
+    "taste": {
+        "unanswered": (
+            Sub("input.answer_state.taste.unanswered.name", "未答"),
+            Sub("input.answer_state.taste.unanswered.meaning", "按中性规则评价"),
+        ),
+        "unsure": (
+            Sub("input.answer_state.taste.unsure.name", "暂不确定"),
+            Sub("input.answer_state.taste.unsure.meaning", "按中性规则评价"),
+        ),
+        "no_preference": (
+            Sub("input.answer_state.taste.no_preference.name", "明确没有口味偏好"),
+            Sub("input.answer_state.taste.no_preference.meaning", "按中性规则评价"),
+        ),
+        "described": (
+            Sub("input.answer_state.taste.described.name", "用文字描述"),
+            Sub(
+                "input.answer_state.taste.described.meaning",
+                "先按词表形成候选，你选中的菜系才进入饮食评价；品牌与其他要求只留存",
+            ),
+        ),
+    },
+}
+
+
+def answer_state_texts() -> list[tuple[str, str, str, str]]:
+    """（作答，正式状态，名称，含义）：显示附层在记录器里调用，每段文字都是这次生成的对象。"""
+    return [
+        (answer, state, _say(name), _say(meaning))
+        for answer, states in ANSWER_STATES.items()
+        for state, (name, meaning) in states.items()
+    ]
+
+
 def review_one(
     kind: str, state: str, text: str | None, selected: tuple[str, ...], terms: tuple[Term, ...]
 ) -> tuple[InterestReview, list[ProductIssue], tuple[str, ...]]:
@@ -132,7 +214,18 @@ def review_one(
     labels = {term.key: term.label for term in terms}
 
     def names(keys: Sequence[str]) -> Any:
-        return _listed([labels[k] for k in keys], [Ent(ENTITY[kind], k, labels[k]) for k in keys])
+        return _readable([Ent(ENTITY[kind], k, labels[k]) for k in keys])
+
+    def keys_text(keys: Sequence[str]) -> Any:
+        # 选中的类别：词表里有的写名称，词表外的照写它的编号（加引号）
+        return _readable(
+            [
+                Ent(ENTITY[kind], k, labels[k])
+                if k in labels
+                else Sub("input.interests.unknown_key", "“{v}”", (("v", Code(k)),))
+                for k in keys
+            ]
+        )
 
     found = interpret(text, terms)
     issues: list[ProductIssue] = []
@@ -146,7 +239,7 @@ def review_one(
                     "input.interests.duplicate_selection.message",
                     "{label}里同一类别选了不止一次：{keys}",
                     label=label,
-                    keys=_listed(repeated),
+                    keys=keys_text(repeated),
                 ),
                 t(
                     "input.interests.duplicate_selection.impact",
@@ -166,9 +259,9 @@ def review_one(
                 status="invalid",
                 message_zh=t(
                     "input.interests.duplicate_selection.review",
-                    "{label}：同一类别选了不止一次 {keys}",
+                    "{label}：同一类别选了不止一次（{keys}）",
                     label=label,
-                    keys=_listed(repeated),
+                    keys=keys_text(repeated),
                 ),
             ),
             issues,
@@ -182,9 +275,9 @@ def review_one(
                 f"{where}.selected",
                 t(
                     "input.interests.unknown_category.message",
-                    "{label}里选中了词表外的类别 {keys}",
+                    "{label}里选中了词表外的类别（{keys}）",
                     label=label,
-                    keys=_listed(stray),
+                    keys=keys_text(stray),
                 ),
                 t("input.interests.unknown_category.impact", "词表外的类别不能进入评分"),
                 t("input.interests.unknown_category.next", "只从能力清单列出的类别里选"),
@@ -201,9 +294,9 @@ def review_one(
                 status="invalid",
                 message_zh=t(
                     "input.interests.unknown_category.review",
-                    "{label}：选中了词表外的类别 {keys}",
+                    "{label}：选中了词表外的类别（{keys}）",
                     label=label,
-                    keys=_listed(stray),
+                    keys=keys_text(stray),
                 ),
             ),
             issues,
@@ -217,10 +310,10 @@ def review_one(
                     f"{where}.selected",
                     t(
                         "input.interests.state_conflict.message",
-                        "{label}的作答是“{state}”，却又选中了类别 {keys}",
+                        "{label}的作答是“{state}”，却又选中了类别（{keys}）",
                         label=label,
                         state=_STATE_ZH[state],
-                        keys=_listed(list(selected)),
+                        keys=keys_text(list(selected)),
                     ),
                     t("input.interests.state_conflict.impact", "两种回答互相矛盾，系统不替你取舍"),
                     t(
@@ -267,7 +360,7 @@ def review_one(
                 f"{where}.selected",
                 t(
                     "input.interests.selection_pending.message",
-                    "{label}的文字已经解释成候选 {candidates}，还没有选中要采用的类别",
+                    "{label}的文字已经解释成候选（{candidates}），还没有选中要采用的类别",
                     label=label,
                     candidates=names(found.candidates)
                     if found.candidates
@@ -286,21 +379,21 @@ def review_one(
         status = "pending_selection"
         message = t(
             "input.interests.selection_pending.review",
-            "{label}：待选中——候选 {candidates}，有歧义 {ambiguous}，没认出 {unrecognized}",
+            "{label}：待选中——候选：{candidates}；有歧义：{ambiguous}；没认出：{unrecognized}",
             label=label,
-            candidates=_listed(found.candidates, [Code(k) for k in found.candidates]),
-            ambiguous=_listed(list(found.ambiguous)),
-            unrecognized=_listed(list(found.unrecognized)),
+            candidates=names(found.candidates),
+            ambiguous=_quoted(found.ambiguous),
+            unrecognized=_quoted(found.unrecognized),
         )
     else:
         status = "confirmable"
         message = (
             t(
                 "input.interests.adopted_with_unrecognized.review",
-                "{label}：采用 {names}；没认出的片段 {unrecognized} 原样保留、本版不评分",
+                "{label}：采用 {names}；没认出的片段（{unrecognized}）原样保留、本版不评分",
                 label=label,
                 names=names(selected),
-                unrecognized=_listed(list(found.unrecognized)),
+                unrecognized=_quoted(found.unrecognized),
             )
             if found.unrecognized
             else t(

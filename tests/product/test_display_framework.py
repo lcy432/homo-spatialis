@@ -12,7 +12,7 @@ from product.display import Code, Ent, Join, Months, Num, Raw, Sub, bind_json, l
 from product.display.catalog import DisplayResourceError, freeze, resources
 from product.display.document import binding_document, binding_set, json_fingerprint
 from product.display.render import BindingSet, display_fields
-from product.display.text import months_zh
+from product.display.text import months_zh, zh_sha
 
 PACK = "a" * 64
 
@@ -62,7 +62,8 @@ def test_t_returns_the_same_chinese_and_months_keep_the_old_format():
             cities=Join((Ent("city", "US:X:1", "西雅图"), Ent("city", "US:X:2", "芝加哥"))),
         )
     assert a == "办公室文员·p50（1–3 月）" and b == "候选城市：西雅图、芝加哥"
-    assert set(rec.by_text) == {a, b}
+    assert rec.get(a) is not None and rec.get(b) is not None and len(rec) == 2
+    assert rec.get("办公室文员·p50（1–3 月）".encode().decode()) is None  # 内容相同的另一个对象不算
     assert (
         t("note.cash", "现金 {amount}", amount=Num("3,000.50")) == "现金 3,000.50"
     )  # 没有记录器时照样返回中文
@@ -124,17 +125,82 @@ def test_stale_translations_and_mismatched_chinese_are_not_shown(tmp_path):
     assert display_fields(tampered, [fake], "en")[0][0]["missing_reason"] == "source_changed"
 
 
-def test_one_chinese_text_with_two_meanings_is_ambiguous(tmp_path):
-    res = _catalog(
-        tmp_path,
-        {**BASE, "a.one": {"zh": "低档", "en": "Low tier"}, "a.two": {"zh": "低档", "en": "Basic"}},
-    )
+@pytest.mark.parametrize("different_english", [False, True])
+def test_two_entities_with_the_same_chinese_keep_their_own_identity(tmp_path, different_english):
+    """两个城市的岗位中文都叫“文员”：各是各的实体编号，英文不同也各自正确（独立复核 F2 的反例）。"""
+    ent = {
+        "job": {
+            "job.city_a": {"label": {"zh": "文员", "en": "Office clerk"}},
+            "job.city_b": {
+                "label": {
+                    "zh": "文员",
+                    "en": "Administrative clerk" if different_english else "Office clerk",
+                }
+            },
+        }
+    }
+    res = _catalog(tmp_path, BASE, ent)
     with recording() as rec:
-        t("a.one", "低档")
-        t("a.two", "低档")
-    msg = {"x": "低档"}
-    bset = BindingSet(tuple(bind_json(msg, rec)), res, res.resource_version)
-    assert display_fields(msg, [bset], "en")[0][0]["missing_reason"] == "ambiguous"
+        source = {
+            "a": label("job", "job.city_a", "文员"),
+            "b": label("job", "job.city_b", "文员"),
+            "copy": "文员",  # 同样的中文但不是生成的对象：不认它是谁
+        }
+    bset = BindingSet(tuple(bind_json(source, rec)), res, res.resource_version)
+    fields, _, _ = display_fields(source, [bset], "en")
+    by = {f["pointer"]: f for f in fields}
+    assert by["/a"]["key"] == "entity.job.label:job.city_a" and by["/a"]["text"] == "Office clerk"
+    assert by["/b"]["key"] == "entity.job.label:job.city_b"
+    assert by["/b"]["text"] == ("Administrative clerk" if different_english else "Office clerk")
+    assert by["/copy"]["missing_reason"] == "no_binding"
+    # 数组顺序换了也不串：绑定跟着对象走
+    swapped = {"list": [source["b"], source["a"]]}
+    fields, _, _ = display_fields(
+        swapped, [BindingSet(tuple(bind_json(swapped, rec)), res, res.resource_version)], "en"
+    )
+    assert [f["key"] for f in fields] == [
+        "entity.job.label:job.city_b",
+        "entity.job.label:job.city_a",
+    ]
+
+
+def test_a_position_with_several_bindings_is_ambiguous_and_never_takes_the_first(tmp_path):
+    """旧方法（按中文）留下的一个位置配了几种绑定：不知道是谁，报 ambiguous——英文相同也不挑第一个。"""
+    res = _catalog(tmp_path, BASE, ENT)
+    cand = {"key": "entity.label", "zh_sha": zh_sha("{v}")}
+    entry = {
+        "pointer": "/x",
+        "candidates": [
+            {
+                **cand,
+                "params": {
+                    "v": {
+                        "t": "ent",
+                        "kind": "city",
+                        "id": "US:X:1",
+                        "zh": "西雅图",
+                        "field": "label",
+                    }
+                },
+            },
+            {
+                **cand,
+                "params": {
+                    "v": {
+                        "t": "ent",
+                        "kind": "city",
+                        "id": "US:X:2",
+                        "zh": "西雅图",
+                        "field": "label",
+                    }
+                },
+            },
+        ],
+    }
+    fields, _, _ = display_fields(
+        {"x": "西雅图"}, [BindingSet((entry,), res, res.resource_version)], "en"
+    )
+    assert fields[0]["missing_reason"] == "ambiguous" and fields[0]["text"] is None
 
 
 def test_nested_templates_and_codes_render_in_both_languages(tmp_path):
@@ -242,23 +308,28 @@ def test_the_same_template_never_borrows_another_instances_values(tmp_path):
     assert {f["key"] for f in fields} == {"fact.item_months"}  # 同一个模板键，各自的参数
 
 
-def test_copied_texts_borrow_the_bindings_of_the_message_they_came_from(tmp_path):
-    from product.display.document import adopt_copies
+def test_copied_texts_carry_their_binding_only_through_named_positions(tmp_path):
+    """结果照抄预检查的一段文字：按明确写出的位置对带过来那份绑定；另一版的绑定、旧方法的绑定、两处文字不同都不带。"""
+    from product.display.document import carry_bindings
 
     res = _catalog(tmp_path, BASE, ENT)
     with recording() as rec:
         pre = {"planner": t("note.cash", "现金 {amount}", amount=Num("20"))}
     pre_doc = binding_document(pre, rec, pack_fingerprint=PACK)
+    pre_json = json.loads(
+        json.dumps(pre, ensure_ascii=False)
+    )  # 从保存的预检查读回：不再是生成的对象
     with recording() as rec2:
-        result = {
-            "planner": pre["planner"],
-            "own": label("city", "US:X:1", "西雅图"),
-        }  # 照抄 + 自己生成
+        result = {"planner": pre_json["planner"], "own": label("city", "US:X:1", "西雅图")}
+    pairs = (("/planner", "/planner"),)
     assert (
-        adopt_copies(rec2, pre, {**pre_doc, "source_fingerprint": "0" * 64}) == 0
-    )  # 另一版的绑定不借
-    assert adopt_copies(rec2, pre, pre_doc) == 1
-    bset = BindingSet(tuple(bind_json(result, rec2)), res, res.resource_version)
+        carry_bindings({**pre_doc, "source_fingerprint": "0" * 64}, pre_json, result, pairs) == ()
+    )
+    old = {k: v for k, v in pre_doc.items() if k != "binding_method"}
+    assert carry_bindings(old, pre_json, result, pairs) == ()
+    assert carry_bindings(pre_doc, pre_json, {**result, "planner": "现金 30"}, pairs) == ()
+    extra = carry_bindings(pre_doc, pre_json, result, pairs)
+    bset = BindingSet((*bind_json(result, rec2), *extra), res, res.resource_version)
     fields, status, _ = display_fields(result, [bset], "en")
     assert status == "complete"
     assert {f["pointer"]: f["text"] for f in fields} == {"/planner": "Cash 20", "/own": "Seattle"}

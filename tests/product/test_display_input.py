@@ -1,4 +1,4 @@
-"""输入侧的显示文字（``e3-display-v1``）：能力清单、审阅、确认画像与确认回复。
+"""输入侧的显示文字：能力清单、审阅、确认画像与确认回复。
 
 * **中文不变。** 按生成公共样例的同一条代码路径（``product.scenarios``、``product.answers``）重建 ``contracts/product/v3/samples``
   里这些消息，与提交的样例逐字相同（只去掉 ``meta.sample`` 出处标签）。工作目录只复制资料包本身，不复制整套基础样例。
@@ -300,17 +300,11 @@ def test_english_is_provided_or_missing_only_for_stated_reasons(pack_path: str) 
 
 @pytest.mark.parametrize("pack_path", [E3A, E3B])
 def test_capabilities_are_fully_translated_except_vocabulary_aliases(pack_path: str) -> None:
-    """词表别名不生成显示文字；与某个类别名称同字的别名（例如“音乐”）在同一份消息里会对到那个名称的绑定。"""
+    """词表别名不生成显示文字；与某个类别名称同字的别名（例如“音乐”）也不借那个名称的绑定（绑定按生成的对象与位置，不按中文）。"""
     pack = load_pack(REPO / pack_path)
     cov = _coverage(pack, lambda: build_capabilities(pack), "capabilities")
     terms = (*pack.body.interests.leisure_categories, *pack.body.interests.cuisines)
-    names = {term.label for term in terms}
-    unbound = sum(
-        1
-        for term in terms
-        for a in term.aliases
-        if any("一" <= ch <= "鿿" for ch in a) and a not in names
-    )
+    unbound = sum(1 for term in terms for a in term.aliases if any("一" <= ch <= "鿿" for ch in a))
     assert cov["missing"] == ({"no_binding": unbound} if unbound else {})
     assert set(cov["missing_patterns"]) <= set(ALIASES)
     assert cov["provided"] == cov["displayable"] - unbound

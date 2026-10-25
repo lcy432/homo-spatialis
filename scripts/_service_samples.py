@@ -947,6 +947,36 @@ def display_samples(s: _Samples) -> None:
         box.get(f"/display/geography?pack_fingerprint={box.ctx.pack.fingerprint}").json(),
     )
     _fixture_resources(s, e3b)
+    # 知悉项说明与作答状态（显示附层 v2；放在最后，前面样例的编号不受影响）：审阅里的知悉项与 pending_confirmations 一一对应；作答状态按正式状态给名称与含义
+    box.person("合成人物 u545")
+    view = box.post("/drafts").json()
+    attrs = (
+        {
+            "preference_id": "pref.brand",
+            "need": "daily_convenience",
+            "kind": "brand",
+            "raw_text": "家电更喜欢国产品牌",
+        },
+    )
+    saved = box.put(
+        f"/drafts/{view['draft']['draft_id']}", box.draft_body(view, attributes=attrs)
+    ).json()
+    review = box.post(f"/drafts/{saved['draft']['draft_id']}/review").json()
+    w(
+        "126_display_review_acknowledgements_en",
+        "DisplayEnvelope",
+        "审阅的显示（kind = review）：acknowledgements 与 source.review.pending_confirmations 一一对应、同样的顺序，每项给中英说明、"
+        "所用资源版本与缺失状态；留存的陈述带 statement_pointer 指向原审阅里的那条陈述。确认时照旧提交原来的编号，显示条目不勾选、"
+        "不新增也不删除任何事项；answer_states 是这份审阅绑定的那一版资源下的作答状态",
+        _display(box, "review", review["review"]["review_id"], "en").json(),
+    )
+    w(
+        "127_display_capabilities_answer_states_en",
+        "DisplayEnvelope",
+        "能力清单的显示：answer_states 按正式状态（leisure 的 unanswered / unsure / no_fixed_hobby / generic / described，taste 的 "
+        "unanswered / unsure / no_preference / described）给中英名称与含义，不靠 leisure_states_zh 的顺序或冒号；识别别名照原文、不翻译",
+        _display(box, "capabilities", None, "en").json(),
+    )
 
 
 def _fixture_resources(s: _Samples, e3b: Any) -> None:
@@ -1011,6 +1041,20 @@ def _fixture_resources(s: _Samples, e3b: Any) -> None:
             city["anchor_status"], city["anchor"] = "unknown", None
 
         res.publish(e3b, "geo-unknown", geo_edit=unknown_anchor)
+        broken = res.publish(pack, "v4")
+        target = res.root / "frozen" / pack.fingerprint / broken / "resources.json"
+        target.write_text(target.read_text(encoding="utf-8") + " ", encoding="utf-8")
+        res.catalog._load_frozen.cache_clear()
+        from fastapi.testclient import TestClient
+
+        w(
+            "128_service_error_display_resources_invalid",
+            "ServiceError",
+            "显示资源坏了（受控夹具：这一版冻结资源被改动过、校验没通过）：未登录的读取照样是 401 unauthenticated 的安全 JSON，中文三句"
+            "照常；display 的英文照实标 resources_invalid（坏资源一段也不用），不会变成 500",
+            TestClient(box.app, base_url=ORIGIN).get(f"{API}/session").json(),
+            s.fixture,
+        )
         w(
             "125_display_geography_missing_coordinate",
             "GeographyDisplayBundle",

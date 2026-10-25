@@ -27,7 +27,7 @@ from typing import Any
 import portalocker
 
 from common.product_contracts import ConfirmedProfile, ProductResult
-from product.display.document import explained
+from product.display.document import doc_version, explained
 from product.execution import ExecutionSpec
 from product.service.actions import ServiceContext
 from product.service.explain import service_explanation
@@ -396,8 +396,13 @@ class Worker:
         if run_id is None:
             return
         try:
+            row = self.store.intent_row(intent)
             found = RunDir(self.ctx, intent).progress_with_display(
-                run_id, self.store.now(), resumable=resumable, running_now=running_now
+                run_id,
+                self.store.now(),
+                resumable=resumable,
+                running_now=running_now,
+                resource_version=doc_version(row["preflight_display"]) if row else None,
             )
         except Exception:  # 进度文件正被替换、账本正被写：这一轮跳过，下一轮再读
             return

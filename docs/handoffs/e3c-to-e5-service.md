@@ -1,6 +1,6 @@
 # E3C 托管服务交给界面层（E3 → E5）
 
-日期：2026-10-23；2026-10-24 E3C 收尾（运行选项、独立审核 R1–R6 的修复，第 11 节是本轮的改动清单）；2026-10-24 E3 → E5 接口补齐（按钮与期限、双语显示附层、地理清单、结果色阶，第 12 节）。规则见 [ADR0043](../../DECISIONS/0043-e3c-hosted-service.md)，机制见 [E3C 托管服务](../design/e3c-service.md)。本轮只提供服务、接口与样例，**没有改 E5 页面**。
+日期：2026-10-23；2026-10-24 E3C 收尾（运行选项、独立审核 R1–R6 的修复，第 11 节是本轮的改动清单）；2026-10-24 E3 → E5 接口补齐（按钮与期限、双语显示附层、地理清单、结果色阶，第 12 节）；2026-10-25 独立复核 F1–F3 的收尾修复与四项小接口问题（第 13 节）。规则见 [ADR0043](../../DECISIONS/0043-e3c-hosted-service.md)，机制见 [E3C 托管服务](../design/e3c-service.md)。本轮只提供服务、接口与样例，**没有改 E5 页面**。
 
 ## 1. 现在能做什么、不能做什么
 
@@ -14,7 +14,7 @@
 |---|---|
 | [`contracts/product/v3/openapi.json`](../../contracts/product/v3/openapi.json) | 全部 HTTP 接口（路径、请求与回复的结构、错误码）。生产不在线公开 `/docs`；本地 mock 服务在 `http://127.0.0.1:8765/api/v1/docs` 有交互式文档 |
 | `contracts/product/v3/*.schema.json`、`index.json` | 公共结构 `e3a-product-schema-v3.3`（33 份消息，含显示附层的 5 份）。唯一权威是 `src/common/product_contracts.py` |
-| `contracts/product/v3/samples/60_…–125_…` | 服务的样例（第 8 节；105–125 是显示附层，第 12.6 节），全部由服务端真实代码路径产生，凭证是明确无效的测试值 |
+| `contracts/product/v3/samples/60_…–128_…` | 服务的样例（第 8 节；105–128 是显示附层，第 12.6、13.6 节），全部由服务端真实代码路径产生，凭证是明确无效的测试值 |
 | `contracts/product/display/v1/service-errors.json` | 固定双语错误目录（未登录、服务不可达时随页面携带；第 12.3 节） |
 | `configs/product/service_local_mock.yaml` | 本地联调配置（`site_origin = http://localhost:5173`） |
 
@@ -213,7 +213,7 @@ fetch(url, { method, headers: { "Content-Type": "application/json", "X-CSRF-Toke
 
 `DisplayEnvelope`：`display_schema_version`、`kind`、`id`、`source`（**与对应业务读取的回复完全相同**，按 `kind` 是固定的公共消息）、`source_view_fingerprint`（`source` 规范 JSON 的 SHA-256，只用来对齐显示文字）、`locale`、`resource_version`、`status`（`complete` / `partial` / `unavailable`）、`fields`、`metrics`。
 
-外层的 `resource_version` 是这次读取当场生成的文字用的版本（当前登记的）；保存下来的部分（预检查、进度、结果、停下的说明、审阅、确认画像）按它们生成时记下的版本渲染，每段文字实际用的版本看 `fields[].resource_version`。
+外层的 `resource_version`：历史对象（审阅、确认画像、运行意图、进度、结果）是它绑定的版本，当场生成的对象（能力清单、会话、草稿、运行列表）是当前登记的版本（2026-10-25 收尾修复后的规则，见第 13 节）；每段文字实际用的版本看 `fields[].resource_version`。
 
 `DisplayField`：`pointer`（相对 `source` 的 JSON Pointer）、`key`（稳定的模板键或 `entity.<种类>.<字段>:<编号>`）、`status`（`provided` / `missing`）、`text`（纯文字，缺失时 `null`）、`source_locale`（`zh`）、`missing_reason`（缺失时）、`resource_version`（这段文字用的资源版本）。
 
@@ -223,7 +223,7 @@ fetch(url, { method, headers: { "Content-Type": "application/json", "X-CSRF-Toke
 4. 修改请求（POST / PUT / DELETE）照旧走原接口；之后用显示出口只读刷新。错误与确认回复不必再读一次：直接用回复里的 `display.translations[locale].fields`（`source_view_fingerprint` 对的是去掉 `display` 之后的回复）。
 5. 轮询时可以直接轮询 `GET /api/v1/display?kind=intent&id=…`：`source` 与文字同一次返回，不会把新进度与旧翻译拼在一起；读取不写库、不续期、不调用模型（与业务查询相同的保证）。
 6. 未登录、会话失效、服务不可达时，用随包携带的固定双语错误目录 `contracts/product/display/v1/service-errors.json`（按 `code`，到期按对象）。动态业务问题只以服务回复里的 `display` 为准。
-7. 结果色阶：`kind = result` 时 `metrics` 有一项 `MetricDisplaySpec`——`key = mean_j`、`minimum = "0"`、`maximum = "1"`、`unit = model_score`、`direction = higher_model_evaluation`、`denominator_field = mean_denominator`、`comparison_scope = within_result_only`、`evaluation_refs`（协议、评分、评价的公开引用）、`notes`（中英）。两种地图、所有国家共用这把固定尺度，不按城市重新拉伸；超出 [0, 1] 是契约错误，不截断；C = 0 或没有评价不画最低分的颜色；有 M 时照常着色并标出缺失人数；缺失范围的分母是 C + M，不是置信区间；0.7 不是“现实里幸福 70%”，也不是排名。
+7. 结果色阶：`kind = result` 时 `metrics` 有一项 `MetricDisplaySpec`——`key = mean_j`、`minimum = "0"`、`maximum = "1"`、`unit = model_score`、`direction = higher_model_evaluation`、`denominator_field = mean_denominator`、`comparison_scope = within_result_only`、`evaluation_refs`（协议、评分、评价的公开引用）、`notes`（中英）。`minimum` / `maximum` 是合法数值域 [0, 1]，不是图例窗口；图例窗口按 ADR 0045 第 4 条在同一份结果之内适度放大（第 13 节）；超出 [0, 1] 是契约错误，不截断；C = 0 或没有评价不画最低分的颜色；有 M 时照常着色并标出缺失人数；缺失范围的分母是 C + M，不是置信区间；0.7 不是“现实里幸福 70%”，也不是排名。
 
 ### 12.4 显示资源从哪来
 
@@ -268,3 +268,84 @@ fetch(url, { method, headers: { "Content-Type": "application/json", "X-CSRF-Toke
 * 已实现并离线自测：离线全量测试 1251 条通过、0 失败、0 跳过（干净工作树：HEAD 加本轮文件，`uv run pytest -n auto`）；ruff check / format、`check-schema`（33 份 schema、122 份样例）、`check-openapi`、`scripts/product_display.py check`（0 处不一致、0 个 key 缺英文）、`scripts/product_geography.py check` 都通过；R3/R4 的原审核探针 5 条通过。三条本地 mock 服务故事从专属链接走到删除（运行删除 202 → 结果 410 `deleted`，删除全部之后没有运行）：E3B 默认规模 6 城 × 每城 4 个分身 × 3 年、20 元——22 C / 0 E / 2 M，两个 M 都是芝加哥已登记的期末估值缺失（与之前相同）；E3B 两城 × 每城 2 个分身、5 元——3 C / 1 M（同一原因）；合成资料包——2 C。三条故事里每种对象的中文完整、英文全部提供。定向测试：`tests/product_service/test_e5_service_boundaries.py`、`test_display_service.py`，`tests/product/test_display_*.py`（框架、资源、各层文字、地理）。本机证据 `runs/e3-e5-display-20261024/`
 * 待独立复核：本节全部内容。
 * 还缺资源或接线：E5 还没有接线（页面、显示 adapter、地图与地球上的城市点）；结果色阶的口径要所有者裁定（这一轮按任务写的是固定 [0, 1]、不拉伸，ADR 0045 第 4 条记的是界面适度放大，见 [交接单](e5-bilingual-map-service-requests.md) 第 13 节）；分身事件链里 E1 的中文记录没有英文；交接单第 12 节第 1–5 条（路径过长的启动检查、审阅里的内部键名、知悉项文字、作答状态的结构、模型语言）这一轮没有做
+
+## 13. E3 → E5 收尾修复（2026-10-25：独立复核 F1–F3、四项小接口问题、色阶统一）
+
+状态：**修复及离线自测完成，待独立复核**。复核报告在本机 `runs/e3c-display-review-20261025/README.md`；修复证据在 `runs/e3-e5-review-fixes-20261025/`。没有真实或订阅模型调用、没有在线翻译、没有部署、没有推送；本轮没有改 `web/`。
+
+### 13.1 版本与迁移
+
+| 层 | 新版本 | E5 要做的 |
+|---|---|---|
+| 显示附层 | `e3-display-v2`（`DisplayEnvelope` / `DisplayAttachment` / `GeographyDisplayBundle` 的 `display_schema_version`） | 按提交的 schema 重新生成类型；`missing_reason` 新增 `resources_invalid`、`binding_unverified`；`DisplayEnvelope` 新增 `acknowledgements`、`answer_states`；新模型 `DisplayText`、`DisplayAcknowledgement`、`DisplayAnswerState` |
+| 服务 API | `e3c-service-api-v1.2`（URL 仍 `/api/v1`） | 路由、成功码与业务回复不变 |
+| 核心公共结构 | `e3a-product-schema-v3.3`（不变） | 无 |
+| 显示资源 | 合成包 `e3-display-res-v1-a7813e49b0e3fbdc`，E3B 包 `e3-display-res-v1-bf20cbd7db94ecb8`（当前）；上一轮的 `…0c6e23d0ce146d9a`、`…43b216694e20aa77` 保留 | 无（服务读冻结资源） |
+
+旧数据：上一轮保存的显示绑定是按中文配上的，读取时报 `binding_unverified`（英文缺失，页面照中文原文显示），不重算、不补写；业务读取不受影响。审阅说明的中文措辞改了（第 13.4 节），保存过的旧审阅与确认画像不改写。
+
+### 13.2 三项复核问题修好之后的规则
+
+1. **显示故障不破坏业务回复**（F1）：资源校验没通过、登记表读不出来时，显示字段报 `resources_invalid`（缺版本报 `resources_unavailable`），原回复、HTTP 状态码与中文三句不变；未登录照样是 401 的安全 JSON；确认已经保存就回 200 `confirmed`、只保存一次；即时回复的附层生成出问题时 `display` 为空（照中文原文显示）。地理清单那一版资源坏了：200、`status = unavailable`、`notes` 写明原因。
+2. **绑定按位置与实体身份**（F2）：同名的两个实体（例如两座城的“文员”）各有自己的 `key`，英文不同也各自正确；数组换顺序不串。`key` 是可靠的显示键，但业务身份仍然只看 `source`。
+3. **历史正文用自己的版本**（F3）：当场的服务说明不接管内嵌的画像、预检查、进度、结果或停下的说明。`DisplayEnvelope.resource_version`：
+   * 审阅、确认画像、结果：这个对象生成时绑定的版本；
+   * 运行意图、进度：这次运行预检查时绑定的版本（同一次运行的进度与结果都用它）；**还没有绑定时为空**（例如还在排队检查）；
+   * 能力清单、会话、草稿、运行列表：当前登记的版本。
+
+   每段文字实际用的版本在 `fields[].resource_version`（当场说明用当前版本时写在那个字段上）。**地图读历史结果时，把那份结果显示读取回来的 `resource_version` 传给 `GET /api/v1/display/geography`**；它是空的就不传版本、也不要拿当前版本冒充（按“没有历史版本”处理）。明确请求的版本不存在仍是 404，不回退。
+
+### 13.3 `acknowledgements` 与 `answer_states` 怎么读
+
+**知悉项说明**（只在 `kind = review`）：
+
+```text
+acknowledgements[i] = {
+  ack_id,                # 就是 source.review.pending_confirmations[i]，顺序相同、一一对应
+  text: {key, zh, en, status, missing_reason, resource_version},
+  statement_pointer      # 留存的陈述（ack:retained:<ref>）指向 source 里那条陈述，例如 /review/statements/2；其他为 null
+}
+```
+
+* 页面按 `ack_id` 显示 `text`（当前语言是英文就用 `en`；`status = missing` 时显示 `zh` 并标明英文缺失；旧审阅没有保存时 `zh` 也为空，只显示编号对应的提示）。
+* **确认时照旧提交 `pending_confirmations` 的编号**（`ProfileConfirmRequest.acknowledged`）。这些条目只是说明：不新增、不删除、不代替任何必须知悉的事项，也不表示已经勾选；页面不要自动勾选。
+* 文字与确认被拒时“还没有确认：……”同一个来源（`product.answers.ack_display`）。
+
+**作答状态**（`kind = capabilities`、`draft`、`review`）：
+
+```text
+answer_states[j] = {
+  answer: leisure | taste,
+  state,                 # 正式状态：leisure 的 unanswered / unsure / no_fixed_hobby / generic / described，taste 的 unanswered / unsure / no_preference / described
+  name: {key, zh, en, status, missing_reason, resource_version},
+  meaning: {…同上}
+}
+```
+
+* 按 `(answer, state)` 找，不按顺序、不拆 `leisure_states_zh` 的冒号；`leisure_states_zh` / `taste_states_zh` 这两个业务字段照旧（内容不变），页面不再需要解析它们。
+* 审阅里的作答状态用这份审阅绑定的版本，能力清单与草稿用当前版本。
+
+### 13.4 审阅说明与启动诊断
+
+* 兴趣与口味的审阅说明改成人能读的写法：例如口味写“喜欢川菜”（E3B 资料包）时是“口味与菜系：待选中——候选：中餐；有歧义：无；没认出：无”，没有 `['chinese']`、`[]` 之类的程序写法；类别编号（`candidates`）、匹配结果、用户原文与确认规则不变。
+* 数据目录路径过长：服务启动时（建服务库与密钥之前）检查；Windows 没有开启长路径支持时数据目录不能超过 133 个字符，超过就报“数据目录路径过长，请改用较短目录”并停止启动（不建任何文件、不改系统设置）。开了长路径支持或不是 Windows 不限制。网页上看不到这条（服务根本没有启动）。
+
+### 13.5 色阶已经统一
+
+按 ADR 0045 第 4 条：`MetricDisplaySpec.minimum` / `maximum` 是合法数值域 [0, 1]，不是图例窗口；图例窗口由 E5 在同一份结果之内适度放大（同一结果的所有国家、两种地图共用一个窗口，图例写明两端，不暗示最低的城市是零分、最高的是满分）。C = 0 或没有评价不着最低分的颜色、M 单独标、均值分母与“只在本结果内比较”不变；E3 不另写色阶计算器，分数与比较结论不变。`notes` 已经改成这条规则（样例 115、116）。
+
+### 13.6 样例
+
+| 情形 | 样例 |
+|---|---|
+| 审阅的知悉项说明与作答状态（新） | 126 |
+| 能力清单的作答状态（新） | 127 |
+| 显示资源坏了：未登录错误仍是安全 JSON，英文 `resources_invalid`（受控夹具，新） | 128 |
+| 显示附层 v2 重新导出（版本字段、历史版本语义、色阶说明） | 105–125 |
+| 审阅说明改成可读写法 | 39、42、43、49（只是说明文字；编号、匹配结果与原文不变） |
+
+### 13.7 已实现、待复核与还没有的
+
+* 已实现并离线自测：离线全量测试 1271 条通过、0 失败、0 跳过（干净工作树：`32d7c21` 加本轮文件，`uv run pytest -n auto`）；ruff check / format、`check-schema`（33 份 schema、125 份样例）、`check-openapi`、`scripts/product_display.py check`（0 处不一致、0 个 key 缺英文）、`scripts/product_geography.py check` 都通过；独立复核的 5 条原反例与 R3/R4 原探针共 10 条通过；新的定向测试 `tests/product_service/test_e5_review_fixes.py`（18 条）与改写后的 `tests/product/test_display_framework.py`。六城本地 mock 服务闭环（同一冻结资料包、6 城 × 每城 4 个分身 × 3 年、20 元）：24 人完成三年，22 C / 0 E / 2 M，两个 M 都是芝加哥已登记的期末估值缺失（与基线相同），规划 104 / 216，次数 3 / 1 / 0 / 2，真实模型调用 0；九种显示对象中英完整，删除运行 202 → 结果 410，删除全部后没有运行。本机证据 `runs/e3-e5-review-fixes-20261025/`
+* 待独立复核：本节全部内容。
+* 还没有做：模型输入 / 输出语言（新功能，等所有者排期）；分身事件链里 E1 自己写成中文句子的记录（要 E3AB 给结构化事实绑定）；E5 接上新的 `acknowledgements` / `answer_states` 与历史版本规则；部署与真实模型试跑。

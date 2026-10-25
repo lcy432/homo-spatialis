@@ -1,4 +1,4 @@
-"""运行前检查、资料性质与目录编译的显示文字（``e3-display-v1``）：``ProductPreflight``（问题、规划器说明、开局摘要、逐城原因、资料
+"""运行前检查、资料性质与目录编译的显示文字：``ProductPreflight``（问题、规划器说明、开局摘要、逐城原因、资料
 缺口、范围说明、``scope_zh``）、``CityDataNature``（也嵌在 ``ProductResult.data_nature`` 里）、``CatalogCompilation`` 与
 ``OptionInventoryCoverage``。
 
@@ -23,7 +23,7 @@ import pytest
 
 from product import scenarios as sc
 from product.answers import confirm_profile, review_draft
-from product.catalog import inventory_coverage
+from product.catalog import CONSTANT_TEXTS, inventory_coverage
 from product.display import bind_json, recording
 from product.display.catalog import source_resources
 from product.display.render import coverage
@@ -84,7 +84,7 @@ def _same_as_sample(name: str, message: Any) -> None:
 
 def _unbound(payload: dict[str, Any], rec: Any) -> set[str]:
     """要展示（含中文）却没有绑定的位置。"""
-    bound = {b["pointer"] for b in bind_json(payload, rec)}
+    bound = {b["pointer"] for b in bind_json(payload, rec, constants=CONSTANT_TEXTS)}
     return {p for p, text in iter_text(payload) if has_cjk(text) and p not in bound}
 
 
@@ -111,14 +111,14 @@ def _mine_missing(payload: dict[str, Any], rec: Any, res: Any) -> list[str]:
         elif p["t"] == "sub":
             template(p["key"], p["zh_sha"], p["params"])
 
-    for b in bind_json(payload, rec):
+    for b in bind_json(payload, rec, constants=CONSTANT_TEXTS):
         for cand in b["candidates"]:
             template(cand["key"], cand["zh_sha"], cand["params"])
     return sorted(set(out))
 
 
 def _english_ok(payload: dict[str, Any], rec: Any, res: Any) -> None:
-    cov = coverage(payload, rec, res)
+    cov = coverage(payload, rec, res, constants=CONSTANT_TEXTS)
     assert not BAD & set(cov["missing"]), cov["missing_patterns"]
     assert _mine_missing(payload, rec, res) == []
 
@@ -278,7 +278,7 @@ def test_synthetic_fixture_samples_keep_their_chinese(synthetic, tmp_path):
     ):
         payload = _dump(message)
         assert _unbound(payload, rec) == set()
-        cov = coverage(payload, rec, res)
+        cov = coverage(payload, rec, res, constants=CONSTANT_TEXTS)
         assert not {"source_changed", "ambiguous"} & set(cov["missing"]), cov["missing_patterns"]
         assert all(m.startswith("source_fact/") for m in _mine_missing(payload, rec, res))
 
@@ -290,7 +290,7 @@ def test_copied_scope_lines_are_bound_only_when_regenerated_exactly(synthetic):
     with recording() as rec:
         same = _e1_scope(world)
     assert same == tuple(world.scope["数据与参数"])
-    assert all(rec.by_text.get(line) for line in same)
+    assert all(rec.get(line) for line in same)
     changed = SimpleNamespace(
         bundle=world.bundle,
         scoring=world.scoring,
@@ -300,12 +300,14 @@ def test_copied_scope_lines_are_bound_only_when_regenerated_exactly(synthetic):
     with recording() as rec2:
         fallback = _e1_scope(changed)  # type: ignore[arg-type]
     assert fallback == tuple(changed.scope["数据与参数"])
-    assert not rec2.by_text.get("E1 改过的写法")
+    assert all(
+        rec2.get(line) is None for line in fallback
+    )  # 照用的原文不是这次生成的文字：没有绑定
 
     confirmed = synthetic.confirmed
     with recording() as rec3:
         lines = confirmed_scope_lines(synthetic.pack, confirmed)
-    assert lines == confirmed.interests.scope_zh and all(rec3.by_text.get(x) for x in lines)
+    assert lines == confirmed.interests.scope_zh and all(rec3.get(x) for x in lines)
     edited = confirmed.model_copy(
         update={
             "interests": confirmed.interests.model_copy(
@@ -316,7 +318,7 @@ def test_copied_scope_lines_are_bound_only_when_regenerated_exactly(synthetic):
     with recording() as rec4:
         kept = confirmed_scope_lines(synthetic.pack, edited)
     assert kept == edited.interests.scope_zh
-    assert not rec4.by_text.get("确认时的另一种写法")
+    assert all(rec4.get(x) is None for x in kept)
 
 
 def test_inventory_reasons_fall_back_to_the_recorded_text_when_the_compilation_differs(synthetic):

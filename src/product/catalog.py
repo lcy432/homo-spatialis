@@ -51,7 +51,7 @@ from common.product_contracts import (
     identity_content,
 )
 from product.answers import issue
-from product.display import Code, Ent, Join, Num, Raw, Sub, label, t
+from product.display import Code, Ent, Join, Num, Raw, Sub, label, say, t
 from product.display.text import has_cjk
 from product.pack import DataPack
 
@@ -87,7 +87,7 @@ _PER_UNIT_KIND: dict[str, str] = {
 _PERIOD_LABEL = {"per_month": "按月", "per_visit": "按次", "one_time": "一次性"}
 _KIND_LABEL = {"service_month": "服务月", "visit": "次", "set": "套", "machine": "台"}
 
-# ---------------------------------------------------------------------- 显示文字（e3-display-v1）
+# ---------------------------------------------------------------------- 显示文字（显示附层）
 #
 # 编译原因都是有 key 的模板（``Sub``），生成问题时才变成文字：同一句原因在覆盖报告里还要再拼进一句话。字段、计费周期、计价对象
 # 与候选种类的名称按实体绑定（``candidate_field`` / ``billing_period`` / ``price_object`` / ``candidate_kind``）；资料里的原样
@@ -169,6 +169,12 @@ def _number(text: str | None) -> Fraction | None:
     return Fraction(d)
 
 
+#: 家务时间的单位：结构里写死成常量（``TaskDefinition.unit`` 是 ``Literal``），绑定只能按位置（见 ``bind_json`` 的 ``constants``）
+TASK_UNIT = Sub("catalog.task.unit", "小时/月")
+#: ``CatalogCompilation`` 里写死成常量的显示字段
+CONSTANT_TEXTS = {"/tasks/*/unit": TASK_UNIT}
+
+
 def _task_definitions(
     base_protocol: dict[str, Any], tasks: tuple[str, ...]
 ) -> tuple[TaskDefinition, ...]:
@@ -180,7 +186,7 @@ def _task_definitions(
                 TaskDefinition(
                     task=task["task"],
                     baseline_hours_per_month=str(task["baseline_hours_per_month"]),
-                    unit=t("catalog.task.unit", "小时/月"),  # type: ignore[arg-type]
+                    unit=say(TASK_UNIT),  # type: ignore[arg-type]
                     description=label("household_task", task["task"], task["description"]),
                 )
             )
