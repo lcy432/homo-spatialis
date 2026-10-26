@@ -21,7 +21,7 @@ import type {
   QualificationReview,
   UserInputDraft,
 } from "../../contract/types";
-import { ApiErrorView, IssueList, Loading, Section, SupportChip, TableWrap, UsageChips } from "../../components/common";
+import { ApiErrorView, IssueCard, IssueList, Loading, Section, SupportChip, TableWrap, UsageChips } from "../../components/common";
 import { PageTitle, StepNav } from "../../components/Layout";
 import { CityName } from "../../components/RunViews";
 import { PendingStartNotice, StartPanel } from "../../components/StartPanel";
@@ -344,7 +344,7 @@ export function ReviewStep() {
                 <p>{vIssues.some((i) => i.code !== "allocation_mode_retired") ? t("review.migrateHint") : t("review.rerateHint")}</p>
                 <div className="stack">
                   {vIssues.map((i) => (
-                    <IssueList key={`${i.code}.${i.field}`} issues={[i]} draftId={draftId} pointer={`${R}/issues/${issueIndex(i)}`.replace(/\/\d+$/, "")} />
+                    <IssueCard key={`${i.code}.${i.field}`} issue={i} draftId={draftId} pointer={at(`${R}/issues`, issueIndex(i))} />
                   ))}
                 </div>
                 <a className="button" href={`/draft/${encodeURIComponent(draftId)}/${vIssues.some((i) => i.code !== "allocation_mode_retired") ? "place" : "priorities"}`}>
@@ -357,7 +357,7 @@ export function ReviewStep() {
               {blockers.length ? <h2>{t("review.blockers", { n: blockers.length })}</h2> : <p className="box ok">{t("review.noBlockers")}</p>}
               <div className="stack">
                 {allIssues.map((i, n) =>
-                  vIssues.includes(i) ? null : <IssueList key={`${i.code}.${i.field}.${n}`} issues={[i]} draftId={draftId} pointer={`${R}/issues/${n}`.replace(/\/\d+$/, "")} />,
+                  vIssues.includes(i) ? null : <IssueCard key={`${i.code}.${i.field}.${n}`} issue={i} draftId={draftId} pointer={at(`${R}/issues`, n)} />,
                 )}
               </div>
             </div>
