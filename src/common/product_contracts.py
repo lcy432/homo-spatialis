@@ -1701,6 +1701,10 @@ class RunProgress(ProductModel):
     report_available: bool
     #: 这份进度快照是什么时候写下的（E3C：worker 从权威进度与账本生成；UTC ISO 8601）。离线桥接不写。
     updated_at: str | None = _optional()
+    #: 已结算的分身年度数（DECISIONS/0049）：E1 运行归档里已经执行并结算的年度行动条数（每个分身每年最多一条；出局或停下之后没有
+    #: 经历的年份没有记录）；``clone_years_planned`` 是 E1 冻结的名单 × 年数。托管服务的快照才写，离线桥接与旧快照没有。
+    clone_years_settled: Annotated[int, Field(ge=0)] | None = _optional()
+    clone_years_planned: Annotated[int, Field(ge=1)] | None = _optional()
 
 
 # ==========================================================================
@@ -2816,6 +2820,56 @@ class RunIntentCreateRequest(ProductModel):
     start: StartWhenReady | None = None
 
 
+#: 等待页的阶段（DECISIONS/0049）：检查中、排队、模拟中、整理结果、完成、需要处理，以及结束在取消、删除或过期
+ProgressPhase = Literal[
+    "checking",
+    "queued",
+    "simulating",
+    "assembling_result",
+    "finished",
+    "needs_attention",
+    "cancelled",
+    "deleted",
+    "expired",
+]
+#: 进度条怎么画：不定长 / 按已结算的分身年度数 / 完成
+ProgressMode = Literal["indeterminate", "clone_years", "finished"]
+
+
+class ProgressSummary(ProductModel):
+    """等待页的一句当前状态与进度条（DECISIONS/0049）：读取运行意图时按服务库的阶段与 E1 写下的权威进度快照当场生成（只读，没有
+    ``run_id`` 的检查阶段也有）。
+
+    * ``sentence_zh`` 是一句当前状态，新的一句覆盖上一句（不是执行历史）；``updated_at`` 是这句所依据的记录的时间（进度快照或意图
+      本身的更新时间），断线时页面照它显示“最后已知”。
+    * ``mode``：``indeterminate`` 不定长——检查、排队、整理结果、还没有第一份进度快照，以及停下时没有快照；``clone_years`` 按已结算的
+      分身年度数：``settled_clone_years`` 是 E1 进度快照里各分身已结算年数之和（出局或中断之后没有经历的年份不算），
+      ``planned_clone_years`` 是这次的名单（城市 × 每城分身数，E1 的名单按它冻结）× 年数；``finished`` 只在结果真的可以读时，完成不等于
+      所有分身都是 C。不按调用次数、不按时间增长；不含内部状态、路径、凭证或评分参数。"""
+
+    phase: ProgressPhase
+    sentence_zh: str = Field(min_length=1, max_length=200)
+    updated_at: UtcTime
+    mode: ProgressMode
+    settled_clone_years: Annotated[int, Field(ge=0)] | None = None
+    planned_clone_years: Annotated[int, Field(ge=1)] | None = None
+
+    @model_validator(mode="after")
+    def _shape(self) -> ProgressSummary:
+        counted = self.settled_clone_years is not None
+        if counted != (self.planned_clone_years is not None):
+            raise ValueError("已结算与计划的分身年度数要一起给")
+        if self.mode == "clone_years" and not counted:
+            raise ValueError("clone_years 要给分身年度数")
+        if self.mode == "indeterminate" and counted:
+            raise ValueError("不定长的进度不给分身年度数")
+        if counted and self.settled_clone_years > self.planned_clone_years:  # type: ignore[operator]
+            raise ValueError("已结算的分身年度数不能超过计划")
+        if (self.mode == "finished") != (self.phase == "finished"):
+            raise ValueError("只有结果可以读的完成阶段用 finished")
+        return self
+
+
 StartAuthorizationState = Literal["pending", "used", "void"]
 #: 开始授权作废的原因（说明见运行意图的 ``explanation``；检查没通过时是那次检查自己的说明）
 StartVoidReason = Literal[
@@ -2885,6 +2939,8 @@ class RunIntentView(ProductModel):
     start: StartAuthorizationView | None = None
     #: 已经确认开始时，确认来自哪里：用户在检查之后确认（``user_confirm``），或用户在检查之前的一次开始授权（``start_authorization``）
     confirmation_source: Literal["user_confirm", "start_authorization"] | None = None
+    #: 等待页的一句当前状态与进度条（每次读取当场生成；只读）
+    progress_summary: ProgressSummary
 
 
 class RunSubmitRequest(ProductModel):

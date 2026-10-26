@@ -237,7 +237,7 @@ fetch(url, { method, headers: { "Content-Type": "application/json", "X-CSRF-Toke
 
 `GeographyDisplayBundle`：`display_schema_version`、`resource_version`、`pack_fingerprint`、`status`、`cities[]`、`sources[]`、`notes[]`（中英）。每座城：`city_ref`、`country`、`scheme`、`code`、`geography_version`、`country_names`、`names`（中英正式名与短名）、`model_kind`（`real` / `synthetic`）、`anchor_status`（`available` / `unknown` / `not_applicable`）、`anchor`（`latitude`、`longitude`，度；`crs = EPSG:4326`；`kind = metro_internal_point`；`source_refs`）、`support_scope`（`ref`、`version`，中英的居住、工作与说明）、`coverage_note`。
 
-* 用哪个资料包：当前的看能力清单的 `meta.data_pack`；历史结果用那次结果 `source.meta.data_pack` 的指纹，并把显示读取回来的 `resource_version` 一起传进来，读到的就是那一版冻结的清单。省略 `resource_version` 用当前登记的版本；明确请求的版本不存在或资料包没有登记：404，**不回退**；登记了但没有地理资源：`status = unavailable`、城市为空。
+* 用哪个资料包：当前的看能力清单的 `meta.data_pack`；历史结果用那次结果 `source.meta.data_pack` 的指纹，并把显示读取回来的 `resource_version` 一起传进来，读到的就是那一版冻结的清单。省略 `resource_version` 用当前登记的版本（所以只有当前输入才省略；历史对象的版本为空时**不要请求**地理清单，见第 19 节）；明确请求的版本不存在或资料包没有登记：404，**不回退**；登记了但没有地理资源：`status = unavailable`、城市为空。
 * 六城都是 `available`：Census 2024 Gazetteer CBSA 文件的都会区内部点（代表点，不是住处、主城市中心或都会区边界；都会区大，点可能离市区较远）。原始基准 NAD83（同一批内部点在官方 TIGER/Line 2024 CBSA 文件里也有，七位小数四舍五入到六位一致，那份文件的坐标系是 NAD83），按 EPSG 登记的 1188 号转换（三个平移量都是 0、精度 4 米）发布为 EPSG:4326，数值不变；边界版本是 2023 年 7 月的 CBSA 划定。合成城市 `not_applicable`、`anchor = null`。以后有城市没有可靠的点就是 `unknown`、`anchor = null`（样例 125）：仍在列表里、照常可选，不要用别的点代替，也不要画在地图上。
 * 支持范围写明：纽约只支持纽约市五个区的居民、工作在纽约州；芝加哥只支持伊利诺伊州部分；旧金山都会区不含圣何塞（另一个都会区，CBSA 41940）。**清单不授予运行资格**：能选哪些城市只看能力清单与服务规则。
 * 底图、投影、纹理、标签避让与拖转由 E5 负责；首版没有住宅、街道或 PUMA 多边形。生成器 `scripts/product_geography.py`（`build` / `check`），参数目录 PI-61。
@@ -294,7 +294,7 @@ fetch(url, { method, headers: { "Content-Type": "application/json", "X-CSRF-Toke
    * 运行意图、进度：这次运行预检查时绑定的版本（同一次运行的进度与结果都用它）；**还没有绑定时为空**（例如还在排队检查）；
    * 能力清单、会话、草稿、运行列表：当前登记的版本。
 
-   每段文字实际用的版本在 `fields[].resource_version`（当场说明用当前版本时写在那个字段上）。**地图读历史结果时，把那份结果显示读取回来的 `resource_version` 传给 `GET /api/v1/display/geography`**；它是空的就不传版本、也不要拿当前版本冒充（按“没有历史版本”处理）。明确请求的版本不存在仍是 404，不回退。
+   每段文字实际用的版本在 `fields[].resource_version`（当场说明用当前版本时写在那个字段上）。**地图读历史结果时，把那份结果显示读取回来的 `resource_version` 传给 `GET /api/v1/display/geography`**；它是空的就**不要请求地理清单**（不带版本请求读到的是当前版本，等于拿当前版本冒充），按“没有绑定的历史版本”处理（第 19 节）。明确请求的版本不存在仍是 404，不回退。
 
 ### 13.3 `acknowledgements` 与 `answer_states` 怎么读
 
@@ -672,3 +672,109 @@ LangGraph → E1 → 结果。E3 定义授权、核对与停下的规则；E5 �
   两种情形都只开始一次、付费调用被关 / 报价变了 / 选项收窄 / 知悉规则变了 / 检查没通过时授权作废、取消 / 删除 / 过期与开始竞争、删除
   之后不显示授权、旧意图照旧）；服务库 v2、v3 就地升到 v4 的测试。
 * 待独立复核：本节全部内容。还没有做：E5 页面没有接；没有部署、没有真实模型试跑。
+
+## 18. 等待页的进度摘要（2026-10-25，`RunIntentView.progress_summary`）
+
+状态：**实现及离线自测完成，待独立复核**。同一任务的第三个提交（只有这一项的文件，没有推送）。规则见
+[ADR0049](../../DECISIONS/0049-e3c-progress-summary.md)。
+
+### 18.1 字段
+
+每次读取运行意图（`GET /api/v1/run-intents/{id}`、一次开始的回复、`submit` 回复里的意图）都带 `progress_summary`，按服务库的阶段与 E1
+写下的权威进度快照**当场生成、只读**；检查阶段还没有 `run_id` 也有：
+
+| 字段 | 意思 |
+|---|---|
+| `phase` | `checking` / `queued` / `simulating` / `assembling_result` / `finished` / `needs_attention`，以及结束在 `cancelled` / `deleted` / `expired` |
+| `sentence_zh` | 一句当前状态（显示附层给英文，指针 `/progress_summary/sentence_zh`）；新的一句覆盖上一句，**不是执行历史** |
+| `updated_at` | 这句状态所依据的记录的时间（进度快照或意图本身的更新时间）；断线时页面照它写“最后已知” |
+| `mode` | `indeterminate`：不定长（检查、排队、整理结果、还没有第一份快照、停下时没有快照）；`clone_years`：按已结算的分身年度数；`finished`：结果真的可以读 |
+| `settled_clone_years` / `planned_clone_years` | 只在 `clone_years` 与有计数的 `finished` 里给：已结算 = E1 运行归档里已经执行并结算的年度行动条数（每个分身每年最多一条，进行中的分身也算到它过完的那一年）；计划 = E1 冻结的名单 × 年数 |
+
+这两个数也写进进度快照（`RunProgress.clone_years_settled` / `clone_years_planned`，worker 从 E1 的归档与名单生成；离线桥接与旧快照没有这两项）。旧版本写下的快照没有计数时：每个分身都已经有结局记录才按记录相加（那时是准确的），否则不给计数（模拟中显示“这份进度快照没有记下已结算的分身年度数”），不拿只数了已结束分身的下界冒充进度。
+
+### 18.2 怎么画（规则在 E3，页面照画）
+
+* 检查、排队、整理结果：不定长的进度条；模拟中：`settled / planned`（例如“已结算 18/72 个分身年度”）。**不按调用次数、不按时间增长。**
+* 提前出局、停下或中断之后没有经历的年份不算进已结算：一个分身第 1 年出局，它只算 1；所以完成时已结算可以小于计划。
+* `finished` 只在结果可以读时出现；完成不等于所有分身都是 C（C / E / M 照结果分别呈现）。阶段是 `finished` 但结果读不到时给
+  `needs_attention`（“模拟结束了，但结果暂时读不到”），不说完成。
+* `needs_attention` 包括：检查没通过、开始授权作废、旧流程里检查通过等用户确认、停下了（可以恢复 / 等维护者）。原因与下一步看意图的
+  `explanation` 与 `allowed_actions`，不要用永久转圈遮住。
+* 只显示当前这一句，不累积执行历史；不含内部状态、路径、凭证或评分参数。
+
+### 18.3 每种情形的一句话（中 / 英）
+
+| `phase` | `mode` | 情形 | 中文 | English |
+|---|---|---|---|---|
+| `checking` | `indeterminate` | 检查中（旧流程，没有开始授权） | 正在后台检查这次模拟能不能开始（不使用次数） | Checking in the background whether this simulation can start (this does not use a run) |
+| `checking` | `indeterminate` | 检查中，带开始授权 | 正在后台检查；通过后按你的确认自动开始 | Checking in the background; once it passes, it starts automatically as you confirmed |
+| `checking` | `indeterminate` | 检查通过，正按授权开始 | 检查通过，正在按你的确认开始 | The check passed; starting as you confirmed |
+| `queued` | `indeterminate` | 已确认，排队等首次启动 | 已确认开始，排队等待启动 | Start confirmed; queued to start |
+| `queued` | `indeterminate` | 已经开始过，排队等恢复 | 已经开始过，排队等待恢复 | Already started before; queued to resume |
+| `simulating` | `indeterminate` | 刚开始，还没有第一份进度快照 | 模拟刚开始，第一份进度还没有写下 | The simulation has just started; the first progress record has not been written yet |
+| `simulating` | `clone_years` | 模拟中（按已结算的分身年度数） | 已结算 {settled}/{planned} 个分身年度 | {settled}/{planned} clone-years settled |
+| `simulating` | `indeterminate` | 模拟中，旧版本的快照没有记下已结算的年度数 | 模拟进行中（这份进度快照没有记下已结算的分身年度数） | The simulation is running (this progress record does not include the number of settled clone-years) |
+| `assembling_result` | `indeterminate` | E1 已结束，正在整理结果 | 模拟已经结束，正在整理结果 | The simulation has ended; assembling the results |
+| `finished` | `finished` | 结果可以读（有进度快照） | 结果可以查看：已结算 {settled}/{planned} 个分身年度（完成、出局与模拟缺失见结果） | Results are ready: {settled}/{planned} clone-years settled (completions, exits and simulation gaps are in the results) |
+| `finished` | `finished` | 结果可以读（没有进度快照） | 结果可以查看（完成、出局与模拟缺失见结果） | Results are ready (completions, exits and simulation gaps are in the results) |
+| `needs_attention` | `indeterminate` | 旧流程：检查通过，等用户确认 | 检查通过，等你确认开始 | The check passed; waiting for you to confirm the start |
+| `needs_attention` | `indeterminate` | 检查通过，等维护者开启付费调用 | 检查通过，等维护者开启付费模型调用 | The check passed; waiting for the maintainer to enable paid model calls |
+| `needs_attention` | `indeterminate` | 开始授权作废 | 开始授权已经作废：需要你看过说明后重新确认 | The start authorization is no longer valid: read the explanation and confirm again |
+| `needs_attention` | `indeterminate` | 开始之前停下（检查没通过等） | 开始之前停下了：原因与下一步见说明 | Stopped before starting: see the explanation for the reason and what to do next |
+| `needs_attention` | `clone_years` | 停下了，可以恢复 | 停下了：已结算 {settled}/{planned} 个分身年度，可以恢复 | Stopped: {settled}/{planned} clone-years settled; you can resume |
+| `needs_attention` | `clone_years` | 停下了，等维护者 | 停下了：已结算 {settled}/{planned} 个分身年度，等维护者处理 | Stopped: {settled}/{planned} clone-years settled; waiting for the maintainer |
+| `needs_attention` | `indeterminate` | 停下了，没有进度快照 | 停下了，需要处理 | Stopped; needs attention |
+| `needs_attention` | `indeterminate` | 流程结束但结果读不到 | 模拟结束了，但结果暂时读不到 | The simulation has ended, but the results cannot be read right now |
+| `cancelled` | `indeterminate` | 开始之前取消 | 开始之前已取消 | Cancelled before starting |
+| `deleted` | `indeterminate` | 删除中 | 正在删除 | Deleting |
+| `deleted` | `indeterminate` | 已删除 | 已删除 | Deleted |
+| `expired` | `indeterminate` | 已过期 | 已过期 | Expired |
+
+（`{settled}` / `{planned}` 是已结算 / 计划的分身年度数，例如“已结算 18/72 个分身年度”。）
+
+### 18.4 样例
+
+| 情形 | 样例 |
+|---|---|
+| 模拟中（`simulating`、按已结算的分身年度数，测试传输）/ 英文 | 177 / 178 |
+| 停下了、可以恢复（`needs_attention`、`clone_years`）的英文 | 179 |
+| 结束但不是全部完成（`finished`，已结算小于计划，两个分身都是 M）/ 英文 | 180 / 181 |
+| 开始之前取消（`cancelled`）/ 英文 | 182 / 183 |
+| 其他阶段：检查中 70 / 166（英文 176）、排队 73、完成 78 / 167、检查没通过 81 / 175、开始授权作废 173 / 174、删除 87、过期 90（英文 119）；每一份运行意图样例都带 `progress_summary` | — |
+
+### 18.5 自测
+
+离线自测（干净工作树：`ebf5549` 加本提交的文件）：全量离线测试 1423 条通过、0 失败（`uv run pytest -n 8`，17 分 05 秒）；ruff 通过；
+`check-schema`（36 份 schema、180 份样例）、`check-openapi`、显示核对都通过。新的 `tests/product_service/test_progress_summary.py`
+（每种阶段的一句话与进度条、已结算按 E1 归档计数、旧快照不猜、读取与英文显示不写库、停下时只数已结算的年份）。两次旧版升级探针与
+一座城的正式入口闭环见本机证据 `runs/e3-v35-experience-20261025/`。待独立复核。
+
+## 19. 给 E5 的交接清单（2026-10-25 这一轮：独立评分、一次开始、进度摘要）
+
+状态：**实现及离线自测完成，待独立复核**；没有部署、没有推送、没有调用真实 / 订阅 / 在线翻译模型。
+
+| 事项 | 在哪 |
+|---|---|
+| 提交 | `f7b64e5` 独立评分（第 16 节）、`ebf5549` 一次开始（第 17 节）、第三个提交（本节所在的提交）进度摘要（第 18 节）；基线 `6c01e79` |
+| 公共结构与 OpenAPI | `contracts/product/v3/`：36 份 schema（新增 `RunStartPreviewRequest`、`RunStartPreview`），`openapi.json` 是 `e3c-service-api-v1.4`；以这里为准，不要按建议的路由名或字段名自己实现 |
+| 原始评分 ↔ 权重样例 | 155 → 143 → 161 → 160（80/40/40/20/10/10 → 40/20/20/10/5/5）、142（同等重视）、144（明确 0）、145（全零）、146（超过 100）、156（同比例）、147 → 158（物质父项 0 → 恢复）、157（旧百分比停用） |
+| 预览与一次开始的请求 | 162（预览请求）、163 / 164（预览）、165（带 `start` 的创建请求）；回复 166 / 167 / 168 |
+| 授权作废与错误 | 169–175（同键冲突、同意身份对不上、知悉项不全、带授权又确认、报价变了、付费调用被关、检查没通过）、159（迁移没有选择） |
+| 进度摘要的中英样例 | 第 18.3 节的句子表（每一种情形，中英都来自冻结的显示资源）与第 18.4 节的意图样例 |
+| 迁移说明 | 旧草稿（v3.3、v3.4 的百分比分配）迁移时要用户选 `rerate` 或 `equal_weight`（第 16.5 节）；已确认的旧画像、已开始的运行、历史结果不改；服务库 v3 → v4 打开时就地升级（只加一列），旧意图照旧流程 |
+
+**E5 不要做的**：不要自己换算权重或把旧百分比改读成评分；不要在页面上轮询到“检查通过”再发 `submit` 或恢复；找回一次开始时同一次操作
+一直用同一个键（只有授权作废之后用户重新确认，即 `start_again`，才用新键）；不要重算或重签旧对象的身份、不要把旧画像保存成新版本、不要拿当前译文补历史对象。
+
+**历史地图的版本（澄清第 12.5、13.2 节的写法）**：地理清单 `GET /api/v1/display/geography` **省略版本时读到的是当前登记的版本**，不是
+历史版本。所以历史结果（或运行意图）的显示信封 `resource_version` 为空时，**不要请求地理清单**——既不要不带版本请求，也不要拿当前版本
+冒充；页面按“没有绑定的历史版本”显示，不画城市点、不用当前城市锚点补，底图、列表、表格与能读的事实照常显示。只有当前输入（选城）
+才省略版本读当前清单。明确请求的版本不存在仍是 404，不回退。
+
+**E5 的夹具**：`web/tests/fixtures/drafts/` 现在是 v3.4 的百分比草稿，E3 照原样审阅（旧含义 + 阻断，见第 16.6 节）；按 v3.5 重新生成
+之后告诉 E3，`tests/product/test_web_drafts.py` 里对应的几条要换成独立评分的例子。`tests/fixtures/v33_objects/`、`tests/fixtures/v34_objects/`
+是旧版真实写下的对象，可以用来做迁移与旧对象读取的浏览器联验。
+
+**只是工程验证、还没有证明的**：全部是离线 mock 与测试传输（离线替身）；没有真实用户、没有真实模型、没有可用性测试；进度条只按 E1
+已结算的年份前进，没有在真实模型的耗时下看过等待体验；联网部署、并发多用户与长时间运行没有测。

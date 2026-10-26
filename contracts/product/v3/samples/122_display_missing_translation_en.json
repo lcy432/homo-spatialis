@@ -10,7 +10,7 @@
     "key": "pack.note.synthetic",
     "missing_reason": null,
     "pointer": "/meta/data_pack/note",
-    "resource_version": "e3-display-res-v1-e47bcbdb940aed38",
+    "resource_version": "e3-display-res-v1-819bcf9ccb96d70f",
     "source_locale": "zh",
     "status": "provided",
     "text": "Synthetic data pack: every value is a hand-made model setting or test data, not real city data"
@@ -19,7 +19,7 @@
     "key": "stage.awaiting_confirmation",
     "missing_reason": "translation_missing",
     "pointer": "/stage_zh",
-    "resource_version": "e3-display-res-v1-e47bcbdb940aed38",
+    "resource_version": "e3-display-res-v1-819bcf9ccb96d70f",
     "source_locale": "zh",
     "status": "missing",
     "text": null
@@ -842,6 +842,15 @@
     "source_locale": "zh",
     "status": "missing",
     "text": null
+   },
+   {
+    "key": "progress_summary.awaiting_confirmation",
+    "missing_reason": null,
+    "pointer": "/progress_summary/sentence_zh",
+    "resource_version": "e3-display-res-v1-819bcf9ccb96d70f",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "The check passed; waiting for you to confirm the start"
    }
   ],
   "id": "intent-0000000000000074",
@@ -1623,6 +1632,14 @@
     "years": 3
    },
    "progress": null,
+   "progress_summary": {
+    "mode": "indeterminate",
+    "phase": "needs_attention",
+    "planned_clone_years": null,
+    "sentence_zh": "检查通过，等你确认开始",
+    "settled_clone_years": null,
+    "updated_at": "2026-12-24T09:01:02Z"
+   },
    "quota": {
     "available": 3,
     "reserved": 0,
@@ -1653,7 +1670,7 @@
    "updated_at": "2026-12-24T09:01:02Z",
    "waiting_for": "user"
   },
-  "source_view_fingerprint": "252122cab5491328f69e4359e4a2b19ff720289685a823bde0c0ce9411a1573c",
+  "source_view_fingerprint": "436ff810cd730e7a79ba65229cd7f7f2acfd482507beedd792592a5fcbf812b8",
   "status": "partial"
  },
  "sample": {

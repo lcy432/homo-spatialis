@@ -10,7 +10,7 @@
     "key": "pack.note.synthetic",
     "missing_reason": null,
     "pointer": "/meta/data_pack/note",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Synthetic data pack: every value is a hand-made model setting or test data, not real city data"
@@ -19,7 +19,16 @@
     "key": "stage.expired",
     "missing_reason": null,
     "pointer": "/stage_zh",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Expired"
+   },
+   {
+    "key": "progress_summary.expired",
+    "missing_reason": null,
+    "pointer": "/progress_summary/sentence_zh",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Expired"
@@ -66,6 +75,14 @@
    },
    "preflight": null,
    "progress": null,
+   "progress_summary": {
+    "mode": "indeterminate",
+    "phase": "expired",
+    "planned_clone_years": null,
+    "sentence_zh": "已过期",
+    "settled_clone_years": null,
+    "updated_at": "2026-11-23T09:01:02Z"
+   },
    "quota": {
     "available": 2,
     "reserved": 0,
@@ -82,7 +99,7 @@
    "updated_at": "2026-11-23T09:01:02Z",
    "waiting_for": "none"
   },
-  "source_view_fingerprint": "f4698e5c14b91bde5586c7033d81911e46f3d60c9723dcfbdcdeadd8ab0e5e22",
+  "source_view_fingerprint": "dbe03d7cf055e7c9a14c35b2d37124b754398b61920d7812851daccd31d0b0ee",
   "status": "complete"
  },
  "sample": {

@@ -5,7 +5,7 @@
   "code": "preflight_stale",
   "display": {
    "display_schema_version": "e3-display-v2",
-   "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+   "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
    "source_view_fingerprint": "84dc36b65b4bbd9a44652a77e249ee32bcac2d0b26578f3d525df8ef07d94cf3",
    "translations": {
     "en": {
@@ -14,7 +14,7 @@
        "key": "error.preflight_stale.message",
        "missing_reason": null,
        "pointer": "/message_zh",
-       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
        "source_locale": "zh",
        "status": "provided",
        "text": "What you confirmed is not the current pre-run summary (the conditions or data changed, or the summary was updated)"
@@ -23,7 +23,7 @@
        "key": "error.preflight_stale.impact",
        "missing_reason": null,
        "pointer": "/impact_zh",
-       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
        "source_locale": "zh",
        "status": "provided",
        "text": "No simulation was started and no run was used"
@@ -32,7 +32,7 @@
        "key": "error.preflight_stale.next",
        "missing_reason": null,
        "pointer": "/next_action_zh",
-       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
        "source_locale": "zh",
        "status": "provided",
        "text": "Read the latest pre-run summary, then confirm again"
@@ -46,7 +46,7 @@
        "key": "error.preflight_stale.message",
        "missing_reason": null,
        "pointer": "/message_zh",
-       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
        "source_locale": "zh",
        "status": "provided",
        "text": "你确认的不是当前这一份运行前说明（条件或资料变了，或说明已经更新）"
@@ -55,7 +55,7 @@
        "key": "error.preflight_stale.impact",
        "missing_reason": null,
        "pointer": "/impact_zh",
-       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
        "source_locale": "zh",
        "status": "provided",
        "text": "没有开始模拟，也没有使用次数"
@@ -64,7 +64,7 @@
        "key": "error.preflight_stale.next",
        "missing_reason": null,
        "pointer": "/next_action_zh",
-       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
        "source_locale": "zh",
        "status": "provided",
        "text": "查看最新的运行前说明后再确认"

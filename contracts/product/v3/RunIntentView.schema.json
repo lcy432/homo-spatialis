@@ -1174,6 +1174,81 @@
    "title": "ProductPreflight",
    "type": "object"
   },
+  "ProgressSummary": {
+   "additionalProperties": false,
+   "description": "等待页的一句当前状态与进度条（DECISIONS/0049）：读取运行意图时按服务库的阶段与 E1 写下的权威进度快照当场生成（只读，没有\n``run_id`` 的检查阶段也有）。\n\n* ``sentence_zh`` 是一句当前状态，新的一句覆盖上一句（不是执行历史）；``updated_at`` 是这句所依据的记录的时间（进度快照或意图\n  本身的更新时间），断线时页面照它显示“最后已知”。\n* ``mode``：``indeterminate`` 不定长——检查、排队、整理结果、还没有第一份进度快照，以及停下时没有快照；``clone_years`` 按已结算的\n  分身年度数：``settled_clone_years`` 是 E1 进度快照里各分身已结算年数之和（出局或中断之后没有经历的年份不算），\n  ``planned_clone_years`` 是这次的名单（城市 × 每城分身数，E1 的名单按它冻结）× 年数；``finished`` 只在结果真的可以读时，完成不等于\n  所有分身都是 C。不按调用次数、不按时间增长；不含内部状态、路径、凭证或评分参数。",
+   "properties": {
+    "mode": {
+     "enum": [
+      "indeterminate",
+      "clone_years",
+      "finished"
+     ],
+     "title": "Mode",
+     "type": "string"
+    },
+    "phase": {
+     "enum": [
+      "checking",
+      "queued",
+      "simulating",
+      "assembling_result",
+      "finished",
+      "needs_attention",
+      "cancelled",
+      "deleted",
+      "expired"
+     ],
+     "title": "Phase",
+     "type": "string"
+    },
+    "planned_clone_years": {
+     "anyOf": [
+      {
+       "minimum": 1,
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Planned Clone Years"
+    },
+    "sentence_zh": {
+     "maxLength": 200,
+     "minLength": 1,
+     "title": "Sentence Zh",
+     "type": "string"
+    },
+    "settled_clone_years": {
+     "anyOf": [
+      {
+       "minimum": 0,
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Settled Clone Years"
+    },
+    "updated_at": {
+     "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+     "title": "Updated At",
+     "type": "string"
+    }
+   },
+   "required": [
+    "phase",
+    "sentence_zh",
+    "updated_at",
+    "mode"
+   ],
+   "title": "ProgressSummary",
+   "type": "object"
+  },
   "PublicExplanation": {
    "additionalProperties": false,
    "description": "给用户看的状态说明（E3-A 收尾 F5）：只由结构化类别生成——类别代码、中文原因、影响与下一步，加一个不含内部内容的审计编号。\n\n不透传异常原文、内部路径或参数；完整原文留在运行归档或内部诊断里，``audit_ref`` 指向它（运行编号、分身与记录文件）。",
@@ -1327,6 +1402,32 @@
    "additionalProperties": false,
    "description": "一次运行的进度（断线后用运行 ID 查询；不重发付费规划）。请求成功、计划可执行、生活完成、评分完整分别记录。",
    "properties": {
+    "clone_years_planned": {
+     "anyOf": [
+      {
+       "minimum": 1,
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Clone Years Planned"
+    },
+    "clone_years_settled": {
+     "anyOf": [
+      {
+       "minimum": 0,
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Clone Years Settled"
+    },
     "clones": {
      "default": [],
      "items": {
@@ -1966,6 +2067,9 @@
    ],
    "default": null
   },
+  "progress_summary": {
+   "$ref": "#/$defs/ProgressSummary"
+  },
   "quota": {
    "$ref": "#/$defs/QuotaSummary"
   },
@@ -2071,7 +2175,8 @@
   "updated_at",
   "expiry_basis",
   "deletion",
-  "quota"
+  "quota",
+  "progress_summary"
  ],
  "title": "RunIntentView",
  "type": "object"

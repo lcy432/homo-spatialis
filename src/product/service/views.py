@@ -18,6 +18,7 @@ from common.product_contracts import (
     MoneyRange,
     ProductMeta,
     ProductPreflight,
+    ProgressSummary,
     PublicExplanation,
     QuotaSummary,
     RunIntentView,
@@ -313,6 +314,184 @@ def confirmation_source(row: Mapping[str, Any]) -> str | None:
     return "start_authorization" if auth is not None and auth["state"] == "used" else "user_confirm"
 
 
+def _summary(
+    phase: str,
+    sentence: str,
+    at: str,
+    *,
+    mode: str = "indeterminate",
+    counts: tuple[int, int] | None = None,
+) -> ProgressSummary:
+    return ProgressSummary(
+        phase=phase,  # type: ignore[arg-type]
+        sentence_zh=sentence,
+        updated_at=at,
+        mode=mode,  # type: ignore[arg-type]
+        settled_clone_years=None if counts is None else counts[0],
+        planned_clone_years=None if counts is None else counts[1],
+    )
+
+
+def _clone_years(row: Mapping[str, Any]) -> tuple[tuple[int, int] | None, str | None, str | None]:
+    """（已结算 / 计划的分身年度数，快照的时间，E1 的批次状态）。快照记下了 E1 的已结算年度数与计划总数就用它们（出局或中断之后没有
+    经历的年份不算）；旧快照没有时，只有名单里每个分身都已经有结局记录才按记录相加（那时是准确的），否则不给计数——不拿只数了已结束
+    分身的下界冒充进度。没有快照就是空。"""
+    snap = _json(row["progress_body"])
+    if snap is None:
+        return None, None, None
+    when, stage = snap.get("updated_at"), snap.get("stage")
+    if snap.get("clone_years_settled") is not None and snap.get("clone_years_planned"):
+        settled, planned = int(snap["clone_years_settled"]), int(snap["clone_years_planned"])
+        return (min(settled, planned), planned), when, stage
+    if row["execution_body"] is None:
+        return None, when, stage
+    spec = ExecutionSpec.model_validate_json(row["execution_body"])
+    clones = snap.get("clones", ())
+    if len(clones) != spec.clones:
+        return None, when, stage
+    planned = spec.clones * spec.years
+    settled = sum(int(c["years_committed"]) for c in clones)
+    return (min(settled, planned), planned), when, stage
+
+
+def progress_summary(
+    row: Mapping[str, Any], *, started: bool, start_allowed: bool
+) -> ProgressSummary:
+    """等待页的一句当前状态与进度条（只读，按服务库的阶段与 E1 的进度快照当场生成；见 ``ProgressSummary``）。"""
+    stage = row["stage"]
+    at = row["updated_at"]
+    auth = start_authorization(row)
+    pending = auth is not None and auth["state"] == "pending"
+    if stage == "checking":
+        return _summary(
+            "checking",
+            t("progress_summary.checking_authorized", "正在后台检查；通过后按你的确认自动开始")
+            if pending
+            else t("progress_summary.checking", "正在后台检查这次模拟能不能开始（不使用次数）"),
+            at,
+        )
+    if stage == "awaiting_confirmation":
+        if pending:
+            return _summary(
+                "checking", t("progress_summary.starting", "检查通过，正在按你的确认开始"), at
+            )
+        if auth is not None:
+            sentence = t(
+                "progress_summary.start_void", "开始授权已经作废：需要你看过说明后重新确认"
+            )
+        elif not start_allowed:
+            sentence = t("progress_summary.paid_off", "检查通过，等维护者开启付费模型调用")
+        else:
+            sentence = t("progress_summary.awaiting_confirmation", "检查通过，等你确认开始")
+        return _summary("needs_attention", sentence, at)
+    if stage == "blocked":
+        return _summary(
+            "needs_attention",
+            t("progress_summary.blocked", "开始之前停下了：原因与下一步见说明"),
+            at,
+        )
+    if stage == "queued":
+        return _summary(
+            "queued",
+            t("progress_summary.queued_resume", "已经开始过，排队等待恢复")
+            if started
+            else t("progress_summary.queued", "已确认开始，排队等待启动"),
+            at,
+        )
+    counts, snap_at, e1_stage = _clone_years(row)
+    when = snap_at or at
+    if stage == "running":
+        if row["progress_body"] is None:
+            return _summary(
+                "simulating",
+                t("progress_summary.started", "模拟刚开始，第一份进度还没有写下"),
+                at,
+            )
+        if counts is None:  # 旧版本写下的快照：没有记下已结算的年度数，不拿下界冒充
+            return _summary(
+                "simulating",
+                t(
+                    "progress_summary.simulating_uncounted",
+                    "模拟进行中（这份进度快照没有记下已结算的分身年度数）",
+                ),
+                when,
+            )
+        if e1_stage == "completed":
+            return _summary(
+                "assembling_result",
+                t("progress_summary.assembling", "模拟已经结束，正在整理结果"),
+                when,
+            )
+        return _summary(
+            "simulating",
+            t(
+                "progress_summary.simulating",
+                "已结算 {settled}/{planned} 个分身年度",
+                settled=Num(str(counts[0])),
+                planned=Num(str(counts[1])),
+            ),
+            when,
+            mode="clone_years",
+            counts=counts,
+        )
+    if stage == "needs_attention":
+        if counts is None:
+            return _summary(
+                "needs_attention", t("progress_summary.stopped", "停下了，需要处理"), at
+            )
+        return _summary(
+            "needs_attention",
+            t(
+                "progress_summary.stopped_resumable",
+                "停下了：已结算 {settled}/{planned} 个分身年度，可以恢复",
+                settled=Num(str(counts[0])),
+                planned=Num(str(counts[1])),
+            )
+            if row["resume_allowed"]
+            else t(
+                "progress_summary.stopped_maintainer",
+                "停下了：已结算 {settled}/{planned} 个分身年度，等维护者处理",
+                settled=Num(str(counts[0])),
+                planned=Num(str(counts[1])),
+            ),
+            when,
+            mode="clone_years",
+            counts=counts,
+        )
+    if stage == "finished":
+        if row["result_body"] is None:  # 结果读不到就不说完成
+            return _summary(
+                "needs_attention",
+                t("progress_summary.result_unreadable", "模拟结束了，但结果暂时读不到"),
+                at,
+            )
+        return _summary(
+            "finished",
+            t(
+                "progress_summary.finished_counted",
+                "结果可以查看：已结算 {settled}/{planned} 个分身年度（完成、出局与模拟缺失见结果）",
+                settled=Num(str(counts[0])),
+                planned=Num(str(counts[1])),
+            )
+            if counts is not None
+            else t("progress_summary.finished", "结果可以查看（完成、出局与模拟缺失见结果）"),
+            when if counts is not None else at,
+            mode="finished",
+            counts=counts,
+        )
+    if stage == "cancelled":
+        return _summary("cancelled", t("progress_summary.cancelled", "开始之前已取消"), at)
+    if stage == "expired":
+        return _summary("expired", t("progress_summary.expired", "已过期"), at)
+    return _summary(
+        "deleted",
+        t("progress_summary.deleting", "正在删除")
+        if stage == "deleting"
+        else t("progress_summary.deleted", "已删除"),
+        at,
+    )
+
+
 def intent_view(
     meta: ProductMeta,
     row: Mapping[str, Any],
@@ -396,6 +575,7 @@ def intent_view(
         settings=None if gone else settings_view(row),
         start=None if gone else start_view(row),
         confirmation_source=confirmation_source(row),  # type: ignore[arg-type]
+        progress_summary=progress_summary(row, started=started, start_allowed=start_allowed),
     )
 
 

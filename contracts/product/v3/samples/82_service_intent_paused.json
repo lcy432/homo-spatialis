@@ -787,6 +787,8 @@
    "years": 3
   },
   "progress": {
+   "clone_years_planned": 6,
+   "clone_years_settled": 2,
    "clones": [],
    "cost": {
     "call_limit": 18,
@@ -822,6 +824,14 @@
    "run_id": "run-e3a-f6f4a03b95a9f390",
    "stage": "halted",
    "stage_zh": "批次停下（服务、预算或请求检查）",
+   "updated_at": "2026-10-24T09:00:00Z"
+  },
+  "progress_summary": {
+   "mode": "clone_years",
+   "phase": "needs_attention",
+   "planned_clone_years": 6,
+   "sentence_zh": "停下了：已结算 2/6 个分身年度，可以恢复",
+   "settled_clone_years": 2,
    "updated_at": "2026-10-24T09:00:00Z"
   },
   "quota": {

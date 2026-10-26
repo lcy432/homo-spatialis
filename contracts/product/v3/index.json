@@ -24,7 +24,7 @@
   },
   "DisplayEnvelope": {
    "file": "DisplayEnvelope.schema.json",
-   "sha256": "6f9cdfeef520411b0088fffcbf9f107435188d01f40ace9d693cfa6a0523b071"
+   "sha256": "f3cac8d27225349667e17884489ad039bd588bf4d3ce032fa6c192360575c4dc"
   },
   "DraftMigrateRequest": {
    "file": "DraftMigrateRequest.schema.json",
@@ -92,7 +92,7 @@
   },
   "RunIntentView": {
    "file": "RunIntentView.schema.json",
-   "sha256": "0193e9f338e576c2fee515f535f512db7d99fe2ece1bab313d6de2ac4758b1be"
+   "sha256": "3b3cf6af6030d088b555f7c4597d4afb2ec6b5e48f6e63f12ea5fddd851effa5"
   },
   "RunList": {
    "file": "RunList.schema.json",
@@ -100,7 +100,7 @@
   },
   "RunProgress": {
    "file": "RunProgress.schema.json",
-   "sha256": "9fa28191db7fde76ea95538b264c83b68708254cd85c0df862884f4207a28a42"
+   "sha256": "623e9eae85a54874d976cc53fe80b7bc124a71cdcec6abbb7dfdf997c28e359b"
   },
   "RunReceipt": {
    "file": "RunReceipt.schema.json",
@@ -120,7 +120,7 @@
   },
   "RunSubmitReply": {
    "file": "RunSubmitReply.schema.json",
-   "sha256": "50b428976627779da7ba303e5ef3c582fcde68be5a51a89f2d6e835984fddfc7"
+   "sha256": "02d38e629bae5a9311aae27e34229dcec16ad00f463048461a39c15473e30d2c"
   },
   "RunSubmitRequest": {
    "file": "RunSubmitRequest.schema.json",

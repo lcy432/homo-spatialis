@@ -42,6 +42,14 @@
   },
   "preflight": null,
   "progress": null,
+  "progress_summary": {
+   "mode": "indeterminate",
+   "phase": "checking",
+   "planned_clone_years": null,
+   "sentence_zh": "正在后台检查；通过后按你的确认自动开始",
+   "settled_clone_years": null,
+   "updated_at": "2026-12-24T09:01:02Z"
+  },
   "quota": {
    "available": 3,
    "reserved": 0,

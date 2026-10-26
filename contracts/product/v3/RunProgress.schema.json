@@ -397,6 +397,32 @@
  "additionalProperties": false,
  "description": "一次运行的进度（断线后用运行 ID 查询；不重发付费规划）。请求成功、计划可执行、生活完成、评分完整分别记录。",
  "properties": {
+  "clone_years_planned": {
+   "anyOf": [
+    {
+     "minimum": 1,
+     "type": "integer"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Clone Years Planned"
+  },
+  "clone_years_settled": {
+   "anyOf": [
+    {
+     "minimum": 0,
+     "type": "integer"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Clone Years Settled"
+  },
   "clones": {
    "default": [],
    "items": {

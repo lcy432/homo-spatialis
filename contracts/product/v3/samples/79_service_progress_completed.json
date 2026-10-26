@@ -2,6 +2,8 @@
  "description_zh": "运行结束后的进度快照（worker 写的白名单快照；查询只读它，不恢复、不调用规划器）",
  "message": "RunProgress",
  "payload": {
+  "clone_years_planned": 6,
+  "clone_years_settled": 6,
   "clones": [
    {
     "city_ref": "US:SYNTH2026:K51",

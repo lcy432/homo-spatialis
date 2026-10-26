@@ -5,7 +5,7 @@
   "code": "cancel_not_allowed",
   "display": {
    "display_schema_version": "e3-display-v2",
-   "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+   "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
    "source_view_fingerprint": "62b4d7c99a22c037c7cc01c5fa429b355b6d055732dbcef1d9d7f7b38278c425",
    "translations": {
     "en": {
@@ -14,7 +14,7 @@
        "key": "error.cancel_not_allowed.message",
        "missing_reason": null,
        "pointer": "/message_zh",
-       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
        "source_locale": "zh",
        "status": "provided",
        "text": "This run has already started, so it cannot be withdrawn with “cancel before start”"
@@ -23,7 +23,7 @@
        "key": "error.cancel_not_allowed.impact",
        "missing_reason": null,
        "pointer": "/impact_zh",
-       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
        "source_locale": "zh",
        "status": "provided",
        "text": "Nothing was cancelled; the 1 run already used is not refunded, and existing progress and results stay as they are"
@@ -32,7 +32,7 @@
        "key": "error.cancel_not_allowed.next",
        "missing_reason": null,
        "pointer": "/next_action_zh",
-       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
        "source_locale": "zh",
        "status": "provided",
        "text": "You can let it continue, or delete this run using the action on the page"
@@ -46,7 +46,7 @@
        "key": "error.cancel_not_allowed.message",
        "missing_reason": null,
        "pointer": "/message_zh",
-       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
        "source_locale": "zh",
        "status": "provided",
        "text": "这次运行已经开始过，不能按“开始前取消”撤回"
@@ -55,7 +55,7 @@
        "key": "error.cancel_not_allowed.impact",
        "missing_reason": null,
        "pointer": "/impact_zh",
-       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
        "source_locale": "zh",
        "status": "provided",
        "text": "没有取消；已经用掉的 1 次机会不退，已有的进度与结果保持不变"
@@ -64,7 +64,7 @@
        "key": "error.cancel_not_allowed.next",
        "missing_reason": null,
        "pointer": "/next_action_zh",
-       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
        "source_locale": "zh",
        "status": "provided",
        "text": "可以等它接着运行，或者按页面上的动作删除这次运行"

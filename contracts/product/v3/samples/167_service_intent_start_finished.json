@@ -782,6 +782,8 @@
    "years": 3
   },
   "progress": {
+   "clone_years_planned": 12,
+   "clone_years_settled": 12,
    "clones": [
     {
      "city_ref": "US:SYNTH2026:K51",
@@ -840,6 +842,14 @@
    "run_id": "run-e3a-de4e48185f035b2f",
    "stage": "completed",
    "stage_zh": "已完成",
+   "updated_at": "2026-12-24T09:01:02Z"
+  },
+  "progress_summary": {
+   "mode": "finished",
+   "phase": "finished",
+   "planned_clone_years": 12,
+   "sentence_zh": "结果可以查看：已结算 12/12 个分身年度（完成、出局与模拟缺失见结果）",
+   "settled_clone_years": 12,
    "updated_at": "2026-12-24T09:01:02Z"
   },
   "quota": {

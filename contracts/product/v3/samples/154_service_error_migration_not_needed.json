@@ -5,7 +5,7 @@
   "code": "migration_not_needed",
   "display": {
    "display_schema_version": "e3-display-v2",
-   "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
+   "resource_version": "e3-display-res-v1-5d90b8cacc0dd94b",
    "source_view_fingerprint": "e622aedfaadeeb415e79610ec5296d8b14778bc70e2e8a351935f7c92b9cc86e",
    "translations": {
     "en": {
@@ -14,7 +14,7 @@
        "key": "error.migration_not_needed.message",
        "missing_reason": null,
        "pointer": "/message_zh",
-       "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
+       "resource_version": "e3-display-res-v1-5d90b8cacc0dd94b",
        "source_locale": "zh",
        "status": "provided",
        "text": "This draft already uses the current questionnaire version; there is nothing to migrate"
@@ -23,7 +23,7 @@
        "key": "error.migration_not_needed.impact",
        "missing_reason": null,
        "pointer": "/impact_zh",
-       "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
+       "resource_version": "e3-display-res-v1-5d90b8cacc0dd94b",
        "source_locale": "zh",
        "status": "provided",
        "text": "The draft was not changed"
@@ -32,7 +32,7 @@
        "key": "error.migration_not_needed.next",
        "missing_reason": null,
        "pointer": "/next_action_zh",
-       "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
+       "resource_version": "e3-display-res-v1-5d90b8cacc0dd94b",
        "source_locale": "zh",
        "status": "provided",
        "text": "Review this draft directly"
@@ -46,7 +46,7 @@
        "key": "error.migration_not_needed.message",
        "missing_reason": null,
        "pointer": "/message_zh",
-       "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
+       "resource_version": "e3-display-res-v1-5d90b8cacc0dd94b",
        "source_locale": "zh",
        "status": "provided",
        "text": "这份草稿已经是当前的问卷版本，没有要迁移的内容"
@@ -55,7 +55,7 @@
        "key": "error.migration_not_needed.impact",
        "missing_reason": null,
        "pointer": "/impact_zh",
-       "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
+       "resource_version": "e3-display-res-v1-5d90b8cacc0dd94b",
        "source_locale": "zh",
        "status": "provided",
        "text": "草稿没有改动"
@@ -64,7 +64,7 @@
        "key": "error.migration_not_needed.next",
        "missing_reason": null,
        "pointer": "/next_action_zh",
-       "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
+       "resource_version": "e3-display-res-v1-5d90b8cacc0dd94b",
        "source_locale": "zh",
        "status": "provided",
        "text": "直接审阅这份草稿"

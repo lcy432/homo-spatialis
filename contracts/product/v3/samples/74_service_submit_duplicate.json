@@ -782,6 +782,14 @@
     "years": 3
    },
    "progress": null,
+   "progress_summary": {
+    "mode": "indeterminate",
+    "phase": "queued",
+    "planned_clone_years": null,
+    "sentence_zh": "已确认开始，排队等待启动",
+    "settled_clone_years": null,
+    "updated_at": "2026-10-24T09:00:00Z"
+   },
    "quota": {
     "available": 2,
     "reserved": 1,

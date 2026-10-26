@@ -138,6 +138,14 @@ def test_public_samples_validate_and_cover_the_required_cases():
         "174_service_intent_start_void_paid_off",
         "175_service_intent_start_blocked",
         "176_display_intent_start_checking_en",
+        # 进度摘要（DECISIONS/0049）：模拟中、停下、结束但不是全部完成、取消，各带英文显示
+        "177_service_intent_progress_simulating",
+        "178_display_intent_progress_simulating_en",
+        "179_display_intent_progress_stopped_en",
+        "180_service_intent_progress_finished_partial",
+        "181_display_intent_progress_finished_partial_en",
+        "182_service_intent_progress_cancelled",
+        "183_display_intent_progress_cancelled_en",
     ):
         assert required in names, f"缺少公共样例 {required}"
     for p in samples:

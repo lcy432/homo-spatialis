@@ -780,6 +780,8 @@
    "years": 3
   },
   "progress": {
+   "clone_years_planned": 6,
+   "clone_years_settled": 3,
    "clones": [
     {
      "city_ref": "US:SYNTH2026:K51",
@@ -826,6 +828,14 @@
    "run_id": "run-e3a-d8e020392ab5cd54",
    "stage": "running",
    "stage_zh": "运行中",
+   "updated_at": "2026-10-24T09:00:00Z"
+  },
+  "progress_summary": {
+   "mode": "clone_years",
+   "phase": "simulating",
+   "planned_clone_years": 6,
+   "sentence_zh": "已结算 3/6 个分身年度",
+   "settled_clone_years": 3,
    "updated_at": "2026-10-24T09:00:00Z"
   },
   "quota": {

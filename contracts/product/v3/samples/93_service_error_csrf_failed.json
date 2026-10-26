@@ -5,7 +5,7 @@
   "code": "csrf_failed",
   "display": {
    "display_schema_version": "e3-display-v2",
-   "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+   "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
    "source_view_fingerprint": "56f42d4463a838eb01be5a1e106ff6cee8f0b90d860c7d14853174623101cced",
    "translations": {
     "en": {
@@ -14,7 +14,7 @@
        "key": "error.csrf_failed.message",
        "missing_reason": null,
        "pointer": "/message_zh",
-       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
        "source_locale": "zh",
        "status": "provided",
        "text": "The request is missing the page check code, or it is wrong"
@@ -23,7 +23,7 @@
        "key": "error.csrf_failed.impact",
        "missing_reason": null,
        "pointer": "/impact_zh",
-       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
        "source_locale": "zh",
        "status": "provided",
        "text": "This change was not made"
@@ -32,7 +32,7 @@
        "key": "error.csrf_failed.next",
        "missing_reason": null,
        "pointer": "/next_action_zh",
-       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
        "source_locale": "zh",
        "status": "provided",
        "text": "Refresh the page and try again"
@@ -46,7 +46,7 @@
        "key": "error.csrf_failed.message",
        "missing_reason": null,
        "pointer": "/message_zh",
-       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
        "source_locale": "zh",
        "status": "provided",
        "text": "请求缺少或带错了页面校验码"
@@ -55,7 +55,7 @@
        "key": "error.csrf_failed.impact",
        "missing_reason": null,
        "pointer": "/impact_zh",
-       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
        "source_locale": "zh",
        "status": "provided",
        "text": "这次修改没有被执行"
@@ -64,7 +64,7 @@
        "key": "error.csrf_failed.next",
        "missing_reason": null,
        "pointer": "/next_action_zh",
-       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
        "source_locale": "zh",
        "status": "provided",
        "text": "刷新页面后再试"

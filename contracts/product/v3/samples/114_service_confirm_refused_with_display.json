@@ -5,7 +5,7 @@
   "confirmed": null,
   "display": {
    "display_schema_version": "e3-display-v2",
-   "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+   "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
    "source_view_fingerprint": "c55d7aad599a856512141c51fc445c9c0031a8f123bd17057a2268a41ac498ef",
    "translations": {
     "en": {
@@ -14,7 +14,7 @@
        "key": "pack.note.synthetic",
        "missing_reason": null,
        "pointer": "/meta/data_pack/note",
-       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
        "source_locale": "zh",
        "status": "provided",
        "text": "Synthetic data pack: every value is a hand-made model setting or test data, not real city data"
@@ -23,7 +23,7 @@
        "key": "issue.review_stale.message",
        "missing_reason": null,
        "pointer": "/issues/0/message_zh",
-       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
        "source_locale": "zh",
        "status": "provided",
        "text": "The review you referred to is not the review of the current draft version (the draft or the data pack changed after the review)"
@@ -32,7 +32,7 @@
        "key": "issue.review_stale.impact",
        "missing_reason": null,
        "pointer": "/issues/0/impact_zh",
-       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
        "source_locale": "zh",
        "status": "provided",
        "text": "Not confirmed"
@@ -41,7 +41,7 @@
        "key": "issue.review_stale.next",
        "missing_reason": null,
        "pointer": "/issues/0/next_action_zh",
-       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
        "source_locale": "zh",
        "status": "provided",
        "text": "Review the current draft again, then confirm"
@@ -55,7 +55,7 @@
        "key": "pack.note.synthetic",
        "missing_reason": null,
        "pointer": "/meta/data_pack/note",
-       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
        "source_locale": "zh",
        "status": "provided",
        "text": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料"
@@ -64,7 +64,7 @@
        "key": "issue.review_stale.message",
        "missing_reason": null,
        "pointer": "/issues/0/message_zh",
-       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
        "source_locale": "zh",
        "status": "provided",
        "text": "确认引用的审阅不是当前这一版草稿的审阅（草稿或资料包在审阅之后变了）"
@@ -73,7 +73,7 @@
        "key": "issue.review_stale.impact",
        "missing_reason": null,
        "pointer": "/issues/0/impact_zh",
-       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
        "source_locale": "zh",
        "status": "provided",
        "text": "没有确认"
@@ -82,7 +82,7 @@
        "key": "issue.review_stale.next",
        "missing_reason": null,
        "pointer": "/issues/0/next_action_zh",
-       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
        "source_locale": "zh",
        "status": "provided",
        "text": "重新审阅当前的草稿后再确认"

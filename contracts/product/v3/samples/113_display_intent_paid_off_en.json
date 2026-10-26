@@ -10,7 +10,7 @@
     "key": "pack.note.synthetic",
     "missing_reason": null,
     "pointer": "/meta/data_pack/note",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Synthetic data pack: every value is a hand-made model setting or test data, not real city data"
@@ -19,7 +19,7 @@
     "key": "stage.awaiting_confirmation",
     "missing_reason": null,
     "pointer": "/stage_zh",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Waiting for you to confirm the start"
@@ -28,7 +28,7 @@
     "key": "pack.note.synthetic",
     "missing_reason": null,
     "pointer": "/preflight/meta/data_pack/note",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Synthetic data pack: every value is a hand-made model setting or test data, not real city data"
@@ -37,7 +37,7 @@
     "key": "entity.occupation.label:occ.office_clerk",
     "missing_reason": null,
     "pointer": "/preflight/start/occupation_label",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Office clerk"
@@ -46,7 +46,7 @@
     "key": "entity.preflight_text.label:start_time_note",
     "missing_reason": null,
     "pointer": "/preflight/start/monthly_time_note",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "About 365 hours a month can be scheduled (12 hours a day for sleep and basic rest are already set aside) — a uniform model setting in this version, not a measurement of you"
@@ -55,7 +55,7 @@
     "key": "entity.preflight_text.label:start_energy_note",
     "missing_reason": null,
     "pointer": "/preflight/start/monthly_energy_note",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Each month you can take on activities worth 250 burden points (a uniform model setting in this version); the more satisfying the previous year, the more the next year allows, up to 10% more"
@@ -64,7 +64,7 @@
     "key": "entity.capability.item.0:start_scenario",
     "missing_reason": null,
     "pointer": "/preflight/start/scenario_zh/0",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "This is a simplified scenario of moving to a candidate city and starting over: it starts in year 1, healthy, with no belongings, no courses in progress and no savings goal"
@@ -73,7 +73,7 @@
     "key": "entity.capability.item.1:start_scenario",
     "missing_reason": null,
     "pointer": "/preflight/start/scenario_zh/1",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Real old furniture, medical history and ongoing courses are not included yet; this is an assumption of the simulation, not a judgement about your real situation"
@@ -82,7 +82,7 @@
     "key": "entity.capability.item.2:start_scenario",
     "missing_reason": null,
     "pointer": "/preflight/start/scenario_zh/2",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "The same you has the same age, cash, abilities and base time and energy in every city and every clone; specific jobs in a city are matched against the local catalogue"
@@ -91,7 +91,7 @@
     "key": "entity.city.label:US:SYNTH2026:K51",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/label",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Synthetic city K51"
@@ -100,7 +100,7 @@
     "key": "entity.opportunity.label:k51.job.clerk",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/start_job_label",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Full-time clerk (synthetic office building)"
@@ -109,7 +109,7 @@
     "key": "preflight.city.executable_yes",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/executable/reasons/0",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "The standard start passed and the roster is frozen; each year's plan is still checked by the environment, so not every plan is guaranteed to be valid"
@@ -118,7 +118,7 @@
     "key": "preflight.city.scorable_yes",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/scorable/reasons/0",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "With the current input, the scoring data for positive weights is complete within the declared scope; this does not guarantee that every future month can be fully scored"
@@ -127,7 +127,7 @@
     "key": "preflight.city.feedback_on",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/feedback/reasons/0",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Next year's energy allowance is updated only when all 12 months of the previous year were fully scored"
@@ -136,7 +136,7 @@
     "key": "entity.city.label:US:SYNTH2026:K51",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/data_nature/label",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Synthetic city K51"
@@ -145,7 +145,7 @@
     "key": "datanature.summary.synthetic",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/data_nature/summary_zh",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Synthetic city K51: synthetic data pack; all 28 opportunities in the catalog are hand-made synthetic model settings or test data, not real city data"
@@ -154,7 +154,7 @@
     "key": "entity.assumption.note:k51.housing.near",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/data_nature/named_assumptions/0/note_zh",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Hand-set values, not from any real city, product, service, employer, data source or LLM"
@@ -163,7 +163,7 @@
     "key": "entity.opportunity.label:k51.housing.near",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/data_nature/named_assumptions/0/examples/0",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "One-bedroom (near work)"
@@ -172,7 +172,7 @@
     "key": "entity.opportunity.label:k51.housing.far",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/data_nature/named_assumptions/0/examples/1",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "One-bedroom (far from work)"
@@ -181,7 +181,7 @@
     "key": "entity.opportunity.label:k51.food.basic",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/data_nature/named_assumptions/0/examples/2",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Basic food plan (home-cooked)"
@@ -190,7 +190,7 @@
     "key": "entity.assumption.note:k51.durable.convenience_pack",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/data_nature/named_assumptions/1/note_zh",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "E3-A compilation: per-field sources are in the catalog compilation record; it contains synthetic settings, so the whole item is labeled synthetic by its weakest source — a synthetic lifetime setting shared by the whole group (the same device pack in both cities); a uniform effect assumption shared by the whole group: the same device pack leaves the same personal residual hours in both cities (parameter register SC-18); a hand-set synthetic price (the same as in the E1 convenience example)"
@@ -199,7 +199,7 @@
     "key": "entity.opportunity.label:k51.durable.convenience_pack",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/data_nature/named_assumptions/1/examples/0",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Convenience device pack (washer-dryer + robot vacuum)"
@@ -208,7 +208,7 @@
     "key": "entity.assumption.note:k51.service.chores",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/data_nature/named_assumptions/2/note_zh",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "E3-A compilation: per-field sources are in the catalog compilation record; it contains synthetic settings, so the whole item is labeled synthetic by its weakest source — a uniform effect assumption shared by the whole group: the same chore service leaves the same personal residual hours in both cities (parameter register SC-18); synthetic setting: for home-visit services you do not take part in the service itself (putting away and handover count as residual chores); a hand-set synthetic monthly price (the same as in the E1 convenience example)"
@@ -217,7 +217,7 @@
     "key": "entity.opportunity.label:k51.service.chores",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/data_nature/named_assumptions/2/examples/0",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Daily chores service (monthly home laundry and cleaning)"
@@ -226,7 +226,7 @@
     "key": "entity.assumption.note:k51.durable.dryer",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/data_nature/named_assumptions/3/note_zh",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "E3-A compilation: per-field sources are in the catalog compilation record; it contains synthetic settings, so the whole item is labeled synthetic by its weakest source — synthetic lifetime setting; synthetic effect setting"
@@ -235,7 +235,7 @@
     "key": "entity.opportunity.label:k51.durable.dryer",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/data_nature/named_assumptions/3/examples/0",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Clothes dryer (single item)"
@@ -244,7 +244,7 @@
     "key": "entity.common_prior.label:safety_index",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/data_nature/common_priors/0/label",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Safety conditions (synthetic index)"
@@ -253,7 +253,7 @@
     "key": "entity.common_prior.meaning:safety_index",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/data_nature/common_priors/0/meaning_zh",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "A synthetic index of the city's safety conditions, 0–10; higher is safer. Not the crime rate or statistical definition of any real city; comparable only within this set of synthetic cities"
@@ -262,7 +262,7 @@
     "key": "entity.common_prior.label:development_index",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/data_nature/common_priors/1/label",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Development opportunities (synthetic index)"
@@ -271,7 +271,7 @@
     "key": "entity.common_prior.meaning:development_index",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/data_nature/common_priors/1/meaning_zh",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "A synthetic index of the city's career and growth opportunities, 0–10; higher means the city itself offers better conditions for development (not including your own learning progress). Not real employment or education statistics"
@@ -280,7 +280,7 @@
     "key": "entity.common_prior.label:leisure_index",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/data_nature/common_priors/2/label",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Leisure conditions (synthetic index)"
@@ -289,7 +289,7 @@
     "key": "entity.common_prior.meaning:leisure_index",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/data_nature/common_priors/2/meaning_zh",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "A synthetic index of the city's leisure facilities and public space, 0–10; higher means better leisure you can enjoy without spending money (fitness, experiences and the like are arranged separately). Not real facility statistics"
@@ -298,7 +298,7 @@
     "key": "entity.common_prior.label:environment_index",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/data_nature/common_priors/3/label",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Environmental quality (synthetic index)"
@@ -307,7 +307,7 @@
     "key": "entity.common_prior.meaning:environment_index",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/data_nature/common_priors/3/meaning_zh",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "A synthetic index of the city's environmental quality (a synthetic summary of air, green space and noise), 0–10; higher is better. Not real environmental monitoring data"
@@ -316,7 +316,7 @@
     "key": "entity.assumption.note:k51.care.clinic",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/data_nature/treatment_assumptions_zh/0",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Hand-set treatment price and visit time, not from any real medical provider or price data"
@@ -325,7 +325,7 @@
     "key": "entity.opportunity.label:k51.experience.concert",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/data_nature/model_plan_activities/0",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Concert (one time)"
@@ -334,7 +334,7 @@
     "key": "entity.opportunity.label:k51.experience.guitar_practice",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/data_nature/model_plan_activities/1",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Guitar practice at home (one 2-hour session)"
@@ -343,7 +343,7 @@
     "key": "entity.opportunity.label:k51.experience.tennis_with_rental",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/data_nature/model_plan_activities/2",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Tennis court with racket rental (one session)"
@@ -352,7 +352,7 @@
     "key": "entity.opportunity.label:k51.experience.community_choir",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/data_nature/model_plan_activities/3",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Community choir rehearsal (free, one session)"
@@ -361,7 +361,7 @@
     "key": "entity.opportunity.label:k51.experience.gallery_tour",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/data_nature/model_plan_activities/4",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Art gallery tour (one time)"
@@ -370,7 +370,7 @@
     "key": "entity.opportunity.label:k51.experience.cooking_class",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/data_nature/model_plan_activities/5",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Cooking class (one session, does not replace a meal)"
@@ -379,7 +379,7 @@
     "key": "entity.commute_mode.label:walk_bike",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/data_nature/commute_modes/0/mode_zh",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "walking or cycling"
@@ -388,7 +388,7 @@
     "key": "entity.commute_mode.label:transit",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/data_nature/commute_modes/1/mode_zh",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "public transit"
@@ -397,7 +397,7 @@
     "key": "entity.commute_rule.label:US:SYNTH2026:K51.transit",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/data_nature/commute_modes/1/condition_zh",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Public transit in the synthetic city: no conditions of use, no cap"
@@ -406,7 +406,7 @@
     "key": "entity.commute_mode.label:drive",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/data_nature/commute_modes/2/mode_zh",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "driving"
@@ -415,7 +415,7 @@
     "key": "entity.tax_status.label:synthetic_test_double",
     "missing_reason": null,
     "pointer": "/preflight/cities/0/data_nature/tax/status_zh",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Synthetic test double (not real tax)"
@@ -424,7 +424,7 @@
     "key": "entity.city.label:US:SYNTH2026:M52",
     "missing_reason": null,
     "pointer": "/preflight/cities/1/label",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Synthetic city M52"
@@ -433,7 +433,7 @@
     "key": "entity.opportunity.label:m52.job.clerk",
     "missing_reason": null,
     "pointer": "/preflight/cities/1/start_job_label",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Full-time clerk (synthetic office building)"
@@ -442,7 +442,7 @@
     "key": "preflight.city.executable_yes",
     "missing_reason": null,
     "pointer": "/preflight/cities/1/executable/reasons/0",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "The standard start passed and the roster is frozen; each year's plan is still checked by the environment, so not every plan is guaranteed to be valid"
@@ -451,7 +451,7 @@
     "key": "preflight.city.scorable_yes",
     "missing_reason": null,
     "pointer": "/preflight/cities/1/scorable/reasons/0",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "With the current input, the scoring data for positive weights is complete within the declared scope; this does not guarantee that every future month can be fully scored"
@@ -460,7 +460,7 @@
     "key": "preflight.city.feedback_on",
     "missing_reason": null,
     "pointer": "/preflight/cities/1/feedback/reasons/0",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Next year's energy allowance is updated only when all 12 months of the previous year were fully scored"
@@ -469,7 +469,7 @@
     "key": "entity.city.label:US:SYNTH2026:M52",
     "missing_reason": null,
     "pointer": "/preflight/cities/1/data_nature/label",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Synthetic city M52"
@@ -478,7 +478,7 @@
     "key": "datanature.summary.synthetic",
     "missing_reason": null,
     "pointer": "/preflight/cities/1/data_nature/summary_zh",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Synthetic city M52: synthetic data pack; all 27 opportunities in the catalog are hand-made synthetic model settings or test data, not real city data"
@@ -487,7 +487,7 @@
     "key": "entity.assumption.note:m52.housing.near",
     "missing_reason": null,
     "pointer": "/preflight/cities/1/data_nature/named_assumptions/0/note_zh",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Hand-set values, not from any real city, product, service, employer, data source or LLM"
@@ -496,7 +496,7 @@
     "key": "entity.opportunity.label:m52.housing.near",
     "missing_reason": null,
     "pointer": "/preflight/cities/1/data_nature/named_assumptions/0/examples/0",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "One-bedroom (near work)"
@@ -505,7 +505,7 @@
     "key": "entity.opportunity.label:m52.housing.far",
     "missing_reason": null,
     "pointer": "/preflight/cities/1/data_nature/named_assumptions/0/examples/1",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "One-bedroom (far from work)"
@@ -514,7 +514,7 @@
     "key": "entity.opportunity.label:m52.food.basic",
     "missing_reason": null,
     "pointer": "/preflight/cities/1/data_nature/named_assumptions/0/examples/2",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Basic food plan (home-cooked)"
@@ -523,7 +523,7 @@
     "key": "entity.assumption.note:m52.durable.convenience_pack",
     "missing_reason": null,
     "pointer": "/preflight/cities/1/data_nature/named_assumptions/1/note_zh",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "E3-A compilation: per-field sources are in the catalog compilation record; it contains synthetic settings, so the whole item is labeled synthetic by its weakest source — a synthetic lifetime setting shared by the whole group (the same device pack in both cities); a uniform effect assumption shared by the whole group: the same device pack leaves the same personal residual hours in both cities (parameter register SC-18); a hand-set synthetic price (the same as in the E1 convenience example)"
@@ -532,7 +532,7 @@
     "key": "entity.opportunity.label:m52.durable.convenience_pack",
     "missing_reason": null,
     "pointer": "/preflight/cities/1/data_nature/named_assumptions/1/examples/0",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Convenience device pack (washer-dryer + robot vacuum)"
@@ -541,7 +541,7 @@
     "key": "entity.assumption.note:m52.service.chores",
     "missing_reason": null,
     "pointer": "/preflight/cities/1/data_nature/named_assumptions/2/note_zh",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "E3-A compilation: per-field sources are in the catalog compilation record; it contains synthetic settings, so the whole item is labeled synthetic by its weakest source — a uniform effect assumption shared by the whole group: the same chore service leaves the same personal residual hours in both cities (parameter register SC-18); synthetic setting: for home-visit services you do not take part in the service itself (putting away and handover count as residual chores); a hand-set synthetic monthly price (the same as in the E1 convenience example)"
@@ -550,7 +550,7 @@
     "key": "entity.opportunity.label:m52.service.chores",
     "missing_reason": null,
     "pointer": "/preflight/cities/1/data_nature/named_assumptions/2/examples/0",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Daily chores service (monthly home laundry and cleaning)"
@@ -559,7 +559,7 @@
     "key": "entity.common_prior.label:safety_index",
     "missing_reason": null,
     "pointer": "/preflight/cities/1/data_nature/common_priors/0/label",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Safety conditions (synthetic index)"
@@ -568,7 +568,7 @@
     "key": "entity.common_prior.meaning:safety_index",
     "missing_reason": null,
     "pointer": "/preflight/cities/1/data_nature/common_priors/0/meaning_zh",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "A synthetic index of the city's safety conditions, 0–10; higher is safer. Not the crime rate or statistical definition of any real city; comparable only within this set of synthetic cities"
@@ -577,7 +577,7 @@
     "key": "entity.common_prior.label:development_index",
     "missing_reason": null,
     "pointer": "/preflight/cities/1/data_nature/common_priors/1/label",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Development opportunities (synthetic index)"
@@ -586,7 +586,7 @@
     "key": "entity.common_prior.meaning:development_index",
     "missing_reason": null,
     "pointer": "/preflight/cities/1/data_nature/common_priors/1/meaning_zh",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "A synthetic index of the city's career and growth opportunities, 0–10; higher means the city itself offers better conditions for development (not including your own learning progress). Not real employment or education statistics"
@@ -595,7 +595,7 @@
     "key": "entity.common_prior.label:leisure_index",
     "missing_reason": null,
     "pointer": "/preflight/cities/1/data_nature/common_priors/2/label",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Leisure conditions (synthetic index)"
@@ -604,7 +604,7 @@
     "key": "entity.common_prior.meaning:leisure_index",
     "missing_reason": null,
     "pointer": "/preflight/cities/1/data_nature/common_priors/2/meaning_zh",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "A synthetic index of the city's leisure facilities and public space, 0–10; higher means better leisure you can enjoy without spending money (fitness, experiences and the like are arranged separately). Not real facility statistics"
@@ -613,7 +613,7 @@
     "key": "entity.common_prior.label:environment_index",
     "missing_reason": null,
     "pointer": "/preflight/cities/1/data_nature/common_priors/3/label",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Environmental quality (synthetic index)"
@@ -622,7 +622,7 @@
     "key": "entity.common_prior.meaning:environment_index",
     "missing_reason": null,
     "pointer": "/preflight/cities/1/data_nature/common_priors/3/meaning_zh",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "A synthetic index of the city's environmental quality (a synthetic summary of air, green space and noise), 0–10; higher is better. Not real environmental monitoring data"
@@ -631,7 +631,7 @@
     "key": "entity.assumption.note:m52.care.clinic",
     "missing_reason": null,
     "pointer": "/preflight/cities/1/data_nature/treatment_assumptions_zh/0",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Hand-set treatment price and visit time, not from any real medical provider or price data"
@@ -640,7 +640,7 @@
     "key": "entity.opportunity.label:m52.experience.concert",
     "missing_reason": null,
     "pointer": "/preflight/cities/1/data_nature/model_plan_activities/0",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Concert (one time)"
@@ -649,7 +649,7 @@
     "key": "entity.opportunity.label:m52.experience.guitar_practice",
     "missing_reason": null,
     "pointer": "/preflight/cities/1/data_nature/model_plan_activities/1",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Guitar practice at home (one 2-hour session)"
@@ -658,7 +658,7 @@
     "key": "entity.opportunity.label:m52.experience.tennis_with_rental",
     "missing_reason": null,
     "pointer": "/preflight/cities/1/data_nature/model_plan_activities/2",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Tennis court with racket rental (one session)"
@@ -667,7 +667,7 @@
     "key": "entity.opportunity.label:m52.experience.community_choir",
     "missing_reason": null,
     "pointer": "/preflight/cities/1/data_nature/model_plan_activities/3",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Community choir rehearsal (free, one session)"
@@ -676,7 +676,7 @@
     "key": "entity.opportunity.label:m52.experience.gallery_tour",
     "missing_reason": null,
     "pointer": "/preflight/cities/1/data_nature/model_plan_activities/4",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Art gallery tour (one time)"
@@ -685,7 +685,7 @@
     "key": "entity.opportunity.label:m52.experience.cooking_class",
     "missing_reason": null,
     "pointer": "/preflight/cities/1/data_nature/model_plan_activities/5",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Cooking class (one session, does not replace a meal)"
@@ -694,7 +694,7 @@
     "key": "entity.commute_mode.label:walk_bike",
     "missing_reason": null,
     "pointer": "/preflight/cities/1/data_nature/commute_modes/0/mode_zh",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "walking or cycling"
@@ -703,7 +703,7 @@
     "key": "entity.commute_mode.label:transit",
     "missing_reason": null,
     "pointer": "/preflight/cities/1/data_nature/commute_modes/1/mode_zh",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "public transit"
@@ -712,7 +712,7 @@
     "key": "entity.commute_rule.label:US:SYNTH2026:M52.transit",
     "missing_reason": null,
     "pointer": "/preflight/cities/1/data_nature/commute_modes/1/condition_zh",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Public transit in the synthetic city: no conditions of use, no cap"
@@ -721,7 +721,7 @@
     "key": "entity.commute_mode.label:drive",
     "missing_reason": null,
     "pointer": "/preflight/cities/1/data_nature/commute_modes/2/mode_zh",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "driving"
@@ -730,7 +730,7 @@
     "key": "entity.tax_status.label:synthetic_test_double",
     "missing_reason": null,
     "pointer": "/preflight/cities/1/data_nature/tax/status_zh",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Synthetic test double (not real tax)"
@@ -739,7 +739,7 @@
     "key": "preflight.executable_yes",
     "missing_reason": null,
     "pointer": "/preflight/executable/reasons/0",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "The standard start and roster checks passed for all candidate cities"
@@ -748,7 +748,7 @@
     "key": "preflight.scorable_overall",
     "missing_reason": null,
     "pointer": "/preflight/scorable/reasons/0",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "See cities for each city; this does not guarantee that every future month can be fully scored"
@@ -757,7 +757,7 @@
     "key": "preflight.feedback_overall",
     "missing_reason": null,
     "pointer": "/preflight/feedback/reasons/0",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Next year's allowance is updated only after a fully scored year; when a year is incomplete, this clone's next year is blocked"
@@ -766,7 +766,7 @@
     "key": "preflight.planner.llm",
     "missing_reason": null,
     "pointer": "/preflight/planner/description_zh",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Real-model planner: qwen3.8-flash (product_planner role, rolling version); each clone gets one regular plan a year and at most 2 revisions, and each candidate gets at most 1 more service attempts; it receives only the safe projection shown to clones, and plans are still checked and settled by the environment"
@@ -775,7 +775,7 @@
     "key": "preflight.planner.max_cost",
     "missing_reason": null,
     "pointer": "/preflight/planner/max_cost",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "20 CNY (an app-side cap estimated from price list qwen3.8-flash@beijing@2026-10-09, not a provider billing cap)"
@@ -784,7 +784,7 @@
     "key": "preflight.e1_scope.protocol",
     "missing_reason": null,
     "pointer": "/preflight/scope_zh/0",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Life protocol life-v1-e3a-product (status synthetic_fixture_only), scoring score.e1-life.explore (exploratory): city, price, wage, illness, treatment and scoring parameters are all synthetic settings, not real cities; real cities are not ranked"
@@ -793,7 +793,7 @@
     "key": "preflight.e1_scope.city_facts",
     "missing_reason": null,
     "pointer": "/preflight/scope_zh/1",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "City background facts e1-7a-city-facts-v1: 4 synthetic indices per city; the rules converting them into scoring conditions are internal synthetic settings"
@@ -802,7 +802,7 @@
     "key": "preflight.e1_scope.evaluation",
     "missing_reason": null,
     "pointer": "/preflight/scope_zh/2",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Evaluation follows E1-6: the complete-clone mean uses only fully evaluated clones; life exits are reported separately as a share, with their event chains; simulation problems go into the missing range (not a confidence interval)"
@@ -811,7 +811,7 @@
     "key": "entity.capability.item.0:limits",
     "missing_reason": null,
     "pointer": "/preflight/scope_zh/3",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Cities, quotes, wages, taxes, illness and treatment are all synthetic settings; the results do not rank real cities and are not real-world recommendations"
@@ -820,7 +820,7 @@
     "key": "entity.capability.item.1:limits",
     "missing_reason": null,
     "pointer": "/preflight/scope_zh/4",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "The offline planner is a controllable mock and does not represent a real large language model's ability or understanding of preferences"
@@ -829,7 +829,7 @@
     "key": "entity.capability.item.2:limits",
     "missing_reason": null,
     "pointer": "/preflight/scope_zh/5",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "The questionnaire wording and reference improvement ranges are provisional drafts, not tested in cognitive interviews or validated as a scale"
@@ -838,7 +838,7 @@
     "key": "input.interests.scope.leisure.unanswered",
     "missing_reason": null,
     "pointer": "/preflight/scope_zh/6",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Leisure interests: you did not answer; this time it is not personalized by specific interests (evaluated with neutral rules)"
@@ -847,7 +847,7 @@
     "key": "input.interests.scope.taste.unanswered",
     "missing_reason": null,
     "pointer": "/preflight/scope_zh/7",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Taste and cuisines: you did not answer; this time it is not personalized by specific cuisines (only fresh meals count)"
@@ -856,7 +856,7 @@
     "key": "explain.reason.paid_calls_off_waiting",
     "missing_reason": null,
     "pointer": "/explanation/reason_zh",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "This simulation needs a real model, and the service has not turned on paid model calls"
@@ -865,7 +865,7 @@
     "key": "explain.impact",
     "missing_reason": null,
     "pointer": "/explanation/impact_zh",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "No simulation was started, and no run was used; The system will not quietly switch to the offline planner"
@@ -874,17 +874,26 @@
     "key": "explain.before_next.paid_calls_off_waiting",
     "missing_reason": null,
     "pointer": "/explanation/next_action_zh",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Once the maintainer turns them on, the page will show “Confirm start”; you do not need to fill anything in again, and you can also cancel this preparation first"
+   },
+   {
+    "key": "progress_summary.paid_off",
+    "missing_reason": null,
+    "pointer": "/progress_summary/sentence_zh",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "The check passed; waiting for the maintainer to enable paid model calls"
    }
   ],
   "id": "intent-0000000000000062",
   "kind": "intent",
   "locale": "en",
   "metrics": [],
-  "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+  "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
   "source": {
    "allowed_actions": [
     "cancel"
@@ -1664,6 +1673,14 @@
     "years": 3
    },
    "progress": null,
+   "progress_summary": {
+    "mode": "indeterminate",
+    "phase": "needs_attention",
+    "planned_clone_years": null,
+    "sentence_zh": "检查通过，等维护者开启付费模型调用",
+    "settled_clone_years": null,
+    "updated_at": "2026-11-23T09:01:02Z"
+   },
    "quota": {
     "available": 3,
     "reserved": 0,
@@ -1694,7 +1711,7 @@
    "updated_at": "2026-11-23T09:01:02Z",
    "waiting_for": "maintainer"
   },
-  "source_view_fingerprint": "04b861c0be7b206e854de3eb873cd4b5afd445e4da9a12d9b2ddedd5f919d0b0",
+  "source_view_fingerprint": "f236c034e7e94e221019a44a348e10cbe16c897efc182d7c3d1aaab6724a6e42",
   "status": "complete"
  },
  "sample": {

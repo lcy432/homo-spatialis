@@ -148,6 +148,7 @@ def test_one_start_then_closing_the_page_still_finishes_once(tmp_path):
     view = r.json()
     assert view["stage"] == "checking" and view["start"]["state"] == "pending"
     assert "submit" not in view["allowed_actions"] and view["run_id"] is None
+    assert view["progress_summary"]["phase"] == "checking"  # 还没有运行编号也有进度摘要
     # 关掉页面：之后没有任何浏览器请求，worker 照样检查、按授权开始、跑完
     svc.work()
     done = svc.store.intent_row(view["intent_id"])
@@ -446,6 +447,7 @@ def test_an_intent_without_authorization_keeps_the_old_flow(tmp_path):
     _principal, b = svc.person()
     view = ready_intent(svc, b)
     assert view["start"] is None and "submit" in view["allowed_actions"]
+    assert view["progress_summary"]["phase"] == "needs_attention"  # 旧流程：检查通过，等你确认开始
     assert b.submit(view).status_code == 202
     svc.work()
     done = b.intent(view["intent_id"])

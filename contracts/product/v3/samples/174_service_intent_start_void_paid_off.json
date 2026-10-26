@@ -785,6 +785,14 @@
    "years": 3
   },
   "progress": null,
+  "progress_summary": {
+   "mode": "indeterminate",
+   "phase": "needs_attention",
+   "planned_clone_years": null,
+   "sentence_zh": "开始授权已经作废：需要你看过说明后重新确认",
+   "settled_clone_years": null,
+   "updated_at": "2026-12-24T09:01:02Z"
+  },
   "quota": {
    "available": 3,
    "reserved": 0,

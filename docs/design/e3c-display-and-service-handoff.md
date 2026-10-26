@@ -86,7 +86,7 @@ metrics: [MetricDisplaySpec, ...]   # 结果显示时提供，其余为空
 
 新增 `GET /api/v1/display/geography?pack_fingerprint=<资料包指纹>[&resource_version=<显示资源版本>]`，返回 `GeographyDisplayBundle`。当前能力从 capabilities.meta.data_pack 取身份；历史运行从该运行 source.meta.data_pack 取身份。请求不接受任意路径。
 
-**历史版本的选择**（实施时补的规则）：省略 `resource_version` 时用这个资料包当前登记的版本；历史对象（以前的结果、运行意图）把它显示读取回来的 `DisplayEnvelope.resource_version`（或字段上的 `resource_version`）原样传进来，读到的是那一版冻结的地理清单。明确请求的版本不存在、资料包没有登记：404 `not_found`，**不回退**到当前版本或当前六城；版本登记了但没有地理资源：200、`status = unavailable`、城市为空（列表仍可访问）。版本名格式不对：422 `invalid_request`。资源版本不可覆盖，旧版本在登记表与冻结目录里一直保留。
+**历史版本的选择**（实施时补的规则）：省略 `resource_version` 时用这个资料包当前登记的版本——所以只有当前输入（选城）才省略；历史对象的 `resource_version` 为空时页面不请求地理清单（不带版本读到的是当前版本），按“没有绑定的历史版本”显示；历史对象（以前的结果、运行意图）把它显示读取回来的 `DisplayEnvelope.resource_version`（或字段上的 `resource_version`）原样传进来，读到的是那一版冻结的地理清单。明确请求的版本不存在、资料包没有登记：404 `not_found`，**不回退**到当前版本或当前六城；版本登记了但没有地理资源：200、`status = unavailable`、城市为空（列表仍可访问）。版本名格式不对：422 `invalid_request`。资源版本不可覆盖，旧版本在登记表与冻结目录里一直保留。
 
 清单字段：
 

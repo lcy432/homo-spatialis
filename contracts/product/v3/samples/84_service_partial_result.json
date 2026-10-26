@@ -1,5 +1,5 @@
 {
- "description_zh": "部分结果：一个分身第 1 年规划器出错（受控夹具），E1 记为模拟缺失 M；另一座城照常过完。服务流程是 finished，但不是所有分身都是 C",
+ "description_zh": "部分结果：一个分身第 1 年规划器出错（受控夹具），E1 按程序错误暂停这一批，还没轮到的分身没有运行；两个都记为模拟缺失 M。服务流程是 finished，但不是所有分身都是 C",
  "message": "ProductResult",
  "payload": {
   "cities": [

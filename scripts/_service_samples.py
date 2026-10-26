@@ -241,6 +241,7 @@ class _Samples:
         display_samples(self)  # 最后跑：前面的样例时间与编号都不受影响
         input_samples(self)  # v3.4 的新输入流程：放在最后，前面样例的编号与身份都不变
         start_samples(self)  # v3.5 / API v1.4 的一次开始：再往后放
+        progress_samples(self)  # 等待页的进度摘要：最后
 
     # ---- 运行选项：较小规模、越界（E3C 收尾第二步）
     def options(self, box: _Box) -> None:
@@ -574,8 +575,8 @@ class _Samples:
         self.w(
             "84_service_partial_result",
             "ProductResult",
-            "部分结果：一个分身第 1 年规划器出错（受控夹具），E1 记为模拟缺失 M；另一座城照常过完。服务流程是 finished，但不是所有"
-            "分身都是 C",
+            "部分结果：一个分身第 1 年规划器出错（受控夹具），E1 按程序错误暂停这一批，还没轮到的分身没有运行；两个都记为模拟缺失 M。"
+            "服务流程是 finished，但不是所有分身都是 C",
             box.get(f"/runs/{done['run_id']}/result").json(),
             self.fixture,
         )
@@ -1615,4 +1616,109 @@ def start_samples(s: _Samples) -> None:
         "运行前说明之后用 start_again 重新取预览、再确认并开始（新的幂等键）；没有发送、没有预留",
         paid.get(f"/run-intents/{view['intent_id']}").json(),
         s.fixture,
+    )
+
+
+# ---------------------------------------------------------------------- 进度摘要（DECISIONS/0049）
+
+
+def progress_samples(s: _Samples) -> None:
+    """进度摘要的样例（177 起，合成资料包）：模拟中（按已结算的分身年度数）、停下可以恢复、结束但不是全部完成、开始之前取消；每种都有
+    英文显示。其余阶段的摘要在已有的运行意图样例里（检查中 70 / 166、排队 73、完成 78 / 167、检查没通过 81、删除 87、过期 90）。"""
+    from common.life_planning_contracts import MockScript
+    from workflows import service_runs as svc_runs
+
+    w = s.w
+    # 模拟中：测试传输在第 4 次发送时停住，拍下运行中的意图（与监测线程运行中写下的那一份进度快照相同）
+    gate, reached = threading.Event(), threading.Event()
+    live = _Box(s.work / "progress-live", s.clock, planner="llm", live_calls_enabled=True)
+    live.worker.transport_factory = lambda _s: _test_transport(4, gate, reached)
+    live.person("合成人物 u570")
+    view = live.ready()
+    live.submit(view, "key-u570-0001")
+    runner = threading.Thread(target=live.worker.run_pending, daemon=True)
+    runner.start()
+    try:
+        if not reached.wait(120):
+            raise RuntimeError("测试传输没有收到第 4 次发送")
+        row = live.ctx.store.intent_row(view["intent_id"])
+        live.worker._write_progress(view["intent_id"], row["run_id"], running_now=True)
+        running = live.get(f"/run-intents/{view['intent_id']}").json()
+        running_en = _display(live, "intent", view["intent_id"], "en").json()
+    finally:
+        gate.set()
+        runner.join(300)
+    w(
+        "177_service_intent_progress_simulating",
+        "RunIntentView",
+        "模拟中的进度摘要（测试传输，不是真实模型）：phase = simulating、mode = clone_years；settled_clone_years 是 E1 进度快照里各分身已"
+        "结算年数之和，planned_clone_years = 名单 × 年数；一句当前状态“已结算 x/y 个分身年度”，updated_at 是那份快照的时间。不按调用"
+        "次数、不按时间增长",
+        running,
+        s.fixture,
+    )
+    w(
+        "178_display_intent_progress_simulating_en",
+        "DisplayEnvelope",
+        "同一个意图的英文显示：进度摘要的一句话在 /progress_summary/sentence_zh 有英文（例如“3/6 clone-years settled”）",
+        running_en,
+        s.fixture,
+    )
+    # 停下了，可以恢复：第 3 次规划调用时服务不可用（受控夹具）
+    box = _Box(s.work / "progress", s.clock)
+    box.person("合成人物 u571")
+    view = box.ready()
+    box.submit(view, "key-u571-0001")
+    box.worker.faults = {"life:halt_at_call:3:service_unavailable"}
+    box.worker.run_pending()
+    box.worker.faults = None
+    w(
+        "179_display_intent_progress_stopped_en",
+        "DisplayEnvelope",
+        "停下了、可以恢复（受控夹具：第 3 次规划调用时服务不可用）：phase = needs_attention、mode = clone_years，只数已经结算的年份；"
+        "原因与下一步见 explanation 与 allowed_actions（resume）",
+        _display(box, "intent", view["intent_id"], "en").json(),
+        s.fixture,
+    )
+    # 结束了，但不是全部完成：一个分身第 1 年规划器出错，E1 记为模拟缺失 M，它没有经历的年份不算进已结算
+    principal = box.person("合成人物 u572")
+    original = svc_runs.RunDir.request
+    clone = f"{box.ctx.person_ref(principal)}.k51.r0"
+
+    def with_script(rd: Any, spec: Any) -> Any:
+        script = MockScript(clone_id=clone, behavior="raise_error", years=[1], note="受控夹具")
+        return original(rd, spec).model_copy(update={"scripts": (script,)})
+
+    with mock.patch.object(svc_runs.RunDir, "request", with_script):
+        done = box.finished()
+    w(
+        "180_service_intent_progress_finished_partial",
+        "RunIntentView",
+        "结束但不是全部完成（受控夹具：一个分身第 1 年规划器出错，E1 按程序错误暂停这一批，还没轮到的分身没有运行）：phase = finished、"
+        "mode = finished——结果可以读；已结算 0/6（没有经历的年份不算），两个分身都是模拟缺失 M，见结果",
+        done,
+        s.fixture,
+    )
+    w(
+        "181_display_intent_progress_finished_partial_en",
+        "DisplayEnvelope",
+        "同一个意图的英文显示：完成的一句话写明已结算 / 计划的分身年度数，完成、出局与模拟缺失见结果",
+        _display(box, "intent", done["intent_id"], "en").json(),
+        s.fixture,
+    )
+    # 开始之前取消
+    box.person("合成人物 u573")
+    _, rc = box.confirmed()
+    intent = box.post("/run-intents", {"confirmed_id": rc["confirmed"]["confirmed_id"]}).json()
+    w(
+        "182_service_intent_progress_cancelled",
+        "RunIntentView",
+        "开始之前取消：phase = cancelled、mode = indeterminate，一句“开始之前已取消”；没有使用次数",
+        box.post(f"/run-intents/{intent['intent_id']}/cancel").json(),
+    )
+    w(
+        "183_display_intent_progress_cancelled_en",
+        "DisplayEnvelope",
+        "同一个意图的英文显示（开始之前已取消）",
+        _display(box, "intent", intent["intent_id"], "en").json(),
     )

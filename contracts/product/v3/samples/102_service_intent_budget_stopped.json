@@ -786,6 +786,8 @@
    "years": 3
   },
   "progress": {
+   "clone_years_planned": 6,
+   "clone_years_settled": 4,
    "clones": [
     {
      "city_ref": "US:SYNTH2026:K51",
@@ -838,6 +840,14 @@
    "run_id": "run-e3a-fcbab0b82b6c9909",
    "stage": "halted",
    "stage_zh": "批次停下（服务、预算或请求检查）",
+   "updated_at": "2026-10-24T09:00:00Z"
+  },
+  "progress_summary": {
+   "mode": "clone_years",
+   "phase": "needs_attention",
+   "planned_clone_years": 6,
+   "sentence_zh": "停下了：已结算 4/6 个分身年度，等维护者处理",
+   "settled_clone_years": 4,
    "updated_at": "2026-10-24T09:00:00Z"
   },
   "quota": {

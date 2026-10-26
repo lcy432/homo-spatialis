@@ -10,7 +10,7 @@
     "key": "pack.note.synthetic",
     "missing_reason": null,
     "pointer": "/meta/data_pack/note",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Synthetic data pack: every value is a hand-made model setting or test data, not real city data"
@@ -19,10 +19,19 @@
     "key": "stage.checking_authorized",
     "missing_reason": null,
     "pointer": "/stage_zh",
-    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
     "source_locale": "zh",
     "status": "provided",
     "text": "Queued for checking: once the check passes, it starts automatically as you confirmed (checking does not use a run)"
+   },
+   {
+    "key": "progress_summary.checking_authorized",
+    "missing_reason": null,
+    "pointer": "/progress_summary/sentence_zh",
+    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Checking in the background; once it passes, it starts automatically as you confirmed"
    }
   ],
   "id": "intent-0000000000000091",
@@ -66,6 +75,14 @@
    },
    "preflight": null,
    "progress": null,
+   "progress_summary": {
+    "mode": "indeterminate",
+    "phase": "checking",
+    "planned_clone_years": null,
+    "sentence_zh": "正在后台检查；通过后按你的确认自动开始",
+    "settled_clone_years": null,
+    "updated_at": "2026-12-24T09:01:02Z"
+   },
    "quota": {
     "available": 3,
     "reserved": 0,
@@ -108,7 +125,7 @@
    "updated_at": "2026-12-24T09:01:02Z",
    "waiting_for": "service"
   },
-  "source_view_fingerprint": "99dc6316684b065171cfe9269fd5e2166944d22d411007e2acce55525d07a9a0",
+  "source_view_fingerprint": "eae016f48bd5fd4bb39932aa057e5d7f67ae28d44ba5c82bafef88bc688cd09d",
   "status": "complete"
  },
  "sample": {

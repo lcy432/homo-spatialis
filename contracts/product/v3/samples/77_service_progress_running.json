@@ -2,6 +2,8 @@
  "description_zh": "运行中的进度（测试传输）：费用按报价估算——已核算、用量不确定（保留预留）与在途预留分开写；规划候选数（calls_used）与服务尝试数（service_attempts）分开计；费用上限（这次运行的有效设置，默认 20 元）是应用侧上限，不是供应商账单；运行还在进行，没有要恢复的东西",
  "message": "RunProgress",
  "payload": {
+  "clone_years_planned": 6,
+  "clone_years_settled": 3,
   "clones": [
    {
     "city_ref": "US:SYNTH2026:K51",

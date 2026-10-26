@@ -42,6 +42,14 @@
   },
   "preflight": null,
   "progress": null,
+  "progress_summary": {
+   "mode": "indeterminate",
+   "phase": "deleted",
+   "planned_clone_years": null,
+   "sentence_zh": "已删除",
+   "settled_clone_years": null,
+   "updated_at": "2026-10-24T09:00:00Z"
+  },
   "quota": {
    "available": 2,
    "reserved": 0,

@@ -329,4 +329,7 @@ def progress(
         ),
         report_available=report,
         updated_at=updated_at,
+        # 已结算的分身年度：归档的 accepted 表一行就是一个执行并结算过的分身年度（进行中的分身也算到它已经过完的那一年）
+        clone_years_settled=None if execution is None else len(archive.records("accepted")),
+        clone_years_planned=None if execution is None else len(p.order) * execution.years,
     )
