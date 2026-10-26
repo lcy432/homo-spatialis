@@ -20,7 +20,7 @@
 
 - 每次改动跑全量自动化测试与 lint：`uv run pytest -n auto`（日常全量手动加 `-n auto` 并行；它故意不写进默认配置，单跑一个文件时不加。研究线测试标了 slow，默认不跑，要跑用 `-m slow`）、`uv run ruff check src tests scripts`、`uv run ruff format --check src tests scripts`（`runs/` 里的历史脚本不在 lint 范围）。检查入口与环境准备见 [开发指南](docs/DEVELOPMENT.md)。
 - 每实现完一个功能（feature），全量测试与 lint 通过后就 `git commit` 一次：只 `git add` 这次改动的文件（不用 `git add .` / `-A`，不把其他窗口的未提交修改带进去），提交信息写清做了什么。推送（`git push`）仍由所有者决定。
-- 不再做：旧版本逐字节比较、源码快照、每轮变异检查、每轮证据目录与 prompt 归档、为保留旧路径而开新版本号、新旧代码永久并存、把旧归档钉死的测试。旧代码直接改或删；`runs/` 可以清理、覆盖。
+- 不再做：旧版本逐字节比较、源码快照、每轮变异检查、每轮证据目录与 prompt 归档、为保留旧路径而开新版本号、新旧代码永久并存、把旧归档钉死的测试。旧代码直接改或删；`runs/` 可以清理、覆盖（`runs/ledgers/` 的付费账本除外）。
 - 只在真正的设计决定时写简短 ADR（`DECISIONS/`），状态写进 docs/INDEX.md，不在多份文档里重复写。
 - 新增或改变环境数值、资料映射、评价方法或代理信息条件时，同步更新 [参数与假设目录](docs/design/parameter-assumption-register.md) 的相关条目。
 - 几个窗口共用同一个工作区：改共享文件前先看它是否刚被别人改过，只做局部修改，不覆盖别人的改动。
@@ -139,8 +139,7 @@ homo-spatialis/
 ├── configs/             运行与模型配置（configs/life/、configs/product/、models.yaml）
 ├── scripts/             入口与演示脚本
 ├── tests/               与 src 同样分层
-├── ledgers/             付费预算账本（每本一个 ledger.sqlite，进 git；运行配置的 paid_budget.ledger_dir 指向这里）
-└── runs/                运行输出（只在本机，不进 git）
+└── runs/                运行输出与付费预算账本（只在本机，不进 git；Flash 小规模测试配置的账本在 runs/ledgers/，产品流程每次运行新建一本）
 ```
 
 ---

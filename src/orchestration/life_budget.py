@@ -1,6 +1,7 @@
 """E1-7B 付费预算账本（`DECISIONS/0031` 第五节）：本轮所有真实服务请求共用一本账——先导、主试跑、诊断与服务重试都记在这里。
 
-账本放在运行目录之外（运行配置的 ``paid_budget.ledger_dir``；当前几本在仓库根目录的 ``ledgers/``，进 git），是目录里的一个
+账本放在运行配置的 ``paid_budget.ledger_dir``（只在本机、不进 git：Flash 小规模测试配置用 ``runs/ledgers/product-flash``；
+产品流程与托管服务每次运行在自己的工作目录里新建一本），是目录里的一个
 SQLite 文件 ``ledger.sqlite``（2026-10-19 起取代原来的 budget.json 与 ledger.jsonl），两张表：
 
     header      一行：额度（请求次数、费用）与报价，第一次建立之后不改；配置与它不同就拒绝打开

@@ -117,7 +117,7 @@ E5 浏览器 ──同源 HTTPS（Cookie + CSRF）──> FastAPI（product.serv
 
 ## 8. 真实规划器与费用
 
-真实模型通路：`LlmPlanner` + `make_transport` + 这次运行工作目录里的新 `RoundBudget`（不用 `ledgers/` 里的历史账本）；恢复继续读原账本。`live_calls_enabled: false`（默认）时确认开始返回 `paid_calls_disabled`；缺凭证时运行停在 `credentials_missing` 并退回预留——都不换成 mock。
+真实模型通路：`LlmPlanner` + `make_transport` + 这次运行工作目录里的新 `RoundBudget`（不与别的运行或配置共用账本）；恢复继续读原账本。`live_calls_enabled: false`（默认）时确认开始返回 `paid_calls_disabled`；缺凭证时运行停在 `credentials_missing` 并退回预留——都不换成 mock。
 
 进度的费用：mock 是 `offline_mock_zero_cost`；真实模型是 `estimated_from_quote`，分开写 `settled_cost`（返回了用量、已核算）、`uncertain_cost`（可能已发出、用量不确定，保留预留，不记 0）、`in_flight_cost`（已预留、还没有结果），`estimated_cost` 是三者之和；`calls_used` / `call_limit` 是规划候选，`service_attempts` / `service_attempt_limit` 是服务尝试；带币种、报价版本与这次运行的费用上限（默认 20 元，全部城市、分身与服务尝试共用），并写明不是供应商账单。
 

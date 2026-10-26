@@ -126,7 +126,7 @@ P8 / P9 / P10 已实现，门一已过，门二与门三待真实输入；开发
 | 生活样例（唯一一份，测试、命令行与资料包共用） | `configs/life/synthetic_product.yaml`，评分 `scoring_product.yaml`、评价 `evaluation_product.yaml`、名单 `roster_product.yaml`、城市事实 `city_facts_product.yaml` |
 | 非全量真实 LLM 测试（`scripts/run_life_e1_7b.py` 不写 `--config`） | `configs/life/run_product_sonnet.yaml`（Claude Sonnet 5.5，effort max，走订阅） |
 | 全规模产品流程测试（所有城市、每城 ≥ 4 个分身、完整年限） | `scripts/run_product_full.py`（Qwen 最新 Flash，`product_planner`；每次运行一本新账本；`--mock` 零费用） |
-| 产品样例的 Flash 配置 / Haiku 测试配置（显式 `--config`） | `configs/life/run_product_flash.yaml`（账本 `ledgers/qwen-flash-convenience/`）/ `configs/life/run_product_haiku.yaml` |
+| 产品样例的 Flash 配置 / Haiku 测试配置（显式 `--config`） | `configs/life/run_product_flash.yaml`（账本在本机 `runs/ledgers/product-flash/`，每份克隆第一次用时新建）/ `configs/life/run_product_haiku.yaml` |
 | 离线 mock 对照 | `configs/life/run_product_mock.yaml` |
 | 托管服务（E3C） | `scripts/product_service.py`（api / worker / invite / jobs / quota-adjust / openapi / check-openapi / e2e 离线联调）；生产 `configs/product/service.yaml`（真实规划器、付费开关关闭），本地联调 `configs/product/service_local_mock.yaml`（离线 mock，只绑定 127.0.0.1） |
 | 接入层产品链 | `scripts/product_e3a.py` 显式编译产品样例 |
@@ -152,8 +152,7 @@ P8 / P9 / P10 已实现，门一已过，门二与门三待真实输入；开发
 | [DECISIONS/](../DECISIONS/README.zh-CN.md) | 为什么这样定（只在真正的设计决定时写） |
 | [docs/design/](design/README.zh-CN.md) | 公式、代码位置、手算例子、省略了什么 |
 | [参数与假设目录](design/parameter-assumption-register.md) | 参数的含义、取值与是否标定 |
-| `runs/` | 运行输出；只在本机、不进 git，开发期可以清理、覆盖 |
-| `ledgers/` | 付费预算账本（每本一个 `ledger.sqlite`，进 git） |
+| `runs/` | 运行输出；只在本机、不进 git，开发期可以清理、覆盖（`runs/ledgers/` 是本机的付费账本，清理时保留） |
 | [历史导航](history/README.md) | 旧版文档的完整存档与旧章节对应；保留 2026-10-18、2026-10-26 两次拆分前的记录 |
 
 历史文档里的“PLAN §3.0.x”指 [2026-10-18 之前的 PLAN](history/pre-dev-refactor-2026-10-18/PLAN.md)；旧“README §…”可以从[历史导航](history/README.md)定位。新文档直接链接主题页与稳定锚点。

@@ -73,7 +73,7 @@ def _llm(tmp_path, transport, **over):
 
 
 def test_llm_planner_path_with_a_test_transport_keeps_budget_and_service_records(tmp_path):
-    shared = REPO / "ledgers/qwen-flash-convenience/ledger.sqlite"
+    shared = REPO / "runs/ledgers/product-flash/ledger.sqlite"
     shared_before = hashlib.sha256(shared.read_bytes()).hexdigest() if shared.is_file() else None
     transport = ScriptedTransport()
     svc = _llm(tmp_path, transport)

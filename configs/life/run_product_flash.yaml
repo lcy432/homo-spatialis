@@ -2,8 +2,8 @@
 # 明确要求时用 --config 显式选。模型调用设定（思考关闭、温度 0.2、JSON object、输出上限 4,096、超时 90 秒、每份候选最多 1 次服务重试）
 # 与之前的 Flash 配置逐项相同。
 #
-# 付费预算：接着用 ledgers/qwen-flash-convenience 这本账（额度 12 次请求、应用侧估算 2 元，已用的照算，不重置）。要更大的预算，所有者另给
-# 额度并换一本新账。预算保护是按已记录报价执行的应用侧控制，不是供应商级的账单上限；费用以供应商账单为准。
+# 付费预算：账本在 runs/ledgers/product-flash（runs/ 不进 git：每份克隆第一次用时新建，各自记自己的花费；额度 12 次请求、应用侧
+# 估算 2 元，同一份克隆里已用的照算，不重置）。要更大的预算，改这里的额度并换一个新的 ledger_dir。预算保护是按已记录报价执行的应用侧控制，不是供应商级的账单上限；费用以供应商账单为准。
 
 run_notice: >-
   exploratory_synthetic：产品协议样例的真实模型配置（Qwen3.8 Flash）。合成城市、合成参数、合成人设；结果只说明这个模型在这一次合成试跑
@@ -63,7 +63,7 @@ run:
         沿用 E1-7B 的调用设定（思考关闭、温度 0.2、JSON object、输出上限 4,096、超时 90 秒、SDK 自动重试关闭、每份候选最多 1 次服务重试），
         只换模型与角色；qwen3.8-flash 是滚动型号（没有带日期的快照）
   paid_budget:
-    ledger_dir: ledgers/qwen-flash-convenience
+    ledger_dir: runs/ledgers/product-flash
     max_requests: 12
     max_cost_cny: 2
     price:
@@ -80,4 +80,4 @@ run:
         分档；每个输入 token 都按未命中缓存的标价估算，不假设缓存折扣或促销。核对记录见 runs/2026-10-18-e1-daily-convenience/pricing/
   prompt_template: e3b-product-prompt-v3
   memory_policy: e1-life-memory-v2
-  note: 产品协议样例的真实模型配置（产品角色 Qwen3.8 Flash）；接着用 ledgers/qwen-flash-convenience 这本账（12 次、2 元以内）。
+  note: 产品协议样例的真实模型配置（产品角色 Qwen3.8 Flash）；账本在本机的 runs/ledgers/product-flash（12 次、2 元以内）。
