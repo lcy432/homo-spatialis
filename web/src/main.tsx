@@ -1,4 +1,16 @@
-import "@fontsource/patrick-hand/latin-400.css";
+// 固定的英文字体（只带 latin 子集，随包打包，不走网络）。稿纸：Great Vibes（大标题）+ EB Garamond；地球：Rajdhani（大标题）+ Space Grotesk（中标题）+ IBM Plex Sans / Mono。
+import "@fontsource/great-vibes/latin-400.css";
+import "@fontsource/eb-garamond/latin-400.css";
+import "@fontsource/eb-garamond/latin-400-italic.css";
+import "@fontsource/eb-garamond/latin-600.css";
+import "@fontsource/rajdhani/latin-600.css";
+import "@fontsource/space-grotesk/latin-500.css";
+import "@fontsource/space-grotesk/latin-600.css";
+import "@fontsource/ibm-plex-sans/latin-400.css";
+import "@fontsource/ibm-plex-sans/latin-400-italic.css";
+import "@fontsource/ibm-plex-sans/latin-600.css";
+import "@fontsource/ibm-plex-mono/latin-400.css";
+import "@fontsource/ibm-plex-mono/latin-500.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";

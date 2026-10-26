@@ -3,7 +3,12 @@
  *
  * 稿纸（默认，html[data-mode="paper"]）——不去模仿纸的“材质”，而是照搬印刷表格与旧式统计报告的排版习惯：
  *   衬线正文、章节编号、细横线与双横线分段、booktabs 式表格（只有横线）、小号带字距的标签、朱砂色只用来盖章与标记当前项；
- *   用户填进去的答案用手写体（中文楷体、英文 Patrick Hand），填写框只是一道横线，像用笔在表格上填字。
+ *   用户填进去的答案用手写感的字（中文楷体、英文 EB Garamond），填写框只是一道横线，像用笔在表格上填字。
+ *
+ * 英文字体固定（所有者 2026-10-26）：三档各司其职——
+ *   大字 --font-display 只给页面的一级标题与页眉品牌（艺术字；同一页最多出现三处，不得用于 h2 以下、按钮、表格或正文）；
+ *   中字 --font-heading 给 h2 / h3 / h4；小字 --font-body / --font-label / --font-num 给正文、标签与数字。
+ *   稿纸：Great Vibes / EB Garamond / EB Garamond；地球：Rajdhani / Space Grotesk / IBM Plex Sans 与 IBM Plex Mono。字体文件随包打包（main.tsx）。
  * 地球（html[data-mode="globe"]）——地球与星空是重的，界面要轻：半透明薄面板、发丝线、角标、等宽小字、克制的青色。
  *
  * 纸纹与格线只在页面背景；地图、图表、数据点上不加任何纹理，不改变面积、位置、坐标、柱长或月历标记。
@@ -38,11 +43,12 @@ html[data-mode="paper"] {
   --m-color: #8a6f12;
   --focus-color: #b4382a;
   --radius: 2px;
-  --font-body: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, "Songti SC", "STSong", "Noto Serif CJK SC",
-    "Source Han Serif SC", "SimSun", serif;
-  --font-hand: "Patrick Hand", "Kaiti SC", "STKaiti", "KaiTi", "楷体", "Kaiti", cursive;
+  --font-display: "Great Vibes", "Kaiti SC", "STKaiti", "KaiTi", "楷体", "Kaiti", cursive;
+  --font-heading: "EB Garamond", Georgia, "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", serif;
+  --font-body: "EB Garamond", Georgia, "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", serif;
+  --font-hand: "EB Garamond", "Kaiti SC", "STKaiti", "KaiTi", "楷体", "Kaiti", serif;
   --font-label: var(--font-body);
-  --font-num: "Iowan Old Style", Georgia, "Songti SC", serif;
+  --font-num: "EB Garamond", Georgia, "Songti SC", serif;
   --page-bg: linear-gradient(var(--grid-major) 1px, transparent 1px) 0 0 / 120px 120px,
     linear-gradient(90deg, var(--grid-major) 1px, transparent 1px) 0 0 / 120px 120px,
     linear-gradient(var(--grid) 1px, transparent 1px) 0 0 / 24px 24px,
@@ -86,11 +92,13 @@ html[data-mode="globe"] {
   --m-color: #e2cc6a;
   --focus-color: #ffd166;
   --radius: 3px;
-  --font-body: "Segoe UI", system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC",
+  --font-display: Rajdhani, "Segoe UI", system-ui, "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  --font-heading: "Space Grotesk", "Segoe UI", system-ui, "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC",
     "Noto Sans CJK SC", sans-serif;
   --font-hand: var(--font-body);
-  --font-label: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-  --font-num: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --font-label: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --font-num: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   --page-bg: radial-gradient(ellipse at 50% -10%, #182a3d 0%, var(--bg) 55%) fixed, var(--bg);
   --panel-blur: blur(14px) saturate(1.1);
   --pie-1: #4fa8c4;
@@ -123,7 +131,7 @@ body {
 }
 
 html[data-mode="globe"] body {
-  font-weight: 300;
+  font-weight: 400;
 }
 
 h1,
@@ -134,10 +142,11 @@ h4 {
   margin: 1.2em 0 0.5em;
 }
 
+/* 大字：只有 h1 与页眉品牌用艺术字 */
 h1 {
-  font-family: var(--font-hand);
-  font-size: 2rem;
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-size: 2.6rem;
+  font-weight: 400;
   letter-spacing: 0.01em;
 }
 
@@ -148,18 +157,27 @@ html[data-mode="paper"] h1 {
 }
 
 html[data-mode="globe"] h1 {
-  font-weight: 300;
-  letter-spacing: 0.04em;
+  font-size: 2.4rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+/* 中字：h2 / h3 / h4 用标题字体，不用艺术字 */
+h2,
+h3,
+h4 {
+  font-family: var(--font-heading);
 }
 
 h2 {
-  font-size: 1.2rem;
-  font-weight: 700;
+  font-size: 1.25rem;
+  font-weight: 600;
 }
 
 h3 {
-  font-size: 1.04rem;
-  font-weight: 700;
+  font-size: 1.08rem;
+  font-weight: 600;
 }
 
 html[data-mode="paper"] h3,
@@ -169,8 +187,8 @@ html[data-mode="paper"] h4 {
 
 html[data-mode="globe"] h2,
 html[data-mode="globe"] h3 {
-  font-weight: 500;
-  letter-spacing: 0.03em;
+  font-weight: 600;
+  letter-spacing: 0.01em;
 }
 
 .hand {
