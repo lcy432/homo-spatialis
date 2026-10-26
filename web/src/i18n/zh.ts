@@ -597,6 +597,7 @@ export const zh = {
     scopeTitle: "这次运行的范围说明",
     scopeMissing: "这次运行绑定的运行前检查读不到，范围说明暂缺（不用别的检查替代）。",
     sourceCountNote: "条数只说明来源性质的构成，不是“真实性百分比”。",
+    osmCredit: "真实资料包里的餐馆与场所计数来自 OpenStreetMap：© OpenStreetMap contributors，ODbL 1.0。",
     clonesTitle: "各个分身",
     cloneYears: "生活了 {{years}} 年 {{months}} 个月",
     openClone: "看这段生活",

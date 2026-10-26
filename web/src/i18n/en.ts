@@ -602,6 +602,7 @@ export const en: Dict = {
     scopeTitle: "Scope notes for this run",
     scopeMissing: "The pre-run check bound to this run cannot be read, so its scope notes are missing (no other check is used instead).",
     sourceCountNote: "Counts only describe the mix of source kinds; they are not a “percentage of truth”.",
+    osmCredit: "Restaurant and venue counts in the real data pack are derived from OpenStreetMap: © OpenStreetMap contributors, ODbL 1.0.",
     clonesTitle: "Clones",
     cloneYears: "Time lived: {{years}} y {{months}} m",
     openClone: "Open this life",

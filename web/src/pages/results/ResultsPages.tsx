@@ -424,6 +424,9 @@ function DataNatureView({ nature, pointer }: { nature: CityDataNature; pointer: 
       </p>
       <h3>{t("city.sourceKinds")}</h3>
       <p className="small muted">{t("city.sourceCountNote")}</p>
+      {nature.pack_status === "real_data_frozen" && (
+        <p className="small muted">{t("city.osmCredit")}</p>
+      )}
       <TableWrap label={t("city.sourceKinds")}>
         <table>
           <thead>
