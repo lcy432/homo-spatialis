@@ -2,7 +2,7 @@
 // 饼图与滑块（初始全部未答、鼠标拖动按整数步、“将其余项目设为 0”、撤销、刷新恢复）；兴趣与口味面板的特殊状态与互斥；
 // 不再有硬要求、属性偏好与文字解释；英文界面按能力清单的显示信封显示目录名称与说明。全部对着真实的本地服务。
 import { expect, test } from "@playwright/test";
-import { createInvite, shot, signIn, waitSaved } from "./helpers";
+import { ORIGIN, createInvite, shot, signIn, waitSaved } from "./helpers";
 
 async function newDraft(page: import("@playwright/test").Page, label: string): Promise<string> {
   await signIn(page, createInvite(label), "/start");
@@ -61,65 +61,123 @@ test("职业目录：没有结果 → 清除筛选；分组浏览；搜“程序
   await expect(page.locator('[data-granted="edu_at_least_bachelor"]')).toBeVisible();
 });
 
-test("饼图与滑块：初始全部未答；鼠标拖动按整数步、不自动补零；“将其余项目设为 0”；撤销；刷新恢复；物质为 0 不问内部", async ({ page }, info) => {
+test("独立评分：初始全部未答；鼠标拖动按整数、两次独立手势两条撤销（E5-R5）；记为 0；同等重视；父项 0 不问内部但答案留着；刷新恢复", async ({ page }, info) => {
   test.setTimeout(4 * 60_000);
-  const base = await newDraft(page, "e2e 饼图");
+  const base = await newDraft(page, "e2e 评分");
   await page.goto(`${base}/priorities`);
   const six = page.locator('[data-allocator="six_dimensions"]');
-  await expect(six.locator('[data-slice="unallocated"]')).toHaveCount(1);
+  await expect(six).toHaveAttribute("data-preview", "none");
   await expect(six.locator('[data-key][data-state="unanswered"]')).toHaveCount(6);
-  await expect(six.getByRole("status")).toHaveText("还剩 100 分未分配");
+  await expect(six.locator("[data-slice]")).toHaveCount(0);
   await expect(page.locator("[data-material]")).toHaveAttribute("data-material", "need_parent");
 
-  // 鼠标拖动安全的滑块到大约 40%：值是整数，池子按整数减少，没有累积误差；其他项仍是未答
+  // 鼠标：第一次点到大约 20%，第二次点到大约 40%；值都是整数；撤销一次回到第一次的值，再撤销回到未答（E5-R5）
   const slider = six.locator('[data-slider="safety"]');
+  const valueOf = async () => Number(await six.locator('[data-key="safety"] [data-value]').getAttribute("data-value"));
+  const clickAt = async (fraction: number) => {
+    await slider.scrollIntoViewIfNeeded();
+    const box = (await slider.boundingBox()) as { x: number; y: number; width: number; height: number };
+    await page.mouse.click(box.x + box.width * fraction, box.y + box.height / 2);
+  };
+  await clickAt(0.2);
+  await expect.poll(valueOf).toBeGreaterThan(0);
+  const first = await valueOf();
+  expect(Number.isInteger(first)).toBe(true);
+  // 第一次评分之后饼图说明多了两行、各行往下移：等版面稳定再量第二次的位置
+  await expect(six.getByRole("status")).toContainText("临时预览");
+  await page.waitForTimeout(150);
+  await clickAt(0.4);
+  await expect.poll(valueOf).toBeGreaterThan(first);
+  const second = await valueOf();
+  expect(Number.isInteger(second)).toBe(true);
+  await expect(six).toHaveAttribute("data-preview", "partial");
+  await expect(six.locator('[data-key][data-state="unanswered"]')).toHaveCount(5);
+  await six.getByRole("button", { name: "撤销" }).click();
+  await expect(six.locator('[data-key="safety"] [data-value]')).toHaveAttribute("data-value", String(first));
+  await six.getByRole("button", { name: "撤销" }).click();
+  await expect(six.locator('[data-key="safety"]')).toHaveAttribute("data-state", "unanswered");
+  await six.getByRole("button", { name: "重做" }).click();
+  await expect(six.locator('[data-key="safety"] [data-value]')).toHaveAttribute("data-value", String(first));
+  await shot(page, info, "ratings-drag");
+
+  // 拖动一项不改别的项；“记为 0”是明确的 0（撤销 / 重做按钮在上面，点过之后滑块可能滚出视口：先滚回来再量）
   await slider.scrollIntoViewIfNeeded();
   const box = (await slider.boundingBox()) as { x: number; y: number; width: number; height: number };
   const y = box.y + box.height / 2;
   await page.mouse.move(box.x + 2, y);
   await page.mouse.down();
-  await page.mouse.move(box.x + box.width * 0.2, y, { steps: 5 });
-  await page.mouse.move(box.x + box.width * 0.4, y, { steps: 5 });
+  await page.mouse.move(box.x + box.width * 0.6, y, { steps: 6 });
   await page.mouse.up();
-  const v = Number(await six.locator('[data-key="safety"] [data-value]').getAttribute("data-value"));
-  expect(Number.isInteger(v) && v > 0 && v < 100).toBe(true);
-  await expect(six.getByRole("status")).toHaveText(`还剩 ${100 - v} 分未分配`);
-  await expect(six.locator('[data-key][data-state="unanswered"]')).toHaveCount(5);
-  await expect(six.locator('[data-slice="unallocated"]')).toHaveCount(1);
-  await shot(page, info, "pie-drag");
-
-  // 精确输入：安全 80、物质 20 → 已分完，其余 4 项仍未答（不自动补零），出现“将其余 4 项设为 0”
-  await six.locator('input[name="six_dimensions.safety"]').fill("80");
-  await six.locator('input[name="six_dimensions.material"]').fill("20");
-  await expect(six.getByRole("status")).toHaveText("已分完");
-  await expect(six.locator('[data-key][data-state="unanswered"]')).toHaveCount(4);
-  await expect(six.locator('[data-slice="unallocated"]')).toHaveCount(0);
-  await expect(page.locator("[data-material]")).toHaveAttribute("data-material", "open");
-  const restZero = six.locator('[data-action="rest-zero"]');
-  await expect(restZero).toHaveText("将其余 4 项设为 0");
-  await restZero.click();
-  await expect(six.locator('[data-key][data-state="unanswered"]')).toHaveCount(0);
+  await expect.poll(valueOf).toBeGreaterThan(first);
+  const third = await valueOf();
+  expect(Number.isInteger(third)).toBe(true);
+  await six.locator('[data-key="leisure"] [data-action="zero"]').click();
   await expect(six.locator('[data-key="leisure"] [data-value]')).toHaveAttribute("data-value", "0");
-  // 撤销一次：四项回到未答；重做再设回 0
-  await six.getByRole("button", { name: "撤销" }).click();
-  await expect(six.locator('[data-key][data-state="unanswered"]')).toHaveCount(4);
-  await six.getByRole("button", { name: "重做" }).click();
-  await expect(six.locator('[data-key][data-state="unanswered"]')).toHaveCount(0);
+  await expect(six.locator('[data-key="leisure"]')).toHaveAttribute("data-state", "provided");
+  await expect(six.locator('[data-key="safety"] [data-value]')).toHaveAttribute("data-value", String(third));
 
-  // 物质 0：内部四项不需要填
+  // 数字框 120：原样保留并提示，不截断；改回 40
+  const safetyInput = six.locator('input[name="six_dimensions.safety"]');
+  await safetyInput.fill("120");
+  await expect(safetyInput).toHaveAttribute("aria-invalid", "true");
+  await expect(six.getByText(/每项评分在 0 到 100 之间/)).toBeVisible();
+  await safetyInput.fill("40");
+
+  // 同等重视：六项 50，权重各 50/3（临时预览）
+  await six.locator('[data-action="equal-weight"]').click();
+  await page.getByRole("dialog").getByRole("button", { name: "同等重视" }).click();
+  for (const k of ["material", "safety", "leisure"]) {
+    await expect(six.locator(`[data-key="${k}"] [data-value]`)).toHaveAttribute("data-value", "50");
+    await expect(six.locator(`[data-key="${k}"] [data-value]`)).toHaveAttribute("data-weight", "50/3");
+  }
+  await expect(six).toHaveAttribute("data-preview", "complete");
+
+  // 物质内部先填一项，再把父项改成 0：内部收起、标为不适用；父项改回正数后内部答案还在
+  await expect(page.locator("[data-material]")).toHaveAttribute("data-material", "open");
+  const material = page.locator('[data-allocator="material"]');
+  await material.locator('input[name="material.housing_condition"]').fill("70");
   await six.locator('input[name="six_dimensions.material"]').fill("0");
   await expect(page.locator("[data-material]")).toHaveAttribute("data-material", "zero");
-  await six.locator('input[name="six_dimensions.material"]').fill("20");
+  await expect(material).toHaveCount(0);
+  await six.locator('input[name="six_dimensions.material"]').fill("30");
   await expect(page.locator("[data-material]")).toHaveAttribute("data-material", "open");
+  await expect(page.locator('[data-allocator="material"] [data-key="housing_condition"] [data-value]')).toHaveAttribute("data-value", "70");
 
-  // 刷新后恢复的是服务器上保存的精确值
+  // 刷新后恢复的是服务器上保存的原始评分
   await waitSaved(page);
   await page.reload();
-  await expect(six.locator('[data-key="safety"] [data-value]')).toHaveAttribute("data-value", "80");
-  await expect(six.locator('[data-key="material"] [data-value]')).toHaveAttribute("data-value", "20");
-  await expect(six.locator('[data-key="leisure"] [data-value]')).toHaveAttribute("data-value", "0");
-  await expect(six.getByRole("status")).toHaveText("已分完");
-  await shot(page, info, "pie-full");
+  await expect(six.locator('[data-key="safety"] [data-value]')).toHaveAttribute("data-value", "50");
+  await expect(six.locator('[data-key="material"] [data-value]')).toHaveAttribute("data-value", "30");
+  await expect(page.locator('[data-allocator="material"] [data-key="housing_condition"] [data-value]')).toHaveAttribute("data-value", "70");
+  await shot(page, info, "ratings-full");
+});
+
+test("有相关经验但还没填年数：刷新后不变成“没有相关经验”（E5-R1）；填了年数再删掉回到未答", async ({ page }, info) => {
+  const base = await newDraft(page, "e2e 经验未完成");
+  await page.goto(`${base}/facts`);
+  await page.locator("[data-occupation-search]").fill("厨师");
+  await page.locator('[data-occupation="occ.soc_35_2014"] button').click();
+  const exp = page.locator('[data-field="experience"]');
+  await exp.locator('input[name="experience.state"][value="has"]').check();
+  await expect(exp.locator('input[name="experience.state"][value="has"]')).toBeChecked();
+  await waitSaved(page);
+  await page.reload();
+  await expect(exp).toBeVisible();
+  await expect(exp.locator('input[name="experience.state"][value="none"]')).not.toBeChecked();
+  await expect(exp.locator('input[name="experience.state"][value="has"]')).not.toBeChecked();
+  await expect(exp.locator('input[name="experience.state"][value="unanswered"]')).toBeChecked();
+  await shot(page, info, "experience-unfinished");
+  await exp.locator('input[name="experience.state"][value="has"]').check();
+  await exp.locator('input[name="experience.occ.soc_35_3031"]').fill("2");
+  // 等服务器真的存下（“已保存”可能是上一次的状态：按服务器上的草稿内容等）
+  const draftId = base.split("/draft/")[1] as string;
+  const savedState = async () => (await (await page.request.get(`${ORIGIN}/api/v1/drafts/${draftId}`)).json()).draft.experience.state as string;
+  await expect.poll(savedState, { timeout: 20_000 }).toBe("provided");
+  await exp.locator('input[name="experience.occ.soc_35_3031"]').fill("");
+  await expect.poll(savedState, { timeout: 20_000 }).toBe("unanswered");
+  await page.reload();
+  await expect(exp.locator('input[name="experience.state"][value="unanswered"]')).toBeChecked();
+  await expect(exp.locator('input[name="experience.state"][value="none"]')).not.toBeChecked();
 });
 
 test("兴趣与口味面板：特殊状态与已选类别互斥（切换时说清会清空什么）；状态名称与含义来自显示信封；审阅照实显示", async ({ page }, info) => {
@@ -175,6 +233,7 @@ test("英文界面：目录名称、职责、学历、面板与搜索说明来�
   await search.fill("teacher");
   await expect(page.locator("[data-no-match]")).toContainText("No occupation in the catalog matches");
   await search.fill("clerk");
+  await expect(page.locator('[data-group="it_tech"]')).toContainText("IT");
   await expect(page.locator('[data-occupation="occ.office_clerk"]')).toContainText("Office clerk");
   await expect(page.locator('[data-occupation="occ.office_clerk"]')).toContainText("Handling documents and spreadsheets");
   await page.locator('[data-occupation="occ.office_clerk"] button').click();
@@ -187,6 +246,11 @@ test("英文界面：目录名称、职责、学历、面板与搜索说明来�
   await waitSaved(page);
   await page.goto(`${base}/more`);
   await expect(page.locator('[data-panel="taste"] [data-panel-item="chinese"]')).toContainText("Chinese");
+  // 原生控件也用英文（E5-R7）：分组下拉的选项、移除已选项的读屏名称
+  await page.locator('input[name="taste.chinese"]').check();
+  const options = await page.locator('[data-panel="taste"] select option').allTextContents();
+  expect(options.join(" ")).not.toMatch(/[\u3400-\u9fff]/);
+  await expect(page.locator('[data-panel="taste"] [data-selected-key="chinese"] button')).toHaveAttribute("aria-label", /^Remove Chinese$/);
   await page.locator('[data-panel="taste"] [data-panel-search]').fill("sichuan");
   await expect(page.locator('[data-search-note="taste.chinese_regional"]')).toBeVisible();
   await waitSaved(page);

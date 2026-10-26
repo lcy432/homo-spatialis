@@ -37,7 +37,9 @@ test("未答、明确 0、无所谓分开保存；切换语言与外观不改答
   await page.goto(`${base}/review`);
   await expect(page.locator("[data-blockers]")).not.toHaveAttribute("data-blockers", "0", { timeout: 60_000 });
   const lines = page.locator('[data-compare="cmp-six_dimensions"]');
-  await expect(lines.locator('[data-line="material"]')).toHaveAttribute("data-exact", "0");
+  // 六维还不完整：没有权重（data-exact 为空）；原始评分 0 照实显示
+  await expect(lines.locator('[data-line="material"]')).toHaveAttribute("data-rating", "0");
+  await expect(lines.locator('[data-line="material"]')).not.toHaveAttribute("data-exact", /./);
   await expect(lines.locator('[data-line="environment"]')).toContainText("无所谓");
   await expect(lines.locator('[data-line="leisure"]')).toContainText("还没有回答");
 });
@@ -59,7 +61,7 @@ test("两个标签页改同一份草稿：后保存的一方看到冲突，可�
   await waitSaved(p2);
 });
 
-test("只用键盘：勾选城市、各项均分（对话框 Enter 确认）、Esc 关闭对话框后焦点回到按钮", async ({ page }) => {
+test("只用键盘：勾选城市、方向键评分、同等重视（对话框 Enter 确认）、Esc 关闭对话框后焦点回到按钮", async ({ page }) => {
   const base = await newDraft(page, "e2e 键盘");
   await page.getByRole("button", { name: "清除选择" }).focus();
   await page.keyboard.press("Enter");
@@ -70,17 +72,25 @@ test("只用键盘：勾选城市、各项均分（对话框 Enter 确认）、E
   await expect(first).toBeChecked();
 
   await page.goto(`${base}/priorities`);
-  const split = page.locator('[data-allocator="six_dimensions"]').getByRole("button", { name: "各项均分" });
-  await split.focus();
+  const six = page.locator('[data-allocator="six_dimensions"]');
+  // 键盘给评分：聚焦滑块、方向键 → 明确的整数评分
+  await six.locator('[data-slider="safety"]').focus();
+  await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("ArrowRight");
+  await expect(six.locator('[data-key="safety"] [data-value]')).toHaveAttribute("data-value", "2");
+  // 同等重视：已有答案会被替换 → 先出对话框；Esc 关闭后焦点回到按钮；Enter 确认后每项 50
+  const equal = six.getByRole("button", { name: "同等重视" });
+  await equal.focus();
   await page.keyboard.press("Enter");
   await expect(page.getByRole("dialog")).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).toBeHidden();
-  await expect(split).toBeFocused();
+  await expect(equal).toBeFocused();
   await page.keyboard.press("Enter");
-  await page.getByRole("dialog").getByRole("button", { name: "各项均分" }).focus();
+  await page.getByRole("dialog").getByRole("button", { name: "同等重视" }).focus();
   await page.keyboard.press("Enter");
-  await expect(page.locator('[data-allocator="six_dimensions"]').getByText(/每项 16.7 分（精确值 50\/3）/)).toBeVisible();
+  await expect(six.locator('[data-key="safety"] [data-value]')).toHaveAttribute("data-value", "50");
+  await expect(six).toHaveAttribute("data-preview", "complete");
 });
 
 test("地图上的城市点来自服务的地理清单：真实六城都有点；点一个点就是切换这座城，与列表同步", async ({ page }, info) => {

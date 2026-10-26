@@ -50,6 +50,9 @@ test.describe("手机 @mobile-only", () => {
     // 第 3 步：饼图与滑块（触屏尺寸）
     await page.goto(page.url().replace(/\/facts$/, "/priorities"));
     await expect(page.locator('[data-allocator="six_dimensions"] [data-slider="safety"]')).toBeVisible();
+    // 触屏尺寸下“记为 0”按钮可点：明确的 0
+    await page.locator('[data-allocator="six_dimensions"] [data-key="leisure"] [data-action="zero"]').click();
+    await expect(page.locator('[data-allocator="six_dimensions"] [data-key="leisure"] [data-value]')).toHaveAttribute("data-value", "0");
     await shot(page, info, "priorities");
     await expectNoHorizontalScroll(page);
     await expectAccessible(page, info, "priorities");

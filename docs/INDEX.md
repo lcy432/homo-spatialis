@@ -1,8 +1,29 @@
 # 项目索引
 
-**层与命名、轮次与状态、默认入口都只在这里写一次。** 其他文档不再各写一遍状态，只链接过来。改了状态、默认配置或命名，只改这一份。
+这里是读者、贡献者和编码代理共用的文档入口。**层与命名、轮次与状态、默认入口都只在这里维护。** 其他文档解释各自的主题，并链接到这里查询进度。
 
-更新：2026-10-24。
+文档导航更新：2026-10-26。各轮实现与核验状态见下方记录。
+
+<a id="reading-routes"></a>
+## 按问题阅读
+
+| 我想了解什么 | 从这里开始 |
+|---|---|
+| 项目为什么做、能体验什么 | [English README](../README.md) · [中文 README](../README.zh-CN.md) |
+| 在本机跑一遍、查看输出 | [复现说明](REPRODUCING.md) · [网页启动指南](../web/README.md) |
+| 生活如何执行、结果如何评价 | [方法概览](METHODS.md) → [详细设计](design/README.md) |
+| 城市资料从哪里来、怎样成为可选机会 | [数据与映射](DATA.md) → [贡献指南](../CONTRIBUTING.md) |
+| 找代码、改功能、运行检查 | [架构说明](ARCHITECTURE.md) → [开发指南](DEVELOPMENT.md) |
+| 研究问题、数学标尺和文献依据 | [研究方法](RESEARCH.md) · [参考文献](REFERENCES.md) |
+| 已经做到哪里、接下来做什么 | [当前状态](#status) · [版本路线](../PLAN.md) |
+| 查旧章节、早期设计与决策 | [历史导航](history/README.md) · [决策记录](../DECISIONS/README.md) |
+
+编码代理先读 [CLAUDE.md](../CLAUDE.md) 的共同规则，再按本表选择本次任务涉及的文档。研究方法、详细设计与历史记录按需阅读，不必为了修改一个模块通读全部历史。
+
+<a id="governance"></a>
+## 文档与实现不一致时
+
+项目所有者最新明确决定优先。愿景与当前范围看双语 README，版本方向看 PLAN，模块状态看本索引；具体机制与数值协议查有效的设计和 ADR。代码说明当前实际行为，文档说明目标与约束；两者不一致时先记录差距，再决定改哪边。历史材料只解释当时的背景，已被替代的规则不作为当前要求。
 
 ## 0. 现在怎么工作（开发期）
 
@@ -19,6 +40,7 @@
 
 运行清单不再记源码指纹：改了代码，旧运行照样可以续跑或重放（配置、规则、事实等内容身份照旧核对）。只在真正的设计决定时写简短 ADR（`DECISIONS/`）。
 
+<a id="layers"></a>
 ## 1. 层与命名
 
 旧的 E 编号与 M 编号都退役，统一用"层"。旧编号只在本表与历史文档里出现。
@@ -29,12 +51,13 @@
 | **代理层** agent | 规划接口、事实记忆、mock 与真实模型、传输层、预算、归档与重放 | E1-7A / E1-7B | M4 | `src/agentlayer/`、`src/orchestration/` | [e1-7](design/e1-7-agent-loop.md) |
 | **接入层** intake | 用户输入、职业匹配、标准初态、真实资料、共享消息结构 | E3（含 E3-A） | M1、M1.5 | `src/product/`、`src/common/product_contracts.py`、`src/common/intake_contracts.py`、`contracts/product/` | [共享约定](design/e3-e5-product-contract.md)、[E3-A](design/e3a-product-input.md)、[intake-02 真实资料](design/intake-02-real-data.md) |
 | **界面层** ui | 表单、进度、结果展示、网页入口 | E5 | M6 | `web/`（`src/ui/` 未使用） | [E5 网页](design/e5-web-ui.md)、[E5 → E3 交接单](handoffs/e5-bilingual-map-service-requests.md)、[E5-A（存档）](design/e5-a-offline-ui.md) |
-| **研究线** research | 大模型偏好理解评估（P8/P9/P10、三个门）、合成世界与人设、信息条件实验 | R、E4 | M3、M5 | `src/eval/`、`src/worlds/` | [README](../README.md) 第 3、7、10、11 章 |
+| **研究线** research | 大模型偏好理解评估（P8/P9/P10、三个门）、合成世界与人设、信息条件实验 | R、E4 | M3、M5 | `src/eval/`、`src/worlds/` | [研究方法](RESEARCH.md)、[参考文献](REFERENCES.md) |
 
-旧的福利模型核心（`src/econ/core.py`、`kernel.py`、`utility.py` 等，M2）属于研究线的真值标尺；跨国扩展（M7）是 V2，暂不归层。
+旧的福利模型核心（`src/econ/core.py`、`kernel.py`、`utility.py` 等，M2）属于研究线的真值标尺；跨国比较是长期方向，版本安排见 [PLAN](../PLAN.md)。
 
 轮次编号：`层-序号`，例如 `engine-05c`、`agent-04`。已经写进 ADR 与 `runs/` 目录名的旧编号不改。
 
+<a id="status"></a>
 ## 2. 轮次与状态
 
 状态只用：**计划中** / **进行中** / **已实现**。"已实现"表示代码在、测试通过；"备注"里注明它曾经过的研究期独立审核（开发期不再要求）。
@@ -85,12 +108,13 @@
 | 编号 | 旧编号 | 内容 | 状态 | 备注 | ADR |
 |---|---|---|---|---|---|
 | ui-01 | E5-A | 离线界面原型（React + TypeScript + Vite，`web/`；读共享结构 v2 的公共样例） | 已实现（已被 ui-02 取代，存档） | 说明见 [e5-a](design/e5-a-offline-ui.md)（存档） | [0036](../DECISIONS/0036-e5a-offline-ui.md) |
-| ui-02 | E5-B / E5-C | 网页接 E3C 托管服务（共享结构 v3.4、服务 API v1.3、显示附层 v2）：专属链接换会话、服务器草稿（自动保存、冲突由用户选）、输入页按 E3 的目录与结构（职业目录分组 + 搜索 + 直接选、学历单选、证书多选、按需的经验题、饼图 + 滑块的定和分配、兴趣与口味多选面板、旧草稿迁移；没有硬要求、属性偏好与文字解释）、审阅与确认（知悉项说明按 ack_id）、运行选项与意图、确认开始（幂等）、只读轮询、恢复 / 取消 / 删除、我的运行；结果三层（城市比较 → 单城详情 → 分身年度记录）；双语：界面字典 + E3 业务文字按显示信封取英文（缺译显示原文并标“未翻译”）；历史结果的地图用结果绑定的显示资源版本；默认稿纸 + 平面地图，可切换的写实地球（react-globe.gl，可拖动）；显示语言与模型语言是开局选项。次数、排队、预算、后台调度与删除过期由 E3C 负责，界面不另做 | 进行中 | 本地 mock 主闭环（浏览器 → E3C → worker → LangGraph → E1）与输入页由 Playwright 自动验收（桌面 + 手机）；2026-10-25 接了 E3 的 v3.4 输入目录、显示附层 v2 与历史版本规则。还开着：模型语言字段、事件链里 E1 中文句子的结构化绑定、旧草稿迁移的浏览器测试，见 [交接单](handoffs/e5-bilingual-map-service-requests.md) 第 14–16 节；说明见 [e5-web-ui](design/e5-web-ui.md) | [0045](../DECISIONS/0045-e5-web-dual-mode-bilingual.md) |
+| ui-02 | E5-B / E5-C | 网页接 E3C 托管服务（共享结构 v3.5、服务 API v1.4、显示附层 v2）：专属链接换会话、服务器草稿（自动保存、冲突由用户选）、输入页按 E3 的目录与结构（职业目录分组 + 搜索 + 直接选、学历单选、证书多选、按需的经验题、六维与物质四项的独立评分（0–100 滑块 + 数字精调、临时权重预览、同等重视）、兴趣与口味多选面板、旧草稿迁移（同意 + 重新评分 / 同等重视的选择）；没有硬要求、属性偏好与文字解释）、审阅与确认（原始评分与精确权重分开、知悉项说明按 ack_id）、本次设置预览与一次“确认并开始”（发送前存找回记录、同键找回、作废后 start_again）、同一个等待页（progress_summary 的进度条与一句话、授权状态）、只读轮询、恢复 / 取消 / 删除、我的运行；结果三层（城市比较 → 单城详情 → 分身年度记录）；双语：界面字典 + E3 业务文字按显示信封的字段位置取英文（缺译显示原文并标“未翻译”，原生控件也取英文）；历史结果的地图只用结果绑定的显示资源版本（为空就不请求）；默认稿纸 + 平面地图，可切换的写实地球（react-globe.gl，可拖动）；显示语言与模型语言是开局选项。次数、排队、预算、后台调度与删除过期由 E3C 负责，界面不另做 | 进行中 | 本地 mock 主闭环（浏览器 → E3C → worker → LangGraph → E1）、输入页、迁移、历史地图、一次开始的找回由 Playwright 自动验收（桌面 + 手机）；2026-10-26 修了独立核查的 E5-R1–R7（R6 以独立评分替换解决）并接上 v3.5 / API v1.4：独立评分、设置预览与一次开始、进度摘要。修复及离线自测完成，待独立复核；没有部署、没有真实模型。还开着：模型语言字段、事件链里 E1 中文句子的结构化绑定、真正旧版运行的浏览器联验，见 [交接单](handoffs/e5-bilingual-map-service-requests.md) 第 17–19 节；说明见 [e5-web-ui](design/e5-web-ui.md) | [0045](../DECISIONS/0045-e5-web-dual-mode-bilingual.md) |
 
 ### 研究线
 
-P8 / P9 / P10 已实现，门一已过，门二与门三待真实输入；开发期暂停，开发完成后再一次性重跑。见 [README](../README.md) 第 10、11 章。
+P8 / P9 / P10 已实现，门一已过，门二与门三待真实输入；开发期暂停，开发完成后再一次性重跑。定义与判据见[研究方法](RESEARCH.md#research-gates)。
 
+<a id="entry-points"></a>
 ## 3. 默认入口与配置
 
 | 用途 | 配置 |
@@ -107,23 +131,30 @@ P8 / P9 / P10 已实现，门一已过，门二与门三待真实输入；开发
 
 模型角色在 `configs/models.yaml`：研究基座 `base_a` / `base_b`，产品 `product_planner`（Flash，全规模测试也用它），测试 `test_planner_sonnet`（Sonnet，非全量测试默认）与 `test_planner`（Haiku）。密钥在 `.env`。
 
+<a id="document-roles"></a>
 ## 4. 文档各管什么
 
 | 文档 | 只放 |
 |---|---|
-| [README](../README.md) | 愿景、产品流程、方法、研究问题 |
-| [CLAUDE.md](../CLAUDE.md) | 编码代理每次要读的不变量、安全约束与工作方式 |
-| [PLAN.md](../PLAN.md) | 当前阶段与下一步 |
-| 本文件 | 层与命名、轮次与状态、默认入口 |
+| [README](../README.md) / [中文 README](../README.zh-CN.md) | 项目动机、体验入口、当前范围与路线摘要；两种语言保持相同事实 |
+| [METHODS](METHODS.md) | 生活模拟的方法概览、评价方式与验证边界 |
+| [REPRODUCING](REPRODUCING.md) / [网页指南](../web/README.md) | 安装、试跑、输出与检查步骤 |
+| [ARCHITECTURE](ARCHITECTURE.md) / [DEVELOPMENT](DEVELOPMENT.md) | 模块职责、代码入口与开发方式 |
+| [DATA](DATA.md) / [CONTRIBUTING](../CONTRIBUTING.md) | 资料来源与映射、贡献入口与城市接入方向 |
+| [RESEARCH](RESEARCH.md) / [REFERENCES](REFERENCES.md) | 研究问题、静态数学标尺、实验方法与文献依据 |
+| [CLAUDE.md](../CLAUDE.md) | 编码代理共用的不变量、安全约束与工作方式；[AGENTS.md](../AGENTS.md) 只负责引路 |
+| [PLAN.md](../PLAN.md) | 版本方向与未来工作 |
+| 本文件 | 阅读路线、文档分工、层与命名、轮次与状态、默认入口 |
 | [DECISIONS/](../DECISIONS/) | 为什么这样定（只在真正的设计决定时写） |
 | [docs/design/](design/README.md) | 公式、代码位置、手算例子、省略了什么 |
 | [参数与假设目录](design/parameter-assumption-register.md) | 参数的含义、取值与是否标定 |
 | `runs/` | 运行输出；只在本机、不进 git，开发期可以清理、覆盖 |
 | `ledgers/` | 付费预算账本（每本一个 `ledger.sqlite`，进 git） |
-| [docs/history/](history/) | 旧版文档的完整存档（2026-10-18 重构之前的 CLAUDE.md、PLAN、README、设计索引） |
+| [历史导航](history/README.md) | 旧版文档的完整存档与旧章节对应；保留 2026-10-18、2026-10-26 两次拆分前的记录 |
 
-历史文档里的"PLAN §3.0.x"指存档里的 [旧 PLAN](history/pre-dev-refactor-2026-10-18/PLAN.md)。
+历史文档里的“PLAN §3.0.x”指 [2026-10-18 之前的 PLAN](history/pre-dev-refactor-2026-10-18/PLAN.md)；旧“README §…”可以从[历史导航](history/README.md)定位。新文档直接链接主题页与稳定锚点。
 
+<a id="glossary"></a>
 ## 5. 词汇表
 
 | 词 | 意思 |
