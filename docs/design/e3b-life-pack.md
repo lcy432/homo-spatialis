@@ -1,5 +1,7 @@
 # E3B 六城真实生活资料包：组装、冻结与产品链
 
+[English](e3b-life-pack.en.md) · 简体中文
+
 本说明讲六城资料包怎样从三块冻结资料组装成 E1 能跑的输入，以及怎样走产品链。引擎机制的决定见
 [ADR0042](../../DECISIONS/0042-e3b-real-life-pack.md)；通勤资料见 [e3b-commute-data](e3b-commute-data.md)，食品、服务、设备、活动
 与职业见 [e3b-items-data](e3b-items-data.md)；官方税规则见 `configs/intake/tax_us_2024.yaml`；所有设定与映射登记在

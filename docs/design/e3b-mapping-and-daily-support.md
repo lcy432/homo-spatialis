@@ -1,5 +1,7 @@
 # E3B 映射修正：完整 B 分布、A 共同结构、日常支持与抽象消费篮子
 
+[English](e3b-mapping-and-daily-support.en.md) · 简体中文
+
 更新：2026-10-24。规则见 [ADR0044](../../DECISIONS/0044-e3b-mapping-daily-support.md)；给界面层的迁移说明见 [E3B 映射修正 → E5](../handoffs/e3b-mapping-to-e5.md)；参数行见 [参数与假设目录](parameter-assumption-register.md) 的 PI-18、PI-20、PI-23、PI-29、PI-35、PI-43、PI-44、PI-47、PI-48、PI-51–PI-56 与 SC-16、SC-23、SC-25。
 
 所有生活参数仍是合成探索设定；城市资料来自公开来源，但不能据此排序真实城市。

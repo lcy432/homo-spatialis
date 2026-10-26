@@ -1,10 +1,12 @@
 # 参数与假设目录：合成世界、数据抽象与代理认知
 
+[English](parameter-assumption-register.en.md) · 简体中文
+
 > **2026-10-19 起只保留产品版（[ADR0037](../../DECISIONS/0037-life-keep-only-product-version.md)）：** 本文的手算例子与配置名来自当时的样例（`synthetic_e1_*`、`run_e1_7b_*` 等），这些配置与旧版本的规则、评分、模板已从仓库删除；机制与公式仍是现行代码的说明，现行样例是 `configs/life/*_product.yaml`。
 
 > 超参数附录，登记基线：2026-10-08。本文记录“我们设定了什么、它改变什么、以后怎样检查”，不代表这些设定已经被现实验证。
 
-**阅读入口：** [README](../../README.md) 讲愿景；[PLAN](../../PLAN.md) 讲阶段；[ADR0022](../../DECISIONS/0022-parameter-register-and-e1-5-scope.md) 规定登记义务；本目录把分散在配置、代码和讨论里的参数与假设放到一起。公式细节仍见 [E1-3](e1-3-life-model.md) 和 [E1-4](e1-4-time-energy.md)。
+**阅读入口：** [README](../../README.zh-CN.md) 讲愿景；[PLAN](../../PLAN.md) 讲阶段；[ADR0022](../../DECISIONS/0022-parameter-register-and-e1-5-scope.md) 规定登记义务；本目录把分散在配置、代码和讨论里的参数与假设放到一起。公式细节仍见 [E1-3](e1-3-life-model.md) 和 [E1-4](e1-4-time-energy.md)。
 
 快速查找：[满足感](#scoring) · [钱与物品](#accounting) · [时间精力与α](#resources) · [数据映射](#mapping) · [代理认知](#information) · [E1-5](#long-term) · [E1-6](#evaluation) · [E1-7A](#agent-loop) · [旧经济/研究模块](#legacy) · [V2](#v2) · [V3怎样研究](#v3)。每行有稳定编号，例如 FB-01 就是反馈强度α。
 

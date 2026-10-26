@@ -1,53 +1,55 @@
-# 贡献指南
+# Contributing
 
-欢迎贡献你感兴趣城市的一小块可靠资料、映射方法或验证结果。无需先完成整座城市，也无需有机构或论文背景。先开一个 issue 说明城市、资料来源和准备解决的问题，再提交一个范围明确的 PR。
+English · [简体中文](CONTRIBUTING.zh-CN.md)
 
-V1.1 将建立统一的城市资料提交与校验流程，目前仍在搭建。下面的要求适用于现在可以提出的资料、映射和代码贡献。先了解现有做法可读[数据与映射](docs/DATA.md)，开发环境与代码入口见[开发指南](docs/DEVELOPMENT.md)。
+Contribute a reliable piece of city data, a mapping method, or a validation result. You do not need to cover an entire city or have an institutional affiliation or publication record. Start with an issue describing the city, source, and problem, then submit a focused pull request.
 
-## 每次贡献提交什么
+V1.1 will introduce a common submission and validation process for city data; that process is still being built. These requirements apply to contributions you can propose today. Read [data and mapping](docs/DATA.en.md) for the current approach and the [development guide](docs/DEVELOPMENT.en.md) for setup and code locations.
 
-- **代码或映射方法**：说明问题、修改原因、输入输出，以及能证明修改的例子。改变环境数值、映射或评价假设时，同时更新 [参数与假设目录](docs/design/parameter-assumption-register.md)。经济公式调整遵循 [项目约束](CLAUDE.md)。
-- **城市资料**：给出下表的来源记录；优先提交获取脚本、小型公开样例及转换规则。原始下载文件不默认进入仓库。
-- **验证或失败案例**：记录软件提交 / 版本、资料包及配置、种子、规划器和实际模型版本、预期与观察结果。mock 结果、合成实验和现实观测分开报告；失败和未知都保留。
-- **文档或翻译**：指出所对应的实现和资料版本，避免将计划中的能力写成已经完成。
+## What to include
 
-城市资料最小来源记录（可直接写在 PR 描述中；合并时保存到相关配置或资料清单）：
+- **Code or mapping methods:** explain the problem, reason for the change, inputs and outputs, and an example that demonstrates the result. Changes to environment values, mappings, or evaluation assumptions must also update the [parameter and assumption register](docs/design/parameter-assumption-register.en.md). Follow the [project rules (Chinese)](CLAUDE.md) when changing economic formulas.
+- **City data:** supply the provenance record below. Prefer acquisition scripts, small public samples, and transformation rules. Raw downloads are not included in the repository by default.
+- **Validation or failure cases:** record the software commit or version, data pack and configuration, seeds, planner and actual model version, and expected and observed results. Report mock runs, synthetic experiments, and real-world observations separately. Retain failures and unknowns.
+- **Documentation or translations:** identify the implementation and data version described. Distinguish planned capabilities from implemented behavior.
 
-| 字段 | 应说明的内容 |
+For city data, include this minimum provenance record in the PR description. On merge, it belongs in the relevant configuration or source manifest.
+
+| Field | What to record |
 |---|---|
-| 贡献者 | 愿意公开的姓名 / 账号、贡献类别 |
-| 城市与空间范围 | 城市标识，市区 / 都市圈 / 州等边界；不混用 |
-| 发布者与来源 | 数据集 / 表 / 字段、原始链接、发布日期或版本、访问日期 |
-| 许可与再分发依据 | 许可名称和条款链接、是否允许再分发 / 改编、署名要求；不能只写“网上公开” |
-| 数值口径 | 单位、币种、基年、含税与否、月 / 年频率、统计对象 |
-| 转换与映射 | 原始字段到引擎字段的规则、代码 / 配置位置、代理变量与插补假设 |
-| 缺失和局限 | 不可得的字段、覆盖范围、已知偏差；未知不能填零或由 LLM 编造 |
-| 核验 | 一条可追溯原始记录、转换示例、检查命令与结果 |
+| Contributor | Public name or account, and type of contribution |
+| City and geography | City identifier and boundaries: city proper, metropolitan area, state, or another defined area; do not mix them |
+| Publisher and source | Dataset, table, fields, original URL, publication date or version, and access date |
+| License and redistribution | License name and terms, permission to redistribute or adapt, and attribution requirements; “publicly available online” is not a license |
+| Measurement basis | Units, currency, base year, tax treatment, monthly or annual frequency, and population measured |
+| Transformation and mapping | Source-to-engine field rules, code or configuration locations, proxies, and imputation assumptions |
+| Gaps and limitations | Missing fields, coverage, and known biases; do not replace unknowns with zero or LLM-generated values |
+| Verification | A traceable source record, a worked transformation, and check commands and results |
 
-已有来源记录可参考 [美国资料来源清单](configs/intake/us_v1.yaml) 和 [冻结资料报告](data/frozen/intake/us-v1/reports/sources.json)。它们记录已有核查，不代表所有第三方材料均适用 Apache-2.0。遇到 ODbL 等许可时，应按该资料的具体要求处理署名、数据库共享及分发边界；无法确认再分发权时，只提交来源与方法，先讨论后收录数据。
+Examples are available in the [US source manifest](configs/intake/us_v1.yaml) and [frozen source report](data/frozen/intake/us-v1/reports/sources.json). These document the checks performed; they do not place every third-party source under Apache-2.0. For licenses such as ODbL, follow the source's requirements for attribution, database sharing, and redistribution. If redistribution rights are unclear, contribute the source reference and method first and discuss whether the data can be included.
 
-## 许可与来源承诺
+## Licensing and provenance
 
-提交原创代码、文档或配置，表示你有权提交，并同意按本项目的 **Apache-2.0** 许可接收这些贡献；你保留相应著作权。不要求为普通贡献签署著作权转让文件。
+By contributing original code, documentation, or configuration, you confirm that you have the right to submit it and agree to its inclusion under **Apache-2.0**. You retain your copyright. Ordinary contributions do not require a copyright assignment.
 
-第三方资料、代码和素材必须标明原始权利人及原许可，保留需要的声明；不能未经授权将其改标为 Apache-2.0。原创数据需明确单独的数据许可，再由维护者确认是否可接收。不得提交密钥、私密资料、真实用户画像或未经授权的个人信息。
+Identify the original rights holders and licenses of third-party data, code, and assets, and retain required notices. Do not relabel them as Apache-2.0 without authorization. Original data needs an explicit, separate data license and maintainer review before inclusion. Do not submit credentials, private material, real users' private profiles, or unauthorized personal information.
 
-PR 请确认：
+Please confirm in your PR:
 
-- 我有权提交所包含的内容；原创代码 / 文档 / 配置按 Apache-2.0 提交，第三方及数据材料已另列来源与许可。
-- 我说明了真实观测、代理映射与合成设定的区别，并保留缺失和失败记录。
-- 我提供了相关验证，以及希望公开的署名方式。
+- I have the right to submit this material. Original code, documentation, and configuration are submitted under Apache-2.0; third-party material and data have their sources and licenses listed separately.
+- I distinguish observations, proxy mappings, and synthetic assumptions, and retain missing-data and failure records.
+- I provide relevant validation and my preferred public attribution.
 
-## 检查与署名
+## Checks and attribution
 
-安装和最小演示见 [复现说明](docs/REPRODUCING.md)。代码改动按项目约定运行以下离线检查；不要在未经同意时发起付费模型调用。
+Installation and the smallest runnable example are in the [reproduction guide](docs/REPRODUCING.en.md). For code changes, run the project's offline checks. Obtain agreement before making paid model calls.
 
-```text
+~~~text
 uv run --frozen pytest -n auto
 uv run --frozen ruff check src tests scripts
 uv run --frozen ruff format --check src tests scripts
-```
+~~~
 
-涉及网页时另按 [web/README.md](web/README.md) 验证。合并时同步 [AUTHORS.md](AUTHORS.md) 的贡献记录和对应城市资料的出处；每次发布再确认软件作者名单。
+For web changes, also follow the [web guide](web/README.en.md). On merge, update the contribution record in [authors and attribution](AUTHORS.en.md) and the relevant city-data provenance. Confirm the software author list for each release.
 
-我们希望研究使用者按 [CITATION.cff](CITATION.cff) 引用软件，同时引用实际使用的数据来源。这是学术引用请求，不是附加的许可证限制，也不保证每次使用都会形成学术引用。Apache-2.0 本身规定的许可、版权与相关声明义务仍应遵守。
+We ask researchers to [cite the software](CITATION.cff) and the data sources they use. This is a request for scholarly attribution, not an additional license restriction or a guarantee of citation. Apache-2.0's license, copyright, and notice requirements still apply.

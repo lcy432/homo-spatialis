@@ -1,5 +1,7 @@
 # 文献与设计来源
 
+[English](REFERENCES.en.md) · 简体中文
+
 [返回文档索引](INDEX.md) · [研究方法](RESEARCH.md) · [生活模拟的方法](METHODS.md)
 
 这里整理项目动机和设计用到的文献，说明每篇工作与项目的具体关系。文献提供问题、方法和对照；项目当前实现见[项目索引](INDEX.md)，具体设计取舍见[决策记录](../DECISIONS/README.md)。

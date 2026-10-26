@@ -54,7 +54,7 @@ uv run python scripts/run_product_full.py --mock --out runs/first-run
 
 This runs the full simulation process on a small synthetic example using an offline planner. No API key is needed. The run summary is saved to `runs/first-run/summary.json`. Use a new output directory for each run.
 
-For the browser interface, follow the [web setup guide](web/README.md). It uses Node.js 22 and includes a local mode with the six-city dataset. The [reproduction guide](docs/REPRODUCING.md) covers the environment, saved outputs, and checks in more detail.
+For the browser interface, follow the [web setup guide](web/README.en.md). It uses Node.js 22 and includes a local mode with the six-city dataset. The [reproduction guide](docs/REPRODUCING.en.md) covers the environment, saved outputs, and checks in more detail.
 
 ## Current scope
 
@@ -85,7 +85,7 @@ $$
 \end{aligned}
 $$
 
-B preserves observed relationships and uses explicit assumptions where sources cannot be linked. The bundled six-city data still lacks qualifying quotes for A's update. See [data mapping](docs/DATA.md#mapping-methods) for both methods.
+B preserves observed relationships and uses explicit assumptions where sources cannot be linked. The bundled six-city data still lacks qualifying quotes for A's update. See [data mapping](docs/DATA.en.md#mapping-methods) for both methods.
 
 ### From choices to a life trajectory
 
@@ -95,7 +95,7 @@ $$
 x_{m+1}=F(x_m,a_y,\mathcal O_c,\varepsilon_m;\theta).
 $$
 
-Subscripts y, m, and c denote the year, month, and city. Money, time, and energy constrain today's choices; learning, spending, and health change tomorrow's possibilities. The [life model](docs/METHODS.md#life-kernel) defines these relationships.
+Subscripts y, m, and c denote the year, month, and city. Money, time, and energy constrain today's choices; learning, spending, and health change tomorrow's possibilities. The [life model](docs/METHODS.en.md#life-kernel) defines these relationships.
 
 ### From lived conditions to personal evaluation
 
@@ -107,9 +107,9 @@ f(z)=\min\left(c,\frac{z}{z+\tau}\right),
 B_m=\sum_{k=1}^{6}w_k s_{k,m}.
 $$
 
-Here z measures the conditions or services actually obtained, c caps the response, and τ controls how quickly it levels off. Component scores combine into six dimension scores s, weighted by the person's stated preferences w. Health enters the [monthly evaluation](docs/METHODS.md#monthly-scoring) separately; [longer-term evaluation](docs/METHODS.md#terminal-evaluation) also considers the life supported by remaining cash, skills, and equipment.
+Here z measures the conditions or services actually obtained, c caps the response, and τ controls how quickly it levels off. Component scores combine into six dimension scores s, weighted by the person's stated preferences w. Health enters the [monthly evaluation](docs/METHODS.en.md#monthly-scoring) separately; [longer-term evaluation](docs/METHODS.en.md#terminal-evaluation) also considers the life supported by remaining cash, skills, and equipment.
 
-Full formulas, assumptions, and implementation notes are collected in the [documentation index](docs/INDEX.md). See also the [research methods](docs/RESEARCH.md) and [references](docs/REFERENCES.md).
+Full formulas, assumptions, and implementation notes are collected in the [documentation index](docs/INDEX.en.md). See also the [research methods](docs/RESEARCH.en.md) and [references](docs/REFERENCES.en.md).
 
 ## License
 

@@ -1,5 +1,7 @@
 # Homo Spatialis：首版模拟引擎方法报告
 
+[English](METHODS.en.md) · 简体中文
+
 作者：**Chengyu Liu**。软件版本：**0.1.0**。本文随源码发布，是软件方法说明，不是已发表论文或同行评审结论。版本发布进度见[项目索引](INDEX.md#status)，运行与检查步骤见[复现说明](REPRODUCING.md)。
 
 ## 1. 问题与研究动机
@@ -31,7 +33,7 @@ flowchart LR
 
 关键实现位于 `src/product/`、`src/agentlayer/`、`src/orchestration/`、`src/ledger/` 和 `src/econ/`；具体公式及代码对应见 [技术设计索引](design/README.md)。参数值、现实资料与探索性设定的区别见 [参数与假设目录](design/parameter-assumption-register.md)。
 
-项目发起人与贡献说明见 [AUTHORS.md](../AUTHORS.md)。
+项目发起人与贡献说明见 [作者与贡献者](../AUTHORS.md)。
 
 <a id="life-kernel"></a>
 ## 3. 生活引擎的数学逻辑

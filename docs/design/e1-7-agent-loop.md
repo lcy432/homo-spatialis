@@ -1,5 +1,7 @@
 # E1-7 代理规划闭环
 
+[English](e1-7-agent-loop.en.md) · 简体中文
+
 > **2026-10-19 起只保留产品版（[ADR0037](../../DECISIONS/0037-life-keep-only-product-version.md)）：** 本文的手算例子与配置名来自当时的样例（`synthetic_e1_*`、`run_e1_7b_*` 等），这些配置与旧版本的规则、评分、模板已从仓库删除；机制与公式仍是现行代码的说明，现行样例是 `configs/life/*_product.yaml`。
 
 > 长期技术说明。E1-7A（2026-10-12）：**已实现、自测通过，待独立复核**；规则见 [ADR0030](../../DECISIONS/0030-life-e1-7a-agent-planning-loop.md)，任务原文见

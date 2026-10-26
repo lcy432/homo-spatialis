@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-本文件集中维护编码代理共用的**约束与工作方式**，`AGENTS.md` 只负责路由。项目介绍见 [README.md](README.md)，方法见 [METHODS](docs/METHODS.md)，代码职责见 [ARCHITECTURE](docs/ARCHITECTURE.md)。状态、命名与默认入口见 [项目索引](docs/INDEX.md)，开发步骤见 [DEVELOPMENT](docs/DEVELOPMENT.md)，下一步见 [PLAN.md](PLAN.md)，设计理由见 [决策记录](DECISIONS/README.md)。
+本文件集中维护编码代理共用的**约束与工作方式**，`AGENTS.md` 只负责路由。项目介绍见 [README.md](README.zh-CN.md)，方法见 [模型与评价](docs/METHODS.md)，代码职责见 [架构说明](docs/ARCHITECTURE.md)。状态、命名与默认入口见 [项目索引](docs/INDEX.md)，开发步骤见 [开发指南](docs/DEVELOPMENT.md)，下一步见 [版本路线](PLAN.md)，设计理由见 [决策记录](DECISIONS/README.md)。
 
 > 本文件保持无标记差异（不用删除线、不写"某日补记"）。2026-10-18 之前的完整版本存档在 docs/history/pre-dev-refactor-2026-10-18/CLAUDE.md。
 
@@ -69,9 +69,9 @@
 
 ## 研究线硬规则（改 src/eval/、src/worlds/ 或旧福利模型核心时适用）
 
-研究线当前安排见 [项目索引](docs/INDEX.md)；以下规则适用于研究代码。现行方法从 [研究问题](docs/RESEARCH.md#research-questions)、[经济标尺](docs/RESEARCH.md#economics)、[偏好回收](docs/RESEARCH.md#recovery)、[抽样](docs/RESEARCH.md#sampling) 和 [测量地板](docs/RESEARCH.md#floor) 阅读；三个研究门见 [研究门](docs/RESEARCH.md#research-gates)，`make gates` 目前只跑门一。文献依据见 [REFERENCES](docs/REFERENCES.md)。
+研究线当前安排见 [项目索引](docs/INDEX.md)；以下规则适用于研究代码。现行方法从 [研究问题](docs/RESEARCH.md#research-questions)、[经济标尺](docs/RESEARCH.md#economics)、[偏好回收](docs/RESEARCH.md#recovery)、[抽样](docs/RESEARCH.md#sampling) 和 [测量地板](docs/RESEARCH.md#floor) 阅读；三个研究门见 [研究门](docs/RESEARCH.md#research-gates)，`make gates` 目前只跑门一。文献依据见 [参考文献](docs/REFERENCES.md)。
 
-下列保留的 `§` 章节号指向 [拆分前 README 存档](docs/history/pre-readme-split-2026-10-26/README.md)，便于追溯原推导，不再指 GitHub 首页。当前主题说明以 [RESEARCH](docs/RESEARCH.md) 和相关决策记录为入口；噪声标定见 [重复选择与噪声](docs/RESEARCH.md#noise)，区间估计与报告见 [数值精度](docs/RESEARCH.md#precision)。
+下列保留的 `§` 章节号指向 [拆分前 README 存档](docs/history/pre-readme-split-2026-10-26/README.md)，便于追溯原推导，不再指 GitHub 首页。当前主题说明以 [研究方法](docs/RESEARCH.md) 和相关决策记录为入口；噪声标定见 [重复选择与噪声](docs/RESEARCH.md#noise)，区间估计与报告见 [数值精度](docs/RESEARCH.md#precision)。
 
 8. **M2 必须对国家无知（country-blind）。** 纯函数 `indirect_utility(y_net, p, a, params)` 只吃标准化量，不接触任何原始列、不知道城市、不知道国家。若 `src/econ/` 里出现 `if country == ...`，说明上游抽象漏了，修上游不修 M2。验收标准是 `FAKE_COUNTRY` fixture 跑通时 M2 一行不改。
 9. **支出份额 `s` 是 `Persona` 的字段，不是 `(Persona, City)` 的函数。** 装配层不得持有 CEX provider 的引用，`_price_index` 只读 `persona.shares`。这条**通过删除依赖注入来保证，不是通过加断言**。理由见 §5.2.2：按城市查表会同时毁掉价格指数的定义、`κ` 的跨城不变性、以及条件 logit 的正确设定，而这三条在排序测试里都发现不了。

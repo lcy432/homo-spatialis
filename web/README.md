@@ -1,6 +1,8 @@
 # 网页开发与本地试用
 
-[项目首页](../README.md) · [文档索引](../docs/INDEX.md) · [开发指南](../docs/DEVELOPMENT.md) · [网页设计](../docs/design/e5-web-ui.md)
+[English](README.en.md) · 简体中文
+
+[项目首页](../README.zh-CN.md) · [文档索引](../docs/INDEX.md) · [开发指南](../docs/DEVELOPMENT.md) · [网页设计](../docs/design/e5-web-ui.md)
 
 用户在浏览器里走完“专属链接 → 开局设置 → 填写与审阅 → 本次设置 → 确认并开始 → 进度 → 城市比较 → 单城详情 → 分身年度生活”。
 偏好输入使用 v3.5 的独立评分：每项 0–100，不必凑满 100；审阅时分别展示原始评分与服务换算的权重。

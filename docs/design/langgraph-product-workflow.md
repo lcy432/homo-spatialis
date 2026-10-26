@@ -1,5 +1,7 @@
 # LangGraph 产品外层流程（原型）
 
+[English](langgraph-product-workflow.en.md) · 简体中文
+
 更新：2026-10-18（本地时区 UTC−7）。分支 `langgraph-workflow-prototype`（独立 worktree `C:/dev/homo-spatialis-langgraph`）。任务原文与
 两次补充指示见 [prompt 归档](prompts/2026-10-18-langgraph-product-workflow.md)。证据分两轮：
 

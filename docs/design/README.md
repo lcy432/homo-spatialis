@@ -1,5 +1,7 @@
 # 技术设计说明
 
+[English](README.en.md) · 简体中文
+
 这里放供人和编码代理反复查阅的技术说明：一个机制怎样变成数据、公式、代码与测试，省略了什么、影响谁。**进度与状态不写在这里**，见 [docs/INDEX.md](../INDEX.md)。2026-10-18 之前带状态的旧版本索引存档在 [docs/history/pre-dev-refactor-2026-10-18/docs-design-README.md](../history/pre-dev-refactor-2026-10-18/docs-design-README.md)。
 
 第一次阅读可从[方法概览](../METHODS.md)开始；找代码看[架构](../ARCHITECTURE.md)，了解城市资料看[数据与映射](../DATA.md)，安装与修改看[开发指南](../DEVELOPMENT.md)。研究测量及其文献已从主 README 移到[研究方法](../RESEARCH.md)和[参考文献](../REFERENCES.md)。全部入口见[项目索引](../INDEX.md#reading-routes)。

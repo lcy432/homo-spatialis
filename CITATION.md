@@ -1,10 +1,12 @@
 # 引用、署名与使用说明 / Citation and attribution
 
+[English](CITATION.en.md) · 简体中文
+
 If you use Homo Spatialis in research, please cite the software version you used, acknowledge the original authors, and cite the underlying data sources separately. Citation metadata is maintained in [CITATION.cff](CITATION.cff).
 
 ## 如何引用
 
-软件名称：**Homo Spatialis · LLMs Becoming Us**。当前软件作者：**Chengyu Liu**。作者与具体贡献见 [AUTHORS.md](AUTHORS.md)，模型方法见 [方法报告](docs/METHODS.md)，研究依据见 [参考文献](docs/REFERENCES.md)。作者名单、名称与版本以所用版本的 `CITATION.cff` 为准。
+软件名称：**Homo Spatialis · LLMs Becoming Us**。当前软件作者：**Chengyu Liu**。作者与具体贡献见 [作者与贡献者](AUTHORS.md)，模型方法见 [方法报告](docs/METHODS.md)，研究依据见 [参考文献](docs/REFERENCES.md)。作者名单、名称与版本以所用版本的 `CITATION.cff` 为准。
 
 - **使用正式归档版本**：从对应 Zenodo 记录复制引用，使用该版本的 DOI，并注明软件版本。方法或实验中同时记录完整 Git 提交号、资料包、配置、规划器和随机种子（如适用）。
 - **使用尚未发布的代码**：引用软件仓库，并补充实际使用的完整 Git 提交号及访问日期。`main` 会变化，不能单独标识实验所用代码；包含未提交改动时，应先保存可追溯的版本或补丁。
@@ -26,9 +28,9 @@ If you use Homo Spatialis in research, please cite the software version you used
 
 ## 什么应当获得署名
 
-原项目的发起与核心设计归属记录在 [AUTHORS.md](AUTHORS.md)，实现与演进记录在源码、Git 历史及 [设计决定](DECISIONS/README.md)。引用具体机制时，可同时指向相应版本的方法报告或设计文档，便于核查实际贡献。
+原项目的发起与核心设计归属记录在 [作者与贡献者](AUTHORS.md)，实现与演进记录在源码、Git 历史及 [设计决定](DECISIONS/README.md)。引用具体机制时，可同时指向相应版本的方法报告或设计文档，便于核查实际贡献。
 
-使用城市资料时，应分别说明原始资料发布者、整理或映射贡献者，以及实际使用的数据版本。引用本软件不能替代对底层数据和既有研究的引用。资料出处与映射见 [数据说明](docs/DATA.md)；贡献接收与署名流程由正在维护的 [贡献指南](CONTRIBUTING.md) 规定，本文件不另设一套规则。
+使用城市资料时，应分别说明原始资料发布者、整理或映射贡献者，以及实际使用的数据版本。引用本软件不能替代对底层数据和既有研究的引用。资料出处与映射见 [数据说明](docs/DATA.md)；贡献接收与署名流程由正在维护的 [贡献指南](CONTRIBUTING.zh-CN.md) 规定，本文件不另设一套规则。
 
 ## 许可义务与学术引用
 

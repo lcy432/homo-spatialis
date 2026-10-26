@@ -1,5 +1,7 @@
 # E3-A 技术说明：用户输入、共享契约与 E1 边界适配
 
+[English](e3a-product-input.en.md) · 简体中文
+
 更新：2026-10-18（本地时区 UTC−7）。规则见 [ADR0034](../../DECISIONS/0034-e3a-product-input-contract.md)，任务原文见
 [prompt 归档](prompts/2026-10-18-e3-a-input.md)。
 

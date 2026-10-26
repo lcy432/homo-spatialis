@@ -1,5 +1,7 @@
 # 生活扩展：完整食品方案、个人消费与享受、装备与爱好（E1 + E3）
 
+[English](e1-8-life-extension.en.md) · 简体中文
+
 裁决见 [ADR0041](../../DECISIONS/0041-life-extension-food-enjoyment-hobbies.md)（第三节是独立审核 R1–R9 的收尾修复）；参数见[参数与假设目录](parameter-assumption-register.md) SC-21–SC-25、PI-26–PI-27、EV-19、AG-04、AG-17、AG-23。所有数值都是合成探索设定，不能据此排序真实城市。
 
 ## 1. 做什么
