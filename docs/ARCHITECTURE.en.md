@@ -4,7 +4,7 @@ English · [简体中文](ARCHITECTURE.md)
 
 Homo-Spatialis separates three questions: what choices are available, how to plan, and what happens when the plan runs. Data preparation supplies choices, the language model plans, and the life engine executes and evaluates. The browser, command line, and background service share that engine.
 
-Start with the [README](../README.md) and [methods](METHODS.en.md). This guide locates code; [reproduction](REPRODUCING.en.md) covers execution and the [project index](INDEX.en.md) covers navigation and status.
+Start with the [README](../README.md) and [methods](METHODS.en.md). This guide helps you find the relevant code; the [reproduction guide](REPRODUCING.en.md) explains how to run it, and the [project index](INDEX.en.md) provides navigation and implementation status.
 
 ## One simulation
 
@@ -52,7 +52,7 @@ There are two loops. `workflows` manages whether a product request is authorized
 
 **Scoring reads actual results.** [life_year.py](../src/econ/life_year.py) connects settlement, scoring, and next-year state. Scoring uses confirmed preferences and actual consumption, activities, and resources. Unknown data remains unknown. Incomplete scoring, life exit, planning stops, and software faults have distinct states. City reports preserve the original clone count.
 
-**Replay uses archives.** [life_archive.py](../src/orchestration/life_archive.py) stores plans, input bindings, and execution records. Replay checks results without asking the model again. Recovery resumes completed progress and calls the model only when a new plan is needed.
+**Replay uses archives.** [life_archive.py](../src/orchestration/life_archive.py) stores plans, input bindings, and execution records. Replay checks results without asking the model again. Recovery continues from the last committed state and calls the model only when a new plan is needed.
 
 ## Code reading routes
 

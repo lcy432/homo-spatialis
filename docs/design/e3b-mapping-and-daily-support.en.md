@@ -31,7 +31,7 @@ w_{o,j,h,\ell}
 =E_o\,p(w_j\mid o)\,p(h,\ell\mid g(o)).
 $$
 
-E_o is occupational employment. The wage quantile function is piecewise linear between OEWS P10, P25, P50, P75 and P90. Twenty midpoint supports cover P10–P90, each with probability mass 0.04. The two tails retain 20% unidentified mass; unpublished segments also remain unidentified.
+E_o is occupational employment. The wage quantile function is piecewise linear between OEWS P10, P25, P50, P75 and P90. Twenty support points, each at an interval midpoint, cover P10–P90 with probability mass 0.04 each. The two tails contain 20% unidentified mass; unpublished segments also remain unidentified.
 
 Hours and workplace area come from the same ACS person record, weighted by PWGTP within a broad occupational group. Sparse groups fall back to all employed people. Top-coded hours retain their missing mass. The job pool does not manufacture remote jobs from work-at-home records.
 

@@ -53,7 +53,7 @@ Missing, suppressed, unmappable and access-restricted values retain their status
 
 Raw cache reads are bound to the fetch record and SHA-256. Changed content requires a new build; an old manifest cannot certify a new file. Fetch timestamps and local paths do not define content identity.
 
-CPI converts observation periods. RPP can estimate a local price from a broader geographic reference. A price index is a conversion factor, never the price of an executable purchase.
+CPI adjusts prices across observation periods. RPP can be used to estimate a local price from a broader geographic reference. A price index is an adjustment factor, not the amount charged for a purchase.
 
 ## Survey mappings
 

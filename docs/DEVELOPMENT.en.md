@@ -16,7 +16,7 @@ uv sync --locked
 
 The web app uses Node.js 22. Run `npm ci` in `web/`; the [web guide](../web/README.md) covers the service, worker, and browser app.
 
-## Find the code and design together
+## Code and design references
 
 | Change | Code | Design |
 |---|---|---|

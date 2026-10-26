@@ -10,7 +10,7 @@ Each record explains why a design decision was made. Records are numbered and re
 
 For reading routes, see the [documentation index](../docs/INDEX.en.md). The [module status log (Chinese)](../docs/INDEX.md#status) maps decisions to layers and development rounds.
 
-Older references to “README `…” or “PLAN `…” retain their original section names. The [history index (Chinese)](../docs/history/README.md) locates those documents. New records link directly to the current topic guides.
+Older references to README or PLAN sections retain their original section names. The [history index (Chinese)](../docs/history/README.md) locates those documents. New records link directly to the current topic guides.
 
 **Development convention, since 2026-10-18:** write a short ADR for a substantive design decision, covering context, decision, and consequences. Acceptance checklists, trial results, and detailed implementation status belong elsewhere. Earlier records retain their implementation details and “awaiting review” notes as history.
 

@@ -220,7 +220,7 @@ $$
 
 Likewise, scaling both the effort allowance and every burden coefficient can leave feasibility unchanged. Units and necessary anchors must be fixed before interpreting fitted coefficients.
 
-A calibration study should declare adjustable parameters, admissible domains, target observations, fixed conditions, training/validation split, budget and stopping rule. Heuristic search, hyperparameter search or learned mappings may be compared where the data support them; no optimizer currently establishes a unique true world.
+A calibration study should specify adjustable parameters, admissible ranges, target observations, fixed conditions, the training/validation split, a computational budget and a stopping rule. Heuristic search, hyperparameter search and learned mappings can be compared where suitable data are available. Fitting the calibration targets does not by itself establish that the rules are realistic or uniquely identified.
 
 Calibrate world rules separately from testing the planner. Keep evaluation criteria and user-confirmed preferences distinct from fit parameters. Check held-out cities, periods and groups, and report where improvement for one group worsens another. Rescoring a fixed trajectory differs from changing feedback and rerunning life.
 

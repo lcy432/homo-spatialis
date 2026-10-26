@@ -38,9 +38,9 @@ These distinctions are recorded in provenance, build reports, and the [parameter
 
 ## Standardization
 
-Acquisition stores source URLs, versions, access records, and content fingerprints. Standardization aligns geography, units, currency, period, and statistical population while preserving provenance. Building reads acquired inputs separately, allowing the same pack to be rebuilt.
+Acquisition stores source URLs, versions, access records, and content fingerprints. Standardization aligns geography, units, currency, period, and statistical population while preserving provenance. Data acquisition and pack construction are separate steps, so the same saved inputs can be used to rebuild a pack.
 
-Price indices, expenditure totals, and actual quotes serve different purposes. An index may support an explicit adjustment but is not an item's payment price. Taxes use supported residence, work location, and tax year. The pack does not perform implicit currency or base-year conversion. See [data intake](design/intake-02-real-data.en.md).
+Price indices, expenditure totals, and actual quotes serve different purposes. An index can be used to adjust a price, but is not itself the amount paid for an item. Taxes depend on the supported residence, work location, and tax year. The pack does not perform implicit currency or base-year conversion. See [data intake](design/intake-02-real-data.en.md).
 
 <a id="mapping-methods"></a>
 ## Two mapping methods

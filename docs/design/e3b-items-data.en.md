@@ -2,7 +2,7 @@
 
 English · [简体中文](e3b-items-data.md)
 
-This layer turns public records and declared assumptions into executable food plans, household services, equipment, activities, jobs and courses. Observed models or venues remain distinct from estimated prices and modeled effects.
+This layer turns public records and declared assumptions into executable food plans, household services, equipment, activities, jobs and courses. Records of actual products and venues are distinguished from estimated prices and modeled effects.
 
 The current food grid, support services, consumption basket and wage supports are described in [A/B mappings](e3b-mapping-and-daily-support.en.md). They supersede the early examples retained in the Chinese edition.
 
@@ -69,7 +69,7 @@ Starting jobs use the person's confirmed occupation at median pay. An unsupporte
 
 IPEDS program fees and the CIP–SOC crosswalk provide program and related-occupation evidence. A crosswalk alone does not establish qualification or hiring. The current compiler accepts the declared certificate mappings and whole-year course durations; weekly participation uses the stated common assumption.
 
-Start dates are unknown and the current model assumes courses may begin in any month. The narrow support leaves three programs each in New York and Houston and none in the other four cities. That is a limitation of the mapping and source coverage, not evidence that those cities have no training.
+Start dates are unknown, so the current model assumes courses may begin in any month. Under the current eligibility and data requirements, three programs are included in each of New York and Houston, and none in the other four cities. This reflects the mapping and source coverage, not an absence of training in those cities.
 
 ## Outputs, code and tests
 

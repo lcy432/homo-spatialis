@@ -1,12 +1,12 @@
-# 复现首版模拟引擎
+# 运行与复现
 
 [English](REPRODUCING.en.md) · 简体中文
 
-本说明的目标是用仓库自带的合成人物、合成城市和确定性 mock 规划器复现一条完整产品流程。它检验工程行为，不验证真实城市排序或真实 LLM 的能力。软件版本见根目录 `pyproject.toml`；首发目标为 `0.1.0`，发布进度见 [项目索引](INDEX.md)。
+先用下面的离线示例，在合成人物、合成城市和确定性 mock 规划器上跑通完整产品流程，再按[真实模型运行说明](#real-models)使用自己的 API 密钥。离线示例检验软件行为，不验证真实城市排序或真实 LLM 的能力。软件版本见根目录 `pyproject.toml`；首发目标为 `0.1.0`，发布进度见 [项目索引](INDEX.md)。
 
 ## 环境与源码
 
-需要 Git、[uv](https://docs.astral.sh/uv/getting-started/installation/) 和 Python。仓库 `.python-version` 固定为 Python 3.13；依赖版本由 `uv.lock` 固定。首次安装依赖需要联网，下面的两个模拟命令无需模型密钥，也不访问模型或外部数据端点。
+需要 Git、[uv](https://docs.astral.sh/uv/getting-started/installation/) 和 Python。仓库 `.python-version` 固定为 Python 3.13；依赖版本由 `uv.lock` 固定。首次安装依赖需要联网，离线示例无需模型密钥，也不访问模型或外部数据端点。
 
 ```text
 git clone https://github.com/lcy432/homo-spatialis.git
@@ -16,7 +16,7 @@ uv sync --locked
 
 正式发布后，在安装前执行 `git checkout v0.1.0`；发布标签尚不存在时，使用发布准备提交并记录 `git rev-parse HEAD`，不要把浮动的 `main` 当成固定版本。也可以下载对应 Release 的源码 ZIP，解压后在根目录运行同样命令。
 
-本项目通过源码目录运行，不依赖将它安装成可导入的同名 Python 包。无需配置 `.env`、启动网页、下载原始城市资料或执行 `make check-env`。请保留下面的 `run-offline` 子命令；另一个入口 `run_product_full.py` 若未加 `--mock` 会请求付费模型。
+本项目通过源码目录运行，不依赖将它安装成可导入的同名 Python 包。离线示例无需配置 `.env`、启动网页、下载原始城市资料或执行 `make check-env`。请保留下面的 `run-offline` 子命令；另一个入口 `run_product_full.py` 若未加 `--mock` 会请求付费模型。
 
 ## 成功示例
 
@@ -85,7 +85,9 @@ uv run --frozen python scripts/run_product_full.py --out runs/first-llm-syntheti
 uv run --frozen python scripts/run_product_full.py --out runs/first-llm-six-cities --pack configs/product/e3b_us_v1_pack.yaml --abilities edu_at_least_hs --max-cost-cny 20
 ~~~
 
-第二条命令明确确认样例人物具有高中学历，这是开局岗位需要的资格，不会从职称自动推断。两条命令都使用仓库中的样例人物答案；填写自己的资料可参照[网页指南](../web/README.zh-CN.md)。
+第二条命令明确确认样例人物具有高中学历，这是开局岗位需要的资格，不会从职称自动推断。
+
+两条命令都使用内置样例人物。要填写自己的资料并查看可视化结果，请使用[网页](../web/README.zh-CN.md)。本地网页使用 mock，即用于测试的确定性离线规划器；它既能跑内置样例，也能跑自己填写的资料。要让真实 LLM 按自己的资料规划，需要配置下文的 HTTPS 服务。
 
 每次使用新的输出目录。`--max-cost-cny 20` 将本次运行的估算费用限制为 20 元，也可以调低。程序在发送请求前预留估算费用，下一次预留会超限时就停止。这是按配置报价计算的应用内上限，不是供应商账单上限。每次新运行都会建立新账本，不会跨运行累计额度。在任一命令后加上 `--mock`，即可用同一资料包和输入流程做离线检查，不调用模型。
 
@@ -102,7 +104,7 @@ uv run --frozen python scripts/run_product_full.py --out runs/first-llm-six-citi
 
 ### 在网页中使用真实模型
 
-[本地网页启动方式](../web/README.zh-CN.md)使用 `service_local_mock.yaml`，该配置只允许离线 mock，填入密钥也不会切换模式。网页使用真实模型需要生产服务配置、HTTPS 站点、服务端密钥，以及开启的 `live_calls_enabled` 开关；API 与 worker 在站点后运行。部署和邀请设置见[服务说明](design/e3c-service.md)。上面的命令行模拟无需网站或 HTTPS 部署。
+要让网页中填写的个人资料交由真实模型规划，需要使用生产服务配置、通过 HTTPS 访问站点、在服务端配置模型密钥，并开启 `live_calls_enabled`；API 与 worker 也需要启动。部署和邀请设置见[服务说明](design/e3c-service.md)。上面的命令行示例无需网站或 HTTPS 部署。
 
 ## 自动化检查
 

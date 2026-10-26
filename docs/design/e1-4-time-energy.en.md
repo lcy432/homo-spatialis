@@ -70,7 +70,7 @@ $$
 
 The allowance is recomputed from the base, not multiplied into the previous year's allowance. It is therefore bounded by the configured score range rather than compounding indefinitely. The current synthetic settings use Q_base = 250 and α = 0.10.
 
-The annual score must be complete. Missing scores produce a blocked handoff, not an assumed score of zero. Disabling feedback, or setting α to zero, gives the base allowance. Unused time and effort do not themselves replenish it.
+The annual score must be complete. Missing scores prevent the transition to the next year; they are not replaced with zero. Disabling feedback, or setting α to zero, gives the base allowance. Unused time and effort do not themselves replenish it.
 
 The handoff records the scoring content identity. Changing a parameter while retaining a configuration name does not permit an allowance generated under the old rule to continue under the new one. Comparable interventions restart from the same initial state.
 

@@ -45,7 +45,7 @@ An overdue goal remains a recorded intention. It does not trigger an automatic p
 
 ## Illness events and paired comparisons
 
-New illness can occur in a healthy month. Risk depends on age and work burden from the preceding complete month, using the declared health rules. The same person's repeat index and month share the random draw across cities; different city histories can still produce different thresholds and outcomes.
+New illness can occur in a healthy month. Risk depends on age and work burden from the preceding complete month, using the declared health rules. For a given person, replicate, and month, the same random draw is used across cities; different city histories can still produce different thresholds and outcomes.
 
 For a uniform draw u, major illness occupies the first interval, minor illness the next, and the remainder is healthy:
 
@@ -68,7 +68,7 @@ The annual plan declares whether to seek treatment for minor and major illness a
 
 Execution checks minimum living costs, pays for housing and food, then handles treatment before other actions. If necessary, declared activities are paused in order. If treatment still cannot fit, it is dropped; if the remaining plan still cannot fit, the clone stops. A treatment data gap is not reported as inability to afford care.
 
-The no-new-event feasibility check occurs before committing the year. After a real event, earlier months remain committed. A stopped month is not committed, so its provisional income and expenses do not enter the ledger.
+Before the year begins, feasibility is checked without drawing new illness events. If illness occurs during execution, earlier months remain committed. A stopped month is not committed, so its provisional income and expenses do not enter the ledger.
 
 ## Health in scoring
 

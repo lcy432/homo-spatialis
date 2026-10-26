@@ -4,11 +4,11 @@ English · [简体中文](README.zh-CN.md)
 
 [Project](../README.md) · [Documentation](../docs/INDEX.en.md) · [Development](../docs/DEVELOPMENT.en.md) · [Web design (Chinese)](../docs/design/e5-web-ui.md)
 
-The browser flow is: private invitation → starting conditions → answers and review → run settings → confirm and start → progress → city comparison → city detail → each clone's annual life.
+Use the web app to enter your own details, review your profile, run a simulation, and explore the results visually. Start with a private invitation, confirm your starting conditions and run settings, then follow progress. The results let you compare cities and explore each clone's life year by year.
 
-Preference input uses independent v3.5 ratings from 0 to 100; they do not have to total 100. Review shows both original ratings and service-normalized weights.
+In the current v3.5 questionnaire, each preference is rated independently from 0 to 100; the ratings do not have to total 100. The review page shows both your original ratings and the normalized weights calculated by the service.
 
-The web app reads business data from the E3C service at `/api/v1`. After start confirmation, the service checks and starts the authorized request; the browser displays its reported stage and progress. The local configuration below uses an offline mock and needs no model key. Its outputs test the process rather than real-model performance.
+The web app gets its data from the E3C service at `/api/v1`. When you confirm a run, the service checks and starts it; the browser displays progress. The local setup uses a mock planner—a deterministic offline planner for testing—and needs no model key. Mock refers to the planner, not to a fixed example profile: you can still enter your own details.
 
 ## Run locally without model calls
 
@@ -45,7 +45,9 @@ The local configuration selects all six metropolitan areas and four clones per c
 
 ## Use a real model
 
-For a command-line run with your own key, follow [the real-model guide](../docs/REPRODUCING.en.md#real-models). The local web configuration above only permits mock runs. Browser access to a real model requires the production service with HTTPS, a server-side key, and paid calls enabled; see [service operations (Chinese)](../docs/design/e3c-service.md).
+To use a real LLM with the profile you enter here, configure the production service with HTTPS, a server-side model key, and paid calls enabled. Follow [service operations (Chinese)](../docs/design/e3c-service.md). The local setup above uses mock.
+
+You can also try a real model through the [command-line guide](../docs/REPRODUCING.en.md#real-models). Those commands use a bundled example profile and do not import profiles from the web app.
 
 ## Testing
 
@@ -65,8 +67,8 @@ Tests use the current checkout by default. To test another backend, set `E5_SERV
 
 - Generate `src/contract/generated/` with `npm run contract:gen`; do not edit it manually. The source is `src/common/product_contracts.py`, exported to `contracts/product/v3/`. `contract:check` runs before build and test and fails on a mismatch. Missing fields belong in the [interface handoff (Chinese)](../docs/handoffs/e5-bilingual-map-service-requests.md), not in frontend-only extensions.
 - Display the service's numerical `display` values. Do not recompute J, averages, rates, or bounds in the browser. Temporary weight previews help users fill the form; the service performs the final conversion. The page does not add city rankings or recommendations.
-- Browser storage holds language, appearance, and one-start recovery records. Recovery stores confirmed-profile and draft IDs, run options, consent identity, acknowledgements, idempotency key, and time. It is cleared after successful acknowledgement, logout, or identity change. Questionnaire and result bodies, invitation secrets, and session credentials are not stored there. See [startRecord.ts](src/draft/startRecord.ts).
-- Interface strings live in `src/i18n/zh.ts` and `en.ts`. Business text uses the service's bilingual display envelopes, resolved by object and field location and checked against the source text. Missing translations retain Chinese and are marked untranslated. See [biz.tsx](src/i18n/biz.tsx) and [display/](src/display/).
+- Browser storage holds language and appearance preferences, plus records needed to recover an interrupted start request. A recovery record contains confirmed-profile and draft IDs, run options, consent identity, acknowledgements, an idempotency key, and a timestamp. It is cleared after the start request is acknowledged, on logout, or when the user identity changes. Questionnaire answers, results, invitation secrets, and session credentials are not stored there. See [startRecord.ts](src/draft/startRecord.ts).
+- Interface strings live in `src/i18n/zh.ts` and `en.ts`. Text returned by the service uses bilingual display envelopes: translations are matched to the relevant object and field, then checked against the source text. Missing translations retain the Chinese text and are marked as untranslated. See [biz.tsx](src/i18n/biz.tsx) and [display/](src/display/).
 - Map and globe sources, licenses, and processing are documented in [geographic sources (Chinese)](public/geo/SOURCES.md). Rebuild the basemap with `node scripts/build-basemap.mjs --zh … --en …`.
 
 ## Directory guide

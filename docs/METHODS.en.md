@@ -1,4 +1,4 @@
-# Homo-Spatialis: methods of the first simulation engine
+# Homo-Spatialis: simulation methods
 
 English · [简体中文](METHODS.md)
 
@@ -12,7 +12,7 @@ The initial release separates data, mapping assumptions, actions, settlement rec
 
 ## 2. Model structure
 
-A confirmed profile has independent clones in several cities. Each clone plans annually; the economic environment executes and accounts monthly. The default example lasts three years.
+A confirmed user profile is used to create independent clones in several cities. Each clone makes an annual plan; the economic model carries it out and records the outcomes month by month. The default example lasts three years.
 
 ~~~mermaid
 flowchart LR
@@ -137,7 +137,7 @@ $$
 
 Existing abilities have progress one. For an unearned ability, related courses contribute their maximum completion fraction; two half-completed courses do not create a full qualification. Progress contributes to development scoring, while activated ability changes job eligibility at its own effective time.
 
-**Savings goals track actual payment.** A goal specifies an item, quantity, and deadline and reads the shared cash account. Only a linked purchase or tuition payment paid in full fulfills it. Reaching the quoted price means affordable, not fulfilled. Goals neither create accounts nor lock money, and saving intentions do not earn a separate score. Remaining cash matters through future execution and terminal evaluation.
+**Savings goals track actual payment.** A goal specifies an item, quantity, and deadline and uses the shared cash balance. It is fulfilled only when the linked purchase or tuition payment is made in full. Reaching the target balance alone does not fulfill the goal or guarantee affordability after living costs. Goals neither create separate accounts nor reserve funds, and saving intentions do not earn a separate score. Remaining cash matters through future execution and terminal evaluation.
 
 **Health transitions monthly.** New-illness probabilities in a healthy month depend on age band and the previous complete month's relative work burden:
 
@@ -148,7 +148,7 @@ $$
 
 Using one uniform draw, major illness occurs below its probability; minor illness occupies the next interval up to the sum; otherwise no new illness occurs. Existing illness follows duration, treatment, and recovery rules. Treatment costs, recovery time, and sick-pay effects enter the same accounts and resource constraints. Annual plans specify contingencies in advance.
 
-The same person, replicate, and month share paired draws across cities. Different risk and resource conditions may still produce different outcomes. Lagged work burden avoids using illness-reduced current work to determine current illness.
+For a given person, replicate, and month, the same random draw is used across cities. Different risk and resource conditions may still produce different outcomes. Using the previous month's work burden avoids making current illness risk depend on work already reduced by that illness.
 
 See [career](../src/econ/life_career.py), [savings](../src/econ/life_savings.py), [health](../src/econ/life_health.py), their [career](../tests/life/test_career.py), [savings](../tests/life/test_savings.py), and [health tests](../tests/life/test_health.py), and the [technical design](design/e1-5-career-savings-risk.en.md).
 
@@ -213,7 +213,7 @@ $$
 L=\frac1T\sum_{m=1}^{T}S_m.
 $$
 
-Cash, skills, and equipment still matter at the end. Starting from the actual terminal state, the same settlement and scoring rules evaluate a declared set of H = 12 month reference plans:
+Cash, skills, and equipment still matter at the end. Starting from the actual terminal state, the same settlement and scoring rules evaluate a predefined set of reference plans, each lasting H = 12 months:
 
 $$
 V(x_{\mathrm{terminal}})=

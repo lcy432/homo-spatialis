@@ -8,12 +8,12 @@ Each clone stays in its assigned city. Once a year, a planner proposes a complet
 
 1. Project the opening state, confirmed user statements, city facts, available options and permitted memory into a safe request.
 2. Ask the planner for a structured annual action, a short needs summary and a rationale.
-3. Parse the JSON and run the engine's no-new-event feasibility check.
+3. Parse the JSON and check feasibility without drawing new illness events.
 4. Return safe diagnostics for repairable errors, within the fixed revision allowance.
 5. Execute the accepted plan with actual events, then score and hand off the resulting state.
 6. Preserve the records for evaluation, replay and the next year's observation.
 
-The default is one normal planning attempt and at most two revisions per clone-year. Service retries and plan revisions have separate counters. Actual events never trigger a return to the opening state to obtain a more favorable plan.
+The default is one initial planning attempt and at most two revisions per clone-year. Service retries and plan revisions have separate counters. Events during execution never trigger a return to the opening state to obtain a more favorable plan.
 
 ## What the planner sees
 
@@ -41,7 +41,7 @@ Current holdings, balances and health come from the opening state, not a prose m
 | Actual inability to afford minimum living | Life exit under the engine rules |
 | Event-driven stop or incomplete feedback | Existing trajectory retained as incomplete |
 | Shared configuration or unexpected program failure | Batch pauses |
-| Global call or budget limit | No further authorized sends; original roster retained |
+| Global call or budget limit | Further model requests are blocked; original roster retained |
 
 Diagnostics disclose only permitted facts. They do not reveal which option would score best. Missing clones are not replaced, and evaluation uses the original roster.
 

@@ -1,12 +1,12 @@
-# Reproducing the first simulation engine
+# Running and reproducing simulations
 
 English · [简体中文](REPRODUCING.md)
 
-This guide runs a complete product flow using the bundled synthetic people, synthetic cities, and deterministic mock planner. It checks engineering behavior; it does not validate real city rankings or real LLM performance. The software version is in `pyproject.toml`. The initial release target is `0.1.0`; see the [project index](INDEX.en.md) for status.
+Start with the offline examples below to run the full product workflow using synthetic profiles, synthetic cities, and a deterministic mock planner. The [real-model section](#real-models) then explains how to use your own API key. The offline examples test the software's behavior, not real-world city rankings or LLM performance. The software version is in `pyproject.toml`. The initial release target is `0.1.0`; see the [project index](INDEX.en.md) for status.
 
 ## Environment and source
 
-You need Git, [uv](https://docs.astral.sh/uv/getting-started/installation/), and Python. The repository's `.python-version` specifies Python 3.13; `uv.lock` pins dependencies. Initial installation needs network access. The two simulation commands below need no model key and contact neither model nor external-data endpoints.
+You need Git, [uv](https://docs.astral.sh/uv/getting-started/installation/), and Python. The repository's `.python-version` specifies Python 3.13; `uv.lock` pins dependencies. Initial installation needs network access. The offline examples need no model key and make no requests to model or external-data services.
 
 ~~~text
 git clone https://github.com/lcy432/homo-spatialis.git
@@ -50,7 +50,7 @@ Inspect `rejections.json`. A device with a known price but unknown lifetime stay
 <a id="real-models"></a>
 ## Run with your own model key
 
-After installing the environment above, you can replace the offline planner with Qwen. These commands run a bundled example person through all cities in the selected pack, with four clones per city and three years by default.
+Once the environment is set up, you can replace the offline planner with Qwen. The commands below simulate the life of the same example person in every city in the selected pack, with four clones per city over three years by default.
 
 ### Set up the key and endpoint
 
@@ -85,9 +85,11 @@ Or use the frozen six-city US pack:
 uv run --frozen python scripts/run_product_full.py --out runs/first-llm-six-cities --pack configs/product/e3b_us_v1_pack.yaml --abilities edu_at_least_hs --max-cost-cny 20
 ~~~
 
-The second example explicitly confirms the example person's high-school qualification. It is needed for the starting job and is not inferred from the job title. Both commands still use the bundled person's answers; the [web guide](../web/README.md) explains entering your own profile.
+The second command confirms that the example person has completed high school, as required by the starting job. The system does not infer this qualification from the job title.
 
-Use a new output directory each time. `--max-cost-cny 20` sets a separate estimated CNY 20 limit for that run; you can lower it. The application reserves the estimated cost before each request and stops when the next reservation would exceed the limit. This uses the price record in the configuration, not a provider-side billing cap. Each new run creates a new budget; limits do not add up across runs. Add `--mock` to either command to check the same pack and input flow without model calls.
+These commands use the bundled example profile. To enter your own details and explore the results visually, use the [web app](../web/README.md). The local web setup uses a mock planner: a deterministic offline planner for testing, which can run either example profiles or your own input. To use a real LLM with your own profile, configure the HTTPS service described below.
+
+Use a new output directory each time. `--max-cost-cny 20` caps the run's estimated cost at CNY 20; you can set a lower limit. Before each request, the application reserves its estimated cost against the budget and stops if that reservation would exceed the limit. The estimate uses the configured rates; it does not impose a spending cap on your provider account. Each new run gets a separate budget, so there is no shared cap across runs. Add `--mock` to either command to check the same data pack and input workflow without model calls.
 
 ### Inspect the result
 
@@ -102,7 +104,7 @@ Paths below are relative to the chosen output directory:
 
 ### Use a real model through the browser
 
-The [local web setup](../web/README.md) uses `service_local_mock.yaml`, which only permits an offline mock. Adding a key does not change that mode. A browser session with a real model uses the production service configuration, an HTTPS site, a server-side model key, and an enabled `live_calls_enabled` switch, with the API and worker running behind the site. See [service operations (Chinese)](design/e3c-service.md) for deployment and invitation setup. The command-line runs above do not need a website or HTTPS deployment.
+To run a profile entered through the browser with a real model, use the production service configuration, serve the site over HTTPS, configure the model key on the server, and enable `live_calls_enabled`. The API and worker must also be running. See [service operations (Chinese)](design/e3c-service.md) for deployment and invitations. The command-line examples above need no website or HTTPS setup.
 
 ## Automated checks
 

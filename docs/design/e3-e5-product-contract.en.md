@@ -2,7 +2,7 @@
 
 English · [简体中文](e3-e5-product-contract.md)
 
-The product connects a confirmed person and a documented city pack to the life engine. The browser presents that process; it does not determine the economic results.
+The product passes a confirmed user profile and a documented city data pack to the life engine. The browser presents that process; it does not determine the economic results.
 
 ## Responsibilities
 
@@ -38,7 +38,7 @@ Every city preserves the original roster N = C + E + M. Complete-clone means use
 
 The interface presents city comparison, city details and clone-year records. It must distinguish incomplete computation from a person's inability to sustain minimum living. A missing value is not rendered as zero.
 
-Progress measures committed work. During simulation, the summary uses settled clone-years; checking, queueing and result preparation do not pretend to have a fixed duration. Completion is shown when results can be read.
+Progress reflects committed work. During simulation, the summary counts completed simulation years across clones. Input checks, queueing and result preparation have no fixed duration, so they are shown as stages rather than percentage estimates. The run is marked complete when its results are available.
 
 ## Display language
 

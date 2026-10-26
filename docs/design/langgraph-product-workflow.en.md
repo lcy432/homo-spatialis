@@ -43,7 +43,7 @@ The demonstration entry point is [product_workflow.py](../../scripts/product_wor
 
 The public view exposes stage, what it is waiting for, preflight, confirmation reference, run identifier, progress, result and safe error codes. It does not expose internal exceptions, local paths or credentials.
 
-The standalone workflow database is intended for one advancing process. Hosted coordination adds the worker and service controls; it does not turn arbitrary simultaneous writes to a prototype workspace into supported operation.
+The standalone workflow database is designed for a single process to advance the workflow. Hosted execution uses worker and service controls to coordinate access. Concurrent writes to the standalone prototype workspace are not supported.
 
 ## Verification
 

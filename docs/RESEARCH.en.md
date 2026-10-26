@@ -24,7 +24,7 @@ Implementation status and plans belong in the [index](INDEX.en.md) and [roadmap]
 | | Static understanding experiment | Three-year life task |
 |---|---|---|
 | Observation | Trade-offs in fixed city-choice questions | Trajectories from work, housing, and consumption choices |
-| Evaluation | Injected truth preferences and a static economic core | Shared constraints, settlement, and multi-period evaluation |
+| Evaluation | Known preference parameters and a static economic model | Shared constraints, settlement, and multi-period evaluation |
 | Purpose | Locate preference misunderstanding and recovery bias | Compare personal simulated lives and planning consequences |
 | Reference | Optimal city and simple baselines under the same truth | Reference policies with the same information, actions, and terminal rules |
 
@@ -75,7 +75,7 @@ $$
 \beta=w_1s_{\mathrm{rent}},\qquad \theta_k=w_k.
 $$
 
-Two equally material-oriented people can face different price pressure because their housing shares differ. Indirect utility already optimizes consumption allocation; it cannot directly score arbitrary actual spending chosen by an LLM. See [utility.py](../src/econ/utility.py) and [core.py](../src/econ/core.py).
+Two people who place the same weight on material living standards can face different costs of living because their housing expenditure shares differ. Indirect utility already optimizes consumption allocation; it cannot directly evaluate an arbitrary spending plan chosen by an LLM. See [utility.py](../src/econ/utility.py) and [core.py](../src/econ/core.py).
 
 ### Scales, units, and double counting
 
@@ -97,7 +97,7 @@ Its wage/rent paths are exogenous and savings do not enter its terminal utility.
 
 ### Welfare loss from a wrong choice
 
-Choices may use estimated preferences, but both optimal and chosen cities are evaluated under the same person's truth. At reference prices and amenities equal to one:
+Choices may use estimated preferences, but both the optimal city and the chosen city are evaluated using the same person's known preference parameters. With reference prices and amenities set to one:
 
 $$
 \ln e=\frac{\ln V-\ln\kappa}{w_1},
@@ -131,7 +131,7 @@ Questions include dominance, trade-offs, exact ties, and adversarial cases. Gene
 
 O1 provides raw city/economic facts; O2 adds environment accounting; O3 adds representative-basket real income. Higher conditions retain all lower-condition fields, so O3 still includes amenities and persona information.
 
-Persona presentation reserves implicit, mixed, and explicit variants; the current generator uses implicit prose. Hidden weights are absent, dimension order randomized, and generated text frozen and bound to truth. Scalar leakage tolerance is `1e-3`; seven-dimensional fingerprint tolerance is `4e-2`. See [ADR0001 (Chinese)](../DECISIONS/0001-leak-scan-tolerances.md). Product-confirmed preferences and research-prose information conditions serve different tasks.
+The design allows implicit, mixed, and explicit persona descriptions; the current generator uses implicit prose. Hidden weights are omitted, the order of dimensions is randomized, and the generated text is frozen and linked to its underlying preference parameters. Scalar leakage tolerance is `1e-3`; seven-dimensional fingerprint tolerance is `4e-2`. See [ADR0001 (Chinese)](../DECISIONS/0001-leak-scan-tolerances.md). User-confirmed product preferences and prose descriptions used in research serve different purposes.
 
 <a id="noise"></a>
 ## Repeated choices and noise
@@ -190,7 +190,7 @@ Reuse fitted individual posteriors, group by injected truth or predefined featur
 <a id="floor"></a>
 ## Model compression and estimator shrinkage (P8)
 
-Recovered people may look alike because of the LLM or because limited choices shrink estimates. Generate choices from known truth and run the same estimator to measure its floor.
+Recovered preference profiles may look similar because of the LLM's behavior or because limited choice data cause the estimator to shrink them toward a common mean. To measure this estimation floor, generate choices from known preference parameters and apply the same estimator.
 
 Compare fitted and sample-truth covariance through diagonal variance ratios and the Frobenius error. Report mean drift separately; do not divide near-zero off-diagonal elements.
 
