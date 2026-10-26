@@ -5,6 +5,7 @@ import type { Dict } from "./zh";
 export const en: Dict = {
   app: {
     title: "Homo-Spatialis · LLMs Becoming Us",
+    brand: "Homo-Spatialis",
     skip: "Skip to content",
     nav: { home: "Home", runs: "My runs", settings: "Settings & deletion" },
     lang: { label: "Display language" },

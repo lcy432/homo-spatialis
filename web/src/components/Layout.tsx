@@ -87,7 +87,7 @@ export function AppShell() {
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <p className={styles.brand}>
-            <Link to="/">{t("app.title")}</Link>
+            <Link to="/">{t("app.brand")}</Link>
           </p>
           {status === "active" ? (
             <nav aria-label={t("app.nav.home")} className={styles.nav}>

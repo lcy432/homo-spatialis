@@ -3,6 +3,7 @@
 export const zh = {
   app: {
     title: "Homo-Spatialis · LLM：成为我们",
+    brand: "Homo-Spatialis",
     skip: "跳到正文",
     nav: { home: "首页", runs: "我的运行", settings: "设置与删除" },
     lang: { label: "显示语言" },
