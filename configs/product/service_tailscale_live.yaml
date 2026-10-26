@@ -6,6 +6,9 @@
 # * 总额由 scripts/site_budget.py 控制（500 元，所有者 2026-10-26）：签发新身份前按“已记账花费 + 没用掉的次数 × 20 元”算最坏情况，超了就拒绝。
 #   签发测试者一律用 site_budget.py invite，不直接用 product_service.py invite create。
 # * data_dir 是仓库外的短路径（持久、不进 git、不随工作树重建丢失）；与本地 mock 的数据分开。
+# * 仓库里只放占位来源（your-machine.your-tailnet.ts.net）：试用站不对外公开，真实地址不进 git。实际运行用仓库外的本机副本
+#   C:\dev\hs-site-config\service_tailscale_live.yaml（复制本文件、把 site_origin 改成本机的 Funnel 地址），
+#   scripts/site_start.ps1 默认读它，并从它的 site_origin 取对外主机名。
 # 密钥 DASHSCOPE_API_KEY 只从进程环境读（scripts/site_start.ps1 从主工作区的 .env 取出后只传给子进程）。
 
 service:

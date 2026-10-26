@@ -1,13 +1,15 @@
 # E3C 本地 mock 服务经 Tailscale Funnel 对外开放（给外部测试者用；仍是离线 mock，零费用、不调真实模型）。
-# 与 service_local_mock.yaml 的差别只有来源与文档：浏览器从 https://<本机>.your-tailnet.ts.net 打开，Funnel 把 443 转到本机 Vite 预览
+# 与 service_local_mock.yaml 的差别只有来源与文档：浏览器从 https://<本机>.<tailnet>.ts.net 打开，Funnel 把 443 转到本机 Vite 预览
 # 服务器（4173），预览服务器再把 /api 代理到这里的 127.0.0.1:8765——浏览器只看到隧道这一个来源，Origin / CSRF 检查照常。
 # 服务仍只绑定回环地址（只能经隧道访问）；交互式文档不对外开。数据目录与本地 mock 相同，已签发的身份与次数继续有效，
 # 但专属链接的前缀变成隧道的来源，要按这份配置重新打印（invite reissue 或 create）。
 #
-#   本机：  E5_PUBLIC_HOST=<本机>.your-tailnet.ts.net  npm run preview       （web/，先 npm run build）
+#   本机：  E5_PUBLIC_HOST=<本机>.<tailnet>.ts.net  npm run preview       （web/，先 npm run build）
 #           tailscale funnel --bg 4173
-#   服务：  python scripts/product_service.py api    --config configs/product/service_tailscale_mock.yaml
-#           python scripts/product_service.py worker --config configs/product/service_tailscale_mock.yaml
+#   服务：  python scripts/product_service.py api    --config C:\dev\hs-site-config\service_tailscale_mock.yaml
+#           python scripts/product_service.py worker --config C:\dev\hs-site-config\service_tailscale_mock.yaml
+#
+# 仓库里只放占位来源：真实地址不进 git。复制本文件到 C:\dev\hs-site-config\，把 site_origin 改成本机的 Funnel 地址后再用。
 
 service:
   version: e3c-service-config-v1

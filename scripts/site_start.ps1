@@ -7,6 +7,8 @@
 #
 # 做的事：
 #   1. 站点代码来自只含已提交代码的工作树 C:\dev\hs-site（不受别的窗口未提交改动影响）；数据在 C:\dev\hs-site-data（配置里写的）。
+#      配置读仓库外的本机副本 C:\dev\hs-site-config\service_tailscale_live.yaml：试用站地址只在本机，不进 git；
+#      对外主机名默认从它的 site_origin 取。
 #   2. 从主工作区的 .env 只取 DASHSCOPE_API_KEY，放进这个进程的环境再传给服务与 worker；不打印、不写日志、不复制 .env。
 #   3. 后台起三个进程（不开窗口）：服务接口 127.0.0.1:8766、worker、网页预览 127.0.0.1:4173（/api 代理到 8766）。日志在数据目录的 logs\。
 #   4. 确认 Tailscale Funnel 把 443 转到 4173（已经开着就不动）。
@@ -14,8 +16,8 @@
 param(
   [string]$Repo = "C:\dev\homo-spatialis",
   [string]$Site = "C:\dev\hs-site",
-  [string]$Config = "configs/product/service_tailscale_live.yaml",
-  [string]$PublicHost = "your-machine.your-tailnet.ts.net",
+  [string]$Config = "C:\dev\hs-site-config\service_tailscale_live.yaml",
+  [string]$PublicHost = "",
   [int]$ApiPort = 8766,
   [int]$WebPort = 4173,
   [switch]$Stop,
@@ -24,6 +26,12 @@ param(
   [switch]$Uninstall
 )
 $ErrorActionPreference = "Stop"
+if (-not (Test-Path $Config)) { throw "没有本机配置 $Config：从 configs/product/service_tailscale_live.yaml 复制一份，填上真实的 site_origin" }
+if (-not $PublicHost) {
+  $origin = Get-Content $Config -Encoding UTF8 | Where-Object { $_ -match '^\s*site_origin:\s*https://' } | Select-Object -First 1
+  if (-not $origin) { throw "$Config 里没有 https 的 site_origin" }
+  $PublicHost = ($origin -replace '^\s*site_origin:\s*https://', '').Trim().TrimEnd('/')
+}
 $py = Join-Path $Repo ".venv\Scripts\python.exe"
 $web = Join-Path $Site "web"
 $data = "C:\dev\hs-site-data"
