@@ -2,7 +2,7 @@
 // 原样显示，英文由 E3 的显示资源提供（还没有时显示中文原文并标明）。英文字典 en.ts 必须与这里的键一一对应（类型检查）。
 export const zh = {
   app: {
-    title: "同一个人，换一座城市生活三年",
+    title: "Homo-Spatialis · LLM：成为我们",
     skip: "跳到正文",
     nav: { home: "首页", runs: "我的运行", settings: "设置与删除" },
     lang: { label: "显示语言" },
