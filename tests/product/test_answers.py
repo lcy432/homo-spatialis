@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import contextlib
 import copy
-from fractions import Fraction
 from pathlib import Path
 
 import pytest
@@ -70,16 +69,19 @@ def test_unanswered_zero_indifferent_and_unsure_stay_distinct(pack):
     )
     review = review_draft(pack, draft)
     ln = lines(review)
-    assert ln["material"].state == "provided" and ln["material"].exact == "0"
-    assert (ln["leisure"].state, ln["leisure"].exact) == ("unanswered", None)
-    assert (ln["environment"].state, ln["environment"].exact) == ("indifferent", None)
-    assert (ln["commute"].state, ln["commute"].exact) == ("unsure", None)
+    # 独立评分：明确的 0 是回答（原始评分 0）；没有回答完之前不出任何权重
+    assert ln["material"].state == "provided" and ln["material"].rating_exact == "0"
+    assert (ln["leisure"].state, ln["leisure"].rating_exact) == ("unanswered", None)
+    assert (ln["environment"].state, ln["environment"].rating_exact) == ("indifferent", None)
+    assert (ln["commute"].state, ln["commute"].rating_exact) == ("unsure", None)
+    assert all(x.exact is None for x in ln.values())
     assert {"allocation_unanswered", "allocation_indifferent", "allocation_unsure"} <= set(
         codes(review)
     )
     assert not review.confirmable
-    # 没有被自动换成 0 或均分：合计只算已提供的三项，不报“合计不是 100”（还不完整）
+    # 没有被自动换成 0 或均分：原始合计只算已回答的三项（还不完整）
     assert review.six_dimensions.status == "incomplete"
+    assert review.six_dimensions.rating_total.exact == "70"
     with pytest.raises(ConfirmationRefusedError):
         confirm_profile(pack, draft, person_ref="u1", acknowledged=review.pending_confirmations)
 
@@ -122,71 +124,25 @@ def test_material_zero_skips_the_breakdown_without_fabricating_answers(pack):
     assert "material_parent_zero_ignored" in codes(review2) and review2.confirmable
 
 
-def test_points_must_sum_exactly_to_100_and_nothing_is_auto_adjusted(pack):
-    review = review_draft(
-        pack,
-        make_draft(
-            pack,
-            six={
-                "material": "30",
-                "safety": "20",
-                "opportunity": "20",
-                "leisure": "10",
-                "environment": "10",
-                "commute": "9.5",
-            },
-        ),
-    )
-    issue = next(i for i in review.issues if i.code == "points_sum_not_100")
-    assert "199/2" in issue.message_zh and "还差 1/2 分" in issue.message_zh
-    assert lines(review)["commute"].exact == "19/2"  # 用户填的原值，没有被改
-    assert not review.confirmable
-
-
-def test_equal_split_is_exact_and_has_no_order_bias(pack):
-    draft = make_draft(pack, six_mode="equal_split", material_mode="equal_split")
+def test_the_old_percentage_modes_are_read_but_no_longer_confirm(pack):
+    """v0.5 问卷用独立评分（逐项规则见 ``test_ratings``）；旧的百分比分配照原来的含义算出各项，但不再用来确认新画像。"""
+    draft = make_draft(pack, six_mode="manual", material_mode="equal_split")
     review = review_draft(pack, draft)
-    six = lines(review)
-    assert {ln.exact for ln in six.values()} == {"50/3"} and {
-        ln.display for ln in six.values()
-    } == {"16.7"}
-    assert sum(Fraction(ln.exact) for ln in six.values()) == 100
-    assert sum(Fraction(ln.display) for ln in six.values()) == Fraction(
-        "100.2"
-    )  # 显示值之和不是 100：显示不回流计算
-    mat = lines(review, "material")
-    assert {ln.exact for ln in mat.values()} == {"25"}
-    confirmed = confirm_profile(
-        pack, draft, person_ref="u1", acknowledged=review.pending_confirmations
-    )
-    assert set(confirmed.six_dimensions.points.values()) == {"50/3"}
-    assert confirmed.six_dimensions.mode == "equal_split"
-
-
-def test_equal_split_with_manual_values_is_rejected(pack):
-    from common.product_contracts import AllocationAnswer, PointEntry
-
-    draft = make_draft(pack).model_copy(
-        update={
-            "six_dimensions": AllocationAnswer(
-                mode="equal_split",
-                entries={"material": PointEntry(state="provided", value_text="40")},
-            )
-        }
-    )
-    assert "equal_split_with_values" in codes(review_draft(pack, draft))
+    assert lines(review)["material"].exact == "30"  # 原来的含义：百分比原样
+    assert {ln.exact for ln in lines(review, "material").values()} == {"25"}  # 主动平均分配
+    assert "allocation_mode_retired" in codes(review) and not review.confirmable
 
 
 @pytest.mark.parametrize(
     ("text", "code"),
     [
         ("16.666", "points_too_many_decimals"),
-        ("100/6", "points_fraction_not_canonical"),
+        ("100/6", "rating_not_decimal"),
         ("abc", "points_not_a_number"),
-        ("120", "points_out_of_range"),
+        ("120", "rating_out_of_range"),
     ],
 )
-def test_manual_entries_are_parsed_exactly(pack, text, code):
+def test_ratings_are_parsed_exactly(pack, text, code):
     six = {
         "material": text,
         "safety": "20",
@@ -196,32 +152,6 @@ def test_manual_entries_are_parsed_exactly(pack, text, code):
         "commute": "10",
     }
     assert code in codes(review_draft(pack, make_draft(pack, six=six)))
-
-
-def test_decimal_and_canonical_fraction_entries_are_exact(pack):
-    six = {
-        "material": "50/3",
-        "safety": "50/3",
-        "opportunity": "50/3",
-        "leisure": "25",
-        "environment": "12.5",
-        "commute": "12.5",
-    }
-    review = review_draft(pack, make_draft(pack, six=six))
-    assert review.confirmable, codes(review)
-    assert (
-        lines(review)["environment"].exact == "25/2" and lines(review)["material"].exact == "50/3"
-    )
-    # 33.33 + 33.34 + 3 × 50/3 不是 100：精确比较不放过 1/300 的差
-    off = {
-        "material": "33.33",
-        "safety": "33.34",
-        "opportunity": "50/3",
-        "leisure": "50/3",
-        "environment": "0",
-        "commute": "0",
-    }
-    assert "points_sum_not_100" in codes(review_draft(pack, make_draft(pack, six=off)))
 
 
 def test_healthcare_is_not_a_seventh_dimension_and_laundry_is_not_convenience(pack):

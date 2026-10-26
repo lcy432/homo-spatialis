@@ -1,22 +1,22 @@
 {
- "conversion_version": "e3a-conversion-v3",
+ "conversion_version": "e3a-conversion-v4",
  "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
  "messages": {
   "CatalogCompilation": {
    "file": "CatalogCompilation.schema.json",
-   "sha256": "2ad4e2fe2dc25483ef3735ec43888ba7742b651acb5066c8d16bea9e2673f150"
+   "sha256": "65e00f526ffaa3d5af817a31661232e5168dbdec2233594c207d43d6dca4c0c7"
   },
   "ConfirmedProfile": {
    "file": "ConfirmedProfile.schema.json",
-   "sha256": "5d4dbbbd788c2ac258149b6a2f29ae5cc4901cd770fb58c8910f3ff8ef80733a"
+   "sha256": "c8c452cccf5916fae7b54d384cd7f37ba4241c56864b098b94425a9abb12f2d2"
   },
   "ConfirmedProfileView": {
    "file": "ConfirmedProfileView.schema.json",
-   "sha256": "d833fa13f74ec1d39a08e4d9ec9e003ff941b0dfddb792e20e19add808b00529"
+   "sha256": "06eb48077a2ab6df504463bc5c04f4c5d4b2b0f1c6664a1edd91fe15f38c8c6a"
   },
   "DeletionReceipt": {
    "file": "DeletionReceipt.schema.json",
-   "sha256": "51d1e542bb2288fcd33258a5a50d844df4c74d0d3a4c640a6c2180ceafbf36dc"
+   "sha256": "9ed672377006edf12a9a9cd946e79a988136ce44e5ac8c9da138da65ea11f471"
   },
   "DisplayAttachment": {
    "file": "DisplayAttachment.schema.json",
@@ -24,19 +24,19 @@
   },
   "DisplayEnvelope": {
    "file": "DisplayEnvelope.schema.json",
-   "sha256": "1c981dccfd41eb16539c294ef21a4a4f76322d2dce90a48b9a826d5dc7f78d4a"
+   "sha256": "438851a7191224bcb107ee5d7ecec7ef89afcb7704aeb63d36cf8c3c59b970de"
   },
   "DraftMigrateRequest": {
    "file": "DraftMigrateRequest.schema.json",
-   "sha256": "41a4ddbf7b3847dcaa38b13f15ac18d38fe2a6895db788ee3b3fe0d7f2986be2"
+   "sha256": "1fe11adad4269c289f0010437e5bff4cd1ab36fbe182255c2331c209ce083702"
   },
   "DraftSaveRequest": {
    "file": "DraftSaveRequest.schema.json",
-   "sha256": "f5aa887f104b97de48f865713d34987d78f9a7dc425d9909e3cab0968faf5b78"
+   "sha256": "523b3171cfd805cddbd8275d0a231148e8c78ecfb7a48edcc744d751a8fb18a5"
   },
   "DraftView": {
    "file": "DraftView.schema.json",
-   "sha256": "70e390aeb66bd628d3606d24a2745c00bbbca6d28e94085b2ac932b9ae6e0fd2"
+   "sha256": "2d619e56bdb19cd700024be538d06f02366ba10bab49b91ac3a57742d4aa8586"
   },
   "GeographyDisplayBundle": {
    "file": "GeographyDisplayBundle.schema.json",
@@ -44,7 +44,7 @@
   },
   "LifeItemCompilation": {
    "file": "LifeItemCompilation.schema.json",
-   "sha256": "2c553d0fabae2f3588ce40ccf563dce1736f1f2e34ad6816578e266a24065217"
+   "sha256": "4f644c9bd68b4ad4c4c5ee0cf1f1b56bb6041f78e59e36f764cb994832cf7c36"
   },
   "OpportunityCandidate": {
    "file": "OpportunityCandidate.schema.json",
@@ -52,23 +52,23 @@
   },
   "OptionInventoryCoverage": {
    "file": "OptionInventoryCoverage.schema.json",
-   "sha256": "41b7b7e560e535dfb079bf6bb58eebe2d4c72ab597faad5489211ac2246b2a5a"
+   "sha256": "6d7259a603d86da087782558c8e2663c51f5eeace411c03112fd545de316b71b"
   },
   "ProductCapabilities": {
    "file": "ProductCapabilities.schema.json",
-   "sha256": "add389063b2c7525e5f95c01f150d10af12cb12d3b9bde9152dd7d10cec1b566"
+   "sha256": "308db9d705b86feeb6f6b22e3a30c3ebf940cf70cb3dff9c20a77fe81e2dc60a"
   },
   "ProductPreflight": {
    "file": "ProductPreflight.schema.json",
-   "sha256": "c575e060d39949f8e7865f5303a2f807f81cd046582200c17f072a6190ab2f09"
+   "sha256": "1a4948c06df5154fd17df1e2a747432e684e631b5f35b0b690666d5b9af1496f"
   },
   "ProductResult": {
    "file": "ProductResult.schema.json",
-   "sha256": "41611848f6ac8f0ec8f259adc9f6cf7ab05a056950ec6e2c9a990acb9cfbc4a6"
+   "sha256": "2b8e415d77239402cc17a85c5ce464429e1a7cfdcf84f5b679011a8f61318d6a"
   },
   "ProfileConfirmReply": {
    "file": "ProfileConfirmReply.schema.json",
-   "sha256": "3e947fc98bbb8a6e63db4733877fb7180604df344e7a81966610fd4c2a2b4a15"
+   "sha256": "f4cffca1b9247ceb8c038058cee8c7ca567a3abf0faae8344cb51d7632c7ed1e"
   },
   "ProfileConfirmRequest": {
    "file": "ProfileConfirmRequest.schema.json",
@@ -76,15 +76,15 @@
   },
   "ProfileList": {
    "file": "ProfileList.schema.json",
-   "sha256": "93fd502a5302f3159ffe50ea1efebf62d1cf65a558ef55be823989c070484c81"
+   "sha256": "d1854b67df95023eae9a8e9bf35fe74cefa9075228dda2325b4c07d7dd58723e"
   },
   "ProfileReview": {
    "file": "ProfileReview.schema.json",
-   "sha256": "2bed0d2b4820fa4618edf49d216f73bd8daa8e1aaf4dab8e335394f62cdbb40f"
+   "sha256": "b21a458defe09812b3e5db8a371424dd318883abeb2e6f15d28748677fb5f697"
   },
   "ReviewReply": {
    "file": "ReviewReply.schema.json",
-   "sha256": "44559c50b8d39a89a3fada673d3a97ce3b58b16a2030df4bd587b95e61ca6bd9"
+   "sha256": "df0f1fb81dd22c62b9da7c916980c9955e0ba09810ba23b80e78d96c321977ad"
   },
   "RunIntentCreateRequest": {
    "file": "RunIntentCreateRequest.schema.json",
@@ -92,27 +92,27 @@
   },
   "RunIntentView": {
    "file": "RunIntentView.schema.json",
-   "sha256": "b74329da83ca174e769a907932d5d6618bcb6e72a4e31ca28d515b5b1df9b3d3"
+   "sha256": "1237cb03c26219cb257a399fa6c09edaacdfc3abc337493785124fe786eafad8"
   },
   "RunList": {
    "file": "RunList.schema.json",
-   "sha256": "e18fadd3e75bf79f27df05e250673d30a470cb8076e16d13020ed2a246ed3256"
+   "sha256": "d74136935d7aed9283d61115af7f915354015f14279d1086dac46c9b5399ab9b"
   },
   "RunProgress": {
    "file": "RunProgress.schema.json",
-   "sha256": "97d08622ff04267e1badd55ca86cadcbf01ec139fa6231d794fc93344b6ceb15"
+   "sha256": "9fa28191db7fde76ea95538b264c83b68708254cd85c0df862884f4207a28a42"
   },
   "RunReceipt": {
    "file": "RunReceipt.schema.json",
-   "sha256": "60484335c0a24594da212470ecae38e1dd64d3c68614150be1cb1f9284694b93"
+   "sha256": "fcdccca9257a92f250f8d4125c9ef33f2fbb4acb243ef02b1acc8844d735e332"
   },
   "RunSubmission": {
    "file": "RunSubmission.schema.json",
-   "sha256": "ac88e356b96d58e791ef8a54b190df08881f01a28713268fcb39bddfa8b96ea0"
+   "sha256": "adcde1f4847f562a2ff12bc006f732b1053efa93ec0d592b137ad5c078c6b62c"
   },
   "RunSubmitReply": {
    "file": "RunSubmitReply.schema.json",
-   "sha256": "0a961090a45f239f39d9dd8459d576cad1a51a66060962a103b995cae358d5fa"
+   "sha256": "9451be04770226add7ce8a877c4fd894d4cd53ebe42d94fdf5c263a1e1a2923e"
   },
   "RunSubmitRequest": {
    "file": "RunSubmitRequest.schema.json",
@@ -120,7 +120,7 @@
   },
   "ServiceError": {
    "file": "ServiceError.schema.json",
-   "sha256": "6fab801663e1600c4b54f79402c2d0132b4fefac3a7aad00e0c90533ae92df8d"
+   "sha256": "76aa45e10a1280832028a7abd43513d2961af781fd007920e3bef62bbde714d6"
   },
   "SessionExchangeRequest": {
    "file": "SessionExchangeRequest.schema.json",
@@ -128,7 +128,7 @@
   },
   "SessionView": {
    "file": "SessionView.schema.json",
-   "sha256": "9741afb6e910d61215e8722bab0390ae0a29f42fd46495cd40c7cb44df7abef4"
+   "sha256": "f850382e80196f306816affc523e1d2177759db1cc9a98a0c23615eadd5daa15"
   },
   "SourceFact": {
    "file": "SourceFact.schema.json",
@@ -136,11 +136,11 @@
   },
   "UserInputDraft": {
    "file": "UserInputDraft.schema.json",
-   "sha256": "d74376a83f7e6cf85f0403b288e53510ef0b3a7075f496db5202817729b06f0e"
+   "sha256": "117d2e6c44084f5ee9644f95be24b781fff400311b025aa793a49153158d2e17"
   }
  },
- "questionnaire_version": "e3a-questionnaire-v0.4-draft",
- "schema_version": "e3a-product-schema-v3.4",
+ "questionnaire_version": "e3a-questionnaire-v0.5-draft",
+ "schema_version": "e3a-product-schema-v3.5",
  "source": "src/common/product_contracts.py（唯一权威结构；这些文件由 scripts/product_e3a.py export-schema 导出，不要手改）",
  "vocabulary_version": "e3a-vocabulary-v5"
 }

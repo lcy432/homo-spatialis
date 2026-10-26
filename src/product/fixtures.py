@@ -97,9 +97,9 @@ def make_draft(
     age: int | None = 35,
     cash: tuple[str | None, str | None, str | None] = ("3000", "USD", "2024"),
     six: dict[str, str | None] | None = None,
-    six_mode: str | None = "manual",
+    six_mode: str | None = "ratings_normalized_v1",
     material: dict[str, str | None] | None = None,
-    material_mode: str | None = "manual",
+    material_mode: str | None = "ratings_normalized_v1",
     health_choices: dict[str, str | None] | None = None,
     free_text: str | None = NORMAL_TEXT,
     attributes: tuple[dict[str, Any], ...] = (),
@@ -114,6 +114,10 @@ def make_draft(
     experience: tuple[tuple[str, int], ...] | None = None,
 ) -> UserInputDraft:
     """一份合成草稿；默认就是主故事里的 u501（全职文员、看重省事、健康问卷一题暂不确定）。
+
+    v3.5：六维与物质四项默认是独立评分（``ratings_normalized_v1``），评分就是 ``NORMAL_SIX`` / ``NORMAL_MATERIAL``——它们正好合计
+    100，换算出的权重与原来的百分比逐项相同（E1 的输入不变）。``six_mode`` / ``material_mode`` 写 ``manual`` / ``equal_split`` 是旧的
+    百分比分配（只给读回与迁移的测试用；新问卷审阅会阻断）。
 
     v3.4：新问卷不再收集硬要求与属性偏好，默认两者都为空（``hard_requirements`` / ``attributes`` 只给“旧草稿”的测试用）。
     ``occupation_mode = "catalog"`` 时按资料包的输入目录选 ``selected``（不带文字）；``education`` 是学历选项编号（或

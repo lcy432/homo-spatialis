@@ -4,7 +4,8 @@
 * 按目录选职业、回答学历与证书、面板多选兴趣与口味、不写补充文字：审阅 → 确认 → 检查 → 开始 → worker → LangGraph → E1 → 结果，
   离线 mock，真实模型调用 0；新画像没有硬要求与属性偏好。
 * 按目录选却带文字 → 422；目录里没有的编号、过期的目录 → 审阅阻断，不替换职业。
-* 旧草稿：读取时附迁移说明；没有同意就 409、草稿不变；同意后清空并换成当前版本，其他表不动；已经是当前版本就 409。
+* 旧草稿：读取时附迁移说明；没有同意就 409、草稿不变；旧的百分比分配没有选择重新评分或同等重视也 409（v0.5，DECISIONS/0047）；
+  同意并选择之后清空并换成当前版本，其他表不动；已经是当前版本就 409。
 """
 
 from __future__ import annotations
@@ -161,6 +162,8 @@ def _old_draft(svc, view, **kw):
         draft_id=view["draft"]["draft_id"],
         revision=view["draft"]["revision"],
         hard_requirements=kw.pop("hard_requirements", (COMMUTE,)),
+        six_mode=kw.pop("six_mode", "manual"),  # 旧问卷的百分比分配
+        material_mode=kw.pop("material_mode", "manual"),
         **kw,
     )
     body = draft.model_dump(mode="json")
@@ -178,8 +181,9 @@ def test_an_old_draft_is_migrated_only_with_consent(tmp_path, publish):
     assert _put(b, view, _old_draft(svc, view)).status_code == 200
     got = b.get(f"/drafts/{did}").json()
     m = got["migration"]
-    assert m["consent_required"] and m["version_changed"]
+    assert m["consent_required"] and m["version_changed"] and m["allocation_choice_required"]
     assert [(r["section"], r["ref"]) for r in m["removed"]] == [("hard_requirements", "hr.commute")]
+    assert [a["group"] for a in m["allocations"]] == ["six_dimensions", "material"]
     review = b.post(f"/drafts/{did}/review").json()["review"]
     assert not review["confirmable"]
     assert "removed_section_present" in [i["code"] for i in review["issues"]]
@@ -199,11 +203,22 @@ def test_an_old_draft_is_migrated_only_with_consent(tmp_path, publish):
         f"/drafts/{did}/migrate",
         json={"expected_revision": got["draft"]["revision"], "clear_removed": True},
     )
+    assert r.status_code == 409 and r.json()["code"] == "migration_choice_required"
+    assert db_dump(svc.store.path) == before  # 没有选择重新评分或同等重视：什么都没改
+    r = b.post(
+        f"/drafts/{did}/migrate",
+        json={
+            "expected_revision": got["draft"]["revision"],
+            "clear_removed": True,
+            "allocation_choice": "equal_weight",
+        },
+    )
     assert r.status_code == 200, r.text
     moved = r.json()
     assert moved["draft"]["revision"] == got["draft"]["revision"] + 1
     assert moved["draft"]["hard_requirements"] == [] and moved["migration"] is None
-    assert moved["draft"]["meta"]["questionnaire_version"] == "e3a-questionnaire-v0.4-draft"
+    assert moved["draft"]["meta"]["questionnaire_version"] == "e3a-questionnaire-v0.5-draft"
+    assert moved["draft"]["six_dimensions"]["mode"] == "ratings_normalized_v1"
     after = db_dump(svc.store.path)
     for table in ("profiles", "intents"):
         assert after.get(table) == before.get(table), table  # 历史画像与运行不改写

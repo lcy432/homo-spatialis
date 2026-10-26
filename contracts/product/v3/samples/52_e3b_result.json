@@ -2042,7 +2042,7 @@
   ],
   "confirmed": {
    "confirmed_id": "confirmed.draft.u501.r1",
-   "content_fingerprint": "556964ff59532f99651492dfc9a0e2344fad42ab194a53be32810aac5a24b35c"
+   "content_fingerprint": "4f76b3f2d61d57c3c41d9714a852fd7fff80d648f4bfa5e2b00eda2fe0d166cc"
   },
   "data_nature": [
    {
@@ -2796,7 +2796,7 @@
    "结果只给用户看，不回灌给仍在生活中的分身"
   ],
   "meta": {
-   "conversion_version": "e3a-conversion-v3",
+   "conversion_version": "e3a-conversion-v4",
    "data_pack": {
     "content_fingerprint": "2d234a5137dedf2f9b6d5dc08d662d1eec113cb6dbe346e50e2f537c940e50c3",
     "note": "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定",
@@ -2804,14 +2804,14 @@
     "status": "real_data_frozen"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.4-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.5-draft",
    "sample": {
     "note": "离线闭环实际执行的结果（mock 规划器，零网络）；人物是合成的，城市资料是冻结的 E3B 真实资料包",
     "origin": "offline_run",
     "produced_by": "product.scenarios.closed_loop(e3b)",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.4",
+   "schema_version": "e3a-product-schema-v3.5",
    "vocabulary_version": "e3a-vocabulary-v5"
   },
   "not_generated_reason": null,
@@ -2844,7 +2844,7 @@
    "planner_kind": "mock"
   },
   "preflight": {
-   "preflight_fingerprint": "caec61e101ffbeb8f15db1fa70bc71639cd3af54a389ba2a4723aa9418a7c462",
+   "preflight_fingerprint": "ecfafc90368452cd5eb4fc26b02302332786c1af56e72a77b9b26eff5d062fae",
    "preflight_id": "preflight.confirmed.draft.u501.r1"
   },
   "reading_guide_zh": [
@@ -2858,9 +2858,9 @@
    "分数是当前合成模型下、按你确认的陈述偏好计算的结果；小数末位的差异不构成可靠的排序"
   ],
   "real_model_calls": 0,
-  "result_fingerprint": "d7a0605da65a1edf72b9b79833d6dccdf652b0a593070c56d38da3197caae088",
-  "result_id": "result.run-e3a-e23d999ae75d16e0",
-  "run_id": "run-e3a-e23d999ae75d16e0",
+  "result_fingerprint": "4cb75000a6358fed725fae11db3b8831db3af435fc8f3b183ab6a0678210377e",
+  "result_id": "result.run-e3a-85d00680024e9bb5",
+  "run_id": "run-e3a-85d00680024e9bb5",
   "run_stage": "completed",
   "sources_zh": [
    "生活事实：E1 结算记录（钱、岗位、住房、食品、服务月份）与月度资源账（本人家务小时）",

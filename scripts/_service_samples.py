@@ -1067,6 +1067,9 @@ OLD_META = {
     "conversion_version": "e3a-conversion-v2",
 }
 _SIX = ("material", "safety", "opportunity", "leisure", "environment", "commute")
+_LEAVES = ("housing_condition", "food_life", "daily_convenience", "personal_enjoyment")
+#: 独立评分的手算例子（DECISIONS/0047）：原始合计 200，权重 = 100 × 评分 ÷ 200 = 40/20/20/10/5/5
+_RATED = dict(zip(_SIX, ("80", "40", "40", "20", "10", "10"), strict=True))
 _SIX_NORMAL = {
     "material": "30",
     "safety": "20",
@@ -1092,7 +1095,8 @@ def _new_flow(**kw: Any) -> dict[str, Any]:
 
 
 def input_samples(s: _Samples) -> None:
-    """新输入流程的样例（129 起，E3B 资料包）：输入目录、按目录选职业与资格题、面板多选、定和分配的各种情形、拒绝与旧草稿迁移。"""
+    """新输入流程的样例（129 起，E3B 资料包）：输入目录、按目录选职业与资格题、面板多选、独立评分的各种情形（v3.5）、拒绝与旧草稿
+    迁移。"""
     from common.product_contracts import UserInputDraft
 
     w = s.w
@@ -1200,41 +1204,101 @@ def input_samples(s: _Samples) -> None:
         ),
         (
             "142_service_review_allocation_equal_split",
-            {"six_mode": "equal_split", "material_mode": "equal_split"},
-            "主动选择平均分配：六维每项精确 50/3（显示 16.7，只供阅读）、物质四项每项 25",
-        ),
-        (
-            "143_service_review_allocation_moved",
-            {"six": {**dict.fromkeys(_SIX, "50/3"), "material": "65/3", "safety": "35/3"}},
-            "均分之后移动点数：物质 +5、安全 −5，其他维度不动（不按比例自动调整），写成规范分数 65/3、35/3，合计精确 100",
+            {"six": dict.fromkeys(_SIX, "50"), "material": dict.fromkeys(_LEAVES, "50")},
+            "同等重视（独立评分 ratings_normalized_v1，用户主动把每项评分设为 50）：六维原始合计 300、每项权重精确 50/3（显示 16.7，只供"
+            "阅读）；物质四项原始合计 200、每项权重 25。不是系统替用户均分",
         ),
         (
             "144_service_review_allocation_zero_values",
-            {
-                "six": _SIX_NORMAL
-                | {"material": "40", "safety": "0", "leisure": "0", "environment": "20"}
-            },
-            "明确给 0 分的维度（安全、休闲）是“已提供 0”，与未答、无所谓、暂不确定分开；合计 100 可以确认",
+            {"six": dict(zip(_SIX, ("80", "0", "40", "0", "20", "20"), strict=True))},
+            "明确评 0 分的维度（安全、休闲）是“已提供 0”，权重就是 0，与未答、无所谓、暂不确定分开；原始合计 160，权重 = 100 × 评分 ÷ 160 = "
+            "50/0/25/0/12.5/12.5，可以确认",
         ),
         (
-            "145_service_review_allocation_under",
-            {"six": _SIX_NORMAL | {"material": "29"}},
-            "六维合计 99：报“还差 1 分”，由用户自己改，不按比例补",
+            "145_service_review_ratings_all_zero",
+            {"six": dict.fromkeys(_SIX, "0")},
+            "六维全部评 0：error ratings_all_zero（“至少有一项大于 0，或主动选择同等重视”），不能确认、不出权重；系统不自动均分",
         ),
         (
-            "146_service_review_allocation_over",
-            {"six": _SIX_NORMAL | {"material": "31"}},
-            "六维合计 101：报“多出 1 分”，由用户自己改，不按比例扣",
+            "146_service_review_ratings_out_of_range",
+            {"six": _SIX_NORMAL | {"material": "120"}},
+            "评分超过 100（物质 120）：error rating_out_of_range，这一项没有可用的数值；不截断成 100、不按比例缩小，由用户自己改",
         ),
         (
-            "147_service_review_allocation_parent_zero",
-            {"six": _SIX_NORMAL | {"material": "0", "safety": "40"}, "material_mode": None},
-            "物质父项明确为 0：四项细分不适用（status = not_applicable），不需要也不伪造细分",
+            "156_service_review_ratings_scaled",
+            {"six": dict(zip(_SIX, ("8", "4", "4", "2", "1", "1"), strict=True))},
+            "同比例缩小的评分 8/4/4/2/1/1（原始合计 20）：权重与 80/40/40/20/10/10 完全相同，都是 40/20/20/10/5/5——只看比例，不看绝对大小",
+        ),
+        (
+            "157_service_review_allocation_mode_retired",
+            {"six_mode": "manual", "material_mode": "manual"},
+            "当前版本的草稿却用旧的百分比分配（mode = manual，30/20/20/10/10/10 与 25/25/30/20）：照原来的含义审阅（合计 100、status = "
+            "complete），但 error allocation_mode_retired 挡住确认；系统不把百分比改读成评分，用户要重新评分或选择同等重视",
         ),
     )
     for name, kw, text in cases:
         did, _ = draft(**kw)
         w(name, "ReviewReply", text, box.post(f"/drafts/{did}/review").json())
+    # 独立评分的完整例子：草稿保存原始评分 → 审阅给出原始合计与精确权重 → 确认画像保存原始评分、换算规则与最终权重
+    did, saved = draft(six=_RATED)
+    w(
+        "155_service_draft_ratings",
+        "DraftView",
+        "独立评分的草稿：六维 mode = ratings_normalized_v1，entries 保存用户填的原始评分 80/40/40/20/10/10（不必凑满 100，也不在草稿里"
+        "换算）；物质四项评分 25/25/30/20",
+        saved,
+    )
+    review = box.post(f"/drafts/{did}/review").json()
+    w(
+        "143_service_review_ratings_normalized",
+        "ReviewReply",
+        "独立评分换成权重：原始合计 rating_total = 200；权重 = 100 × 评分 ÷ 200 = 40/20/20/10/5/5（精确分数，不加任何系数、不按职业或文字"
+        "调整）。lines 里 rating_exact / rating_display 是原始评分，exact / display 是权重；total 是权重合计 100；rule 写明换算规则",
+        review,
+    )
+    w(
+        "161_display_review_ratings_en",
+        "DisplayEnvelope",
+        "同一份审阅的英文显示：评分、原始合计与权重的说明都有英文；source 与中文完全相同（换语言不改评分或权重）",
+        _display(box, "review", review["review"]["review_id"], "en").json(),
+    )
+    req = {
+        "review_id": review["review"]["review_id"],
+        "draft_id": did,
+        "draft_revision": review["reviewed_revision"],
+        "acknowledged": list(review["review"]["pending_confirmations"]),
+    }
+    w(
+        "160_service_confirm_ratings_normalized",
+        "ProfileConfirmReply",
+        "确认画像：six_dimensions.ratings 是原始评分 80/40/40/20/10/10、rating_total = 200、rule = ratings_normalized_v1；points 是最终"
+        "权重 40/20/20/10/5/5——E1 只读 points。物质四项同样保存原始评分与权重",
+        box.post("/profiles/confirm", req).json(),
+    )
+    # 物质父项为 0：四项不适用、答案原样留着；父项重新大于 0：照原样恢复（不清零、不自动均分）
+    leaves = {
+        "housing_condition": "70",
+        "food_life": None,
+        "daily_convenience": "0",
+        "personal_enjoyment": "30",
+    }
+    did, saved = draft(six=_SIX_NORMAL | {"material": "0", "safety": "40"}, material=leaves)
+    w(
+        "147_service_review_allocation_parent_zero",
+        "ReviewReply",
+        "物质父项评分明确为 0：物质四项不适用（status = not_applicable），这一次不参与、也不挡确认；草稿里已有的四项评分（居住 70、"
+        "饮食未答、便利 0、享受 30）原样留着，不清空",
+        box.post(f"/drafts/{did}/review").json(),
+    )
+    body = box.draft_body(saved, **_new_flow(six=_SIX_NORMAL, material=leaves))
+    box.put(f"/drafts/{did}", body)
+    w(
+        "158_service_review_ratings_parent_restored",
+        "ReviewReply",
+        "同一份草稿把物质父项改回 30：四项评分照原样恢复（居住 70、便利 0、享受 30），饮食仍是未答——报 allocation_unanswered，不清零、"
+        "不自动均分；回答饮食之后才能确认",
+        box.post(f"/drafts/{did}/review").json(),
+    )
     view = box.post("/drafts").json()
     body = box.draft_body(view, **_new_flow())
     body["draft"]["occupation"]["raw_text"] = "我是程序员"
@@ -1249,6 +1313,8 @@ def input_samples(s: _Samples) -> None:
     body = box.draft_body(
         view,
         abilities=("edu_at_least_hs",),
+        six_mode="manual",  # 旧问卷的百分比分配
+        material_mode="manual",
         hard_requirements=(
             {
                 "requirement_id": "hr.commute",
@@ -1274,7 +1340,8 @@ def input_samples(s: _Samples) -> None:
         "148_service_draft_migration_needed",
         "DraftView",
         "按旧版问卷（v0.3）填的草稿：migration 写明版本从哪到哪、要清空的旧答案（往返 60 分钟的硬要求、品牌偏好，逐条列出，原文照原样）、"
-        "迁移会做什么；consent_required = true。读取不改写草稿",
+        "迁移会做什么；consent_required = true。旧的六维 / 物质分配是当时的百分比：allocations 照原样列出（manual，30/20/20/10/10/10 与 "
+        "25/25/30/20，不换算），allocation_choice_required = true。读取不改写草稿",
         old,
     )
     w(
@@ -1286,16 +1353,21 @@ def input_samples(s: _Samples) -> None:
     w(
         "150_service_review_removed_sections",
         "ReviewReply",
-        "旧草稿迁移之前的审阅：version_changed（问卷、词表、转换、结构版本）与 removed_section_present（硬要求、属性偏好各一条）都阻断；"
-        "旧值会改变模拟，不悄悄沿用、也不悄悄丢掉",
+        "旧草稿迁移之前的审阅：version_changed（问卷、词表、转换、结构版本）、removed_section_present（硬要求、属性偏好各一条）与 "
+        "allocation_mode_retired（六维、物质各一条：百分比不是独立评分）都阻断；旧值会改变模拟，不悄悄沿用、也不悄悄丢掉",
         box.post(f"/drafts/{did}/review").json(),
     )
     w(
         "151_service_draft_migrate_request",
         "DraftMigrateRequest",
         "迁移请求（POST /api/v1/drafts/{id}/migrate）：expected_revision 是当前修订号；clear_removed = true 表示用户看过迁移说明、"
-        "同意清空那些旧答案（省略或为 false 时，有要清空的答案就拒绝）",
-        {"expected_revision": old["draft"]["revision"], "clear_removed": True},
+        "同意清空那些旧答案（省略或为 false 时，有要清空的答案就拒绝）；allocation_choice 是用户对旧百分比分配的选择：rerate（这两组"
+        "改成独立评分、各项未答，由用户重新打分）或 equal_weight（每项评分 50）。有旧分配时必须选，省略就拒绝",
+        {
+            "expected_revision": old["draft"]["revision"],
+            "clear_removed": True,
+            "allocation_choice": "rerate",
+        },
     )
     w(
         "152_service_error_migration_consent_required",
@@ -1303,15 +1375,30 @@ def input_samples(s: _Samples) -> None:
         "没有同意清空就迁移（clear_removed 省略或为 false）：409 migration_consent_required，草稿不变",
         box.post(f"/drafts/{did}/migrate", {"expected_revision": old["draft"]["revision"]}).json(),
     )
+    w(
+        "159_service_error_migration_choice_required",
+        "ServiceError",
+        "同意清空、却没有对旧的百分比分配选择重新评分或同等重视（allocation_choice 省略）：409 migration_choice_required，草稿不变；"
+        "系统不把旧百分比改读成评分",
+        box.post(
+            f"/drafts/{did}/migrate",
+            {"expected_revision": old["draft"]["revision"], "clear_removed": True},
+        ).json(),
+    )
     moved = box.post(
         f"/drafts/{did}/migrate",
-        {"expected_revision": old["draft"]["revision"], "clear_removed": True},
+        {
+            "expected_revision": old["draft"]["revision"],
+            "clear_removed": True,
+            "allocation_choice": "rerate",
+        },
     ).json()
     w(
         "153_service_draft_migrated",
         "DraftView",
-        "同意之后迁移（POST /api/v1/drafts/{id}/migrate，clear_removed = true）：版本换成 v0.4、硬要求与属性偏好清空、其他答案原样保留，"
-        "修订号加一；migration 为空。之后要重新审阅与确认；已经确认的画像与已经开始的运行不受影响",
+        "同意并选择重新评分之后迁移（clear_removed = true，allocation_choice = rerate）：版本换成 v0.5、硬要求与属性偏好清空；六维与物质"
+        "改成独立评分（ratings_normalized_v1）、各项未答，由用户重新打分；其他答案原样保留，修订号加一；migration 为空。之后要重新审阅"
+        "与确认；已经确认的画像与已经开始的运行不受影响",
         moved,
     )
     w(

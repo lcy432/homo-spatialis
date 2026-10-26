@@ -1,11 +1,10 @@
-"""新问卷的结构化答案（DECISIONS/0046）：按目录选职业、学历 / 证书 / 相关经验、兴趣与口味面板、去掉的板块、定和分配。
+"""新问卷的结构化答案（DECISIONS/0046）：按目录选职业、学历 / 证书 / 相关经验、兴趣与口味面板、去掉的板块（定和分配见 test_ratings）。
 
 全部走正式入口（``review_draft`` / ``confirm_profile``），不预先写结果。资格换算与 E3B 已有规则一致的核对在 ``test_input_catalog``。
 """
 
 from __future__ import annotations
 
-from fractions import Fraction
 from functools import cache
 from pathlib import Path
 
@@ -379,80 +378,4 @@ def test_removed_sections_in_a_new_draft_block_and_are_listed():
         _confirm(draft, E3A)
 
 
-# ---------------------------------------------------------------------- 定和分配
-
-
-SIX = ("material", "safety", "opportunity", "leisure", "environment", "commute")
-
-
-def test_active_equal_split_is_exact():
-    draft = _draft(six_mode="equal_split", material_mode="equal_split")
-    review = review_draft(_pack(), draft)
-    assert {ln.key: ln.exact for ln in review.six_dimensions.lines} == {k: "50/3" for k in SIX}
-    assert {ln.exact for ln in review.material.lines} == {"25"}
-    c = _confirm(draft)
-    assert c.six_dimensions.points == {k: "50/3" for k in SIX}
-    assert (
-        c.six_dimensions.display["material"] == "16.7"
-    )  # 显示四舍五入（资料包规定一位小数）只供阅读
-    assert sum(Fraction(v) for v in c.six_dimensions.points.values()) == 100
-
-
-def test_moving_points_after_an_equal_split_keeps_exact_fractions():
-    six = {k: "50/3" for k in SIX} | {"material": "65/3", "safety": "35/3"}
-    c = _confirm(_draft(six=six))
-    assert c.six_dimensions.mode == "manual"
-    assert (
-        c.six_dimensions.points["material"] == "65/3"
-        and c.six_dimensions.points["safety"] == "35/3"
-    )
-    assert sum(Fraction(v) for v in c.six_dimensions.points.values()) == 100
-
-
-@pytest.mark.parametrize(("value", "word"), [("29", "还差"), ("31", "多出")])
-def test_under_and_over_allocation_are_refused_not_rescaled(value, word):
-    six = {
-        "material": value,
-        "safety": "20",
-        "opportunity": "20",
-        "leisure": "10",
-        "environment": "10",
-        "commute": "10",
-    }
-    review = review_draft(_pack(), _draft(six=six))
-    assert not review.confirmable
-    assert any(word in i.message_zh for i in review.issues if i.field.startswith("six"))
-    assert {ln.key: ln.exact for ln in review.six_dimensions.lines}[
-        "material"
-    ] == value  # 不按比例改别的维度
-
-
-def test_zero_unanswered_unsure_and_indifferent_stay_distinct():
-    six = {
-        "material": "0",
-        "safety": "40",
-        "opportunity": "30",
-        "leisure": None,
-        "environment": "indifferent",
-        "commute": "unsure",
-    }
-    review = review_draft(_pack(), _draft(six=six))
-    states = {ln.key: (ln.state, ln.exact) for ln in review.six_dimensions.lines}
-    assert states["material"] == ("provided", "0")
-    assert states["leisure"] == ("unanswered", None)
-    assert states["environment"] == ("indifferent", None)
-    assert states["commute"] == ("unsure", None)
-    assert not review.confirmable
-
-
-def test_a_zero_material_parent_needs_no_breakdown():
-    six = {
-        "material": "0",
-        "safety": "40",
-        "opportunity": "30",
-        "leisure": "10",
-        "environment": "10",
-        "commute": "10",
-    }
-    c = _confirm(_draft(six=six, material_mode=None))
-    assert c.material.status == "not_applicable_parent_zero" and c.material.allocation is None
+# 定和分配（v3.5 起是独立评分）的规则见 tests/product/test_ratings.py

@@ -2,6 +2,22 @@
  "additionalProperties": false,
  "description": "迁移草稿（``POST /api/v1/drafts/{id}/migrate``）：``expected_revision`` 必须等于当前修订号；有要清空的旧答案时\n``clear_removed`` 必须为真（用户看过迁移说明并同意），否则拒绝、草稿不变。",
  "properties": {
+  "allocation_choice": {
+   "anyOf": [
+    {
+     "enum": [
+      "rerate",
+      "equal_weight"
+     ],
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Allocation Choice"
+  },
   "clear_removed": {
    "default": false,
    "title": "Clear Removed",

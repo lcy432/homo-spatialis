@@ -504,3 +504,90 @@ answer_states[j] = {
 * **给 E5 的受控夹具**：`tests/fixtures/v33_objects/` 是旧版服务真实写下的草稿、审阅、确认画像与它们的显示绑定（合成人物，没有凭证），
   可以给迁移的浏览器测试用（交接单第 17 节说还缺能造旧版本草稿的夹具）。
 * 自测：离线全量测试 1385 条通过、0 失败、0 跳过（干净工作树：`7efc3ce` 加本轮文件，`uv run pytest -n 8`）；新的 `tests/product/test_legacy_objects.py`（25 条，修复前 20 条失败）与 `tests/product_service/test_legacy_rows.py`；复核探针原样重跑 14 条通过（显示 5、R3/R4 5、F3 遗留 1、R1 身份 / 读取 3）；ruff、`check-schema`（34 份 schema、151 份样例）、`check-openapi`、显示与地理核对都通过；两进程升级探针（旧版 `a851db3` 开始并停下 → 新版恢复）的修复前后对照在本机证据 `runs/e3-compat-fix-20261025/`
+
+## 16. 独立评分（2026-10-25，共享结构 v3.5）
+
+状态：**实现及离线自测完成，待独立复核**。基线 `6c01e79`；所有者 2026-10-25 的“E3 输入与服务体验调整”按功能分三个提交（独立评分 /
+一次开始 / 进度摘要），本节是第一个（只有这一项的文件，没有推送）。规则见 [ADR0047](../../DECISIONS/0047-e3-independent-ratings.md)。
+主链不变：原始答案 → 审阅 → 用户确认画像 → E1 只读 `points`。E3 定义换算与状态，E5 做控件；页面可以按公开规则先算一个**标明为临时**的
+预览，正式的权重以审阅为准。
+
+### 16.1 版本
+
+| 项 | 现在 | 说明 |
+|---|---|---|
+| 共享结构 | `e3a-product-schema-v3.5` | 仍导出到 `contracts/product/v3/`（34 份 schema）。`ProductMeta.schema_version` 同时接受 v3.3、v3.4：只为读回历史对象，它们照原样写出、身份不变（第 16.6 节） |
+| 问卷 / 词表 / 转换 | `e3a-questionnaire-v0.5-draft` / `e3a-vocabulary-v5`（不变）/ `e3a-conversion-v4` | 新的审阅与确认必须用这一版；旧草稿先迁移 |
+| 服务 API | `e3c-service-api-v1.4` | 本提交起：`DraftMigrateRequest.allocation_choice`、错误 `migration_choice_required`；一次开始与进度摘要在后两个提交里加 |
+| 显示附层 | `e3-display-v2`（不变） | 新冻结的资源版本：合成 `e3-display-res-v1-8fae36bca51b48ea`、E3B `e3-display-res-v1-ff3e9e8264d8b665`；旧版本保留 |
+| 输入目录、健康问卷、生活协议、评分 | 不变 | 没有改 E1 生活数学，没有重建六城资料包（`48eda959…` 不变） |
+
+### 16.2 用户怎么填（读 `capabilities.points.ratings`）
+
+1. 六维一组、物质四项一组，**各自独立**换算。每项一个 0–100 的原始评分：滑条步长 1（`slider_step`），也可以输入数字精调，最多两位小数
+   （`max_decimals`）；不必凑满 100，改一项不影响别的项。
+2. 提交：`six_dimensions = {mode: "ratings_normalized_v1", entries: {<key>: PointEntry}}`（物质同样）。`PointEntry` 照旧：
+   `{state: "provided", value_text: "80"}` 是评分（写十进制；`"50/3"` 这种分数写法不是评分，会被拒绝）；`unanswered` / `indifferent` /
+   `unsure` 是对应状态。**未答不是 0**，不预填任何值；明确的 0 是回答。
+3. “同等重视”按钮：用户主动把这一组每项设成 50（`equal_weight_rating`），提交的就是这些 50；没有单独的模式。
+4. 物质父项评 0：四项不适用（审阅 `material.status = "not_applicable"`），页面可以收起四项，但**不要清掉**草稿里已有的四项评分；父项
+   重新大于 0 时原样恢复（不清零、不均分）。
+5. 页面可以先显示临时的权重预览（必须标明是临时的，未答的不能画成 0 权重）；正式权重以审阅的 `lines[].exact` 为准。
+
+### 16.3 系统怎么换算（服务端，精确分数）
+
+* 要回答的项都回答了、原始合计大于 0：权重 = 100 × 评分 ÷ 原始合计。例：80/40/40/20/10/10（合计 200）→ 40/20/20/10/5/5；同比例的
+  8/4/4/2/1/1 得到同样的权重；六维全 50 → 每项 `50/3`（显示 16.7）；物质四项全 50 → 每项 25。不加系数，不按职业、文字或消费能力调整。
+* 审阅 `AllocationReview`：`mode`、`rule = "ratings_normalized_v1"`、`status`、`rating_total`（已答各项的原始合计，`{exact, display}`）、
+  `total`（权重合计 100，完整时才有）；每行 `rating_exact` / `rating_display` 是原始评分，`exact` / `display` 是权重（没回答完时为空）。
+  显示的四舍五入只供阅读，不回到计算。
+* 确认画像 `ConfirmedAllocation`：`mode`、`rule`、`ratings`（原始评分，精确写法）、`rating_total`、`points`（最终权重，E1 只读它）、
+  `display`。物质在 `material.allocation` 里同样。
+
+### 16.4 错误（审阅里，`severity = error`）
+
+| 代码 | 意思 |
+|---|---|
+| `ratings_all_zero` | 这一组全部是 0：“至少有一项大于 0，或主动选择同等重视”；不自动均分、不出权重 |
+| `rating_out_of_range` / `rating_not_decimal` / `points_too_many_decimals` / `points_not_a_number` | 超过 100 / 写成分数 / 超过两位小数 / 不是数 |
+| `allocation_unanswered` / `allocation_indifferent` / `allocation_unsure` | 还有项没给评分（不换成 0、不均分） |
+| `allocation_mode_retired` | 用了旧的百分比分配（`manual` / `equal_split`）：这一版问卷不能用它确认 |
+
+### 16.5 旧草稿迁移
+
+* `DraftMigration` 新增 `allocations`（逐组照原样列出旧分配：`group`、`mode`、`lines[]` 的 `key`、`label`、`state`、`value_text`；
+  `equal_split` 的各项写成当时的均分值）与 `allocation_choice_required`。旧百分比不是独立评分，系统不换算、不改读。
+* `POST /api/v1/drafts/{id}/migrate` 的 `DraftMigrateRequest` 新增 `allocation_choice`：`rerate`（这两组改成独立评分、各项未答，用户重新
+  打分）或 `equal_weight`（每项评分 50）。有旧分配时必须选，否则 409 `migration_choice_required`、草稿不变；有要清空的旧答案时先要
+  `clear_removed = true`（否则仍是 `migration_consent_required`）。其他答案原样保留。
+* 已经确认的旧画像、已经开始的运行与历史结果不改；旧画像仍不能直接准备新模拟（`preflight_stale`）。
+
+### 16.6 旧对象
+
+v3.3 与 v3.4 的草稿、审阅与确认画像照原样读回、照原样写出（没有 v3.5 的字段），内容身份、草稿指纹与显示绑定都与当初相同；旧对象里
+出现 v3.5 才有的内容（例如 `ratings_normalized_v1`）就当作非法输入拒绝（`tests/fixtures/v34_objects/` 是 v3.4 真实导出的四份）。E5 现有
+的草稿样本（`web/tests/fixtures/drafts/`，v3.4 的百分比）照原样审阅：旧分配按原义，同时带 `version_changed` 与 `allocation_mode_retired`
+阻断；按 v3.5 重新生成后，`tests/product/test_web_drafts.py` 里对应的几条要换成独立评分的例子。
+
+### 16.7 样例（`contracts/product/v3/samples/`）
+
+| 情形 | 样例 |
+|---|---|
+| 草稿（原始评分 80/40/40/20/10/10）→ 审阅（合计 200、权重 40/20/20/10/5/5）→ 英文显示 → 确认画像（`ratings` + `points`） | 155 → 143 → 161 → 160 |
+| 同等重视（六维 50/3、物质 25）/ 明确 0 / 全零拒绝 / 超过 100 / 同比例缩小 | 142 / 144 / 145 / 146 / 156 |
+| 物质父项为 0（四项不适用、答案留着）→ 父项改回 30（四项恢复，饮食仍未答） | 147 → 158 |
+| 当前版本草稿用旧百分比（照原义审阅 + `allocation_mode_retired`） | 157 |
+| 旧草稿：迁移说明（`allocations`）/ 英文 / 迁移前审阅 / 迁移请求（`allocation_choice = rerate`）/ 没同意 / 没选择（409） / 迁移后 / 不需要 | 148 / 149 / 150 / 151 / 152 / 159 / 153 / 154 |
+| 其他 | 12、13、14 改成独立评分的写法（主故事 30/20/20/10/10/10 正好合计 100，权重与 E1 输入不变）；名称改了的：143（原“均分后移动”）、145（原“差 1 分”）、146（原“多 1 分”）——这三种是旧百分比才有的情形 |
+
+### 16.8 自测与没有验证的
+
+* 离线自测（干净工作树：`6c01e79` 加本提交的文件）：全量离线测试 1400 条通过、0 失败、0 跳过（`uv run pytest -n 8`，13 分 53 秒）；ruff check /
+  format 通过；`check-schema`（34 份 schema、158 份样例）、`check-openapi`、`scripts/product_display.py check`（0 处不一致、0 个 key 缺英文）、
+  `scripts/product_geography.py check` 都通过。新的 `tests/product/test_ratings.py`（20 条：精确归一、同比例、明确 0 / 未答 / 全零、父项
+  为 0 的往返、确认画像与 E1 只读 `points`、旧方式停用、v3.3 与 v3.4 旧草稿的显式迁移、v3.4 对象原样读回与身份不变）；旧对象的
+  `test_legacy_objects.py`（25 条）照旧通过。两进程升级探针（旧版服务开始并停下的运行，新版恢复）在第三个提交之后、连同服务库 v4 一起重跑。
+* 待独立复核：本节全部内容。
+* 还没有做 / 本版限制：E5 页面没有接（评分控件、同等重视、父项为 0 的收起与恢复、迁移时的两种选择都要 E5 做）；独立评分只认比例，
+  想表达“都不在乎”的人只能选无所谓 / 暂不确定，而这两种状态挡住确认；没有做用户访谈或可用性测试；mock 通过不代表真实用户或真实模型
+  的效果；没有部署、没有真实模型试跑。

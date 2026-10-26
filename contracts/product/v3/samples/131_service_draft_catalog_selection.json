@@ -91,10 +91,10 @@
       "value_text": "20"
      }
     },
-    "mode": "manual"
+    "mode": "ratings_normalized_v1"
    },
    "meta": {
-    "conversion_version": "e3a-conversion-v3",
+    "conversion_version": "e3a-conversion-v4",
     "data_pack": {
      "content_fingerprint": "48eda959e2eb8254c891d1de88b92f792ccf8ecbaadac8037d548279cd9dd22b",
      "note": "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定",
@@ -102,9 +102,9 @@
      "status": "real_data_frozen"
     },
     "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-    "questionnaire_version": "e3a-questionnaire-v0.4-draft",
+    "questionnaire_version": "e3a-questionnaire-v0.5-draft",
     "sample": null,
-    "schema_version": "e3a-product-schema-v3.4",
+    "schema_version": "e3a-product-schema-v3.5",
     "vocabulary_version": "e3a-vocabulary-v5"
    },
    "occupation": {
@@ -144,7 +144,7 @@
       "value_text": "20"
      }
     },
-    "mode": "manual"
+    "mode": "ratings_normalized_v1"
    },
    "taste": {
     "selected": [
@@ -156,7 +156,7 @@
   },
   "expires_at": "2027-01-23T09:01:02Z",
   "meta": {
-   "conversion_version": "e3a-conversion-v3",
+   "conversion_version": "e3a-conversion-v4",
    "data_pack": {
     "content_fingerprint": "48eda959e2eb8254c891d1de88b92f792ccf8ecbaadac8037d548279cd9dd22b",
     "note": "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定",
@@ -164,14 +164,14 @@
     "status": "real_data_frozen"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.4-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.5-draft",
    "sample": {
     "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
     "origin": "offline_run",
     "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.4",
+   "schema_version": "e3a-product-schema-v3.5",
    "vocabulary_version": "e3a-vocabulary-v5"
   },
   "migration": null,

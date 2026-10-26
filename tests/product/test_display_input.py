@@ -50,7 +50,15 @@ REVIEW_ONLY: dict[str, dict[str, Any]] = {
             "personal_enjoyment": "0",
         },
     },
-    "equal_split": {"six_mode": "equal_split", "material_mode": "equal_split"},
+    # v3.5：“同等重视”是用户主动把每项评分设为 50（不再是旧的平均分配方式）
+    "equal_split": {
+        "six": dict.fromkeys(
+            ("material", "safety", "opportunity", "leisure", "environment", "commute"), "50"
+        ),
+        "material": dict.fromkeys(
+            ("housing_condition", "food_life", "daily_convenience", "personal_enjoyment"), "50"
+        ),
+    },
     "health_unsure": {
         "health_choices": {
             "hc_more_pay_more_sick_risk": "unsure",

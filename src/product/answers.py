@@ -4,8 +4,10 @@
 ``ConfirmedProfile``（用户确认的语义与精确数值，带内容身份）。规则：
 
 * 未答、已提供（明确 0 也是已提供）、明确无所谓、暂不确定四种状态互不代替；“无所谓”“不确定”不会被自动换成 0 或均分。
-* 六维合计必须**精确**等于 100；手工输入按精确十进制解析；只有用户主动选择平均分配才生成均分（六维每项 50/3、物质每项 25）。
-  不预填、不按比例自动扣减；合计不对就报“还差 / 多出几分”，由用户自己改。
+* v0.5 问卷（v3.5）用独立评分（``ratings_normalized_v1``）：每项 0–100、最多两位小数，不必凑满 100；全部回答、原始合计大于 0
+  之后，权重 = 100 × 评分 ÷ 合计（精确分数，不加任何系数）。全零拒绝（不自动均分）；“同等重视”是用户主动把每项设为 50。
+  旧的百分比分配（``manual`` / ``equal_split``）保留原来的含义——合计必须**精确**等于 100、只有主动选择平均分配才均分——只为读回
+  旧对象；新问卷里用它们确认会被阻断，旧草稿迁移时由用户选择重新评分或同等重视。
 * 物质父项为正时四项细分必须精确合计 100；父项明确为 0 时细分不适用，不伪造回答。旧问卷的 ``laundry`` 不能自动当作
   ``daily_convenience``；``healthcare`` 不在六维里（健康回答另有独立问卷）。
 * 职业（v3.4）从输入目录直接选中（不需要文字；目录过期、编号不在目录里都拒绝），或用兼容的文字描述在少量可读候选里确认；
@@ -20,11 +22,13 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
+from decimal import Decimal
 from fractions import Fraction
 from typing import Any
 
 from common.product_contracts import (
     PRODUCT_SCHEMA_VERSION,
+    RATINGS_RULE,
     AllocationAnswer,
     AllocationLine,
     AllocationReview,
@@ -260,6 +264,38 @@ def _allocation(
                     ),
                 )
             )
+    if answer.mode in ("manual", "equal_split"):
+        issues.append(
+            issue(
+                "allocation_mode_retired",
+                f"{where}.mode",
+                t(
+                    "input.allocation.mode_retired.message",
+                    "这一版问卷的{what}用独立评分：每项 0–100 分，不必凑满 100；旧的百分比分配不能直接用来确认",
+                    what=what,
+                ),
+                t(
+                    "input.allocation.mode_retired.impact",
+                    "百分比不是独立评分，系统不把它改读成评分；画像暂时不能确认",
+                ),
+                t(
+                    "input.allocation.mode_retired.next",
+                    "给每一项重新评分，或选择同等重视（每项 50 分）",
+                ),
+            )
+        )
+    if answer.mode == RATINGS_RULE:
+        return _ratings(
+            pack,
+            answer,
+            keys=keys,
+            kind=kind,
+            labels=labels,
+            supports=supports,
+            where=where,
+            what=what,
+            issues=issues,
+        )
     lines: list[AllocationLine] = []
     values: dict[str, Fraction] = {}
     if answer.mode == "equal_split":
@@ -378,7 +414,10 @@ def _allocation(
                 )
             )
     total = sum(values.values(), Fraction(0)) if values else None
-    complete = len(values) == len(keys) and not any(i.severity == "error" for i in issues)
+    # 旧的百分比分配照原来的含义审阅（合计精确 100 才完整）；“方式已停用”只挡确认，不改这组分配本身完整与否
+    complete = len(values) == len(keys) and not any(
+        i.severity == "error" and i.code != "allocation_mode_retired" for i in issues
+    )
     if len(values) == len(keys) and total is not None and total != TOTAL:
         diff = TOTAL - total
         gap = (
@@ -415,6 +454,166 @@ def _allocation(
         lines=tuple(lines),
     )
     return review, (values if complete else None), issues
+
+
+def _rating_text(q: Fraction) -> str:
+    """原始评分的显示：照它的十进制写法（最多两位小数，不补零），例如 80、12.5、12.25。"""
+    d = Decimal(q.numerator) / Decimal(q.denominator)
+    return format(d.normalize(), "f")
+
+
+def _ratings(
+    pack: DataPack,
+    answer: AllocationAnswer,
+    *,
+    keys: tuple[str, ...],
+    kind: str,
+    labels: dict[str, str],
+    supports: dict[str, str],
+    where: str,
+    what: Sub,
+    issues: list[ProductIssue],
+) -> tuple[AllocationReview, dict[str, Fraction] | None, list[ProductIssue]]:
+    """独立评分（``ratings_normalized_v1``）：每项原始评分 0–100、最多两位小数；全部要回答的项都回答了、原始合计大于 0 之后，
+    权重 = 100 × 评分 ÷ 合计（精确分数）。未答、暂不确定、无所谓保留状态，不换成数值；全零拒绝，不自动均分。"""
+    digits = pack.body.points.display_decimals
+    max_dec = pack.body.points.manual_max_decimals
+    name = {k: Ent(kind, k, labels[k]) for k in keys}
+    ratings: dict[str, Fraction] = {}
+    states: dict[str, str] = {}
+    for k in keys:
+        entry = answer.entries.get(k)
+        states[k] = "unanswered" if entry is None else entry.state
+        if entry is None or entry.state != "provided":
+            continue
+        assert entry.value_text is not None
+        try:
+            if "/" in entry.value_text:
+                raise ExactParseError(
+                    "rating_not_decimal",
+                    Sub(
+                        "input.exact.rating_not_decimal",
+                        "“{text}”不是十进制数：评分写成 0 到 100 之间、最多两位小数的数",
+                        (("text", Raw(entry.value_text)),),
+                    ),
+                )
+            q = parse_points(entry.value_text, max_decimals=max_dec)
+        except ExactParseError as exc:
+            issues.append(
+                issue(
+                    exc.code,
+                    f"{where}.entries.{k}",
+                    t(
+                        "input.allocation.parse_error.message",
+                        "{name}：{error}",
+                        name=name[k],
+                        error=exc.text,
+                    ),
+                    t("input.allocation.no_value.impact", "这一项没有可用的数值"),
+                    t(
+                        "input.ratings.parse_error.next",
+                        "改成 0 到 100 之间、最多两位小数的评分",
+                    ),
+                )
+            )
+            continue
+        if q > TOTAL:
+            issues.append(
+                issue(
+                    "rating_out_of_range",
+                    f"{where}.entries.{k}",
+                    t(
+                        "input.ratings.out_of_range.message",
+                        "{name} 的评分 {value} 超过了 100",
+                        name=name[k],
+                        value=Raw(entry.value_text),
+                    ),
+                    t("input.allocation.no_value.impact", "这一项没有可用的数值"),
+                    t("input.ratings.out_of_range.next", "每一项的评分在 0 到 100 之间"),
+                )
+            )
+            continue
+        ratings[k] = q
+    for k in keys:
+        if states[k] == "provided":
+            continue
+        text = {
+            "unanswered": Sub("input.allocation.state.unanswered", "还没有分配"),
+            "indifferent": Sub("input.allocation.state.indifferent", "选了“无所谓”"),
+            "unsure": Sub("input.allocation.state.unsure", "选了“暂不确定”"),
+        }[states[k]]
+        issues.append(
+            issue(
+                f"allocation_{states[k]}",
+                f"{where}.entries.{k}",
+                t(
+                    "input.allocation.not_given.message",
+                    "{name} {state}：系统不会把它自动换成 0 分或平均分",
+                    name=name[k],
+                    state=text,
+                ),
+                t("input.allocation.not_given.impact", "{what}还不完整，不能确认", what=what),
+                t(
+                    "input.ratings.not_given.next",
+                    "给它一个 0 到 100 的评分（可以是 0），或选择同等重视",
+                ),
+            )
+        )
+    rating_total = sum(ratings.values(), Fraction(0)) if ratings else None
+    answered = len(ratings) == len(keys)
+    points: dict[str, Fraction] | None = None
+    if answered and rating_total == 0:
+        issues.append(
+            issue(
+                "ratings_all_zero",
+                f"{where}.entries",
+                t(
+                    "input.ratings.all_zero.message",
+                    "{what}的评分全部是 0：至少有一项大于 0，或主动选择同等重视",
+                    what=what,
+                ),
+                t(
+                    "input.ratings.all_zero.impact",
+                    "全部是 0 时没法换成权重；系统不会自动平均分配",
+                ),
+                t(
+                    "input.ratings.all_zero.next",
+                    "给你在意的项目打一个大于 0 的分，或选择同等重视（每项 50 分）",
+                ),
+            )
+        )
+    elif answered and rating_total is not None:
+        points = {k: TOTAL * ratings[k] / rating_total for k in keys}
+    complete = points is not None and not any(
+        i.severity == "error" and i.field.startswith(where) for i in issues
+    )
+    lines = tuple(
+        AllocationLine(
+            key=k,
+            label=label(kind, k, labels[k]),
+            state=states[k],  # type: ignore[arg-type]
+            exact=canonical(points[k]) if complete and points else None,
+            display=display(points[k], digits) if complete and points else None,
+            support=supports[k],  # type: ignore[arg-type]
+            usage=POINT_USAGE,  # type: ignore[arg-type]
+            rating_exact=canonical(ratings[k]) if k in ratings else None,
+            rating_display=_rating_text(ratings[k]) if k in ratings else None,
+        )
+        for k in keys
+    )
+    review = AllocationReview(
+        mode=answer.mode,
+        status="complete" if complete else "incomplete",
+        total=ExactNumber(exact=canonical(TOTAL), display=display(TOTAL, digits))
+        if complete
+        else None,
+        lines=lines,
+        rating_total=None
+        if rating_total is None
+        else ExactNumber(exact=canonical(rating_total), display=_rating_text(rating_total)),
+        rule=RATINGS_RULE,
+    )
+    return review, (points if complete else None), issues
 
 
 # ---------------------------------------------------------------------- 健康问卷
@@ -1314,6 +1513,7 @@ def confirm_profile(
                 display={
                     ln.key: ln.display for ln in review.material.lines if ln.display is not None
                 },  # type: ignore[misc]
+                **_rating_source(review.material),
             ),
         )
     )
@@ -1402,6 +1602,7 @@ def confirm_profile(
             mode=review.six_dimensions.mode or "manual",
             points={k: canonical(v) for k, v in six.items()},
             display={k: display(v, digits) for k, v in six.items()},
+            **_rating_source(review.six_dimensions),
         ),
         material=material,
         health=health,
@@ -1425,6 +1626,18 @@ def confirm_profile(
     )
     unsealed = ConfirmedProfile.model_construct(**fields, content_fingerprint="0" * 64)
     return ConfirmedProfile(**fields, content_fingerprint=unsealed.expected_fingerprint())
+
+
+def _rating_source(review: AllocationReview) -> dict[str, Any]:
+    """独立评分的确认来源：原始评分、原始合计与换算规则（其他作答方式没有这三项）。"""
+    if review.mode != RATINGS_RULE:
+        return {}
+    assert review.rating_total is not None
+    return {
+        "ratings": {ln.key: ln.rating_exact for ln in review.lines if ln.rating_exact is not None},
+        "rating_total": review.rating_total.exact,
+        "rule": RATINGS_RULE,
+    }
 
 
 def _ack_text(key: str) -> Sub | Raw:

@@ -1,5 +1,5 @@
 {
- "description_zh": "同意之后迁移（POST /api/v1/drafts/{id}/migrate，clear_removed = true）：版本换成 v0.4、硬要求与属性偏好清空、其他答案原样保留，修订号加一；migration 为空。之后要重新审阅与确认；已经确认的画像与已经开始的运行不受影响",
+ "description_zh": "同意并选择重新评分之后迁移（clear_removed = true，allocation_choice = rerate）：版本换成 v0.5、硬要求与属性偏好清空；六维与物质改成独立评分（ratings_normalized_v1）、各项未答，由用户重新打分；其他答案原样保留，修订号加一；migration 为空。之后要重新审阅与确认；已经确认的画像与已经开始的运行不受影响",
  "message": "DraftView",
  "payload": {
   "draft": {
@@ -36,7 +36,7 @@
     ],
     "state": "provided"
    },
-   "draft_id": "draft-000000000000008a",
+   "draft_id": "draft-000000000000008c",
    "education": {
     "option_id": null,
     "state": "unanswered"
@@ -75,28 +75,11 @@
     "text": null
    },
    "material": {
-    "entries": {
-     "daily_convenience": {
-      "state": "provided",
-      "value_text": "30"
-     },
-     "food_life": {
-      "state": "provided",
-      "value_text": "25"
-     },
-     "housing_condition": {
-      "state": "provided",
-      "value_text": "25"
-     },
-     "personal_enjoyment": {
-      "state": "provided",
-      "value_text": "20"
-     }
-    },
-    "mode": "manual"
+    "entries": {},
+    "mode": "ratings_normalized_v1"
    },
    "meta": {
-    "conversion_version": "e3a-conversion-v3",
+    "conversion_version": "e3a-conversion-v4",
     "data_pack": {
      "content_fingerprint": "48eda959e2eb8254c891d1de88b92f792ccf8ecbaadac8037d548279cd9dd22b",
      "note": "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定",
@@ -104,9 +87,9 @@
      "status": "real_data_frozen"
     },
     "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-    "questionnaire_version": "e3a-questionnaire-v0.4-draft",
+    "questionnaire_version": "e3a-questionnaire-v0.5-draft",
     "sample": null,
-    "schema_version": "e3a-product-schema-v3.4",
+    "schema_version": "e3a-product-schema-v3.5",
     "vocabulary_version": "e3a-vocabulary-v5"
    },
    "occupation": {
@@ -120,33 +103,8 @@
    },
    "revision": 3,
    "six_dimensions": {
-    "entries": {
-     "commute": {
-      "state": "provided",
-      "value_text": "10"
-     },
-     "environment": {
-      "state": "provided",
-      "value_text": "10"
-     },
-     "leisure": {
-      "state": "provided",
-      "value_text": "10"
-     },
-     "material": {
-      "state": "provided",
-      "value_text": "30"
-     },
-     "opportunity": {
-      "state": "provided",
-      "value_text": "20"
-     },
-     "safety": {
-      "state": "provided",
-      "value_text": "20"
-     }
-    },
-    "mode": "manual"
+    "entries": {},
+    "mode": "ratings_normalized_v1"
    },
    "taste": {
     "selected": [],
@@ -156,7 +114,7 @@
   },
   "expires_at": "2027-01-23T09:01:02Z",
   "meta": {
-   "conversion_version": "e3a-conversion-v3",
+   "conversion_version": "e3a-conversion-v4",
    "data_pack": {
     "content_fingerprint": "48eda959e2eb8254c891d1de88b92f792ccf8ecbaadac8037d548279cd9dd22b",
     "note": "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定",
@@ -164,14 +122,14 @@
     "status": "real_data_frozen"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.4-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.5-draft",
    "sample": {
     "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
     "origin": "offline_run",
     "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.4",
+   "schema_version": "e3a-product-schema-v3.5",
    "vocabulary_version": "e3a-vocabulary-v5"
   },
   "migration": null,

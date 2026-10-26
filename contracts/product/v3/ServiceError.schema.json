@@ -244,7 +244,8 @@
     "schema_version": {
      "enum": [
       "e3a-product-schema-v3.3",
-      "e3a-product-schema-v3.4"
+      "e3a-product-schema-v3.4",
+      "e3a-product-schema-v3.5"
      ],
      "title": "Schema Version",
      "type": "string"
@@ -331,6 +332,7 @@
     "run_options_invalid",
     "run_settings_unavailable",
     "migration_consent_required",
+    "migration_choice_required",
     "migration_not_needed",
     "rate_limited",
     "csrf_failed",

@@ -5,7 +5,7 @@
   "code": "invalid_request",
   "display": {
    "display_schema_version": "e3-display-v2",
-   "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+   "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
    "source_view_fingerprint": "12286f4a9dd15b86916fa562c8e5510638c285b6f478cfdc504eb8afe973de0c",
    "translations": {
     "en": {
@@ -14,7 +14,7 @@
        "key": "error.invalid_request.message",
        "missing_reason": null,
        "pointer": "/message_zh",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "The request's format or content does not meet the requirements"
@@ -23,7 +23,7 @@
        "key": "error.invalid_request.impact",
        "missing_reason": null,
        "pointer": "/impact_zh",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "This request was not carried out"
@@ -32,7 +32,7 @@
        "key": "error.invalid_request.next",
        "missing_reason": null,
        "pointer": "/next_action_zh",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "Check what you entered on the page; if it keeps happening, contact the maintainer with the support reference"
@@ -46,7 +46,7 @@
        "key": "error.invalid_request.message",
        "missing_reason": null,
        "pointer": "/message_zh",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "请求的格式或内容不符合要求"
@@ -55,7 +55,7 @@
        "key": "error.invalid_request.impact",
        "missing_reason": null,
        "pointer": "/impact_zh",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "这次请求没有被执行"
@@ -64,7 +64,7 @@
        "key": "error.invalid_request.next",
        "missing_reason": null,
        "pointer": "/next_action_zh",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "检查页面上的填写；问题一直出现时请联系维护者并提供支持编号"

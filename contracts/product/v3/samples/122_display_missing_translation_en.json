@@ -10,7 +10,7 @@
     "key": "pack.note.synthetic",
     "missing_reason": null,
     "pointer": "/meta/data_pack/note",
-    "resource_version": "e3-display-res-v1-57dad9253817ea4a",
+    "resource_version": "e3-display-res-v1-d84a4cf8e13bd104",
     "source_locale": "zh",
     "status": "provided",
     "text": "Synthetic data pack: every value is a hand-made model setting or test data, not real city data"
@@ -19,7 +19,7 @@
     "key": "stage.awaiting_confirmation",
     "missing_reason": "translation_missing",
     "pointer": "/stage_zh",
-    "resource_version": "e3-display-res-v1-57dad9253817ea4a",
+    "resource_version": "e3-display-res-v1-d84a4cf8e13bd104",
     "source_locale": "zh",
     "status": "missing",
     "text": null
@@ -854,10 +854,10 @@
     "submit",
     "cancel"
    ],
-   "confirm_with": "d06df7669870824823fcbfbb6f87657d71f5e05f7b1dd0a50950e843cae26805",
+   "confirm_with": "6014cbe2db0b806cc1228e5959b469587d2f4571f9b5511ae8a60353f7c9ec3b",
    "confirmed": {
     "confirmed_id": "confirmed.draft-0000000000000073.r2",
-    "content_fingerprint": "fb2b87797bbf82d7c39461d9fe35892aee85484fb75f5863f5817e9956c67ddd"
+    "content_fingerprint": "22b8cb62da492641a35c8bc65d2ef7ebc64a74c0d710c396ca4c2f9279dec7cf"
    },
    "created_at": "2026-12-24T09:01:02Z",
    "deletion": {
@@ -870,7 +870,7 @@
    "explanation": null,
    "intent_id": "intent-0000000000000074",
    "meta": {
-    "conversion_version": "e3a-conversion-v3",
+    "conversion_version": "e3a-conversion-v4",
     "data_pack": {
      "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
      "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
@@ -878,21 +878,21 @@
      "status": "synthetic_fixture_only"
     },
     "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-    "questionnaire_version": "e3a-questionnaire-v0.4-draft",
+    "questionnaire_version": "e3a-questionnaire-v0.5-draft",
     "sample": null,
-    "schema_version": "e3a-product-schema-v3.4",
+    "schema_version": "e3a-product-schema-v3.5",
     "vocabulary_version": "e3a-vocabulary-v5"
    },
    "preflight": {
     "binding": {
      "compiled_inputs": {
-      "life_input": "d0610ae173b7a89fece424bf6f23a3b5a4a166410bbf7c2a4406b7e6d5555a93",
+      "life_input": "785829fb7c9448bad7df4a411f656f77163b16e990326e0b29093f83a0af2223",
       "roster": "17602d0dd549d3f21706e286b4730248346fc0c1a006ebca8282a10016d9c2ed",
       "run_config": "f6548fdaa51a07245387da40ae1b491b407e8d5b2ca7db55ad388e1b9e878f3a",
       "scoring_config": "c05fe69c0f9a260142617914da82b6d7ea2255cd290452e4b09807663ddfab7b"
      },
      "evaluation_spec_id": "eval.e1-life.main",
-     "identities_fingerprint": "c88df3a83d965cac916e07854dd5302c30ed287af200bc74e08fafeea81baa9f",
+     "identities_fingerprint": "41f6307afecf13b43441a1da0ef1e59624058a45832994780bc2697f8b092c33",
      "planner_id": "mock.rules.e3a-product",
      "planner_kind": "mock",
      "prompt_template": "e3b-product-prompt-v3",
@@ -1544,7 +1544,7 @@
     "clones_per_city": 1,
     "confirmed": {
      "confirmed_id": "confirmed.draft-0000000000000073.r2",
-     "content_fingerprint": "fb2b87797bbf82d7c39461d9fe35892aee85484fb75f5863f5817e9956c67ddd"
+     "content_fingerprint": "22b8cb62da492641a35c8bc65d2ef7ebc64a74c0d710c396ca4c2f9279dec7cf"
     },
     "executable": {
      "reasons": [
@@ -1560,7 +1560,7 @@
     },
     "issues": [],
     "meta": {
-     "conversion_version": "e3a-conversion-v3",
+     "conversion_version": "e3a-conversion-v4",
      "data_pack": {
       "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
       "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
@@ -1568,9 +1568,9 @@
       "status": "synthetic_fixture_only"
      },
      "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-     "questionnaire_version": "e3a-questionnaire-v0.4-draft",
+     "questionnaire_version": "e3a-questionnaire-v0.5-draft",
      "sample": null,
-     "schema_version": "e3a-product-schema-v3.4",
+     "schema_version": "e3a-product-schema-v3.5",
      "vocabulary_version": "e3a-vocabulary-v5"
     },
     "planner": {
@@ -1581,7 +1581,7 @@
      "planner_id": "mock.rules.e3a-product",
      "planner_kind": "mock"
     },
-    "preflight_fingerprint": "d06df7669870824823fcbfbb6f87657d71f5e05f7b1dd0a50950e843cae26805",
+    "preflight_fingerprint": "6014cbe2db0b806cc1228e5959b469587d2f4571f9b5511ae8a60353f7c9ec3b",
     "preflight_id": "preflight.confirmed.draft-0000000000000073.r2",
     "scope_zh": [
      "生活协议 life-v1-e3a-product（状态 synthetic_fixture_only）、评分 score.e1-life.explore（探索版）：城市、报价、工资、疾病、治疗与评分参数全部是合成设定，不是现实城市，不排序真实城市",
@@ -1651,7 +1651,7 @@
    "updated_at": "2026-12-24T09:01:02Z",
    "waiting_for": "user"
   },
-  "source_view_fingerprint": "3281fa03f85c1878d82bf25a2c6a7e752a167547364f3526c0efb31bc8bd9cb7",
+  "source_view_fingerprint": "a0ba6c46100adc76136c37859f886eeff40e3471cd7419bded47dfa6902e8da8",
   "status": "partial"
  },
  "sample": {

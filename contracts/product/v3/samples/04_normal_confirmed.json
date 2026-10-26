@@ -10,9 +10,9 @@
   ],
   "confirmation_source": "user_form",
   "confirmed_id": "confirmed.draft.u501.r1",
-  "content_fingerprint": "586ad949efa46f6b6bd1670c998252cc12a385b953d1f574f5bdcb7fa2e25e63",
+  "content_fingerprint": "3c91992b82045ffad35939353b8c9cfd4b4afb8a743576f72075e6faa3babdc2",
   "draft": {
-   "draft_fingerprint": "fde99c7c33226eab30a160b6abfdae28fcefd9576d01623ae93cdfa85c7da7fb",
+   "draft_fingerprint": "70155147bf454b1c5167e8a91d558982b800ad71721e098cbae2e3115e1a529e",
    "draft_id": "draft.u501",
    "revision": 1
   },
@@ -70,18 +70,26 @@
      "housing_condition": "25.0",
      "personal_enjoyment": "20.0"
     },
-    "mode": "manual",
+    "mode": "ratings_normalized_v1",
     "points": {
      "daily_convenience": "30",
      "food_life": "25",
      "housing_condition": "25",
      "personal_enjoyment": "20"
-    }
+    },
+    "rating_total": "100",
+    "ratings": {
+     "daily_convenience": "30",
+     "food_life": "25",
+     "housing_condition": "25",
+     "personal_enjoyment": "20"
+    },
+    "rule": "ratings_normalized_v1"
    },
    "status": "allocated"
   },
   "meta": {
-   "conversion_version": "e3a-conversion-v3",
+   "conversion_version": "e3a-conversion-v4",
    "data_pack": {
     "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
@@ -89,14 +97,14 @@
     "status": "synthetic_fixture_only"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.4-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.5-draft",
    "sample": {
     "note": "离线闭环实际执行的结果（mock 规划器，零网络）",
     "origin": "offline_run",
     "produced_by": "product.scenarios.closed_loop(normal)",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.4",
+   "schema_version": "e3a-product-schema-v3.5",
    "vocabulary_version": "e3a-vocabulary-v5"
   },
   "money": {
@@ -157,7 +165,7 @@
     "opportunity": "20.0",
     "safety": "20.0"
    },
-   "mode": "manual",
+   "mode": "ratings_normalized_v1",
    "points": {
     "commute": "10",
     "environment": "10",
@@ -165,7 +173,17 @@
     "material": "30",
     "opportunity": "20",
     "safety": "20"
-   }
+   },
+   "rating_total": "100",
+   "ratings": {
+    "commute": "10",
+    "environment": "10",
+    "leisure": "10",
+    "material": "30",
+    "opportunity": "20",
+    "safety": "20"
+   },
+   "rule": "ratings_normalized_v1"
   },
   "sources": [
    {

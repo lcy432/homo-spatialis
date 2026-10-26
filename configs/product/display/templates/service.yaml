@@ -559,3 +559,12 @@ templates:
   error.migration_not_needed.next:
     en: Review this draft directly
     zh: 直接审阅这份草稿
+  error.migration_choice_required.impact:
+    en: The draft was not changed; the system does not reinterpret the old percentages as ratings
+    zh: 草稿没有改动；系统不把旧百分比改读成评分
+  error.migration_choice_required.message:
+    en: This old draft's six-dimension / material allocation uses the old questionnaire's percentages; choose to re-rate or to weight everything equally before migrating
+    zh: 这份旧草稿的六维 / 物质分配是旧问卷的百分比，迁移时要先选择重新评分或同等重视
+  error.migration_choice_required.next:
+    en: Look at the original allocation in the migration notes, then choose re-rate or equal weight and migrate
+    zh: 先看迁移说明里原来的分配，再选择重新评分或同等重视后迁移

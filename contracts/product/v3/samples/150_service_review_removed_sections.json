@@ -1,9 +1,9 @@
 {
- "description_zh": "旧草稿迁移之前的审阅：version_changed（问卷、词表、转换、结构版本）与 removed_section_present（硬要求、属性偏好各一条）都阻断；旧值会改变模拟，不悄悄沿用、也不悄悄丢掉",
+ "description_zh": "旧草稿迁移之前的审阅：version_changed（问卷、词表、转换、结构版本）、removed_section_present（硬要求、属性偏好各一条）与 allocation_mode_retired（六维、物质各一条：百分比不是独立评分）都阻断；旧值会改变模拟，不悄悄沿用、也不悄悄丢掉",
  "message": "ReviewReply",
  "payload": {
   "meta": {
-   "conversion_version": "e3a-conversion-v3",
+   "conversion_version": "e3a-conversion-v4",
    "data_pack": {
     "content_fingerprint": "48eda959e2eb8254c891d1de88b92f792ccf8ecbaadac8037d548279cd9dd22b",
     "note": "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定",
@@ -11,14 +11,14 @@
     "status": "real_data_frozen"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.4-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.5-draft",
    "sample": {
     "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
     "origin": "offline_run",
     "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.4",
+   "schema_version": "e3a-product-schema-v3.5",
    "vocabulary_version": "e3a-vocabulary-v5"
   },
   "review": {
@@ -36,8 +36,8 @@
    ],
    "confirmable": false,
    "draft": {
-    "draft_fingerprint": "d0f716f44e4ca1e0a4983b257205d1456e522cdce10652cf00cf48270589fd7a",
-    "draft_id": "draft-000000000000008a",
+    "draft_fingerprint": "83ff3d8f815177e4780a56d2781f014abed6ed02e51400221397a1572166d59d",
+    "draft_id": "draft-000000000000008c",
     "revision": 2
    },
    "free_text_chars": 61,
@@ -73,7 +73,7 @@
      "code": "version_changed",
      "field": "草稿.meta.schema_version",
      "impact_zh": "按旧版本问卷、词表或转换规则填写的答案不能直接沿用",
-     "message_zh": "草稿 用的 schema_version 是 e3a-product-schema-v3.3，现在是 e3a-product-schema-v3.4",
+     "message_zh": "草稿 用的 schema_version 是 e3a-product-schema-v3.3，现在是 e3a-product-schema-v3.5",
      "next_action_zh": "按当前版本重新填写或重新确认相关答案",
      "severity": "error"
     },
@@ -82,7 +82,7 @@
      "code": "version_changed",
      "field": "草稿.meta.questionnaire_version",
      "impact_zh": "按旧版本问卷、词表或转换规则填写的答案不能直接沿用",
-     "message_zh": "草稿 用的 questionnaire_version 是 e3a-questionnaire-v0.3-draft，现在是 e3a-questionnaire-v0.4-draft",
+     "message_zh": "草稿 用的 questionnaire_version 是 e3a-questionnaire-v0.3-draft，现在是 e3a-questionnaire-v0.5-draft",
      "next_action_zh": "按当前版本重新填写或重新确认相关答案",
      "severity": "error"
     },
@@ -100,8 +100,26 @@
      "code": "version_changed",
      "field": "草稿.meta.conversion_version",
      "impact_zh": "按旧版本问卷、词表或转换规则填写的答案不能直接沿用",
-     "message_zh": "草稿 用的 conversion_version 是 e3a-conversion-v2，现在是 e3a-conversion-v3",
+     "message_zh": "草稿 用的 conversion_version 是 e3a-conversion-v2，现在是 e3a-conversion-v4",
      "next_action_zh": "按当前版本重新填写或重新确认相关答案",
+     "severity": "error"
+    },
+    {
+     "audit_ref": null,
+     "code": "allocation_mode_retired",
+     "field": "six_dimensions.mode",
+     "impact_zh": "百分比不是独立评分，系统不把它改读成评分；画像暂时不能确认",
+     "message_zh": "这一版问卷的六维用独立评分：每项 0–100 分，不必凑满 100；旧的百分比分配不能直接用来确认",
+     "next_action_zh": "给每一项重新评分，或选择同等重视（每项 50 分）",
+     "severity": "error"
+    },
+    {
+     "audit_ref": null,
+     "code": "allocation_mode_retired",
+     "field": "material.mode",
+     "impact_zh": "百分比不是独立评分，系统不把它改读成评分；画像暂时不能确认",
+     "message_zh": "这一版问卷的物质四项用独立评分：每项 0–100 分，不必凑满 100；旧的百分比分配不能直接用来确认",
+     "next_action_zh": "给每一项重新评分，或选择同等重视（每项 50 分）",
      "severity": "error"
     },
     {
@@ -279,6 +297,8 @@
       "exact": "25",
       "key": "housing_condition",
       "label": "居住条件",
+      "rating_display": null,
+      "rating_exact": null,
       "state": "provided",
       "support": "supported",
       "usage": [
@@ -291,6 +311,8 @@
       "exact": "25",
       "key": "food_life",
       "label": "饮食生活",
+      "rating_display": null,
+      "rating_exact": null,
       "state": "provided",
       "support": "partially_supported",
       "usage": [
@@ -303,6 +325,8 @@
       "exact": "30",
       "key": "daily_convenience",
       "label": "日常支持与便利",
+      "rating_display": null,
+      "rating_exact": null,
       "state": "provided",
       "support": "supported",
       "usage": [
@@ -315,6 +339,8 @@
       "exact": "20",
       "key": "personal_enjoyment",
       "label": "个人消费与享受",
+      "rating_display": null,
+      "rating_exact": null,
       "state": "provided",
       "support": "partially_supported",
       "usage": [
@@ -324,6 +350,8 @@
      }
     ],
     "mode": "manual",
+    "rating_total": null,
+    "rule": null,
     "status": "complete",
     "total": {
      "display": "100.0",
@@ -331,7 +359,7 @@
     }
    },
    "meta": {
-    "conversion_version": "e3a-conversion-v3",
+    "conversion_version": "e3a-conversion-v4",
     "data_pack": {
      "content_fingerprint": "48eda959e2eb8254c891d1de88b92f792ccf8ecbaadac8037d548279cd9dd22b",
      "note": "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定",
@@ -339,9 +367,9 @@
      "status": "real_data_frozen"
     },
     "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-    "questionnaire_version": "e3a-questionnaire-v0.4-draft",
+    "questionnaire_version": "e3a-questionnaire-v0.5-draft",
     "sample": null,
-    "schema_version": "e3a-product-schema-v3.4",
+    "schema_version": "e3a-product-schema-v3.5",
     "vocabulary_version": "e3a-vocabulary-v5"
    },
    "money": {
@@ -408,7 +436,7 @@
     ],
     "source": "ability_claims"
    },
-   "review_id": "review.draft-000000000000008a.r2",
+   "review_id": "review.draft-000000000000008c.r2",
    "six_dimensions": {
     "lines": [
      {
@@ -416,6 +444,8 @@
       "exact": "30",
       "key": "material",
       "label": "物质生活",
+      "rating_display": null,
+      "rating_exact": null,
       "state": "provided",
       "support": "supported",
       "usage": [
@@ -428,6 +458,8 @@
       "exact": "20",
       "key": "safety",
       "label": "安全",
+      "rating_display": null,
+      "rating_exact": null,
       "state": "provided",
       "support": "partially_supported",
       "usage": [
@@ -440,6 +472,8 @@
       "exact": "20",
       "key": "opportunity",
       "label": "发展机会",
+      "rating_display": null,
+      "rating_exact": null,
       "state": "provided",
       "support": "supported",
       "usage": [
@@ -452,6 +486,8 @@
       "exact": "10",
       "key": "leisure",
       "label": "休闲",
+      "rating_display": null,
+      "rating_exact": null,
       "state": "provided",
       "support": "supported",
       "usage": [
@@ -464,6 +500,8 @@
       "exact": "10",
       "key": "environment",
       "label": "环境",
+      "rating_display": null,
+      "rating_exact": null,
       "state": "provided",
       "support": "partially_supported",
       "usage": [
@@ -476,6 +514,8 @@
       "exact": "10",
       "key": "commute",
       "label": "交通便捷程度",
+      "rating_display": null,
+      "rating_exact": null,
       "state": "provided",
       "support": "supported",
       "usage": [
@@ -485,6 +525,8 @@
      }
     ],
     "mode": "manual",
+    "rating_total": null,
+    "rule": null,
     "status": "complete",
     "total": {
      "display": "100.0",

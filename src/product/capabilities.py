@@ -18,6 +18,7 @@ from common.product_contracts import (
     OccupationCapability,
     PointsRules,
     ProductCapabilities,
+    RatingsRules,
     SampleLabel,
     VocabularyTerm,
 )
@@ -121,6 +122,33 @@ def build_capabilities(pack: DataPack, *, sample: SampleLabel | None = None) -> 
             equal_split_six=b.points.equal_split_six,
             equal_split_material=b.points.equal_split_material,
             rules=tuple(text("points", f"rules.{i}", r) for i, r in enumerate(b.points.rules)),
+            ratings=RatingsRules(
+                method="ratings_normalized_v1",
+                max_decimals=b.points.manual_max_decimals,
+                rules=(
+                    t(
+                        "input.capabilities.ratings.range",
+                        "每一项单独打 0–100 分：滑条一次 1 分，也可以输入最多两位小数；不必凑满 100",
+                    ),
+                    t(
+                        "input.capabilities.ratings.normalize",
+                        "全部要回答的项都打了分、合计大于 0 之后，E3 按“100 × 这一项的评分 ÷ 全部评分之和”换成权重（精确分数，"
+                        "不加任何系数）；评分同比例放大或缩小，权重不变",
+                    ),
+                    t(
+                        "input.capabilities.ratings.states",
+                        "未答不是 0；“无所谓”“暂不确定”保留原状态，不换成数值；全部是 0 时不能确认，系统也不会自动平均分配",
+                    ),
+                    t(
+                        "input.capabilities.ratings.equal_weight",
+                        "“同等重视”是你主动把每一项都设为 50 分（六维各得 50/3、物质四项各得 25）",
+                    ),
+                    t(
+                        "input.capabilities.ratings.material_zero",
+                        "物质生活打 0 分时物质四项不适用：已经打的分留在草稿里，不参与这一次的换算；物质重新大于 0 时照原样恢复",
+                    ),
+                ),
+            ),
         ),
         health_questionnaire=HealthQuestionnaire(
             version=hq.version,

@@ -5,6 +5,10 @@
 
 可手算的例子：六维均分每项 50/3；把安全改成 20 之后，5 × 50/3 + 20 = 310/3，多出 10/3（界面显示“多出 3.3 分”）；再从物质减去 10/3，
 物质是 40/3，合计正好 100。
+
+现有样本是界面按 v3.4（v0.4 问卷）生成的旧的百分比分配。v3.5 起问卷改用独立评分（DECISIONS/0047）：这里照原样审阅旧草稿——旧分配
+保留原来的含义，同时带着“版本已变”与“分配方式已停用”的阻断；迁移要用户自己选择重新评分或同等重视，这里不替用户选（迁移见
+``test_ratings`` 与 ``test_draft_migration``）。界面按 v3.5 重新生成样本之后，这几条要换成独立评分的例子。
 """
 
 from __future__ import annotations
@@ -22,7 +26,6 @@ from common.product_contracts import (
 )
 from product.answers import review_draft
 from product.fixtures import prepare_workspace
-from product.migration import migrate, migration_for
 from product.pack import DataPack, load_pack
 
 REPO = Path(__file__).resolve().parents[2]
@@ -49,14 +52,14 @@ def reviewed(pack: DataPack, name: str):
     assert draft.meta.data_pack.content_fingerprint == pack.meta().data_pack.content_fingerprint, (
         f"{name} 是按另一版资料包生成的：{REGENERATE}"
     )
+    review = review_draft(pack, draft)
     if version != PRODUCT_SCHEMA_VERSION:
-        # 旧版本问卷的草稿：走与页面上“迁移”同一条显式迁移（DECISIONS/0046）。只换版本；要清空旧答案的草稿不替用户同意
-        migration = migration_for(pack, draft)
-        assert migration is not None and not migration.consent_required, (
-            f"{name} 里有新问卷不再收集的答案：{REGENERATE}"
-        )
-        draft = migrate(pack, draft, clear_removed=False)
-    return review_draft(pack, draft)
+        # 旧版本问卷的草稿：照原样审阅，不能确认；迁移由用户在页面上明确选择（不替用户同意、不替用户选重新评分或同等重视）
+        codes = {i.code for i in review.issues if i.severity == "error"}
+        assert "version_changed" in codes and not review.confirmable
+        if draft.six_dimensions.mode in ("manual", "equal_split"):
+            assert "allocation_mode_retired" in codes
+    return review
 
 
 def issue_keys(review) -> set[tuple[str, str]]:

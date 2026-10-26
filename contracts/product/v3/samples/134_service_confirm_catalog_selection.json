@@ -20,9 +20,9 @@
    ],
    "confirmation_source": "user_form",
    "confirmed_id": "confirmed.draft-000000000000007c.r2",
-   "content_fingerprint": "41998d3c0d0eb51e215eea55779648ce6b5093d96c93504cffa2f777b1e4f07e",
+   "content_fingerprint": "97293f0b2f1eae1e76eae87e3c72d645bb9251e5016443c6bbaaa1b9eb9a4693",
    "draft": {
-    "draft_fingerprint": "0bbab8f50f343c458fd6a25701b9727544723c09f83d5d8dd8ace5da1c1a8a01",
+    "draft_fingerprint": "46603e9b6e3255ecbac3ce78d5db596637922a2f8c13278adf8cbbd1c1f3fcb3",
     "draft_id": "draft-000000000000007c",
     "revision": 2
    },
@@ -85,18 +85,26 @@
       "housing_condition": "25.0",
       "personal_enjoyment": "20.0"
      },
-     "mode": "manual",
+     "mode": "ratings_normalized_v1",
      "points": {
       "daily_convenience": "30",
       "food_life": "25",
       "housing_condition": "25",
       "personal_enjoyment": "20"
-     }
+     },
+     "rating_total": "100",
+     "ratings": {
+      "daily_convenience": "30",
+      "food_life": "25",
+      "housing_condition": "25",
+      "personal_enjoyment": "20"
+     },
+     "rule": "ratings_normalized_v1"
     },
     "status": "allocated"
    },
    "meta": {
-    "conversion_version": "e3a-conversion-v3",
+    "conversion_version": "e3a-conversion-v4",
     "data_pack": {
      "content_fingerprint": "48eda959e2eb8254c891d1de88b92f792ccf8ecbaadac8037d548279cd9dd22b",
      "note": "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定",
@@ -104,9 +112,9 @@
      "status": "real_data_frozen"
     },
     "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-    "questionnaire_version": "e3a-questionnaire-v0.4-draft",
+    "questionnaire_version": "e3a-questionnaire-v0.5-draft",
     "sample": null,
-    "schema_version": "e3a-product-schema-v3.4",
+    "schema_version": "e3a-product-schema-v3.5",
     "vocabulary_version": "e3a-vocabulary-v5"
    },
    "money": {
@@ -165,7 +173,7 @@
      "opportunity": "20.0",
      "safety": "20.0"
     },
-    "mode": "manual",
+    "mode": "ratings_normalized_v1",
     "points": {
      "commute": "10",
      "environment": "10",
@@ -173,7 +181,17 @@
      "material": "30",
      "opportunity": "20",
      "safety": "20"
-    }
+    },
+    "rating_total": "100",
+    "ratings": {
+     "commute": "10",
+     "environment": "10",
+     "leisure": "10",
+     "material": "30",
+     "opportunity": "20",
+     "safety": "20"
+    },
+    "rule": "ratings_normalized_v1"
    },
    "sources": [
     {
@@ -320,8 +338,8 @@
   },
   "display": {
    "display_schema_version": "e3-display-v2",
-   "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
-   "source_view_fingerprint": "8124e463f0b0f9b9a4e6617f31cb0e7a16bc8b2bc019cec7b7ad77f7f9cfaede",
+   "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+   "source_view_fingerprint": "df0611976e3d042cd04b5dd49f2abb61721c9313cdfb9e04f24af9201d277026",
    "translations": {
     "en": {
      "fields": [
@@ -329,7 +347,7 @@
        "key": "pack.note.real",
        "missing_reason": null,
        "pointer": "/meta/data_pack/note",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "Frozen real data pack (DECISIONS/0042): city data comes from public sources and registered model settings; life rules and scoring parameters are synthetic exploratory settings"
@@ -338,7 +356,7 @@
        "key": "pack.note.real",
        "missing_reason": null,
        "pointer": "/confirmed/meta/data_pack/note",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "Frozen real data pack (DECISIONS/0042): city data comes from public sources and registered model settings; life rules and scoring parameters are synthetic exploratory settings"
@@ -347,7 +365,7 @@
        "key": "entity.occupation.label:occ.soc_15_1252",
        "missing_reason": null,
        "pointer": "/confirmed/occupation/label",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "Software Developers"
@@ -356,7 +374,7 @@
        "key": "entity.duty.label:occ.soc_15_1252.0",
        "missing_reason": null,
        "pointer": "/confirmed/occupation/duties/0",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "Software Developers"
@@ -365,7 +383,7 @@
        "key": "entity.occupation.basis.0:occ.soc_15_1252",
        "missing_reason": null,
        "pointer": "/confirmed/occupation/internal_mappings/0/basis",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "SOC 2018 occupation 15-1252 (within the occupations E3B supports)"
@@ -374,7 +392,7 @@
        "key": "entity.health_question.text:hc_more_pay_more_sick_risk",
        "missing_reason": null,
        "pointer": "/confirmed/health/answers/0/question_text",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "One arrangement earns a little more money, but also makes it more likely that you get sick and need a few days of rest. I am willing to choose it."
@@ -383,7 +401,7 @@
        "key": "entity.health_option.label:disagree",
        "missing_reason": null,
        "pointer": "/confirmed/health/answers/0/option_label",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "Does not describe me"
@@ -392,7 +410,7 @@
        "key": "entity.health_question.disagree_meaning:hc_more_pay_more_sick_risk",
        "missing_reason": null,
        "pointer": "/confirmed/health/answers/0/meaning",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "Not willing to accept a higher chance of getting sick and needing rest for a little more income"
@@ -401,7 +419,7 @@
        "key": "entity.health_question.text:hc_reserve_for_health_costs",
        "missing_reason": null,
        "pointer": "/confirmed/health/answers/1/question_text",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "To be ready for possible health costs, I am willing to postpone a purchase I want but do not urgently need, and set some money aside first."
@@ -410,7 +428,7 @@
        "key": "entity.health_option.label:agree",
        "missing_reason": null,
        "pointer": "/confirmed/health/answers/1/option_label",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "Describes me"
@@ -419,7 +437,7 @@
        "key": "entity.health_question.agree_meaning:hc_reserve_for_health_costs",
        "missing_reason": null,
        "pointer": "/confirmed/health/answers/1/meaning",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "Willing to postpone non-urgent purchases and set money aside for possible health costs first"
@@ -428,7 +446,7 @@
        "key": "entity.health_question.text:hc_wait_for_clear_risk_info",
        "missing_reason": null,
        "pointer": "/confirmed/health/answers/2/question_text",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "When information about a health risk is still unclear, I am willing to give up a small immediate gain and decide once things are clear."
@@ -437,7 +455,7 @@
        "key": "input.health.meaning.unsure",
        "missing_reason": null,
        "pointer": "/confirmed/health/answers/2/meaning",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "The user is not sure yet"
@@ -446,7 +464,7 @@
        "key": "input.interests.scope.leisure.described",
        "missing_reason": null,
        "pointer": "/confirmed/interests/scope_zh/0",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "Leisure interests: personalized by the interests you confirmed (Fitness, Music)"
@@ -455,7 +473,7 @@
        "key": "input.interests.scope.taste.described",
        "missing_reason": null,
        "pointer": "/confirmed/interests/scope_zh/1",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "Taste and cuisines: personalized by the cuisines you confirmed (Chinese)"
@@ -464,7 +482,7 @@
        "key": "entity.capability.matching_note:interests",
        "missing_reason": null,
        "pointer": "/confirmed/interests/matching_note_zh",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "A confirmed interest only brings moderately higher satisfaction for the same actual time spent (model assumption: 50% more, with a cap); a confirmed cuisine only makes meals to your taste that you actually eat count a little more. These coefficients are publicly registered model assumptions, not measurements of you; they do not change your points, cash or qualifications, and do not make expensive things automatically better"
@@ -478,7 +496,7 @@
        "key": "pack.note.real",
        "missing_reason": null,
        "pointer": "/meta/data_pack/note",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定"
@@ -487,7 +505,7 @@
        "key": "pack.note.real",
        "missing_reason": null,
        "pointer": "/confirmed/meta/data_pack/note",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定"
@@ -496,7 +514,7 @@
        "key": "entity.occupation.label:occ.soc_15_1252",
        "missing_reason": null,
        "pointer": "/confirmed/occupation/label",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "软件开发工程师"
@@ -505,7 +523,7 @@
        "key": "entity.duty.label:occ.soc_15_1252.0",
        "missing_reason": null,
        "pointer": "/confirmed/occupation/duties/0",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "软件开发工程师"
@@ -514,7 +532,7 @@
        "key": "entity.occupation.basis.0:occ.soc_15_1252",
        "missing_reason": null,
        "pointer": "/confirmed/occupation/internal_mappings/0/basis",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "SOC 2018 职业 15-1252（E3B 支持的职业范围）"
@@ -523,7 +541,7 @@
        "key": "entity.health_question.text:hc_more_pay_more_sick_risk",
        "missing_reason": null,
        "pointer": "/confirmed/health/answers/0/question_text",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "一种安排能多赚一点钱，但生病、需要休息几天的可能也更高。我愿意选择它。"
@@ -532,7 +550,7 @@
        "key": "entity.health_option.label:disagree",
        "missing_reason": null,
        "pointer": "/confirmed/health/answers/0/option_label",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "不符合我"
@@ -541,7 +559,7 @@
        "key": "entity.health_question.disagree_meaning:hc_more_pay_more_sick_risk",
        "missing_reason": null,
        "pointer": "/confirmed/health/answers/0/meaning",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "不愿意为多一点收入接受更高的生病与休息可能"
@@ -550,7 +568,7 @@
        "key": "entity.health_question.text:hc_reserve_for_health_costs",
        "missing_reason": null,
        "pointer": "/confirmed/health/answers/1/question_text",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "为了应对可能发生的健康开支，我愿意推迟一次想要、但并不急需的消费，先留一笔钱。"
@@ -559,7 +577,7 @@
        "key": "entity.health_option.label:agree",
        "missing_reason": null,
        "pointer": "/confirmed/health/answers/1/option_label",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "符合我"
@@ -568,7 +586,7 @@
        "key": "entity.health_question.agree_meaning:hc_reserve_for_health_costs",
        "missing_reason": null,
        "pointer": "/confirmed/health/answers/1/meaning",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "愿意推迟不急需的消费，先为可能的健康开支留钱"
@@ -577,7 +595,7 @@
        "key": "entity.health_question.text:hc_wait_for_clear_risk_info",
        "missing_reason": null,
        "pointer": "/confirmed/health/answers/2/question_text",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "健康风险的信息还不清楚时，我愿意先放弃眼前的一点收益，等了解清楚再决定。"
@@ -586,7 +604,7 @@
        "key": "input.health.meaning.unsure",
        "missing_reason": null,
        "pointer": "/confirmed/health/answers/2/meaning",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "用户暂不确定"
@@ -595,7 +613,7 @@
        "key": "input.interests.scope.leisure.described",
        "missing_reason": null,
        "pointer": "/confirmed/interests/scope_zh/0",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "休闲兴趣：按你确认的兴趣（健身、音乐）个性化"
@@ -604,7 +622,7 @@
        "key": "input.interests.scope.taste.described",
        "missing_reason": null,
        "pointer": "/confirmed/interests/scope_zh/1",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "口味与菜系：按你确认的菜系（中餐）个性化"
@@ -613,7 +631,7 @@
        "key": "entity.capability.matching_note:interests",
        "missing_reason": null,
        "pointer": "/confirmed/interests/matching_note_zh",
-       "resource_version": "e3-display-res-v1-ea5466ac2d62ebec",
+       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
        "source_locale": "zh",
        "status": "provided",
        "text": "确认的兴趣只在同样的实际参与时间下带来适度更高的满足（模型假设：多 50%，有上限）；确认的菜系只让实际吃到的合口味餐多计一点。 这些系数是公开登记的模型假设，不是对你个人的测量；不改变你的点数、现金或资格，也不让贵的东西自动更好"
@@ -625,7 +643,7 @@
   },
   "issues": [],
   "meta": {
-   "conversion_version": "e3a-conversion-v3",
+   "conversion_version": "e3a-conversion-v4",
    "data_pack": {
     "content_fingerprint": "48eda959e2eb8254c891d1de88b92f792ccf8ecbaadac8037d548279cd9dd22b",
     "note": "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定",
@@ -633,19 +651,19 @@
     "status": "real_data_frozen"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.4-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.5-draft",
    "sample": {
     "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
     "origin": "offline_run",
     "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.4",
+   "schema_version": "e3a-product-schema-v3.5",
    "vocabulary_version": "e3a-vocabulary-v5"
   },
   "profile_summary": {
    "confirmed_id": "confirmed.draft-000000000000007c.r2",
-   "content_fingerprint": "41998d3c0d0eb51e215eea55779648ce6b5093d96c93504cffa2f777b1e4f07e",
+   "content_fingerprint": "97293f0b2f1eae1e76eae87e3c72d645bb9251e5016443c6bbaaa1b9eb9a4693",
    "draft_id": "draft-000000000000007c",
    "draft_revision": 2,
    "expires_at": "2027-01-23T09:01:02Z",

@@ -157,7 +157,7 @@
    },
    "AllocationAnswer": {
     "additionalProperties": false,
-    "description": "一组定和分配的作答。``mode = equal_split`` 表示用户**主动**选择了平均分配（不预选、不默认）；``None`` 表示还没开始分配。",
+    "description": "一组定和分配的作答。``mode = equal_split`` 表示用户**主动**选择了平均分配（不预选、不默认）；``None`` 表示还没开始分配。\n``ratings_normalized_v1``：独立评分（未答不是 0；“同等重视”由用户主动把每项设为 50）。",
     "properties": {
      "entries": {
       "additionalProperties": {
@@ -171,7 +171,8 @@
        {
         "enum": [
          "manual",
-         "equal_split"
+         "equal_split",
+         "ratings_normalized_v1"
         ],
         "type": "string"
        },
@@ -220,6 +221,29 @@
       "title": "Label",
       "type": "string"
      },
+     "rating_display": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Rating Display"
+     },
+     "rating_exact": {
+      "anyOf": [
+       {
+        "pattern": "^(0|-?[1-9][0-9]*)(/[1-9][0-9]*)?$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Rating Exact"
+     },
      "state": {
       "enum": [
        "unanswered",
@@ -266,6 +290,7 @@
    },
    "AllocationReview": {
     "additionalProperties": false,
+    "description": "一组定和分配的审阅。独立评分时 ``rating_total`` 是原始评分的合计（回答了的那些），``total`` 是换算后权重的合计（精确 100），\n``rule`` 写明换算规则。",
     "properties": {
      "lines": {
       "default": [],
@@ -280,7 +305,8 @@
        {
         "enum": [
          "manual",
-         "equal_split"
+         "equal_split",
+         "ratings_normalized_v1"
         ],
         "type": "string"
        },
@@ -289,6 +315,28 @@
        }
       ],
       "title": "Mode"
+     },
+     "rating_total": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/ExactNumber"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "rule": {
+      "anyOf": [
+       {
+        "const": "ratings_normalized_v1",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Rule"
      },
      "status": {
       "enum": [
@@ -1847,7 +1895,7 @@
    },
    "ConfirmedAllocation": {
     "additionalProperties": false,
-    "description": "确认的定和分配：规范精确分数（参与计算）与显示文字（只供阅读）。",
+    "description": "确认的定和分配：规范精确分数（参与计算）与显示文字（只供阅读）。独立评分（v3.5）另外保存原始评分、原始合计与换算规则；\nE1 编译只读 ``points``（换算后的最终权重）。",
     "properties": {
      "display": {
       "additionalProperties": {
@@ -1859,7 +1907,8 @@
      "mode": {
       "enum": [
        "manual",
-       "equal_split"
+       "equal_split",
+       "ratings_normalized_v1"
       ],
       "title": "Mode",
       "type": "string"
@@ -1871,6 +1920,45 @@
       },
       "title": "Points",
       "type": "object"
+     },
+     "rating_total": {
+      "anyOf": [
+       {
+        "pattern": "^(0|-?[1-9][0-9]*)(/[1-9][0-9]*)?$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Rating Total"
+     },
+     "ratings": {
+      "anyOf": [
+       {
+        "additionalProperties": {
+         "pattern": "^(0|-?[1-9][0-9]*)(/[1-9][0-9]*)?$",
+         "type": "string"
+        },
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Ratings"
+     },
+     "rule": {
+      "anyOf": [
+       {
+        "const": "ratings_normalized_v1",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Rule"
      }
     },
     "required": [
@@ -3638,6 +3726,21 @@
     "additionalProperties": false,
     "description": "迁移草稿（``POST /api/v1/drafts/{id}/migrate``）：``expected_revision`` 必须等于当前修订号；有要清空的旧答案时\n``clear_removed`` 必须为真（用户看过迁移说明并同意），否则拒绝、草稿不变。",
     "properties": {
+     "allocation_choice": {
+      "anyOf": [
+       {
+        "enum": [
+         "rerate",
+         "equal_weight"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Allocation Choice"
+     },
      "clear_removed": {
       "default": false,
       "title": "Clear Removed",
@@ -3659,6 +3762,19 @@
     "additionalProperties": false,
     "description": "这份草稿进入新问卷要做的迁移（``GET`` 草稿时一起给出；没有要迁移的就没有这一项）。\n\n迁移把草稿的版本换成当前版本、清空新问卷不再收集的硬要求与属性偏好（``removed`` 逐条列出），其他答案原样保留；之后要重新审阅\n和确认。有要清空的答案时必须用户明确同意（``consent_required``）；只差版本时也要用户点一次。已经确认或已经开始的运行不受影响。",
     "properties": {
+     "allocation_choice_required": {
+      "default": false,
+      "title": "Allocation Choice Required",
+      "type": "boolean"
+     },
+     "allocations": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/LegacyAllocation"
+      },
+      "title": "Allocations",
+      "type": "array"
+     },
      "consent_required": {
       "title": "Consent Required",
       "type": "boolean"
@@ -5344,6 +5460,95 @@
     "title": "ItemStatus",
     "type": "object"
    },
+   "LegacyAllocation": {
+    "additionalProperties": false,
+    "description": "旧草稿里的一组定和分配（v3.5）：迁移前照原样给你看；它们是当时的百分比分配，不是独立评分，迁移时由你明确选择重新评分或\n同等重视，系统不把它们改读成评分。",
+    "properties": {
+     "group": {
+      "enum": [
+       "six_dimensions",
+       "material"
+      ],
+      "title": "Group",
+      "type": "string"
+     },
+     "lines": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/LegacyAllocationLine"
+      },
+      "title": "Lines",
+      "type": "array"
+     },
+     "mode": {
+      "anyOf": [
+       {
+        "enum": [
+         "manual",
+         "equal_split"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Mode"
+     }
+    },
+    "required": [
+     "group"
+    ],
+    "title": "LegacyAllocation",
+    "type": "object"
+   },
+   "LegacyAllocationLine": {
+    "additionalProperties": false,
+    "description": "旧草稿里一组分配的一项：原来的作答状态与原来写的数值（百分比，不是独立评分）。",
+    "properties": {
+     "key": {
+      "maxLength": 48,
+      "minLength": 1,
+      "title": "Key",
+      "type": "string"
+     },
+     "label": {
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "Label",
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "unanswered",
+       "provided",
+       "indifferent",
+       "unsure"
+      ],
+      "title": "State",
+      "type": "string"
+     },
+     "value_text": {
+      "anyOf": [
+       {
+        "maxLength": 40,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Value Text"
+     }
+    },
+    "required": [
+     "key",
+     "label",
+     "state"
+    ],
+    "title": "LegacyAllocationLine",
+    "type": "object"
+   },
    "LeisureInterestAnswer": {
     "additionalProperties": false,
     "description": "休闲兴趣：未答、暂不确定、明确没有固定爱好、选择通用休闲评价（“城市有什么合适的就体验什么”），或用文字描述。\n\n文字描述先由 E3 按词表形成待确认的解释；``selected`` 是用户从解释或词表里**明确选中**的类别——只有选了才进入有评分作用的类别。\n空白不会被当成“通用评价”的选择。",
@@ -6247,7 +6452,7 @@
    },
    "PointsRules": {
     "additionalProperties": false,
-    "description": "定和量表的规则：合计、手工输入的小数位、显示小数位、精确分数的规范写法与均分的精确值。",
+    "description": "定和量表的规则：合计、手工输入的小数位、显示小数位、精确分数的规范写法与均分的精确值。v3.5 起新问卷用 ``ratings``。",
     "properties": {
      "canonical_form": {
       "maxLength": 300,
@@ -6282,6 +6487,16 @@
       "minimum": 0.0,
       "title": "Manual Max Decimals",
       "type": "integer"
+     },
+     "ratings": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/RatingsRules"
+       },
+       {
+        "type": "null"
+       }
+      ]
      },
      "rules": {
       "items": {
@@ -6597,7 +6812,8 @@
      "schema_version": {
       "enum": [
        "e3a-product-schema-v3.3",
-       "e3a-product-schema-v3.4"
+       "e3a-product-schema-v3.4",
+       "e3a-product-schema-v3.5"
       ],
       "title": "Schema Version",
       "type": "string"
@@ -7517,6 +7733,62 @@
      "available"
     ],
     "title": "QuotaSummary",
+    "type": "object"
+   },
+   "RatingsRules": {
+    "additionalProperties": false,
+    "description": "独立评分（v3.5，``ratings_normalized_v1``）：每项 0–100，滑条步长 1，数字精调最多 ``max_decimals`` 位小数；不必凑满 100。\n全部要回答的项都回答了、原始合计大于 0 之后，E3 按 100 × 评分 ÷ 合计换成精确权重。“同等重视”是用户主动把每项设为 50。",
+    "properties": {
+     "equal_weight_rating": {
+      "const": "50",
+      "default": "50",
+      "title": "Equal Weight Rating",
+      "type": "string"
+     },
+     "max_decimals": {
+      "maximum": 6.0,
+      "minimum": 0.0,
+      "title": "Max Decimals",
+      "type": "integer"
+     },
+     "maximum": {
+      "const": 100,
+      "default": 100,
+      "title": "Maximum",
+      "type": "integer"
+     },
+     "method": {
+      "const": "ratings_normalized_v1",
+      "title": "Method",
+      "type": "string"
+     },
+     "minimum": {
+      "const": 0,
+      "default": 0,
+      "title": "Minimum",
+      "type": "integer"
+     },
+     "rules": {
+      "items": {
+       "type": "string"
+      },
+      "minItems": 1,
+      "title": "Rules",
+      "type": "array"
+     },
+     "slider_step": {
+      "const": 1,
+      "default": 1,
+      "title": "Slider Step",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "method",
+     "max_decimals",
+     "rules"
+    ],
+    "title": "RatingsRules",
     "type": "object"
    },
    "RemovedAnswer": {
@@ -8703,6 +8975,7 @@
        "run_options_invalid",
        "run_settings_unavailable",
        "migration_consent_required",
+       "migration_choice_required",
        "migration_not_needed",
        "rate_limited",
        "csrf_failed",
@@ -9783,7 +10056,7 @@
  "info": {
   "description": "E3C 托管服务的公开接口（同源 HTTPS；会话 Cookie + CSRF；长任务由后台 worker 执行，网页轮询）。",
   "title": "Homo Spatialis 产品服务",
-  "version": "e3c-service-api-v1.3"
+  "version": "e3c-service-api-v1.4"
  },
  "openapi": "3.1.0",
  "paths": {

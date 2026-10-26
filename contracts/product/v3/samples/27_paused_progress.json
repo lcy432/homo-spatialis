@@ -26,7 +26,7 @@
    "note": "离线 mock：没有网络调用，费用为 0（真实模型运行会写“按报价估算”，以供应商账单为准）"
   },
   "meta": {
-   "conversion_version": "e3a-conversion-v3",
+   "conversion_version": "e3a-conversion-v4",
    "data_pack": {
     "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
@@ -34,18 +34,18 @@
     "status": "synthetic_fixture_only"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.4-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.5-draft",
    "sample": {
     "note": "受控夹具：mock 在第 1 个分身第 1 年抛出意外异常",
     "origin": "controlled_fixture",
     "produced_by": "product.scenarios.closed_loop(paused)",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.4",
+   "schema_version": "e3a-product-schema-v3.5",
    "vocabulary_version": "e3a-vocabulary-v5"
   },
   "pause": {
-   "audit_ref": "run:run-e3a-1d7ae2409ec08c79 record:progress.json, failures.json",
+   "audit_ref": "run:run-e3a-46b61d31c61875e0 record:progress.json, failures.json",
    "category": "batch_paused_program_error",
    "impact_zh": "这两类分身都是模拟缺失（不是生活出局），不进完成者平均；评价与汇总已经生成，可以查看结果（C / E / M 按上面的分类）",
    "next_action_zh": "维护者按审计编号查看内部记录并修复；这次运行不能恢复，处理之后用新的运行重跑",
@@ -54,7 +54,7 @@
   "report_available": true,
   "resumable": false,
   "resume_note": "这次运行已经结束，没有可以恢复的部分",
-  "run_id": "run-e3a-1d7ae2409ec08c79",
+  "run_id": "run-e3a-46b61d31c61875e0",
   "stage": "paused",
   "stage_zh": "批次暂停（程序或配置问题）"
  }

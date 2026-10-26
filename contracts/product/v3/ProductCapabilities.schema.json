@@ -1212,7 +1212,7 @@
   },
   "PointsRules": {
    "additionalProperties": false,
-   "description": "定和量表的规则：合计、手工输入的小数位、显示小数位、精确分数的规范写法与均分的精确值。",
+   "description": "定和量表的规则：合计、手工输入的小数位、显示小数位、精确分数的规范写法与均分的精确值。v3.5 起新问卷用 ``ratings``。",
    "properties": {
     "canonical_form": {
      "maxLength": 300,
@@ -1247,6 +1247,17 @@
      "minimum": 0,
      "title": "Manual Max Decimals",
      "type": "integer"
+    },
+    "ratings": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/RatingsRules"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
     },
     "rules": {
      "items": {
@@ -1313,7 +1324,8 @@
     "schema_version": {
      "enum": [
       "e3a-product-schema-v3.3",
-      "e3a-product-schema-v3.4"
+      "e3a-product-schema-v3.4",
+      "e3a-product-schema-v3.5"
      ],
      "title": "Schema Version",
      "type": "string"
@@ -1378,6 +1390,62 @@
     "meaning"
    ],
    "title": "QualificationStateText",
+   "type": "object"
+  },
+  "RatingsRules": {
+   "additionalProperties": false,
+   "description": "独立评分（v3.5，``ratings_normalized_v1``）：每项 0–100，滑条步长 1，数字精调最多 ``max_decimals`` 位小数；不必凑满 100。\n全部要回答的项都回答了、原始合计大于 0 之后，E3 按 100 × 评分 ÷ 合计换成精确权重。“同等重视”是用户主动把每项设为 50。",
+   "properties": {
+    "equal_weight_rating": {
+     "const": "50",
+     "default": "50",
+     "title": "Equal Weight Rating",
+     "type": "string"
+    },
+    "max_decimals": {
+     "maximum": 6,
+     "minimum": 0,
+     "title": "Max Decimals",
+     "type": "integer"
+    },
+    "maximum": {
+     "const": 100,
+     "default": 100,
+     "title": "Maximum",
+     "type": "integer"
+    },
+    "method": {
+     "const": "ratings_normalized_v1",
+     "title": "Method",
+     "type": "string"
+    },
+    "minimum": {
+     "const": 0,
+     "default": 0,
+     "title": "Minimum",
+     "type": "integer"
+    },
+    "rules": {
+     "items": {
+      "type": "string"
+     },
+     "minItems": 1,
+     "title": "Rules",
+     "type": "array"
+    },
+    "slider_step": {
+     "const": 1,
+     "default": 1,
+     "title": "Slider Step",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "method",
+    "max_decimals",
+    "rules"
+   ],
+   "title": "RatingsRules",
    "type": "object"
   },
   "SampleLabel": {

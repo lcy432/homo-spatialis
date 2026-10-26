@@ -1,5 +1,5 @@
 {
- "description_zh": "历史版本（受控夹具）：停下的说明在资源版本 e3-display-res-v1-10a01abc4052089a 时生成并保存了绑定；之后登记了新版本 e3-display-res-v1-210af34323703870（英文改了措辞）。读取时说明部分仍按它记下的 v1 渲染（fields[].resource_version），当场生成的部分用当前版本；历史对象从不改用最新资源",
+ "description_zh": "历史版本（受控夹具）：停下的说明在资源版本 e3-display-res-v1-8fae36bca51b48ea 时生成并保存了绑定；之后登记了新版本 e3-display-res-v1-18c0b714ace0fc21（英文改了措辞）。读取时说明部分仍按它记下的 v1 渲染（fields[].resource_version），当场生成的部分用当前版本；历史对象从不改用最新资源",
  "message": "DisplayEnvelope",
  "payload": {
   "acknowledgements": [],
@@ -10,7 +10,7 @@
     "key": "pack.note.synthetic",
     "missing_reason": null,
     "pointer": "/meta/data_pack/note",
-    "resource_version": "e3-display-res-v1-210af34323703870",
+    "resource_version": "e3-display-res-v1-18c0b714ace0fc21",
     "source_locale": "zh",
     "status": "provided",
     "text": "Synthetic data pack: every value is a hand-made model setting or test data, not real city data"
@@ -19,7 +19,7 @@
     "key": "stage.needs_attention",
     "missing_reason": null,
     "pointer": "/stage_zh",
-    "resource_version": "e3-display-res-v1-210af34323703870",
+    "resource_version": "e3-display-res-v1-18c0b714ace0fc21",
     "source_locale": "zh",
     "status": "provided",
     "text": "Stopped; needs attention"
@@ -910,7 +910,7 @@
     "key": "explain.reason.service_unavailable",
     "missing_reason": null,
     "pointer": "/explanation/reason_zh",
-    "resource_version": "e3-display-res-v1-10a01abc4052089a",
+    "resource_version": "e3-display-res-v1-8fae36bca51b48ea",
     "source_locale": "zh",
     "status": "provided",
     "text": "The model service is temporarily unavailable, so the simulation paused, as the rules allow, at a year boundary or between two candidate plans"
@@ -919,7 +919,7 @@
     "key": "explain.impact",
     "missing_reason": null,
     "pointer": "/explanation/impact_zh",
-    "resource_version": "e3-display-res-v1-10a01abc4052089a",
+    "resource_version": "e3-display-res-v1-8fae36bca51b48ea",
     "source_locale": "zh",
     "status": "provided",
     "text": "The simulation has started, and this run has used 1 of your runs (not refunded once started); Replies already saved will not be requested again"
@@ -928,7 +928,7 @@
     "key": "explain.after_next.resumable",
     "missing_reason": null,
     "pointer": "/explanation/next_action_zh",
-    "resource_version": "e3-display-res-v1-10a01abc4052089a",
+    "resource_version": "e3-display-res-v1-8fae36bca51b48ea",
     "source_locale": "zh",
     "status": "provided",
     "text": "Click “Resume” later to continue the same run (no extra run is used)"
@@ -948,7 +948,7 @@
    "confirm_with": null,
    "confirmed": {
     "confirmed_id": "confirmed.draft-000000000000006d.r2",
-    "content_fingerprint": "50427705415789fd7ed12e36ed3f46df3dda5c5479aca9bcb9641e9aa7c47138"
+    "content_fingerprint": "6f2fe0b22eb198f7a2c31d87061c39be2571b2da9639f8e1a9369b3e6c881362"
    },
    "created_at": "2026-12-24T09:01:02Z",
    "deletion": {
@@ -967,7 +967,7 @@
    },
    "intent_id": "intent-000000000000006e",
    "meta": {
-    "conversion_version": "e3a-conversion-v3",
+    "conversion_version": "e3a-conversion-v4",
     "data_pack": {
      "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
      "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
@@ -975,21 +975,21 @@
      "status": "synthetic_fixture_only"
     },
     "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-    "questionnaire_version": "e3a-questionnaire-v0.4-draft",
+    "questionnaire_version": "e3a-questionnaire-v0.5-draft",
     "sample": null,
-    "schema_version": "e3a-product-schema-v3.4",
+    "schema_version": "e3a-product-schema-v3.5",
     "vocabulary_version": "e3a-vocabulary-v5"
    },
    "preflight": {
     "binding": {
      "compiled_inputs": {
-      "life_input": "6f742c99fbeb645bf94beb25cbfd88965cc29368c0587a36d1a94744e9ea804f",
+      "life_input": "cb64b1d8879d3157fb72f6c6e8276230f7239b28469e9441f64776f207dfcb86",
       "roster": "d997e6b80daaa5d375c62afd9595ec92887930e50ad00cf7d7d71f6f2a6f37ba",
       "run_config": "ddd9024dd3c79188811aa0b2c27da4411e6a7f12e0b961c7c86deb2db334b750",
       "scoring_config": "b51328437d327df68a809b172206fde47f6946d17903c39a25ba090d55568dc8"
      },
      "evaluation_spec_id": "eval.e1-life.main",
-     "identities_fingerprint": "1877e3d614a11fefb4fa9b364e540774ac766ed41070442f6addf8f1c5fd6d6e",
+     "identities_fingerprint": "d2c6764b95499e69a5a51229744839f51e9e7a90bf12d6bb0136c7ac11c62896",
      "planner_id": "mock.rules.e3a-product",
      "planner_kind": "mock",
      "prompt_template": "e3b-product-prompt-v3",
@@ -1641,7 +1641,7 @@
     "clones_per_city": 1,
     "confirmed": {
      "confirmed_id": "confirmed.draft-000000000000006d.r2",
-     "content_fingerprint": "50427705415789fd7ed12e36ed3f46df3dda5c5479aca9bcb9641e9aa7c47138"
+     "content_fingerprint": "6f2fe0b22eb198f7a2c31d87061c39be2571b2da9639f8e1a9369b3e6c881362"
     },
     "executable": {
      "reasons": [
@@ -1657,7 +1657,7 @@
     },
     "issues": [],
     "meta": {
-     "conversion_version": "e3a-conversion-v3",
+     "conversion_version": "e3a-conversion-v4",
      "data_pack": {
       "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
       "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
@@ -1665,9 +1665,9 @@
       "status": "synthetic_fixture_only"
      },
      "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-     "questionnaire_version": "e3a-questionnaire-v0.4-draft",
+     "questionnaire_version": "e3a-questionnaire-v0.5-draft",
      "sample": null,
-     "schema_version": "e3a-product-schema-v3.4",
+     "schema_version": "e3a-product-schema-v3.5",
      "vocabulary_version": "e3a-vocabulary-v5"
     },
     "planner": {
@@ -1678,7 +1678,7 @@
      "planner_id": "mock.rules.e3a-product",
      "planner_kind": "mock"
     },
-    "preflight_fingerprint": "bb18bafd65da49856257a1ddb600dac5d71c91420e9bf7d74a5a67a81fb8f349",
+    "preflight_fingerprint": "0e66b90b43acebdb26e55cb8dfe398b45a6d5631ea3bef3b99baad50d51bfbbe",
     "preflight_id": "preflight.confirmed.draft-000000000000006d.r2",
     "scope_zh": [
      "生活协议 life-v1-e3a-product（状态 synthetic_fixture_only）、评分 score.e1-life.explore（探索版）：城市、报价、工资、疾病、治疗与评分参数全部是合成设定，不是现实城市，不排序真实城市",
@@ -1728,7 +1728,7 @@
      "note": "离线 mock：没有网络调用，费用为 0（真实模型运行会写“按报价估算”，以供应商账单为准）"
     },
     "meta": {
-     "conversion_version": "e3a-conversion-v3",
+     "conversion_version": "e3a-conversion-v4",
      "data_pack": {
       "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
       "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
@@ -1736,13 +1736,13 @@
       "status": "synthetic_fixture_only"
      },
      "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-     "questionnaire_version": "e3a-questionnaire-v0.4-draft",
+     "questionnaire_version": "e3a-questionnaire-v0.5-draft",
      "sample": null,
-     "schema_version": "e3a-product-schema-v3.4",
+     "schema_version": "e3a-product-schema-v3.5",
      "vocabulary_version": "e3a-vocabulary-v5"
     },
     "pause": {
-     "audit_ref": "run:run-e3a-bcb7424345cfa25c record:progress.json",
+     "audit_ref": "run:run-e3a-339484f29c6ae584 record:progress.json",
      "category": "batch_halted_service_unavailable",
      "impact_zh": "不是生活结果；还没有生成评价与汇总，不擅自给出分类或分数",
      "next_action_zh": "维护者处理服务、凭证、预算或请求的问题；可以恢复同一次运行（恢复前逐条核对归档，已用的调用次数与预算不清零）；系统不会替分身生成计划",
@@ -1751,7 +1751,7 @@
     "report_available": false,
     "resumable": true,
     "resume_note": "可以从年度边界或两份候选之间恢复（E1 的恢复入口逐条核对归档，尝试次数与调用次数不清零）",
-    "run_id": "run-e3a-bcb7424345cfa25c",
+    "run_id": "run-e3a-339484f29c6ae584",
     "stage": "halted",
     "stage_zh": "批次停下（服务、预算或请求检查）",
     "updated_at": "2026-12-24T09:01:02Z"
@@ -1763,7 +1763,7 @@
     "used": 1
    },
    "result_available": false,
-   "run_id": "run-e3a-bcb7424345cfa25c",
+   "run_id": "run-e3a-339484f29c6ae584",
    "settings": {
     "call_limit": 18,
     "cities": [
@@ -1785,7 +1785,7 @@
    "updated_at": "2026-12-24T09:01:02Z",
    "waiting_for": "user"
   },
-  "source_view_fingerprint": "71f4fd148817520f42d8a979674739953a5a974c0672c3aa0449f4e868fbae79",
+  "source_view_fingerprint": "82d20f4b4b6d64b979a9983a1cfb42739d43ecb812157899b169ea57ec7dc274",
   "status": "partial"
  },
  "sample": {

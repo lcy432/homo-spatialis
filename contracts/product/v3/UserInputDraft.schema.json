@@ -62,7 +62,7 @@
   },
   "AllocationAnswer": {
    "additionalProperties": false,
-   "description": "一组定和分配的作答。``mode = equal_split`` 表示用户**主动**选择了平均分配（不预选、不默认）；``None`` 表示还没开始分配。",
+   "description": "一组定和分配的作答。``mode = equal_split`` 表示用户**主动**选择了平均分配（不预选、不默认）；``None`` 表示还没开始分配。\n``ratings_normalized_v1``：独立评分（未答不是 0；“同等重视”由用户主动把每项设为 50）。",
    "properties": {
     "entries": {
      "additionalProperties": {
@@ -76,7 +76,8 @@
       {
        "enum": [
         "manual",
-        "equal_split"
+        "equal_split",
+        "ratings_normalized_v1"
        ],
        "type": "string"
       },
@@ -760,7 +761,8 @@
     "schema_version": {
      "enum": [
       "e3a-product-schema-v3.3",
-      "e3a-product-schema-v3.4"
+      "e3a-product-schema-v3.4",
+      "e3a-product-schema-v3.5"
      ],
      "title": "Schema Version",
      "type": "string"

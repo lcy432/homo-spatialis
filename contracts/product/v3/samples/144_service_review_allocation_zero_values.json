@@ -1,9 +1,9 @@
 {
- "description_zh": "明确给 0 分的维度（安全、休闲）是“已提供 0”，与未答、无所谓、暂不确定分开；合计 100 可以确认",
+ "description_zh": "明确评 0 分的维度（安全、休闲）是“已提供 0”，权重就是 0，与未答、无所谓、暂不确定分开；原始合计 160，权重 = 100 × 评分 ÷ 160 = 50/0/25/0/12.5/12.5，可以确认",
  "message": "ReviewReply",
  "payload": {
   "meta": {
-   "conversion_version": "e3a-conversion-v3",
+   "conversion_version": "e3a-conversion-v4",
    "data_pack": {
     "content_fingerprint": "48eda959e2eb8254c891d1de88b92f792ccf8ecbaadac8037d548279cd9dd22b",
     "note": "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定",
@@ -11,14 +11,14 @@
     "status": "real_data_frozen"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.4-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.5-draft",
    "sample": {
     "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
     "origin": "offline_run",
     "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.4",
+   "schema_version": "e3a-product-schema-v3.5",
    "vocabulary_version": "e3a-vocabulary-v5"
   },
   "review": {
@@ -37,10 +37,10 @@
     "US:CBSA2023:26420",
     "US:CBSA2023:42660"
    ],
-   "confirmable": false,
+   "confirmable": true,
    "draft": {
-    "draft_fingerprint": "aef53b11a7959a4d5a69de37230df86eeefca4a6838c5c12e7761430b7cc820b",
-    "draft_id": "draft-0000000000000085",
+    "draft_fingerprint": "08c138d58875fbcc57689e191b289a0c40b7a7b8f7c91bb69ae3b811d9e0ce0d",
+    "draft_id": "draft-0000000000000084",
     "revision": 2
    },
    "free_text_chars": 0,
@@ -70,17 +70,7 @@
      "text": "健康风险的信息还不清楚时，我愿意先放弃眼前的一点收益，等了解清楚再决定。"
     }
    ],
-   "issues": [
-    {
-     "audit_ref": null,
-     "code": "points_sum_not_100",
-     "field": "six_dimensions.entries",
-     "impact_zh": "系统不会按比例自动扣减或补齐任何一项",
-     "message_zh": "六维合计是 90（显示 90.0），不是 100：还差 10 分",
-     "next_action_zh": "由你决定从哪一项挪到哪一项，直到精确合计 100",
-     "severity": "error"
-    }
-   ],
+   "issues": [],
    "items": [
     {
      "answer_state": "provided",
@@ -133,7 +123,7 @@
      ]
     },
     {
-     "answer_state": "unanswered",
+     "answer_state": "provided",
      "confirmation": "pending",
      "execution_guaranteed": null,
      "item": "six_dimensions",
@@ -242,6 +232,8 @@
       "exact": "25",
       "key": "housing_condition",
       "label": "居住条件",
+      "rating_display": "25",
+      "rating_exact": "25",
       "state": "provided",
       "support": "supported",
       "usage": [
@@ -254,6 +246,8 @@
       "exact": "25",
       "key": "food_life",
       "label": "饮食生活",
+      "rating_display": "25",
+      "rating_exact": "25",
       "state": "provided",
       "support": "partially_supported",
       "usage": [
@@ -266,6 +260,8 @@
       "exact": "30",
       "key": "daily_convenience",
       "label": "日常支持与便利",
+      "rating_display": "30",
+      "rating_exact": "30",
       "state": "provided",
       "support": "supported",
       "usage": [
@@ -278,6 +274,8 @@
       "exact": "20",
       "key": "personal_enjoyment",
       "label": "个人消费与享受",
+      "rating_display": "20",
+      "rating_exact": "20",
       "state": "provided",
       "support": "partially_supported",
       "usage": [
@@ -286,7 +284,12 @@
       ]
      }
     ],
-    "mode": "manual",
+    "mode": "ratings_normalized_v1",
+    "rating_total": {
+     "display": "100",
+     "exact": "100"
+    },
+    "rule": "ratings_normalized_v1",
     "status": "complete",
     "total": {
      "display": "100.0",
@@ -294,7 +297,7 @@
     }
    },
    "meta": {
-    "conversion_version": "e3a-conversion-v3",
+    "conversion_version": "e3a-conversion-v4",
     "data_pack": {
      "content_fingerprint": "48eda959e2eb8254c891d1de88b92f792ccf8ecbaadac8037d548279cd9dd22b",
      "note": "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定",
@@ -302,9 +305,9 @@
      "status": "real_data_frozen"
     },
     "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-    "questionnaire_version": "e3a-questionnaire-v0.4-draft",
+    "questionnaire_version": "e3a-questionnaire-v0.5-draft",
     "sample": null,
-    "schema_version": "e3a-product-schema-v3.4",
+    "schema_version": "e3a-product-schema-v3.5",
     "vocabulary_version": "e3a-vocabulary-v5"
    },
    "money": {
@@ -381,14 +384,16 @@
     ],
     "source": "structured_answers"
    },
-   "review_id": "review.draft-0000000000000085.r2",
+   "review_id": "review.draft-0000000000000084.r2",
    "six_dimensions": {
     "lines": [
      {
-      "display": "40.0",
-      "exact": "40",
+      "display": "50.0",
+      "exact": "50",
       "key": "material",
       "label": "物质生活",
+      "rating_display": "80",
+      "rating_exact": "80",
       "state": "provided",
       "support": "supported",
       "usage": [
@@ -401,6 +406,8 @@
       "exact": "0",
       "key": "safety",
       "label": "安全",
+      "rating_display": "0",
+      "rating_exact": "0",
       "state": "provided",
       "support": "partially_supported",
       "usage": [
@@ -409,10 +416,12 @@
       ]
      },
      {
-      "display": "20.0",
-      "exact": "20",
+      "display": "25.0",
+      "exact": "25",
       "key": "opportunity",
       "label": "发展机会",
+      "rating_display": "40",
+      "rating_exact": "40",
       "state": "provided",
       "support": "supported",
       "usage": [
@@ -425,6 +434,8 @@
       "exact": "0",
       "key": "leisure",
       "label": "休闲",
+      "rating_display": "0",
+      "rating_exact": "0",
       "state": "provided",
       "support": "supported",
       "usage": [
@@ -433,10 +444,12 @@
       ]
      },
      {
-      "display": "20.0",
-      "exact": "20",
+      "display": "12.5",
+      "exact": "25/2",
       "key": "environment",
       "label": "环境",
+      "rating_display": "20",
+      "rating_exact": "20",
       "state": "provided",
       "support": "partially_supported",
       "usage": [
@@ -445,10 +458,12 @@
       ]
      },
      {
-      "display": "10.0",
-      "exact": "10",
+      "display": "12.5",
+      "exact": "25/2",
       "key": "commute",
       "label": "交通便捷程度",
+      "rating_display": "20",
+      "rating_exact": "20",
       "state": "provided",
       "support": "supported",
       "usage": [
@@ -457,15 +472,21 @@
       ]
      }
     ],
-    "mode": "manual",
-    "status": "incomplete",
+    "mode": "ratings_normalized_v1",
+    "rating_total": {
+     "display": "160",
+     "exact": "160"
+    },
+    "rule": "ratings_normalized_v1",
+    "status": "complete",
     "total": {
-     "display": "90.0",
-     "exact": "90"
+     "display": "100.0",
+     "exact": "100"
     }
    },
    "statements": [],
    "summary_zh": [
+    "答案可以确认：请核对下面的解释，并知悉标准开局与只留存的陈述",
     "健康问卷有 1 题没有明确倾向（未答或暂不确定）：照实保留，分身会被告知没有这几项的明确指令"
    ],
    "taste": {

@@ -272,6 +272,8 @@ def test_the_real_old_draft_migrates_only_with_consent(pack):
     draft = UserInputDraft.model_validate(raw("draft"))
     m = migration_for(pack, draft)
     assert m is not None and m.version_changed and m.consent_required  # 旧问卷收集过的通勤上限
-    moved = migrate(pack, draft, clear_removed=True)
+    # 旧的百分比分配：用户要选重新评分或同等重视（v0.5，DECISIONS/0047）
+    assert m.allocation_choice_required
+    moved = migrate(pack, draft, clear_removed=True, allocation_choice="equal_weight")
     assert moved.meta.schema_version == PRODUCT_SCHEMA_VERSION and moved.hard_requirements == ()
     assert review_draft(pack, moved).confirmable

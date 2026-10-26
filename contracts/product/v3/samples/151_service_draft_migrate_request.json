@@ -1,7 +1,8 @@
 {
- "description_zh": "迁移请求（POST /api/v1/drafts/{id}/migrate）：expected_revision 是当前修订号；clear_removed = true 表示用户看过迁移说明、同意清空那些旧答案（省略或为 false 时，有要清空的答案就拒绝）",
+ "description_zh": "迁移请求（POST /api/v1/drafts/{id}/migrate）：expected_revision 是当前修订号；clear_removed = true 表示用户看过迁移说明、同意清空那些旧答案（省略或为 false 时，有要清空的答案就拒绝）；allocation_choice 是用户对旧百分比分配的选择：rerate（这两组改成独立评分、各项未答，由用户重新打分）或 equal_weight（每项评分 50）。有旧分配时必须选，省略就拒绝",
  "message": "DraftMigrateRequest",
  "payload": {
+  "allocation_choice": "rerate",
   "clear_removed": true,
   "expected_revision": 2
  },

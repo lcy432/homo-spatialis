@@ -2,7 +2,7 @@
  "$defs": {
   "ConfirmedAllocation": {
    "additionalProperties": false,
-   "description": "确认的定和分配：规范精确分数（参与计算）与显示文字（只供阅读）。",
+   "description": "确认的定和分配：规范精确分数（参与计算）与显示文字（只供阅读）。独立评分（v3.5）另外保存原始评分、原始合计与换算规则；\nE1 编译只读 ``points``（换算后的最终权重）。",
    "properties": {
     "display": {
      "additionalProperties": {
@@ -14,7 +14,8 @@
     "mode": {
      "enum": [
       "manual",
-      "equal_split"
+      "equal_split",
+      "ratings_normalized_v1"
      ],
      "title": "Mode",
      "type": "string"
@@ -26,6 +27,48 @@
      },
      "title": "Points",
      "type": "object"
+    },
+    "rating_total": {
+     "anyOf": [
+      {
+       "pattern": "^(0|-?[1-9][0-9]*)(/[1-9][0-9]*)?$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Rating Total"
+    },
+    "ratings": {
+     "anyOf": [
+      {
+       "additionalProperties": {
+        "pattern": "^(0|-?[1-9][0-9]*)(/[1-9][0-9]*)?$",
+        "type": "string"
+       },
+       "type": "object"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Ratings"
+    },
+    "rule": {
+     "anyOf": [
+      {
+       "const": "ratings_normalized_v1",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Rule"
     }
    },
    "required": [
@@ -961,7 +1004,8 @@
     "schema_version": {
      "enum": [
       "e3a-product-schema-v3.3",
-      "e3a-product-schema-v3.4"
+      "e3a-product-schema-v3.4",
+      "e3a-product-schema-v3.5"
      ],
      "title": "Schema Version",
      "type": "string"

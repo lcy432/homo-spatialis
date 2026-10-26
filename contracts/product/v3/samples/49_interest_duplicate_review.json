@@ -10,7 +10,7 @@
   ],
   "confirmable": false,
   "draft": {
-   "draft_fingerprint": "6c02387abbbd1ba57847a4170a1c1e6b0b03fa27edf0d68872b36cf09c6b114d",
+   "draft_fingerprint": "f175955a6a2bad2d3c76b77bab46285c322ef5393c570101a76c92ccf3e5e5d0",
    "draft_id": "draft.u501.interest_duplicate",
    "revision": 1
   },
@@ -214,6 +214,8 @@
      "exact": "25",
      "key": "housing_condition",
      "label": "居住条件",
+     "rating_display": "25",
+     "rating_exact": "25",
      "state": "provided",
      "support": "supported",
      "usage": [
@@ -226,6 +228,8 @@
      "exact": "25",
      "key": "food_life",
      "label": "饮食生活",
+     "rating_display": "25",
+     "rating_exact": "25",
      "state": "provided",
      "support": "partially_supported",
      "usage": [
@@ -238,6 +242,8 @@
      "exact": "30",
      "key": "daily_convenience",
      "label": "日常支持与便利",
+     "rating_display": "30",
+     "rating_exact": "30",
      "state": "provided",
      "support": "supported",
      "usage": [
@@ -250,6 +256,8 @@
      "exact": "20",
      "key": "personal_enjoyment",
      "label": "个人消费与享受",
+     "rating_display": "20",
+     "rating_exact": "20",
      "state": "provided",
      "support": "partially_supported",
      "usage": [
@@ -258,7 +266,12 @@
      ]
     }
    ],
-   "mode": "manual",
+   "mode": "ratings_normalized_v1",
+   "rating_total": {
+    "display": "100",
+    "exact": "100"
+   },
+   "rule": "ratings_normalized_v1",
    "status": "complete",
    "total": {
     "display": "100.0",
@@ -266,7 +279,7 @@
    }
   },
   "meta": {
-   "conversion_version": "e3a-conversion-v3",
+   "conversion_version": "e3a-conversion-v4",
    "data_pack": {
     "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
@@ -274,14 +287,14 @@
     "status": "synthetic_fixture_only"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.4-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.5-draft",
    "sample": {
     "note": "审阅与确认的实际输出（没有运行生活）",
     "origin": "offline_run",
     "produced_by": "product.scenarios.review_only(interest_duplicate)",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.4",
+   "schema_version": "e3a-product-schema-v3.5",
    "vocabulary_version": "e3a-vocabulary-v5"
   },
   "money": {
@@ -344,6 +357,8 @@
      "exact": "30",
      "key": "material",
      "label": "物质生活",
+     "rating_display": "30",
+     "rating_exact": "30",
      "state": "provided",
      "support": "supported",
      "usage": [
@@ -356,6 +371,8 @@
      "exact": "20",
      "key": "safety",
      "label": "安全",
+     "rating_display": "20",
+     "rating_exact": "20",
      "state": "provided",
      "support": "partially_supported",
      "usage": [
@@ -368,6 +385,8 @@
      "exact": "20",
      "key": "opportunity",
      "label": "发展机会",
+     "rating_display": "20",
+     "rating_exact": "20",
      "state": "provided",
      "support": "supported",
      "usage": [
@@ -380,6 +399,8 @@
      "exact": "10",
      "key": "leisure",
      "label": "休闲",
+     "rating_display": "10",
+     "rating_exact": "10",
      "state": "provided",
      "support": "supported",
      "usage": [
@@ -392,6 +413,8 @@
      "exact": "10",
      "key": "environment",
      "label": "环境",
+     "rating_display": "10",
+     "rating_exact": "10",
      "state": "provided",
      "support": "partially_supported",
      "usage": [
@@ -404,6 +427,8 @@
      "exact": "10",
      "key": "commute",
      "label": "交通便捷程度",
+     "rating_display": "10",
+     "rating_exact": "10",
      "state": "provided",
      "support": "supported",
      "usage": [
@@ -412,7 +437,12 @@
      ]
     }
    ],
-   "mode": "manual",
+   "mode": "ratings_normalized_v1",
+   "rating_total": {
+    "display": "100",
+    "exact": "100"
+   },
+   "rule": "ratings_normalized_v1",
    "status": "complete",
    "total": {
     "display": "100.0",

@@ -747,7 +747,8 @@
     "schema_version": {
      "enum": [
       "e3a-product-schema-v3.3",
-      "e3a-product-schema-v3.4"
+      "e3a-product-schema-v3.4",
+      "e3a-product-schema-v3.5"
      ],
      "title": "Schema Version",
      "type": "string"

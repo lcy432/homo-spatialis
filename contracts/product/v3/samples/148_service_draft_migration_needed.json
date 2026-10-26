@@ -1,5 +1,5 @@
 {
- "description_zh": "按旧版问卷（v0.3）填的草稿：migration 写明版本从哪到哪、要清空的旧答案（往返 60 分钟的硬要求、品牌偏好，逐条列出，原文照原样）、迁移会做什么；consent_required = true。读取不改写草稿",
+ "description_zh": "按旧版问卷（v0.3）填的草稿：migration 写明版本从哪到哪、要清空的旧答案（往返 60 分钟的硬要求、品牌偏好，逐条列出，原文照原样）、迁移会做什么；consent_required = true。旧的六维 / 物质分配是当时的百分比：allocations 照原样列出（manual，30/20/20/10/10/10 与 25/25/30/20，不换算），allocation_choice_required = true。读取不改写草稿",
  "message": "DraftView",
  "payload": {
   "draft": {
@@ -29,10 +29,6 @@
     "price_period": "2024",
     "state": "provided"
    },
-   "certificates": {
-    "selected": [],
-    "state": "unanswered"
-   },
    "cities": {
     "city_refs": [
      "US:CBSA2023:35620",
@@ -44,16 +40,8 @@
     ],
     "state": "provided"
    },
-   "draft_id": "draft-000000000000008a",
-   "education": {
-    "option_id": null,
-    "state": "unanswered"
-   },
+   "draft_id": "draft-000000000000008c",
    "evidence": [],
-   "experience": {
-    "entries": [],
-    "state": "unanswered"
-   },
    "free_text": {
     "state": "provided",
     "text": "我在写字楼做全职文员。下班以后不想再把很多时间花在洗衣服、打扫屋子上，愿意为省事花一些钱；但也不想因为花钱让自己手头太紧。"
@@ -125,10 +113,7 @@
     "vocabulary_version": "e3a-vocabulary-v4"
    },
    "occupation": {
-    "catalog_fingerprint": null,
-    "catalog_version": null,
     "language": "zh",
-    "mode": "text",
     "raw_text": "我在写字楼做全职文员，平时处理文件和表格",
     "selected_candidate": "occ.office_clerk",
     "state": "provided"
@@ -171,7 +156,7 @@
   },
   "expires_at": "2027-01-23T09:01:02Z",
   "meta": {
-   "conversion_version": "e3a-conversion-v3",
+   "conversion_version": "e3a-conversion-v4",
    "data_pack": {
     "content_fingerprint": "48eda959e2eb8254c891d1de88b92f792ccf8ecbaadac8037d548279cd9dd22b",
     "note": "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定",
@@ -179,22 +164,98 @@
     "status": "real_data_frozen"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.4-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.5-draft",
    "sample": {
     "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
     "origin": "offline_run",
     "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.4",
+   "schema_version": "e3a-product-schema-v3.5",
    "vocabulary_version": "e3a-vocabulary-v5"
   },
   "migration": {
+   "allocation_choice_required": true,
+   "allocations": [
+    {
+     "group": "six_dimensions",
+     "lines": [
+      {
+       "key": "material",
+       "label": "物质生活",
+       "state": "provided",
+       "value_text": "30"
+      },
+      {
+       "key": "safety",
+       "label": "安全",
+       "state": "provided",
+       "value_text": "20"
+      },
+      {
+       "key": "opportunity",
+       "label": "发展机会",
+       "state": "provided",
+       "value_text": "20"
+      },
+      {
+       "key": "leisure",
+       "label": "休闲",
+       "state": "provided",
+       "value_text": "10"
+      },
+      {
+       "key": "environment",
+       "label": "环境",
+       "state": "provided",
+       "value_text": "10"
+      },
+      {
+       "key": "commute",
+       "label": "交通便捷程度",
+       "state": "provided",
+       "value_text": "10"
+      }
+     ],
+     "mode": "manual"
+    },
+    {
+     "group": "material",
+     "lines": [
+      {
+       "key": "housing_condition",
+       "label": "居住条件",
+       "state": "provided",
+       "value_text": "25"
+      },
+      {
+       "key": "food_life",
+       "label": "饮食生活",
+       "state": "provided",
+       "value_text": "25"
+      },
+      {
+       "key": "daily_convenience",
+       "label": "日常支持与便利",
+       "state": "provided",
+       "value_text": "30"
+      },
+      {
+       "key": "personal_enjoyment",
+       "label": "个人消费与享受",
+       "state": "provided",
+       "value_text": "20"
+      }
+     ],
+     "mode": "manual"
+    }
+   ],
    "consent_required": true,
    "effects_zh": [
     "草稿换成当前的问卷、词表与转换版本",
     "清空 2 条新问卷不再收集的答案（硬要求、品牌与菜系等属性偏好）；之后的模拟不再用它们",
-    "城市、职业、年龄、现金、六维与物质点数、健康问卷、兴趣与口味、资格与补充文字原样保留",
+    "旧的六维 / 物质分配是百分比，不是独立评分：请选择重新评分（这两组改成未答，由你重新打分）或同等重视（每项 50 分）；系统不把旧百分比改读成评分",
+    "城市、职业、年龄、现金、健康问卷、兴趣与口味、资格与补充文字原样保留",
     "迁移后要重新审阅并确认，才能准备新的模拟",
     "已经确认的画像、已经开始的模拟与历史结果不受影响（它们用自己保存的副本）"
    ],
@@ -214,7 +275,7 @@
      "summary": "“家电更喜欢国产品牌”"
     }
    ],
-   "to_questionnaire_version": "e3a-questionnaire-v0.4-draft",
+   "to_questionnaire_version": "e3a-questionnaire-v0.5-draft",
    "version_changed": true
   },
   "updated_at": "2026-12-24T09:01:02Z"

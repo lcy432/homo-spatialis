@@ -8,7 +8,7 @@
   "confirm_with": null,
   "confirmed": {
    "confirmed_id": "confirmed.draft-000000000000004b.r2",
-   "content_fingerprint": "7b8446db14682728df879d839e67cfa6c70947e15cb09d7b60896d11e8deb197"
+   "content_fingerprint": "4f847edb040acc4ee90142ca87a0c3c9575114a8e464391340afca8be290f9c4"
   },
   "created_at": "2026-10-24T09:00:00Z",
   "deletion": {
@@ -21,7 +21,7 @@
   "explanation": null,
   "intent_id": "intent-000000000000004c",
   "meta": {
-   "conversion_version": "e3a-conversion-v3",
+   "conversion_version": "e3a-conversion-v4",
    "data_pack": {
     "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
@@ -29,14 +29,14 @@
     "status": "synthetic_fixture_only"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.4-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.5-draft",
    "sample": {
     "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
     "origin": "offline_run",
     "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.4",
+   "schema_version": "e3a-product-schema-v3.5",
    "vocabulary_version": "e3a-vocabulary-v5"
   },
   "preflight": null,
@@ -48,7 +48,7 @@
    "used": 1
   },
   "result_available": false,
-  "run_id": "run-e3a-3e6a6d05395fe1c8",
+  "run_id": "run-e3a-23cc962d7a843c01",
   "settings": null,
   "stage": "expired",
   "stage_zh": "已过期",

@@ -44,10 +44,11 @@ def test_every_message_exports_a_schema_and_the_committed_files_match():
         assert path.read_text(encoding="utf-8") == text, f"{name} 与权威结构不一致"
     index = json.loads(texts["index.json"])
     # 输入体验收敛（DECISIONS/0046）：输入目录、结构化资格答案、面板多选；新问卷不再收集硬要求与属性偏好
-    assert index["schema_version"] == "e3a-product-schema-v3.4"
-    assert index["questionnaire_version"] == "e3a-questionnaire-v0.4-draft"
+    # 输入与服务体验（DECISIONS/0047）：独立评分、设置预览与一次开始、进度摘要；目录与生活协议不换版
+    assert index["schema_version"] == "e3a-product-schema-v3.5"
+    assert index["questionnaire_version"] == "e3a-questionnaire-v0.5-draft"
     assert index["vocabulary_version"] == "e3a-vocabulary-v5"
-    assert index["conversion_version"] == "e3a-conversion-v3"
+    assert index["conversion_version"] == "e3a-conversion-v4"
     assert index["health_questionnaire_version"] == "e3a-health-coping-q-v0.1-draft"
 
 
@@ -106,13 +107,21 @@ def test_public_samples_validate_and_cover_the_required_cases():
         "132_service_review_catalog_selection",
         "134_service_confirm_catalog_selection",
         "142_service_review_allocation_equal_split",
-        "143_service_review_allocation_moved",
-        "145_service_review_allocation_under",
-        "146_service_review_allocation_over",
         "147_service_review_allocation_parent_zero",
         "148_service_draft_migration_needed",
         "151_service_draft_migrate_request",
         "153_service_draft_migrated",
+        # 独立评分（v3.5，DECISIONS/0047）：原始评分 → 精确权重、同比例、全零、超范围、父项为 0 与恢复、旧方式停用、迁移要选择
+        "143_service_review_ratings_normalized",
+        "145_service_review_ratings_all_zero",
+        "146_service_review_ratings_out_of_range",
+        "155_service_draft_ratings",
+        "156_service_review_ratings_scaled",
+        "157_service_review_allocation_mode_retired",
+        "158_service_review_ratings_parent_restored",
+        "159_service_error_migration_choice_required",
+        "160_service_confirm_ratings_normalized",
+        "161_display_review_ratings_en",
     ):
         assert required in names, f"缺少公共样例 {required}"
     for p in samples:

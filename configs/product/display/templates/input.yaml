@@ -1046,3 +1046,60 @@ templates:
   input.removed_section.next:
     en: After reading the draft's migration notes, agree to clear these old answers, then review again
     zh: 看过草稿的迁移说明后同意清空这些旧答案，再重新审阅
+  input.allocation.mode_retired.impact:
+    en: Percentages are not independent ratings, and the system does not reinterpret them as ratings; the profile cannot be confirmed for now
+    zh: 百分比不是独立评分，系统不把它改读成评分；画像暂时不能确认
+  input.allocation.mode_retired.message:
+    en: 'In this version of the questionnaire, {what} uses independent ratings: each item gets 0–100 points and they need not add up to 100; the old percentage allocation cannot be used to confirm'
+    zh: 这一版问卷的{what}用独立评分：每项 0–100 分，不必凑满 100；旧的百分比分配不能直接用来确认
+  input.allocation.mode_retired.next:
+    en: Rate each item again, or choose equal weight (50 points each)
+    zh: 给每一项重新评分，或选择同等重视（每项 50 分）
+  input.capabilities.ratings.equal_weight:
+    en: “Equal weight” means you actively set every item to 50 points (each of the six dimensions gets 50/3, each of the four material items gets 25)
+    zh: “同等重视”是你主动把每一项都设为 50 分（六维各得 50/3、物质四项各得 25）
+  input.capabilities.ratings.material_zero:
+    en: 'When material life gets 0 points, the four material items do not apply: the points you already gave stay in the draft but are not used this time; they come back as they were when material life is above 0 again'
+    zh: 物质生活打 0 分时物质四项不适用：已经打的分留在草稿里，不参与这一次的换算；物质重新大于 0 时照原样恢复
+  input.capabilities.ratings.normalize:
+    en: Once every item that needs an answer is rated and the total is above 0, E3 turns ratings into weights as “100 × this item's rating ÷ the sum of all ratings” (exact fractions, no extra factors); scaling all ratings by the same factor leaves the weights unchanged
+    zh: 全部要回答的项都打了分、合计大于 0 之后，E3 按“100 × 这一项的评分 ÷ 全部评分之和”换成权重（精确分数，不加任何系数）；评分同比例放大或缩小，权重不变
+  input.capabilities.ratings.range:
+    en: 'Rate each item separately from 0 to 100: the slider moves 1 point at a time, and you can also type up to two decimals; the ratings need not add up to 100'
+    zh: 每一项单独打 0–100 分：滑条一次 1 分，也可以输入最多两位小数；不必凑满 100
+  input.capabilities.ratings.states:
+    en: Not answered is not 0; “no strong view” and “not sure yet” keep their own state and are not turned into numbers; if every rating is 0 you cannot confirm, and the system does not split the weight evenly for you
+    zh: 未答不是 0；“无所谓”“暂不确定”保留原状态，不换成数值；全部是 0 时不能确认，系统也不会自动平均分配
+  input.exact.rating_not_decimal:
+    en: '“{text}” is not a decimal number: write ratings as numbers from 0 to 100 with at most two decimals'
+    zh: “{text}”不是十进制数：评分写成 0 到 100 之间、最多两位小数的数
+  input.migration.effect.allocation:
+    en: 'The old six-dimension / material allocation is in percentages, not independent ratings: choose re-rate (these two groups become unanswered and you rate them again) or equal weight (50 points each); the system does not reinterpret the old percentages as ratings'
+    zh: 旧的六维 / 物质分配是百分比，不是独立评分：请选择重新评分（这两组改成未答，由你重新打分）或同等重视（每项 50 分）；系统不把旧百分比改读成评分
+  input.migration.effect.keep_except_allocation:
+    en: Cities, occupation, age, cash, the health questionnaire, interests and taste, qualifications and your notes are kept as they are
+    zh: 城市、职业、年龄、现金、健康问卷、兴趣与口味、资格与补充文字原样保留
+  input.migration.message.allocation:
+    en: 'This draft''s six-dimension / material allocation uses the old questionnaire''s percentages: choose re-rate or equal weight when migrating (other answers are kept as they are)'
+    zh: 这份草稿的六维 / 物质分配是旧问卷的百分比：迁移时请选择重新评分或同等重视（其他答案原样保留）
+  input.ratings.all_zero.impact:
+    en: When every rating is 0 they cannot be turned into weights; the system does not split the weight evenly for you
+    zh: 全部是 0 时没法换成权重；系统不会自动平均分配
+  input.ratings.all_zero.message:
+    en: 'Every rating in {what} is 0: give at least one item more than 0, or actively choose equal weight'
+    zh: '{what}的评分全部是 0：至少有一项大于 0，或主动选择同等重视'
+  input.ratings.all_zero.next:
+    en: Give the items you care about a rating above 0, or choose equal weight (50 points each)
+    zh: 给你在意的项目打一个大于 0 的分，或选择同等重视（每项 50 分）
+  input.ratings.not_given.next:
+    en: Give it a rating from 0 to 100 (0 is allowed), or choose equal weight
+    zh: 给它一个 0 到 100 的评分（可以是 0），或选择同等重视
+  input.ratings.out_of_range.message:
+    en: The rating {value} for {name} is above 100
+    zh: '{name} 的评分 {value} 超过了 100'
+  input.ratings.out_of_range.next:
+    en: Each rating is between 0 and 100
+    zh: 每一项的评分在 0 到 100 之间
+  input.ratings.parse_error.next:
+    en: Change it to a rating from 0 to 100 with at most two decimals
+    zh: 改成 0 到 100 之间、最多两位小数的评分

@@ -1,0 +1,180 @@
+{
+ "description_zh": "独立评分的草稿：六维 mode = ratings_normalized_v1，entries 保存用户填的原始评分 80/40/40/20/10/10（不必凑满 100，也不在草稿里换算）；物质四项评分 25/25/30/20",
+ "message": "DraftView",
+ "payload": {
+  "draft": {
+   "abilities": [],
+   "age": {
+    "state": "provided",
+    "value": 35
+   },
+   "attribute_preferences": [],
+   "cash": {
+    "amount_text": "3000",
+    "currency": "USD",
+    "meaning": "liquid_funds_v1",
+    "price_period": "2024",
+    "state": "provided"
+   },
+   "certificates": {
+    "selected": [],
+    "state": "provided"
+   },
+   "cities": {
+    "city_refs": [
+     "US:CBSA2023:35620",
+     "US:CBSA2023:31080",
+     "US:CBSA2023:41860",
+     "US:CBSA2023:16980",
+     "US:CBSA2023:26420",
+     "US:CBSA2023:42660"
+    ],
+    "state": "provided"
+   },
+   "draft_id": "draft-0000000000000089",
+   "education": {
+    "option_id": "bachelor",
+    "state": "provided"
+   },
+   "evidence": [],
+   "experience": {
+    "entries": [],
+    "state": "unanswered"
+   },
+   "free_text": {
+    "state": "unanswered",
+    "text": null
+   },
+   "hard_requirements": [],
+   "health": {
+    "items": [
+     {
+      "choice": "disagree",
+      "question_id": "hc_more_pay_more_sick_risk"
+     },
+     {
+      "choice": "agree",
+      "question_id": "hc_reserve_for_health_costs"
+     },
+     {
+      "choice": "unsure",
+      "question_id": "hc_wait_for_clear_risk_info"
+     }
+    ],
+    "questionnaire_version": "e3a-health-coping-q-v0.1-draft"
+   },
+   "input_channel": "form",
+   "leisure_interest": {
+    "selected": [
+     "fitness",
+     "music"
+    ],
+    "state": "selected",
+    "text": null
+   },
+   "material": {
+    "entries": {
+     "daily_convenience": {
+      "state": "provided",
+      "value_text": "30"
+     },
+     "food_life": {
+      "state": "provided",
+      "value_text": "25"
+     },
+     "housing_condition": {
+      "state": "provided",
+      "value_text": "25"
+     },
+     "personal_enjoyment": {
+      "state": "provided",
+      "value_text": "20"
+     }
+    },
+    "mode": "ratings_normalized_v1"
+   },
+   "meta": {
+    "conversion_version": "e3a-conversion-v4",
+    "data_pack": {
+     "content_fingerprint": "48eda959e2eb8254c891d1de88b92f792ccf8ecbaadac8037d548279cd9dd22b",
+     "note": "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定",
+     "pack_id": "pack.e3b.us-v1",
+     "status": "real_data_frozen"
+    },
+    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
+    "questionnaire_version": "e3a-questionnaire-v0.5-draft",
+    "sample": null,
+    "schema_version": "e3a-product-schema-v3.5",
+    "vocabulary_version": "e3a-vocabulary-v5"
+   },
+   "occupation": {
+    "catalog_fingerprint": "d55d76971830b638d6bed01907a54ff25b3a0397b7d84adb51608b7d41378da0",
+    "catalog_version": "e3-input-catalog-v1",
+    "language": "zh",
+    "mode": "catalog",
+    "raw_text": null,
+    "selected_candidate": "occ.soc_15_1252",
+    "state": "provided"
+   },
+   "revision": 2,
+   "six_dimensions": {
+    "entries": {
+     "commute": {
+      "state": "provided",
+      "value_text": "10"
+     },
+     "environment": {
+      "state": "provided",
+      "value_text": "10"
+     },
+     "leisure": {
+      "state": "provided",
+      "value_text": "20"
+     },
+     "material": {
+      "state": "provided",
+      "value_text": "80"
+     },
+     "opportunity": {
+      "state": "provided",
+      "value_text": "40"
+     },
+     "safety": {
+      "state": "provided",
+      "value_text": "40"
+     }
+    },
+    "mode": "ratings_normalized_v1"
+   },
+   "taste": {
+    "selected": [
+     "chinese"
+    ],
+    "state": "selected",
+    "text": null
+   }
+  },
+  "expires_at": "2027-01-23T09:01:02Z",
+  "meta": {
+   "conversion_version": "e3a-conversion-v4",
+   "data_pack": {
+    "content_fingerprint": "48eda959e2eb8254c891d1de88b92f792ccf8ecbaadac8037d548279cd9dd22b",
+    "note": "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定",
+    "pack_id": "pack.e3b.us-v1",
+    "status": "real_data_frozen"
+   },
+   "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.5-draft",
+   "sample": {
+    "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+    "origin": "offline_run",
+    "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+    "synthetic": true
+   },
+   "schema_version": "e3a-product-schema-v3.5",
+   "vocabulary_version": "e3a-vocabulary-v5"
+  },
+  "migration": null,
+  "updated_at": "2026-12-24T09:01:02Z"
+ }
+}

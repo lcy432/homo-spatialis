@@ -7,7 +7,7 @@
   "clones_per_city": 0,
   "confirmed": {
    "confirmed_id": "confirmed.draft.u501.start_rejected.r1",
-   "content_fingerprint": "cac0dc10517ff0e5713eac67e7b10cbffb04fef0badc8231305eea9d01a90a69"
+   "content_fingerprint": "286952a5fb1fab6f3a6182e4ad3e30c9911dadee77b76a03eb5dd6043bd30720"
   },
   "executable": {
    "reasons": [
@@ -33,7 +33,7 @@
    }
   ],
   "meta": {
-   "conversion_version": "e3a-conversion-v3",
+   "conversion_version": "e3a-conversion-v4",
    "data_pack": {
     "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
@@ -41,14 +41,14 @@
     "status": "synthetic_fixture_only"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.4-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.5-draft",
    "sample": {
     "note": "预检查的实际输出（没有运行生活）",
     "origin": "controlled_fixture",
     "produced_by": "product.scenarios.preflight_only(start_rejected)",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.4",
+   "schema_version": "e3a-product-schema-v3.5",
    "vocabulary_version": "e3a-vocabulary-v5"
   },
   "planner": {
@@ -59,7 +59,7 @@
    "planner_id": "mock.rules.e3a-product",
    "planner_kind": "mock"
   },
-  "preflight_fingerprint": "93fb6a1d3c49c1389062ba808bba153648735fb458e85308c6c90f968d4a5fda",
+  "preflight_fingerprint": "868ea1bf2802514b3dd56fdffe8e26ac8589c925e0a38bc4c8ef912cce688b5e",
   "preflight_id": "preflight.confirmed.draft.u501.start_rejected.r1",
   "scope_zh": [
    "城市、报价、工资、税、疾病与治疗全部是合成设定；结果不排序真实城市，也不是现实推荐",

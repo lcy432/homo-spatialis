@@ -62,7 +62,7 @@
   },
   "AllocationAnswer": {
    "additionalProperties": false,
-   "description": "一组定和分配的作答。``mode = equal_split`` 表示用户**主动**选择了平均分配（不预选、不默认）；``None`` 表示还没开始分配。",
+   "description": "一组定和分配的作答。``mode = equal_split`` 表示用户**主动**选择了平均分配（不预选、不默认）；``None`` 表示还没开始分配。\n``ratings_normalized_v1``：独立评分（未答不是 0；“同等重视”由用户主动把每项设为 50）。",
    "properties": {
     "entries": {
      "additionalProperties": {
@@ -76,7 +76,8 @@
       {
        "enum": [
         "manual",
-        "equal_split"
+        "equal_split",
+        "ratings_normalized_v1"
        ],
        "type": "string"
       },
@@ -295,6 +296,19 @@
    "additionalProperties": false,
    "description": "这份草稿进入新问卷要做的迁移（``GET`` 草稿时一起给出；没有要迁移的就没有这一项）。\n\n迁移把草稿的版本换成当前版本、清空新问卷不再收集的硬要求与属性偏好（``removed`` 逐条列出），其他答案原样保留；之后要重新审阅\n和确认。有要清空的答案时必须用户明确同意（``consent_required``）；只差版本时也要用户点一次。已经确认或已经开始的运行不受影响。",
    "properties": {
+    "allocation_choice_required": {
+     "default": false,
+     "title": "Allocation Choice Required",
+     "type": "boolean"
+    },
+    "allocations": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/LegacyAllocation"
+     },
+     "title": "Allocations",
+     "type": "array"
+    },
     "consent_required": {
      "title": "Consent Required",
      "type": "boolean"
@@ -614,6 +628,97 @@
    "title": "HealthItemAnswer",
    "type": "object"
   },
+  "LegacyAllocation": {
+   "additionalProperties": false,
+   "description": "旧草稿里的一组定和分配（v3.5）：迁移前照原样给你看；它们是当时的百分比分配，不是独立评分，迁移时由你明确选择重新评分或\n同等重视，系统不把它们改读成评分。",
+   "properties": {
+    "group": {
+     "enum": [
+      "six_dimensions",
+      "material"
+     ],
+     "title": "Group",
+     "type": "string"
+    },
+    "lines": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/LegacyAllocationLine"
+     },
+     "title": "Lines",
+     "type": "array"
+    },
+    "mode": {
+     "anyOf": [
+      {
+       "enum": [
+        "manual",
+        "equal_split"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Mode"
+    }
+   },
+   "required": [
+    "group"
+   ],
+   "title": "LegacyAllocation",
+   "type": "object"
+  },
+  "LegacyAllocationLine": {
+   "additionalProperties": false,
+   "description": "旧草稿里一组分配的一项：原来的作答状态与原来写的数值（百分比，不是独立评分）。",
+   "properties": {
+    "key": {
+     "maxLength": 48,
+     "minLength": 1,
+     "title": "Key",
+     "type": "string"
+    },
+    "label": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Label",
+     "type": "string"
+    },
+    "state": {
+     "enum": [
+      "unanswered",
+      "provided",
+      "indifferent",
+      "unsure"
+     ],
+     "title": "State",
+     "type": "string"
+    },
+    "value_text": {
+     "anyOf": [
+      {
+       "maxLength": 40,
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Value Text"
+    }
+   },
+   "required": [
+    "key",
+    "label",
+    "state"
+   ],
+   "title": "LegacyAllocationLine",
+   "type": "object"
+  },
   "LeisureInterestAnswer": {
    "additionalProperties": false,
    "description": "休闲兴趣：未答、暂不确定、明确没有固定爱好、选择通用休闲评价（“城市有什么合适的就体验什么”），或用文字描述。\n\n文字描述先由 E3 按词表形成待确认的解释；``selected`` 是用户从解释或词表里**明确选中**的类别——只有选了才进入有评分作用的类别。\n空白不会被当成“通用评价”的选择。",
@@ -818,7 +923,8 @@
     "schema_version": {
      "enum": [
       "e3a-product-schema-v3.3",
-      "e3a-product-schema-v3.4"
+      "e3a-product-schema-v3.4",
+      "e3a-product-schema-v3.5"
      ],
      "title": "Schema Version",
      "type": "string"

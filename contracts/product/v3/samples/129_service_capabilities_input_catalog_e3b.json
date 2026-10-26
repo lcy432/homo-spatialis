@@ -1991,7 +1991,7 @@
    }
   ],
   "meta": {
-   "conversion_version": "e3a-conversion-v3",
+   "conversion_version": "e3a-conversion-v4",
    "data_pack": {
     "content_fingerprint": "48eda959e2eb8254c891d1de88b92f792ccf8ecbaadac8037d548279cd9dd22b",
     "note": "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定",
@@ -1999,14 +1999,14 @@
     "status": "real_data_frozen"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.4-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.5-draft",
    "sample": {
     "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
     "origin": "offline_run",
     "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.4",
+   "schema_version": "e3a-product-schema-v3.5",
    "vocabulary_version": "e3a-vocabulary-v5"
   },
   "money_bases": [
@@ -2039,6 +2039,21 @@
    "equal_split_six": "50/3",
    "manual_entry": "手工输入按精确十进制解析，最多 2 位小数（步长不是测量精度）；也接受规范分数写法（例如 50/3）",
    "manual_max_decimals": 2,
+   "ratings": {
+    "equal_weight_rating": "50",
+    "max_decimals": 2,
+    "maximum": 100,
+    "method": "ratings_normalized_v1",
+    "minimum": 0,
+    "rules": [
+     "每一项单独打 0–100 分：滑条一次 1 分，也可以输入最多两位小数；不必凑满 100",
+     "全部要回答的项都打了分、合计大于 0 之后，E3 按“100 × 这一项的评分 ÷ 全部评分之和”换成权重（精确分数，不加任何系数）；评分同比例放大或缩小，权重不变",
+     "未答不是 0；“无所谓”“暂不确定”保留原状态，不换成数值；全部是 0 时不能确认，系统也不会自动平均分配",
+     "“同等重视”是你主动把每一项都设为 50 分（六维各得 50/3、物质四项各得 25）",
+     "物质生活打 0 分时物质四项不适用：已经打的分留在草稿里，不参与这一次的换算；物质重新大于 0 时照原样恢复"
+    ],
+    "slider_step": 1
+   },
    "rules": [
     "六维合计必须精确等于 100；不预填数值、不提供人格套餐，不自动按比例扣减其他项",
     "只有用户主动选择“平均分配”才生成均分（六维每项 50/3、物质每项 25），不让排在前面的项目多拿分",

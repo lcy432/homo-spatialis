@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from dataclasses import dataclass
 from typing import Annotated, Any, Literal, get_args
 
 from pydantic import (
@@ -50,21 +51,32 @@ from pydantic import (
 #: v3.4（E3 输入体验收敛，DECISIONS/0046）：能力清单新增输入目录（``input_catalog``）；草稿新增按目录直接选职业、最高学历 / 证书 /
 #: 相关经验、兴趣与口味的面板多选（``selected``）；新问卷不再收集硬要求与属性偏好（字段留着，只为读回历史对象）。v3.3 的对象仍能
 #: 读回（``ProductMeta.schema_version`` 两个都接受），新的审阅与确认必须是 v3.4；目录仍是 contracts/product/v3。
-PRODUCT_SCHEMA_VERSION = "e3a-product-schema-v3.4"
+#: v3.5（E3 输入与服务体验，DECISIONS/0047）：六维与物质四项的独立评分（``ratings_normalized_v1``：原始评分 → 精确归一权重），
+#: 设置预览与“确认并开始”的预先授权，运行意图的进度摘要。v3.3、v3.4 的对象照原版本读回与序列化（``_Since``），新对象是 v3.5。
+PRODUCT_SCHEMA_VERSION = "e3a-product-schema-v3.5"
 #: 问卷 / 题干语义版本：六维与物质的题干、定义、参考改善范围与控件规则。题干一变，旧确认失效、需要重新确认。
 #: v0.4：职业按目录选、学历 / 证书 / 经验分开问、兴趣与口味面板多选；不再问硬要求与属性偏好。
-QUESTIONNAIRE_VERSION = "e3a-questionnaire-v0.4-draft"
+#: v0.5：六维与物质四项改为独立评分（每项 0–100，不必凑满 100）；旧的百分比分配不再用来确认新画像。
+QUESTIONNAIRE_VERSION = "e3a-questionnaire-v0.5-draft"
 #: 词表版本：六维键、物质键、职业受控词表、硬要求选项与属性偏好种类。v5：职业目录的分组与搜索词、学历选项（输入目录）。
 VOCABULARY_VERSION = "e3a-vocabulary-v5"
 #: 独立健康问卷版本（暂定文案，未经量表验证）。
 HEALTH_QUESTIONNAIRE_VERSION = "e3a-health-coping-q-v0.1-draft"
 #: 转换版本：原始答案 → 确认画像 → E1 输入的规则（精确分数、规范写法、金额换算、标准开局编译）。v3：学历 / 证书 / 相关经验的
 #: 结构化答案按资料包已有的规则换成资格（``confirmed_experience_mapping_v1``）；面板选中的兴趣与口味直接是确认的类别。
-CONVERSION_VERSION = "e3a-conversion-v3"
+#: v4：独立评分按 ``ratings_normalized_v1`` 换成权重（每项 = 100 × 原始评分 ÷ 原始合计，精确分数；不加任何系数）。
+CONVERSION_VERSION = "e3a-conversion-v4"
 #: 读回历史对象时仍接受的结构版本（v3.3 的草稿、审阅、画像与结果；新对象一律是 ``PRODUCT_SCHEMA_VERSION``）
-READABLE_SCHEMA_VERSIONS = ("e3a-product-schema-v3.3", "e3a-product-schema-v3.4")
-#: 旧结构版本：它的对象没有 v3.4 新增的字段（见 ``_legacy_dump``）
+READABLE_SCHEMA_VERSIONS = (
+    "e3a-product-schema-v3.3",
+    "e3a-product-schema-v3.4",
+    "e3a-product-schema-v3.5",
+)
+#: 最早仍能读回的结构版本（v3.3）；各版本新增了什么见 ``_Since``
 LEGACY_SCHEMA_VERSION = READABLE_SCHEMA_VERSIONS[0]
+_V34, _V35 = READABLE_SCHEMA_VERSIONS[1], READABLE_SCHEMA_VERSIONS[2]
+#: 独立评分的换算规则（v3.5）
+RATINGS_RULE = "ratings_normalized_v1"
 #: 自由文字的上限（沿用 E1 画像的 2,000 字符；超限明确报错，不静默截断）。
 FREE_TEXT_MAX_CHARS = 2000
 
@@ -92,43 +104,74 @@ def content_fingerprint(content: object) -> str:
     return hashlib.sha256(canonical_json(content).encode("utf-8")).hexdigest()
 
 
-def _is_legacy(obj: Any) -> bool:
-    return obj.meta.schema_version == LEGACY_SCHEMA_VERSION
+@dataclass(frozen=True)
+class _Since:
+    """某个结构版本新增的一处内容（DECISIONS/0046 第 9 条、0047）。``path`` 用点分隔，``*`` 表示列表的每一项。``states`` 不为空时是
+    那个版本新增的取值（更早版本的对象不能用）；否则是新增的字段：更早版本的对象里只能是 ``default``，写出时照原样不写。"""
+
+    version: str
+    path: str
+    default: Any = None
+    states: tuple[str, ...] = ()
 
 
-def _legacy_problems(
-    obj: Any,
-    added: dict[str, Any],
-    nested: dict[str, dict[str, Any]],
-    states: dict[str, tuple[str, ...]] | None = None,
-) -> list[str]:
-    """一个 v3.3 对象里不该出现的 v3.4 内容：新增字段不是默认值（未答 / 空），或用了 v3.4 才有的状态。"""
-    bad = [k for k, default in added.items() if getattr(obj, k) != default]
-    for parent, fields in nested.items():
-        sub = getattr(obj, parent)
-        bad += [f"{parent}.{k}" for k, default in fields.items() if getattr(sub, k) != default]
-    for path, new_states in (states or {}).items():
-        parent, name = path.split(".")
-        if getattr(getattr(obj, parent), name) in new_states:
-            bad.append(path)
+def _older(obj: Any, version: str) -> bool:
+    return READABLE_SCHEMA_VERSIONS.index(obj.meta.schema_version) < READABLE_SCHEMA_VERSIONS.index(
+        version
+    )
+
+
+def _at(value: Any, parts: list[str]) -> Any:
+    """一个对象上某个路径的全部取值（遇到空值就停；``*`` 展开列表）。"""
+    if not parts:
+        yield value
+        return
+    if value is None:
+        return
+    head, rest = parts[0], parts[1:]
+    if head == "*":
+        for item in value:
+            yield from _at(item, rest)
+    else:
+        yield from _at(getattr(value, head), rest)
+
+
+def _version_problems(obj: Any, rules: tuple[_Since, ...]) -> list[str]:
+    """一个旧版本对象里不该出现的新版本内容：新增字段不是默认值（未答 / 空），或用了新版本才有的取值。"""
+    bad = []
+    for r in rules:
+        if not _older(obj, r.version):
+            continue
+        for v in _at(obj, r.path.split(".")):
+            if (v in r.states) if r.states else (v != r.default):
+                bad.append(r.path)
+                break
     return bad
 
 
-def _legacy_dump(
-    obj: Any, data: Any, added: dict[str, Any], nested: dict[str, dict[str, Any]]
-) -> Any:
-    """按对象自己的结构版本序列化（DECISIONS/0046 的兼容读取）。v3.3 的对象没有 v3.4 新增的字段：读回时它们只能是默认值，写出时
-    照原样不写——所以旧对象的 JSON、内容身份、草稿指纹与显示绑定的消息摘要都与它当初生成时相同，不重签、不改写旧绑定。
-    新版本的对象照常写出全部字段。"""
-    if not isinstance(data, dict) or not _is_legacy(obj):
+def _drop(data: Any, parts: list[str]) -> None:
+    head, rest = parts[0], parts[1:]
+    if head == "*":
+        if isinstance(data, list) and rest:
+            for item in data:
+                _drop(item, rest)
+        return
+    if not isinstance(data, dict):
+        return
+    if rest:
+        _drop(data.get(head), rest)
+    else:
+        data.pop(head, None)
+
+
+def _versioned_dump(obj: Any, data: Any, rules: tuple[_Since, ...]) -> Any:
+    """按对象自己的结构版本序列化：旧版本的对象没有后来新增的字段，写出时照原样不写——所以旧对象的 JSON、内容身份、草稿指纹与
+    显示绑定的消息摘要都与它当初生成时相同，不重签、不改写旧绑定。当前版本的对象照常写出全部字段。"""
+    if not isinstance(data, dict) or obj.meta.schema_version == PRODUCT_SCHEMA_VERSION:
         return data
-    for k in added:
-        data.pop(k, None)
-    for parent, fields in nested.items():
-        sub = data.get(parent)
-        if isinstance(sub, dict):
-            for k in fields:
-                sub.pop(k, None)
+    for r in rules:
+        if not r.states and _older(obj, r.version):
+            _drop(data, r.path.split("."))
     return data
 
 
@@ -177,8 +220,10 @@ class SampleLabel(ProductModel):
 class ProductMeta(ProductModel):
     """每条产品消息都带的共同元数据：结构、问卷、词表、健康问卷、转换的版本与资料包身份。"""
 
-    #: v3.3 只为读回历史对象（旧草稿、画像、运行与结果）；新对象都是 v3.4，审阅与确认按当前版本核对
-    schema_version: Literal["e3a-product-schema-v3.3", "e3a-product-schema-v3.4"]
+    #: v3.3、v3.4 只为读回历史对象（旧草稿、画像、运行与结果）；新对象都是当前版本，审阅与确认按当前版本核对
+    schema_version: Literal[
+        "e3a-product-schema-v3.3", "e3a-product-schema-v3.4", "e3a-product-schema-v3.5"
+    ]
     questionnaire_version: str = Field(min_length=1, max_length=80)
     vocabulary_version: str = Field(min_length=1, max_length=80)
     health_questionnaire_version: str = Field(min_length=1, max_length=80)
@@ -281,8 +326,21 @@ class MaterialLeafDefinition(ProductModel):
     note: str = Field(min_length=1, max_length=400)
 
 
+class RatingsRules(ProductModel):
+    """独立评分（v3.5，``ratings_normalized_v1``）：每项 0–100，滑条步长 1，数字精调最多 ``max_decimals`` 位小数；不必凑满 100。
+    全部要回答的项都回答了、原始合计大于 0 之后，E3 按 100 × 评分 ÷ 合计换成精确权重。“同等重视”是用户主动把每项设为 50。"""
+
+    method: Literal["ratings_normalized_v1"]
+    minimum: Literal[0] = 0
+    maximum: Literal[100] = 100
+    slider_step: Literal[1] = 1
+    max_decimals: Annotated[int, Field(ge=0, le=6)]
+    equal_weight_rating: Literal["50"] = "50"
+    rules: tuple[str, ...] = Field(min_length=1)
+
+
 class PointsRules(ProductModel):
-    """定和量表的规则：合计、手工输入的小数位、显示小数位、精确分数的规范写法与均分的精确值。"""
+    """定和量表的规则：合计、手工输入的小数位、显示小数位、精确分数的规范写法与均分的精确值。v3.5 起新问卷用 ``ratings``。"""
 
     total: Literal[100]
     manual_entry: str = Field(min_length=1, max_length=300)
@@ -292,6 +350,7 @@ class PointsRules(ProductModel):
     equal_split_six: ExactText
     equal_split_material: ExactText
     rules: tuple[str, ...]
+    ratings: RatingsRules | None = None
 
 
 class HealthQuestion(ProductModel):
@@ -594,10 +653,16 @@ class PointEntry(ProductModel):
         return self
 
 
-class AllocationAnswer(ProductModel):
-    """一组定和分配的作答。``mode = equal_split`` 表示用户**主动**选择了平均分配（不预选、不默认）；``None`` 表示还没开始分配。"""
+#: 定和分配的作答方式。``ratings_normalized_v1``（v3.5，新问卷）：每项是 0–100 的独立评分，``value_text`` 写原始评分；
+#: ``manual`` / ``equal_split`` 保留原来的含义（百分比、主动平均分配），只为读回旧对象，新问卷不再用它们确认。
+AllocationMode = Literal["manual", "equal_split", "ratings_normalized_v1"]
 
-    mode: Literal["manual", "equal_split"] | None = None
+
+class AllocationAnswer(ProductModel):
+    """一组定和分配的作答。``mode = equal_split`` 表示用户**主动**选择了平均分配（不预选、不默认）；``None`` 表示还没开始分配。
+    ``ratings_normalized_v1``：独立评分（未答不是 0；“同等重视”由用户主动把每项设为 50）。"""
+
+    mode: AllocationMode | None = None
     entries: dict[str, PointEntry] = Field(default_factory=dict)
 
 
@@ -817,28 +882,33 @@ class UserInputDraft(ProductModel):
     experience: ExperienceAnswer = Field(default_factory=ExperienceAnswer)
 
     @model_validator(mode="after")
-    def _legacy_shape(self) -> UserInputDraft:
-        if _is_legacy(self) and (bad := _legacy_problems(self, *_DRAFT_V34, _DRAFT_V34_STATES)):
-            raise ValueError(f"v3.3 的草稿没有 v3.4 新增的内容：{bad}（先按迁移换成当前版本）")
+    def _version_shape(self) -> UserInputDraft:
+        if bad := _version_problems(self, _DRAFT_SINCE):
+            raise ValueError(
+                f"{self.meta.schema_version} 的草稿没有后来版本新增的内容：{bad}（先按迁移换成当前版本）"
+            )
         return self
 
     @model_serializer(mode="wrap")
     def _versioned(
         self, handler: SerializerFunctionWrapHandler
     ):  # 不写返回类型：JSON Schema 照原结构
-        return _legacy_dump(self, handler(self), *_DRAFT_V34)
+        return _versioned_dump(self, handler(self), _DRAFT_SINCE)
 
 
-#: v3.4 给草稿新增的字段与它们的默认值（v3.3 的草稿只能是默认值，写出时不写）
-_DRAFT_V34 = (
-    {
-        "education": EducationAnswer(),
-        "certificates": CertificatesAnswer(),
-        "experience": ExperienceAnswer(),
-    },
-    {"occupation": {"mode": "text", "catalog_version": None, "catalog_fingerprint": None}},
+#: 草稿在 v3.4、v3.5 新增的内容
+_DRAFT_SINCE = (
+    _Since(_V34, "education", EducationAnswer()),
+    _Since(_V34, "certificates", CertificatesAnswer()),
+    _Since(_V34, "experience", ExperienceAnswer()),
+    _Since(_V34, "occupation.mode", "text"),
+    _Since(_V34, "occupation.catalog_version"),
+    _Since(_V34, "occupation.catalog_fingerprint"),
+    _Since(_V34, "leisure_interest.state", states=("selected",)),
+    _Since(_V34, "taste.state", states=("selected",)),
+    _Since(_V35, "six_dimensions.mode", states=(RATINGS_RULE,)),
+    _Since(_V35, "material.mode", states=(RATINGS_RULE,)),
 )
-_DRAFT_V34_STATES = {"leisure_interest.state": ("selected",), "taste.state": ("selected",)}
 
 
 # ==========================================================================
@@ -884,13 +954,21 @@ class AllocationLine(ProductModel):
     display: str | None = None
     support: SupportState
     usage: tuple[Usage, ...]
+    #: v3.5 独立评分：用户给的原始评分（精确值与显示）；``exact`` / ``display`` 是换算后的权重（全部回答完、合计大于 0 才有）
+    rating_exact: ExactText | None = None
+    rating_display: str | None = None
 
 
 class AllocationReview(ProductModel):
-    mode: Literal["manual", "equal_split"] | None = None
+    """一组定和分配的审阅。独立评分时 ``rating_total`` 是原始评分的合计（回答了的那些），``total`` 是换算后权重的合计（精确 100），
+    ``rule`` 写明换算规则。"""
+
+    mode: AllocationMode | None = None
     status: Literal["complete", "incomplete", "not_applicable"]
     total: ExactNumber | None = None
     lines: tuple[AllocationLine, ...] = ()
+    rating_total: ExactNumber | None = None
+    rule: Literal["ratings_normalized_v1"] | None = None
 
 
 class HealthReviewItem(ProductModel):
@@ -1015,27 +1093,37 @@ class ProfileReview(ProductModel):
     qualifications: QualificationReview | None = None
 
     @model_validator(mode="after")
-    def _legacy_shape(self) -> ProfileReview:
-        if _is_legacy(self) and (bad := _legacy_problems(self, *_REVIEW_V34, _REVIEW_V34_STATES)):
-            raise ValueError(f"v3.3 的审阅没有 v3.4 新增的内容：{bad}")
+    def _version_shape(self) -> ProfileReview:
+        if bad := _version_problems(self, _REVIEW_SINCE):
+            raise ValueError(f"{self.meta.schema_version} 的审阅没有后来版本新增的内容：{bad}")
         return self
 
     @model_serializer(mode="wrap")
     def _versioned(
         self, handler: SerializerFunctionWrapHandler
     ):  # 不写返回类型：JSON Schema 照原结构
-        return _legacy_dump(self, handler(self), *_REVIEW_V34)
+        return _versioned_dump(self, handler(self), _REVIEW_SINCE)
 
 
-_REVIEW_V34: tuple[dict[str, Any], dict[str, dict[str, Any]]] = (
-    {"qualifications": None},
-    {"occupation": {"mode": "text"}},
+#: 审阅在 v3.4、v3.5 新增的内容
+_REVIEW_SINCE = (
+    _Since(_V34, "qualifications"),
+    _Since(_V34, "occupation.mode", "text"),
+    _Since(_V34, "occupation.status", states=("catalog_selected",)),
+    _Since(_V34, "leisure_interest.state", states=("selected",)),
+    _Since(_V34, "taste.state", states=("selected",)),
+    *(
+        rule
+        for group in ("six_dimensions", "material")
+        for rule in (
+            _Since(_V35, f"{group}.rating_total"),
+            _Since(_V35, f"{group}.rule"),
+            _Since(_V35, f"{group}.lines.*.rating_exact"),
+            _Since(_V35, f"{group}.lines.*.rating_display"),
+            _Since(_V35, f"{group}.mode", states=(RATINGS_RULE,)),
+        )
+    ),
 )
-_REVIEW_V34_STATES = {
-    "occupation.status": ("catalog_selected",),
-    "leisure_interest.state": ("selected",),
-    "taste.state": ("selected",),
-}
 
 
 # ==========================================================================
@@ -1089,11 +1177,26 @@ class ConfirmedMoney(ProductModel):
 
 
 class ConfirmedAllocation(ProductModel):
-    """确认的定和分配：规范精确分数（参与计算）与显示文字（只供阅读）。"""
+    """确认的定和分配：规范精确分数（参与计算）与显示文字（只供阅读）。独立评分（v3.5）另外保存原始评分、原始合计与换算规则；
+    E1 编译只读 ``points``（换算后的最终权重）。"""
 
-    mode: Literal["manual", "equal_split"]
+    mode: AllocationMode
     points: dict[str, ExactText]
     display: dict[str, str]
+    ratings: dict[str, ExactText] | None = None
+    rating_total: ExactText | None = None
+    rule: Literal["ratings_normalized_v1"] | None = None
+
+    @model_validator(mode="after")
+    def _ratings_source(self) -> ConfirmedAllocation:
+        rated = self.mode == RATINGS_RULE
+        if {rated} != {
+            self.ratings is not None,
+            self.rating_total is not None,
+            self.rule is not None,
+        }:
+            raise ValueError("只有独立评分才带原始评分、原始合计与换算规则，而且三者都要有")
+        return self
 
 
 class ConfirmedMaterial(ProductModel):
@@ -1230,16 +1333,16 @@ class ConfirmedProfile(ProductModel):
     content_fingerprint: Sha256
 
     @model_validator(mode="after")
-    def _legacy_shape(self) -> ConfirmedProfile:
-        if _is_legacy(self) and (bad := _legacy_problems(self, *_PROFILE_V34)):
-            raise ValueError(f"v3.3 的确认画像没有 v3.4 新增的内容：{bad}")
+    def _version_shape(self) -> ConfirmedProfile:
+        if bad := _version_problems(self, _PROFILE_SINCE):
+            raise ValueError(f"{self.meta.schema_version} 的确认画像没有后来版本新增的内容：{bad}")
         return self
 
     @model_serializer(mode="wrap")
     def _versioned(
         self, handler: SerializerFunctionWrapHandler
     ):  # 不写返回类型：JSON Schema 照原结构
-        return _legacy_dump(self, handler(self), *_PROFILE_V34)
+        return _versioned_dump(self, handler(self), _PROFILE_SINCE)
 
     def content(self) -> dict[str, Any]:
         """参与内容身份的全部字段（指纹本身与样例出处标签除外）。"""
@@ -1249,10 +1352,21 @@ class ConfirmedProfile(ProductModel):
         return content_fingerprint(self.content())
 
 
-#: v3.4 给确认画像新增的字段（v3.3 的画像只能是默认值，写出时不写；目录选中的职业只在 v3.4 有）
-_PROFILE_V34: tuple[dict[str, Any], dict[str, dict[str, Any]]] = (
-    {"qualifications": None},
-    {"occupation": {"catalog_version": None, "catalog_fingerprint": None}},
+#: 确认画像在 v3.4、v3.5 新增的内容（目录选中的职业只在 v3.4 起有；独立评分只在 v3.5 起有）
+_PROFILE_SINCE = (
+    _Since(_V34, "qualifications"),
+    _Since(_V34, "occupation.catalog_version"),
+    _Since(_V34, "occupation.catalog_fingerprint"),
+    *(
+        rule
+        for path in ("six_dimensions", "material.allocation")
+        for rule in (
+            _Since(_V35, f"{path}.ratings"),
+            _Since(_V35, f"{path}.rating_total"),
+            _Since(_V35, f"{path}.rule"),
+            _Since(_V35, f"{path}.mode", states=(RATINGS_RULE,)),
+        )
+    ),
 )
 
 
@@ -2356,6 +2470,24 @@ class RemovedAnswer(ProductModel):
     raw_text: str | None = Field(default=None, max_length=300)
 
 
+class LegacyAllocationLine(ProductModel):
+    """旧草稿里一组分配的一项：原来的作答状态与原来写的数值（百分比，不是独立评分）。"""
+
+    key: str = Field(min_length=1, max_length=48)
+    label: str = Field(min_length=1, max_length=80)
+    state: AnswerState
+    value_text: str | None = Field(default=None, max_length=40)
+
+
+class LegacyAllocation(ProductModel):
+    """旧草稿里的一组定和分配（v3.5）：迁移前照原样给你看；它们是当时的百分比分配，不是独立评分，迁移时由你明确选择重新评分或
+    同等重视，系统不把它们改读成评分。"""
+
+    group: Literal["six_dimensions", "material"]
+    mode: Literal["manual", "equal_split"] | None = None
+    lines: tuple[LegacyAllocationLine, ...] = ()
+
+
 class DraftMigration(ProductModel):
     """这份草稿进入新问卷要做的迁移（``GET`` 草稿时一起给出；没有要迁移的就没有这一项）。
 
@@ -2369,6 +2501,9 @@ class DraftMigration(ProductModel):
     consent_required: bool
     message_zh: str = Field(min_length=1, max_length=400)
     effects_zh: tuple[str, ...] = Field(min_length=1)
+    #: v3.5：旧的百分比分配（原样）；有就要在迁移时选择重新评分或同等重视（``DraftMigrateRequest.allocation_choice``）
+    allocations: tuple[LegacyAllocation, ...] = ()
+    allocation_choice_required: bool = False
 
 
 class DraftView(ProductModel):
@@ -2388,6 +2523,8 @@ class DraftMigrateRequest(ProductModel):
 
     expected_revision: Annotated[int, Field(ge=1)]
     clear_removed: bool = False
+    #: v3.5：旧草稿有百分比分配时必须选：``rerate``（这两组改成独立评分、各项未答，由你重新评分）或 ``equal_weight``（每项评分 50）
+    allocation_choice: Literal["rerate", "equal_weight"] | None = None
 
 
 class DraftSaveRequest(ProductModel):
@@ -2703,6 +2840,7 @@ ServiceErrorCode = Literal[
     "run_options_invalid",
     "run_settings_unavailable",
     "migration_consent_required",
+    "migration_choice_required",
     "migration_not_needed",
     "rate_limited",
     "csrf_failed",

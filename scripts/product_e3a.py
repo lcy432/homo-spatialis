@@ -284,24 +284,32 @@ def generate_samples(out: Path, work: Path) -> None:
         out,
         "12_unanswered_and_zero_review",
         "ProfileReview",
-        "未答与明确 0：物质给 0 是已提供的数值（细分不适用、不伪造回答）；休闲未答、环境选了无所谓，都不会被换成 0",
+        "未答与明确 0（独立评分）：物质评 0 是已提供的数值（细分不适用、不伪造回答）；休闲未答、环境选了无所谓，都不会被换成 0；没回答完不出权重",
         dump(zero.review),
     )
     eq = sc.review_only(
-        work / "equal", "equal_split", six_mode="equal_split", material_mode="equal_split"
+        work / "equal",
+        "equal_split",
+        six=dict.fromkeys(
+            ("material", "safety", "opportunity", "leisure", "environment", "commute"), "50"
+        ),
+        material=dict.fromkeys(
+            ("housing_condition", "food_life", "daily_convenience", "personal_enjoyment"), "50"
+        ),
     )
     _sample_file(
         out,
         "13_equal_split_review",
         "ProfileReview",
-        "主动均分：六维每项 50/3（显示 16.7）、物质每项 25（显示 25.0）；精确合计 100，显示值不回流计算",
+        "同等重视（独立评分，用户主动把每项设为 50）：六维每项权重 50/3（显示 16.7）、物质每项 25（显示 25.0）；原始合计 300 与 200，"
+        "权重精确合计 100，显示值不回流计算",
         dump(eq.review),
     )
     _sample_file(
         out,
         "14_equal_split_confirmed",
         "ConfirmedProfile",
-        "主动均分确认后的精确分数",
+        "同等重视确认后的画像：points 是精确权重，ratings 是原始评分（每项 50），rule 是 ratings_normalized_v1",
         dump(eq.confirmed),
     )
     unsure = sc.review_only(

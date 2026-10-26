@@ -2078,7 +2078,7 @@
   "comparisons": [],
   "confirmed": {
    "confirmed_id": "confirmed.draft.u501.r1",
-   "content_fingerprint": "fb7ac19a99caab9f2badd460bbc03bf8913d9be41b1d26cada794c20cef1bd5f"
+   "content_fingerprint": "8320a14dd90abda85fb690820fff6d25ce81ad190855b9160e063d2f95b5fa95"
   },
   "data_nature": [
    {
@@ -2462,7 +2462,7 @@
    "结果只给用户看，不回灌给仍在生活中的分身"
   ],
   "meta": {
-   "conversion_version": "e3a-conversion-v3",
+   "conversion_version": "e3a-conversion-v4",
    "data_pack": {
     "content_fingerprint": "51ea50b0bde90ace59bad07ea263bb6359c3bec8329bba81725592a0976e7da8",
     "note": "冻结的真实资料包（DECISIONS/0042）：城市资料来自公开来源与登记的模型设定，生活规则与评分参数是合成探索设定",
@@ -2470,14 +2470,14 @@
     "status": "real_data_frozen"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.4-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.5-draft",
    "sample": {
     "note": "受控夹具：画像带着旧问卷的往返 60 分钟上限（新问卷不再收集硬要求）；离线闭环实际执行的结果（mock 规划器，零网络）；旧金山没有公交资料，不用车到不了岗位的年份买用车权开车上班",
     "origin": "controlled_fixture",
     "produced_by": "product.scenarios.closed_loop(e3b_sf_car)",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.4",
+   "schema_version": "e3a-product-schema-v3.5",
    "vocabulary_version": "e3a-vocabulary-v5"
   },
   "not_generated_reason": null,
@@ -2501,7 +2501,7 @@
    "planner_kind": "mock"
   },
   "preflight": {
-   "preflight_fingerprint": "6babf641d6f5f00840c110c8cdad0f5a2c752c1716605e6b8c1ea81db143d36b",
+   "preflight_fingerprint": "d8552691ee7ffdc12fa52ac7ccbec771e8e362186d737116f63dd24060fd81b0",
    "preflight_id": "preflight.confirmed.draft.u501.r1"
   },
   "reading_guide_zh": [
@@ -2515,9 +2515,9 @@
    "分数是当前合成模型下、按你确认的陈述偏好计算的结果；小数末位的差异不构成可靠的排序"
   ],
   "real_model_calls": 0,
-  "result_fingerprint": "c59f51245f20201310f52ba4f0adaefdc8ab5e55c08605e630e21b21960517e0",
-  "result_id": "result.run-e3a-0e79aabd0781d0d8",
-  "run_id": "run-e3a-0e79aabd0781d0d8",
+  "result_fingerprint": "6f13b8037d9eee4f74c95d3295b2a4310ecfa03bb6c121638cc2222def26fdee",
+  "result_id": "result.run-e3a-0fac80556acf8d46",
+  "run_id": "run-e3a-0fac80556acf8d46",
   "run_stage": "completed",
   "sources_zh": [
    "生活事实：E1 结算记录（钱、岗位、住房、食品、服务月份）与月度资源账（本人家务小时）",

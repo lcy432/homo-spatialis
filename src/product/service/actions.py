@@ -294,6 +294,7 @@ def migrate_draft(
             ctx.pack,
             UserInputDraft.model_validate_json(row["body"]),
             clear_removed=req.clear_removed,
+            allocation_choice=req.allocation_choice,
         )
     except MigrationError as exc:
         raise ServiceFailure(exc.code) from exc

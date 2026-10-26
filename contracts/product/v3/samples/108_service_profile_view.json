@@ -11,9 +11,9 @@
    ],
    "confirmation_source": "user_form",
    "confirmed_id": "confirmed.draft-000000000000005b.r2",
-   "content_fingerprint": "3a4d4078e02ec5279839599794ae8e531142c045d7220e832c4a77db7504a257",
+   "content_fingerprint": "f95a4eda9cb966d0b7527b60e437b56e8dedf59190c03ed5257bc83447e32213",
    "draft": {
-    "draft_fingerprint": "6e4556099aa30bbca20cae508fd2a7539a0224cc3424779e923af88d0842d766",
+    "draft_fingerprint": "d259bd0c718c1b7eda1124a50cc9fb1deec441bf72af16322d89726ede93ceaf",
     "draft_id": "draft-000000000000005b",
     "revision": 2
    },
@@ -71,18 +71,26 @@
       "housing_condition": "25.0",
       "personal_enjoyment": "20.0"
      },
-     "mode": "manual",
+     "mode": "ratings_normalized_v1",
      "points": {
       "daily_convenience": "30",
       "food_life": "25",
       "housing_condition": "25",
       "personal_enjoyment": "20"
-     }
+     },
+     "rating_total": "100",
+     "ratings": {
+      "daily_convenience": "30",
+      "food_life": "25",
+      "housing_condition": "25",
+      "personal_enjoyment": "20"
+     },
+     "rule": "ratings_normalized_v1"
     },
     "status": "allocated"
    },
    "meta": {
-    "conversion_version": "e3a-conversion-v3",
+    "conversion_version": "e3a-conversion-v4",
     "data_pack": {
      "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
      "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
@@ -90,9 +98,9 @@
      "status": "synthetic_fixture_only"
     },
     "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-    "questionnaire_version": "e3a-questionnaire-v0.4-draft",
+    "questionnaire_version": "e3a-questionnaire-v0.5-draft",
     "sample": null,
-    "schema_version": "e3a-product-schema-v3.4",
+    "schema_version": "e3a-product-schema-v3.5",
     "vocabulary_version": "e3a-vocabulary-v5"
    },
    "money": {
@@ -153,7 +161,7 @@
      "opportunity": "20.0",
      "safety": "20.0"
     },
-    "mode": "manual",
+    "mode": "ratings_normalized_v1",
     "points": {
      "commute": "10",
      "environment": "10",
@@ -161,7 +169,17 @@
      "material": "30",
      "opportunity": "20",
      "safety": "20"
-    }
+    },
+    "rating_total": "100",
+    "ratings": {
+     "commute": "10",
+     "environment": "10",
+     "leisure": "10",
+     "material": "30",
+     "opportunity": "20",
+     "safety": "20"
+    },
+    "rule": "ratings_normalized_v1"
    },
    "sources": [
     {
@@ -307,7 +325,7 @@
    ]
   },
   "meta": {
-   "conversion_version": "e3a-conversion-v3",
+   "conversion_version": "e3a-conversion-v4",
    "data_pack": {
     "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
@@ -315,19 +333,19 @@
     "status": "synthetic_fixture_only"
    },
    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-   "questionnaire_version": "e3a-questionnaire-v0.4-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.5-draft",
    "sample": {
     "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
     "origin": "offline_run",
     "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
     "synthetic": true
    },
-   "schema_version": "e3a-product-schema-v3.4",
+   "schema_version": "e3a-product-schema-v3.5",
    "vocabulary_version": "e3a-vocabulary-v5"
   },
   "summary": {
    "confirmed_id": "confirmed.draft-000000000000005b.r2",
-   "content_fingerprint": "3a4d4078e02ec5279839599794ae8e531142c045d7220e832c4a77db7504a257",
+   "content_fingerprint": "f95a4eda9cb966d0b7527b60e437b56e8dedf59190c03ed5257bc83447e32213",
    "draft_id": "draft-000000000000005b",
    "draft_revision": 2,
    "expires_at": "2026-12-23T09:01:02Z",

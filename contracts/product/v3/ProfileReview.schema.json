@@ -37,6 +37,31 @@
      "title": "Label",
      "type": "string"
     },
+    "rating_display": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Rating Display"
+    },
+    "rating_exact": {
+     "anyOf": [
+      {
+       "pattern": "^(0|-?[1-9][0-9]*)(/[1-9][0-9]*)?$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Rating Exact"
+    },
     "state": {
      "enum": [
       "unanswered",
@@ -83,6 +108,7 @@
   },
   "AllocationReview": {
    "additionalProperties": false,
+   "description": "一组定和分配的审阅。独立评分时 ``rating_total`` 是原始评分的合计（回答了的那些），``total`` 是换算后权重的合计（精确 100），\n``rule`` 写明换算规则。",
    "properties": {
     "lines": {
      "default": [],
@@ -97,7 +123,8 @@
       {
        "enum": [
         "manual",
-        "equal_split"
+        "equal_split",
+        "ratings_normalized_v1"
        ],
        "type": "string"
       },
@@ -107,6 +134,30 @@
      ],
      "default": null,
      "title": "Mode"
+    },
+    "rating_total": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/ExactNumber"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "rule": {
+     "anyOf": [
+      {
+       "const": "ratings_normalized_v1",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Rule"
     },
     "status": {
      "enum": [
@@ -775,7 +826,8 @@
     "schema_version": {
      "enum": [
       "e3a-product-schema-v3.3",
-      "e3a-product-schema-v3.4"
+      "e3a-product-schema-v3.4",
+      "e3a-product-schema-v3.5"
      ],
      "title": "Schema Version",
      "type": "string"
