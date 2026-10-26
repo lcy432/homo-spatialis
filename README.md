@@ -12,6 +12,11 @@ It creates simulated versions of the same person and lets them live in different
 
 “LLMs Becoming Us” comes from a simple thought: most of us have only a few opportunities to move somewhere new, and each move is costly. How can we use our limited resources to satisfy our boundless curiosity about the world?
 
+<p align="center">
+  <img src="pics/titlePic.png" alt="City comparison page of a six-city run: a map of the United States with the six cities, the colour scale for mean J, and the result status" width="900">
+</p>
+<p align="center"><em>The city comparison page of a six-city run (offline planner, paper look). Life rules and scoring parameters are synthetic exploratory settings; results do not rank real cities.</em></p>
+
 ## Research motivation
 
 A higher salary can come with higher rent, taxes, or a longer commute. A city’s attractions matter differently to different people. Someone who rarely visits the coast may still pay for its appeal through housing costs.
