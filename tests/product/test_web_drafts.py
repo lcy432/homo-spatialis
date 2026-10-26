@@ -1,14 +1,11 @@
 """界面层导出的草稿交给接入层审阅：E3 读到的答案状态与界面上显示的一致。
 
 草稿样本由界面的状态更新函数按页面操作生成（web/tests/draft-fixtures.test.ts），存在 web/tests/fixtures/drafts/。界面改了草稿的
-写法、或这里的审阅规则变了，这些测试就会失败——两边对“未答、0、无所谓、暂不确定”的理解不能悄悄分家。
+写法、或这里的审阅规则变了，这些测试就会失败——两边对"未答、0、无所谓、暂不确定"的理解不能悄悄分家。
 
-可手算的例子：六维均分每项 50/3；把安全改成 20 之后，5 × 50/3 + 20 = 310/3，多出 10/3（界面显示“多出 3.3 分”）；再从物质减去 10/3，
-物质是 40/3，合计正好 100。
-
-现有样本是界面按 v3.4（v0.4 问卷）生成的旧的百分比分配。v3.5 起问卷改用独立评分（DECISIONS/0047）：这里照原样审阅旧草稿——旧分配
-保留原来的含义，同时带着“版本已变”与“分配方式已停用”的阻断；迁移要用户自己选择重新评分或同等重视，这里不替用户选（迁移见
-``test_ratings`` 与 ``test_draft_migration``）。界面按 v3.5 重新生成样本之后，这几条要换成独立评分的例子。
+v3.5 起六维与物质是独立评分（DECISIONS/0047）：样本里是原始评分，权重由这里的审阅按比例精确换算。可手算的例子：
+六维 80/40/40/20/10/10（原始合计 200）→ 权重 40/20/20/10/5/5；两组都"同等重视"（每项 50）→ 六维每项 50/3、物质每项 25；
+物质父项为 0 时四项不适用、草稿里的四项答案留着。
 """
 
 from __future__ import annotations
@@ -52,14 +49,10 @@ def reviewed(pack: DataPack, name: str):
     assert draft.meta.data_pack.content_fingerprint == pack.meta().data_pack.content_fingerprint, (
         f"{name} 是按另一版资料包生成的：{REGENERATE}"
     )
-    review = review_draft(pack, draft)
-    if version != PRODUCT_SCHEMA_VERSION:
-        # 旧版本问卷的草稿：照原样审阅，不能确认；迁移由用户在页面上明确选择（不替用户同意、不替用户选重新评分或同等重视）
-        codes = {i.code for i in review.issues if i.severity == "error"}
-        assert "version_changed" in codes and not review.confirmable
-        if draft.six_dimensions.mode in ("manual", "equal_split"):
-            assert "allocation_mode_retired" in codes
-    return review
+    assert version == PRODUCT_SCHEMA_VERSION, (
+        f"{name} 不是当前共享结构 {PRODUCT_SCHEMA_VERSION}：{REGENERATE}"
+    )
+    return review_draft(pack, draft)
 
 
 def issue_keys(review) -> set[tuple[str, str]]:
@@ -70,46 +63,100 @@ def six_lines(review):
     return {ln.key: ln for ln in review.six_dimensions.lines}
 
 
+def material_lines(review):
+    return {ln.key: ln for ln in review.material.lines}
+
+
+def test_ratings_are_raw_scores_and_weights_come_from_exact_proportion(pack):
+    review = reviewed(pack, "ratings.json")
+    assert review.six_dimensions.mode == "ratings_normalized_v1"
+    assert review.six_dimensions.rule == "ratings_normalized_v1"
+    lines = six_lines(review)
+    # 界面存的是原始评分；权重 = 100 × 评分 ÷ 200
+    assert {k: lines[k].rating_exact for k in lines} == {
+        "material": "80",
+        "safety": "40",
+        "opportunity": "40",
+        "leisure": "20",
+        "environment": "10",
+        "commute": "10",
+    }
+    assert {k: lines[k].exact for k in lines} == {
+        "material": "40",
+        "safety": "20",
+        "opportunity": "20",
+        "leisure": "10",
+        "environment": "5",
+        "commute": "5",
+    }
+    assert review.six_dimensions.rating_total is not None
+    assert review.six_dimensions.rating_total.exact == "200"
+    assert review.six_dimensions.total is not None
+    assert review.six_dimensions.total.exact == "100"
+    assert review.six_dimensions.status == "complete"
+    mat = material_lines(review)
+    assert {k: mat[k].exact for k in mat} == {
+        "housing_condition": "25",
+        "food_life": "25",
+        "daily_convenience": "30",
+        "personal_enjoyment": "20",
+    }
+    assert review.material.status == "complete"
+
+
 def test_unanswered_zero_indifferent_and_unsure_stay_distinct(pack):
     review = reviewed(pack, "states.json")
     lines = six_lines(review)
-    assert (lines["material"].state, lines["material"].exact) == ("provided", "0")
+    assert (lines["material"].state, lines["material"].rating_exact) == ("provided", "0")
     assert lines["environment"].state == "indifferent"
     assert lines["leisure"].state == "unanswered"
     assert ("allocation_unanswered", "six_dimensions.entries.leisure") in issue_keys(review)
     assert ("allocation_indifferent", "six_dimensions.entries.environment") in issue_keys(review)
-    # 无所谓、未答都不能代替分数：六维还不完整，不能确认
+    # 无所谓、未答都不能代替评分：六维还不完整，不出权重、不补 0，不能确认
     assert review.six_dimensions.status == "incomplete"
+    assert review.six_dimensions.total is None
+    assert lines["safety"].exact is None
     assert not review.confirmable
     health = {h.question_id: h.answer_state for h in review.health}
     assert health["hc_more_pay_more_sick_risk"] == "unsure"
     assert health["hc_reserve_for_health_costs"] == "unanswered"
 
 
-def test_equal_split_then_editing_one_item_is_over_by_exactly_ten_thirds(pack):
-    review = reviewed(pack, "equal-split-over.json")
+def test_equal_weight_sets_every_rating_to_50_and_weights_follow(pack):
+    review = reviewed(pack, "equal-weight.json")
     lines = six_lines(review)
-    assert lines["safety"].exact == "20"
-    assert all(
-        lines[k].exact == "50/3"
-        for k in ("material", "opportunity", "leisure", "environment", "commute")
-    )
-    assert review.six_dimensions.total is not None
-    assert review.six_dimensions.total.exact == "310/3"
-    over = [
-        i
-        for i in review.issues
-        if i.code == "points_sum_not_100" and i.field == "six_dimensions.entries"
-    ]
-    assert over and "多出 10/3 分" in over[0].message_zh
-
-
-def test_moving_the_overflow_out_of_material_sums_to_exactly_100(pack):
-    review = reviewed(pack, "equal-split-fixed.json")
-    assert six_lines(review)["material"].exact == "40/3"
+    assert all(lines[k].rating_exact == "50" for k in lines)
+    assert all(lines[k].exact == "50/3" for k in lines)
+    assert review.six_dimensions.rating_total is not None
+    assert review.six_dimensions.rating_total.exact == "300"
     assert review.six_dimensions.total is not None
     assert review.six_dimensions.total.exact == "100"
+    mat = material_lines(review)
+    assert all(mat[k].rating_exact == "50" and mat[k].exact == "25" for k in mat)
+
+
+def test_material_parent_zero_keeps_inner_answers_but_does_not_use_them(pack):
+    review = reviewed(pack, "parent-zero.json")
+    lines = six_lines(review)
+    assert lines["material"].rating_exact == "0" and lines["material"].exact == "0"
+    # 五项 40/20/10/10/10（合计 90）：权重 400/9、200/9、100/9、100/9、100/9
+    assert lines["safety"].exact == "400/9"
+    assert lines["commute"].exact == "100/9"
     assert review.six_dimensions.status == "complete"
+    assert review.material.status == "not_applicable"
+    assert not review.material.lines
+    assert ("material_parent_zero_ignored", "material") in issue_keys(review)
+    # 草稿里的物质内部答案仍在（这里不改草稿；界面也不清零）
+    raw = json.loads((FIXTURES / "parent-zero.json").read_text(encoding="utf-8"))
+    assert raw["material"]["entries"]["housing_condition"] == {
+        "state": "provided",
+        "value_text": "70",
+    }
+    assert raw["material"]["entries"]["daily_convenience"] == {
+        "state": "provided",
+        "value_text": "0",
+    }
+    assert "food_life" not in raw["material"]["entries"]
 
 
 def test_cash_written_with_a_comma_decimal_is_rejected_not_reinterpreted(pack):

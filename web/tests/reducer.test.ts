@@ -39,64 +39,84 @@ describe("草稿状态：四种答案状态分开", () => {
   });
 });
 
-describe("饼图 + 滑块：精确转移", () => {
-  it("主动均分保存 50/3；拖动一次把休闲的 5 点转给安全：35/3 与 65/3，其余四项不变，合计严格 100，一条撤销记录", () => {
-    const eq = { keys: SIX, value: caps.points.equal_split_six };
-    let s = run({ type: "points/equalSplit", group: "six_dimensions" });
-    expect(s.draft.six_dimensions).toEqual({ mode: "equal_split", entries: {} });
-    // 安全 50/3 → 65/3，来源休闲（均分状态下先换成精确均分值，同一条记录）
-    s = draftReducer(s, { type: "points/move", group: "six_dimensions", key: "safety", value: "65/3", source: "leisure", maxDecimals: MAX, fromEqual: eq });
-    expect(value(s, "six_dimensions", "safety")).toBe("65/3");
-    expect(value(s, "six_dimensions", "leisure")).toBe("35/3");
-    for (const k of SIX.filter((k) => k !== "safety" && k !== "leisure")) expect(value(s, "six_dimensions", k)).toBe("50/3");
-    expect(total(s, "six_dimensions").equals(100)).toBe(true);
+describe("独立评分：每项 0–100，互不影响", () => {
+  it("滑块一次手势写一个整数评分；其他项完全不变；同一手势合并成一条记录，下一次手势是新记录（E5-R5）", () => {
+    let s = run({ type: "points/set", group: "six_dimensions", key: "safety", value: "20", gesture: "ptr-1" });
+    expect(s.draft.six_dimensions).toEqual({ mode: "ratings_normalized_v1", entries: { safety: { state: "provided", value_text: "20" } } });
+    // 同一次拖动的多次输入：一条记录
+    s = draftReducer(s, { type: "points/set", group: "six_dimensions", key: "safety", value: "25", gesture: "ptr-1" });
+    s = draftReducer(s, { type: "points/set", group: "six_dimensions", key: "safety", value: "30", gesture: "ptr-1" });
+    expect(s.past).toHaveLength(1);
+    // 第二次独立手势：新记录；撤销一次回到 30，再撤销回到未答
+    s = draftReducer(s, { type: "points/set", group: "six_dimensions", key: "safety", value: "40", gesture: "ptr-2" });
+    expect(s.past).toHaveLength(2);
+    expect(value(s, "six_dimensions", "safety")).toBe("40");
+    s = draftReducer(s, { type: "history/undo" });
+    expect(value(s, "six_dimensions", "safety")).toBe("30");
+    s = draftReducer(s, { type: "history/undo" });
+    expect(s.draft.six_dimensions.entries?.safety).toBeUndefined();
+    s = draftReducer(s, { type: "history/redo" });
+    expect(value(s, "six_dimensions", "safety")).toBe("30");
+  });
+
+  it("连续方向键按同一编辑序列合并；失焦（history/break）后再按就是新记录", () => {
+    let s = run(
+      { type: "points/set", group: "six_dimensions", key: "safety", value: "20", gesture: "kb-safety" },
+      { type: "points/set", group: "six_dimensions", key: "safety", value: "21", gesture: "kb-safety" },
+      { type: "points/set", group: "six_dimensions", key: "safety", value: "22", gesture: "kb-safety" },
+    );
+    expect(s.past).toHaveLength(1);
+    s = draftReducer(s, { type: "history/break" });
+    s = draftReducer(s, { type: "points/set", group: "six_dimensions", key: "safety", value: "23", gesture: "kb-safety" });
+    expect(s.past).toHaveLength(2);
+  });
+
+  it("80/40/40/20/10/10 原样保存为原始评分（不凑 100、不换算）；改一项不改别的项", () => {
+    const vals: Record<string, string> = { material: "80", safety: "40", opportunity: "40", leisure: "20", environment: "10", commute: "10" };
+    let s = run(...Object.entries(vals).map(([k, v], i) => ({ type: "points/set", group: "six_dimensions", key: k, value: v, gesture: `g${i}` }) as DraftAction));
+    for (const [k, v] of Object.entries(vals)) expect(value(s, "six_dimensions", k)).toBe(v);
+    expect(total(s, "six_dimensions").equals(200)).toBe(true);
+    s = draftReducer(s, { type: "points/set", group: "six_dimensions", key: "safety", value: "60", gesture: "g9" });
+    for (const [k, v] of Object.entries(vals)) if (k !== "safety") expect(value(s, "six_dimensions", k)).toBe(v);
+    expect(value(s, "six_dimensions", "safety")).toBe("60");
+  });
+
+  it("越界、负数、分数写法、相同值：滑块动作不生效；数字框原样保存写法不对的文字（页面提示，不截断）", () => {
+    const base = run({ type: "points/set", group: "six_dimensions", key: "safety", value: "10", gesture: "a" });
+    expect(draftReducer(base, { type: "points/set", group: "six_dimensions", key: "safety", value: "101", gesture: "b" })).toBe(base);
+    expect(draftReducer(base, { type: "points/set", group: "six_dimensions", key: "safety", value: "-1", gesture: "b" })).toBe(base);
+    expect(draftReducer(base, { type: "points/set", group: "six_dimensions", key: "safety", value: "50/3", gesture: "b" })).toBe(base);
+    expect(draftReducer(base, { type: "points/set", group: "six_dimensions", key: "safety", value: "10", gesture: "b" })).toBe(base);
+    const typed = draftReducer(base, { type: "points/text", group: "six_dimensions", key: "safety", text: "120" });
+    expect(value(typed, "six_dimensions", "safety")).toBe("120");
+  });
+
+  it("同等重视：每项 50，一条记录，可撤销；明确 0 与未答分开", () => {
+    let s = run({ type: "points/set", group: "six_dimensions", key: "safety", value: "20", gesture: "a" }, { type: "points/equalWeight", group: "six_dimensions", keys: SIX, value: "50" });
+    for (const k of SIX) expect(value(s, "six_dimensions", k)).toBe("50");
     expect(s.past).toHaveLength(2);
     s = draftReducer(s, { type: "history/undo" });
-    expect(s.draft.six_dimensions.mode).toBe("equal_split");
-  });
-
-  it("从未分配池取：只改目标一项；减少退回池里；反复拖动不积累误差", () => {
-    let s = run({ type: "points/move", group: "six_dimensions", key: "safety", value: "20", source: null, maxDecimals: MAX });
     expect(value(s, "six_dimensions", "safety")).toBe("20");
-    expect(Object.keys(s.draft.six_dimensions.entries ?? {})).toEqual(["safety"]);
-    for (let i = 0; i < 30; i += 1) {
-      s = draftReducer(s, { type: "history/break" });
-      s = draftReducer(s, { type: "points/move", group: "six_dimensions", key: "safety", value: i % 2 ? "20" : "65/3", source: null, maxDecimals: MAX });
-    }
-    expect(value(s, "six_dimensions", "safety")).toBe("20"); // 第 30 次是偶数次：回到 20，没有累积误差
-    s = draftReducer(s, { type: "points/move", group: "six_dimensions", key: "safety", value: "0", source: null, maxDecimals: MAX });
-    expect(value(s, "six_dimensions", "safety")).toBe("0");
+    expect(s.draft.six_dimensions.entries?.leisure).toBeUndefined();
+    s = draftReducer(s, { type: "points/set", group: "six_dimensions", key: "leisure", value: "0", gesture: "z" });
+    expect(s.draft.six_dimensions.entries?.leisure).toEqual({ state: "provided", value_text: "0" });
   });
 
-  it("来源不够、负数、来源等于目标：不做；连续按方向键合成一条撤销记录", () => {
-    const base = run(
-      { type: "points/move", group: "six_dimensions", key: "safety", value: "10", source: null, maxDecimals: MAX },
-      { type: "history/break" },
-      { type: "points/move", group: "six_dimensions", key: "leisure", value: "5", source: null, maxDecimals: MAX },
-      { type: "history/break" },
-    );
-    expect(draftReducer(base, { type: "points/move", group: "six_dimensions", key: "safety", value: "20", source: "leisure", maxDecimals: MAX })).toBe(base);
-    expect(draftReducer(base, { type: "points/move", group: "six_dimensions", key: "safety", value: "-1", source: null, maxDecimals: MAX })).toBe(base);
-    expect(draftReducer(base, { type: "points/move", group: "six_dimensions", key: "safety", value: "12", source: "safety", maxDecimals: MAX })).toBe(base);
-    let s = draftReducer(base, { type: "points/move", group: "six_dimensions", key: "safety", value: "11", source: null, maxDecimals: MAX });
-    s = draftReducer(s, { type: "points/move", group: "six_dimensions", key: "safety", value: "12", source: null, maxDecimals: MAX });
-    s = draftReducer(s, { type: "points/move", group: "six_dimensions", key: "safety", value: "13", source: null, maxDecimals: MAX });
-    expect(s.past).toHaveLength(base.past.length + 1);
-    expect(draftReducer(s, { type: "history/undo" }).draft.six_dimensions.entries?.safety?.value_text).toBe("10");
+  it("物质父项评 0：物质内部的答案原样留在草稿里（不清零、不均分）", () => {
+    let s = run({ type: "points/set", group: "material", key: "housing_condition", value: "70", gesture: "m1" });
+    s = draftReducer(s, { type: "points/set", group: "six_dimensions", key: "material", value: "0", gesture: "p" });
+    expect(value(s, "material", "housing_condition")).toBe("70");
+    s = draftReducer(s, { type: "points/set", group: "six_dimensions", key: "material", value: "30", gesture: "q" });
+    expect(value(s, "material", "housing_condition")).toBe("70");
   });
 
-  it("合计 100 还有未答：不偷偷补零；用户点“将其余设为 0”才写零值", () => {
-    let s = run({ type: "points/move", group: "six_dimensions", key: "safety", value: "100", source: null, maxDecimals: MAX });
-    expect(Object.keys(s.draft.six_dimensions.entries ?? {})).toEqual(["safety"]);
-    s = draftReducer(s, { type: "points/setRestZero", group: "six_dimensions", keys: SIX.filter((k) => k !== "safety") });
-    for (const k of SIX.filter((k) => k !== "safety")) expect(value(s, "six_dimensions", k)).toBe("0");
-    expect(value(s, "six_dimensions", "safety")).toBe("100");
-  });
-
-  it("均分状态下直接改数字要经过 fromEqual；没有就不生效", () => {
-    const s = run({ type: "points/equalSplit", group: "six_dimensions" });
-    expect(draftReducer(s, { type: "points/text", group: "six_dimensions", key: "safety", text: "20" })).toBe(s);
-    expect(draftReducer(s, { type: "points/move", group: "six_dimensions", key: "safety", value: "20", source: null, maxDecimals: MAX })).toBe(s);
+  it("旧的百分比分配（manual / equal_split）不能编辑；用户明确改成独立评分后各项未答", () => {
+    const old = { ...created.draft, six_dimensions: { mode: "manual" as const, entries: { safety: { state: "provided" as const, value_text: "20" } } } };
+    let s = initialDraftState(old);
+    expect(draftReducer(s, { type: "points/set", group: "six_dimensions", key: "safety", value: "30", gesture: "a" })).toBe(s);
+    expect(draftReducer(s, { type: "points/text", group: "six_dimensions", key: "safety", text: "30" })).toBe(s);
+    s = draftReducer(s, { type: "points/rerate", group: "six_dimensions" });
+    expect(s.draft.six_dimensions).toEqual({ mode: "ratings_normalized_v1", entries: {} });
   });
 });
 
@@ -123,8 +143,9 @@ describe("职业、资格", () => {
     expect(s.draft.certificates).toEqual({ state: "provided", selected: [] });
     s = draftReducer(s, { type: "experience/set", conceptId: "occ.counter_drinks", years: 2 });
     expect(s.draft.experience).toEqual({ state: "provided", entries: [{ concept_id: "occ.counter_drinks", years: 2 }] });
+    // 删掉最后一条年数：回到未答，不是“明确没有”（E5-R1）
     s = draftReducer(s, { type: "experience/set", conceptId: "occ.counter_drinks", years: null });
-    expect(s.draft.experience).toEqual({ state: "provided", entries: [] });
+    expect(s.draft.experience).toEqual({ state: "unanswered", entries: [] });
     s = draftReducer(s, { type: "experience/state", state: "unsure" });
     expect(s.draft.experience).toEqual({ state: "unsure", entries: [] });
   });

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { CityOption } from "../contract/types";
+import { indexPointer } from "../display/pointers";
 import { Zh } from "../i18n/biz";
 
 export function countriesOf(cities: readonly CityOption[]): string[] {
@@ -82,14 +83,14 @@ export function CityList({
             {pulse[c.city_ref] ? <span key={pulse[c.city_ref]} className="choice-pulse" aria-hidden="true" /> : null}
             <span>
               <strong>
-                <Zh>{c.label}</Zh>
+                <Zh pointer={indexPointer(cities, (x) => x.city_ref === c.city_ref, "/cities", "label")}>{c.label}</Zh>
               </strong>{" "}
               <span className={c.data_status === "real_data" ? "chip accent" : "chip warn"}>
                 {c.data_status === "real_data" ? t("place.realData") : t("place.syntheticCity")}
               </span>{" "}
               {!c.selectable ? <span className="chip">{t("place.notSelectable")}</span> : null}
               <span id={`city-note-${c.city_ref}`} className="small muted" style={{ display: "block" }}>
-                <Zh>{c.note}</Zh>
+                <Zh pointer={indexPointer(cities, (x) => x.city_ref === c.city_ref, "/cities", "note")}>{c.note}</Zh>
               </span>
             </span>
           </label>

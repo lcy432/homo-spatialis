@@ -4,6 +4,9 @@
 // * 服务没给可靠的总进度，就不显示百分比或剩余时间。
 import { useTranslation } from "react-i18next";
 import type { CapabilityStatus, CostStatus, ProductCapabilities, ProductPreflight, RunProgress, RunSettingsView } from "../contract/types";
+import { useCityName } from "../display/names";
+import { capsPtr } from "../display/pointers";
+import { at } from "../display/scope";
 import { BizNotice, Zh, ZhList } from "../i18n/biz";
 import { formatTime } from "../i18n/format";
 import { useLocale } from "../i18n/index";
@@ -11,6 +14,16 @@ import { ExplanationView, IssueList, Num, Section } from "./common";
 
 export function cityLabelOf(caps: ProductCapabilities | null | undefined, ref: string): string {
   return caps?.cities.find((c) => c.city_ref === ref)?.label ?? ref;
+}
+
+/** 城市名：按能力清单（或传入的结果城市表）的位置取当前语言的名称。 */
+export function CityName({ caps, cityRef, cities }: { caps: ProductCapabilities | null | undefined; cityRef: string; cities?: readonly { city_ref: string; label: string }[] | null }) {
+  const inResult = cities?.find((c) => c.city_ref === cityRef);
+  if (inResult) {
+    const i = cities?.indexOf(inResult) ?? -1;
+    return <Zh pointer={at("/cities", i, "label")}>{inResult.label}</Zh>;
+  }
+  return <Zh pointer={capsPtr.city(caps, cityRef)}>{cityLabelOf(caps, cityRef)}</Zh>;
 }
 
 export function SettingsView({ settings, caps }: { settings: RunSettingsView | null | undefined; caps: ProductCapabilities | null }) {
@@ -25,7 +38,7 @@ export function SettingsView({ settings, caps }: { settings: RunSettingsView | n
           {settings.cities.map((c, i) => (
             <span key={c}>
               {i ? "、" : ""}
-              <Zh>{cityLabelOf(caps, c)}</Zh>
+              <CityName caps={caps} cityRef={c} />
             </span>
           ))}
         </dd>
@@ -54,19 +67,22 @@ export function SettingsView({ settings, caps }: { settings: RunSettingsView | n
   );
 }
 
-function Capability({ name, status }: { name: "executable" | "scorable" | "feedback"; status: CapabilityStatus }) {
+function Capability({ name, status, pointer }: { name: "executable" | "scorable" | "feedback"; status: CapabilityStatus; pointer: string }) {
   const { t } = useTranslation();
   return (
     <li data-capability={name} data-status={status.status}>
       {t(`capabilityName.${name}`)}：<strong>{t(`capability.${status.status}`)}</strong>
-      {status.reasons?.length ? <ZhList items={status.reasons} /> : null}
+      {status.reasons?.length ? <ZhList items={status.reasons} pointer={`${pointer}/${name}/reasons`} /> : null}
     </li>
   );
 }
 
-export function PreflightView({ preflight, caps }: { preflight: ProductPreflight; caps: ProductCapabilities | null }) {
+/** 运行前检查。pointer 是它在业务对象里的位置（运行意图里是 /preflight）。 */
+export function PreflightView({ preflight, caps, pointer = "/preflight" }: { preflight: ProductPreflight; caps: ProductCapabilities | null; pointer?: string }) {
   const { t } = useTranslation();
   const p = preflight;
+  const pp = pointer;
+  const cityName = useCityName(caps);
   const topics = [...new Set((p.scope_notes ?? []).map((n) => n.topic))];
   return (
     <Section title={t("preflight.title")} id="preflight">
@@ -76,21 +92,21 @@ export function PreflightView({ preflight, caps }: { preflight: ProductPreflight
         <br />
         {t("preflight.scale", { cities: p.cities?.length ?? 0, clones: p.clones_per_city, years: p.years })}
       </p>
-      <IssueList issues={p.issues} />
+      <IssueList issues={p.issues} pointer={`${pp}/issues`} />
       <h3>{t("preflight.capabilities")}</h3>
       <ul>
-        <Capability name="executable" status={p.executable} />
-        <Capability name="scorable" status={p.scorable} />
-        <Capability name="feedback" status={p.feedback} />
+        <Capability name="executable" status={p.executable} pointer={pp} />
+        <Capability name="scorable" status={p.scorable} pointer={pp} />
+        <Capability name="feedback" status={p.feedback} pointer={pp} />
       </ul>
       {p.start ? (
         <details>
           <summary>{t("preflight.start")}</summary>
-          <ZhList items={p.start.scenario_zh} />
+          <ZhList items={p.start.scenario_zh} pointer={`${pp}/start/scenario_zh`} />
           <dl className="facts">
             <dt>{t("review.occupation")}</dt>
             <dd>
-              <Zh>{p.start.occupation_label}</Zh>
+              <Zh pointer={`${pp}/start/occupation_label`}>{p.start.occupation_label}</Zh>
             </dd>
             <dt>{t("review.age")}</dt>
             <dd>{p.start.age_years}</dd>
@@ -100,33 +116,33 @@ export function PreflightView({ preflight, caps }: { preflight: ProductPreflight
             </dd>
           </dl>
           <p className="small">
-            <Zh>{p.start.monthly_time_note}</Zh>
+            <Zh pointer={`${pp}/start/monthly_time_note`}>{p.start.monthly_time_note}</Zh>
           </p>
           <p className="small">
-            <Zh>{p.start.monthly_energy_note}</Zh>
+            <Zh pointer={`${pp}/start/monthly_energy_note`}>{p.start.monthly_energy_note}</Zh>
           </p>
           <p className="small muted">
-            <Zh>{p.start.rule}</Zh>
+            <Zh pointer={`${pp}/start/rule`}>{p.start.rule}</Zh>
           </p>
         </details>
       ) : null}
       <h3>{t("preflight.cities")}</h3>
       <ul className="plain stack">
-        {(p.cities ?? []).map((c) => (
+        {(p.cities ?? []).map((c, ci) => (
           <li key={c.city_ref} className="card" data-city={c.city_ref}>
             <strong>
-              <Zh>{c.label}</Zh>
+              <Zh pointer={at(`${pp}/cities`, ci, "label")}>{c.label}</Zh>
             </strong>
             {c.start_job_label ? (
               <p className="small">
                 {t("preflight.startJob", { label: "" })}
-                <Zh>{c.start_job_label}</Zh>
+                <Zh pointer={at(`${pp}/cities`, ci, "start_job_label")}>{c.start_job_label}</Zh>
               </p>
             ) : null}
             <ul className="small">
-              <Capability name="executable" status={c.executable} />
-              <Capability name="scorable" status={c.scorable} />
-              <Capability name="feedback" status={c.feedback} />
+              <Capability name="executable" status={c.executable} pointer={at(`${pp}/cities`, ci)} />
+              <Capability name="scorable" status={c.scorable} pointer={at(`${pp}/cities`, ci)} />
+              <Capability name="feedback" status={c.feedback} pointer={at(`${pp}/cities`, ci)} />
             </ul>
             {c.coverage ? (
               <dl className="facts small">
@@ -146,13 +162,13 @@ export function PreflightView({ preflight, caps }: { preflight: ProductPreflight
             ) : null}
             {c.data_nature ? (
               <p className="small">
-                <Zh>{c.data_nature.summary_zh}</Zh>
+                <Zh pointer={at(`${pp}/cities`, ci, "data_nature", "summary_zh")}>{c.data_nature.summary_zh}</Zh>
               </p>
             ) : null}
             {c.data_gaps?.length ? (
               <>
                 <p className="small">{t("preflight.dataGaps")}</p>
-                <IssueList issues={c.data_gaps} />
+                <IssueList issues={c.data_gaps} pointer={at(`${pp}/cities`, ci, "data_gaps")} />
               </>
             ) : null}
           </li>
@@ -166,18 +182,21 @@ export function PreflightView({ preflight, caps }: { preflight: ProductPreflight
               <summary>{t(`scopeTopic.${topic}` as "scopeTopic.data", { defaultValue: topic })}</summary>
               <ul>
                 {(p.scope_notes ?? [])
-                  .filter((n) => n.topic === topic)
-                  .map((n, i) => (
-                    <li key={`${topic}.${i}`}>
+                  .map((n, ni) => [n, ni] as const)
+                  .filter(([n]) => n.topic === topic)
+                  .map(([n, ni]) => (
+                    <li key={`${topic}.${ni}`}>
                       <strong>
-                        <Zh>{n.title_zh}</Zh>
+                        <Zh pointer={at(`${pp}/scope_notes`, ni, "title_zh")}>{n.title_zh}</Zh>
                       </strong>
                       {n.cities?.length ? (
-                        <span className="small muted">（{n.cities.map((c) => cityLabelOf(caps, c)).join("、")}）</span>
+                        <span className="small muted">（{n.cities.map((c) => cityName(c)).join("、")}）</span>
                       ) : (
                         <span className="small muted">（{t("preflight.scopeAll")}）</span>
                       )}
-                      <Zh as="p">{n.text_zh}</Zh>
+                      <Zh as="p" pointer={at(`${pp}/scope_notes`, ni, "text_zh")}>
+                        {n.text_zh}
+                      </Zh>
                     </li>
                   ))}
               </ul>
@@ -188,12 +207,12 @@ export function PreflightView({ preflight, caps }: { preflight: ProductPreflight
       {p.scope_zh?.length ? (
         <details>
           <summary>{t("preflight.scope")}</summary>
-          <ZhList items={p.scope_zh} />
+          <ZhList items={p.scope_zh} pointer={`${pp}/scope_zh`} />
         </details>
       ) : null}
       <h3>{t("preflight.plannerTitle")}</h3>
       <p>
-        <Zh>{p.planner.description_zh}</Zh>
+        <Zh pointer={`${pp}/planner/description_zh`}>{p.planner.description_zh}</Zh>
       </p>
       <ul className="small">
         <li>{p.planner.paid ? t("preflight.plannerPaid", { v: t("common.yes") }) : t("preflight.notPaid")}</li>
@@ -206,14 +225,14 @@ export function PreflightView({ preflight, caps }: { preflight: ProductPreflight
   );
 }
 
-export function CostView({ cost }: { cost: CostStatus }) {
+export function CostView({ cost, pointer }: { cost: CostStatus; pointer: string }) {
   const { t } = useTranslation();
   if (cost.kind === "offline_mock_zero_cost") {
     return (
       <div data-cost="mock">
         <p className="small">{t("progress.costMock")}</p>
         <p className="small muted">
-          <Zh>{cost.note}</Zh>
+          <Zh pointer={`${pointer}/note`}>{cost.note}</Zh>
         </p>
         <p className="small">{t("progress.calls", { used: cost.calls_used, limit: cost.call_limit })}</p>
       </div>
@@ -242,37 +261,39 @@ export function CostView({ cost }: { cost: CostStatus }) {
       {cost.uncertain_attempts ? <p className="small">{t("progress.uncertainAttempts", { n: cost.uncertain_attempts })}</p> : null}
       {cost.price_version ? <p className="small muted">{t("progress.priceVersion", { v: cost.price_version })}</p> : null}
       <p className="small muted">
-        <Zh>{cost.note}</Zh>
+        <Zh pointer={`${pointer}/note`}>{cost.note}</Zh>
       </p>
     </div>
   );
 }
 
-export function ProgressView({ progress, caps }: { progress: RunProgress; caps: ProductCapabilities | null }) {
+/** 公开进度（各分身、费用、能否恢复）。pointer 是它在运行意图里的位置（/progress）。 */
+export function ProgressView({ progress, caps, pointer = "/progress" }: { progress: RunProgress; caps: ProductCapabilities | null; pointer?: string }) {
   const { t } = useTranslation();
   const locale = useLocale();
+  const pp = pointer;
   return (
     <Section title={t("progress.title")} id="progress">
       <BizNotice />
       <p data-progress-stage={progress.stage}>
         <strong>
-          <Zh>{progress.stage_zh}</Zh>
+          <Zh pointer={`${pp}/stage_zh`}>{progress.stage_zh}</Zh>
         </strong>
       </p>
       {progress.updated_at ? <p className="small muted">{t("common.lastUpdated", { time: formatTime(progress.updated_at, locale) })}</p> : null}
       <p className="small muted">{t("progress.noPercent")}</p>
-      <ExplanationView explanation={progress.pause} />
+      <ExplanationView explanation={progress.pause} pointer={`${pp}/pause`} />
       <h3>{t("progress.clones")}</h3>
       <ul className="plain">
-        {(progress.clones ?? []).map((c) => (
+        {(progress.clones ?? []).map((c, ci) => (
           <li key={c.clone_ref} data-clone={c.clone_ref} data-status={c.status}>
-            <Zh>{cityLabelOf(caps, c.city_ref)}</Zh> · {c.clone_ref}：<Zh>{c.status_zh}</Zh>（{t("progress.cloneLine", { n: c.years_committed })}）
+            <CityName caps={caps} cityRef={c.city_ref} /> · {c.clone_ref}：<Zh pointer={at(`${pp}/clones`, ci, "status_zh")}>{c.status_zh}</Zh>（{t("progress.cloneLine", { n: c.years_committed })}）
           </li>
         ))}
       </ul>
-      <CostView cost={progress.cost} />
+      <CostView cost={progress.cost} pointer={`${pp}/cost`} />
       <p className="small">
-        {t("progress.resumable")}：{progress.resumable ? t("common.yes") : t("common.no")} — <Zh>{progress.resume_note}</Zh>
+        {t("progress.resumable")}：{progress.resumable ? t("common.yes") : t("common.no")} — <Zh pointer={`${pp}/resume_note`}>{progress.resume_note}</Zh>
       </p>
     </Section>
   );

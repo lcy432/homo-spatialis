@@ -1,23 +1,25 @@
-// 定和分配器（六维 / 物质内部）：饼图 + 每项一根滑块。合计基准固定 100；没分出去的部分是“未分配”扇区（中性纹理，不是第七个偏好）。
-// * 初始不预填；“各项均分”要用户主动点（六维每项 50/3、物质每项 25，保存的是精确值）。
-// * 增加某一项默认从未分配池取；减少退回未分配池。池不够时用户先选一个来源维度，再拖目标滑块：只改这两项，界面写明“休闲 → 安全”。
-// * 手势开始记下精确基准；滑动按相对基准的整点数增减算（不从屏幕上的舍入数字反算），范围限制在双方可转移的额度内；
-//   拖到端点就精确转完剩余（50/3 + 20/3 = 70/3 之类）。一次拖动 = 一条撤销记录；过程中只在本地预览，松手才写进草稿。
-// * 未答的项显示“未答”，不当成 0；合计 100 而还有未答时，用户点“将其余项目设为 0”才写零。
-// * 数字输入框保留（精确输入与无障碍）；写法不对的项原样保留、不计入合计。合计是填写辅助，正式结论以 E3 审阅为准。
-import { useId, useMemo, useRef, useState } from "react";
+// 独立评分（六维 / 物质四项，DECISIONS/0047）：每项一根 0–100 的滑块 + 数字精调，互不影响、不必凑 100。
+// * 初始不预填：滑块停在 0 也是“未答”；用户拖动、输入数字或点“记为 0”才成为明确的 0 或别的评分。
+// * 饼图是**临时预览**：权重 = 100 × 评分 ÷ 本组已答评分之和（精确分数），只画已答的项；未答的项列出来、不画成 0；
+//   已答的全是 0 时没有可用比例，不画看似有效的均分图。正式权重以 E3 审阅为准，页面不自己换算业务真值。
+// * “同等重视”是用户主动把本组每项设成 50（服务 points.ratings.equal_weight_rating），会替换已有答案时先说明，可撤销。
+// * 一次指针手势（按下 → 拖动 → 松开）一条撤销记录，中途只本地预览、松手才写进草稿；下一次手势是新记录（E5-R5）。
+//   连续方向键按同一编辑序列合并，失焦结束。无所谓 / 暂不确定保留状态、不转数值。写法不对的数字原样保留、给出提示，不悄悄截断。
+// * 旧的百分比分配（manual / equal_split）在当前版本的草稿里不能编辑：显示原义并让用户明确改成独立评分（各项重新打分）。
+import { useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { AllocationGroup, DimensionDefinition, MaterialLeafDefinition, PointEntry } from "../contract/types";
 import { useDraftEditor } from "../draft/DraftEditor";
-import { equalValue, groupKeys, groupLabels } from "../draft/draft";
-import { Fraction, type PointsParse, canonical, displayFixed, parsePoints, remainingOf, sumProvided } from "../draft/exact";
+import { groupKeys } from "../draft/draft";
+import { Fraction, canonical, displayFixed, parsePoints } from "../draft/exact";
+import { at } from "../display/scope";
 import { Zh } from "../i18n/biz";
 import { Dialog } from "./Dialog";
 import { SupportChip } from "./common";
 import styles from "./Allocator.module.css";
 
 /** 能精确写成 decimals 位以内的小数就直接写（“5”“16.5”），否则写四舍五入后的显示值，另附精确值。 */
-function friendly(q: Fraction, decimals: number): { text: string; exact: string | null } {
+export function friendly(q: Fraction, decimals: number): { text: string; exact: string | null } {
   const scale = 10n ** BigInt(decimals);
   if ((q.n * scale) % q.d === 0n) {
     const whole = (q.n * scale) / q.d;
@@ -32,23 +34,33 @@ function toNumber(q: Fraction): number {
   return Number(q.s * q.n) / Number(q.d);
 }
 
-function definitionOf(d: DimensionDefinition | MaterialLeafDefinition) {
-  if ("reference_improvement" in d) {
-    return { definition: d.definition, reference: d.reference_improvement, note: d.support !== "supported" ? d.support_note : null };
+/** 临时预览：已答且写法正确的评分按比例换成权重（精确分数）。 */
+export function previewWeights(
+  entries: Record<string, PointEntry | undefined>,
+  keys: readonly string[],
+  maxDecimals: number,
+): { ratings: Map<string, Fraction>; total: Fraction; weights: Map<string, Fraction>; unanswered: string[]; unset: string[]; invalid: string[] } {
+  const ratings = new Map<string, Fraction>();
+  const unanswered: string[] = [];
+  const unset: string[] = [];
+  const invalid: string[] = [];
+  let total = new Fraction(0);
+  for (const k of keys) {
+    const e = entries[k];
+    if (!e) unanswered.push(k);
+    else if (e.state !== "provided") unset.push(k);
+    else {
+      const p = e.value_text == null ? null : parsePoints(e.value_text, maxDecimals);
+      if (!p || !p.ok || p.value.compare(100) > 0 || (e.value_text ?? "").includes("/")) invalid.push(k);
+      else {
+        ratings.set(k, p.value);
+        total = total.add(p.value);
+      }
+    }
   }
-  return { definition: d.definition, reference: null, note: d.note };
-}
-
-interface Drag {
-  key: string;
-  /** 手势开始时目标项的精确值；sliderStart 是它在滑块上的整数位置。 */
-  base: Fraction;
-  sliderStart: number;
-  /** 这次手势能增加的精确额度（来源项的值，或未分配池）。 */
-  room: Fraction;
-  source: string | null;
-  sourceBase: Fraction | null;
-  value: Fraction;
+  const weights = new Map<string, Fraction>();
+  if (total.n !== 0n) for (const [k, r] of ratings) weights.set(k, r.mul(100).div(total));
+  return { ratings, total, weights, unanswered, unset, invalid };
 }
 
 const PIE_R = 48;
@@ -65,24 +77,33 @@ function arcPath(startFrac: number, endFrac: number): string {
   return `M ${PIE_C} ${PIE_C} L ${x0} ${y0} A ${PIE_R} ${PIE_R} 0 ${large} 1 ${x1} ${y1} Z`;
 }
 
+interface Drag {
+  key: string;
+  value: number;
+  gesture: string;
+}
+
+let gestureCounter = 0;
+const newGesture = (prefix: string) => `${prefix}-${(gestureCounter += 1)}`;
+
 export function Allocator({ group, title, help }: { group: AllocationGroup; title: string; help: string }) {
   const { t } = useTranslation();
   const { caps, state, dispatch } = useDraftEditor();
   const uid = useId();
   const keys = groupKeys(caps, group);
-  const labels = groupLabels(caps, group);
   const defs = (group === "six_dimensions" ? caps.dimensions : caps.material_leaves) as (DimensionDefinition | MaterialLeafDefinition)[];
-  const maxDec = caps.points.manual_max_decimals;
+  const defBase = group === "six_dimensions" ? "/dimensions" : "/material_leaves";
+  const rules = caps.points.ratings ?? null;
+  const maxDec = rules?.max_decimals ?? caps.points.manual_max_decimals;
+  const maxRating = rules?.maximum ?? 100;
+  const step = rules?.slider_step ?? 1;
+  const equalRating = rules?.equal_weight_rating ?? "50";
   const dispDec = caps.points.display_decimals;
   const answer = state.draft[group];
-  const entries: Record<string, PointEntry> = answer.entries ?? {};
-  const isEqual = answer.mode === "equal_split";
-  const eqExact = equalValue(caps, group);
-  const eqDisplay = friendly(new Fraction(eqExact), dispDec).text;
+  const entries: Record<string, PointEntry | undefined> = answer.entries ?? {};
+  const legacyMode = answer.mode === "manual" || answer.mode === "equal_split";
 
   const [equalDialog, setEqualDialog] = useState(false);
-  const [picker, setPicker] = useState<{ amount: string } | null>(null);
-  const [source, setSource] = useState<string | null>(null);
   const [drag, setDragState] = useState<Drag | null>(null);
   // 同一个事件里预览与提交先后到来（React 的 onChange 对 range 也是 input 事件）：用 ref 读最新的手势，不读闭包
   const dragRef = useRef<Drag | null>(null);
@@ -90,189 +111,130 @@ export function Allocator({ group, title, help }: { group: AllocationGroup; titl
     dragRef.current = d;
     setDragState(d);
   };
+  // 当前手势的编号：按下指针时换新的（一次拖动 = 一条记录）；键盘序列按项共用一个编号，失焦时结束
+  const gestureRef = useRef<Record<string, string>>({});
+  const gestureOf = (k: string) => gestureRef.current[k] ?? (gestureRef.current[k] = `kb-${k}`);
 
-  // 已写进草稿的值（均分状态下每项都是精确的均分值）
-  const counted: Record<string, PointEntry | undefined> = isEqual
-    ? Object.fromEntries(keys.map((k) => [k, { state: "provided" as const, value_text: eqExact }]))
+  const shownEntries: Record<string, PointEntry | undefined> = drag
+    ? { ...entries, [drag.key]: { state: "provided", value_text: String(drag.value) } }
     : entries;
-  const totals = sumProvided(counted, keys, maxDec);
-  const rem = remainingOf(totals.total);
-  const committedOf = (k: string): Fraction | null => {
-    const e = counted[k];
-    if (!e || e.state !== "provided" || e.value_text == null) return null;
-    const p = parsePoints(e.value_text, maxDec);
-    return p.ok ? p.value : null;
-  };
-  const pool = rem.kind === "remaining" ? rem.amount : new Fraction(0);
+  const preview = previewWeights(shownEntries, keys, maxDec);
+  const answered = preview.ratings.size + preview.invalid.length;
+  const previewKind: "none" | "zero" | "partial" | "complete" =
+    preview.ratings.size === 0 && preview.invalid.length === 0 ? "none" : preview.total.n === 0n ? "zero" : preview.unanswered.length || preview.unset.length ? "partial" : "complete";
 
-  // 拖动中的预览：目标项与来源项按手势算，其余照已写入的值
-  const shownOf = (k: string): Fraction | null => {
-    if (drag) {
-      if (k === drag.key) return drag.value;
-      if (drag.source === k && drag.sourceBase) return drag.sourceBase.sub(drag.value.sub(drag.base));
-    }
-    return committedOf(k);
-  };
-  const shownTotal = useMemo(() => {
-    let sum = new Fraction(0);
-    for (const k of keys) {
-      const v = shownOf(k);
-      if (v) sum = sum.add(v);
-    }
-    return sum;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [keys, drag, entries, isEqual]);
-  const shownRem = remainingOf(shownTotal);
-  const shownPool = shownRem.kind === "remaining" ? shownRem.amount : new Fraction(0);
-  const unanswered = isEqual ? [] : keys.filter((k) => !entries[k]);
-  const sourceValid = source !== null && keys.includes(source) && (committedOf(source)?.compare(0) ?? 0) > 0;
-  const activeSource = sourceValid ? source : null;
+  const labelOf = (k: string) => defs.find((d) => d.key === k)?.label ?? k;
+  const labelPointer = (k: string) => at(defBase, defs.findIndex((d) => d.key === k), "label");
 
-  /** 这一项现在能增加多少（来源项的值，或未分配池）。 */
-  const roomFor = (k: string): Fraction => {
-    if (activeSource && activeSource !== k) return committedOf(activeSource) ?? new Fraction(0);
-    return pool;
+  const onSlide = (k: string, raw: number) => {
+    const value = Math.min(maxRating, Math.max(0, Math.round(raw / step) * step));
+    setDrag({ key: k, value, gesture: gestureOf(k) });
   };
-
-  const commit = (dr: Drag) => {
-    dispatch({
-      type: "points/move",
-      group,
-      key: dr.key,
-      value: canonical(dr.value),
-      source: dr.source,
-      maxDecimals: maxDec,
-      fromEqual: isEqual ? { keys, value: eqExact } : undefined,
-    });
-  };
-
-  /** 滑块的每一次输入：第一次记下基准，之后按相对基准的整点数算；端点精确转完。 */
-  const onSlide = (k: string, raw: number, e: { currentTarget: HTMLInputElement }) => {
-    const base = drag?.key === k ? drag.base : (committedOf(k) ?? new Fraction(0));
-    const sliderStart = drag?.key === k ? drag.sliderStart : Math.round(toNumber(base));
-    const src = drag?.key === k ? drag.source : activeSource && activeSource !== k ? activeSource : null;
-    const sourceBase = drag?.key === k ? drag.sourceBase : src ? (committedOf(src) ?? new Fraction(0)) : null;
-    const room = drag?.key === k ? drag.room : roomFor(k);
-    const hiExact = base.add(room);
-    const hi = toNumber(hiExact);
-    let slider = Math.round(raw);
-    let value: Fraction;
-    if (slider >= Math.floor(hi) && slider >= sliderStart) {
-      slider = Math.max(sliderStart, Math.floor(hi));
-      value = hiExact; // 拖到头：精确转完剩余
-    } else if (slider <= 0) {
-      slider = 0;
-      value = new Fraction(0);
-    } else {
-      value = base.add(slider - sliderStart);
-      if (value.s < 0n) value = new Fraction(0);
-      if (value.compare(hiExact) > 0) value = hiExact;
-    }
-    e.currentTarget.value = String(slider);
-    setDrag({ key: k, base, sliderStart, room, source: src, sourceBase, value });
-  };
-
+  /** 松手 / 松键 / 失焦：把这次手势的值写进草稿（只一次）。 */
   const endSlide = () => {
     const dr = dragRef.current;
     if (!dr) return;
-    if (dr.value.compare(dr.base) !== 0) commit(dr);
     setDrag(null);
+    dispatch({ type: "points/set", group, key: dr.key, value: String(dr.value), gesture: dr.gesture });
   };
 
-  const hintOf = (p: Extract<PointsParse, { ok: false }>) =>
-    p.reason === "too_many_decimals"
-      ? t("priorities.hintDecimals", { n: maxDec })
-      : p.reason === "fraction_not_canonical"
-        ? t("priorities.hintFraction", { canonical: p.canonical })
-        : t("priorities.hintNumber");
+  const hintOf = (text: string): string | null => {
+    const p = parsePoints(text, maxDec);
+    if (text.includes("/")) return t("ratings.hintDecimalOnly");
+    if (!p.ok) return p.reason === "too_many_decimals" ? t("ratings.hintDecimals", { n: maxDec }) : t("ratings.hintNumber");
+    if (p.value.compare(maxRating) > 0) return t("ratings.hintRange", { max: maxRating });
+    return null;
+  };
 
-  const amount = friendly(shownRem.amount, dispDec);
-  const statusText =
-    shownRem.kind === "full"
-      ? t("priorities.full")
-      : shownRem.kind === "over"
-        ? t("priorities.over", { x: amount.text })
-        : t("priorities.remaining", { x: amount.text });
-
-  // 饼图：扇区按点数占 100 的比例；超过 100 时按实际合计画、外圈标红
-  const pieBase = shownRem.kind === "over" ? shownTotal : new Fraction(100);
-  const slices: { key: string | null; from: number; to: number }[] = [];
+  // 饼图：只画已答的项，按它们之间的比例
+  const slices: { key: string; from: number; to: number }[] = [];
   let acc = 0;
   for (const k of keys) {
-    const v = shownOf(k);
-    if (!v || v.n === 0n) continue;
-    const frac = toNumber(v) / toNumber(pieBase);
+    const w = preview.weights.get(k);
+    if (!w || w.n === 0n) continue;
+    const frac = toNumber(w) / 100;
     slices.push({ key: k, from: acc, to: acc + frac });
     acc += frac;
   }
-  if (shownRem.kind === "remaining") slices.push({ key: null, from: acc, to: 1 });
-
+  const totalText = friendly(preview.total, maxDec).text;
   const pieLabel = keys
     .map((k) => {
-      const v = shownOf(k);
-      return `${labels[k]}：${v ? friendly(v, dispDec).text : t("states.unanswered")}`;
+      const w = preview.weights.get(k);
+      const r = preview.ratings.get(k);
+      if (r && w) return t("ratings.ariaLine", { label: labelOf(k), rating: friendly(r, maxDec).text, weight: displayFixed(w, dispDec) });
+      return `${labelOf(k)}：${t("states.unanswered")}`;
     })
-    .concat(shownRem.kind === "remaining" ? [`${t("priorities.unallocated")}：${friendly(shownPool, dispDec).text}`] : [])
     .join("；");
 
+  if (legacyMode) {
+    return (
+      <div className={styles.wrap} data-allocator={group} data-mode={answer.mode ?? ""}>
+        <h2>{title}</h2>
+        <p className="box warn" data-legacy-allocation>
+          {t("ratings.legacyMode")}
+        </p>
+        <ul>
+          {keys.map((k) => {
+            const e = entries[k];
+            const v = e?.state === "provided" ? (e.value_text ?? "") : t(`states.${e?.state ?? "unanswered"}` as "states.unanswered");
+            return (
+              <li key={k}>
+                <Zh pointer={labelPointer(k)}>{labelOf(k)}</Zh>：{answer.mode === "equal_split" ? t("ratings.legacyEqual") : v}
+              </li>
+            );
+          })}
+        </ul>
+        <button type="button" className="primary" data-action="rerate" onClick={() => dispatch({ type: "points/rerate", group })}>
+          {t("ratings.rerate")}
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className={styles.wrap} data-allocator={group} data-mode={isEqual ? "equal_split" : "manual"}>
+    <div className={styles.wrap} data-allocator={group} data-mode="ratings_normalized_v1" data-preview={previewKind} data-rating-total={canonical(preview.total)}>
       <h2>{title}</h2>
       <p className="muted">{help}</p>
+      <p className="small">{t("ratings.meaning")}</p>
 
       <div className={styles.layout}>
         <figure className={styles.pie}>
           <svg viewBox="0 0 112 112" role="img" aria-label={`${title}：${pieLabel}`} data-pie={group}>
-            <defs>
-              <pattern id={`${uid}-hatch`} width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-                <line x1="0" y1="0" x2="0" y2="5" className={styles.pieHatchLine} />
-              </pattern>
-            </defs>
             {slices.length === 0 ? <circle cx={PIE_C} cy={PIE_C} r={PIE_R} className={styles.pieEmpty} /> : null}
             {slices.map((s) =>
               s.to - s.from >= 0.9999 ? (
-                <circle
-                  key={s.key ?? "pool"}
-                  cx={PIE_C}
-                  cy={PIE_C}
-                  r={PIE_R}
-                  className={s.key ? styles.pieSlice : styles.piePool}
-                  style={s.key ? { fill: `var(--pie-${(keys.indexOf(s.key) % 6) + 1})` } : { fill: `url(#${uid}-hatch)` }}
-                  data-slice={s.key ?? "unallocated"}
-                />
+                <circle key={s.key} cx={PIE_C} cy={PIE_C} r={PIE_R} className={styles.pieSlice} style={{ fill: `var(--pie-${(keys.indexOf(s.key) % 6) + 1})` }} data-slice={s.key} />
               ) : (
-                <path
-                  key={s.key ?? "pool"}
-                  d={arcPath(s.from, s.to)}
-                  className={s.key ? styles.pieSlice : styles.piePool}
-                  style={s.key ? { fill: `var(--pie-${(keys.indexOf(s.key) % 6) + 1})` } : { fill: `url(#${uid}-hatch)` }}
-                  data-slice={s.key ?? "unallocated"}
-                />
+                <path key={s.key} d={arcPath(s.from, s.to)} className={styles.pieSlice} style={{ fill: `var(--pie-${(keys.indexOf(s.key) % 6) + 1})` }} data-slice={s.key} />
               ),
             )}
-            {shownRem.kind === "over" ? <circle cx={PIE_C} cy={PIE_C} r={PIE_R + 3} className={styles.pieOver} /> : null}
           </svg>
           <figcaption className={styles.pieCaption}>
             <span role="status" aria-live="polite" id={`${uid}-status`} className={styles.statusText}>
-              {shownRem.kind === "full" ? <span className="stamp">{statusText}</span> : statusText}
-              {amount.exact ? (
-                <span className="small muted">
-                  （{t("common.exact")} {amount.exact}）
-                </span>
-              ) : null}
+              {previewKind === "none"
+                ? t("ratings.noneYet")
+                : previewKind === "zero"
+                  ? t("ratings.allZero")
+                  : previewKind === "partial"
+                    ? t("ratings.previewPartial", { n: answered, total: keys.length })
+                    : t("ratings.previewComplete")}
             </span>
-            {shownRem.kind === "remaining" ? (
-              <span className={`small muted ${styles.poolNote}`}>
-                <span className={styles.swatchPool} aria-hidden="true" /> {t("priorities.unallocatedNote")}
+            {previewKind === "partial" ? (
+              <span className="small muted">
+                {preview.unanswered.length ? `${t("ratings.unansweredList")}：${preview.unanswered.map(labelOf).join("、")}` : null}
+                {preview.unanswered.length && preview.unset.length ? "；" : null}
+                {preview.unset.length ? `${t("ratings.unsetList")}：${preview.unset.map(labelOf).join("、")}` : null}
               </span>
             ) : null}
+            {previewKind !== "none" ? <span className="small muted">{t("ratings.total", { x: totalText })}</span> : null}
+            <span className="small muted">{t("ratings.previewNote")}</span>
           </figcaption>
         </figure>
 
         <div className={styles.controlsCol}>
           <div className={styles.toolbar}>
-            <button type="button" className={isEqual || keys.some((k) => entries[k]) ? undefined : "primary"} onClick={() => setEqualDialog(true)} disabled={isEqual}>
-              {t("priorities.equalSplit")}
+            <button type="button" data-action="equal-weight" onClick={() => (answered || preview.unset.length ? setEqualDialog(true) : dispatch({ type: "points/equalWeight", group, keys, value: equalRating }))}>
+              {t("ratings.equalWeight")}
             </button>
             <button type="button" onClick={() => dispatch({ type: "history/undo" })} disabled={!state.past.length}>
               {t("common.undo")}
@@ -281,24 +243,19 @@ export function Allocator({ group, title, help }: { group: AllocationGroup; titl
               {t("common.redo")}
             </button>
           </div>
-          {isEqual ? <p className="box note">{t("priorities.equalSplitOn", { each: eqDisplay, exact: eqExact })}</p> : null}
-
-          {/* 来源：增加某一项时从哪里取。池里还有就默认从池取；池空了要用户明确选一个来源维度 */}
-          <p className={styles.sourceRow}>
-            <label htmlFor={`${uid}-source`}>{t("priorities.sourceLabel")}</label>{" "}
-            <select id={`${uid}-source`} value={activeSource ?? ""} onChange={(e) => setSource(e.target.value || null)} data-source-select>
-              <option value="">{t("priorities.sourcePool", { x: friendly(pool, dispDec).text })}</option>
-              {keys
-                .filter((k) => (committedOf(k)?.compare(0) ?? 0) > 0)
-                .map((k) => (
-                  <option key={k} value={k}>
-                    {t("priorities.sourceDim", { label: labels[k], x: friendly(committedOf(k) as Fraction, dispDec).text })}
-                  </option>
+          <p className="small muted">{t("ratings.sliderHint", { max: maxRating, decimals: maxDec })}</p>
+          {rules?.rules.length ? (
+            <details className={styles.what}>
+              <summary>{t("ratings.serviceRules")}</summary>
+              <ul className="small">
+                {rules.rules.map((r, i) => (
+                  <Zh as="li" key={r} pointer={at("/points/ratings/rules", i)}>
+                    {r}
+                  </Zh>
                 ))}
-            </select>
-          </p>
-          {pool.n === 0n && !activeSource && shownRem.kind !== "over" ? <p className="small muted">{t("priorities.poolEmpty")}</p> : null}
-          <p className="small muted">{t("priorities.sliderHint")}</p>
+              </ul>
+            </details>
+          ) : null}
         </div>
       </div>
 
@@ -310,37 +267,41 @@ export function Allocator({ group, title, help }: { group: AllocationGroup; titl
           const sliderId = `${uid}-${k}-slider`;
           const descId = `${uid}-${k}-desc`;
           const errId = `${uid}-${k}-err`;
-          const info = definitionOf(d);
-          const committed = committedOf(k);
-          const shown = shownOf(k);
-          const parsed = !isEqual && e?.state === "provided" && e.value_text != null ? parsePoints(e.value_text, maxDec) : null;
-          const stateSel = !isEqual && (e?.state === "indifferent" || e?.state === "unsure") ? e.state : "";
-          const textShown = isEqual ? eqExact : e?.state === "provided" ? (e.value_text ?? "") : "";
-          const describedBy = [descId, parsed && !parsed.ok ? errId : null, stateSel ? `${errId}-state` : null].filter(Boolean).join(" ");
-          const sliderDisabled = !!stateSel || (parsed !== null && !parsed.ok);
-          const sliderValue = drag?.key === k ? Math.round(toNumber(drag.value)) : committed ? Math.round(toNumber(committed)) : 0;
-          const transferText =
-            drag?.key === k && drag.source ? t("priorities.transferFrom", { from: labels[drag.source] ?? drag.source, to: labels[k] ?? k }) : activeSource && activeSource !== k ? t("priorities.transferFrom", { from: labels[activeSource] ?? activeSource, to: labels[k] ?? k }) : null;
-          const display = shown ? friendly(shown, dispDec) : null;
+          const text = e?.state === "provided" ? (e.value_text ?? "") : "";
+          const hint = e?.state === "provided" && text !== "" ? hintOf(text) : null;
+          const stateSel = e?.state === "indifferent" || e?.state === "unsure" ? e.state : "";
+          const rating = preview.ratings.get(k) ?? null;
+          const weight = preview.weights.get(k) ?? null;
+          const sliderValue = drag?.key === k ? drag.value : rating ? Math.round(toNumber(rating)) : 0;
+          const describedBy = [descId, hint ? errId : null, stateSel ? `${errId}-state` : null].filter(Boolean).join(" ");
+          const isDimension = "reference_improvement" in d;
           return (
-            <li key={k} className={styles.row} data-key={k} data-state={isEqual ? "provided" : (e?.state ?? "unanswered")}>
+            <li key={k} className={styles.row} data-key={k} data-state={e?.state ?? "unanswered"}>
               <div className={styles.rowHead}>
                 <span className={styles.swatch} style={{ background: `var(--pie-${(i % 6) + 1})` }} aria-hidden="true" />
                 <label htmlFor={sliderId} className={styles.rowLabel}>
-                  <Zh>{labels[k]}</Zh>
+                  <Zh pointer={at(defBase, i, "label")}>{d.label}</Zh>
                 </label>
                 {d.support !== "supported" ? <SupportChip support={d.support} /> : null}
-                <span className={styles.rowValue} data-value={shown ? canonical(shown) : ""}>
-                  {!isEqual && !e ? (
+                <span className={styles.rowValue} data-value={rating ? canonical(rating) : ""} data-weight={weight ? canonical(weight) : ""}>
+                  {!e ? (
                     <span className="chip">{t("states.unanswered")}</span>
                   ) : stateSel ? (
                     <span className="chip">{t(`states.${stateSel}`)}</span>
-                  ) : display ? (
+                  ) : rating ? (
                     <>
-                      <strong className="num">{display.text}</strong>
-                      {display.exact ? <span className="small muted">（{display.exact}）</span> : null}
+                      <strong className="num">{friendly(rating, maxDec).text}</strong>
+                      {weight ? (
+                        <span className="small muted">
+                          {" "}
+                          {t("ratings.weightOf", { w: displayFixed(weight, dispDec) })}
+                          {friendly(weight, dispDec).exact ? `（${canonical(weight)}）` : ""}
+                        </span>
+                      ) : null}
                     </>
-                  ) : null}
+                  ) : (
+                    <span className="chip warn">{t("ratings.invalidChip")}</span>
+                  )}
                 </span>
               </div>
               <div className={styles.sliderRow}>
@@ -348,29 +309,42 @@ export function Allocator({ group, title, help }: { group: AllocationGroup; titl
                   id={sliderId}
                   type="range"
                   min={0}
-                  max={100}
-                  step={1}
+                  max={maxRating}
+                  step={step}
                   className={styles.slider}
                   value={sliderValue}
-                  disabled={sliderDisabled}
-                  aria-valuetext={display ? `${display.text}${display.exact ? `（${display.exact}）` : ""}` : t("states.unanswered")}
+                  disabled={!!stateSel}
+                  aria-valuetext={rating ? t("ratings.ariaValue", { v: friendly(rating, maxDec).text }) : t("states.unanswered")}
                   aria-describedby={descId}
                   data-slider={k}
-                  onInput={(ev) => onSlide(k, Number(ev.currentTarget.value), ev)}
+                  onPointerDown={() => {
+                    gestureRef.current[k] = newGesture(`ptr-${k}`);
+                  }}
+                  onInput={(ev) => onSlide(k, Number(ev.currentTarget.value))}
                   onChange={() => undefined}
-                  onPointerUp={endSlide}
-                  onPointerCancel={endSlide}
+                  onPointerUp={() => {
+                    endSlide();
+                    gestureRef.current[k] = `kb-${k}`;
+                  }}
+                  onPointerCancel={() => {
+                    endSlide();
+                    gestureRef.current[k] = `kb-${k}`;
+                  }}
                   onKeyUp={endSlide}
                   onBlur={() => {
                     endSlide();
                     dispatch({ type: "history/break" });
                   }}
                 />
-                {transferText ? <span className={`small ${styles.transfer}`}>{transferText}</span> : null}
+                {!e ? (
+                  <button type="button" className="small" data-action="zero" onClick={() => dispatch({ type: "points/set", group, key: k, value: "0", gesture: newGesture(`zero-${k}`) })}>
+                    {t("ratings.markZero")}
+                  </button>
+                ) : null}
               </div>
               <div className={styles.controls}>
                 <label htmlFor={inputId} className="small muted">
-                  {t("priorities.exactInput")}
+                  {t("ratings.exactInput")}
                 </label>
                 <input
                   id={inputId}
@@ -379,22 +353,17 @@ export function Allocator({ group, title, help }: { group: AllocationGroup; titl
                   type="text"
                   inputMode="decimal"
                   autoComplete="off"
-                  value={textShown}
+                  value={text}
                   aria-describedby={describedBy}
-                  aria-invalid={parsed && !parsed.ok ? true : undefined}
-                  onChange={(ev) =>
-                    isEqual
-                      ? dispatch({ type: "points/move", group, key: k, value: ev.target.value, source: null, maxDecimals: maxDec, fromEqual: { keys, value: eqExact } })
-                      : dispatch({ type: "points/text", group, key: k, text: ev.target.value })
-                  }
+                  aria-invalid={hint ? true : undefined}
+                  onChange={(ev) => dispatch({ type: "points/text", group, key: k, text: ev.target.value })}
                   onBlur={() => dispatch({ type: "history/break" })}
                 />
                 <select
-                  aria-label={`${labels[k]}：${t("priorities.unsureMenu")}`}
+                  aria-label={`${d.label}：${t("priorities.unsureMenu")}`}
                   value={stateSel}
                   onChange={(ev) => {
                     const v = ev.target.value;
-                    if (isEqual) dispatch({ type: "points/toManual", group, keys, value: eqExact });
                     dispatch({ type: "points/state", group, key: k, state: v === "indifferent" || v === "unsure" ? v : "unanswered" });
                   }}
                 >
@@ -405,29 +374,35 @@ export function Allocator({ group, title, help }: { group: AllocationGroup; titl
                 <details className={styles.what}>
                   <summary>{t("priorities.whatIsThis")}</summary>
                   <div id={descId}>
-                    <Zh as="p">{info.definition}</Zh>
-                    {info.reference ? (
+                    <Zh as="p" pointer={at(defBase, i, "definition")}>
+                      {d.definition}
+                    </Zh>
+                    {isDimension ? (
                       <p className="small">
-                        <Zh>{info.reference}</Zh>
+                        <Zh pointer={at(defBase, i, "reference_improvement")}>{(d as DimensionDefinition).reference_improvement}</Zh>
+                      </p>
+                    ) : (d as MaterialLeafDefinition).note ? (
+                      <p className="small muted">
+                        <Zh pointer={at(defBase, i, "note")}>{(d as MaterialLeafDefinition).note}</Zh>
                       </p>
                     ) : null}
-                    {info.note ? (
+                    {isDimension && d.support !== "supported" && (d as DimensionDefinition).support_note ? (
                       <p className="small muted">
-                        <Zh>{info.note}</Zh>
+                        <Zh pointer={at(defBase, i, "support_note")}>{(d as DimensionDefinition).support_note}</Zh>
                       </p>
                     ) : null}
                   </div>
                 </details>
               </div>
-              {parsed && !parsed.ok ? (
+              {hint ? (
                 <p id={errId} className="small" style={{ color: "var(--error-line)" }}>
                   {t("priorities.invalid")}
-                  {hintOf(parsed)}
+                  {hint}
                 </p>
               ) : null}
               {stateSel ? (
                 <p id={`${errId}-state`} className="small">
-                  {stateSel === "indifferent" ? t("states.indifferent") : t("states.unsure")}：{t("priorities.unsetNote")}
+                  {stateSel === "indifferent" ? t("states.indifferent") : t("states.unsure")}：{t("ratings.unsetNote")}
                 </p>
               ) : null}
             </li>
@@ -435,64 +410,23 @@ export function Allocator({ group, title, help }: { group: AllocationGroup; titl
         })}
       </ol>
 
-      <div className={`${styles.status} ${rem.kind === "over" ? styles.over : rem.kind === "full" ? styles.full : ""}`}>
-        <span aria-hidden="true">{statusText}</span>
-        {rem.kind === "over" && !isEqual ? (
-          <button type="button" onClick={() => setPicker({ amount: canonical(rem.amount) })}>
-            {t("priorities.reduceFrom", { x: amount.text })}
-          </button>
-        ) : null}
-        {rem.kind === "full" && unanswered.length ? (
-          <button type="button" data-action="rest-zero" onClick={() => dispatch({ type: "points/setRestZero", group, keys: unanswered })}>
-            {t("priorities.setRestZero", { n: unanswered.length })}
-          </button>
-        ) : null}
-        {totals.invalid.length ? <span className="small">{t("priorities.notCounted", { n: totals.invalid.length })}</span> : null}
-      </div>
-
-      <Dialog open={equalDialog} onClose={() => setEqualDialog(false)} title={t("priorities.equalSplit")}>
-        <p>{t("priorities.equalSplitConfirm", { each: eqDisplay, exact: eqExact })}</p>
+      <Dialog open={equalDialog} onClose={() => setEqualDialog(false)} title={t("ratings.equalWeight")}>
+        <p>{t("ratings.equalWeightConfirm", { v: equalRating, n: answered + preview.unset.length })}</p>
         <div className="row">
           <button
             type="button"
             className="primary"
             onClick={() => {
-              dispatch({ type: "points/equalSplit", group });
+              dispatch({ type: "points/equalWeight", group, keys, value: equalRating });
               setEqualDialog(false);
             }}
           >
-            {t("priorities.equalSplit")}
+            {t("ratings.equalWeight")}
           </button>
           <button type="button" onClick={() => setEqualDialog(false)}>
             {t("common.cancel")}
           </button>
         </div>
-      </Dialog>
-
-      <Dialog open={picker !== null} onClose={() => setPicker(null)} title={t("priorities.reduceFrom", { x: amount.text })}>
-        <p className="small">{t("priorities.moveNote")}</p>
-        <ul className={styles.pickList}>
-          {picker
-            ? keys
-                .filter((k) => (committedOf(k)?.compare(0) ?? 0) > 0)
-                .map((k) => (
-                  <li key={k}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        dispatch({ type: "points/reduce", group, key: k, amount: picker.amount, maxDecimals: maxDec });
-                        setPicker(null);
-                      }}
-                    >
-                      {t("priorities.pointsOf", { label: labels[k], v: friendly(committedOf(k) as Fraction, dispDec).text })}
-                    </button>
-                  </li>
-                ))
-            : null}
-        </ul>
-        <button type="button" onClick={() => setPicker(null)}>
-          {t("common.cancel")}
-        </button>
       </Dialog>
     </div>
   );

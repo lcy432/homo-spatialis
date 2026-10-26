@@ -109,11 +109,11 @@ export function StartPage() {
 
       <Section title={t("start.scopeTitle")}>
         <BizNotice />
-        <ZhList items={c.start_scenario} />
+        <ZhList items={c.start_scenario} pointer="/start_scenario" />
         <details>
           <summary>{t("start.unsupportedTitle")}</summary>
-          <ZhList items={c.unsupported} />
-          <ZhList items={c.limits} />
+          <ZhList items={c.unsupported} pointer="/unsupported" />
+          <ZhList items={c.limits} pointer="/limits" />
         </details>
       </Section>
 

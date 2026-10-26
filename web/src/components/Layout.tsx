@@ -77,6 +77,7 @@ export function AppShell() {
   // 能力清单的显示信封（当前登记的资源版本）：城市、维度、目录、面板的名称与说明在英文界面里按它显示
   const caps = useCapabilities();
   const capsDisplay = useDisplay("capabilities", null, locale, caps.data?.capabilities_id ?? "", !!caps.data);
+  const sessionDisplay = useDisplay("session", null, locale, view?.session_expires_at ?? "", !!view);
   useFocusOnNavigate();
   return (
     <>
@@ -123,8 +124,10 @@ export function AppShell() {
       </header>
       <main id="main" className={styles.main}>
         <div key={location.pathname} className="page-enter">
-          <DisplayScope envelope={capsDisplay.data}>
-            <Outlet />
+          <DisplayScope envelope={sessionDisplay.data}>
+            <DisplayScope envelope={capsDisplay.data}>
+              <Outlet />
+            </DisplayScope>
           </DisplayScope>
         </div>
       </main>

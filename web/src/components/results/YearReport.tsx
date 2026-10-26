@@ -6,21 +6,22 @@
 import { useTranslation } from "react-i18next";
 import { HEALTH_MONTH, HOUSEHOLD_TASK, YEAR_STATUS, pendingLabel } from "../../contract/pending-labels";
 import type { ConvenienceService, YearFacts } from "../../contract/types";
+import { at } from "../../display/scope";
 import { Zh, ZhList } from "../../i18n/biz";
 import { formatMonths } from "../../i18n/format";
 import { useLocale } from "../../i18n/index";
 import { Money, PendingText } from "../common";
 import { MonthStrip, monthStates } from "./MonthStrip";
 
-function ServiceLines({ lines, monthsLived }: { lines: readonly ConvenienceService[]; monthsLived: number }) {
+function ServiceLines({ lines, monthsLived, pointer }: { lines: readonly ConvenienceService[]; monthsLived: number; pointer: string }) {
   const { t } = useTranslation();
   const locale = useLocale();
   return (
     <ul className="plain stack">
-      {lines.map((s) => (
+      {lines.map((s, si) => (
         <li key={s.opportunity_id} data-service={s.opportunity_id}>
           <strong>
-            <Zh>{s.label}</Zh>
+            <Zh pointer={at(pointer, si, "label")}>{s.label}</Zh>
           </strong>
           <p className="small">
             {t("clone.planned")}：{formatMonths(s.months_planned, locale) || t("common.monthsNone")} · {t("clone.obtained")}：
@@ -34,10 +35,12 @@ function ServiceLines({ lines, monthsLived }: { lines: readonly ConvenienceServi
   );
 }
 
-export function YearReport({ year }: { year: YearFacts }) {
+/** pointer 是这一年在结果对象里的位置（/clones/{i}/years/{j}）。 */
+export function YearReport({ year, pointer }: { year: YearFacts; pointer: string }) {
   const { t } = useTranslation();
   const locale = useLocale();
   const y = year;
+  const pp = pointer;
   const lived = y.months_lived;
   const status = pendingLabel(YEAR_STATUS, y.status);
   return (
@@ -66,11 +69,11 @@ export function YearReport({ year }: { year: YearFacts }) {
       {y.jobs?.length || y.training?.length ? (
         <>
           <h4>{t("clone.jobs")}</h4>
-          <ZhList items={y.jobs} />
+          <ZhList items={y.jobs} pointer={`${pp}/jobs`} />
           {y.training?.length ? (
             <>
               <p className="small">{t("clone.training")}</p>
-              <ZhList items={y.training} />
+              <ZhList items={y.training} pointer={`${pp}/training`} />
             </>
           ) : null}
         </>
@@ -79,16 +82,16 @@ export function YearReport({ year }: { year: YearFacts }) {
       {y.housing?.length || y.homes?.length ? (
         <>
           <h4>{t("clone.housing")}</h4>
-          <ZhList items={y.housing} />
+          <ZhList items={y.housing} pointer={`${pp}/housing`} />
           {y.homes?.length ? (
             <ul className="plain stack">
-              {y.homes.map((h) => (
+              {y.homes.map((h, hi) => (
                 <li key={`${h.opportunity_id}.${h.months[0]}`} data-home={h.opportunity_id}>
-                  <Zh>{h.label}</Zh>：{formatMonths(h.months, locale)}
+                  <Zh pointer={at(`${pp}/homes`, hi, "label")}>{h.label}</Zh>：{formatMonths(h.months, locale)}
                   {h.area_label ? (
                     <p className="small">
                       {t("clone.homeArea", { area: "" })}
-                      <Zh>{h.area_label}</Zh>
+                      <Zh pointer={at(`${pp}/homes`, hi, "area_label")}>{h.area_label}</Zh>
                     </p>
                   ) : null}
                   <p className="small muted">
@@ -107,13 +110,13 @@ export function YearReport({ year }: { year: YearFacts }) {
         <>
           <h4>{t("clone.commute")}</h4>
           <ul className="plain stack">
-            {y.commute.map((c) => (
+            {y.commute.map((c, ci) => (
               <li key={c.months.join(",")} data-commute={c.status}>
-                <strong>{formatMonths(c.months, locale)}</strong>：<Zh>{c.status_zh}</Zh>
+                <strong>{formatMonths(c.months, locale)}</strong>：<Zh pointer={at(`${pp}/commute`, ci, "status_zh")}>{c.status_zh}</Zh>
                 {c.home_area_label ? (
                   <span className="small muted">
                     {" "}
-                    · <Zh>{c.home_area_label}</Zh>
+                    · <Zh pointer={at(`${pp}/commute`, ci, "home_area_label")}>{c.home_area_label}</Zh>
                   </span>
                 ) : null}
                 {c.trips?.length ? (
@@ -147,16 +150,16 @@ export function YearReport({ year }: { year: YearFacts }) {
         <>
           <h4>{t("clone.carAccess")}</h4>
           <p className="small">
-            <Zh>{y.car_access.note_zh}</Zh>
+            <Zh pointer={`${pp}/car_access/note_zh`}>{y.car_access.note_zh}</Zh>
           </p>
-          {y.car_access.lines?.length ? <ServiceLines lines={y.car_access.lines} monthsLived={lived} /> : null}
+          {y.car_access.lines?.length ? <ServiceLines lines={y.car_access.lines} monthsLived={lived} pointer={`${pp}/car_access/lines`} /> : null}
         </>
       ) : null}
 
       {y.food?.length ? (
         <>
           <h4>{t("clone.food")}</h4>
-          <ZhList items={y.food} />
+          <ZhList items={y.food} pointer={`${pp}/food`} />
         </>
       ) : null}
 
@@ -164,10 +167,10 @@ export function YearReport({ year }: { year: YearFacts }) {
         <>
           <h4>{t("clone.goods")}</h4>
           <ul className="plain stack">
-            {y.goods.map((g) => (
+            {y.goods.map((g, gi) => (
               <li key={g.opportunity_id} data-goods={g.opportunity_id}>
                 <strong>
-                  <Zh>{g.label}</Zh>
+                  <Zh pointer={at(`${pp}/goods`, gi, "label")}>{g.label}</Zh>
                 </strong>
                 <span className="small">
                   {g.bought_month ? ` · ${t("clone.goodsBought", { m: g.bought_month })}` : ""}
@@ -192,7 +195,7 @@ export function YearReport({ year }: { year: YearFacts }) {
       {y.services?.length ? (
         <>
           <h4>{t("clone.services")}</h4>
-          <ServiceLines lines={y.services} monthsLived={lived} />
+          <ServiceLines lines={y.services} monthsLived={lived} pointer={`${pp}/services`} />
         </>
       ) : null}
 
@@ -200,10 +203,10 @@ export function YearReport({ year }: { year: YearFacts }) {
         <>
           <h4>{t("clone.support")}</h4>
           <ul className="plain stack">
-            {y.support.map((s) => (
+            {y.support.map((s, si) => (
               <li key={s.function} data-support={s.function}>
                 <strong>
-                  <Zh>{s.label_zh}</Zh>
+                  <Zh pointer={at(`${pp}/support`, si, "label_zh")}>{s.label_zh}</Zh>
                 </strong>
                 <p className="small">
                   {t("clone.planned")}：{formatMonths(s.months_planned, locale) || t("common.monthsNone")} · {t("clone.obtained")}：
@@ -234,7 +237,7 @@ export function YearReport({ year }: { year: YearFacts }) {
         <>
           <h4>{t("clone.activities")}</h4>
           <ul className="plain stack">
-            {y.activities.map((a) => (
+            {y.activities.map((a, ai) => (
               <li key={a.opportunity_id} data-activity={a.opportunity_id}>
                 <strong>{t("clone.activityLine", { label: a.label, sessions: a.sessions, hours: a.participation_hours })}</strong>
                 <p className="small">
@@ -244,7 +247,7 @@ export function YearReport({ year }: { year: YearFacts }) {
                 </p>
                 {a.not_done_zh ? (
                   <p className="small">
-                    <Zh>{a.not_done_zh}</Zh>
+                    <Zh pointer={at(`${pp}/activities`, ai, "not_done_zh")}>{a.not_done_zh}</Zh>
                   </p>
                 ) : null}
               </li>
@@ -257,10 +260,10 @@ export function YearReport({ year }: { year: YearFacts }) {
         <>
           <h4>{t("clone.notMade")}</h4>
           <ul>
-            {y.purchases_not_made.map((p) => (
+            {y.purchases_not_made.map((p, pi) => (
               <li key={`${p.opportunity_id}.${p.month ?? ""}`}>
-                <Zh>{p.label}</Zh>
-                {p.month ? `（${p.month}）` : ""}：<Zh>{p.status_zh}</Zh>
+                <Zh pointer={at(`${pp}/purchases_not_made`, pi, "label")}>{p.label}</Zh>
+                {p.month ? `（${p.month}）` : ""}：<Zh pointer={at(`${pp}/purchases_not_made`, pi, "status_zh")}>{p.status_zh}</Zh>
               </li>
             ))}
           </ul>
@@ -271,9 +274,10 @@ export function YearReport({ year }: { year: YearFacts }) {
         <>
           <h4>{t("clone.failures")}</h4>
           <ul>
-            {y.device_failures.map((f) => (
+            {y.device_failures.map((f, fi) => (
               <li key={`${f.opportunity_id}.${f.month}`}>
-                <Zh>{f.label}</Zh>（{f.month} · ×{f.units_failed}）：<Zh>{f.replacement_status_zh}</Zh>
+                <Zh pointer={at(`${pp}/device_failures`, fi, "label")}>{f.label}</Zh>（{f.month} · ×{f.units_failed}）：
+                <Zh pointer={at(`${pp}/device_failures`, fi, "replacement_status_zh")}>{f.replacement_status_zh}</Zh>
               </li>
             ))}
           </ul>
@@ -301,14 +305,14 @@ export function YearReport({ year }: { year: YearFacts }) {
 
       {y.tax ? (
         <p className="small">
-          {t("clone.tax")}：<Zh>{y.tax.status_zh}</Zh>
+          {t("clone.tax")}：<Zh pointer={`${pp}/tax/status_zh`}>{y.tax.status_zh}</Zh>
         </p>
       ) : null}
 
       {y.notes?.length ? (
         <>
           <h4>{t("clone.notes")}</h4>
-          <ZhList items={y.notes} />
+          <ZhList items={y.notes} pointer={`${pp}/notes`} />
         </>
       ) : null}
     </article>

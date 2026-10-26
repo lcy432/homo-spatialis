@@ -62,11 +62,28 @@
     "text": null
   },
   "material": {
-    "entries": {},
-    "mode": null
+    "mode": "ratings_normalized_v1",
+    "entries": {
+      "housing_condition": {
+        "state": "provided",
+        "value_text": "25"
+      },
+      "food_life": {
+        "state": "provided",
+        "value_text": "25"
+      },
+      "daily_convenience": {
+        "state": "provided",
+        "value_text": "30"
+      },
+      "personal_enjoyment": {
+        "state": "provided",
+        "value_text": "20"
+      }
+    }
   },
   "meta": {
-    "conversion_version": "e3a-conversion-v3",
+    "conversion_version": "e3a-conversion-v4",
     "data_pack": {
       "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
       "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
@@ -74,8 +91,8 @@
       "status": "synthetic_fixture_only"
     },
     "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
-    "questionnaire_version": "e3a-questionnaire-v0.4-draft",
-    "schema_version": "e3a-product-schema-v3.4",
+    "questionnaire_version": "e3a-questionnaire-v0.5-draft",
+    "schema_version": "e3a-product-schema-v3.5",
     "vocabulary_version": "e3a-vocabulary-v5"
   },
   "occupation": {
@@ -89,31 +106,31 @@
   },
   "revision": 1,
   "six_dimensions": {
-    "mode": "manual",
+    "mode": "ratings_normalized_v1",
     "entries": {
       "material": {
         "state": "provided",
-        "value_text": "40/3"
+        "value_text": "80"
       },
       "safety": {
         "state": "provided",
-        "value_text": "20"
+        "value_text": "40"
       },
       "opportunity": {
         "state": "provided",
-        "value_text": "50/3"
+        "value_text": "40"
       },
       "leisure": {
         "state": "provided",
-        "value_text": "50/3"
+        "value_text": "20"
       },
       "environment": {
         "state": "provided",
-        "value_text": "50/3"
+        "value_text": "10"
       },
       "commute": {
         "state": "provided",
-        "value_text": "50/3"
+        "value_text": "10"
       }
     }
   },

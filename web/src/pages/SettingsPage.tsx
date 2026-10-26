@@ -39,11 +39,11 @@ export function SettingsPage() {
       {receipt ? (
         <div className="box note" role="status" data-deletion={receipt.status}>
           <p>{t("settings.deleteAllDone")}</p>
-          <Zh as="p">{receipt.note_zh}</Zh>
+          <Zh as="p" pointer="/note_zh">{receipt.note_zh}</Zh>
           {receipt.kept_zh?.length ? (
             <>
               <p className="small">{t("settings.kept")}</p>
-              <ZhList items={receipt.kept_zh} />
+              <ZhList items={receipt.kept_zh} pointer="/kept_zh" />
             </>
           ) : null}
         </div>

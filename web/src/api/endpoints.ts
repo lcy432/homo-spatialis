@@ -16,6 +16,8 @@ import type {
   RunIntentCreateRequest,
   RunIntentView,
   RunList,
+  RunStartPreview,
+  RunStartPreviewRequest,
   RunProgress,
   RunSubmitReply,
   RunSubmitRequest,
@@ -98,7 +100,18 @@ export function makeApi(ctx: HttpContext, fetchImpl: typeof fetch = (...a) => fe
         }),
       ),
 
-    /** 准备模拟：202 新建（检查排队），200 同一份画像与同样设置的原意图。 */
+    /** 设置预览（只读：不排队、不占次数、不调用模型、不写库）：有效设置、范围说明、知悉项与同意身份。 */
+    startPreview: (req: RunStartPreviewRequest) =>
+      data(
+        call<RunStartPreview>({
+          method: "POST",
+          path: "/run-start-preview",
+          body: req,
+          bodyMessage: "RunStartPreviewRequest",
+          response: "RunStartPreview",
+        }),
+      ),
+    /** 准备模拟 / 一次“确认并开始”（带 start）：202 新建，200 找回同一个意图（同一个键或同样设置的原意图）。 */
     createIntent: (req: RunIntentCreateRequest) =>
       call<RunIntentView>({
         method: "POST",

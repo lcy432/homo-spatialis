@@ -9,7 +9,8 @@ import { useSession } from "../api/session";
 import type { DeletionReceipt, RunSummary } from "../contract/types";
 import { Dialog } from "../components/Dialog";
 import { PageTitle } from "../components/Layout";
-import { cityLabelOf } from "../components/RunViews";
+import { CityName } from "../components/RunViews";
+import { at } from "../display/scope";
 import { ApiErrorView, Loading } from "../components/common";
 import { BizNotice, Zh, ZhList } from "../i18n/biz";
 import { formatTime } from "../i18n/format";
@@ -69,17 +70,17 @@ export function RunsPage() {
       {receipt ? (
         <div className="box note" role="status">
           <p>{t("runs.deleting")}</p>
-          <Zh as="p">{receipt.note_zh}</Zh>
-          <ZhList items={receipt.kept_zh} />
+          <Zh as="p" pointer="/__receipt__/note_zh">{receipt.note_zh}</Zh>
+          <ZhList items={receipt.kept_zh} pointer="/__receipt__/kept_zh" />
         </div>
       ) : null}
       {list.length === 0 ? <p className="muted">{t("runs.empty")}</p> : null}
       <ul className="plain stack">
-        {list.map((r) => (
+        {list.map((r, ri) => (
           <li key={r.intent_id} className="card" data-run={r.run_id ?? r.intent_id} data-stage={r.stage}>
             <p>
               <strong>
-                <Zh>{r.stage_zh}</Zh>
+                <Zh pointer={at("/runs", ri, "stage_zh")}>{r.stage_zh}</Zh>
               </strong>{" "}
               <span className="small muted">{t("runs.created", { time: formatTime(r.created_at, locale) })}</span>
               {r.finished_at ? <span className="small muted"> · {t("runs.finished", { time: formatTime(r.finished_at, locale) })}</span> : null}
@@ -96,7 +97,7 @@ export function RunsPage() {
                 {r.settings.cities.map((c, i) => (
                   <span key={c}>
                     {i ? "、" : ""}
-                    <Zh>{cityLabelOf(caps.data, c)}</Zh>
+                    <CityName caps={caps.data} cityRef={c} />
                   </span>
                 ))}{" "}
                 · {t("prepare.clones")} {r.settings.clones_per_city} · {t("prepare.years")} {r.settings.years} · {t("intent.maxCost")}{" "}

@@ -1,76 +1,101 @@
-// 显示附层的页面接法（display/scope + <Zh>）：英文界面在作用域里按原文拿译文；缺译显示原文并标“未翻译”；知悉项按 ack_id、
-// 作答状态按 (answer, state) 取；业务状态只从 source 读。中文界面不受作用域影响。
+// 显示附层的页面接法（display/scope + <Zh pointer>）：英文界面按字段位置取译文，并核对信封的 source 在那个位置就是正在显示的原文；
+// 同名字段各取自己的译文、缺译不借别的字段或外层当前资源（E5-R3）；知悉项按 ack_id、作答状态按 (answer, state) 取；
+// 业务状态只从 source 读；中文界面不受作用域影响；整块说明按实际显示的缺译字段数写。
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { samplePayload } from "../src/contract/samples";
 import type { DisplayEnvelope, DraftView, ProductCapabilities, ReviewReply } from "../src/contract/types";
-import { DisplayScope, buildScope, findAcknowledgement, findAnswerState, lookupText, resolveDisplayText } from "../src/display/scope";
+import {
+  buildScope,
+  envelopeOf,
+  envelopeOfAttachment,
+  findAcknowledgement,
+  findAnswerState,
+  lookupText,
+  resolveDisplayText,
+  DisplayScope,
+} from "../src/display/scope";
 import { BizNotice, DText, Zh } from "../src/i18n/biz";
 import { i18n } from "../src/i18n/index";
 
 const reviewEn = samplePayload<DisplayEnvelope>("133");
 const capsEn = samplePayload<DisplayEnvelope>("130");
 const intentPartial = samplePayload<DisplayEnvelope>("122");
+const scopeOf = (env: DisplayEnvelope) => buildScope(envelopeOf(env));
 
-describe("作用域里按原文找译文", () => {
-  it("审阅信封（样例 133）：职业名称、维度名称按原文给出英文；业务状态仍只在 source 里", () => {
-    const scope = buildScope(reviewEn);
+describe("按字段位置找译文", () => {
+  it("审阅信封（样例 133）：按位置给出英文；位置上的原文对不上就不套；source 有原文而没有字段 = no_field；业务状态仍只在 source 里", () => {
+    const scope = scopeOf(reviewEn);
     const src = reviewEn.source as ReviewReply;
     const label = src.review.occupation.candidates?.[0]?.label as string;
-    expect(lookupText([scope], label)).toMatchObject({ text: "Software Developers", provided: true });
-    expect(lookupText([scope], src.review.six_dimensions.lines?.[1]?.label as string).text).toBe("Safety");
-    // 按位置找优先
-    expect(lookupText([scope], label, "/review/occupation/candidates/0/label").provided).toBe(true);
-    // 作用域里没有的原文：照原文，reason null
-    expect(lookupText([scope], "不存在的一段")).toEqual({ text: "不存在的一段", provided: false, reason: null, field: null });
+    expect(lookupText([scope], "/review/occupation/candidates/0/label", label)).toMatchObject({ text: "Software Developers", provided: true });
+    expect(lookupText([scope], "/review/six_dimensions/lines/1/label", src.review.six_dimensions.lines?.[1]?.label as string).text).toBe("Safety");
+    // 同一个位置、不同的原文（附层与业务对象不匹配）：不套文字
+    expect(lookupText([scope], "/review/occupation/candidates/0/label", "别的原文")).toMatchObject({ text: "别的原文", provided: false, reason: null });
+    // source 里有、fields 里没有的位置：原文 + no_field（不去别处借）
+    expect(lookupText([scope], "/review/occupation/status", src.review.occupation.status)).toMatchObject({ provided: false, reason: "no_field" });
     expect(src.review.occupation.status).toBe("catalog_selected");
   });
 
-  it("同一原文在两个位置译文不同 → 有歧义，照原文显示；译文相同就正常给出", () => {
-    const env: DisplayEnvelope = {
-      display_schema_version: "e3-display-v2",
-      kind: "runs",
-      locale: "en",
-      source: { a: "文员", b: "文员", c: "厨师", d: "厨师" } as unknown as DisplayEnvelope["source"],
-      source_view_fingerprint: "x",
-      status: "complete",
-      fields: [
-        { pointer: "/a", key: "k1", status: "provided", text: "Clerk A", source_locale: "zh" },
-        { pointer: "/b", key: "k2", status: "provided", text: "Clerk B", source_locale: "zh" },
-        { pointer: "/c", key: "k3", status: "provided", text: "Cook", source_locale: "zh" },
-        { pointer: "/d", key: "k4", status: "provided", text: "Cook", source_locale: "zh" },
-      ],
-    };
-    const scope = buildScope(env);
-    expect(lookupText([scope], "文员")).toMatchObject({ text: "文员", provided: false, reason: "ambiguous" });
-    expect(lookupText([scope], "厨师")).toMatchObject({ text: "Cook", provided: true });
-    // 按位置找不受歧义影响
-    expect(lookupText([scope], "文员", "/b").text).toBe("Clerk B");
+  it("同名字段各取自己的译文：第二个“文员”缺译就照原文并给原因，不借第一个的英文；两个合法不同译文各自正确（独立核查 R3）", () => {
+    const env = structuredClone(capsEn);
+    const caps = env.source as ProductCapabilities;
+    const a = "/input_catalog/occupations/0/label";
+    const b = "/input_catalog/occupations/1/label";
+    (caps.input_catalog as NonNullable<typeof caps.input_catalog>).occupations[0]!.label = "文员";
+    (caps.input_catalog as NonNullable<typeof caps.input_catalog>).occupations[1]!.label = "文员";
+    env.fields = [
+      { pointer: a, key: "entity.job.a", status: "provided", text: "Office clerk", source_locale: "zh" },
+      { pointer: b, key: "entity.job.b", status: "missing", text: null, missing_reason: "binding_unverified", source_locale: "zh" },
+    ];
+    const scope = scopeOf(env);
+    expect(lookupText([scope], a, "文员")).toMatchObject({ text: "Office clerk", provided: true });
+    expect(lookupText([scope], b, "文员")).toMatchObject({ text: "文员", provided: false, reason: "binding_unverified" });
+    env.fields[1] = { pointer: b, key: "entity.job.b", status: "provided", text: "Administrative clerk", source_locale: "zh" };
+    expect(lookupText([scopeOf(env)], b, "文员").text).toBe("Administrative clerk");
+    expect(lookupText([scopeOf(env)], a, "文员").text).toBe("Office clerk");
   });
 
-  it("嵌套作用域：由内向外找（内层审阅没有的目录名称从外层能力清单拿）", () => {
-    const inner = buildScope(reviewEn);
-    const outer = buildScope(capsEn);
+  it("嵌套作用域：内层的 source 没有这个位置才看外层；内层有同样原文却缺译时不借外层当前资源的文字", () => {
+    const inner = scopeOf(reviewEn);
+    const outer = scopeOf(capsEn);
     const caps = capsEn.source as ProductCapabilities;
     const group = caps.input_catalog?.groups.find((g) => g.group_id === "it_tech")?.label as string;
-    expect(lookupText([inner], group).provided).toBe(false);
-    expect(lookupText([inner, outer], group).provided).toBe(true);
+    const gp = `/input_catalog/groups/${caps.input_catalog?.groups.findIndex((g) => g.group_id === "it_tech")}/label`;
+    expect(lookupText([inner], gp, group).provided).toBe(false);
+    expect(lookupText([inner, outer], gp, group).provided).toBe(true);
+    // 内层 unavailable（没有字段）、原文与外层相同：照原文 + no_field，不借外层
+    const unavailable = structuredClone(capsEn);
+    unavailable.fields = [];
+    unavailable.status = "unavailable";
+    const note = caps.meta.data_pack.note;
+    expect(lookupText([scopeOf(unavailable), outer], "/meta/data_pack/note", note)).toMatchObject({ text: note, provided: false, reason: "no_field" });
+    expect(lookupText([outer], "/meta/data_pack/note", note).provided).toBe(true);
   });
 
   it("缺译（受控夹具 122）：原文 + 服务报的原因", () => {
-    const scope = buildScope(intentPartial);
+    const scope = scopeOf(intentPartial);
     const src = intentPartial.source as { stage_zh: string };
-    const r = lookupText([scope], src.stage_zh, "/stage_zh");
+    const r = lookupText([scope], "/stage_zh", src.stage_zh);
     expect(r.provided).toBe(false);
     expect(r.text).toBe(src.stage_zh);
     expect(r.reason).toBe("translation_missing");
+  });
+
+  it("即时回复的附层（服务错误样例 159）：按当前语言取那组字段，业务对象就是这份回复", () => {
+    const err = samplePayload<{ message_zh: string; display: Parameters<typeof envelopeOfAttachment>[1] }>("159");
+    const en = envelopeOfAttachment(err, err.display, "en");
+    expect(en).not.toBeNull();
+    const r = lookupText([buildScope(en as NonNullable<typeof en>)], "/message_zh", err.message_zh);
+    expect(r.provided).toBe(true);
+    expect(r.text).toContain("re-rate");
   });
 });
 
 describe("知悉项与作答状态", () => {
   it("知悉项按 ack_id 找（样例 126），与 pending_confirmations 一一对应；页面不自动勾选（只是说明）", () => {
     const env = samplePayload<DisplayEnvelope>("126");
-    const scope = buildScope(env);
+    const scope = scopeOf(env);
     const pending = (env.source as ReviewReply).review.pending_confirmations ?? [];
     expect(pending.length).toBeGreaterThan(0);
     for (const id of pending) {
@@ -84,7 +109,7 @@ describe("知悉项与作答状态", () => {
 
   it("作答状态按 (answer, state) 找（样例 127），不按顺序；两种语言都有", () => {
     const env = samplePayload<DisplayEnvelope>("127");
-    const scope = buildScope(env);
+    const scope = scopeOf(env);
     const a = findAnswerState([scope], "taste", "no_preference");
     expect(a?.name.zh).toBe("明确没有口味偏好");
     expect(a?.name.en).toBeTruthy();
@@ -98,50 +123,51 @@ describe("知悉项与作答状态", () => {
     });
   });
 
-  it("草稿迁移信封（样例 149）：迁移说明只从 source 读，不从 fields 推断", () => {
+  it("草稿迁移信封（样例 149）：迁移说明与旧分配只从 source 读，英文按位置取", () => {
     const env = samplePayload<DisplayEnvelope>("149");
     const m = (env.source as DraftView).migration;
     expect(m?.consent_required).toBe(true);
     expect(m?.removed?.[0]?.ref).toBe("hr.commute");
+    expect(m?.allocation_choice_required).toBe(true);
+    const r = lookupText([scopeOf(env)], "/migration/message_zh", m?.message_zh as string);
+    expect(r.provided).toBe(true);
   });
 });
 
-describe("<Zh> 在作用域里", () => {
-  it("英文界面：有译文显示英文；缺译显示原文并标“未翻译”；中文界面原样显示", async () => {
+describe("<Zh pointer> 在作用域里", () => {
+  it("英文界面：有译文显示英文；缺译显示原文并标“未翻译”；整块说明按实际显示的缺译数；中文界面原样显示", async () => {
     const src = reviewEn.source as ReviewReply;
     const label = src.review.occupation.candidates?.[0]?.label as string;
     await i18n.changeLanguage("en");
     const { rerender } = render(
       <DisplayScope envelope={reviewEn}>
-        <Zh>{label}</Zh>
-        <Zh>不在信封里的原文</Zh>
+        <Zh pointer="/review/occupation/candidates/0/label">{label}</Zh>
+        <Zh pointer="/nowhere">不在信封里的原文</Zh>
         <BizNotice />
       </DisplayScope>,
     );
     expect(screen.getByText("Software Developers")).toBeInTheDocument();
     const raw = screen.getByText(/不在信封里的原文/);
     expect(raw).toHaveAttribute("lang", "zh-CN");
-    expect(raw).toHaveAttribute("data-missing", "no_field");
+    expect(raw).toHaveAttribute("data-missing", "no_scope");
     expect(raw.textContent).toContain("(not translated)");
-    // 信封英文完整：不再显示“这一部分有中文原文”的整块说明
+    // 作用域里没有这段原文：不算这个信封的缺译，整块说明不出现
     expect(screen.queryByRole("note")).toBeNull();
 
+    const partialSrc = intentPartial.source as { stage_zh: string };
     rerender(
       <DisplayScope envelope={intentPartial}>
-        <Zh>{(intentPartial.source as { stage_zh: string }).stage_zh}</Zh>
+        <Zh pointer="/stage_zh">{partialSrc.stage_zh}</Zh>
         <BizNotice />
       </DisplayScope>,
     );
-    expect(screen.getByRole("note")).toHaveAttribute("data-missing-count", String((intentPartial.fields ?? []).filter((f) => f.status === "missing").length));
-    expect(screen.getByText((intentPartial.source as { stage_zh: string }).stage_zh, { exact: false }).closest("[data-missing]")).toHaveAttribute(
-      "data-missing",
-      "translation_missing",
-    );
+    expect(screen.getByRole("note")).toHaveAttribute("data-missing-count", "1");
+    expect(screen.getByText(partialSrc.stage_zh, { exact: false }).closest("[data-missing]")).toHaveAttribute("data-missing", "translation_missing");
 
     await i18n.changeLanguage("zh");
     rerender(
       <DisplayScope envelope={reviewEn}>
-        <Zh>{label}</Zh>
+        <Zh pointer="/review/occupation/candidates/0/label">{label}</Zh>
         <DText text={{ key: "k", status: "provided", zh: "中文说明", en: "English note" }} />
       </DisplayScope>,
     );

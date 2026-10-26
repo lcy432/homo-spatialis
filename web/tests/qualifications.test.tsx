@@ -57,7 +57,7 @@ describe("经验题", () => {
     expect(screen.getByText(/至少做过 1 年/)).toBeInTheDocument();
   });
 
-  it("点“有相关经验”：单选保持选中、出现年数框；填 2 年 → entries；再点“没有相关经验”→ provided + 空表", () => {
+  it("点“有相关经验”：只打开年数框、不写答案；填 2 年 → entries；再点“没有相关经验”→ provided + 空表", () => {
     const cook = occupationById(catalog, "occ.soc_35_2014") as NonNullable<ReturnType<typeof occupationById>>;
     render(
       <Harness>
@@ -70,7 +70,8 @@ describe("经验题", () => {
     fireEvent.click(has);
     expect(has.checked).toBe(true);
     expect(none.checked).toBe(false);
-    expect(latest?.draft.experience).toEqual({ state: "provided", entries: [] });
+    // 还没填年数：业务答案仍是未答，不是“没有”（E5-R1）
+    expect(latest?.draft.experience?.state).toBe("unanswered");
     const years = document.querySelector('input[name="experience.occ.soc_35_3031"]') as HTMLInputElement;
     expect(years).not.toBeNull();
     fireEvent.change(years, { target: { value: "2" } });

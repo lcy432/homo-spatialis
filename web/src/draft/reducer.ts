@@ -5,13 +5,19 @@
 // * 四种答案状态严格分开：未答 = 没有这一项；明确 0 = provided "0"；无所谓 = indifferent；暂不确定 = unsure。
 // * 职业按目录选（mode = catalog，带目录版本与内容身份，不带文字）；学历单选、证书多选（selected: [] 是明确“没有”）、经验按相关职业填整年数。
 // * 兴趣与口味按面板多选（state = selected）；“暂不确定”“没有固定爱好 / 没有口味偏好”“随当地体验”是单独的状态，与选中的类别互斥。
-// * 点数：用户亲手输入的文字原样保存；滑块与挪分算出来的值由这里写（能写成最多两位小数就写小数，否则写规范分数）。
-//   滑块的一次拖动只产生一条记录（points/move：目标的精确新值 + 来源：未分配池或某一项）；不自动补零、不按比例扣别的项。
+// * 评分（ratings_normalized_v1，DECISIONS/0047）：六维一组、物质四项一组，每项一个 0–100 的原始评分，互不影响、不必凑 100；
+//   权重由服务按比例换算（页面只做标明为临时的预览）。用户亲手输入的文字原样保存；滑块写整数；“同等重视”把本组每项设成 50。
+//   一次指针手势一条撤销记录（points/set 带手势编号：同一手势合并，下一次手势是新记录）；连续方向键按同一编辑序列合并。
+//   未答不是 0；明确的 0 要用户自己给（滑块、数字框或“记为 0”）。物质父项为 0 时四项不参与，但草稿里的四项答案原样留着。
 // * 不再收集硬要求与属性偏好（新问卷没有这两块；旧草稿由服务端迁移清空）。
 // * 撤销以“用户的一次操作”为一步：连续在同一个输入框里打字、连续按方向键合成一步。
 // * 草稿编号、修订号与 meta 归服务器：这里从不改它们（保存时由自动保存写上当时的服务器修订号）。
 import type { AllocationGroup, PointEntry, UserInputDraft } from "../contract/types";
-import { Fraction, formatComputed, parsePoints } from "./exact";
+import { Fraction, parsePoints } from "./exact";
+
+/** 评分的范围与精度（与能力清单 points.ratings 相同：0–100、最多两位小数）；页面也会读能力清单，这里是最后一道形状检查。 */
+const RATING_MAX = new Fraction(100);
+const RATING_MAX_DECIMALS = 2;
 
 export interface DraftSnapshot {
   draft: UserInputDraft;
@@ -54,29 +60,18 @@ export type ContentAction =
   | { type: "ability/set"; abilityId: string; state: "provided" | "unsure" | null }
   | { type: "age/text"; text: string }
   | { type: "cash/text"; text: string; currency: string; pricePeriod: string }
+  /** 数字框里亲手输入的文字：原样保存（空字符串 = 回到未答）。 */
   | { type: "points/text"; group: AllocationGroup; key: string; text: string }
   | { type: "points/state"; group: AllocationGroup; key: string; state: "indifferent" | "unsure" | "unanswered" }
-  | { type: "points/step"; group: AllocationGroup; key: string; delta: number; maxDecimals: number }
-  | { type: "points/reduce"; group: AllocationGroup; key: string; amount: string; maxDecimals: number }
-  | { type: "points/transfer"; group: AllocationGroup; from: string; to: string; amount: string; maxDecimals: number }
   /**
-   * 滑块的一次拖动：目标项的精确新值（规范写法）。source 为 null 时差额进出“未分配”池（不改任何别的项）；
-   * source 是某一项时只在这两项之间转移，来源不够就不做。
+   * 滑块或按钮算出来的评分（规范写法，0–100）。gesture 是这次手势的编号：同一手势的多次输入合并成一条撤销记录，
+   * 下一次独立手势（新的编号）是新记录；连续方向键用同一个编号，失焦或换项时结束。
    */
-  | {
-      type: "points/move";
-      group: AllocationGroup;
-      key: string;
-      value: string;
-      source: string | null;
-      maxDecimals: number;
-      /** 均分状态下拖动：先把每项换成精确的均分值（同一条记录），再移动。 */
-      fromEqual?: { keys: string[]; value: string };
-    }
-  /** 合计已满而还有未答项时，用户明确点“将其余项目设为 0”才写入这些零值。 */
-  | { type: "points/setRestZero"; group: AllocationGroup; keys: string[] }
-  | { type: "points/equalSplit"; group: AllocationGroup }
-  | { type: "points/toManual"; group: AllocationGroup; keys: string[]; value: string }
+  | { type: "points/set"; group: AllocationGroup; key: string; value: string; gesture: string }
+  /** “同等重视”：用户主动把本组每项的原始评分设成 value（服务规定 50）；一条记录。 */
+  | { type: "points/equalWeight"; group: AllocationGroup; keys: string[]; value: string }
+  /** 当前版本的草稿还带着旧的百分比分配（manual / equal_split）：用户明确选择改成独立评分、重新打分（各项未答）。 */
+  | { type: "points/rerate"; group: AllocationGroup }
   | { type: "health/choice"; questionId: string; choice: HealthChoice | null }
   /** 面板之外的单独状态，或回到未答：都清空选中的类别（撤销可以找回）。 */
   | { type: "interest/state"; field: InterestField; state: InterestSpecialState | "unanswered" }
@@ -123,8 +118,8 @@ function coalesceOf(a: ContentAction): string | null {
       return "cash";
     case "points/text":
       return `points.${a.group}.${a.key}`;
-    case "points/move":
-      return `points.move.${a.group}.${a.key}.${a.source ?? ""}`;
+    case "points/set":
+      return `points.set.${a.group}.${a.key}.${a.gesture}`;
     case "experience/set":
       return `experience.${a.conceptId}`;
     case "freeText/text":
@@ -138,25 +133,16 @@ function entriesOf(d: UserInputDraft, g: AllocationGroup): Record<string, PointE
   return { ...(d[g].entries ?? {}) };
 }
 
-function withGroup(
-  d: UserInputDraft,
-  g: AllocationGroup,
-  mode: "manual" | "equal_split" | null,
-  entries: Record<string, PointEntry>,
-): UserInputDraft {
-  return { ...d, [g]: { mode, entries } };
+const RATINGS_MODE = "ratings_normalized_v1";
+
+/** 评分组只在独立评分模式下可编辑：旧的百分比分配（manual / equal_split）要先由用户明确改成独立评分。 */
+function editable(d: UserInputDraft, g: AllocationGroup): boolean {
+  const mode = d[g].mode ?? null;
+  return mode === null || mode === RATINGS_MODE;
 }
 
-function providedValue(e: PointEntry | undefined, maxDecimals: number): Fraction | null {
-  if (!e || e.state !== "provided" || e.value_text == null) return null;
-  const p = parsePoints(e.value_text, maxDecimals);
-  return p.ok ? p.value : null;
-}
-
-/** 按钮、滑块与挪分的起点：没有数字的项（未答、无所谓、暂不确定）从 0 开始；写法不对的项返回 null，不替用户改。 */
-function startingValue(e: PointEntry | undefined, maxDecimals: number): Fraction | null {
-  if (!e || e.state !== "provided") return new Fraction(0);
-  return providedValue(e, maxDecimals);
+function withGroup(d: UserInputDraft, g: AllocationGroup, entries: Record<string, PointEntry>): UserInputDraft {
+  return { ...d, [g]: { mode: RATINGS_MODE, entries } };
 }
 
 function interestOf(d: UserInputDraft, field: InterestField): { state: string; selected: string[] } {
@@ -244,10 +230,11 @@ function applyContent(s: DraftSnapshot, a: ContentAction): DraftSnapshot | null 
         draft: { ...d, certificates: a.state === "none" ? { state: "provided", selected: [] } : { state: a.state, selected: [] } },
       };
     case "experience/set": {
+      // 年数只有写成非负整数才成为答案；删掉最后一条就回到未答（“明确没有相关经验”只来自用户点那个单选）
       const cur = d.experience?.state === "provided" ? [...(d.experience.entries ?? [])] : [];
       const rest = cur.filter((e) => e.concept_id !== a.conceptId);
       const entries = a.years === null ? rest : [...rest, { concept_id: a.conceptId, years: a.years }];
-      return { ...s, draft: { ...d, experience: { state: "provided", entries } } };
+      return { ...s, draft: { ...d, experience: entries.length ? { state: "provided", entries } : { state: "unanswered", entries: [] } } };
     }
     case "experience/state":
       return {
@@ -283,97 +270,39 @@ function applyContent(s: DraftSnapshot, a: ContentAction): DraftSnapshot | null 
       };
     }
     case "points/text": {
-      if (d[a.group].mode === "equal_split") return null;
+      if (!editable(d, a.group)) return null;
       const entries = entriesOf(d, a.group);
       if (a.text === "") delete entries[a.key];
       else entries[a.key] = { state: "provided", value_text: a.text };
-      return { ...s, draft: withGroup(d, a.group, "manual", entries) };
+      return { ...s, draft: withGroup(d, a.group, entries) };
     }
     case "points/state": {
-      if (d[a.group].mode === "equal_split") return null;
+      if (!editable(d, a.group)) return null;
       const entries = entriesOf(d, a.group);
       if (a.state === "unanswered") delete entries[a.key];
       else entries[a.key] = { state: a.state };
-      return { ...s, draft: withGroup(d, a.group, "manual", entries) };
+      return { ...s, draft: withGroup(d, a.group, entries) };
     }
-    case "points/step": {
-      if (d[a.group].mode === "equal_split") return null;
+    case "points/set": {
+      if (!editable(d, a.group)) return null;
+      // 评分写十进制（分数写法“50/3”不是评分，服务会拒绝），范围 0–100
+      const parsed = parsePoints(a.value, RATING_MAX_DECIMALS);
+      if (a.value.includes("/") || !parsed.ok || parsed.value.s < 0n || parsed.value.compare(RATING_MAX) > 0) return null;
       const entries = entriesOf(d, a.group);
-      const cur = startingValue(entries[a.key], a.maxDecimals);
-      if (cur === null) return null;
-      let next = cur.add(a.delta);
-      if (next.s < 0n) next = new Fraction(0);
-      entries[a.key] = { state: "provided", value_text: formatComputed(next, a.maxDecimals) };
-      return { ...s, draft: withGroup(d, a.group, "manual", entries) };
+      const cur = entries[a.key];
+      if (cur?.state === "provided" && cur.value_text === a.value) return null;
+      entries[a.key] = { state: "provided", value_text: a.value };
+      return { ...s, draft: withGroup(d, a.group, entries) };
     }
-    case "points/reduce": {
-      if (d[a.group].mode === "equal_split") return null;
-      const entries = entriesOf(d, a.group);
-      const cur = providedValue(entries[a.key], a.maxDecimals);
-      if (cur === null) return null;
-      let next = cur.sub(new Fraction(a.amount));
-      if (next.s < 0n) next = new Fraction(0);
-      entries[a.key] = { state: "provided", value_text: formatComputed(next, a.maxDecimals) };
-      return { ...s, draft: withGroup(d, a.group, "manual", entries) };
-    }
-    case "points/transfer": {
-      if (d[a.group].mode === "equal_split" || a.from === a.to) return null;
-      const entries = entriesOf(d, a.group);
-      const from = providedValue(entries[a.from], a.maxDecimals);
-      if (from === null) return null;
-      const want = new Fraction(a.amount);
-      const moved = from.compare(want) < 0 ? from : want;
-      const toCur = startingValue(entries[a.to], a.maxDecimals);
-      if (toCur === null) return null;
-      entries[a.from] = { state: "provided", value_text: formatComputed(from.sub(moved), a.maxDecimals) };
-      entries[a.to] = { state: "provided", value_text: formatComputed(toCur.add(moved), a.maxDecimals) };
-      return { ...s, draft: withGroup(d, a.group, "manual", entries) };
-    }
-    case "points/move": {
-      if (a.source === a.key) return null;
-      let entries = entriesOf(d, a.group);
-      if (d[a.group].mode === "equal_split") {
-        if (!a.fromEqual) return null;
-        entries = {};
-        for (const k of a.fromEqual.keys) entries[k] = { state: "provided", value_text: a.fromEqual.value };
-      }
-      const cur = startingValue(entries[a.key], a.maxDecimals);
-      if (cur === null) return null;
-      const parsed = parsePoints(a.value, a.maxDecimals);
-      if (!parsed.ok || parsed.value.s < 0n) return null;
-      const next = parsed.value;
-      const delta = next.sub(cur);
-      if (a.source !== null) {
-        const src = startingValue(entries[a.source], a.maxDecimals);
-        if (src === null) return null;
-        const srcNext = src.sub(delta);
-        if (srcNext.s < 0n) return null;
-        entries[a.source] = { state: "provided", value_text: formatComputed(srcNext, a.maxDecimals) };
-      }
-      entries[a.key] = { state: "provided", value_text: formatComputed(next, a.maxDecimals) };
-      return { ...s, draft: withGroup(d, a.group, "manual", entries) };
-    }
-    case "points/setRestZero": {
-      if (d[a.group].mode === "equal_split") return null;
-      const entries = entriesOf(d, a.group);
-      let changed = false;
-      for (const k of a.keys) {
-        if (!entries[k]) {
-          entries[k] = { state: "provided", value_text: "0" };
-          changed = true;
-        }
-      }
-      return changed ? { ...s, draft: withGroup(d, a.group, "manual", entries) } : null;
-    }
-    case "points/equalSplit":
-      // E3 规定：选了平均分配就不能同时带手工数值
-      return { ...s, draft: withGroup(d, a.group, "equal_split", {}) };
-    case "points/toManual": {
-      if (d[a.group].mode !== "equal_split") return null;
+    case "points/equalWeight": {
+      if (!editable(d, a.group)) return null;
       const entries: Record<string, PointEntry> = {};
       for (const k of a.keys) entries[k] = { state: "provided", value_text: a.value };
-      return { ...s, draft: withGroup(d, a.group, "manual", entries) };
+      return { ...s, draft: withGroup(d, a.group, entries) };
     }
+    case "points/rerate":
+      if (editable(d, a.group)) return null;
+      return { ...s, draft: withGroup(d, a.group, {}) };
     case "health/choice": {
       const items = [...(d.health.items ?? [])];
       const i = items.findIndex((x) => x.question_id === a.questionId);

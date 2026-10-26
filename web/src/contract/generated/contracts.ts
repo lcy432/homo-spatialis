@@ -1,11 +1,11 @@
 /* eslint-disable */
 /**
- * 由 web/scripts/contract-gen.mjs 从 contracts/product/v3/*.schema.json 生成（结构版本 e3a-product-schema-v3.4）。
+ * 由 web/scripts/contract-gen.mjs 从 contracts/product/v3/*.schema.json 生成（结构版本 e3a-product-schema-v3.5）。
  * 不要手改：共享结构由 E3 维护（src/common/product_contracts.py），结构变了就重新运行 npm run contract:gen。
  */
 
 /**
- * 全部 34 份共享消息（只为生成类型而合成的根，不是一份真实消息）
+ * 全部 36 份共享消息（只为生成类型而合成的根，不是一份真实消息）
  */
 export interface ProductContracts {
   CatalogCompilation: CatalogCompilation;
@@ -34,6 +34,8 @@ export interface ProductContracts {
   RunList: RunList;
   RunProgress: RunProgress;
   RunReceipt: RunReceipt;
+  RunStartPreview: RunStartPreview;
+  RunStartPreviewRequest: RunStartPreviewRequest;
   RunSubmission: RunSubmission;
   RunSubmitReply: RunSubmitReply;
   RunSubmitRequest: RunSubmitRequest;
@@ -110,7 +112,7 @@ export interface ProductMeta {
   health_questionnaire_version: string;
   questionnaire_version: string;
   sample?: SampleLabel | null;
-  schema_version: "e3a-product-schema-v3.3" | "e3a-product-schema-v3.4";
+  schema_version: "e3a-product-schema-v3.3" | "e3a-product-schema-v3.4" | "e3a-product-schema-v3.5";
   vocabulary_version: string;
 }
 /**
@@ -298,7 +300,8 @@ export interface ConfirmedMaterial {
   status: "allocated" | "not_applicable_parent_zero";
 }
 /**
- * 确认的定和分配：规范精确分数（参与计算）与显示文字（只供阅读）。
+ * 确认的定和分配：规范精确分数（参与计算）与显示文字（只供阅读）。独立评分（v3.5）另外保存原始评分、原始合计与换算规则；
+ * E1 编译只读 ``points``（换算后的最终权重）。
  *
  * This interface was referenced by `ProductContracts`'s JSON-Schema
  * via the `definition` "ConfirmedAllocation".
@@ -307,10 +310,15 @@ export interface ConfirmedAllocation {
   display: {
     [k: string]: string;
   };
-  mode: "manual" | "equal_split";
+  mode: "manual" | "equal_split" | "ratings_normalized_v1";
   points: {
     [k: string]: string;
   };
+  rating_total?: string | null;
+  ratings?: {
+    [k: string]: string;
+  } | null;
+  rule?: "ratings_normalized_v1" | null;
 }
 /**
  * 确认的开局现金：保留原始金额、币种、时期、口径与换算依据，以及换算后的整数最小单位。
@@ -1142,7 +1150,7 @@ export interface OccupationCapability {
   vocabulary_version: string;
 }
 /**
- * 定和量表的规则：合计、手工输入的小数位、显示小数位、精确分数的规范写法与均分的精确值。
+ * 定和量表的规则：合计、手工输入的小数位、显示小数位、精确分数的规范写法与均分的精确值。v3.5 起新问卷用 ``ratings``。
  *
  * This interface was referenced by `ProductContracts`'s JSON-Schema
  * via the `definition` "PointsRules".
@@ -1154,8 +1162,28 @@ export interface PointsRules {
   equal_split_six: string;
   manual_entry: string;
   manual_max_decimals: number;
+  ratings?: RatingsRules | null;
   rules: string[];
   total: 100;
+}
+/**
+ * 独立评分（v3.5，``ratings_normalized_v1``）：每项 0–100，滑条步长 1，数字精调最多 ``max_decimals`` 位小数；不必凑满 100。
+ * 全部要回答的项都回答了、原始合计大于 0 之后，E3 按 100 × 评分 ÷ 合计换成精确权重。“同等重视”是用户主动把每项设为 50。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "RatingsRules".
+ */
+export interface RatingsRules {
+  equal_weight_rating?: "50";
+  max_decimals: number;
+  maximum?: 100;
+  method: "ratings_normalized_v1";
+  minimum?: 0;
+  /**
+   * @minItems 1
+   */
+  rules: [string, ...string[]];
+  slider_step?: 1;
 }
 /**
  * 当前会话（``POST /api/v1/session`` 交换邀请之后、``GET /api/v1/session``）：到期时间、本会话的 CSRF token、次数与服务规则。
@@ -1435,6 +1463,7 @@ export interface LeisureInterestAnswer {
 }
 /**
  * 一组定和分配的作答。``mode = equal_split`` 表示用户**主动**选择了平均分配（不预选、不默认）；``None`` 表示还没开始分配。
+ * ``ratings_normalized_v1``：独立评分（未答不是 0；“同等重视”由用户主动把每项设为 50）。
  *
  * This interface was referenced by `ProductContracts`'s JSON-Schema
  * via the `definition` "AllocationAnswer".
@@ -1443,7 +1472,7 @@ export interface AllocationAnswer {
   entries?: {
     [k: string]: PointEntry;
   };
-  mode?: ("manual" | "equal_split") | null;
+  mode?: ("manual" | "equal_split" | "ratings_normalized_v1") | null;
 }
 /**
  * 一个维度或细项的作答：已提供时写数值文字（精确十进制或规范分数），其余状态不写数值。明确 0 写 ``"0"``。
@@ -1492,6 +1521,8 @@ export interface TasteAnswer {
  * via the `definition` "DraftMigration".
  */
 export interface DraftMigration {
+  allocation_choice_required?: boolean;
+  allocations?: LegacyAllocation[];
   consent_required: boolean;
   /**
    * @minItems 1
@@ -1502,6 +1533,30 @@ export interface DraftMigration {
   removed?: RemovedAnswer[];
   to_questionnaire_version: string;
   version_changed: boolean;
+}
+/**
+ * 旧草稿里的一组定和分配（v3.5）：迁移前照原样给你看；它们是当时的百分比分配，不是独立评分，迁移时由你明确选择重新评分或
+ * 同等重视，系统不把它们改读成评分。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "LegacyAllocation".
+ */
+export interface LegacyAllocation {
+  group: "six_dimensions" | "material";
+  lines?: LegacyAllocationLine[];
+  mode?: ("manual" | "equal_split") | null;
+}
+/**
+ * 旧草稿里一组分配的一项：原来的作答状态与原来写的数值（百分比，不是独立评分）。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "LegacyAllocationLine".
+ */
+export interface LegacyAllocationLine {
+  key: string;
+  label: string;
+  state: "unanswered" | "provided" | "indifferent" | "unsure";
+  value_text?: string | null;
 }
 /**
  * 旧草稿里新问卷不再收集的一条答案（迁移说明里逐条列出，不悄悄丢掉）。``summary`` 是 E3 生成的可读写法（受支持的硬要求写成
@@ -1604,12 +1659,17 @@ export interface InterestReview {
   unrecognized?: string[];
 }
 /**
+ * 一组定和分配的审阅。独立评分时 ``rating_total`` 是原始评分的合计（回答了的那些），``total`` 是换算后权重的合计（精确 100），
+ * ``rule`` 写明换算规则。
+ *
  * This interface was referenced by `ProductContracts`'s JSON-Schema
  * via the `definition` "AllocationReview".
  */
 export interface AllocationReview {
   lines?: AllocationLine[];
-  mode?: ("manual" | "equal_split") | null;
+  mode?: ("manual" | "equal_split" | "ratings_normalized_v1") | null;
+  rating_total?: ExactNumber | null;
+  rule?: "ratings_normalized_v1" | null;
   status: "complete" | "incomplete" | "not_applicable";
   total?: ExactNumber | null;
 }
@@ -1624,6 +1684,8 @@ export interface AllocationLine {
   exact?: string | null;
   key: string;
   label: string;
+  rating_display?: string | null;
+  rating_exact?: string | null;
   state: "unanswered" | "provided" | "indifferent" | "unsure";
   support: "supported" | "partially_supported" | "unsupported";
   usage: ("planning" | "start_state" | "qualification" | "scoring" | "retained_only")[];
@@ -1751,9 +1813,10 @@ export interface StatementReview {
  */
 export interface RunIntentView {
   allowed_actions?: (
-    "submit" | "cancel" | "resume" | "delete" | "view_progress" | "view_result" | "create_new_intent"
+    "submit" | "cancel" | "resume" | "delete" | "view_progress" | "view_result" | "create_new_intent" | "start_again"
   )[];
   confirm_with?: string | null;
+  confirmation_source?: ("user_confirm" | "start_authorization") | null;
   confirmed: ConfirmedRef;
   created_at: string;
   deletion: DeletionState;
@@ -1764,6 +1827,7 @@ export interface RunIntentView {
   meta: ProductMeta;
   preflight?: ProductPreflight | null;
   progress?: RunProgress | null;
+  progress_summary: ProgressSummary;
   quota: QuotaSummary;
   result_available: boolean;
   run_id?: string | null;
@@ -1781,6 +1845,7 @@ export interface RunIntentView {
     | "deleted"
     | "expired";
   stage_zh: string;
+  start?: StartAuthorizationView | null;
   support_ref?: string | null;
   updated_at: string;
   waiting_for: "user" | "maintainer" | "service" | "none";
@@ -2095,6 +2160,8 @@ export interface StartSummary {
  * via the `definition` "RunProgress".
  */
 export interface RunProgress {
+  clone_years_planned?: number | null;
+  clone_years_settled?: number | null;
   clones?: CloneProgress[];
   cost: CostStatus;
   meta: ProductMeta;
@@ -2146,6 +2213,37 @@ export interface CostStatus {
   uncertain_cost?: string | null;
 }
 /**
+ * 等待页的一句当前状态与进度条（DECISIONS/0049）：读取运行意图时按服务库的阶段与 E1 写下的权威进度快照当场生成（只读，没有
+ * ``run_id`` 的检查阶段也有）。
+ *
+ * * ``sentence_zh`` 是一句当前状态，新的一句覆盖上一句（不是执行历史）；``updated_at`` 是这句所依据的记录的时间（进度快照或意图
+ *   本身的更新时间），断线时页面照它显示“最后已知”。
+ * * ``mode``：``indeterminate`` 不定长——检查、排队、整理结果、还没有第一份进度快照，以及停下时没有快照；``clone_years`` 按已结算的
+ *   分身年度数：``settled_clone_years`` 是 E1 进度快照里各分身已结算年数之和（出局或中断之后没有经历的年份不算），
+ *   ``planned_clone_years`` 是这次的名单（城市 × 每城分身数，E1 的名单按它冻结）× 年数；``finished`` 只在结果真的可以读时，完成不等于
+ *   所有分身都是 C。不按调用次数、不按时间增长；不含内部状态、路径、凭证或评分参数。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "ProgressSummary".
+ */
+export interface ProgressSummary {
+  mode: "indeterminate" | "clone_years" | "finished";
+  phase:
+    | "checking"
+    | "queued"
+    | "simulating"
+    | "assembling_result"
+    | "finished"
+    | "needs_attention"
+    | "cancelled"
+    | "deleted"
+    | "expired";
+  planned_clone_years?: number | null;
+  sentence_zh: string;
+  settled_clone_years?: number | null;
+  updated_at: string;
+}
+/**
  * 一次运行意图的有效设置：创建时由服务端校验并保存，之后的检查、确认、执行、进度、结果与恢复都用这一份（改服务默认值不影响它）。
  * 规划候选上限与服务尝试上限按这次的规模与修订、重试规则算出。离线 mock 不花钱：费用上限照样写用户这次的选择（它进入设置的
  * 身份），服务尝试上限不出现。
@@ -2167,6 +2265,35 @@ export interface RunSettingsView {
   service_attempt_limit?: number | null;
   settings_fingerprint: string;
   years: number;
+}
+/**
+ * 这次准备带着的一次开始授权（DECISIONS/0048）。``pending``：检查通过后由服务按它开始；``used``：已经按它开始——确认来源是这份
+ * 授权，不是用户在检查之后又点了一次；``void``：条件变了或开始前停下，授权作废，不会再自动开始（``void_reason``）。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "StartAuthorizationView".
+ */
+export interface StartAuthorizationView {
+  acknowledged: ("ack:start.one_run" | "ack:start.auto_start" | "ack:start.scope" | "ack:start.cost_cap")[];
+  authorized_at: string;
+  consent_fingerprint: string;
+  mode: "start_when_ready";
+  state: "pending" | "used" | "void";
+  used_at?: string | null;
+  void_reason?:
+    | (
+        | "conditions_changed"
+        | "consent_changed"
+        | "options_not_allowed"
+        | "paid_calls_disabled"
+        | "quota_exhausted"
+        | "preflight_blocked"
+        | "authorization_mismatch"
+        | "data_pack_unavailable"
+        | "internal_error"
+        | "cancelled"
+      )
+    | null;
 }
 /**
  * 面向产品的结果：只投影 E1 已算好的报告与生活事实，不另算“更好看”的分数，不排序，不给现实推荐结论。
@@ -2615,6 +2742,7 @@ export interface RunSummary {
  * via the `definition` "DraftMigrateRequest".
  */
 export interface DraftMigrateRequest {
+  allocation_choice?: ("rerate" | "equal_weight") | null;
   clear_removed?: boolean;
   expected_revision: number;
 }
@@ -2923,6 +3051,9 @@ export interface ProfileList {
  * 准备一次模拟（``POST /api/v1/run-intents``）：引用一份确认画像，可以选每城分身数、年数与这次的费用上限（省略就用服务默认值，
  * 能选什么见 ``ServiceRules.options``）。城市来自确认画像。服务端校验后保存这次的有效设置，再排队做运行前检查（不扣次数）。
  *
+ * 带 ``start``（一次开始）：检查通过之后由服务按这份授权自动开始，页面不需要、也不应该再发确认；不带就是原来的流程（检查之后由
+ * 用户在 ``submit`` 确认开始）。
+ *
  * This interface was referenced by `ProductContracts`'s JSON-Schema
  * via the `definition` "RunIntentCreateRequest".
  */
@@ -2930,7 +3061,30 @@ export interface RunIntentCreateRequest {
   clones_per_city?: number | null;
   confirmed_id: string;
   max_cost_cny?: string | null;
+  start?: StartWhenReady | null;
   years?: number | null;
+}
+/**
+ * 一次“确认并开始”（``RunIntentCreateRequest.start``）：用户看过设置预览、勾选了全部必要知悉项，授权“检查通过后就按这些设置开始，
+ * 只开始一次”。``consent_fingerprint`` 是那份预览的同意身份（服务端重新核对，对不上就拒绝）；``idempotency_key`` 是这一次操作的
+ * 幂等键：连点、回复丢失、刷新或重开后重发都带同一个键（页面要把它和这次操作一起保存），服务端返回同一个意图——即使它已经结束、
+ * 取消或删除，也不另起运行；同一个键配不同请求是冲突。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "StartWhenReady".
+ */
+export interface StartWhenReady {
+  accept: true;
+  /**
+   * @minItems 1
+   */
+  acknowledged: [
+    "ack:start.one_run" | "ack:start.auto_start" | "ack:start.scope" | "ack:start.cost_cap",
+    ...("ack:start.one_run" | "ack:start.auto_start" | "ack:start.scope" | "ack:start.cost_cap")[],
+  ];
+  consent_fingerprint: string;
+  idempotency_key: string;
+  mode: "start_when_ready";
 }
 /**
  * 提交回执：接受、重复提交（返回原运行 ID，不再生成新的一批分身）或拒绝（附原因）。
@@ -2945,6 +3099,56 @@ export interface RunReceipt {
   run_id?: string | null;
   service: "offline_bridge" | "hosted_service" | "contract_example_only";
   status: "accepted" | "duplicate_same_run" | "rejected";
+}
+/**
+ * 设置预览：这次会用的有效设置（城市、每城分身数、年数、规划器与模型种类、费用上限、调用上限）、范围说明、必要知悉项与同意身份。
+ *
+ * ``consent_fingerprint`` 绑定确认画像、资料包、有效设置（含模型、报价与费用上限）、范围说明的业务版本与知悉项编号；换语言不改它。
+ * 费用上限是停机上限，不是预计费用。``start_allowed`` 为假时 ``start_refusal`` 说明此刻为什么不能开始（付费调用没开、次数用完、已经
+ * 有一次条件不同的准备）。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "RunStartPreview".
+ */
+export interface RunStartPreview {
+  /**
+   * @minItems 1
+   */
+  acknowledgements: [StartAcknowledgement, ...StartAcknowledgement[]];
+  confirmed: ConfirmedRef;
+  consent_fingerprint: string;
+  display?: DisplayAttachment | null;
+  meta: ProductMeta;
+  planner: PlannerAndCost;
+  quota: QuotaSummary;
+  scope_version: "e3c-start-scope-v1";
+  scope_zh?: string[];
+  settings: RunSettingsView;
+  start_allowed: boolean;
+  start_refusal?: ("paid_calls_disabled" | "quota_exhausted" | "intent_conflict") | null;
+}
+/**
+ * 开始之前要知悉的一项（“确认并开始”时一起勾选）。同意身份只记 ``ack_id`` 与范围说明的业务版本，文字随语言变。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "StartAcknowledgement".
+ */
+export interface StartAcknowledgement {
+  ack_id: "ack:start.one_run" | "ack:start.auto_start" | "ack:start.scope" | "ack:start.cost_cap";
+  text_zh: string;
+}
+/**
+ * 设置预览（``POST /api/v1/run-start-preview``）：与准备模拟同样的确认画像引用与运行选项（省略的用服务默认值）。只读：不编译生活
+ * 输入、不排队、不预留次数、不调用模型、不写库。
+ *
+ * This interface was referenced by `ProductContracts`'s JSON-Schema
+ * via the `definition` "RunStartPreviewRequest".
+ */
+export interface RunStartPreviewRequest {
+  clones_per_city?: number | null;
+  confirmed_id: string;
+  max_cost_cny?: string | null;
+  years?: number | null;
 }
 /**
  * 提交一次运行：引用确认画像与预检查，带幂等键。相同确认的重复点击只生成同一运行；输入或配置变了必须重查。
@@ -3006,7 +3210,11 @@ export interface ServiceError {
     | "run_options_invalid"
     | "run_settings_unavailable"
     | "migration_consent_required"
+    | "migration_choice_required"
     | "migration_not_needed"
+    | "start_consent_stale"
+    | "start_acknowledgement_missing"
+    | "start_already_authorized"
     | "rate_limited"
     | "csrf_failed"
     | "origin_rejected"

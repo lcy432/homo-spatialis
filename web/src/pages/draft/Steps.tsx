@@ -14,6 +14,8 @@ import { MapStage } from "../../components/MapStage";
 import { Section } from "../../components/common";
 import { PageTitle, StepNav } from "../../components/Layout";
 import { occupationById } from "../../draft/catalog";
+import { capsPtr } from "../../display/pointers";
+import { at } from "../../display/scope";
 import { useDraftEditor } from "../../draft/DraftEditor";
 import { parsePoints } from "../../draft/exact";
 import type { HealthChoice, InterestField, InterestSpecialState } from "../../draft/reducer";
@@ -112,20 +114,20 @@ function OccupationTextCompat() {
           <div className="stack" aria-busy={!current || undefined}>
             <h3>{t("facts.candidatesTitle")}</h3>
             <p>
-              <Zh>{occ.message_zh}</Zh>
+              <Zh pointer="/review/occupation/message_zh">{occ.message_zh}</Zh>
             </p>
             <ul className="plain stack">
-              {(occ.candidates ?? []).map((c) => {
+              {(occ.candidates ?? []).map((c, ci) => {
                 const picked = d.occupation.selected_candidate === c.candidate_id;
                 return (
                   <li key={c.candidate_id} className="card" data-candidate={c.candidate_id}>
                     <strong>
-                      <Zh>{c.label}</Zh>
+                      <Zh pointer={at("/review/occupation/candidates", ci, "label")}>{c.label}</Zh>
                     </strong>{" "}
                     {picked ? <span className="chip accent">{t("facts.picked")}</span> : null}
                     <ul className="small">
-                      {c.duties.map((x) => (
-                        <Zh as="li" key={x}>
+                      {c.duties.map((x, xi) => (
+                        <Zh as="li" key={x} pointer={at("/review/occupation/candidates", ci, "duties", String(xi))}>
                           {x}
                         </Zh>
                       ))}
@@ -170,12 +172,15 @@ export function ExperienceQuestion({ catalog, occupation }: { catalog: InputCata
       </fieldset>
     );
   }
+  // 单选的勾选跟着用户点的那个：年数还没填时业务答案仍是“未答”（刷新后回到未答，不会变成“没有”）
   const mode: "unanswered" | "unsure" | "none" | "has" =
-    exp?.state === "unsure" ? "unsure" : exp?.state === "provided" ? (entries.length || wantsEntries ? "has" : "none") : "unanswered";
+    exp?.state === "unsure" ? "unsure" : exp?.state === "provided" ? (entries.length || wantsEntries ? "has" : "none") : wantsEntries ? "has" : "unanswered";
   return (
     <fieldset data-field="experience">
       <legend>{t("facts.experience")}</legend>
-      <Zh as="p">{q.prompt}</Zh>
+      <Zh as="p" pointer={capsPtr.experiencePrompt(catalog, q.question_id)}>
+        {q.prompt}
+      </Zh>
       <p className="small muted">{t("facts.expNote")}</p>
       {(
         [
@@ -193,9 +198,9 @@ export function ExperienceQuestion({ catalog, occupation }: { catalog: InputCata
             checked={mode === v}
             onChange={() => {
               setWantsEntries(v === "has");
-              // “有相关经验”先成为空表，由下面填年数；其他状态照原样
+              // “有相关经验”只是打开年数框，不写任何答案（E5-R1：未填完不能存成“没有”）；原来是“没有”或“暂不确定”就先回到未答
               if (v === "has") {
-                if (exp?.state !== "provided") dispatch({ type: "experience/state", state: "none" });
+                if (exp?.state === "unsure" || (exp?.state === "provided" && entries.length === 0)) dispatch({ type: "experience/state", state: "unanswered" });
               } else dispatch({ type: "experience/state", state: v });
             }}
           />
@@ -210,7 +215,10 @@ export function ExperienceQuestion({ catalog, occupation }: { catalog: InputCata
             const id = `exp-${cid}`;
             return (
               <p key={cid}>
-                <label htmlFor={id}>{t("facts.expYears", { label: o?.label ?? cid })}</label>{" "}
+                <label htmlFor={id}>
+                  <Zh pointer={capsPtr.occupation(catalog, cid)}>{o?.label ?? cid}</Zh>
+                  {t("facts.expYears", { label: "" })}
+                </label>{" "}
                 <input
                   id={id}
                   name={`experience.${cid}`}
@@ -250,7 +258,7 @@ function StaleEntries({ entries, catalog }: { entries: readonly { concept_id: st
     <ul className="small">
       {entries.map((e) => (
         <li key={e.concept_id}>
-          <Zh>{occupationById(catalog, e.concept_id)?.label ?? e.concept_id}</Zh>：{e.years}{" "}
+          <Zh pointer={capsPtr.occupation(catalog, e.concept_id)}>{occupationById(catalog, e.concept_id)?.label ?? e.concept_id}</Zh>：{e.years}{" "}
           <button type="button" className="link" onClick={() => dispatch({ type: "experience/set", conceptId: e.concept_id, years: null })}>
             {t("common.remove")}
           </button>
@@ -275,11 +283,22 @@ function Qualifications({ catalog }: { catalog: InputCatalog }) {
   const certItems: PanelItem[] = (catalog.certificates ?? []).map((c) => ({
     key: c.ability_id,
     label: c.label,
+    pointer: capsPtr.certificate(catalog, c.ability_id),
     groupId: "all",
     searchTerms: [c.label],
-    note: t("facts.certFor", { list: c.occupations.map((id) => occupationById(catalog, id)?.label ?? id).join("、") }),
+    note: (
+      <>
+        {t("facts.certFor", { list: "" })}
+        {c.occupations.map((id, i) => (
+          <span key={id}>
+            {i ? "、" : ""}
+            <Zh pointer={capsPtr.occupation(catalog, id)}>{occupationById(catalog, id)?.label ?? id}</Zh>
+          </span>
+        ))}
+      </>
+    ),
   }));
-  const certGroups: PanelGroupDef[] = [{ id: "all", label: t("facts.certificates") }];
+  const certGroups: PanelGroupDef[] = [{ id: "all", label: t("facts.certificates"), pointer: null }];
   return (
     <Section title={t("facts.qualTitle")}>
       <p className="small muted">{t("facts.qualNote")}</p>
@@ -305,7 +324,7 @@ function Qualifications({ catalog }: { catalog: InputCatalog }) {
                   checked={eduMode === o.option_id}
                   onChange={() => dispatch({ type: "education/set", state: "provided", optionId: o.option_id })}
                 />
-                <Zh>{o.label}</Zh>
+                <Zh pointer={capsPtr.education(catalog, o.option_id)}>{o.label}</Zh>
               </label>
             ))}
           <label className="choice">
@@ -450,7 +469,7 @@ export function FactsStep() {
         />
         {basis ? <span> {basis.currency}</span> : null}
         <p className="small" id="cash-rule">
-          <Zh>{caps.money_input_rule_zh}</Zh>
+          <Zh pointer="/money_input_rule_zh">{caps.money_input_rule_zh}</Zh>
         </p>
         {cashLooksWrong ? (
           <p className="small box warn" id="cash-err">
@@ -459,7 +478,7 @@ export function FactsStep() {
         ) : null}
         {basis ? (
           <p className="small">
-            {t("facts.cashBasis", { period: basis.price_period, currency: basis.currency })}（<Zh>{basis.note}</Zh>）。
+            {t("facts.cashBasis", { period: basis.price_period, currency: basis.currency })}（<Zh pointer={capsPtr.moneyBasis(caps.money_bases.indexOf(basis))}>{basis.note}</Zh>）。
             {caps.money_bases.length === 1 ? t("facts.cashBasisOnly") : null}
           </p>
         ) : null}
@@ -472,7 +491,7 @@ export function FactsStep() {
       ) : null}
 
       <Section title={t("facts.startTitle")}>
-        <ZhList items={caps.start_scenario} />
+        <ZhList items={caps.start_scenario} pointer="/start_scenario" />
       </Section>
 
       <StepNav draftId={draftId} prev="place" next="priorities" />
@@ -494,10 +513,10 @@ function LegacyAbilities({ caps }: { caps: ProductCapabilities }) {
         return (
           <fieldset key={a.ability_id}>
             <legend>
-              <Zh>{a.label}</Zh>
+              <Zh pointer={capsPtr.ability(caps, a.ability_id)}>{a.label}</Zh>
             </legend>
             <p className="small muted">
-              <Zh>{a.ask_when}</Zh>
+              <Zh pointer={capsPtr.ability(caps, a.ability_id, "ask_when")}>{a.ask_when}</Zh>
             </p>
             {(
               [
@@ -559,16 +578,21 @@ export function PrioritiesStep() {
 /** 面板的条目与分组：有输入目录就用目录；没有（合成包）就用能力清单的词表（一个分组，别名当搜索词）。 */
 function panelOf(field: InterestField, caps: ProductCapabilities, t: (k: "more.leisureTitle" | "more.tasteTitle") => string): { items: PanelItem[]; groups: PanelGroupDef[]; panel: InterestPanel | null } {
   const panel = field === "leisure_interest" ? (caps.input_catalog?.leisure ?? null) : (caps.input_catalog?.taste ?? null);
+  const catalog = caps.input_catalog ?? null;
   if (panel) {
-    const groups = [...panel.groups].sort((a, b) => a.order - b.order).map((g) => ({ id: g.group_id, label: g.label }));
-    const items = [...panel.entries].sort((a, b) => a.order - b.order).map((e) => ({ key: e.key, label: e.label, groupId: e.group_id, searchTerms: e.search_terms }));
+    const groups = [...panel.groups]
+      .sort((a, b) => a.order - b.order)
+      .map((g) => ({ id: g.group_id, label: g.label, pointer: capsPtr.panelGroup(catalog, field, g.group_id) }));
+    const items = [...panel.entries]
+      .sort((a, b) => a.order - b.order)
+      .map((e) => ({ key: e.key, label: e.label, pointer: capsPtr.panelEntry(catalog, field, e.key), groupId: e.group_id, searchTerms: e.search_terms }));
     return { items, groups, panel };
   }
   const vocab = field === "leisure_interest" ? caps.interests.leisure_categories : caps.interests.cuisines;
   const gid = "all";
   return {
-    items: vocab.map((v) => ({ key: v.key, label: v.label, groupId: gid, searchTerms: [v.label, ...v.aliases] })),
-    groups: [{ id: gid, label: t(field === "leisure_interest" ? "more.leisureTitle" : "more.tasteTitle") }],
+    items: vocab.map((v) => ({ key: v.key, label: v.label, pointer: capsPtr.vocab(caps, field, v.key), groupId: gid, searchTerms: [v.label, ...v.aliases] })),
+    groups: [{ id: gid, label: t(field === "leisure_interest" ? "more.leisureTitle" : "more.tasteTitle"), pointer: null }],
     panel: null,
   };
 }
@@ -609,7 +633,11 @@ function InterestSection({ field, title }: { field: InterestField; title: string
   };
   return (
     <Section title={title}>
-      {panel ? <Zh as="p">{panel.note}</Zh> : null}
+      {panel ? (
+        <Zh as="p" pointer={capsPtr.panelNote(field)}>
+          {panel.note}
+        </Zh>
+      ) : null}
       <p className="small muted">{t(field === "leisure_interest" ? "more.leisureHelp" : "more.tasteHelp")}</p>
       {curState === "described" && cur?.text ? (
         <div className="box warn" data-legacy-interest-text>
@@ -632,7 +660,7 @@ function InterestSection({ field, title }: { field: InterestField; title: string
           items={items}
           groups={groups}
           selected={selected}
-          notes={panel?.search_notes ?? []}
+          notes={(panel?.search_notes ?? []).map((n) => ({ ...n, pointer: capsPtr.panelSearchNote(caps.input_catalog, field, n.note_id) }))}
           onToggle={(k, on) => dispatch({ type: "interest/toggle", field, key: k, selected: on })}
         />
       )}
@@ -686,7 +714,7 @@ export function MoreStep() {
       <Section title={t("more.healthTitle")}>
         <p className="box note">{t("more.healthNote")}</p>
         <p>
-          <Zh>{hq.common_prompt}</Zh>
+          <Zh pointer="/health_questionnaire/common_prompt">{hq.common_prompt}</Zh>
         </p>
         {hq.questions.map((q, qi) => {
           const item = d.health.items?.find((i) => i.question_id === q.question_id);
@@ -695,7 +723,7 @@ export function MoreStep() {
           return (
             <fieldset key={q.question_id} data-field="health">
               <legend>
-                {qi + 1}. <Zh>{q.text}</Zh>
+                {qi + 1}. <Zh pointer={at("/health_questionnaire/questions", qi, "text")}>{q.text}</Zh>
               </legend>
               {hq.options.map((o) => (
                 <label key={o.option_id} className="choice">
@@ -706,7 +734,7 @@ export function MoreStep() {
                     checked={current === o.option_id}
                     onChange={() => dispatch({ type: "health/choice", questionId: q.question_id, choice: o.option_id as HealthChoice })}
                   />
-                  <Zh>{o.label}</Zh>
+                  <Zh pointer={capsPtr.healthOption(caps, o.option_id)}>{o.label}</Zh>
                 </label>
               ))}
               {current ? (
@@ -720,14 +748,14 @@ export function MoreStep() {
           );
         })}
         <p className="small muted">
-          <Zh>{hq.unanswered_rule}</Zh>
+          <Zh pointer="/health_questionnaire/unanswered_rule">{hq.unanswered_rule}</Zh>
         </p>
       </Section>
 
       <InterestSection field="leisure_interest" title={t("more.leisureTitle")} />
       <InterestSection field="taste" title={t("more.tasteTitle")} />
       <p className="small muted">
-        <Zh>{caps.interests.matching_note_zh}</Zh>
+        <Zh pointer="/interests/matching_note_zh">{caps.interests.matching_note_zh}</Zh>
       </p>
 
       <Section title={<label htmlFor="free-text">{t("more.freeTitle")}</label>}>

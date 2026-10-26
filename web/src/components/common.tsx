@@ -7,7 +7,9 @@ import { type ApiError, isApiError } from "../api/errors";
 import type { ResolvedLabel } from "../contract/pending-labels";
 import type { ExactNumber, ProductIssue, ProductMoney, PublicExplanation } from "../contract/types";
 import { stepForField } from "../draft/fieldSteps";
+import { DisplayScope, at, envelopeOfAttachment } from "../display/scope";
 import { Zh } from "../i18n/biz";
+import { useLocale } from "../i18n/index";
 
 export function Section({ title, children, id, className }: { title: ReactNode; children: ReactNode; id?: string; className?: string }) {
   return (
@@ -53,7 +55,8 @@ export function SupportChip({ support }: { support: string | undefined }) {
   );
 }
 
-export function IssueCard({ issue, draftId }: { issue: ProductIssue; draftId?: string | null }) {
+/** 问题卡：pointer 是这条问题在业务对象里的位置（例如 /review/issues/0）。 */
+export function IssueCard({ issue, draftId, pointer }: { issue: ProductIssue; draftId?: string | null; pointer: string }) {
   const { t } = useTranslation();
   const step = draftId ? stepForField(issue.field) : null;
   const cls = issue.severity === "error" ? "box error" : issue.severity === "warning" ? "box warn" : "box note";
@@ -61,13 +64,13 @@ export function IssueCard({ issue, draftId }: { issue: ProductIssue; draftId?: s
     <div className={cls} data-issue={issue.code}>
       <p>
         <strong>{t(`severity.${issue.severity}`)}：</strong>
-        <Zh>{issue.message_zh}</Zh>
+        <Zh pointer={`${pointer}/message_zh`}>{issue.message_zh}</Zh>
       </p>
       <p className="small">
-        {t("common.impact")}：<Zh>{issue.impact_zh}</Zh>
+        {t("common.impact")}：<Zh pointer={`${pointer}/impact_zh`}>{issue.impact_zh}</Zh>
       </p>
       <p className="small">
-        {t("common.nextAction")}：<Zh>{issue.next_action_zh}</Zh>
+        {t("common.nextAction")}：<Zh pointer={`${pointer}/next_action_zh`}>{issue.next_action_zh}</Zh>
       </p>
       {issue.audit_ref ? <p className="small muted">{t("common.auditRef", { ref: issue.audit_ref })}</p> : null}
       {step && draftId ? (
@@ -81,30 +84,31 @@ export function IssueCard({ issue, draftId }: { issue: ProductIssue; draftId?: s
   );
 }
 
-export function IssueList({ issues, draftId }: { issues: readonly ProductIssue[] | undefined; draftId?: string | null }) {
+/** 问题列表：pointer 是数组在业务对象里的位置（例如 /review/issues）。 */
+export function IssueList({ issues, draftId, pointer }: { issues: readonly ProductIssue[] | undefined; draftId?: string | null; pointer: string }) {
   if (!issues?.length) return null;
   return (
     <div className="stack">
       {issues.map((i, n) => (
-        <IssueCard key={`${i.code}.${i.field}.${n}`} issue={i} draftId={draftId} />
+        <IssueCard key={`${i.code}.${i.field}.${n}`} issue={i} draftId={draftId} pointer={at(pointer, n)} />
       ))}
     </div>
   );
 }
 
-export function ExplanationView({ explanation }: { explanation: PublicExplanation | null | undefined }) {
+export function ExplanationView({ explanation, pointer }: { explanation: PublicExplanation | null | undefined; pointer: string }) {
   const { t } = useTranslation();
   if (!explanation) return null;
   return (
     <div className="box note" data-explanation={explanation.category}>
       <p>
-        <Zh>{explanation.reason_zh}</Zh>
+        <Zh pointer={`${pointer}/reason_zh`}>{explanation.reason_zh}</Zh>
       </p>
       <p className="small">
-        {t("common.impact")}：<Zh>{explanation.impact_zh}</Zh>
+        {t("common.impact")}：<Zh pointer={`${pointer}/impact_zh`}>{explanation.impact_zh}</Zh>
       </p>
       <p className="small">
-        {t("common.nextAction")}：<Zh>{explanation.next_action_zh}</Zh>
+        {t("common.nextAction")}：<Zh pointer={`${pointer}/next_action_zh`}>{explanation.next_action_zh}</Zh>
       </p>
       {explanation.audit_ref ? <p className="small muted">{t("common.auditRef", { ref: explanation.audit_ref })}</p> : null}
     </div>
@@ -114,26 +118,28 @@ export function ExplanationView({ explanation }: { explanation: PublicExplanatio
 /** 接口错误：服务的三句中文与支持编号；断线、结构不符各有固定说明。不显示原始异常。 */
 export function ApiErrorView({ error, onRetry }: { error: unknown; onRetry?: () => void }) {
   const { t } = useTranslation();
+  const locale = useLocale();
   if (!error) return null;
   const e: ApiError | null = isApiError(error) ? error : null;
   if (e?.kind === "stale") return null;
   let body: ReactNode;
   if (e?.kind === "service" && e.service) {
     const s = e.service;
+    // 即时回复的附层：这份错误自己带中英文字（display），按位置取，不去别的作用域借
     body = (
-      <>
+      <DisplayScope envelope={envelopeOfAttachment(s, s.display, locale)}>
         <p>
-          <Zh>{s.message_zh}</Zh>
+          <Zh pointer="/message_zh">{s.message_zh}</Zh>
         </p>
         <p className="small">
-          {t("common.impact")}：<Zh>{s.impact_zh}</Zh>
+          {t("common.impact")}：<Zh pointer="/impact_zh">{s.impact_zh}</Zh>
         </p>
         <p className="small">
-          {t("common.nextAction")}：<Zh>{s.next_action_zh}</Zh>
+          {t("common.nextAction")}：<Zh pointer="/next_action_zh">{s.next_action_zh}</Zh>
         </p>
         {s.retry_after_seconds ? <p className="small">{t("errors.rateLimited", { s: s.retry_after_seconds })}</p> : null}
         {s.support_ref ? <p className="small muted">{t("common.supportRef", { ref: s.support_ref })}</p> : null}
-      </>
+      </DisplayScope>
     );
   } else if (e?.kind === "network") {
     body = <p>{e.status && e.status >= 500 ? t("errors.unavailable", { status: e.status }) : t("errors.network")}</p>;
@@ -187,7 +193,7 @@ export function PendingText({ label }: { label: ResolvedLabel }) {
   const { t } = useTranslation();
   return (
     <>
-      <Zh>{label.text}</Zh>
+      <Zh pointer="/__pending_label__">{label.text}</Zh>
       {import.meta.env.DEV && label.pending ? (
         <span className="chip warn" title={label.source} style={{ marginLeft: "0.3em" }}>
           {t("common.pending")}

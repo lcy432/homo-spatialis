@@ -19,7 +19,8 @@ import type {
 import { CityMapSlot } from "../../components/CityMapSlot";
 import { MapStage } from "../../components/MapStage";
 import { PageTitle } from "../../components/Layout";
-import { cityLabelOf } from "../../components/RunViews";
+import { useCityName } from "../../display/names";
+import { resultPtr } from "../../display/pointers";
 import { ApiErrorView, ExplanationView, Loading, Num, PendingText, Section, TableWrap } from "../../components/common";
 import { CemBar, ColorLegend, CompareChart } from "../../components/results/CompareChart";
 import { YearReport } from "../../components/results/YearReport";
@@ -29,7 +30,7 @@ import { useMode } from "../../ui/mode";
 import { colorWindow, positionIn, rampColor } from "../../view/colorScale";
 import { type CityRow, cityRows, groupByCountry } from "../../view/results";
 import { useGeography } from "../../api/queries";
-import { DisplayScope } from "../../display/scope";
+import { DisplayScope, at } from "../../display/scope";
 import { useRunResult } from "./useRunResult";
 
 function useLoaded(intentId: string) {
@@ -44,7 +45,9 @@ function useLoaded(intentId: string) {
       kind: "node",
       node: (
         <div>
-          <p className="box note">{t("results.unavailable")}</p>
+          <p className="box note" data-results-unavailable>
+            {t("results.unavailable")}
+          </p>
           <Link className="tap" to={`/intents/${encodeURIComponent(intentId)}`}>
             {t("runs.open")}
           </Link>
@@ -58,26 +61,30 @@ function useLoaded(intentId: string) {
   return { kind: "data", data: { ...r, intentView: v, res: r.result.data } } as const;
 }
 
-function comparisonSentence(line: ComparisonLine, label: (ref: string) => string, t: ReturnType<typeof useTranslation>["t"]): string {
+type Translate = (key: string, options?: Record<string, unknown>) => string;
+
+function comparisonSentence(line: ComparisonLine, label: (ref: string) => string, t: Translate): string {
   return t(`results.direction.${line.direction}`, { a: label(line.city_a), b: label(line.city_b) });
 }
 
 function Comparisons({ lines, label, only }: { lines: readonly ComparisonLine[]; label(ref: string): string; only?: string }) {
   const { t } = useTranslation();
-  const shown = only ? lines.filter((l) => l.city_a === only || l.city_b === only) : lines;
+  const shown = lines.map((l, i) => [l, i] as const).filter(([l]) => !only || l.city_a === only || l.city_b === only);
   if (!shown.length) return null;
   return (
     <ul className="plain stack">
-      {shown.map((l) => (
+      {shown.map(([l, li]) => (
         <li key={`${l.city_a}.${l.city_b}`} data-comparison={l.direction}>
-          <strong>{comparisonSentence(l, label, t)}</strong>
+          <strong>{comparisonSentence(l, label, t as unknown as Translate)}</strong>
           {l.range_difference_low || l.range_difference_high ? (
             <span className="small muted">
               {" "}
               · {t("results.rangeDiff", { low: l.range_difference_low?.display ?? "—", high: l.range_difference_high?.display ?? "—" })}
             </span>
           ) : null}
-          <Zh as="p">{l.note_zh}</Zh>
+          <Zh as="p" pointer={at("/comparisons", li, "note_zh")}>
+            {l.note_zh}
+          </Zh>
         </li>
       ))}
     </ul>
@@ -91,7 +98,7 @@ function CitySummaryCard({ row, base, swatch }: { row: CityRow; base: string; sw
     <article className="card" data-city={c.city_ref} aria-labelledby={`city-${c.city_ref}`}>
       <h3 id={`city-${c.city_ref}`} className="card-title">
         {swatch ? <span className={styles.swatch} style={{ background: swatch }} aria-hidden="true" /> : <span className={styles.swatchNone} aria-hidden="true" />}
-        <Zh>{c.label}</Zh>
+        <Zh pointer={row.labelPointer}>{c.label}</Zh>
       </h3>
       <p data-mean={c.mean_j?.exact ?? ""}>
         {t("results.col.j")}：<strong>
@@ -103,7 +110,7 @@ function CitySummaryCard({ row, base, swatch }: { row: CityRow; base: string; sw
       <p className="small">{c.mean_j ? t("results.meanOf", { mean: c.mean_j.display, c: c.mean_denominator }) : t("results.noMean")}</p>
       <CemBar planned={c.planned} c={c.complete} e={c.exits} m={c.missing} />
       <p className="small">
-        <Zh>{c.headline_zh}</Zh>
+        <Zh pointer={`${row.pointer}/headline_zh`}>{c.headline_zh}</Zh>
       </p>
       <Link className="button" to={`${base}/city/${encodeURIComponent(c.city_ref)}`}>
         {t("results.openCity")}
@@ -135,10 +142,10 @@ function CityTable({ rows }: { rows: readonly CityRow[] }) {
           </tr>
         </thead>
         <tbody>
-          {rows.map(({ city: c }) => (
+          {rows.map(({ city: c, ...r }) => (
             <tr key={c.city_ref} data-city={c.city_ref}>
               <th scope="row">
-                <Zh>{c.label}</Zh>
+                <Zh pointer={r.labelPointer}>{c.label}</Zh>
               </th>
               <td className="num">
                 <Num value={c.mean_j} />
@@ -165,9 +172,9 @@ function CityTable({ rows }: { rows: readonly CityRow[] }) {
                 )}
               </td>
               <td>
-                {(c.missing_reasons ?? []).map((m) => (
+                {(c.missing_reasons ?? []).map((m, mi) => (
                   <span key={m.reason} className="small" style={{ display: "block" }}>
-                    <Zh>{m.reason_zh}</Zh> ×{m.count}
+                    <Zh pointer={at(`${r.pointer}/missing_reasons`, mi, "reason_zh")}>{m.reason_zh}</Zh> ×{m.count}
                   </span>
                 ))}
               </td>
@@ -185,21 +192,25 @@ export function ResultsPage() {
   // 城市点：按这次结果自己的资料包指纹读地理清单（不是当前能力清单的资料包），并传这份结果显示信封里绑定的资源版本
   // （交接单第 13.2 节）。信封还没读到就先不读清单；版本为空就不传版本、不拿当前版本冒充，页面写明。清单里每座城的 city_ref
   // 自带地理版本，只配给同一个 city_ref。读不到就不画点。
+  // 历史结果只在有明确绑定的版本时才读地理清单（省略版本 = 当前登记的版本，不是历史版本；E5-R4）。
+  // 版本为空、信封读不到、信封还没读到：都不发不带版本的请求，也不拿当前城市点兜底——底图、列表与表格照常。
   const pack = loaded.kind === "data" ? loaded.data.res.meta.data_pack.content_fingerprint : null;
   const boundVersion = loaded.kind === "data" ? loaded.data.boundVersion : undefined;
-  const geo = useGeography(boundVersion === undefined ? null : pack, boundVersion ?? null);
+  const geo = useGeography(boundVersion ? pack : null, boundVersion ?? null);
   if (loaded.kind === "node") return <div>{loaded.node}</div>;
-  const { res, intentView: v, caps, display } = loaded.data;
+  const { res, intentView: v, caps, display, intentDisplay } = loaded.data;
   return (
-    <DisplayScope envelope={display.data}>
-      <ResultsOverview
-        res={res}
-        caps={caps.data ?? null}
-        settings={v.settings ?? null}
-        geography={geo.data ?? (geo.isError ? null : undefined)}
-        boundVersion={boundVersion}
-        base={`/results/${encodeURIComponent(intentId)}`}
-      />
+    <DisplayScope envelope={intentDisplay.data}>
+      <DisplayScope envelope={display.data}>
+        <ResultsOverview
+          res={res}
+          caps={caps.data ?? null}
+          settings={v.settings ?? null}
+          geography={boundVersion ? (geo.data ?? (geo.isError ? null : undefined)) : null}
+          boundVersion={boundVersion}
+          base={`/results/${encodeURIComponent(intentId)}`}
+        />
+      </DisplayScope>
     </DisplayScope>
   );
 }
@@ -232,7 +243,7 @@ export function ResultsOverview({
     () => new Map(rows.filter((r) => r.mean !== null && w).map((r) => [r.cityRef, rampColor(positionIn(r.mean as number, w as NonNullable<typeof w>), mode)])),
     [rows, w, mode],
   );
-  const label = (ref: string) => res.cities?.find((c) => c.city_ref === ref)?.label ?? cityLabelOf(caps, ref);
+  const label = useCityName(caps, res.cities);
   const groups = groupByCountry(rows.filter((r) => country === null || r.country === country));
   const generated = res.evaluation_status === "generated";
   const mapSlot = generated ? (
@@ -272,11 +283,15 @@ export function ResultsOverview({
     <>
       <Section title={t("results.status")}>
         <p className={generated ? "box ok" : "box warn"}>{generated ? t("results.generated") : t("results.notGenerated")}</p>
-        {!generated && res.not_generated_reason ? <Zh as="p">{res.not_generated_reason}</Zh> : null}
+        {!generated && res.not_generated_reason ? (
+          <Zh as="p" pointer="/not_generated_reason">
+            {res.not_generated_reason}
+          </Zh>
+        ) : null}
         <p className="small">{t("results.stageLabel", { stage: res.run_stage })}</p>
         <p className="small">{t("results.realCalls", { n: res.real_model_calls })}</p>
         <p className="small">
-          {t("app.dataPack")}：{res.meta.data_pack.pack_id}（{res.meta.data_pack.status}）— <Zh>{res.meta.data_pack.note}</Zh>
+          {t("app.dataPack")}：{res.meta.data_pack.pack_id}（{res.meta.data_pack.status}）— <Zh pointer="/meta/data_pack/note">{res.meta.data_pack.note}</Zh>
         </p>
         {settings ? (
           <p className="small">
@@ -328,17 +343,19 @@ export function ResultsOverview({
 
       {res.reading_guide_zh?.length ? (
         <Section title={t("results.readingGuide")}>
-          <ZhList items={res.reading_guide_zh} />
+          <ZhList items={res.reading_guide_zh} pointer="/reading_guide_zh" />
         </Section>
       ) : null}
       {res.limitations_zh?.length ? (
         <Section title={t("results.limitations")}>
-          <ZhList items={res.limitations_zh} />
+          <ZhList items={res.limitations_zh} pointer="/limitations_zh" />
         </Section>
       ) : null}
       <Section title={t("results.plannerTitle")}>
-        <Zh as="p">{res.planner.description_zh}</Zh>
-        <ZhList items={res.sources_zh} />
+        <Zh as="p" pointer="/planner/description_zh">
+          {res.planner.description_zh}
+        </Zh>
+        <ZhList items={res.sources_zh} pointer="/sources_zh" />
       </Section>
     </>
   );
@@ -361,25 +378,27 @@ export function ResultsOverview({
 
 function CloneLinks({ res, base, cityRef }: { res: ProductResult; base: string; cityRef?: string }) {
   const { t } = useTranslation();
-  const clones = (res.clones ?? []).filter((c) => !cityRef || c.city_ref === cityRef);
+  const cityName = useCityName(null, res.cities);
+  const clones = (res.clones ?? []).map((c, i) => [c, i] as const).filter(([c]) => !cityRef || c.city_ref === cityRef);
   return (
     <ul className="plain stack">
-      {clones.map((c) => {
+      {clones.map(([c, ci]) => {
         const months = (c.years ?? []).reduce((n, y) => n + y.months_lived, 0);
+        const cp = at("/clones", ci);
         return (
           <li key={c.clone_ref} className="card" data-clone={c.clone_ref} data-category={c.category ?? "none"}>
             <p>
-              <strong>{t("clone.title", { city: res.cities?.find((x) => x.city_ref === c.city_ref)?.label ?? c.city_ref, n: c.repeat_index + 1 })}</strong>
+              <strong>{t("clone.title", { city: cityName(c.city_ref), n: c.repeat_index + 1 })}</strong>
               {" · "}
-              <Zh>{c.category_zh}</Zh>
+              <Zh pointer={`${cp}/category_zh`}>{c.category_zh}</Zh>
             </p>
             <p className="small">{t("city.cloneYears", { years: Math.floor(months / 12), months: months % 12 })}</p>
             <p className="small">
-              <Zh>{c.explanation.reason_zh}</Zh>
+              <Zh pointer={`${cp}/explanation/reason_zh`}>{c.explanation.reason_zh}</Zh>
             </p>
             {c.missing_reason_zh ? (
               <p className="small">
-                <Zh>{c.missing_reason_zh}</Zh>
+                <Zh pointer={`${cp}/missing_reason_zh`}>{c.missing_reason_zh}</Zh>
               </p>
             ) : null}
             <Link className="button" to={`${base}/clone/${encodeURIComponent(c.clone_ref)}`}>
@@ -392,11 +411,14 @@ function CloneLinks({ res, base, cityRef }: { res: ProductResult; base: string; 
   );
 }
 
-function DataNatureView({ nature }: { nature: CityDataNature }) {
+function DataNatureView({ nature, pointer }: { nature: CityDataNature; pointer: string }) {
   const { t } = useTranslation();
+  const pp = pointer;
   return (
     <div className="stack" data-nature={nature.pack_status}>
-      <Zh as="p">{nature.summary_zh}</Zh>
+      <Zh as="p" pointer={`${pp}/summary_zh`}>
+        {nature.summary_zh}
+      </Zh>
       <p className="small">
         {t("city.packStatus")}：{nature.pack_status}
       </p>
@@ -445,9 +467,9 @@ function DataNatureView({ nature }: { nature: CityDataNature }) {
         <>
           <h3>{t("city.assumptions")}</h3>
           <ul>
-            {nature.named_assumptions.map((a) => (
+            {nature.named_assumptions.map((a, ai) => (
               <li key={a.note_zh}>
-                <Zh>{a.note_zh}</Zh>{" "}
+                <Zh pointer={at(`${pp}/named_assumptions`, ai, "note_zh")}>{a.note_zh}</Zh>{" "}
                 <span className="small muted">{t("city.assumptionCount", { n: a.count, examples: a.examples.join("、") })}</span>
               </li>
             ))}
@@ -458,9 +480,9 @@ function DataNatureView({ nature }: { nature: CityDataNature }) {
         <>
           <h3>{t("city.priors")}</h3>
           <ul>
-            {nature.common_priors.map((p) => (
+            {nature.common_priors.map((p, pi) => (
               <li key={p.fact_id}>
-                <Zh>{p.label}</Zh>：<Zh>{p.meaning_zh}</Zh>
+                <Zh pointer={at(`${pp}/common_priors`, pi, "label")}>{p.label}</Zh>：<Zh pointer={at(`${pp}/common_priors`, pi, "meaning_zh")}>{p.meaning_zh}</Zh>
               </li>
             ))}
           </ul>
@@ -469,13 +491,13 @@ function DataNatureView({ nature }: { nature: CityDataNature }) {
       {nature.treatment_assumptions_zh?.length ? (
         <>
           <h3>{t("city.treatment")}</h3>
-          <ZhList items={nature.treatment_assumptions_zh} />
+          <ZhList items={nature.treatment_assumptions_zh} pointer={`${pp}/treatment_assumptions_zh`} />
         </>
       ) : null}
       {nature.model_plan_activities?.length ? (
         <>
           <h3>{t("city.activities")}</h3>
-          <ZhList items={nature.model_plan_activities} />
+          <ZhList items={nature.model_plan_activities} pointer={`${pp}/model_plan_activities`} />
         </>
       ) : null}
       {nature.home_areas != null || nature.work_areas != null ? (
@@ -485,13 +507,13 @@ function DataNatureView({ nature }: { nature: CityDataNature }) {
         <>
           <h3>{t("city.commuteModes")}</h3>
           <ul>
-            {nature.commute_modes.map((m) => (
+            {nature.commute_modes.map((m, mi) => (
               <li key={m.mode} data-mode-available={m.in_relation}>
-                <Zh>{m.mode_zh}</Zh>：{m.in_relation ? t("city.inRelation", { n: m.lines }) : t("city.notInRelation")}
+                <Zh pointer={at(`${pp}/commute_modes`, mi, "mode_zh")}>{m.mode_zh}</Zh>：{m.in_relation ? t("city.inRelation", { n: m.lines }) : t("city.notInRelation")}
                 {m.condition_zh ? (
                   <span className="small muted">
                     {" "}
-                    · <Zh>{m.condition_zh}</Zh>
+                    · <Zh pointer={at(`${pp}/commute_modes`, mi, "condition_zh")}>{m.condition_zh}</Zh>
                   </span>
                 ) : null}
               </li>
@@ -515,20 +537,24 @@ function DataNatureView({ nature }: { nature: CityDataNature }) {
         <>
           <h3>{t("city.tax")}</h3>
           <p>
-            <Zh>{nature.tax.status_zh}</Zh>
+            <Zh pointer={`${pp}/tax/status_zh`}>{nature.tax.status_zh}</Zh>
           </p>
-          {nature.tax.residence_scope_zh ? <Zh as="p">{nature.tax.residence_scope_zh}</Zh> : null}
-          <ZhList items={nature.tax.rules_zh} />
+          {nature.tax.residence_scope_zh ? (
+            <Zh as="p" pointer={`${pp}/tax/residence_scope_zh`}>
+              {nature.tax.residence_scope_zh}
+            </Zh>
+          ) : null}
+          <ZhList items={nature.tax.rules_zh} pointer={`${pp}/tax/rules_zh`} />
           {nature.tax.absent_zh?.length ? (
             <>
               <p className="small">{t("city.taxAbsent")}</p>
-              <ZhList items={nature.tax.absent_zh} />
+              <ZhList items={nature.tax.absent_zh} pointer={`${pp}/tax/absent_zh`} />
             </>
           ) : null}
           {nature.tax.not_modeled_zh?.length ? (
             <>
               <p className="small">{t("city.taxNotModeled")}</p>
-              <ZhList items={nature.tax.not_modeled_zh} />
+              <ZhList items={nature.tax.not_modeled_zh} pointer={`${pp}/tax/not_modeled_zh`} />
             </>
           ) : null}
         </>
@@ -538,9 +564,9 @@ function DataNatureView({ nature }: { nature: CityDataNature }) {
         <p className="small">{t("city.buildUnknown")}</p>
       ) : (
         <ul className="small">
-          {(nature.build ?? []).map((b) => (
+          {(nature.build ?? []).map((b, bi) => (
             <li key={b.key}>
-              <Zh>{b.label_zh}</Zh>：{b.count}
+              <Zh pointer={at(`${pp}/build`, bi, "label_zh")}>{b.label_zh}</Zh>：{b.count}
             </li>
           ))}
         </ul>
@@ -550,15 +576,17 @@ function DataNatureView({ nature }: { nature: CityDataNature }) {
 }
 
 function ScopeNotes({ notes, cityRef }: { notes: readonly ScopeNote[]; cityRef: string }) {
-  const shown = notes.filter((n) => !n.cities?.length || n.cities.includes(cityRef));
+  const shown = notes.map((n, i) => [n, i] as const).filter(([n]) => !n.cities?.length || n.cities.includes(cityRef));
   return (
     <ul className="plain stack">
-      {shown.map((n, i) => (
+      {shown.map(([n, i]) => (
         <li key={`${n.topic}.${i}`} data-topic={n.topic}>
           <strong>
-            <Zh>{n.title_zh}</Zh>
+            <Zh pointer={at("/preflight/scope_notes", i, "title_zh")}>{n.title_zh}</Zh>
           </strong>
-          <Zh as="p">{n.text_zh}</Zh>
+          <Zh as="p" pointer={at("/preflight/scope_notes", i, "text_zh")}>
+            {n.text_zh}
+          </Zh>
         </li>
       ))}
     </ul>
@@ -569,10 +597,12 @@ export function CityPage() {
   const { intentId = "", cityRef = "" } = useParams();
   const loaded = useLoaded(intentId);
   if (loaded.kind === "node") return <div>{loaded.node}</div>;
-  const { res, boundPreflight, caps, display } = loaded.data;
+  const { res, boundPreflight, caps, display, intentDisplay } = loaded.data;
   return (
-    <DisplayScope envelope={display.data}>
-      <CityDetail res={res} caps={caps.data ?? null} cityRef={cityRef} boundPreflight={boundPreflight} base={`/results/${encodeURIComponent(intentId)}`} />
+    <DisplayScope envelope={intentDisplay.data}>
+      <DisplayScope envelope={display.data}>
+        <CityDetail res={res} caps={caps.data ?? null} cityRef={cityRef} boundPreflight={boundPreflight} base={`/results/${encodeURIComponent(intentId)}`} />
+      </DisplayScope>
     </DisplayScope>
   );
 }
@@ -593,9 +623,12 @@ export function CityDetail({
 }) {
   const { t } = useTranslation();
   const c: CityResult | undefined = res.cities?.find((x) => x.city_ref === cityRef);
-  const label = (ref: string) => res.cities?.find((x) => x.city_ref === ref)?.label ?? cityLabelOf(caps, ref);
-  const nature = res.data_nature?.find((n) => n.city_ref === cityRef);
-  const coverage = res.option_coverage?.find((o) => o.city_ref === cityRef);
+  const label = useCityName(caps, res.cities);
+  const cp = resultPtr.city(res.cities, cityRef).replace(/\/label$/, "");
+  const natureIndex = (res.data_nature ?? []).findIndex((n) => n.city_ref === cityRef);
+  const nature = natureIndex >= 0 ? res.data_nature?.[natureIndex] : undefined;
+  const coverageIndex = (res.option_coverage ?? []).findIndex((o) => o.city_ref === cityRef);
+  const coverage = coverageIndex >= 0 ? res.option_coverage?.[coverageIndex] : undefined;
   const back = base;
   return (
     <div data-city-page={cityRef}>
@@ -649,9 +682,9 @@ export function CityDetail({
               <>
                 <h3>{t("city.missingReasons")}</h3>
                 <ul>
-                  {c.missing_reasons.map((m) => (
+                  {c.missing_reasons.map((m, mi) => (
                     <li key={m.reason}>
-                      <Zh>{m.reason_zh}</Zh> ×{m.count}
+                      <Zh pointer={at(`${cp}/missing_reasons`, mi, "reason_zh")}>{m.reason_zh}</Zh> ×{m.count}
                     </li>
                   ))}
                 </ul>
@@ -682,7 +715,7 @@ export function CityDetail({
             {c.notes_zh?.length ? (
               <>
                 <h3>{t("city.notes")}</h3>
-                <ZhList items={c.notes_zh} />
+                <ZhList items={c.notes_zh} pointer={`${cp}/notes_zh`} />
               </>
             ) : null}
             {res.comparisons?.length ? (
@@ -695,14 +728,16 @@ export function CityDetail({
         </>
       ) : null}
       <Section title={t("city.dataTitle")}>
-        {nature ? <DataNatureView nature={nature} /> : <p className="muted">{t("common.none")}</p>}
+        {nature ? <DataNatureView nature={nature} pointer={at("/data_nature", natureIndex)} /> : <p className="muted">{t("common.none")}</p>}
         {coverage ? (
           <>
             <h3>{t("city.coverageTitle")}</h3>
             <p className="small">
               {t("city.coverageLine", { surveyed: coverage.surveyed, resolved: coverage.resolved, unresolved: coverage.unresolved, excluded: coverage.excluded })}
             </p>
-            <Zh as="p">{coverage.note_zh}</Zh>
+            <Zh as="p" pointer={at("/option_coverage", coverageIndex, "note_zh")}>
+              {coverage.note_zh}
+            </Zh>
           </>
         ) : null}
         <h3>{t("city.scopeTitle")}</h3>
@@ -720,8 +755,10 @@ export function ClonePage() {
   const loaded = useLoaded(intentId);
   if (loaded.kind === "node") return <div>{loaded.node}</div>;
   return (
-    <DisplayScope envelope={loaded.data.display.data}>
-      <CloneDetail res={loaded.data.res} cloneRef={cloneRef} base={`/results/${encodeURIComponent(intentId)}`} />
+    <DisplayScope envelope={loaded.data.intentDisplay.data}>
+      <DisplayScope envelope={loaded.data.display.data}>
+        <CloneDetail res={loaded.data.res} cloneRef={cloneRef} base={`/results/${encodeURIComponent(intentId)}`} />
+      </DisplayScope>
     </DisplayScope>
   );
 }
@@ -729,9 +766,12 @@ export function ClonePage() {
 /** 第三层：一个分身逐年的生活记录。 */
 export function CloneDetail({ res, cloneRef, base }: { res: ProductResult; cloneRef: string; base: string }) {
   const { t } = useTranslation();
-  const c = res.clones?.find((x) => x.clone_ref === cloneRef);
+  const nameOf = useCityName(null, res.cities);
+  const ci = (res.clones ?? []).findIndex((x) => x.clone_ref === cloneRef);
+  const c = ci >= 0 ? res.clones?.[ci] : undefined;
   if (!c) return <p className="box warn">{t("common.none")}</p>;
-  const cityName = res.cities?.find((x) => x.city_ref === c.city_ref)?.label ?? c.city_ref;
+  const cityName = nameOf(c.city_ref);
+  const cp = at("/clones", ci);
   return (
     <div data-clone-page={cloneRef}>
       <p>
@@ -744,10 +784,10 @@ export function CloneDetail({ res, cloneRef, base }: { res: ProductResult; clone
       <Section title={t("clone.scores")}>
         <p data-category={c.category ?? "none"}>
           <strong>
-            <Zh>{c.category_zh}</Zh>
+            <Zh pointer={`${cp}/category_zh`}>{c.category_zh}</Zh>
           </strong>
         </p>
-        <ExplanationView explanation={c.explanation} />
+        <ExplanationView explanation={c.explanation} pointer={`${cp}/explanation`} />
         <dl className="facts">
           <dt>J</dt>
           <dd>
@@ -772,14 +812,18 @@ export function CloneDetail({ res, cloneRef, base }: { res: ProductResult; clone
           <dt>{t("clone.reference")}</dt>
           <dd>{c.reference_plan ? <PendingText label={pendingLabel(REFERENCE_PLAN, c.reference_plan)} /> : t("common.none")}</dd>
         </dl>
-        {c.missing_reason_zh ? <Zh as="p">{c.missing_reason_zh}</Zh> : null}
+        {c.missing_reason_zh ? (
+          <Zh as="p" pointer={`${cp}/missing_reason_zh`}>
+            {c.missing_reason_zh}
+          </Zh>
+        ) : null}
         {c.valuation_scope?.length ? (
           <>
             <h3>{t("clone.valuationScope")}</h3>
             <ul>
-              {c.valuation_scope.map((s) => (
+              {c.valuation_scope.map((s, si) => (
                 <li key={s.opportunity_id}>
-                  <Zh>{s.label}</Zh>：<Zh>{s.text_zh}</Zh>
+                  <Zh pointer={at(`${cp}/valuation_scope`, si, "label")}>{s.label}</Zh>：<Zh pointer={at(`${cp}/valuation_scope`, si, "text_zh")}>{s.text_zh}</Zh>
                 </li>
               ))}
             </ul>
@@ -788,7 +832,7 @@ export function CloneDetail({ res, cloneRef, base }: { res: ProductResult; clone
         {c.event_chain?.length ? (
           <>
             <h3>{t("clone.events")}</h3>
-            <ZhList items={c.event_chain} />
+            <ZhList items={c.event_chain} pointer={`${cp}/event_chain`} />
           </>
         ) : null}
         {c.hard_requirements?.length ? (
@@ -810,7 +854,7 @@ export function CloneDetail({ res, cloneRef, base }: { res: ProductResult; clone
       </Section>
       <Section title={t("clone.record")}>
         <p className="small muted">{t("clone.recordNote")}</p>
-        {c.years?.length ? c.years.map((y) => <YearReport key={y.year_index} year={y} />) : <p>{t("clone.noYears")}</p>}
+        {c.years?.length ? c.years.map((y, yi) => <YearReport key={y.year_index} year={y} pointer={at(`${cp}/years`, yi)} />) : <p>{t("clone.noYears")}</p>}
       </Section>
       <Section title={t("clone.modelPlan")}>
         <p className="small muted">{t("clone.modelPlanPending")}</p>

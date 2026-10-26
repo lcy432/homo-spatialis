@@ -1,34 +1,92 @@
-// /intents/:intentId —— 运行前说明、确认开始与进度。
-// * 按钮只看服务给的 allowed_actions；waiting_for 说明在等谁。阶段是网页流程（不是 C / E / M），“结束”不等于每个分身都成功。
-// * 确认开始：用户这一次明确确认生成一个幂等键，绑定这份运行前检查（confirm_with）；在途时不能再点；超时或断线不自动重发——
-//   先重新查询状态，用户再点时沿用同一个键与同一份内容（服务按键与意图去重，不会开第二次模拟）。检查换了（preflight_stale）就要
-//   重新阅读、再次确认、换新键。
-// * 取消、恢复、删除都要用户在对话框里确认，不自动重试；轮询（checking / queued / running / deleting）只读，从不提交或恢复。
+// /intents/:intentId —— 同一个等待页：后台检查 → 排队 → 生活模拟 → 整理结果 → 完成（DECISIONS/0048、0049）。
+// * 进度条与一句当前状态直接照服务的 progress_summary 画：不定长（检查、排队、整理）或按已结算的分身年度数；
+//   不按调用次数、不按时钟增长；新的一句覆盖上一句，不累积执行历史。断线时保留最后一份摘要与它的时间。
+// * 轮询只读：页面从不自己提交确认、恢复或重开。带开始授权的意图没有第二个正常开始按钮（服务也不接受 submit）。
+//   没有授权的旧意图照旧：只在 allowed_actions 含 submit 时由用户明确确认（幂等键绑定 confirm_with）。
+// * 授权作废（start.state = void）时显示原因与下一步；allowed_actions 含 start_again 才重新取预览、用户再确认一次（新键）。
+// * 取消、恢复、删除都要用户在对话框里确认，只按 allowed_actions；deletion.state 区分删除中与已删除。
+// * 文字按位置取这次意图的显示信封（运行意图与进度用这次运行预检查时绑定的版本）。
 import { useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams } from "react-router";
 import { hasCode, isApiError } from "../api/errors";
 import { useCapabilities, useDisplay, useIntent, useKeys } from "../api/queries";
-import { DisplayScope } from "../display/scope";
 import { useSession } from "../api/session";
-import type { RunIntentView, RunReceipt } from "../contract/types";
+import type { ProgressSummary, RunIntentView, RunReceipt } from "../contract/types";
 import { Dialog } from "../components/Dialog";
 import { PageTitle } from "../components/Layout";
 import { PreflightView, ProgressView, SettingsView } from "../components/RunViews";
+import { StartPanel } from "../components/StartPanel";
 import { ApiErrorView, ExplanationView, Loading, Section } from "../components/common";
 import { newIdempotencyKey } from "../draft/draft";
+import { DisplayScope } from "../display/scope";
 import { BizNotice, Zh } from "../i18n/biz";
 import { formatTime } from "../i18n/format";
 import { useLocale } from "../i18n/index";
 
 type Confirming = "cancel" | "resume" | "delete" | null;
 
+const BUSY_PHASES: ReadonlySet<ProgressSummary["phase"]> = new Set(["checking", "queued", "simulating", "assembling_result"]);
+
+/** 进度条与一句当前状态：全部照服务的摘要画。 */
+export function ProgressSummaryView({ summary, offlineSince }: { summary: ProgressSummary; offlineSince: string | null }) {
+  const { t } = useTranslation();
+  const locale = useLocale();
+  const busy = BUSY_PHASES.has(summary.phase) && !offlineSince;
+  const counted = summary.mode === "clone_years" || (summary.mode === "finished" && summary.settled_clone_years != null && summary.planned_clone_years != null);
+  const settled = summary.settled_clone_years ?? 0;
+  const planned = summary.planned_clone_years ?? 0;
+  const pct = counted && planned > 0 ? Math.min(100, Math.round((settled / planned) * 100)) : null;
+  return (
+    <div className="progress-summary" data-phase={summary.phase} data-progress-mode={summary.mode} data-busy={busy}>
+      <p className="progress-phase">
+        <span className="chip accent" data-phase-chip>
+          {t(`wait.phase.${summary.phase}`)}
+        </span>
+      </p>
+      <p className="progress-sentence" role="status" aria-live="polite">
+        <strong>
+          <Zh pointer="/progress_summary/sentence_zh">{summary.sentence_zh}</Zh>
+        </strong>
+      </p>
+      {summary.mode === "indeterminate" ? (
+        <div className={`progress-bar ${busy ? "progress-bar-busy" : ""}`} role="progressbar" aria-label={t("wait.title")} aria-valuetext={t("wait.indeterminate")} data-bar="indeterminate">
+          <span className="progress-fill progress-fill-indeterminate" />
+        </div>
+      ) : (
+        <div
+          className="progress-bar"
+          role="progressbar"
+          aria-label={t("wait.title")}
+          aria-valuemin={0}
+          aria-valuemax={planned || undefined}
+          aria-valuenow={counted ? settled : undefined}
+          aria-valuetext={counted ? t("wait.cloneYears", { settled, planned }) : t("wait.indeterminate")}
+          data-bar={summary.mode}
+          data-settled={counted ? settled : undefined}
+          data-planned={counted ? planned : undefined}
+        >
+          <span className="progress-fill" style={{ width: `${pct ?? 0}%` }} />
+        </div>
+      )}
+      {counted ? <p className="small">{t("wait.cloneYears", { settled, planned })}</p> : null}
+      <p className="small muted">{t("wait.updated", { time: formatTime(summary.updated_at, locale) })}</p>
+      {offlineSince ? (
+        <p className="box warn small" data-offline>
+          {t("wait.offline", { time: formatTime(offlineSince, locale) })}
+        </p>
+      ) : null}
+      {!busy && !offlineSince && summary.phase !== "finished" ? <p className="small muted">{t("wait.stopped")}</p> : null}
+    </div>
+  );
+}
+
 export function IntentPage() {
   const { t } = useTranslation();
   const locale = useLocale();
   const { intentId = "" } = useParams();
-  const { api, refresh } = useSession();
+  const { api, refresh, view: session } = useSession();
   const keys = useKeys();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -54,11 +112,16 @@ export function IntentPage() {
   const allowed = new Set(v.allowed_actions ?? []);
   const capsData = caps.data ?? null;
   const gone = v.stage === "deleted" || v.stage === "deleting" || v.stage === "expired";
+  const authorized = !!v.start;
+  // 轮询失败而手里有上一份：按“最后已知状态”显示，不假装实时
+  const offlineSince = intent.error && isApiError(intent.error) && intent.error.kind === "network" ? v.progress_summary.updated_at : null;
+  const resultReadable = v.result_available && v.progress_summary.phase === "finished";
 
   const setView = (nv: RunIntentView) => queryClient.setQueryData(keys.intent(intentId), nv);
 
+  // 旧流程（没有开始授权的意图）：用户明确点一次确认开始
   const submit = async () => {
-    if (inFlight.current || !v.confirm_with || !accept) return;
+    if (inFlight.current || !v.confirm_with || !accept || authorized) return;
     inFlight.current = true;
     setSending(true);
     setSubmitError(null);
@@ -74,7 +137,6 @@ export function IntentPage() {
       void refresh();
     } catch (e) {
       if (isApiError(e) && e.kind === "network") {
-        // 不知道有没有送到：先查询，不自动重发
         setUnknownDelivery(true);
       } else if (hasCode(e, "preflight_stale")) {
         setStale(true);
@@ -99,6 +161,8 @@ export function IntentPage() {
       else if (kind === "resume" && v.run_id) setView(await api.resume(v.run_id));
       else if (kind === "delete" && v.run_id) {
         await api.deleteRun(v.run_id);
+        // 删掉的内容不能从缓存里复活：结果与显示信封一起清掉，再重新读意图
+        queryClient.removeQueries({ queryKey: ["s"], predicate: (q) => q.queryKey.includes(v.run_id as string) });
         void intent.refetch();
       }
       setConfirming(null);
@@ -114,122 +178,165 @@ export function IntentPage() {
 
   return (
     <DisplayScope envelope={display.data}>
-    <div data-stage={v.stage} data-display-version={display.data ? (display.data.resource_version ?? "unbound") : undefined}>
-      <PageTitle>{t("intent.title")}</PageTitle>
-      <BizNotice />
-      <Section title={t("intent.stage")}>
-        <p>
-          <strong>
-            <Zh>{v.stage_zh}</Zh>
-          </strong>
-        </p>
-        <p data-waiting={v.waiting_for}>{t(`intent.waiting.${v.waiting_for}`)}</p>
-        {v.stage === "checking" ? <p className="small muted">{t("intent.checkingNote")}</p> : null}
-        <p className="small muted">{t("common.lastUpdated", { time: formatTime(v.updated_at, locale) })}</p>
-        <p className="small" data-expiry-basis={v.expiry_basis}>
-          {v.expires_at ? t("intent.expiresLine", { time: formatTime(v.expires_at, locale) }) : t("intent.expiresNone")}
-          {" "}
-          <span className="muted">（{t(`intent.expiryBasis.${v.expiry_basis}`)}）</span>
-        </p>
-        <p className="small muted">{t("intent.expiryNote")}</p>
-        {intent.error ? <ApiErrorView error={intent.error} onRetry={() => void intent.refetch()} /> : null}
-        <button type="button" onClick={() => void intent.refetch()}>
-          {t("common.refresh")}
-        </button>
-        <ExplanationView explanation={v.explanation} />
-        {v.support_ref ? <p className="small muted">{t("common.supportRef", { ref: v.support_ref })}</p> : null}
-        {gone ? <p className="box warn">{t("intent.goneNote")}</p> : null}
-      </Section>
+      <div data-stage={v.stage} data-display-version={display.data ? (display.data.resource_version ?? "unbound") : undefined} data-start-state={v.start?.state ?? "none"}>
+        <PageTitle>{t("wait.title")}</PageTitle>
+        <BizNotice />
 
-      <SettingsView settings={v.settings} caps={capsData} />
-
-      {v.preflight && (v.stage === "awaiting_confirmation" || v.stage === "blocked" || v.stage === "checking") ? (
-        <PreflightView preflight={v.preflight} caps={capsData} />
-      ) : null}
-
-      {allowed.has("submit") && v.confirm_with ? (
-        <Section title={t("intent.submit")} id="start">
-          {stale ? <p className="box warn">{t("intent.stale")}</p> : null}
-          <label className="choice top">
-            <input type="checkbox" name="accept_scope" checked={accept} onChange={(e) => setAccept(e.target.checked)} />
-            {t("intent.acceptScope")}
-          </label>
-          <button
-            type="button"
-            className="primary"
-            data-action="submit"
-            disabled={!accept || sending}
-            aria-busy={sending || undefined}
-            onClick={() => void submit()}
-          >
-            {sending ? t("intent.sending") : t("intent.submit")}
-          </button>
-          {unknownDelivery ? <p className="box warn">{t("intent.submitUnknown")}</p> : null}
-          <ApiErrorView error={submitError} />
+        <Section title={t("intent.stage")}>
+          <ProgressSummaryView summary={v.progress_summary} offlineSince={offlineSince} />
+          <p className="small muted" data-waiting={v.waiting_for}>
+            {t(`intent.waiting.${v.waiting_for}`)}
+          </p>
+          <p className="small muted">
+            <Zh pointer="/stage_zh">{v.stage_zh}</Zh>
+          </p>
+          <p className="small" data-expiry-basis={v.expiry_basis}>
+            {v.expires_at ? t("intent.expiresLine", { time: formatTime(v.expires_at, locale) }) : t("intent.expiresNone")}{" "}
+            <span className="muted">（{t(`intent.expiryBasis.${v.expiry_basis}`)}）</span>
+          </p>
+          {intent.error && !offlineSince ? <ApiErrorView error={intent.error} onRetry={() => void intent.refetch()} /> : null}
+          <ExplanationView explanation={v.explanation} pointer="/explanation" />
+          {v.support_ref ? <p className="small muted">{t("common.supportRef", { ref: v.support_ref })}</p> : null}
+          {v.deletion.state === "deleting" ? (
+            <p className="box warn" data-deletion="deleting">
+              {t("wait.deleting")}
+            </p>
+          ) : v.deletion.state === "deleted" ? (
+            <p className="box note" data-deletion="deleted">
+              {t("wait.deleted")}
+            </p>
+          ) : gone ? (
+            <p className="box warn">{t("intent.goneNote")}</p>
+          ) : null}
+          {v.stage === "finished" && !v.result_available ? (
+            <p className="box warn" data-result-unreadable>
+              {t("wait.resultNotReadable")}
+            </p>
+          ) : null}
+          <div className="row">
+            <Link className="button" to="/">
+              {t("wait.leave")}
+            </Link>
+            <button type="button" onClick={() => void intent.refetch()}>
+              {t("common.refresh")}
+            </button>
+          </div>
+          <p className="small muted">{t("wait.leaveNote")}</p>
         </Section>
-      ) : null}
-      {receipt?.status === "duplicate_same_run" ? <p className="box note">{t("intent.submitDuplicate")}</p> : null}
 
-      {v.progress ? <ProgressView progress={v.progress} caps={capsData} /> : null}
+        {v.start ? (
+          <Section title={t("wait.authorization")} id="authorization">
+            <p data-authorization={v.start.state}>
+              <strong>
+                {v.start.state === "pending"
+                  ? t("wait.authPending")
+                  : v.start.state === "used"
+                    ? t("wait.authUsed", { time: formatTime(v.start.used_at ?? v.start.authorized_at, locale) })
+                    : t("wait.authVoid")}
+              </strong>
+            </p>
+            {v.start.state === "void" && v.start.void_reason ? (
+              <p className="small" data-void-reason={v.start.void_reason}>
+                {t(`wait.voidReason.${v.start.void_reason}`)}
+              </p>
+            ) : null}
+            {v.start.state === "pending" ? <p className="small muted">{t("wait.noSubmitNote")}</p> : null}
+          </Section>
+        ) : null}
 
-      {v.stage === "finished" ? (
-        <Section title={t("intent.viewResult")}>
-          <p>{t("intent.finishedNote")}</p>
-          {v.result_available && allowed.has("view_result") ? (
+        {allowed.has("start_again") && v.start?.state === "void" ? (
+          <StartPanel
+            confirmedId={v.confirmed.confirmed_id}
+            draftId={null}
+            caps={capsData}
+            rules={session?.rules ?? null}
+            again
+            onStarted={(id) => {
+              void refresh();
+              if (id === intentId) void intent.refetch();
+              else navigate(`/intents/${encodeURIComponent(id)}`);
+            }}
+          />
+        ) : null}
+
+        {resultReadable && allowed.has("view_result") ? (
+          <Section title={t("intent.viewResult")}>
+            <p>{t("intent.finishedNote")}</p>
             <Link className="button primary" to={`/results/${encodeURIComponent(intentId)}`}>
               {t("intent.viewResult")}
             </Link>
-          ) : (
-            <p className="muted">{t("intent.noResultYet")}</p>
-          )}
-        </Section>
-      ) : null}
+          </Section>
+        ) : null}
 
-      <div className="row">
-        {allowed.has("cancel") ? (
-          <button type="button" data-action="cancel" onClick={() => setConfirming("cancel")}>
-            {t("intent.cancel")}
-          </button>
+        {!authorized && allowed.has("submit") && v.confirm_with ? (
+          <Section title={t("intent.submit")} id="start">
+            {stale ? <p className="box warn">{t("intent.stale")}</p> : null}
+            <label className="choice top">
+              <input type="checkbox" name="accept_scope" checked={accept} onChange={(e) => setAccept(e.target.checked)} />
+              {t("intent.acceptScope")}
+            </label>
+            <button type="button" className="primary" data-action="submit" disabled={!accept || sending} aria-busy={sending || undefined} onClick={() => void submit()}>
+              {sending ? t("intent.sending") : t("intent.submit")}
+            </button>
+            {unknownDelivery ? <p className="box warn">{t("intent.submitUnknown")}</p> : null}
+            <ApiErrorView error={submitError} />
+          </Section>
         ) : null}
-        {allowed.has("resume") ? (
-          <button type="button" data-action="resume" onClick={() => setConfirming("resume")}>
-            {t("intent.resume")}
-          </button>
-        ) : null}
-        {allowed.has("delete") ? (
-          <button type="button" className="danger" data-action="delete" onClick={() => setConfirming("delete")}>
-            {t("intent.deleteRun")}
-          </button>
-        ) : null}
-        {allowed.has("create_new_intent") ? (
-          <button type="button" onClick={() => navigate("/")}>
-            {t("intent.newIntent")}
-          </button>
-        ) : null}
-      </div>
-      <ApiErrorView error={actionError} />
+        {receipt?.status === "duplicate_same_run" ? <p className="box note">{t("intent.submitDuplicate")}</p> : null}
 
-      <Dialog
-        open={confirming !== null}
-        onClose={() => setConfirming(null)}
-        title={confirming === "cancel" ? t("intent.cancelTitle") : confirming === "resume" ? t("intent.resumeTitle") : t("runs.deleteTitle")}
-      >
-        <p>{confirming === "cancel" ? t("intent.cancelBody") : confirming === "resume" ? t("intent.resumeBody") : t("runs.deleteBody")}</p>
+        <details className="card" data-inputs>
+          <summary>{t("wait.inputs")}</summary>
+          <SettingsView settings={v.settings} caps={capsData} />
+          {v.preflight ? <PreflightView preflight={v.preflight} caps={capsData} pointer="/preflight" /> : null}
+          {v.progress ? <ProgressView progress={v.progress} caps={capsData} pointer="/progress" /> : null}
+        </details>
+
         <div className="row">
-          <button
-            type="button"
-            className={confirming === "delete" ? "danger primary" : "primary"}
-            disabled={actionBusy}
-            onClick={() => confirming && void runAction(confirming)}
-          >
-            {confirming === "cancel" ? t("intent.cancel") : confirming === "resume" ? t("intent.resume") : t("runs.delete")}
-          </button>
-          <button type="button" onClick={() => setConfirming(null)}>
-            {t("common.cancel")}
-          </button>
+          {allowed.has("cancel") ? (
+            <button type="button" data-action="cancel" onClick={() => setConfirming("cancel")}>
+              {t("intent.cancel")}
+            </button>
+          ) : null}
+          {allowed.has("resume") ? (
+            <button type="button" data-action="resume" onClick={() => setConfirming("resume")}>
+              {t("intent.resume")}
+            </button>
+          ) : null}
+          {allowed.has("delete") ? (
+            <button type="button" className="danger" data-action="delete" onClick={() => setConfirming("delete")}>
+              {t("intent.deleteRun")}
+            </button>
+          ) : null}
+          {allowed.has("create_new_intent") ? (
+            <button type="button" onClick={() => navigate("/")}>
+              {t("intent.newIntent")}
+            </button>
+          ) : null}
         </div>
-      </Dialog>
-    </div>
+        <ApiErrorView error={actionError} />
+
+        <Dialog
+          open={confirming !== null}
+          onClose={() => setConfirming(null)}
+          title={confirming === "cancel" ? t("intent.cancelTitle") : confirming === "resume" ? t("intent.resumeTitle") : t("runs.deleteTitle")}
+        >
+          <p>{confirming === "cancel" ? t("intent.cancelBody") : confirming === "resume" ? t("intent.resumeBody") : t("runs.deleteBody")}</p>
+          <div className="row">
+            <button
+              type="button"
+              className={confirming === "delete" ? "danger primary" : "primary"}
+              disabled={actionBusy}
+              data-action="confirm-action"
+              onClick={() => confirming && void runAction(confirming)}
+            >
+              {confirming === "cancel" ? t("intent.cancel") : confirming === "resume" ? t("intent.resume") : t("runs.delete")}
+            </button>
+            <button type="button" onClick={() => setConfirming(null)}>
+              {t("common.cancel")}
+            </button>
+          </div>
+        </Dialog>
+      </div>
     </DisplayScope>
   );
 }

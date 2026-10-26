@@ -12,9 +12,11 @@ export function useRunResult(intentId: string) {
   const v = intent.data;
   const result = useResult(v?.run_id, v?.updated_at ?? "", !!v?.result_available);
   const display = useDisplay("result", v?.run_id, locale, v?.updated_at ?? "", !!v?.result_available && !!result.data);
+  // 这次运行的意图信封（范围说明在意图的 preflight 里；它用这次运行预检查时绑定的版本）
+  const intentDisplay = useDisplay("intent", intentId, locale, v?.updated_at ?? "", !!v);
   const boundPreflight =
     v?.preflight && result.data && v.preflight.preflight_fingerprint === result.data.preflight.preflight_fingerprint ? v.preflight : null;
   /** 这份结果绑定的显示资源版本：undefined = 还没读到信封；null = 信封读到了但没有绑定（或信封读不到）。 */
   const boundVersion: string | null | undefined = display.data ? (display.data.resource_version ?? null) : display.isError ? null : undefined;
-  return { intent, caps, result, boundPreflight, display, boundVersion };
+  return { intent, caps, result, boundPreflight, display, intentDisplay, boundVersion };
 }

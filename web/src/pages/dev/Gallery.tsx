@@ -47,7 +47,7 @@ export function GalleryIndex() {
                 <Link className="tap" to={`/dev/gallery/${id}`}>
                   {id}
                 </Link>{" "}
-                <Zh>{sample(id).description_zh}</Zh>
+                <Zh pointer="/__sample_description__">{sample(id).description_zh}</Zh>
               </li>
             ))}
           </ul>
@@ -65,7 +65,7 @@ export function GallerySample() {
   const base = `/dev/gallery/${id}`;
   const header = (
     <p className="box note" data-gallery={id}>
-      {t("dev.gallery")} · {s.file} — <Zh>{s.description_zh}</Zh>{" "}
+      {t("dev.gallery")} · {s.file} — <Zh pointer="/__sample_description__">{s.description_zh}</Zh>{" "}
       <Link className="tap" to="/dev/gallery">
         {t("common.back")}
       </Link>

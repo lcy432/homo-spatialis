@@ -7,6 +7,7 @@ import { Component, type ReactNode, Suspense, lazy, useMemo, useState } from "re
 import { useTranslation } from "react-i18next";
 import type { CityOption, GeographyDisplayBundle } from "../contract/types";
 import { type AnchorResolution, resolveAnchors } from "../geo/anchors";
+import { indexPointer } from "../display/pointers";
 import { Zh } from "../i18n/biz";
 import { useLocale } from "../i18n/index";
 import { useMode } from "../ui/mode";
@@ -79,7 +80,7 @@ function AnchorNotes({ res, geography, cities }: { res: AnchorResolution; geogra
           <summary>{t("maps.anchorSources")}</summary>
           <ul>
             {notes.map((n, i) => (
-              <li key={`${i}.${n.zh.slice(0, 20)}`}>{locale === "en" && n.en ? n.en : <Zh>{n.zh}</Zh>}</li>
+              <li key={`${i}.${n.zh.slice(0, 20)}`}>{locale === "en" && n.en ? n.en : <Zh pointer="/__geography_note__">{n.zh}</Zh>}</li>
             ))}
           </ul>
         </details>
@@ -90,7 +91,7 @@ function AnchorNotes({ res, geography, cities }: { res: AnchorResolution; geogra
           {res.missing.map((m, i) => (
             <span key={m.cityRef}>
               {i ? "；" : ""}
-              <Zh>{name(m.cityRef)}</Zh>（{t(`maps.anchorStatus.${m.status}` as "maps.anchorStatus.unknown")}）
+              <Zh pointer={indexPointer(cities, (x) => x.city_ref === m.cityRef, "/cities", "label")}>{name(m.cityRef)}</Zh>（{t(`maps.anchorStatus.${m.status}` as "maps.anchorStatus.unknown")}）
             </span>
           ))}
         </p>

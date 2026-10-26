@@ -59,7 +59,7 @@ describe("城市比较图", () => {
       range_lower: exact(0.45),
       range_upper: exact(0.55),
     } as unknown as CityResult;
-    const rows: CityRow[] = [{ cityRef: city.city_ref, label: city.label, country: null, city, mean: 0.3, low: 0.45, high: 0.55 }];
+    const rows: CityRow[] = [{ cityRef: city.city_ref, label: city.label, pointer: "/cities/0", labelPointer: "/cities/0/label", country: null, city, mean: 0.3, low: 0.45, high: 0.55 }];
     const { container } = render(
       <ModeProvider initial="paper">
         <CompareChart rows={rows} window={colorWindow([0.3])} />
@@ -89,8 +89,8 @@ describe("城市比较图", () => {
     } as unknown as CityResult;
     const wide = { ...city, city_ref: "X:TEST:3", label: "普通范围城", mean_j: exact(0.52), range_lower: exact(0.5), range_upper: exact(0.56) } as unknown as CityResult;
     const rows: CityRow[] = [
-      { cityRef: city.city_ref, label: city.label, country: null, city, mean: 0.5, low: 0.5, high: 0.5 },
-      { cityRef: wide.city_ref, label: wide.label, country: null, city: wide, mean: 0.52, low: 0.5, high: 0.56 },
+      { cityRef: city.city_ref, label: city.label, pointer: "/cities/0", labelPointer: "/cities/0/label", country: null, city, mean: 0.5, low: 0.5, high: 0.5 },
+      { cityRef: wide.city_ref, label: wide.label, pointer: "/cities/1", labelPointer: "/cities/1/label", country: null, city: wide, mean: 0.52, low: 0.5, high: 0.56 },
     ];
     const { container } = render(
       <ModeProvider initial="paper">
@@ -145,7 +145,7 @@ describe("分身的年度生活记录", () => {
       months_lived: 10,
       consumption: { baskets_by_month: ["1", "1", "0", "1", "1", "1", "1", "1", "1", "1", "—", "—"], opportunity_ids: ["x"] },
     };
-    render(<YearReport year={year} />);
+    render(<YearReport year={year} pointer="/clones/0/years/0" />);
     const strip = screen.getByRole("list", { name: /个人消费篮子/ });
     const cells = within(strip).getAllByRole("listitem");
     expect(cells[2]).toHaveAttribute("title", "3 · 0");
@@ -166,7 +166,7 @@ describe("分身的年度生活记录", () => {
         },
       ],
     };
-    render(<YearReport year={year} />);
+    render(<YearReport year={year} pointer="/clones/0/years/0" />);
     const strip = screen.getByRole("list", { name: /上门清洁/ });
     const cells = within(strip).getAllByRole("listitem");
     expect(cells[0]).toHaveAttribute("title", "1 · 没有安排");
@@ -184,7 +184,7 @@ describe("分身的年度生活记录", () => {
       services: [{ opportunity_id: "svc.net", label: "测试用联网服务", months_planned: [1, 2, 3, 4, 5, 6, 7, 8], months_covered: [1, 2, 3, 4, 5, 6, 7, 8], months_not_obtained: [] }],
       devices: [{ opportunity_id: "dev.washer", label: "测试用洗衣机", months_in_service: [3, 4, 5, 6, 7, 8] }],
     };
-    render(<YearReport year={year} />);
+    render(<YearReport year={year} pointer="/clones/0/years/0" />);
     const svc = within(screen.getByRole("list", { name: /测试用联网服务/ })).getAllByRole("listitem");
     expect(svc[7]).toHaveAttribute("title", "8 · 已获得");
     expect(svc[8]).toHaveAttribute("title", "9 · 没有生活");
@@ -200,57 +200,58 @@ describe("分身的年度生活记录", () => {
   });
 
   it("片区居民的典型通勤与这个分身的实际通勤分开写；年度已支付总额写明不是月度流水", () => {
-    render(<YearReport year={base} />);
+    render(<YearReport year={base} pointer="/clones/0/years/0" />);
     expect(screen.getByText(/片区的典型值，不是你的实际通勤|片区典型通勤：未知/)).toBeInTheDocument();
     expect(screen.getByText("实际通勤（逐月执行记录）")).toBeInTheDocument();
     expect(screen.getByText("这一年已支付的总额（年度合计，不是月度流水）")).toBeInTheDocument();
   });
 });
 
-describe("分配器（饼图 + 滑块）", () => {
+describe("独立评分控件（饼图 + 滑块）", () => {
   const slider = (key: string) => document.querySelector<HTMLInputElement>(`[data-slider="${key}"]`) as HTMLInputElement;
   const shown = (key: string) => document.querySelector<HTMLElement>(`[data-key="${key}"] [data-value]`)?.dataset.value;
+  const weight = (key: string) => document.querySelector<HTMLElement>(`[data-key="${key}"] [data-value]`)?.dataset.weight;
+  /** 一次指针手势：按下 → 输入 → 松开。 */
   const drag = (key: string, to: number) => {
     const el = slider(key);
+    fireEvent.pointerDown(el);
     fireEvent.input(el, { target: { value: String(to) } });
     fireEvent.pointerUp(el);
   };
 
-  it("初始不预填：六项都是“未答”，饼图没有扇区，池里 100 分", () => {
+  it("初始不预填：六项都是“未答”，没有任何扇区，状态写“还没有评分”；滑块停在 0 不等于回答 0", () => {
     render(
       <EditorHarness>
         <Allocator group="six_dimensions" title="六个方面" help="" />
       </EditorHarness>,
     );
     expect(document.querySelectorAll('[data-allocator="six_dimensions"] [data-state="unanswered"]')).toHaveLength(6);
-    // 饼图只有一个“未分配”扇区（整圆），没有任何偏好扇区
-    expect([...document.querySelectorAll("[data-slice]")].map((e) => e.getAttribute("data-slice"))).toEqual(["unallocated"]);
-    expect(screen.getByRole("status")).toHaveTextContent("还剩 100 分未分配");
+    expect(document.querySelectorAll("[data-slice]")).toHaveLength(0);
+    expect(document.querySelector('[data-allocator="six_dimensions"]')).toHaveAttribute("data-preview", "none");
+    expect(screen.getByRole("status")).toHaveTextContent("还没有评分");
+    expect(slider("safety").value).toBe("0");
   });
 
-  it("主动均分保存 50/3；再把休闲的 5 点拖给安全：35/3 与 65/3，合计严格 100；拖动中只改这两项", async () => {
-    const user = userEvent.setup();
+  it("80/40/40/20/10/10 → 临时预览 40/20/20/10/5/5（精确），原始合计 200；改一项不改别的项的原始评分", () => {
     render(
       <EditorHarness>
         <Allocator group="six_dimensions" title="六个方面" help="" />
       </EditorHarness>,
     );
-    await user.click(screen.getByRole("button", { name: "各项均分" }));
-    await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "各项均分" }));
-    expect(screen.getByRole("status")).toHaveTextContent("已分完");
-    expect(document.querySelectorAll("[data-slice]")).toHaveLength(6); // 六个扇区、没有未分配
-    expect(shown("safety")).toBe("50/3");
-    // 池是空的：先选来源“休闲”，再拖安全（17 → 22 = +5 点）
-    await user.selectOptions(document.querySelector("[data-source-select]") as HTMLSelectElement, "leisure");
-    expect(screen.getAllByText("休闲 → 安全").length).toBeGreaterThan(0);
-    drag("safety", 22);
-    expect(shown("safety")).toBe("65/3");
-    expect(shown("leisure")).toBe("35/3");
-    for (const k of ["material", "opportunity", "environment", "commute"]) expect(shown(k)).toBe("50/3");
-    expect(screen.getByRole("status")).toHaveTextContent("已分完");
+    const vals: Record<string, number> = { material: 80, safety: 40, opportunity: 40, leisure: 20, environment: 10, commute: 10 };
+    for (const [k, v] of Object.entries(vals)) drag(k, v);
+    expect(document.querySelector('[data-allocator="six_dimensions"]')).toHaveAttribute("data-preview", "complete");
+    expect(document.querySelector('[data-allocator="six_dimensions"]')).toHaveAttribute("data-rating-total", "200");
+    expect(weight("material")).toBe("40");
+    expect(weight("safety")).toBe("20");
+    expect(weight("environment")).toBe("5");
+    expect(document.querySelectorAll("[data-slice]")).toHaveLength(6);
+    drag("safety", 60);
+    expect(shown("safety")).toBe("60");
+    for (const [k, v] of Object.entries(vals)) if (k !== "safety") expect(shown(k)).toBe(String(v));
   });
 
-  it("从未分配池取：安全拖到 20 只改安全，池剩 80，饼图有安全扇区与未分配扇区；拖到 100 后可以把其余项设为 0", async () => {
+  it("两次独立手势是两条撤销记录（E5-R5）；拖到一半只是预览，松手才写入", async () => {
     const user = userEvent.setup();
     render(
       <EditorHarness>
@@ -258,20 +259,67 @@ describe("分配器（饼图 + 滑块）", () => {
       </EditorHarness>,
     );
     drag("safety", 20);
+    drag("safety", 40);
+    expect(shown("safety")).toBe("40");
+    await user.click(screen.getByRole("button", { name: "撤销" }));
     expect(shown("safety")).toBe("20");
-    expect(screen.getByRole("status")).toHaveTextContent("还剩 80 分未分配");
-    expect(document.querySelector('[data-slice="safety"]')).not.toBeNull();
-    expect(document.querySelector('[data-slice="unallocated"]')).not.toBeNull();
-    expect(document.querySelectorAll('[data-state="unanswered"]')).toHaveLength(5);
-    drag("safety", 100);
-    expect(shown("safety")).toBe("100");
-    expect(document.querySelectorAll('[data-state="unanswered"]')).toHaveLength(5); // 不偷偷补零
-    await user.click(screen.getByRole("button", { name: "将其余 5 项设为 0" }));
-    expect(document.querySelectorAll('[data-state="unanswered"]')).toHaveLength(0);
-    expect(shown("leisure")).toBe("0");
+    await user.click(screen.getByRole("button", { name: "撤销" }));
+    expect(document.querySelector('[data-key="safety"]')).toHaveAttribute("data-state", "unanswered");
+    await user.click(screen.getByRole("button", { name: "重做" }));
+    expect(shown("safety")).toBe("20");
+    // 中途的输入只改预览，不写草稿
+    const el = slider("leisure");
+    fireEvent.pointerDown(el);
+    fireEvent.input(el, { target: { value: "33" } });
+    expect(document.querySelector('[data-key="leisure"]')).toHaveAttribute("data-state", "unanswered");
+    fireEvent.pointerUp(el);
+    expect(shown("leisure")).toBe("33");
   });
 
-  it("切换到英文：精确值与已填的数不变（只换界面文字）", async () => {
+  it("部分已填：预览标为临时并列出未答项；明确 0（“记为 0”）与未答分开；全零时没有可用比例", async () => {
+    const user = userEvent.setup();
+    render(
+      <EditorHarness>
+        <Allocator group="six_dimensions" title="六个方面" help="" />
+      </EditorHarness>,
+    );
+    drag("safety", 20);
+    expect(document.querySelector('[data-allocator="six_dimensions"]')).toHaveAttribute("data-preview", "partial");
+    expect(screen.getByRole("status")).toHaveTextContent("临时预览（已填 1/6 项）");
+    expect(screen.getByText(/未答：/)).toHaveTextContent("物质生活");
+    expect(document.querySelectorAll('[data-state="unanswered"]')).toHaveLength(5);
+    // “记为 0”：明确的 0
+    await user.click(within(document.querySelector('[data-key="leisure"]') as HTMLElement).getByRole("button", { name: "记为 0" }));
+    expect(shown("leisure")).toBe("0");
+    expect(document.querySelector('[data-key="leisure"]')).toHaveAttribute("data-state", "provided");
+    // 全零
+    drag("safety", 0);
+    expect(document.querySelector('[data-allocator="six_dimensions"]')).toHaveAttribute("data-preview", "zero");
+    expect(screen.getByRole("status")).toHaveTextContent("至少有一项大于 0");
+  });
+
+  it("同等重视：每项 50、预览每项 50/3；数字框写 120 或 50/3 原样保留并提示，不截断", async () => {
+    const user = userEvent.setup();
+    render(
+      <EditorHarness>
+        <Allocator group="six_dimensions" title="六个方面" help="" />
+      </EditorHarness>,
+    );
+    await user.click(screen.getByRole("button", { name: "同等重视" }));
+    for (const k of ["material", "safety", "opportunity", "leisure", "environment", "commute"]) {
+      expect(shown(k)).toBe("50");
+      expect(weight(k)).toBe("50/3");
+    }
+    const input = document.querySelector<HTMLInputElement>('input[name="six_dimensions.safety"]') as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "120" } });
+    expect(input.value).toBe("120");
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByText(/每项评分在 0 到 100 之间/)).toBeInTheDocument();
+    fireEvent.change(input, { target: { value: "50/3" } });
+    expect(screen.getByText(/评分写十进制数/)).toBeInTheDocument();
+  });
+
+  it("切换到英文：原始评分不变（只换界面文字）", async () => {
     render(
       <EditorHarness>
         <Allocator group="six_dimensions" title="six" help="" />
@@ -279,9 +327,9 @@ describe("分配器（饼图 + 滑块）", () => {
     );
     drag("safety", 30);
     await i18n.changeLanguage("en");
-    expect(await screen.findByRole("button", { name: "Split equally" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Equal weight" })).toBeInTheDocument();
     expect(shown("safety")).toBe("30");
-    expect(screen.getByRole("status")).toHaveTextContent("Unallocated: 70 points");
+    expect(screen.getByRole("status")).toHaveTextContent("Temporary preview (1/6 items filled)");
   });
 });
 

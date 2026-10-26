@@ -39,6 +39,8 @@ export function keysFor(epoch: number) {
     geography: (pack: string, version: string | null) => ["s", epoch, "geography", pack, version ?? ""] as const,
     profiles: ["s", epoch, "profiles"] as const,
     display: (kind: string, id: string, locale: string, version: string) => ["s", epoch, "display", kind, id, locale, version] as const,
+    startPreview: (confirmedId: string, clones: number | null, years: number | null, maxCost: string | null) =>
+      ["s", epoch, "startPreview", confirmedId, clones ?? "", years ?? "", maxCost ?? ""] as const,
   };
 }
 

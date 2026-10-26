@@ -44,7 +44,7 @@ export function CompareChart({ rows, window: w }: { rows: readonly CityRow[]; wi
         {rows.map((r) => (
           <div key={r.cityRef} className={styles.chartRow} data-city={r.cityRef}>
             <span className={styles.rowLabel}>
-              <Zh>{r.label}</Zh>
+              <Zh pointer={r.labelPointer}>{r.label}</Zh>
             </span>
             <div className={styles.track}>
               {ticks.map((v) => (

@@ -4,6 +4,8 @@ import { useId, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { CatalogOccupation, InputCatalog } from "../contract/types";
 import { searchOccupations } from "../draft/catalog";
+import { useTextOf } from "../display/names";
+import { capsPtr } from "../display/pointers";
 import { Zh } from "../i18n/biz";
 import styles from "./CatalogPicker.module.css";
 
@@ -27,6 +29,7 @@ export function CatalogPicker({
   const results = useMemo(() => searchOccupations(catalog, query, group), [catalog, query, group]);
   const current = selected ? (catalog.occupations.find((o) => o.concept_id === selected) ?? null) : null;
   const groupLabel = (id: string) => groups.find((g) => g.group_id === id)?.label ?? id;
+  const text = useTextOf();
 
   return (
     <div className={styles.picker} data-field="occupation">
@@ -34,16 +37,16 @@ export function CatalogPicker({
         <div className={styles.selected} data-selected-occupation={current.concept_id}>
           <p className={styles.selectedHead}>
             <strong>
-              <Zh>{current.label}</Zh>
+              <Zh pointer={capsPtr.occupation(catalog, current.concept_id)}>{current.label}</Zh>
             </strong>{" "}
             <span className="chip accent">{t("facts.selectedChip")}</span>{" "}
             <span className="small muted">
-              <Zh>{groupLabel(current.group_id)}</Zh>
+              <Zh pointer={capsPtr.group(catalog, current.group_id)}>{groupLabel(current.group_id)}</Zh>
             </span>
           </p>
           <ul className="small">
-            {current.duties.map((x) => (
-              <Zh as="li" key={x}>
+            {current.duties.map((x, j) => (
+              <Zh as="li" key={x} pointer={capsPtr.duty(catalog, current.concept_id, j)}>
                 {x}
               </Zh>
             ))}
@@ -84,7 +87,7 @@ export function CatalogPicker({
                 <option value="">{t("facts.allGroups")}</option>
                 {groups.map((g) => (
                   <option key={g.group_id} value={g.group_id}>
-                    {g.label}
+                    {text(capsPtr.group(catalog, g.group_id), g.label)}
                   </option>
                 ))}
               </select>
@@ -97,7 +100,7 @@ export function CatalogPicker({
                 {groups.map((g) => (
                   <li key={g.group_id}>
                     <button type="button" aria-pressed={group === g.group_id} onClick={() => setGroup(g.group_id)} data-group={g.group_id}>
-                      <Zh>{g.label}</Zh>
+                      <Zh pointer={capsPtr.group(catalog, g.group_id)}>{g.label}</Zh>
                     </button>
                   </li>
                 ))}
@@ -106,7 +109,9 @@ export function CatalogPicker({
             <div className={styles.results} role="region" aria-live="polite" aria-label={t("facts.results")}>
               {results.length === 0 ? (
                 <div className="box note" data-no-match>
-                  <Zh as="p">{catalog.search.no_match}</Zh>
+                  <Zh as="p" pointer={capsPtr.noMatch}>
+                    {catalog.search.no_match}
+                  </Zh>
                   <button
                     type="button"
                     onClick={() => {
@@ -133,20 +138,20 @@ export function CatalogPicker({
                           }}
                         >
                           <span className={styles.resultLabel}>
-                            <Zh>{o.label}</Zh>
+                            <Zh pointer={capsPtr.occupation(catalog, o.concept_id)}>{o.label}</Zh>
                             {picked ? <span className="chip accent">{t("facts.selectedChip")}</span> : null}
                           </span>
                           <span className={`small muted ${styles.resultDuties}`}>
                             {o.duties.map((x, i) => (
                               <span key={x}>
                                 {i ? "；" : ""}
-                                <Zh>{x}</Zh>
+                                <Zh pointer={capsPtr.duty(catalog, o.concept_id, i)}>{x}</Zh>
                               </span>
                             ))}
                           </span>
                           {group === null ? (
                             <span className={`small muted ${styles.resultGroup}`}>
-                              <Zh>{groupLabel(o.group_id)}</Zh>
+                              <Zh pointer={capsPtr.group(catalog, o.group_id)}>{groupLabel(o.group_id)}</Zh>
                             </span>
                           ) : null}
                         </button>

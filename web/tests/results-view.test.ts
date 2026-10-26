@@ -19,7 +19,7 @@ describe("结果的展示模型", () => {
   it("数轴包含全部均值与范围端点，均值落在范围外时两者都不被裁掉", () => {
     // 合法的展示夹具：1 个完整分身 J = 0.3；1 个缺失分身已有的月份分数很高（下界 0.6、上界 0.8）→ 城市范围 [0.45, 0.55]
     const [lo, hi] = chartDomain([
-      { cityRef: "x", label: "x", country: null, city: {} as never, mean: 0.3, low: 0.45, high: 0.55 },
+      { cityRef: "x", label: "x", pointer: "/cities/0", labelPointer: "/cities/0/label", country: null, city: {} as never, mean: 0.3, low: 0.45, high: 0.55 },
     ])!;
     expect(lo).toBeLessThanOrEqual(0.3);
     expect(hi).toBeGreaterThanOrEqual(0.55);

@@ -15,6 +15,9 @@ export function exactToNumber(x: ExactNumber | null | undefined): number | null 
 export interface CityRow {
   cityRef: string;
   label: string;
+  /** 这座城在结果对象里的位置（/cities/{i}）与名称的位置（显示作用域按它取译文）。 */
+  pointer: string;
+  labelPointer: string;
   country: string | null;
   city: CityResult;
   mean: number | null;
@@ -23,9 +26,11 @@ export interface CityRow {
 }
 
 export function cityRows(result: ProductResult, caps: ProductCapabilities | null): CityRow[] {
-  return (result.cities ?? []).map((c) => ({
+  return (result.cities ?? []).map((c, i) => ({
     cityRef: c.city_ref,
     label: c.label,
+    pointer: `/cities/${i}`,
+    labelPointer: `/cities/${i}/label`,
     country: caps?.cities.find((o) => o.city_ref === c.city_ref)?.country ?? countryFromRef(c.city_ref),
     city: c,
     mean: exactToNumber(c.mean_j),

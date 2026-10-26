@@ -719,6 +719,77 @@ div.biz-zh {
   font-style: italic;
 }
 
+/* 等待页的进度条：按服务的 progress_summary 画。不定长用往复的短段；按分身年度数用实心比例。不按时间增长。 */
+.progress-summary {
+  margin: 0.4em 0 0.8em;
+}
+
+.progress-phase {
+  margin: 0 0 0.3em;
+}
+
+.progress-sentence {
+  margin: 0 0 0.5em;
+  font-size: 1.1rem;
+}
+
+.progress-bar {
+  position: relative;
+  height: 10px;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+html[data-mode="globe"] .progress-bar {
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.progress-fill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.4s ease-out;
+}
+
+.progress-fill-indeterminate {
+  width: 28%;
+  transform: translateX(-100%);
+}
+
+.progress-bar-busy .progress-fill-indeterminate {
+  animation: progress-sweep 1.8s ease-in-out infinite;
+}
+
+[data-busy="false"] .progress-fill-indeterminate {
+  width: 100%;
+  transform: none;
+  background: var(--line-strong);
+  opacity: 0.5;
+}
+
+@keyframes progress-sweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(360%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress-bar-busy .progress-fill-indeterminate {
+    animation: none;
+    width: 100%;
+    transform: none;
+    opacity: 0.6;
+  }
+  .progress-fill {
+    transition: none;
+  }
+}
+
 .visually-hidden {
   position: absolute !important;
   width: 1px;

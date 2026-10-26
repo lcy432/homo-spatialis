@@ -8,6 +8,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { type ReactNode, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { SessionView } from "../contract/types";
+import { clearAllPendingStarts } from "../draft/startRecord";
 import { type ServiceApi, makeApi } from "./endpoints";
 import { ApiError, isApiError } from "./errors";
 
@@ -82,6 +83,8 @@ export function SessionProvider({ children, api: injected }: { children: ReactNo
       setView(null);
       void queryClient.cancelQueries();
       queryClient.clear();
+      // 这台设备上的“确认并开始”找回记录属于上一个身份：一起清掉
+      clearAllPendingStarts();
       setStatus(next);
     },
     [queryClient, setStatus],
