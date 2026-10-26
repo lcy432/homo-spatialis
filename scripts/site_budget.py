@@ -1,4 +1,4 @@
-"""测试站的总额控制（所有者 2026-10-25：按“人数 × 次数 × 每次上限”控制，总额暂定 300 元）。
+"""测试站的总额控制（所有者 2026-10-25：按“人数 × 次数 × 每次上限”控制；总额 2026-10-26 调到 500 元）。
 
 服务本身只有每次运行的费用上限（``max_cost_cny_max``）与每个身份的次数（``runs_total``），没有跨身份的总额。这里用最坏情况
 把总额管住：
@@ -28,7 +28,7 @@ from orchestration.life_budget import LEDGER_DB, ledger_state, read_ledger
 from product.service.actions import ServiceContext
 from product.service.config import load_service_config
 
-DEFAULT_CAP = Decimal("300")
+DEFAULT_CAP = Decimal("500")
 
 
 def committed_cost(events: list[dict[str, Any]], currency: str = "cny") -> Decimal:
