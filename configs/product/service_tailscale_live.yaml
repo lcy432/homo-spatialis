@@ -1,0 +1,43 @@
+# 测试站：真实规划器（product_planner = Qwen 最新 Flash），经 Tailscale Funnel 对外（所有者 2026-10-25 决定开真实调用）。
+# 与生产配置 service.yaml 相同的档位（production：同源 HTTPS、__Host- Secure Cookie、不公开文档、只用真实规划器），差别只有：
+# * site_origin 是本机的 Funnel 地址；浏览器 → Funnel（443）→ 本机 Vite 预览服务器 127.0.0.1:4173 → /api 代理 → 这里的 127.0.0.1:8766
+#   （不用 8765：本地 mock 联调 run_web_local.ps1 占着它，两者可以同时跑）。
+# * live_calls_enabled: true。每次运行一本新账本，费用上限默认 20 元（用户只能选更低）；每个身份 3 次。
+# * 总额由 scripts/site_budget.py 控制（暂定 300 元）：签发新身份前按“已记账花费 + 没用掉的次数 × 20 元”算最坏情况，超了就拒绝。
+#   签发测试者一律用 site_budget.py invite，不直接用 product_service.py invite create。
+# * data_dir 是仓库外的短路径（持久、不进 git、不随工作树重建丢失）；与本地 mock 的数据分开。
+# 密钥 DASHSCOPE_API_KEY 只从进程环境读（scripts/site_start.ps1 从主工作区的 .env 取出后只传给子进程）。
+
+service:
+  version: e3c-service-config-v1
+  profile: production
+  data_dir: C:/dev/hs-site-data
+  site_origin: https://your-machine.your-tailnet.ts.net
+  bind_host: 127.0.0.1
+  bind_port: 8766
+  forwarded_allow_ips: 127.0.0.1
+  pack_path: configs/product/e3b_us_v1_pack.yaml
+  allowed_cities: []
+  default_clones_per_city: 4
+  clones_per_city_min: 1
+  clones_per_city_max: 4
+  default_years: null
+  years_allowed: []
+  planner: llm
+  live_calls_enabled: true
+  flash_config: configs/life/run_product_flash.yaml
+  models_config: configs/models.yaml
+  max_cost_cny: "20"
+  max_cost_cny_min: "0.01"
+  max_cost_cny_max: "20"
+  workers: 16
+  runs_total: 3
+  session_days: 7
+  result_retention_days: 30
+  draft_retention_days: 30
+  intent_retention_days: 30
+  profile_retention_days: 30
+  max_body_bytes: 262144
+  invite_rate_per_minute: 10
+  write_rate_per_minute: 60
+  expose_docs: false
