@@ -5,7 +5,7 @@
  */
 
 /**
- * 全部 36 份共享消息（只为生成类型而合成的根，不是一份真实消息）
+ * 全部 35 份共享消息（只为生成类型而合成的根，不是一份真实消息）
  */
 export interface ProductContracts {
   CatalogCompilation: CatalogCompilation;
@@ -14,7 +14,6 @@ export interface ProductContracts {
   DeletionReceipt: DeletionReceipt;
   DisplayAttachment: DisplayAttachment;
   DisplayEnvelope: DisplayEnvelope;
-  DraftMigrateRequest: DraftMigrateRequest;
   DraftSaveRequest: DraftSaveRequest;
   DraftView: DraftView;
   GeographyDisplayBundle: GeographyDisplayBundle;
@@ -1293,7 +1292,6 @@ export interface DraftView {
   draft: UserInputDraft;
   expires_at: string;
   meta: ProductMeta;
-  migration?: DraftMigration | null;
   updated_at: string;
 }
 /**
@@ -1510,66 +1508,6 @@ export interface TasteAnswer {
   selected?: string[];
   state?: "unanswered" | "unsure" | "no_preference" | "described" | "selected";
   text?: string | null;
-}
-/**
- * 这份草稿进入新问卷要做的迁移（``GET`` 草稿时一起给出；没有要迁移的就没有这一项）。
- *
- * 迁移把草稿的版本换成当前版本、清空新问卷不再收集的硬要求与属性偏好（``removed`` 逐条列出），其他答案原样保留；之后要重新审阅
- * 和确认。有要清空的答案时必须用户明确同意（``consent_required``）；只差版本时也要用户点一次。已经确认或已经开始的运行不受影响。
- *
- * This interface was referenced by `ProductContracts`'s JSON-Schema
- * via the `definition` "DraftMigration".
- */
-export interface DraftMigration {
-  allocation_choice_required?: boolean;
-  allocations?: LegacyAllocation[];
-  consent_required: boolean;
-  /**
-   * @minItems 1
-   */
-  effects_zh: [string, ...string[]];
-  from_questionnaire_version: string;
-  message_zh: string;
-  removed?: RemovedAnswer[];
-  to_questionnaire_version: string;
-  version_changed: boolean;
-}
-/**
- * 旧草稿里的一组定和分配（v3.5）：迁移前照原样给你看；它们是当时的百分比分配，不是独立评分，迁移时由你明确选择重新评分或
- * 同等重视，系统不把它们改读成评分。
- *
- * This interface was referenced by `ProductContracts`'s JSON-Schema
- * via the `definition` "LegacyAllocation".
- */
-export interface LegacyAllocation {
-  group: "six_dimensions" | "material";
-  lines?: LegacyAllocationLine[];
-  mode?: ("manual" | "equal_split") | null;
-}
-/**
- * 旧草稿里一组分配的一项：原来的作答状态与原来写的数值（百分比，不是独立评分）。
- *
- * This interface was referenced by `ProductContracts`'s JSON-Schema
- * via the `definition` "LegacyAllocationLine".
- */
-export interface LegacyAllocationLine {
-  key: string;
-  label: string;
-  state: "unanswered" | "provided" | "indifferent" | "unsure";
-  value_text?: string | null;
-}
-/**
- * 旧草稿里新问卷不再收集的一条答案（迁移说明里逐条列出，不悄悄丢掉）。``summary`` 是 E3 生成的可读写法（受支持的硬要求写成
- * 选项与数值）；``raw_text`` 是用户自己写的原文（照原样，不翻译；受支持的选项没有原文）。
- *
- * This interface was referenced by `ProductContracts`'s JSON-Schema
- * via the `definition` "RemovedAnswer".
- */
-export interface RemovedAnswer {
-  raw_text?: string | null;
-  ref: string;
-  section: "hard_requirements" | "attribute_preferences";
-  summary: string;
 }
 /**
  * 审阅已保存的那一版草稿（``POST /api/v1/drafts/{id}/review``）。审阅绑定草稿编号、修订号、内容与所用资料包。
@@ -2735,18 +2673,6 @@ export interface RunSummary {
   stage_zh: string;
 }
 /**
- * 迁移草稿（``POST /api/v1/drafts/{id}/migrate``）：``expected_revision`` 必须等于当前修订号；有要清空的旧答案时
- * ``clear_removed`` 必须为真（用户看过迁移说明并同意），否则拒绝、草稿不变。
- *
- * This interface was referenced by `ProductContracts`'s JSON-Schema
- * via the `definition` "DraftMigrateRequest".
- */
-export interface DraftMigrateRequest {
-  allocation_choice?: ("rerate" | "equal_weight") | null;
-  clear_removed?: boolean;
-  expected_revision: number;
-}
-/**
  * 保存草稿（``PUT /api/v1/drafts/{id}``）：``expected_revision`` 必须等于服务端当前的修订号，否则返回冲突，不覆盖新答案。
  * ``draft.draft_id`` 必须是路径里的编号；服务端写入时修订号加一。
  *
@@ -3209,9 +3135,6 @@ export interface ServiceError {
     | "paid_calls_disabled"
     | "run_options_invalid"
     | "run_settings_unavailable"
-    | "migration_consent_required"
-    | "migration_choice_required"
-    | "migration_not_needed"
     | "start_consent_stale"
     | "start_acknowledgement_missing"
     | "start_already_authorized"

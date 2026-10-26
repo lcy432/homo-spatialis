@@ -82,13 +82,13 @@ describe("按字段位置找译文", () => {
     expect(r.reason).toBe("translation_missing");
   });
 
-  it("即时回复的附层（服务错误样例 159）：按当前语言取那组字段，业务对象就是这份回复", () => {
-    const err = samplePayload<{ message_zh: string; display: Parameters<typeof envelopeOfAttachment>[1] }>("159");
+  it("即时回复的附层（服务错误样例 170）：按当前语言取那组字段，业务对象就是这份回复", () => {
+    const err = samplePayload<{ message_zh: string; display: Parameters<typeof envelopeOfAttachment>[1] }>("170");
     const en = envelopeOfAttachment(err, err.display, "en");
     expect(en).not.toBeNull();
     const r = lookupText([buildScope(en as NonNullable<typeof en>)], "/message_zh", err.message_zh);
     expect(r.provided).toBe(true);
-    expect(r.text).toContain("re-rate");
+    expect(r.text).toContain("settings preview");
   });
 });
 
