@@ -31,7 +31,14 @@ import hashlib
 import json
 from typing import Annotated, Any, Literal, get_args
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    SerializerFunctionWrapHandler,
+    model_serializer,
+    model_validator,
+)
 
 #: 结构版本（字段形状）。字段含义或形状一变就换名字，并在 ADR 记录。v3.1（DECISIONS/0042）：结果里的住处、通勤、用车权、
 #: 设备故障与税，逐城的资料性质，预检查的范围说明——都是新增的可选字段，v3 的字段含义不变；目录仍是 contracts/product/v3。
@@ -56,6 +63,8 @@ HEALTH_QUESTIONNAIRE_VERSION = "e3a-health-coping-q-v0.1-draft"
 CONVERSION_VERSION = "e3a-conversion-v3"
 #: 读回历史对象时仍接受的结构版本（v3.3 的草稿、审阅、画像与结果；新对象一律是 ``PRODUCT_SCHEMA_VERSION``）
 READABLE_SCHEMA_VERSIONS = ("e3a-product-schema-v3.3", "e3a-product-schema-v3.4")
+#: 旧结构版本：它的对象没有 v3.4 新增的字段（见 ``_legacy_dump``）
+LEGACY_SCHEMA_VERSION = READABLE_SCHEMA_VERSIONS[0]
 #: 自由文字的上限（沿用 E1 画像的 2,000 字符；超限明确报错，不静默截断）。
 FREE_TEXT_MAX_CHARS = 2000
 
@@ -81,6 +90,46 @@ def canonical_json(content: object) -> str:
 def content_fingerprint(content: object) -> str:
     """一份规范化内容的 SHA-256（只核对内容，不是认证）。"""
     return hashlib.sha256(canonical_json(content).encode("utf-8")).hexdigest()
+
+
+def _is_legacy(obj: Any) -> bool:
+    return obj.meta.schema_version == LEGACY_SCHEMA_VERSION
+
+
+def _legacy_problems(
+    obj: Any,
+    added: dict[str, Any],
+    nested: dict[str, dict[str, Any]],
+    states: dict[str, tuple[str, ...]] | None = None,
+) -> list[str]:
+    """一个 v3.3 对象里不该出现的 v3.4 内容：新增字段不是默认值（未答 / 空），或用了 v3.4 才有的状态。"""
+    bad = [k for k, default in added.items() if getattr(obj, k) != default]
+    for parent, fields in nested.items():
+        sub = getattr(obj, parent)
+        bad += [f"{parent}.{k}" for k, default in fields.items() if getattr(sub, k) != default]
+    for path, new_states in (states or {}).items():
+        parent, name = path.split(".")
+        if getattr(getattr(obj, parent), name) in new_states:
+            bad.append(path)
+    return bad
+
+
+def _legacy_dump(
+    obj: Any, data: Any, added: dict[str, Any], nested: dict[str, dict[str, Any]]
+) -> Any:
+    """按对象自己的结构版本序列化（DECISIONS/0046 的兼容读取）。v3.3 的对象没有 v3.4 新增的字段：读回时它们只能是默认值，写出时
+    照原样不写——所以旧对象的 JSON、内容身份、草稿指纹与显示绑定的消息摘要都与它当初生成时相同，不重签、不改写旧绑定。
+    新版本的对象照常写出全部字段。"""
+    if not isinstance(data, dict) or not _is_legacy(obj):
+        return data
+    for k in added:
+        data.pop(k, None)
+    for parent, fields in nested.items():
+        sub = data.get(parent)
+        if isinstance(sub, dict):
+            for k in fields:
+                sub.pop(k, None)
+    return data
 
 
 def identity_content(model: BaseModel, fingerprint_field: str) -> dict[str, Any]:
@@ -767,6 +816,30 @@ class UserInputDraft(ProductModel):
     certificates: CertificatesAnswer = Field(default_factory=CertificatesAnswer)
     experience: ExperienceAnswer = Field(default_factory=ExperienceAnswer)
 
+    @model_validator(mode="after")
+    def _legacy_shape(self) -> UserInputDraft:
+        if _is_legacy(self) and (bad := _legacy_problems(self, *_DRAFT_V34, _DRAFT_V34_STATES)):
+            raise ValueError(f"v3.3 的草稿没有 v3.4 新增的内容：{bad}（先按迁移换成当前版本）")
+        return self
+
+    @model_serializer(mode="wrap")
+    def _versioned(
+        self, handler: SerializerFunctionWrapHandler
+    ):  # 不写返回类型：JSON Schema 照原结构
+        return _legacy_dump(self, handler(self), *_DRAFT_V34)
+
+
+#: v3.4 给草稿新增的字段与它们的默认值（v3.3 的草稿只能是默认值，写出时不写）
+_DRAFT_V34 = (
+    {
+        "education": EducationAnswer(),
+        "certificates": CertificatesAnswer(),
+        "experience": ExperienceAnswer(),
+    },
+    {"occupation": {"mode": "text", "catalog_version": None, "catalog_fingerprint": None}},
+)
+_DRAFT_V34_STATES = {"leisure_interest.state": ("selected",), "taste.state": ("selected",)}
+
 
 # ==========================================================================
 # ProfileReview：可读解释、候选、缺失、未支持与待确认
@@ -940,6 +1013,29 @@ class ProfileReview(ProductModel):
     taste: InterestReview
     #: v3.4：学历、证书与相关经验的审阅（旧审阅没有）
     qualifications: QualificationReview | None = None
+
+    @model_validator(mode="after")
+    def _legacy_shape(self) -> ProfileReview:
+        if _is_legacy(self) and (bad := _legacy_problems(self, *_REVIEW_V34, _REVIEW_V34_STATES)):
+            raise ValueError(f"v3.3 的审阅没有 v3.4 新增的内容：{bad}")
+        return self
+
+    @model_serializer(mode="wrap")
+    def _versioned(
+        self, handler: SerializerFunctionWrapHandler
+    ):  # 不写返回类型：JSON Schema 照原结构
+        return _legacy_dump(self, handler(self), *_REVIEW_V34)
+
+
+_REVIEW_V34: tuple[dict[str, Any], dict[str, dict[str, Any]]] = (
+    {"qualifications": None},
+    {"occupation": {"mode": "text"}},
+)
+_REVIEW_V34_STATES = {
+    "occupation.status": ("catalog_selected",),
+    "leisure_interest.state": ("selected",),
+    "taste.state": ("selected",),
+}
 
 
 # ==========================================================================
@@ -1133,12 +1229,31 @@ class ConfirmedProfile(ProductModel):
     qualifications: ConfirmedQualifications | None = None
     content_fingerprint: Sha256
 
+    @model_validator(mode="after")
+    def _legacy_shape(self) -> ConfirmedProfile:
+        if _is_legacy(self) and (bad := _legacy_problems(self, *_PROFILE_V34)):
+            raise ValueError(f"v3.3 的确认画像没有 v3.4 新增的内容：{bad}")
+        return self
+
+    @model_serializer(mode="wrap")
+    def _versioned(
+        self, handler: SerializerFunctionWrapHandler
+    ):  # 不写返回类型：JSON Schema 照原结构
+        return _legacy_dump(self, handler(self), *_PROFILE_V34)
+
     def content(self) -> dict[str, Any]:
         """参与内容身份的全部字段（指纹本身与样例出处标签除外）。"""
         return identity_content(self, "content_fingerprint")
 
     def expected_fingerprint(self) -> str:
         return content_fingerprint(self.content())
+
+
+#: v3.4 给确认画像新增的字段（v3.3 的画像只能是默认值，写出时不写；目录选中的职业只在 v3.4 有）
+_PROFILE_V34: tuple[dict[str, Any], dict[str, dict[str, Any]]] = (
+    {"qualifications": None},
+    {"occupation": {"catalog_version": None, "catalog_fingerprint": None}},
+)
 
 
 class ConfirmedRef(ProductModel):
