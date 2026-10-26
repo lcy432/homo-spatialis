@@ -518,7 +518,7 @@ def test_duplicate_personas_get_independent_panel_ids(scheme):
 
 
 def test_the_dirichlet_alr_moments_match_the_closed_form():
-    """`MEMOS/2026-09-26-t-path-proposal.md` 第三节的三个数。
+    """`docs/history/memos/2026-09-26-t-path-proposal.md` 第三节的三个数。
 
     material 基准（α_b=1.5）、六个舒适度维（α_k=0.5）：
 

@@ -9,7 +9,7 @@
 `configs/life/synthetic_e1_3.yaml` 与 `configs/life/scoring_e1_3.yaml`（新增；E1-1、E1-2 样例不动）、
 `scripts/demo_life_scoring.py`、`tests/life/`、运行证据 `runs/2026-10-06-e1-3-scoring-demo/`
 **订正**：[ADR0017](0017-life-monthly-settlement.md) 第七节关于旧税表的表述（本记录 1.2）。
-**指针**：README §8.5、§14；PLAN §3.0、§3.0.1；设计备忘 [MEMOS/2026-10-06-e1-3-design.md](../MEMOS/2026-10-06-e1-3-design.md)
+**指针**：README §8.5、§14；PLAN §3.0、§3.0.1；设计备忘 [docs/history/memos/2026-10-06-e1-3-design.md](../docs/history/memos/2026-10-06-e1-3-design.md)
 （思考与审核过程，**不具有覆盖本记录的效力**）
 
 > **本记录完成的是"逐月说明分身实际过了什么样的生活"的探索评分，不是正式评分。** 不计算三年

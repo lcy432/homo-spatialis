@@ -3,7 +3,7 @@
 - 日期：2026-10-08。
 - 状态：所有者已明确采纳的文档规则与设计范围；E1-5 代码尚未实现。
 - 依据：所有者要求整理合成环境、现实数据抽象、代理认知及 V2 预留参数，未来用独立研究确定数值；V1 不追求最大程度还原现实。
-- 入口：[README](../README.md#governance)、[PLAN](../PLAN.md)、[参数与假设目录](../docs/design/parameter-assumption-register.md)。
+- 入口：[README（存档）](../docs/history/pre-readme-split-2026-10-26/README.md#governance)、[PLAN](../PLAN.md)、[参数与假设目录](../docs/design/parameter-assumption-register.md)。
 
 ## 1. 一份目录，区分不同性质的参数
 

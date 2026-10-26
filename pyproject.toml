@@ -1,10 +1,10 @@
 [project]
 name = "homo-spatialis"
 version = "0.1.0"
-description = "Rebirth Simulator: a computable spatial welfare model, used as a ground-truth ruler for preference recovery in large language models"
+description = "Individual-centered city life simulation with LLM planning and an explicit economic model"
 readme = "README.md"
 requires-python = ">=3.11"
-license = { text = "MIT" }
+license = { text = "Apache-2.0" }
 dependencies = [
     # M1 data acquisition and cleaning
     "pandas>=2.2",

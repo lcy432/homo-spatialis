@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-本文件是 Claude Code 每次会话自动加载的项目说明，只放**不变的约束与工作方式**。进度、状态、命名与默认入口见 [docs/INDEX.md](docs/INDEX.md)；愿景与方法见 [README.md](README.md)；当前阶段与下一步见 [PLAN.md](PLAN.md)；为什么这样定见 `DECISIONS/`。
+本文件集中维护编码代理共用的**约束与工作方式**，`AGENTS.md` 只负责路由。项目介绍见 [README.md](README.md)，方法见 [METHODS](docs/METHODS.md)，代码职责见 [ARCHITECTURE](docs/ARCHITECTURE.md)。状态、命名与默认入口见 [项目索引](docs/INDEX.md)，开发步骤见 [DEVELOPMENT](docs/DEVELOPMENT.md)，下一步见 [PLAN.md](PLAN.md)，设计理由见 [决策记录](DECISIONS/README.md)。
 
 > 本文件保持无标记差异（不用删除线、不写"某日补记"）。2026-10-18 之前的完整版本存档在 docs/history/pre-dev-refactor-2026-10-18/CLAUDE.md。
 
@@ -8,7 +8,7 @@
 
 ## 项目一句话
 
-一个可计算的空间福利模型：产品模式算出一个人在哪座城市过得最好（同一个用户的分身在不同城市各过几年，语言模型做年度规划，经济环境按月算账）；研究模式用它作真值标尺，衡量大语言模型对偏好的理解误差。
+从具体人的技能、资源与偏好出发比较城市生活：同一个人的分身在不同城市各过几年，语言模型做年度规划，经济环境按月算账；研究线在已知偏好的合成环境中，衡量语言模型的理解误差及其后果。
 
 开工先读 [docs/INDEX.md](docs/INDEX.md)（层与命名、状态、默认配置），再按任务读 docs/design/ 里对应的技术说明。
 
@@ -18,7 +18,7 @@
 
 现在按**普通软件项目**开发，不按研究项目。开发完成后冻结版本（git tag），再按研究标准一次性重跑研究问题。
 
-- 每次改动跑全量自动化测试与 lint：`uv run pytest -n auto`（日常全量手动加 `-n auto` 并行，约 1 分钟；它故意不写进默认配置，单跑一个文件时不加，免得白白启动一批进程。研究线测试标了 slow，默认不跑，要跑用 `-m slow`）、`uv run ruff check src tests scripts`、`uv run ruff format --check src tests scripts`（`runs/` 里的历史脚本不在 lint 范围）。
+- 每次改动跑全量自动化测试与 lint：`uv run pytest -n auto`（日常全量手动加 `-n auto` 并行；它故意不写进默认配置，单跑一个文件时不加。研究线测试标了 slow，默认不跑，要跑用 `-m slow`）、`uv run ruff check src tests scripts`、`uv run ruff format --check src tests scripts`（`runs/` 里的历史脚本不在 lint 范围）。检查入口与环境准备见 [开发指南](docs/DEVELOPMENT.md)。
 - 每实现完一个功能（feature），全量测试与 lint 通过后就 `git commit` 一次：只 `git add` 这次改动的文件（不用 `git add .` / `-A`，不把其他窗口的未提交修改带进去），提交信息写清做了什么。推送（`git push`）仍由所有者决定。
 - 不再做：旧版本逐字节比较、源码快照、每轮变异检查、每轮证据目录与 prompt 归档、为保留旧路径而开新版本号、新旧代码永久并存、把旧归档钉死的测试。旧代码直接改或删；`runs/` 可以清理、覆盖。
 - 只在真正的设计决定时写简短 ADR（`DECISIONS/`），状态写进 docs/INDEX.md，不在多份文档里重复写。
@@ -58,18 +58,20 @@
 - 分工：`common` 只放形状与局部约束；`ledger` 只做加载与跨对象检查；`econ` 做执行、记账、评分与评价；`agentlayer` 管许可与可见事实；`orchestration` 管运行、归档与重放。
 - 结算只读计划与目录、不读偏好真值；金额内部用整数最小单位，守恒是精确等式。评分只读实际结算记录，不读计划与理由，不改结算结果。
 - 未知不当零：资料未知、评分不完整时报未知或信息不足，不补零、不删正权重、不重新归一化来制造完整结果。
-- 产品偏好只认用户明确给出的数值；不把序数换成数字，不借用研究真值。
+- 产品偏好只认用户明确给出的数值，不从排序、文字或研究真值推断权重。当前 v3.5 的 `ratings_normalized_v1` 接受每项 0–100 的独立评分，全部必答项完成且合计大于零后，按 `权重 = 100 × 评分 ÷ 合计` 精确归一；保留原始评分和换算结果。未答或不确定保留状态，全零不自动均分；“同等重视”必须是用户主动选择。规则见 [产品输入](docs/design/e3a-product-input.md) 与 [ADR0047](DECISIONS/0047-e3-independent-ratings.md)。
 - 出局、停止、模拟缺失分开：城市平均是完成且评分完整的分身平均，出局另报比例，模拟问题另作不确定性范围；不删人、不补人、不改原计划人数。
 - 计划不可行、资料错误、程序错误与生活出局分开处理；真实执行之后发生的事件不回到年初重问规划器。
 - 每个分身每年一次正常规划、最多两次修订，每次调用都是一份完整的单轮安全请求，不带对话历史；年度事实记忆是有长度上限的结构化记录。
 - 分身之间互不影响，可以并行（DECISIONS/0039）：入口脚本默认所有分身同时过（`--workers`，最多 16 个），库函数默认顺序。共享的只有全局调用上限（发送前在锁里占位）、批次状态与进度文件；不要给分身之间加共享的可变状态。
-- 所有生活参数（价格、工资、税、疾病概率、评分锚点等）都是合成探索设定，不得据此排序真实城市；`exploratory_synthetic` 不得改成正式可评价。
+- 区分资料包的依据：`exploratory_synthetic` 使用合成城市与参数；`real_data_frozen` 使用冻结的公开资料、派生映射与登记过的假设。真实资料包中的生活规则、疾病概率和评分锚点仍含探索性设定，不能把来源真实等同于结果已经得到现实验证。保留原有范围标记，区分观测、估计与设定；不得通过改标签把合成样例变成现实评价。来源与转换见 [数据与映射](docs/DATA.md)。
 
 ---
 
 ## 研究线硬规则（改 src/eval/、src/worlds/ 或旧福利模型核心时适用）
 
-开发期研究线暂停；这些规则在研究线代码里仍然是不变量。研究方法见 README 第 3、7、10、11 章；三个研究门（L_rep 判据、测量窗口、公式前提）见 README §10.3，`make gates` 目前只跑门一。
+研究线当前安排见 [项目索引](docs/INDEX.md)；以下规则适用于研究代码。现行方法从 [研究问题](docs/RESEARCH.md#research-questions)、[经济标尺](docs/RESEARCH.md#economics)、[偏好回收](docs/RESEARCH.md#recovery)、[抽样](docs/RESEARCH.md#sampling) 和 [测量地板](docs/RESEARCH.md#floor) 阅读；三个研究门见 [研究门](docs/RESEARCH.md#research-gates)，`make gates` 目前只跑门一。文献依据见 [REFERENCES](docs/REFERENCES.md)。
+
+下列保留的 `§` 章节号指向 [拆分前 README 存档](docs/history/pre-readme-split-2026-10-26/README.md)，便于追溯原推导，不再指 GitHub 首页。当前主题说明以 [RESEARCH](docs/RESEARCH.md) 和相关决策记录为入口；噪声标定见 [重复选择与噪声](docs/RESEARCH.md#noise)，区间估计与报告见 [数值精度](docs/RESEARCH.md#precision)。
 
 8. **M2 必须对国家无知（country-blind）。** 纯函数 `indirect_utility(y_net, p, a, params)` 只吃标准化量，不接触任何原始列、不知道城市、不知道国家。若 `src/econ/` 里出现 `if country == ...`，说明上游抽象漏了，修上游不修 M2。验收标准是 `FAKE_COUNTRY` fixture 跑通时 M2 一行不改。
 9. **支出份额 `s` 是 `Persona` 的字段，不是 `(Persona, City)` 的函数。** 装配层不得持有 CEX provider 的引用，`_price_index` 只读 `persona.shares`。这条**通过删除依赖注入来保证，不是通过加断言**。理由见 §5.2.2：按城市查表会同时毁掉价格指数的定义、`κ` 的跨城不变性、以及条件 logit 的正确设定，而这三条在排序测试里都发现不了。
@@ -77,7 +79,7 @@
 11. **价格指数全程在对数空间。** `_price_index` 返回 `ln_p` 而非 `p`，并带断言 `abs(sum(s) − 1) < tol`。这条断言不可移除：份额不和为一，`P` 就不是价格的一次齐次函数，它就不是价格指数。
 12. **所有货币量带 `numeraire_id`**（如 `"USD_2024_US100"`）。跨 numeraire 的福利水平比较是**类型错误**；无量纲量（回收误差、坍缩比例）永远放行。全程基年不变价，三个增长率一律取实际增长率。
 13. **福利损失永远在真值偏好参数下评价，近似参数只用于 argmax。** 若用近似参数同时做选择和评价，算出的是自洽的胡话而不是损失。这条适用于 `L_rep`、`L_s`、`L_amen`、`L_llm` 全部四项（§9.1.1）。
-14. **w 空间不存在对角协方差。** `Σw = 1` ⟹ `1'Σ1 = 0`，而非零对角阵的 `1'Σ1 > 0`。混合 logit 一律按 §11.7.1.1 的差分法在 γ 空间估计（6 个随机系数对角协方差，`γ_0` 固定），逐维压缩作为派生量从变换回来的 7×7 秩 6 矩阵取对角线。基准维的选择是自由度，必须跑多基准维稳健性。
+14. **w 空间不存在对角协方差。** `Σw = 1` ⟹ `1'Σ1 = 0`，而非零对角阵的 `1'Σ1 > 0`。混合 logit 的差分法分支按 §11.7.1.1 在 γ 空间估计（6 个随机系数对角协方差，`γ_0` 固定），逐维压缩作为派生量从变换回来的 7×7 秩 6 矩阵取对角线。基准维的选择是自由度，必须跑多基准维稳健性。ALR 主规格及完整协方差见 [偏好回收](docs/RESEARCH.md#recovery)；两种规格都遵守权重和为 1 的约束。
 15. **打乱人设臂是完全坍缩的天花板，不是零假设。** 在 `proj_i` 与美元福利损失两条曲线上都是天花板，匹配臂应当低于它。地板来自 §10.3 的收缩自检。**不要把打乱臂用作协方差比的天花板**（打乱不改变人设总体，两臂的总体协方差应当接近）。
 16. **坍缩的主证据是协方差比，不是 `proj`。** `proj` 只能部分识别：地板需要知道估计器看到的 `Σ_pop`，而坍缩就是压缩 `Σ_pop`，循环打不开。因此它报 `r(t)` 曲线而非点估计，且只作"往哪压"的方向证据。协方差比识别干净，因为两端都是已知输入——Dirichlet(α=0.5) 的协方差有闭式解（§1.2.2、§1.2.3、§11.7.3）。
 17. **`proj` 与协方差比机械耦合，不得作为互相印证的证据。** Σ 被压小会加剧收缩从而抬高 `proj`，后者部分重复计入前者。结果部分必须自己写明这一条。
@@ -114,8 +116,10 @@ web/              前端（Vite + TypeScript）
 
 ```
 homo-spatialis/
-├── README.md / PLAN.md / CLAUDE.md
+├── README.md / README.zh-CN.md / PLAN.md
+├── AGENTS.md / CLAUDE.md  代理入口 / 共用约束
 ├── docs/INDEX.md        层与命名、状态、默认入口（唯一的状态来源）
+├── docs/                方法、架构、资料、复现、研究与文献指南
 ├── docs/design/         技术说明、参数与假设目录、执行 prompt
 ├── docs/handoffs/       层与层之间的交接说明
 ├── docs/history/        旧版文档存档
@@ -127,6 +131,7 @@ homo-spatialis/
 │   ├── agentlayer/      代理层：观察、规划请求、mock、真实模型传输层
 │   ├── orchestration/   运行器、归档、预算
 │   ├── product/         接入层：用户答案、职业、资料编译、产品结果
+│   ├── workflows/       产品请求与资料构建流程
 │   ├── worlds/ eval/    研究线：合成世界与人设、评估
 │   └── data/ ui/        占位（前端在 web/）
 ├── contracts/product/   共享消息的 JSON Schema 与公共样例
@@ -148,7 +153,7 @@ make test       pytest（默认不跑 -m live）
 make lint       ruff check && ruff format --check
 make gates      研究门一（零大模型调用）
 uv run python scripts/run_life_e1_7b.py offline-check --out <目录>   开跑前检查（零网络）
-uv run python scripts/run_life_e1_7b.py pilot --out <目录> --run-id <编号>   真实小试跑（默认 Haiku）
+uv run python scripts/run_life_e1_7b.py pilot --out <目录> --run-id <编号>   真实小试跑（默认 Sonnet，effort max）
 ```
 
 ---

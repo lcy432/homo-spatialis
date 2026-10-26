@@ -1,0 +1,21 @@
+Homo Spatialis · LLMs Becoming Us
+Copyright 2026 Chengyu Liu
+
+Project founder and initial core design: Chengyu Liu.
+Project: https://github.com/lcy432/homo-spatialis
+Authorship and contribution records: AUTHORS.md and the Git history.
+
+Original project code, documentation and configuration are licensed under the
+Apache License, Version 2.0, unless a file explicitly states otherwise.
+Contributors retain copyright in their respective contributions.
+Third-party dependencies, datasets, quotations, fonts and other assets retain
+their own licenses; they are not relicensed by this notice. Data source records
+are described in CONTRIBUTING.md and configs/intake/us_v1.yaml.
+
+OpenStreetMap: values in data/frozen derived from OpenStreetMap (for example
+restaurant and venue counts by cuisine) are © OpenStreetMap contributors and
+are made available under the Open Database License (ODbL) 1.0,
+https://opendatacommons.org/licenses/odbl/1-0/. They are not relicensed under
+Apache-2.0. Source records: configs/intake/us_v1.yaml (source osm_overpass).
+
+Earlier versions distributed under MIT retain their MIT license grants.

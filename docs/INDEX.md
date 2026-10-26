@@ -11,8 +11,8 @@
 |---|---|
 | 项目为什么做、能体验什么 | [English README](../README.md) · [中文 README](../README.zh-CN.md) |
 | 在本机跑一遍、查看输出 | [复现说明](REPRODUCING.md) · [网页启动指南](../web/README.md) |
-| 生活如何执行、结果如何评价 | [方法概览](METHODS.md) → [详细设计](design/README.md) |
-| 城市资料从哪里来、怎样成为可选机会 | [数据与映射](DATA.md) → [贡献指南](../CONTRIBUTING.md) |
+| 生活如何执行、结果如何评价 | [生活引擎的数学逻辑](METHODS.md#life-kernel) → [详细设计](design/README.md) |
+| 城市资料从哪里来、怎样成为可选机会 | [A、B 两种映射](DATA.md#mapping-methods) → [数据来源](DATA.md) → [贡献指南](../CONTRIBUTING.md) |
 | 找代码、改功能、运行检查 | [架构说明](ARCHITECTURE.md) → [开发指南](DEVELOPMENT.md) |
 | 研究问题、数学标尺和文献依据 | [研究方法](RESEARCH.md) · [参考文献](REFERENCES.md) |
 | 已经做到哪里、接下来做什么 | [当前状态](#status) · [版本路线](../PLAN.md) |

@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+type: software
+message: >-
+  If you use Homo Spatialis in research, please cite this software and state the
+  version, data pack, configuration and planner used. This is a scholarly citation
+  request, not an additional condition of the Apache-2.0 license.
+title: "Homo Spatialis · LLMs Becoming Us"
+authors:
+  - family-names: Liu
+    given-names: Chengyu
+    website: "https://github.com/lcy432"
+version: "0.1.0"
+license: Apache-2.0
+repository-code: "https://github.com/lcy432/homo-spatialis"
+url: "https://github.com/lcy432/homo-spatialis"
+abstract: >-
+  An exploratory spatial life simulation engine that separates agent planning
+  from explicit monthly economic settlement and outcome-based evaluation.
+  The reproducible baseline uses synthetic people and cities with a deterministic
+  mock planner. It does not establish predictive validity for real cities or
+  individual life outcomes. The repository includes a methods report and
+  contribution and data provenance guidelines.
+keywords:
+  - spatial welfare
+  - life simulation
+  - agent-based modeling
+  - research software
+  - reproducibility
+# Release preparation: add the actual date-released when the release is made.
+# Add doi only after Zenodo has issued the DOI for this exact version.
+# Do not use a placeholder DOI or invent a paper as preferred-citation.

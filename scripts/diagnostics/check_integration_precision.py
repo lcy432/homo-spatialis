@@ -1,4 +1,4 @@
-"""固定参数下的积分精度检查（`MEMOS/2026-09-26-integration-precision-plan.md` 甲）。
+"""固定参数下的积分精度检查（`docs/history/memos/2026-09-26-integration-precision-plan.md` 甲）。
 
 **不拟合。** 参数、数据、σ 全部固定，只换积分点数 R 与随机化，看三个输出量抖多少。
 参数从 `check_base_change.py` 的缓存读，缺缓存就报告退出。

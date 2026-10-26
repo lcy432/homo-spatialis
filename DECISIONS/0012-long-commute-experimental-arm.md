@@ -141,7 +141,7 @@ safety 0.359→0.280、healthcare 0.319→0.263），量级在 5 块的块间波
 
 `eval/gates.py` 用的是 `WorldGenerator(n_cities=...)`，即**默认标定**；默认标定
 下本次改动逐位无变化（有两条测试：分钟数与标度值都 `array_equal`）。因此
-`runs/20260911T014107Z-2d2d30` 的门一结果仍然有效，`MEMOS/2026-09-11-gate-one.md`
+`runs/20260911T014107Z-2d2d30` 的门一结果仍然有效，`docs/history/memos/2026-09-11-gate-one.md`
 不需要修订。
 
 **若将来把长通勤臂升为主臂，门一必须重跑**：`L_rep` 与 `L_amen` 直接依赖
