@@ -10,7 +10,7 @@
     "key": "pack.note.synthetic",
     "missing_reason": null,
     "pointer": "/meta/data_pack/note",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "Synthetic data pack: every value is a hand-made model setting or test data, not real city data"
@@ -19,7 +19,7 @@
     "key": "stage.cancelled",
     "missing_reason": null,
     "pointer": "/stage_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "Cancelled before the start"
@@ -28,7 +28,7 @@
     "key": "progress_summary.cancelled",
     "missing_reason": null,
     "pointer": "/progress_summary/sentence_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "Cancelled before starting"

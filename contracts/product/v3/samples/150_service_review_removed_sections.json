@@ -1,5 +1,5 @@
 {
- "description_zh": "旧草稿迁移之前的审阅：version_changed（问卷、词表、转换、结构版本）、removed_section_present（硬要求、属性偏好各一条）与 allocation_mode_retired（六维、物质各一条：百分比不是独立评分）都阻断；旧值会改变模拟，不悄悄沿用、也不悄悄丢掉",
+ "description_zh": "按旧版问卷（v0.3）填的草稿的审阅：version_changed（问卷、词表、转换、结构版本）、removed_section_present（硬要求、属性偏好各一条）与 allocation_mode_retired（六维、物质各一条：百分比不是独立评分）都阻断。旧草稿不迁移：用户新开一份草稿按这一版问卷填写（DECISIONS/0050）；已经确认的画像与已经开始的运行不受影响",
  "message": "ReviewReply",
  "payload": {
   "meta": {
@@ -128,7 +128,7 @@
      "field": "hard_requirements",
      "impact_zh": "它们会改变模拟，系统不悄悄沿用、也不悄悄丢掉；画像暂时不能确认",
      "message_zh": "这一版问卷不再收集“硬要求”，草稿里还有 1 条：住处到就业中心的往返时间不超过（分钟） 60 分钟",
-     "next_action_zh": "看过草稿的迁移说明后同意清空这些旧答案，再重新审阅",
+     "next_action_zh": "新开一份草稿，按这一版问卷重新填写",
      "severity": "error"
     },
     {
@@ -137,7 +137,7 @@
      "field": "attribute_preferences",
      "impact_zh": "它们会改变模拟，系统不悄悄沿用、也不悄悄丢掉；画像暂时不能确认",
      "message_zh": "这一版问卷不再收集“品牌、菜系等属性偏好”，草稿里还有 1 条：“家电更喜欢国产品牌”",
-     "next_action_zh": "看过草稿的迁移说明后同意清空这些旧答案，再重新审阅",
+     "next_action_zh": "新开一份草稿，按这一版问卷重新填写",
      "severity": "error"
     }
    ],

@@ -851,27 +851,6 @@ templates:
   input.item.abilities.note.v2:
     en: Comes only from your answers about highest education, occupational certificates and related experience (or the compatible item-by-item qualification answers); never granted automatically from a job title, free text or search words
     zh: 只来自你回答的最高学历、职业证书与相关经验（或兼容的逐项资格确认），不从职业称呼、自由文字或搜索词自动授予
-  input.migration.effect.clear:
-    en: Clears {n} answers the new questionnaire no longer collects (hard requirements, attribute preferences such as brands and cuisines); later simulations no longer use them
-    zh: 清空 {n} 条新问卷不再收集的答案（硬要求、品牌与菜系等属性偏好）；之后的模拟不再用它们
-  input.migration.effect.history:
-    en: Profiles already confirmed, simulations already started and past results are not affected (they use their own saved copies)
-    zh: 已经确认的画像、已经开始的模拟与历史结果不受影响（它们用自己保存的副本）
-  input.migration.effect.keep:
-    en: Cities, occupation, age, cash, six-dimension and material points, the health questionnaire, interests and taste, qualifications and your notes are kept as they are
-    zh: 城市、职业、年龄、现金、六维与物质点数、健康问卷、兴趣与口味、资格与补充文字原样保留
-  input.migration.effect.review:
-    en: After migrating, review and confirm again before preparing a new simulation
-    zh: 迁移后要重新审阅并确认，才能准备新的模拟
-  input.migration.effect.version:
-    en: The draft moves to the current questionnaire, vocabulary and conversion versions
-    zh: 草稿换成当前的问卷、词表与转换版本
-  input.migration.message.removed:
-    en: This draft was filled in with an older questionnaire and has {n} answers the new questionnaire no longer collects. Read the notes below and agree to clear them before continuing
-    zh: 这份草稿是按旧版问卷填的，里面有 {n} 条新问卷不再收集的答案。看过下面的说明、同意清空之后才能继续
-  input.migration.message.version:
-    en: 'This draft was filled in with an older questionnaire: move it to the current version, then review it (your answers are kept)'
-    zh: 这份草稿是按旧版问卷填的：换成当前版本之后再审阅（答案原样保留）
   input.occupation.catalog_expired.impact:
     en: A choice made in the old catalog cannot be reused as is; the occupation is not confirmed yet
     zh: 旧目录里的选择不能直接沿用，职业还没有确认
@@ -1044,8 +1023,8 @@ templates:
     en: 'This version of the questionnaire no longer collects “{section}”, but the draft still has {n}: {items}'
     zh: 这一版问卷不再收集“{section}”，草稿里还有 {n} 条：{items}
   input.removed_section.next:
-    en: After reading the draft's migration notes, agree to clear these old answers, then review again
-    zh: 看过草稿的迁移说明后同意清空这些旧答案，再重新审阅
+    en: Start a new draft and fill it in with this version of the questionnaire
+    zh: 新开一份草稿，按这一版问卷重新填写
   input.allocation.mode_retired.impact:
     en: Percentages are not independent ratings, and the system does not reinterpret them as ratings; the profile cannot be confirmed for now
     zh: 百分比不是独立评分，系统不把它改读成评分；画像暂时不能确认
@@ -1073,15 +1052,6 @@ templates:
   input.exact.rating_not_decimal:
     en: '“{text}” is not a decimal number: write ratings as numbers from 0 to 100 with at most two decimals'
     zh: “{text}”不是十进制数：评分写成 0 到 100 之间、最多两位小数的数
-  input.migration.effect.allocation:
-    en: 'The old six-dimension / material allocation is in percentages, not independent ratings: choose re-rate (these two groups become unanswered and you rate them again) or equal weight (50 points each); the system does not reinterpret the old percentages as ratings'
-    zh: 旧的六维 / 物质分配是百分比，不是独立评分：请选择重新评分（这两组改成未答，由你重新打分）或同等重视（每项 50 分）；系统不把旧百分比改读成评分
-  input.migration.effect.keep_except_allocation:
-    en: Cities, occupation, age, cash, the health questionnaire, interests and taste, qualifications and your notes are kept as they are
-    zh: 城市、职业、年龄、现金、健康问卷、兴趣与口味、资格与补充文字原样保留
-  input.migration.message.allocation:
-    en: 'This draft''s six-dimension / material allocation uses the old questionnaire''s percentages: choose re-rate or equal weight when migrating (other answers are kept as they are)'
-    zh: 这份草稿的六维 / 物质分配是旧问卷的百分比：迁移时请选择重新评分或同等重视（其他答案原样保留）
   input.ratings.all_zero.impact:
     en: When every rating is 0 they cannot be turned into weights; the system does not split the weight evenly for you
     zh: 全部是 0 时没法换成权重；系统不会自动平均分配

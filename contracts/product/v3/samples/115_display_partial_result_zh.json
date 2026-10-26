@@ -10,7 +10,7 @@
     "key": "pack.note.synthetic",
     "missing_reason": null,
     "pointer": "/meta/data_pack/note",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料"
@@ -19,7 +19,7 @@
     "key": "entity.city.label:US:SYNTH2026:K51",
     "missing_reason": null,
     "pointer": "/cities/0/label",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "合成城 K51"
@@ -28,7 +28,7 @@
     "key": "result.missing_reason.input_config_program_error",
     "missing_reason": null,
     "pointer": "/cities/0/missing_reasons/0/reason_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "输入 / 配置 / 程序错误"
@@ -37,7 +37,7 @@
     "key": "result.city.headline_no_mean",
     "missing_reason": null,
     "pointer": "/cities/0/headline_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "合成城 K51：原计划 1 个分身——0 个完成且可评价、0 个生活出局、1 个模拟问题；没有可用于平均的完整结果"
@@ -46,7 +46,7 @@
     "key": "result.city.note.no_complete",
     "missing_reason": null,
     "pointer": "/cities/0/notes_zh/0",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "没有完整评价的分身：完整者均值为空（不填 0，不用 L 代替 J），只给缺失范围"
@@ -55,7 +55,7 @@
     "key": "result.city.note.unexpected_error",
     "missing_reason": null,
     "pointer": "/cities/0/notes_zh/1",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "有意外程序错误：不能假定它只影响这一个分身，先查原因再解读这份报告"
@@ -64,7 +64,7 @@
     "key": "entity.city.label:US:SYNTH2026:M52",
     "missing_reason": null,
     "pointer": "/cities/1/label",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "合成城 M52"
@@ -73,7 +73,7 @@
     "key": "result.missing_reason.not_run",
     "missing_reason": null,
     "pointer": "/cities/1/missing_reasons/0/reason_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "未运行 / 未返回"
@@ -82,7 +82,7 @@
     "key": "result.city.headline_no_mean",
     "missing_reason": null,
     "pointer": "/cities/1/headline_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "合成城 M52：原计划 1 个分身——0 个完成且可评价、0 个生活出局、1 个模拟问题；没有可用于平均的完整结果"
@@ -91,7 +91,7 @@
     "key": "result.city.note.no_complete",
     "missing_reason": null,
     "pointer": "/cities/1/notes_zh/0",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "没有完整评价的分身：完整者均值为空（不填 0，不用 L 代替 J），只给缺失范围"
@@ -100,7 +100,7 @@
     "key": "result.category.M",
     "missing_reason": null,
     "pointer": "/clones/0/category_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "模拟问题，无法完整评价"
@@ -109,7 +109,7 @@
     "key": "result.missing_reason.input_config_program_error",
     "missing_reason": null,
     "pointer": "/clones/0/missing_reason_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "输入 / 配置 / 程序错误"
@@ -118,7 +118,7 @@
     "key": "result.clone.program_error.reason",
     "missing_reason": null,
     "pointer": "/clones/0/explanation/reason_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "模拟程序或配置出错，这个分身没有完成（不是生活出局）"
@@ -127,7 +127,7 @@
     "key": "result.clone.not_in_mean",
     "missing_reason": null,
     "pointer": "/clones/0/explanation/impact_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "不进完成者平均；城市的模拟缺失范围把它当作未知（0 到 1 之间都保留），不写成生活出局"
@@ -136,7 +136,7 @@
     "key": "result.clone.program_error.next",
     "missing_reason": null,
     "pointer": "/clones/0/explanation/next_action_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "维护者按审计编号查看内部记录、修复之后用新的运行重跑；这里不显示内部错误内容"
@@ -145,7 +145,7 @@
     "key": "result.category.M",
     "missing_reason": null,
     "pointer": "/clones/1/category_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "模拟问题，无法完整评价"
@@ -154,7 +154,7 @@
     "key": "result.missing_reason.not_run",
     "missing_reason": null,
     "pointer": "/clones/1/missing_reason_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "未运行 / 未返回"
@@ -163,7 +163,7 @@
     "key": "result.clone.not_run.reason",
     "missing_reason": null,
     "pointer": "/clones/1/explanation/reason_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "这个分身没有运行或没有返回结果（例如批次在轮到它之前暂停，或全局调用上限用尽）"
@@ -172,7 +172,7 @@
     "key": "result.clone.not_in_mean",
     "missing_reason": null,
     "pointer": "/clones/1/explanation/impact_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "不进完成者平均；城市的模拟缺失范围把它当作未知（0 到 1 之间都保留），不写成生活出局"
@@ -181,7 +181,7 @@
     "key": "result.clone.not_run.next",
     "missing_reason": null,
     "pointer": "/clones/1/explanation/next_action_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "批次的问题处理之后，用新的运行重跑"
@@ -190,7 +190,7 @@
     "key": "result.comparison.note",
     "missing_reason": null,
     "pointer": "/comparisons/0/note_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "范围差含 0：在这些缺失范围下不能确定方向。出局比例 A 0%、B 0%，有效分身数 A 0/1、B 0/1"
@@ -199,7 +199,7 @@
     "key": "result.option_coverage.note",
     "missing_reason": null,
     "pointer": "/option_coverage/0/note_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "选项目录覆盖：声明范围内调查过的便利设备与服务资料齐不齐；与这座城的轨迹能否评分是两件事"
@@ -208,7 +208,7 @@
     "key": "result.option_coverage.note",
     "missing_reason": null,
     "pointer": "/option_coverage/1/note_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "选项目录覆盖：声明范围内调查过的便利设备与服务资料齐不齐；与这座城的轨迹能否评分是两件事"
@@ -217,7 +217,7 @@
     "key": "entity.city.label:US:SYNTH2026:K51",
     "missing_reason": null,
     "pointer": "/data_nature/0/label",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "合成城 K51"
@@ -226,7 +226,7 @@
     "key": "datanature.summary.synthetic",
     "missing_reason": null,
     "pointer": "/data_nature/0/summary_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "合成城 K51：合成资料包，目录 28 项机会全部是手工合成的模型设定或测试资料，不是真实城市资料"
@@ -235,7 +235,7 @@
     "key": "entity.assumption.note:k51.housing.near",
     "missing_reason": null,
     "pointer": "/data_nature/0/named_assumptions/0/note_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "手工设定的数值，不来自任何真实城市、商品、服务、雇主、数据源或 LLM"
@@ -244,7 +244,7 @@
     "key": "entity.opportunity.label:k51.housing.near",
     "missing_reason": null,
     "pointer": "/data_nature/0/named_assumptions/0/examples/0",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "一居室（离工作地近）"
@@ -253,7 +253,7 @@
     "key": "entity.opportunity.label:k51.housing.far",
     "missing_reason": null,
     "pointer": "/data_nature/0/named_assumptions/0/examples/1",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "一居室（离工作地远）"
@@ -262,7 +262,7 @@
     "key": "entity.opportunity.label:k51.food.basic",
     "missing_reason": null,
     "pointer": "/data_nature/0/named_assumptions/0/examples/2",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "基本食品方案（自己做）"
@@ -271,7 +271,7 @@
     "key": "entity.assumption.note:k51.durable.convenience_pack",
     "missing_reason": null,
     "pointer": "/data_nature/0/named_assumptions/1/note_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "E3-A 编译：逐字段来源见目录编译记录；含合成设定，整条按最弱来源标合成——全组共用的合成寿命设定（两城同一款设备包相同）；全组共用的统一效果假设：两城同一款设备包的本人残余小时相同（参数目录 SC-18）；手工设定的合成报价（与 E1 便利版样例相同）"
@@ -280,7 +280,7 @@
     "key": "entity.opportunity.label:k51.durable.convenience_pack",
     "missing_reason": null,
     "pointer": "/data_nature/0/named_assumptions/1/examples/0",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "便利设备包（洗烘一体机＋扫地机器人）"
@@ -289,7 +289,7 @@
     "key": "entity.assumption.note:k51.service.chores",
     "missing_reason": null,
     "pointer": "/data_nature/0/named_assumptions/2/note_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "E3-A 编译：逐字段来源见目录编译记录；含合成设定，整条按最弱来源标合成——全组共用的统一效果假设：两城同一种杂务服务的本人残余小时相同（参数目录 SC-18）；合成设定：上门服务本人不参与服务本身（收纳与交接算在残余家务里）；手工设定的合成月价（与 E1 便利版样例相同）"
@@ -298,7 +298,7 @@
     "key": "entity.opportunity.label:k51.service.chores",
     "missing_reason": null,
     "pointer": "/data_nature/0/named_assumptions/2/examples/0",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "日常杂务服务（每月上门洗衣与打扫）"
@@ -307,7 +307,7 @@
     "key": "entity.assumption.note:k51.durable.dryer",
     "missing_reason": null,
     "pointer": "/data_nature/0/named_assumptions/3/note_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "E3-A 编译：逐字段来源见目录编译记录；含合成设定，整条按最弱来源标合成——合成寿命设定；合成效果设定"
@@ -316,7 +316,7 @@
     "key": "entity.opportunity.label:k51.durable.dryer",
     "missing_reason": null,
     "pointer": "/data_nature/0/named_assumptions/3/examples/0",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "烘干机（单件）"
@@ -325,7 +325,7 @@
     "key": "entity.common_prior.label:safety_index",
     "missing_reason": null,
     "pointer": "/data_nature/0/common_priors/0/label",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "安全条件（合成指数）"
@@ -334,7 +334,7 @@
     "key": "entity.common_prior.meaning:safety_index",
     "missing_reason": null,
     "pointer": "/data_nature/0/common_priors/0/meaning_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "合成的城市安全条件指数，0–10，越高越安全。不是任何真实城市的犯罪率或统计口径，只在这组合成城市之间可比"
@@ -343,7 +343,7 @@
     "key": "entity.common_prior.label:development_index",
     "missing_reason": null,
     "pointer": "/data_nature/0/common_priors/1/label",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "发展机会（合成指数）"
@@ -352,7 +352,7 @@
     "key": "entity.common_prior.meaning:development_index",
     "missing_reason": null,
     "pointer": "/data_nature/0/common_priors/1/meaning_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "合成的城市职业与成长机会指数，0–10，越高表示城市本身提供的发展条件越好（不含你自己的学习进度）。不是真实的 就业或教育统计"
@@ -361,7 +361,7 @@
     "key": "entity.common_prior.label:leisure_index",
     "missing_reason": null,
     "pointer": "/data_nature/0/common_priors/2/label",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "休闲条件（合成指数）"
@@ -370,7 +370,7 @@
     "key": "entity.common_prior.meaning:leisure_index",
     "missing_reason": null,
     "pointer": "/data_nature/0/common_priors/2/meaning_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "合成的城市休闲设施与公共空间指数，0–10，越高表示不花钱也能享受的休闲条件越好（健身、体验等要另外安排）。不是 真实的设施统计"
@@ -379,7 +379,7 @@
     "key": "entity.common_prior.label:environment_index",
     "missing_reason": null,
     "pointer": "/data_nature/0/common_priors/3/label",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "环境质量（合成指数）"
@@ -388,7 +388,7 @@
     "key": "entity.common_prior.meaning:environment_index",
     "missing_reason": null,
     "pointer": "/data_nature/0/common_priors/3/meaning_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "合成的城市环境质量指数（空气、绿地、噪声的合成概括），0–10，越高越好。不是真实的环境监测数据"
@@ -397,7 +397,7 @@
     "key": "entity.assumption.note:k51.care.clinic",
     "missing_reason": null,
     "pointer": "/data_nature/0/treatment_assumptions_zh/0",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "手工设定的治疗价格与就医时间，不来自任何真实医疗机构或价格资料"
@@ -406,7 +406,7 @@
     "key": "entity.opportunity.label:k51.experience.concert",
     "missing_reason": null,
     "pointer": "/data_nature/0/model_plan_activities/0",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "音乐会（一次）"
@@ -415,7 +415,7 @@
     "key": "entity.opportunity.label:k51.experience.guitar_practice",
     "missing_reason": null,
     "pointer": "/data_nature/0/model_plan_activities/1",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "在家练吉他（一次 2 小时）"
@@ -424,7 +424,7 @@
     "key": "entity.opportunity.label:k51.experience.tennis_with_rental",
     "missing_reason": null,
     "pointer": "/data_nature/0/model_plan_activities/2",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "网球场地连球拍租借（一次）"
@@ -433,7 +433,7 @@
     "key": "entity.opportunity.label:k51.experience.community_choir",
     "missing_reason": null,
     "pointer": "/data_nature/0/model_plan_activities/3",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "社区合唱排练（免费，一次）"
@@ -442,7 +442,7 @@
     "key": "entity.opportunity.label:k51.experience.gallery_tour",
     "missing_reason": null,
     "pointer": "/data_nature/0/model_plan_activities/4",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "美术馆导览（一次）"
@@ -451,7 +451,7 @@
     "key": "entity.opportunity.label:k51.experience.cooking_class",
     "missing_reason": null,
     "pointer": "/data_nature/0/model_plan_activities/5",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "烹饪课（一次，不代替正餐）"
@@ -460,7 +460,7 @@
     "key": "entity.commute_mode.label:walk_bike",
     "missing_reason": null,
     "pointer": "/data_nature/0/commute_modes/0/mode_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "步行或骑车"
@@ -469,7 +469,7 @@
     "key": "entity.commute_mode.label:transit",
     "missing_reason": null,
     "pointer": "/data_nature/0/commute_modes/1/mode_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "公共交通"
@@ -478,7 +478,7 @@
     "key": "entity.commute_rule.label:US:SYNTH2026:K51.transit",
     "missing_reason": null,
     "pointer": "/data_nature/0/commute_modes/1/condition_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "合成城的公共交通，没有使用条件、不封顶"
@@ -487,7 +487,7 @@
     "key": "entity.commute_mode.label:drive",
     "missing_reason": null,
     "pointer": "/data_nature/0/commute_modes/2/mode_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "开车"
@@ -496,7 +496,7 @@
     "key": "entity.tax_status.label:synthetic_test_double",
     "missing_reason": null,
     "pointer": "/data_nature/0/tax/status_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "合成测试替身（不是真实税）"
@@ -505,7 +505,7 @@
     "key": "entity.city.label:US:SYNTH2026:M52",
     "missing_reason": null,
     "pointer": "/data_nature/1/label",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "合成城 M52"
@@ -514,7 +514,7 @@
     "key": "datanature.summary.synthetic",
     "missing_reason": null,
     "pointer": "/data_nature/1/summary_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "合成城 M52：合成资料包，目录 27 项机会全部是手工合成的模型设定或测试资料，不是真实城市资料"
@@ -523,7 +523,7 @@
     "key": "entity.assumption.note:m52.housing.near",
     "missing_reason": null,
     "pointer": "/data_nature/1/named_assumptions/0/note_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "手工设定的数值，不来自任何真实城市、商品、服务、雇主、数据源或 LLM"
@@ -532,7 +532,7 @@
     "key": "entity.opportunity.label:m52.housing.near",
     "missing_reason": null,
     "pointer": "/data_nature/1/named_assumptions/0/examples/0",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "一居室（离工作地近）"
@@ -541,7 +541,7 @@
     "key": "entity.opportunity.label:m52.housing.far",
     "missing_reason": null,
     "pointer": "/data_nature/1/named_assumptions/0/examples/1",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "一居室（离工作地远）"
@@ -550,7 +550,7 @@
     "key": "entity.opportunity.label:m52.food.basic",
     "missing_reason": null,
     "pointer": "/data_nature/1/named_assumptions/0/examples/2",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "基本食品方案（自己做）"
@@ -559,7 +559,7 @@
     "key": "entity.assumption.note:m52.durable.convenience_pack",
     "missing_reason": null,
     "pointer": "/data_nature/1/named_assumptions/1/note_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "E3-A 编译：逐字段来源见目录编译记录；含合成设定，整条按最弱来源标合成——全组共用的合成寿命设定（两城同一款设备包相同）；全组共用的统一效果假设：两城同一款设备包的本人残余小时相同（参数目录 SC-18）；手工设定的合成报价（与 E1 便利版样例相同）"
@@ -568,7 +568,7 @@
     "key": "entity.opportunity.label:m52.durable.convenience_pack",
     "missing_reason": null,
     "pointer": "/data_nature/1/named_assumptions/1/examples/0",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "便利设备包（洗烘一体机＋扫地机器人）"
@@ -577,7 +577,7 @@
     "key": "entity.assumption.note:m52.service.chores",
     "missing_reason": null,
     "pointer": "/data_nature/1/named_assumptions/2/note_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "E3-A 编译：逐字段来源见目录编译记录；含合成设定，整条按最弱来源标合成——全组共用的统一效果假设：两城同一种杂务服务的本人残余小时相同（参数目录 SC-18）；合成设定：上门服务本人不参与服务本身（收纳与交接算在残余家务里）；手工设定的合成月价（与 E1 便利版样例相同）"
@@ -586,7 +586,7 @@
     "key": "entity.opportunity.label:m52.service.chores",
     "missing_reason": null,
     "pointer": "/data_nature/1/named_assumptions/2/examples/0",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "日常杂务服务（每月上门洗衣与打扫）"
@@ -595,7 +595,7 @@
     "key": "entity.common_prior.label:safety_index",
     "missing_reason": null,
     "pointer": "/data_nature/1/common_priors/0/label",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "安全条件（合成指数）"
@@ -604,7 +604,7 @@
     "key": "entity.common_prior.meaning:safety_index",
     "missing_reason": null,
     "pointer": "/data_nature/1/common_priors/0/meaning_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "合成的城市安全条件指数，0–10，越高越安全。不是任何真实城市的犯罪率或统计口径，只在这组合成城市之间可比"
@@ -613,7 +613,7 @@
     "key": "entity.common_prior.label:development_index",
     "missing_reason": null,
     "pointer": "/data_nature/1/common_priors/1/label",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "发展机会（合成指数）"
@@ -622,7 +622,7 @@
     "key": "entity.common_prior.meaning:development_index",
     "missing_reason": null,
     "pointer": "/data_nature/1/common_priors/1/meaning_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "合成的城市职业与成长机会指数，0–10，越高表示城市本身提供的发展条件越好（不含你自己的学习进度）。不是真实的 就业或教育统计"
@@ -631,7 +631,7 @@
     "key": "entity.common_prior.label:leisure_index",
     "missing_reason": null,
     "pointer": "/data_nature/1/common_priors/2/label",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "休闲条件（合成指数）"
@@ -640,7 +640,7 @@
     "key": "entity.common_prior.meaning:leisure_index",
     "missing_reason": null,
     "pointer": "/data_nature/1/common_priors/2/meaning_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "合成的城市休闲设施与公共空间指数，0–10，越高表示不花钱也能享受的休闲条件越好（健身、体验等要另外安排）。不是 真实的设施统计"
@@ -649,7 +649,7 @@
     "key": "entity.common_prior.label:environment_index",
     "missing_reason": null,
     "pointer": "/data_nature/1/common_priors/3/label",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "环境质量（合成指数）"
@@ -658,7 +658,7 @@
     "key": "entity.common_prior.meaning:environment_index",
     "missing_reason": null,
     "pointer": "/data_nature/1/common_priors/3/meaning_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "合成的城市环境质量指数（空气、绿地、噪声的合成概括），0–10，越高越好。不是真实的环境监测数据"
@@ -667,7 +667,7 @@
     "key": "entity.assumption.note:m52.care.clinic",
     "missing_reason": null,
     "pointer": "/data_nature/1/treatment_assumptions_zh/0",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "手工设定的治疗价格与就医时间，不来自任何真实医疗机构或价格资料"
@@ -676,7 +676,7 @@
     "key": "entity.opportunity.label:m52.experience.concert",
     "missing_reason": null,
     "pointer": "/data_nature/1/model_plan_activities/0",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "音乐会（一次）"
@@ -685,7 +685,7 @@
     "key": "entity.opportunity.label:m52.experience.guitar_practice",
     "missing_reason": null,
     "pointer": "/data_nature/1/model_plan_activities/1",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "在家练吉他（一次 2 小时）"
@@ -694,7 +694,7 @@
     "key": "entity.opportunity.label:m52.experience.tennis_with_rental",
     "missing_reason": null,
     "pointer": "/data_nature/1/model_plan_activities/2",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "网球场地连球拍租借（一次）"
@@ -703,7 +703,7 @@
     "key": "entity.opportunity.label:m52.experience.community_choir",
     "missing_reason": null,
     "pointer": "/data_nature/1/model_plan_activities/3",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "社区合唱排练（免费，一次）"
@@ -712,7 +712,7 @@
     "key": "entity.opportunity.label:m52.experience.gallery_tour",
     "missing_reason": null,
     "pointer": "/data_nature/1/model_plan_activities/4",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "美术馆导览（一次）"
@@ -721,7 +721,7 @@
     "key": "entity.opportunity.label:m52.experience.cooking_class",
     "missing_reason": null,
     "pointer": "/data_nature/1/model_plan_activities/5",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "烹饪课（一次，不代替正餐）"
@@ -730,7 +730,7 @@
     "key": "entity.commute_mode.label:walk_bike",
     "missing_reason": null,
     "pointer": "/data_nature/1/commute_modes/0/mode_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "步行或骑车"
@@ -739,7 +739,7 @@
     "key": "entity.commute_mode.label:transit",
     "missing_reason": null,
     "pointer": "/data_nature/1/commute_modes/1/mode_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "公共交通"
@@ -748,7 +748,7 @@
     "key": "entity.commute_rule.label:US:SYNTH2026:M52.transit",
     "missing_reason": null,
     "pointer": "/data_nature/1/commute_modes/1/condition_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "合成城的公共交通，没有使用条件、不封顶"
@@ -757,7 +757,7 @@
     "key": "entity.commute_mode.label:drive",
     "missing_reason": null,
     "pointer": "/data_nature/1/commute_modes/2/mode_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "开车"
@@ -766,7 +766,7 @@
     "key": "entity.tax_status.label:synthetic_test_double",
     "missing_reason": null,
     "pointer": "/data_nature/1/tax/status_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "合成测试替身（不是真实税）"
@@ -775,7 +775,7 @@
     "key": "result.reading.mean_denominator",
     "missing_reason": null,
     "pointer": "/reading_guide_zh/0",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "完整者平均 J 的分母是 C（完成且评价完整的分身），不是原计划人数；C = 0 时没有平均值，不显示为 0"
@@ -784,7 +784,7 @@
     "key": "result.reading.exits",
     "missing_reason": null,
     "pointer": "/reading_guide_zh/1",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "确认的生活出局（E）不进均值，也不进模拟缺失范围；出局与缺失的比例以原计划人数为分母"
@@ -793,7 +793,7 @@
     "key": "result.reading.missing_range",
     "missing_reason": null,
     "pointer": "/reading_guide_zh/2",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "模拟缺失范围的分母是 C + M：已知的月份照算，未知部分在 0 到 1 之间都保留。它不是置信区间，也不是现实幸福的概率"
@@ -802,7 +802,7 @@
     "key": "result.reading.l_v_j",
     "missing_reason": null,
     "pointer": "/reading_guide_zh/3",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "L 是实际几年逐月满足感的平均；V 是从终态出发、在预先冻结的参考生活模板与治疗分支里的估值，不是对未来的预测，也不是全局最优；J 按月份权重合成两者"
@@ -811,7 +811,7 @@
     "key": "result.reading.simulation_problems",
     "missing_reason": null,
     "pointer": "/reading_guide_zh/4",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "资料缺失、规划没有完成、停止与程序问题是模拟问题（M），不写成“在这座城活不下去”"
@@ -820,7 +820,7 @@
     "key": "result.reading.chores",
     "missing_reason": null,
     "pointer": "/reading_guide_zh/5",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "减少日常杂务本身对应便利满足感；没有安排的空闲时间不额外加分"
@@ -829,7 +829,7 @@
     "key": "result.reading.event_chain",
     "missing_reason": null,
     "pointer": "/reading_guide_zh/6",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "事件链按核对过的环境记录写成，不是模型的理由，也不是因果证明；硬要求单独报告，不扣分、不删人"
@@ -838,7 +838,7 @@
     "key": "result.reading.precision",
     "missing_reason": null,
     "pointer": "/reading_guide_zh/7",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "分数是当前合成模型下、按你确认的陈述偏好计算的结果；小数末位的差异不构成可靠的排序"
@@ -847,7 +847,7 @@
     "key": "entity.capability.item.0:limits",
     "missing_reason": null,
     "pointer": "/limitations_zh/0",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "城市、报价、工资、税、疾病与治疗全部是合成设定；结果不排序真实城市，也不是现实推荐"
@@ -856,7 +856,7 @@
     "key": "entity.capability.item.1:limits",
     "missing_reason": null,
     "pointer": "/limitations_zh/1",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "离线规划器是可控的 mock，不代表真实大语言模型的能力或偏好理解"
@@ -865,7 +865,7 @@
     "key": "entity.capability.item.2:limits",
     "missing_reason": null,
     "pointer": "/limitations_zh/2",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "问卷文案与参考改善范围是暂定稿，没有做认知访谈与量表验证"
@@ -874,7 +874,7 @@
     "key": "input.interests.scope.leisure.unanswered",
     "missing_reason": null,
     "pointer": "/limitations_zh/3",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "休闲兴趣：你没有回答，本次不按具体兴趣个性化（按中性规则评价）"
@@ -883,7 +883,7 @@
     "key": "input.interests.scope.taste.unanswered",
     "missing_reason": null,
     "pointer": "/limitations_zh/4",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "口味与菜系：你没有回答，本次不按具体菜系个性化（只看新鲜餐）"
@@ -892,7 +892,7 @@
     "key": "result.limit.option_coverage",
     "missing_reason": null,
     "pointer": "/limitations_zh/5",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "选项目录覆盖只说明声明范围内调查过的候选资料齐不齐，不保证穷尽整个城市市场"
@@ -901,7 +901,7 @@
     "key": "result.limit.not_fed_back",
     "missing_reason": null,
     "pointer": "/limitations_zh/6",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "结果只给用户看，不回灌给仍在生活中的分身"
@@ -910,7 +910,7 @@
     "key": "result.source.life_facts",
     "missing_reason": null,
     "pointer": "/sources_zh/0",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "生活事实：E1 结算记录（钱、岗位、住房、食品、服务月份）与月度资源账（本人家务小时）"
@@ -919,7 +919,7 @@
     "key": "result.source.area_facts",
     "missing_reason": null,
     "pointer": "/sources_zh/1",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "片区、通勤、用车权、设备故障与税：E1 月度资源账里每月唯一的通勤记录与结算记录（不含故障抽签）"
@@ -928,7 +928,7 @@
     "key": "result.source.evaluation",
     "missing_reason": null,
     "pointer": "/sources_zh/2",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "评价：E1-6A 单分身跨期评价（L / V / J）；汇总：E1-6B 城市报告（C / E / M、均值、模拟缺失范围、事件链、硬要求）"
@@ -937,7 +937,7 @@
     "key": "result.source.pack_synthetic",
     "missing_reason": null,
     "pointer": "/sources_zh/3",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "资料：合成资料包 pack.e3a.synthetic-v2（f58ef477619f…）与产品协议的基础样例；全部是合成设定"
@@ -946,7 +946,7 @@
     "key": "preflight.planner.mock_free",
     "missing_reason": null,
     "pointer": "/planner/description_zh",
-    "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+    "resource_version": "e3-display-res-v1-dccf43aea09b882a",
     "source_locale": "zh",
     "status": "provided",
     "text": "可控的确定性离线规划器（mock）：只检验接线、状态传递与信息隔离，不代表真实大语言模型的能力；没有网络调用，费用为 0"
@@ -993,7 +993,7 @@
     "unit": "model_score"
    }
   ],
-  "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+  "resource_version": "e3-display-res-v1-dccf43aea09b882a",
   "source": {
    "cities": [
     {

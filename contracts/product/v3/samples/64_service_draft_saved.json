@@ -165,7 +165,6 @@
    "schema_version": "e3a-product-schema-v3.5",
    "vocabulary_version": "e3a-vocabulary-v5"
   },
-  "migration": null,
   "updated_at": "2026-10-24T09:00:00Z"
  }
 }

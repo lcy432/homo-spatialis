@@ -5,7 +5,7 @@
   "code": "run_options_invalid",
   "display": {
    "display_schema_version": "e3-display-v2",
-   "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+   "resource_version": "e3-display-res-v1-dccf43aea09b882a",
    "source_view_fingerprint": "3d414c73aed87e3480aafc4f039b50d15cd44f240e6fe68a5a4fd2832d4aad57",
    "translations": {
     "en": {
@@ -14,7 +14,7 @@
        "key": "error.run_options_invalid.message",
        "missing_reason": null,
        "pointer": "/message_zh",
-       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+       "resource_version": "e3-display-res-v1-dccf43aea09b882a",
        "source_locale": "zh",
        "status": "provided",
        "text": "The cities, clones per city, years or cost cap chosen this time are outside what the service allows"
@@ -23,7 +23,7 @@
        "key": "error.run_options_invalid.impact",
        "missing_reason": null,
        "pointer": "/impact_zh",
-       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+       "resource_version": "e3-display-res-v1-dccf43aea09b882a",
        "source_locale": "zh",
        "status": "provided",
        "text": "No simulation was prepared and no run was used (field names which option)"
@@ -32,7 +32,7 @@
        "key": "error.run_options_invalid.next",
        "missing_reason": null,
        "pointer": "/next_action_zh",
-       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+       "resource_version": "e3-display-res-v1-dccf43aea09b882a",
        "source_locale": "zh",
        "status": "provided",
        "text": "Choose again within the defaults and ranges in the service rules; cities are changed in the draft, followed by a new review and confirmation"
@@ -46,7 +46,7 @@
        "key": "error.run_options_invalid.message",
        "missing_reason": null,
        "pointer": "/message_zh",
-       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+       "resource_version": "e3-display-res-v1-dccf43aea09b882a",
        "source_locale": "zh",
        "status": "provided",
        "text": "这次选的城市、每城分身数、年数或费用上限不在服务允许的范围里"
@@ -55,7 +55,7 @@
        "key": "error.run_options_invalid.impact",
        "missing_reason": null,
        "pointer": "/impact_zh",
-       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+       "resource_version": "e3-display-res-v1-dccf43aea09b882a",
        "source_locale": "zh",
        "status": "provided",
        "text": "没有准备模拟，也没有使用次数（field 指出是哪一项）"
@@ -64,7 +64,7 @@
        "key": "error.run_options_invalid.next",
        "missing_reason": null,
        "pointer": "/next_action_zh",
-       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+       "resource_version": "e3-display-res-v1-dccf43aea09b882a",
        "source_locale": "zh",
        "status": "provided",
        "text": "按服务规则里的默认值与允许范围重新选择；城市要在草稿里改，再重新审阅与确认"

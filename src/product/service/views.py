@@ -32,8 +32,6 @@ from common.product_contracts import (
 )
 from product.display import Code, Join, Num, t
 from product.execution import ExecutionSpec, RunPolicy
-from product.migration import migration_for
-from product.pack import DataPack
 from product.service.config import ServiceConfig
 from product.service.explain import service_explanation
 from product.service.store import Quota, intent_deadline, start_authorization
@@ -206,17 +204,13 @@ def settings_from_spec(spec: ExecutionSpec, fingerprint: str | None = None) -> R
     )
 
 
-def draft_view(
-    meta: ProductMeta, row: Mapping[str, Any], pack: DataPack | None = None
-) -> DraftView:
-    """一份草稿；给了资料包时附上它进入新问卷要做的迁移（``product.migration``，读取不改写草稿）。"""
-    draft = UserInputDraft.model_validate_json(row["body"])
+def draft_view(meta: ProductMeta, row: Mapping[str, Any]) -> DraftView:
+    """一份草稿（读取不改写；旧版本的草稿照原样读回，审阅会挡住确认，不迁移，DECISIONS/0050）。"""
     return DraftView(
         meta=meta,
-        draft=draft,
+        draft=UserInputDraft.model_validate_json(row["body"]),
         updated_at=row["updated_at"],
         expires_at=row["expires_at"],
-        migration=None if pack is None else migration_for(pack, draft),
     )
 
 

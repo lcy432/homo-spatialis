@@ -3,7 +3,7 @@
 * 权重 = 100 × 评分 ÷ 原始合计（精确分数，不加任何系数）；同比例放大或缩小，权重不变；显示的四舍五入不回到计算；
 * 未答不是 0；明确的 0 是回答；无所谓、暂不确定保留状态；全零拒绝、不自动均分；“同等重视”是用户主动把每项设为 50；
 * 物质父项为 0 时四项不适用，草稿里已有的四项答案原样留着、不参与这一次；父项重新大于 0 时照原样恢复；
-* 新问卷不再用旧的百分比分配确认；旧草稿迁移时由用户选择重新评分或同等重视；已确认的旧画像照原样读回；
+* 新问卷不再用旧的百分比分配确认；旧草稿不迁移（新开一份，DECISIONS/0050）；已确认的旧画像照原样读回；
 * 确认画像保存原始评分、原始合计与换算规则，``points`` 是最终权重；E1 的输入只看 ``points``。
 """
 
@@ -23,7 +23,6 @@ from common.product_contracts import (
 )
 from product.answers import confirm_profile, review_draft
 from product.fixtures import make_draft
-from product.migration import MigrationError, migrate, migration_for
 from product.pack import load_pack
 
 REPO = Path(__file__).resolve().parents[2]
@@ -228,37 +227,13 @@ def _payload(path: Path, part: str | None = None):
         (V34 / "131_service_draft_catalog_selection.json", "draft"),
     ],
 )
-def test_old_drafts_show_their_allocation_and_need_an_explicit_choice(path, part):
+def test_old_drafts_read_back_but_cannot_be_confirmed(path, part):
+    """旧草稿不迁移（DECISIONS/0050）：照原样读回（旧的百分比原样），审阅挡住确认；用户新开一份草稿。"""
     draft = UserInputDraft.model_validate(_payload(path, part))
-    m = migration_for(_pack(), draft)
-    assert m is not None and m.allocation_choice_required
-    six = next(a for a in m.allocations if a.group == "six_dimensions")
-    assert six.mode == draft.six_dimensions.mode  # 原样列出，不换算
-    assert [ln.value_text for ln in six.lines] == [
-        draft.six_dimensions.entries[k].value_text for k in SIX
-    ]
-    with pytest.raises(MigrationError) as exc:
-        migrate(_pack(), draft, clear_removed=True)
-    assert exc.value.code == "migration_choice_required"  # 不选就不迁移，不把旧百分比当评分
-    rerated = migrate(_pack(), draft, clear_removed=True, allocation_choice="rerate")
-    assert (
-        rerated.six_dimensions.mode == "ratings_normalized_v1"
-        and rerated.six_dimensions.entries == {}
-    )
-    equal = migrate(_pack(), draft, clear_removed=True, allocation_choice="equal_weight")
-    assert {e.value_text for e in equal.six_dimensions.entries.values()} == {"50"}
-    for k in (
-        "cities",
-        "occupation",
-        "age",
-        "cash",
-        "health",
-        "free_text",
-        "abilities",
-        "leisure_interest",
-        "taste",
-    ):
-        assert getattr(equal, k) == getattr(draft, k), k  # 其他答案原样保留
+    assert draft.six_dimensions.mode in ("manual", "equal_split")
+    review = review_draft(_pack(), draft)
+    assert {"version_changed", "allocation_mode_retired"} <= set(_codes(review))
+    assert not review.confirmable
 
 
 def test_v34_objects_read_back_exactly_without_v35_fields():

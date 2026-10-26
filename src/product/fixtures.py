@@ -117,7 +117,7 @@ def make_draft(
 
     v3.5：六维与物质四项默认是独立评分（``ratings_normalized_v1``），评分就是 ``NORMAL_SIX`` / ``NORMAL_MATERIAL``——它们正好合计
     100，换算出的权重与原来的百分比逐项相同（E1 的输入不变）。``six_mode`` / ``material_mode`` 写 ``manual`` / ``equal_split`` 是旧的
-    百分比分配（只给读回与迁移的测试用；新问卷审阅会阻断）。
+    百分比分配（只给读回旧对象的测试用；新问卷审阅会阻断）。
 
     v3.4：新问卷不再收集硬要求与属性偏好，默认两者都为空（``hard_requirements`` / ``attributes`` 只给“旧草稿”的测试用）。
     ``occupation_mode = "catalog"`` 时按资料包的输入目录选 ``selected``（不带文字）；``education`` 是学历选项编号（或

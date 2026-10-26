@@ -10,7 +10,7 @@
     "key": "pack.note.synthetic",
     "missing_reason": null,
     "pointer": "/meta/data_pack/note",
-    "resource_version": "e3-display-res-v1-819bcf9ccb96d70f",
+    "resource_version": "e3-display-res-v1-742f878f1288d996",
     "source_locale": "zh",
     "status": "provided",
     "text": "Synthetic data pack: every value is a hand-made model setting or test data, not real city data"
@@ -19,7 +19,7 @@
     "key": "stage.awaiting_confirmation",
     "missing_reason": "translation_missing",
     "pointer": "/stage_zh",
-    "resource_version": "e3-display-res-v1-819bcf9ccb96d70f",
+    "resource_version": "e3-display-res-v1-742f878f1288d996",
     "source_locale": "zh",
     "status": "missing",
     "text": null
@@ -847,7 +847,7 @@
     "key": "progress_summary.awaiting_confirmation",
     "missing_reason": null,
     "pointer": "/progress_summary/sentence_zh",
-    "resource_version": "e3-display-res-v1-819bcf9ccb96d70f",
+    "resource_version": "e3-display-res-v1-742f878f1288d996",
     "source_locale": "zh",
     "status": "provided",
     "text": "The check passed; waiting for you to confirm the start"

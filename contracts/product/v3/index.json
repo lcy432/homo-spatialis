@@ -24,11 +24,7 @@
   },
   "DisplayEnvelope": {
    "file": "DisplayEnvelope.schema.json",
-   "sha256": "f3cac8d27225349667e17884489ad039bd588bf4d3ce032fa6c192360575c4dc"
-  },
-  "DraftMigrateRequest": {
-   "file": "DraftMigrateRequest.schema.json",
-   "sha256": "1fe11adad4269c289f0010437e5bff4cd1ab36fbe182255c2331c209ce083702"
+   "sha256": "81613b50ea5641d1e748cb5aa0eba4bb60cdab8f34249521104af0d87cb1ef38"
   },
   "DraftSaveRequest": {
    "file": "DraftSaveRequest.schema.json",
@@ -36,7 +32,7 @@
   },
   "DraftView": {
    "file": "DraftView.schema.json",
-   "sha256": "2d619e56bdb19cd700024be538d06f02366ba10bab49b91ac3a57742d4aa8586"
+   "sha256": "c614e22648e4f9fcc13ee3e3f787c7344a5159f45b0a552a382ae10e2ac56981"
   },
   "GeographyDisplayBundle": {
    "file": "GeographyDisplayBundle.schema.json",
@@ -128,7 +124,7 @@
   },
   "ServiceError": {
    "file": "ServiceError.schema.json",
-   "sha256": "ee0422cba99e1693fc576d4ce20ef9b7c150e5ad0d1a97419745b1277910966b"
+   "sha256": "52a287d140937ccf9df8d7e1b5a177057aaf704e158b6998321e3ffbee25367d"
   },
   "SessionExchangeRequest": {
    "file": "SessionExchangeRequest.schema.json",

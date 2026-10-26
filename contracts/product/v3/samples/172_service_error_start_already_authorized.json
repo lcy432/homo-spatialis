@@ -5,7 +5,7 @@
   "code": "start_already_authorized",
   "display": {
    "display_schema_version": "e3-display-v2",
-   "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+   "resource_version": "e3-display-res-v1-dccf43aea09b882a",
    "source_view_fingerprint": "8c996d7d8eb3c8f0ed2037374fe2b1d1cc9a5daf5fae1eda7d96783b6ee878f6",
    "translations": {
     "en": {
@@ -14,7 +14,7 @@
        "key": "error.start_already_authorized.message",
        "missing_reason": null,
        "pointer": "/message_zh",
-       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+       "resource_version": "e3-display-res-v1-dccf43aea09b882a",
        "source_locale": "zh",
        "status": "provided",
        "text": "This preparation already carries your “confirm and start”: the service starts it automatically once the check passes, so no further confirmation is needed"
@@ -23,7 +23,7 @@
        "key": "error.start_already_authorized.impact",
        "missing_reason": null,
        "pointer": "/impact_zh",
-       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+       "resource_version": "e3-display-res-v1-dccf43aea09b882a",
        "source_locale": "zh",
        "status": "provided",
        "text": "Nothing was started twice and no extra run was used"
@@ -32,7 +32,7 @@
        "key": "error.start_already_authorized.next",
        "missing_reason": null,
        "pointer": "/next_action_zh",
-       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+       "resource_version": "e3-display-res-v1-dccf43aea09b882a",
        "source_locale": "zh",
        "status": "provided",
        "text": "Wait for the progress; if the start authorization stops being valid, the page offers a way to confirm and start again"
@@ -46,7 +46,7 @@
        "key": "error.start_already_authorized.message",
        "missing_reason": null,
        "pointer": "/message_zh",
-       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+       "resource_version": "e3-display-res-v1-dccf43aea09b882a",
        "source_locale": "zh",
        "status": "provided",
        "text": "这次准备已经带着你的“确认并开始”：检查通过后由服务自动开始，不需要再确认"
@@ -55,7 +55,7 @@
        "key": "error.start_already_authorized.impact",
        "missing_reason": null,
        "pointer": "/impact_zh",
-       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+       "resource_version": "e3-display-res-v1-dccf43aea09b882a",
        "source_locale": "zh",
        "status": "provided",
        "text": "没有重复开始，也没有多用次数"
@@ -64,7 +64,7 @@
        "key": "error.start_already_authorized.next",
        "missing_reason": null,
        "pointer": "/next_action_zh",
-       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+       "resource_version": "e3-display-res-v1-dccf43aea09b882a",
        "source_locale": "zh",
        "status": "provided",
        "text": "等待进度；开始授权作废时，页面会给出重新确认并开始的入口"

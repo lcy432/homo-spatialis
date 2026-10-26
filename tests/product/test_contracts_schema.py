@@ -108,9 +108,6 @@ def test_public_samples_validate_and_cover_the_required_cases():
         "134_service_confirm_catalog_selection",
         "142_service_review_allocation_equal_split",
         "147_service_review_allocation_parent_zero",
-        "148_service_draft_migration_needed",
-        "151_service_draft_migrate_request",
-        "153_service_draft_migrated",
         # 独立评分（v3.5，DECISIONS/0047）：原始评分 → 精确权重、同比例、全零、超范围、父项为 0 与恢复、旧方式停用、迁移要选择
         "143_service_review_ratings_normalized",
         "145_service_review_ratings_all_zero",
@@ -119,7 +116,6 @@ def test_public_samples_validate_and_cover_the_required_cases():
         "156_service_review_ratings_scaled",
         "157_service_review_allocation_mode_retired",
         "158_service_review_ratings_parent_restored",
-        "159_service_error_migration_choice_required",
         "160_service_confirm_ratings_normalized",
         "161_display_review_ratings_en",
         # 一次开始（API v1.4，DECISIONS/0048）：预览、带授权的创建、检查中、按授权跑完、同键重试、拒绝与授权作废

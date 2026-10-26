@@ -3428,77 +3428,6 @@
    "title": "DisplayText",
    "type": "object"
   },
-  "DraftMigration": {
-   "additionalProperties": false,
-   "description": "这份草稿进入新问卷要做的迁移（``GET`` 草稿时一起给出；没有要迁移的就没有这一项）。\n\n迁移把草稿的版本换成当前版本、清空新问卷不再收集的硬要求与属性偏好（``removed`` 逐条列出），其他答案原样保留；之后要重新审阅\n和确认。有要清空的答案时必须用户明确同意（``consent_required``）；只差版本时也要用户点一次。已经确认或已经开始的运行不受影响。",
-   "properties": {
-    "allocation_choice_required": {
-     "default": false,
-     "title": "Allocation Choice Required",
-     "type": "boolean"
-    },
-    "allocations": {
-     "default": [],
-     "items": {
-      "$ref": "#/$defs/LegacyAllocation"
-     },
-     "title": "Allocations",
-     "type": "array"
-    },
-    "consent_required": {
-     "title": "Consent Required",
-     "type": "boolean"
-    },
-    "effects_zh": {
-     "items": {
-      "type": "string"
-     },
-     "minItems": 1,
-     "title": "Effects Zh",
-     "type": "array"
-    },
-    "from_questionnaire_version": {
-     "maxLength": 80,
-     "minLength": 1,
-     "title": "From Questionnaire Version",
-     "type": "string"
-    },
-    "message_zh": {
-     "maxLength": 400,
-     "minLength": 1,
-     "title": "Message Zh",
-     "type": "string"
-    },
-    "removed": {
-     "default": [],
-     "items": {
-      "$ref": "#/$defs/RemovedAnswer"
-     },
-     "title": "Removed",
-     "type": "array"
-    },
-    "to_questionnaire_version": {
-     "maxLength": 80,
-     "minLength": 1,
-     "title": "To Questionnaire Version",
-     "type": "string"
-    },
-    "version_changed": {
-     "title": "Version Changed",
-     "type": "boolean"
-    }
-   },
-   "required": [
-    "from_questionnaire_version",
-    "to_questionnaire_version",
-    "version_changed",
-    "consent_required",
-    "message_zh",
-    "effects_zh"
-   ],
-   "title": "DraftMigration",
-   "type": "object"
-  },
   "DraftRef": {
    "additionalProperties": false,
    "description": "引用一份草稿：编号、修订号与内容指纹（草稿改了，指纹就不同）。",
@@ -3574,17 +3503,6 @@
     },
     "meta": {
      "$ref": "#/$defs/ProductMeta"
-    },
-    "migration": {
-     "anyOf": [
-      {
-       "$ref": "#/$defs/DraftMigration"
-      },
-      {
-       "type": "null"
-      }
-     ],
-     "default": null
     },
     "updated_at": {
      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
@@ -4936,97 +4854,6 @@
     "note"
    ],
    "title": "ItemStatus",
-   "type": "object"
-  },
-  "LegacyAllocation": {
-   "additionalProperties": false,
-   "description": "旧草稿里的一组定和分配（v3.5）：迁移前照原样给你看；它们是当时的百分比分配，不是独立评分，迁移时由你明确选择重新评分或\n同等重视，系统不把它们改读成评分。",
-   "properties": {
-    "group": {
-     "enum": [
-      "six_dimensions",
-      "material"
-     ],
-     "title": "Group",
-     "type": "string"
-    },
-    "lines": {
-     "default": [],
-     "items": {
-      "$ref": "#/$defs/LegacyAllocationLine"
-     },
-     "title": "Lines",
-     "type": "array"
-    },
-    "mode": {
-     "anyOf": [
-      {
-       "enum": [
-        "manual",
-        "equal_split"
-       ],
-       "type": "string"
-      },
-      {
-       "type": "null"
-      }
-     ],
-     "default": null,
-     "title": "Mode"
-    }
-   },
-   "required": [
-    "group"
-   ],
-   "title": "LegacyAllocation",
-   "type": "object"
-  },
-  "LegacyAllocationLine": {
-   "additionalProperties": false,
-   "description": "旧草稿里一组分配的一项：原来的作答状态与原来写的数值（百分比，不是独立评分）。",
-   "properties": {
-    "key": {
-     "maxLength": 48,
-     "minLength": 1,
-     "title": "Key",
-     "type": "string"
-    },
-    "label": {
-     "maxLength": 80,
-     "minLength": 1,
-     "title": "Label",
-     "type": "string"
-    },
-    "state": {
-     "enum": [
-      "unanswered",
-      "provided",
-      "indifferent",
-      "unsure"
-     ],
-     "title": "State",
-     "type": "string"
-    },
-    "value_text": {
-     "anyOf": [
-      {
-       "maxLength": 40,
-       "type": "string"
-      },
-      {
-       "type": "null"
-      }
-     ],
-     "default": null,
-     "title": "Value Text"
-    }
-   },
-   "required": [
-    "key",
-    "label",
-    "state"
-   ],
-   "title": "LegacyAllocationLine",
    "type": "object"
   },
   "LeisureInterestAnswer": {
@@ -7227,52 +7054,6 @@
     "rules"
    ],
    "title": "RatingsRules",
-   "type": "object"
-  },
-  "RemovedAnswer": {
-   "additionalProperties": false,
-   "description": "旧草稿里新问卷不再收集的一条答案（迁移说明里逐条列出，不悄悄丢掉）。``summary`` 是 E3 生成的可读写法（受支持的硬要求写成\n选项与数值）；``raw_text`` 是用户自己写的原文（照原样，不翻译；受支持的选项没有原文）。",
-   "properties": {
-    "raw_text": {
-     "anyOf": [
-      {
-       "maxLength": 300,
-       "type": "string"
-      },
-      {
-       "type": "null"
-      }
-     ],
-     "default": null,
-     "title": "Raw Text"
-    },
-    "ref": {
-     "maxLength": 64,
-     "minLength": 1,
-     "title": "Ref",
-     "type": "string"
-    },
-    "section": {
-     "enum": [
-      "hard_requirements",
-      "attribute_preferences"
-     ],
-     "title": "Section",
-     "type": "string"
-    },
-    "summary": {
-     "maxLength": 300,
-     "minLength": 1,
-     "title": "Summary",
-     "type": "string"
-    }
-   },
-   "required": [
-    "section",
-    "ref",
-    "summary"
-   ],
-   "title": "RemovedAnswer",
    "type": "object"
   },
   "RequirementLine": {

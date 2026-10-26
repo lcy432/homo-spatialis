@@ -449,7 +449,7 @@ answer_states[j] = {
 
 英文缺失照旧按显示附层的原因报（`translation_missing`、`resources_unavailable`……）；新的目录文字在两个资料包的当前资源里都有英文。
 
-### 14.6 旧草稿迁移（`DraftMigration`）
+### 14.6 旧草稿迁移（`DraftMigration`）——已去掉，见第 20 节
 
 * `GET /api/v1/drafts/{id}` 的 `migration`：草稿的版本不是当前的、或里面还有硬要求 / 属性偏好时给出——`from_ / to_questionnaire_version`、
   `version_changed`、`removed`（逐条：`section`、`ref`、可读的 `summary`、用户原文 `raw_text`，原文不翻译）、`consent_required`、`message_zh`、
@@ -553,7 +553,7 @@ answer_states[j] = {
 | `allocation_unanswered` / `allocation_indifferent` / `allocation_unsure` | 还有项没给评分（不换成 0、不均分） |
 | `allocation_mode_retired` | 用了旧的百分比分配（`manual` / `equal_split`）：这一版问卷不能用它确认 |
 
-### 16.5 旧草稿迁移
+### 16.5 旧草稿迁移——已去掉，见第 20 节
 
 * `DraftMigration` 新增 `allocations`（逐组照原样列出旧分配：`group`、`mode`、`lines[]` 的 `key`、`label`、`state`、`value_text`；
   `equal_split` 的各项写成当时的均分值）与 `allocation_choice_required`。旧百分比不是独立评分，系统不换算、不改读。
@@ -760,9 +760,9 @@ LangGraph → E1 → 结果。E3 定义授权、核对与停下的规则；E5 �
 | 公共结构与 OpenAPI | `contracts/product/v3/`：36 份 schema（新增 `RunStartPreviewRequest`、`RunStartPreview`），`openapi.json` 是 `e3c-service-api-v1.4`；以这里为准，不要按建议的路由名或字段名自己实现 |
 | 原始评分 ↔ 权重样例 | 155 → 143 → 161 → 160（80/40/40/20/10/10 → 40/20/20/10/5/5）、142（同等重视）、144（明确 0）、145（全零）、146（超过 100）、156（同比例）、147 → 158（物质父项 0 → 恢复）、157（旧百分比停用） |
 | 预览与一次开始的请求 | 162（预览请求）、163 / 164（预览）、165（带 `start` 的创建请求）；回复 166 / 167 / 168 |
-| 授权作废与错误 | 169–175（同键冲突、同意身份对不上、知悉项不全、带授权又确认、报价变了、付费调用被关、检查没通过）、159（迁移没有选择） |
+| 授权作废与错误 | 169–175（同键冲突、同意身份对不上、知悉项不全、带授权又确认、报价变了、付费调用被关、检查没通过） |
 | 进度摘要的中英样例 | 第 18.3 节的句子表（每一种情形，中英都来自冻结的显示资源）与第 18.4 节的意图样例 |
-| 迁移说明 | 旧草稿（v3.3、v3.4 的百分比分配）迁移时要用户选 `rerate` 或 `equal_weight`（第 16.5 节）；已确认的旧画像、已开始的运行、历史结果不改；服务库 v3 → v4 打开时就地升级（只加一列），旧意图照旧流程 |
+| 旧草稿 | 不迁移（第 20 节）：旧版本的草稿照原样读回、审阅挡住确认，用户新开一份；已确认的旧画像、已开始的运行、历史结果不改；服务库 v3 → v4 打开时就地升级（只加一列），旧意图照旧流程 |
 
 **E5 不要做的**：不要自己换算权重或把旧百分比改读成评分；不要在页面上轮询到“检查通过”再发 `submit` 或恢复；找回一次开始时同一次操作
 一直用同一个键（只有授权作废之后用户重新确认，即 `start_again`，才用新键）；不要重算或重签旧对象的身份、不要把旧画像保存成新版本、不要拿当前译文补历史对象。
@@ -778,3 +778,18 @@ LangGraph → E1 → 结果。E3 定义授权、核对与停下的规则；E5 �
 
 **只是工程验证、还没有证明的**：全部是离线 mock 与测试传输（离线替身）；没有真实用户、没有真实模型、没有可用性测试；进度条只按 E1
 已结算的年份前进，没有在真实模型的耗时下看过等待体验；联网部署、并发多用户与长时间运行没有测。
+
+## 20. 去掉旧草稿迁移（2026-10-26）
+
+状态：**实现及离线自测完成，待独立复核**。所有者 2026-10-26 决定（测试站上没有用户），规则见
+[ADR0050](../../DECISIONS/0050-e3-no-old-draft-migration.md)。第 14.6 节与第 16.5 节的迁移流程作废。
+
+* **删掉的**：`POST /api/v1/drafts/{id}/migrate`、`DraftMigrateRequest`、`DraftView.migration`（`DraftMigration`、`LegacyAllocation`、
+  `LegacyAllocationLine`、`RemovedAnswer`）、错误 `migration_consent_required` / `migration_choice_required` / `migration_not_needed`、
+  样例 148、149、151、152、153、154、159。公共结构仍是 v3.5、服务 API 仍是 v1.4，schema 35 份。
+* **旧版本的草稿**（`meta.schema_version` 不是 v3.5）：`GET` 照原样读回；审阅报 `version_changed`（还有硬要求或属性偏好就
+  `removed_section_present`，旧的百分比分配就 `allocation_mode_retired`），不能确认。页面提示“这是旧版本草稿，请新开一份”即可，
+  不需要迁移对话框（样例 150 是这样一份草稿的审阅）。
+* **不变**：已确认的旧画像、已开始的运行与历史结果照原身份读回、照原绑定显示；停下的旧运行照常恢复；历史结果的显示版本为空时
+  不请求地理清单。
+* **E5 要删的**：迁移对话框与它的调用（`MigrationPanel`、`migrateDraft`、迁移的 e2e 与断言）；重新生成类型以 `contracts/product/v3/` 为准。

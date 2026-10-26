@@ -34,7 +34,6 @@ from common.product_contracts import (
     ConfirmedRef,
     CostStatus,
     DeletionReceipt,
-    DraftMigrateRequest,
     DraftSaveRequest,
     DraftSummary,
     DraftView,
@@ -83,7 +82,6 @@ from product.display import messages as display_messages
 from product.display.document import binding_document, capture
 from product.execution import ExecutionSpec, RunOptions, RunOptionsError, RunPolicy, service_pack
 from product.interests import confirmed_scope_lines
-from product.migration import MigrationError, migrate
 from product.pack import DataPack, load_pack
 from product.pack_facts import pack_lines
 from product.service.clock import Clock, system_clock
@@ -265,11 +263,11 @@ def create_draft(ctx: ServiceContext, principal_id: str, *, generation: int) -> 
         ctx.config.draft_retention_days,
         generation=generation,
     )
-    return draft_view(ctx.meta(), row, ctx.pack)
+    return draft_view(ctx.meta(), row)
 
 
 def get_draft(ctx: ServiceContext, principal_id: str, draft_id: str) -> DraftView:
-    return draft_view(ctx.meta(), ctx.store.draft(principal_id, draft_id), ctx.pack)
+    return draft_view(ctx.meta(), ctx.store.draft(principal_id, draft_id))
 
 
 def save_draft(
@@ -290,40 +288,7 @@ def save_draft(
         ctx.config.draft_retention_days,
         generation=generation,
     )
-    return draft_view(ctx.meta(), row, ctx.pack)
-
-
-def migrate_draft(
-    ctx: ServiceContext,
-    principal_id: str,
-    draft_id: str,
-    req: DraftMigrateRequest,
-    *,
-    generation: int,
-) -> DraftView:
-    """按迁移说明改写草稿（``product.migration``）：换成当前版本、清空新问卷不再收集的答案（要用户明确同意），写成新的修订；
-    之后要重新审阅与确认。修订号不是当前的就冲突，不改。已经确认的画像与已经开始的运行不受影响。"""
-    row = ctx.store.draft(principal_id, draft_id)
-    if row["revision"] != req.expected_revision:
-        raise ServiceFailure("revision_conflict")
-    try:
-        migrated = migrate(
-            ctx.pack,
-            UserInputDraft.model_validate_json(row["body"]),
-            clear_removed=req.clear_removed,
-            allocation_choice=req.allocation_choice,
-        )
-    except MigrationError as exc:
-        raise ServiceFailure(exc.code) from exc
-    row = ctx.store.save_draft(
-        principal_id,
-        draft_id,
-        req.expected_revision,
-        lambda revision: migrated.model_copy(update={"revision": revision}).model_dump_json(),
-        ctx.config.draft_retention_days,
-        generation=generation,
-    )
-    return draft_view(ctx.meta(), row, ctx.pack)
+    return draft_view(ctx.meta(), row)
 
 
 def delete_draft(ctx: ServiceContext, principal_id: str, draft_id: str) -> DeletionReceipt:

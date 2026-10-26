@@ -1,11 +1,10 @@
-"""新输入流程走托管服务（DECISIONS/0046）：能力清单里的输入目录、不写任何文字的完整离线闭环、拒绝的情形与旧草稿的显式迁移。
+"""新输入流程走托管服务（DECISIONS/0046）：能力清单里的输入目录、不写任何文字的完整离线闭环、拒绝的情形；旧草稿不再迁移（DECISIONS/0050）。
 
 * 能力清单带输入目录（E3B 9 组 40 个职业）；中英文显示完整，搜索词照原文。
 * 按目录选职业、回答学历与证书、面板多选兴趣与口味、不写补充文字：审阅 → 确认 → 检查 → 开始 → worker → LangGraph → E1 → 结果，
   离线 mock，真实模型调用 0；新画像没有硬要求与属性偏好。
 * 按目录选却带文字 → 422；目录里没有的编号、过期的目录 → 审阅阻断，不替换职业。
-* 旧草稿：读取时附迁移说明；没有同意就 409、草稿不变；旧的百分比分配没有选择重新评分或同等重视也 409（v0.5，DECISIONS/0047）；
-  同意并选择之后清空并换成当前版本，其他表不动；已经是当前版本就 409。
+* 旧草稿：照原样读回，审阅挡住确认，没有迁移接口；用户新开一份草稿（DECISIONS/0050）。
 """
 
 from __future__ import annotations
@@ -97,7 +96,7 @@ def test_the_new_flow_needs_no_text_and_runs_offline(tmp_path, publish):
     assert draft["occupation"]["raw_text"] is None and draft["free_text"]["text"] is None
     assert draft["leisure_interest"]["text"] is None and draft["taste"]["text"] is None
     assert draft["hard_requirements"] == [] and draft["attribute_preferences"] == []
-    assert view["migration"] is None
+    assert "migration" not in view  # 旧草稿迁移已去掉（DECISIONS/0050）
     did = draft["draft_id"]
     review = b.post(f"/drafts/{did}/review").json()["review"]
     assert review["confirmable"], review["issues"]
@@ -171,61 +170,30 @@ def _old_draft(svc, view, **kw):
     return UserInputDraft.model_validate(body)
 
 
-def test_an_old_draft_is_migrated_only_with_consent(tmp_path, publish):
+def test_an_old_draft_reads_back_but_cannot_continue(tmp_path, publish):
+    """旧草稿不迁移（DECISIONS/0050）：照原样读回，审阅挡住确认，没有迁移接口；用户新开一份草稿。历史运行不受影响。"""
     svc = start(tmp_path)
     publish(svc.ctx.pack)
     _, b = svc.person()
-    finished_run(svc, b)  # 已经确认、已经完成的历史运行：迁移别的草稿不改它们
+    finished_run(svc, b)  # 已经确认、已经完成的历史运行
     view = b.new_draft()
     did = view["draft"]["draft_id"]
-    assert _put(b, view, _old_draft(svc, view)).status_code == 200
+    old = _old_draft(svc, view)
+    assert _put(b, view, old).status_code == 200
     got = b.get(f"/drafts/{did}").json()
-    m = got["migration"]
-    assert m["consent_required"] and m["version_changed"] and m["allocation_choice_required"]
-    assert [(r["section"], r["ref"]) for r in m["removed"]] == [("hard_requirements", "hr.commute")]
-    assert [a["group"] for a in m["allocations"]] == ["six_dimensions", "material"]
+    assert (
+        "migration" not in got
+        and got["draft"]["meta"]["schema_version"] == OLD_META["schema_version"]
+    )
     review = b.post(f"/drafts/{did}/review").json()["review"]
+    codes = {i["code"] for i in review["issues"] if i["severity"] == "error"}
+    assert {"version_changed", "removed_section_present", "allocation_mode_retired"} <= codes
     assert not review["confirmable"]
-    assert "removed_section_present" in [i["code"] for i in review["issues"]]
-    en = display(b, "draft", did, "en").json()
-    notes = [f for f in en["fields"] if f["pointer"].startswith("/migration/")]
-    assert notes and all(f["status"] == "provided" for f in notes)
+    en = display(b, "review", review["review_id"], "en").json()
+    assert all(f["status"] == "provided" for f in en["fields"])  # 阻断的说明照样有英文
     before = db_dump(svc.store.path)
     r = b.post(f"/drafts/{did}/migrate", json={"expected_revision": got["draft"]["revision"]})
-    assert r.status_code == 409 and r.json()["code"] == "migration_consent_required"
-    assert db_dump(svc.store.path) == before  # 没有同意：什么都没改
-    r = b.post(
-        f"/drafts/{did}/migrate",
-        json={"expected_revision": got["draft"]["revision"] - 1, "clear_removed": True},
-    )
-    assert r.status_code == 409 and r.json()["code"] == "revision_conflict"
-    r = b.post(
-        f"/drafts/{did}/migrate",
-        json={"expected_revision": got["draft"]["revision"], "clear_removed": True},
-    )
-    assert r.status_code == 409 and r.json()["code"] == "migration_choice_required"
-    assert db_dump(svc.store.path) == before  # 没有选择重新评分或同等重视：什么都没改
-    r = b.post(
-        f"/drafts/{did}/migrate",
-        json={
-            "expected_revision": got["draft"]["revision"],
-            "clear_removed": True,
-            "allocation_choice": "equal_weight",
-        },
-    )
-    assert r.status_code == 200, r.text
-    moved = r.json()
-    assert moved["draft"]["revision"] == got["draft"]["revision"] + 1
-    assert moved["draft"]["hard_requirements"] == [] and moved["migration"] is None
-    assert moved["draft"]["meta"]["questionnaire_version"] == "e3a-questionnaire-v0.5-draft"
-    assert moved["draft"]["six_dimensions"]["mode"] == "ratings_normalized_v1"
-    after = db_dump(svc.store.path)
-    for table in ("profiles", "intents"):
-        assert after.get(table) == before.get(table), table  # 历史画像与运行不改写
-    review = b.post(f"/drafts/{did}/review").json()["review"]
-    assert review["confirmable"], review["issues"]
-    r = b.post(
-        f"/drafts/{did}/migrate",
-        json={"expected_revision": moved["draft"]["revision"], "clear_removed": True},
-    )
-    assert r.status_code == 409 and r.json()["code"] == "migration_not_needed"
+    assert r.status_code in (404, 405)  # 没有迁移接口
+    assert db_dump(svc.store.path) == before
+    fresh = b.confirm(b.fill(b.new_draft()))  # 新开一份照常确认
+    assert fresh["meta"]["schema_version"] == "e3a-product-schema-v3.5"

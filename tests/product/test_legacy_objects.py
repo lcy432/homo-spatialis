@@ -37,7 +37,6 @@ from product.display import catalog, messages
 from product.display.document import binding_set, json_fingerprint
 from product.display.render import display_fields
 from product.fixtures import make_draft
-from product.migration import migrate, migration_for
 from product.pack import load_pack
 
 REPO = Path(__file__).resolve().parents[2]
@@ -265,15 +264,14 @@ def test_old_resources_gone_or_tampered_are_reported_not_replaced(tmp_path, monk
     assert all(f["missing_reason"] == reason for f in fields)
 
 
-# ---------------------------------------------------------------------- 旧草稿进入新问卷：显式迁移
+# ---------------------------------------------------------------------- 旧草稿：照原样读回、不能确认（不迁移，DECISIONS/0050）
 
 
-def test_the_real_old_draft_migrates_only_with_consent(pack):
+def test_the_real_old_draft_reads_back_but_cannot_be_confirmed(pack):
     draft = UserInputDraft.model_validate(raw("draft"))
-    m = migration_for(pack, draft)
-    assert m is not None and m.version_changed and m.consent_required  # 旧问卷收集过的通勤上限
-    # 旧的百分比分配：用户要选重新评分或同等重视（v0.5，DECISIONS/0047）
-    assert m.allocation_choice_required
-    moved = migrate(pack, draft, clear_removed=True, allocation_choice="equal_weight")
-    assert moved.meta.schema_version == PRODUCT_SCHEMA_VERSION and moved.hard_requirements == ()
-    assert review_draft(pack, moved).confirmable
+    assert draft.meta.schema_version != PRODUCT_SCHEMA_VERSION
+    review = review_draft(pack, draft)
+    codes = {i.code for i in review.issues if i.severity == "error"}
+    # 旧版本、旧问卷收集过的通勤上限、旧的百分比分配：都挡住确认；用户新开一份草稿
+    assert {"version_changed", "removed_section_present", "allocation_mode_retired"} <= codes
+    assert not review.confirmable

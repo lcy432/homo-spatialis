@@ -5,7 +5,7 @@
   "code": "start_acknowledgement_missing",
   "display": {
    "display_schema_version": "e3-display-v2",
-   "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+   "resource_version": "e3-display-res-v1-dccf43aea09b882a",
    "source_view_fingerprint": "b9a7afe40936483a3f30ecd4d6262575336b18bdae197f8b7e2a4f5c4d3dae49",
    "translations": {
     "en": {
@@ -14,7 +14,7 @@
        "key": "error.start_acknowledgement_missing.message",
        "missing_reason": null,
        "pointer": "/message_zh",
-       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+       "resource_version": "e3-display-res-v1-dccf43aea09b882a",
        "source_locale": "zh",
        "status": "provided",
        "text": "Not all of the things to acknowledge before starting were confirmed"
@@ -23,7 +23,7 @@
        "key": "error.start_acknowledgement_missing.impact",
        "missing_reason": null,
        "pointer": "/impact_zh",
-       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+       "resource_version": "e3-display-res-v1-dccf43aea09b882a",
        "source_locale": "zh",
        "status": "provided",
        "text": "Nothing started and no run was used"
@@ -32,7 +32,7 @@
        "key": "error.start_acknowledgement_missing.next",
        "missing_reason": null,
        "pointer": "/next_action_zh",
-       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+       "resource_version": "e3-display-res-v1-dccf43aea09b882a",
        "source_locale": "zh",
        "status": "provided",
        "text": "Read every item in the settings preview, tick them all, then confirm and start"
@@ -46,7 +46,7 @@
        "key": "error.start_acknowledgement_missing.message",
        "missing_reason": null,
        "pointer": "/message_zh",
-       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+       "resource_version": "e3-display-res-v1-dccf43aea09b882a",
        "source_locale": "zh",
        "status": "provided",
        "text": "开始之前要知悉的事项没有全部确认"
@@ -55,7 +55,7 @@
        "key": "error.start_acknowledgement_missing.impact",
        "missing_reason": null,
        "pointer": "/impact_zh",
-       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+       "resource_version": "e3-display-res-v1-dccf43aea09b882a",
        "source_locale": "zh",
        "status": "provided",
        "text": "没有开始，也没有使用次数"
@@ -64,7 +64,7 @@
        "key": "error.start_acknowledgement_missing.next",
        "missing_reason": null,
        "pointer": "/next_action_zh",
-       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+       "resource_version": "e3-display-res-v1-dccf43aea09b882a",
        "source_locale": "zh",
        "status": "provided",
        "text": "看过设置预览里的每一项、全部勾选之后再确认并开始"

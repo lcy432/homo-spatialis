@@ -885,7 +885,7 @@ class UserInputDraft(ProductModel):
     def _version_shape(self) -> UserInputDraft:
         if bad := _version_problems(self, _DRAFT_SINCE):
             raise ValueError(
-                f"{self.meta.schema_version} 的草稿没有后来版本新增的内容：{bad}（先按迁移换成当前版本）"
+                f"{self.meta.schema_version} 的草稿没有后来版本新增的内容：{bad}（旧版本的草稿不迁移，新开一份）"
             )
         return self
 
@@ -2473,52 +2473,6 @@ class SessionView(ProductModel):
     open_intent_id: RefStr | None = None
 
 
-class RemovedAnswer(ProductModel):
-    """旧草稿里新问卷不再收集的一条答案（迁移说明里逐条列出，不悄悄丢掉）。``summary`` 是 E3 生成的可读写法（受支持的硬要求写成
-    选项与数值）；``raw_text`` 是用户自己写的原文（照原样，不翻译；受支持的选项没有原文）。"""
-
-    section: Literal["hard_requirements", "attribute_preferences"]
-    ref: str = Field(min_length=1, max_length=64)
-    summary: str = Field(min_length=1, max_length=300)
-    raw_text: str | None = Field(default=None, max_length=300)
-
-
-class LegacyAllocationLine(ProductModel):
-    """旧草稿里一组分配的一项：原来的作答状态与原来写的数值（百分比，不是独立评分）。"""
-
-    key: str = Field(min_length=1, max_length=48)
-    label: str = Field(min_length=1, max_length=80)
-    state: AnswerState
-    value_text: str | None = Field(default=None, max_length=40)
-
-
-class LegacyAllocation(ProductModel):
-    """旧草稿里的一组定和分配（v3.5）：迁移前照原样给你看；它们是当时的百分比分配，不是独立评分，迁移时由你明确选择重新评分或
-    同等重视，系统不把它们改读成评分。"""
-
-    group: Literal["six_dimensions", "material"]
-    mode: Literal["manual", "equal_split"] | None = None
-    lines: tuple[LegacyAllocationLine, ...] = ()
-
-
-class DraftMigration(ProductModel):
-    """这份草稿进入新问卷要做的迁移（``GET`` 草稿时一起给出；没有要迁移的就没有这一项）。
-
-    迁移把草稿的版本换成当前版本、清空新问卷不再收集的硬要求与属性偏好（``removed`` 逐条列出），其他答案原样保留；之后要重新审阅
-    和确认。有要清空的答案时必须用户明确同意（``consent_required``）；只差版本时也要用户点一次。已经确认或已经开始的运行不受影响。"""
-
-    from_questionnaire_version: str = Field(min_length=1, max_length=80)
-    to_questionnaire_version: str = Field(min_length=1, max_length=80)
-    version_changed: bool
-    removed: tuple[RemovedAnswer, ...] = ()
-    consent_required: bool
-    message_zh: str = Field(min_length=1, max_length=400)
-    effects_zh: tuple[str, ...] = Field(min_length=1)
-    #: v3.5：旧的百分比分配（原样）；有就要在迁移时选择重新评分或同等重视（``DraftMigrateRequest.allocation_choice``）
-    allocations: tuple[LegacyAllocation, ...] = ()
-    allocation_choice_required: bool = False
-
-
 class DraftView(ProductModel):
     """服务端保存的一份草稿：草稿编号与修订号由服务器分配；``expires_at`` 是最后一次编辑后 30 天。"""
 
@@ -2526,18 +2480,6 @@ class DraftView(ProductModel):
     draft: UserInputDraft
     updated_at: UtcTime
     expires_at: UtcTime
-    #: v3.4：这份草稿进入新问卷要做的迁移（不需要时为空）
-    migration: DraftMigration | None = None
-
-
-class DraftMigrateRequest(ProductModel):
-    """迁移草稿（``POST /api/v1/drafts/{id}/migrate``）：``expected_revision`` 必须等于当前修订号；有要清空的旧答案时
-    ``clear_removed`` 必须为真（用户看过迁移说明并同意），否则拒绝、草稿不变。"""
-
-    expected_revision: Annotated[int, Field(ge=1)]
-    clear_removed: bool = False
-    #: v3.5：旧草稿有百分比分配时必须选：``rerate``（这两组改成独立评分、各项未答，由你重新评分）或 ``equal_weight``（每项评分 50）
-    allocation_choice: Literal["rerate", "equal_weight"] | None = None
 
 
 class DraftSaveRequest(ProductModel):
@@ -3012,9 +2954,6 @@ ServiceErrorCode = Literal[
     "paid_calls_disabled",
     "run_options_invalid",
     "run_settings_unavailable",
-    "migration_consent_required",
-    "migration_choice_required",
-    "migration_not_needed",
     "start_consent_stale",
     "start_acknowledgement_missing",
     "start_already_authorized",
@@ -3232,8 +3171,6 @@ PRODUCT_MESSAGES: dict[str, type[ProductModel]] = {
     "SessionView": SessionView,
     "DraftView": DraftView,
     "DraftSaveRequest": DraftSaveRequest,
-    # v3.4：旧草稿的显式迁移
-    "DraftMigrateRequest": DraftMigrateRequest,
     "ReviewReply": ReviewReply,
     "ProfileConfirmRequest": ProfileConfirmRequest,
     "ProfileConfirmReply": ProfileConfirmReply,

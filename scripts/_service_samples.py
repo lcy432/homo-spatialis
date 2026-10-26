@@ -1098,7 +1098,7 @@ def _new_flow(**kw: Any) -> dict[str, Any]:
 
 def input_samples(s: _Samples) -> None:
     """新输入流程的样例（129 起，E3B 资料包）：输入目录、按目录选职业与资格题、面板多选、独立评分的各种情形（v3.5）、拒绝与旧草稿
-    迁移。"""
+    的审阅（不迁移）。"""
     from common.product_contracts import UserInputDraft
 
     w = s.w
@@ -1310,7 +1310,7 @@ def input_samples(s: _Samples) -> None:
         "按目录选职业却带着文字（例如把搜索框里的字一起提交）：保存时 422 invalid_request，草稿不变；目录模式不收文字",
         box.put(f"/drafts/{view['draft']['draft_id']}", body).json(),
     )
-    # 旧草稿的显式迁移
+    # 旧草稿：照原样读回、审阅挡住确认（不迁移，DECISIONS/0050）
     view = box.post("/drafts").json()
     body = box.draft_body(
         view,
@@ -1337,80 +1337,13 @@ def input_samples(s: _Samples) -> None:
     UserInputDraft.model_validate(body["draft"])
     did = view["draft"]["draft_id"]
     box.put(f"/drafts/{did}", body)
-    old = box.get(f"/drafts/{did}").json()
-    w(
-        "148_service_draft_migration_needed",
-        "DraftView",
-        "按旧版问卷（v0.3）填的草稿：migration 写明版本从哪到哪、要清空的旧答案（往返 60 分钟的硬要求、品牌偏好，逐条列出，原文照原样）、"
-        "迁移会做什么；consent_required = true。旧的六维 / 物质分配是当时的百分比：allocations 照原样列出（manual，30/20/20/10/10/10 与 "
-        "25/25/30/20，不换算），allocation_choice_required = true。读取不改写草稿",
-        old,
-    )
-    w(
-        "149_display_draft_migration_en",
-        "DisplayEnvelope",
-        "同一份草稿的英文显示：迁移说明（版本、要清空的条目的可读写法、迁移的影响）都有英文；用户写的原文照原样、不翻译",
-        _display(box, "draft", did, "en").json(),
-    )
     w(
         "150_service_review_removed_sections",
         "ReviewReply",
-        "旧草稿迁移之前的审阅：version_changed（问卷、词表、转换、结构版本）、removed_section_present（硬要求、属性偏好各一条）与 "
-        "allocation_mode_retired（六维、物质各一条：百分比不是独立评分）都阻断；旧值会改变模拟，不悄悄沿用、也不悄悄丢掉",
+        "按旧版问卷（v0.3）填的草稿的审阅：version_changed（问卷、词表、转换、结构版本）、removed_section_present（硬要求、属性偏好各"
+        "一条）与 allocation_mode_retired（六维、物质各一条：百分比不是独立评分）都阻断。旧草稿不迁移：用户新开一份草稿按这一版问卷"
+        "填写（DECISIONS/0050）；已经确认的画像与已经开始的运行不受影响",
         box.post(f"/drafts/{did}/review").json(),
-    )
-    w(
-        "151_service_draft_migrate_request",
-        "DraftMigrateRequest",
-        "迁移请求（POST /api/v1/drafts/{id}/migrate）：expected_revision 是当前修订号；clear_removed = true 表示用户看过迁移说明、"
-        "同意清空那些旧答案（省略或为 false 时，有要清空的答案就拒绝）；allocation_choice 是用户对旧百分比分配的选择：rerate（这两组"
-        "改成独立评分、各项未答，由用户重新打分）或 equal_weight（每项评分 50）。有旧分配时必须选，省略就拒绝",
-        {
-            "expected_revision": old["draft"]["revision"],
-            "clear_removed": True,
-            "allocation_choice": "rerate",
-        },
-    )
-    w(
-        "152_service_error_migration_consent_required",
-        "ServiceError",
-        "没有同意清空就迁移（clear_removed 省略或为 false）：409 migration_consent_required，草稿不变",
-        box.post(f"/drafts/{did}/migrate", {"expected_revision": old["draft"]["revision"]}).json(),
-    )
-    w(
-        "159_service_error_migration_choice_required",
-        "ServiceError",
-        "同意清空、却没有对旧的百分比分配选择重新评分或同等重视（allocation_choice 省略）：409 migration_choice_required，草稿不变；"
-        "系统不把旧百分比改读成评分",
-        box.post(
-            f"/drafts/{did}/migrate",
-            {"expected_revision": old["draft"]["revision"], "clear_removed": True},
-        ).json(),
-    )
-    moved = box.post(
-        f"/drafts/{did}/migrate",
-        {
-            "expected_revision": old["draft"]["revision"],
-            "clear_removed": True,
-            "allocation_choice": "rerate",
-        },
-    ).json()
-    w(
-        "153_service_draft_migrated",
-        "DraftView",
-        "同意并选择重新评分之后迁移（clear_removed = true，allocation_choice = rerate）：版本换成 v0.5、硬要求与属性偏好清空；六维与物质"
-        "改成独立评分（ratings_normalized_v1）、各项未答，由用户重新打分；其他答案原样保留，修订号加一；migration 为空。之后要重新审阅"
-        "与确认；已经确认的画像与已经开始的运行不受影响",
-        moved,
-    )
-    w(
-        "154_service_error_migration_not_needed",
-        "ServiceError",
-        "已经是当前版本、没有要清空的答案时再迁移：409 migration_not_needed，草稿不变",
-        box.post(
-            f"/drafts/{did}/migrate",
-            {"expected_revision": moved["draft"]["revision"], "clear_removed": True},
-        ).json(),
     )
 
 

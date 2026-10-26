@@ -106,7 +106,9 @@ def test_old_rows_read_back_exactly_and_show_their_original_english(tmp_path, mo
     assert db_dump(svc.store.path) == db  # 读取不写库、不改写旧绑定
     draft = b.get(f"/drafts/{ids['draft']}").json()
     assert draft["draft"] == json.loads(_text("draft"))
-    assert draft["migration"]["consent_required"]  # 旧问卷收集过的通勤上限：迁移前要同意清空
+    assert (
+        "migration" not in draft
+    )  # 旧草稿不迁移：照原样读回，审阅挡住确认，新开一份（DECISIONS/0050）
     r = b.post("/run-intents", json={"confirmed_id": ids["profile"]})
     assert (
         r.status_code == 409 and r.json()["code"] == "preflight_stale"

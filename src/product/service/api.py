@@ -28,7 +28,6 @@ from common.product_contracts import (
     ConfirmedProfileView,
     DeletionReceipt,
     DisplayEnvelope,
-    DraftMigrateRequest,
     DraftSaveRequest,
     DraftView,
     GeographyDisplayBundle,
@@ -410,17 +409,6 @@ def create_app(ctx: ServiceContext) -> FastAPI:
     )
     def save_draft(draft_id: str, body: DraftSaveRequest, who: Caller = write) -> DraftView:
         return actions.save_draft(ctx, who.principal_id, draft_id, body, generation=who.generation)
-
-    @app.post(
-        f"{API}/drafts/{{draft_id}}/migrate",
-        response_model=DraftView,
-        responses=ERROR_RESPONSES,
-        summary="把旧草稿迁移到新问卷（有要清空的旧答案时必须明确同意；之后重新审阅）",
-    )
-    def migrate_draft(draft_id: str, body: DraftMigrateRequest, who: Caller = write) -> DraftView:
-        return actions.migrate_draft(
-            ctx, who.principal_id, draft_id, body, generation=who.generation
-        )
 
     @app.delete(
         f"{API}/drafts/{{draft_id}}",

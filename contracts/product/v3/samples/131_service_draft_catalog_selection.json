@@ -174,7 +174,6 @@
    "schema_version": "e3a-product-schema-v3.5",
    "vocabulary_version": "e3a-vocabulary-v5"
   },
-  "migration": null,
   "updated_at": "2026-12-24T09:01:02Z"
  }
 }

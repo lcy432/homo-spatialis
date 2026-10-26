@@ -5,7 +5,7 @@
   "code": "unauthenticated",
   "display": {
    "display_schema_version": "e3-display-v2",
-   "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+   "resource_version": "e3-display-res-v1-dccf43aea09b882a",
    "source_view_fingerprint": "d94b727bc32d9acb55ce8efdf1c3303870f9aa41f5cbbec80ef5da18e8506e39",
    "translations": {
     "en": {
@@ -14,7 +14,7 @@
        "key": "error.unauthenticated.message",
        "missing_reason": "resources_invalid",
        "pointer": "/message_zh",
-       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+       "resource_version": "e3-display-res-v1-dccf43aea09b882a",
        "source_locale": "zh",
        "status": "missing",
        "text": null
@@ -23,7 +23,7 @@
        "key": "error.unauthenticated.impact",
        "missing_reason": "resources_invalid",
        "pointer": "/impact_zh",
-       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+       "resource_version": "e3-display-res-v1-dccf43aea09b882a",
        "source_locale": "zh",
        "status": "missing",
        "text": null
@@ -32,7 +32,7 @@
        "key": "error.unauthenticated.next",
        "missing_reason": "resources_invalid",
        "pointer": "/next_action_zh",
-       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+       "resource_version": "e3-display-res-v1-dccf43aea09b882a",
        "source_locale": "zh",
        "status": "missing",
        "text": null
@@ -46,7 +46,7 @@
        "key": "error.unauthenticated.message",
        "missing_reason": null,
        "pointer": "/message_zh",
-       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+       "resource_version": "e3-display-res-v1-dccf43aea09b882a",
        "source_locale": "zh",
        "status": "provided",
        "text": "没有有效的会话，或专属链接已经失效"
@@ -55,7 +55,7 @@
        "key": "error.unauthenticated.impact",
        "missing_reason": null,
        "pointer": "/impact_zh",
-       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+       "resource_version": "e3-display-res-v1-dccf43aea09b882a",
        "source_locale": "zh",
        "status": "provided",
        "text": "不能读取或修改这个空间里的任何内容"
@@ -64,7 +64,7 @@
        "key": "error.unauthenticated.next",
        "missing_reason": null,
        "pointer": "/next_action_zh",
-       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+       "resource_version": "e3-display-res-v1-dccf43aea09b882a",
        "source_locale": "zh",
        "status": "provided",
        "text": "重新打开你的专属链接；如果链接被重发过，请使用最新的那一个"

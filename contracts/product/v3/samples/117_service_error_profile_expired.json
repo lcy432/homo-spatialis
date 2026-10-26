@@ -5,7 +5,7 @@
   "code": "expired",
   "display": {
    "display_schema_version": "e3-display-v2",
-   "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+   "resource_version": "e3-display-res-v1-dccf43aea09b882a",
    "source_view_fingerprint": "3fec0c899e9ce7a1bc2ce105d48e8e29f72e012da5a3734eb99229eb04681305",
    "translations": {
     "en": {
@@ -14,7 +14,7 @@
        "key": "error.expired.profile.message",
        "missing_reason": null,
        "pointer": "/message_zh",
-       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+       "resource_version": "e3-display-res-v1-dccf43aea09b882a",
        "source_locale": "zh",
        "status": "provided",
        "text": "This confirmed profile can no longer be used to prepare new simulations"
@@ -23,7 +23,7 @@
        "key": "error.expired.profile.impact",
        "missing_reason": null,
        "pointer": "/impact_zh",
-       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+       "resource_version": "e3-display-res-v1-dccf43aea09b882a",
        "source_locale": "zh",
        "status": "provided",
        "text": "A confirmed profile can prepare new simulations for the period in the service rules from its first confirmation; confirming again or viewing does not extend it; simulations already prepared use their own copy and deadline and are not affected"
@@ -32,7 +32,7 @@
        "key": "error.expired.profile.next",
        "missing_reason": null,
        "pointer": "/next_action_zh",
-       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+       "resource_version": "e3-display-res-v1-dccf43aea09b882a",
        "source_locale": "zh",
        "status": "provided",
        "text": "Review and confirm a draft that is still within its retention period, or start a new draft"
@@ -46,7 +46,7 @@
        "key": "error.expired.profile.message",
        "missing_reason": null,
        "pointer": "/message_zh",
-       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+       "resource_version": "e3-display-res-v1-dccf43aea09b882a",
        "source_locale": "zh",
        "status": "provided",
        "text": "这份确认画像已经超过可以准备新模拟的期限"
@@ -55,7 +55,7 @@
        "key": "error.expired.profile.impact",
        "missing_reason": null,
        "pointer": "/impact_zh",
-       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+       "resource_version": "e3-display-res-v1-dccf43aea09b882a",
        "source_locale": "zh",
        "status": "provided",
        "text": "确认画像从首次确认起按服务规则可用，重复确认、查看都不续期；已经准备的模拟用自己的副本与期限，不受影响"
@@ -64,7 +64,7 @@
        "key": "error.expired.profile.next",
        "missing_reason": null,
        "pointer": "/next_action_zh",
-       "resource_version": "e3-display-res-v1-e3ab8650f69331a0",
+       "resource_version": "e3-display-res-v1-dccf43aea09b882a",
        "source_locale": "zh",
        "status": "provided",
        "text": "重新审阅并确认还在保存期内的草稿，或新建草稿"
