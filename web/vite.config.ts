@@ -15,6 +15,9 @@ const contractsDir = realpathSync.native(
 // /api 同源代理到 E3C 服务：浏览器始终只看到页面这一个来源，Cookie 与 Origin 检查按同源工作（不放宽 CORS）。
 // 本地联调默认是 configs/product/service_local_mock.yaml 的 127.0.0.1:8765；浏览器测试用 E5_API_TARGET 指向自己的隔离服务。
 const apiTarget = process.env.E5_API_TARGET ?? "http://127.0.0.1:8765";
+// 经隧道（例如 Tailscale Funnel）对外开放时，浏览器带的 Host 是隧道的域名：E5_PUBLIC_HOST 写那个域名，开发与预览服务器才接受它；
+// 不写就只接受 localhost。同源仍只有一个：隧道 → 这里的 /api 代理 → 服务，服务配置的 site_origin 写隧道的 https 来源。
+const publicHosts = process.env.E5_PUBLIC_HOST ? [process.env.E5_PUBLIC_HOST] : [];
 
 export default defineConfig({
   plugins: [react()],
@@ -23,9 +26,13 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
     fs: { allow: [repoRoot, contractsDir] },
+    allowedHosts: publicHosts,
     proxy: { "/api": { target: apiTarget, changeOrigin: false } },
   },
   preview: {
+    port: 4173,
+    strictPort: true,
+    allowedHosts: publicHosts,
     proxy: { "/api": { target: apiTarget, changeOrigin: false } },
   },
   test: {
