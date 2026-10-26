@@ -1,0 +1,98 @@
+{
+ "description_zh": "开始之前要知悉的事项没有全部确认：422 start_acknowledgement_missing，没有开始、没有使用次数",
+ "message": "ServiceError",
+ "payload": {
+  "code": "start_acknowledgement_missing",
+  "display": {
+   "display_schema_version": "e3-display-v2",
+   "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+   "source_view_fingerprint": "b9a7afe40936483a3f30ecd4d6262575336b18bdae197f8b7e2a4f5c4d3dae49",
+   "translations": {
+    "en": {
+     "fields": [
+      {
+       "key": "error.start_acknowledgement_missing.message",
+       "missing_reason": null,
+       "pointer": "/message_zh",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "Not all of the things to acknowledge before starting were confirmed"
+      },
+      {
+       "key": "error.start_acknowledgement_missing.impact",
+       "missing_reason": null,
+       "pointer": "/impact_zh",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "Nothing started and no run was used"
+      },
+      {
+       "key": "error.start_acknowledgement_missing.next",
+       "missing_reason": null,
+       "pointer": "/next_action_zh",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "Read every item in the settings preview, tick them all, then confirm and start"
+      }
+     ],
+     "status": "complete"
+    },
+    "zh": {
+     "fields": [
+      {
+       "key": "error.start_acknowledgement_missing.message",
+       "missing_reason": null,
+       "pointer": "/message_zh",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "开始之前要知悉的事项没有全部确认"
+      },
+      {
+       "key": "error.start_acknowledgement_missing.impact",
+       "missing_reason": null,
+       "pointer": "/impact_zh",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "没有开始，也没有使用次数"
+      },
+      {
+       "key": "error.start_acknowledgement_missing.next",
+       "missing_reason": null,
+       "pointer": "/next_action_zh",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "看过设置预览里的每一项、全部勾选之后再确认并开始"
+      }
+     ],
+     "status": "complete"
+    }
+   }
+  },
+  "field": null,
+  "impact_zh": "没有开始，也没有使用次数",
+  "message_zh": "开始之前要知悉的事项没有全部确认",
+  "meta": null,
+  "next_action_zh": "看过设置预览里的每一项、全部勾选之后再确认并开始",
+  "retry_after_seconds": null,
+  "sample": {
+   "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+   "origin": "offline_run",
+   "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+   "synthetic": true
+  },
+  "status": 422,
+  "support_ref": null
+ },
+ "sample": {
+  "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+  "origin": "offline_run",
+  "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+  "synthetic": true
+ }
+}

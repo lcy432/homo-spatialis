@@ -6,6 +6,7 @@
    "cancel"
   ],
   "confirm_with": null,
+  "confirmation_source": null,
   "confirmed": {
    "confirmed_id": "confirmed.draft-000000000000000a.r2",
    "content_fingerprint": "74882dd1bb079daf2f59428c513809464da105285d559edfce8986d650720cef"
@@ -151,6 +152,7 @@
   },
   "stage": "blocked",
   "stage_zh": "运行前检查没有通过",
+  "start": null,
   "support_ref": null,
   "updated_at": "2026-10-24T09:00:00Z",
   "waiting_for": "user"

@@ -8,6 +8,8 @@
   不回退到服务现在的默认值。
 * 确认开始：复用 ``product.bridge.submission_problems`` 的核对，稳定运行编号用 ``product.bridge.run_id_for``——与之后 LangGraph 登记
   用的编号一致；预留次数、排队在服务库的一个短事务里完成。
+* 一次开始（DECISIONS/0048）：设置预览只读（有效设置、范围说明、必要知悉项与同意身份）；准备模拟时带上 ``start``，服务端重新核对预览
+  并把授权保存在意图上；检查通过之后 worker 用 ``start_authorized`` 走与“确认开始”同一套核对与同一个提交事务（授权同时标为已用）。
 
 会产生或恢复正文的写入都带着请求开始时读到的数据代次（``generation``），服务库在写回事务里核对（见 ``product.service.store``）。
 """
@@ -21,6 +23,7 @@ from pathlib import Path
 from typing import Any
 
 from common.product_contracts import (
+    START_SCOPE_VERSION,
     AgeAnswer,
     AllocationAnswer,
     CashAnswer,
@@ -54,11 +57,15 @@ from common.product_contracts import (
     RunList,
     RunProgress,
     RunReceipt,
+    RunStartPreview,
+    RunStartPreviewRequest,
     RunSubmission,
     RunSubmitReply,
     RunSubmitRequest,
     SessionView,
+    StartAcknowledgement,
     UserInputDraft,
+    content_fingerprint,
 )
 from product.answers import (
     ConfirmationRefusedError,
@@ -71,17 +78,26 @@ from product.answers import (
 )
 from product.bridge import run_id_for, submission_problems
 from product.capabilities import build_capabilities
+from product.display import Code, Num, t
 from product.display import messages as display_messages
-from product.display import t
 from product.display.document import binding_document, capture
 from product.execution import ExecutionSpec, RunOptions, RunOptionsError, RunPolicy, service_pack
+from product.interests import confirmed_scope_lines
 from product.migration import MigrationError, migrate
 from product.pack import DataPack, load_pack
+from product.pack_facts import pack_lines
 from product.service.clock import Clock, system_clock
 from product.service.config import REPO, ServiceConfig, check_data_dir
 from product.service.errors import ServiceFailure
 from product.service.explain import service_explanation
-from product.service.store import INTENT_CONTENT, ServiceStore, expired_subject, intent_due
+from product.service.store import (
+    INTENT_CONTENT,
+    ServiceStore,
+    StartRequest,
+    expired_subject,
+    intent_due,
+    start_authorization,
+)
 from product.service.tokens import csrf_for, digest, server_key
 from product.service.views import (
     draft_view,
@@ -89,6 +105,7 @@ from product.service.views import (
     quota_view,
     rules_view,
     run_summary,
+    settings_from_spec,
     stage_text,
 )
 
@@ -493,15 +510,21 @@ def _expired_view(ctx: ServiceContext, row: Mapping[str, Any]) -> Mapping[str, A
     return data
 
 
-def create_intent(
-    ctx: ServiceContext, principal_id: str, req: RunIntentCreateRequest, *, generation: int
-) -> tuple[RunIntentView, bool]:
-    """准备一次模拟。城市来自确认画像；每城分身数、年数与费用上限按服务政策校验（越界在预留与任何调用之前就拒绝），省略的用默认值。
-    这次的有效设置在这里就保存下来。"""
-    row = ctx.store.profile(principal_id, req.confirmed_id)
+def _usable_profile(ctx: ServiceContext, principal_id: str, confirmed_id: str) -> ConfirmedProfile:
+    """一份还能用来准备新模拟的确认画像（在、没删、没过期，而且是按当前问卷确认的）。"""
+    row = ctx.store.profile(principal_id, confirmed_id)
     confirmed = ConfirmedProfile.model_validate_json(row["body"])
     if confirmation_problems(ctx.pack, confirmed):
         raise ServiceFailure("preflight_stale")
+    return confirmed
+
+
+def _settings(
+    ctx: ServiceContext,
+    confirmed: ConfirmedProfile,
+    req: RunIntentCreateRequest | RunStartPreviewRequest,
+) -> tuple[RunOptions, ExecutionSpec]:
+    """城市来自确认画像；每城分身数、年数与费用上限按服务政策校验（越界就拒绝），省略的用默认值。"""
     try:
         options = ctx.policy.resolve(
             tuple(confirmed.cities),
@@ -509,9 +532,177 @@ def create_intent(
             years=req.years,
             max_cost_cny=req.max_cost_cny,
         )
-        spec = ctx.policy.derive(options)
+        return options, ctx.policy.derive(options)
     except RunOptionsError as exc:
         raise ServiceFailure("run_options_invalid", field=exc.field) from exc
+
+
+# ---------------------------------------------------------------------- 一次开始（DECISIONS/0048）
+
+START_SCOPE = {
+    "start.scope.check": "开始之前，服务在后台做运行前检查（不使用次数、不调用模型）；关闭页面、刷新或断线都不影响",
+    "start.scope.gaps": "检查可能发现某些城市缺少某项评分要读的资料：这类普通资料缺口不会再让你确认，结果里照实标为不完整或缺失"
+    "（不补 0）",
+    "start.scope.stop": "检查没有通过，或资料、报价、规模、费用上限与要知悉的事项变了：服务停下并说明原因，不替你重新确认",
+    "start.scope.once": "这次确认只开始一次：停下之后的恢复要你自己点，结束之后再模拟要重新开始",
+}
+
+
+def start_acknowledgements(spec: ExecutionSpec) -> tuple[StartAcknowledgement, ...]:
+    """开始之前要知悉的几项（同意身份只记编号；文字随语言变）。用真实模型时多一项费用上限。"""
+    acks = [
+        StartAcknowledgement(
+            ack_id="ack:start.one_run",
+            text_zh=t(
+                "start.ack.one_run",
+                "真正开始（第一次进入模拟）时用掉 1 次启动机会；开始之前检查没有通过、取消或过期都不扣",
+            ),
+        ),
+        StartAcknowledgement(
+            ack_id="ack:start.auto_start",
+            text_zh=t(
+                "start.ack.auto_start",
+                "检查通过就按这些设置自动开始，不再询问；检查没有通过或条件变了就停下说明",
+            ),
+        ),
+        StartAcknowledgement(
+            ack_id="ack:start.scope",
+            text_zh=t(
+                "start.ack.scope",
+                "我知道这次模拟的范围与限制：结果只说明在这些设定下的生活，不是真实城市的排名",
+            ),
+        ),
+    ]
+    if spec.planner_kind == "llm":
+        acks.append(
+            StartAcknowledgement(
+                ack_id="ack:start.cost_cap",
+                text_zh=t(
+                    "start.ack.cost_cap",
+                    "费用上限 {amount} {currency} 是停机上限，不是预计费用：不够发下一次请求时就停下；用量不确定的请求按预留保留",
+                    amount=Num(f"{spec.max_cost}"),
+                    currency=Code(f"{spec.currency}"),
+                ),
+            )
+        )
+    return tuple(acks)
+
+
+def consent_fingerprint(
+    confirmed_id: str,
+    confirmed_fingerprint: str,
+    spec: ExecutionSpec,
+    acks: tuple[StartAcknowledgement, ...],
+) -> str:
+    """一次开始的同意身份：确认画像、资料包、有效设置（含规划器、模型、报价与费用上限）、范围说明的业务版本与知悉项编号。不含任何
+    文字，所以换语言不改它；这几样任何一样变了，旧的同意就不再成立。"""
+    return content_fingerprint(
+        {
+            "scope_version": START_SCOPE_VERSION,
+            "confirmed_id": confirmed_id,
+            "confirmed_fingerprint": confirmed_fingerprint,
+            "pack_fingerprint": spec.pack_fingerprint,
+            "settings_fingerprint": spec.fingerprint,
+            "acknowledged": sorted(a.ack_id for a in acks),
+        }
+    )
+
+
+def _start_refusal(
+    ctx: ServiceContext, principal_id: str, confirmed: ConfirmedProfile, spec: ExecutionSpec
+) -> str | None:
+    """此刻能不能按这份预览开始（只读）：付费调用没开、已经有一次条件不同的准备、次数不够。"""
+    if spec.planner_kind == "llm" and not ctx.config.live_calls_enabled:
+        return "paid_calls_disabled"
+    open_id = ctx.store.open_intent(principal_id)
+    same = None
+    if open_id is not None:
+        row = ctx.store.intent(principal_id, open_id)
+        if (row["confirmed_id"], row["execution_fingerprint"]) != (
+            confirmed.confirmed_id,
+            spec.fingerprint,
+        ):
+            return "intent_conflict"
+        same = row
+    if (same is None or same["run_id"] is None) and ctx.store.quota(principal_id).available < 1:
+        return "quota_exhausted"
+    return None
+
+
+def start_preview(
+    ctx: ServiceContext, principal_id: str, req: RunStartPreviewRequest
+) -> RunStartPreview:
+    """设置预览（只读：不编译生活输入、不排队、不预留次数、不调用模型、不写库）。"""
+    confirmed = _usable_profile(ctx, principal_id, req.confirmed_id)
+    _, spec = _settings(ctx, confirmed, req)
+    acks = start_acknowledgements(spec)
+    refusal = _start_refusal(ctx, principal_id, confirmed, spec)
+    return RunStartPreview(
+        meta=ctx.meta(),
+        confirmed=ConfirmedRef(
+            confirmed_id=confirmed.confirmed_id, content_fingerprint=confirmed.content_fingerprint
+        ),
+        settings=settings_from_spec(spec),
+        planner=spec.planner_and_cost(),
+        scope_version=START_SCOPE_VERSION,
+        scope_zh=tuple(t(k, v) for k, v in START_SCOPE.items())
+        + pack_lines("limits", ctx.pack.body.limits)
+        + confirmed_scope_lines(ctx.pack, confirmed),
+        acknowledgements=acks,
+        start_allowed=refusal is None,
+        start_refusal=refusal,  # type: ignore[arg-type]
+        quota=quota_view(ctx.store.quota(principal_id)),
+        consent_fingerprint=consent_fingerprint(
+            confirmed.confirmed_id, confirmed.content_fingerprint, spec, acks
+        ),
+    )
+
+
+def _start_request(req: RunIntentCreateRequest) -> StartRequest | None:
+    if req.start is None:
+        return None
+    request = {
+        "confirmed_id": req.confirmed_id,
+        "clones_per_city": req.clones_per_city,
+        "years": req.years,
+        "max_cost_cny": req.max_cost_cny,
+        "consent_fingerprint": req.start.consent_fingerprint,
+        "acknowledged": sorted(req.start.acknowledged),
+    }
+    return StartRequest(
+        consent_fingerprint=req.start.consent_fingerprint,
+        acknowledged=tuple(sorted(req.start.acknowledged)),
+        key=req.start.idempotency_key,
+        request_fingerprint=content_fingerprint(request),
+    )
+
+
+def create_intent(
+    ctx: ServiceContext, principal_id: str, req: RunIntentCreateRequest, *, generation: int
+) -> tuple[RunIntentView, bool]:
+    """准备一次模拟。城市来自确认画像；每城分身数、年数与费用上限按服务政策校验（越界在预留与任何调用之前就拒绝），省略的用默认值。
+    这次的有效设置在这里就保存下来。
+
+    带 ``start``（一次开始）：同一个键的重试先找回原来的意图（在任何别的核对之前，所以条件后来变了也找得回）；新的请求按当前的设置
+    预览核对同意身份与知悉项，付费调用没开就拒绝；授权保存在意图上，检查通过之后由 worker 按它开始。"""
+    start = _start_request(req)
+    if start is not None:
+        seen = ctx.store.intent_for_start(principal_id, start)
+        if seen is not None:
+            return view(ctx, principal_id, seen), False
+    confirmed = _usable_profile(ctx, principal_id, req.confirmed_id)
+    options, spec = _settings(ctx, confirmed, req)
+    if start is not None:
+        acks = start_acknowledgements(spec)
+        expected = consent_fingerprint(
+            confirmed.confirmed_id, confirmed.content_fingerprint, spec, acks
+        )
+        if start.consent_fingerprint != expected:
+            raise ServiceFailure("start_consent_stale")
+        if set(start.acknowledged) != {a.ack_id for a in acks}:
+            raise ServiceFailure("start_acknowledgement_missing")
+        if spec.planner_kind == "llm" and not ctx.config.live_calls_enabled:
+            raise ServiceFailure("paid_calls_disabled")
     row, created = ctx.store.create_intent(
         principal_id,
         confirmed_id=confirmed.confirmed_id,
@@ -521,6 +712,7 @@ def create_intent(
         run_options=options.model_dump_json(),
         workflow_key=lambda intent_id: ctx.workflow_key(principal_id, intent_id),
         generation=generation,
+        start=start,
     )
     return view(ctx, principal_id, row), created
 
@@ -543,9 +735,12 @@ def submit(
 ) -> RunSubmitReply:
     """确认开始。先核对截止时间；再按保存的运行选项与服务现在的政策重算有效设置——资料包、规划器设定或报价变了，就回到排队检查
     （用户要看新的运行前说明再确认，不扣次数）；选项已经不被允许，就标为检查没通过。核对在事务之外做（读运行自己的资料快照、复用
-    提交核对）；接受、预留、写运行编号与排队在一个短事务里。"""
+    提交核对）；接受、预留、写运行编号与排队在一个短事务里。带着一次开始授权的意图由服务按授权开始，这里拒绝
+    （``start_already_authorized``）。"""
     ctx.store.ensure_not_due(principal_id, intent_id)
     row = ctx.store.intent(principal_id, intent_id)
+    if start_authorization(row) is not None:
+        raise ServiceFailure("start_already_authorized")
     spec = intent_spec(row) if row["execution_body"] is not None else None
     if row["run_id"] is None and row["stage"] == "awaiting_confirmation":
         if spec is None:
@@ -568,26 +763,7 @@ def submit(
             raise ServiceFailure("paid_calls_disabled")
         if row["preflight_fingerprint"] != req.confirm_with or row["preflight_body"] is None:
             raise ServiceFailure("preflight_stale")
-        pre = ProductPreflight.model_validate_json(row["preflight_body"])
-        confirmed = _run_confirmed(ctx, intent_id, row["confirmed_id"])
-        try:
-            pack = service_pack(ctx.run_dir(intent_id) / "ws" / spec.pack_path, spec)
-        except (OSError, ValueError) as exc:
-            raise ServiceFailure("data_pack_unavailable") from exc
-        submission = RunSubmission(
-            meta=pack.meta(),
-            confirmed=ConfirmedRef(
-                confirmed_id=confirmed.confirmed_id,
-                content_fingerprint=confirmed.content_fingerprint,
-            ),
-            preflight=PreflightRef(
-                preflight_id=pre.preflight_id, preflight_fingerprint=pre.preflight_fingerprint
-            ),
-            idempotency_key=row["workflow_key"],
-        )
-        if submission_problems(pack, confirmed, pre, submission):
-            raise ServiceFailure("preflight_stale")
-        run_id = run_id_for(submission)
+        run_id = _run_id(ctx, row, spec)
     else:
         run_id = row["run_id"] or ""
     status, run_id = ctx.store.submit_intent(
@@ -610,6 +786,105 @@ def submit(
         receipt=receipt,
         intent=view(ctx, principal_id, ctx.store.intent(principal_id, intent_id)),
     )
+
+
+def _run_id(ctx: ServiceContext, row: Mapping[str, Any], spec: ExecutionSpec) -> str:
+    """提交前的最后核对（用户确认与按授权开始共用）：读这次运行自己的资料快照与确认画像副本，复用提交核对，得出稳定运行编号。"""
+    intent_id = row["intent_id"]
+    pre = ProductPreflight.model_validate_json(row["preflight_body"])
+    confirmed = _run_confirmed(ctx, intent_id, row["confirmed_id"])
+    try:
+        pack = service_pack(ctx.run_dir(intent_id) / "ws" / spec.pack_path, spec)
+    except (OSError, ValueError) as exc:
+        raise ServiceFailure("data_pack_unavailable") from exc
+    submission = RunSubmission(
+        meta=pack.meta(),
+        confirmed=ConfirmedRef(
+            confirmed_id=confirmed.confirmed_id,
+            content_fingerprint=confirmed.content_fingerprint,
+        ),
+        preflight=PreflightRef(
+            preflight_id=pre.preflight_id, preflight_fingerprint=pre.preflight_fingerprint
+        ),
+        idempotency_key=row["workflow_key"],
+    )
+    if submission_problems(pack, confirmed, pre, submission):
+        raise ServiceFailure("preflight_stale")
+    return run_id_for(submission)
+
+
+def start_authorized(ctx: ServiceContext, row: Mapping[str, Any]) -> str | None:
+    """worker 用：检查通过之后按一次开始的授权开始（DECISIONS/0048）。核对与用户点“确认开始”相同——有效设置按保存的选项与服务现在的
+    政策重算、同意身份按这次的设置与现在的知悉规则重算、付费开关、预检查是不是授权的那一份设置、提交核对——接受、预留 1 次、写运行
+    编号、排队与把授权标为已用在服务库的同一个短事务里（次数要到第一次进入 E1 才转为已使用）。成功返回 ``None``；授权不再成立返回
+    作废原因（调用方作废授权，不替用户接受）：设置变了就回到排队检查（用户看新的运行前说明后重新确认），选项不再允许就标为检查没通过。
+    意图已经取消、删除、过期或已经开始：什么也不做，返回 ``None``。"""
+    auth = start_authorization(row)
+    if auth is None or auth["state"] != "pending":
+        return None
+    try:
+        return _start_checked(ctx, row, auth)
+    except ServiceFailure as exc:
+        after = ctx.store.intent_row(row["intent_id"])
+        if (
+            after is None
+            or after["stage"] != "awaiting_confirmation"
+            or after["run_id"] is not None
+        ):
+            return None  # 取消、删除、过期或已经开始：意图自己的阶段说明一切
+        return {
+            "quota_exhausted": "quota_exhausted",
+            "data_pack_unavailable": "data_pack_unavailable",
+        }.get(exc.code, "authorization_mismatch")
+
+
+def _start_checked(ctx: ServiceContext, row: Mapping[str, Any], auth: dict[str, Any]) -> str | None:
+    """``start_authorized`` 的核对与提交（服务库拒绝时抛出 ``ServiceFailure``，由调用方按意图现在的阶段处理）。"""
+    principal_id, intent_id = row["principal_id"], row["intent_id"]
+    spec = intent_spec(row)
+    try:
+        current = ctx.policy.derive(intent_options(row))
+    except RunOptionsError:
+        explanation = service_explanation("options_not_allowed").model_dump_json()
+        ctx.store.block_intent(principal_id, intent_id, explanation)
+        return "options_not_allowed"
+    if current.fingerprint != spec.fingerprint:
+        ctx.store.recheck_intent(
+            principal_id,
+            intent_id,
+            execution_fingerprint=current.fingerprint,
+            execution_body=current.model_dump_json(),
+        )
+        return "conditions_changed"
+    expected = consent_fingerprint(
+        row["confirmed_id"], row["confirmed_fingerprint"], spec, start_acknowledgements(spec)
+    )
+    if auth["consent_fingerprint"] != expected:
+        return "consent_changed"
+    if spec.planner_kind == "llm" and not ctx.config.live_calls_enabled:
+        return "paid_calls_disabled"
+    if row["preflight_fingerprint"] is None or row["preflight_body"] is None:
+        return "authorization_mismatch"
+    pre = ProductPreflight.model_validate_json(row["preflight_body"])
+    planned = spec.planner_and_cost()
+    if (
+        pre.status != "ready"
+        or (pre.clones_per_city, pre.years) != (len(spec.repeat_indexes), spec.years)
+        or sorted(c.city_ref for c in pre.cities) != sorted(spec.cities)
+        or (pre.planner.planner_kind, pre.planner.planner_id, pre.planner.call_limit)
+        != (planned.planner_kind, planned.planner_id, planned.call_limit)
+    ):
+        return "authorization_mismatch"  # 检查出来的不是授权的那一份设置：不按它开始
+    ctx.store.submit_intent(
+        principal_id,
+        intent_id,
+        confirm_with=row["preflight_fingerprint"],
+        key="start-authorization:" + auth["key_digest"][:40],
+        run_id=_run_id(ctx, row, spec),
+        execution_fingerprint=row["execution_fingerprint"],
+        authorization=auth["consent_fingerprint"],
+    )
+    return None
 
 
 def cancel(ctx: ServiceContext, principal_id: str, intent_id: str) -> RunIntentView:

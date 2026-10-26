@@ -574,46 +574,59 @@ V3_COLUMNS = {
 }
 
 
-def _downgrade_to_v2(path):
-    """把 v3 服务库改回 v2 的样子：v2 与 v3 的差别只有这几列显示绑定（与 8ccec1c 的建表语句逐列核对过）。"""
+#: v3 → v4（一次开始，DECISIONS/0048）只加开始授权这一列
+V4_COLUMNS = {"intents": ("start_authorization",)}
+
+
+def _downgrade(path, to: str):
+    """把当前的服务库改回旧版本的样子：v3 与 v4 只差开始授权这一列，v2 与 v3 只差这几列显示绑定（与 8ccec1c 的建表语句逐列核对过）。"""
+    drop = [V4_COLUMNS] + ([V3_COLUMNS] if to == "e3c-service-store-v2" else [])
     con = sqlite3.connect(path)
     try:
-        for table, cols in V3_COLUMNS.items():
-            for col in cols:
-                con.execute(f"ALTER TABLE {table} DROP COLUMN {col}")
-        con.execute("UPDATE meta SET value = 'e3c-service-store-v2' WHERE key = 'store_version'")
+        for columns in drop:
+            for table, cols in columns.items():
+                for col in cols:
+                    con.execute(f"ALTER TABLE {table} DROP COLUMN {col}")
+        con.execute("UPDATE meta SET value = ? WHERE key = 'store_version'", (to,))
         con.commit()
     finally:
         con.close()
 
 
-def test_a_v2_store_is_upgraded_in_place_and_keeps_users_and_quota(tmp_path, publish):
-    from product.service.store import _MIGRATE_V3
+@pytest.mark.parametrize("old", ["e3c-service-store-v2", "e3c-service-store-v3"])
+def test_an_old_store_is_upgraded_in_place_and_keeps_users_and_quota(tmp_path, publish, old):
+    from product.service.store import _MIGRATE_V3, _MIGRATE_V4, STORE_VERSION
 
     assert {k: tuple(v) for k, v in _MIGRATE_V3.items()} == V3_COLUMNS
+    assert {k: tuple(v) for k, v in _MIGRATE_V4.items()} == V4_COLUMNS
     svc = start(tmp_path)
     publish(svc.ctx.pack)
     principal, b = svc.person()
     done = finished_run(svc, b)
     token = b.token
-    _downgrade_to_v2(svc.store.path)
+    _downgrade(svc.store.path, old)
     before = db_dump(svc.store.path)
-    again = start(tmp_path)  # 同一个数据目录：打开时就地升级
+    again = start(tmp_path)  # 同一个数据目录：打开时就地升级（v2 先到 v3、再到 v4）
     after = db_dump(again.store.path)
-    assert after["meta"] != before["meta"]
-    assert {k: v for k, v in after.items() if k not in ("meta", *V3_COLUMNS)} == {
-        k: v for k, v in before.items() if k not in ("meta", *V3_COLUMNS)
+    assert after["meta"] != before["meta"] and ("store_version", STORE_VERSION) in after["meta"]
+    added = [*V4_COLUMNS, *(V3_COLUMNS if old.endswith("v2") else ())]
+    assert {k: v for k, v in after.items() if k not in ("meta", *added)} == {
+        k: v for k, v in before.items() if k not in ("meta", *added)
     }
-    for table in V3_COLUMNS:  # 原有的列逐行不变，新列都是空的
+    for table in added:  # 原有的列逐行不变，新列都是空的
         assert [r[: len(before[table][0])] for r in after[table]] == before[table]
+        assert all(set(r[len(before[table][0]) :]) <= {None} for r in after[table])
     nb = Browser(again)
     assert nb.login(token).status_code == 200
     assert nb.quota() == {"total": 3, "used": 1, "reserved": 0, "available": 2}
     assert nb.get(f"/runs/{done['run_id']}/result").status_code == 200
     snapshot = db_dump(again.store.path)
     env = display(nb, "result", done["run_id"], "en").json()
-    assert env["status"] == "unavailable"
-    assert {f["missing_reason"] for f in env["fields"]} == {"no_binding"}
+    if old.endswith("v2"):  # v2 没有显示绑定：照实缺失
+        assert env["status"] == "unavailable"
+        assert {f["missing_reason"] for f in env["fields"]} == {"no_binding"}
+    else:  # v3 的显示绑定原样保留
+        assert env["status"] == "complete"
     sessions = {k: v for k, v in db_dump(again.store.path).items() if k != "sessions"}
     assert sessions == {k: v for k, v in snapshot.items() if k != "sessions"}  # 读取不补写绑定
     assert principal in {r[0] for r in after["principals"]}

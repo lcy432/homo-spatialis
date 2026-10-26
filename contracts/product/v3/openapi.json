@@ -8095,7 +8095,7 @@
    },
    "RunIntentCreateRequest": {
     "additionalProperties": false,
-    "description": "准备一次模拟（``POST /api/v1/run-intents``）：引用一份确认画像，可以选每城分身数、年数与这次的费用上限（省略就用服务默认值，\n能选什么见 ``ServiceRules.options``）。城市来自确认画像。服务端校验后保存这次的有效设置，再排队做运行前检查（不扣次数）。",
+    "description": "准备一次模拟（``POST /api/v1/run-intents``）：引用一份确认画像，可以选每城分身数、年数与这次的费用上限（省略就用服务默认值，\n能选什么见 ``ServiceRules.options``）。城市来自确认画像。服务端校验后保存这次的有效设置，再排队做运行前检查（不扣次数）。\n\n带 ``start``（一次开始）：检查通过之后由服务按这份授权自动开始，页面不需要、也不应该再发确认；不带就是原来的流程（检查之后由\n用户在 ``submit`` 确认开始）。",
     "properties": {
      "clones_per_city": {
       "anyOf": [
@@ -8126,6 +8126,16 @@
        }
       ],
       "title": "Max Cost Cny"
+     },
+     "start": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/StartWhenReady"
+       },
+       {
+        "type": "null"
+       }
+      ]
      },
      "years": {
       "anyOf": [
@@ -8161,7 +8171,8 @@
         "delete",
         "view_progress",
         "view_result",
-        "create_new_intent"
+        "create_new_intent",
+        "start_again"
        ],
        "type": "string"
       },
@@ -8179,6 +8190,21 @@
        }
       ],
       "title": "Confirm With"
+     },
+     "confirmation_source": {
+      "anyOf": [
+       {
+        "enum": [
+         "user_confirm",
+         "start_authorization"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Confirmation Source"
      },
      "confirmed": {
       "$ref": "#/components/schemas/ConfirmedRef"
@@ -8301,6 +8327,16 @@
       "minLength": 1,
       "title": "Stage Zh",
       "type": "string"
+     },
+     "start": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/StartAuthorizationView"
+       },
+       {
+        "type": "null"
+       }
+      ]
      },
      "support_ref": {
       "anyOf": [
@@ -8667,6 +8703,150 @@
     "title": "RunSettingsView",
     "type": "object"
    },
+   "RunStartPreview": {
+    "additionalProperties": false,
+    "description": "设置预览：这次会用的有效设置（城市、每城分身数、年数、规划器与模型种类、费用上限、调用上限）、范围说明、必要知悉项与同意身份。\n\n``consent_fingerprint`` 绑定确认画像、资料包、有效设置（含模型、报价与费用上限）、范围说明的业务版本与知悉项编号；换语言不改它。\n费用上限是停机上限，不是预计费用。``start_allowed`` 为假时 ``start_refusal`` 说明此刻为什么不能开始（付费调用没开、次数用完、已经\n有一次条件不同的准备）。",
+    "properties": {
+     "acknowledgements": {
+      "items": {
+       "$ref": "#/components/schemas/StartAcknowledgement"
+      },
+      "minItems": 1,
+      "title": "Acknowledgements",
+      "type": "array"
+     },
+     "confirmed": {
+      "$ref": "#/components/schemas/ConfirmedRef"
+     },
+     "consent_fingerprint": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Consent Fingerprint",
+      "type": "string"
+     },
+     "display": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/DisplayAttachment"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "meta": {
+      "$ref": "#/components/schemas/ProductMeta"
+     },
+     "planner": {
+      "$ref": "#/components/schemas/PlannerAndCost"
+     },
+     "quota": {
+      "$ref": "#/components/schemas/QuotaSummary"
+     },
+     "scope_version": {
+      "const": "e3c-start-scope-v1",
+      "title": "Scope Version",
+      "type": "string"
+     },
+     "scope_zh": {
+      "default": [],
+      "items": {
+       "type": "string"
+      },
+      "title": "Scope Zh",
+      "type": "array"
+     },
+     "settings": {
+      "$ref": "#/components/schemas/RunSettingsView"
+     },
+     "start_allowed": {
+      "title": "Start Allowed",
+      "type": "boolean"
+     },
+     "start_refusal": {
+      "anyOf": [
+       {
+        "enum": [
+         "paid_calls_disabled",
+         "quota_exhausted",
+         "intent_conflict"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Start Refusal"
+     }
+    },
+    "required": [
+     "meta",
+     "confirmed",
+     "settings",
+     "planner",
+     "scope_version",
+     "acknowledgements",
+     "start_allowed",
+     "quota",
+     "consent_fingerprint"
+    ],
+    "title": "RunStartPreview",
+    "type": "object"
+   },
+   "RunStartPreviewRequest": {
+    "additionalProperties": false,
+    "description": "设置预览（``POST /api/v1/run-start-preview``）：与准备模拟同样的确认画像引用与运行选项（省略的用服务默认值）。只读：不编译生活\n输入、不排队、不预留次数、不调用模型、不写库。",
+    "properties": {
+     "clones_per_city": {
+      "anyOf": [
+       {
+        "maximum": 1000.0,
+        "minimum": 1.0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Clones Per City"
+     },
+     "confirmed_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+      "title": "Confirmed Id",
+      "type": "string"
+     },
+     "max_cost_cny": {
+      "anyOf": [
+       {
+        "pattern": "^(0|[1-9][0-9]{0,6})(\\.[0-9]{1,2})?$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Max Cost Cny"
+     },
+     "years": {
+      "anyOf": [
+       {
+        "maximum": 100.0,
+        "minimum": 1.0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Years"
+     }
+    },
+    "required": [
+     "confirmed_id"
+    ],
+    "title": "RunStartPreviewRequest",
+    "type": "object"
+   },
    "RunSubmitReply": {
     "additionalProperties": false,
     "properties": {
@@ -8977,6 +9157,9 @@
        "migration_consent_required",
        "migration_choice_required",
        "migration_not_needed",
+       "start_consent_stale",
+       "start_acknowledgement_missing",
+       "start_already_authorized",
        "rate_limited",
        "csrf_failed",
        "origin_rejected",
@@ -9298,6 +9481,121 @@
     "title": "SourceKindCount",
     "type": "object"
    },
+   "StartAcknowledgement": {
+    "additionalProperties": false,
+    "description": "开始之前要知悉的一项（“确认并开始”时一起勾选）。同意身份只记 ``ack_id`` 与范围说明的业务版本，文字随语言变。",
+    "properties": {
+     "ack_id": {
+      "enum": [
+       "ack:start.one_run",
+       "ack:start.auto_start",
+       "ack:start.scope",
+       "ack:start.cost_cap"
+      ],
+      "title": "Ack Id",
+      "type": "string"
+     },
+     "text_zh": {
+      "maxLength": 300,
+      "minLength": 1,
+      "title": "Text Zh",
+      "type": "string"
+     }
+    },
+    "required": [
+     "ack_id",
+     "text_zh"
+    ],
+    "title": "StartAcknowledgement",
+    "type": "object"
+   },
+   "StartAuthorizationView": {
+    "additionalProperties": false,
+    "description": "这次准备带着的一次开始授权（DECISIONS/0048）。``pending``：检查通过后由服务按它开始；``used``：已经按它开始——确认来源是这份\n授权，不是用户在检查之后又点了一次；``void``：条件变了或开始前停下，授权作废，不会再自动开始（``void_reason``）。",
+    "properties": {
+     "acknowledged": {
+      "items": {
+       "enum": [
+        "ack:start.one_run",
+        "ack:start.auto_start",
+        "ack:start.scope",
+        "ack:start.cost_cap"
+       ],
+       "type": "string"
+      },
+      "title": "Acknowledged",
+      "type": "array"
+     },
+     "authorized_at": {
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+      "title": "Authorized At",
+      "type": "string"
+     },
+     "consent_fingerprint": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Consent Fingerprint",
+      "type": "string"
+     },
+     "mode": {
+      "const": "start_when_ready",
+      "title": "Mode",
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "pending",
+       "used",
+       "void"
+      ],
+      "title": "State",
+      "type": "string"
+     },
+     "used_at": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Used At"
+     },
+     "void_reason": {
+      "anyOf": [
+       {
+        "enum": [
+         "conditions_changed",
+         "consent_changed",
+         "options_not_allowed",
+         "paid_calls_disabled",
+         "quota_exhausted",
+         "preflight_blocked",
+         "authorization_mismatch",
+         "data_pack_unavailable",
+         "internal_error",
+         "cancelled"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Void Reason"
+     }
+    },
+    "required": [
+     "mode",
+     "state",
+     "consent_fingerprint",
+     "acknowledged",
+     "authorized_at"
+    ],
+    "title": "StartAuthorizationView",
+    "type": "object"
+   },
    "StartSummary": {
     "additionalProperties": false,
     "description": "标准开局摘要：同一用户跨城、跨重复序号相同的个人条件。",
@@ -9354,6 +9652,57 @@
      "scenario_zh"
     ],
     "title": "StartSummary",
+    "type": "object"
+   },
+   "StartWhenReady": {
+    "additionalProperties": false,
+    "description": "一次“确认并开始”（``RunIntentCreateRequest.start``）：用户看过设置预览、勾选了全部必要知悉项，授权“检查通过后就按这些设置开始，\n只开始一次”。``consent_fingerprint`` 是那份预览的同意身份（服务端重新核对，对不上就拒绝）；``idempotency_key`` 是这一次操作的\n幂等键：连点、回复丢失、刷新或重开后重发都带同一个键（页面要把它和这次操作一起保存），服务端返回同一个意图——即使它已经结束、\n取消或删除，也不另起运行；同一个键配不同请求是冲突。",
+    "properties": {
+     "accept": {
+      "const": true,
+      "title": "Accept",
+      "type": "boolean"
+     },
+     "acknowledged": {
+      "items": {
+       "enum": [
+        "ack:start.one_run",
+        "ack:start.auto_start",
+        "ack:start.scope",
+        "ack:start.cost_cap"
+       ],
+       "type": "string"
+      },
+      "minItems": 1,
+      "title": "Acknowledged",
+      "type": "array"
+     },
+     "consent_fingerprint": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Consent Fingerprint",
+      "type": "string"
+     },
+     "idempotency_key": {
+      "maxLength": 80,
+      "minLength": 8,
+      "pattern": "^[A-Za-z0-9_.:\\-]+$",
+      "title": "Idempotency Key",
+      "type": "string"
+     },
+     "mode": {
+      "const": "start_when_ready",
+      "title": "Mode",
+      "type": "string"
+     }
+    },
+    "required": [
+     "mode",
+     "consent_fingerprint",
+     "acknowledged",
+     "accept",
+     "idempotency_key"
+    ],
+    "title": "StartWhenReady",
     "type": "object"
    },
    "StatementReview": {
@@ -11790,7 +12139,7 @@
         }
        }
       },
-      "description": "同一份确认画像、同样的有效设置已经有未结束的意图：返回原意图"
+      "description": "同一份确认画像、同样的有效设置已经有未结束的意图，或同一个一次开始的键重试：返回原意图"
      },
      "202": {
       "content": {
@@ -11903,7 +12252,7 @@
       "description": "统一的安全错误"
      }
     },
-    "summary": "准备一次模拟：排队做运行前检查（不使用次数）；新建 202，返回已有 200"
+    "summary": "准备一次模拟：排队做运行前检查（不使用次数）；带 start 时检查通过后按授权自动开始；新建 202，返回已有 200"
    }
   },
   "/api/v1/run-intents/{intent_id}": {
@@ -12311,6 +12660,134 @@
      }
     },
     "summary": "确认开始：预留 1 次并排队（accepted 202；重复提交 duplicate_same_run 200）"
+   }
+  },
+  "/api/v1/run-start-preview": {
+   "post": {
+    "operationId": "start_preview_api_v1_run_start_preview_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RunStartPreviewRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RunStartPreview"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "401": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "403": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "409": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "410": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "413": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "429": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "500": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     },
+     "503": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceError"
+        }
+       }
+      },
+      "description": "统一的安全错误"
+     }
+    },
+    "summary": "设置预览：这次会用的有效设置、范围说明、必要知悉项与同意身份（只读：不排队、不预留次数、不调用模型）"
    }
   },
   "/api/v1/runs": {

@@ -9,6 +9,7 @@
    "create_new_intent"
   ],
   "confirm_with": null,
+  "confirmation_source": "user_confirm",
   "confirmed": {
    "confirmed_id": "confirmed.draft-0000000000000005.r2",
    "content_fingerprint": "4ab50a159e1a93f08c9e6509538550a28e11f4fe50d59a5d4c18cef8d67dc548"
@@ -852,6 +853,7 @@
   },
   "stage": "finished",
   "stage_zh": "本次服务流程结束（结果里逐城写明完成、出局与模拟缺失）",
+  "start": null,
   "support_ref": null,
   "updated_at": "2026-10-24T09:00:00Z",
   "waiting_for": "none"

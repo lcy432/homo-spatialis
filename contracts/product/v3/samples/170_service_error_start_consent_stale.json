@@ -1,0 +1,98 @@
+{
+ "description_zh": "确认的不是当前这一份设置预览（同意身份对不上：资料、报价、规模、费用上限或要知悉的事项变了）：409 start_consent_stale，没有开始、没有使用次数；重新取一份预览再确认",
+ "message": "ServiceError",
+ "payload": {
+  "code": "start_consent_stale",
+  "display": {
+   "display_schema_version": "e3-display-v2",
+   "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+   "source_view_fingerprint": "63401dce280bf8eda0cea1e1b5f675b96897603469236c93f39bfd847de3ba3a",
+   "translations": {
+    "en": {
+     "fields": [
+      {
+       "key": "error.start_consent_stale.message",
+       "missing_reason": null,
+       "pointer": "/message_zh",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "What you confirmed is not the current settings preview (the data, quote, scale, cost cap or the things to acknowledge changed)"
+      },
+      {
+       "key": "error.start_consent_stale.impact",
+       "missing_reason": null,
+       "pointer": "/impact_zh",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "Nothing started and no run was used"
+      },
+      {
+       "key": "error.start_consent_stale.next",
+       "missing_reason": null,
+       "pointer": "/next_action_zh",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "Get a new settings preview, read it, then confirm and start"
+      }
+     ],
+     "status": "complete"
+    },
+    "zh": {
+     "fields": [
+      {
+       "key": "error.start_consent_stale.message",
+       "missing_reason": null,
+       "pointer": "/message_zh",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "你确认的不是当前这一份设置预览（资料、报价、规模、费用上限或要知悉的事项变了）"
+      },
+      {
+       "key": "error.start_consent_stale.impact",
+       "missing_reason": null,
+       "pointer": "/impact_zh",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "没有开始，也没有使用次数"
+      },
+      {
+       "key": "error.start_consent_stale.next",
+       "missing_reason": null,
+       "pointer": "/next_action_zh",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "重新取一份设置预览，看过之后再确认并开始"
+      }
+     ],
+     "status": "complete"
+    }
+   }
+  },
+  "field": null,
+  "impact_zh": "没有开始，也没有使用次数",
+  "message_zh": "你确认的不是当前这一份设置预览（资料、报价、规模、费用上限或要知悉的事项变了）",
+  "meta": null,
+  "next_action_zh": "重新取一份设置预览，看过之后再确认并开始",
+  "retry_after_seconds": null,
+  "sample": {
+   "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+   "origin": "offline_run",
+   "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+   "synthetic": true
+  },
+  "status": 409,
+  "support_ref": null
+ },
+ "sample": {
+  "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+  "origin": "offline_run",
+  "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+  "synthetic": true
+ }
+}

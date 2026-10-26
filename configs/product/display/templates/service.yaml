@@ -568,3 +568,126 @@ templates:
   error.migration_choice_required.next:
     en: Look at the original allocation in the migration notes, then choose re-rate or equal weight and migrate
     zh: 先看迁移说明里原来的分配，再选择重新评分或同等重视后迁移
+  error.start_acknowledgement_missing.impact:
+    en: Nothing started and no run was used
+    zh: 没有开始，也没有使用次数
+  error.start_acknowledgement_missing.message:
+    en: Not all of the things to acknowledge before starting were confirmed
+    zh: 开始之前要知悉的事项没有全部确认
+  error.start_acknowledgement_missing.next:
+    en: Read every item in the settings preview, tick them all, then confirm and start
+    zh: 看过设置预览里的每一项、全部勾选之后再确认并开始
+  error.start_already_authorized.impact:
+    en: Nothing was started twice and no extra run was used
+    zh: 没有重复开始，也没有多用次数
+  error.start_already_authorized.message:
+    en: 'This preparation already carries your “confirm and start”: the service starts it automatically once the check passes, so no further confirmation is needed'
+    zh: 这次准备已经带着你的“确认并开始”：检查通过后由服务自动开始，不需要再确认
+  error.start_already_authorized.next:
+    en: Wait for the progress; if the start authorization stops being valid, the page offers a way to confirm and start again
+    zh: 等待进度；开始授权作废时，页面会给出重新确认并开始的入口
+  error.start_consent_stale.impact:
+    en: Nothing started and no run was used
+    zh: 没有开始，也没有使用次数
+  error.start_consent_stale.message:
+    en: What you confirmed is not the current settings preview (the data, quote, scale, cost cap or the things to acknowledge changed)
+    zh: 你确认的不是当前这一份设置预览（资料、报价、规模、费用上限或要知悉的事项变了）
+  error.start_consent_stale.next:
+    en: Get a new settings preview, read it, then confirm and start
+    zh: 重新取一份设置预览，看过之后再确认并开始
+  explain.before_impact.start_authorization_mismatch:
+    en: It will not start on the earlier consent
+    zh: 不会按原来的同意开始
+  explain.before_impact.start_conditions_changed:
+    en: The service checks again under the new conditions and will not start on the earlier consent
+    zh: 服务按新的条件重新检查，不会按原来的同意开始
+  explain.before_impact.start_consent_changed:
+    en: It will not start on the earlier consent
+    zh: 不会按原来的同意开始
+  explain.before_impact.start_data_pack_unavailable:
+    en: The system will not substitute other data, and will not start on the earlier consent
+    zh: 系统不会拿别的资料冒充，也不会按原来的同意开始
+  explain.before_impact.start_internal_error:
+    en: It will not retry automatically, and will not start on the earlier consent
+    zh: 不会自动重试，也不会按原来的同意开始
+  explain.before_impact.start_paid_calls_disabled:
+    en: The system will not quietly switch to the offline planner, and will not start automatically once calls are enabled
+    zh: 系统不会悄悄换成离线规划器，也不会在开启之后自动开始
+  explain.before_impact.start_quota_exhausted:
+    en: It will not start on the earlier consent
+    zh: 不会按原来的同意开始
+  explain.before_next.start_authorization_mismatch:
+    en: Confirm and start again, or cancel this preparation; if the problem keeps happening, contact the maintainer
+    zh: 重新确认并开始，或取消这次准备；问题一直出现时请联系维护者
+  explain.before_next.start_conditions_changed:
+    en: After reading the new pre-run notes, confirm and start again; you can also cancel this preparation
+    zh: 看过新的运行前说明后重新确认并开始；也可以取消这次准备
+  explain.before_next.start_consent_changed:
+    en: After reading the new notes, confirm and start again; you can also cancel this preparation
+    zh: 看过新的说明后重新确认并开始；也可以取消这次准备
+  explain.before_next.start_data_pack_unavailable:
+    en: Cancel this preparation and prepare again; if the problem keeps happening, contact the maintainer
+    zh: 取消这次准备后重新准备；问题一直出现时请联系维护者
+  explain.before_next.start_internal_error:
+    en: Confirm and start again, or cancel this preparation; if the problem keeps happening, contact the maintainer
+    zh: 重新确认并开始，或取消这次准备；问题一直出现时请联系维护者
+  explain.before_next.start_paid_calls_disabled:
+    en: Once the service enables them, confirm and start again; there is nothing to fill in again, and you can also cancel this preparation first
+    zh: 等服务开启后重新确认并开始；不需要重新填写，也可以先取消这次准备
+  explain.before_next.start_quota_exhausted:
+    en: Cancel this preparation; simulation runs are not topped up automatically
+    zh: 取消这次准备；启动机会不会自动增加
+  explain.reason.start_authorization_mismatch:
+    en: The settings found by the check do not match the ones you confirmed, so the earlier start authorization no longer applies
+    zh: 检查出来的设置与你确认开始的那一份对不上，原来的开始授权作废
+  explain.reason.start_conditions_changed:
+    en: After you confirmed the start, the data pack, planner, quote or settings changed, so the earlier start authorization no longer applies
+    zh: 你确认开始之后，资料包、规划器、报价或这次的设置变了，原来的开始授权作废
+  explain.reason.start_consent_changed:
+    en: After you confirmed the start, the scope notes you must acknowledge changed, so the earlier start authorization no longer applies
+    zh: 你确认开始之后，这次开始要知悉的范围说明变了，原来的开始授权作废
+  explain.reason.start_data_pack_unavailable:
+    en: The data this simulation is bound to could not be read before starting, so the earlier start authorization no longer applies
+    zh: 开始之前读不到这次模拟绑定的资料，原来的开始授权作废
+  explain.reason.start_internal_error:
+    en: The service hit an internal problem while starting as you confirmed, so the earlier start authorization no longer applies
+    zh: 按你的确认开始时服务出现了内部问题，原来的开始授权作废
+  explain.reason.start_paid_calls_disabled:
+    en: When the check passed, paid model calls were not enabled, so the earlier start authorization no longer applies
+    zh: 检查通过时服务没有开启付费模型调用，原来的开始授权作废
+  explain.reason.start_quota_exhausted:
+    en: When the check passed, no simulation runs were left, so the earlier start authorization no longer applies
+    zh: 检查通过时已经没有可用的启动机会，原来的开始授权作废
+  stage.awaiting_confirmation_authorized:
+    en: The check passed; starting as you confirmed
+    zh: 检查通过，正在按你的确认开始
+  stage.awaiting_confirmation_void:
+    en: The start authorization is no longer valid; waiting for you to confirm again
+    zh: 开始授权已经作废，等你重新确认
+  stage.checking_authorized:
+    en: 'Queued for checking: once the check passes, it starts automatically as you confirmed (checking does not use a run)'
+    zh: 排队检查中：检查通过后按你的确认自动开始（检查不使用次数）
+  start.ack.auto_start:
+    en: Once the check passes, the simulation starts with these settings without asking again; if the check does not pass or the conditions change, it stops and explains why
+    zh: 检查通过就按这些设置自动开始，不再询问；检查没有通过或条件变了就停下说明
+  start.ack.cost_cap:
+    en: 'The cost cap of {amount} {currency} is a cap that stops the run, not an expected cost: the run stops when there is not enough left for the next request; requests whose usage is uncertain keep their reservation'
+    zh: 费用上限 {amount} {currency} 是停机上限，不是预计费用：不够发下一次请求时就停下；用量不确定的请求按预留保留
+  start.ack.one_run:
+    en: Starting for real (the first time the simulation is entered) uses 1 of your simulation runs; nothing is used if the check does not pass, or if you cancel or it expires before then
+    zh: 真正开始（第一次进入模拟）时用掉 1 次启动机会；开始之前检查没有通过、取消或过期都不扣
+  start.ack.scope:
+    en: 'I understand the scope and limits of this simulation: the results only describe life under these settings and are not a ranking of real cities'
+    zh: 我知道这次模拟的范围与限制：结果只说明在这些设定下的生活，不是真实城市的排名
+  start.scope.check:
+    en: Before starting, the service runs the pre-run check in the background (it does not use a run and does not call any model); closing the page, refreshing or losing the connection does not affect it
+    zh: 开始之前，服务在后台做运行前检查（不使用次数、不调用模型）；关闭页面、刷新或断线都不影响
+  start.scope.gaps:
+    en: 'The check may find that some city lacks data that a score needs: you will not be asked to confirm such ordinary data gaps again, and the results mark them as incomplete or missing (never filled with 0)'
+    zh: 检查可能发现某些城市缺少某项评分要读的资料：这类普通资料缺口不会再让你确认，结果里照实标为不完整或缺失（不补 0）
+  start.scope.once:
+    en: 'This confirmation starts the simulation once: resuming after a stop is up to you, and simulating again after it ends needs a new start'
+    zh: 这次确认只开始一次：停下之后的恢复要你自己点，结束之后再模拟要重新开始
+  start.scope.stop:
+    en: If the check does not pass, or the data, quote, scale, cost cap or the things you must acknowledge change, the service stops and explains why; it does not confirm again on your behalf
+    zh: 检查没有通过，或资料、报价、规模、费用上限与要知悉的事项变了：服务停下并说明原因，不替你重新确认

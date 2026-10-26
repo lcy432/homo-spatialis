@@ -10,7 +10,7 @@
     "key": "pack.note.synthetic",
     "missing_reason": null,
     "pointer": "/meta/data_pack/note",
-    "resource_version": "e3-display-res-v1-8fae36bca51b48ea",
+    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
     "source_locale": "zh",
     "status": "provided",
     "text": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料"
@@ -19,7 +19,7 @@
     "key": "stage.expired",
     "missing_reason": null,
     "pointer": "/stage_zh",
-    "resource_version": "e3-display-res-v1-8fae36bca51b48ea",
+    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
     "source_locale": "zh",
     "status": "provided",
     "text": "已过期"
@@ -35,6 +35,7 @@
     "create_new_intent"
    ],
    "confirm_with": null,
+   "confirmation_source": null,
    "confirmed": {
     "confirmed_id": "confirmed.draft-000000000000005b.r2",
     "content_fingerprint": "f95a4eda9cb966d0b7527b60e437b56e8dedf59190c03ed5257bc83447e32213"
@@ -76,11 +77,12 @@
    "settings": null,
    "stage": "expired",
    "stage_zh": "已过期",
+   "start": null,
    "support_ref": "sup-000000000000005d",
    "updated_at": "2026-11-23T09:01:02Z",
    "waiting_for": "none"
   },
-  "source_view_fingerprint": "d4628929d9a333ce4a1c52634689895c89dc89340b60d5076cd7a779cd2762ca",
+  "source_view_fingerprint": "f4698e5c14b91bde5586c7033d81911e46f3d60c9723dcfbdcdeadd8ab0e5e22",
   "status": "complete"
  },
  "sample": {

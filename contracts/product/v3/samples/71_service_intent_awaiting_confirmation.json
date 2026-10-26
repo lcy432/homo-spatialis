@@ -7,6 +7,7 @@
    "cancel"
   ],
   "confirm_with": "c6c84b95f1d06742f391a09f485c81673109eb4c0c28a661d83f6a1c5f73d77f",
+  "confirmation_source": null,
   "confirmed": {
    "confirmed_id": "confirmed.draft-0000000000000005.r2",
    "content_fingerprint": "4ab50a159e1a93f08c9e6509538550a28e11f4fe50d59a5d4c18cef8d67dc548"
@@ -804,6 +805,7 @@
   },
   "stage": "awaiting_confirmation",
   "stage_zh": "等你确认开始",
+  "start": null,
   "support_ref": null,
   "updated_at": "2026-10-24T09:00:00Z",
   "waiting_for": "user"

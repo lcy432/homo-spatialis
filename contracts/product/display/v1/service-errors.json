@@ -326,6 +326,45 @@
     "next": "取消这次准备后重新准备；问题一直出现时请联系维护者并提供支持编号"
    }
   },
+  "start_acknowledgement_missing": {
+   "en": {
+    "impact": "Nothing started and no run was used",
+    "message": "Not all of the things to acknowledge before starting were confirmed",
+    "next": "Read every item in the settings preview, tick them all, then confirm and start"
+   },
+   "status": 422,
+   "zh": {
+    "impact": "没有开始，也没有使用次数",
+    "message": "开始之前要知悉的事项没有全部确认",
+    "next": "看过设置预览里的每一项、全部勾选之后再确认并开始"
+   }
+  },
+  "start_already_authorized": {
+   "en": {
+    "impact": "Nothing was started twice and no extra run was used",
+    "message": "This preparation already carries your “confirm and start”: the service starts it automatically once the check passes, so no further confirmation is needed",
+    "next": "Wait for the progress; if the start authorization stops being valid, the page offers a way to confirm and start again"
+   },
+   "status": 409,
+   "zh": {
+    "impact": "没有重复开始，也没有多用次数",
+    "message": "这次准备已经带着你的“确认并开始”：检查通过后由服务自动开始，不需要再确认",
+    "next": "等待进度；开始授权作废时，页面会给出重新确认并开始的入口"
+   }
+  },
+  "start_consent_stale": {
+   "en": {
+    "impact": "Nothing started and no run was used",
+    "message": "What you confirmed is not the current settings preview (the data, quote, scale, cost cap or the things to acknowledge changed)",
+    "next": "Get a new settings preview, read it, then confirm and start"
+   },
+   "status": 409,
+   "zh": {
+    "impact": "没有开始，也没有使用次数",
+    "message": "你确认的不是当前这一份设置预览（资料、报价、规模、费用上限或要知悉的事项变了）",
+    "next": "重新取一份设置预览，看过之后再确认并开始"
+   }
+  },
   "unauthenticated": {
    "en": {
     "impact": "Nothing in this space can be read or changed",

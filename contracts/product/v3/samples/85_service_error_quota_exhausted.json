@@ -5,7 +5,7 @@
   "code": "quota_exhausted",
   "display": {
    "display_schema_version": "e3-display-v2",
-   "resource_version": "e3-display-res-v1-8fae36bca51b48ea",
+   "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
    "source_view_fingerprint": "38bad476b3beebb9c83e9ecfb965ce281061bb51f344d2447eced1ead60d0eb1",
    "translations": {
     "en": {
@@ -14,7 +14,7 @@
        "key": "error.quota_exhausted.message",
        "missing_reason": null,
        "pointer": "/message_zh",
-       "resource_version": "e3-display-res-v1-8fae36bca51b48ea",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
        "source_locale": "zh",
        "status": "provided",
        "text": "This space's 3 simulation runs are used up or all in use"
@@ -23,7 +23,7 @@
        "key": "error.quota_exhausted.impact",
        "missing_reason": null,
        "pointer": "/impact_zh",
-       "resource_version": "e3-display-res-v1-8fae36bca51b48ea",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
        "source_locale": "zh",
        "status": "provided",
        "text": "No new simulation can be started"
@@ -32,7 +32,7 @@
        "key": "error.quota_exhausted.next",
        "missing_reason": null,
        "pointer": "/next_action_zh",
-       "resource_version": "e3-display-res-v1-8fae36bca51b48ea",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
        "source_locale": "zh",
        "status": "provided",
        "text": "Look at the results you already have; the count does not reset automatically"
@@ -46,7 +46,7 @@
        "key": "error.quota_exhausted.message",
        "missing_reason": null,
        "pointer": "/message_zh",
-       "resource_version": "e3-display-res-v1-8fae36bca51b48ea",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
        "source_locale": "zh",
        "status": "provided",
        "text": "这个空间的 3 次模拟机会已经用完或都在使用中"
@@ -55,7 +55,7 @@
        "key": "error.quota_exhausted.impact",
        "missing_reason": null,
        "pointer": "/impact_zh",
-       "resource_version": "e3-display-res-v1-8fae36bca51b48ea",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
        "source_locale": "zh",
        "status": "provided",
        "text": "不能再开始新的模拟"
@@ -64,7 +64,7 @@
        "key": "error.quota_exhausted.next",
        "missing_reason": null,
        "pointer": "/next_action_zh",
-       "resource_version": "e3-display-res-v1-8fae36bca51b48ea",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
        "source_locale": "zh",
        "status": "provided",
        "text": "查看已有的运行结果；次数不会自动重置"

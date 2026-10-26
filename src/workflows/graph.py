@@ -94,7 +94,14 @@ def build_graph(services: WorkflowServices) -> StateGraph:
             confirmation = {
                 "preflight_fingerprint": answer["preflight_fingerprint"],
                 "at": str(answer.get("at", "")),
+                # 谁确认的（DECISIONS/0048）：用户在检查之后点“确认开始”（user_confirm），或用户在检查之前的一次开始授权
+                # （start_authorization，附授权的同意身份与授权时间）——不写成用户在检查之后又点了一次
+                "source": str(answer.get("source") or "user_confirm"),
             }
+            if isinstance(answer.get("authorization"), dict):
+                confirmation["authorization"] = {
+                    k: str(v) for k, v in answer["authorization"].items()
+                }
             return Command(
                 update={"stage": "submitting", "confirmation": confirmation, "notice": None},
                 goto="revalidate",

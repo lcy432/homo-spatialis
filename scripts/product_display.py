@@ -56,9 +56,9 @@ def literal_calls(root: Path = REPO / "src") -> dict[str, set[str]]:
 
 
 def table_calls() -> dict[str, set[str]]:
-    """服务层按表格生成的 key（错误、说明、阶段、删除后保留的记录）。"""
+    """服务层按表格生成的 key（错误、说明、阶段、删除后保留的记录、一次开始的范围说明）。"""
     from product.service import explain as ex
-    from product.service.actions import KEPT_AFTER_DELETE
+    from product.service.actions import KEPT_AFTER_DELETE, START_SCOPE
     from product.service.errors import ERRORS, EXPIRED_SUBJECTS
     from product.service.views import STAGE_ZH
 
@@ -82,6 +82,7 @@ def table_calls() -> dict[str, set[str]]:
     ):
         out |= {f"{prefix}.{k}": v for k, v in table.items()}
     out |= dict(KEPT_AFTER_DELETE)
+    out |= dict(START_SCOPE)
     return {k: {v} for k, v in out.items()}
 
 

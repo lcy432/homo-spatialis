@@ -8,6 +8,7 @@
     "delete"
    ],
    "confirm_with": null,
+   "confirmation_source": "user_confirm",
    "confirmed": {
     "confirmed_id": "confirmed.draft-0000000000000005.r2",
     "content_fingerprint": "4ab50a159e1a93f08c9e6509538550a28e11f4fe50d59a5d4c18cef8d67dc548"
@@ -806,6 +807,7 @@
    },
    "stage": "queued",
    "stage_zh": "已确认，排队等待首次启动",
+   "start": null,
    "support_ref": null,
    "updated_at": "2026-10-24T09:00:00Z",
    "waiting_for": "service"

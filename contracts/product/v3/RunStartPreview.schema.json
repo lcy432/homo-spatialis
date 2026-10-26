@@ -1,0 +1,636 @@
+{
+ "$defs": {
+  "ConfirmedRef": {
+   "additionalProperties": false,
+   "properties": {
+    "confirmed_id": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+     "title": "Confirmed Id",
+     "type": "string"
+    },
+    "content_fingerprint": {
+     "pattern": "^[0-9a-f]{64}$",
+     "title": "Content Fingerprint",
+     "type": "string"
+    }
+   },
+   "required": [
+    "confirmed_id",
+    "content_fingerprint"
+   ],
+   "title": "ConfirmedRef",
+   "type": "object"
+  },
+  "DataPackRef": {
+   "additionalProperties": false,
+   "description": "一份资料包的身份：编号、内容指纹与状态（合成测试资料，或冻结的真实资料包）。",
+   "properties": {
+    "content_fingerprint": {
+     "pattern": "^[0-9a-f]{64}$",
+     "title": "Content Fingerprint",
+     "type": "string"
+    },
+    "note": {
+     "maxLength": 400,
+     "minLength": 1,
+     "title": "Note",
+     "type": "string"
+    },
+    "pack_id": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+     "title": "Pack Id",
+     "type": "string"
+    },
+    "status": {
+     "enum": [
+      "synthetic_fixture_only",
+      "real_data_frozen"
+     ],
+     "title": "Status",
+     "type": "string"
+    }
+   },
+   "required": [
+    "pack_id",
+    "content_fingerprint",
+    "status",
+    "note"
+   ],
+   "title": "DataPackRef",
+   "type": "object"
+  },
+  "DisplayAttachment": {
+   "additionalProperties": false,
+   "description": "即时回复（错误、确认结果）的显示附层：这类回复可能没有可以再读的对象，所以随回复一起给中英两种文字。\n``source_view_fingerprint`` 是去掉 ``display`` 之后的原回复的规范 JSON 摘要；``pointer`` 都相对那份原回复。",
+   "properties": {
+    "display_schema_version": {
+     "const": "e3-display-v2",
+     "title": "Display Schema Version",
+     "type": "string"
+    },
+    "resource_version": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Resource Version"
+    },
+    "source_view_fingerprint": {
+     "pattern": "^[0-9a-f]{64}$",
+     "title": "Source View Fingerprint",
+     "type": "string"
+    },
+    "translations": {
+     "additionalProperties": {
+      "$ref": "#/$defs/DisplayTranslation"
+     },
+     "propertyNames": {
+      "enum": [
+       "zh",
+       "en"
+      ]
+     },
+     "title": "Translations",
+     "type": "object"
+    }
+   },
+   "required": [
+    "display_schema_version",
+    "source_view_fingerprint",
+    "translations"
+   ],
+   "title": "DisplayAttachment",
+   "type": "object"
+  },
+  "DisplayField": {
+   "additionalProperties": false,
+   "description": "原消息里一个可展示文字位置的显示文字。``pointer`` 是相对原消息（或原回复）的 JSON Pointer，只指向含中文的业务说明文字——\n不指向数值、权重、编号、动作枚举、秘密，也不指向用户原文（用户原文保持原文，不翻译）。``key`` 是稳定的文案 / 实体键。",
+   "properties": {
+    "key": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Key",
+     "type": "string"
+    },
+    "missing_reason": {
+     "anyOf": [
+      {
+       "enum": [
+        "no_binding",
+        "translation_missing",
+        "translation_stale",
+        "source_changed",
+        "ambiguous",
+        "untranslated_param",
+        "resources_unavailable",
+        "resources_invalid",
+        "binding_stale",
+        "binding_unverified"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Missing Reason"
+    },
+    "pointer": {
+     "maxLength": 400,
+     "pattern": "^(/[^/]+)+$",
+     "title": "Pointer",
+     "type": "string"
+    },
+    "resource_version": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Resource Version"
+    },
+    "source_locale": {
+     "enum": [
+      "zh",
+      "en"
+     ],
+     "title": "Source Locale",
+     "type": "string"
+    },
+    "status": {
+     "enum": [
+      "provided",
+      "missing"
+     ],
+     "title": "Status",
+     "type": "string"
+    },
+    "text": {
+     "anyOf": [
+      {
+       "maxLength": 6000,
+       "minLength": 1,
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Text"
+    }
+   },
+   "required": [
+    "pointer",
+    "key",
+    "status",
+    "source_locale"
+   ],
+   "title": "DisplayField",
+   "type": "object"
+  },
+  "DisplayTranslation": {
+   "additionalProperties": false,
+   "properties": {
+    "fields": {
+     "default": [],
+     "items": {
+      "$ref": "#/$defs/DisplayField"
+     },
+     "title": "Fields",
+     "type": "array"
+    },
+    "status": {
+     "enum": [
+      "complete",
+      "partial",
+      "unavailable"
+     ],
+     "title": "Status",
+     "type": "string"
+    }
+   },
+   "required": [
+    "status"
+   ],
+   "title": "DisplayTranslation",
+   "type": "object"
+  },
+  "PlannerAndCost": {
+   "additionalProperties": false,
+   "properties": {
+    "call_limit": {
+     "title": "Call Limit",
+     "type": "integer"
+    },
+    "description_zh": {
+     "title": "Description Zh",
+     "type": "string"
+    },
+    "max_cost": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Max Cost"
+    },
+    "paid": {
+     "title": "Paid",
+     "type": "boolean"
+    },
+    "planner_id": {
+     "title": "Planner Id",
+     "type": "string"
+    },
+    "planner_kind": {
+     "enum": [
+      "mock",
+      "llm"
+     ],
+     "title": "Planner Kind",
+     "type": "string"
+    }
+   },
+   "required": [
+    "planner_kind",
+    "planner_id",
+    "description_zh",
+    "call_limit",
+    "paid"
+   ],
+   "title": "PlannerAndCost",
+   "type": "object"
+  },
+  "ProductMeta": {
+   "additionalProperties": false,
+   "description": "每条产品消息都带的共同元数据：结构、问卷、词表、健康问卷、转换的版本与资料包身份。",
+   "properties": {
+    "conversion_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Conversion Version",
+     "type": "string"
+    },
+    "data_pack": {
+     "$ref": "#/$defs/DataPackRef"
+    },
+    "health_questionnaire_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Health Questionnaire Version",
+     "type": "string"
+    },
+    "questionnaire_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Questionnaire Version",
+     "type": "string"
+    },
+    "sample": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/SampleLabel"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "schema_version": {
+     "enum": [
+      "e3a-product-schema-v3.3",
+      "e3a-product-schema-v3.4",
+      "e3a-product-schema-v3.5"
+     ],
+     "title": "Schema Version",
+     "type": "string"
+    },
+    "vocabulary_version": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Vocabulary Version",
+     "type": "string"
+    }
+   },
+   "required": [
+    "schema_version",
+    "questionnaire_version",
+    "vocabulary_version",
+    "health_questionnaire_version",
+    "conversion_version",
+    "data_pack"
+   ],
+   "title": "ProductMeta",
+   "type": "object"
+  },
+  "QuotaSummary": {
+   "additionalProperties": false,
+   "description": "这个专属空间的使用次数：一共 ``total`` 次启动模拟的机会；``used`` 已开始的、``reserved`` 已确认开始但还没有启动的、\n``available`` 还能用的。次数不自动重置；删除结果、换设备、重发链接都不改变它。3 次是启动模拟的机会，不保证每次所有分身都完整。",
+   "properties": {
+    "available": {
+     "minimum": 0,
+     "title": "Available",
+     "type": "integer"
+    },
+    "reserved": {
+     "minimum": 0,
+     "title": "Reserved",
+     "type": "integer"
+    },
+    "total": {
+     "minimum": 0,
+     "title": "Total",
+     "type": "integer"
+    },
+    "used": {
+     "minimum": 0,
+     "title": "Used",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "total",
+    "used",
+    "reserved",
+    "available"
+   ],
+   "title": "QuotaSummary",
+   "type": "object"
+  },
+  "RunSettingsView": {
+   "additionalProperties": false,
+   "description": "一次运行意图的有效设置：创建时由服务端校验并保存，之后的检查、确认、执行、进度、结果与恢复都用这一份（改服务默认值不影响它）。\n规划候选上限与服务尝试上限按这次的规模与修订、重试规则算出。离线 mock 不花钱：费用上限照样写用户这次的选择（它进入设置的\n身份），服务尝试上限不出现。",
+   "properties": {
+    "call_limit": {
+     "minimum": 1,
+     "title": "Call Limit",
+     "type": "integer"
+    },
+    "cities": {
+     "items": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+      "type": "string"
+     },
+     "minItems": 1,
+     "title": "Cities",
+     "type": "array"
+    },
+    "clones_per_city": {
+     "minimum": 1,
+     "title": "Clones Per City",
+     "type": "integer"
+    },
+    "clones_total": {
+     "minimum": 1,
+     "title": "Clones Total",
+     "type": "integer"
+    },
+    "currency": {
+     "anyOf": [
+      {
+       "enum": [
+        "CNY",
+        "USD"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Currency"
+    },
+    "max_cost": {
+     "anyOf": [
+      {
+       "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Max Cost"
+    },
+    "planner_kind": {
+     "enum": [
+      "mock",
+      "llm"
+     ],
+     "title": "Planner Kind",
+     "type": "string"
+    },
+    "service_attempt_limit": {
+     "anyOf": [
+      {
+       "minimum": 0,
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Service Attempt Limit"
+    },
+    "settings_fingerprint": {
+     "pattern": "^[0-9a-f]{64}$",
+     "title": "Settings Fingerprint",
+     "type": "string"
+    },
+    "years": {
+     "minimum": 1,
+     "title": "Years",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "cities",
+    "clones_per_city",
+    "years",
+    "clones_total",
+    "planner_kind",
+    "call_limit",
+    "settings_fingerprint"
+   ],
+   "title": "RunSettingsView",
+   "type": "object"
+  },
+  "SampleLabel": {
+   "additionalProperties": false,
+   "description": "公共样例的出处标签（只出现在样例里；真实运行的消息不写）。\n\n* ``offline_run``：由离线闭环实际执行产生；\n* ``controlled_fixture``：受控测试夹具（例如写好的计划、注入的事件、构造的资料缺口），标明来源；\n* ``contract_example``：线上服务（幂等提交、查询、断线恢复）尚未实现，这里只是**标明为示例**的契约响应。",
+   "properties": {
+    "note": {
+     "maxLength": 600,
+     "minLength": 1,
+     "title": "Note",
+     "type": "string"
+    },
+    "origin": {
+     "enum": [
+      "offline_run",
+      "controlled_fixture",
+      "contract_example"
+     ],
+     "title": "Origin",
+     "type": "string"
+    },
+    "produced_by": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Produced By",
+     "type": "string"
+    },
+    "synthetic": {
+     "const": true,
+     "default": true,
+     "title": "Synthetic",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "origin",
+    "produced_by",
+    "note"
+   ],
+   "title": "SampleLabel",
+   "type": "object"
+  },
+  "StartAcknowledgement": {
+   "additionalProperties": false,
+   "description": "开始之前要知悉的一项（“确认并开始”时一起勾选）。同意身份只记 ``ack_id`` 与范围说明的业务版本，文字随语言变。",
+   "properties": {
+    "ack_id": {
+     "enum": [
+      "ack:start.one_run",
+      "ack:start.auto_start",
+      "ack:start.scope",
+      "ack:start.cost_cap"
+     ],
+     "title": "Ack Id",
+     "type": "string"
+    },
+    "text_zh": {
+     "maxLength": 300,
+     "minLength": 1,
+     "title": "Text Zh",
+     "type": "string"
+    }
+   },
+   "required": [
+    "ack_id",
+    "text_zh"
+   ],
+   "title": "StartAcknowledgement",
+   "type": "object"
+  }
+ },
+ "additionalProperties": false,
+ "description": "设置预览：这次会用的有效设置（城市、每城分身数、年数、规划器与模型种类、费用上限、调用上限）、范围说明、必要知悉项与同意身份。\n\n``consent_fingerprint`` 绑定确认画像、资料包、有效设置（含模型、报价与费用上限）、范围说明的业务版本与知悉项编号；换语言不改它。\n费用上限是停机上限，不是预计费用。``start_allowed`` 为假时 ``start_refusal`` 说明此刻为什么不能开始（付费调用没开、次数用完、已经\n有一次条件不同的准备）。",
+ "properties": {
+  "acknowledgements": {
+   "items": {
+    "$ref": "#/$defs/StartAcknowledgement"
+   },
+   "minItems": 1,
+   "title": "Acknowledgements",
+   "type": "array"
+  },
+  "confirmed": {
+   "$ref": "#/$defs/ConfirmedRef"
+  },
+  "consent_fingerprint": {
+   "pattern": "^[0-9a-f]{64}$",
+   "title": "Consent Fingerprint",
+   "type": "string"
+  },
+  "display": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/DisplayAttachment"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null
+  },
+  "meta": {
+   "$ref": "#/$defs/ProductMeta"
+  },
+  "planner": {
+   "$ref": "#/$defs/PlannerAndCost"
+  },
+  "quota": {
+   "$ref": "#/$defs/QuotaSummary"
+  },
+  "scope_version": {
+   "const": "e3c-start-scope-v1",
+   "title": "Scope Version",
+   "type": "string"
+  },
+  "scope_zh": {
+   "default": [],
+   "items": {
+    "type": "string"
+   },
+   "title": "Scope Zh",
+   "type": "array"
+  },
+  "settings": {
+   "$ref": "#/$defs/RunSettingsView"
+  },
+  "start_allowed": {
+   "title": "Start Allowed",
+   "type": "boolean"
+  },
+  "start_refusal": {
+   "anyOf": [
+    {
+     "enum": [
+      "paid_calls_disabled",
+      "quota_exhausted",
+      "intent_conflict"
+     ],
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Start Refusal"
+  }
+ },
+ "required": [
+  "meta",
+  "confirmed",
+  "settings",
+  "planner",
+  "scope_version",
+  "acknowledgements",
+  "start_allowed",
+  "quota",
+  "consent_fingerprint"
+ ],
+ "title": "RunStartPreview",
+ "type": "object"
+}

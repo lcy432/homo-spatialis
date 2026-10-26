@@ -152,19 +152,30 @@ class WorkflowRuntime:
         return self.status(workflow_id, error=error)
 
     def confirm(
-        self, workflow_id: str, preflight_fingerprint: str, *, at: str | None = None
+        self,
+        workflow_id: str,
+        preflight_fingerprint: str,
+        *,
+        at: str | None = None,
+        source: str = "user_confirm",
+        authorization: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
+        """确认开始。``source`` 写明是谁确认的：``user_confirm``（用户在检查之后确认）或 ``start_authorization``（用户在检查之前的
+        一次开始授权，``authorization`` 带它的同意身份与授权时间；DECISIONS/0048）。"""
         snap = self._require(workflow_id)
         if self._pending(snap) != "confirmation":
             done = snap.values.get("confirmation") or snap.values.get("run_id")
             return self.status(
                 workflow_id, notice="already_confirmed" if done else "nothing_pending"
             )
-        payload = {
+        payload: dict[str, Any] = {
             "action": "accept",
             "preflight_fingerprint": str(preflight_fingerprint),
             "at": at or _now(),
+            "source": source,
         }
+        if authorization is not None:
+            payload["authorization"] = dict(authorization)
         error = self._invoke(workflow_id, Command(resume=payload), "confirm")
         return self.status(workflow_id, error=error)
 

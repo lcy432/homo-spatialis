@@ -240,6 +240,7 @@ class _Samples:
         self.expiry_and_errors(box)
         display_samples(self)  # 最后跑：前面的样例时间与编号都不受影响
         input_samples(self)  # v3.4 的新输入流程：放在最后，前面样例的编号与身份都不变
+        start_samples(self)  # v3.5 / API v1.4 的一次开始：再往后放
 
     # ---- 运行选项：较小规模、越界（E3C 收尾第二步）
     def options(self, box: _Box) -> None:
@@ -1409,4 +1410,209 @@ def input_samples(s: _Samples) -> None:
             f"/drafts/{did}/migrate",
             {"expected_revision": moved["draft"]["revision"], "clear_removed": True},
         ).json(),
+    )
+
+
+# ---------------------------------------------------------------------- 一次开始（API v1.4，DECISIONS/0048）
+
+
+def _start(preview: dict[str, Any], confirmed_id: str, key: str, **options: Any) -> dict[str, Any]:
+    return {
+        "confirmed_id": confirmed_id,
+        **options,
+        "start": {
+            "mode": "start_when_ready",
+            "consent_fingerprint": preview["consent_fingerprint"],
+            "acknowledged": [a["ack_id"] for a in preview["acknowledgements"]],
+            "accept": True,
+            "idempotency_key": key,
+        },
+    }
+
+
+def start_samples(s: _Samples) -> None:
+    """一次开始的样例（162 起，合成资料包）：设置预览、一次“确认并开始”、后台检查后按授权开始、同一个键的重试、拒绝与授权作废。"""
+    import dataclasses
+
+    import yaml
+
+    w = s.w
+    box = _Box(s.work / "start", s.clock)
+    box.person("合成人物 u560")
+    _, reply = box.confirmed()
+    cid = reply["confirmed"]["confirmed_id"]
+    req = {"confirmed_id": cid, "clones_per_city": 2}
+    w(
+        "162_service_start_preview_request",
+        "RunStartPreviewRequest",
+        "设置预览（POST /api/v1/run-start-preview）：与准备模拟同样的确认画像引用与运行选项（这里每城 2 个分身，省略的用服务默认）",
+        req,
+    )
+    preview = box.post("/run-start-preview", req).json()
+    w(
+        "163_service_start_preview",
+        "RunStartPreview",
+        "设置预览（离线 mock）：有效设置（2 座城 × 每城 2 个分身 × 3 年）、规划器、范围说明（scope_version 是说明的业务版本）、开始之前要"
+        "知悉的三项与同意身份 consent_fingerprint；只读——不排队、不预留次数、不调用模型、不写库；display 带中英两种文字（换语言不改同意"
+        "身份）",
+        preview,
+    )
+    create = _start(preview, cid, "start-u560-0001", clones_per_city=2)
+    w(
+        "165_service_intent_create_start",
+        "RunIntentCreateRequest",
+        "一次“确认并开始”（POST /api/v1/run-intents，带 start）：同意身份、勾选的全部知悉项、accept = true 与这次操作的幂等键（连点、回复"
+        "丢失、刷新或重开后重发都带同一个键）",
+        create,
+    )
+    checking = box.post("/run-intents", create).json()
+    w(
+        "166_service_intent_start_checking",
+        "RunIntentView",
+        "刚确认并开始：排队检查中（还没有运行编号）；start.state = pending——检查通过后由服务按这份授权自动开始；没有 submit（不需要、也"
+        "不接受第二次确认），开始之前可以取消",
+        checking,
+    )
+    w(
+        "176_display_intent_start_checking_en",
+        "DisplayEnvelope",
+        "同一个意图的英文显示（检查中、带开始授权）",
+        _display(box, "intent", checking["intent_id"], "en").json(),
+    )
+    box.worker.run_pending()  # 页面关掉也一样：没有任何浏览器请求，worker 检查、按授权开始、跑完
+    done = box.get(f"/run-intents/{checking['intent_id']}").json()
+    w(
+        "167_service_intent_start_finished",
+        "RunIntentView",
+        "按授权开始并跑完：start.state = used（used_at 是按授权开始的时间）、confirmation_source = start_authorization（不是用户在检查之后"
+        "又点了一次）；次数在第一次进入 E1 时转为已使用，一共只用 1 次",
+        done,
+    )
+    w(
+        "168_service_intent_start_retry",
+        "RunIntentView",
+        "结束之后同一个键、同一份请求重发（例如回复丢了、页面重开）：200，返回原来的意图，不另起运行、不再扣次数",
+        box.post("/run-intents", create).json(),
+    )
+    other = _start(
+        box.post("/run-start-preview", {"confirmed_id": cid}).json(), cid, "start-u560-0001"
+    )
+    w(
+        "169_service_error_start_idempotency_conflict",
+        "ServiceError",
+        "同一个幂等键配了不同的请求（这里换了规模）：409 idempotency_conflict，什么都没做；新的一次开始要用新的键",
+        box.post("/run-intents", other).json(),
+    )
+    stale = _start(preview, cid, "start-u560-0002", clones_per_city=2)
+    stale["start"]["consent_fingerprint"] = "0" * 64
+    w(
+        "170_service_error_start_consent_stale",
+        "ServiceError",
+        "确认的不是当前这一份设置预览（同意身份对不上：资料、报价、规模、费用上限或要知悉的事项变了）：409 start_consent_stale，没有开始、"
+        "没有使用次数；重新取一份预览再确认",
+        box.post("/run-intents", stale).json(),
+    )
+    short = _start(preview, cid, "start-u560-0003", clones_per_city=2)
+    short["start"]["acknowledged"] = short["start"]["acknowledged"][:1]
+    w(
+        "171_service_error_start_acknowledgement_missing",
+        "ServiceError",
+        "开始之前要知悉的事项没有全部确认：422 start_acknowledgement_missing，没有开始、没有使用次数",
+        box.post("/run-intents", short).json(),
+    )
+    # 带授权的意图不接受第二次确认：再准备一次（新的键），检查通过、开始之后用旧的确认接口
+    again = box.post(
+        "/run-intents",
+        _start(
+            box.post("/run-start-preview", {"confirmed_id": cid}).json(), cid, "start-u560-0004"
+        ),
+    ).json()
+    w(
+        "172_service_error_start_already_authorized",
+        "ServiceError",
+        "带着一次开始授权的意图又收到“确认开始”（POST …/submit）：409 start_already_authorized——由服务在检查通过后按授权开始，不需要也不"
+        "接受第二次确认",
+        box.post(
+            f"/run-intents/{again['intent_id']}/submit",
+            {"confirm_with": "0" * 64, "idempotency_key": "key-u560-0005", "accept_scope": True},
+        ).json(),
+    )
+    box.post(f"/run-intents/{again['intent_id']}/cancel")
+    # 检查没有通过：授权作废（不会在之后某次检查通过时被悄悄用掉）
+    box.person("合成人物 u561")
+    _, blocked = box.confirmed(occupation_text="我在超市做收银", selected="occ.cashier")
+    bid = blocked["confirmed"]["confirmed_id"]
+    view = box.post(
+        "/run-intents",
+        _start(
+            box.post("/run-start-preview", {"confirmed_id": bid}).json(), bid, "start-u561-0001"
+        ),
+    ).json()
+    box.worker.run_pending()
+    w(
+        "175_service_intent_start_blocked",
+        "RunIntentView",
+        "检查没有通过（收银员在合成城市 K51 没有同一分类的岗位）：start.state = void、void_reason = preflight_blocked；没有开始、没有使用"
+        "次数；说明是那次检查自己的；可以取消后修改",
+        box.get(f"/run-intents/{view['intent_id']}").json(),
+    )
+    # 真实模型规划器（测试传输，不是真实模型）：付费开关与报价
+    gate, reached = threading.Event(), threading.Event()
+    gate.set()
+    paid = _Box(s.work / "start-paid", s.clock, planner="llm", live_calls_enabled=False)
+    paid.worker.transport_factory = lambda _s: _test_transport(None, gate, reached)
+    paid.person("合成人物 u562")
+    _, pr = paid.confirmed()
+    pid = pr["confirmed"]["confirmed_id"]
+    w(
+        "164_service_start_preview_paid_off",
+        "RunStartPreview",
+        "真实模型规划器、服务没有开启付费调用：start_allowed = false、start_refusal = paid_calls_disabled；多一项知悉“费用上限是停机上限，"
+        "不是预计费用”；这时“确认并开始”会被拒绝（409 paid_calls_disabled），什么都不建",
+        paid.post("/run-start-preview", {"confirmed_id": pid}).json(),
+        s.fixture,
+    )
+    paid.ctx.config = paid.ctx.config.model_copy(update={"live_calls_enabled": True})
+    view = paid.post(
+        "/run-intents",
+        _start(
+            paid.post("/run-start-preview", {"confirmed_id": pid}).json(), pid, "start-u562-0001"
+        ),
+    ).json()
+    paid.ctx.config = paid.ctx.config.model_copy(update={"live_calls_enabled": False})
+    paid.worker.run_pending()
+    w(
+        "174_service_intent_start_void_paid_off",
+        "RunIntentView",
+        "确认并开始之后、检查通过时付费调用被关掉（测试传输）：授权作废（void_reason = paid_calls_disabled），没有发送、没有预留；在等"
+        "维护者；开启之后也不会自动开始，要用户重新确认（那时 allowed_actions 里出现 start_again）",
+        paid.get(f"/run-intents/{view['intent_id']}").json(),
+        s.fixture,
+    )
+    paid.post(f"/run-intents/{view['intent_id']}/cancel")
+    paid.ctx.config = paid.ctx.config.model_copy(update={"live_calls_enabled": True})
+    paid.person("合成人物 u563")
+    _, qr = paid.confirmed()
+    qid = qr["confirmed"]["confirmed_id"]
+    view = paid.post(
+        "/run-intents",
+        _start(
+            paid.post("/run-start-preview", {"confirmed_id": qid}).json(), qid, "start-u563-0001"
+        ),
+    ).json()
+    flash = yaml.safe_load(paid.ctx.policy.flash_config.read_text(encoding="utf-8"))
+    flash["run"]["paid_budget"]["price"]["price_version"] = "test-price-v2"
+    newer = s.work / "start-paid-flash-v2.yaml"
+    newer.write_text(yaml.safe_dump(flash, allow_unicode=True), encoding="utf-8")
+    paid.ctx.policy = dataclasses.replace(
+        paid.ctx.policy, flash_config=newer
+    )  # 维护者在检查之前换了报价
+    paid.worker.run_pending()
+    w(
+        "173_service_intent_start_void_conditions_changed",
+        "RunIntentView",
+        "确认并开始之后报价变了（测试传输）：授权作废（void_reason = conditions_changed），服务按新报价重新检查；停在等你确认——看过新的"
+        "运行前说明之后用 start_again 重新取预览、再确认并开始（新的幂等键）；没有发送、没有预留",
+        paid.get(f"/run-intents/{view['intent_id']}").json(),
+        s.fixture,
     )

@@ -42,6 +42,8 @@ from common.product_contracts import (
     RunIntentView,
     RunList,
     RunProgress,
+    RunStartPreview,
+    RunStartPreviewRequest,
     RunSubmitReply,
     RunSubmitRequest,
     ServiceError,
@@ -478,13 +480,27 @@ def create_app(ctx: ServiceContext) -> FastAPI:
     # ------------------------------------------------------------------ 运行意图
 
     @app.post(
+        f"{API}/run-start-preview",
+        response_model=RunStartPreview,
+        responses=ERROR_RESPONSES,
+        summary="设置预览：这次会用的有效设置、范围说明、必要知悉项与同意身份（只读：不排队、不预留次数、不调用模型）",
+    )
+    def start_preview(body: RunStartPreviewRequest, who: Caller = write) -> RunStartPreview:
+        with recording() as rec:
+            preview = actions.start_preview(ctx, who.principal_id, body)
+        # 即时回复，没有可以再读的对象：中英两种文字随回复一起给
+        return service_display.with_display(preview, rec, pack_fingerprint=pack)
+
+    @app.post(
         f"{API}/run-intents",
         status_code=202,
         response_model=RunIntentView,
         responses=_also(
-            200, RunIntentView, "同一份确认画像、同样的有效设置已经有未结束的意图：返回原意图"
+            200,
+            RunIntentView,
+            "同一份确认画像、同样的有效设置已经有未结束的意图，或同一个一次开始的键重试：返回原意图",
         ),
-        summary="准备一次模拟：排队做运行前检查（不使用次数）；新建 202，返回已有 200",
+        summary="准备一次模拟：排队做运行前检查（不使用次数）；带 start 时检查通过后按授权自动开始；新建 202，返回已有 200",
     )
     def create_intent(
         body: RunIntentCreateRequest, response: Response, who: Caller = write

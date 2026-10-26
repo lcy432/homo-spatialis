@@ -5,6 +5,9 @@
   次数、账本或尝试计数，也不新建运行目录。
 * 任务：``preflight``（排队检查：准备工作目录与快照，经 LangGraph 做运行前检查，不扣次数）、``run``（最后核对 → 经 LangGraph
   确认、登记、启动 E1、投影；首次启动 E1 之前把预留转为已使用）、``resume``（服务端判定安全的恢复）、``delete``（安全收尾后清理）。
+* 一次开始（DECISIONS/0048）：意图带着用户在检查之前的开始授权时，检查通过之后由 ``preflight`` 任务接着按授权开始——与用户点“确认
+  开始”同一套核对、同一个提交事务（预留、写运行编号、排队，授权同时标为已用）；条件变了就作废授权、停下说明，不替用户接受。检查与
+  开始之间进程退出：重启后这个任务退回待办，再按授权与当时的条件核对一次，只开始一次。LangGraph 的确认节点照旧，确认记录写明来源。
 * 一次运行进行中时，监测线程按绝对路径读 E1 的进度与这次运行的账本，写白名单进度快照（不切换工作目录、不推进流程）；维护线程
   按时检查过期并清理不在执行中的意图。删除与完成同时发生时删除优先：只有仍在“运行中”的意图才会被写回进度或结果。
 * 停下时（E3C 收尾 R4、R6）：能不能由用户恢复按 E1 的进度、请求尝试、预算与发送状态判断（``RunDir.resume_state``），按钮、公开进度
@@ -29,8 +32,9 @@ import portalocker
 from common.product_contracts import ConfirmedProfile, ProductResult
 from product.display.document import doc_version, explained
 from product.execution import ExecutionSpec
-from product.service.actions import ServiceContext
+from product.service.actions import ServiceContext, start_authorized
 from product.service.explain import service_explanation
+from product.service.store import start_authorization
 from product.service.tokens import support_ref
 from product.workspace import SnapshotError
 from workflows.ports import AttentionRequiredError
@@ -111,6 +115,8 @@ class Worker:
         self.maintain()
         for job in self.store.requeue_active():
             self._diag("requeued", job["intent_id"], kind=job["kind"])
+        for intent in self.store.requeue_pending_starts():
+            self._diag("requeued_start", intent)
 
     def run_pending(self, limit: int = 10_000) -> int:
         """执行到没有待办任务为止（测试与一次性运行用）。返回执行的任务数。"""
@@ -152,6 +158,10 @@ class Worker:
 
     def _preflight(self, intent: str) -> None:
         row = self.store.intent_row(intent)
+        if row is not None and row["stage"] == "awaiting_confirmation":
+            # 检查已经通过：一次开始的授权刚附上，或上一个进程在检查与开始之间退出——按授权与现在的条件核对后开始（只一次）
+            self._start_when_ready(intent)
+            return
         if row is None or row["stage"] != "checking":
             return
         body = self.store.profile_body(row["confirmed_id"])
@@ -189,6 +199,22 @@ class Worker:
                 elif view["waiting_for"] is None and not view["finished"]:
                     view = rt.resume(intent)  # 上一个进程在检查中途退出
         self._publish_preflight(intent, view)
+        self._start_when_ready(intent)
+
+    def _start_when_ready(self, intent: str) -> None:
+        """检查通过之后按用户在检查之前的一次开始授权开始（DECISIONS/0048）：核对与提交见 ``actions.start_authorized``；授权不再成立就
+        作废它（读取时按原因说明），不替用户接受。没有授权、授权已用或作废、意图不在等确认：什么也不做。"""
+        row = self.store.intent_row(intent)
+        if row is None or row["stage"] != "awaiting_confirmation" or row["run_id"] is not None:
+            return
+        auth = start_authorization(row)
+        if auth is None or auth["state"] != "pending":
+            return
+        reason = start_authorized(self.ctx, row)
+        if reason is None:
+            self._diag("start_authorized", intent)
+        elif self.store.void_start(intent, reason):
+            self._diag("start_void", intent, code=reason)
 
     def _publish_preflight(self, intent: str, view: dict[str, Any]) -> None:
         pre = view.get("preflight") or {}
@@ -268,7 +294,7 @@ class Worker:
                 else:
                     view = rt.status(intent)
                     if view["waiting_for"] == "confirmation":
-                        view = rt.confirm(intent, row["preflight_fingerprint"])
+                        view = self._confirm(rt, row)
                     elif view["waiting_for"] is None and not view["finished"]:
                         view = rt.resume(
                             intent
@@ -278,6 +304,22 @@ class Worker:
         self._publish_run(intent, view)
         after = self.store.intent_row(intent)
         self._write_progress(intent, run_id, resumable=bool(after and after["resume_allowed"]))
+
+    @staticmethod
+    def _confirm(rt: Any, row: Any) -> dict[str, Any]:
+        """LangGraph 的确认节点：照实写明谁确认的——用户在检查之后确认，或用户在检查之前的一次开始授权（附同意身份与授权时间）。"""
+        auth = start_authorization(row)
+        if auth is not None and auth["state"] == "used":
+            return rt.confirm(
+                row["intent_id"],
+                row["preflight_fingerprint"],
+                source="start_authorization",
+                authorization={
+                    "consent_fingerprint": auth["consent_fingerprint"],
+                    "authorized_at": auth["authorized_at"],
+                },
+            )
+        return rt.confirm(row["intent_id"], row["preflight_fingerprint"])
 
     def _on_start(self, intent: str) -> None:
         """首次启动 E1 之前的最后一步：删除或取消优先；有效的预留转为已使用（重复调用不重复扣）。"""
@@ -370,7 +412,7 @@ class Worker:
             released=released,
             support=support,
         )
-        self.store.update_intent(
+        blocked = self.store.update_intent(
             intent,
             only_stages=only,
             stage="blocked",
@@ -382,6 +424,10 @@ class Worker:
             explanation=explanation,
             explanation_display=display,
         )
+        if blocked:  # 检查没有通过：一次开始的授权不再成立（不会在之后某次检查通过时被悄悄用掉）
+            self.store.void_start(
+                intent, "internal_error" if code == "internal_error" else "preflight_blocked"
+            )
 
     # ------------------------------------------------------------------ 进度快照（只读）
 
@@ -475,6 +521,9 @@ class Worker:
             return
         if row["stage"] == "checking":
             self._block(intent, "internal_error", only=("checking",), support=ref)
+        elif row["stage"] == "awaiting_confirmation":
+            # 按授权开始时出了程序问题：不重试，授权作废，等用户重新确认
+            self.store.void_start(intent, "internal_error")
         elif row["stage"] in ("queued", "running"):
             self._stop(intent, "internal_error", support=ref)
 

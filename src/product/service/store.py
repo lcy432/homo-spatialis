@@ -36,7 +36,7 @@ from product.service.clock import Clock, days_after, iso
 from product.service.errors import ServiceFailure
 from product.service.tokens import digest, new_secret, opaque
 
-STORE_VERSION = "e3c-service-store-v3"
+STORE_VERSION = "e3c-service-store-v4"
 #: 尚未结束的意图（同一身份最多一个）
 OPEN_STAGES = (
     "checking",
@@ -142,7 +142,8 @@ CREATE TABLE IF NOT EXISTS intents (
     preflight_display TEXT,
     progress_display TEXT,
     result_display TEXT,
-    explanation_display TEXT
+    explanation_display TEXT,
+    start_authorization TEXT
 );
 CREATE UNIQUE INDEX IF NOT EXISTS intents_one_open ON intents(principal_id)
     WHERE stage IN ('checking', 'awaiting_confirmation', 'blocked', 'queued', 'running', 'needs_attention');
@@ -191,6 +192,7 @@ INTENT_CONTENT = (
     "snapshot",
     "execution_body",
     "run_options",
+    "start_authorization",
     *DISPLAY_CONTENT,
 )
 #: 取消时清掉的内容（取消的意图不再需要运行前说明；选的设置照样显示，直到过期或删除）
@@ -208,6 +210,39 @@ _MIGRATE_V3 = {
     "profiles": ("display_body",),
     "intents": DISPLAY_CONTENT,
 }
+#: v3 → v4（一次开始，DECISIONS/0048）：只加开始授权的列；已有的意图没有授权，照旧走“检查之后确认开始”
+_MIGRATE_V4 = {"intents": ("start_authorization",)}
+#: 依次就地升级：（从哪个版本，加哪些列，升到哪个版本）
+_UPGRADES = (
+    ("e3c-service-store-v2", _MIGRATE_V3, "e3c-service-store-v3"),
+    ("e3c-service-store-v3", _MIGRATE_V4, "e3c-service-store-v4"),
+)
+
+
+@dataclass(frozen=True)
+class StartRequest:
+    """一次“确认并开始”的授权（服务端已经按当前预览核对过同意身份与知悉项，DECISIONS/0048）：检查通过后按这次的设置开始，
+    只一次。``key`` 是这次操作的幂等键（同一次操作的重试带同一个键），``request_fingerprint`` 是这次请求本身的指纹（同一个键配不同
+    请求是冲突）。"""
+
+    consent_fingerprint: str
+    acknowledged: tuple[str, ...]
+    key: str
+    request_fingerprint: str
+
+
+def start_key_digest(principal_id: str, key: str) -> str:
+    """一次开始的幂等键在服务库里的写法（与确认开始的键分开命名，互不冲突）。"""
+    return digest(f"start|{principal_id}|{key}")
+
+
+def start_authorization(row: Any) -> dict[str, Any] | None:
+    """意图上保存的开始授权（没有就是旧流程：检查之后由用户确认开始）。"""
+    try:
+        raw = row["start_authorization"]
+    except (IndexError, KeyError):
+        return None
+    return None if raw is None else json.loads(raw)
 
 
 def intent_deadline(row: Any, intent_days: int, *, running: bool = False) -> tuple[str | None, str]:
@@ -265,6 +300,21 @@ class Quota:
         }
 
 
+def _authorization(start: StartRequest, principal_id: str, now: str) -> str:
+    """保存在意图上的开始授权：同意身份、知悉项、授权时间、状态（还没用 / 已用 / 作废）与这次操作的键（服务库里的写法）。"""
+    return json.dumps(
+        {
+            "mode": "start_when_ready",
+            "consent_fingerprint": start.consent_fingerprint,
+            "acknowledged": sorted(start.acknowledged),
+            "authorized_at": now,
+            "state": "pending",
+            "key_digest": start_key_digest(principal_id, start.key),
+        },
+        sort_keys=True,
+    )
+
+
 def _gone(row: Any) -> ServiceFailure:
     """删除中、已删除、已过期的意图对写操作的统一回答。"""
     stage = row["stage"]
@@ -296,27 +346,28 @@ class ServiceStore:
                 "INSERT OR IGNORE INTO meta (key, value) VALUES ('store_version', ?)",
                 (STORE_VERSION,),
             )
-            got = con.execute("SELECT value FROM meta WHERE key = 'store_version'").fetchone()
-            if got[0] == "e3c-service-store-v2":
-                self._migrate_v3(con)
-                got = (STORE_VERSION,)
-            if got[0] != STORE_VERSION:
-                raise RuntimeError(f"服务库版本 {got[0]} 与代码 {STORE_VERSION} 不同")
+            got = con.execute("SELECT value FROM meta WHERE key = 'store_version'").fetchone()[0]
+            for old, columns, new in _UPGRADES:
+                if got == old:
+                    self._migrate(con, columns, new)
+                    got = new
+            if got != STORE_VERSION:
+                raise RuntimeError(f"服务库版本 {got} 与代码 {STORE_VERSION} 不同")
         finally:
             con.close()
 
     @staticmethod
-    def _migrate_v3(con: sqlite3.Connection) -> None:
-        """就地把 v2 的服务库升到 v3：在一个事务里加显示绑定的空列、改版本号。用户的草稿、确认、运行、次数事件与会话都保留，
-        不要求删库重建；已有对象没有绑定，显示为 ``no_binding``（不在读取时补写）。"""
+    def _migrate(con: sqlite3.Connection, columns: dict[str, tuple[str, ...]], to: str) -> None:
+        """就地升一级：在一个事务里加空列、改版本号。用户的草稿、确认、运行、次数事件与会话都保留，不要求删库重建。v2 → v3 加显示
+        绑定的列（已有对象没有绑定，显示为 ``no_binding``，不在读取时补写）；v3 → v4 加开始授权的列（已有意图没有授权，照旧流程）。"""
         con.execute("BEGIN IMMEDIATE")
         try:
-            for table, columns in _MIGRATE_V3.items():
+            for table, names in columns.items():
                 have = {r[1] for r in con.execute(f"PRAGMA table_info({table})")}
-                for column in columns:
+                for column in names:
                     if column not in have:
                         con.execute(f"ALTER TABLE {table} ADD COLUMN {column} TEXT")
-            con.execute("UPDATE meta SET value = ? WHERE key = 'store_version'", (STORE_VERSION,))
+            con.execute("UPDATE meta SET value = ? WHERE key = 'store_version'", (to,))
             con.execute("COMMIT")
         except BaseException:
             con.execute("ROLLBACK")
@@ -874,12 +925,21 @@ class ServiceStore:
         run_options: str,
         workflow_key: Callable[[str], str],
         generation: int,
+        start: StartRequest | None = None,
     ) -> tuple[sqlite3.Row, bool]:
         """创建运行意图（带这次的有效设置）并排队预检查。事务里核对代次与确认画像（在、没删、没过期、是同一份）。同一身份已经有尚未
-        结束的意图：确认画像与有效设置都相同就返回原意图（``False``），不同就冲突（先取消原来的准备再重新创建）。"""
+        结束的意图：确认画像与有效设置都相同就返回原意图（``False``），不同就冲突（先取消原来的准备再重新创建）。
+
+        ``start``（一次开始，DECISIONS/0048）：同一个键、同一份请求返回它当初对应的那个意图（哪怕已经结束、取消或删除：重试不另起
+        运行），同一个键、不同请求是冲突；新的键遇到尚未结束的同一份准备，就把授权附在它上面（它已经有有效授权或已经开始，就只记下
+        这个键）；授权保存在意图上，检查通过之后由 worker 按它开始。"""
         now = self.now()
         with self.write() as con:
             self._check_generation(con, principal_id, generation)
+            if start is not None:
+                seen = self._start_seen(con, principal_id, start)
+                if seen is not None:
+                    return seen, False
             prof = con.execute(
                 "SELECT * FROM profiles WHERE confirmed_id = ? AND principal_id = ? AND deleted_at IS NULL",
                 (confirmed_id, principal_id),
@@ -908,6 +968,8 @@ class ServiceStore:
                 )
                 if not same:
                     raise ServiceFailure("intent_conflict")
+                if start is not None:
+                    old = self._authorize(con, old, start, now)
                 return old, False
             if self.quota(principal_id, con).available < 1:
                 raise ServiceFailure("quota_exhausted")
@@ -915,7 +977,8 @@ class ServiceStore:
             con.execute(
                 "INSERT INTO intents (intent_id, principal_id, confirmed_id, confirmed_fingerprint, "
                 "execution_fingerprint, execution_body, run_options, workflow_key, stage, waiting_for, created_at, "
-                "updated_at, last_activity_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'checking', 'service', ?, ?, ?)",
+                "updated_at, last_activity_at, start_authorization) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'checking', 'service', ?, ?, ?, ?)",
                 (
                     intent,
                     principal_id,
@@ -928,11 +991,115 @@ class ServiceStore:
                     now,
                     now,
                     now,
+                    None if start is None else _authorization(start, principal_id, now),
                 ),
             )
+            if start is not None:
+                self._remember_start(con, principal_id, intent, start, now)
             self._enqueue(con, "preflight", intent)
             row = con.execute("SELECT * FROM intents WHERE intent_id = ?", (intent,)).fetchone()
             return row, True
+
+    def _start_seen(
+        self, con: sqlite3.Connection, principal_id: str, start: StartRequest
+    ) -> sqlite3.Row | None:
+        """这个一次开始的键已经对应过的意图：同一份请求就是它（重试），不同请求是冲突。"""
+        seen = con.execute(
+            "SELECT * FROM submissions WHERE key_digest = ?",
+            (start_key_digest(principal_id, start.key),),
+        ).fetchone()
+        if seen is None:
+            return None
+        if seen["request_fingerprint"] != start.request_fingerprint:
+            raise ServiceFailure("idempotency_conflict")
+        return con.execute(
+            "SELECT * FROM intents WHERE intent_id = ?", (seen["intent_id"],)
+        ).fetchone()
+
+    def intent_for_start(self, principal_id: str, start: StartRequest) -> sqlite3.Row | None:
+        """只读：这个一次开始的键已经对应过的意图（重试时在任何别的核对之前找回它；同一个键、不同请求是冲突）。"""
+        with self.read() as con:
+            return self._start_seen(con, principal_id, start)
+
+    def _remember_start(
+        self,
+        con: sqlite3.Connection,
+        principal_id: str,
+        intent_id: str,
+        start: StartRequest,
+        now: str,
+    ) -> None:
+        con.execute(
+            "INSERT INTO submissions VALUES (?, ?, ?, ?, ?)",
+            (
+                start_key_digest(principal_id, start.key),
+                principal_id,
+                intent_id,
+                start.request_fingerprint,
+                now,
+            ),
+        )
+
+    def _authorize(
+        self, con: sqlite3.Connection, row: sqlite3.Row, start: StartRequest, now: str
+    ) -> sqlite3.Row:
+        """把一次开始的授权附在尚未结束的同一份准备上。已经有有效授权、已经开始，或检查没有通过：只记下这个键（重试找回同一个
+        意图），授权不变——检查没通过的要先取消再重新准备，不替用户接受。检查已经通过、正等确认的：附上授权并排队，worker 接着
+        按它开始。"""
+        intent_id = row["intent_id"]
+        self._remember_start(con, row["principal_id"], intent_id, start, now)
+        auth = start_authorization(row)
+        open_auth = auth is not None and auth["state"] in ("pending", "used")
+        if (
+            open_auth
+            or row["run_id"] is not None
+            or row["stage"] not in ("checking", "awaiting_confirmation")
+        ):
+            return row
+        self.touch(
+            con,
+            intent_id,
+            start_authorization=_authorization(start, row["principal_id"], now),
+            last_activity_at=now,
+        )
+        if row["stage"] == "awaiting_confirmation":
+            self._enqueue(con, "preflight", intent_id)
+        return con.execute("SELECT * FROM intents WHERE intent_id = ?", (intent_id,)).fetchone()
+
+    def void_start(self, intent_id: str, reason: str) -> bool:
+        """开始授权作废（条件变了、检查没有通过、付费调用关了、次数不够……）：只对还没用的授权，写下原因（给用户的说明在读取时按
+        原因生成）。授权作废后不会再自动开始，要用户重新确认（新的一次开始）。返回是否真的作废了一份授权。"""
+        now = self.now()
+        with self.write() as con:
+            row = con.execute("SELECT * FROM intents WHERE intent_id = ?", (intent_id,)).fetchone()
+            auth = None if row is None else start_authorization(row)
+            if auth is None or auth["state"] != "pending":
+                return False
+            void = {**auth, "state": "void", "void_reason": reason, "voided_at": now}
+            self.touch(con, intent_id, start_authorization=json.dumps(void, sort_keys=True))
+            return True
+
+    def requeue_pending_starts(self) -> list[str]:
+        """worker 启动时的兜底：检查已经通过、开始授权还没用、却没有待办检查任务的意图重新排队（上一个进程在检查与自动开始之间
+        出了问题）。只排一个任务，开始仍由 worker 按授权与当时的条件核对；返回排队的意图。"""
+        out: list[str] = []
+        with self.write() as con:
+            rows = con.execute(
+                "SELECT * FROM intents WHERE stage = 'awaiting_confirmation' AND run_id IS NULL "
+                "AND start_authorization IS NOT NULL"
+            ).fetchall()
+            for row in rows:
+                auth = start_authorization(row)
+                if auth is None or auth["state"] != "pending":
+                    continue
+                busy = con.execute(
+                    "SELECT 1 FROM jobs WHERE intent_id = ? AND kind = 'preflight' AND state IN ('pending', 'active')",
+                    (row["intent_id"],),
+                ).fetchone()
+                if busy is None:
+                    self._enqueue(con, "preflight", row["intent_id"])
+                    out.append(row["intent_id"])
+        return out
 
     def intent(self, principal_id: str, intent_id: str) -> sqlite3.Row:
         with self.read() as con:
@@ -1035,9 +1202,13 @@ class ServiceStore:
         key: str,
         run_id: str,
         execution_fingerprint: str,
+        authorization: str | None = None,
     ) -> tuple[str, str]:
         """确认开始：一个短事务里先核对截止时间，再核对意图、有效设置与幂等键、预留 1 次、写下稳定运行编号、排队。返回（回执状态，
         运行编号）。
+
+        * ``authorization``：worker 按一次开始的授权开始时给出那份授权的同意身份——授权必须还没用、就是这一份，在同一个事务里标为
+          已用；用户自己确认开始（没有它）时，带着开始授权的意图拒绝（``start_already_authorized``：不需要、也不接受第二次确认）；
 
         * 同一个键、同一份请求（同一份预检查、同一份有效设置）→ ``duplicate_same_run``；同一个键、不同请求 → 冲突；
         * 同一意图已经确认过：即使换了键，也返回原运行（同一份预检查）——一次确认只能产生一次运行；
@@ -1067,6 +1238,15 @@ class ServiceStore:
             if row["stage"] in GONE_STAGES:
                 raise _gone(row)
             self._refuse_if_due(con, row)
+            auth = start_authorization(row)
+            if authorization is None and auth is not None:
+                raise ServiceFailure("start_already_authorized")
+            if authorization is not None and (
+                auth is None
+                or auth["state"] != "pending"
+                or auth["consent_fingerprint"] != authorization
+            ):
+                raise ServiceFailure("preflight_stale")
             if row["run_id"] is not None:
                 # 已经确认过：同一份预检查与设置返回原运行（不管键是不是新的）；换了就是旧确认
                 if (
@@ -1096,6 +1276,11 @@ class ServiceStore:
                 "INSERT INTO submissions VALUES (?, ?, ?, ?, ?)",
                 (key_digest, principal_id, intent_id, request_fp, now),
             )
+            used: dict[str, Any] = {}
+            if auth is not None:
+                used["start_authorization"] = json.dumps(
+                    {**auth, "state": "used", "used_at": now}, sort_keys=True
+                )
             self.touch(
                 con,
                 intent_id,
@@ -1104,6 +1289,7 @@ class ServiceStore:
                 run_id=run_id,
                 last_activity_at=now,
                 explanation=None,
+                **used,
             )
             self._enqueue(con, "run", intent_id)
             return "accepted", run_id
@@ -1171,6 +1357,12 @@ class ServiceStore:
                 (now, intent_id),
             )
             fields: dict[str, Any] = {c: None for c in _CANCEL_CONTENT}
+            auth = start_authorization(row)
+            if auth is not None and auth["state"] == "pending":
+                fields["start_authorization"] = json.dumps(
+                    {**auth, "state": "void", "void_reason": "cancelled", "voided_at": now},
+                    sort_keys=True,
+                )
             self.touch(
                 con,
                 intent_id,

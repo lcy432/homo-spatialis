@@ -6,6 +6,7 @@
    "cancel"
   ],
   "confirm_with": null,
+  "confirmation_source": null,
   "confirmed": {
    "confirmed_id": "confirmed.draft-0000000000000005.r2",
    "content_fingerprint": "4ab50a159e1a93f08c9e6509538550a28e11f4fe50d59a5d4c18cef8d67dc548"
@@ -66,6 +67,7 @@
   },
   "stage": "checking",
   "stage_zh": "排队检查中：运行前检查由服务按顺序执行，不使用次数",
+  "start": null,
   "support_ref": null,
   "updated_at": "2026-10-24T09:00:00Z",
   "waiting_for": "service"

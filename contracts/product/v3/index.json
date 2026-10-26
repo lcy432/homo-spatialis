@@ -24,7 +24,7 @@
   },
   "DisplayEnvelope": {
    "file": "DisplayEnvelope.schema.json",
-   "sha256": "438851a7191224bcb107ee5d7ecec7ef89afcb7704aeb63d36cf8c3c59b970de"
+   "sha256": "6f9cdfeef520411b0088fffcbf9f107435188d01f40ace9d693cfa6a0523b071"
   },
   "DraftMigrateRequest": {
    "file": "DraftMigrateRequest.schema.json",
@@ -88,11 +88,11 @@
   },
   "RunIntentCreateRequest": {
    "file": "RunIntentCreateRequest.schema.json",
-   "sha256": "4823728d6b37a9e8377ac0fb09b5f9c7a1be37ce61f0637e2c0c5cb34ccfc6a0"
+   "sha256": "d426f1d82c405916be5009ee0aa897b7f3a18730f74bb375eea513eb75bfdb02"
   },
   "RunIntentView": {
    "file": "RunIntentView.schema.json",
-   "sha256": "1237cb03c26219cb257a399fa6c09edaacdfc3abc337493785124fe786eafad8"
+   "sha256": "0193e9f338e576c2fee515f535f512db7d99fe2ece1bab313d6de2ac4758b1be"
   },
   "RunList": {
    "file": "RunList.schema.json",
@@ -106,13 +106,21 @@
    "file": "RunReceipt.schema.json",
    "sha256": "fcdccca9257a92f250f8d4125c9ef33f2fbb4acb243ef02b1acc8844d735e332"
   },
+  "RunStartPreview": {
+   "file": "RunStartPreview.schema.json",
+   "sha256": "5f894acabf39806f41b875ce59c08f0f5868d1da3cb8d880f4c2270cef22c9b7"
+  },
+  "RunStartPreviewRequest": {
+   "file": "RunStartPreviewRequest.schema.json",
+   "sha256": "ed54c6f9df4902d28234a30b153542dbf15df16d7bd11e29a579cf3a747236b5"
+  },
   "RunSubmission": {
    "file": "RunSubmission.schema.json",
    "sha256": "adcde1f4847f562a2ff12bc006f732b1053efa93ec0d592b137ad5c078c6b62c"
   },
   "RunSubmitReply": {
    "file": "RunSubmitReply.schema.json",
-   "sha256": "9451be04770226add7ce8a877c4fd894d4cd53ebe42d94fdf5c263a1e1a2923e"
+   "sha256": "50b428976627779da7ba303e5ef3c582fcde68be5a51a89f2d6e835984fddfc7"
   },
   "RunSubmitRequest": {
    "file": "RunSubmitRequest.schema.json",
@@ -120,7 +128,7 @@
   },
   "ServiceError": {
    "file": "ServiceError.schema.json",
-   "sha256": "76aa45e10a1280832028a7abd43513d2961af781fd007920e3bef62bbde714d6"
+   "sha256": "ee0422cba99e1693fc576d4ce20ef9b7c150e5ad0d1a97419745b1277910966b"
   },
   "SessionExchangeRequest": {
    "file": "SessionExchangeRequest.schema.json",

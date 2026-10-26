@@ -2323,8 +2323,17 @@ WaitingFor = Literal["user", "maintainer", "service", "none"]
 #: ``unavailable`` 已删除、删除中或已过期，没有可用期限。查看、轮询、切换语言都不续期。
 ExpiryBasis = Literal["intent_activity", "first_finished", "active_execution", "unavailable"]
 #: 服务端此刻允许的操作。前端只显示这里列出的按钮。
+#: ``start_again``（一次开始，DECISIONS/0048）：开始授权作废之后，用户可以重新取一份设置预览、再“确认并开始”一次（新的幂等键）；
+#: 带开始授权的意图没有 ``submit``（不需要、也不接受检查之后的第二次确认）。
 IntentAction = Literal[
-    "submit", "cancel", "resume", "delete", "view_progress", "view_result", "create_new_intent"
+    "submit",
+    "cancel",
+    "resume",
+    "delete",
+    "view_progress",
+    "view_result",
+    "create_new_intent",
+    "start_again",
 ]
 _SUPPORT_REF = r"^sup-[0-9a-f]{16}$"
 SupportRef = Annotated[str, Field(pattern=_SUPPORT_REF)]
@@ -2722,14 +2731,118 @@ class ProfileList(ProductModel):
     profiles: tuple[ConfirmedProfileSummary, ...] = ()
 
 
-class RunIntentCreateRequest(ProductModel):
-    """准备一次模拟（``POST /api/v1/run-intents``）：引用一份确认画像，可以选每城分身数、年数与这次的费用上限（省略就用服务默认值，
-    能选什么见 ``ServiceRules.options``）。城市来自确认画像。服务端校验后保存这次的有效设置，再排队做运行前检查（不扣次数）。"""
+# ---------------------------------------------------------------------- 一次开始（API v1.4，DECISIONS/0048）
+
+#: 设置预览里范围说明与必要知悉项的业务版本：说明的含义变了才换（同意身份随之改变）；换语言不改它。
+START_SCOPE_VERSION = "e3c-start-scope-v1"
+#: 开始之前要知悉的几项。``ack:start.cost_cap`` 只在这次用真实模型（付费）时出现。
+StartAckId = Literal[
+    "ack:start.one_run", "ack:start.auto_start", "ack:start.scope", "ack:start.cost_cap"
+]
+#: 设置预览说“此刻不能开始”的原因（与对应的服务错误同名）
+StartRefusal = Literal["paid_calls_disabled", "quota_exhausted", "intent_conflict"]
+_IDEMPOTENCY_KEY = r"^[A-Za-z0-9_.:\-]+$"
+
+
+class RunStartPreviewRequest(ProductModel):
+    """设置预览（``POST /api/v1/run-start-preview``）：与准备模拟同样的确认画像引用与运行选项（省略的用服务默认值）。只读：不编译生活
+    输入、不排队、不预留次数、不调用模型、不写库。"""
 
     confirmed_id: RefStr
     clones_per_city: Annotated[int, Field(ge=1, le=1000)] | None = None
     years: Annotated[int, Field(ge=1, le=100)] | None = None
     max_cost_cny: CentsText | None = None
+
+
+class StartAcknowledgement(ProductModel):
+    """开始之前要知悉的一项（“确认并开始”时一起勾选）。同意身份只记 ``ack_id`` 与范围说明的业务版本，文字随语言变。"""
+
+    ack_id: StartAckId
+    text_zh: str = Field(min_length=1, max_length=300)
+
+
+class RunStartPreview(ProductModel):
+    """设置预览：这次会用的有效设置（城市、每城分身数、年数、规划器与模型种类、费用上限、调用上限）、范围说明、必要知悉项与同意身份。
+
+    ``consent_fingerprint`` 绑定确认画像、资料包、有效设置（含模型、报价与费用上限）、范围说明的业务版本与知悉项编号；换语言不改它。
+    费用上限是停机上限，不是预计费用。``start_allowed`` 为假时 ``start_refusal`` 说明此刻为什么不能开始（付费调用没开、次数用完、已经
+    有一次条件不同的准备）。"""
+
+    meta: ProductMeta
+    confirmed: ConfirmedRef
+    settings: RunSettingsView
+    planner: PlannerAndCost
+    scope_version: Literal["e3c-start-scope-v1"]
+    scope_zh: tuple[str, ...] = ()
+    acknowledgements: tuple[StartAcknowledgement, ...] = Field(min_length=1)
+    start_allowed: bool
+    start_refusal: StartRefusal | None = None
+    quota: QuotaSummary
+    consent_fingerprint: Sha256
+    #: 显示附层：这份回复的中英两种文字（即时回复，没有可以再读的对象）
+    display: DisplayAttachment | None = None
+
+    @model_validator(mode="after")
+    def _shape(self) -> RunStartPreview:
+        if self.start_allowed == (self.start_refusal is not None):
+            raise ValueError("start_allowed 为假时才写 start_refusal")
+        return self
+
+
+class StartWhenReady(ProductModel):
+    """一次“确认并开始”（``RunIntentCreateRequest.start``）：用户看过设置预览、勾选了全部必要知悉项，授权“检查通过后就按这些设置开始，
+    只开始一次”。``consent_fingerprint`` 是那份预览的同意身份（服务端重新核对，对不上就拒绝）；``idempotency_key`` 是这一次操作的
+    幂等键：连点、回复丢失、刷新或重开后重发都带同一个键（页面要把它和这次操作一起保存），服务端返回同一个意图——即使它已经结束、
+    取消或删除，也不另起运行；同一个键配不同请求是冲突。"""
+
+    mode: Literal["start_when_ready"]
+    consent_fingerprint: Sha256
+    acknowledged: tuple[StartAckId, ...] = Field(min_length=1)
+    accept: Literal[True]
+    idempotency_key: Annotated[str, Field(min_length=8, max_length=80, pattern=_IDEMPOTENCY_KEY)]
+
+
+class RunIntentCreateRequest(ProductModel):
+    """准备一次模拟（``POST /api/v1/run-intents``）：引用一份确认画像，可以选每城分身数、年数与这次的费用上限（省略就用服务默认值，
+    能选什么见 ``ServiceRules.options``）。城市来自确认画像。服务端校验后保存这次的有效设置，再排队做运行前检查（不扣次数）。
+
+    带 ``start``（一次开始）：检查通过之后由服务按这份授权自动开始，页面不需要、也不应该再发确认；不带就是原来的流程（检查之后由
+    用户在 ``submit`` 确认开始）。"""
+
+    confirmed_id: RefStr
+    clones_per_city: Annotated[int, Field(ge=1, le=1000)] | None = None
+    years: Annotated[int, Field(ge=1, le=100)] | None = None
+    max_cost_cny: CentsText | None = None
+    start: StartWhenReady | None = None
+
+
+StartAuthorizationState = Literal["pending", "used", "void"]
+#: 开始授权作废的原因（说明见运行意图的 ``explanation``；检查没通过时是那次检查自己的说明）
+StartVoidReason = Literal[
+    "conditions_changed",
+    "consent_changed",
+    "options_not_allowed",
+    "paid_calls_disabled",
+    "quota_exhausted",
+    "preflight_blocked",
+    "authorization_mismatch",
+    "data_pack_unavailable",
+    "internal_error",
+    "cancelled",
+]
+
+
+class StartAuthorizationView(ProductModel):
+    """这次准备带着的一次开始授权（DECISIONS/0048）。``pending``：检查通过后由服务按它开始；``used``：已经按它开始——确认来源是这份
+    授权，不是用户在检查之后又点了一次；``void``：条件变了或开始前停下，授权作废，不会再自动开始（``void_reason``）。"""
+
+    mode: Literal["start_when_ready"]
+    state: StartAuthorizationState
+    consent_fingerprint: Sha256
+    acknowledged: tuple[StartAckId, ...]
+    authorized_at: UtcTime
+    used_at: UtcTime | None = None
+    void_reason: StartVoidReason | None = None
 
 
 class DeletionState(ProductModel):
@@ -2768,6 +2881,10 @@ class RunIntentView(ProductModel):
     quota: QuotaSummary
     #: 这次的有效设置（删除或过期之后不再显示：里面有用户选的城市）
     settings: RunSettingsView | None = None
+    #: 一次开始的授权（没有就是原来的流程：检查之后由用户确认开始）；删除或过期之后不再显示
+    start: StartAuthorizationView | None = None
+    #: 已经确认开始时，确认来自哪里：用户在检查之后确认（``user_confirm``），或用户在检查之前的一次开始授权（``start_authorization``）
+    confirmation_source: Literal["user_confirm", "start_authorization"] | None = None
 
 
 class RunSubmitRequest(ProductModel):
@@ -2842,6 +2959,9 @@ ServiceErrorCode = Literal[
     "migration_consent_required",
     "migration_choice_required",
     "migration_not_needed",
+    "start_consent_stale",
+    "start_acknowledgement_missing",
+    "start_already_authorized",
     "rate_limited",
     "csrf_failed",
     "origin_rejected",
@@ -3063,6 +3183,9 @@ PRODUCT_MESSAGES: dict[str, type[ProductModel]] = {
     "ProfileConfirmReply": ProfileConfirmReply,
     "RunIntentCreateRequest": RunIntentCreateRequest,
     "RunIntentView": RunIntentView,
+    # v3.5 / API v1.4：一次开始的设置预览（DECISIONS/0048）
+    "RunStartPreviewRequest": RunStartPreviewRequest,
+    "RunStartPreview": RunStartPreview,
     "RunSubmitRequest": RunSubmitRequest,
     "RunSubmitReply": RunSubmitReply,
     "RunList": RunList,

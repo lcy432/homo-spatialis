@@ -1,6 +1,59 @@
 {
+ "$defs": {
+  "StartWhenReady": {
+   "additionalProperties": false,
+   "description": "一次“确认并开始”（``RunIntentCreateRequest.start``）：用户看过设置预览、勾选了全部必要知悉项，授权“检查通过后就按这些设置开始，\n只开始一次”。``consent_fingerprint`` 是那份预览的同意身份（服务端重新核对，对不上就拒绝）；``idempotency_key`` 是这一次操作的\n幂等键：连点、回复丢失、刷新或重开后重发都带同一个键（页面要把它和这次操作一起保存），服务端返回同一个意图——即使它已经结束、\n取消或删除，也不另起运行；同一个键配不同请求是冲突。",
+   "properties": {
+    "accept": {
+     "const": true,
+     "title": "Accept",
+     "type": "boolean"
+    },
+    "acknowledged": {
+     "items": {
+      "enum": [
+       "ack:start.one_run",
+       "ack:start.auto_start",
+       "ack:start.scope",
+       "ack:start.cost_cap"
+      ],
+      "type": "string"
+     },
+     "minItems": 1,
+     "title": "Acknowledged",
+     "type": "array"
+    },
+    "consent_fingerprint": {
+     "pattern": "^[0-9a-f]{64}$",
+     "title": "Consent Fingerprint",
+     "type": "string"
+    },
+    "idempotency_key": {
+     "maxLength": 80,
+     "minLength": 8,
+     "pattern": "^[A-Za-z0-9_.:\\-]+$",
+     "title": "Idempotency Key",
+     "type": "string"
+    },
+    "mode": {
+     "const": "start_when_ready",
+     "title": "Mode",
+     "type": "string"
+    }
+   },
+   "required": [
+    "mode",
+    "consent_fingerprint",
+    "acknowledged",
+    "accept",
+    "idempotency_key"
+   ],
+   "title": "StartWhenReady",
+   "type": "object"
+  }
+ },
  "additionalProperties": false,
- "description": "准备一次模拟（``POST /api/v1/run-intents``）：引用一份确认画像，可以选每城分身数、年数与这次的费用上限（省略就用服务默认值，\n能选什么见 ``ServiceRules.options``）。城市来自确认画像。服务端校验后保存这次的有效设置，再排队做运行前检查（不扣次数）。",
+ "description": "准备一次模拟（``POST /api/v1/run-intents``）：引用一份确认画像，可以选每城分身数、年数与这次的费用上限（省略就用服务默认值，\n能选什么见 ``ServiceRules.options``）。城市来自确认画像。服务端校验后保存这次的有效设置，再排队做运行前检查（不扣次数）。\n\n带 ``start``（一次开始）：检查通过之后由服务按这份授权自动开始，页面不需要、也不应该再发确认；不带就是原来的流程（检查之后由\n用户在 ``submit`` 确认开始）。",
  "properties": {
   "clones_per_city": {
    "anyOf": [
@@ -33,6 +86,17 @@
    ],
    "default": null,
    "title": "Max Cost Cny"
+  },
+  "start": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/StartWhenReady"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null
   },
   "years": {
    "anyOf": [

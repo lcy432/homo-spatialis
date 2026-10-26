@@ -71,7 +71,7 @@ def run_e2e(
     ctx = ServiceContext.open(cfg)
     worker = Worker(ctx)
     client = TestClient(create_app(ctx), base_url=origin)
-    _, secret = ctx.store.create_principal("离线联调")
+    principal, secret = ctx.store.create_principal("离线联调")
     session = client.post(
         f"{API}/session", json={"invite_token": secret}, headers={"Origin": origin}
     )
@@ -116,11 +116,20 @@ def run_e2e(
         for k, v in (("clones_per_city", clones), ("years", years), ("max_cost_cny", max_cost))
         if v is not None
     }
-    intent = call(
-        "POST", "/run-intents", {"confirmed_id": confirmed["confirmed"]["confirmed_id"], **options}
-    )
-    worker.run_pending()
-    ready = call("GET", f"/run-intents/{intent['intent_id']}")
+    # 一次开始（API v1.4，DECISIONS/0048）：设置预览 → 一次“确认并开始”；检查与开始都在后台（worker），页面之后只读
+    confirmed_id = confirmed["confirmed"]["confirmed_id"]
+    preview = call("POST", "/run-start-preview", {"confirmed_id": confirmed_id, **options})
+    start_body = {
+        "confirmed_id": confirmed_id,
+        **options,
+        "start": {
+            "mode": "start_when_ready",
+            "consent_fingerprint": preview["consent_fingerprint"],
+            "acknowledged": [a["ack_id"] for a in preview["acknowledgements"]],
+            "accept": True,
+            "idempotency_key": "e2e-start-0001",
+        },
+    }
     summary: dict[str, Any] = {
         "data_identity": _identity(ctx),
         "input": {
@@ -133,68 +142,67 @@ def run_e2e(
             "abilities_confirmed": list(confirmed["confirmed"]["abilities"]),
         },
         "service_profile": profile,
-        "settings": ready["settings"],
-        "preflight_status": (ready.get("preflight") or {}).get("status"),
-        "preflight_issues": [i["code"] for i in (ready.get("preflight") or {}).get("issues", [])],
-        "stage_after_check": ready["stage"],
+        "settings": preview["settings"],
+        "start_allowed": preview["start_allowed"],
+        "start_refusal": preview.get("start_refusal"),
+        "acknowledgements": [a["ack_id"] for a in preview["acknowledgements"]],
     }
     if llm:
-        # 付费开关关闭：确认开始应当被明确拒绝，不预留、不扣次数、不换成 mock
-        r = client.post(
-            f"{API}/run-intents/{intent['intent_id']}/submit",
-            json={
-                "confirm_with": ready.get("confirm_with"),
-                "idempotency_key": "e2e-0001",
-                "accept_scope": True,
-            },
-            headers=h,
-        )
+        # 付费开关关闭：预览写明不能开始；一次开始被明确拒绝，什么都不建、不预留、不扣次数、不换成 mock
+        r = client.post(f"{API}/run-intents", json=start_body, headers=h)
         summary.update(
-            submit_http=r.status_code,
-            submit_code=r.json().get("code"),
+            start_http=r.status_code,
+            start_code=r.json().get("code"),
             quota=call("GET", "/session")["quota"],
+            intents=len(ctx.store.intents(principal)),
             jobs_pending=len(ctx.store.pending_jobs()),
             real_model_calls=0,
             seconds=round(time.monotonic() - started, 1),
         )
         return summary
-    if ready["stage"] != "awaiting_confirmation":
-        summary["explanation"] = ready.get("explanation")
+    intent = call("POST", "/run-intents", start_body)
+    summary["stage_after_start"] = intent["stage"]
+    worker.run_pending()  # 之后没有任何浏览器请求也照样检查、按授权开始、跑完
+    done = call("GET", f"/run-intents/{intent['intent_id']}")
+    pre = done.get("preflight") or {}
+    summary.update(
+        preflight_status=pre.get("status"),
+        preflight_issues=[i["code"] for i in pre.get("issues", [])],
+        stage=done["stage"],
+        start_state=(done.get("start") or {}).get("state"),
+        start_void_reason=(done.get("start") or {}).get("void_reason"),
+        confirmation_source=done.get("confirmation_source"),
+        quota=done["quota"],
+        run_id=done["run_id"],
+        planned_clones=preview["settings"]["clones_total"],
+    )
+    if done["run_id"] is None:
+        summary["explanation"] = done.get("explanation")
         summary["seconds"] = round(time.monotonic() - started, 1)
         return summary
-    receipt = call(
-        "POST",
-        f"/run-intents/{intent['intent_id']}/submit",
-        {
-            "confirm_with": ready["confirm_with"],
-            "idempotency_key": "e2e-0001",
-            "accept_scope": True,
-        },
-    )["receipt"]
-    worker.run_pending()
-    done = call("GET", f"/run-intents/{intent['intent_id']}")
-    summary.update(
-        stage=done["stage"],
-        quota=done["quota"],
-        run_id=receipt["run_id"],
-        planned_clones=ready["settings"]["clones_total"],
-    )
+    run_id = done["run_id"]
     if done["result_available"]:
-        result = call("GET", f"/runs/{receipt['run_id']}/result")
-        progress = call("GET", f"/runs/{receipt['run_id']}/progress")
+        result = call("GET", f"/runs/{run_id}/result")
+        progress = call("GET", f"/runs/{run_id}/progress")
         summary.update(_result_summary(result, progress))
     else:
         summary["explanation"] = done.get("explanation")
+    retry = client.post(f"{API}/run-intents", json=start_body, headers=h)
+    summary["same_key_retry"] = {
+        "http": retry.status_code,
+        "same_intent": retry.json().get("intent_id") == intent["intent_id"],
+        "quota": call("GET", "/session")["quota"],
+    }
     ids = {
         "draft": draft.draft_id,
         "review": review["review"]["review_id"],
         "profile": confirmed["confirmed"]["confirmed_id"],
         "intent": intent["intent_id"],
-        "progress": receipt["run_id"],
-        "result": receipt["run_id"] if done["result_available"] else None,
+        "progress": run_id,
+        "result": run_id if done["result_available"] else None,
     }
     summary["display"] = _display_story(client, h, ctx, ids, review)
-    summary["deletion"] = _delete_story(client, h, worker, receipt["run_id"])
+    summary["deletion"] = _delete_story(client, h, worker, run_id)
     summary["seconds"] = round(time.monotonic() - started, 1)
     return summary
 

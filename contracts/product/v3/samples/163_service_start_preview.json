@@ -1,0 +1,356 @@
+{
+ "description_zh": "设置预览（离线 mock）：有效设置（2 座城 × 每城 2 个分身 × 3 年）、规划器、范围说明（scope_version 是说明的业务版本）、开始之前要知悉的三项与同意身份 consent_fingerprint；只读——不排队、不预留次数、不调用模型、不写库；display 带中英两种文字（换语言不改同意身份）",
+ "message": "RunStartPreview",
+ "payload": {
+  "acknowledgements": [
+   {
+    "ack_id": "ack:start.one_run",
+    "text_zh": "真正开始（第一次进入模拟）时用掉 1 次启动机会；开始之前检查没有通过、取消或过期都不扣"
+   },
+   {
+    "ack_id": "ack:start.auto_start",
+    "text_zh": "检查通过就按这些设置自动开始，不再询问；检查没有通过或条件变了就停下说明"
+   },
+   {
+    "ack_id": "ack:start.scope",
+    "text_zh": "我知道这次模拟的范围与限制：结果只说明在这些设定下的生活，不是真实城市的排名"
+   }
+  ],
+  "confirmed": {
+   "confirmed_id": "confirmed.draft-0000000000000090.r2",
+   "content_fingerprint": "b8c6f16d85cfcf6b4166c2c6a49a589af907efafef5f5631692c0e8a1ca03ddf"
+  },
+  "consent_fingerprint": "f11f88618db60f90f0117800b856854975f0fab9d12b0b6f3efe6d53e9b60837",
+  "display": {
+   "display_schema_version": "e3-display-v2",
+   "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+   "source_view_fingerprint": "34d183c64777b82a77dc666c2163f7132e25e5dd5ee478b96fbd15ea3f8dd4e9",
+   "translations": {
+    "en": {
+     "fields": [
+      {
+       "key": "pack.note.synthetic",
+       "missing_reason": null,
+       "pointer": "/meta/data_pack/note",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "Synthetic data pack: every value is a hand-made model setting or test data, not real city data"
+      },
+      {
+       "key": "preflight.planner.mock_free",
+       "missing_reason": null,
+       "pointer": "/planner/description_zh",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "Controlled, deterministic offline planner (mock): it only tests wiring, state passing and information isolation and does not represent the abilities of a real large language model; no network calls, cost 0"
+      },
+      {
+       "key": "start.scope.check",
+       "missing_reason": null,
+       "pointer": "/scope_zh/0",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "Before starting, the service runs the pre-run check in the background (it does not use a run and does not call any model); closing the page, refreshing or losing the connection does not affect it"
+      },
+      {
+       "key": "start.scope.gaps",
+       "missing_reason": null,
+       "pointer": "/scope_zh/1",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "The check may find that some city lacks data that a score needs: you will not be asked to confirm such ordinary data gaps again, and the results mark them as incomplete or missing (never filled with 0)"
+      },
+      {
+       "key": "start.scope.stop",
+       "missing_reason": null,
+       "pointer": "/scope_zh/2",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "If the check does not pass, or the data, quote, scale, cost cap or the things you must acknowledge change, the service stops and explains why; it does not confirm again on your behalf"
+      },
+      {
+       "key": "start.scope.once",
+       "missing_reason": null,
+       "pointer": "/scope_zh/3",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "This confirmation starts the simulation once: resuming after a stop is up to you, and simulating again after it ends needs a new start"
+      },
+      {
+       "key": "entity.capability.item.0:limits",
+       "missing_reason": null,
+       "pointer": "/scope_zh/4",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "Cities, quotes, wages, taxes, illness and treatment are all synthetic settings; the results do not rank real cities and are not real-world recommendations"
+      },
+      {
+       "key": "entity.capability.item.1:limits",
+       "missing_reason": null,
+       "pointer": "/scope_zh/5",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "The offline planner is a controllable mock and does not represent a real large language model's ability or understanding of preferences"
+      },
+      {
+       "key": "entity.capability.item.2:limits",
+       "missing_reason": null,
+       "pointer": "/scope_zh/6",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "The questionnaire wording and reference improvement ranges are provisional drafts, not tested in cognitive interviews or validated as a scale"
+      },
+      {
+       "key": "input.interests.scope.leisure.unanswered",
+       "missing_reason": null,
+       "pointer": "/scope_zh/7",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "Leisure interests: you did not answer; this time it is not personalized by specific interests (evaluated with neutral rules)"
+      },
+      {
+       "key": "input.interests.scope.taste.unanswered",
+       "missing_reason": null,
+       "pointer": "/scope_zh/8",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "Taste and cuisines: you did not answer; this time it is not personalized by specific cuisines (only fresh meals count)"
+      },
+      {
+       "key": "start.ack.one_run",
+       "missing_reason": null,
+       "pointer": "/acknowledgements/0/text_zh",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "Starting for real (the first time the simulation is entered) uses 1 of your simulation runs; nothing is used if the check does not pass, or if you cancel or it expires before then"
+      },
+      {
+       "key": "start.ack.auto_start",
+       "missing_reason": null,
+       "pointer": "/acknowledgements/1/text_zh",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "Once the check passes, the simulation starts with these settings without asking again; if the check does not pass or the conditions change, it stops and explains why"
+      },
+      {
+       "key": "start.ack.scope",
+       "missing_reason": null,
+       "pointer": "/acknowledgements/2/text_zh",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "I understand the scope and limits of this simulation: the results only describe life under these settings and are not a ranking of real cities"
+      }
+     ],
+     "status": "complete"
+    },
+    "zh": {
+     "fields": [
+      {
+       "key": "pack.note.synthetic",
+       "missing_reason": null,
+       "pointer": "/meta/data_pack/note",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料"
+      },
+      {
+       "key": "preflight.planner.mock_free",
+       "missing_reason": null,
+       "pointer": "/planner/description_zh",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "可控的确定性离线规划器（mock）：只检验接线、状态传递与信息隔离，不代表真实大语言模型的能力；没有网络调用，费用为 0"
+      },
+      {
+       "key": "start.scope.check",
+       "missing_reason": null,
+       "pointer": "/scope_zh/0",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "开始之前，服务在后台做运行前检查（不使用次数、不调用模型）；关闭页面、刷新或断线都不影响"
+      },
+      {
+       "key": "start.scope.gaps",
+       "missing_reason": null,
+       "pointer": "/scope_zh/1",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "检查可能发现某些城市缺少某项评分要读的资料：这类普通资料缺口不会再让你确认，结果里照实标为不完整或缺失（不补 0）"
+      },
+      {
+       "key": "start.scope.stop",
+       "missing_reason": null,
+       "pointer": "/scope_zh/2",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "检查没有通过，或资料、报价、规模、费用上限与要知悉的事项变了：服务停下并说明原因，不替你重新确认"
+      },
+      {
+       "key": "start.scope.once",
+       "missing_reason": null,
+       "pointer": "/scope_zh/3",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "这次确认只开始一次：停下之后的恢复要你自己点，结束之后再模拟要重新开始"
+      },
+      {
+       "key": "entity.capability.item.0:limits",
+       "missing_reason": null,
+       "pointer": "/scope_zh/4",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "城市、报价、工资、税、疾病与治疗全部是合成设定；结果不排序真实城市，也不是现实推荐"
+      },
+      {
+       "key": "entity.capability.item.1:limits",
+       "missing_reason": null,
+       "pointer": "/scope_zh/5",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "离线规划器是可控的 mock，不代表真实大语言模型的能力或偏好理解"
+      },
+      {
+       "key": "entity.capability.item.2:limits",
+       "missing_reason": null,
+       "pointer": "/scope_zh/6",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "问卷文案与参考改善范围是暂定稿，没有做认知访谈与量表验证"
+      },
+      {
+       "key": "input.interests.scope.leisure.unanswered",
+       "missing_reason": null,
+       "pointer": "/scope_zh/7",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "休闲兴趣：你没有回答，本次不按具体兴趣个性化（按中性规则评价）"
+      },
+      {
+       "key": "input.interests.scope.taste.unanswered",
+       "missing_reason": null,
+       "pointer": "/scope_zh/8",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "口味与菜系：你没有回答，本次不按具体菜系个性化（只看新鲜餐）"
+      },
+      {
+       "key": "start.ack.one_run",
+       "missing_reason": null,
+       "pointer": "/acknowledgements/0/text_zh",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "真正开始（第一次进入模拟）时用掉 1 次启动机会；开始之前检查没有通过、取消或过期都不扣"
+      },
+      {
+       "key": "start.ack.auto_start",
+       "missing_reason": null,
+       "pointer": "/acknowledgements/1/text_zh",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "检查通过就按这些设置自动开始，不再询问；检查没有通过或条件变了就停下说明"
+      },
+      {
+       "key": "start.ack.scope",
+       "missing_reason": null,
+       "pointer": "/acknowledgements/2/text_zh",
+       "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+       "source_locale": "zh",
+       "status": "provided",
+       "text": "我知道这次模拟的范围与限制：结果只说明在这些设定下的生活，不是真实城市的排名"
+      }
+     ],
+     "status": "complete"
+    }
+   }
+  },
+  "meta": {
+   "conversion_version": "e3a-conversion-v4",
+   "data_pack": {
+    "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
+    "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
+    "pack_id": "pack.e3a.synthetic-v2",
+    "status": "synthetic_fixture_only"
+   },
+   "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.5-draft",
+   "sample": {
+    "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+    "origin": "offline_run",
+    "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+    "synthetic": true
+   },
+   "schema_version": "e3a-product-schema-v3.5",
+   "vocabulary_version": "e3a-vocabulary-v5"
+  },
+  "planner": {
+   "call_limit": 36,
+   "description_zh": "可控的确定性离线规划器（mock）：只检验接线、状态传递与信息隔离，不代表真实大语言模型的能力；没有网络调用，费用为 0",
+   "max_cost": null,
+   "paid": false,
+   "planner_id": "mock.rules.e3a-product",
+   "planner_kind": "mock"
+  },
+  "quota": {
+   "available": 3,
+   "reserved": 0,
+   "total": 3,
+   "used": 0
+  },
+  "scope_version": "e3c-start-scope-v1",
+  "scope_zh": [
+   "开始之前，服务在后台做运行前检查（不使用次数、不调用模型）；关闭页面、刷新或断线都不影响",
+   "检查可能发现某些城市缺少某项评分要读的资料：这类普通资料缺口不会再让你确认，结果里照实标为不完整或缺失（不补 0）",
+   "检查没有通过，或资料、报价、规模、费用上限与要知悉的事项变了：服务停下并说明原因，不替你重新确认",
+   "这次确认只开始一次：停下之后的恢复要你自己点，结束之后再模拟要重新开始",
+   "城市、报价、工资、税、疾病与治疗全部是合成设定；结果不排序真实城市，也不是现实推荐",
+   "离线规划器是可控的 mock，不代表真实大语言模型的能力或偏好理解",
+   "问卷文案与参考改善范围是暂定稿，没有做认知访谈与量表验证",
+   "休闲兴趣：你没有回答，本次不按具体兴趣个性化（按中性规则评价）",
+   "口味与菜系：你没有回答，本次不按具体菜系个性化（只看新鲜餐）"
+  ],
+  "settings": {
+   "call_limit": 36,
+   "cities": [
+    "US:SYNTH2026:K51",
+    "US:SYNTH2026:M52"
+   ],
+   "clones_per_city": 2,
+   "clones_total": 4,
+   "currency": "CNY",
+   "max_cost": "20",
+   "planner_kind": "mock",
+   "service_attempt_limit": null,
+   "settings_fingerprint": "ab393b806eceea6f11a864beb5a1b3093e7eb17c176163e40811fa9d00d76f96",
+   "years": 3
+  },
+  "start_allowed": true,
+  "start_refusal": null
+ }
+}

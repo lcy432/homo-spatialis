@@ -1,0 +1,14 @@
+{
+ "description_zh": "设置预览（POST /api/v1/run-start-preview）：与准备模拟同样的确认画像引用与运行选项（这里每城 2 个分身，省略的用服务默认）",
+ "message": "RunStartPreviewRequest",
+ "payload": {
+  "clones_per_city": 2,
+  "confirmed_id": "confirmed.draft-0000000000000090.r2"
+ },
+ "sample": {
+  "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+  "origin": "offline_run",
+  "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+  "synthetic": true
+ }
+}

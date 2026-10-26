@@ -7472,7 +7472,8 @@
        "delete",
        "view_progress",
        "view_result",
-       "create_new_intent"
+       "create_new_intent",
+       "start_again"
       ],
       "type": "string"
      },
@@ -7491,6 +7492,22 @@
      ],
      "default": null,
      "title": "Confirm With"
+    },
+    "confirmation_source": {
+     "anyOf": [
+      {
+       "enum": [
+        "user_confirm",
+        "start_authorization"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Confirmation Source"
     },
     "confirmed": {
      "$ref": "#/$defs/ConfirmedRef"
@@ -7619,6 +7636,17 @@
      "minLength": 1,
      "title": "Stage Zh",
      "type": "string"
+    },
+    "start": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/StartAuthorizationView"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
     },
     "support_ref": {
      "anyOf": [
@@ -8356,6 +8384,95 @@
     "count"
    ],
    "title": "SourceKindCount",
+   "type": "object"
+  },
+  "StartAuthorizationView": {
+   "additionalProperties": false,
+   "description": "这次准备带着的一次开始授权（DECISIONS/0048）。``pending``：检查通过后由服务按它开始；``used``：已经按它开始——确认来源是这份\n授权，不是用户在检查之后又点了一次；``void``：条件变了或开始前停下，授权作废，不会再自动开始（``void_reason``）。",
+   "properties": {
+    "acknowledged": {
+     "items": {
+      "enum": [
+       "ack:start.one_run",
+       "ack:start.auto_start",
+       "ack:start.scope",
+       "ack:start.cost_cap"
+      ],
+      "type": "string"
+     },
+     "title": "Acknowledged",
+     "type": "array"
+    },
+    "authorized_at": {
+     "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+     "title": "Authorized At",
+     "type": "string"
+    },
+    "consent_fingerprint": {
+     "pattern": "^[0-9a-f]{64}$",
+     "title": "Consent Fingerprint",
+     "type": "string"
+    },
+    "mode": {
+     "const": "start_when_ready",
+     "title": "Mode",
+     "type": "string"
+    },
+    "state": {
+     "enum": [
+      "pending",
+      "used",
+      "void"
+     ],
+     "title": "State",
+     "type": "string"
+    },
+    "used_at": {
+     "anyOf": [
+      {
+       "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Used At"
+    },
+    "void_reason": {
+     "anyOf": [
+      {
+       "enum": [
+        "conditions_changed",
+        "consent_changed",
+        "options_not_allowed",
+        "paid_calls_disabled",
+        "quota_exhausted",
+        "preflight_blocked",
+        "authorization_mismatch",
+        "data_pack_unavailable",
+        "internal_error",
+        "cancelled"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Void Reason"
+    }
+   },
+   "required": [
+    "mode",
+    "state",
+    "consent_fingerprint",
+    "acknowledged",
+    "authorized_at"
+   ],
+   "title": "StartAuthorizationView",
    "type": "object"
   },
   "StartSummary": {

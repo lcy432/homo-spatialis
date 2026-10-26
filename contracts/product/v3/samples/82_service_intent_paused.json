@@ -8,6 +8,7 @@
    "delete"
   ],
   "confirm_with": null,
+  "confirmation_source": "user_confirm",
   "confirmed": {
    "confirmed_id": "confirmed.draft-000000000000000f.r2",
    "content_fingerprint": "a8013ce80c217042bb479515c0e8b78ec649799c4f8aed15da3da71e2e8bfa0e"
@@ -848,6 +849,7 @@
   },
   "stage": "needs_attention",
   "stage_zh": "停下了，需要处理",
+  "start": null,
   "support_ref": "sup-0000000000000011",
   "updated_at": "2026-10-24T09:00:00Z",
   "waiting_for": "user"

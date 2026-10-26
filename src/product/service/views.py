@@ -26,6 +26,7 @@ from common.product_contracts import (
     RunSettingsView,
     RunSummary,
     ServiceRules,
+    StartAuthorizationView,
     UserInputDraft,
 )
 from product.display import Code, Join, Num, t
@@ -34,7 +35,7 @@ from product.migration import migration_for
 from product.pack import DataPack
 from product.service.config import ServiceConfig
 from product.service.explain import service_explanation
-from product.service.store import Quota, intent_deadline
+from product.service.store import Quota, intent_deadline, start_authorization
 
 STAGE_ZH = {
     "checking": "排队检查中：运行前检查由服务按顺序执行，不使用次数",
@@ -182,7 +183,13 @@ def settings_view(row: Mapping[str, Any]) -> RunSettingsView | None:
     """这次运行保存的有效设置（删除、过期之后已经清掉，就不显示）。"""
     if row["execution_body"] is None:
         return None
-    spec = ExecutionSpec.model_validate_json(row["execution_body"])
+    return settings_from_spec(
+        ExecutionSpec.model_validate_json(row["execution_body"]), row["execution_fingerprint"]
+    )
+
+
+def settings_from_spec(spec: ExecutionSpec, fingerprint: str | None = None) -> RunSettingsView:
+    """一份有效设置的公开写法（运行意图保存的那一份，或设置预览按当前政策算出的那一份）。"""
     llm = spec.planner_kind == "llm"
     return RunSettingsView(
         cities=tuple(spec.cities),
@@ -194,7 +201,7 @@ def settings_view(row: Mapping[str, Any]) -> RunSettingsView | None:
         currency=spec.currency,
         call_limit=spec.global_call_limit,
         service_attempt_limit=spec.max_requests if llm else None,
-        settings_fingerprint=row["execution_fingerprint"],
+        settings_fingerprint=fingerprint or spec.fingerprint,
     )
 
 
@@ -222,11 +229,17 @@ def allowed_actions(
     """此刻服务允许的动作——与动作接口用同一份规则（读取之后状态变了，动作接口仍可能拒绝）：
 
     * ``submit``：等确认、还有可用次数，而且这次的规划器现在能开始（真实模型需要服务开启付费调用；离线 mock 不受这个开关影响）；
+      带着一次开始授权的意图没有它（由服务按授权开始，不需要第二次确认）；
+    * ``start_again``：一次开始的授权作废之后、意图仍在等确认，可以重新取设置预览、再“确认并开始”一次（同样要有次数、能开始）；
     * ``cancel``：还没有开始过（服务库里没有启动记录）的检查中、等确认、检查没通过或排队等首次启动——恢复之后又在排队的不能取消。"""
     stage = row["stage"]
+    auth = start_authorization(row)
     out: list[str] = []
-    if stage == "awaiting_confirmation" and quota.available >= 1 and start_allowed:
+    can_start = stage == "awaiting_confirmation" and quota.available >= 1 and start_allowed
+    if can_start and auth is None:
         out.append("submit")
+    if can_start and auth is not None and auth["state"] == "void":
+        out.append("start_again")
     if stage in ("checking", "awaiting_confirmation", "blocked", "queued") and not started:
         out.append("cancel")
     if row["progress_body"] is not None and stage not in ("deleting", "deleted", "expired"):
@@ -244,6 +257,9 @@ def allowed_actions(
 
 def waiting_for(row: Mapping[str, Any], *, start_allowed: bool = True) -> str:
     stage = row["stage"]
+    auth = start_authorization(row)
+    if stage == "awaiting_confirmation" and auth is not None and auth["state"] == "pending":
+        return "service"  # 检查通过、授权还没用：服务正按授权开始
     if stage == "awaiting_confirmation" and not start_allowed:
         return "maintainer"  # 付费调用没有开启：要等维护者开启，不是等用户
     if stage in ("awaiting_confirmation", "blocked"):
@@ -262,6 +278,41 @@ def needs_live_calls(row: Mapping[str, Any]) -> bool:
     return ExecutionSpec.model_validate_json(row["execution_body"]).planner_kind == "llm"
 
 
+#: 开始授权作废、意图仍在等确认时的说明代码（检查没通过等改了阶段的，用那一次自己保存的说明）
+_VOID_EXPLAINED = {
+    "conditions_changed",
+    "consent_changed",
+    "paid_calls_disabled",
+    "quota_exhausted",
+    "authorization_mismatch",
+    "data_pack_unavailable",
+    "internal_error",
+}
+
+
+def start_view(row: Mapping[str, Any]) -> StartAuthorizationView | None:
+    auth = start_authorization(row)
+    if auth is None:
+        return None
+    return StartAuthorizationView(
+        mode="start_when_ready",
+        state=auth["state"],
+        consent_fingerprint=auth["consent_fingerprint"],
+        acknowledged=tuple(auth["acknowledged"]),
+        authorized_at=auth["authorized_at"],
+        used_at=auth.get("used_at"),
+        void_reason=auth.get("void_reason"),
+    )
+
+
+def confirmation_source(row: Mapping[str, Any]) -> str | None:
+    """已经确认开始时，确认来自哪里（还没确认开始，或删除、过期之后内容已经清掉，就是空）。"""
+    if row["run_id"] is None or row["stage"] in ("deleting", "deleted", "expired"):
+        return None
+    auth = start_authorization(row)
+    return "start_authorization" if auth is not None and auth["state"] == "used" else "user_confirm"
+
+
 def intent_view(
     meta: ProductMeta,
     row: Mapping[str, Any],
@@ -276,6 +327,7 @@ def intent_view(
     pre = _json(row["preflight_body"])
     progress = _json(row["progress_body"])
     explanation = _json(row["explanation"])
+    auth = start_authorization(row)
     start_allowed = live_calls_enabled or not needs_live_calls(row)
     stage_zh = stage_text(row["stage"])
     if row["stage"] == "queued":
@@ -287,8 +339,22 @@ def intent_view(
             )
         else:
             explanation = service_explanation("queued_first_start").model_dump(mode="json")
+    elif row["stage"] == "awaiting_confirmation" and auth is not None:
+        if auth["state"] == "pending":
+            stage_zh = t("stage.awaiting_confirmation_authorized", "检查通过，正在按你的确认开始")
+        elif auth["state"] == "void":
+            stage_zh = t("stage.awaiting_confirmation_void", "开始授权已经作废，等你重新确认")
+            if auth.get("void_reason") in _VOID_EXPLAINED:
+                explanation = service_explanation(f"start_{auth['void_reason']}").model_dump(
+                    mode="json"
+                )
     elif row["stage"] == "awaiting_confirmation" and not start_allowed:
         explanation = service_explanation("paid_calls_off_waiting").model_dump(mode="json")
+    elif row["stage"] == "checking" and auth is not None and auth["state"] == "pending":
+        stage_zh = t(
+            "stage.checking_authorized",
+            "排队检查中：检查通过后按你的确认自动开始（检查不使用次数）",
+        )
     expires, basis = intent_deadline(row, intent_days)
     if row["stage"] in ("deleted", "deleting"):
         deletion = DeletionState(
@@ -328,6 +394,8 @@ def intent_view(
         support_ref=row["support_ref"],
         quota=quota_view(quota),
         settings=None if gone else settings_view(row),
+        start=None if gone else start_view(row),
+        confirmation_source=confirmation_source(row),  # type: ignore[arg-type]
     )
 
 

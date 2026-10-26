@@ -44,6 +44,14 @@ REASONS: dict[str, str] = {
     "queued_first_start": "已经确认开始，正在排队等待首次启动",
     "queued_resume": "这次运行已经开始过，正在排队等待恢复",
     "paid_calls_off_waiting": "这次模拟需要真实模型，服务现在没有开启付费模型调用",
+    # 一次开始的授权作废（DECISIONS/0048）：检查之后、开始之前发现授权不再成立；意图仍在等确认
+    "start_conditions_changed": "你确认开始之后，资料包、规划器、报价或这次的设置变了，原来的开始授权作废",
+    "start_consent_changed": "你确认开始之后，这次开始要知悉的范围说明变了，原来的开始授权作废",
+    "start_paid_calls_disabled": "检查通过时服务没有开启付费模型调用，原来的开始授权作废",
+    "start_quota_exhausted": "检查通过时已经没有可用的启动机会，原来的开始授权作废",
+    "start_authorization_mismatch": "检查出来的设置与你确认开始的那一份对不上，原来的开始授权作废",
+    "start_data_pack_unavailable": "开始之前读不到这次模拟绑定的资料，原来的开始授权作废",
+    "start_internal_error": "按你的确认开始时服务出现了内部问题，原来的开始授权作废",
 }
 
 #: 固定的几句（也是显示附层的稳定 key 对应的中文）
@@ -75,6 +83,13 @@ _BEFORE_IMPACT: dict[str, str] = {
     "request_too_large": "没有发出请求；系统不会删减选项或换模型",
     "model_mismatch": "没有用任何回复规划",
     "paid_calls_off_waiting": "系统不会悄悄换成离线规划器",
+    "start_conditions_changed": "服务按新的条件重新检查，不会按原来的同意开始",
+    "start_consent_changed": "不会按原来的同意开始",
+    "start_paid_calls_disabled": "系统不会悄悄换成离线规划器，也不会在开启之后自动开始",
+    "start_quota_exhausted": "不会按原来的同意开始",
+    "start_authorization_mismatch": "不会按原来的同意开始",
+    "start_data_pack_unavailable": "系统不会拿别的资料冒充，也不会按原来的同意开始",
+    "start_internal_error": "不会自动重试，也不会按原来的同意开始",
 }
 
 #: 开始之前的第一句（默认按是否退回预留写；排队等首次启动的已经预留了 1 次，要照实说）
@@ -99,6 +114,13 @@ _BEFORE_NEXT: dict[str, str] = {
     "options_not_allowed": "取消这次准备，按服务规则里现在允许的范围重新准备",
     "queued_first_start": "不需要操作：服务会按顺序开始；开始之前也可以取消",
     "paid_calls_off_waiting": "等维护者开启后，页面会出现“确认开始”；不需要重新填写，也可以先取消这次准备",
+    "start_conditions_changed": "看过新的运行前说明后重新确认并开始；也可以取消这次准备",
+    "start_consent_changed": "看过新的说明后重新确认并开始；也可以取消这次准备",
+    "start_paid_calls_disabled": "等服务开启后重新确认并开始；不需要重新填写，也可以先取消这次准备",
+    "start_quota_exhausted": "取消这次准备；启动机会不会自动增加",
+    "start_authorization_mismatch": "重新确认并开始，或取消这次准备；问题一直出现时请联系维护者",
+    "start_data_pack_unavailable": "取消这次准备后重新准备；问题一直出现时请联系维护者",
+    "start_internal_error": "重新确认并开始，或取消这次准备；问题一直出现时请联系维护者",
 }
 
 

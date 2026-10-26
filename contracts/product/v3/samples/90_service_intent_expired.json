@@ -6,6 +6,7 @@
    "create_new_intent"
   ],
   "confirm_with": null,
+  "confirmation_source": null,
   "confirmed": {
    "confirmed_id": "confirmed.draft-000000000000004b.r2",
    "content_fingerprint": "4f847edb040acc4ee90142ca87a0c3c9575114a8e464391340afca8be290f9c4"
@@ -52,6 +53,7 @@
   "settings": null,
   "stage": "expired",
   "stage_zh": "已过期",
+  "start": null,
   "support_ref": null,
   "updated_at": "2026-10-24T09:00:00Z",
   "waiting_for": "none"

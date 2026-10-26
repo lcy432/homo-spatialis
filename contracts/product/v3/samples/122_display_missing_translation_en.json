@@ -10,7 +10,7 @@
     "key": "pack.note.synthetic",
     "missing_reason": null,
     "pointer": "/meta/data_pack/note",
-    "resource_version": "e3-display-res-v1-d84a4cf8e13bd104",
+    "resource_version": "e3-display-res-v1-e47bcbdb940aed38",
     "source_locale": "zh",
     "status": "provided",
     "text": "Synthetic data pack: every value is a hand-made model setting or test data, not real city data"
@@ -19,7 +19,7 @@
     "key": "stage.awaiting_confirmation",
     "missing_reason": "translation_missing",
     "pointer": "/stage_zh",
-    "resource_version": "e3-display-res-v1-d84a4cf8e13bd104",
+    "resource_version": "e3-display-res-v1-e47bcbdb940aed38",
     "source_locale": "zh",
     "status": "missing",
     "text": null
@@ -855,6 +855,7 @@
     "cancel"
    ],
    "confirm_with": "6014cbe2db0b806cc1228e5959b469587d2f4571f9b5511ae8a60353f7c9ec3b",
+   "confirmation_source": null,
    "confirmed": {
     "confirmed_id": "confirmed.draft-0000000000000073.r2",
     "content_fingerprint": "22b8cb62da492641a35c8bc65d2ef7ebc64a74c0d710c396ca4c2f9279dec7cf"
@@ -1647,11 +1648,12 @@
    },
    "stage": "awaiting_confirmation",
    "stage_zh": "等你确认开始",
+   "start": null,
    "support_ref": null,
    "updated_at": "2026-12-24T09:01:02Z",
    "waiting_for": "user"
   },
-  "source_view_fingerprint": "a0ba6c46100adc76136c37859f886eeff40e3471cd7419bded47dfa6902e8da8",
+  "source_view_fingerprint": "252122cab5491328f69e4359e4a2b19ff720289685a823bde0c0ce9411a1573c",
   "status": "partial"
  },
  "sample": {

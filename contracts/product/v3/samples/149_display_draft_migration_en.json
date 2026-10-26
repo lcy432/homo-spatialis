@@ -10,7 +10,7 @@
      "en": "No clear information for this item: evaluated with the neutral rule, and not treated as choosing the “general evaluation”",
      "key": "input.answer_state.leisure.unanswered.meaning",
      "missing_reason": null,
-     "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+     "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
      "status": "provided",
      "zh": "没有这一项的明确信息，按中性规则评价；不会被当成“通用评价”的选择"
     },
@@ -18,7 +18,7 @@
      "en": "Not answered",
      "key": "input.answer_state.leisure.unanswered.name",
      "missing_reason": null,
-     "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+     "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
      "status": "provided",
      "zh": "未答"
     },
@@ -30,7 +30,7 @@
      "en": "Evaluated with the neutral rule",
      "key": "input.answer_state.leisure.unsure.meaning",
      "missing_reason": null,
-     "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+     "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
      "status": "provided",
      "zh": "按中性规则评价"
     },
@@ -38,7 +38,7 @@
      "en": "Not sure yet",
      "key": "input.answer_state.leisure.unsure.name",
      "missing_reason": null,
-     "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+     "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
      "status": "provided",
      "zh": "暂不确定"
     },
@@ -50,7 +50,7 @@
      "en": "Evaluated with the neutral rule",
      "key": "input.answer_state.leisure.no_fixed_hobby.meaning",
      "missing_reason": null,
-     "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+     "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
      "status": "provided",
      "zh": "按中性规则评价"
     },
@@ -58,7 +58,7 @@
      "en": "No fixed hobby (stated)",
      "key": "input.answer_state.leisure.no_fixed_hobby.name",
      "missing_reason": null,
-     "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+     "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
      "status": "provided",
      "zh": "明确没有固定爱好"
     },
@@ -70,7 +70,7 @@
      "en": "Experience whatever suitable activities the city offers (evaluated with the neutral rule)",
      "key": "input.answer_state.leisure.generic.meaning",
      "missing_reason": null,
-     "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+     "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
      "status": "provided",
      "zh": "城市有什么合适的就体验什么（按中性规则评价）"
     },
@@ -78,7 +78,7 @@
      "en": "General leisure evaluation",
      "key": "input.answer_state.leisure.generic.name",
      "missing_reason": null,
-     "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+     "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
      "status": "provided",
      "zh": "采用通用休闲评价"
     },
@@ -90,7 +90,7 @@
      "en": "Candidates are first formed from the vocabulary; only the categories you choose enter the evaluation, and unrecognized descriptions are kept as written and not evaluated in this version",
      "key": "input.answer_state.leisure.described.meaning",
      "missing_reason": null,
-     "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+     "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
      "status": "provided",
      "zh": "先按词表形成候选，你选中的类别才进入评价；没认出的描述原样保留，本版不评价"
     },
@@ -98,7 +98,7 @@
      "en": "Described in words",
      "key": "input.answer_state.leisure.described.name",
      "missing_reason": null,
-     "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+     "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
      "status": "provided",
      "zh": "用文字描述"
     },
@@ -110,7 +110,7 @@
      "en": "The categories you pick are used for the evaluation directly; no text is needed",
      "key": "input.answer_state.leisure.selected.meaning",
      "missing_reason": null,
-     "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+     "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
      "status": "provided",
      "zh": "你选中的类别直接用于评价，不需要写文字"
     },
@@ -118,7 +118,7 @@
      "en": "Picked from the panel",
      "key": "input.answer_state.leisure.selected.name",
      "missing_reason": null,
-     "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+     "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
      "status": "provided",
      "zh": "从面板选择"
     },
@@ -130,7 +130,7 @@
      "en": "Evaluated with the neutral rule",
      "key": "input.answer_state.taste.unanswered.meaning",
      "missing_reason": null,
-     "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+     "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
      "status": "provided",
      "zh": "按中性规则评价"
     },
@@ -138,7 +138,7 @@
      "en": "Not answered",
      "key": "input.answer_state.taste.unanswered.name",
      "missing_reason": null,
-     "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+     "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
      "status": "provided",
      "zh": "未答"
     },
@@ -150,7 +150,7 @@
      "en": "Evaluated with the neutral rule",
      "key": "input.answer_state.taste.unsure.meaning",
      "missing_reason": null,
-     "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+     "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
      "status": "provided",
      "zh": "按中性规则评价"
     },
@@ -158,7 +158,7 @@
      "en": "Not sure yet",
      "key": "input.answer_state.taste.unsure.name",
      "missing_reason": null,
-     "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+     "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
      "status": "provided",
      "zh": "暂不确定"
     },
@@ -170,7 +170,7 @@
      "en": "Evaluated with the neutral rule",
      "key": "input.answer_state.taste.no_preference.meaning",
      "missing_reason": null,
-     "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+     "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
      "status": "provided",
      "zh": "按中性规则评价"
     },
@@ -178,7 +178,7 @@
      "en": "No taste preference (stated)",
      "key": "input.answer_state.taste.no_preference.name",
      "missing_reason": null,
-     "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+     "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
      "status": "provided",
      "zh": "明确没有口味偏好"
     },
@@ -190,7 +190,7 @@
      "en": "Candidates are first formed from the vocabulary; only the cuisines you choose enter the food evaluation, and brands and other requirements are only kept as written",
      "key": "input.answer_state.taste.described.meaning",
      "missing_reason": null,
-     "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+     "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
      "status": "provided",
      "zh": "先按词表形成候选，你选中的菜系才进入饮食评价；品牌与其他要求只留存"
     },
@@ -198,7 +198,7 @@
      "en": "Described in words",
      "key": "input.answer_state.taste.described.name",
      "missing_reason": null,
-     "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+     "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
      "status": "provided",
      "zh": "用文字描述"
     },
@@ -210,7 +210,7 @@
      "en": "The cuisines you pick are used for the food evaluation directly; no text is needed",
      "key": "input.answer_state.taste.selected.meaning",
      "missing_reason": null,
-     "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+     "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
      "status": "provided",
      "zh": "你选中的菜系直接用于饮食评价，不需要写文字"
     },
@@ -218,7 +218,7 @@
      "en": "Picked from the panel",
      "key": "input.answer_state.taste.selected.name",
      "missing_reason": null,
-     "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+     "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
      "status": "provided",
      "zh": "从面板选择"
     },
@@ -231,7 +231,7 @@
     "key": "pack.note.real",
     "missing_reason": null,
     "pointer": "/meta/data_pack/note",
-    "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+    "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
     "source_locale": "zh",
     "status": "provided",
     "text": "Frozen real data pack (DECISIONS/0042): city data comes from public sources and registered model settings; life rules and scoring parameters are synthetic exploratory settings"
@@ -240,7 +240,7 @@
     "key": "pack.note.real",
     "missing_reason": null,
     "pointer": "/draft/meta/data_pack/note",
-    "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+    "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
     "source_locale": "zh",
     "status": "provided",
     "text": "Frozen real data pack (DECISIONS/0042): city data comes from public sources and registered model settings; life rules and scoring parameters are synthetic exploratory settings"
@@ -249,7 +249,7 @@
     "key": "input.removed.hard_requirement",
     "missing_reason": null,
     "pointer": "/migration/removed/0/summary",
-    "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+    "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
     "source_locale": "zh",
     "status": "provided",
     "text": "Round trip between home and the employment center no longer than (minutes) 60 minutes"
@@ -258,7 +258,7 @@
     "key": "input.removed.quoted",
     "missing_reason": "untranslated_param",
     "pointer": "/migration/removed/1/summary",
-    "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+    "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
     "source_locale": "zh",
     "status": "missing",
     "text": null
@@ -267,7 +267,7 @@
     "key": "input.migration.message.removed",
     "missing_reason": null,
     "pointer": "/migration/message_zh",
-    "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+    "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
     "source_locale": "zh",
     "status": "provided",
     "text": "This draft was filled in with an older questionnaire and has 2 answers the new questionnaire no longer collects. Read the notes below and agree to clear them before continuing"
@@ -276,7 +276,7 @@
     "key": "input.migration.effect.version",
     "missing_reason": null,
     "pointer": "/migration/effects_zh/0",
-    "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+    "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
     "source_locale": "zh",
     "status": "provided",
     "text": "The draft moves to the current questionnaire, vocabulary and conversion versions"
@@ -285,7 +285,7 @@
     "key": "input.migration.effect.clear",
     "missing_reason": null,
     "pointer": "/migration/effects_zh/1",
-    "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+    "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
     "source_locale": "zh",
     "status": "provided",
     "text": "Clears 2 answers the new questionnaire no longer collects (hard requirements, attribute preferences such as brands and cuisines); later simulations no longer use them"
@@ -294,7 +294,7 @@
     "key": "input.migration.effect.allocation",
     "missing_reason": null,
     "pointer": "/migration/effects_zh/2",
-    "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+    "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
     "source_locale": "zh",
     "status": "provided",
     "text": "The old six-dimension / material allocation is in percentages, not independent ratings: choose re-rate (these two groups become unanswered and you rate them again) or equal weight (50 points each); the system does not reinterpret the old percentages as ratings"
@@ -303,7 +303,7 @@
     "key": "input.migration.effect.keep_except_allocation",
     "missing_reason": null,
     "pointer": "/migration/effects_zh/3",
-    "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+    "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
     "source_locale": "zh",
     "status": "provided",
     "text": "Cities, occupation, age, cash, the health questionnaire, interests and taste, qualifications and your notes are kept as they are"
@@ -312,7 +312,7 @@
     "key": "input.migration.effect.review",
     "missing_reason": null,
     "pointer": "/migration/effects_zh/4",
-    "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+    "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
     "source_locale": "zh",
     "status": "provided",
     "text": "After migrating, review and confirm again before preparing a new simulation"
@@ -321,7 +321,7 @@
     "key": "input.migration.effect.history",
     "missing_reason": null,
     "pointer": "/migration/effects_zh/5",
-    "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+    "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
     "source_locale": "zh",
     "status": "provided",
     "text": "Profiles already confirmed, simulations already started and past results are not affected (they use their own saved copies)"
@@ -330,7 +330,7 @@
     "key": "entity.dimension.label:material",
     "missing_reason": null,
     "pointer": "/migration/allocations/0/lines/0/label",
-    "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+    "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
     "source_locale": "zh",
     "status": "provided",
     "text": "Material life"
@@ -339,7 +339,7 @@
     "key": "entity.dimension.label:safety",
     "missing_reason": null,
     "pointer": "/migration/allocations/0/lines/1/label",
-    "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+    "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
     "source_locale": "zh",
     "status": "provided",
     "text": "Safety"
@@ -348,7 +348,7 @@
     "key": "entity.dimension.label:opportunity",
     "missing_reason": null,
     "pointer": "/migration/allocations/0/lines/2/label",
-    "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+    "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
     "source_locale": "zh",
     "status": "provided",
     "text": "Opportunity"
@@ -357,7 +357,7 @@
     "key": "entity.dimension.label:leisure",
     "missing_reason": null,
     "pointer": "/migration/allocations/0/lines/3/label",
-    "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+    "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
     "source_locale": "zh",
     "status": "provided",
     "text": "Leisure"
@@ -366,7 +366,7 @@
     "key": "entity.dimension.label:environment",
     "missing_reason": null,
     "pointer": "/migration/allocations/0/lines/4/label",
-    "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+    "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
     "source_locale": "zh",
     "status": "provided",
     "text": "Environment"
@@ -375,7 +375,7 @@
     "key": "entity.dimension.label:commute",
     "missing_reason": null,
     "pointer": "/migration/allocations/0/lines/5/label",
-    "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+    "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
     "source_locale": "zh",
     "status": "provided",
     "text": "Ease of commuting"
@@ -384,7 +384,7 @@
     "key": "entity.leaf.label:housing_condition",
     "missing_reason": null,
     "pointer": "/migration/allocations/1/lines/0/label",
-    "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+    "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
     "source_locale": "zh",
     "status": "provided",
     "text": "Housing condition"
@@ -393,7 +393,7 @@
     "key": "entity.leaf.label:food_life",
     "missing_reason": null,
     "pointer": "/migration/allocations/1/lines/1/label",
-    "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+    "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
     "source_locale": "zh",
     "status": "provided",
     "text": "Food"
@@ -402,7 +402,7 @@
     "key": "entity.leaf.label:daily_convenience",
     "missing_reason": null,
     "pointer": "/migration/allocations/1/lines/2/label",
-    "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+    "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
     "source_locale": "zh",
     "status": "provided",
     "text": "Daily support and convenience"
@@ -411,7 +411,7 @@
     "key": "entity.leaf.label:personal_enjoyment",
     "missing_reason": null,
     "pointer": "/migration/allocations/1/lines/3/label",
-    "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+    "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
     "source_locale": "zh",
     "status": "provided",
     "text": "Personal consumption and enjoyment"
@@ -421,7 +421,7 @@
   "kind": "draft",
   "locale": "en",
   "metrics": [],
-  "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+  "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
   "source": {
    "draft": {
     "abilities": [

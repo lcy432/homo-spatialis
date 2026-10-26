@@ -1,0 +1,120 @@
+{
+ "description_zh": "同一个意图的英文显示（检查中、带开始授权）",
+ "message": "DisplayEnvelope",
+ "payload": {
+  "acknowledgements": [],
+  "answer_states": [],
+  "display_schema_version": "e3-display-v2",
+  "fields": [
+   {
+    "key": "pack.note.synthetic",
+    "missing_reason": null,
+    "pointer": "/meta/data_pack/note",
+    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Synthetic data pack: every value is a hand-made model setting or test data, not real city data"
+   },
+   {
+    "key": "stage.checking_authorized",
+    "missing_reason": null,
+    "pointer": "/stage_zh",
+    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
+    "source_locale": "zh",
+    "status": "provided",
+    "text": "Queued for checking: once the check passes, it starts automatically as you confirmed (checking does not use a run)"
+   }
+  ],
+  "id": "intent-0000000000000091",
+  "kind": "intent",
+  "locale": "en",
+  "metrics": [],
+  "resource_version": null,
+  "source": {
+   "allowed_actions": [
+    "cancel"
+   ],
+   "confirm_with": null,
+   "confirmation_source": null,
+   "confirmed": {
+    "confirmed_id": "confirmed.draft-0000000000000090.r2",
+    "content_fingerprint": "b8c6f16d85cfcf6b4166c2c6a49a589af907efafef5f5631692c0e8a1ca03ddf"
+   },
+   "created_at": "2026-12-24T09:01:02Z",
+   "deletion": {
+    "completed_at": null,
+    "requested_at": null,
+    "state": "none"
+   },
+   "expires_at": "2027-01-23T09:01:02Z",
+   "expiry_basis": "intent_activity",
+   "explanation": null,
+   "intent_id": "intent-0000000000000091",
+   "meta": {
+    "conversion_version": "e3a-conversion-v4",
+    "data_pack": {
+     "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
+     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
+     "pack_id": "pack.e3a.synthetic-v2",
+     "status": "synthetic_fixture_only"
+    },
+    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
+    "questionnaire_version": "e3a-questionnaire-v0.5-draft",
+    "sample": null,
+    "schema_version": "e3a-product-schema-v3.5",
+    "vocabulary_version": "e3a-vocabulary-v5"
+   },
+   "preflight": null,
+   "progress": null,
+   "quota": {
+    "available": 3,
+    "reserved": 0,
+    "total": 3,
+    "used": 0
+   },
+   "result_available": false,
+   "run_id": null,
+   "settings": {
+    "call_limit": 36,
+    "cities": [
+     "US:SYNTH2026:K51",
+     "US:SYNTH2026:M52"
+    ],
+    "clones_per_city": 2,
+    "clones_total": 4,
+    "currency": "CNY",
+    "max_cost": "20",
+    "planner_kind": "mock",
+    "service_attempt_limit": null,
+    "settings_fingerprint": "ab393b806eceea6f11a864beb5a1b3093e7eb17c176163e40811fa9d00d76f96",
+    "years": 3
+   },
+   "stage": "checking",
+   "stage_zh": "排队检查中：检查通过后按你的确认自动开始（检查不使用次数）",
+   "start": {
+    "acknowledged": [
+     "ack:start.auto_start",
+     "ack:start.one_run",
+     "ack:start.scope"
+    ],
+    "authorized_at": "2026-12-24T09:01:02Z",
+    "consent_fingerprint": "f11f88618db60f90f0117800b856854975f0fab9d12b0b6f3efe6d53e9b60837",
+    "mode": "start_when_ready",
+    "state": "pending",
+    "used_at": null,
+    "void_reason": null
+   },
+   "support_ref": null,
+   "updated_at": "2026-12-24T09:01:02Z",
+   "waiting_for": "service"
+  },
+  "source_view_fingerprint": "99dc6316684b065171cfe9269fd5e2166944d22d411007e2acce55525d07a9a0",
+  "status": "complete"
+ },
+ "sample": {
+  "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+  "origin": "offline_run",
+  "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+  "synthetic": true
+ }
+}

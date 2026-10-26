@@ -7,6 +7,7 @@
    "delete"
   ],
   "confirm_with": null,
+  "confirmation_source": "user_confirm",
   "confirmed": {
    "confirmed_id": "confirmed.draft-0000000000000029.r2",
    "content_fingerprint": "17b18a723cfc2ac38d31662afc713cdc6fe208baa44ee5be9429c853acf567cd"
@@ -852,6 +853,7 @@
   },
   "stage": "running",
   "stage_zh": "模拟进行中",
+  "start": null,
   "support_ref": null,
   "updated_at": "2026-10-24T09:00:00Z",
   "waiting_for": "service"

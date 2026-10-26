@@ -122,6 +122,22 @@ def test_public_samples_validate_and_cover_the_required_cases():
         "159_service_error_migration_choice_required",
         "160_service_confirm_ratings_normalized",
         "161_display_review_ratings_en",
+        # 一次开始（API v1.4，DECISIONS/0048）：预览、带授权的创建、检查中、按授权跑完、同键重试、拒绝与授权作废
+        "162_service_start_preview_request",
+        "163_service_start_preview",
+        "164_service_start_preview_paid_off",
+        "165_service_intent_create_start",
+        "166_service_intent_start_checking",
+        "167_service_intent_start_finished",
+        "168_service_intent_start_retry",
+        "169_service_error_start_idempotency_conflict",
+        "170_service_error_start_consent_stale",
+        "171_service_error_start_acknowledgement_missing",
+        "172_service_error_start_already_authorized",
+        "173_service_intent_start_void_conditions_changed",
+        "174_service_intent_start_void_paid_off",
+        "175_service_intent_start_blocked",
+        "176_display_intent_start_checking_en",
     ):
         assert required in names, f"缺少公共样例 {required}"
     for p in samples:

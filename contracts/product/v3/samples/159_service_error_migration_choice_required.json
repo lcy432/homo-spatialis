@@ -5,7 +5,7 @@
   "code": "migration_choice_required",
   "display": {
    "display_schema_version": "e3-display-v2",
-   "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+   "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
    "source_view_fingerprint": "2941268de3e3468e83385473d6a8643add411913898661881fa877cba5202b64",
    "translations": {
     "en": {
@@ -14,7 +14,7 @@
        "key": "error.migration_choice_required.message",
        "missing_reason": null,
        "pointer": "/message_zh",
-       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+       "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
        "source_locale": "zh",
        "status": "provided",
        "text": "This old draft's six-dimension / material allocation uses the old questionnaire's percentages; choose to re-rate or to weight everything equally before migrating"
@@ -23,7 +23,7 @@
        "key": "error.migration_choice_required.impact",
        "missing_reason": null,
        "pointer": "/impact_zh",
-       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+       "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
        "source_locale": "zh",
        "status": "provided",
        "text": "The draft was not changed; the system does not reinterpret the old percentages as ratings"
@@ -32,7 +32,7 @@
        "key": "error.migration_choice_required.next",
        "missing_reason": null,
        "pointer": "/next_action_zh",
-       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+       "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
        "source_locale": "zh",
        "status": "provided",
        "text": "Look at the original allocation in the migration notes, then choose re-rate or equal weight and migrate"
@@ -46,7 +46,7 @@
        "key": "error.migration_choice_required.message",
        "missing_reason": null,
        "pointer": "/message_zh",
-       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+       "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
        "source_locale": "zh",
        "status": "provided",
        "text": "这份旧草稿的六维 / 物质分配是旧问卷的百分比，迁移时要先选择重新评分或同等重视"
@@ -55,7 +55,7 @@
        "key": "error.migration_choice_required.impact",
        "missing_reason": null,
        "pointer": "/impact_zh",
-       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+       "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
        "source_locale": "zh",
        "status": "provided",
        "text": "草稿没有改动；系统不把旧百分比改读成评分"
@@ -64,7 +64,7 @@
        "key": "error.migration_choice_required.next",
        "missing_reason": null,
        "pointer": "/next_action_zh",
-       "resource_version": "e3-display-res-v1-ff3e9e8264d8b665",
+       "resource_version": "e3-display-res-v1-3d92f2cfcec8949a",
        "source_locale": "zh",
        "status": "provided",
        "text": "先看迁移说明里原来的分配，再选择重新评分或同等重视后迁移"

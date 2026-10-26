@@ -1,0 +1,57 @@
+{
+ "additionalProperties": false,
+ "description": "设置预览（``POST /api/v1/run-start-preview``）：与准备模拟同样的确认画像引用与运行选项（省略的用服务默认值）。只读：不编译生活\n输入、不排队、不预留次数、不调用模型、不写库。",
+ "properties": {
+  "clones_per_city": {
+   "anyOf": [
+    {
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Clones Per City"
+  },
+  "confirmed_id": {
+   "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:\\-/]{0,127}$",
+   "title": "Confirmed Id",
+   "type": "string"
+  },
+  "max_cost_cny": {
+   "anyOf": [
+    {
+     "pattern": "^(0|[1-9][0-9]{0,6})(\\.[0-9]{1,2})?$",
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Max Cost Cny"
+  },
+  "years": {
+   "anyOf": [
+    {
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Years"
+  }
+ },
+ "required": [
+  "confirmed_id"
+ ],
+ "title": "RunStartPreviewRequest",
+ "type": "object"
+}

@@ -1,0 +1,172 @@
+{
+ "description_zh": "检查没有通过（收银员在合成城市 K51 没有同一分类的岗位）：start.state = void、void_reason = preflight_blocked；没有开始、没有使用次数；说明是那次检查自己的；可以取消后修改",
+ "message": "RunIntentView",
+ "payload": {
+  "allowed_actions": [
+   "cancel"
+  ],
+  "confirm_with": null,
+  "confirmation_source": null,
+  "confirmed": {
+   "confirmed_id": "confirmed.draft-0000000000000096.r2",
+   "content_fingerprint": "a38a6d924a7a1948bf9fc739a6f859e186665e43e9ed23ece145764b127511b9"
+  },
+  "created_at": "2026-12-24T09:01:02Z",
+  "deletion": {
+   "completed_at": null,
+   "requested_at": null,
+   "state": "none"
+  },
+  "expires_at": "2027-01-23T09:01:02Z",
+  "expiry_basis": "intent_activity",
+  "explanation": {
+   "audit_ref": null,
+   "category": "service_preflight_blocked",
+   "impact_zh": "没有开始模拟，没有使用次数",
+   "next_action_zh": "按说明修改答案，重新审阅、确认画像后再准备一次",
+   "reason_zh": "运行前检查没有通过（原因逐条写在运行前说明里）"
+  },
+  "intent_id": "intent-0000000000000097",
+  "meta": {
+   "conversion_version": "e3a-conversion-v4",
+   "data_pack": {
+    "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
+    "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
+    "pack_id": "pack.e3a.synthetic-v2",
+    "status": "synthetic_fixture_only"
+   },
+   "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
+   "questionnaire_version": "e3a-questionnaire-v0.5-draft",
+   "sample": {
+    "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+    "origin": "offline_run",
+    "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+    "synthetic": true
+   },
+   "schema_version": "e3a-product-schema-v3.5",
+   "vocabulary_version": "e3a-vocabulary-v5"
+  },
+  "preflight": {
+   "binding": null,
+   "cities": [],
+   "clones_per_city": 0,
+   "confirmed": {
+    "confirmed_id": "confirmed.draft-0000000000000096.r2",
+    "content_fingerprint": "a38a6d924a7a1948bf9fc739a6f859e186665e43e9ed23ece145764b127511b9"
+   },
+   "executable": {
+    "reasons": [
+     "合成城 K51 的目录里没有与“收银员”同一分类的岗位",
+     "合成城 M52 的目录里没有与“收银员”同一分类的岗位"
+    ],
+    "status": "no"
+   },
+   "feedback": {
+    "reasons": [
+     "运行前检查没有通过"
+    ],
+    "status": "unknown"
+   },
+   "issues": [
+    {
+     "audit_ref": null,
+     "code": "start_job_unmatched",
+     "field": "cities.US:SYNTH2026:K51",
+     "impact_zh": "开局岗位无法匹配，这座城不能生成标准开局（不自动换成别的职业）",
+     "message_zh": "合成城 K51 的目录里没有与“收银员”同一分类的岗位",
+     "next_action_zh": "换一座有对应岗位的城市，或核对职业描述",
+     "severity": "error"
+    },
+    {
+     "audit_ref": null,
+     "code": "start_job_unmatched",
+     "field": "cities.US:SYNTH2026:M52",
+     "impact_zh": "开局岗位无法匹配，这座城不能生成标准开局（不自动换成别的职业）",
+     "message_zh": "合成城 M52 的目录里没有与“收银员”同一分类的岗位",
+     "next_action_zh": "换一座有对应岗位的城市，或核对职业描述",
+     "severity": "error"
+    }
+   ],
+   "meta": {
+    "conversion_version": "e3a-conversion-v4",
+    "data_pack": {
+     "content_fingerprint": "f58ef477619ff8754a1d1672736d44e38356802a89a8b78f29382f6a800ca8e5",
+     "note": "合成资料包：全部数值是手工合成的模型设定或测试资料，不是真实城市资料",
+     "pack_id": "pack.e3a.synthetic-v2",
+     "status": "synthetic_fixture_only"
+    },
+    "health_questionnaire_version": "e3a-health-coping-q-v0.1-draft",
+    "questionnaire_version": "e3a-questionnaire-v0.5-draft",
+    "sample": null,
+    "schema_version": "e3a-product-schema-v3.5",
+    "vocabulary_version": "e3a-vocabulary-v5"
+   },
+   "planner": {
+    "call_limit": 0,
+    "description_zh": "可控的确定性离线规划器（mock）：只检验接线、状态传递与信息隔离，不代表真实大语言模型的能力；没有网络调用，费用为 0",
+    "max_cost": null,
+    "paid": false,
+    "planner_id": "mock.rules.e3a-product",
+    "planner_kind": "mock"
+   },
+   "preflight_fingerprint": "5da76705147802d93e0298714c74af7f660441b70855fc16d3acaf442d483ea7",
+   "preflight_id": "preflight.confirmed.draft-0000000000000096.r2",
+   "scope_zh": [
+    "城市、报价、工资、税、疾病与治疗全部是合成设定；结果不排序真实城市，也不是现实推荐",
+    "离线规划器是可控的 mock，不代表真实大语言模型的能力或偏好理解",
+    "问卷文案与参考改善范围是暂定稿，没有做认知访谈与量表验证"
+   ],
+   "scorable": {
+    "reasons": [
+     "运行前检查没有通过，没有评估评分能力"
+    ],
+    "status": "unknown"
+   },
+   "start": null,
+   "status": "blocked",
+   "years": 3
+  },
+  "progress": null,
+  "quota": {
+   "available": 3,
+   "reserved": 0,
+   "total": 3,
+   "used": 0
+  },
+  "result_available": false,
+  "run_id": null,
+  "settings": {
+   "call_limit": 18,
+   "cities": [
+    "US:SYNTH2026:K51",
+    "US:SYNTH2026:M52"
+   ],
+   "clones_per_city": 1,
+   "clones_total": 2,
+   "currency": "CNY",
+   "max_cost": "20",
+   "planner_kind": "mock",
+   "service_attempt_limit": null,
+   "settings_fingerprint": "abad17408a53d78b458ab17172dc89028fcb59201857cdea81336c0559a52938",
+   "years": 3
+  },
+  "stage": "blocked",
+  "stage_zh": "运行前检查没有通过",
+  "start": {
+   "acknowledged": [
+    "ack:start.auto_start",
+    "ack:start.one_run",
+    "ack:start.scope"
+   ],
+   "authorized_at": "2026-12-24T09:01:02Z",
+   "consent_fingerprint": "a0a31bace137a6d90f14141e556fc5302a73de037f34fb7e17fdb8c5018b3b83",
+   "mode": "start_when_ready",
+   "state": "void",
+   "used_at": null,
+   "void_reason": "preflight_blocked"
+  },
+  "support_ref": null,
+  "updated_at": "2026-12-24T09:01:02Z",
+  "waiting_for": "user"
+ }
+}

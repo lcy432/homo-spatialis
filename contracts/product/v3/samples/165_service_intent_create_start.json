@@ -1,0 +1,25 @@
+{
+ "description_zh": "一次“确认并开始”（POST /api/v1/run-intents，带 start）：同意身份、勾选的全部知悉项、accept = true 与这次操作的幂等键（连点、回复丢失、刷新或重开后重发都带同一个键）",
+ "message": "RunIntentCreateRequest",
+ "payload": {
+  "clones_per_city": 2,
+  "confirmed_id": "confirmed.draft-0000000000000090.r2",
+  "start": {
+   "accept": true,
+   "acknowledged": [
+    "ack:start.one_run",
+    "ack:start.auto_start",
+    "ack:start.scope"
+   ],
+   "consent_fingerprint": "f11f88618db60f90f0117800b856854975f0fab9d12b0b6f3efe6d53e9b60837",
+   "idempotency_key": "start-u560-0001",
+   "mode": "start_when_ready"
+  }
+ },
+ "sample": {
+  "note": "托管服务的真实代码路径（测试时钟、测试秘密、合成人物、离线 mock，零网络）",
+  "origin": "offline_run",
+  "produced_by": "product.service（HTTP → 业务函数 → worker → LangGraph → E1）",
+  "synthetic": true
+ }
+}

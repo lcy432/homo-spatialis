@@ -591,3 +591,84 @@ v3.3 与 v3.4 的草稿、审阅与确认画像照原样读回、照原样写出
 * 还没有做 / 本版限制：E5 页面没有接（评分控件、同等重视、父项为 0 的收起与恢复、迁移时的两种选择都要 E5 做）；独立评分只认比例，
   想表达“都不在乎”的人只能选无所谓 / 暂不确定，而这两种状态挡住确认；没有做用户访谈或可用性测试；mock 通过不代表真实用户或真实模型
   的效果；没有部署、没有真实模型试跑。
+
+## 17. 一次开始：设置预览 → 一次“确认并开始”→ 后台检查与开始（2026-10-25，服务 API v1.4）
+
+状态：**实现及离线自测完成，待独立复核**。同一任务的第二个提交（基线是第一个提交 `f7b64e5`；只有这一项的文件，没有推送）。规则见
+[ADR0048](../../DECISIONS/0048-e3c-one-start.md)。主链不变：确认画像 → 设置预览 → 一次“确认并开始” → 后台运行前检查 → 幂等提交 →
+LangGraph → E1 → 结果。E3 定义授权、核对与停下的规则；E5 只呈现、只读轮询，**不自己发第二次确认、不自己恢复或重开**。
+
+### 17.1 用户怎么开始
+
+1. 确认画像之后，页面用 `POST /api/v1/run-start-preview`（`RunStartPreviewRequest`：`confirmed_id` 与可选的 `clones_per_city` / `years` /
+   `max_cost_cny`，和准备模拟同样的选项）取一份设置预览 `RunStartPreview`：
+   * `settings`（城市、每城分身数、年数、分身总数、规划器种类、费用上限、调用上限、服务尝试上限、设置身份）、`planner`（规划器与费用
+     说明，同预检查里的那一份）；**费用上限是停机上限，不是预计费用**；
+   * `scope_zh`（范围说明：后台检查、普通资料缺口不再确认、什么情况停下、只开始一次，加资料包的限制与这份画像的兴趣范围说明）；
+   * `acknowledgements`（开始之前要知悉的几项，`ack_id` + 中文；真实模型时多一项 `ack:start.cost_cap`）；
+   * `start_allowed` / `start_refusal`（`paid_calls_disabled` / `quota_exhausted` / `intent_conflict`：此刻为什么不能开始）、`quota`；
+   * `consent_fingerprint`（同意身份，见 17.2）与 `display`（这份回复的中英两种文字，即时回复没有可以再读的对象）。
+   预览只读：不排队、不预留次数、不调用模型、不写库。设置或语言变了随时可以重新取。
+2. 用户看过、勾选全部知悉项，点**一次**“确认并开始”：`POST /api/v1/run-intents`，`RunIntentCreateRequest` 带
+   `start = {mode: "start_when_ready", consent_fingerprint, acknowledged: [全部 ack_id], accept: true, idempotency_key}`。
+   新建 202，找回已有的 200；回复是 `RunIntentView`（阶段 `checking`，`start.state = "pending"`，还没有 `run_id`）。
+3. 之后页面只读：`GET /api/v1/run-intents/{id}`（或 `GET /api/v1/runs`）。检查通过后服务按授权自动开始；**页面不要发 `submit`**（带
+   授权的意图会 409 `start_already_authorized`）。关掉页面、刷新、断线都不影响。
+
+### 17.2 同意身份与幂等
+
+* `consent_fingerprint` = 确认画像（编号与内容身份）+ 资料包 + 有效设置（含模型、报价、费用上限与调用上限）+ 范围说明的业务版本
+  （`scope_version = "e3c-start-scope-v1"`）+ 知悉项编号。**不含文字**：换语言不改它；设置、规模、费用上限、报价或知悉规则变了就不同。
+* 服务端收到一次开始时按**当前**的预览重新核对：对不上 409 `start_consent_stale`（重新取预览）；知悉项不全 422
+  `start_acknowledgement_missing`；需要付费调用而服务没开 409 `paid_calls_disabled`；已经有一次条件不同、尚未结束的准备 409
+  `intent_conflict`。这些拒绝都不建任何东西。
+* `idempotency_key`：这一次操作的键。**页面要在发请求之前把它和这次操作一起保存**（例如随画像编号与选项存进本地），连点、回复丢失、
+  刷新或重开之后重发**同一个请求、同一个键**：服务端返回同一个意图（200），即使它已经结束、取消或删除——这就是“没拿到 intent_id
+  时的找回办法”，不要猜“列表里最新一项”，也不要换新键另起。同一个键配不同的请求 409 `idempotency_conflict`。
+* 新的键遇到尚未结束的同一份准备（同一画像、同样的有效设置，例如另一个标签页）：返回同一个意图，不另起运行。结束之后要再模拟：
+  新的预览、新的键。
+
+### 17.3 开始授权（`RunIntentView.start`）与确认来源
+
+| 字段 | 意思 |
+|---|---|
+| `start.state = pending` | 检查通过后由服务按这份授权开始（`waiting_for = service`；阶段可能是 `checking`，或检查刚通过、正在开始的 `awaiting_confirmation`） |
+| `start.state = used` | 已经按授权开始（`used_at`）；`confirmation_source = start_authorization`——确认来自检查前的这次授权，不是检查之后又点了一次 |
+| `start.state = void` | 授权作废，不会再自动开始；`void_reason` 说为什么，`explanation` 写发生了什么、影响与下一步 |
+| `start = null` | 没有授权的旧意图：照旧在检查之后由用户确认（`submit`），`confirmation_source = user_confirm` |
+
+作废原因（`void_reason`）：`conditions_changed`（资料包、规划器、报价或设置变了，服务已按新条件重新检查）、`consent_changed`（要知悉的
+范围说明变了）、`options_not_allowed`（选项不再被允许，意图标为检查没通过）、`paid_calls_disabled`、`quota_exhausted`、`preflight_blocked`
+（检查没有通过）、`authorization_mismatch`（检查结果与授权的设置对不上）、`data_pack_unavailable`、`internal_error`、`cancelled`。
+
+动作（`allowed_actions`）：带授权的意图**没有** `submit`；授权作废、意图仍在等确认、有次数、现在能开始时出现 `start_again`——页面重新取
+预览、让用户看过新的说明后再“确认并开始”一次（**新的幂等键**）；`cancel` 照旧（开始之前）。付费调用关着时没有 `start_again`，
+`waiting_for = maintainer`；开启之后也不会自动开始。
+
+### 17.4 次数、费用与停下（与原来相同的规则）
+
+* 预览与检查不扣次数；检查通过后在提交事务里预留 1 次，第一次进入 E1 才转为已使用。开始之前失败、取消或过期都不扣，已有的预留照原规则退回。
+* 付费开关、费用上限、发送不确定、恢复资格、删除、过期与本人归属的核对都照旧；自动开始 ≠ 自动恢复 ≠ 失败后自动重开。
+* 预览不编译生活输入：检查才会发现的普通资料缺口（例如某座城缺某项评分资料）不在预览里逐条列出，开始后不再要求确认，结果里照实标；
+  阻断（检查没通过）与授权以外的变化照样停下说明。
+
+### 17.5 样例（`contracts/product/v3/samples/`）
+
+| 情形 | 样例 |
+|---|---|
+| 预览请求 / 预览（mock）/ 预览（真实模型、付费调用没开） | 162 / 163 / 164 |
+| 一次开始的请求 → 检查中（`pending`）→ 英文显示 → 按授权跑完（`used`、`start_authorization`） | 165 → 166 → 176 → 167 |
+| 结束之后同一个键重试（200，同一个意图）/ 同一个键配不同请求（409） | 168 / 169 |
+| 同意身份对不上（409）/ 知悉项不全（422）/ 带授权的意图又收到确认（409） | 170 / 171 / 172 |
+| 授权作废：报价变了（重新检查、`start_again`）/ 付费调用被关（等维护者）/ 检查没通过 | 173 / 174 / 175 |
+
+173、174 用测试传输（离线替身，不是真实模型），标为 `controlled_fixture`。
+
+### 17.6 自测与没有验证的
+
+* 离线自测（干净工作树：`f7b64e5` 加本提交的文件）：全量离线测试 1419 条通过、0 失败（`uv run pytest -n 8`，15 分 26 秒）；ruff 通过；
+  `check-schema`（36 份 schema、173 份样例）、`check-openapi`、显示核对都通过。新的 `tests/product_service/test_one_start.py`（18 条：
+  预览只读、付费开关、关掉页面照样跑完、连点 / 并发 / 同键重试只有一个意图与一次扣次、带授权不接受第二次确认、检查与开始之间崩溃
+  两种情形都只开始一次、付费调用被关 / 报价变了 / 选项收窄 / 知悉规则变了 / 检查没通过时授权作废、取消 / 删除 / 过期与开始竞争、删除
+  之后不显示授权、旧意图照旧）；服务库 v2、v3 就地升到 v4 的测试。
+* 待独立复核：本节全部内容。还没有做：E5 页面没有接；没有部署、没有真实模型试跑。

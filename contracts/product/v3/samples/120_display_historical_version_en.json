@@ -1,5 +1,5 @@
 {
- "description_zh": "历史版本（受控夹具）：停下的说明在资源版本 e3-display-res-v1-8fae36bca51b48ea 时生成并保存了绑定；之后登记了新版本 e3-display-res-v1-18c0b714ace0fc21（英文改了措辞）。读取时说明部分仍按它记下的 v1 渲染（fields[].resource_version），当场生成的部分用当前版本；历史对象从不改用最新资源",
+ "description_zh": "历史版本（受控夹具）：停下的说明在资源版本 e3-display-res-v1-7c8c0cf0f4a4ae3d 时生成并保存了绑定；之后登记了新版本 e3-display-res-v1-f5cd679047725eb6（英文改了措辞）。读取时说明部分仍按它记下的 v1 渲染（fields[].resource_version），当场生成的部分用当前版本；历史对象从不改用最新资源",
  "message": "DisplayEnvelope",
  "payload": {
   "acknowledgements": [],
@@ -10,7 +10,7 @@
     "key": "pack.note.synthetic",
     "missing_reason": null,
     "pointer": "/meta/data_pack/note",
-    "resource_version": "e3-display-res-v1-18c0b714ace0fc21",
+    "resource_version": "e3-display-res-v1-f5cd679047725eb6",
     "source_locale": "zh",
     "status": "provided",
     "text": "Synthetic data pack: every value is a hand-made model setting or test data, not real city data"
@@ -19,7 +19,7 @@
     "key": "stage.needs_attention",
     "missing_reason": null,
     "pointer": "/stage_zh",
-    "resource_version": "e3-display-res-v1-18c0b714ace0fc21",
+    "resource_version": "e3-display-res-v1-f5cd679047725eb6",
     "source_locale": "zh",
     "status": "provided",
     "text": "Stopped; needs attention"
@@ -910,7 +910,7 @@
     "key": "explain.reason.service_unavailable",
     "missing_reason": null,
     "pointer": "/explanation/reason_zh",
-    "resource_version": "e3-display-res-v1-8fae36bca51b48ea",
+    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
     "source_locale": "zh",
     "status": "provided",
     "text": "The model service is temporarily unavailable, so the simulation paused, as the rules allow, at a year boundary or between two candidate plans"
@@ -919,7 +919,7 @@
     "key": "explain.impact",
     "missing_reason": null,
     "pointer": "/explanation/impact_zh",
-    "resource_version": "e3-display-res-v1-8fae36bca51b48ea",
+    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
     "source_locale": "zh",
     "status": "provided",
     "text": "The simulation has started, and this run has used 1 of your runs (not refunded once started); Replies already saved will not be requested again"
@@ -928,7 +928,7 @@
     "key": "explain.after_next.resumable",
     "missing_reason": null,
     "pointer": "/explanation/next_action_zh",
-    "resource_version": "e3-display-res-v1-8fae36bca51b48ea",
+    "resource_version": "e3-display-res-v1-7c8c0cf0f4a4ae3d",
     "source_locale": "zh",
     "status": "provided",
     "text": "Click “Resume” later to continue the same run (no extra run is used)"
@@ -946,6 +946,7 @@
     "delete"
    ],
    "confirm_with": null,
+   "confirmation_source": "user_confirm",
    "confirmed": {
     "confirmed_id": "confirmed.draft-000000000000006d.r2",
     "content_fingerprint": "6f2fe0b22eb198f7a2c31d87061c39be2571b2da9639f8e1a9369b3e6c881362"
@@ -1781,11 +1782,12 @@
    },
    "stage": "needs_attention",
    "stage_zh": "停下了，需要处理",
+   "start": null,
    "support_ref": "sup-000000000000006f",
    "updated_at": "2026-12-24T09:01:02Z",
    "waiting_for": "user"
   },
-  "source_view_fingerprint": "82d20f4b4b6d64b979a9983a1cfb42739d43ecb812157899b169ea57ec7dc274",
+  "source_view_fingerprint": "7ff8498b266ad3a3e0788ffe93f25ba66d4a231d9a6b6b27d477ebca0b2f6a29",
   "status": "partial"
  },
  "sample": {
