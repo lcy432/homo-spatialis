@@ -31,7 +31,7 @@ flowchart LR
 - **Unknowns and failures:** missing data is not zero. Positive-weight dimensions are not dropped and renormalized to manufacture a complete score. Reports preserve the original count N = C + E + M: complete evaluations, life exits, and simulation missingness.
 - **Traceability:** compiled configuration, input snapshots, plans, archives, and submission identities remain linked. Recovery, replay, and duplicate submissions have defined behavior.
 
-Implementation spans `src/product/`, `src/agentlayer/`, `src/orchestration/`, `src/ledger/`, and `src/econ/`. See [technical designs](design/README.en.md), the [parameter register](design/parameter-assumption-register.en.md), and [attribution](../AUTHORS.en.md).
+Implementation spans `src/product/`, `src/agentlayer/`, `src/orchestration/`, `src/ledger/`, and `src/econ/`. See [technical designs](design/README.md), the [parameter register](design/parameter-assumption-register.en.md), and [attribution](../AUTHORS.en.md).
 
 <a id="life-kernel"></a>
 ## 3. Mathematical structure

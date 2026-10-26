@@ -4,7 +4,7 @@
 [修复与接线 prompt](prompts/2026-10-25-e5-review-fixes-service-followup.md)（独立核查记录在本机 `runs/e5-review-1025/`）与
 [完整实施 prompt](prompts/2026-10-25-e5-complete-v35-implementation.md)（七项独立核查问题记录在本机 `runs/e5r34/REVIEW.md`），视觉要求见
 [e5-visual-direction](e5-visual-direction.md)，上游依赖见 [E5 → E3 交接单](../handoffs/e5-bilingual-map-service-requests.md)，运行方法见
-[web/README.md](../../web/README.md)，状态见 [docs/INDEX.md](../INDEX.md)（界面层 ui-02）。离线原型（ui-01）的说明存档在
+[网页指南](../../web/README.zh-CN.md)，状态见 [docs/INDEX.md](../INDEX.md)（界面层 ui-02）。离线原型（ui-01）的说明存档在
 [e5-a-offline-ui](e5-a-offline-ui.md)。
 
 ## 1. 用户能做什么

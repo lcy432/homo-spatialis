@@ -264,4 +264,4 @@ $$
 
 A tolerance of 0.005 is half a point on a 100-point preference scale. It measures numerical approximation, not model-versus-human error. The higher-budget reference still has error; effective sample size is not a true population sample size. Check group comparisons, rankings, and slopes as well. Low-budget bootstrap is not automatically conservative.
 
-Reports record model version, prompts, reasoning settings, information conditions, design, seeds, failures/retries, subgroup results, and floors. For rolling aliases, save the actual returned version. See [index](INDEX.en.md), [reproduction](REPRODUCING.en.md), and [decisions (Chinese)](../DECISIONS/README.md).
+Reports record model version, prompts, reasoning settings, information conditions, design, seeds, failures/retries, subgroup results, and floors. For rolling aliases, save the actual returned version. See [index](INDEX.en.md), [reproduction](REPRODUCING.en.md), and [decisions](../DECISIONS/README.md).

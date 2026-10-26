@@ -12,17 +12,17 @@
 | 我想了解什么 | 从这里开始 |
 |---|---|
 | 项目为什么做、能体验什么 | [中文 README](../README.zh-CN.md) |
-| 在本机跑一遍、查看输出 | [复现说明](REPRODUCING.md) · [网页启动指南](../web/README.md) |
-| 生活如何执行、结果如何评价 | [生活引擎的数学逻辑](METHODS.md#life-kernel) → [详细设计](design/README.md) |
+| 在本机跑一遍、查看输出 | [复现说明](REPRODUCING.md) · [网页启动指南](../web/README.zh-CN.md) |
+| 生活如何执行、结果如何评价 | [生活引擎的数学逻辑](METHODS.md#life-kernel) → [详细设计](design/README.zh-CN.md) |
 | 城市资料从哪里来、怎样成为可选机会 | [A、B 两种映射](DATA.md#mapping-methods) → [数据来源](DATA.md) → [贡献指南](../CONTRIBUTING.zh-CN.md) |
 | 找代码、改功能、运行检查 | [架构说明](ARCHITECTURE.md) → [开发指南](DEVELOPMENT.md) |
 | 研究问题、数学标尺和文献依据 | [研究方法](RESEARCH.md) · [参考文献](REFERENCES.md) |
 | 已经做到哪里、接下来做什么 | [当前状态](#status) · [版本路线](../PLAN.md) |
-| 查旧章节、早期设计与决策 | [历史导航](history/README.md) · [决策记录](../DECISIONS/README.md) |
+| 查旧章节、早期设计与决策 | [历史导航](history/README.md) · [决策记录](../DECISIONS/README.zh-CN.md) |
 
 编码代理先读 [CLAUDE.md](../CLAUDE.md) 的共同规则，再按本表选择本次任务涉及的文档。研究方法、详细设计与历史记录按需阅读，不必为了修改一个模块通读全部历史。
 
-中英文文档各自链接到同语言的指南；成对文档可从页首切换语言。中文文件沿用原有路径，英文指南使用 .en.md，项目首页和贡献指南则默认英文。历史记录保留原文。更新机制、公式或命令时，同步核对两种语言的说明。
+中英文文档各自链接到同语言的指南；成对文档可从页首切换语言。活跃目录的默认首页使用英文 README.md，中文版使用 README.zh-CN.md；贡献指南同样默认英文。其他中文主题文档沿用原有路径，英文版使用 .en.md。历史存档和旧版测试夹具保留原文。更新机制、公式或命令时，同步核对两种语言的说明。
 
 <a id="governance"></a>
 ## 文档与实现不一致时
@@ -142,15 +142,15 @@ P8 / P9 / P10 已实现，门一已过，门二与门三待真实输入；开发
 |---|---|
 | [中文 README](../README.zh-CN.md) / [English README](../README.md) | 项目动机、体验入口、当前范围与路线摘要；两种语言保持相同事实 |
 | [模型与评价](METHODS.md) | 生活模拟的方法概览、评价方式与验证边界 |
-| [复现说明](REPRODUCING.md) / [网页指南](../web/README.md) | 安装、试跑、输出与检查步骤 |
+| [复现说明](REPRODUCING.md) / [网页指南](../web/README.zh-CN.md) | 安装、试跑、输出与检查步骤 |
 | [架构说明](ARCHITECTURE.md) / [开发指南](DEVELOPMENT.md) | 模块职责、代码入口与开发方式 |
 | [数据与映射](DATA.md) / [贡献指南](../CONTRIBUTING.zh-CN.md) | 资料来源与映射、贡献入口与城市接入方向 |
 | [研究方法](RESEARCH.md) / [参考文献](REFERENCES.md) | 研究问题、静态数学标尺、实验方法与文献依据 |
 | [CLAUDE.md](../CLAUDE.md) | 编码代理共用的不变量、安全约束与工作方式；[AGENTS.md](../AGENTS.md) 只负责引路 |
 | [版本路线](../PLAN.md) | 版本方向与未来工作 |
 | 本文件 | 阅读路线、文档分工、层与命名、轮次与状态、默认入口 |
-| [DECISIONS/](../DECISIONS/) | 为什么这样定（只在真正的设计决定时写） |
-| [docs/design/](design/README.md) | 公式、代码位置、手算例子、省略了什么 |
+| [DECISIONS/](../DECISIONS/README.zh-CN.md) | 为什么这样定（只在真正的设计决定时写） |
+| [docs/design/](design/README.zh-CN.md) | 公式、代码位置、手算例子、省略了什么 |
 | [参数与假设目录](design/parameter-assumption-register.md) | 参数的含义、取值与是否标定 |
 | `runs/` | 运行输出；只在本机、不进 git，开发期可以清理、覆盖 |
 | `ledgers/` | 付费预算账本（每本一个 `ledger.sqlite`，进 git） |

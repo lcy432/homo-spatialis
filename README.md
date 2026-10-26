@@ -54,7 +54,9 @@ uv run python scripts/run_product_full.py --mock --out runs/first-run
 
 This runs the full simulation process on a small synthetic example using an offline planner. No API key is needed. The run summary is saved to `runs/first-run/summary.json`. Use a new output directory for each run.
 
-For the browser interface, follow the [web setup guide](web/README.en.md). It uses Node.js 22 and includes a local mode with the six-city dataset. The [reproduction guide](docs/REPRODUCING.en.md) covers the environment, saved outputs, and checks in more detail.
+For the browser interface, follow the [web setup guide](web/README.md). It uses Node.js 22 and includes a local mode with the six-city dataset. The [reproduction guide](docs/REPRODUCING.en.md) covers the environment, saved outputs, and checks in more detail.
+
+To run with your own model API key, follow [Running with a real model](docs/REPRODUCING.en.md#real-models).
 
 ## Current scope
 

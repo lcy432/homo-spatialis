@@ -5,7 +5,7 @@
 ## 1. 现状
 
 * 界面层还没有迁到 v3：网页仍读 `contracts/product/v2/`，`tests/product/test_web_drafts.py` 的网页草稿检查照旧跳过。E3B 的增补在 v3 目录里，结构版本升到 `e3a-product-schema-v3.1`（只加了可选字段，v3 的字段含义不变）。网页迁移时直接读 v3.1。
-* 唯一权威结构仍是 `src/common/product_contracts.py`；样例与 schema 在 [`contracts/product/v3/`](../../contracts/product/v3/README.md)，用 `uv run python scripts/product_e3a.py check-schema` 核对。
+* 唯一权威结构仍是 `src/common/product_contracts.py`；样例与 schema 在 [`contracts/product/v3/`](../../contracts/product/v3/README.zh-CN.md)，用 `uv run python scripts/product_e3a.py check-schema` 核对。
 * 真实资料包是 `configs/product/e3b_us_v1_pack.yaml`（`pack.e3b.us-v1`，状态 `real_data_frozen`），六座城：纽约（纽约市五区居民）、洛杉矶、旧金山、芝加哥（伊利诺伊州部分）、休斯敦、西雅图。人物仍是合成的；规划器是 mock。
 
 ## 2. 界面要渲染的东西

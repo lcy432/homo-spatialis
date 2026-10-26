@@ -4,7 +4,7 @@ English · [简体中文](REFERENCES.md)
 
 [Documentation](INDEX.en.md) · [Research](RESEARCH.en.md) · [Life-simulation methods](METHODS.en.md)
 
-This guide explains how prior work informs the questions, methods, and comparisons. Current implementation is described in the [index](INDEX.en.md); design choices are recorded in [decisions (Chinese)](../DECISIONS/README.md).
+This guide explains how prior work informs the questions, methods, and comparisons. Current implementation is described in the [index](INDEX.en.md); design choices are recorded in [decisions](../DECISIONS/README.md).
 
 <a id="spatial-economics"></a>
 ## Comparing cities for particular people
@@ -111,4 +111,4 @@ Project weights and scores are its own definitions, not direct implementations o
 
 Earlier notes mention *Polypersona: Persona-Grounded LLM for Synthetic Survey Responses* and *Do large language models shop like people? Comparing GPT and human food choices using discrete choice experiments*. These remain reading leads, not evidence supporting current design claims.
 
-See the [design index](design/README.en.md), [decisions (Chinese)](../DECISIONS/README.md), and [history (Chinese)](history/README.md).
+See the [design index](design/README.md), [decisions](../DECISIONS/README.md), and [history (Chinese)](history/README.md).

@@ -31,7 +31,7 @@ flowchart LR
 - **未知与失败显式保留**：资料未知不填零，不删去正权重后重新归一化制造完整分数。城市报告区分完成且可评价 C、生活出局 E 和模拟缺失 M；原计划人数 N = C + E + M，完成者均分不冒充全体均分。
 - **可追溯与恢复**：编译配置、输入快照、计划、运行归档与提交身份连接起来。重复提交、恢复与重放的行为由代码和测试约束。
 
-关键实现位于 `src/product/`、`src/agentlayer/`、`src/orchestration/`、`src/ledger/` 和 `src/econ/`；具体公式及代码对应见 [技术设计索引](design/README.md)。参数值、现实资料与探索性设定的区别见 [参数与假设目录](design/parameter-assumption-register.md)。
+关键实现位于 `src/product/`、`src/agentlayer/`、`src/orchestration/`、`src/ledger/` 和 `src/econ/`；具体公式及代码对应见 [技术设计索引](design/README.zh-CN.md)。参数值、现实资料与探索性设定的区别见 [参数与假设目录](design/parameter-assumption-register.md)。
 
 项目发起人与贡献说明见 [作者与贡献者](../AUTHORS.md)。
 

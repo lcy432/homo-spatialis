@@ -47,6 +47,63 @@ uv run --frozen python scripts/product_e3a.py reject-example --out runs/reproduc
 
 查看 `rejections.json`：设备报价存在但寿命未知时，设备不进入可执行目录（`device_in_e1_catalog: false`）；职业在本地无可匹配岗位时，记录预检查问题；金额无法换算到规定币种和基年时，报告 `money_conversion_missing`。这些是受控输入的预期拒绝，不是现实发生率估计。
 
+<a id="real-models"></a>
+## 使用自己的模型密钥运行
+
+完成前面的环境安装后，可以将离线规划器换成千问。下面的命令会让样例人物在所选资料包的所有城市生活，默认每城四个分身、模拟三年。
+
+### 配置密钥和端点
+
+在[阿里云百炼](https://help.aliyun.com/zh/model-studio/get-api-key)创建按量付费的 API Key。如果仓库根目录还没有 `.env`，将 [`.env.example`](../.env.example) 复制为 `.env`；已有文件则直接编辑，填入：
+
+~~~dotenv
+DASHSCOPE_API_KEY=your_dashscope_api_key_here
+~~~
+
+将占位文字换成自己的密钥。也可以设置系统环境变量 `DASHSCOPE_API_KEY`，并删除 `.env` 中对应的那一行。已有环境变量不会被覆盖；两处值不一致时，模型初始化会报配置冲突。密钥文件不要提交到 Git。使用仓库中的资料包无需 BEA 密钥，也不用下载原始数据。
+
+仓库当前通过 `product_planner` 角色选择 `qwen3.8-flash`，默认端点为北京地域的 `https://dashscope.aliyuncs.com/compatible-mode/v1`。不同地域的密钥、端点和可用模型不能混用。使用其他地域的密钥时，按照[官方接入说明](https://help.aliyun.com/zh/model-studio/get-api-key)选择对应端点，并**同时修改两处**：
+
+| 文件 | 配置项 |
+|---|---|
+| [`configs/models.yaml`](../configs/models.yaml) | `product_planner.base_url` |
+| [`configs/life/run_product_flash.yaml`](../configs/life/run_product_flash.yaml) | `run.planner.llm.base_url` |
+
+两处的供应商和模型名称也必须一致。确认账户能使用所选模型，并核对 `run.paid_budget.price` 的地域与报价。全规模启动脚本目前使用人民币预算；只把报价币种改成美元会无法通过检查，脚本不会自动换汇。
+
+### 启动模拟
+
+下面的命令会产生付费模型请求。先用合成资料包试跑：
+
+~~~sh
+uv run --frozen python scripts/run_product_full.py --out runs/first-llm-synthetic --max-cost-cny 20
+~~~
+
+也可以使用冻结的美国六城资料包：
+
+~~~sh
+uv run --frozen python scripts/run_product_full.py --out runs/first-llm-six-cities --pack configs/product/e3b_us_v1_pack.yaml --abilities edu_at_least_hs --max-cost-cny 20
+~~~
+
+第二条命令明确确认样例人物具有高中学历，这是开局岗位需要的资格，不会从职称自动推断。两条命令都使用仓库中的样例人物答案；填写自己的资料可参照[网页指南](../web/README.zh-CN.md)。
+
+每次使用新的输出目录。`--max-cost-cny 20` 将本次运行的估算费用限制为 20 元，也可以调低。程序在发送请求前预留估算费用，下一次预留会超限时就停止。这是按配置报价计算的应用内上限，不是供应商账单上限。每次新运行都会建立新账本，不会跨运行累计额度。在任一命令后加上 `--mock`，即可用同一资料包和输入流程做离线检查，不调用模型。
+
+### 查看结果
+
+以下路径都位于所选的输出目录中：
+
+| 路径 | 内容 |
+|---|---|
+| `summary.json` | 批次状态、城市、分身、已完成年数与进度 |
+| `ws/compiled/full/` | 编译后的输入和实际使用的 `run_flash_full.yaml` |
+| `ws/archive/full/` | 计划、模型调用记录与逐月生活记录 |
+| `ws/budget/ledger.sqlite` | 请求预留、已记录用量与估算费用 |
+
+### 在网页中使用真实模型
+
+[本地网页启动方式](../web/README.zh-CN.md)使用 `service_local_mock.yaml`，该配置只允许离线 mock，填入密钥也不会切换模式。网页使用真实模型需要生产服务配置、HTTPS 站点、服务端密钥，以及开启的 `live_calls_enabled` 开关；API 与 worker 在站点后运行。部署和邀请设置见[服务说明](design/e3c-service.md)。上面的命令行模拟无需网站或 HTTPS 部署。
+
 ## 自动化检查
 
 ```text

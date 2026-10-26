@@ -28,7 +28,7 @@ A version field alone is not evidence of a release. Check the matching GitHub Re
 
 ## What to attribute
 
-[AUTHORS](AUTHORS.en.md) records initiation and core contributions; source, Git history, and [decisions (Chinese)](DECISIONS/README.md) record implementation and evolution. Cite a versioned methods or design document when referring to a specific mechanism.
+[AUTHORS](AUTHORS.en.md) records initiation and core contributions; source, Git history, and [decisions](DECISIONS/README.md) record implementation and evolution. Cite a versioned methods or design document when referring to a specific mechanism.
 
 For city data, distinguish original publishers, preparation/mapping contributors, and data versions. Citing this software does not replace citations to underlying data and research. See [data provenance](docs/DATA.en.md) and the [contribution process](CONTRIBUTING.md).
 

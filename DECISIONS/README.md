@@ -1,15 +1,17 @@
-# 决策记录（ADR）
+# Design decisions (ADRs)
 
-每份记录说明一个设计决定**为什么**这样定。记录按编号保存，不回头改写；被后来的决定取代时，在新记录里写明取代了哪一条。
+English · [简体中文](README.zh-CN.md)
 
-- 0001–0015：研究线（泄漏扫描、坍缩比例、地板标定、估计设定等）。
-- 0016–0033、0035、0037：生活引擎与代理层（旧编号 E1-1 到 E1-7 及其补充；0037 起只保留产品版）。
-- 0034：接入层（E3-A）；0036：界面层（E5-A 离线原型）；0045：界面层（接 E3C、双语、稿纸与地球）。
+Each record explains why a design decision was made. Records are numbered and remain as written; a later decision identifies any earlier one it supersedes. The original records are in Chinese.
 
-各条对应哪一层、哪一轮、现在是什么状态，见 [docs/INDEX.md](../docs/INDEX.md) 第 2 节。
+- 0001–0015: research methods, including leakage checks, collapse proportions, floor calibration, and estimation.
+- 0016–0033, 0035, and 0037: the life engine and agent layer, formerly E1-1 through E1-7 and their extensions. Decision 0037 keeps only the product version.
+- 0034: product intake; 0036: the offline interface prototype; 0045: the service-connected bilingual interface and its paper and globe views.
 
-旧记录中的“README §…”和“PLAN §…”保留当时的章节名称。完整原文与新主题页的对应见[历史导航](../docs/history/README.md)；新记录直接链接当前主题文档。
+For reading routes, see the [documentation index](../docs/INDEX.en.md). The [module status log (Chinese)](../docs/INDEX.md#status) maps decisions to layers and development rounds.
 
-**开发期约定（2026-10-18 起）：** 只在真正的设计决定时写简短记录（背景、决定、后果）；不再把验收表、试跑结果和逐项状态写进 ADR，也不再要求每份记录在 README 原处留指针。较早的记录里仍有大段实现细节与"待复核"字样，保留原样作为历史。
+Older references to “README `…” or “PLAN `…” retain their original section names. The [history index (Chinese)](../docs/history/README.md) locates those documents. New records link directly to the current topic guides.
 
-**运行证据只在本机（2026-10-19 起）：** `runs/` 不进 git。较早记录里指向 `runs/…` 的链接是当时的本机证据，仓库里打不开；需要时看 git 标签 `pre-legacy-removal` 之前的提交历史。记录里提到的旧样例配置（`synthetic_e1_*`、`run_e1_7b_*` 等）已在 [0037](0037-life-keep-only-product-version.md) 删除。
+**Development convention, since 2026-10-18:** write a short ADR for a substantive design decision, covering context, decision, and consequences. Acceptance checklists, trial results, and detailed implementation status belong elsewhere. Earlier records retain their implementation details and “awaiting review” notes as history.
+
+**Run evidence stays local, since 2026-10-19:** `runs/` is not tracked in Git. Links to it in earlier records refer to evidence from the original machine. For older committed evidence, consult history before the `pre-legacy-removal` tag. Legacy configurations such as `synthetic_e1_*` and `run_e1_7b_*` were removed by [decision 0037 (Chinese)](0037-life-keep-only-product-version.md).

@@ -67,4 +67,4 @@ Public results preserve L, V, J, the original roster, C/E/M counts, exit reasons
 | Results | [results.py](../../src/product/results.py) |
 | Verification | [Ratings](../../tests/product/test_ratings.py), [structured answers](../../tests/product/test_structured_answers.py), [legacy objects](../../tests/product/test_legacy_objects.py) |
 
-See [Shared contract](e3-e5-product-contract.en.md), [product-input assumptions](parameter-assumption-register.en.md#product-input) and [Web setup](../../web/README.en.md).
+See [Shared contract](e3-e5-product-contract.en.md), [product-input assumptions](parameter-assumption-register.en.md#product-input) and [Web setup](../../web/README.md).

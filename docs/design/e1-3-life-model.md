@@ -568,7 +568,7 @@ U_c\in[K_c,K_c+1-C_i].
 
 ## 19. 参考与继续阅读
 
-- [设计说明索引](README.md)、[原 E1-3 设计备忘](history/2026-10-06-e1-3-design.md)。
+- [设计说明索引](README.zh-CN.md)、[原 E1-3 设计备忘](history/2026-10-06-e1-3-design.md)。
 - [ADR0016 契约](../../DECISIONS/0016-life-model-contract.md)、[ADR0017 月度结算](../../DECISIONS/0017-life-monthly-settlement.md)、[ADR0018 探索评分](../../DECISIONS/0018-life-exploratory-monthly-scoring.md)。
 - [ILO ISCO-08](https://isco.ilo.org/en/isco-08/) 与 [工时工资口径](https://ilostat.ilo.org/methods/concepts-and-definitions/description-wages-and-working-time-statistics/)：职业分类和统计定义，不是培训收益模型。
 - [AgentSociety v2](https://arxiv.org/html/2502.08691v2) §3.5/4.4：劳动、收入与消费结算；不提供本项目所需的现实培训回报。

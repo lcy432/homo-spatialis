@@ -1,9 +1,12 @@
-# 付费预算账本
+# Paid-call budget ledgers
 
-每本账一个目录，里面是 `ledger.sqlite`（`orchestration.life_budget`）：`header` 表一行（额度与报价，建立后不改），`events` 表逐条记预留、核算与不确定。运行配置的 `paid_budget.ledger_dir` 指向这里的目录。
+English · [简体中文](README.zh-CN.md)
 
-账本记着已经花了多少钱，所以进 git、不随 `runs/` 清理；换运行编号或运行目录都读同一本账，额度不会重置。不要手工改。
+Each ledger directory contains `ledger.sqlite`, managed by `orchestration.life_budget`. Its `header` table fixes the limits and price record; its `events` table records reservations, settled usage, and uncertain usage. The run configuration's `paid_budget.ledger_dir` selects the ledger.
 
-- `qwen-max-e1-7b-pilot/`：`configs/life/run_e1_7b_live.yaml`（千问 Max）
-- `qwen-flash-product/`：`configs/life/run_e1_7b_flash.yaml`（千问 Flash）
-- `qwen-flash-convenience/`：`configs/life/run_e1_convenience_flash.yaml`（便利版 Flash）
+These shared ledgers retain spending across runs and are tracked in Git. Changing a run ID or output directory does not reset a shared ledger. Keep them when clearing local outputs, and do not edit them by hand.
+
+The full-run launcher, `scripts/run_product_full.py`, instead creates a separate ledger at `<out>/ws/budget/ledger.sqlite` for each run. See [running with a real model](../docs/REPRODUCING.en.md#real-models) for setup and limits.
+
+- `qwen-flash-convenience/` is used by the direct run configuration `configs/life/run_product_flash.yaml`. The full-run launcher replaces this path with its own per-run budget.
+- `qwen-max-e1-7b-pilot/` and `qwen-flash-product/` retain earlier spending records. Their original run configurations have been retired.

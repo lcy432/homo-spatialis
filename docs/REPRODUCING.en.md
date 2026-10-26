@@ -47,6 +47,63 @@ uv run --frozen python scripts/product_e3a.py reject-example --out runs/reproduc
 
 Inspect `rejections.json`. A device with a known price but unknown lifetime stays outside the executable catalog (`device_in_e1_catalog: false`). An occupation with no matching local job produces a preflight issue. Missing currency/base-year conversion produces `money_conversion_missing`. These are expected rejections of controlled inputs, not estimates of real-world incidence.
 
+<a id="real-models"></a>
+## Run with your own model key
+
+After installing the environment above, you can replace the offline planner with Qwen. These commands run a bundled example person through all cities in the selected pack, with four clones per city and three years by default.
+
+### Set up the key and endpoint
+
+Create a pay-as-you-go key in [Alibaba Cloud Model Studio](https://www.alibabacloud.com/help/en/model-studio/get-api-key). If you have no `.env`, copy [`.env.example`](../.env.example) to `.env` in the repository root. Otherwise, edit the existing file. Set:
+
+~~~dotenv
+DASHSCOPE_API_KEY=your_dashscope_api_key_here
+~~~
+
+Replace the placeholder with your key. You can instead set `DASHSCOPE_API_KEY` in the process environment and remove its line from `.env`. Environment variables are not overwritten; conflicting values in the two places are rejected during model setup. Keep `.env` out of Git. Running the bundled packs needs no BEA key or raw-data download.
+
+The repository currently selects `qwen3.8-flash` through the `product_planner` role and the Beijing endpoint, `https://dashscope.aliyuncs.com/compatible-mode/v1`. Keys, endpoints, and available models vary by region. For a key from another region, use its matching endpoint from the [official regional configuration](https://www.alibabacloud.com/help/en/model-studio/compatibility-of-openai-with-dashscope) and update **both** locations:
+
+| File | Setting |
+|---|---|
+| [`configs/models.yaml`](../configs/models.yaml) | `product_planner.base_url` |
+| [`configs/life/run_product_flash.yaml`](../configs/life/run_product_flash.yaml) | `run.planner.llm.base_url` |
+
+The provider and model must also agree between those two entries. Check that the selected model is available to your account and that `run.paid_budget.price` matches its region and rates. The full-run launcher currently uses a CNY budget; changing the price record to USD alone will fail validation. It does not convert currencies automatically.
+
+### Run a simulation
+
+These commands make paid model requests. Start with the synthetic pack:
+
+~~~sh
+uv run --frozen python scripts/run_product_full.py --out runs/first-llm-synthetic --max-cost-cny 20
+~~~
+
+Or use the frozen six-city US pack:
+
+~~~sh
+uv run --frozen python scripts/run_product_full.py --out runs/first-llm-six-cities --pack configs/product/e3b_us_v1_pack.yaml --abilities edu_at_least_hs --max-cost-cny 20
+~~~
+
+The second example explicitly confirms the example person's high-school qualification. It is needed for the starting job and is not inferred from the job title. Both commands still use the bundled person's answers; the [web guide](../web/README.md) explains entering your own profile.
+
+Use a new output directory each time. `--max-cost-cny 20` sets a separate estimated CNY 20 limit for that run; you can lower it. The application reserves the estimated cost before each request and stops when the next reservation would exceed the limit. This uses the price record in the configuration, not a provider-side billing cap. Each new run creates a new budget; limits do not add up across runs. Add `--mock` to either command to check the same pack and input flow without model calls.
+
+### Inspect the result
+
+Paths below are relative to the chosen output directory:
+
+| Path | Contents |
+|---|---|
+| `summary.json` | Batch status, cities, clones, completed years, and progress |
+| `ws/compiled/full/` | Compiled inputs and the effective `run_flash_full.yaml` |
+| `ws/archive/full/` | Plans, model-call records, and monthly life history |
+| `ws/budget/ledger.sqlite` | Request reservations, recorded usage, and estimated costs |
+
+### Use a real model through the browser
+
+The [local web setup](../web/README.md) uses `service_local_mock.yaml`, which only permits an offline mock. Adding a key does not change that mode. A browser session with a real model uses the production service configuration, an HTTPS site, a server-side model key, and an enabled `live_calls_enabled` switch, with the API and worker running behind the site. See [service operations (Chinese)](design/e3c-service.md) for deployment and invitation setup. The command-line runs above do not need a website or HTTPS deployment.
+
 ## Automated checks
 
 ~~~text

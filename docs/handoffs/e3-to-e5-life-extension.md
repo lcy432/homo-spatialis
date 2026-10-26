@@ -4,7 +4,7 @@
 
 ## 1. 结构升级
 
-共享结构从 `contracts/product/v2/` 升到 [`contracts/product/v3/`](../../contracts/product/v3/README.md)（`e3a-product-schema-v3`）。唯一权威结构仍是 `src/common/product_contracts.py`；不要在前端临时加字段。`tests/product/test_web_drafts.py` 在网页草稿还写着 v2 时跳过（4 条），网页改读 v3 后它会恢复检查。
+共享结构从 `contracts/product/v2/` 升到 [`contracts/product/v3/`](../../contracts/product/v3/README.zh-CN.md)（`e3a-product-schema-v3`）。唯一权威结构仍是 `src/common/product_contracts.py`；不要在前端临时加字段。`tests/product/test_web_drafts.py` 在网页草稿还写着 v2 时跳过（4 条），网页改读 v3 后它会恢复检查。
 
 ## 2. 界面要改的地方
 

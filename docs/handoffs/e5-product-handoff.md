@@ -10,13 +10,13 @@
 
 **2026-10-18 收尾补记：** 请改用 [contracts/product/v2/](../../contracts/product/v2/README.md)（结构 `e3a-product-schema-v2`，39 份样例；v1 保留为历史导出）。要同步的字段在其 README 第 3 节：分身说明 `detail_zh` → `explanation`、批次暂停 `pause_reason` → `pause`（都只有按类别生成的原因、影响、下一步与审计编号，不会出现异常原文或服务器路径）、问题的 `audit_ref`、覆盖条目的三种状态、能力清单的金额写法 `money_input_rule_zh`，以及新的问题代码（金额写法、重复答案、资料来源）。前端提示与防重只帮忙，正式检查在服务端。收尾已实现、离线自测通过，待独立复核（ADR0034 第九节）。
 
-**界面层现在在哪里、接服务先读什么：** 离线原型在 `web/`（[技术说明](../design/e5-a-offline-ui.md)、[web/README.md](../../web/README.md)、设计决定 [ADR0036](../../DECISIONS/0036-e5a-offline-ui.md)；状态只看 [docs/INDEX.md](../INDEX.md)）。接服务之前先读 [LangGraph 外层流程](../design/langgraph-product-workflow.md)第 5、11 节：界面经 E3-C 调用流程的 `start` / `confirm` / `status`，确认时原样带回 `confirm_with`；流程阶段与生活结果分开显示；`needs_attention` 只显示中文说明与审计编号，不提供自动重试。给 E3 的接口需求见 [e5-to-e3-interface-requests.md](e5-to-e3-interface-requests.md)（B8：流程的公开视图先收进共享结构）。
+**界面层现在在哪里、接服务先读什么：** 离线原型在 `web/`（[技术说明](../design/e5-a-offline-ui.md)、[网页指南](../../web/README.zh-CN.md)、设计决定 [ADR0036](../../DECISIONS/0036-e5a-offline-ui.md)；状态只看 [docs/INDEX.md](../INDEX.md)）。接服务之前先读 [LangGraph 外层流程](../design/langgraph-product-workflow.md)第 5、11 节：界面经 E3-C 调用流程的 `start` / `confirm` / `status`，确认时原样带回 `confirm_with`；流程阶段与生活结果分开显示；`needs_attention` 只显示中文说明与审计编号，不提供自动重试。给 E3 的接口需求见 [e5-to-e3-interface-requests.md](e5-to-e3-interface-requests.md)（B8：流程的公开视图先收进共享结构）。
 
 ## 1. 新窗口先读什么
 
 1. [E3/E5 共享约定](../design/e3-e5-product-contract.md)：输入语义、偏差控制、接口、E1 兼容、结果分母的共同依据。
 2. [E3 交接](e3-data-input-handoff.md)：了解服务侧何时交付结构、样例、真实资料与运行接口。
-3. [README](../../README.md)、[PLAN](../../PLAN.md)：愿景和产品优先的阶段安排。
+3. [README](../../README.zh-CN.md)、[PLAN](../../PLAN.md)：愿景和产品优先的阶段安排。
 4. [E1-7 技术说明](../design/e1-7-agent-loop.md)、[E1-6 评价说明](../design/e1-6-evaluation.md)：已有运行与报告，避免前端另写机制。
 5. E1 最终核查（本机记录）：只通过合成范围，不代表网页或真实城市产品已上线。
 

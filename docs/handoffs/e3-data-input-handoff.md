@@ -13,7 +13,7 @@
 ## 1. 新窗口先读什么
 
 1. [E3/E5 共享约定](../design/e3-e5-product-contract.md)：双方共同的输入、偏差控制、结果语义与版本边界；本文不另定一套。
-2. [README](../../README.md) 的愿景、文件规则与新版用户输入入口；[PLAN](../../PLAN.md) 的最新进度。
+2. [README](../../README.zh-CN.md) 的愿景、文件规则与新版用户输入入口；[PLAN](../../PLAN.md) 的最新进度。
 3. [E1-7 技术说明](../design/e1-7-agent-loop.md)、[E1-6 评价说明](../design/e1-6-evaluation.md)：规划到结果的现有闭环。
 4. [参数与假设目录](../design/parameter-assumption-register.md)：每次新增映射、默认或模型设定都需登记。
 5. E1 最终独立核查（本机记录）：已通过合成范围的审核；真实数据和托管产品尚未完成。

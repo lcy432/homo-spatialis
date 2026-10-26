@@ -4,7 +4,7 @@
 
 [返回文档索引](INDEX.md) · [研究方法](RESEARCH.md) · [生活模拟的方法](METHODS.md)
 
-这里整理项目动机和设计用到的文献，说明每篇工作与项目的具体关系。文献提供问题、方法和对照；项目当前实现见[项目索引](INDEX.md)，具体设计取舍见[决策记录](../DECISIONS/README.md)。
+这里整理项目动机和设计用到的文献，说明每篇工作与项目的具体关系。文献提供问题、方法和对照；项目当前实现见[项目索引](INDEX.md)，具体设计取舍见[决策记录](../DECISIONS/README.zh-CN.md)。
 
 <a id="spatial-economics"></a>
 ## 从具体的人比较城市
@@ -121,4 +121,4 @@ AgentSociety 和 Agentopia 的环境也包含各自的模型假设与生成式�
 
 旧文档还记录了 *Polypersona: Persona-Grounded LLM for Synthetic Survey Responses* 与 *Do large language models shop like people? Comparing GPT and human food choices using discrete choice experiments*。这两项保留供后续核对，不用于支撑当前设计结论。
 
-历史讨论见[设计索引](design/README.md)、[决策记录](../DECISIONS/README.md)与[文档存档](history/)。
+历史讨论见[设计索引](design/README.zh-CN.md)、[决策记录](../DECISIONS/README.zh-CN.md)与[文档存档](history/)。

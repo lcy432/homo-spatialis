@@ -28,7 +28,7 @@ If you use Homo Spatialis in research, please cite the software version you used
 
 ## 什么应当获得署名
 
-原项目的发起与核心设计归属记录在 [作者与贡献者](AUTHORS.md)，实现与演进记录在源码、Git 历史及 [设计决定](DECISIONS/README.md)。引用具体机制时，可同时指向相应版本的方法报告或设计文档，便于核查实际贡献。
+原项目的发起与核心设计归属记录在 [作者与贡献者](AUTHORS.md)，实现与演进记录在源码、Git 历史及 [设计决定](DECISIONS/README.zh-CN.md)。引用具体机制时，可同时指向相应版本的方法报告或设计文档，便于核查实际贡献。
 
 使用城市资料时，应分别说明原始资料发布者、整理或映射贡献者，以及实际使用的数据版本。引用本软件不能替代对底层数据和既有研究的引用。资料出处与映射见 [数据说明](docs/DATA.md)；贡献接收与署名流程由正在维护的 [贡献指南](CONTRIBUTING.zh-CN.md) 规定，本文件不另设一套规则。
 

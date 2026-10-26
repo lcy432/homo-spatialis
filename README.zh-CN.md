@@ -49,7 +49,9 @@ uv run python scripts/run_product_full.py --mock --out runs/first-run
 
 这会用离线规划器，在一个小型合成样例上跑完模拟流程，无需 API 密钥。运行摘要保存在 `runs/first-run/summary.json`。每次运行请使用一个新的输出目录。
 
-使用浏览器界面可按照[网页启动指南](web/README.md)操作。网页需要 Node.js 22，并提供使用六城资料包的本地运行方式。环境、输出和检查的详细步骤见[复现说明](docs/REPRODUCING.md)。
+使用浏览器界面可按照[网页启动指南](web/README.zh-CN.md)操作。网页需要 Node.js 22，并提供使用六城资料包的本地运行方式。环境、输出和检查的详细步骤见[复现说明](docs/REPRODUCING.md)。
+
+使用自己的模型密钥运行，见[真实模型运行指南](docs/REPRODUCING.md#real-models)。
 
 ## 当前范围
 

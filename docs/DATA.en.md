@@ -199,7 +199,7 @@ Read the [coverage report (Chinese)](../data/frozen/intake/us-v1/coverage.md), [
 | Frozen identity and coverage | [Manifest](../data/frozen/intake/us-v1/manifest.json), [coverage (Chinese)](../data/frozen/intake/us-v1/coverage.md) |
 | Executable catalogs, scores, evaluation, city facts | [Frozen life pack](../data/frozen/life/us-v1/pack/) |
 | Pack/input binding | [Product pack configuration](../configs/product/e3b_us_v1_pack.yaml) |
-| Mapping assumptions | [Design index](design/README.en.md), [parameter register](design/parameter-assumption-register.en.md) |
+| Mapping assumptions | [Design index](design/README.md), [parameter register](design/parameter-assumption-register.en.md) |
 | Acquisition, building, trial runs | [Reproduction](REPRODUCING.en.md), [intake design](design/intake-02-real-data.en.md) |
 
 Not all raw downloads or the full intake database are distributed. The repository retains manifests, reports, and the executable frozen pack. Third-party licenses continue to govern their data.

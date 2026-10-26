@@ -6,7 +6,7 @@ English · [简体中文](AUTHORS.md)
 
 **Chengyu Liu ([lcy432](https://github.com/lcy432))** founded and maintains Homo-Spatialis (LLMs Becoming Us). The project began with questions about future study and places to live, developing into an interest in spatial welfare, LLM preference understanding, and computational life simulation.
 
-Recorded initial contributions include the project questions and goals; a system separating annual planning, monthly settlement, and outcome evaluation; information boundaries and provenance/assumption principles; implementation coordination, testing, and methods documentation. [Design decisions (Chinese)](DECISIONS/README.md), source, tests, and Git history record the work. Attribution does not claim that every underlying idea originated here.
+Recorded initial contributions include the project questions and goals; a system separating annual planning, monthly settlement, and outcome evaluation; information boundaries and provenance/assumption principles; implementation coordination, testing, and methods documentation. [Design decisions](DECISIONS/README.md), source, tests, and Git history record the work. Attribution does not claim that every underlying idea originated here.
 
 This is an independent personal project. No institution, funder, supervisor, ORCID, or corresponding paper is listed without confirmation. The author name for software citation is maintained in [CITATION.cff](CITATION.cff).
 
@@ -16,7 +16,7 @@ City-data preparation, mapping, validation, code, and documentation are all attr
 
 | Contributor | Contribution | Scope | Record |
 |---|---|---|---|
-| Chengyu Liu / lcy432 | Initiation, methods and system design, implementation coordination, maintenance, documentation | Initial engine and overall project | [Design decisions (Chinese)](DECISIONS/README.md), Git history |
+| Chengyu Liu / lcy432 | Initiation, methods and system design, implementation coordination, maintenance, documentation | Initial engine and overall project | [Design decisions](DECISIONS/README.md), Git history |
 
 This table is neither a paper author list nor automatically a release's software author list. Before release, contributors with substantial software contributions and willingness to take responsibility should discuss inclusion in that version's `CITATION.cff`. Non-code work is not automatically excluded; a small change does not automatically guarantee future paper authorship.
 

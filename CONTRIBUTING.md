@@ -50,6 +50,6 @@ uv run --frozen ruff check src tests scripts
 uv run --frozen ruff format --check src tests scripts
 ~~~
 
-For web changes, also follow the [web guide](web/README.en.md). On merge, update the contribution record in [authors and attribution](AUTHORS.en.md) and the relevant city-data provenance. Confirm the software author list for each release.
+For web changes, also follow the [web guide](web/README.md). On merge, update the contribution record in [authors and attribution](AUTHORS.en.md) and the relevant city-data provenance. Confirm the software author list for each release.
 
 We ask researchers to [cite the software](CITATION.cff) and the data sources they use. This is a request for scholarly attribution, not an additional license restriction or a guarantee of citation. Apache-2.0's license, copyright, and notice requirements still apply.

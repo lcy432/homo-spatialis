@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-本文件集中维护编码代理共用的**约束与工作方式**，`AGENTS.md` 只负责路由。项目介绍见 [README.md](README.zh-CN.md)，方法见 [模型与评价](docs/METHODS.md)，代码职责见 [架构说明](docs/ARCHITECTURE.md)。状态、命名与默认入口见 [项目索引](docs/INDEX.md)，开发步骤见 [开发指南](docs/DEVELOPMENT.md)，下一步见 [版本路线](PLAN.md)，设计理由见 [决策记录](DECISIONS/README.md)。
+本文件集中维护编码代理共用的**约束与工作方式**，`AGENTS.md` 只负责路由。项目介绍见 [README.md](README.zh-CN.md)，方法见 [模型与评价](docs/METHODS.md)，代码职责见 [架构说明](docs/ARCHITECTURE.md)。状态、命名与默认入口见 [项目索引](docs/INDEX.md)，开发步骤见 [开发指南](docs/DEVELOPMENT.md)，下一步见 [版本路线](PLAN.md)，设计理由见 [决策记录](DECISIONS/README.zh-CN.md)。
 
 > 本文件保持无标记差异（不用删除线、不写"某日补记"）。2026-10-18 之前的完整版本存档在 docs/history/pre-dev-refactor-2026-10-18/CLAUDE.md。
 

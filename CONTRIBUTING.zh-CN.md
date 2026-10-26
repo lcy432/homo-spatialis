@@ -50,6 +50,6 @@ uv run --frozen ruff check src tests scripts
 uv run --frozen ruff format --check src tests scripts
 ```
 
-涉及网页时另按 [web/README.md](web/README.md) 验证。合并时同步 [作者与贡献者](AUTHORS.md) 的贡献记录和对应城市资料的出处；每次发布再确认软件作者名单。
+涉及网页时另按 [web/README.md](web/README.zh-CN.md) 验证。合并时同步 [作者与贡献者](AUTHORS.md) 的贡献记录和对应城市资料的出处；每次发布再确认软件作者名单。
 
 我们希望研究使用者按 [CITATION.cff](CITATION.cff) 引用软件，同时引用实际使用的数据来源。这是学术引用请求，不是附加的许可证限制，也不保证每次使用都会形成学术引用。Apache-2.0 本身规定的许可、版权与相关声明义务仍应遵守。

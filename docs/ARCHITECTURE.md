@@ -40,7 +40,7 @@ flowchart TD
 | [`src/econ/`](../src/econ/) | 执行生活计划、记账、检查资源、评分并评价。经济公式在这里实现。 |
 | [`src/orchestration/`](../src/orchestration/) | 管理多城市、多分身和多年度运行，以及调用预算、归档、恢复和重放。 |
 | [`src/workflows/`](../src/workflows/) 与 [`src/product/service/`](../src/product/service/) | 管理一次产品请求的生命周期：检查、授权、登记、后台执行和结果交付；服务还管理会话、任务与配额。 |
-| [`web/`](../web/) | 收集回答，展示设置、进度和结果。前后端共享消息定义，界面不另算生活分数。 |
+| [`web/`](../web/README.zh-CN.md) | 收集回答，展示设置、进度和结果。前后端共享消息定义，界面不另算生活分数。 |
 
 这里有两层循环。`workflows` 管一次产品请求是否已经获准、开始或完成；`orchestration` 管分身的几年生活。LangGraph 属于前者，月度经济运算属于后者调用的生活引擎。
 
@@ -64,7 +64,7 @@ flowchart TD
 | 钱、时间和精力怎样约束生活？ | [`life_settlement.py`](../src/econ/life_settlement.py)、[`life_resources.py`](../src/econ/life_resources.py) | [`test_settlement.py`](../tests/life/test_settlement.py)、[时间与精力](design/e1-4-time-energy.md) |
 | 一段生活怎样得到分数？ | [`life_scoring.py`](../src/econ/life_scoring.py)、[`life_evaluation.py`](../src/econ/life_evaluation.py)、[`life_aggregation.py`](../src/econ/life_aggregation.py) | [`test_scoring.py`](../tests/life/test_scoring.py)、[`test_evaluation.py`](../tests/life/test_evaluation.py)、[评价方法](design/e1-6-evaluation.md) |
 | 产品请求怎样接到生活引擎？ | [`graph.py`](../src/workflows/graph.py)、[`e3_adapters.py`](../src/workflows/e3_adapters.py)、[`service_worker.py`](../src/workflows/service_worker.py) | [`test_e3_wiring.py`](../tests/workflows/test_e3_wiring.py)、[`test_smoke_flow.py`](../tests/product_service/test_smoke_flow.py) |
-| 网页与后端怎样约定输入输出？ | [`product_contracts.py`](../src/common/product_contracts.py)、[`contracts/product/v3/`](../contracts/product/v3/)、[`web/`](../web/) | [`test_contracts_schema.py`](../tests/product/test_contracts_schema.py)、[网页说明](design/e5-web-ui.md) |
+| 网页与后端怎样约定输入输出？ | [`product_contracts.py`](../src/common/product_contracts.py)、[`contracts/product/v3/`](../contracts/product/v3/README.zh-CN.md)、[`web/`](../web/README.zh-CN.md) | [`test_contracts_schema.py`](../tests/product/test_contracts_schema.py)、[网页说明](design/e5-web-ui.md) |
 
 共享消息的源定义在 Python 契约中，导出的 JSON Schema 和公共样例供前端使用。`contracts/product/v3/` 是这一代结构的目录；具体修订号以契约声明和 [项目索引](INDEX.md) 为准。
 

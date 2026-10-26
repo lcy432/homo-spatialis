@@ -2,7 +2,7 @@
 
 > **存档（2026-10-24）**：网页已改接 E3C 服务、读共享结构 v3.3，样例适配器与本标签页存储已删除；现行说明见 [e5-web-ui](e5-web-ui.md)。下面是 E5-A 离线原型当时的设计，不再维护。
 
-更新：2026-10-19（本地时区 UTC−7）。设计决定见 [ADR0036](../../DECISIONS/0036-e5a-offline-ui.md)，运行方法见 [web/README.md](../../web/README.md)，
+更新：2026-10-19（本地时区 UTC−7）。设计决定见 [ADR0036](../../DECISIONS/0036-e5a-offline-ui.md)，运行方法见 [网页指南](../../web/README.zh-CN.md)，
 状态见 [docs/INDEX.md](../INDEX.md)（界面层 ui-01）。
 
 界面读的全部是接入层的合成公共样例与 mock 规划器的结果，没有接任何服务。共享语义以 [E3/E5 共享约定](e3-e5-product-contract.md)与

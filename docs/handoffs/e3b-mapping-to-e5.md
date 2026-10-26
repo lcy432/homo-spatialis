@@ -5,7 +5,7 @@
 ## 1. 唯一要读的版本
 
 * 公共结构 `e3a-product-schema-v3.3`；问卷 `e3a-questionnaire-v0.3-draft`；词表 `e3a-vocabulary-v4`（健康问卷与转换版本不变）。
-* 权威结构仍是 `src/common/product_contracts.py`；schema 与样例在 [`contracts/product/v3/`](../../contracts/product/v3/README.md)（目录名不变），用 `uv run python scripts/product_e3a.py check-schema` 核对（28 份 schema、93 份样例）。
+* 权威结构仍是 `src/common/product_contracts.py`；schema 与样例在 [`contracts/product/v3/`](../../contracts/product/v3/README.zh-CN.md)（目录名不变），用 `uv run python scripts/product_e3a.py check-schema` 核对（28 份 schema、93 份样例）。
 * v3.2 的字段含义不变；v3.3 新增的都是可选字段，空的不序列化。
 
 ## 2. 用户需要重新确认的文案

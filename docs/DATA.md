@@ -223,7 +223,7 @@ $$
 | 冻结构建的身份与覆盖 | [`data/frozen/intake/us-v1/manifest.json`](../data/frozen/intake/us-v1/manifest.json)、[覆盖报告](../data/frozen/intake/us-v1/coverage.md) |
 | 引擎实际读取的目录、评分、评价和城市事实 | [`data/frozen/life/us-v1/pack/`](../data/frozen/life/us-v1/pack/) |
 | 资料包与产品输入的绑定 | [`configs/product/e3b_us_v1_pack.yaml`](../configs/product/e3b_us_v1_pack.yaml) |
-| 映射方法与已登记假设 | [设计文档索引](design/README.md)、[参数与假设目录](design/parameter-assumption-register.md) |
+| 映射方法与已登记假设 | [设计文档索引](design/README.zh-CN.md)、[参数与假设目录](design/parameter-assumption-register.md) |
 | 如何获取、构建和试跑 | [复现说明](REPRODUCING.md)、[真实资料接入说明](design/intake-02-real-data.md) |
 
 原始下载文件和完整 intake 数据库不随仓库全部分发；仓库保留来源清单、报告和可执行的冻结生活资料包。下载、使用和分发第三方资料时仍需遵循各自许可，项目的 Apache-2.0 不替代数据来源的许可。

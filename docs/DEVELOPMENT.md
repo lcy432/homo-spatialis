@@ -14,7 +14,7 @@ uv sync --locked
 
 Python 版本由 [`.python-version`](../.python-version) 指定，依赖由 [`uv.lock`](../uv.lock) 固定。应用直接从源码运行，入口脚本通过 `scripts/_bootstrap.py` 加载 `src/`。首次体验与输出说明见[复现指南](REPRODUCING.md)。
 
-网页使用 Node.js 22。在 `web/` 中运行 `npm ci`；服务、worker 和网页的启动方式见 [web/README.md](../web/README.md)。
+网页使用 Node.js 22。在 `web/` 中运行 `npm ci`；服务、worker 和网页的启动方式见 [网页指南](../web/README.zh-CN.md)。
 
 ## 代码与文档一起定位
 
@@ -55,20 +55,20 @@ npm run typecheck
 npm run build
 ```
 
-浏览器端到端测试的依赖和命令见[网页测试](../web/README.md#测试)。修改之后记录实际运行的检查及结果，区分本机验证、CI 和历史报告。
+浏览器端到端测试的依赖和命令见[网页测试](../web/README.zh-CN.md#测试)。修改之后记录实际运行的检查及结果，区分本机验证、CI 和历史报告。
 
 ## 接口与生成文件
 
-共享消息的 Python 定义在 [`src/common/product_contracts.py`](../src/common/product_contracts.py)，JSON Schema 与公共样例在 [`contracts/product/v3/`](../contracts/product/v3/README.md)。改变字段先更新权威定义，再重新导出结构与前端类型。具体导出命令见[共享结构说明](../contracts/product/v3/README.md)。
+共享消息的 Python 定义在 [`src/common/product_contracts.py`](../src/common/product_contracts.py)，JSON Schema 与公共样例在 [`contracts/product/v3/`](../contracts/product/v3/README.zh-CN.md)。改变字段先更新权威定义，再重新导出结构与前端类型。具体导出命令见[共享结构说明](../contracts/product/v3/README.zh-CN.md)。
 
 前端 `src/contract/generated/` 中的类型由 `npm run contract:gen` 生成；`npm test` 和 `npm run build` 会先检查生成内容与结构的一致性。新状态还需要相应的显示文字、输入样例或结果样例。
 
 ## 维护文档
 
 - README 只介绍项目、试用入口、范围和方向；中英文的事实与路线图保持一致。
-- 代码职责写在 [架构说明](ARCHITECTURE.md)，公式与映射细节放入现有 [design/](design/README.md)。
+- 代码职责写在 [架构说明](ARCHITECTURE.md)，公式与映射细节放入现有 [design/](design/README.zh-CN.md)。
 - 当前模块状态和默认入口继续维护在 [项目索引](INDEX.md)，版本方向写在 [PLAN](../PLAN.md)。
-- 文献依据写在 [参考文献](REFERENCES.md)，真实设计决定写入 [DECISIONS](../DECISIONS/README.md)。
+- 文献依据写在 [参考文献](REFERENCES.md)，真实设计决定写入 [DECISIONS](../DECISIONS/README.zh-CN.md)。
 - 链接使用相对于所在文件的位置；更名或移动后检查入口、锚点及引用它的文档。旧章节编号通过[历史导航](history/README.md)查找。
 
 多个会话共用工作区时，修改前核对当前差异，只提交本次工作的文件。提交与推送的约定见 [CLAUDE.md](../CLAUDE.md)。
