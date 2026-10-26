@@ -23,14 +23,14 @@
 | 第 3–4、14 章：架构、模块、逐文件地图 | [架构](../ARCHITECTURE.md)、[开发指南](../DEVELOPMENT.md)；完整旧逐文件表留在存档 |
 | 第 5–6 章：资料与输入 | [城市资料与映射](../DATA.md)、[输入设计](../design/e3a-product-input.md) |
 | 第 7、10–11 章：静态福利、研究门与测量 | [研究方法](../RESEARCH.md) |
-| 第 8–9 章：生活过程、评分与结果 | [方法报告](../METHODS.md)、[生活设计索引](../design/README.md) |
+| 第 8–9 章：生活过程、评分与结果 | [方法报告](../METHODS.md)、[生活设计索引](../design/README.zh-CN.md) |
 | 第 13、15.1 章：相关工作与领域书目 | [参考文献](../REFERENCES.md) |
-| 安装、运行与测试 | [复现说明](../REPRODUCING.md)、[网页指南](../../web/README.md)、[开发指南](../DEVELOPMENT.md) |
+| 安装、运行与测试 | [复现说明](../REPRODUCING.md)、[网页指南](../../web/README.zh-CN.md)、[开发指南](../DEVELOPMENT.md) |
 
 ## 其他记录
 
 - [设计历史](../design/history/)：早期机制与文献讨论。
-- [设计决定](../../DECISIONS/README.md)：决定的背景、取舍和替代关系。
+- [设计决定](../../DECISIONS/README.zh-CN.md)：决定的背景、取舍和替代关系。
 - [交接记录](../handoffs/)与[执行任务记录](../design/prompts/)：当时的工作上下文，现行入口由项目索引提供。
 
 `runs/` 中的本机运行输出不随仓库发布。历史文档指向的本机证据目录可能已清理；公开复现使用当前的复现说明及实际发布记录。

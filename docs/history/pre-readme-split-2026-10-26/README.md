@@ -15,7 +15,7 @@
 - 想知道研究怎样判断模型是否够好：第 10–11 章。
 - 想查边界、文献和现有代码用途：第 12–15 章。
 - 想开始工程工作：先读文件规则，再读 PLAN 的当前阶段；E3/E5 新窗口先读[共享接口与设计约定](../../../docs/design/e3-e5-product-contract.md)，再读 [E3 交接](../../../docs/handoffs/e3-data-input-handoff.md)或 [E5 交接](../../../docs/handoffs/e5-product-handoff.md)。
-- 想查生活机制怎样变成公式与代码：[技术设计说明索引](../../../docs/design/README.md)，其中 [E1-3 技术说明](../../../docs/design/e1-3-life-model.md) 集中解释当前实现、增补与 V2 扩展，[E1-4 技术说明](../../../docs/design/e1-4-time-energy.md) 解释月度时间与精力约束（E1-4A）与上一年满足感对下一年精力额度的有界反馈（E1-4B）。
+- 想查生活机制怎样变成公式与代码：[技术设计说明索引](../../../docs/design/README.zh-CN.md)，其中 [E1-3 技术说明](../../../docs/design/e1-3-life-model.md) 集中解释当前实现、增补与 V2 扩展，[E1-4 技术说明](../../../docs/design/e1-4-time-energy.md) 解释月度时间与精力约束（E1-4A）与上一年满足感对下一年精力额度的有界反馈（E1-4B）。
 - 想知道哪些是现实资料、哪些是我们的假设：[参数与假设目录（超参数附录）](../../../docs/design/parameter-assumption-register.md)。它解释现行参数、数据映射、代理认知及 E1/V2 待定规则，也记录未来 V3 怎样研究它们。
 
 ---
@@ -43,7 +43,7 @@
 | [PLAN.md](PLAN.md) | 当前阶段与下一步 |
 | [CLAUDE.md](../../../CLAUDE.md) | 编码代理每次要读的不变量、安全约束与工作方式 |
 | `DECISIONS/` | 为什么这样定（只在真正的设计决定时写） |
-| [docs/design/](../../../docs/design/README.md) | 公式、代码位置、手算例子、省略了什么；[参数与假设目录](../../../docs/design/parameter-assumption-register.md) |
+| [docs/design/](../../../docs/design/README.zh-CN.md) | 公式、代码位置、手算例子、省略了什么；[参数与假设目录](../../../docs/design/parameter-assumption-register.md) |
 | `MEMOS/`、`runs/`、[docs/history/](../../../docs/history/) | 历史记录与运行输出 |
 
 本文各节可能还留有"本段已被 DECISIONS/00NN 推翻"的指针：以指向的 ADR 为准。各机制的实现进度不写在本文，见 INDEX。

@@ -4,7 +4,7 @@
 [任务原文](../docs/design/prompts/2026-10-18-e5-a-offline-ui.md)。只新增 `web/`、证据目录 `runs/2026-10-18-e5-a-offline-ui/` 与 E5 的文档；
 没有改 `src/`、`scripts/`、`configs/`、`contracts/`、`tests/`、`pyproject.toml`、`uv.lock`、README 或 CLAUDE.md；新增真实模型调用 0；没有部署、提交或推送。
 **依赖**：E3-A 的共享结构 `contracts/product/v2/`（`e3a-product-schema-v2`；E3-A 收尾待独立复核，结构可能再变——见 2.1 的自动核对）。
-**指针**：技术说明 [docs/design/e5-a-offline-ui.md](../docs/design/e5-a-offline-ui.md)；使用说明 [web/README.md](../web/README.md)；给 E3 的接口需求
+**指针**：技术说明 [docs/design/e5-a-offline-ui.md](../docs/design/e5-a-offline-ui.md)；使用说明 [web/README.zh-CN.md](../web/README.zh-CN.md)；给 E3 的接口需求
 [docs/handoffs/e5-to-e3-interface-requests.md](../docs/handoffs/e5-to-e3-interface-requests.md)；证据 [runs/2026-10-18-e5-a-offline-ui/](../runs/2026-10-18-e5-a-offline-ui/README.md)。
 
 > **当前规则一览**

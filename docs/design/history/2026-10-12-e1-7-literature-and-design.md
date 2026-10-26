@@ -51,7 +51,7 @@
 
 ## 阅读入口
 
-- [设计说明索引](../README.md)
+- [设计说明索引](../README.zh-CN.md)
 - [参数与假设目录](../parameter-assumption-register.md)
 - [工程计划](../../../PLAN.md)
 - [E1-6 收尾独立审核](../../../runs/2026-10-12-e1-6b-closeout-review/audit.json)：允许结束 E1-6 的 V1 工程范围并开始 E1-7。
