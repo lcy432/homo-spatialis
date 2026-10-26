@@ -28,10 +28,9 @@ async function confirmedProfile(page: import("@playwright/test").Page, label: st
   await expect(page.locator("#start")).toBeVisible({ timeout: 30_000 });
 }
 
-test("回复丢了：同一个键找回同一个意图；没有第二个意图、没有 submit；开始之前可以取消", async ({ page }, info) => {
+test("回复丢了：同一个键找回同一个意图；没有第二个意图；开始之前可以取消", async ({ page }, info) => {
   test.setTimeout(5 * 60_000);
   const starts = countRequests(page, (url, method) => method === "POST" && /\/run-intents$/.test(new URL(url).pathname));
-  const submits = countRequests(page, (url, method) => method === "POST" && url.includes("/submit"));
   await confirmedProfile(page, "e2e 找回");
   await page.locator("#opt-clones").fill("1");
   await expect(page.locator("[data-start-preview]")).toBeVisible({ timeout: 30_000 });
@@ -58,7 +57,6 @@ test("回复丢了：同一个键找回同一个意图；没有第二个意图�
   await page.locator('[data-pending-start-notice] [data-action="recover-start"]').click();
   await expect(page).toHaveURL(/\/intents\/[^/]+$/, { timeout: 30_000 });
   expect(starts.get()).toBe(2);
-  expect(submits.get()).toBe(0);
   const runs = await (await page.request.get(`${ORIGIN}/api/v1/runs`)).json();
   expect(runs.runs).toHaveLength(1);
   const intentId = decodeURIComponent(page.url().split("/intents/")[1] ?? "");
@@ -80,5 +78,4 @@ test("回复丢了：同一个键找回同一个意图；没有第二个意图�
     await page.goto("/");
     await expect(page.locator("[data-quota]")).toHaveAttribute("data-quota", "3/0/0/3");
   }
-  expect(submits.get()).toBe(0);
 });

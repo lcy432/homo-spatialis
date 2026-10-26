@@ -82,24 +82,35 @@ describe("HTTP 客户端", () => {
     expect(isApiError(err) && err.kind).toBe("stale");
   });
 
-  it("请求体不符合共享结构：不发送", async () => {
+  it("请求体不符合共享结构：不发送（一次开始的键太短）", async () => {
     const fetchImpl = vi.fn() as unknown as typeof fetch;
     const err = await makeApi(ctx().ctx, fetchImpl)
-      .submit("intent-1", { confirm_with: "x", idempotency_key: "short", accept_scope: true })
+      .createIntent({
+        confirmed_id: "confirmed.x",
+        start: { mode: "start_when_ready", consent_fingerprint: "f".repeat(64), acknowledged: ["ack:start.one_run"], accept: true, idempotency_key: "short" },
+      })
       .catch((e) => e);
     expect(isApiError(err) && err.kind).toBe("contract");
     expect(isApiError(err) && err.direction).toBe("request");
     expect(fetchImpl).not.toHaveBeenCalled();
   });
 
-  it("准备模拟与确认开始：同时接受 200（原意图 / 重复提交）与 202，业务状态看内容", async () => {
-    const intent = samplePayload("70");
-    const reply = samplePayload("74");
-    const fetchImpl = vi.fn(async (url: string) => (url.endsWith("/submit") ? json(200, reply) : json(202, intent))) as unknown as typeof fetch;
+  it("一次“确认并开始”：202 新建与 200 找回（同一个键）都接受，业务状态看内容", async () => {
+    const created = samplePayload("166");
+    const found = samplePayload("168");
+    let calls = 0;
+    const fetchImpl = vi.fn(async () => {
+      calls += 1;
+      return calls === 1 ? json(202, created) : json(200, found);
+    }) as unknown as typeof fetch;
     const api = makeApi(ctx().ctx, fetchImpl);
-    expect((await api.createIntent({ confirmed_id: "confirmed.x" })).status).toBe(202);
-    const r = await api.submit("intent-1", { confirm_with: "a".repeat(64), idempotency_key: "idem-0123456789abcdef", accept_scope: true });
-    expect(r.status).toBe(200);
-    expect(r.data.receipt.status).toBe("duplicate_same_run");
+    const req = samplePayload<Parameters<typeof api.createIntent>[0]>("165");
+    const first = await api.createIntent(req);
+    expect(first.status).toBe(202);
+    expect(first.data.start?.state).toBe("pending");
+    const again = await api.createIntent(req);
+    expect(again.status).toBe(200);
+    expect(again.data.intent_id).toBe(first.data.intent_id);
+    expect(again.data.start?.state).toBe("used");
   });
 });

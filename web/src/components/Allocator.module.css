@@ -31,28 +31,11 @@
   stroke-width: 1.2;
 }
 
-.piePool {
-  stroke: var(--line-strong);
-  stroke-width: 1;
-}
-
-.pieHatchLine {
-  stroke: var(--line-strong);
-  stroke-width: 1;
-  opacity: 0.45;
-}
-
 .pieEmpty {
   fill: none;
   stroke: var(--line);
   stroke-width: 1;
   stroke-dasharray: 3 3;
-}
-
-.pieOver {
-  fill: none;
-  stroke: var(--error-line);
-  stroke-width: 2;
 }
 
 .pieCaption {
@@ -69,20 +52,6 @@
   font-weight: 700;
 }
 
-.poolNote {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35em;
-}
-
-.swatchPool {
-  display: inline-block;
-  width: 12px;
-  height: 12px;
-  border: 1px solid var(--line-strong);
-  background: repeating-linear-gradient(45deg, transparent 0 2px, var(--line-strong) 2px 3px);
-}
-
 .controlsCol {
   min-width: 0;
 }
@@ -92,10 +61,6 @@
   flex-wrap: wrap;
   gap: 0.5em;
   margin: 0.4em 0;
-}
-
-.sourceRow {
-  margin: 0.6em 0 0.2em;
 }
 
 .rows {
@@ -154,12 +119,6 @@
   opacity: 0.5;
 }
 
-.transfer {
-  white-space: nowrap;
-  color: var(--accent-2);
-  font-weight: 600;
-}
-
 .controls {
   display: flex;
   flex-wrap: wrap;
@@ -181,36 +140,3 @@
   align-items: center;
 }
 
-/* 合计行：像账本最后一行，固定在各项之后；不浮动、不盖住任何一题 */
-.status {
-  border-top: 2px solid var(--accent);
-  border-bottom: 1px solid var(--accent);
-  padding: 0.5em 0.3em;
-  margin: 0.8em 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5em 1em;
-  align-items: center;
-  font-weight: 700;
-}
-
-html[data-mode="globe"] .status {
-  border: 1px solid var(--accent);
-  border-radius: var(--radius);
-  padding: 0.5em 0.8em;
-}
-
-.over {
-  border-color: var(--error-line);
-}
-
-.full {
-  border-color: var(--c-color);
-}
-
-.pickList {
-  list-style: none;
-  padding: 0;
-  display: grid;
-  gap: 0.4em;
-}

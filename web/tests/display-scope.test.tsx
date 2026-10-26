@@ -4,7 +4,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { samplePayload } from "../src/contract/samples";
-import type { DisplayEnvelope, DraftView, ProductCapabilities, ReviewReply } from "../src/contract/types";
+import type { DisplayEnvelope, ProductCapabilities, ReviewReply } from "../src/contract/types";
 import {
   buildScope,
   envelopeOf,
@@ -121,16 +121,6 @@ describe("知悉项与作答状态", () => {
       provided: false,
       reason: "translation_missing",
     });
-  });
-
-  it("草稿迁移信封（样例 149）：迁移说明与旧分配只从 source 读，英文按位置取", () => {
-    const env = samplePayload<DisplayEnvelope>("149");
-    const m = (env.source as DraftView).migration;
-    expect(m?.consent_required).toBe(true);
-    expect(m?.removed?.[0]?.ref).toBe("hr.commute");
-    expect(m?.allocation_choice_required).toBe(true);
-    const r = lookupText([scopeOf(env)], "/migration/message_zh", m?.message_zh as string);
-    expect(r.provided).toBe(true);
   });
 });
 

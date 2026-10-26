@@ -1,15 +1,12 @@
 // /draft/:draftId/:step —— 读服务器草稿与能力清单，挂上编辑器（换步骤时编辑器不重建，撤销记录与未保存的改动都在）。
-// 旧问卷的草稿先经过迁移说明与用户同意（服务端迁移），再进入编辑器：不会出现“控件藏起来、旧值照样提交”。
-import { useQueryClient } from "@tanstack/react-query";
+// 只适配当前问卷：旧版本（meta 的问卷 / 共享结构版本不是当前的）的草稿不进编辑器，只提示新开一份；没有迁移对话框（所有者 2026-10-26 定）。
 import { useTranslation } from "react-i18next";
-import { Navigate, useParams } from "react-router";
-import { useKeys } from "../../api/queries";
+import { Link, Navigate, useParams } from "react-router";
 import { ApiErrorView, Loading } from "../../components/common";
-import { Stepper } from "../../components/Layout";
+import { PageTitle, Stepper } from "../../components/Layout";
 import { SaveBar } from "../../components/SaveBar";
 import { DraftEditorProvider, useDraftLoad } from "../../draft/DraftEditor";
 import { STEP_SLUGS, type StepSlug } from "../../draft/fieldSteps";
-import { MigrationPanel } from "./MigrationPanel";
 import { ReviewStep } from "./ReviewStep";
 import { FactsStep, MoreStep, PlaceStep, PrioritiesStep } from "./Steps";
 
@@ -32,8 +29,6 @@ export function DraftRoute() {
   const { t } = useTranslation();
   const { draftId = "", step = "place" } = useParams();
   const { caps, draft } = useDraftLoad(draftId);
-  const keys = useKeys();
-  const queryClient = useQueryClient();
   if (!(STEP_SLUGS as readonly string[]).includes(step)) return <Navigate to={`/draft/${encodeURIComponent(draftId)}/place`} replace />;
   if (caps.error || draft.error) {
     return (
@@ -47,13 +42,22 @@ export function DraftRoute() {
     );
   }
   if (!caps.data || !draft.data) return <Loading label={t("common.loading")} />;
-  if (draft.data.migration) {
+  const dm = draft.data.draft.meta;
+  const cm = caps.data.meta;
+  if (dm.schema_version !== cm.schema_version || dm.questionnaire_version !== cm.questionnaire_version || dm.conversion_version !== cm.conversion_version) {
     return (
-      <MigrationPanel
-        view={draft.data}
-        onMigrated={(v) => queryClient.setQueryData(keys.draft(draftId), v)}
-        onReload={() => void draft.refetch()}
-      />
+      <div data-old-draft={dm.questionnaire_version}>
+        <PageTitle>{t("draft.oldTitle")}</PageTitle>
+        <p className="box warn">{t("draft.oldBody", { from: dm.questionnaire_version, to: cm.questionnaire_version })}</p>
+        <p>
+          <Link className="button primary" to="/start">
+            {t("home.newDraft")}
+          </Link>{" "}
+          <Link className="button" to="/">
+            {t("app.nav.home")}
+          </Link>
+        </p>
+      </div>
     );
   }
   return (

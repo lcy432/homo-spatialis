@@ -9,9 +9,10 @@
 //   权重由服务按比例换算（页面只做标明为临时的预览）。用户亲手输入的文字原样保存；滑块写整数；“同等重视”把本组每项设成 50。
 //   一次指针手势一条撤销记录（points/set 带手势编号：同一手势合并，下一次手势是新记录）；连续方向键按同一编辑序列合并。
 //   未答不是 0；明确的 0 要用户自己给（滑块、数字框或“记为 0”）。物质父项为 0 时四项不参与，但草稿里的四项答案原样留着。
-// * 不再收集硬要求与属性偏好（新问卷没有这两块；旧草稿由服务端迁移清空）。
+// * 不再收集硬要求与属性偏好（新问卷没有这两块）。
 // * 撤销以“用户的一次操作”为一步：连续在同一个输入框里打字、连续按方向键合成一步。
 // * 草稿编号、修订号与 meta 归服务器：这里从不改它们（保存时由自动保存写上当时的服务器修订号）。
+// * 只适配当前问卷：没有文字描述职业、逐项资格确认或兴趣文字这些旧流程的动作。
 import type { AllocationGroup, PointEntry, UserInputDraft } from "../contract/types";
 import { Fraction, parsePoints } from "./exact";
 
@@ -42,10 +43,7 @@ export type ContentAction =
   | { type: "cities/toggle"; cityRef: string; selected: boolean }
   | { type: "cities/set"; cityRefs: string[] }
   | { type: "language/set"; language: string }
-  /** 兼容：没有输入目录的资料包仍按文字描述 + 服务候选。 */
-  | { type: "occupation/text"; text: string }
-  | { type: "occupation/select"; candidateId: string | null }
-  /** 新流程：从目录里点一个职业（不带文字；目录版本与内容身份随答案提交）。 */
+  /** 从目录里点一个职业（不带文字；目录版本与内容身份随答案提交）。 */
   | { type: "occupation/catalog"; conceptId: string; catalogVersion: string; catalogFingerprint: string }
   | { type: "occupation/clear" }
   | { type: "education/set"; state: "provided"; optionId: string }
@@ -55,9 +53,6 @@ export type ContentAction =
   | { type: "certificates/state"; state: "none" | "unanswered" | "unsure" }
   | { type: "experience/set"; conceptId: string; years: number | null }
   | { type: "experience/state"; state: "none" | "unanswered" | "unsure" }
-  | { type: "abilities/clear" }
-  /** 兼容：没有输入目录时的逐项资格确认。 */
-  | { type: "ability/set"; abilityId: string; state: "provided" | "unsure" | null }
   | { type: "age/text"; text: string }
   | { type: "cash/text"; text: string; currency: string; pricePeriod: string }
   /** 数字框里亲手输入的文字：原样保存（空字符串 = 回到未答）。 */
@@ -70,19 +65,11 @@ export type ContentAction =
   | { type: "points/set"; group: AllocationGroup; key: string; value: string; gesture: string }
   /** “同等重视”：用户主动把本组每项的原始评分设成 value（服务规定 50）；一条记录。 */
   | { type: "points/equalWeight"; group: AllocationGroup; keys: string[]; value: string }
-  /** 当前版本的草稿还带着旧的百分比分配（manual / equal_split）：用户明确选择改成独立评分、重新打分（各项未答）。 */
-  | { type: "points/rerate"; group: AllocationGroup }
   | { type: "health/choice"; questionId: string; choice: HealthChoice | null }
   /** 面板之外的单独状态，或回到未答：都清空选中的类别（撤销可以找回）。 */
   | { type: "interest/state"; field: InterestField; state: InterestSpecialState | "unanswered" }
   | { type: "interest/toggle"; field: InterestField; key: string; selected: boolean }
-  | { type: "interest/clear"; field: InterestField }
-  | { type: "freeText/text"; text: string }
-  /**
-   * 问卷或词表换了版本：用户读过新说明、明确勾选“已按新说明重新确认”之后，才把草稿的版本信息换成当前能力清单的版本。
-   * 只有这一个动作会改 meta（其余动作都不碰）；答案本身不变，之后照常重新审阅、重新确认。
-   */
-  | { type: "meta/adopt"; meta: UserInputDraft["meta"] };
+  | { type: "freeText/text"; text: string };
 
 export type DraftAction =
   | ContentAction
@@ -110,8 +97,6 @@ function snapshotOf(s: DraftState): DraftSnapshot {
 
 function coalesceOf(a: ContentAction): string | null {
   switch (a.type) {
-    case "occupation/text":
-      return "occupation.text";
     case "age/text":
       return "age";
     case "cash/text":
@@ -134,12 +119,6 @@ function entriesOf(d: UserInputDraft, g: AllocationGroup): Record<string, PointE
 }
 
 const RATINGS_MODE = "ratings_normalized_v1";
-
-/** 评分组只在独立评分模式下可编辑：旧的百分比分配（manual / equal_split）要先由用户明确改成独立评分。 */
-function editable(d: UserInputDraft, g: AllocationGroup): boolean {
-  const mode = d[g].mode ?? null;
-  return mode === null || mode === RATINGS_MODE;
-}
 
 function withGroup(d: UserInputDraft, g: AllocationGroup, entries: Record<string, PointEntry>): UserInputDraft {
   return { ...d, [g]: { mode: RATINGS_MODE, entries } };
@@ -171,26 +150,6 @@ function applyContent(s: DraftSnapshot, a: ContentAction): DraftSnapshot | null 
     }
     case "language/set":
       return { ...s, draft: { ...d, occupation: { ...d.occupation, language: a.language } } };
-    case "occupation/text": {
-      const text = a.text;
-      const changed = text !== (d.occupation.raw_text ?? "");
-      return {
-        ...s,
-        draft: {
-          ...d,
-          occupation: {
-            language: d.occupation.language,
-            mode: "text",
-            state: text.trim() ? "provided" : "unanswered",
-            raw_text: text === "" ? null : text,
-            // 描述改了，原来选的候选不一定还对：清掉，由用户按新描述重新选（E3 也会这样提示）
-            selected_candidate: changed ? null : (d.occupation.selected_candidate ?? null),
-          },
-        },
-      };
-    }
-    case "occupation/select":
-      return { ...s, draft: { ...d, occupation: { ...d.occupation, selected_candidate: a.candidateId } } };
     case "occupation/catalog":
       return {
         ...s,
@@ -241,13 +200,6 @@ function applyContent(s: DraftSnapshot, a: ContentAction): DraftSnapshot | null 
         ...s,
         draft: { ...d, experience: a.state === "none" ? { state: "provided", entries: [] } : { state: a.state, entries: [] } },
       };
-    case "abilities/clear":
-      return { ...s, draft: { ...d, abilities: [] } };
-    case "ability/set": {
-      const list = (d.abilities ?? []).filter((x) => x.ability_id !== a.abilityId);
-      if (a.state) list.push({ ability_id: a.abilityId, state: a.state });
-      return { ...s, draft: { ...d, abilities: list } };
-    }
     case "age/text": {
       const t = a.text.trim();
       const age = AGE_INT.test(t) ? { state: "provided" as const, value: Number(t) } : { state: "unanswered" as const, value: null };
@@ -270,21 +222,18 @@ function applyContent(s: DraftSnapshot, a: ContentAction): DraftSnapshot | null 
       };
     }
     case "points/text": {
-      if (!editable(d, a.group)) return null;
       const entries = entriesOf(d, a.group);
       if (a.text === "") delete entries[a.key];
       else entries[a.key] = { state: "provided", value_text: a.text };
       return { ...s, draft: withGroup(d, a.group, entries) };
     }
     case "points/state": {
-      if (!editable(d, a.group)) return null;
       const entries = entriesOf(d, a.group);
       if (a.state === "unanswered") delete entries[a.key];
       else entries[a.key] = { state: a.state };
       return { ...s, draft: withGroup(d, a.group, entries) };
     }
     case "points/set": {
-      if (!editable(d, a.group)) return null;
       // 评分写十进制（分数写法“50/3”不是评分，服务会拒绝），范围 0–100
       const parsed = parsePoints(a.value, RATING_MAX_DECIMALS);
       if (a.value.includes("/") || !parsed.ok || parsed.value.s < 0n || parsed.value.compare(RATING_MAX) > 0) return null;
@@ -295,14 +244,10 @@ function applyContent(s: DraftSnapshot, a: ContentAction): DraftSnapshot | null 
       return { ...s, draft: withGroup(d, a.group, entries) };
     }
     case "points/equalWeight": {
-      if (!editable(d, a.group)) return null;
       const entries: Record<string, PointEntry> = {};
       for (const k of a.keys) entries[k] = { state: "provided", value_text: a.value };
       return { ...s, draft: withGroup(d, a.group, entries) };
     }
-    case "points/rerate":
-      if (editable(d, a.group)) return null;
-      return { ...s, draft: withGroup(d, a.group, {}) };
     case "health/choice": {
       const items = [...(d.health.items ?? [])];
       const i = items.findIndex((x) => x.question_id === a.questionId);
@@ -322,18 +267,11 @@ function applyContent(s: DraftSnapshot, a: ContentAction): DraftSnapshot | null 
       const selected = a.selected ? [...base, a.key] : base.filter((k) => k !== a.key);
       return { ...s, draft: { ...d, [a.field]: selected.length ? { state: "selected", text: null, selected } : { state: "unanswered", text: null, selected: [] } } };
     }
-    case "interest/clear":
-      return { ...s, draft: { ...d, [a.field]: { state: "unanswered", text: null, selected: [] } } };
     case "freeText/text":
       return {
         ...s,
         draft: { ...d, free_text: a.text === "" ? { state: "unanswered", text: null } : { state: "provided", text: a.text } },
       };
-    case "meta/adopt": {
-      const { sample: _s, ...meta } = a.meta;
-      void _s;
-      return { ...s, draft: { ...d, meta } };
-    }
   }
 }
 

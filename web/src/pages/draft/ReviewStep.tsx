@@ -1,10 +1,8 @@
 // 第 5 步：系统怎样理解我 → 知悉 → 确认画像 → 本次设置与一次“确认并开始”。
 // * 审阅的永远是服务器上已保存的那一版；进入这一步先把改动存完。改过答案，旧审阅与旧确认都失效。
 // * 文字按位置取译文：审阅对象的位置以 /review 开头（这份审阅的信封），目录与词表的名称按能力清单的位置。
-// * 知悉项的说明按 ack_id 从这份审阅的显示信封取（acknowledgements）；信封没有时用公开内容拼。确认时照旧提交
-//   pending_confirmations 的编号；页面不自动勾选。
+// * 知悉项的说明按 ack_id 从这份审阅的显示信封取（acknowledgements）。确认时照旧提交 pending_confirmations 的编号；页面不自动勾选。
 // * 六维与物质：左边是原始评分（或状态），右边是 E3 的原始评分、原始合计与精确权重（两类数值分开，没生成权重就不补 0）。
-// * 旧版本草稿（version_changed / removed_section_present / allocation_mode_retired）：提示回草稿页迁移或改成独立评分，页面不改版本字段。
 // * 确认成功之后是本次设置与一次“确认并开始”（StartPanel）；没有第二个正常开始按钮。
 import { type ReactNode, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -15,9 +13,7 @@ import type {
   ConfirmedProfile,
   ConfirmedProfileSummary,
   InputCatalog,
-  ProductCapabilities,
   ProductIssue,
-  ProfileReview,
   QualificationReview,
   UserInputDraft,
 } from "../../contract/types";
@@ -38,68 +34,16 @@ import { SpecialStateText } from "./Steps";
 
 const R = "/review";
 
-function AckContent({ ackKey, review, caps }: { ackKey: string; review: ProfileReview; caps: ProductCapabilities }) {
+/** 知悉项的说明：按 ack_id 取这份审阅显示信封里的文字（中英都在信封里）；信封没有这一项时只显示编号对应的提示。 */
+function AckContent({ ackKey }: { ackKey: string }) {
   const { t } = useTranslation();
   const fromService = useAcknowledgement(ackKey);
-  const serviceText = fromService?.text.zh || fromService?.text.en ? <DText text={fromService.text} as="p" /> : null;
+  if (!fromService || !(fromService.text.zh || fromService.text.en)) return <p className="small muted">{t("review.ackUnknown", { key: ackKey })}</p>;
   return (
-    <div>
-      {serviceText ? (
-        <div data-ack-source="service">
-          <p className="small muted">{t("review.ackFromService")}</p>
-          {serviceText}
-        </div>
-      ) : null}
-      <AckPublicContent ackKey={ackKey} review={review} caps={caps} brief={!!serviceText} />
+    <div data-ack-source="service">
+      <DText text={fromService.text} as="p" />
     </div>
   );
-}
-
-/** 公开内容拼出的说明（信封没有说明时是唯一内容；有时只补充原文与开局清单）。 */
-function AckPublicContent({ ackKey, review, caps, brief }: { ackKey: string; review: ProfileReview; caps: ProductCapabilities; brief: boolean }) {
-  const { t } = useTranslation();
-  if (ackKey === "ack:standard_start") {
-    return (
-      <div>
-        <strong>{t("review.ackStart")}</strong>
-        <ZhList items={caps.start_scenario} pointer="/start_scenario" />
-      </div>
-    );
-  }
-  if (ackKey.startsWith("ack:retained:")) {
-    const ref = ackKey.slice("ack:retained:".length);
-    const i = (review.statements ?? []).findIndex((s) => s.ref === ref);
-    const st = i >= 0 ? review.statements?.[i] : undefined;
-    return (
-      <div>
-        <strong>{t("review.ackRetained")}</strong>
-        {st ? (
-          <p>
-            “{st.raw_text}”：<Zh pointer={at(`${R}/statements`, i, "message_zh")}>{st.message_zh}</Zh>
-          </p>
-        ) : (
-          <p className="small muted">{t("review.ackUnknown", { key: ackKey })}</p>
-        )}
-      </div>
-    );
-  }
-  if (ackKey === "ack:interests_not_personalized") {
-    return (
-      <div>
-        <strong>{t("review.ackInterests")}</strong>
-        <ul>
-          <Zh as="li" pointer={`${R}/leisure_interest/message_zh`}>
-            {review.leisure_interest.message_zh}
-          </Zh>
-          <Zh as="li" pointer={`${R}/taste/message_zh`}>
-            {review.taste.message_zh}
-          </Zh>
-        </ul>
-      </div>
-    );
-  }
-  if (brief) return null;
-  return <p className="small muted">{t("review.ackUnknown", { key: ackKey })}</p>;
 }
 
 /** 资格的“我填的”：学历、证书、经验按目录名称显示（没有目录时只显示状态）。 */
@@ -157,7 +101,6 @@ function MyQualifications({ d, catalog }: { d: UserInputDraft; catalog: InputCat
           </>
         )}
       </li>
-      {(d.abilities ?? []).length ? <li className="muted">{t("facts.legacyAbilities", { n: (d.abilities ?? []).length })}</li> : null}
     </ul>
   );
 }
@@ -238,10 +181,6 @@ function Compare({ title, mine, system, id }: { title: string; mine: ReactNode; 
   );
 }
 
-function versionIssues(issues: readonly ProductIssue[] | undefined): ProductIssue[] {
-  return (issues ?? []).filter((i) => i.code === "version_changed" || i.code === "removed_section_present" || i.code === "allocation_mode_retired");
-}
-
 export function ReviewStep() {
   const { t } = useTranslation();
   const { caps, state, draftId, save, flush } = useDraftEditor();
@@ -278,10 +217,8 @@ export function ReviewStep() {
   const pending = review?.pending_confirmations ?? [];
   const allAcked = pending.every((k) => acks[k]);
   const blockers = (review?.issues ?? []).filter((i) => i.severity === "error");
-  const vIssues = versionIssues(review?.issues);
   const canConfirm = !!review && current && review.confirmable && allAcked && !confirming;
   const allIssues = review?.issues ?? [];
-  const issueIndex = (i: ProductIssue) => allIssues.indexOf(i);
 
   const doConfirm = async () => {
     if (!review || !reply || !canConfirm) return;
@@ -339,26 +276,12 @@ export function ReviewStep() {
             ) : null}
             <p className="small muted">{t("review.reviewedRevision", { rev: reply?.reviewed_revision })}</p>
 
-            {vIssues.length ? (
-              <div className="box warn" data-migration-hint>
-                <p>{vIssues.some((i) => i.code !== "allocation_mode_retired") ? t("review.migrateHint") : t("review.rerateHint")}</p>
-                <div className="stack">
-                  {vIssues.map((i) => (
-                    <IssueCard key={`${i.code}.${i.field}`} issue={i} draftId={draftId} pointer={at(`${R}/issues`, issueIndex(i))} />
-                  ))}
-                </div>
-                <a className="button" href={`/draft/${encodeURIComponent(draftId)}/${vIssues.some((i) => i.code !== "allocation_mode_retired") ? "place" : "priorities"}`}>
-                  {vIssues.some((i) => i.code !== "allocation_mode_retired") ? t("review.migrateLink") : t("review.rerateLink")}
-                </a>
-              </div>
-            ) : null}
-
             <div data-blockers={blockers.length}>
               {blockers.length ? <h2>{t("review.blockers", { n: blockers.length })}</h2> : <p className="box ok">{t("review.noBlockers")}</p>}
               <div className="stack">
-                {allIssues.map((i, n) =>
-                  vIssues.includes(i) ? null : <IssueCard key={`${i.code}.${i.field}.${n}`} issue={i} draftId={draftId} pointer={at(`${R}/issues`, n)} />,
-                )}
+                {allIssues.map((i, n) => (
+                  <IssueCard key={`${i.code}.${i.field}.${n}`} issue={i} draftId={draftId} pointer={at(`${R}/issues`, n)} />
+                ))}
               </div>
             </div>
 
@@ -412,7 +335,7 @@ export function ReviewStep() {
                     </ul>
                   </div>
                 ) : (
-                  <p lang={d.occupation.language === "en" ? "en" : "zh-CN"}>{d.occupation.raw_text ?? t("states.unanswered")}</p>
+                  <p>{t("states.unanswered")}</p>
                 )
               }
               system={
@@ -483,7 +406,6 @@ export function ReviewStep() {
               const entries = d[g].entries ?? {};
               const defs = g === "six_dimensions" ? caps.dimensions : caps.material_leaves;
               const defPtr = (key: string) => (g === "six_dimensions" ? capsPtr.dimension(caps, key) : capsPtr.materialLeaf(caps, key));
-              const legacy = d[g].mode === "manual" || d[g].mode === "equal_split";
               return (
                 <Compare
                   key={g}
@@ -491,16 +413,11 @@ export function ReviewStep() {
                   title={g === "six_dimensions" ? t("review.six") : t("review.material")}
                   mine={
                     <div data-my-allocation-mode={d[g].mode ?? "ratings_normalized_v1"}>
-                      {legacy ? <p className="small box warn">{t("review.legacyAllocation")}</p> : <p className="small muted">{t("review.ratingsMine")}</p>}
+                      <p className="small muted">{t("review.ratingsMine")}</p>
                       <ul>
                         {defs.map((def) => {
                           const e = entries[def.key];
-                          const v =
-                            d[g].mode === "equal_split"
-                              ? t("ratings.legacyEqual")
-                              : e?.state === "provided"
-                                ? (e.value_text ?? "")
-                                : t(`states.${e?.state ?? "unanswered"}` as "states.unanswered");
+                          const v = e?.state === "provided" ? (e.value_text ?? "") : t(`states.${e?.state ?? "unanswered"}` as "states.unanswered");
                           return (
                             <li key={def.key} data-my-rating={def.key}>
                               <Zh pointer={defPtr(def.key)}>{def.label}</Zh>：{v}
@@ -600,8 +517,6 @@ export function ReviewStep() {
                             </Zh>
                           ))}
                         </ul>
-                      ) : st === "described" ? (
-                        <p>{mine?.text ?? ""}</p>
                       ) : st === "unanswered" ? (
                         <p>{t("states.unanswered")}</p>
                       ) : (
@@ -673,7 +588,7 @@ export function ReviewStep() {
             <Section title={t("review.acksTitle")}>
               {pending.map((k) => (
                 <div key={k} className="card" data-ack={k}>
-                  <AckContent ackKey={k} review={review} caps={caps} />
+                  <AckContent ackKey={k} />
                   <label className="choice">
                     <input type="checkbox" checked={!!acks[k]} onChange={(e) => setAcks((a) => ({ ...a, [k]: e.target.checked }))} />
                     {t("review.ackLabel")}

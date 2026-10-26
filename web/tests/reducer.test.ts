@@ -109,15 +109,6 @@ describe("独立评分：每项 0–100，互不影响", () => {
     s = draftReducer(s, { type: "points/set", group: "six_dimensions", key: "material", value: "30", gesture: "q" });
     expect(value(s, "material", "housing_condition")).toBe("70");
   });
-
-  it("旧的百分比分配（manual / equal_split）不能编辑；用户明确改成独立评分后各项未答", () => {
-    const old = { ...created.draft, six_dimensions: { mode: "manual" as const, entries: { safety: { state: "provided" as const, value_text: "20" } } } };
-    let s = initialDraftState(old);
-    expect(draftReducer(s, { type: "points/set", group: "six_dimensions", key: "safety", value: "30", gesture: "a" })).toBe(s);
-    expect(draftReducer(s, { type: "points/text", group: "six_dimensions", key: "safety", text: "30" })).toBe(s);
-    s = draftReducer(s, { type: "points/rerate", group: "six_dimensions" });
-    expect(s.draft.six_dimensions).toEqual({ mode: "ratings_normalized_v1", entries: {} });
-  });
 });
 
 describe("职业、资格", () => {
@@ -170,14 +161,14 @@ describe("兴趣与口味面板", () => {
     expect(s.draft.taste).toEqual({ state: "unanswered", text: null, selected: [] });
   });
 
-  it("旧版本的文字描述：清除后回到未答，文字不再提交", () => {
+  it("读回的旧文字描述（described）：改回按面板选就回到未答，文字不再提交", () => {
     const old = { ...created.draft, leisure_interest: { state: "described" as const, text: "喜欢音乐", selected: [] } };
-    const s = draftReducer(initialDraftState(old), { type: "interest/clear", field: "leisure_interest" });
+    const s = draftReducer(initialDraftState(old), { type: "interest/state", field: "leisure_interest", state: "unanswered" });
     expect(s.draft.leisure_interest).toEqual({ state: "unanswered", text: null, selected: [] });
   });
 });
 
-describe("撤销与重做、城市、版本", () => {
+describe("撤销与重做、城市", () => {
   it("同一个输入框里连续打字合成一步；撤销恢复精确状态", () => {
     let s = run({ type: "age/text", text: "3" }, { type: "age/text", text: "35" });
     expect(s.past).toHaveLength(1);
@@ -195,11 +186,5 @@ describe("撤销与重做、城市、版本", () => {
     const s = run({ type: "cities/set", cityRefs: [] });
     expect(s.draft.cities).toEqual({ state: "unanswered", city_refs: [] });
     expect(draftReducer(s, { type: "history/undo" }).draft.cities).toEqual(created.draft.cities);
-  });
-
-  it("只有用户明确的“按新说明重新确认”才换 meta，且不带样例出处标签", () => {
-    const s = run({ type: "meta/adopt", meta: { ...caps.meta, sample: { note: "x", origin: "contract_example", produced_by: "y" } } });
-    expect(s.draft.meta.sample).toBeUndefined();
-    expect(s.draft.meta.schema_version).toBe(caps.meta.schema_version);
   });
 });

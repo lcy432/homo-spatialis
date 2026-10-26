@@ -13,7 +13,6 @@ const CHICAGO = "US:CBSA2023:16980";
 test("主闭环：从专属链接到分身的年度生活记录（真实本地服务，离线 mock，一次开始）", async ({ page }, info) => {
   test.setTimeout(15 * 60_000);
   const token = createInvite("e2e 主闭环");
-  const submits = countRequests(page, (url, method) => method === "POST" && url.includes("/submit"));
   const resumes = countRequests(page, (url, method) => method === "POST" && url.includes("/resume"));
   const starts = countRequests(page, (url, method) => method === "POST" && /\/run-intents$/.test(new URL(url).pathname));
   await signIn(page, token);
@@ -154,7 +153,6 @@ test("主闭环：从专属链接到分身的年度生活记录（真实本地�
   const intentId = decodeURIComponent(page.url().split("/intents/")[1] ?? "");
   saveIdentityA(token, intentId);
   expect(starts.get()).toBe(1);
-  expect(submits.get()).toBe(0);
 
   // 同一个等待页：带开始授权（pending），进度条与一句话，没有第二个开始按钮
   await expect(page.locator("[data-start-state]")).toHaveAttribute("data-start-state", /pending|used/);
@@ -176,7 +174,6 @@ test("主闭环：从专属链接到分身的年度生活记录（真实本地�
   await expect(page.locator('[data-bar="finished"]')).toHaveAttribute("data-settled", "6");
   await expect(page.locator('[data-bar="finished"]')).toHaveAttribute("data-planned", "6");
   expect(resumes.get()).toBe(0);
-  expect(submits.get()).toBe(0);
   expect(starts.get()).toBe(1);
   await shot(page, info, "8-finished");
   await page.getByRole("link", { name: "查看结果" }).click();
@@ -215,7 +212,6 @@ test("主闭环：从专属链接到分身的年度生活记录（真实本地�
   await page.reload();
   await expect(page.locator("[data-results]")).toBeVisible();
   expect(starts.get()).toBe(1);
-  expect(submits.get()).toBe(0);
   await page.goto("/");
   await expect(page.locator("[data-quota]")).toHaveAttribute("data-quota", "3/1/0/2");
 });

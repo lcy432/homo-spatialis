@@ -1,25 +1,24 @@
 // /intents/:intentId —— 同一个等待页：后台检查 → 排队 → 生活模拟 → 整理结果 → 完成（DECISIONS/0048、0049）。
 // * 进度条与一句当前状态直接照服务的 progress_summary 画：不定长（检查、排队、整理）或按已结算的分身年度数；
 //   不按调用次数、不按时钟增长；新的一句覆盖上一句，不累积执行历史。断线时保留最后一份摘要与它的时间。
-// * 轮询只读：页面从不自己提交确认、恢复或重开。带开始授权的意图没有第二个正常开始按钮（服务也不接受 submit）。
-//   没有授权的旧意图照旧：只在 allowed_actions 含 submit 时由用户明确确认（幂等键绑定 confirm_with）。
+// * 轮询只读：页面从不自己提交确认、恢复或重开。开始授权在创建意图时就给了，没有第二个开始按钮（服务也不接受 submit）。
+//   旧客户端留下的、没有授权的意图（allowed_actions 含 submit）只说明一句并给“取消”，当前版本不再实现两步确认。
 // * 授权作废（start.state = void）时显示原因与下一步；allowed_actions 含 start_again 才重新取预览、用户再确认一次（新键）。
 // * 取消、恢复、删除都要用户在对话框里确认，只按 allowed_actions；deletion.state 区分删除中与已删除。
 // * 文字按位置取这次意图的显示信封（运行意图与进度用这次运行预检查时绑定的版本）。
 import { useQueryClient } from "@tanstack/react-query";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams } from "react-router";
-import { hasCode, isApiError } from "../api/errors";
+import { isApiError } from "../api/errors";
 import { useCapabilities, useDisplay, useIntent, useKeys } from "../api/queries";
 import { useSession } from "../api/session";
-import type { ProgressSummary, RunIntentView, RunReceipt } from "../contract/types";
+import type { ProgressSummary, RunIntentView } from "../contract/types";
 import { Dialog } from "../components/Dialog";
 import { PageTitle } from "../components/Layout";
 import { PreflightView, ProgressView, SettingsView } from "../components/RunViews";
 import { StartPanel } from "../components/StartPanel";
 import { ApiErrorView, ExplanationView, Loading, Section } from "../components/common";
-import { newIdempotencyKey } from "../draft/draft";
 import { DisplayScope } from "../display/scope";
 import { BizNotice, Zh } from "../i18n/biz";
 import { formatTime } from "../i18n/format";
@@ -94,14 +93,6 @@ export function IntentPage() {
   const caps = useCapabilities();
   // 显示信封：运行意图与进度的文字用这次运行预检查时绑定的版本（还没绑定时服务给空）；只读，不续期
   const display = useDisplay("intent", intentId, locale, intent.data?.updated_at ?? "", !!intent.data);
-  const [accept, setAccept] = useState(false);
-  const [sending, setSending] = useState(false);
-  const inFlight = useRef(false);
-  const keyRef = useRef<{ confirmWith: string; key: string } | null>(null);
-  const [submitError, setSubmitError] = useState<unknown>(null);
-  const [unknownDelivery, setUnknownDelivery] = useState(false);
-  const [receipt, setReceipt] = useState<RunReceipt | null>(null);
-  const [stale, setStale] = useState(false);
   const [confirming, setConfirming] = useState<Confirming>(null);
   const [actionError, setActionError] = useState<unknown>(null);
   const [actionBusy, setActionBusy] = useState(false);
@@ -112,45 +103,11 @@ export function IntentPage() {
   const allowed = new Set(v.allowed_actions ?? []);
   const capsData = caps.data ?? null;
   const gone = v.stage === "deleted" || v.stage === "deleting" || v.stage === "expired";
-  const authorized = !!v.start;
   // 轮询失败而手里有上一份：按“最后已知状态”显示，不假装实时
   const offlineSince = intent.error && isApiError(intent.error) && intent.error.kind === "network" ? v.progress_summary.updated_at : null;
   const resultReadable = v.result_available && v.progress_summary.phase === "finished";
 
   const setView = (nv: RunIntentView) => queryClient.setQueryData(keys.intent(intentId), nv);
-
-  // 旧流程（没有开始授权的意图）：用户明确点一次确认开始
-  const submit = async () => {
-    if (inFlight.current || !v.confirm_with || !accept || authorized) return;
-    inFlight.current = true;
-    setSending(true);
-    setSubmitError(null);
-    setUnknownDelivery(false);
-    setStale(false);
-    if (!keyRef.current || keyRef.current.confirmWith !== v.confirm_with) {
-      keyRef.current = { confirmWith: v.confirm_with, key: newIdempotencyKey() };
-    }
-    try {
-      const r = await api.submit(intentId, { confirm_with: v.confirm_with, idempotency_key: keyRef.current.key, accept_scope: true });
-      setReceipt(r.data.receipt);
-      setView(r.data.intent);
-      void refresh();
-    } catch (e) {
-      if (isApiError(e) && e.kind === "network") {
-        setUnknownDelivery(true);
-      } else if (hasCode(e, "preflight_stale")) {
-        setStale(true);
-        setAccept(false);
-        keyRef.current = null;
-      } else {
-        setSubmitError(e);
-      }
-      void intent.refetch();
-    } finally {
-      inFlight.current = false;
-      setSending(false);
-    }
-  };
 
   const runAction = async (kind: Exclude<Confirming, null>) => {
     if (actionBusy) return;
@@ -268,21 +225,11 @@ export function IntentPage() {
           </Section>
         ) : null}
 
-        {!authorized && allowed.has("submit") && v.confirm_with ? (
-          <Section title={t("intent.submit")} id="start">
-            {stale ? <p className="box warn">{t("intent.stale")}</p> : null}
-            <label className="choice top">
-              <input type="checkbox" name="accept_scope" checked={accept} onChange={(e) => setAccept(e.target.checked)} />
-              {t("intent.acceptScope")}
-            </label>
-            <button type="button" className="primary" data-action="submit" disabled={!accept || sending} aria-busy={sending || undefined} onClick={() => void submit()}>
-              {sending ? t("intent.sending") : t("intent.submit")}
-            </button>
-            {unknownDelivery ? <p className="box warn">{t("intent.submitUnknown")}</p> : null}
-            <ApiErrorView error={submitError} />
-          </Section>
+        {allowed.has("submit") ? (
+          <p className="box warn" data-legacy-intent>
+            {t("wait.legacyIntent")}
+          </p>
         ) : null}
-        {receipt?.status === "duplicate_same_run" ? <p className="box note">{t("intent.submitDuplicate")}</p> : null}
 
         <details className="card" data-inputs>
           <summary>{t("wait.inputs")}</summary>

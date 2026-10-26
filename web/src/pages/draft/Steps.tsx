@@ -19,7 +19,6 @@ import { at } from "../../display/scope";
 import { useDraftEditor } from "../../draft/DraftEditor";
 import { parsePoints } from "../../draft/exact";
 import type { HealthChoice, InterestField, InterestSpecialState } from "../../draft/reducer";
-import { useDraftReview } from "../../draft/review";
 import { BizNotice, DText, Zh, ZhList } from "../../i18n/biz";
 import { useAnswerState } from "../../display/scope";
 import { ModelLanguageChoice } from "../StartPage";
@@ -76,78 +75,6 @@ export function PlaceStep() {
         <StepNav draftId={draftId} next="facts" />
       </MapStage>
     </div>
-  );
-}
-
-/** 兼容：没有输入目录的资料包（合成包）仍按文字描述 + 服务给的候选。 */
-function OccupationTextCompat() {
-  const { t } = useTranslation();
-  const { state, dispatch, save } = useDraftEditor();
-  const d = state.draft;
-  const lang = d.occupation.language ?? "zh";
-  const { review, current, query } = useDraftReview(!!d.occupation.raw_text?.trim());
-  const occ = review?.occupation ?? null;
-  return (
-    <fieldset data-field="occupation">
-      <legend>{t("facts.occupation")}</legend>
-      <p className="small muted" id="occupation-help">
-        {t("facts.noCatalog")}
-      </p>
-      <label htmlFor="occupation-text" className="visually-hidden">
-        {t("facts.occupation")}
-      </label>
-      <textarea
-        id="occupation-text"
-        name="occupation.raw_text"
-        lang={lang === "en" ? "en" : "zh-CN"}
-        aria-describedby="occupation-help"
-        value={d.occupation.raw_text ?? ""}
-        maxLength={300}
-        onChange={(e) => dispatch({ type: "occupation/text", text: e.target.value })}
-        onBlur={() => dispatch({ type: "history/break" })}
-        style={{ minHeight: "4em" }}
-      />
-      {d.occupation.raw_text?.trim() ? (
-        !occ ? (
-          <p className="small muted">{save.kind === "saved" && query.isFetching ? t("facts.candidatesChecking") : t("facts.candidatesWait")}</p>
-        ) : (
-          <div className="stack" aria-busy={!current || undefined}>
-            <h3>{t("facts.candidatesTitle")}</h3>
-            <p>
-              <Zh pointer="/review/occupation/message_zh">{occ.message_zh}</Zh>
-            </p>
-            <ul className="plain stack">
-              {(occ.candidates ?? []).map((c, ci) => {
-                const picked = d.occupation.selected_candidate === c.candidate_id;
-                return (
-                  <li key={c.candidate_id} className="card" data-candidate={c.candidate_id}>
-                    <strong>
-                      <Zh pointer={at("/review/occupation/candidates", ci, "label")}>{c.label}</Zh>
-                    </strong>{" "}
-                    {picked ? <span className="chip accent">{t("facts.picked")}</span> : null}
-                    <ul className="small">
-                      {c.duties.map((x, xi) => (
-                        <Zh as="li" key={x} pointer={at("/review/occupation/candidates", ci, "duties", String(xi))}>
-                          {x}
-                        </Zh>
-                      ))}
-                    </ul>
-                    <button
-                      type="button"
-                      className={picked ? undefined : "primary"}
-                      aria-pressed={picked}
-                      onClick={() => dispatch({ type: "occupation/select", candidateId: picked ? null : c.candidate_id })}
-                    >
-                      {picked ? t("facts.unpick") : t("facts.pick")}
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        )
-      ) : null}
-    </fieldset>
   );
 }
 
@@ -302,14 +229,6 @@ function Qualifications({ catalog }: { catalog: InputCatalog }) {
   return (
     <Section title={t("facts.qualTitle")}>
       <p className="small muted">{t("facts.qualNote")}</p>
-      {(d.abilities ?? []).length ? (
-        <div className="box warn" data-legacy-abilities>
-          <p>{t("facts.legacyAbilities", { n: (d.abilities ?? []).length })}</p>
-          <button type="button" onClick={() => dispatch({ type: "abilities/clear" })}>
-            {t("facts.legacyAbilitiesClear")}
-          </button>
-        </div>
-      ) : null}
       {s.education && catalog.education?.length ? (
         <fieldset data-field="education">
           <legend>{t("facts.education")}</legend>
@@ -399,14 +318,6 @@ export function FactsStep() {
       {catalog && catalog.sections.occupation === "catalog_select" ? (
         <Section title={t("facts.occupation")}>
           <p className="small muted">{t("facts.occupationHelp")}</p>
-          {d.occupation.mode !== "catalog" && d.occupation.raw_text ? (
-            <div className="box warn" data-legacy-occupation-text>
-              <p>{t("facts.legacyText", { text: d.occupation.raw_text })}</p>
-              <button type="button" onClick={() => dispatch({ type: "occupation/clear" })}>
-                {t("facts.clearOccupation")}
-              </button>
-            </div>
-          ) : null}
           <CatalogPicker
             catalog={catalog}
             selected={selectedConcept}
@@ -417,7 +328,9 @@ export function FactsStep() {
           />
         </Section>
       ) : (
-        <OccupationTextCompat />
+        <p className="box error" data-field="occupation">
+          {t("facts.noCatalog")}
+        </p>
       )}
 
       <fieldset data-field="age">
@@ -484,11 +397,7 @@ export function FactsStep() {
         ) : null}
       </fieldset>
 
-      {catalog && (catalog.sections.education || catalog.sections.certificates || catalog.sections.experience) ? (
-        <Qualifications catalog={catalog} />
-      ) : (caps.abilities ?? []).length ? (
-        <LegacyAbilities caps={caps} />
-      ) : null}
+      {catalog && (catalog.sections.education || catalog.sections.certificates || catalog.sections.experience) ? <Qualifications catalog={catalog} /> : null}
 
       <Section title={t("facts.startTitle")}>
         <ZhList items={caps.start_scenario} pointer="/start_scenario" />
@@ -499,58 +408,13 @@ export function FactsStep() {
   );
 }
 
-/** 兼容：没有输入目录时的逐项资格确认（合成资料包）。 */
-function LegacyAbilities({ caps }: { caps: ProductCapabilities }) {
-  const { t } = useTranslation();
-  const { state, dispatch } = useDraftEditor();
-  const d = state.draft;
-  return (
-    <fieldset data-field="abilities">
-      <legend>{t("facts.abilities")}</legend>
-      <p className="small muted">{t("facts.abilitiesNote")}</p>
-      {(caps.abilities ?? []).map((a) => {
-        const cur = d.abilities?.find((x) => x.ability_id === a.ability_id)?.state ?? "";
-        return (
-          <fieldset key={a.ability_id}>
-            <legend>
-              <Zh pointer={capsPtr.ability(caps, a.ability_id)}>{a.label}</Zh>
-            </legend>
-            <p className="small muted">
-              <Zh pointer={capsPtr.ability(caps, a.ability_id, "ask_when")}>{a.ask_when}</Zh>
-            </p>
-            {(
-              [
-                ["provided", t("facts.abilityHeld")],
-                ["unsure", t("facts.abilityUnsure")],
-                ["", t("facts.abilityNone")],
-              ] as const
-            ).map(([v, label]) => (
-              <label key={v || "none"} className="choice">
-                <input
-                  type="radio"
-                  name={`abilities.${a.ability_id}`}
-                  value={v || "none"}
-                  checked={cur === v}
-                  onChange={() => dispatch({ type: "ability/set", abilityId: a.ability_id, state: v === "" ? null : v })}
-                />
-                {label}
-              </label>
-            ))}
-          </fieldset>
-        );
-      })}
-    </fieldset>
-  );
-}
-
 export function PrioritiesStep() {
   const { t } = useTranslation();
   const { caps, state, draftId } = useDraftEditor();
   const six = state.draft.six_dimensions;
   const parent = six.entries?.material;
   let materialStatus: "need_parent" | "zero" | "open";
-  if (six.mode === "equal_split") materialStatus = "open";
-  else if (!parent || parent.state !== "provided" || parent.value_text == null) materialStatus = "need_parent";
+  if (!parent || parent.state !== "provided" || parent.value_text == null) materialStatus = "need_parent";
   else {
     const p = parsePoints(parent.value_text, caps.points.manual_max_decimals);
     materialStatus = !p.ok ? "need_parent" : p.value.n === 0n ? "zero" : "open";
@@ -639,14 +503,6 @@ function InterestSection({ field, title }: { field: InterestField; title: string
         </Zh>
       ) : null}
       <p className="small muted">{t(field === "leisure_interest" ? "more.leisureHelp" : "more.tasteHelp")}</p>
-      {curState === "described" && cur?.text ? (
-        <div className="box warn" data-legacy-interest-text>
-          <p>{t("more.legacyText", { text: cur.text })}</p>
-          <button type="button" onClick={() => dispatch({ type: "interest/clear", field })}>
-            {t("more.legacyClear")}
-          </button>
-        </div>
-      ) : null}
       {isSpecial ? (
         <p className="box note" data-interest-state={curState}>
           <SpecialStateText field={field} state={curState} />{" "}

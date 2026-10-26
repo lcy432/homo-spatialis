@@ -5,7 +5,6 @@
 // * “同等重视”是用户主动把本组每项设成 50（服务 points.ratings.equal_weight_rating），会替换已有答案时先说明，可撤销。
 // * 一次指针手势（按下 → 拖动 → 松开）一条撤销记录，中途只本地预览、松手才写进草稿；下一次手势是新记录（E5-R5）。
 //   连续方向键按同一编辑序列合并，失焦结束。无所谓 / 暂不确定保留状态、不转数值。写法不对的数字原样保留、给出提示，不悄悄截断。
-// * 旧的百分比分配（manual / equal_split）在当前版本的草稿里不能编辑：显示原义并让用户明确改成独立评分（各项重新打分）。
 import { useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { AllocationGroup, DimensionDefinition, MaterialLeafDefinition, PointEntry } from "../contract/types";
@@ -101,7 +100,6 @@ export function Allocator({ group, title, help }: { group: AllocationGroup; titl
   const dispDec = caps.points.display_decimals;
   const answer = state.draft[group];
   const entries: Record<string, PointEntry | undefined> = answer.entries ?? {};
-  const legacyMode = answer.mode === "manual" || answer.mode === "equal_split";
 
   const [equalDialog, setEqualDialog] = useState(false);
   const [drag, setDragState] = useState<Drag | null>(null);
@@ -124,7 +122,6 @@ export function Allocator({ group, title, help }: { group: AllocationGroup; titl
     preview.ratings.size === 0 && preview.invalid.length === 0 ? "none" : preview.total.n === 0n ? "zero" : preview.unanswered.length || preview.unset.length ? "partial" : "complete";
 
   const labelOf = (k: string) => defs.find((d) => d.key === k)?.label ?? k;
-  const labelPointer = (k: string) => at(defBase, defs.findIndex((d) => d.key === k), "label");
 
   const onSlide = (k: string, raw: number) => {
     const value = Math.min(maxRating, Math.max(0, Math.round(raw / step) * step));
@@ -165,31 +162,6 @@ export function Allocator({ group, title, help }: { group: AllocationGroup; titl
       return `${labelOf(k)}：${t("states.unanswered")}`;
     })
     .join("；");
-
-  if (legacyMode) {
-    return (
-      <div className={styles.wrap} data-allocator={group} data-mode={answer.mode ?? ""}>
-        <h2>{title}</h2>
-        <p className="box warn" data-legacy-allocation>
-          {t("ratings.legacyMode")}
-        </p>
-        <ul>
-          {keys.map((k) => {
-            const e = entries[k];
-            const v = e?.state === "provided" ? (e.value_text ?? "") : t(`states.${e?.state ?? "unanswered"}` as "states.unanswered");
-            return (
-              <li key={k}>
-                <Zh pointer={labelPointer(k)}>{labelOf(k)}</Zh>：{answer.mode === "equal_split" ? t("ratings.legacyEqual") : v}
-              </li>
-            );
-          })}
-        </ul>
-        <button type="button" className="primary" data-action="rerate" onClick={() => dispatch({ type: "points/rerate", group })}>
-          {t("ratings.rerate")}
-        </button>
-      </div>
-    );
-  }
 
   return (
     <div className={styles.wrap} data-allocator={group} data-mode="ratings_normalized_v1" data-preview={previewKind} data-rating-total={canonical(preview.total)}>
