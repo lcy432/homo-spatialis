@@ -21,8 +21,7 @@ data/raw/*
 
 # --- experiment outputs ---
 # 运行输出只留在本机，不进仓库（开发期决定，2026-10-18）。
-runs/*
-!runs/.gitkeep
+runs/
 
 # --- notebooks ---
 .ipynb_checkpoints/
