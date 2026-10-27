@@ -1,4 +1,4 @@
-# Homo-Spatialis: simulation methods
+# Homo spatialis: simulation methods
 
 English · [简体中文](METHODS.md)
 

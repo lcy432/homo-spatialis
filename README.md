@@ -1,10 +1,10 @@
-# Homo-Spatialis · LLMs Becoming Us
+# Homo spatialis · LLMs Becoming Us
 
 English · [简体中文](README.zh-CN.md)
 
 *Let LLMs live many versions of your life around the world. Explore and compare cities and countries.*
 
-Homo-Spatialis explores what cities, countries, and regions can offer through the lives of individual people. It aims to make comparisons of living standards in different cities and nations more meaningful by grounding them in the person experiencing them. Our skills, resources, priorities, and individual circumstances all shape the world we see. The project offers a way to explore that world through our own preferences.
+Homo spatialis explores what cities, countries, and regions can offer through the lives of individual people. It aims to make comparisons of living standards in different cities and nations more meaningful by grounding them in the person experiencing them. Our skills, resources, priorities, and individual circumstances all shape the world we see. The project offers a way to explore that world through our own preferences.
 
 Our long-term goal is to make comparisons of living standards—Shanghai and New York, London and Paris—meaningful to the individual: given my skills, resources, and preferences, what kind of life could I lead in each city?
 
@@ -15,7 +15,7 @@ It creates simulated versions of the same person and lets them live in different
 <p align="center">
   <img src="pics/titlePic.png" alt="City comparison page of a six-city run: a map of the United States with the six cities, the colour scale for mean J, and the result status" width="900">
 </p>
-<p align="center"><em>The city comparison page of a six-city run (offline planner, paper look). Life rules and scoring parameters are synthetic exploratory settings; results do not rank real cities.</em></p>
+<p align="center"><em>The city comparison page of a six-city run (real Qwen planner, paper look). Life rules and scoring parameters are synthetic exploratory settings; results do not rank real cities.</em></p>
 
 ## Research motivation
 
@@ -23,7 +23,7 @@ A higher salary can come with higher rent, taxes, or a longer commute. A city’
 
 Even the cost of living depends on the person. People buy different things, have different skills, and value their time differently. Research on [consumer preferences and local product choices](https://realestate.wharton.upenn.edu/wp-content/uploads/2022/04/w836.pdf) and [living standards across income groups](https://web.stanford.edu/~diamondr/DiamondMoretti.pdf) shows why a single city price index tells only part of the story.
 
-Homo-Spatialis brings these factors into one person’s simulated life. It follows how local opportunities and personal choices combine, giving people a way to explore the trade-offs that city averages leave out.
+Homo spatialis brings these factors into one person’s simulated life. It follows how local opportunities and personal choices combine, giving people a way to explore the trade-offs that city averages leave out.
 
 ## How it works
 

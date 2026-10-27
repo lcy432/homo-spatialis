@@ -1,10 +1,10 @@
 cff-version: 1.2.0
 type: software
 message: >-
-  If you use Homo Spatialis in research, please cite this software and state the
+  If you use Homo spatialis in research, please cite this software and state the
   version, data pack, configuration and planner used. This is a scholarly citation
   request, not an additional condition of the Apache-2.0 license.
-title: "Homo Spatialis · LLMs Becoming Us"
+title: "Homo spatialis · LLMs Becoming Us"
 authors:
   - family-names: Liu
     given-names: Chengyu

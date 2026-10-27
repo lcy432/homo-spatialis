@@ -2,7 +2,7 @@
 
 English · [简体中文](ARCHITECTURE.md)
 
-Homo-Spatialis separates three questions: what choices are available, how to plan, and what happens when the plan runs. Data preparation supplies choices, the language model plans, and the life engine executes and evaluates. The browser, command line, and background service share that engine.
+Homo spatialis separates three questions: what choices are available, how to plan, and what happens when the plan runs. Data preparation supplies choices, the language model plans, and the life engine executes and evaluates. The browser, command line, and background service share that engine.
 
 Start with the [README](../README.md) and [methods](METHODS.en.md). This guide helps you find the relevant code; the [reproduction guide](REPRODUCING.en.md) explains how to run it, and the [project index](INDEX.en.md) provides navigation and implementation status.
 

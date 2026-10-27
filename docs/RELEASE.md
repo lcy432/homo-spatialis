@@ -43,7 +43,7 @@ uvx --from cffconvert==2.0.0 cffconvert --validate -i CITATION.cff
 
 | 字段 | 内容 |
 |---|---|
-| 软件 | Homo Spatialis · LLMs Becoming Us |
+| 软件 | Homo spatialis · LLMs Becoming Us |
 | 版本 / 标签 | 实际发布版本与标签 |
 | 源码提交 | 完整 Git 提交号 |
 | 作者 | 对应版本 `CITATION.cff` 中的软件作者 |

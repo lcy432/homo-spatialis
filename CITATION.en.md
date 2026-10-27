@@ -2,11 +2,11 @@
 
 English · [简体中文](CITATION.md)
 
-If you use Homo-Spatialis in research, please cite the software version used, acknowledge its authors, and cite underlying data separately. [CITATION.cff](CITATION.cff) maintains citation metadata.
+If you use Homo spatialis in research, please cite the software version used, acknowledge its authors, and cite underlying data separately. [CITATION.cff](CITATION.cff) maintains citation metadata.
 
 ## How to cite
 
-The software is **Homo Spatialis · LLMs Becoming Us**, with **Chengyu Liu** as its current software author. Use the name, authors, and version in the `CITATION.cff` distributed with the version you used. See [authors](AUTHORS.en.md), [methods](docs/METHODS.en.md), and [references](docs/REFERENCES.en.md).
+The software is **Homo spatialis · LLMs Becoming Us**, with **Chengyu Liu** as its current software author. Use the name, authors, and version in the `CITATION.cff` distributed with the version you used. See [authors](AUTHORS.en.md), [methods](docs/METHODS.en.md), and [references](docs/REFERENCES.en.md).
 
 - **Archived release:** copy the citation from its Zenodo record and use that version's DOI. Record the full commit, pack, configuration, planner, and seeds in the methods or experiment record.
 - **Unreleased code:** cite the repository with the full commit and access date. A moving `main` does not identify the code used. Preserve an identifiable version or patch if local modifications were involved.
@@ -17,7 +17,7 @@ Repository-level BibLaTeX without a DOI:
 ~~~bibtex
 @software{liu_homo_spatialis,
   author = {Liu, Chengyu},
-  title = {Homo Spatialis · LLMs Becoming Us},
+  title = {Homo spatialis · LLMs Becoming Us},
   url = {https://github.com/lcy432/homo-spatialis}
 }
 ~~~

@@ -2,8 +2,8 @@
 // 原样显示，英文由 E3 的显示资源提供（还没有时显示中文原文并标明）。英文字典 en.ts 必须与这里的键一一对应（类型检查）。
 export const zh = {
   app: {
-    title: "Homo-Spatialis · LLM：成为我们",
-    brand: "Homo-Spatialis",
+    title: "Homo spatialis · LLM：成为我们",
+    brand: "Homo spatialis",
     skip: "跳到正文",
     nav: { home: "首页", runs: "我的运行", settings: "设置与删除" },
     lang: { label: "显示语言" },

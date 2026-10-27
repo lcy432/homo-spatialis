@@ -1,4 +1,4 @@
-# Homo Spatialis：首版模拟引擎方法报告
+# Homo spatialis：首版模拟引擎方法报告
 
 [English](METHODS.en.md) · 简体中文
 

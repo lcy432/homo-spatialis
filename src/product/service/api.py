@@ -239,7 +239,7 @@ def create_app(ctx: ServiceContext) -> FastAPI:
     config = ctx.config
     docs = config.expose_docs
     app = FastAPI(
-        title="Homo Spatialis 产品服务",
+        title="Homo spatialis 产品服务",
         version=API_VERSION,
         description="E3C 托管服务的公开接口（同源 HTTPS；会话 Cookie + CSRF；长任务由后台 worker 执行，网页轮询）。",
         docs_url=f"{API}/docs" if docs else None,

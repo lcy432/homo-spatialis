@@ -2,11 +2,11 @@
 
 [English](CITATION.en.md) · 简体中文
 
-If you use Homo Spatialis in research, please cite the software version you used, acknowledge the original authors, and cite the underlying data sources separately. Citation metadata is maintained in [CITATION.cff](CITATION.cff).
+If you use Homo spatialis in research, please cite the software version you used, acknowledge the original authors, and cite the underlying data sources separately. Citation metadata is maintained in [CITATION.cff](CITATION.cff).
 
 ## 如何引用
 
-软件名称：**Homo Spatialis · LLMs Becoming Us**。当前软件作者：**Chengyu Liu**。作者与具体贡献见 [作者与贡献者](AUTHORS.md)，模型方法见 [方法报告](docs/METHODS.md)，研究依据见 [参考文献](docs/REFERENCES.md)。作者名单、名称与版本以所用版本的 `CITATION.cff` 为准。
+软件名称：**Homo spatialis · LLMs Becoming Us**。当前软件作者：**Chengyu Liu**。作者与具体贡献见 [作者与贡献者](AUTHORS.md)，模型方法见 [方法报告](docs/METHODS.md)，研究依据见 [参考文献](docs/REFERENCES.md)。作者名单、名称与版本以所用版本的 `CITATION.cff` 为准。
 
 - **使用正式归档版本**：从对应 Zenodo 记录复制引用，使用该版本的 DOI，并注明软件版本。方法或实验中同时记录完整 Git 提交号、资料包、配置、规划器和随机种子（如适用）。
 - **使用尚未发布的代码**：引用软件仓库，并补充实际使用的完整 Git 提交号及访问日期。`main` 会变化，不能单独标识实验所用代码；包含未提交改动时，应先保存可追溯的版本或补丁。
@@ -17,7 +17,7 @@ If you use Homo Spatialis in research, please cite the software version you used
 ```bibtex
 @software{liu_homo_spatialis,
   author = {Liu, Chengyu},
-  title = {Homo Spatialis · LLMs Becoming Us},
+  title = {Homo spatialis · LLMs Becoming Us},
   url = {https://github.com/lcy432/homo-spatialis}
 }
 ```

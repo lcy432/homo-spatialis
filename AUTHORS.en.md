@@ -4,7 +4,7 @@ English · [简体中文](AUTHORS.md)
 
 ## Founder and initial software author
 
-**Chengyu Liu ([lcy432](https://github.com/lcy432))** founded and maintains Homo-Spatialis (LLMs Becoming Us). The project began with questions about future study and places to live, developing into an interest in spatial welfare, LLM preference understanding, and computational life simulation.
+**Chengyu Liu ([lcy432](https://github.com/lcy432))** founded and maintains Homo spatialis (LLMs Becoming Us). The project began with questions about future study and places to live, developing into an interest in spatial welfare, LLM preference understanding, and computational life simulation.
 
 Recorded initial contributions include the project questions and goals; a system separating annual planning, monthly settlement, and outcome evaluation; information boundaries and provenance/assumption principles; implementation coordination, testing, and methods documentation. [Design decisions](DECISIONS/README.md), source, tests, and Git history record the work. Attribution does not claim that every underlying idea originated here.
 
