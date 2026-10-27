@@ -41,7 +41,7 @@
    "vocabulary_version": "e3a-vocabulary-v5"
   },
   "pause": {
-   "audit_ref": "run:run-e3a-401160052f6c5889 record:progress.json",
+   "audit_ref": "run:run-e3a-3efa1ec13285fcca record:progress.json",
    "category": "batch_halted_service_unavailable",
    "impact_zh": "不是生活结果；还没有生成评价与汇总，不擅自给出分类或分数",
    "next_action_zh": "维护者处理服务、凭证、预算或请求的问题；这次运行不能恢复，处理之后用新的运行重跑",
@@ -50,7 +50,7 @@
   "report_available": false,
   "resumable": false,
   "resume_note": "这次运行停在不能由你恢复的位置：等维护者处理（尝试次数与预算不会被清零来绕过）",
-  "run_id": "run-e3a-401160052f6c5889",
+  "run_id": "run-e3a-3efa1ec13285fcca",
   "stage": "halted",
   "stage_zh": "批次停下（服务、预算或请求检查）",
   "updated_at": "2026-10-24T09:00:00Z"

@@ -11,6 +11,7 @@
 
 from __future__ import annotations
 
+import ntpath
 import os
 from decimal import Decimal
 from pathlib import Path
@@ -170,7 +171,8 @@ def check_data_dir(
         return
     if windows_long_paths_enabled() if long_paths is None else long_paths:
         return
-    length = len(os.path.abspath(data_root))
+    # 按 Windows 的路径规则求绝对路径（在 Windows 上就是 os.path；在别的系统上模拟检查时，C:/… 也不会被当成相对路径）
+    length = len(ntpath.abspath(data_root))
     limit = WINDOWS_MAX_PATH - 1 - RUN_PATH_RELATIVE
     if length > limit:
         raise DataDirTooLongError(

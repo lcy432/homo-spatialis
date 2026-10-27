@@ -42,7 +42,7 @@ def parse_run_config(data: dict[str, Any]) -> LifeRunConfig:
 def load_run_config(path: Path) -> LifeRunConfig:
     raw = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
     if not isinstance(raw, dict) or "run" not in raw:
-        raise LifeContractError(f"{path}: 顶层必须是映射，并有 run 一节")
+        raise LifeContractError(f"{Path(path).as_posix()}: 顶层必须是映射，并有 run 一节")
     return parse_run_config(raw["run"])
 
 

@@ -199,9 +199,11 @@ def load_evaluation_config(
 ) -> EvaluationConfig:
     raw = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
     if not isinstance(raw, dict):
-        raise LifeContractError(f"{path}: 顶层必须是映射")
+        raise LifeContractError(f"{Path(path).as_posix()}: 顶层必须是映射")
     config = parse_evaluation_config(raw)
     problems = evaluation_spec_problems(config.spec, bundle, scoring)
     if problems:
-        raise LifeContractError(f"{path}: 评价配置检查失败：\n  " + "\n  ".join(problems))
+        raise LifeContractError(
+            f"{Path(path).as_posix()}: 评价配置检查失败：\n  " + "\n  ".join(problems)
+        )
     return config

@@ -188,16 +188,22 @@ def test_a_claude_settings_have_their_own_rules():
     assert ident.note == load_yaml(REPO / HAIKU_CONFIG)["run"]["planner"]["identity"]["note"]
 
 
-def test_a_qwen_identities_and_ledgers_are_unchanged(monkeypatch):
+def test_a_qwen_settings_and_a_fresh_local_ledger(monkeypatch, tmp_path):
+    """Flash 配置的调用设定不变；账本只在本机（runs/ 下，不进 git），每份克隆第一次用时按配置新建，头与配置逐项相同。
+    不读本机已有的账本：干净的检出（例如 CI）里没有它。"""
     monkeypatch.chdir(REPO)
     world = preflight(FLASH_CONFIG)
     llm = world.config.planner.llm
     assert {"thinking", "effort"}.isdisjoint(llm.model_dump(mode="json"))
-    found = read_ledger(Path(world.config.paid_budget.ledger_dir))
+    budget = world.config.paid_budget
+    assert Path(budget.ledger_dir).parts[0] == "runs"
+    fresh = budget.model_copy(update={"ledger_dir": str(tmp_path / "ledger")})
+    summary = RoundBudget(fresh).summary()
+    assert summary["remaining_requests"] == budget.max_requests
+    found = read_ledger(tmp_path / "ledger")
     assert found is not None
     on_disk = {k: v for k, v in found[0].items() if k != "created_at"}
-    assert budget_header(world.config.paid_budget) == on_disk  # 迁移后的人民币账本，头逐项相同
-    assert LlmPlanner is LlmPlanner
+    assert budget_header(budget) == on_disk
 
 
 def test_a_billing_is_a_ledger_or_a_declared_reason():

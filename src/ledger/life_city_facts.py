@@ -190,9 +190,11 @@ def load_city_facts(path: Path, bundle: LifeBundle, scoring: ScoringConfig) -> C
     """读事实表并做全部跨对象检查；不通过就拒绝（``LifeContractError``，列出每一条）。"""
     raw = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
     if not isinstance(raw, dict) or "city_facts" not in raw:
-        raise LifeContractError(f"{path}: 顶层必须是映射，并有 city_facts 一节")
+        raise LifeContractError(f"{Path(path).as_posix()}: 顶层必须是映射，并有 city_facts 一节")
     facts = parse_city_facts(raw["city_facts"])
     problems = city_facts_problems(facts, bundle, scoring)
     if problems:
-        raise LifeContractError(f"{path}: 城市事实表检查失败：\n  " + "\n  ".join(problems))
+        raise LifeContractError(
+            f"{Path(path).as_posix()}: 城市事实表检查失败：\n  " + "\n  ".join(problems)
+        )
     return facts

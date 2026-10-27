@@ -898,7 +898,7 @@
    "allowed_actions": [
     "cancel"
    ],
-   "confirm_with": "51bcd9eb2fb68949fa88bff0e4d9130d3751653c8ef5247172c3acab6acbf04d",
+   "confirm_with": "959ab1150a247a7ca59e6b3c879721a9a7a06e3654dc050e2cf952b70bf4b497",
    "confirmation_source": null,
    "confirmed": {
     "confirmed_id": "confirmed.draft-0000000000000061.r2",
@@ -943,7 +943,7 @@
       "scoring_config": "63666ddf3f93899bebf171659ff21ba58999888658e295a038f9f6ff8371116e"
      },
      "evaluation_spec_id": "eval.e1-life.main",
-     "identities_fingerprint": "6662075baf5abfddf21d870c0bda67bf4f9161f9ddd6da9e1224b0e15af2e0c2",
+     "identities_fingerprint": "d5f768ea260aed5bb2683758adf5ef23c9b308b89f9204a0b3187b0b16d9b8b2",
      "planner_id": "llm.qwen.product_planner",
      "planner_kind": "llm",
      "prompt_template": "e3b-product-prompt-v3",
@@ -1632,7 +1632,7 @@
      "planner_id": "llm.qwen.product_planner",
      "planner_kind": "llm"
     },
-    "preflight_fingerprint": "51bcd9eb2fb68949fa88bff0e4d9130d3751653c8ef5247172c3acab6acbf04d",
+    "preflight_fingerprint": "959ab1150a247a7ca59e6b3c879721a9a7a06e3654dc050e2cf952b70bf4b497",
     "preflight_id": "preflight.confirmed.draft-0000000000000061.r2",
     "scope_zh": [
      "生活协议 life-v1-e3a-product（状态 synthetic_fixture_only）、评分 score.e1-life.explore（探索版）：城市、报价、工资、疾病、治疗与评分参数全部是合成设定，不是现实城市，不排序真实城市",
@@ -1711,7 +1711,7 @@
    "updated_at": "2026-11-23T09:01:02Z",
    "waiting_for": "maintainer"
   },
-  "source_view_fingerprint": "f236c034e7e94e221019a44a348e10cbe16c897efc182d7c3d1aaab6724a6e42",
+  "source_view_fingerprint": "e98bf81088b94932d31650ddbbc652ca14b8acf87e74ea82808a832aa4a31586",
   "status": "complete"
  },
  "sample": {

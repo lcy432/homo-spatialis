@@ -1886,14 +1886,17 @@ def load_life_bundle(
     """
     raw = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
     if not isinstance(raw, dict):
-        raise LifeContractError(f"{path}: 顶层必须是映射")
+        raise LifeContractError(f"{Path(path).as_posix()}: 顶层必须是映射")
     bundle = parse_bundle(raw)
     report = cross_validate(bundle)
     if strict and not report.contract_valid:
-        raise LifeContractError(f"{path}: 交叉校验失败：\n  " + "\n  ".join(report.errors))
+        raise LifeContractError(
+            f"{Path(path).as_posix()}: 交叉校验失败：\n  " + "\n  ".join(report.errors)
+        )
     if require_settlement_ready and not report.settlement_ready:
         raise LifeContractError(
-            f"{path}: 不能结算：\n  " + "\n  ".join(report.errors + report.settlement_problems)
+            f"{Path(path).as_posix()}: 不能结算：\n  "
+            + "\n  ".join(report.errors + report.settlement_problems)
         )
     return bundle, report
 

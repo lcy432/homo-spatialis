@@ -476,9 +476,11 @@ def load_scoring_config(
 ) -> tuple[ScoringConfig, ScoringConfigReport]:
     raw = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
     if not isinstance(raw, dict):
-        raise LifeContractError(f"{path}: 顶层必须是映射")
+        raise LifeContractError(f"{Path(path).as_posix()}: 顶层必须是映射")
     config = parse_scoring_config(raw)
     report = check_scoring_config(config, bundle)
     if strict and not report.exploration_scoring_ready:
-        raise LifeContractError(f"{path}: 评分配置检查失败：\n  " + "\n  ".join(report.errors))
+        raise LifeContractError(
+            f"{Path(path).as_posix()}: 评分配置检查失败：\n  " + "\n  ".join(report.errors)
+        )
     return config, report

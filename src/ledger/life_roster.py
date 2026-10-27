@@ -213,7 +213,7 @@ def load_roster(
     普通缺失）。"""
     raw = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
     if not isinstance(raw, dict) or not isinstance(raw.get("roster"), dict):
-        raise LifeContractError(f"{path}: 顶层必须是映射，并有 roster 一节")
+        raise LifeContractError(f"{Path(path).as_posix()}: 顶层必须是映射，并有 roster 一节")
     config = parse_roster_config(raw["roster"])
     bundle, _ = load_life_bundle(Path(config.life_input), require_settlement_ready=True)
     scoring, _ = load_scoring_config(Path(config.scoring_config), bundle)
@@ -223,5 +223,7 @@ def load_roster(
     }
     problems = roster_problems(config, bundle, scoring, specs)
     if problems:
-        raise LifeContractError(f"{path}: 名单检查失败：\n  " + "\n  ".join(problems))
+        raise LifeContractError(
+            f"{Path(path).as_posix()}: 名单检查失败：\n  " + "\n  ".join(problems)
+        )
     return config, bundle, scoring, specs

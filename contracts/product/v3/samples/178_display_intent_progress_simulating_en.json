@@ -956,7 +956,7 @@
       "scoring_config": "54a6585d1bfdd0c8aed55795191640ffa8cbd96fd2af5fc83c332bde1d8b9cd8"
      },
      "evaluation_spec_id": "eval.e1-life.main",
-     "identities_fingerprint": "e87e8357ead7b69d124dd935f39bd45e17c7ca008ec2f27a60a2a83619f5e8f5",
+     "identities_fingerprint": "8f14b7d69b88645b83e33563d47a50868d2ae22096862755ac383b3d07344086",
      "planner_id": "llm.qwen.product_planner",
      "planner_kind": "llm",
      "prompt_template": "e3b-product-prompt-v3",
@@ -1645,7 +1645,7 @@
      "planner_id": "llm.qwen.product_planner",
      "planner_kind": "llm"
     },
-    "preflight_fingerprint": "6b75c4d89be314827f87407809b3e382c14fde4c3e0d2f503372fb473f39410d",
+    "preflight_fingerprint": "c91e1062d915925030f19302d8bd939ba22bce14a20295c59bcd024fc4136acc",
     "preflight_id": "preflight.confirmed.draft-00000000000000a5.r2",
     "scope_zh": [
      "生活协议 life-v1-e3a-product（状态 synthetic_fixture_only）、评分 score.e1-life.explore（探索版）：城市、报价、工资、疾病、治疗与评分参数全部是合成设定，不是现实城市，不排序真实城市",
@@ -1731,7 +1731,7 @@
     "report_available": false,
     "resumable": false,
     "resume_note": "这次运行正在进行，不需要恢复；结束或暂停之后这里会更新",
-    "run_id": "run-e3a-1288ca846acd9fb7",
+    "run_id": "run-e3a-344aad6a904e2928",
     "stage": "running",
     "stage_zh": "运行中",
     "updated_at": "2026-12-24T09:01:02Z"
@@ -1751,7 +1751,7 @@
     "used": 1
    },
    "result_available": false,
-   "run_id": "run-e3a-1288ca846acd9fb7",
+   "run_id": "run-e3a-344aad6a904e2928",
    "settings": {
     "call_limit": 18,
     "cities": [
@@ -1774,7 +1774,7 @@
    "updated_at": "2026-12-24T09:01:02Z",
    "waiting_for": "service"
   },
-  "source_view_fingerprint": "90bfdad08819dfece183a90ef920a040727ea3d27b35d61389a08cf1b0ac6bde",
+  "source_view_fingerprint": "2380549ab08bc03d2586efcbf1dc8a4b7a9a916d6f025511d474e508e9f835f4",
   "status": "complete"
  },
  "sample": {

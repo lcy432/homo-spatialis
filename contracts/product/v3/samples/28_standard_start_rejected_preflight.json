@@ -23,7 +23,7 @@
   },
   "issues": [
    {
-    "audit_ref": "e1-preflight-refused-6f5ccffff536ec48",
+    "audit_ref": "e1-preflight-refused-ac4aa6f7a9f2ecd2",
     "code": "e1_preflight_refused",
     "field": "run",
     "impact_zh": "这次比较不能启动；系统不会删掉城市或分身再声称执行了原比较",
@@ -59,7 +59,7 @@
    "planner_id": "mock.rules.e3a-product",
    "planner_kind": "mock"
   },
-  "preflight_fingerprint": "868ea1bf2802514b3dd56fdffe8e26ac8589c925e0a38bc4c8ef912cce688b5e",
+  "preflight_fingerprint": "e9069ebb545d384db945d4ca5dc15911c2c73ea11b3f5095edde897d4789df5a",
   "preflight_id": "preflight.confirmed.draft.u501.start_rejected.r1",
   "scope_zh": [
    "城市、报价、工资、税、疾病与治疗全部是合成设定；结果不排序真实城市，也不是现实推荐",
